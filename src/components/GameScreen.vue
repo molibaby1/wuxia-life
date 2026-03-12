@@ -3,7 +3,7 @@
     <div class="header">
       <div class="player-info">
         <span class="name">{{ player?.name }}</span>
-        <span class="age">{{ player?.age }}岁</span>
+        <span class="age">{{ player?.age }}岁 (实际年龄：{{ getRealAge() }})</span>
         <span v-if="player?.sect" class="sect">{{ player.sect }}</span>
       </div>
     </div>
@@ -36,6 +36,16 @@
     </div>
     
     <div class="content-area">
+      <!-- 调试信息 -->
+      <div class="debug-info" style="background: #fff3cd; padding: 10px; margin-bottom: 10px; border: 1px solid #ffc107;">
+        <strong>调试:</strong>
+        <div>currentNode: {{ currentNode ? '有值' : 'null' }}</div>
+        <div v-if="currentNode">ID: {{ currentNode.id }}</div>
+        <div v-if="currentNode">Text: {{ currentNode.text?.substring(0, 50) }}...</div>
+        <div>isAutoPlaying: {{ isAutoPlaying }}</div>
+        <div>choices: {{ availableChoices.length }}</div>
+      </div>
+      
       <div v-if="currentNode" class="story-card card">
         <p class="story-text">{{ currentNode.text }}</p>
         <div v-if="isAutoPlaying" class="auto-play-indicator">
@@ -60,7 +70,8 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore } from '../store/gameStore';
+import { computed, ref, watchEffect } from 'vue';
+import { gameEngine } from '../core/GameEngineIntegration';
 import type { StoryChoice } from '../types';
 
 const props = defineProps<{
@@ -73,8 +84,21 @@ const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
 }>();
 
-const store = useGameStore();
-const player = store.state.player;
+// 使用 ref 存储玩家数据，通过 watchEffect 更新
+const playerRef = ref(gameEngine.getGameState().player);
+
+watchEffect(() => {
+  const state = gameEngine.getGameState();
+  playerRef.value = state.player;
+  console.log('[GameScreen] 玩家数据更新，年龄:', state.player?.age);
+});
+
+const player = playerRef;
+
+const getRealAge = () => {
+  const state = gameEngine.getGameState();
+  return state.player?.age || 0;
+};
 
 const makeChoice = (choice: StoryChoice) => {
   emit('choice', choice);

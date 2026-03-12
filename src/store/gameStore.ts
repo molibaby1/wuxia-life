@@ -48,7 +48,7 @@ export function useGameStore() {
     state.history = [];
   };
 
-  const updatePlayer = (updates: Partial<PlayerState>) => {
+  const updatePlayer = (updates: Partial<PlayerState> & { timeSpan?: { value: number; unit: 'year' | 'month' | 'day' } }) => {
     if (!state.player) return;
     
     if (!state.player.alive) {
@@ -76,10 +76,16 @@ export function useGameStore() {
     }
     
     if (flags !== undefined) {
-      state.player.flags = flags;
+      // 合并 flags，而不是替换
+      const newFlags = flags instanceof Set ? flags : new Set<string>(flags);
+      const mergedFlags = new Set([...state.player.flags, ...newFlags]);
+      state.player.flags = mergedFlags;
     }
     if (events !== undefined) {
-      state.player.events = events;
+      // 合并 events，而不是替换
+      const newEvents = events instanceof Set ? events : new Set<string>(events);
+      const mergedEvents = new Set([...state.player.events, ...newEvents]);
+      state.player.events = mergedEvents;
     }
   };
 

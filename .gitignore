@@ -33,3 +33,6 @@ scripts/life-simulator/reports/*.json
 !scripts/life-simulator/reports/manifest.json
 tests/reports/*.html
 tests/reports/*.json
+
+# Test report markdown files
+tests/*.md

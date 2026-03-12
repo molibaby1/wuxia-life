@@ -10,7 +10,7 @@
  * @since 2026-03-12
  */
 
-import {
+import type {
   EventCondition,
   GameState,
   IConditionEvaluator,

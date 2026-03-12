@@ -15,13 +15,8 @@
  * @since 2026-03-12
  */
 
-import {
-  EventDefinition,
-  EventCategory,
-  EventPriority,
-  EffectType,
-  EffectOperator,
-} from '../types/eventTypes';
+import { EventCategory, EventPriority, EffectType } from '../types/eventTypes';
+import type { EventDefinition, EffectOperator } from '../types/eventTypes';
 
 // ========== 青年向成年过渡事件（19-22 岁） ==========
 /**

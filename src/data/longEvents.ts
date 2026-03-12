@@ -13,7 +13,7 @@ export const sectJoinEvents: StoryNode[] = [
     minAge: 12,
     maxAge: 16,
     text: '各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。',
-    condition: (state) => state.sect === null && !state.events.has('sectRecruitment'),
+    condition: (state) => state.sect === null && !state.flags.has('joinedSectAttempt'),
     weight: 1000, // 高优先级
     choices: [
       {

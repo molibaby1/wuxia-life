@@ -1,4 +1,9 @@
-import type { Condition, Effect, PlayerState } from '../types';
+/**
+ * 条件评估器
+ * 用于评估事件条件
+ */
+
+import type { Condition, PlayerState } from '../types';
 
 export function evaluateCondition(condition: Condition, state: PlayerState): boolean {
   switch (condition.op) {
@@ -29,69 +34,4 @@ export function evaluateCondition(condition: Condition, state: PlayerState): boo
     default:
       return true;
   }
-}
-
-export function applyEffects(effects: Effect[], state: PlayerState): Partial<PlayerState> {
-  const updates: Partial<PlayerState> = {};
-  
-  for (const effect of effects) {
-    if (effect.condition && !evaluateCondition(effect.condition, state)) {
-      continue;
-    }
-    
-    switch (effect.op) {
-      case 'set':
-        if (effect.field) {
-          updates[effect.field] = effect.value;
-        }
-        break;
-      case 'add':
-        if (effect.field) {
-          const current = (state[effect.field] as number) || 0;
-          updates[effect.field] = current + effect.value;
-        }
-        break;
-      case 'sub':
-        if (effect.field) {
-          const current = (state[effect.field] as number) || 0;
-          updates[effect.field] = Math.max(0, current - effect.value);
-        }
-        break;
-      case 'min':
-        if (effect.field) {
-          const current = (state[effect.field] as number) || 0;
-          updates[effect.field] = Math.max(effect.value, current);
-        }
-        break;
-      case 'addFlag':
-        if (!updates.flags) {
-          updates.flags = new Set();
-        }
-        (updates.flags as Set<string>).add(effect.value);
-        break;
-      case 'addEvent':
-        if (!updates.events) {
-          updates.events = new Set();
-        }
-        (updates.events as Set<string>).add(effect.value);
-        break;
-      case 'clearFlags':
-        updates.flags = new Set();
-        break;
-      case 'clearEvents':
-        updates.events = new Set();
-        break;
-      case 'randomAge':
-        const addAge = Math.floor(Math.random() * (effect.maxValue - effect.minValue + 1)) + effect.minValue;
-        updates.age = state.age + addAge;
-        break;
-    }
-    
-    if (effect.effects) {
-      const nestedUpdates = applyEffects(effect.effects, state);
-      Object.assign(updates, nestedUpdates);
-    }
-  }
-  
-  return updates;
 }

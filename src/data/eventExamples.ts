@@ -8,12 +8,8 @@
  * @since 2026-03-12
  */
 
-import {
-  EventDefinition,
-  EventCategory,
-  EventPriority,
-  EffectType,
-} from '../types/eventTypes';
+import { EventCategory, EventPriority, EffectType } from '../types/eventTypes';
+import type { EventDefinition } from '../types/eventTypes';
 
 // ========== 童年事件示例（0-12 岁） ==========
 

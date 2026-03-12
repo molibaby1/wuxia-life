@@ -10,7 +10,8 @@
  * @since 2026-03-12
  */
 
-import { EventDefinition, EventCategory, EventPriority } from '../types/eventTypes';
+import { EventCategory, EventPriority } from '../types/eventTypes';
+import type { EventDefinition } from '../types/eventTypes';
 import { childhoodEvents } from '../data/childhoodEvents';
 import { youthEvents } from '../data/youthEvents';
 import { adultEvents } from '../data/adultEvents';

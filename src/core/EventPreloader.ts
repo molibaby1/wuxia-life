@@ -8,7 +8,7 @@
  * - 懒加载支持
  */
 
-import { EventDefinition } from '../types/eventTypes';
+import type { EventDefinition } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { performanceMonitor } from './PerformanceMonitor';
 

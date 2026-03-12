@@ -1,4 +1,5 @@
 import type { StoryNode, DeathEnding, PlayerState } from '../types';
+import type { EffectDefinition, OnCompleteConfig } from '../types/effects';
 import { evaluateCondition } from '../utils/storyInterpreter';
 import { sectJoinEvents, tournamentEvents, loveStoryEvents } from './longEvents';
 
@@ -40,11 +41,13 @@ export const storyNodes: StoryNode[] = [
     text: '你出生时天有异象，一道金光从天而降！',
     autoNext: true,
     weight: 20,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      internalSkill: state.internalSkill + 5,
-      flags: new Set(['bornWithBlessing'])
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 5, operator: 'add' },
+    ],
+    onComplete: {
+      setFlag: 'bornWithBlessing',
+    },
   },
   {
     id: 'birth_3',
@@ -68,7 +71,9 @@ export const storyNodes: StoryNode[] = [
     text: '你在父母的呵护下慢慢长大，牙牙学语。',
     autoNext: true,
     weight: 50,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
   {
     id: 'age_1_2',
@@ -77,10 +82,10 @@ export const storyNodes: StoryNode[] = [
     text: '你学会了走路，开始在家中四处探索，经常搞些小破坏。',
     autoNext: true,
     weight: 30,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      qinggong: state.qinggong + 1
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'qinggong', value: 1, operator: 'add' },
+    ],
   },
   {
     id: 'age_1_3',
@@ -89,10 +94,10 @@ export const storyNodes: StoryNode[] = [
     text: '你天资聪颖，一岁就能背诗，三岁就能识字。',
     autoNext: true,
     weight: 20,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      internalSkill: state.internalSkill + 2
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 2, operator: 'add' },
+    ],
   },
 
   {
@@ -102,7 +107,9 @@ export const storyNodes: StoryNode[] = [
     text: '这一年你长高了不少，也更懂事了。',
     autoNext: true,
     weight: 60,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
   {
     id: 'age_2_2',
@@ -111,10 +118,10 @@ export const storyNodes: StoryNode[] = [
     text: '你经常一个人发呆，似乎在思考什么深奥的问题。',
     autoNext: true,
     weight: 40,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      internalSkill: state.internalSkill + 1
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 1, operator: 'add' },
+    ],
   },
 
   {
@@ -124,7 +131,9 @@ export const storyNodes: StoryNode[] = [
     text: '你已经能说会道，常常逗得家人开怀大笑。',
     autoNext: true,
     weight: 70,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
   {
     id: 'age_3_2',
@@ -133,7 +142,9 @@ export const storyNodes: StoryNode[] = [
     text: '你生了一场小病，但很快就康复了。',
     autoNext: true,
     weight: 30,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
 
   {
@@ -143,10 +154,10 @@ export const storyNodes: StoryNode[] = [
     text: '你开始识字读书，对书架上的武学秘籍充满好奇。',
     autoNext: true,
     weight: 40,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      internalSkill: state.internalSkill + 2 
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 2, operator: 'add' },
+    ],
   },
   {
     id: 'age_4_2',
@@ -182,7 +193,9 @@ export const storyNodes: StoryNode[] = [
     text: '这一年你在读书和玩耍中度过。',
     autoNext: true,
     weight: 60,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
   {
     id: 'age_5_2',
@@ -191,10 +204,10 @@ export const storyNodes: StoryNode[] = [
     text: '你交到了几个好朋友，经常一起玩。',
     autoNext: true,
     weight: 40,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      qinggong: state.qinggong + 1
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'qinggong', value: 1, operator: 'add' },
+    ],
   },
 
   {
@@ -204,7 +217,9 @@ export const storyNodes: StoryNode[] = [
     text: '这一年平平无奇，就这么过去了。',
     autoNext: true,
     weight: 50,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   },
   {
     id: 'age_6_2',
@@ -213,10 +228,10 @@ export const storyNodes: StoryNode[] = [
     text: '你开始对武功表现出浓厚的兴趣。',
     autoNext: true,
     weight: 50,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      internalSkill: state.internalSkill + 1
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 1, operator: 'add' },
+    ],
   },
 
   {
@@ -252,26 +267,17 @@ export const storyNodes: StoryNode[] = [
     minAge: 8,
     maxAge: 12,
     text: '日复一日，你的武艺在逐渐进步。',
+    condition: (state) => !state.events.has('normalEvent8to12'),  // 只触发一次
     autoNext: true,
     weight: 50,
-    autoEffect: (state) => {
-      const progress = Math.random();
-      if (progress < 0.3) {
-        return { 
-          age: state.age + 1, 
-          externalSkill: state.externalSkill + 2,
-          internalSkill: state.internalSkill + 2,
-          martialPower: state.martialPower + 2
-        };
-      } else if (progress < 0.6) {
-        return { 
-          age: state.age + 1, 
-          qinggong: state.qinggong + 1,
-          money: state.money + Math.floor(Math.random() * 10)
-        };
-      } else {
-        return { age: state.age + 1 };
-      }
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'externalSkill', value: 2, operator: 'add' },
+      { type: 'STAT_MODIFY', stat: 'internalSkill', value: 2, operator: 'add' },
+      { type: 'STAT_MODIFY', stat: 'martialPower', value: 2, operator: 'add' },
+    ],
+    onComplete: {
+      setEvent: 'normalEvent8to12',
     },
   },
   {
@@ -351,11 +357,11 @@ export const storyNodes: StoryNode[] = [
     condition: (state) => !state.events.has('metBully'),
     autoNext: true,
     weight: 10,
-    autoEffect: (state) => ({ 
-      age: state.age + 1, 
-      qinggong: state.qinggong + 8,
-      chivalry: state.chivalry + 10
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+      { type: 'STAT_MODIFY', stat: 'qinggong', value: 8, operator: 'add' },
+      { type: 'STAT_MODIFY', stat: 'chivalry', value: 10, operator: 'add' },
+    ],
   },
 
   {
@@ -366,45 +372,57 @@ export const storyNodes: StoryNode[] = [
     condition: (state) => state.flags.has('bullyFightWin'),
     autoNext: true,
     weight: 100,
-    autoEffect: (state) => ({ 
-      flags: new Set(),
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
+    onComplete: {
+      setEvent: 'bullyWon',
+    },
   },
   {
     id: 'bully_result_lose',
     minAge: 8,
     maxAge: 13,
     text: '你冲上前去与那恶棍打斗，奈何实力不济，被他几招打倒在地，还受了些伤。幸好一位路过的大侠出手相救，才保住性命。',
-    condition: (state) => state.flags.has('bullyFightLose'),
+    condition: (state) => state.flags.has('bullyFightLose') && !state.events.has('bullyFought'),
     autoNext: true,
     weight: 100,
-    autoEffect: (state) => ({ 
-      flags: new Set(),
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
+    onComplete: {
+      setEvent: 'bullyFought',
+    },
   },
   {
     id: 'bully_result_reported',
     minAge: 8,
     maxAge: 13,
     text: '你施展轻功迅速离开现场，找到当地官府报案。官府很快派人前去，将那恶棍绳之以法。',
-    condition: (state) => state.flags.has('reportedToOfficials'),
+    condition: (state) => state.flags.has('reportedToOfficials') && !state.events.has('bullyReported'),
     autoNext: true,
     weight: 100,
-    autoEffect: (state) => ({ 
-      flags: new Set(),
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
+    onComplete: {
+      setEvent: 'bullyReported',
+    },
   },
   {
     id: 'bully_result_ignored',
     minAge: 8,
     maxAge: 13,
     text: '你装作没看见，绕道而行。虽然保住了平安，但心里总觉得有些愧疚...',
-    condition: (state) => state.flags.has('ignoredBully'),
+    condition: (state) => state.flags.has('ignoredBully') && !state.events.has('bullyIgnored'),
     autoNext: true,
     weight: 100,
-    autoEffect: (state) => ({ 
-      flags: new Set(),
-    }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
+    onComplete: {
+      setEvent: 'bullyIgnored',
+    },
   },
 
   {
@@ -634,7 +652,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -646,7 +664,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -658,7 +676,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -703,7 +721,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -715,7 +733,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -782,7 +800,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -794,7 +812,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -850,7 +868,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -862,7 +880,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -874,7 +892,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
       martialPower: state.martialPower + 40,
       internalSkill: state.internalSkill + 40,
       externalSkill: state.externalSkill + 40,
@@ -943,7 +961,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -955,7 +973,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
       martialPower: state.martialPower + 10,
     }),
   },
@@ -1010,7 +1028,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1022,7 +1040,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1035,7 +1053,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1047,7 +1065,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1059,7 +1077,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1118,7 +1136,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 1000,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1130,7 +1148,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 1000,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1300,7 +1318,7 @@ export const storyNodes: StoryNode[] = [
           age: state.age + 1, 
           children: state.children + 1,
           money: Math.max(0, state.money - 100),
-          events: new Set(['proposed']),
+          events: new Set(['proposed', 'married']),  // 添加 married 标志
         }),
       },
       {
@@ -1309,7 +1327,7 @@ export const storyNodes: StoryNode[] = [
         effect: (state) => ({ 
           age: state.age + 1, 
           martialPower: state.martialPower + 8,
-          events: new Set(['proposed']),
+          events: new Set(['proposed', 'focusedOnMartial']),  // 添加 focusedOnMartial 标志
         }),
       },
     ],
@@ -1379,7 +1397,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1391,7 +1409,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1460,7 +1478,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1472,7 +1490,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1537,7 +1555,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1549,7 +1567,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1647,7 +1665,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1659,7 +1677,9 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // 不直接清空 flags，而是添加完成标志
+      // // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配  // ❌ 错误：会清空所有 flags，导致后续剧情无法匹配
+      // 正确做法：添加 events 标记，让系统知道这个剧情已完成
     }),
   },
 
@@ -1733,7 +1753,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
 
@@ -1845,7 +1865,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
     }),
   },
   {
@@ -1857,7 +1877,7 @@ export const storyNodes: StoryNode[] = [
     autoNext: true,
     weight: 100,
     autoEffect: (state) => ({ 
-      flags: new Set(),
+      // flags: new Set(), // 已注释：避免清空所有 flags 导致后续剧情无法匹配
       martialPower: state.martialPower + 15,
     }),
   },
@@ -2096,7 +2116,9 @@ export function getAvailableNodes(state: PlayerState): StoryNode[] {
     text: '岁月流逝，你的人生继续着...',
     autoNext: true,
     weight: 100,
-    autoEffect: (state) => ({ age: state.age + 1 }),
+    effects: [
+      { type: 'TIME_ADVANCE', unit: 'year', value: 1 },
+    ],
   };
   
   return [safeDefaultNode];

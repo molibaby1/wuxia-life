@@ -11,7 +11,9 @@
  * @since 2026-03-12
  */
 
-import { EventDefinition, GameState, Effect, EventPriority } from '../types/eventTypes';
+import { reactive, isReactive } from 'vue';
+import { EventPriority } from '../types/eventTypes';
+import type { EventDefinition, GameState, Effect } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
@@ -27,7 +29,10 @@ export class GameEngineIntegration {
   constructor() {
     this.eventExecutor = new EventExecutor();
     this.conditionEvaluator = new ConditionEvaluator();
-    this.gameState = this.createInitialState();
+    // 先创建普通对象
+    const initialState = this.createInitialState();
+    // 然后包装为响应式
+    this.gameState = reactive(initialState);
   }
   
   /**
@@ -63,11 +68,18 @@ export class GameEngineIntegration {
   }
   
   /**
-   * 获取当前游戏状态
+   * 获取当前游戏状态（响应式）
    */
   public getGameState(): GameState {
-    // 返回深拷贝，避免状态污染
-    return JSON.parse(JSON.stringify(this.gameState));
+    // 返回响应式对象的引用
+    return this.gameState;
+  }
+  
+  /**
+   * 获取响应式游戏状态（用于 Vue 组件直接绑定）
+   */
+  public getReactiveGameState(): GameState {
+    return this.gameState;
   }
   
   /**

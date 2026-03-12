@@ -9,7 +9,7 @@
  * - 存档导入/导出
  */
 
-import { GameState } from '../types/eventTypes';
+import type { GameState } from '../types/eventTypes';
 import * as fs from 'fs';
 import * as path from 'path';
 

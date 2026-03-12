@@ -1,7 +1,7 @@
 import { reactive, nextTick } from 'vue';
 import { useGameStore } from '../store/gameStore';
 import { getAvailableNodes } from '../data/storyData';
-import { evaluateCondition, applyEffects } from '../utils/storyInterpreter';
+import { effectExecutor } from '../core/EffectExecutor';
 import type { StoryNode, StoryChoice } from '../types';
 
 export function useGameEngine() {
@@ -13,28 +13,47 @@ export function useGameEngine() {
     isAutoPlaying: false,
   });
 
+  /**
+   * 处理自动事件
+   */
   const processAutoNode = async (node: StoryNode) => {
     if (!store.state.player) return;
     
     engineState.isAutoPlaying = true;
-    
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    let effect;
-    if ('autoEffects' in node && (node as any).autoEffects) {
-      effect = applyEffects((node as any).autoEffects, store.state.player);
-    } else if ('autoEffect' in node && node.autoEffect) {
-      effect = node.autoEffect(store.state.player);
-    }
+    // 执行效果
+    const effectResult = node.effects 
+      ? effectExecutor.executeEffects(node.effects, store.state.player)
+      : { updates: {} };
     
-    // 构建更新对象，包含 timeSpan
-    const updates: any = { ...effect };
-    if (node.timeSpan) {
-      updates.timeSpan = node.timeSpan;
+    // 应用更新
+    const updates: any = { ...effectResult.updates };
+    if (effectResult.timeSpan) {
+      updates.timeSpan = effectResult.timeSpan;
     }
     
     if (Object.keys(updates).length > 0) {
       store.updatePlayer(updates);
+    }
+    
+    // 处理完成标志
+    if (node.onComplete) {
+      const onCompleteUpdates: any = {};
+      if (node.onComplete.setEvent) {
+        onCompleteUpdates.events = new Set([node.onComplete.setEvent]);
+      }
+      if (node.onComplete.setFlag) {
+        onCompleteUpdates.flags = new Set([node.onComplete.setFlag]);
+      }
+      if (Object.keys(onCompleteUpdates).length > 0) {
+        store.updatePlayer(onCompleteUpdates);
+      }
+    }
+    
+    // 处理结局
+    if (effectResult.ending) {
+      store.endGame(effectResult.ending.reason, effectResult.ending.epitaph);
     }
     
     if (node.text) {
@@ -53,6 +72,9 @@ export function useGameEngine() {
     getNextNode();
   };
 
+  /**
+   * 获取下一个事件
+   */
   const getNextNode = () => {
     if (!store.state.player || engineState.isAutoPlaying) return;
     
@@ -62,45 +84,41 @@ export function useGameEngine() {
       const node = nodes[0];
       engineState.currentNode = node;
       
-      const hasAutoEffects = ('autoEffects' in node && (node as any).autoEffects) || ('autoEffect' in node && node.autoEffect);
-      
-      if (node.autoNext && hasAutoEffects) {
+      if (node.autoNext && node.effects) {
         engineState.availableChoices = [];
         processAutoNode(node);
       } else if (node.choices) {
-        engineState.availableChoices = node.choices.filter(choice => {
-          if (!choice.condition) return true;
-          if (typeof choice.condition === 'function') {
-            return choice.condition(store.state.player!);
-          } else if (typeof choice.condition === 'object') {
-            return evaluateCondition(choice.condition, store.state.player!);
-          }
-          return true;
-        });
+        engineState.availableChoices = node.choices;
       } else {
         engineState.availableChoices = [];
       }
     }
   };
 
+  /**
+   * 处理玩家选择
+   */
   const makeChoice = (choice: StoryChoice) => {
     if (!store.state.player || engineState.isAutoPlaying) return;
 
-    let effect;
-    if ('effects' in choice && (choice as any).effects) {
-      effect = applyEffects((choice as any).effects, store.state.player);
-    } else if ('effect' in choice && choice.effect) {
-      effect = choice.effect(store.state.player);
-    }
+    // 执行选择效果
+    const effectResult = choice.effects 
+      ? effectExecutor.executeEffects(choice.effects as any, store.state.player)
+      : { updates: {} };
     
-    // 构建更新对象，包含 timeSpan
-    const updates: any = { ...effect };
-    if (choice.timeSpan) {
-      updates.timeSpan = choice.timeSpan;
+    // 应用更新
+    const updates: any = { ...effectResult.updates };
+    if (effectResult.timeSpan) {
+      updates.timeSpan = effectResult.timeSpan;
     }
     
     if (Object.keys(updates).length > 0) {
       store.updatePlayer(updates);
+    }
+    
+    // 处理结局
+    if (effectResult.ending) {
+      store.endGame(effectResult.ending.reason, effectResult.ending.epitaph);
     }
     
     if (engineState.currentNode) {

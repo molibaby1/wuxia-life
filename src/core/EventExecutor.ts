@@ -10,9 +10,9 @@
  * @since 2026-03-12
  */
 
-import {
+import { EffectType } from '../types/eventTypes';
+import type {
   EffectDefinition,
-  EffectType,
   EffectOperator,
   GameState,
   IEventExecutor,

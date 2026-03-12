@@ -21,15 +21,31 @@ interface EventState {
   lastEffects: Effect[];
 }
 
-export function useNewGameEngine() {
-  const engineState = reactive<EventState>({
-    currentEvent: null,
-    availableChoices: [],
-    isAutoPlaying: false,
-    lastEffects: [],
-  });
+// 单例状态
+let engineStateInstance: {
+  state: EventState;
+  isProcessing: boolean;
+} | null = null;
 
-  const isProcessing = ref(false);
+function getEngineStateInstance() {
+  if (!engineStateInstance) {
+    engineStateInstance = {
+      state: reactive<EventState>({
+        currentEvent: null,
+        availableChoices: [],
+        isAutoPlaying: false,
+        lastEffects: [],
+      }),
+      isProcessing: false,
+    };
+  }
+  return engineStateInstance;
+}
+
+export function useNewGameEngine() {
+  const instance = getEngineStateInstance();
+  const engineState = instance.state;
+  const isProcessing = ref(instance.isProcessing);
 
   /**
    * 获取下一个事件
@@ -39,11 +55,16 @@ export function useNewGameEngine() {
 
     const gameState = gameEngine.getGameState();
     const age = gameState.player?.age || 0;
+    
+    console.log(`[NewGameEngine] 获取事件，年龄：${age}`);
 
     // 选择一个事件
     const selectedEvent = gameEngine.selectEvent(age);
+    
+    console.log(`[NewGameEngine] 选择结果：${selectedEvent ? selectedEvent.id : 'null'}`);
 
     if (selectedEvent) {
+      console.log(`[NewGameEngine] 设置 currentEvent: ${selectedEvent.id}`);
       engineState.currentEvent = selectedEvent;
       engineState.lastEffects = [];
 
@@ -72,7 +93,10 @@ export function useNewGameEngine() {
    * 处理自动事件
    */
   const processAutoEvent = async (event: EventDefinition) => {
+    console.log('[NewGameEngine] 开始处理自动事件:', event.id);
+    
     if (!event.autoEffects || event.autoEffects.length === 0) {
+      console.warn('[NewGameEngine] 事件没有效果:', event.id);
       isProcessing.value = false;
       return;
     }
@@ -84,6 +108,8 @@ export function useNewGameEngine() {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
+      console.log('[NewGameEngine] 执行效果:', event.autoEffects);
+      
       // 执行事件效果
       await gameEngine.executeAutoEvent(event);
       engineState.lastEffects = event.autoEffects;
@@ -105,10 +131,14 @@ export function useNewGameEngine() {
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
       
-      // 短暂延迟后继续
-      setTimeout(() => {
+      // 等待 UI 渲染事件文本（2 秒）
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 只有在玩家还活着的情况下才继续
+      const state = gameEngine.getGameState();
+      if (state.player?.alive) {
         getNextEvent();
-      }, 500);
+      }
     } catch (error) {
       console.error('[NewGameEngine] 执行事件失败:', error);
       engineState.isAutoPlaying = false;

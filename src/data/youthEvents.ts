@@ -15,13 +15,8 @@
  * @since 2026-03-12
  */
 
-import {
-  EventDefinition,
-  EventCategory,
-  EventPriority,
-  EffectType,
-  EffectOperator,
-} from '../types/eventTypes';
+import { EventCategory, EventPriority, EffectType } from '../types/eventTypes';
+import type { EventDefinition, EffectOperator } from '../types/eventTypes';
 
 // ========== 少年成长事件（13-14 岁） ==========
 /**

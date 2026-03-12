@@ -1,3 +1,6 @@
+import type { EffectDefinition, OnCompleteConfig } from './effects';
+import type { EffectOperator, EffectType, EventCategory, EventPriority } from './eventTypes';
+
 export type ConditionOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'hasFlag' | 'hasEvent' | 'not' | 'and' | 'or' | 'random';
 
 export interface Condition {
@@ -7,7 +10,8 @@ export interface Condition {
   conditions?: Condition[];
 }
 
-export type EffectOperator = 'set' | 'add' | 'sub' | 'min' | 'addFlag' | 'addEvent' | 'clearFlags' | 'clearEvents' | 'randomAge';
+// 从 eventTypes 重新导出
+export type { EffectOperator, EffectType, EventCategory, EventPriority };
 
 export interface Effect {
   op: EffectOperator;
@@ -51,8 +55,10 @@ export interface PlayerState {
 export interface StoryChoice {
   id: string;
   text: string;
-  condition?: Condition;
-  effects: Effect[];
+  condition?: (state: PlayerState) => boolean;
+  // 支持新旧两种效果格式
+  effects?: Effect[];
+  effect?: (state: PlayerState) => any;
   nextNodeId?: string;
   // 时间跨度配置
   timeSpan?: {
@@ -67,9 +73,15 @@ export interface StoryNode {
   maxAge?: number;
   text: string;
   choices?: StoryChoice[];
+  // 支持新旧两种效果格式
   autoEffects?: Effect[];
+  autoEffect?: (state: PlayerState) => any;
+  // 新的声明式效果系统
+  effects?: EffectDefinition[];
+  // 完成标志（自动设置）
+  onComplete?: OnCompleteConfig;
   autoNext?: boolean;
-  condition?: Condition;
+  condition?: (state: PlayerState) => boolean;
   weight?: number;
   // 时间跨度配置
   timeSpan?: {

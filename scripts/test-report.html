@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>剧情流程测试报告</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+    }
+    
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary-card h3 {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    
+    .summary-card .number {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .summary-card.passed .number {
+      color: #28a745;
+    }
+    
+    .summary-card.failed .number {
+      color: #dc3545;
+    }
+    
+    .summary-card.rate .number {
+      color: #6f42c1;
+    }
+    
+    .test-results {
+      padding: 40px;
+    }
+    
+    .test-results h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .test-case {
+      border-bottom: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+    
+    .test-case:hover {
+      background: #f8f9fa;
+    }
+    
+    .test-case.status-passed {
+      border-left: 4px solid #28a745;
+    }
+    
+    .test-case.status-failed {
+      border-left: 4px solid #dc3545;
+    }
+    
+    td {
+      padding: 20px;
+      vertical-align: top;
+    }
+    
+    td:first-child {
+      width: 50px;
+      color: #6c757d;
+      font-weight: bold;
+    }
+    
+    td:last-child {
+      width: 100px;
+      text-align: center;
+    }
+    
+    .test-name {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .test-details {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    
+    .step {
+      background: #f8f9fa;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border-left: 3px solid #667eea;
+    }
+    
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .step-number {
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .node-id {
+      font-family: 'Courier New', monospace;
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    .step-details {
+      margin-left: 60px;
+    }
+    
+    .choice {
+      margin-bottom: 5px;
+    }
+    
+    .choice code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      color: #495057;
+    }
+    
+    .node-text {
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .errors {
+      margin-top: 15px;
+      padding: 15px;
+      background: #fff5f5;
+      border-left: 3px solid #dc3545;
+      border-radius: 4px;
+    }
+    
+    .errors h4 {
+      color: #dc3545;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    
+    .errors ul {
+      margin-left: 20px;
+    }
+    
+    .errors li {
+      color: #721c24;
+      margin: 5px 0;
+      font-size: 13px;
+    }
+    
+    .status {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .status-passed .status {
+      color: #28a745;
+    }
+    
+    .status-failed .status {
+      color: #dc3545;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-size: 12px;
+      border-top: 1px solid #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 剧情流程测试报告</h1>
+      <p>生成时间：2026-03-11T03:27:11.756Z</p>
+    </div>
+    
+    <div class="summary">
+      <div class="summary-card">
+        <h3>总测试数</h3>
+        <div class="number">15</div>
+      </div>
+      <div class="summary-card passed">
+        <h3>通过</h3>
+        <div class="number">15</div>
+      </div>
+      <div class="summary-card failed">
+        <h3>失败</h3>
+        <div class="number">0</div>
+      </div>
+      <div class="summary-card rate">
+        <h3>通过率</h3>
+        <div class="number">100.00%</div>
+      </div>
+    </div>
+    
+    <div class="test-results">
+      <h2>测试详情</h2>
+      <table>
+        <tbody>
+          
+      <tr class="test-case status-passed">
+        <td>1</td>
+        <td>
+          <div class="test-name">✅ 少林派入门 - 外功路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">sect_recruitment_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>apply_shaolin</code></div>
+          <div class="node-text">剧情：各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">shaolin_physical_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>lift_easily</code></div>
+          <div class="node-text">剧情：你来到少林寺，武僧统领打量着你：「来，试试举起这块五百斤的石锁。」...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">sect_mental_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>answer_persistence</code></div>
+          <div class="node-text">剧情：体魄测试通过后，长老问你：「习武之人，最重要的是什么？」...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>2</td>
+        <td>
+          <div class="test-name">✅ 武当派入门 - 内力路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">sect_recruitment_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>apply_wudang</code></div>
+          <div class="node-text">剧情：各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">wudang_physical_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>taichi_perfect</code></div>
+          <div class="node-text">剧情：你来到武当山，道长让你展示基本功：「打一套太极拳来看看。」...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">sect_mental_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>answer_diligence</code></div>
+          <div class="node-text">剧情：体魄测试通过后，长老问你：「习武之人，最重要的是什么？」...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>3</td>
+        <td>
+          <div class="test-name">✅ 峨眉派入门 - 女性角色</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">sect_recruitment_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>apply_emei</code></div>
+          <div class="node-text">剧情：各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">emei_physical_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>sword_perfect</code></div>
+          <div class="node-text">剧情：你来到峨眉山，师姐让你演示剑法：「舞一套峨眉剑法来瞧瞧。」...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">sect_mental_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>answer_virtue</code></div>
+          <div class="node-text">剧情：体魄测试通过后，长老问你：「习武之人，最重要的是什么？」...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>4</td>
+        <td>
+          <div class="test-name">✅ 少林派入门 - 失败路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">sect_recruitment_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>apply_shaolin</code></div>
+          <div class="node-text">剧情：各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">shaolin_physical_test</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>lift_fail</code></div>
+          <div class="node-text">剧情：你来到少林寺，武僧统领打量着你：「来，试试举起这块五百斤的石锁。」...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>5</td>
+        <td>
+          <div class="test-name">✅ 自学成才路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">sect_recruitment_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>decline_sect</code></div>
+          <div class="node-text">剧情：各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>6</td>
+        <td>
+          <div class="test-name">✅ 爱情线 - 主动搭话完整流程</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">love_first_meeting</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>approach_bravely</code></div>
+          <div class="node-text">剧情：春日明媚，你在桃花树下遇到了一位让你心动的人。Ta 正专注地看着手中的书卷，微风拂过，花瓣飘落。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">love_second_encounter</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>help_investigate</code></div>
+          <div class="node-text">剧情：数月后，你们在江湖上再次相遇。原来 Ta 也是习武之人，正在追查一桩案件。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">love_develop_relationship</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>travel_together</code></div>
+          <div class="node-text">剧情：经过几次相遇，你们渐渐熟悉起来。Ta 邀请你一起游历江湖，你意下如何？...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>7</td>
+        <td>
+          <div class="test-name">✅ 爱情线 - 提供线索（修复验证）</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">love_first_meeting</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>watch_silently</code></div>
+          <div class="node-text">剧情：春日明媚，你在桃花树下遇到了一位让你心动的人。Ta 正专注地看着手中的书卷，微风拂过，花瓣飘落。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">love_second_encounter</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>give_tips</code></div>
+          <div class="node-text">剧情：数月后，你们在江湖上再次相遇。原来 Ta 也是习武之人，正在追查一桩案件。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">love_develop_relationship</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>travel_together</code></div>
+          <div class="node-text">剧情：经过几次相遇，你们渐渐熟悉起来。Ta 邀请你一起游历江湖，你意下如何？...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>8</td>
+        <td>
+          <div class="test-name">✅ 爱情线 - 假装不认识（独立结局）</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">love_first_meeting</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>watch_silently</code></div>
+          <div class="node-text">剧情：春日明媚，你在桃花树下遇到了一位让你心动的人。Ta 正专注地看着手中的书卷，微风拂过，花瓣飘落。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">love_second_encounter</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>pretend_not_know</code></div>
+          <div class="node-text">剧情：数月后，你们在江湖上再次相遇。原来 Ta 也是习武之人，正在追查一桩案件。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>9</td>
+        <td>
+          <div class="test-name">✅ 爱情线 - 侠义不足无法搭话</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">love_first_meeting</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>watch_silently</code></div>
+          <div class="node-text">剧情：春日明媚，你在桃花树下遇到了一位让你心动的人。Ta 正专注地看着手中的书卷，微风拂过，花瓣飘落。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>10</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 冠军路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>join_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">tournament_preliminary</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>fight_careful</code></div>
+          <div class="node-text">剧情：武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">tournament_semifinal</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>use_qinggong</code></div>
+          <div class="node-text">剧情：你成功晋级半决赛！对手是一位峨眉派女侠，剑法精妙。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 4</span>
+          <span class="node-id">tournament_final</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>final_all_out</code></div>
+          <div class="node-text">剧情：决赛！你的对手是上届盟主之子，实力深不可测。全场观众屏息以待。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>11</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 亚军路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>join_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">tournament_preliminary</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>fight_careful</code></div>
+          <div class="node-text">剧情：武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">tournament_semifinal</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>use_qinggong</code></div>
+          <div class="node-text">剧情：你成功晋级半决赛！对手是一位峨眉派女侠，剑法精妙。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 4</span>
+          <span class="node-id">tournament_final</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>final_all_out</code></div>
+          <div class="node-text">剧情：决赛！你的对手是上届盟主之子，实力深不可测。全场观众屏息以待。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>12</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 力量路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>join_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">tournament_preliminary</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>fight_careful</code></div>
+          <div class="node-text">剧情：武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">tournament_semifinal</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>use_strength</code></div>
+          <div class="node-text">剧情：你成功晋级半决赛！对手是一位峨眉派女侠，剑法精妙。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>13</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 技巧路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>join_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">tournament_preliminary</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>fight_careful</code></div>
+          <div class="node-text">剧情：武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 3</span>
+          <span class="node-id">tournament_semifinal</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>use_technique</code></div>
+          <div class="node-text">剧情：你成功晋级半决赛！对手是一位峨眉派女侠，剑法精妙。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>14</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 失败路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>join_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 2</span>
+          <span class="node-id">tournament_preliminary</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>fight_aggressive</code></div>
+          <div class="node-text">剧情：武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+      <tr class="test-case status-passed">
+        <td>15</td>
+        <td>
+          <div class="test-name">✅ 武林大会 - 旁观路线</div>
+          <div class="test-details">
+      <div class="step">
+        <div class="step-header">
+          <span class="step-number">步骤 1</span>
+          <span class="node-id">tournament_announcement</span>
+        </div>
+        <div class="step-details">
+          <div class="choice">选择：<code>watch_tournament</code></div>
+          <div class="node-text">剧情：江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。...</div>
+        </div>
+      </div>
+    </div>
+        </td>
+        <td class="status">通过</td>
+      </tr>
+    
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="footer">
+      <p>Generated by 剧情流程测试系统 v2.0</p>
+    </div>
+  </div>
+</body>
+</html>

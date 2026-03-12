@@ -1,0 +1,105 @@
+{
+  "comment": "这是一个示例文件，展示如何使用声明式数据结构定义剧情",
+  "exampleStoryNode": {
+    "id": "example_birth",
+    "minAge": 0,
+    "maxAge": 0,
+    "text": "你降生在一个武侠世家，哭声洪亮，远近皆闻。",
+    "autoNext": true,
+    "weight": 70,
+    "autoEffects": [
+      {
+        "op": "random",
+        "condition": { "op": "random", "value": 0.1 },
+        "effects": [
+          { "op": "set", "field": "alive", "value": false },
+          { "op": "set", "field": "deathReason", "value": "出生时因脐带绕颈，不幸夭折" },
+          { "op": "set", "field": "title", "value": "最短命少侠" }
+        ]
+      },
+      {
+        "op": "add",
+        "field": "age",
+        "value": 1,
+        "condition": { "op": "eq", "field": "alive", "value": true }
+      }
+    ]
+  },
+  
+  "exampleChoiceNode": {
+    "id": "example_age_7",
+    "minAge": 7,
+    "maxAge": 7,
+    "text": "父亲开始教你基础武功，你的武学天赋逐渐显露。",
+    "weight": 100,
+    "choices": [
+      {
+        "id": "train_hard",
+        "text": "刻苦练习",
+        "effects": [
+          { "op": "add", "field": "age", "value": 1 },
+          { "op": "add", "field": "externalSkill", "value": 5 },
+          { "op": "add", "field": "martialPower", "value": 3 }
+        ]
+      },
+      {
+        "id": "play_hooky",
+        "text": "偷偷溜出去玩",
+        "effects": [
+          { "op": "add", "field": "age", "value": 1 },
+          { "op": "add", "field": "qinggong", "value": 3 }
+        ]
+      }
+    ]
+  },
+  
+  "exampleConditionalEffect": {
+    "id": "example_fight",
+    "minAge": 16,
+    "maxAge": 16,
+    "text": "你遇到一个恶棍在欺负百姓。",
+    "choices": [
+      {
+        "id": "fight_bully",
+        "text": "出手相助",
+        "effects": [
+          {
+            "op": "and",
+            "condition": {
+              "op": "or",
+              "conditions": [
+                { "op": "gte", "field": "martialPower", "value": 10 },
+                { "op": "gte", "field": "externalSkill", "value": 15 }
+              ]
+            },
+            "effects": [
+              { "op": "add", "field": "age", "value": 1 },
+              { "op": "add", "field": "chivalry", "value": 20 },
+              { "op": "add", "field": "money", "value": 50 },
+              { "op": "addFlag", "value": "bullyFightWin" },
+              { "op": "addEvent", "value": "metBully" }
+            ]
+          },
+          {
+            "op": "not",
+            "condition": {
+              "op": "or",
+              "conditions": [
+                { "op": "gte", "field": "martialPower", "value": 10 },
+                { "op": "gte", "field": "externalSkill", "value": 15 }
+              ]
+            },
+            "effects": [
+              { "op": "add", "field": "age", "value": 1 },
+              { "op": "add", "field": "chivalry", "value": 5 },
+              { "op": "sub", "field": "internalSkill", "value": 3 },
+              { "op": "sub", "field": "externalSkill", "value": 3 },
+              { "op": "addFlag", "value": "bullyFightLose" },
+              { "op": "addEvent", "value": "metBully" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

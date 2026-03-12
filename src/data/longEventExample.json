@@ -1,0 +1,409 @@
+{
+  "comment": "多阶段长事件示例 - 使用纯 JSON 数据描述",
+  "description": "这个文件展示了如何用声明式数据结构定义多阶段长时间跨度的事件",
+  
+  "longEventExamples": [
+    {
+      "id": "closed_training_event",
+      "name": "闭关修炼事件",
+      "stages": [
+        {
+          "node": {
+            "id": "closed_training_start",
+            "minAge": 15,
+            "maxAge": 50,
+            "text": "你决定闭关修炼，突破当前瓶颈。",
+            "condition": {
+              "op": "and",
+              "conditions": [
+                { "op": "gte", "field": "martialPower", "value": 30 },
+                { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "closedTraining" } }
+              ]
+            },
+            "weight": 15,
+            "choices": [
+              {
+                "id": "train_10_days",
+                "text": "闭关 10 天",
+                "timeSpan": { "value": 10, "unit": "day" },
+                "effects": [
+                  { "op": "add", "field": "internalSkill", "value": 5 },
+                  { "op": "addEvent", "field": "events", "value": "closedTraining" }
+                ]
+              },
+              {
+                "id": "train_30_days",
+                "text": "闭关 30 天（一个月）",
+                "timeSpan": { "value": 30, "unit": "day" },
+                "effects": [
+                  { "op": "add", "field": "internalSkill", "value": 12 },
+                  { "op": "add", "field": "martialPower", "value": 8 },
+                  { "op": "addEvent", "field": "events", "value": "closedTraining" }
+                ]
+              },
+              {
+                "id": "train_90_days",
+                "text": "闭关 90 天（三个月）",
+                "timeSpan": { "value": 90, "unit": "day" },
+                "condition": {
+                  "op": "gte", "field": "internalSkill", "value": 20
+                },
+                "effects": [
+                  { "op": "add", "field": "internalSkill", "value": 30 },
+                  { "op": "add", "field": "martialPower", "value": 20 },
+                  { "op": "addFlag", "field": "flags", "value": "breakthrough" },
+                  { "op": "addEvent", "field": "events", "value": "closedTraining" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "closed_training_result",
+            "minAge": 15,
+            "maxAge": 51,
+            "text": "经过长时间的闭关，你感觉体内真气澎湃，似乎突破在即！",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "breakthrough"
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "day" },
+            "autoEffects": [
+              { "op": "add", "field": "martialPower", "value": 15 },
+              { "op": "add", "field": "internalSkill", "value": 20 },
+              { "op": "clearFlags" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "sect_mission_event",
+      "name": "师门任务事件",
+      "stages": [
+        {
+          "node": {
+            "id": "sect_mission_start",
+            "minAge": 14,
+            "maxAge": 25,
+            "text": "师傅叫住你：『徒儿，为师有个任务交给你。护送师妹去江南办事，你可愿意？』",
+            "condition": {
+              "op": "and",
+              "conditions": [
+                { "op": "ne", "field": "sect", "value": null },
+                { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "sectMission" } }
+              ]
+            },
+            "weight": 20,
+            "choices": [
+              {
+                "id": "accept_mission",
+                "text": "接受任务",
+                "timeSpan": { "value": 30, "unit": "day" },
+                "effects": [
+                  { "op": "add", "field": "chivalry", "value": 15 },
+                  { "op": "add", "field": "money", "value": 50 },
+                  { "op": "addFlag", "field": "flags", "value": "onMission" },
+                  { "op": "addEvent", "field": "events", "value": "sectMission" }
+                ]
+              },
+              {
+                "id": "decline_mission",
+                "text": "婉拒任务",
+                "effects": [
+                  { "op": "sub", "field": "chivalry", "value": 5 },
+                  { "op": "addEvent", "field": "events", "value": "sectMission" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "sect_mission_encounter",
+            "minAge": 14,
+            "maxAge": 26,
+            "text": "护送途中，你们遇到了一群山贼拦路！",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "onMission"
+            },
+            "weight": 50,
+            "choices": [
+              {
+                "id": "fight_bandits",
+                "text": "出手迎敌",
+                "timeSpan": { "value": 1, "unit": "day" },
+                "condition": {
+                  "op": "gte", "field": "martialPower", "value": 20
+                },
+                "effects": [
+                  { "op": "add", "field": "chivalry", "value": 10 },
+                  { "op": "add", "field": "martialPower", "value": 5 },
+                  { "op": "addFlag", "field": "flags", "value": "missionSuccess" }
+                ]
+              },
+              {
+                "id": "bribe_bandits",
+                "text": "用银子打发他们",
+                "timeSpan": { "value": 1, "unit": "day" },
+                "condition": {
+                  "op": "gte", "field": "money", "value": 30
+                },
+                "effects": [
+                  { "op": "sub", "field": "money", "value": 30 },
+                  { "op": "addFlag", "field": "flags", "value": "missionSuccess" }
+                ]
+              },
+              {
+                "id": "flee_bandits",
+                "text": "带着师妹逃跑",
+                "timeSpan": { "value": 3, "unit": "day" },
+                "condition": {
+                  "op": "gte", "field": "qinggong", "value": 15
+                },
+                "effects": [
+                  { "op": "add", "field": "qinggong", "value": 3 },
+                  { "op": "addFlag", "field": "flags", "value": "missionPartial" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "sect_mission_complete",
+            "minAge": 14,
+            "maxAge": 27,
+            "text": "你们成功抵达江南，完成了任务！师傅对你的表现很满意。",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "missionSuccess"
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "day" },
+            "autoEffects": [
+              { "op": "add", "field": "chivalry", "value": 20 },
+              { "op": "add", "field": "money", "value": 100 },
+              { "op": "add", "field": "martialPower", "value": 10 },
+              { "op": "clearFlags" }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "sect_mission_partial",
+            "minAge": 14,
+            "maxAge": 27,
+            "text": "虽然过程有些波折，但你们最终还是安全抵达了江南。",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "missionPartial"
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "day" },
+            "autoEffects": [
+              { "op": "add", "field": "chivalry", "value": 10 },
+              { "op": "add", "field": "money", "value": 50 },
+              { "op": "clearFlags" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "long_journey_event",
+      "name": "西域游历事件",
+      "stages": [
+        {
+          "node": {
+            "id": "west_journey_start",
+            "minAge": 18,
+            "maxAge": 40,
+            "text": "你听说西域有许多奇人异士，心中向往不已。",
+            "condition": {
+              "op": "and",
+              "conditions": [
+                { "op": "gte", "field": "money", "value": 50 },
+                { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "westJourney" } }
+              ]
+            },
+            "weight": 12,
+            "choices": [
+              {
+                "id": "journey_quick",
+                "text": "快速往返（6 个月）",
+                "timeSpan": { "value": 6, "unit": "month" },
+                "effects": [
+                  { "op": "add", "field": "chivalry", "value": 10 },
+                  { "op": "sub", "field": "money", "value": 30 },
+                  { "op": "addEvent", "field": "events", "value": "westJourney" }
+                ]
+              },
+              {
+                "id": "journey_slow",
+                "text": "慢慢游历（2 年）",
+                "timeSpan": { "value": 2, "unit": "year" },
+                "effects": [
+                  { "op": "add", "field": "chivalry", "value": 30 },
+                  { "op": "add", "field": "martialPower", "value": 15 },
+                  { "op": "add", "field": "externalSkill", "value": 20 },
+                  { "op": "sub", "field": "money", "value": 50 },
+                  { "op": "addFlag", "field": "flags", "value": "wellTraveled" },
+                  { "op": "addEvent", "field": "events", "value": "westJourney" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "west_journey_result",
+            "minAge": 18,
+            "maxAge": 42,
+            "text": "西域之行让你大开眼界，你见识了许多中原没有的武功和风土人情。",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "wellTraveled"
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "month" },
+            "autoEffects": [
+              { "op": "add", "field": "chivalry", "value": 15 },
+              { "op": "add", "field": "martialPower", "value": 10 },
+              { "op": "clearFlags" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "seek_manual_event",
+      "name": "寻找秘籍事件",
+      "stages": [
+        {
+          "node": {
+            "id": "seek_manual_start",
+            "minAge": 16,
+            "maxAge": 35,
+            "text": "你听说在东海之滨有一本上古秘籍，决定去寻找。",
+            "condition": {
+              "op": "and",
+              "conditions": [
+                { "op": "gte", "field": "qinggong", "value": 15 },
+                { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "seekManual" } }
+              ]
+            },
+            "weight": 10,
+            "choices": [
+              {
+                "id": "seek_1_week",
+                "text": "寻找 1 周",
+                "timeSpan": { "value": 7, "unit": "day" },
+                "effects": [
+                  { "op": "random", "field": "martialPower", "minValue": 0, "maxValue": 5 },
+                  { "op": "addEvent", "field": "events", "value": "seekManual" }
+                ]
+              },
+              {
+                "id": "seek_1_month",
+                "text": "寻找 1 个月",
+                "timeSpan": { "value": 30, "unit": "day" },
+                "effects": [
+                  { "op": "random", "field": "martialPower", "minValue": 5, "maxValue": 15 },
+                  { "op": "add", "field": "qinggong", "value": 5 },
+                  { "op": "addEvent", "field": "events", "value": "seekManual" }
+                ]
+              },
+              {
+                "id": "seek_3_months",
+                "text": "寻找 3 个月",
+                "timeSpan": { "value": 90, "unit": "day" },
+                "effects": [
+                  { "op": "random", "field": "martialPower", "minValue": 15, "maxValue": 30 },
+                  { "op": "add", "field": "qinggong", "value": 10 },
+                  { "op": "addFlag", "field": "flags", "value": "foundManual" },
+                  { "op": "addEvent", "field": "events", "value": "seekManual" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "seek_manual_found",
+            "minAge": 16,
+            "maxAge": 36,
+            "text": "功夫不负有心人！你在一处海蚀洞中找到了那本上古秘籍！",
+            "condition": {
+              "op": "hasFlag",
+              "field": "flags",
+              "value": "foundManual"
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "day" },
+            "autoEffects": [
+              { "op": "add", "field": "internalSkill", "value": 50 },
+              { "op": "add", "field": "martialPower", "value": 30 },
+              { "op": "clearFlags" }
+            ]
+          }
+        },
+        {
+          "node": {
+            "id": "seek_manual_failed",
+            "minAge": 16,
+            "maxAge": 36,
+            "text": "你找遍了东海之滨，也没有发现秘籍的踪迹。或许这只是一个传说吧。",
+            "condition": {
+              "op": "and",
+              "conditions": [
+                { "op": "hasEvent", "field": "events", "value": "seekManual" },
+                { "op": "not", "condition": { "op": "hasFlag", "field": "flags", "value": "foundManual" } }
+              ]
+            },
+            "autoNext": true,
+            "weight": 100,
+            "timeSpan": { "value": 1, "unit": "day" },
+            "autoEffects": [
+              { "op": "add", "field": "qinggong", "value": 5 }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+
+  "usage": {
+    "description": "使用方法",
+    "steps": [
+      "1. 每个长事件包含多个 stages（阶段）",
+      "2. 每个 stage 包含一个 node（剧情节点）",
+      "3. 使用 condition 和 flag/event 来控制阶段之间的转换",
+      "4. 使用 timeSpan 来控制每个阶段的时间跨度",
+      "5. 第一阶段通常是触发阶段，提供选择",
+      "6. 中间阶段是进展阶段，根据之前的选择有不同的剧情",
+      "7. 最后阶段是结果阶段，给出最终奖励或惩罚"
+    ],
+    "timeUnits": {
+      "day": "按日计算，适合短期事件（闭关、照顾病人、寻找物品）",
+      "month": "按月计算，适合中期事件（师门任务、短途旅行）",
+      "year": "按年计算，适合长期事件（长途游历、重大突破）"
+    }
+  }
+}

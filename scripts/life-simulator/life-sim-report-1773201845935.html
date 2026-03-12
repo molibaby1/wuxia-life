@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>玩家生命周期模拟报告</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 { font-size: 32px; margin-bottom: 10px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      background: #f8f9fa;
+    }
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .summary-card h3 {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .summary-card .number {
+      font-size: 36px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .section {
+      padding: 40px;
+      border-top: 2px solid #e9ecef;
+    }
+    .section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e9ecef;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: bold;
+      color: #495057;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .badge-auto {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    .badge-choice {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+    .node-desc {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .node-detail {
+      font-size: 13px;
+      color: #666;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      line-height: 1.8;
+    }
+    .node-detail strong {
+      color: #495057;
+    }
+    .state-changes {
+      text-align: center;
+      font-weight: bold;
+      color: #667eea;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #d63384;
+    }
+    .ai-score {
+      font-size: 72px;
+      font-weight: bold;
+      color: #28a745;
+    }
+    .dimension {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .conflict {
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #dc3545;
+      background: #fff5f5;
+    }
+    .conflict.critical { border-color: #dc3545; }
+    .conflict.high { border-color: #fd7e14; }
+    .conflict.medium { border-color: #ffc107; }
+    .conflict.low { border-color: #28a745; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 玩家生命周期模拟报告</h1>
+      <p>生成时间：2026-03-11T04:04:05.935Z</p>
+    </div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <h3>总选择次数</h3>
+        <div class="number">3</div>
+      </div>
+      <div class="summary-card">
+        <h3>关键决策点</h3>
+        <div class="number">undefined</div>
+      </div>
+      <div class="summary-card">
+        <h3>寿命（年）</h3>
+        <div class="number">80</div>
+      </div>
+      <div class="summary-card">
+        <h3>状态变化</h3>
+        <div class="number">9</div>
+      </div>
+      <div class="summary-card">
+        <h3>门派</h3>
+        <div class="number">无</div>
+      </div>
+      <div class="summary-card">
+        <h3>子女数量</h3>
+        <div class="number">0</div>
+      </div>
+    </div>
+
+    
+    <div class="section">
+      <h2>🤖 AI 评估报告</h2>
+      <div style="text-align: center; margin: 30px;">
+        <div class="ai-score">100</div>
+        <p>整体合理性评分</p>
+      </div>
+      
+      <h3>各维度评分</h3>
+      <div class="dimension">
+        <span>选择路径连贯性</span>
+        <span>100.0 / 100</span>
+      </div>
+      <div class="dimension">
+        <span>系统反馈关联性</span>
+        <span>100.0 / 100</span>
+      </div>
+      <div class="dimension">
+        <span>状态转换逻辑性</span>
+        <span>100.0 / 100</span>
+      </div>
+      <div class="dimension">
+        <span>决策合理性</span>
+        <span>100.0 / 100</span>
+      </div>
+
+      <p style="color: #28a745; margin: 20px 0;">✅ 未发现逻辑矛盾</p>
+
+      <h3>AI 总结</h3>
+      <p style="margin: 20px 0; line-height: 1.6;">本次模拟整体表现为优秀。 选择路径连贯性好，决策过程自然流畅。 未发现明显的逻辑矛盾。</p>
+
+      
+      <h3>改进建议</h3>
+      <ul style="margin: 20px; line-height: 2;">
+        <li>系统运行良好，无需特别改进</li>
+      </ul>
+      
+    </div>
+    
+
+    <div class="section">
+      <h2>📋 选择记录（前 100 条）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="50">#</th>
+            <th width="80">年龄</th>
+            <th>节点详情</th>
+            <th width="100">状态变化</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+      <tr class="choice-record">
+        <td>1</td>
+        <td>13</td>
+        <td>
+          <span class="badge badge-choice">选择</span>
+          <div class="node-desc">[🏛️ 门派事件 - 用户选择] 各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。</div>
+          <div class="node-detail">
+            <strong>节点 ID:</strong> <code>sect_recruitment_announcement</code><br>
+            <strong>选择:</strong> 报名武当派<br>
+            <strong>理由:</strong> 基于权重选择 (随机性=0.50)<br>
+            <strong>反馈:</strong> 选择了"报名武当派"，状态已更新
+          </div>
+        </td>
+        <td class="state-changes">3</td>
+      </tr>
+    
+      <tr class="choice-record">
+        <td>2</td>
+        <td>15</td>
+        <td>
+          <span class="badge badge-choice">选择</span>
+          <div class="node-desc">[🏛️ 门派事件 - 用户选择] 你来到武当山，道长让你展示基本功：「打一套太极拳来看看。」</div>
+          <div class="node-detail">
+            <strong>节点 ID:</strong> <code>wudang_physical_test</code><br>
+            <strong>选择:</strong> 打出完美拳法<br>
+            <strong>理由:</strong> 唯一可用选择<br>
+            <strong>反馈:</strong> 选择了"打出完美拳法"，状态已更新
+          </div>
+        </td>
+        <td class="state-changes">3</td>
+      </tr>
+    
+      <tr class="choice-record">
+        <td>3</td>
+        <td>17</td>
+        <td>
+          <span class="badge badge-choice">选择</span>
+          <div class="node-desc">[🏛️ 门派事件 - 用户选择] 体魄测试通过后，长老问你：「习武之人，最重要的是什么？」</div>
+          <div class="node-detail">
+            <strong>节点 ID:</strong> <code>sect_mental_test</code><br>
+            <strong>选择:</strong> 「毅力」<br>
+            <strong>理由:</strong> 随机选择<br>
+            <strong>反馈:</strong> 选择了"「毅力」"，状态已更新
+          </div>
+        </td>
+        <td class="state-changes">3</td>
+      </tr>
+    
+        </tbody>
+      </table>
+      
+    </div>
+
+    <div class="section" style="text-align: center; color: #6c757d; font-size: 12px; border-top: 1px solid #e9ecef;">
+      <p>Generated by 玩家生命周期自动模拟测试系统 v1.0</p>
+    </div>
+  </div>
+</body>
+</html>

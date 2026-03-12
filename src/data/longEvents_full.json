@@ -1,0 +1,833 @@
+{
+  "comment": "多阶段长事件集合 - 武林大会、爱情线、门派入门",
+  "description": "完整的多人物、多阶段剧情事件",
+
+  "martialTournamentEvent": {
+    "id": "martial_tournament",
+    "name": "武林大会事件",
+    "description": "五年一度的武林大会，从选拔到决赛的完整流程",
+    "stages": [
+      {
+        "node": {
+          "id": "tournament_announcement",
+          "minAge": 18,
+          "maxAge": 35,
+          "text": "江湖传闻，五年一度的武林大会即将在华山召开！各路英雄豪杰纷纷前往。",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "gte", "field": "martialPower", "value": 25 },
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "tournament2024" } }
+            ]
+          },
+          "weight": 30,
+          "choices": [
+            {
+              "id": "join_tournament",
+              "text": "报名参加",
+              "timeSpan": { "value": 1, "unit": "day" },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "joinedTournament" },
+                { "op": "addEvent", "field": "events", "value": "tournament2024" }
+              ]
+            },
+            {
+              "id": "watch_tournament",
+              "text": "旁观观摩",
+              "timeSpan": { "value": 3, "unit": "day" },
+              "effects": [
+                { "op": "add", "field": "martialPower", "value": 5 },
+                { "op": "addEvent", "field": "events", "value": "tournament2024" }
+              ]
+            },
+            {
+              "id": "skip_tournament",
+              "text": "不感兴趣",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "tournament2024" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_preliminary",
+          "minAge": 18,
+          "maxAge": 36,
+          "text": "武林大会正式开始！第一场比试，你的对手是一个彪形大汉，手持双斧。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "joinedTournament"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "choices": [
+            {
+              "id": "fight_careful",
+              "text": "谨慎应战",
+              "condition": {
+                "op": "gte",
+                "field": "martialPower",
+                "value": 30
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "preliminaryWin" },
+                { "op": "add", "field": "martialPower", "value": 3 }
+              ]
+            },
+            {
+              "id": "fight_aggressive",
+              "text": "主动进攻",
+              "effects": [
+                {
+                  "op": "or",
+                  "conditions": [
+                    {
+                      "condition": { "op": "gte", "field": "martialPower", "value": 35 },
+                      "effects": [
+                        { "op": "addFlag", "field": "flags", "value": "preliminaryWin" },
+                        { "op": "add", "field": "martialPower", "value": 5 }
+                      ]
+                    },
+                    {
+                      "condition": { "op": "lt", "field": "martialPower", "value": 35 },
+                      "effects": [
+                        { "op": "addFlag", "field": "flags", "value": "preliminaryLose" },
+                        { "op": "sub", "field": "internalSkill", "value": 5 }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_semifinal",
+          "minAge": 18,
+          "maxAge": 36,
+          "text": "你成功晋级半决赛！对手是一位峨眉派女侠，剑法精妙。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "preliminaryWin"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 2, "unit": "day" },
+          "choices": [
+            {
+              "id": "use_qinggong",
+              "text": "以轻功取胜",
+              "condition": {
+                "op": "gte",
+                "field": "qinggong",
+                "value": 20
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "semifinalWin" },
+                { "op": "add", "field": "qinggong", "value": 5 }
+              ]
+            },
+            {
+              "id": "use_strength",
+              "text": "以力量硬拼",
+              "condition": {
+                "op": "gte",
+                "field": "martialPower",
+                "value": 45
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "semifinalWin" },
+                { "op": "add", "field": "martialPower", "value": 5 }
+              ]
+            },
+            {
+              "id": "use_technique",
+              "text": "以技巧周旋",
+              "condition": {
+                "op": "gte",
+                "field": "externalSkill",
+                "value": 30
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "semifinalWin" },
+                { "op": "add", "field": "externalSkill", "value": 5 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_final",
+          "minAge": 18,
+          "maxAge": 37,
+          "text": "决赛！你的对手是上届盟主之子，实力深不可测。全场观众屏息以待。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "semifinalWin"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 3, "unit": "day" },
+          "choices": [
+            {
+              "id": "final_all_out",
+              "text": "全力以赴",
+              "condition": {
+                "op": "gte",
+                "field": "martialPower",
+                "value": 60
+              },
+              "effects": [
+                {
+                  "op": "or",
+                  "conditions": [
+                    {
+                      "condition": { "op": "gte", "field": "martialPower", "value": 70 },
+                      "effects": [
+                        { "op": "addFlag", "field": "flags", "value": "tournamentChampion" },
+                        { "op": "set", "field": "title", "value": "武林新秀" },
+                        { "op": "add", "field": "chivalry", "value": 50 },
+                        { "op": "add", "field": "money", "value": 500 }
+                      ]
+                    },
+                    {
+                      "condition": { "op": "lt", "field": "martialPower", "value": 70 },
+                      "effects": [
+                        { "op": "addFlag", "field": "flags", "value": "tournamentRunnerUp" },
+                        { "op": "add", "field": "chivalry", "value": 30 },
+                        { "op": "add", "field": "money", "value": 200 }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "final_defensive",
+              "text": "防守反击",
+              "condition": {
+                "op": "gte",
+                "field": "internalSkill",
+                "value": 50
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "tournamentRunnerUp" },
+                { "op": "add", "field": "chivalry", "value": 30 },
+                { "op": "add", "field": "money", "value": 200 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_result_champion",
+          "minAge": 18,
+          "maxAge": 38,
+          "text": "恭喜你！你击败了所有对手，夺得武林大会头筹！「武林新秀」的名号传遍江湖！各门派纷纷向你抛出橄榄枝。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "tournamentChampion"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "autoEffects": [
+            { "op": "add", "field": "martialPower", "value": 20 },
+            { "op": "add", "field": "chivalry", "value": 20 },
+            { "op": "clearFlags" }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_result_runnerup",
+          "minAge": 18,
+          "maxAge": 38,
+          "text": "你获得了武林大会的亚军！虽然有些遗憾，但你的表现已经赢得了众人的尊重。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "tournamentRunnerUp"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "autoEffects": [
+            { "op": "add", "field": "martialPower", "value": 15 },
+            { "op": "add", "field": "chivalry", "value": 15 },
+            { "op": "clearFlags" }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "tournament_result_eliminated",
+          "minAge": 18,
+          "maxAge": 38,
+          "text": "你在半决赛中落败，无缘决赛。但你从这次大会中学到了很多，见识了各门派的绝技。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "preliminaryLose"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "autoEffects": [
+            { "op": "add", "field": "martialPower", "value": 8 },
+            { "op": "add", "field": "externalSkill", "value": 8 },
+            { "op": "clearFlags" }
+          ]
+        }
+      }
+    ]
+  },
+
+  "loveStoryEvent": {
+    "id": "love_story",
+    "name": "爱情线事件",
+    "description": "从相遇到结婚的完整爱情故事",
+    "stages": [
+      {
+        "node": {
+          "id": "love_first_meeting",
+          "minAge": 16,
+          "maxAge": 22,
+          "text": "春日明媚，你在桃花树下遇到了一位让你心动的人。Ta 正专注地看着手中的书卷，微风拂过，花瓣飘落。",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "metLove" } }
+            ]
+          },
+          "weight": 40,
+          "choices": [
+            {
+              "id": "approach_bravely",
+              "text": "勇敢上前搭话",
+              "condition": {
+                "op": "gte",
+                "field": "chivalry",
+                "value": 15
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "approachedLove" },
+                { "op": "addEvent", "field": "events", "value": "metLove" },
+                { "op": "add", "field": "chivalry", "value": 3 }
+              ]
+            },
+            {
+              "id": "watch_silently",
+              "text": "默默注视",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "metLove" }
+              ]
+            },
+            {
+              "id": "leave_quietly",
+              "text": "悄悄离开",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "metLove" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_second_encounter",
+          "minAge": 17,
+          "maxAge": 23,
+          "text": "数月后，你们在江湖上再次相遇。原来 Ta 也是习武之人，正在追查一桩案件。",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "hasEvent", "field": "events", "value": "metLove" },
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "secondMeeting" } }
+            ]
+          },
+          "weight": 35,
+          "choices": [
+            {
+              "id": "help_investigate",
+              "text": "主动帮忙查案",
+              "condition": {
+                "op": "gte",
+                "field": "martialPower",
+                "value": 25
+              },
+              "timeSpan": { "value": 15, "unit": "day" },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "helpedLove" },
+                { "op": "addEvent", "field": "events", "value": "secondMeeting" },
+                { "op": "add", "field": "chivalry", "value": 10 }
+              ]
+            },
+            {
+              "id": "give_tips",
+              "text": "提供线索",
+              "timeSpan": { "value": 1, "unit": "day" },
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "secondMeeting" },
+                { "op": "add", "field": "chivalry", "value": 5 }
+              ]
+            },
+            {
+              "id": "pretend_not_know",
+              "text": "假装不认识",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "secondMeeting" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_develop_relationship",
+          "minAge": 18,
+          "maxAge": 24,
+          "text": "经过几次相遇，你们渐渐熟悉起来。Ta 邀请你一起游历江湖，你意下如何？",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "hasFlag", "field": "flags", "value": "approachedLove" },
+              { "op": "hasFlag", "field": "flags", "value": "helpedLove" },
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "travelTogether" } }
+            ]
+          },
+          "weight": 30,
+          "timeSpan": { "value": 3, "unit": "month" },
+          "choices": [
+            {
+              "id": "travel_together",
+              "text": "一起游历",
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "travelingTogether" },
+                { "op": "addEvent", "field": "events", "value": "travelTogether" },
+                { "op": "add", "field": "chivalry", "value": 15 },
+                { "op": "add", "field": "martialPower", "value": 10 }
+              ]
+            },
+            {
+              "id": "decline_travel",
+              "text": "婉言谢绝",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "travelTogether" },
+                { "op": "sub", "field": "chivalry", "value": 5 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_confession",
+          "minAge": 19,
+          "maxAge": 25,
+          "text": "中秋之夜，月色如水。Ta 对你说：『这一路走来，有你在身边真好。』眼神中似有千言万语。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "travelingTogether"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "choices": [
+            {
+              "id": "confess_love",
+              "text": "表白心意",
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "inLove" },
+                { "op": "add", "field": "chivalry", "value": 20 }
+              ]
+            },
+            {
+              "id": "hesitate",
+              "text": "犹豫不决",
+              "effects": [
+                { "op": "addEvent", "field": "events", "value": "hesitated" },
+                { "op": "sub", "field": "chivalry", "value": 10 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_proposal",
+          "minAge": 21,
+          "maxAge": 28,
+          "text": "几年过去，你们的感情愈发深厚。是时候考虑终身大事了...",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "inLove"
+          },
+          "weight": 50,
+          "choices": [
+            {
+              "id": "propose_marriage",
+              "text": "求婚/提亲",
+              "condition": {
+                "op": "gte",
+                "field": "money",
+                "value": 100
+              },
+              "timeSpan": { "value": 30, "unit": "day" },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "married" },
+                { "op": "sub", "field": "money", "value": 100 },
+                { "op": "add", "field": "chivalry", "value": 30 },
+                { "op": "addEvent", "field": "events", "value": "gotMarried" }
+              ]
+            },
+            {
+              "id": "focus_career",
+              "text": "先专注武道",
+              "timeSpan": { "value": 1, "unit": "year" },
+              "effects": [
+                { "op": "add", "field": "martialPower", "value": 20 },
+                { "op": "addEvent", "field": "events", "value": "gotMarried" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_wedding",
+          "minAge": 21,
+          "maxAge": 30,
+          "text": "良辰吉日，你们举行了盛大的婚礼。亲朋好友齐聚一堂，共同见证这幸福的时刻。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "married"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 3, "unit": "day" },
+          "autoEffects": [
+            { "op": "add", "field": "chivalry", "value": 20 },
+            { "op": "add", "field": "money", "value": 100 },
+            { "op": "add", "field": "children", "value": 1 },
+            { "op": "clearFlags" }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "love_single_life",
+          "minAge": 25,
+          "maxAge": 40,
+          "text": "你选择了一个人的生活，虽然偶尔会感到孤独，但江湖就是你的家。",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "hasEvent", "field": "events", "value": "metLove" },
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "gotMarried" } }
+            ]
+          },
+          "autoNext": true,
+          "weight": 20,
+          "timeSpan": { "value": 5, "unit": "year" },
+          "autoEffects": [
+            { "op": "add", "field": "martialPower", "value": 30 },
+            { "op": "add", "field": "qinggong", "value": 20 }
+          ]
+        }
+      }
+    ]
+  },
+
+  "sectJoinEvent": {
+    "id": "sect_join",
+    "name": "门派入门事件",
+    "description": "从报名到正式拜入师门的完整流程",
+    "stages": [
+      {
+        "node": {
+          "id": "sect_recruitment",
+          "minAge": 12,
+          "maxAge": 16,
+          "text": "各大门派开始招收弟子了！少林、武当、峨眉等名门正派都在招揽人才。",
+          "condition": {
+            "op": "and",
+            "conditions": [
+              { "op": "eq", "field": "sect", "value": null },
+              { "op": "not", "condition": { "op": "hasEvent", "field": "events", "value": "sectRecruitment" } }
+            ]
+          },
+          "weight": 100,
+          "choices": [
+            {
+              "id": "join_shaolin",
+              "text": "报名少林派",
+              "condition": {
+                "op": "eq",
+                "field": "gender",
+                "value": "male"
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "appliedShaolin" },
+                { "op": "addEvent", "field": "events", "value": "sectRecruitment" }
+              ]
+            },
+            {
+              "id": "join_wudang",
+              "text": "报名武当派",
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "appliedWudang" },
+                { "op": "addEvent", "field": "events", "value": "sectRecruitment" }
+              ]
+            },
+            {
+              "id": "join_emei",
+              "text": "报名峨眉派",
+              "condition": {
+                "op": "eq",
+                "field": "gender",
+                "value": "female"
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "appliedEmei" },
+                { "op": "addEvent", "field": "events", "value": "sectRecruitment" }
+              ]
+            },
+            {
+              "id": "decline_all",
+              "text": "自学成才",
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "selfTaught" },
+                { "op": "addEvent", "field": "events", "value": "sectRecruitment" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "sect_exam_physical",
+          "minAge": 12,
+          "maxAge": 17,
+          "text": "你来到了报名地点，首先需要进行体魄测试。考官打量着你：『来，试试举起这块石锁。』",
+          "condition": {
+            "op": "or",
+            "conditions": [
+              { "op": "hasFlag", "field": "flags", "value": "appliedShaolin" },
+              { "op": "hasFlag", "field": "flags", "value": "appliedWudang" },
+              { "op": "hasFlag", "field": "flags", "value": "appliedEmei" }
+            ]
+          },
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "choices": [
+            {
+              "id": "lift_success",
+              "text": "轻松举起",
+              "condition": {
+                "op": "gte",
+                "field": "externalSkill",
+                "value": 10
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "physicalPass" },
+                { "op": "add", "field": "externalSkill", "value": 2 }
+              ]
+            },
+            {
+              "id": "lift_struggle",
+              "text": "勉强举起",
+              "condition": {
+                "op": "and",
+                "conditions": [
+                  { "op": "gte", "field": "externalSkill", "value": 5 },
+                  { "op": "lt", "field": "externalSkill", "value": 10 }
+                ]
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "physicalPass" }
+              ]
+            },
+            {
+              "id": "lift_fail",
+              "text": "举不起来",
+              "condition": {
+                "op": "lt",
+                "field": "externalSkill",
+                "value": 5
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "physicalFail" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "sect_exam_mental",
+          "minAge": 12,
+          "maxAge": 17,
+          "text": "体魄测试通过后，接下来是心性测试。长老问你：『习武之人，最重要的是什么？』",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "physicalPass"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "choices": [
+            {
+              "id": "answer_virtue",
+              "text": "「武德」",
+              "condition": {
+                "op": "gte",
+                "field": "chivalry",
+                "value": 15
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "mentalPass" },
+                { "op": "add", "field": "chivalry", "value": 5 }
+              ]
+            },
+            {
+              "id": "answer_persistence",
+              "text": "「毅力」",
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "mentalPass" },
+                { "op": "add", "field": "internalSkill", "value": 3 }
+              ]
+            },
+            {
+              "id": "answer_strength",
+              "text": "「力量」",
+              "condition": {
+                "op": "hasFlag",
+                "field": "flags",
+                "value": "appliedShaolin"
+              },
+              "effects": [
+                { "op": "addFlag", "field": "flags", "value": "mentalPass" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "sect_exam_result_accept",
+          "minAge": 13,
+          "maxAge": 17,
+          "text": "恭喜你通过了所有测试！掌门亲自接见你：『从今日起，你便是我派弟子。望你勤加修炼，光大门楣。』",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "mentalPass"
+          },
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "choices": [
+            {
+              "id": "accept_shaolin",
+              "text": "拜入少林",
+              "condition": {
+                "op": "hasFlag",
+                "field": "flags",
+                "value": "appliedShaolin"
+              },
+              "effects": [
+                { "op": "set", "field": "sect", "value": "少林派" },
+                { "op": "add", "field": "externalSkill", "value": 10 },
+                { "op": "add", "field": "internalSkill", "value": 5 },
+                { "op": "clearFlags" }
+              ]
+            },
+            {
+              "id": "accept_wudang",
+              "text": "拜入武当",
+              "condition": {
+                "op": "hasFlag",
+                "field": "flags",
+                "value": "appliedWudang"
+              },
+              "effects": [
+                { "op": "set", "field": "sect", "value": "武当派" },
+                { "op": "add", "field": "internalSkill", "value": 15 },
+                { "op": "add", "field": "qinggong", "value": 5 },
+                { "op": "clearFlags" }
+              ]
+            },
+            {
+              "id": "accept_emei",
+              "text": "拜入峨眉",
+              "condition": {
+                "op": "hasFlag",
+                "field": "flags",
+                "value": "appliedEmei"
+              },
+              "effects": [
+                { "op": "set", "field": "sect", "value": "峨眉派" },
+                { "op": "add", "field": "internalSkill", "value": 12 },
+                { "op": "add", "field": "externalSkill", "value": 8 },
+                { "op": "clearFlags" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "sect_exam_result_reject",
+          "minAge": 13,
+          "maxAge": 17,
+          "text": "很遗憾，你未能通过测试。考官安慰道：『习武之路不止一条，少侠不必灰心。』",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "physicalFail"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "day" },
+          "autoEffects": [
+            { "op": "addFlag", "field": "flags", "value": "selfTaught" },
+            { "op": "add", "field": "martialPower", "value": 5 },
+            { "op": "clearFlags" }
+          ]
+        }
+      },
+      {
+        "node": {
+          "id": "sect_self_taught_start",
+          "minAge": 13,
+          "maxAge": 18,
+          "text": "既然没有门派，那就走自己的路！你决定独自在江湖闯荡，自创一番事业。",
+          "condition": {
+            "op": "hasFlag",
+            "field": "flags",
+            "value": "selfTaught"
+          },
+          "autoNext": true,
+          "weight": 100,
+          "timeSpan": { "value": 1, "unit": "year" },
+          "autoEffects": [
+            { "op": "add", "field": "martialPower", "value": 15 },
+            { "op": "add", "field": "qinggong", "value": 10 },
+            { "op": "add", "field": "chivalry", "value": 10 },
+            { "op": "clearFlags" }
+          ]
+        }
+      }
+    ]
+  }
+}

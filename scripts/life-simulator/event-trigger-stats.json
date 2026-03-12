@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-03-12T01:01:25.045Z",
+  "totalRuns": 20,
+  "events": {
+    "bully": {
+      "count": 9,
+      "rate": "45.0%"
+    },
+    "enemy": {
+      "count": 4,
+      "rate": "20.0%"
+    },
+    "love": {
+      "count": 14,
+      "rate": "70.0%"
+    },
+    "tournament": {
+      "count": 16,
+      "rate": "80.0%"
+    }
+  },
+  "averageRate": "53.8%"
+}

@@ -1,8 +1,36 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-03-12T07:54:17.450Z",
-  "totalReports": 1,
+  "generatedAt": "2026-03-12T23:29:26.728Z",
+  "totalReports": 2,
   "reports": [
+    {
+      "id": "sim_1773358165177",
+      "fileName": "life-sim-report-1773358165178.json",
+      "name": "测试报告 #1773358165178",
+      "type": "life_sim",
+      "generatedAt": "2026-03-12T23:29:25.177Z",
+      "config": {
+        "startAge": 12,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 80
+      },
+      "statistics": {
+        "totalStateChanges": 59,
+        "lifespan": 71,
+        "sect": null,
+        "children": 0,
+        "deathReason": "无疾而终，享年71岁"
+      },
+      "aiEvaluation": {
+        "overallScore": 91,
+        "coherence": 74,
+        "feedbackRelevance": 100,
+        "stateTransitionLogic": 90,
+        "decisionRationality": 100
+      },
+      "duration": 4
+    },
     {
       "id": "gp_1773302056051_a9ec61b8",
       "fileName": "game-process-gp_1773302056051_a9ec61b8.json",

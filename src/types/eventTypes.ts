@@ -257,6 +257,13 @@ export interface EventDefinition {
     max?: number;
   };
   
+  /** 按年龄段权重（可选，优先于 ageRange） */
+  ageWeights?: {
+    min: number;
+    max?: number;
+    weight: number;
+  }[];
+  
   /** 触发器列表 */
   triggers: EventTrigger[];
   
@@ -308,6 +315,8 @@ export interface PlayerStats {
   internalSkill: number;     // 内力
   qinggong: number;         // 轻功
   charisma: number;         // 魅力
+  constitution: number;     // 体魄
+  comprehension: number;    // 悟性
 }
 
 /**
@@ -325,6 +334,8 @@ export interface PlayerState {
   internalSkill: number;
   qinggong: number;
   chivalry: number;
+  constitution: number;
+  comprehension: number;
   
   // 社会属性
   sect: string | null;
@@ -335,10 +346,22 @@ export interface PlayerState {
   // 关系属性
   children: number;
   spouse: string | null;
+  relationships?: Relationship[];
   
   // 状态
   alive: boolean;
   deathReason?: string;
+}
+
+/**
+ * 人际关系
+ */
+export interface Relationship {
+  id: string;
+  role: 'master' | 'lover' | 'sworn' | 'rival' | 'friend' | 'family' | 'enemy' | 'patron';
+  name: string;
+  affinity: number;
+  status?: string;
 }
 
 /**

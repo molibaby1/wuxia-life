@@ -12,10 +12,23 @@
 
 import { EventCategory, EventPriority } from '../types/eventTypes';
 import type { EventDefinition } from '../types/eventTypes';
-import { childhoodEvents } from '../data/childhoodEvents';
-import { youthEvents } from '../data/youthEvents';
-import { adultEvents } from '../data/adultEvents';
-import { elderlyEvents } from '../data/elderlyEvents';
+import eventsIndexJson from '../data/events.json';
+import demonicEventsJson from '../data/lines/demonic.json';
+import generalEventsJson from '../data/lines/general.json';
+import originEventsJson from '../data/lines/origin.json';
+import orthodoxEventsJson from '../data/lines/orthodox.json';
+import trainingEventsJson from '../data/lines/training.json';
+
+const demonicEvents = demonicEventsJson as EventDefinition[];
+const generalEvents = generalEventsJson as EventDefinition[];
+const originEvents = originEventsJson as EventDefinition[];
+const orthodoxEvents = orthodoxEventsJson as EventDefinition[];
+const trainingEvents = trainingEventsJson as EventDefinition[];
+const eventsIndex = eventsIndexJson as {
+  version: string;
+  imports: string[];
+  notes?: string;
+};
 
 /**
  * 事件加载器类
@@ -23,7 +36,6 @@ import { elderlyEvents } from '../data/elderlyEvents';
 export class EventLoader {
   private static instance: EventLoader;
   private allEvents: EventDefinition[] = [];
-  private eventsByAge: Map<number, EventDefinition[]> = new Map();
   private eventsById: Map<string, EventDefinition> = new Map();
   
   private constructor() {
@@ -44,13 +56,20 @@ export class EventLoader {
    * 加载所有事件
    */
   private loadAllEvents(): void {
-    // 合并所有事件
-    this.allEvents = [
-      ...childhoodEvents,
-      ...youthEvents,
-      ...adultEvents,
-      ...elderlyEvents,
-    ];
+    const lineMap: Record<string, EventDefinition[]> = {
+      './lines/origin.json': originEvents,
+      './lines/orthodox.json': orthodoxEvents,
+      './lines/demonic.json': demonicEvents,
+      './lines/training.json': trainingEvents,
+      './lines/general.json': generalEvents,
+    };
+    
+    const orderedLines = (eventsIndex.imports || [])
+      .map(path => lineMap[path])
+      .filter(Boolean);
+    
+    // 合并所有事件（按入口文件顺序组织）
+    this.allEvents = orderedLines.flat();
     
     console.log(`[EventLoader] 加载了 ${this.allEvents.length} 个事件`);
     
@@ -62,31 +81,43 @@ export class EventLoader {
    * 建立事件索引
    */
   private buildIndexes(): void {
-    // 按年龄索引
-    this.eventsByAge.clear();
     this.eventsById.clear();
     
     for (const event of this.allEvents) {
-      // 按年龄范围索引
-      for (let age = event.ageRange.min; age <= event.ageRange.max; age++) {
-        if (!this.eventsByAge.has(age)) {
-          this.eventsByAge.set(age, []);
-        }
-        this.eventsByAge.get(age)!.push(event);
-      }
-      
       // 按 ID 索引
       this.eventsById.set(event.id, event);
     }
     
-    console.log(`[EventLoader] 索引建立完成，覆盖年龄范围：0-80 岁`);
+    console.log(`[EventLoader] 索引建立完成，事件池大小：${this.allEvents.length}`);
   }
   
   /**
    * 根据年龄获取可用事件
    */
   public getEventsByAge(age: number): EventDefinition[] {
-    return this.eventsByAge.get(age) || [];
+    return this.allEvents.filter(event => this.getWeightForAge(event, age) > 0);
+  }
+
+  /**
+   * 获取事件在指定年龄下的权重
+   */
+  public getWeightForAge(event: EventDefinition, age: number): number {
+    if (event.ageWeights && event.ageWeights.length > 0) {
+      let maxWeight = 0;
+      for (const rule of event.ageWeights) {
+        const max = rule.max ?? rule.min;
+        if (age >= rule.min && age <= max) {
+          maxWeight = Math.max(maxWeight, rule.weight);
+        }
+      }
+      return maxWeight;
+    }
+    
+    const max = event.ageRange.max ?? event.ageRange.min;
+    if (age < event.ageRange.min || age > max) {
+      return 0;
+    }
+    return event.weight ?? 0;
   }
   
   /**
@@ -121,9 +152,10 @@ export class EventLoader {
    * 获取指定年龄范围内的所有事件
    */
   public getEventsInAgeRange(minAge: number, maxAge: number): EventDefinition[] {
-    return this.allEvents.filter(event => 
-      event.ageRange.min <= maxAge && event.ageRange.max >= minAge
-    );
+    return this.allEvents.filter(event => {
+      const max = event.ageRange.max ?? event.ageRange.min;
+      return event.ageRange.min <= maxAge && max >= minAge;
+    });
   }
   
   /**
@@ -192,17 +224,13 @@ export class EventLoader {
   public printStatistics(): void {
     console.log('\n=== 事件加载统计 ===');
     console.log(`总事件数：${this.allEvents.length}`);
+    console.log(`入口文件：${eventsIndex.imports.join(', ')}`);
     
-    // 按阶段统计
-    const childhoodCount = childhoodEvents.length;
-    const youthCount = youthEvents.length;
-    const adultCount = adultEvents.length;
-    const elderlyCount = elderlyEvents.length;
-    
-    console.log(`童年事件：${childhoodCount} 个`);
-    console.log(`青年事件：${youthCount} 个`);
-    console.log(`成年事件：${adultCount} 个`);
-    console.log(`中老年事件：${elderlyCount} 个`);
+    console.log(`出身线：${originEvents.length} 个`);
+    console.log(`正道线：${orthodoxEvents.length} 个`);
+    console.log(`魔教线：${demonicEvents.length} 个`);
+    console.log(`修炼线：${trainingEvents.length} 个`);
+    console.log(`通用事件：${generalEvents.length} 个`);
     
     // 按类型统计
     const autoEvents = this.allEvents.filter(e => e.eventType === 'auto').length;

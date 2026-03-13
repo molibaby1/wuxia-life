@@ -1,0 +1,168 @@
+[
+  {
+    "id": "origin_background",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": {
+      "min": 1,
+      "max": 1
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 1
+      }
+    ],
+    "content": {
+      "text": "你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。",
+      "title": "出身背景",
+      "description": "起点决定了你未来的方向。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "origin_wuxia_family",
+        "text": "武林世家",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_wuxia_family"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_wuxia_family"
+          }
+        ]
+      },
+      {
+        "id": "origin_scholar_family",
+        "text": "书香门第",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_scholar_family"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_scholar_family"
+          }
+        ]
+      },
+      {
+        "id": "origin_merchant_family",
+        "text": "商贾之家",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_merchant_family"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 200,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_merchant_family"
+          }
+        ]
+      },
+      {
+        "id": "origin_frontier",
+        "text": "边疆异族",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_frontier"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "subtract"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_frontier"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "出身",
+        "背景",
+        "选择",
+        "once"
+      ],
+      "enabled": true
+    }
+  }
+]

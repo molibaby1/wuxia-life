@@ -30,9 +30,32 @@
         <span class="stat-value">{{ player?.chivalry }}</span>
       </div>
       <div class="stat-item">
+        <span class="stat-label">体魄</span>
+        <span class="stat-value">{{ player?.constitution }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">悟性</span>
+        <span class="stat-value">{{ player?.comprehension }}</span>
+      </div>
+      <div class="stat-item">
         <span class="stat-label">银两</span>
         <span class="stat-value">{{ player?.money }}</span>
       </div>
+    </div>
+
+    <div class="relations-bar">
+      <div class="relation-summary">
+        <span class="relation-label">路线</span>
+        <span class="relation-value">{{ routeLabel }}</span>
+      </div>
+      <div v-if="relationships.length > 0" class="relation-list">
+        <div v-for="rel in relationships" :key="rel.id" class="relation-item">
+          <span class="relation-role">{{ formatRole(rel.role) }}</span>
+          <span class="relation-name">{{ rel.name }}</span>
+          <span class="relation-affinity">好感 {{ rel.affinity }}</span>
+        </div>
+      </div>
+      <div v-else class="relation-empty">暂无关键关系</div>
     </div>
     
     <div class="content-area">
@@ -95,6 +118,41 @@ watchEffect(() => {
 
 const player = playerRef;
 
+const relationships = computed(() => {
+  return player.value?.relationships || [];
+});
+
+const routeLabel = computed(() => {
+  const flags = gameEngine.getGameState().flags || {};
+  if (flags.route_orthodox) return '正道';
+  if (flags.route_demonic) return '魔教';
+  if (flags.route_wanderer) return '游侠';
+  return '未定';
+});
+
+const formatRole = (role: string) => {
+  switch (role) {
+    case 'master':
+      return '师父';
+    case 'lover':
+      return '恋人';
+    case 'sworn':
+      return '结义';
+    case 'rival':
+      return '宿敌';
+    case 'friend':
+      return '友人';
+    case 'family':
+      return '亲族';
+    case 'enemy':
+      return '仇敌';
+    case 'patron':
+      return '恩主';
+    default:
+      return role;
+  }
+};
+
 const getRealAge = () => {
   const state = gameEngine.getGameState();
   return state.player?.age || 0;
@@ -140,11 +198,73 @@ const makeChoice = (choice: StoryChoice) => {
 
 .stats-bar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 12px;
   background: white;
   border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+}
+
+.relations-bar {
+  background: #fffaf0;
+  border-bottom: 1px solid rgba(139, 69, 19, 0.08);
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.relation-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.relation-label {
+  font-size: 12px;
+  color: #8b6914;
+}
+
+.relation-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.relation-list {
+  display: grid;
+  gap: 6px;
+}
+
+.relation-item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  background: white;
+  border-radius: 10px;
+  padding: 6px 10px;
+  border: 1px solid rgba(139, 69, 19, 0.08);
+}
+
+.relation-role {
+  font-size: 12px;
+  color: #8b6914;
+}
+
+.relation-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.relation-affinity {
+  font-size: 12px;
+  color: #8b6914;
+}
+
+.relation-empty {
+  font-size: 12px;
+  color: #b08a44;
 }
 
 .stat-item {

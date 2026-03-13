@@ -1,0 +1,158 @@
+[
+  {
+    "id": "sect_path_choice",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 85,
+    "ageRange": {
+      "min": 13,
+      "max": 14
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 13
+      }
+    ],
+    "content": {
+      "text": "江湖门派开始注意到你的天赋。正道名门与魔教暗使都向你抛出橄榄枝，你需要作出选择。",
+      "title": "门派抉择",
+      "description": "一念之间，人生道路已定。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "join_orthodox",
+        "text": "拜入正道名门",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "route_orthodox"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": {
+              "id": "master_qingxu",
+              "name": "清虚真人",
+              "role": "master",
+              "delta": 20
+            }
+          },
+          {
+            "type": "event_record",
+            "target": "sect_path_choice_orthodox"
+          }
+        ]
+      },
+      {
+        "id": "stay_wanderer",
+        "text": "行走江湖，观望时局",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "route_wanderer"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "sect_path_choice_wanderer"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "路线",
+        "选择"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "orthodox_initiation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 14,
+      "max": 16
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\")"
+      }
+    ],
+    "content": {
+      "text": "清虚真人让你首次下山行侠，救助百姓。此行将考验你的心性。",
+      "title": "正道初行",
+      "description": "行侠仗义，立下名声。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "relation_change",
+        "target": "master",
+        "operator": "add",
+        "value": {
+          "id": "master_qingxu",
+          "name": "清虚真人",
+          "role": "master",
+          "delta": 5
+        }
+      },
+      {
+        "type": "event_record",
+        "target": "orthodox_initiation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "正道",
+        "路线"
+      ],
+      "enabled": true
+    }
+  }
+]

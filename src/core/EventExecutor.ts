@@ -59,6 +59,7 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.FLAG_SET, new FlagSetHandler());
     this.handlers.set(EffectType.FLAG_UNSET, new FlagUnsetHandler());
     this.handlers.set(EffectType.EVENT_RECORD, new EventRecordHandler());
+    this.handlers.set(EffectType.RELATION_CHANGE, new RelationChangeHandler());
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
   }
   
@@ -93,23 +94,35 @@ export class StatModifyHandler implements EffectHandler {
       return state;
     }
     
+    // 为内外功提供差异化成长加成
+    let adjustedValue = finalValue;
+    if (operator === 'add') {
+      if (target === 'internalSkill') {
+        const bonus = Math.floor(((state.player as any).comprehension || 0) / 20);
+        adjustedValue += bonus;
+      } else if (target === 'externalSkill') {
+        const bonus = Math.floor(((state.player as any).constitution || 0) / 20);
+        adjustedValue += bonus;
+      }
+    }
+    
     // 应用操作符
     let newValue: number;
     switch (operator) {
       case 'add':
-        newValue = currentValue + finalValue;
+        newValue = currentValue + adjustedValue;
         break;
       case 'subtract':
-        newValue = currentValue - finalValue;
+        newValue = currentValue - adjustedValue;
         break;
       case 'multiply':
-        newValue = currentValue * finalValue;
+        newValue = currentValue * adjustedValue;
         break;
       case 'divide':
-        newValue = Math.floor(currentValue / finalValue);
+        newValue = adjustedValue === 0 ? currentValue : Math.floor(currentValue / adjustedValue);
         break;
       default:
-        newValue = finalValue;
+        newValue = adjustedValue;
     }
     
     // 确保值在合理范围内
@@ -136,6 +149,8 @@ export class StatModifyHandler implements EffectHandler {
       qinggong: [0, 999],
       chivalry: [0, 100],
       charisma: [0, 100],
+      constitution: [0, 100],
+      comprehension: [0, 100],
       reputation: [-100, 100],
       money: [0, Number.MAX_SAFE_INTEGER],
     };
@@ -195,6 +210,89 @@ export class FlagUnsetHandler implements EffectHandler {
     return {
       ...state,
       flags: newFlags,
+    };
+  }
+}
+
+/**
+ * 关系变更处理器
+ */
+export class RelationChangeHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target, value, operator = 'add' } = effect;
+    const relations = { ...(state.relations || {}) };
+
+    let relationId = target;
+    let role: string | undefined;
+    let name: string | undefined;
+    let delta = 0;
+
+    if (typeof value === 'number') {
+      delta = value;
+    } else if (value && typeof value === 'object') {
+      if (typeof value.id === 'string') relationId = value.id;
+      if (typeof value.role === 'string') role = value.role;
+      if (typeof value.name === 'string') name = value.name;
+      if (typeof value.delta === 'number') delta = value.delta;
+      if (typeof value.value === 'number') delta = value.value;
+      if (typeof value.affinity === 'number') delta = value.affinity;
+    }
+
+    const current = relations[relationId] ?? 0;
+    let next = current;
+
+    switch (operator) {
+      case 'set':
+        next = delta;
+        break;
+      case 'subtract':
+        next = current - delta;
+        break;
+      case 'multiply':
+        next = current * delta;
+        break;
+      case 'divide':
+        next = delta === 0 ? current : Math.floor(current / delta);
+        break;
+      default:
+        next = current + delta;
+    }
+
+    relations[relationId] = next;
+
+    if (!state.player) {
+      return {
+        ...state,
+        relations,
+      };
+    }
+
+    const relationships = [...(state.player.relationships || [])];
+    const existingIndex = relationships.findIndex(rel => rel.id === relationId);
+
+    if (existingIndex === -1) {
+      relationships.push({
+        id: relationId,
+        role: (role || target) as any,
+        name: name || relationId,
+        affinity: next,
+      });
+    } else {
+      relationships[existingIndex] = {
+        ...relationships[existingIndex],
+        role: (role || relationships[existingIndex].role) as any,
+        name: name || relationships[existingIndex].name,
+        affinity: next,
+      };
+    }
+
+    return {
+      ...state,
+      relations,
+      player: {
+        ...state.player,
+        relationships,
+      },
     };
   }
 }

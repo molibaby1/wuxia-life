@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "imports": [
+    "./lines/demonic.json",
+    "./lines/general.json",
+    "./lines/origin.json",
+    "./lines/orthodox.json",
+    "./lines/training.json"
+  ],
+  "notes": "Event lines are split by narrative/theme, not age."
+}

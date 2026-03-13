@@ -13,14 +13,13 @@
  */
 
 import { gameEngine } from '../src/core/GameEngineIntegration';
-import { eventLoader } from '../src/core/EventLoader';
 import { saveManager } from '../src/core/SaveManager';
-import type { GameState, Event, EventChoice } from '../src/types/eventTypes';
+import type { GameState, EventDefinition, EventChoice } from '../src/types/eventTypes';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 
-const REPORTS_DIR = path.join(process.cwd(), 'tests/reports');
+const REPORTS_DIR = path.join(process.cwd(), 'public/reports');
 
 export interface GameProcessConfig {
   playerName: string;
@@ -36,7 +35,8 @@ export interface GameProcessRecord {
   age: number;
   eventId: string;
   eventTitle: string;
-  eventType: 'auto' | 'choice';
+  eventText?: string;
+  eventType: 'auto' | 'choice' | 'ending';
   selectedChoice?: EventChoice;
   availableChoices?: EventChoice[];
   gameState: GameState;
@@ -80,6 +80,7 @@ export class GameProcessSimulator {
   private records: GameProcessRecord[] = [];
   private saveCount: number = 0;
   private gameState: GameState | null = null;
+  private ended: boolean = false;
 
   constructor(config: Partial<GameProcessConfig> = {}) {
     this.config = {
@@ -99,6 +100,7 @@ export class GameProcessSimulator {
    */
   async simulate(): Promise<GameProcessReport> {
     this.log('🎮 开始游戏过程模拟测试...\n');
+    this.ended = false;
     
     // 0. 重置游戏引擎（确保状态干净）
     this.log('📝 步骤 0: 重置游戏引擎');
@@ -117,7 +119,7 @@ export class GameProcessSimulator {
     const startAge = this.gameState.player?.age || 0;
     const endAge = Math.min(startAge + this.config.simulateYears, 120);
     
-    while (this.gameState?.player?.alive && this.gameState.player.age < endAge) {
+    while (this.gameState?.player?.alive && !this.ended && this.gameState.player.age < endAge) {
       // 在每次循环开始时，从游戏引擎获取最新状态
       this.gameState = gameEngine.getGameState();
       
@@ -136,6 +138,7 @@ export class GameProcessSimulator {
     
     // 4. 保存报告
     this.saveReport(report);
+    this.updateManifest(report);
     
     this.log('\n✅ 游戏过程模拟测试完成！\n');
     
@@ -165,6 +168,7 @@ export class GameProcessSimulator {
         age: ageBeforeEvent,
         eventId: 'no_event',
         eventTitle: '平淡的一年',
+        eventText: '这一年并无大事发生，岁月静好。',
         eventType: 'auto',
         gameState: JSON.parse(JSON.stringify(currentState)),
         timestamp: new Date().toISOString()
@@ -182,6 +186,7 @@ export class GameProcessSimulator {
 
     const title = event.content?.title || '未知事件';
     const description = event.content?.description || '';
+    const text = event.content?.text || '';
     const eventType = event.eventType || 'auto';
 
     this.log(`\n   事件：${title}`);
@@ -190,23 +195,31 @@ export class GameProcessSimulator {
 
     // 3. 执行事件效果并推进时间
     if (eventType === 'choice' && event.choices && event.choices.length > 0) {
+      const availableChoices = this.getAvailableChoices(event);
+      if (availableChoices.length === 0) {
+        this.log('   ⚠️  无可用选项，跳过本次事件');
+        gameEngine.advanceTime(1);
+        this.gameState = gameEngine.getGameState();
+        return;
+      }
       // 选择事件：选择一个选项
       const record: GameProcessRecord = {
         age: ageBeforeEvent,
         eventId: event.id,
         eventTitle: title,
-        eventType: eventType as 'auto' | 'choice',
-        availableChoices: event.choices,
-        selectedChoice: this.selectChoice(event.choices),
+        eventText: text,
+        eventType: eventType as 'auto' | 'choice' | 'ending',
+        availableChoices,
+        selectedChoice: this.selectChoice(availableChoices),
         gameState: JSON.parse(JSON.stringify(currentState)),
         timestamp: new Date().toISOString()
       };
       
-      this.log(`   可用选项 (${event.choices.length}个):`);
-      event.choices.forEach((choice, i) => {
-        this.log(`     ${i + 1}. ${choice.content?.text || choice.id}`);
+      this.log(`   可用选项 (${availableChoices.length}个):`);
+      availableChoices.forEach((choice, i) => {
+        this.log(`     ${i + 1}. ${choice.text || choice.id}`);
       });
-      this.log(`   ✅ 选择：${record.selectedChoice.content?.text || record.selectedChoice.id}`);
+      this.log(`   ✅ 选择：${record.selectedChoice.text || record.selectedChoice.id}`);
 
       // 执行选择的效果（传递事件 ID 用于记录）
       if (record.selectedChoice.effects && record.selectedChoice.effects.length > 0) {
@@ -238,11 +251,17 @@ export class GameProcessSimulator {
         age: ageBeforeEvent,
         eventId: event.id,
         eventTitle: title,
-        eventType: eventType as 'auto' | 'choice',
+        eventText: text,
+        eventType: eventType as 'auto' | 'choice' | 'ending',
         gameState: JSON.parse(JSON.stringify(this.gameState)),
         timestamp: new Date().toISOString()
       };
       this.records.push(record);
+    }
+
+    if (eventType === 'ending') {
+      this.log('   🏁 触发结局事件，模拟结束');
+      this.ended = true;
     }
 
     // 检查是否死亡
@@ -259,21 +278,44 @@ export class GameProcessSimulator {
     // 1. 优先选择增加属性的选项
     // 2. 其次选择有趣/有意义的选项
     // 3. 最后随机选择
-    
+
+    let bestChoice = choices[0];
+    let bestScore = -Infinity;
+
     for (const choice of choices) {
+      let score = 0;
       if (choice.effects) {
-        const hasPositiveEffect = choice.effects.some(effect => 
-          effect.operator === 'add' && effect.value > 0
-        );
-        if (hasPositiveEffect) {
-          return choice;
+        for (const effect of choice.effects) {
+          if (effect.operator !== 'add') continue;
+          const value = typeof effect.value === 'number' ? effect.value : 0;
+          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(effect.target)) {
+            score += value * 2;
+          } else {
+            score += value;
+          }
         }
       }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestChoice = choice;
+      }
     }
-    
-    // 随机选择
+
+    if (bestScore > -Infinity) {
+      return bestChoice;
+    }
+
     const randomIndex = Math.floor(Math.random() * choices.length);
     return choices[randomIndex];
+  }
+
+  /**
+   * 获取当前事件可用的选项（考虑条件）
+   */
+  private getAvailableChoices(event: EventDefinition): EventChoice[] {
+    if (!event.choices || event.choices.length === 0) return [];
+    return event.choices.filter(choice => gameEngine.isChoiceAvailable(choice.condition));
   }
 
   /**
@@ -315,7 +357,7 @@ export class GameProcessSimulator {
     const moneyGrowth = finalMoney - initialMoney;
 
     // 提取门派和感情信息
-    const flags = finalState?.player?.flags || {};
+    const flags = finalState?.flags || {};
     
     // 从 flags 中提取门派信息
     const sectJoined = flags.sect_shaolin ? '少林派' :
@@ -329,8 +371,8 @@ export class GameProcessSimulator {
                        flags.sectMember ? '弟子' : 
                        flags.shaolinDisciple || flags.wudangDisciple || flags.emeiDisciple ? '弟子' : undefined;
     
-    const spouse = flags.spouse || undefined;
-    const children = flags.children || 0;
+    const spouse = finalState?.player?.spouse || undefined;
+    const children = finalState?.player?.children || 0;
 
     return {
       id: this.generateId(),
@@ -385,6 +427,54 @@ export class GameProcessSimulator {
     const htmlContent = this.generateHtmlReport(report);
     fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
     this.log(`📄 HTML 报告：${htmlPath}`);
+  }
+
+  /**
+   * 更新报告清单
+   */
+  private updateManifest(report: GameProcessReport): void {
+    const manifestPath = path.join(REPORTS_DIR, 'manifest.json');
+    const reportEntry = {
+      id: report.id,
+      fileName: `game-process-${report.id}.json`,
+      name: `游戏过程模拟 ${new Date(report.timestamp).toLocaleDateString('zh-CN')}`,
+      type: 'game_process',
+      generatedAt: report.timestamp,
+      config: {
+        startAge: 0,
+        endAge: 80,
+        randomnessWeight: 0.5,
+        simulationYears: report.totalYears
+      },
+      statistics: {
+        totalChoices: report.totalChoices,
+        totalStateChanges: report.totalEvents,
+        lifespan: report.finalAge,
+        sect: report.statistics.sectJoined || '无',
+        children: report.statistics.children || 0,
+        deathReason: report.deathReason || (report.isAlive ? '在世' : '未知')
+      },
+      aiEvaluation: null,
+      duration: 0
+    };
+
+    let manifest = { version: '1.0', generatedAt: report.timestamp, totalReports: 0, reports: [] as any[] };
+    if (fs.existsSync(manifestPath)) {
+      try {
+        manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      } catch {
+        // ignore invalid manifest
+      }
+    }
+
+    const reports = (manifest.reports || []).filter((item: any) => item.id !== report.id);
+    reports.unshift(reportEntry);
+    manifest.reports = reports;
+    manifest.totalReports = reports.length;
+    manifest.generatedAt = new Date().toISOString();
+
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+    this.log(`📄 清单已更新：${manifestPath}`);
   }
 
   /**
@@ -662,9 +752,9 @@ export class GameProcessSimulator {
             <div class="timeline-content">
               <div class="timeline-title">
                 ${record.eventTitle}
-                <span class="timeline-type ${record.eventType}">${record.eventType === 'auto' ? '自动' : '选择'}</span>
+                <span class="timeline-type ${record.eventType}">${record.eventType === 'auto' ? '自动' : record.eventType === 'ending' ? '结局' : '选择'}</span>
               </div>
-              <div class="timeline-desc">${record.gameState.player?.events?.some(e => e.eventId === record.eventId) ? '✅ 已触发' : ''}</div>
+              <div class="timeline-desc">${record.eventText || record.eventTitle}</div>
               ${record.selectedChoice ? `
                 <div class="timeline-choice">
                   选择：${record.selectedChoice.text}
@@ -684,6 +774,7 @@ export class GameProcessSimulator {
             <th>年龄</th>
             <th>事件 ID</th>
             <th>事件名称</th>
+            <th>事件文案</th>
             <th>类型</th>
             <th>武力</th>
             <th>金钱</th>
@@ -696,6 +787,7 @@ export class GameProcessSimulator {
               <td>${record.age}</td>
               <td><code>${record.eventId}</code></td>
               <td>${record.eventTitle}</td>
+              <td>${record.eventText || ''}</td>
               <td>${record.eventType}</td>
               <td>${record.gameState.player?.martialPower}</td>
               <td>${record.gameState.player?.money}</td>

@@ -1,0 +1,632 @@
+[
+  {
+    "id": "sect_establishment",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": {
+      "min": 40,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sectFounder\")"
+      }
+    ],
+    "content": {
+      "text": "经过多年经营，你创立的门派已在江湖上占据一席之地。门徒众多，声名远播。你的武学理念得以传承发扬。",
+      "title": "开宗立派",
+      "description": "开创新局，传承武学。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "sectEstablished"
+      },
+      {
+        "type": "event_record",
+        "target": "sect_establishment"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "门派",
+        "传承",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "disciples_everywhere",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 75,
+    "ageRange": {
+      "min": 45,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"wiseMaster\") OR flags.has(\"sectFounder\")"
+      }
+    ],
+    "content": {
+      "text": "你的弟子们已遍布江湖，其中不乏杰出之辈。他们在各自的领域发光发热，将你的武学精神传承下去。",
+      "title": "桃李满天下",
+      "description": "薪火相传，生生不息。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 20,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "legacySecured"
+      },
+      {
+        "type": "event_record",
+        "target": "disciples_everywhere"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "传承",
+        "弟子",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "status_consolidation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 85,
+    "ageRange": {
+      "min": 50,
+      "max": 50
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 180"
+      }
+    ],
+    "content": {
+      "text": "年过半百，你已是江湖中德高望重的前辈。各大门派都对你敬重有加，江湖事务常来请教你的意见。",
+      "title": "江湖地位巩固",
+      "description": "德高望重，一言九鼎。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "respectedElder"
+      },
+      {
+        "type": "event_record",
+        "target": "status_consolidation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "地位",
+        "江湖",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "retirement",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 55,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 55
+      }
+    ],
+    "content": {
+      "text": "年岁渐长，你开始考虑退休生活。是继续留在江湖中心，还是归隐田园，享受平静的生活？",
+      "title": "归隐田园",
+      "description": "功成身退，享受人生。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "retire_to_countryside",
+        "text": "归隐田园，远离江湖",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "retiredInCountryside"
+          },
+          {
+            "type": "flag_set",
+            "target": "peacefulLife"
+          },
+          {
+            "type": "event_record",
+            "target": "retire_to_countryside"
+          }
+        ]
+      },
+      {
+        "id": "stay_in_jianghu",
+        "text": "继续留在江湖",
+        "condition": {
+          "type": "expression",
+          "expression": "player.martialPower >= 200"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "activeInJianghu"
+          },
+          {
+            "type": "event_record",
+            "target": "stay_in_jianghu"
+          }
+        ]
+      },
+      {
+        "id": "travel_world",
+        "text": "游历天下",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "worldTraveler"
+          },
+          {
+            "type": "event_record",
+            "target": "travel_world"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "退休",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 90,
+    "ageRange": {
+      "min": 60,
+      "max": 60
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 60
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"martialScholar\") OR flags.has(\"peakMaster\")"
+      }
+    ],
+    "content": {
+      "text": "花甲之年，你开始总结一生的武学心得。这些经验若能流传后世，将是武林的宝贵财富。",
+      "title": "武学总结",
+      "description": "集大成者，流传后世。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "martialLegacyComplete"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_summary"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "总结",
+        "武学",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "family_happiness",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 65,
+      "max": 65
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 65
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"hasLoveInterest\")"
+      }
+    ],
+    "content": {
+      "text": "儿孙满堂，天伦之乐。你与伴侣相伴多年，看着子孙们健康成长，心中满是欣慰。",
+      "title": "天伦之乐",
+      "description": "家庭和睦，幸福美满。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "happyFamily"
+      },
+      {
+        "type": "event_record",
+        "target": "family_happiness"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "家庭",
+        "幸福",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "legendary_life",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": {
+      "min": 70,
+      "max": 70
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 70
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 250 && player.charisma >= 100 && flags.has(\"legendaryStatus\")"
+      }
+    ],
+    "content": {
+      "text": "古稀之年，你已是一代传奇。江湖中到处流传着你的故事，你的名字将永远载入武林史册。你的一生，是辉煌的武林传奇。",
+      "title": "传奇人生",
+      "description": "一代宗师，名垂青史。"
+    },
+    "eventType": "ending",
+    "endingType": "legendary",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "legendary_life"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "传奇",
+        "完美"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "peaceful_old_age",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": {
+      "min": 75,
+      "max": 75
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 75
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"peacefulLife\") && flags.has(\"happyFamily\")"
+      }
+    ],
+    "content": {
+      "text": "年逾古稀，你过着平静的生活。家人陪伴在侧，子孙孝顺。虽然没有惊天动地的成就，但这一生平淡而幸福。",
+      "title": "幸福晚年",
+      "description": "平淡是真，幸福安康。"
+    },
+    "eventType": "ending",
+    "endingType": "peaceful",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "peaceful_old_age"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "幸福",
+        "平静"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_master",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": {
+      "min": 78,
+      "max": 78
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 78
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sectEstablished\") && flags.has(\"legacySecured\") && player.martialPower >= 220"
+      }
+    ],
+    "content": {
+      "text": "你的门派已传承数代，门徒遍布天下。你的武学理念影响深远，被后人尊为一代宗师。",
+      "title": "武学宗师",
+      "description": "开宗立派，万世流芳。"
+    },
+    "eventType": "ending",
+    "endingType": "master",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "martial_master"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "宗师",
+        "传承"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "ordinary_life",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 50,
+    "ageRange": {
+      "min": 80,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 80
+      }
+    ],
+    "content": {
+      "text": "八十高龄，你回顾一生。虽然没有惊天动地的成就，但也经历了江湖的风风雨雨，有过欢笑，有过泪水。这就是你的人生，平凡而真实。",
+      "title": "平凡一生",
+      "description": "平凡人生，亦有光彩。"
+    },
+    "eventType": "ending",
+    "endingType": "ordinary",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "ordinary_life"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "平凡",
+        "默认"
+      ],
+      "enabled": true
+    }
+  }
+]

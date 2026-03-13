@@ -49,6 +49,8 @@ export class GameEngineIntegration {
         internalSkill: 0,
         qinggong: 0,
         chivalry: 0,
+        constitution: 10,
+        comprehension: 10,
         money: 100,
         health: 100,
         energy: 100,
@@ -56,6 +58,7 @@ export class GameEngineIntegration {
         items: [],
         flags: {},
         events: [],
+        relationships: [],
       },
       currentTime: {
         year: 1,
@@ -64,6 +67,7 @@ export class GameEngineIntegration {
       },
       flags: {},
       events: [],
+      relations: {},
     };
   }
   
@@ -80,6 +84,46 @@ export class GameEngineIntegration {
    */
   public getReactiveGameState(): GameState {
     return this.gameState;
+  }
+
+  /**
+   * 将新状态合并到响应式对象，避免丢失响应性
+   */
+  private applyGameState(nextState: GameState): void {
+    if (!isReactive(this.gameState)) {
+      this.gameState = reactive(nextState);
+      return;
+    }
+
+    Object.assign(this.gameState, nextState);
+
+    if (nextState.player) {
+      if (!this.gameState.player) {
+        this.gameState.player = nextState.player;
+      } else {
+        Object.assign(this.gameState.player, nextState.player);
+        this.gameState.player.items = [...(nextState.player.items || [])];
+        this.gameState.player.events = [...(nextState.player.events || [])];
+        this.gameState.player.flags = { ...(nextState.player.flags || {}) };
+        this.gameState.player.relationships = [...(nextState.player.relationships || [])];
+      }
+    } else {
+      this.gameState.player = nextState.player;
+    }
+
+    if (nextState.currentTime) {
+      if (!this.gameState.currentTime) {
+        this.gameState.currentTime = nextState.currentTime;
+      } else {
+        Object.assign(this.gameState.currentTime, nextState.currentTime);
+      }
+    } else {
+      this.gameState.currentTime = nextState.currentTime;
+    }
+
+    this.gameState.flags = { ...(nextState.flags || {}) };
+    this.gameState.events = [...(nextState.events || [])];
+    this.gameState.relations = { ...(nextState.relations || {}) };
   }
   
   /**
@@ -180,13 +224,13 @@ export class GameEngineIntegration {
     
     // 加权随机选择
     const totalWeight = untriggeredEvents.reduce((sum, event) => {
-      return sum + (event.weight || 1);
+      return sum + eventLoader.getWeightForAge(event, currentAge);
     }, 0);
     
     let random = Math.random() * totalWeight;
     
     for (const event of untriggeredEvents) {
-      random -= (event.weight || 1);
+      random -= eventLoader.getWeightForAge(event, currentAge);
       if (random <= 0) {
         return event;
       }
@@ -208,10 +252,11 @@ export class GameEngineIntegration {
     const ageBeforeEvent = this.gameState.player?.age || 0;
     
     // 执行效果
-    this.gameState = await this.eventExecutor.executeEffects(
+    const updatedState = await this.eventExecutor.executeEffects(
       event.autoEffects,
       this.gameState
     );
+    this.applyGameState(updatedState);
     
     // 记录事件到玩家历史（使用事件前的年龄）
     if (this.gameState.player) {
@@ -233,7 +278,8 @@ export class GameEngineIntegration {
     // 记录事件前的年龄
     const ageBeforeEvent = this.gameState.player?.age || 0;
     
-    this.gameState = await this.eventExecutor.executeEffects(effects, this.gameState);
+    const updatedState = await this.eventExecutor.executeEffects(effects, this.gameState);
+    this.applyGameState(updatedState);
     
     // 记录事件到玩家历史（使用事件前的年龄）
     if (eventId && this.gameState.player) {
@@ -263,7 +309,8 @@ export class GameEngineIntegration {
    * 开始新游戏
    */
   public startNewGame(name: string, gender: 'male' | 'female'): void {
-    this.gameState = this.createInitialState();
+    const nextState = this.createInitialState();
+    this.applyGameState(nextState);
     
     if (this.gameState.player) {
       this.gameState.player.name = name;
@@ -277,7 +324,7 @@ export class GameEngineIntegration {
    * 重置游戏引擎
    */
   public reset(): void {
-    this.gameState = this.createInitialState();
+    this.applyGameState(this.createInitialState());
     console.log(`[GameEngine] 游戏引擎已重置`);
   }
   
@@ -285,7 +332,7 @@ export class GameEngineIntegration {
    * 重置游戏
    */
   public resetGame(): void {
-    this.gameState = this.createInitialState();
+    this.applyGameState(this.createInitialState());
     console.log('[GameEngine] 游戏已重置');
   }
   

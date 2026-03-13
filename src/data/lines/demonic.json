@@ -1,0 +1,171 @@
+[
+  {
+    "id": "demonic_encounter",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "NOT flags.has(\"route_orthodox\") AND (player.chivalry <= 30 OR flags.has(\"route_wanderer\"))"
+      }
+    ],
+    "content": {
+      "text": "你在山道遭遇一场黑衣人伏击，却被一位神秘强者救下。对方自称魔教中人，愿教你绝学。",
+      "title": "魔教奇遇",
+      "description": "一段禁忌的缘分悄然展开。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_demonic",
+        "text": "接受魔教传授",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "route_demonic"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 8,
+            "operator": "subtract"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": {
+              "id": "master_youming",
+              "name": "幽冥尊者",
+              "role": "master",
+              "delta": 18
+            }
+          },
+          {
+            "type": "event_record",
+            "target": "demonic_encounter_accept"
+          }
+        ]
+      },
+      {
+        "id": "decline_demonic",
+        "text": "婉拒对方，保持本心",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "demonic_encounter_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "魔教",
+        "奇遇"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_trial",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 14,
+      "max": 16
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_demonic\")"
+      }
+    ],
+    "content": {
+      "text": "幽冥尊者命你完成一次隐秘试炼。魔教规矩严苛，这将磨炼你的杀伐之心。",
+      "title": "魔教试炼",
+      "description": "黑暗中淬炼，换取力量。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 4,
+        "operator": "subtract"
+      },
+      {
+        "type": "relation_change",
+        "target": "master",
+        "operator": "add",
+        "value": {
+          "id": "master_youming",
+          "name": "幽冥尊者",
+          "role": "master",
+          "delta": 5
+        }
+      },
+      {
+        "type": "event_record",
+        "target": "demonic_trial"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "魔教",
+        "路线"
+      ],
+      "enabled": true
+    }
+  }
+]

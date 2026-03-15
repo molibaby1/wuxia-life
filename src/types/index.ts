@@ -1,5 +1,5 @@
 import type { EffectDefinition, OnCompleteConfig } from './effects';
-import type { EffectOperator, EffectType, EventCategory, EventPriority } from './eventTypes';
+import type { EffectOperator, EffectType, EventCategory, EventPriority, TalentDefinition } from './eventTypes';
 
 export type ConditionOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'hasFlag' | 'hasEvent' | 'not' | 'and' | 'or' | 'random';
 
@@ -11,7 +11,7 @@ export interface Condition {
 }
 
 // 从 eventTypes 重新导出
-export type { EffectOperator, EffectType, EventCategory, EventPriority };
+export type { EffectOperator, EffectType, EventCategory, EventPriority, TalentDefinition };
 
 export interface Effect {
   op: EffectOperator;

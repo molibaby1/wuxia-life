@@ -1,0 +1,669 @@
+[
+  {
+    "id": "love_first_meet",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 15, "max": 35 },
+    "triggers": [
+      {"type": "age_reach", "value": 15},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"love_started\") && !flags.has(\"love_mature_started\") && !flags.has(\"love_elderly_started\") && player.charisma >= 10"
+      }
+    ],
+    "content": {
+      "text": "市集中你与一名气质独特的青年/女子擦肩而过，对方回眸一笑，令人难忘。",
+      "title": "初遇",
+      "description": "缘起一瞬间。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_greet",
+        "text": "上前搭话",
+        "effects": [
+          { "type": "flag_set", "target": "love_started" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 10 } },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+          { "type": "event_record", "target": "love_first_meet_greet" }
+        ]
+      },
+      {
+        "id": "love_pass",
+        "text": "只是远远一望",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "event_record", "target": "love_first_meet_pass" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "初遇", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_shared_mission",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 17, "max": 23 },
+    "triggers": [{ "type": "age_reach", "value": 17 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_started\") && !flags.has(\"love_bonded\")"
+      }
+    ],
+    "content": {
+      "text": "你与明月一同执行一件江湖委托，彼此信任渐深。",
+      "title": "并肩同行",
+      "description": "并肩最能识人心。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 8 } },
+      { "type": "flag_set", "target": "love_bonded" },
+      { "type": "event_record", "target": "love_shared_mission" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "成长", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_family_obstacle",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 19, "max": 25 },
+    "triggers": [{ "type": "age_reach", "value": 19 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_bonded\") && !flags.has(\"love_conflict\")"
+      }
+    ],
+    "content": {
+      "text": "明月的家族对你心存疑虑，提出严苛条件。",
+      "title": "家族阻碍",
+      "description": "情之一字，难过家门。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_prove",
+        "text": "接受考验",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "love_conflict" },
+          { "type": "event_record", "target": "love_family_obstacle_prove" }
+        ]
+      },
+      {
+        "id": "love_avoid",
+        "text": "暂时避让",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -4 } },
+          { "type": "flag_set", "target": "love_conflict" },
+          { "type": "event_record", "target": "love_family_obstacle_avoid" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "冲突", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_rival_appears",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": { "min": 20, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_conflict\") && !flags.has(\"love_rival\")"
+      }
+    ],
+    "content": {
+      "text": "一位门派弟子对明月倾心已久，开始对你施压。",
+      "title": "情敌出现",
+      "description": "江湖情路多波折。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_duel",
+        "text": "正面对决",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "love_rival" },
+          { "type": "event_record", "target": "love_rival_duel" }
+        ]
+      },
+      {
+        "id": "love_withdraw",
+        "text": "暂时退让",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
+          { "type": "flag_set", "target": "love_rival" },
+          { "type": "event_record", "target": "love_rival_withdraw" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "冲突", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_separation",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": { "min": 21, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 21 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_rival\") && !flags.has(\"love_separated\")"
+      }
+    ],
+    "content": {
+      "text": "因门派与家族的压力，你与明月被迫分离。",
+      "title": "别离",
+      "description": "缘分被现实拉扯。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "flag_set", "target": "love_separated" },
+      { "type": "event_record", "target": "love_separation" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "转折", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_reunion",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": { "min": 22, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_separated\") && !flags.has(\"love_reunited\")"
+      }
+    ],
+    "content": {
+      "text": "多年后重逢，你与明月心意未改。",
+      "title": "重逢",
+      "description": "久别重逢。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_commit",
+        "text": "共度余生",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_set", "target": "love_committed" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 12 } },
+          { "type": "event_record", "target": "love_reunion_commit" }
+        ]
+      },
+      {
+        "id": "love_release",
+        "text": "放下执念",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_set", "target": "love_released" },
+          { "type": "event_record", "target": "love_reunion_release" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "转折", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_misunderstanding",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 30,
+    "ageRange": { "min": 18, "max": 25 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_bonded\") && !flags.has(\"love_misunderstood\")"
+      }
+    ],
+    "content": {
+      "text": "你被误传与他人过从甚密，明月心生疑虑。",
+      "title": "误会",
+      "description": "流言最伤人。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_clarify",
+        "text": "坦诚解释",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 5, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 6 } },
+          { "type": "flag_set", "target": "love_misunderstood" },
+          { "type": "event_record", "target": "love_misunderstanding_clarify" }
+        ]
+      },
+      {
+        "id": "love_silent",
+        "text": "沉默回避",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
+          { "type": "flag_set", "target": "love_misunderstood" },
+          { "type": "event_record", "target": "love_misunderstanding_silent" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "冲突", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_secret_help",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 30,
+    "ageRange": { "min": 20, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_misunderstood\") && !flags.has(\"love_secret_help\")"
+      }
+    ],
+    "content": {
+      "text": "你在暗处协助明月度过危机，未曾留下姓名。",
+      "title": "暗中相助",
+      "description": "情深不言。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 4 } },
+      { "type": "flag_set", "target": "love_secret_help" },
+      { "type": "event_record", "target": "love_secret_help" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "成长", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_life_or_death",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 28,
+    "ageRange": { "min": 23, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_secret_help\") && !flags.has(\"love_life_or_death\")"
+      }
+    ],
+    "content": {
+      "text": "你与明月共陷险境，生死一线。",
+      "title": "生死相救",
+      "description": "情与义皆在一瞬。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_save_her",
+        "text": "舍身救她",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 5, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 12, "operator": "subtract" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 10 } },
+          { "type": "flag_set", "target": "love_life_or_death" },
+          { "type": "event_record", "target": "love_life_or_death_save" }
+        ]
+      },
+      {
+        "id": "love_escape",
+        "text": "寻找援手",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 3 } },
+          { "type": "flag_set", "target": "love_life_or_death" },
+          { "type": "event_record", "target": "love_life_or_death_escape" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "转折", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_family_reconcile",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 28,
+    "ageRange": { "min": 21, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 21 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_family_reconcile\")"
+      }
+    ],
+    "content": {
+      "text": "明月家族终于松口，愿意成全你们。",
+      "title": "家族和解",
+      "description": "雨过天晴。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "flag_set", "target": "love_family_reconcile" },
+      { "type": "event_record", "target": "love_family_reconcile" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "转折", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_ending_good",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 25,
+    "ageRange": { "min": 24, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_committed\") && (flags.has(\"love_family_reconcile\") || flags.has(\"love_life_or_death\")) && !flags.has(\"love_ending_good\")"
+      }
+    ],
+    "content": {
+      "text": "风雨过后，你与明月相守相伴，江湖人称神仙眷侣。",
+      "title": "良缘",
+      "description": "情比金坚。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "flag_set", "target": "love_ending_good" },
+      { "type": "event_record", "target": "love_ending_good" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "结局", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_ending_sad",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 25,
+    "ageRange": { "min": 24, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_released\") && !flags.has(\"love_ending_sad\")"
+      }
+    ],
+    "content": {
+      "text": "你们最终选择各自前行，偶尔想起彼此时，已是淡淡温柔。",
+      "title": "缘尽",
+      "description": "情深缘浅。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "flag_set", "target": "love_ending_sad" },
+      { "type": "event_record", "target": "love_ending_sad" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "结局", "支线", "once"],
+      "enabled": true
+    }
+  }
+  ,
+  {
+    "id": "love_ending_sacrifice",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 20,
+    "ageRange": { "min": 22, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_ending_sacrifice\") && !flags.has(\"love_ending_good\")"
+      }
+    ],
+    "content": {
+      "text": "你在一场生死危局中为救明月付出巨大代价，留下永恒的传奇。",
+      "title": "殉情",
+      "description": "情深至此，生死相随。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "flag_set", "target": "love_ending_sacrifice" },
+      { "type": "event_record", "target": "love_ending_sacrifice" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "结局", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_ending_hideaway",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 20,
+    "ageRange": { "min": 23, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_committed\") && flags.has(\"love_family_reconcile\") && !flags.has(\"love_ending_hideaway\") && !flags.has(\"love_ending_good\")"
+      }
+    ],
+    "content": {
+      "text": "你与明月归隐山林，远离江湖纷争。",
+      "title": "隐居",
+      "description": "退隐而去，岁月静好。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "flag_set", "target": "love_ending_hideaway" },
+      { "type": "event_record", "target": "love_ending_hideaway" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "结局", "支线", "once"],
+      "enabled": true
+    }
+  }
+  ,
+  {
+    "id": "love_hideaway_pull",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 18,
+    "ageRange": { "min": 24, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_ending_hideaway\") && !flags.has(\"love_hideaway_pull\")"
+      }
+    ],
+    "content": {
+      "text": "江湖风波再起，有人求你出山。明月望着你，似有话说。",
+      "title": "隐居牵扯",
+      "description": "是出山，还是守护宁静？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "hideaway_return",
+        "text": "重出江湖",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_set", "target": "love_hideaway_return" },
+          { "type": "event_record", "target": "love_hideaway_return" }
+        ]
+      },
+      {
+        "id": "hideaway_stay",
+        "text": "继续隐居",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_set", "target": "love_hideaway_stay" },
+          { "type": "event_record", "target": "love_hideaway_stay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "隐居", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_demonic_conflict",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 22,
+    "ageRange": { "min": 19, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 19 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_started\") && flags.has(\"route_demonic\") && !flags.has(\"love_demonic_conflict\")"
+      }
+    ],
+    "content": {
+      "text": "明月得知你投身魔教，痛苦不已，逼你作出选择。",
+      "title": "情与立场",
+      "description": "爱与道，无法兼得？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_choose_redemption",
+        "text": "为她回头",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "flag_set", "target": "demonic_redemption_started" },
+          { "type": "flag_set", "target": "love_demonic_conflict" },
+          { "type": "event_record", "target": "love_demonic_conflict_redemption" }
+        ]
+      },
+      {
+        "id": "love_choose_demonic",
+        "text": "坚持魔教道路",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -8 } },
+          { "type": "flag_set", "target": "love_demonic_conflict" },
+          { "type": "event_record", "target": "love_demonic_conflict_demonic" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "魔教", "冲突", "支线", "once"],
+      "enabled": true
+    }
+  }
+]

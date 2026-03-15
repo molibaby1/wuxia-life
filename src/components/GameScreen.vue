@@ -3,9 +3,17 @@
     <div class="header">
       <div class="player-info">
         <span class="name">{{ player?.name }}</span>
-        <span class="age">{{ player?.age }}岁 (实际年龄：{{ getRealAge() }})</span>
+        <span class="age">{{ player?.age }}岁 (时间：{{ getCurrentDate() }})</span>
         <span v-if="player?.sect" class="sect">{{ player.sect }}</span>
       </div>
+    </div>
+    
+    <!-- 属性面板 -->
+    <div class="attribute-section">
+      <AttributePanel 
+        :player="player" 
+        :talents="talentDefinitions"
+      />
     </div>
     
     <div class="stats-bar">
@@ -95,7 +103,9 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
-import type { StoryChoice } from '../types';
+import { talentSystem } from '../core/TalentSystem';
+import AttributePanel from './AttributePanel.vue';
+import type { StoryChoice, TalentDefinition } from '../types';
 
 const props = defineProps<{
   currentNode: any;
@@ -106,6 +116,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
 }>();
+
+// 加载天赋定义
+const talentDefinitions = ref<TalentDefinition[]>([]);
+talentSystem.loadTalents();
+talentDefinitions.value = talentSystem.getAllTalents();
 
 // 使用 ref 存储玩家数据，通过 watchEffect 更新
 const playerRef = ref(gameEngine.getGameState().player);
@@ -153,9 +168,10 @@ const formatRole = (role: string) => {
   }
 };
 
-const getRealAge = () => {
+const getCurrentDate = () => {
   const state = gameEngine.getGameState();
-  return state.player?.age || 0;
+  const time = state.currentTime || { year: 1, month: 1, day: 1 };
+  return `${time.year}年${time.month}月${time.day}日`;
 };
 
 const makeChoice = (choice: StoryChoice) => {
@@ -194,6 +210,12 @@ const makeChoice = (choice: StoryChoice) => {
   background: rgba(255,255,255,0.2);
   padding: 4px 10px;
   border-radius: 12px;
+}
+
+.attribute-section {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .stats-bar {

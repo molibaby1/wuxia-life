@@ -1,171 +1,933 @@
 [
   {
-    "id": "demonic_encounter",
-    "version": "1.0.0",
-    "category": "main_story",
-    "priority": 1,
-    "weight": 60,
-    "ageRange": {
-      "min": 14,
-      "max": 17
-    },
+    "id": "demonic_corruption_start",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {"min": 14, "max": 18},
     "triggers": [
-      {
-        "type": "age_reach",
-        "value": 14
-      }
+      {"type": "age_reach", "value": 14}
     ],
     "conditions": [
-      {
-        "type": "expression",
-        "expression": "NOT flags.has(\"route_orthodox\") AND (player.chivalry <= 30 OR flags.has(\"route_wanderer\"))"
-      }
+      {"type": "expression", "expression": "chivalry <= 20 || flags.wandering == true"}
     ],
     "content": {
-      "text": "你在山道遭遇一场黑衣人伏击，却被一位神秘强者救下。对方自称魔教中人，愿教你绝学。",
-      "title": "魔教奇遇",
-      "description": "一段禁忌的缘分悄然展开。"
+      "title": "邪功诱惑",
+      "text": "你在江湖游历时，偶然得到一本邪派秘籍。秘籍中记载的武功诡异强大，但修炼需要付出代价。你感受到内心的挣扎。",
+      "description": "获得邪功秘籍"
     },
     "eventType": "choice",
     "choices": [
       {
-        "id": "accept_demonic",
-        "text": "接受魔教传授",
+        "text": "修炼邪功（侠义 -10，武力 +15）",
         "effects": [
-          {
-            "type": "flag_set",
-            "target": "route_demonic"
-          },
-          {
-            "type": "stat_modify",
-            "target": "chivalry",
-            "value": 8,
-            "operator": "subtract"
-          },
-          {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 6,
-            "operator": "add"
-          },
-          {
-            "type": "relation_change",
-            "target": "master",
-            "operator": "add",
-            "value": {
-              "id": "master_youming",
-              "name": "幽冥尊者",
-              "role": "master",
-              "delta": 18
-            }
-          },
-          {
-            "type": "event_record",
-            "target": "demonic_encounter_accept"
-          }
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+          {"type": "flag_set", "flag": "demonic_corrupted", "value": true},
+          {"type": "flag_set", "flag": "demonic_path_start", "value": true}
         ]
       },
       {
-        "id": "decline_demonic",
-        "text": "婉拒对方，保持本心",
+        "text": "销毁秘籍",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "chivalry",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "event_record",
-            "target": "demonic_encounter_decline"
-          }
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
         ]
       }
-    ],
-    "metadata": {
-      "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
-      "author": "development_team",
-      "tags": [
-        "青年",
-        "魔教",
-        "奇遇"
-      ],
-      "enabled": true
-    }
+    ]
   },
   {
-    "id": "demonic_trial",
-    "version": "1.0.0",
-    "category": "main_story",
-    "priority": 1,
-    "weight": 70,
-    "ageRange": {
-      "min": 14,
-      "max": 16
-    },
+    "id": "demonic_heart_decline",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 95,
+    "weight": 90,
+    "ageRange": {"min": 15, "max": 20},
     "triggers": [
-      {
-        "type": "age_reach",
-        "value": 14
-      }
+      {"type": "age_reach", "value": 15}
     ],
     "conditions": [
-      {
-        "type": "expression",
-        "expression": "flags.has(\"route_demonic\")"
-      }
+      {"type": "expression", "expression": "flags.demonic_corrupted == true"}
     ],
     "content": {
-      "text": "幽冥尊者命你完成一次隐秘试炼。魔教规矩严苛，这将磨炼你的杀伐之心。",
-      "title": "魔教试炼",
-      "description": "黑暗中淬炼，换取力量。"
+      "title": "心性堕落",
+      "text": "随着邪功的修炼，你发现自己的心性在悄然改变。曾经在乎的侠义道德，现在看来如此可笑。力量，才是唯一的真理。",
+      "description": "心性开始堕落"
     },
     "eventType": "auto",
     "autoEffects": [
-      {
-        "type": "time_advance",
-        "target": "age",
-        "value": 1
-      },
-      {
-        "type": "stat_modify",
-        "target": "martialPower",
-        "value": 8,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "chivalry",
-        "value": 4,
-        "operator": "subtract"
-      },
-      {
-        "type": "relation_change",
-        "target": "master",
-        "operator": "add",
-        "value": {
-          "id": "master_youming",
-          "name": "幽冥尊者",
-          "role": "master",
-          "delta": 5
-        }
-      },
-      {
-        "type": "event_record",
-        "target": "demonic_trial"
-      }
+      {"type": "stat_modify", "stat": "chivalry", "value": -8},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 6},
+      {"type": "flag_set", "flag": "demonic_heart_dark", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_sect_join",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
     ],
-    "metadata": {
-      "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
-      "author": "development_team",
-      "tags": [
-        "青年",
-        "魔教",
-        "路线"
-      ],
-      "enabled": true
-    }
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_heart_dark == true"}
+    ],
+    "content": {
+      "title": "拜入邪派",
+      "text": "幽影门的人找上门来，他们感知到你身上的邪功气息。教主欣赏你的天赋，邀请你加入幽影门。这是你正式踏入魔道的机会。",
+      "description": "加入幽影门"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "加入幽影门",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_demonic", "value": true},
+          {"type": "flag_set", "flag": "demonic_disciple", "value": true},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      },
+      {
+        "text": "拒绝，独自修行",
+        "effects": [
+          {"type": "flag_set", "flag": "demonic_loner", "value": true},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_blood_ritual",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 17, "max": 24},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_demonic == true"}
+    ],
+    "content": {
+      "title": "血祭试炼",
+      "text": "幽影门的入门试炼是血祭——杀死一个无辜之人，用其鲜血祭奠魔功。这是你最后的良知考验。",
+      "description": "血祭试炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "完成血祭（侠义 -20）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry <= 10"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+          {"type": "flag_set", "flag": "demonic_blood_done", "value": true},
+          {"type": "flag_set", "flag": "formal_demonic", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝血祭",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "reputation", "value": -15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_power_initial",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 26},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_blood_done == true"}
+    ],
+    "content": {
+      "title": "魔功初成",
+      "text": "经过血祭，你的魔功突飞猛进。你感受到前所未有的力量在体内涌动，仿佛可以掌控一切。",
+      "description": "魔功初成"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 18},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+      {"type": "flag_set", "flag": "demonic_power_initial", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_absorb_internal",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {"min": 19, "max": 28},
+    "triggers": [
+      {"type": "age_reach", "value": 19}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_power_initial == true"}
+    ],
+    "content": {
+      "title": "吞噬内力",
+      "text": "幽影门的邪功可以吞噬他人的内力为己用。你开始猎杀武林人士，吸取他们的内力。这是快速提升实力的捷径。",
+      "description": "吞噬他人内力"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买化功散辅助（需金钱≥400，效果更好）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 400"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -400},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 25},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": -15},
+          {"type": "stat_modify", "stat": "reputation", "value": -20}
+        ]
+      },
+      {
+        "text": "直接吞噬",
+        "effects": [
+          {"type": "stat_modify", "stat": "internalSkill", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "reputation", "value": -15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_steal_manual",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 78,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.formal_demonic == true"}
+    ],
+    "content": {
+      "title": "掠夺秘籍",
+      "text": "教主派你去夺取一本正道秘籍。你不择手段，潜入正道门派，盗取了秘籍。",
+      "description": "掠夺正道秘籍"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "成功夺取（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": -20},
+          {"type": "flag_set", "flag": "demonic_manual_success", "value": true}
+        ]
+      },
+      {
+        "text": "失败逃跑",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_evil_item",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 75,
+    "weight": 60,
+    "ageRange": {"min": 21, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 21}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_manual_success == true"}
+    ],
+    "content": {
+      "title": "炼制邪物",
+      "text": "你学习炼制邪物的方法，可以用活人炼制尸傀、毒人。这种邪术遭天谴，但威力巨大。",
+      "description": "炼制邪物"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "炼制尸傀（侠义 -15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "flag_set", "flag": "demonic_zombie_master", "value": true}
+        ]
+      },
+      {
+        "text": "炼制毒药",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_control_subordinate",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 72,
+    "weight": 55,
+    "ageRange": {"min": 22, "max": 34},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.formal_demonic == true"}
+    ],
+    "content": {
+      "title": "控制下属",
+      "text": "你开始培养自己的势力，收服了一批手下。你学会了如何操控人心，让手下为你效命。",
+      "description": "建立势力"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": -8},
+      {"type": "flag_set", "flag": "demonic_leader", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_destroy_sect",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 82,
+    "weight": 65,
+    "ageRange": {"min": 23, "max": 36},
+    "triggers": [
+      {"type": "age_reach", "value": 23}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_zombie_master == true"}
+    ],
+    "content": {
+      "title": "灭门任务",
+      "text": "教主命令你带人灭掉一个正道门派。这是你向教主表忠心的机会，也是彻底堕落的开始。",
+      "description": "灭门任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "执行灭门（侠义 -30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -30},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": -30},
+          {"type": "flag_set", "flag": "demonic_sect_destroyer", "value": true}
+        ]
+      },
+      {
+        "text": "敷衍了事",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_internal_fight",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 24, "max": 38},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.formal_demonic == true"}
+    ],
+    "content": {
+      "title": "魔道内斗",
+      "text": "幽影门内部派系林立，各护法为争夺地位明争暗斗。你也被卷入其中，必须选择站队。",
+      "description": "派系斗争"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "支持大护法（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "flag_set", "flag": "demonic_faction_big", "value": true}
+        ]
+      },
+      {
+        "text": "支持二护法",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": -8},
+          {"type": "flag_set", "flag": "demonic_faction_second", "value": true}
+        ]
+      },
+      {
+        "text": "保持中立",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_breakthrough",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 80,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_power_initial == true"}
+    ],
+    "content": {
+      "title": "邪功突破",
+      "text": "你的邪功修炼到一个新的境界，可以施展更强大的招式。但每次运功，都感觉心神被侵蚀一分。",
+      "description": "邪功突破"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 20},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 15},
+      {"type": "stat_modify", "stat": "chivalry", "value": -5},
+      {"type": "flag_set", "flag": "demonic_breakthrough", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_master_approval",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 85,
+    "weight": 60,
+    "ageRange": {"min": 26, "max": 42},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_sect_destroyer == true"}
+    ],
+    "content": {
+      "title": "魔头认可",
+      "text": "教主对你的表现非常满意，封你为幽影门护法。你现在是魔教的核心人物，一人之下万人之上。",
+      "description": "成为护法"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 12},
+      {"type": "stat_modify", "stat": "reputation", "value": -20},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "flag_set", "flag": "demonic_guardian", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_power_struggle",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 88,
+    "weight": 65,
+    "ageRange": {"min": 27, "max": 44},
+    "triggers": [
+      {"type": "age_reach", "value": 27}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_guardian == true"}
+    ],
+    "content": {
+      "title": "权位暗涌",
+      "text": "教主年事已高，继承人之争暗流涌动。你决定参与这场权力游戏，争夺教主之位。",
+      "description": "争夺教主之位"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "暗中布局（需魅力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "flag_set", "flag": "demonic_plotting", "value": true}
+        ]
+      },
+      {
+        "text": "武力夺位（需武力≥120）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 120"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "demonic_force_takeover", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_usurpation",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 90,
+    "weight": 70,
+    "ageRange": {"min": 28, "max": 46},
+    "triggers": [
+      {"type": "age_reach", "value": 28}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_plotting == true || flags.demonic_force_takeover == true"}
+    ],
+    "content": {
+      "title": "夺位之夜",
+      "text": "在一个风雨交加的夜晚，你发动了政变。这是你成为幽影门之主的关键一战。",
+      "description": "夺位之夜"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "杀死教主（需武力≥130）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 130"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": -20},
+          {"type": "stat_modify", "stat": "reputation", "value": -25},
+          {"type": "flag_set", "flag": "demonic_new_master", "value": true}
+        ]
+      },
+      {
+        "text": "逼迫教主退位",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "demonic_new_master", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_renounce_path",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 75,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_corrupted == true && chivalry >= -50"}
+    ],
+    "content": {
+      "title": "退隐修行",
+      "text": "你意识到自己已经走得太远，决定退出江湖，找个地方隐居修行，试图洗清身上的罪孽。",
+      "description": "退隐修行"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "彻底隐居",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": -5},
+          {"type": "flag_set", "flag": "demonic_hermit", "value": true}
+        ]
+      },
+      {
+        "text": "暗中行善",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "demonic_secret_good", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_aftermath",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 29, "max": 48},
+    "triggers": [
+      {"type": "age_reach", "value": 29}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_new_master == true"}
+    ],
+    "content": {
+      "title": "权斗余波",
+      "text": "你成为新教主后，不服者众多。你必须铲除异己，巩固自己的地位。",
+      "description": "铲除异己"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "血洗反对者（侠义 -20）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": -20},
+          {"type": "flag_set", "flag": "demonic_purge_done", "value": true}
+        ]
+      },
+      {
+        "text": "恩威并施",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_redemption_offer",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 78,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_corrupted == true && chivalry >= -80"}
+    ],
+    "content": {
+      "title": "改过契机",
+      "text": "一位正道高人找到你，表示愿意给你一个改过自新的机会。你可以选择接受，也可以选择拒绝。",
+      "description": "改过契机"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "重礼感谢高人（需金钱≥600，侠义 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 600"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -600},
+          {"type": "stat_modify", "stat": "chivalry", "value": 25},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "demonic_redemption_start", "value": true}
+        ]
+      },
+      {
+        "text": "接受感化",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "demonic_redemption_start", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝，继续魔道",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_redemption_test",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 75,
+    "weight": 50,
+    "ageRange": {"min": 31, "max": 52},
+    "triggers": [
+      {"type": "age_reach", "value": 31}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_redemption_start == true"}
+    ],
+    "content": {
+      "title": "赎罪试炼",
+      "text": "正道要求你完成赎罪试炼：摧毁幽影门的一个秘密据点，救出被囚禁的正道人士。",
+      "description": "赎罪试炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "完成试炼（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 25},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "flag_set", "flag": "demonic_redemption_done", "value": true}
+        ]
+      },
+      {
+        "text": "放弃",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_redemption_ending",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 85,
+    "weight": 60,
+    "ageRange": {"min": 32, "max": 54},
+    "triggers": [
+      {"type": "age_reach", "value": 32}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_redemption_done == true"}
+    ],
+    "content": {
+      "title": "浪子回头",
+      "text": "你成功完成赎罪试炼，正道接纳了你。虽然过去的罪行无法完全抹去，但你已经走上正途。",
+      "description": "浪子回头"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 20},
+      {"type": "stat_modify", "stat": "reputation", "value": 25},
+      {"type": "flag_set", "flag": "demonic_redeemed", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_redemption_audit",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 80,
+    "weight": 50,
+    "ageRange": {"min": 33, "max": 56},
+    "triggers": [
+      {"type": "age_reach", "value": 33}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_redeemed == true"}
+    ],
+    "content": {
+      "title": "清查",
+      "text": "正道联盟要对你的过去进行清查，一些人反对你加入正道。你需要证明自己。",
+      "description": "接受清查"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受审查",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      },
+      {
+        "text": "愤然离去",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_redemption_chase",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 82,
+    "weight": 45,
+    "ageRange": {"min": 34, "max": 58},
+    "triggers": [
+      {"type": "age_reach", "value": 34}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_redeemed == true"}
+    ],
+    "content": {
+      "title": "亡命天涯",
+      "text": "幽影门派出杀手追杀你这个叛徒。你必须躲避追杀，同时保护自己在意的人。",
+      "description": "躲避追杀"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "正面迎战（需武力≥120）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 120"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "demonic_chase_survived", "value": true}
+        ]
+      },
+      {
+        "text": "躲藏",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "demonic_ending_rule",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 95,
+    "weight": 100,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_new_master == true && martialPower >= 180"}
+    ],
+    "content": {
+      "title": "幽影门之主",
+      "text": "你统治幽影门数十年，魔道在你的领导下达到鼎盛。江湖中人闻你名号而胆寒，你的传说流传千古。",
+      "description": "成为幽影门之主"
+    },
+    "eventType": "ending",
+    "endingType": "demonic_master",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_demonic_master", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_ending_exile",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_hermit == true || flags.demonic_secret_good == true"}
+    ],
+    "content": {
+      "title": "隐退江湖",
+      "text": "你远离江湖纷争，在一个偏僻的地方隐居。虽然不再过问江湖事，但偶尔还是会出手相助有缘人。",
+      "description": "隐退江湖"
+    },
+    "eventType": "ending",
+    "endingType": "demonic_exile",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_demonic_exile", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_ending_purge",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 90,
+    "weight": 70,
+    "ageRange": {"min": 65, "max": 78},
+    "triggers": [
+      {"type": "age_reach", "value": 65}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_sect_destroyer == true && chivalry <= -100"}
+    ],
+    "content": {
+      "title": "清算覆灭",
+      "text": "正道联盟联合起来围剿你。在一场惊天动地的大战后，你力战身亡。你的死亡标志着一个时代的结束。",
+      "description": "被正道围剿身亡"
+    },
+    "eventType": "ending",
+    "endingType": "demonic_purge",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_demonic_purge", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_ending_redemption",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 92,
+    "weight": 75,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_redeemed == true && chivalry >= 50"}
+    ],
+    "content": {
+      "title": "浪子回头金不换",
+      "text": "你用余生赎罪，行侠仗义，弥补过去的过错。晚年时，人们不再记得你曾经的恶行，只记得你的善举。",
+      "description": "成功赎罪"
+    },
+    "eventType": "ending",
+    "endingType": "demonic_redemption",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_demonic_redemption", "value": true}
+    ]
+  },
+  {
+    "id": "demonic_ending_lonely",
+    "version": "1.0",
+    "category": "demonic",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.demonic_corrupted == true && !flags.demonic_new_master == true && !flags.demonic_redeemed == true"}
+    ],
+    "content": {
+      "title": "孤家寡人",
+      "text": "你一生作恶，众叛亲离。晚年时，身边没有任何人，孤独终老。这是你选择的道路的必然结局。",
+      "description": "孤独终老"
+    },
+    "eventType": "ending",
+    "endingType": "demonic_lonely",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_demonic_lonely", "value": true}
+    ]
   }
 ]

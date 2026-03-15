@@ -1,0 +1,394 @@
+[
+  {
+    "id": "talent_birth_awakening",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 100,
+    "ageRange": { "min": 0, "max": 1 },
+    "triggers": [
+      { "type": "age_reach", "value": 0 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "!talents || talents.length === 0" }
+    ],
+    "content": {
+      "title": "天赋觉醒",
+      "text": "在你出生之时，天地异象显现。你展现出与众不同的天赋潜能，这将影响你一生的发展道路。",
+      "description": "选择你的先天天赋"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "talent_choice_1",
+        "text": "武学奇才（战斗属性成长 +50%，上限 +20）",
+        "condition": {
+          "type": "expression",
+          "expression": "true"
+        },
+        "effects": [
+          {
+            "type": "talent_set",
+            "talentId": "martial_genius"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_birth_awakening"
+          }
+        ]
+      },
+      {
+        "id": "talent_choice_2",
+        "text": "八面玲珑（魅力/人脉成长 +40%）",
+        "condition": {
+          "type": "expression",
+          "expression": "true"
+        },
+        "effects": [
+          {
+            "type": "talent_set",
+            "talentId": "social_butterfly"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_birth_awakening"
+          }
+        ]
+      },
+      {
+        "id": "talent_choice_3",
+        "text": "过目不忘（学识成长 +50%，悟性 +30%）",
+        "condition": {
+          "type": "expression",
+          "expression": "true"
+        },
+        "effects": [
+          {
+            "type": "talent_set",
+            "talentId": "photographic_memory"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_birth_awakening"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "出生", "选择", "必触发"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "talent_childhood_sign",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 90,
+    "ageRange": { "min": 5, "max": 8 },
+    "triggers": [
+      { "type": "age_reach", "value": 5 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "talents && talents.length > 0" }
+    ],
+    "content": {
+      "title": "童年异象",
+      "text": "年幼的你已经展现出与众不同的特质。村里的长辈们都说，你将来必成大器。",
+      "description": "你的天赋开始显现"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "event_record",
+        "target": "talent_childhood_sign"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "童年", "成长"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "talent_martial_discovery",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": { "min": 10, "max": 15 },
+    "triggers": [
+      { "type": "age_reach", "value": 10 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "talents && talents.includes('martial_genius') || talents.includes('natural_strength') || talents.includes('spiritual_meridians')"
+      }
+    ],
+    "content": {
+      "title": "武学天赋显现",
+      "text": "你在武学方面展现出惊人的天赋。一招一式，都能迅速领悟；一拳一脚，都蕴含力量。村里的武师都说你是百年难遇的练武奇才。",
+      "description": "你的武学天赋被认可"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "talent_martial_train",
+        "text": "开始系统练武（外功 +5，内功 +3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "talent_martial_discovered"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_martial_train"
+          }
+        ]
+      },
+      {
+        "id": "talent_martial_patient",
+        "text": "不急不躁，继续打磨基础（悟性 +3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "talent_martial_discovered"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_martial_patient"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "武学", "发现"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "talent_social_discovery",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 75,
+    "ageRange": { "min": 10, "max": 15 },
+    "triggers": [
+      { "type": "age_reach", "value": 10 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "talents && talents.includes('social_butterfly') || talents.includes('charismatic') || talents.includes('emperor_star')"
+      }
+    ],
+    "content": {
+      "title": "社交天赋显现",
+      "text": "你天生就有一种吸引人的气质。无论是同龄人还是长辈，都愿意与你亲近。村里的老人都说你会做人，将来必有人脉广阔。",
+      "description": "你的社交天赋被认可"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "flag": "talent_social_discovered"
+      },
+      {
+        "type": "event_record",
+        "target": "talent_social_discovery"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "社交", "发现"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "talent_learning_discovery",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 10, "max": 15 },
+    "triggers": [
+      { "type": "age_reach", "value": 10 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "talents && talents.includes('photographic_memory') || talents.includes('quick_learner')"
+      }
+    ],
+    "content": {
+      "title": "学识天赋显现",
+      "text": "你读书过目不忘，先生教的东西你总能迅速理解。村里的教书先生说你是文曲星下凡，将来必成大器。",
+      "description": "你的学识天赋被认可"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "flag": "talent_learning_discovered"
+      },
+      {
+        "type": "event_record",
+        "target": "talent_learning_discovery"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "学识", "发现"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "talent_lone_wolf_realization",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 65,
+    "ageRange": { "min": 12, "max": 18 },
+    "triggers": [
+      { "type": "age_reach", "value": 12 },
+      { "type": "random", "value": 0.4 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "talents && talents.includes('lone_wolf')"
+      }
+    ],
+    "content": {
+      "title": "孤星命格",
+      "text": "你发现自己总是不合群，更喜欢独自修炼。虽然朋友不多，但你的武功进步神速。或许，这就是你的命格。",
+      "description": "你意识到自己的孤星天赋"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "talent_lone_accept",
+        "text": "接受孤独，专心练武（功力 +8，魅力 -3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": -3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "talent_lone_accepted"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_lone_accept"
+          }
+        ]
+      },
+      {
+        "id": "talent_lone_change",
+        "text": "尝试改变，多与人交流（魅力 +5，功力 +3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "talent_lone_changed"
+          },
+          {
+            "type": "event_record",
+            "target": "talent_lone_change"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["天赋", "孤星", "选择"],
+      "enabled": true
+    }
+  }
+]

@@ -1,0 +1,360 @@
+[
+  {
+    "id": "crisis_omen",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "灾难预兆",
+      "text": "江湖上出现了一系列异象：彗星划过夜空，动物集体迁徙，古老预言开始流传。似乎有什么大事即将发生。",
+      "description": "灾难预兆"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "调查异象（需悟性≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "flag_set", "flag": "crisis_investigated", "value": true}
+        ]
+      },
+      {
+        "text": "不以为意",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "crisis_arrival",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 90,
+    "weight": 70,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.crisis_investigated == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "浩劫降临",
+      "text": "预言成真，一场前所未有的浩劫降临江湖。可能是瘟疫、地震、或者是上古魔物苏醒。无数生灵涂炭。",
+      "description": "浩劫降临"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "挺身而出（需侠义≥50，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "flag_set", "flag": "crisis_hero", "value": true}
+        ]
+      },
+      {
+        "text": "明哲保身（侠义 -10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_suffering",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "生灵涂炭",
+      "text": "浩劫之下，百姓流离失所，哀鸿遍野。你目睹了无数惨状，心中五味杂陈。",
+      "description": "生灵涂炭"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 5},
+      {"type": "stat_modify", "stat": "health", "value": -5},
+      {"type": "stat_modify", "stat": "comprehension", "value": 8}
+    ]
+  },
+  {
+    "id": "crisis_step_up",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 88,
+    "weight": 65,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "expression", "expression": "flags.crisis_hero == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "挺身而出",
+      "text": "你决定不再袖手旁观，而是要为拯救苍生贡献自己的力量。这是成为英雄的第一步。",
+      "description": "挺身而出"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "组织救援（需魅力≥60，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15}
+        ]
+      },
+      {
+        "text": "亲自救助（需医术≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "medicalSkill >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "medicalSkill", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_truth",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 86,
+    "weight": 60,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.crisis_hero == true"}
+    ],
+    "content": {
+      "title": "寻找真相",
+      "text": "你开始调查浩劫的根源，发现这并非天灾，而是人祸。背后隐藏着一个惊天阴谋。",
+      "description": "寻找真相"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "深入调查（需悟性≥70，声望 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "flag_set", "flag": "crisis_truth_found", "value": true}
+        ]
+      },
+      {
+        "text": "浅尝辄止",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_solution",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 89,
+    "weight": 58,
+    "ageRange": {"min": 33, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 33},
+      {"type": "expression", "expression": "flags.crisis_truth_found == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "破解之法",
+      "text": "你找到了破解浩劫的方法，但需要收集稀有材料或者完成艰难的任务。这是拯救苍生的关键。",
+      "description": "破解之法"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受使命（需武力≥90，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "flag_set", "flag": "crisis_mission_accepted", "value": true}
+        ]
+      },
+      {
+        "text": "推脱",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -15},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_materials",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 84,
+    "weight": 62,
+    "ageRange": {"min": 33, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 33},
+      {"type": "expression", "expression": "flags.crisis_mission_accepted == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "收集材料",
+      "text": "破解浩劫需要三种稀有材料：千年灵芝、凤凰之血、神龙之鳞。你需要踏上寻找之旅。",
+      "description": "收集材料"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 12},
+      {"type": "stat_modify", "stat": "qinggong", "value": 10},
+      {"type": "stat_modify", "stat": "constitution", "value": -8},
+      {"type": "flag_set", "flag": "crisis_materials_collected", "value": true}
+    ]
+  },
+  {
+    "id": "crisis_artifact",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 92,
+    "weight": 55,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.crisis_materials_collected == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "炼制神器",
+      "text": "收集齐材料后，你需要找到一位铸剑大师，将材料炼制成可以对抗浩劫的神器。",
+      "description": "炼制神器"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "亲自炼制（需悟性≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "flag_set", "flag": "crisis_artifact_created", "value": true}
+        ]
+      },
+      {
+        "text": "请人炼制（需金钱≥1000）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "flag_set", "flag": "crisis_artifact_created", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_salvation",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 95,
+    "weight": 60,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.crisis_artifact_created == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "拯救苍生",
+      "text": "神器已成，现在是用它来拯救苍生的时候了。你面临着最后的考验，成功则名垂青史，失败则万劫不复。",
+      "description": "拯救苍生"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "使用神器（需武力≥100，声望 +50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 25},
+          {"type": "stat_modify", "stat": "reputation", "value": 50},
+          {"type": "stat_modify", "stat": "chivalry", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 25},
+          {"type": "stat_modify", "stat": "constitution", "value": -15},
+          {"type": "flag_set", "flag": "crisis_savior", "value": true}
+        ]
+      },
+      {
+        "text": "犹豫不决",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "reputation", "value": -15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crisis_survival",
+    "version": "1.0",
+    "category": "jianghu-crisis",
+    "priority": 93,
+    "weight": 55,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "flags.crisis_savior == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "劫后余生",
+      "text": "浩劫终于过去，江湖迎来了新生。你作为拯救苍生的英雄，被世人永远铭记。你的名字成为了传说。",
+      "description": "劫后余生"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 100},
+      {"type": "stat_modify", "stat": "charisma", "value": 40},
+      {"type": "stat_modify", "stat": "chivalry", "value": 30},
+      {"type": "stat_modify", "stat": "health", "value": 20},
+      {"type": "flag_set", "flag": "crisis_legend", "value": true}
+    ]
+  }
+]

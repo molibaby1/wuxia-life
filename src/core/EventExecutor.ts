@@ -61,6 +61,7 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.EVENT_RECORD, new EventRecordHandler());
     this.handlers.set(EffectType.RELATION_CHANGE, new RelationChangeHandler());
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
+    this.handlers.set(EffectType.SPECIAL, new SpecialEffectHandler());
   }
   
   /**
@@ -152,6 +153,7 @@ export class StatModifyHandler implements EffectHandler {
       constitution: [0, 100],
       comprehension: [0, 100],
       reputation: [-100, 100],
+      connections: [0, 100],
       money: [0, Number.MAX_SAFE_INTEGER],
     };
     
@@ -167,13 +169,46 @@ export class StatModifyHandler implements EffectHandler {
  */
 export class TimeAdvanceHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { value = 1 } = effect;
+    const { value = 1, timeUnit = 'year' } = effect;
+    const currentTime = state.currentTime || { year: 1, month: 1, day: 1 };
+    let year = currentTime.year;
+    let month = currentTime.month;
+    let day = currentTime.day;
+    let age = state.player.age;
+
+    if (timeUnit === 'year') {
+      year += value;
+      age += value;
+    } else if (timeUnit === 'month') {
+      month += value;
+      while (month > 12) {
+        month -= 12;
+        year += 1;
+        age += 1;
+      }
+    } else {
+      day += value;
+      while (day > 30) {
+        day -= 30;
+        month += 1;
+        if (month > 12) {
+          month = 1;
+          year += 1;
+          age += 1;
+        }
+      }
+    }
     
     return {
       ...state,
       player: {
         ...state.player,
-        age: state.player.age + value,
+        age,
+      },
+      currentTime: {
+        year,
+        month,
+        day,
       },
       gameTimestamp: Date.now(),
     };
@@ -189,9 +224,12 @@ export class FlagSetHandler implements EffectHandler {
     
     return {
       ...state,
-      flags: {
-        ...state.flags,
-        [target]: true,
+      player: {
+        ...state.player,
+        flags: {
+          ...state.player.flags,
+          [target]: true,
+        },
       },
     };
   }
@@ -204,12 +242,15 @@ export class FlagUnsetHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
     const { target } = effect;
     
-    const newFlags = { ...state.flags };
+    const newFlags = { ...state.player.flags };
     delete newFlags[target];
     
     return {
       ...state,
-      flags: newFlags,
+      player: {
+        ...state.player,
+        flags: newFlags,
+      },
     };
   }
 }
@@ -359,5 +400,30 @@ export class CompositeEffectHandler implements EffectHandler {
     
     const executor = new EventExecutor();
     return executor.executeEffects(effects, state);
+  }
+}
+
+/**
+ * 特殊效果处理器（处理 end_game 等特殊效果）
+ */
+export class SpecialEffectHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target } = effect;
+    
+    // 处理游戏结束效果
+    if (target === 'end_game') {
+      console.log('游戏结束！');
+      // 设置游戏结束标志
+      return {
+        ...state,
+        flags: {
+          ...state.flags,
+          gameEnded: true,
+        },
+      };
+    }
+    
+    // 其他特殊效果可以在这里添加
+    return state;
   }
 }

@@ -246,11 +246,17 @@
       {
         "id": "focus_on_study",
         "text": "专心读书练功",
+        "weight": 4,
         "effects": [
+          {
+            "type": "flag_set",
+            "target": "sect_trial_active"
+          },
           {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -281,11 +287,13 @@
       {
         "id": "play_outside",
         "text": "继续玩耍探索",
+        "weight": 3,
         "effects": [
           {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -308,6 +316,7 @@
       {
         "id": "balance_both",
         "text": "尝试平衡两者",
+        "weight": 2,
         "condition": {
           "type": "expression",
           "expression": "player.charisma >= 15"
@@ -316,7 +325,8 @@
           {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -353,6 +363,7 @@
         "成长路径",
         "平衡"
       ],
+      "autoResolve": true,
       "enabled": true
     }
   },
@@ -476,6 +487,12 @@
         "value": 14
       }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\")"
+      }
+    ],
     "content": {
       "text": "到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。",
       "title": "门派选择",
@@ -494,7 +511,8 @@
           {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -531,9 +549,14 @@
         },
         "effects": [
           {
+            "type": "flag_set",
+            "target": "sect_trial_active"
+          },
+          {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -570,9 +593,14 @@
         },
         "effects": [
           {
+            "type": "flag_set",
+            "target": "sect_trial_active"
+          },
+          {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -607,7 +635,8 @@
           {
             "type": "time_advance",
             "target": "age",
-            "value": 1
+            "value": 1,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -709,6 +738,274 @@
         "江湖",
         "历练",
         "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 14,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && !flags.has(\"sect_trial_started\")"
+      }
+    ],
+    "content": {
+      "text": "拜入门派后，你被安排参与入门试炼。试炼分为基础、身法与心性三关，需逐一完成。",
+      "title": "入门试炼",
+      "description": "门派试炼正式开始。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "trial_basic",
+        "text": "基础关：扎稳马步",
+        "weight": 4,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_basic_done" },
+          { "type": "event_record", "target": "sect_trial_basic" }
+        ]
+      },
+      {
+        "id": "trial_basic_fail",
+        "text": "基础关：失误摔伤",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
+          { "type": "flag_set", "target": "trial_basic_failed" },
+          { "type": "event_record", "target": "sect_trial_basic_fail" }
+        ]
+      },
+      {
+        "id": "trial_agile",
+        "text": "身法关：百步轻身",
+        "weight": 3,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "qinggong", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_agile_done" },
+          { "type": "event_record", "target": "sect_trial_agile" }
+        ]
+      },
+      {
+        "id": "trial_agile_fail",
+        "text": "身法关：失足受伤",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 8, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 8, "operator": "subtract" },
+          { "type": "flag_set", "target": "trial_agile_failed" },
+          { "type": "event_record", "target": "sect_trial_agile_fail" }
+        ]
+      },
+      {
+        "id": "trial_mind",
+        "text": "心性关：静坐悟道",
+        "weight": 3,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_mind_done" },
+          { "type": "event_record", "target": "sect_trial_mind" }
+        ]
+      },
+      {
+        "id": "trial_mind_delay",
+        "text": "心性关：参悟不足，延期再试",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "trial_mind_delayed" },
+          { "type": "event_record", "target": "sect_trial_mind_delay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_followup",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_done\") || flags.has(\"trial_agile_done\") || flags.has(\"trial_mind_done\")) && !flags.has(\"sect_trial_completed\")"
+      }
+    ],
+    "content": {
+      "text": "试炼进展顺利，长老安排你在门内继续修行，等待最终考核。",
+      "title": "试炼进阶",
+      "description": "磨砺心志，积蓄实力。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+      { "type": "event_record", "target": "sect_trial_followup" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_recover",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_failed\") || flags.has(\"trial_agile_failed\"))"
+      }
+    ],
+    "content": {
+      "text": "试炼中受了伤，你被安排在门内静养，同时补修基础。",
+      "title": "试炼养伤",
+      "description": "疗伤亦是修行。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+      { "type": "stat_modify", "target": "health", "value": 12, "operator": "add" },
+      { "type": "flag_unset", "target": "trial_basic_failed" },
+      { "type": "flag_unset", "target": "trial_agile_failed" },
+      { "type": "event_record", "target": "sect_trial_recover" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "恢复"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_final",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_done\") && flags.has(\"trial_agile_done\") && flags.has(\"trial_mind_done\"))"
+      }
+    ],
+    "content": {
+      "text": "三关皆过，门派长老亲自考核你的心性与武艺。你需在一日内完成最后试炼。",
+      "title": "试炼终章",
+      "description": "一日定乾坤。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "trial_final_success",
+        "text": "全力通过终试",
+        "weight": 3,
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "sect_trial_completed" },
+          { "type": "flag_unset", "target": "sect_trial_active" },
+          { "type": "event_record", "target": "sect_trial_final_success" }
+        ]
+      },
+      {
+        "id": "trial_final_delay",
+        "text": "稳妥应对，延期再战",
+        "weight": 1,
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "event_record", "target": "sect_trial_final_delay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
       ],
       "enabled": true
     }

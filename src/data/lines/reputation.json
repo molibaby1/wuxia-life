@@ -1,0 +1,346 @@
+[
+  {
+    "id": "reputation_awakening",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 85,
+    "weight": 70,
+    "ageRange": {"min": 20, "max": 35},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "expression", "expression": "reputation >= 50"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "初露锋芒",
+      "text": "你的名声开始在江湖上传播，人们开始谈论你这个后起之秀。这是你成名的第一步。",
+      "description": "名声初显"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 5},
+      {"type": "flag_set", "flag": "reputation_awakened", "value": true}
+    ]
+  },
+  {
+    "id": "reputation_rumor_spread",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 100"}
+    ],
+    "content": {
+      "title": "名声传播",
+      "text": "江湖上开始流传你的事迹，有人说你武艺高强，有人说你侠义心肠。名声是一把双刃剑。",
+      "description": "传闻四起"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "顺势而为（声望 +20，魅力 +8）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "低调行事（声望 +10，侠义 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_fame_task",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 150"}
+    ],
+    "content": {
+      "title": "声望任务",
+      "text": "有人慕名而来，请你帮忙解决一个难题。这是提升声望的好机会。",
+      "description": "声望任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受任务（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "money", "value": 50},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_damage",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 80,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 200"}
+    ],
+    "content": {
+      "title": "名誉受损",
+      "text": "有人散布关于你的谣言，你的名声受到了损害。树大招风，名声越大，敌人越多。",
+      "description": "名誉受损"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "追查造谣者（需武力≥85，声望 -10）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "用实力证明自己（声望 -15，武力 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      },
+      {
+        "text": "置之不理（声望 -20）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -20},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_clear_truth",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 76,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 150 && flags.reputation_damaged == true"}
+    ],
+    "content": {
+      "title": "澄清真相",
+      "text": "你终于找到了证据证明自己的清白，真相大白于天下。正义或许会迟到，但绝不会缺席。",
+      "description": "真相大白"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "chivalry", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "flag_unset", "flag": "reputation_damaged", "value": true}
+    ]
+  },
+  {
+    "id": "reputation_peak",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 90,
+    "weight": 40,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "reputation >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "声望巅峰",
+      "text": "你的声望达到了巅峰，江湖上无人不知你的名字。你成为了武林中的传奇人物。",
+      "description": "声望巅峰"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "charisma", "value": 20},
+      {"type": "stat_modify", "stat": "martialPower", "value": 15},
+      {"type": "flag_set", "flag": "reputation_legend", "value": true}
+    ]
+  },
+  {
+    "id": "reputation_worship",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 82,
+    "weight": 50,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 600"}
+    ],
+    "content": {
+      "title": "万人敬仰",
+      "text": "无数人崇拜你，把你当作偶像。你的言行举止都能影响整个江湖。",
+      "description": "万人敬仰"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "开宗立派（声望 +30，金钱 +200）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "money", "value": 200},
+          {"type": "flag_set", "flag": "sect_founder", "value": true}
+        ]
+      },
+      {
+        "text": "继续修炼（武力 +20，内力 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_challenge",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 400"}
+    ],
+    "content": {
+      "title": "树大招风",
+      "text": "你的名声引来了无数挑战者，他们都想打败你一举成名。你不得不应对接连不断的挑战。",
+      "description": "挑战不断"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受所有挑战（需武力≥95，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 95"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "constitution", "value": -10}
+        ]
+      },
+      {
+        "text": "拒绝挑战（声望 -10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_hide",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 70,
+    "weight": 40,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 800"}
+    ],
+    "content": {
+      "title": "隐姓埋名",
+      "text": "你厌倦了江湖纷争，决定隐姓埋名，过平静的生活。但你的传说依然在江湖上流传。",
+      "description": "隐居生活"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "彻底隐居（声望 -50，健康 +20）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -50},
+          {"type": "stat_modify", "stat": "health", "value": 20},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "flag_set", "flag": "reputation_hermit", "value": true}
+        ]
+      },
+      {
+        "text": "半隐退（声望 -20，武力 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_legacy",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 95,
+    "weight": 30,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "reputation >= 1000"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "流芳百世",
+      "text": "你的事迹被写入史书，你的名字将成为永恒的传说。即使你不在江湖，江湖依然有你的传说。",
+      "description": "流芳百世"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 100},
+      {"type": "stat_modify", "stat": "charisma", "value": 30},
+      {"type": "flag_set", "flag": "reputation_immortal", "value": true}
+    ]
+  }
+]

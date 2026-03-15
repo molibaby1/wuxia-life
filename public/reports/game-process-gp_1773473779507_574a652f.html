@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏过程模拟报告 - 2026/3/14 15:36:19</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 { font-size: 32px; margin-bottom: 10px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      background: #f8f9fa;
+    }
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .summary-card h3 {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .summary-card .number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .section {
+      padding: 40px;
+      border-top: 2px solid #e9ecef;
+    }
+    .section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    .timeline {
+      margin-top: 20px;
+    }
+    .timeline-item {
+      display: flex;
+      gap: 15px;
+      padding: 15px;
+      border-left: 3px solid #667eea;
+      margin-left: 20px;
+      margin-bottom: 15px;
+      background: #f8f9fa;
+      border-radius: 0 8px 8px 0;
+    }
+    .timeline-age {
+      min-width: 60px;
+      font-weight: bold;
+      color: #667eea;
+      font-size: 18px;
+    }
+    .timeline-content {
+      flex: 1;
+    }
+    .timeline-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .timeline-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .timeline-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .timeline-type.auto {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    .timeline-type.choice {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+    .timeline-choice {
+      margin-top: 8px;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #28a745;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .stat-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e9ecef;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: bold;
+      color: #495057;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 游戏过程模拟报告</h1>
+      <p>完整记录真实游戏体验流程</p>
+      <p style="margin-top: 10px; font-size: 12px;">2026/3/14 15:36:19</p>
+    </div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <h3>总经历年数</h3>
+        <div class="number">54</div>
+      </div>
+      <div class="summary-card">
+        <h3>最终年龄</h3>
+        <div class="number">30岁</div>
+      </div>
+      <div class="summary-card">
+        <h3>生存状态</h3>
+        <div class="number" style="color: #28a745">
+          ✅ 在世
+        </div>
+      </div>
+      <div class="summary-card">
+        <h3>触发事件</h3>
+        <div class="number">54</div>
+      </div>
+      <div class="summary-card">
+        <h3>做出选择</h3>
+        <div class="number">19</div>
+      </div>
+      <div class="summary-card">
+        <h3>存档次数</h3>
+        <div class="number">12</div>
+      </div>
+    </div>
+
+    
+
+    <div class="section">
+      <h2>📊 统计信息</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">童年事件 (0-12 岁)</div>
+          <div class="stat-value">15</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">青年事件 (13-18 岁)</div>
+          <div class="stat-value">13</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">成年事件 (19-54 岁)</div>
+          <div class="stat-value">26</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">老年事件 (55+ 岁)</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">自动事件</div>
+          <div class="stat-value">35</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">选择事件</div>
+          <div class="stat-value">19</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">武力成长</div>
+          <div class="stat-value">+85</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">金钱成长</div>
+          <div class="stat-value">+200</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">加入门派</div>
+          <div class="stat-value">无</div>
+        </div>
+        
+        
+        <div class="stat-item">
+          <div class="stat-label">子女数量</div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📜 游戏过程时间线</h2>
+      <div class="timeline">
+        
+          <div class="timeline-item">
+            <div class="timeline-age">0岁 · 2年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                天降异象
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你出生时天有异象，一道金光从天而降，笼罩了整个府邸。族中长老惊叹：「此子非凡，将来必成大器！」</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">1岁 · 2年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                出身背景
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。</div>
+              
+                <div class="timeline-choice">
+                  选择：商贾之家
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">1岁 · 3年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                探索小能手
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">2岁 · 3年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">3岁 · 5年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                伶牙俐齿
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">4岁 · 5年1月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                童年选择
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。</div>
+              
+                <div class="timeline-choice">
+                  选择：继续玩耍探索
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">4岁 · 5年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">5岁 · 6年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">6岁 · 7年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                武学启蒙
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。</div>
+              
+                <div class="timeline-choice">
+                  选择：注重内力培养
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">7岁 · 8年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">8岁 · 10年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                童年总结
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">9岁 · 10年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">10岁 · 11年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">11岁 · 12年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">12岁 · 13年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">13岁 · 15年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                少年初长成
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">转眼之间，你已从孩童成长为少年。身形逐渐挺拔，武艺也小有成就。家族的长辈们开始考虑你的未来。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">14岁 · 15年2月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                门派选择
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。</div>
+              
+                <div class="timeline-choice">
+                  选择：留在家族继续修炼
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">14岁 · 15年3月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                幽影门奇遇
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">你在山道遭遇一场黑衣人伏击，却被一位神秘强者救下。对方自称幽影门中人，愿教你绝学。</div>
+              
+                <div class="timeline-choice">
+                  选择：接受幽影门传授
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">14岁 · 15年3月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">15岁 · 16年4月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                幽影门试炼
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">幽冥尊者命你完成一次隐秘试炼。门规严苛，这将磨炼你的杀伐之心。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">15岁 · 16年4月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                修炼抉择
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">师门为你制定了新的修炼方案，你可以专精某一方向或平衡发展。</div>
+              
+                <div class="timeline-choice">
+                  选择：专修内功
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">15岁 · 16年4月1日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                暗影试炼
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">幽影门的暗影试炼开始，你需要在夜色中潜入敌营。</div>
+              
+                <div class="timeline-choice">
+                  选择：潜入成功
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">15岁 · 16年4月13日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">16岁 · 18年4月13日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                江湖历练
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">师父认为你已经学有所成，让你下山历练。你行走江湖，见识了各种人物和事端，武艺也在实战中不断精进。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">17岁 · 19年4月13日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                武艺精进
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你没有被儿女情长所困扰，而是专心致志地修炼武艺。日复一日，你的武功已经达到了一个新的高度。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">18岁 · 19年5月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                血影试炼
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">幽冥尊者命你参与血影之战，你需要在混战中夺取信物。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">18岁 · 19年6月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                幽影门试炼完成
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你完成试炼，幽影门高层认可你可担大任。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">18岁 · 19年6月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">19岁 · 21年6月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                江湖历练继续
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你没有参加武林大会，而是继续在江湖上游历。这段时间的历练让你的武艺更加扎实，经验也更加丰富。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">20岁 · 21年6月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                权位暗涌
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">幽影门内部权位斗争日益激烈，你被卷入其中。</div>
+              
+                <div class="timeline-choice">
+                  选择：策动夺权
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">20岁 · 21年7月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                初遇
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">市集中你与一名气质独特的青年/女子擦肩而过，对方回眸一笑，令人难忘。</div>
+              
+                <div class="timeline-choice">
+                  选择：上前搭话
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">20岁 · 21年7月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">21岁 · 22年7月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                夺位之夜
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">你策划了一场血色夜袭，试图夺取幽影门权位。</div>
+              
+                <div class="timeline-choice">
+                  选择：权位到手
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">21岁 · 22年8月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                权斗余波
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">权斗之后，幽影门内外震动，你必须选择下一步。</div>
+              
+                <div class="timeline-choice">
+                  选择：铁血统御
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">21岁 · 22年9月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                情与立场
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">明月得知你投身魔教，痛苦不已，逼你作出选择。</div>
+              
+                <div class="timeline-choice">
+                  选择：为她回头
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">21岁 · 22年9月18日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">22岁 · 23年10月18日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                并肩同行
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你与明月一同执行一件江湖委托，彼此信任渐深。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">22岁 · 23年10月18日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                家族阻碍
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">明月的家族对你心存疑虑，提出严苛条件。</div>
+              
+                <div class="timeline-choice">
+                  选择：接受考验
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">22岁 · 23年11月8日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                赎罪试炼
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">为证明诚意，你被要求护送百姓离开战乱地区。</div>
+              
+                <div class="timeline-choice">
+                  选择：顺利护送
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">22岁 · 23年12月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">23岁 · 24年12月3日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                情敌出现
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">一位门派弟子对明月倾心已久，开始对你施压。</div>
+              
+                <div class="timeline-choice">
+                  选择：正面对决
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">23岁 · 24年12月10日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                误会
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">你被误传与他人过从甚密，明月心生疑虑。</div>
+              
+                <div class="timeline-choice">
+                  选择：坦诚解释
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">23岁 · 25年1月15日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                别离
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">因门派与家族的压力，你与明月被迫分离。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">24岁 · 25年2月15日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                暗中相助
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你在暗处协助明月度过危机，未曾留下姓名。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">24岁 · 25年2月15日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                生死相救
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">你与明月共陷险境，生死一线。</div>
+              
+                <div class="timeline-choice">
+                  选择：舍身救她
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">24岁 · 25年2月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">25岁 · 26年3月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                家族和解
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">明月家族终于松口，愿意成全你们。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">25岁 · 27年3月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                殉情
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你在一场生死危局中为救明月付出巨大代价，留下永恒的传奇。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">26岁 · 27年3月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                重逢
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">多年后重逢，你与明月心意未改。</div>
+              
+                <div class="timeline-choice">
+                  选择：共度余生
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">26岁 · 28年4月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                幽影门之主
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你以铁血手腕统御幽影门，威震江湖。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">27岁 · 29年4月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                良缘
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">风雨过后，你与明月相守相伴，江湖人称神仙眷侣。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">28岁 · 30年4月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                浪子回头
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">你成功脱离幽影门，重归正道，成为江湖上少数的悔改之人。</div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">29岁 · 30年4月20日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                清查
+                <span class="timeline-type choice">选择</span>
+              </div>
+              <div class="timeline-desc">江湖旧账未了，名门要求你接受清查。</div>
+              
+                <div class="timeline-choice">
+                  选择：接受清查
+                </div>
+              
+            </div>
+          </div>
+        
+          <div class="timeline-item">
+            <div class="timeline-age">29岁 · 30年5月10日</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                平淡的一年
+                <span class="timeline-type auto">自动</span>
+              </div>
+              <div class="timeline-desc">这一年并无大事发生，岁月静好。</div>
+              
+            </div>
+          </div>
+        
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📋 详细数据表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>年龄</th>
+            <th>事件 ID</th>
+            <th>事件名称</th>
+            <th>事件文案</th>
+            <th>类型</th>
+            <th>武力</th>
+            <th>金钱</th>
+            <th>时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>0</td>
+              <td><code>birth_with_phenomenon</code></td>
+              <td>天降异象</td>
+              <td>你出生时天有异象，一道金光从天而降，笼罩了整个府邸。族中长老惊叹：「此子非凡，将来必成大器！」</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>100</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>1</td>
+              <td><code>origin_background</code></td>
+              <td>出身背景</td>
+              <td>你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。</td>
+              <td>choice</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>1</td>
+              <td><code>toddler_exploration</code></td>
+              <td>探索小能手</td>
+              <td>你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>2</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>3</td>
+              <td><code>clever_speech</code></td>
+              <td>伶牙俐齿</td>
+              <td>你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>4</td>
+              <td><code>childhood_preference</code></td>
+              <td>童年选择</td>
+              <td>到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。</td>
+              <td>choice</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>4</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>5</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>0</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>6</td>
+              <td><code>martial_arts_enlightenment</code></td>
+              <td>武学启蒙</td>
+              <td>到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。</td>
+              <td>choice</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>7</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>8</td>
+              <td><code>childhood_summary</code></td>
+              <td>童年总结</td>
+              <td>日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>9</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>10</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>11</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>12</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>13</td>
+              <td><code>youth_begins</code></td>
+              <td>少年初长成</td>
+              <td>转眼之间，你已从孩童成长为少年。身形逐渐挺拔，武艺也小有成就。家族的长辈们开始考虑你的未来。</td>
+              <td>auto</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>14</td>
+              <td><code>sect_choice</code></td>
+              <td>门派选择</td>
+              <td>到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。</td>
+              <td>choice</td>
+              <td>2</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>14</td>
+              <td><code>demonic_encounter</code></td>
+              <td>幽影门奇遇</td>
+              <td>你在山道遭遇一场黑衣人伏击，却被一位神秘强者救下。对方自称幽影门中人，愿教你绝学。</td>
+              <td>choice</td>
+              <td>8</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>14</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>8</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>15</td>
+              <td><code>demonic_trial</code></td>
+              <td>幽影门试炼</td>
+              <td>幽冥尊者命你完成一次隐秘试炼。门规严苛，这将磨炼你的杀伐之心。</td>
+              <td>auto</td>
+              <td>13</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>15</td>
+              <td><code>training_focus</code></td>
+              <td>修炼抉择</td>
+              <td>师门为你制定了新的修炼方案，你可以专精某一方向或平衡发展。</td>
+              <td>choice</td>
+              <td>13</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>15</td>
+              <td><code>demonic_trial_shadow</code></td>
+              <td>暗影试炼</td>
+              <td>幽影门的暗影试炼开始，你需要在夜色中潜入敌营。</td>
+              <td>choice</td>
+              <td>13</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>15</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>13</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>16</td>
+              <td><code>jianghu_experience</code></td>
+              <td>江湖历练</td>
+              <td>师父认为你已经学有所成，让你下山历练。你行走江湖，见识了各种人物和事端，武艺也在实战中不断精进。</td>
+              <td>auto</td>
+              <td>21</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>17</td>
+              <td><code>martial_improvement</code></td>
+              <td>武艺精进</td>
+              <td>你没有被儿女情长所困扰，而是专心致志地修炼武艺。日复一日，你的武功已经达到了一个新的高度。</td>
+              <td>auto</td>
+              <td>33</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>18</td>
+              <td><code>demonic_trial_blood</code></td>
+              <td>血影试炼</td>
+              <td>幽冥尊者命你参与血影之战，你需要在混战中夺取信物。</td>
+              <td>auto</td>
+              <td>37</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>18</td>
+              <td><code>demonic_trial_completion</code></td>
+              <td>幽影门试炼完成</td>
+              <td>你完成试炼，幽影门高层认可你可担大任。</td>
+              <td>auto</td>
+              <td>43</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>18</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>43</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>19</td>
+              <td><code>continued_journey</code></td>
+              <td>江湖历练继续</td>
+              <td>你没有参加武林大会，而是继续在江湖上游历。这段时间的历练让你的武艺更加扎实，经验也更加丰富。</td>
+              <td>auto</td>
+              <td>53</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>20</td>
+              <td><code>demonic_power_struggle</code></td>
+              <td>权位暗涌</td>
+              <td>幽影门内部权位斗争日益激烈，你被卷入其中。</td>
+              <td>choice</td>
+              <td>58</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>20</td>
+              <td><code>love_first_meet</code></td>
+              <td>初遇</td>
+              <td>市集中你与一名气质独特的青年/女子擦肩而过，对方回眸一笑，令人难忘。</td>
+              <td>choice</td>
+              <td>58</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>20</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>58</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>21</td>
+              <td><code>demonic_usurpation</code></td>
+              <td>夺位之夜</td>
+              <td>你策划了一场血色夜袭，试图夺取幽影门权位。</td>
+              <td>choice</td>
+              <td>64</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>21</td>
+              <td><code>demonic_aftermath</code></td>
+              <td>权斗余波</td>
+              <td>权斗之后，幽影门内外震动，你必须选择下一步。</td>
+              <td>choice</td>
+              <td>68</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>21</td>
+              <td><code>love_demonic_conflict</code></td>
+              <td>情与立场</td>
+              <td>明月得知你投身魔教，痛苦不已，逼你作出选择。</td>
+              <td>choice</td>
+              <td>68</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>21</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>68</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>22</td>
+              <td><code>love_shared_mission</code></td>
+              <td>并肩同行</td>
+              <td>你与明月一同执行一件江湖委托，彼此信任渐深。</td>
+              <td>auto</td>
+              <td>68</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>22</td>
+              <td><code>love_family_obstacle</code></td>
+              <td>家族阻碍</td>
+              <td>明月的家族对你心存疑虑，提出严苛条件。</td>
+              <td>choice</td>
+              <td>72</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>22</td>
+              <td><code>demonic_redemption_test</code></td>
+              <td>赎罪试炼</td>
+              <td>为证明诚意，你被要求护送百姓离开战乱地区。</td>
+              <td>choice</td>
+              <td>72</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>22</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>72</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>23</td>
+              <td><code>love_rival_appears</code></td>
+              <td>情敌出现</td>
+              <td>一位门派弟子对明月倾心已久，开始对你施压。</td>
+              <td>choice</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>23</td>
+              <td><code>love_misunderstanding</code></td>
+              <td>误会</td>
+              <td>你被误传与他人过从甚密，明月心生疑虑。</td>
+              <td>choice</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>23</td>
+              <td><code>love_separation</code></td>
+              <td>别离</td>
+              <td>因门派与家族的压力，你与明月被迫分离。</td>
+              <td>auto</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>24</td>
+              <td><code>love_secret_help</code></td>
+              <td>暗中相助</td>
+              <td>你在暗处协助明月度过危机，未曾留下姓名。</td>
+              <td>auto</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>24</td>
+              <td><code>love_life_or_death</code></td>
+              <td>生死相救</td>
+              <td>你与明月共陷险境，生死一线。</td>
+              <td>choice</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>24</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>25</td>
+              <td><code>love_family_reconcile</code></td>
+              <td>家族和解</td>
+              <td>明月家族终于松口，愿意成全你们。</td>
+              <td>auto</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>25</td>
+              <td><code>love_ending_sacrifice</code></td>
+              <td>殉情</td>
+              <td>你在一场生死危局中为救明月付出巨大代价，留下永恒的传奇。</td>
+              <td>auto</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>26</td>
+              <td><code>love_reunion</code></td>
+              <td>重逢</td>
+              <td>多年后重逢，你与明月心意未改。</td>
+              <td>choice</td>
+              <td>75</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>26</td>
+              <td><code>demonic_ending_rule</code></td>
+              <td>幽影门之主</td>
+              <td>你以铁血手腕统御幽影门，威震江湖。</td>
+              <td>auto</td>
+              <td>85</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>27</td>
+              <td><code>love_ending_good</code></td>
+              <td>良缘</td>
+              <td>风雨过后，你与明月相守相伴，江湖人称神仙眷侣。</td>
+              <td>auto</td>
+              <td>85</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>28</td>
+              <td><code>demonic_redemption_ending</code></td>
+              <td>浪子回头</td>
+              <td>你成功脱离幽影门，重归正道，成为江湖上少数的悔改之人。</td>
+              <td>auto</td>
+              <td>85</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>29</td>
+              <td><code>demonic_redemption_audit</code></td>
+              <td>清查</td>
+              <td>江湖旧账未了，名门要求你接受清查。</td>
+              <td>choice</td>
+              <td>85</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+            <tr>
+              <td>29</td>
+              <td><code>no_event</code></td>
+              <td>平淡的一年</td>
+              <td>这一年并无大事发生，岁月静好。</td>
+              <td>auto</td>
+              <td>85</td>
+              <td>300</td>
+              <td>15:36:19</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

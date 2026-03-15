@@ -1,0 +1,173 @@
+[
+  {
+    "id": "buddhist_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": { "min": 15, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 15 }],
+    "conditions": [
+      { "type": "expression", "expression": "!flags.has(\"route_buddhist\") && player.chivalry >= 10 && (flags.has(\"sect_shaolin\") || flags.has(\"shaolinDisciple\")) && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\")" }
+    ],
+    "content": {
+      "text": "寺中高僧与你谈经论道，愿引你入佛门修行。",
+      "title": "佛门缘起",
+      "description": "佛门一念，万事皆空。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "buddhist_accept",
+        "text": "入佛门修行",
+        "effects": [
+          { "type": "flag_set", "target": "route_buddhist" },
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "stat_modify", "target": "internalSkill", "value": 3, "operator": "add" },
+          { "type": "event_record", "target": "buddhist_entry_accept" }
+        ]
+      },
+      {
+        "id": "buddhist_decline",
+        "text": "婉拒佛门",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "event_record", "target": "buddhist_entry_decline" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["佛门", "主线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "buddhist_love_trial",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 22,
+    "ageRange": { "min": 18, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"route_buddhist\") && flags.has(\"love_started\") && !flags.has(\"buddhist_love_trial\")" }
+    ],
+    "content": {
+      "text": "寺中长老提醒你：情之一字，最易乱心。你该如何面对明月？",
+      "title": "情劫",
+      "description": "佛门与情缘的抉择。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "buddhist_keep_love",
+        "text": "情缘不舍",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 4 } },
+          { "type": "flag_set", "target": "buddhist_love_trial" },
+          { "type": "event_record", "target": "buddhist_love_keep" }
+        ]
+      },
+      {
+        "id": "buddhist_release_love",
+        "text": "斩断情缘",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "buddhist_love_trial" },
+          { "type": "event_record", "target": "buddhist_love_release" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["佛门", "爱情", "联动", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "buddhist_guard_temple",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 25,
+    "ageRange": { "min": 20, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"route_buddhist\") && !flags.has(\"buddhist_guard_temple\")" }
+    ],
+    "content": {
+      "text": "寺庙遭遇乱兵扰乱，你被要求护寺。",
+      "title": "护寺",
+      "description": "守护清净之地。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "buddhist_guard_temple" },
+      { "type": "event_record", "target": "buddhist_guard_temple" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["佛门", "主线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "buddhist_secularize",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 2,
+    "weight": 15,
+    "ageRange": { "min": 18, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_buddhist\") && !flags.has(\"buddhist_secularized\")"
+      }
+    ],
+    "content": {
+      "text": "你渐觉尘缘未了，向寺中请愿还俗。还俗后方可改换人生道路。",
+      "title": "还俗抉择",
+      "description": "佛门清净与红尘牵挂。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "buddhist_leave",
+        "text": "还俗下山",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_unset", "target": "route_buddhist" },
+          { "type": "flag_set", "target": "buddhist_secularized" },
+          { "type": "event_record", "target": "buddhist_secularize_leave" }
+        ]
+      },
+      {
+        "id": "buddhist_stay",
+        "text": "继续修行",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "event_record", "target": "buddhist_secularize_stay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["佛门", "退派", "once"],
+      "enabled": true
+    }
+  }
+]

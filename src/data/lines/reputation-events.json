@@ -1,0 +1,297 @@
+[
+  {
+    "id": "reputation_disciple_request",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 80,
+    "weight": 65,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 200 && martialPower >= 80"}
+    ],
+    "content": {
+      "title": "拜师学艺",
+      "text": "一位年轻人仰慕你的名声，不远千里前来拜师。他说愿意追随你学习武艺。",
+      "description": "收徒事件"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "收为弟子（声望 +15，获得追随者）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "has_disciple", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝，专心修炼",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3}
+        ]
+      },
+      {
+        "text": "推荐给其他门派（声望 +10，侠义 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_sect_establish",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 85,
+    "weight": 60,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 500 && martialPower >= 100"}
+    ],
+    "content": {
+      "title": "开宗立派",
+      "text": "你已名震一方，有足够的声望和实力开宗立派。这是每个武者的终极梦想。",
+      "description": "创建门派"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "创立门派（需金钱≥1000）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "stat_modify", "stat": "reputation", "value": 50},
+          {"type": "flag_set", "flag": "sect_master", "value": true},
+          {"type": "flag_set", "flag": "has_own_sect", "value": true}
+        ]
+      },
+      {
+        "text": "时机未到",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "reputation_alliance_meeting",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 82,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 600"}
+    ],
+    "content": {
+      "title": "武林大会",
+      "text": "武林大会即将召开，你作为有名望的武者收到邀请函。这是扬名立万的好机会。",
+      "description": "参加武林大会"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参加比武（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 40},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      },
+      {
+        "text": "作为观众",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_alliance_master",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 90,
+    "weight": 50,
+    "ageRange": {"min": 40, "max": 65},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 1000 && chivalry >= 80 && martialPower >= 150"}
+    ],
+    "content": {
+      "title": "武林盟主竞选",
+      "text": "老盟主退位，新一届武林盟主竞选开始。以你的声望和实力，完全有资格参选。",
+      "description": "竞选武林盟主"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参加竞选",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "flag_set", "flag": "alliance_master_candidate", "value": true}
+        ]
+      },
+      {
+        "text": "支持他人",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_legendary_status",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 88,
+    "weight": 45,
+    "ageRange": {"min": 45, "max": 70},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "random", "value": 0.05}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 2000"}
+    ],
+    "content": {
+      "title": "传奇人物",
+      "text": "你的名声已经传遍整个武林，成为活着的传奇。说书人到处传颂你的事迹。",
+      "description": "成为传奇"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 100},
+      {"type": "stat_modify", "stat": "charisma", "value": 20},
+      {"type": "flag_set", "flag": "living_legend", "value": true}
+    ]
+  },
+  {
+    "id": "reputation_low_prove_yourself",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 75,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation < 50"}
+    ],
+    "content": {
+      "title": "无人知晓",
+      "text": "在江湖上混了这么久，还是没人知道你是谁。你需要做些大事来证明自己。",
+      "description": "证明自己"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "挑战成名高手（需武力≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      },
+      {
+        "text": "行侠仗义（需侠义≥30）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10}
+        ]
+      },
+      {
+        "text": "继续默默修炼",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reputation_npc_attitude_change",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 78,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 300"}
+    ],
+    "content": {
+      "title": "名声效应",
+      "text": "随着你的名声越来越大，江湖人士对你的态度也发生了变化。走到哪里都有人恭敬地称呼你'少侠'。",
+      "description": "名声带来的变化"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 8}
+    ]
+  },
+  {
+    "id": "reputation_write_book",
+    "version": "1.0",
+    "category": "reputation",
+    "priority": 85,
+    "weight": 50,
+    "ageRange": {"min": 50, "max": 75},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 800 && martialPower >= 120"}
+    ],
+    "content": {
+      "title": "著书立说",
+      "text": "你想把自己毕生的武学心得写成书籍，流传后世。这是武者最高的成就之一。",
+      "description": "著书立说"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "撰写武学秘籍（需悟性≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 80},
+          {"type": "flag_set", "flag": "wrote_martial_book", "value": true}
+        ]
+      },
+      {
+        "text": "时机未到",
+        "effects": []
+      }
+    ]
+  }
+]

@@ -1,0 +1,404 @@
+[
+  {
+    "id": "love_mature_first",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 30, "max": 45 },
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "!flags.has(\"love_started\") && !flags.has(\"love_mature_started\")"}
+    ],
+    "content": {
+      "text": "多年行走江湖，你已褪去年少轻狂，多了几分沉稳。一次偶然的机会，你遇到了一位同样成熟的江湖人士，彼此心生好感。",
+      "title": "成熟之恋",
+      "description": "岁月沉淀后的爱情更加醇厚。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_mature_accept",
+        "text": "接受这份感情",
+        "effects": [
+          {"type": "flag_set", "target": "love_mature_started"},
+          {"type": "flag_set", "target": "love_started"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mature", "name": "婉清", "role": "lover", "delta": 15}},
+          {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
+          {"type": "event_record", "target": "love_mature_accept"}
+        ]
+      },
+      {
+        "id": "love_mature_decline",
+        "text": "婉拒，专心武道",
+        "effects": [
+          {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+          {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+          {"type": "event_record", "target": "love_mature_decline"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "成熟", "中年", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_mature_bond",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": {"min": 31, "max": 50},
+    "triggers": [{"type": "age_reach", "value": 31}],
+    "conditions": [
+      {"type": "expression", "expression": "flags.has(\"love_mature_started\") && !flags.has(\"love_mature_bonded\")"}
+    ],
+    "content": {
+      "text": "与婉清相处日久，你们一起经历了许多江湖风雨，感情愈发深厚。她理解你的江湖路，支持你的选择。",
+      "title": "相知相守",
+      "description": "成熟的爱情不需要轰轰烈烈，只需相知相守。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "time_advance", "target": "age", "value": 3, "timeUnit": "month"},
+      {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mature", "name": "婉清", "role": "lover", "delta": 20}},
+      {"type": "stat_modify", "target": "charisma", "value": 8, "operator": "add"},
+      {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+      {"type": "flag_set", "target": "love_mature_bonded"},
+      {"type": "event_record", "target": "love_mature_bonded"}
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "成熟", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_second_chance",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.has(\"love_ended\") && !flags.has(\"love_second_chance\")"}
+    ],
+    "content": {
+      "text": "曾经以为爱情已经远去，却在不经意间遇到了一个懂你的人。对方或许也有过一段往事，但你们都愿意重新开始。",
+      "title": "再续前缘",
+      "description": "爱情不会只来一次。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_second_accept",
+        "text": "勇敢接受",
+        "effects": [
+          {"type": "flag_set", "target": "love_second_chance"},
+          {"type": "flag_set", "target": "love_started"},
+          {"type": "flag_unset", "target": "love_ended"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_second", "name": "若兰", "role": "lover", "delta": 18}},
+          {"type": "stat_modify", "target": "charisma", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
+          {"type": "event_record", "target": "love_second_accept"}
+        ]
+      },
+      {
+        "id": "love_second_hesitate",
+        "text": "犹豫不决",
+        "effects": [
+          {"type": "time_advance", "target": "age", "value": 2, "timeUnit": "month"},
+          {"type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add"},
+          {"type": "event_record", "target": "love_second_hesitate"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "再续", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_affair_temptation",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 2,
+    "weight": 30,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "(flags.has(\"love_started\") || flags.has(\"love_married\")) && player.charisma >= 50 && !flags.has(\"love_affair\")"}
+    ],
+    "content": {
+      "text": "江湖路上，你遇到了一位对你倾慕不已的人。对方年轻有为，热情似火，让你心中泛起涟漪。但是，你已有家室...",
+      "title": "婚外情缘",
+      "description": "诱惑与责任的抉择。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_affair_resist",
+        "text": "坚守底线，婉拒对方",
+        "effects": [
+          {"type": "flag_set", "target": "love_affair_resisted"},
+          {"type": "stat_modify", "target": "chivalry", "value": 15, "operator": "add"},
+          {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_current", "name": "现任", "role": "lover", "delta": 10}},
+          {"type": "event_record", "target": "love_affair_resist"}
+        ]
+      },
+      {
+        "id": "love_affair_yield",
+        "text": "陷入情网，难以自拔",
+        "effects": [
+          {"type": "flag_set", "target": "love_affair"},
+          {"type": "stat_modify", "target": "chivalry", "value": -20, "operator": "add"},
+          {"type": "stat_modify", "target": "charisma", "value": 8, "operator": "add"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_current", "name": "现任", "role": "lover", "delta": -30}},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_affair", "name": "情人", "role": "lover", "delta": 25}},
+          {"type": "event_record", "target": "love_affair_yield"}
+        ]
+      },
+      {
+        "id": "love_affair_confess",
+        "text": "向现任坦白",
+        "effects": [
+          {"type": "flag_set", "target": "love_affair_confessed"},
+          {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_current", "name": "现任", "role": "lover", "delta": -15}},
+          {"type": "event_record", "target": "love_affair_confess"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "婚外情", "道德", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_affair_consequence",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": {"min": 36, "max": 62},
+    "triggers": [{"type": "age_reach", "value": 36}],
+    "conditions": [
+      {"type": "expression", "expression": "flags.has(\"love_affair\") && !flags.has(\"love_affair_exposed\")"}
+    ],
+    "content": {
+      "text": "纸包不住火，你的婚外情还是被发现了。江湖上流言四起，家人朋友都对你失望不已。",
+      "title": "东窗事发",
+      "description": "每一个选择都有代价。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_affair_end",
+        "text": "结束婚外情，回归家庭",
+        "effects": [
+          {"type": "flag_set", "target": "love_affair_exposed"},
+          {"type": "flag_unset", "target": "love_affair"},
+          {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": -15, "operator": "add"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_affair", "name": "情人", "role": "lover", "delta": -50}},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_current", "name": "现任", "role": "lover", "delta": -10}},
+          {"type": "event_record", "target": "love_affair_end"}
+        ]
+      },
+      {
+        "id": "love_affair_divorce",
+        "text": "选择情人，离开家庭",
+        "effects": [
+          {"type": "flag_set", "target": "love_affair_exposed"},
+          {"type": "flag_set", "target": "love_divorced"},
+          {"type": "flag_unset", "target": "love_affair"},
+          {"type": "flag_unset", "target": "love_married"},
+          {"type": "stat_modify", "target": "chivalry", "value": -15, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": -30, "operator": "add"},
+          {"type": "stat_modify", "target": "money", "value": -200, "operator": "add"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_current", "name": "前任", "role": "lover", "delta": -100}},
+          {"type": "event_record", "target": "love_affair_divorce"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "婚外情", "后果", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_elderly_companion",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": {"min": 55, "max": 75},
+    "triggers": [
+      {"type": "age_reach", "value": 55},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "!flags.has(\"love_married\") && !flags.has(\"love_elderly_started\")"}
+    ],
+    "content": {
+      "text": "年华已逝，你已步入老年。本以为此生注定孤独，却在一处风景秀丽的地方遇到了一位同样独身的老者。你们相谈甚欢，仿佛回到了年轻时候。",
+      "title": "黄昏情缘",
+      "description": "爱情不分年龄，真心永不褪色。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_elderly_accept",
+        "text": "珍惜这份缘分",
+        "effects": [
+          {"type": "flag_set", "target": "love_elderly_started"},
+          {"type": "flag_set", "target": "love_started"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_elderly", "name": "伴雪", "role": "lover", "delta": 25}},
+          {"type": "stat_modify", "target": "charisma", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "target": "constitution", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "health", "value": 20, "operator": "add"},
+          {"type": "event_record", "target": "love_elderly_accept"}
+        ]
+      },
+      {
+        "id": "love_elderly_friend",
+        "text": "做一对知己好友",
+        "effects": [
+          {"type": "flag_set", "target": "love_elderly_friend"},
+          {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "health", "value": 10, "operator": "add"},
+          {"type": "event_record", "target": "love_elderly_friend"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "老年", "黄昏恋", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_elderly_memories",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": {"min": 60, "max": 80},
+    "triggers": [{"type": "age_reach", "value": 60}],
+    "conditions": [
+      {"type": "expression", "expression": "flags.has(\"love_elderly_started\") && !flags.has(\"love_elderly_memories\")"}
+    ],
+    "content": {
+      "text": "与伴雪相伴多年，你们常常一起回忆往昔，谈论江湖往事。虽然青春不再，但这份相濡以沫的感情却弥足珍贵。",
+      "title": "执子之手",
+      "description": "最浪漫的事，就是和你一起慢慢变老。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "time_advance", "target": "age", "value": 6, "timeUnit": "month"},
+      {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_elderly", "name": "伴雪", "role": "lover", "delta": 30}},
+      {"type": "stat_modify", "target": "charisma", "value": 12, "operator": "add"},
+      {"type": "stat_modify", "target": "health", "value": 25, "operator": "add"},
+      {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+      {"type": "flag_set", "target": "love_elderly_memories"},
+      {"type": "event_record", "target": "love_elderly_memories"}
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "老年", "支线"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "love_reunion_old",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 30,
+    "ageRange": {"min": 45, "max": 70},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.has(\"love_first_meet_pass\") && !flags.has(\"love_reunion_old\")"}
+    ],
+    "content": {
+      "text": "多年后，你再次遇到了当年错过的那个人。岁月在彼此脸上留下了痕迹，但那份心动却依然清晰。",
+      "title": "重逢旧爱",
+      "description": "有些缘分，注定要等待。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "love_reunion_accept",
+        "text": "再续前缘",
+        "effects": [
+          {"type": "flag_set", "target": "love_reunion_old"},
+          {"type": "flag_set", "target": "love_started"},
+          {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 30}},
+          {"type": "stat_modify", "target": "charisma", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+          {"type": "event_record", "target": "love_reunion_accept"}
+        ]
+      },
+      {
+        "id": "love_reunion_friend",
+        "text": "做一对老朋友",
+        "effects": [
+          {"type": "flag_set", "target": "love_reunion_friend"},
+          {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
+          {"type": "event_record", "target": "love_reunion_friend"}
+        ]
+      },
+      {
+        "id": "love_reunion_ignore",
+        "text": "相忘于江湖",
+        "effects": [
+          {"type": "flag_set", "target": "love_reunion_ignored"},
+          {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
+          {"type": "event_record", "target": "love_reunion_ignore"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773450500000,
+      "updatedAt": 1773450500000,
+      "author": "development_team",
+      "tags": ["爱情", "重逢", "旧爱", "支线"],
+      "enabled": true
+    }
+  }
+]

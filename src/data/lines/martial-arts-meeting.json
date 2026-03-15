@@ -1,0 +1,405 @@
+[
+  {
+    "id": "meeting_preparation",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 85,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "reputation >= 100 && martialPower >= 60"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武林大会筹备",
+      "text": "武林盟主宣布将举办盛大的武林大会，各路英雄豪杰都将参加。这是扬名立万的绝佳机会，你决定参与其中。",
+      "description": "大会筹备"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "积极准备（需金钱≥300，声望 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "flag_set", "flag": "meeting_prepared", "value": true}
+        ]
+      },
+      {
+        "text": "正常准备",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "flag_set", "flag": "meeting_prepared", "value": true}
+        ]
+      },
+      {
+        "text": "不准备",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "meeting_registration",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 86,
+    "weight": 75,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_prepared == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "报名参赛",
+      "text": "武林大会开始报名，来自各门各派的高手云集。你需要决定以什么身份参赛。",
+      "description": "报名参赛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "代表门派出战（需门派身份，声望 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "flags.orthodox_member == true || flags.demonic_member == true"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "meeting_registered", "value": true}
+        ]
+      },
+      {
+        "text": "以个人身份参赛",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "meeting_registered", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_preliminary",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 87,
+    "weight": 80,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_registered == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "初赛晋级",
+      "text": "武林大会初赛开始，数百名选手同台竞技。你需要击败对手才能晋级。",
+      "description": "初赛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力以赴（需武力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "constitution", "value": -3},
+          {"type": "flag_set", "flag": "meeting_preliminary_pass", "value": true}
+        ]
+      },
+      {
+        "text": "保存实力（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "flag_set", "flag": "meeting_preliminary_pass", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_quarterfinal",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_preliminary_pass == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "复赛激烈",
+      "text": "复赛对手实力更强，每一场都是硬仗。观众席上人山人海，气氛紧张。",
+      "description": "复赛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "使用绝技（需武力≥80，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+          {"type": "flag_set", "flag": "meeting_quarterfinal_pass", "value": true}
+        ]
+      },
+      {
+        "text": "稳扎稳打（需武力≥75）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 75"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 12},
+          {"type": "flag_set", "flag": "meeting_quarterfinal_pass", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_semifinal",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 89,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_quarterfinal_pass == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "半决赛",
+      "text": "你成功闯入半决赛，离冠军只有一步之遥。对手是成名已久的高手，实力深不可测。",
+      "description": "半决赛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "挑战极限（需武力≥90，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+          {"type": "stat_modify", "stat": "constitution", "value": -8},
+          {"type": "flag_set", "flag": "meeting_semifinal_pass", "value": true}
+        ]
+      },
+      {
+        "text": "保守应战（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 18},
+          {"type": "flag_set", "flag": "meeting_semifinal_pass", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_final",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 95,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_semifinal_pass == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "决赛对决",
+      "text": "终于来到了决赛！你的对手是上届冠军，被誉为百年难遇的武学奇才。整个武林都在注视着这场对决。",
+      "description": "决赛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力一战（需武力≥100，声望 +50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 50},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 20},
+          {"type": "stat_modify", "stat": "constitution", "value": -10},
+          {"type": "flag_set", "flag": "meeting_champion", "value": true}
+        ]
+      },
+      {
+        "text": "惜败（需武力≥95）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 95"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_dark_horse",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 82,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.meeting_registered == true"}
+    ],
+    "content": {
+      "title": "黑马出现",
+      "text": "比赛中出现了一匹黑马，一个名不见经传的小角色接连击败高手，引起了所有人的注意。",
+      "description": "黑马"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "关注黑马（悟性 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      },
+      {
+        "text": "无视",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "meeting_scandal",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 80,
+    "weight": 45,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.meeting_registered == true && chivalry >= 50"}
+    ],
+    "content": {
+      "title": "黑幕揭露",
+      "text": "你发现比赛中有人作弊，甚至裁判也参与其中。这是一个揭露真相的机会，但也可能得罪权贵。",
+      "description": "黑幕"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "揭露黑幕（需武力≥85，侠义 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "明哲保身（侠义 -10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_interruption",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 88,
+    "weight": 40,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.meeting_registered == true"}
+    ],
+    "content": {
+      "title": "意外中断",
+      "text": "比赛进行时，突然有魔教中人捣乱，现场一片混乱。你不得不暂时放下比赛，应对入侵者。",
+      "description": "意外中断"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "出手相助（需武力≥90，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "constitution", "value": -8}
+        ]
+      },
+      {
+        "text": "旁观",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "meeting_result",
+    "version": "1.0",
+    "category": "martial-arts-meeting",
+    "priority": 92,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "flags.meeting_champion == true || flags.meeting_semifinal_pass == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "结果公布",
+      "text": "武林大会圆满结束，你的成绩被记录在武林史册上。无论胜负，你都证明了自己的实力。",
+      "description": "结果公布"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 20},
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "flag_set", "flag": "meeting_complete", "value": true}
+    ]
+  }
+]

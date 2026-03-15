@@ -1,0 +1,533 @@
+[
+  {
+    "id": "jianghu_challenge",
+    "name": "高手挑战",
+    "description": "有江湖高手前来挑战你的武艺。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {
+      "min": 30,
+      "max": 50
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "challenge"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 30,
+        "max": 50
+      },
+      "stats": {
+        "martialPower": {
+          "min": 40
+        }
+      }
+    },
+    "content": {
+      "title": "高手挑战",
+      "text": "有江湖高手前来挑战你的武艺。"
+    },
+    "choices": [
+      {
+        "text": "接受挑战，一决高下 (武力检定)",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "reputation": 20,
+              "martialPower": 5
+            },
+            "failure": {
+              "reputation": -10
+            }
+          }
+        ]
+      },
+      {
+        "text": "婉拒，以和为贵 (侠义 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_grudge",
+    "name": "江湖恩怨",
+    "description": "昔日的仇家找上门来。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 35,
+      "max": 55
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "grudge"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "content": {
+      "title": "江湖恩怨",
+      "text": "昔日的仇家找上门来，要与你了结恩怨。"
+    },
+    "choices": [
+      {
+        "text": "一战泯恩仇 (武力检定)",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "chivalry": 10
+            },
+            "failure": {
+              "martialPower": -10
+            }
+          }
+        ]
+      },
+      {
+        "text": "化干戈为玉帛 (人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_rescue",
+    "name": "江湖救急",
+    "description": "有同道中人遭遇危险，向你求救。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 35,
+      "max": 55
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "rescue"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 55
+      },
+      "stats": {
+        "chivalry": {
+          "min": 20
+        }
+      }
+    },
+    "content": {
+      "title": "江湖救急",
+      "text": "有同道中人遭遇危险，向你求救。"
+    },
+    "choices": [
+      {
+        "text": "立即前往救援 (侠义 +20, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "派遣弟子前往",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "jianghu_demon_sect",
+    "name": "剿灭魔教",
+    "description": "魔教祸乱江湖，正道武林号召你一同剿灭。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 90,
+    "weight": 80,
+    "ageRange": {
+      "min": 40,
+      "max": 60
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "demon-sect"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 60
+      },
+      "stats": {
+        "reputation": {
+          "min": 50
+        }
+      }
+    },
+    "content": {
+      "title": "剿灭魔教",
+      "text": "魔教祸乱江湖，正道武林号召你一同剿灭。"
+    },
+    "choices": [
+      {
+        "text": "率众出征，除魔卫道 (武力检定)",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "reputation": 50,
+              "chivalry": 30
+            },
+            "failure": {
+              "martialPower": -20
+            }
+          }
+        ]
+      },
+      {
+        "text": "提供资金支持 (财富 -100)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -100,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_public_enemy",
+    "name": "武林公敌",
+    "description": "你被人陷害，成为武林公敌。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 40,
+      "max": 60
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "crisis"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 60
+      },
+      "stats": {
+        "reputation": {
+          "min": 40
+        }
+      }
+    },
+    "content": {
+      "title": "武林公敌",
+      "text": "你被人陷害，成为武林公敌。"
+    },
+    "choices": [
+      {
+        "text": "查明真相，洗刷冤屈 (学识 +10, 人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "以武服人，打败质疑者 (武力检定)",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "reputation": 20
+            },
+            "failure": {
+              "reputation": -20
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_hero_meeting",
+    "name": "英雄聚会",
+    "description": "江湖英雄聚会，你也在受邀之列。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 65,
+    "weight": 55,
+    "ageRange": {
+      "min": 35,
+      "max": 55
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "meeting"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 55
+      }
+    },
+    "content": {
+      "title": "英雄聚会",
+      "text": "江湖英雄聚会，你也在受邀之列。"
+    },
+    "choices": [
+      {
+        "text": "前往参加，结交豪杰 (人脉 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "婉拒，专心修炼 (外功 +5, 内功 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_secret_manual",
+    "name": "秘籍现世",
+    "description": "江湖传闻有绝世秘籍现世，引来各方争夺。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 38,
+      "max": 58
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "manual"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 38
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 38,
+        "max": 58
+      }
+    },
+    "content": {
+      "title": "秘籍现世",
+      "text": "江湖传闻有绝世秘籍现世，引来各方争夺。"
+    },
+    "choices": [
+      {
+        "text": "参与争夺，机缘难得 (武力检定)",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "martialPower": 20,
+              "internalSkill": 10
+            },
+            "failure": {
+              "martialPower": -10
+            }
+          }
+        ]
+      },
+      {
+        "text": "静观其变，不惹纷争",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "jianghu_hermit_master",
+    "name": "隐世高手",
+    "description": "你遇到了一位隐世高手，他对你很欣赏。",
+    "version": "1.0.0",
+    "category": "jianghu",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 40,
+      "max": 60
+    },
+    "type": "jianghu",
+    "eventType": "choice",
+    "tags": [
+      "jianghu",
+      "hermit"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 60
+      },
+      "stats": {
+        "martialPower": {
+          "min": 50
+        }
+      }
+    },
+    "content": {
+      "title": "隐世高手",
+      "text": "你遇到了一位隐世高手，他对你很欣赏。"
+    },
+    "choices": [
+      {
+        "text": "虚心请教，学习绝学 (外功 +15, 内功 +15)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 15,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "切磋交流，互相学习 (外功 +5, 内功 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  }
+]

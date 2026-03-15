@@ -73,6 +73,19 @@ export function useNewGameEngine() {
         engineState.availableChoices = [];
         processAutoEvent(selectedEvent);
       } else if (selectedEvent.eventType === 'choice' && selectedEvent.choices) {
+        if (selectedEvent.metadata?.autoResolve) {
+          const availableChoices = selectedEvent.choices.filter(choice =>
+            gameEngine.isChoiceAvailable(choice.condition)
+          );
+          if (availableChoices.length === 0) {
+            console.warn('[NewGameEngine] 自动判定事件无可用选项:', selectedEvent.id);
+            getNextEvent();
+            return;
+          }
+          const autoChoice = pickAutoChoice(availableChoices, gameEngine.getGameState());
+          handleChoice(autoChoice);
+          return;
+        }
         // 如果是选择事件，准备选择项
         engineState.availableChoices = selectedEvent.choices.map(choice => ({
           id: choice.id,
@@ -164,7 +177,7 @@ export function useNewGameEngine() {
 
     try {
       // 执行选择的效果
-      await gameEngine.executeChoiceEffects(selectedChoice.effects);
+      await gameEngine.executeChoiceEffects(selectedChoice.effects, currentEvent.id);
       engineState.lastEffects = selectedChoice.effects;
 
       // 记录日志
@@ -184,6 +197,36 @@ export function useNewGameEngine() {
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
     }
+  };
+
+  const pickAutoChoice = (choices: any[], state: any) => {
+    let best = choices[0];
+    let bestScore = -Infinity;
+
+    for (const choice of choices) {
+      let score = typeof choice.weight === 'number' ? choice.weight : 1;
+      if (choice.effects) {
+        for (const effect of choice.effects) {
+          if (effect.operator === 'add') {
+            const value = typeof effect.value === 'number' ? effect.value : 0;
+            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(effect.target)) {
+              score += value * 2;
+            } else {
+              score += value;
+            }
+          } else if (effect.operator === 'subtract') {
+            const value = typeof effect.value === 'number' ? effect.value : 0;
+            score -= value;
+          }
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = choice;
+      }
+    }
+
+    return best;
   };
 
   /**

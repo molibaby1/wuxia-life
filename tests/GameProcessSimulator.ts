@@ -25,6 +25,7 @@ export interface GameProcessConfig {
   playerName: string;
   gender: 'male' | 'female';
   simulateYears: number;  // 模拟多少年
+  maxEvents: number; // 最大事件数，避免月/日推进导致无限循环
   enableAutoSave: boolean;  // 启用自动保存
   enableManualSave: boolean;  // 启用手动保存
   saveInterval: number;  // 保存间隔（年）
@@ -41,6 +42,7 @@ export interface GameProcessRecord {
   availableChoices?: EventChoice[];
   gameState: GameState;
   timestamp: string;
+  currentTime?: { year: number; month: number; day: number };
 }
 
 export interface GameProcessReport {
@@ -87,6 +89,7 @@ export class GameProcessSimulator {
       playerName: '测试玩家',
       gender: 'male',
       simulateYears: 80,
+      maxEvents: 300,
       enableAutoSave: true,
       enableManualSave: true,
       saveInterval: 5,
@@ -118,12 +121,14 @@ export class GameProcessSimulator {
     this.log('📝 步骤 2: 模拟人生历程');
     const startAge = this.gameState.player?.age || 0;
     const endAge = Math.min(startAge + this.config.simulateYears, 120);
+    let steps = 0;
     
-    while (this.gameState?.player?.alive && !this.ended && this.gameState.player.age < endAge) {
+    while (this.gameState?.player?.alive && !this.ended && this.gameState.player.age < endAge && steps < this.config.maxEvents) {
       // 在每次循环开始时，从游戏引擎获取最新状态
       this.gameState = gameEngine.getGameState();
       
       await this.simulateYear();
+      steps += 1;
       
       // 定期保存
       const currentAge = this.gameState.player?.age || 0;
@@ -171,6 +176,7 @@ export class GameProcessSimulator {
         eventText: '这一年并无大事发生，岁月静好。',
         eventType: 'auto',
         gameState: JSON.parse(JSON.stringify(currentState)),
+        currentTime: currentState.currentTime,
         timestamp: new Date().toISOString()
       };
       this.records.push(record);
@@ -212,6 +218,7 @@ export class GameProcessSimulator {
         availableChoices,
         selectedChoice: this.selectChoice(availableChoices),
         gameState: JSON.parse(JSON.stringify(currentState)),
+        currentTime: currentState.currentTime,
         timestamp: new Date().toISOString()
       };
       
@@ -254,6 +261,7 @@ export class GameProcessSimulator {
         eventText: text,
         eventType: eventType as 'auto' | 'choice' | 'ending',
         gameState: JSON.parse(JSON.stringify(this.gameState)),
+        currentTime: this.gameState.currentTime,
         timestamp: new Date().toISOString()
       };
       this.records.push(record);
@@ -746,9 +754,13 @@ export class GameProcessSimulator {
     <div class="section">
       <h2>📜 游戏过程时间线</h2>
       <div class="timeline">
-        ${records.map(record => `
+        ${records.map(record => {
+          const timeLabel = record.currentTime
+            ? `${record.currentTime.year}年${record.currentTime.month}月${record.currentTime.day}日`
+            : '';
+          return `
           <div class="timeline-item">
-            <div class="timeline-age">${record.age}岁</div>
+            <div class="timeline-age">${record.age}岁${timeLabel ? ` · ${timeLabel}` : ''}</div>
             <div class="timeline-content">
               <div class="timeline-title">
                 ${record.eventTitle}
@@ -762,7 +774,8 @@ export class GameProcessSimulator {
               ` : ''}
             </div>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     </div>
 

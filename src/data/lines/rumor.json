@@ -1,0 +1,345 @@
+[
+  {
+    "id": "rumor_player_deeds",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 70,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "reputation >= 100"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "江湖传闻",
+      "text": "茶馆酒肆中有人谈论你的事迹，有人说你武艺高强，有人说你侠义心肠。你的名声开始在江湖上传播。",
+      "description": "你的事迹"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 8}
+    ]
+  },
+  {
+    "id": "rumor_exaggerated",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 68,
+    "weight": 60,
+    "ageRange": {"min": 28, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 28},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 200"}
+    ],
+    "content": {
+      "title": "传闻夸张",
+      "text": "江湖上关于你的传闻越传越夸张，有人说你能一人击败百人，有人说你有绝世秘籍。这些传闻有真有假。",
+      "description": "传闻夸张"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "顺势而为（声望 +20）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      },
+      {
+        "text": "澄清事实（侠义 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_challenge",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 72,
+    "weight": 58,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 300"}
+    ],
+    "content": {
+      "title": "闻名挑战",
+      "text": "有人听了你的传闻后，前来挑战你，想要证明你名不副实。这是江湖规矩。",
+      "description": "闻名挑战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受挑战（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 18},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_sect_attention",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 75,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "reputation >= 400"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "门派关注",
+      "text": "你的名声引起了大门派的注意，他们派人来接触你，想要拉拢你加入。",
+      "description": "门派关注"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "加入大门派（声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "flag_set", "flag": "joined_major_sect", "value": true}
+        ]
+      },
+      {
+        "text": "保持独立（侠义 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_enemy_makes",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 70,
+    "weight": 52,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 350"}
+    ],
+    "content": {
+      "title": "树敌",
+      "text": "你的名声也引来了一些人的嫉妒，他们暗中散布你的谣言，想要败坏你的名声。",
+      "description": "树敌"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "找出造谣者（需悟性≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      },
+      {
+        "text": "用实力证明（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_alliance_offer",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 76,
+    "weight": 50,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "reputation >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "联盟邀请",
+      "text": "有势力邀请你加入他们的联盟，共同对抗强大的敌人。这是扩大人脉的好机会。",
+      "description": "联盟邀请"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "加入联盟（声望 +30）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "flag_set", "flag": "in_alliance", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_treasure_hint",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 74,
+    "weight": 48,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "宝藏传闻",
+      "text": "江湖上流传着一个宝藏的传闻，据说里面藏有绝世秘籍和珍贵宝物。你知道了一个大概的位置。",
+      "description": "宝藏传闻"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "前往寻宝（需武力≥75）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 75"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "money", "value": 200},
+          {"type": "stat_modify", "stat": "constitution", "value": -8}
+        ]
+      },
+      {
+        "text": "出售消息",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 100}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_master_challenge",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 80,
+    "weight": 45,
+    "ageRange": {"min": 40, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "reputation >= 600"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "高手约战",
+      "text": "一位成名已久的高手听说了你的事迹，主动约战，想要见识一下你的实力。",
+      "description": "高手约战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "应战（需武力≥95）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 95"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "stat_modify", "stat": "constitution", "value": -10}
+        ]
+      },
+      {
+        "text": "婉拒",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -15},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rumor_legend_status",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 85,
+    "weight": 42,
+    "ageRange": {"min": 45, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "expression", "expression": "reputation >= 800"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "传奇地位",
+      "text": "你的事迹被编成评书戏曲，在江湖上广为流传。你已经成为一个传奇人物。",
+      "description": "传奇地位"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "charisma", "value": 25},
+      {"type": "flag_set", "flag": "legend_status", "value": true}
+    ]
+  },
+  {
+    "id": "rumor_history_record",
+    "version": "1.0",
+    "category": "rumor",
+    "priority": 90,
+    "weight": 40,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.legend_status == true && reputation >= 1000"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "史册留名",
+      "text": "史官开始记录你的事迹，你的名字将永远留在历史中。后人将记住你的传奇。",
+      "description": "史册留名"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 100},
+      {"type": "stat_modify", "stat": "charisma", "value": 40},
+      {"type": "stat_modify", "stat": "comprehension", "value": 20}
+    ]
+  }
+]

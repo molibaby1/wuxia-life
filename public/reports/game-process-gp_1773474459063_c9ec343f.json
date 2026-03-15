@@ -1,0 +1,2642 @@
+{
+  "id": "gp_1773474459063_c9ec343f",
+  "timestamp": "2026-03-14T07:47:39.063Z",
+  "config": {
+    "playerName": "测试玩家",
+    "gender": "male",
+    "simulateYears": 20,
+    "maxEvents": 300,
+    "enableAutoSave": true,
+    "enableManualSave": true,
+    "saveInterval": 5,
+    "verbose": true
+  },
+  "totalYears": 22,
+  "finalAge": 20,
+  "isAlive": true,
+  "totalEvents": 22,
+  "totalChoices": 3,
+  "totalSaves": 4,
+  "records": [
+    {
+      "age": 0,
+      "eventId": "birth_wuxia_family",
+      "eventTitle": "降生武侠世家",
+      "eventText": "你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 1,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 0,
+          "chivalry": 0,
+          "charisma": 0,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 100,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 2,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459052
+      },
+      "currentTime": {
+        "year": 2,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.052Z"
+    },
+    {
+      "age": 1,
+      "eventId": "origin_background",
+      "eventTitle": "出身背景",
+      "eventText": "你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "origin_wuxia_family",
+          "text": "武林世家",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_wuxia_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "constitution",
+              "value": 6,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_wuxia_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_scholar_family",
+          "text": "书香门第",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_scholar_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "comprehension",
+              "value": 8,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_scholar_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_merchant_family",
+          "text": "商贾之家",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_merchant_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "money",
+              "value": 200,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 6,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_merchant_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_frontier",
+          "text": "边疆异族",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_frontier"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "constitution",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 2,
+              "operator": "subtract"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_frontier"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "origin_merchant_family",
+        "text": "商贾之家",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_merchant_family"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 200,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_merchant_family"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 1,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 0,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 2,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459052
+      },
+      "currentTime": {
+        "year": 2,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.053Z"
+    },
+    {
+      "age": 1,
+      "eventId": "toddler_exploration",
+      "eventTitle": "探索小能手",
+      "eventText": "你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 2,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 3,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459054
+      },
+      "currentTime": {
+        "year": 3,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.054Z"
+    },
+    {
+      "age": 2,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 2,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 3,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459054
+      },
+      "currentTime": {
+        "year": 3,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.054Z"
+    },
+    {
+      "age": 3,
+      "eventId": "clever_speech",
+      "eventTitle": "伶牙俐齿",
+      "eventText": "你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 8,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459054
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.055Z"
+    },
+    {
+      "age": 4,
+      "eventId": "childhood_preference",
+      "eventTitle": "童年选择",
+      "eventText": "到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "focus_on_study",
+          "text": "专心读书练功",
+          "weight": 4,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "sect_trial_active"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1,
+              "timeUnit": "month"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "diligentStudent"
+            }
+          ],
+          "requirements": {
+            "statRequirements": [
+              {
+                "statName": "chivalry",
+                "minValue": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "play_outside",
+          "text": "继续玩耍探索",
+          "weight": 3,
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1,
+              "timeUnit": "month"
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 3,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "freeSpirit"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "play_outside",
+        "text": "继续玩耍探索",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "freeSpirit"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459055
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.055Z"
+    },
+    {
+      "age": 4,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459055
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.055Z"
+    },
+    {
+      "age": 5,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 5,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 6,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459055
+      },
+      "currentTime": {
+        "year": 6,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.056Z"
+    },
+    {
+      "age": 6,
+      "eventId": "martial_arts_enlightenment",
+      "eventTitle": "武学启蒙",
+      "eventText": "到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "agile_path",
+          "text": "专修轻功身法",
+          "condition": {
+            "type": "expression",
+            "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+          },
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "agilePath"
+            }
+          ]
+        },
+        {
+          "id": "generic_path",
+          "text": "常规修炼",
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 3,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 2,
+              "operator": "add"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "agile_path",
+        "text": "专修轻功身法",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "agilePath"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 7,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 8,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 7,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.057Z"
+    },
+    {
+      "age": 7,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 7,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 8,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 8,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.057Z"
+    },
+    {
+      "age": 8,
+      "eventId": "childhood_summary",
+      "eventTitle": "童年总结",
+      "eventText": "日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 9,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 10,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 10,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.057Z"
+    },
+    {
+      "age": 9,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 9,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 10,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 10,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.058Z"
+    },
+    {
+      "age": 10,
+      "eventId": "tutorial-connections",
+      "eventTitle": "人脉关系",
+      "eventText": "十八岁成人之际，你深刻体会到人脉的重要性。俗话说：'在家靠父母，出门靠朋友'。人脉广的人，办事方便，消息灵通，遇到困难总有人帮忙。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 11,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 12,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 12,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.058Z"
+    },
+    {
+      "age": 11,
+      "eventId": "tutorial-charisma",
+      "eventTitle": "个人魅力",
+      "eventText": "十六岁的你，已经是个小大人了。长辈告诉你，为人处世要有魅力。魅力不仅仅是长相，更重要的是言谈举止、待人接物。有魅力的人，走到哪里都受欢迎。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 12,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 13,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 13,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.058Z"
+    },
+    {
+      "age": 12,
+      "eventId": "tutorial-knowledge",
+      "eventTitle": "读书明理",
+      "eventText": "到了十一岁，该进学堂读书了。先生教你识字、背书，告诉你读书不仅能明白事理，还能让人变得聪明。那些学识渊博的人，说话做事都很有道理，大家都愿意听他们的。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 13,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 14,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 14,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.059Z"
+    },
+    {
+      "age": 13,
+      "eventId": "tutorial-reputation",
+      "eventTitle": "江湖声望",
+      "eventText": "十七岁的你，开始在江湖上闯荡。你发现声望很重要——声望高的人，说话有分量，办事有人帮，走到哪里都受人尊敬。声望是靠一点一滴积累起来的。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.059Z"
+    },
+    {
+      "age": 14,
+      "eventId": "tutorial-constitution",
+      "eventTitle": "强身健体",
+      "eventText": "你今年十岁了，父母常说：'身体是革命的本钱'。你发现那些经常锻炼的孩童，不仅长得高大，而且很少生病。体质好的人，将来不管是练武还是读书，都有更好的本钱。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 15,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 16,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 16,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.059Z"
+    },
+    {
+      "age": 15,
+      "eventId": "tutorial-charisma",
+      "eventTitle": "个人魅力",
+      "eventText": "十六岁的你，已经是个小大人了。长辈告诉你，为人处世要有魅力。魅力不仅仅是长相，更重要的是言谈举止、待人接物。有魅力的人，走到哪里都受欢迎。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 16,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 17,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 17,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.060Z"
+    },
+    {
+      "age": 16,
+      "eventId": "tutorial-reputation",
+      "eventTitle": "江湖声望",
+      "eventText": "十七岁的你，开始在江湖上闯荡。你发现声望很重要——声望高的人，说话有分量，办事有人帮，走到哪里都受人尊敬。声望是靠一点一滴积累起来的。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 17,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 18,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 18,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.060Z"
+    },
+    {
+      "age": 17,
+      "eventId": "tutorial-internal",
+      "eventTitle": "内功心法",
+      "eventText": "十三岁那年，你有机会接触到了一本内功心法。老先生说，外练筋骨皮，内练一口气。内功就是修炼体内的真气，内功深厚的人，一掌打出能带起风声，还能用真气疗伤。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 18,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 19,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 19,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.061Z"
+    },
+    {
+      "age": 18,
+      "eventId": "tutorial-reputation",
+      "eventTitle": "江湖声望",
+      "eventText": "十七岁的你，开始在江湖上闯荡。你发现声望很重要——声望高的人，说话有分量，办事有人帮，走到哪里都受人尊敬。声望是靠一点一滴积累起来的。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 19,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 20,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459057
+      },
+      "currentTime": {
+        "year": 20,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.061Z"
+    },
+    {
+      "age": 19,
+      "eventId": "continued_journey",
+      "eventTitle": "江湖历练继续",
+      "eventText": "你没有参加武林大会，而是继续在江湖上游历。这段时间的历练让你的武艺更加扎实，经验也更加丰富。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 20,
+          "martialPower": 11,
+          "externalSkill": 3,
+          "internalSkill": 3,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474459052,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474459054,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474459054,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474459054,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474459057,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "continued_journey",
+              "timestamp": 1773474459062,
+              "age": 20
+            },
+            {
+              "eventId": "continued_journey",
+              "triggeredAt": 21,
+              "age": 19
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 21,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "steadyProgress": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474459062
+      },
+      "currentTime": {
+        "year": 21,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:47:39.062Z"
+    }
+  ],
+  "statistics": {
+    "childhoodEvents": 15,
+    "youthEvents": 6,
+    "adultEvents": 1,
+    "elderlyEvents": 0,
+    "autoEvents": 19,
+    "choiceEvents": 3,
+    "martialPowerGrowth": 11,
+    "moneyGrowth": 200,
+    "sectJoined": null,
+    "children": 0,
+    "flags": {
+      "bornInWuxiaFamily": true,
+      "origin_merchant_family": true,
+      "curiousChild": true,
+      "giftedSpeaker": true,
+      "freeSpirit": true,
+      "agilePath": true,
+      "childhoodSummaryDone": true,
+      "steadyProgress": true
+    }
+  }
+}

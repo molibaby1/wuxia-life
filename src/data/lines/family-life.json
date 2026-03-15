@@ -1,0 +1,689 @@
+[
+  {
+    "id": "family_marriage",
+    "name": "喜结良缘",
+    "description": "到了成家的年纪，该考虑终身大事了。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 20,
+      "max": 30
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "marriage"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 20,
+        "max": 30
+      },
+      "flags": {
+        "not": [
+          "married"
+        ]
+      }
+    },
+    "content": {
+      "title": "喜结良缘",
+      "text": "到了成家的年纪，亲友都在为你张罗婚事。"
+    },
+    "choices": [
+      {
+        "text": "接受安排，门当户对 (财富 +50, 人脉 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 50,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "married",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "自由恋爱，寻找真爱 (侠义 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "married",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_child_born",
+    "name": "喜得贵子",
+    "description": "你的孩子出生了，全家都沉浸在喜悦之中。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 25,
+      "max": 40
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "child"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 25,
+        "max": 40
+      },
+      "flags": {
+        "required": [
+          "married"
+        ],
+        "not": [
+          "has_child"
+        ]
+      }
+    },
+    "content": {
+      "title": "喜得贵子",
+      "text": "你的孩子出生了，全家都沉浸在喜悦之中。"
+    },
+    "choices": [
+      {
+        "text": "大摆宴席，普天同庆 (财富 -50, 人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -50,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_child",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "简单庆祝，低调行事 (财富 -10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_child",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_child_education",
+    "name": "子女教育",
+    "description": "孩子到了学习的年龄，你需要决定他的培养方向。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 28,
+      "max": 45
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "education"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 28,
+        "max": 45
+      },
+      "flags": {
+        "required": [
+          "has_child"
+        ]
+      }
+    },
+    "content": {
+      "title": "子女教育",
+      "text": "孩子到了学习的年龄，你需要决定他的培养方向。"
+    },
+    "choices": [
+      {
+        "text": "习武：传承你的武学 (外功 +5, 内功 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "child_martial",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "读书：考取功名 (学识 +10, 人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "child_scholar",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "从商：继承家业 (财富 +50)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 50,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "child_merchant",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_crisis",
+    "name": "家族危机",
+    "description": "家族遭遇困难，需要你出面解决。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {
+      "min": 35,
+      "max": 50
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "crisis"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 50
+      }
+    },
+    "content": {
+      "title": "家族危机",
+      "text": "家族遭遇困难，需要你出面解决。"
+    },
+    "choices": [
+      {
+        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -100,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 20,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "尽力而为，量力而行 (财富 -30)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -30,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_child_marriage",
+    "name": "子女成家",
+    "description": "孩子长大了，到了成家的年龄。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 72,
+    "weight": 65,
+    "ageRange": {
+      "min": 45,
+      "max": 60
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "marriage"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 45,
+        "max": 60
+      },
+      "flags": {
+        "required": [
+          "has_child"
+        ]
+      }
+    },
+    "content": {
+      "title": "子女成家",
+      "text": "孩子长大了，到了成家的年龄。"
+    },
+    "choices": [
+      {
+        "text": "操办婚事，风光大嫁 (财富 -100, 人脉 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -100,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "child_married",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "简办婚事，尊重子女",
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "child_married",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_grandchild_born",
+    "name": "喜得孙儿",
+    "description": "你当爷爷奶奶了，子孙满堂，人生圆满。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 68,
+    "weight": 60,
+    "ageRange": {
+      "min": 50,
+      "max": 70
+    },
+    "type": "family",
+    "eventType": "auto",
+    "tags": [
+      "family",
+      "grandchild"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 50,
+        "max": 70
+      },
+      "flags": {
+        "required": [
+          "child_married"
+        ]
+      }
+    },
+    "content": {
+      "title": "喜得孙儿",
+      "text": "你当爷爷奶奶了，子孙满堂，人生圆满。",
+      "autoEffects": [
+        {
+          "type": "add_stats",
+          "stats": {
+            "charisma": 10
+          }
+        },
+        {
+          "type": "set_flag",
+          "flag": "has_grandchild",
+          "value": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "family_reunion",
+    "name": "家族团圆",
+    "description": "逢年过节，全家人团聚在一起，其乐融融。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 60,
+    "weight": 50,
+    "ageRange": {
+      "min": 40,
+      "max": 70
+    },
+    "type": "family",
+    "eventType": "auto",
+    "tags": [
+      "family",
+      "reunion"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 70
+      },
+      "flags": {
+        "required": [
+          "has_child"
+        ]
+      }
+    },
+    "content": {
+      "title": "家族团圆",
+      "text": "逢年过节，全家人团聚在一起，其乐融融。",
+      "autoEffects": [
+        {
+          "type": "add_stats",
+          "stats": {
+            "charisma": 5
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "family_teach_grandchild",
+    "name": "传授孙儿",
+    "description": "你决定将毕生所学传授给孙儿。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 65,
+    "weight": 55,
+    "ageRange": {
+      "min": 55,
+      "max": 75
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "teaching"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 55
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 55,
+        "max": 75
+      },
+      "flags": {
+        "required": [
+          "has_grandchild"
+        ]
+      }
+    },
+    "content": {
+      "title": "传授孙儿",
+      "text": "你决定将毕生所学传授给孙儿。"
+    },
+    "choices": [
+      {
+        "text": "悉心教导，倾囊相授 (外功 +5, 内功 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "顺其自然，快乐成长",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "family_family_precepts",
+    "name": "家风传承",
+    "description": "你决定制定家训，传承家族精神。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {
+      "min": 50,
+      "max": 70
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "legacy"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 50,
+        "max": 70
+      },
+      "stats": {
+        "comprehension": {
+          "min": 30
+        }
+      }
+    },
+    "content": {
+      "title": "家风传承",
+      "text": "你决定制定家训，传承家族精神。"
+    },
+    "choices": [
+      {
+        "text": "撰写家训，流传后世 (学识 +10, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "口传心授，言传身教 (侠义 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family_family_honor",
+    "name": "家族荣耀",
+    "description": "你的子女在各自领域取得了成就，为家族增光。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 48,
+      "max": 65
+    },
+    "type": "family",
+    "eventType": "auto",
+    "tags": [
+      "family",
+      "honor"
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 48
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 48,
+        "max": 65
+      },
+      "flags": {
+        "required": [
+          "has_child"
+        ]
+      }
+    },
+    "content": {
+      "title": "家族荣耀",
+      "text": "你的子女在各自领域取得了成就，为家族增光。",
+      "autoEffects": [
+        {
+          "type": "add_stats",
+          "stats": {
+            "reputation": 20,
+            "charisma": 10
+          }
+        }
+      ]
+    }
+  }
+]

@@ -17,6 +17,8 @@ import type { EventDefinition, GameState, Effect } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
+import { talentSystem } from './TalentSystem';
+import { statGrowthSystem } from './StatGrowthSystem';
 
 /**
  * 游戏引擎集成器类
@@ -25,10 +27,15 @@ export class GameEngineIntegration {
   private eventExecutor: EventExecutor;
   private conditionEvaluator: ConditionEvaluator;
   private gameState: GameState;
+  private maxEventsPerYear: number = 5; // 每年最多触发 5 个重大事件
+  private eventsThisYear: number = 0;
+  private lastYear: number = -1;
   
   constructor() {
     this.eventExecutor = new EventExecutor();
     this.conditionEvaluator = new ConditionEvaluator();
+    // 初始化天赋系统
+    talentSystem.loadTalents();
     // 先创建普通对象
     const initialState = this.createInitialState();
     // 然后包装为响应式
@@ -49,9 +56,12 @@ export class GameEngineIntegration {
         internalSkill: 0,
         qinggong: 0,
         chivalry: 0,
+        charisma: 0,
         constitution: 10,
         comprehension: 10,
         money: 100,
+        reputation: 0,
+        connections: 0,
         health: 100,
         energy: 100,
         alive: true,
@@ -177,6 +187,13 @@ export class GameEngineIntegration {
   public selectEvent(age?: number): EventDefinition | null {
     // 如果没有传入年龄参数，使用游戏引擎当前年龄
     const currentAge = age !== undefined ? age : (this.gameState.player?.age || 0);
+    
+    // 检查年度事件数量限制
+    if (!this.canTriggerEventThisYear(currentAge)) {
+      console.log(`[GameEngine] 年龄 ${currentAge} 岁已达到本年度事件上限 (${this.maxEventsPerYear}个)，跳过事件触发`);
+      return null;
+    }
+    
     const availableEvents = this.getAvailableEvents(currentAge);
     
     if (availableEvents.length === 0) {
@@ -241,6 +258,36 @@ export class GameEngineIntegration {
   }
   
   /**
+   * 检查今年是否还能触发事件
+   */
+  private canTriggerEventThisYear(currentAge: number): boolean {
+    // 如果年份变化，重置计数器
+    if (currentAge !== this.lastYear) {
+      this.lastYear = currentAge;
+      this.eventsThisYear = 0;
+    }
+    
+    // 检查是否达到年度事件上限
+    return this.eventsThisYear < this.maxEventsPerYear;
+  }
+  
+  /**
+   * 记录事件触发（用于年度事件限制）
+   */
+  private recordEventTrigger(): void {
+    const currentAge = this.gameState.player?.age || 0;
+    
+    // 如果年份变化，重置计数器
+    if (currentAge !== this.lastYear) {
+      this.lastYear = currentAge;
+      this.eventsThisYear = 0;
+    }
+    
+    this.eventsThisYear++;
+    console.log(`[GameEngine] 年龄 ${currentAge} 岁本年度已触发 ${this.eventsThisYear}/${this.maxEventsPerYear} 个事件`);
+  }
+  
+  /**
    * 执行自动事件
    */
   public async executeAutoEvent(event: EventDefinition): Promise<GameState> {
@@ -257,6 +304,9 @@ export class GameEngineIntegration {
       this.gameState
     );
     this.applyGameState(updatedState);
+    
+    // 记录事件触发（用于年度事件限制）
+    this.recordEventTrigger();
     
     // 记录事件到玩家历史（使用事件前的年龄）
     if (this.gameState.player) {
@@ -280,6 +330,11 @@ export class GameEngineIntegration {
     
     const updatedState = await this.eventExecutor.executeEffects(effects, this.gameState);
     this.applyGameState(updatedState);
+    
+    // 记录事件触发（用于年度事件限制）
+    if (eventId) {
+      this.recordEventTrigger();
+    }
     
     // 记录事件到玩家历史（使用事件前的年龄）
     if (eventId && this.gameState.player) {
@@ -339,16 +394,43 @@ export class GameEngineIntegration {
   /**
    * 推进时间
    */
-  public advanceTime(years: number = 1): void {
-    if (this.gameState.player) {
-      this.gameState.player.age += years;
+  public advanceTime(value: number = 1, unit: 'year' | 'month' | 'day' = 'year'): void {
+    if (!this.gameState.player) return;
+
+    const currentTime = this.gameState.currentTime || { year: 1, month: 1, day: 1 };
+    let year = currentTime.year;
+    let month = currentTime.month;
+    let day = currentTime.day;
+    let age = this.gameState.player.age;
+
+    if (unit === 'year') {
+      year += value;
+      age += value;
+    } else if (unit === 'month') {
+      month += value;
+      while (month > 12) {
+        month -= 12;
+        year += 1;
+        age += 1;
+      }
+    } else {
+      day += value;
+      while (day > 30) {
+        day -= 30;
+        month += 1;
+        if (month > 12) {
+          month = 1;
+          year += 1;
+          age += 1;
+        }
+      }
     }
+
+    this.gameState.player.age = age;
+    this.gameState.currentTime = { year, month, day };
     
-    if (this.gameState.currentTime) {
-      this.gameState.currentTime.year += years;
-    }
-    
-    console.log(`[GameEngine] 时间推进 ${years} 年`);
+    const unitLabel = unit === 'year' ? '年' : unit === 'month' ? '月' : '天';
+    console.log(`[GameEngine] 时间推进 ${value} ${unitLabel}`);
   }
 }
 

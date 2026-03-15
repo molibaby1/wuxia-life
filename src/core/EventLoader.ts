@@ -13,16 +13,36 @@
 import { EventCategory, EventPriority } from '../types/eventTypes';
 import type { EventDefinition } from '../types/eventTypes';
 import eventsIndexJson from '../data/events.json';
-import demonicEventsJson from '../data/lines/demonic.json';
 import generalEventsJson from '../data/lines/general.json';
 import originEventsJson from '../data/lines/origin.json';
-import orthodoxEventsJson from '../data/lines/orthodox.json';
+import officialEventsJson from '../data/lines/official.json';
+import loveEventsJson from '../data/lines/love.json';
+import tutorialEventsJson from '../data/lines/tutorial.json';
+import middleAgeCareerEventsJson from '../data/lines/middle-age-career.json';
+import familyLifeEventsJson from '../data/lines/family-life.json';
+import jianghuConflictEventsJson from '../data/lines/jianghu-conflict.json';
+import elderlyLegacyEventsJson from '../data/lines/elderly-legacy.json';
+import sectBeggarsEventsJson from '../data/lines/sect-beggars.json';
+import sectBorderEventsJson from '../data/lines/sect-border.json';
+import sectMarginalEventsJson from '../data/lines/sect-marginal.json';
+import sectShaolinEventsJson from '../data/lines/sect-shaolin.json';
+import sectWudangEventsJson from '../data/lines/sect-wudang.json';
 import trainingEventsJson from '../data/lines/training.json';
 
-const demonicEvents = demonicEventsJson as EventDefinition[];
 const generalEvents = generalEventsJson as EventDefinition[];
+const loveEvents = loveEventsJson as EventDefinition[];
+const officialEvents = officialEventsJson as EventDefinition[];
 const originEvents = originEventsJson as EventDefinition[];
-const orthodoxEvents = orthodoxEventsJson as EventDefinition[];
+const tutorialEvents = tutorialEventsJson as EventDefinition[];
+const middleAgeCareerEvents = middleAgeCareerEventsJson as EventDefinition[];
+const familyLifeEvents = familyLifeEventsJson as EventDefinition[];
+const jianghuConflictEvents = jianghuConflictEventsJson as EventDefinition[];
+const elderlyLegacyEvents = elderlyLegacyEventsJson as EventDefinition[];
+const sectBeggarsEvents = sectBeggarsEventsJson as EventDefinition[];
+const sectBorderEvents = sectBorderEventsJson as EventDefinition[];
+const sectMarginalEvents = sectMarginalEventsJson as EventDefinition[];
+const sectShaolinEvents = sectShaolinEventsJson as EventDefinition[];
+const sectWudangEvents = sectWudangEventsJson as EventDefinition[];
 const trainingEvents = trainingEventsJson as EventDefinition[];
 const eventsIndex = eventsIndexJson as {
   version: string;
@@ -58,10 +78,20 @@ export class EventLoader {
   private loadAllEvents(): void {
     const lineMap: Record<string, EventDefinition[]> = {
       './lines/origin.json': originEvents,
-      './lines/orthodox.json': orthodoxEvents,
-      './lines/demonic.json': demonicEvents,
-      './lines/training.json': trainingEvents,
       './lines/general.json': generalEvents,
+      './lines/love.json': loveEvents,
+      './lines/tutorial.json': tutorialEvents,
+      './lines/official.json': officialEvents,
+      './lines/middle-age-career.json': middleAgeCareerEvents,
+      './lines/family-life.json': familyLifeEvents,
+      './lines/jianghu-conflict.json': jianghuConflictEvents,
+      './lines/elderly-legacy.json': elderlyLegacyEvents,
+      './lines/sect-beggars.json': sectBeggarsEvents,
+      './lines/sect-border.json': sectBorderEvents,
+      './lines/sect-marginal.json': sectMarginalEvents,
+      './lines/sect-shaolin.json': sectShaolinEvents,
+      './lines/sect-wudang.json': sectWudangEvents,
+      './lines/training.json': trainingEvents,
     };
     
     const orderedLines = (eventsIndex.imports || [])
@@ -227,10 +257,15 @@ export class EventLoader {
     console.log(`入口文件：${eventsIndex.imports.join(', ')}`);
     
     console.log(`出身线：${originEvents.length} 个`);
-    console.log(`正道线：${orthodoxEvents.length} 个`);
-    console.log(`魔教线：${demonicEvents.length} 个`);
-    console.log(`修炼线：${trainingEvents.length} 个`);
     console.log(`通用事件：${generalEvents.length} 个`);
+    console.log(`爱情线：${loveEvents.length} 个`);
+    console.log(`官场线：${officialEvents.length} 个`);
+    console.log(`丐帮线：${sectBeggarsEvents.length} 个`);
+    console.log(`边地线：${sectBorderEvents.length} 个`);
+    console.log(`江湖争议派：${sectMarginalEvents.length} 个`);
+    console.log(`佛门线：${sectShaolinEvents.length} 个`);
+    console.log(`名门线：${sectWudangEvents.length} 个`);
+    console.log(`修炼线：${trainingEvents.length} 个`);
     
     // 按类型统计
     const autoEvents = this.allEvents.filter(e => e.eventType === 'auto').length;

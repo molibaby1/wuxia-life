@@ -184,6 +184,9 @@ export interface EffectDefinition {
     maxValue: number;
   };
   
+  /** 时间推进单位（仅 TIME_ADVANCE 使用） */
+  timeUnit?: 'year' | 'month' | 'day';
+  
   /** 持续时间 */
   duration?: {
     value: number;
@@ -211,6 +214,9 @@ export interface EventChoice {
   
   /** 选择效果 */
   effects: EffectDefinition[];
+
+  /** 自动判定权重 */
+  weight?: number;
   
   /** 前置要求 */
   requirements?: {
@@ -301,6 +307,7 @@ export interface EventDefinition {
     author?: string;
     tags?: string[];
     enabled: boolean;
+    autoResolve?: boolean;
   };
 }
 
@@ -308,15 +315,33 @@ export interface EventDefinition {
 
 /**
  * 玩家属性
+ * 
+ * 属性说明：
+ * - 所有属性范围：0-100（部分属性如声望、侠义可为负数）
+ * - 属性之间相互影响，共同决定角色发展方向
+ * - 属性值通过事件、修炼、天赋等方式提升
  */
 export interface PlayerStats {
-  martialPower: number;      // 武功
-  externalSkill: number;     // 外功
-  internalSkill: number;     // 内力
-  qinggong: number;         // 轻功
-  charisma: number;         // 魅力
-  constitution: number;     // 体魄
-  comprehension: number;    // 悟性
+  // ========== 战斗属性 ==========
+  martialPower: number;      // 功力/武功：0-100，综合武力水平，决定整体战斗能力
+  externalSkill: number;     // 外功：0-100，招式技巧，影响物理攻击和武技威力
+  internalSkill: number;     // 内功：0-100，内力修为，影响内力储备和内功威力
+  qinggong: number;          // 轻功：0-100，身法速度，影响闪避、先手和移动能力
+  constitution: number;      // 体魄：0-100，身体素质，影响生命值、防御和耐力
+  
+  // ========== 非战斗属性 ==========
+  charisma: number;          // 魅力：0-100，个人魅力，影响社交、说服和 NPC 态度
+  comprehension: number;     // 悟性：0-100，领悟能力，影响学习速度和技能理解
+  chivalry: number;          // 侠义：-100~100，道德倾向，正值为侠义，负值为邪恶
+  reputation: number;        // 声望：-1000~1000，江湖名望，影响 NPC 态度和事件触发
+  connections: number;       // 人脉：0-100，人际关系，影响信息获取和求助成功率
+  knowledge: number;         // 学识：0-100，文化修养，影响读书、仕途和非战斗选项
+  wealth: number;            // 财富：0-10000，经济状况，影响购买力和资源获取
+  
+  // ========== 隐藏属性（通过天赋影响） ==========
+  martialPotential?: number; // 武学潜力：0-100，影响战斗属性成长速度（天赋决定）
+  socialPotential?: number;  // 社交潜力：0-100，影响社交属性成长速度（天赋决定）
+  learningPotential?: number;// 学习潜力：0-100，影响知识和技能学习速度（天赋决定）
 }
 
 /**
@@ -351,6 +376,10 @@ export interface PlayerState {
   // 状态
   alive: boolean;
   deathReason?: string;
+  
+  // ========== 新增：天赋系统 ==========
+  /** 玩家拥有的天赋列表 */
+  talents?: string[];  // 存储天赋 ID
 }
 
 /**
@@ -365,6 +394,66 @@ export interface Relationship {
 }
 
 /**
+ * 天赋定义
+ * 
+ * 天赋说明：
+ * - 天赋在出生时确定，影响属性成长速度和上限
+ * - 天赋可见，但后期可用文案包装（如"资质平平"、"武学奇才"）
+ * - 每个天赋都有独特的成长加成的效果
+ * 
+ * @since 2026-03-14
+ */
+export interface TalentDefinition {
+  /** 天赋唯一标识 */
+  id: string;
+  
+  /** 天赋名称 */
+  name: string;
+  
+  /** 天赋描述（给玩家看） */
+  description: string;
+  
+  /** 天赋类型 */
+  type: 'combat' | 'social' | 'learning' | 'special';
+  
+  /** 稀有度 */
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  
+  /** 影响的属性成长加成（百分比，0.1 = 10%） */
+  growthBonus?: {
+    martialPower?: number;      // 功力成长加成
+    externalSkill?: number;     // 外功成长加成
+    internalSkill?: number;     // 内功成长加成
+    qinggong?: number;          // 轻功成长加成
+    constitution?: number;      // 体魄成长加成
+    charisma?: number;          // 魅力成长加成
+    comprehension?: number;     // 悟性成长加成
+    chivalry?: number;          // 侠义成长加成
+    reputation?: number;        // 声望成长加成
+    connections?: number;       // 人脉成长加成
+    knowledge?: number;         // 学识成长加成
+    wealth?: number;            // 财富成长加成
+  };
+  
+  /** 属性上限提升（突破 100 限制） */
+  statCapBonus?: {
+    martialPower?: number;      // 功力上限提升
+    externalSkill?: number;     // 外功上限提升
+    internalSkill?: number;     // 内功上限提升
+    qinggong?: number;          // 轻功上限提升
+    constitution?: number;      // 体魄上限提升
+  };
+  
+  /** 初始属性加成 */
+  initialBonus?: {
+    [stat: string]: number;
+  };
+  
+  /** 特殊效果（可选） */
+  specialEffects?: string[];
+}
+
+/**
  * 游戏状态
  */
 export interface GameState {
@@ -375,6 +464,13 @@ export interface GameState {
   
   // 玩家状态
   player: PlayerState;
+  
+  // 当前时间
+  currentTime?: {
+    year: number;
+    month: number;
+    day: number;
+  };
   
   // 事件历史
   triggeredEvents: string[];

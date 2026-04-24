@@ -41,3 +41,21 @@ CI runs the same gate in `.github/workflows/ci.yml`:
 - `npm test`
 
 Any failure blocks merge readiness.
+
+## Warning Hygiene Requirements
+
+Release validation requires warning hygiene in addition to pass/fail exit codes:
+
+- Do not ignore warnings that indicate invalid environment setup, incompatible data contract, or broken persistence paths.
+- Treat warning patterns previously fixed in this repo (for example `Unknown stat:*` and invalid localstorage path warnings) as regressions if they reappear in gate logs.
+- When introducing a new warning class, document whether it is expected and how it is monitored; otherwise resolve it before merge.
+
+## Release Checklist
+
+All items must be true before merge:
+
+- `npm run typecheck` passes
+- `npm run build` passes
+- `npm test` passes (real regression gate)
+- Gate logs have no unresolved critical warnings
+- Local run result is reproducible in CI using the same command set

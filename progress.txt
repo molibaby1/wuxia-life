@@ -4,6 +4,10 @@
 - Real test gate should execute suites sequentially with aggregated exit status (do not short-circuit with shell `&&`), so full regression signal is always visible.
 - Keep `state.flags` and `state.player.flags` synchronized when mutating flags to avoid read-path inconsistencies across engine and tests.
 - Compatibility stories should replace placeholder logs with executable legacy/new-format assertions in `tests/AllTests.ts`.
+- For first-stage bundle optimization, prefer low-risk Rollup `manualChunks` splits in `vite.config.ts` (e.g., separate `node_modules` and icon libraries) before touching gameplay code paths.
+- For `STAT_MODIFY`, treat recognized player stat keys with `undefined` values as legacy-uninitialized state (default to `0`) and warn only for truly unknown stat keys.
+- Integration baseline states (e.g., `GameTestFramework.createTestState`) must include every commonly modified stat field (such as `charisma`, `constitution`, `comprehension`) to avoid `Unknown stat` warnings that mask real regressions.
+- Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
 
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
@@ -185,4 +189,55 @@
 - **Learnings for future iterations:**
   - Compatibility tests should always assert both legacy input shape and final state shape to avoid silent adapter regressions.
   - For effect compatibility, verify both top-level state and nested player state paths when dual-read paths still exist.
+---
+
+## [2026-04-24 15:10] - US-002
+- Unified runtime stat validation behavior in `StatModifyHandler` by introducing a canonical modifiable stat key set and gating warnings to unknown keys only.
+- Fixed legacy-uninitialized stat handling by defaulting recognized `undefined` stat values to `0`, preventing false-positive `Unknown stat: charisma` warnings during real test gate execution.
+- Files changed:
+  - `src/core/EventExecutor.ts`
+  - `docs/PRD/project-stabilization-tail-plan-v3.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Stat warnings should distinguish schema mismatch from legacy save initialization gaps; otherwise warning noise hides true data issues.
+  - Keep runtime stat validation aligned with a single canonical key list to avoid drift between event data and executor behavior.
+---
+
+## [2026-04-24 14:52] - US-002
+- Aligned integration test baseline stat definitions with runtime executor expectations by completing missing player stat fields in `GameTestFramework.createTestState`.
+- Eliminated the `Unknown stat: charisma` warning from the real test gate by ensuring stats mutated by event data are initialized in the shared test state.
+- Validation evidence:
+  - `npm run typecheck` ✅
+  - `npm test` ✅ (no `Unknown stat: charisma` in gate output)
+- Files changed:
+  - `tests/GameTestFramework.ts`
+  - `docs/PRD/project-stabilization-tail-plan-v3.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Shared integration fixtures should be treated as a stat dictionary contract with `EventExecutor`; missing keys can silently degrade signal quality via warning noise.
+  - When data lines add/expand `stat_modify` targets, update common test baseline state first to keep gate logs actionable.
+---
+
+## [2026-04-24 15:26] - US-005
+- Expanded release quality documentation in `docs/release-validation-contract.md` to include warning-hygiene requirements and a concrete pre-merge checklist.
+- Explicitly documented reproducibility expectations between local and CI (`typecheck + build + real test gate`) and added "no unresolved critical warnings" as a required condition.
+- Files changed:
+  - `docs/release-validation-contract.md`
+  - `docs/PRD/project-stabilization-tail-plan-v3.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Quality contracts should define both command-level pass criteria and log-level warning hygiene; exit code alone is not enough to guarantee release readiness.
+  - Keeping one checklist section for local/CI parity reduces ambiguity when triaging "works locally but fails in CI" cases.
+---
+
+## [2026-04-24 15:26] - US-004
+- Implemented first-stage bundle control in `vite.config.ts` using Rollup `manualChunks` to split `lucide-vue-next` into an `icons` chunk and all remaining third-party dependencies into a `vendor` chunk.
+- Reduced main application bundle from `~487.00 kB` to `~423.30 kB` while keeping production build and core test gate successful.
+- Files changed:
+  - `vite.config.ts`
+  - `docs/PRD/project-stabilization-tail-plan-v3.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Start bundle-size control with build-time chunk strategy first; it usually delivers measurable gains with minimal runtime risk.
+  - Keep icon packs separated from generic vendor chunks so future icon-library growth does not inflate the main application chunk.
 ---

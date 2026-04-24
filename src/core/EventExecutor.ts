@@ -183,6 +183,30 @@ export class EventExecutor implements IEventExecutor {
  * 属性修改处理器
  */
 export class StatModifyHandler implements EffectHandler {
+  private static readonly MODIFIABLE_PLAYER_STATS = new Set<string>([
+    'age',
+    'martialPower',
+    'externalSkill',
+    'internalSkill',
+    'qinggong',
+    'chivalry',
+    'charisma',
+    'constitution',
+    'comprehension',
+    'reputation',
+    'knowledge',
+    'connections',
+    'money',
+    'businessAcumen',
+    'influence',
+    'martialHeritage',
+    'scholarlyHeritage',
+    'merchantNetwork',
+    'wealth',
+    'health',
+    'energy',
+  ]);
+
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
     const target = effect.target || (effect as any).stat;
     const { value, operator = 'set', randomRange } = effect;
@@ -202,11 +226,12 @@ export class StatModifyHandler implements EffectHandler {
     }
     
     // 获取当前值
-    const currentValue = (state.player as any)[target];
-    if (currentValue === undefined) {
+    const rawCurrentValue = (state.player as any)[target];
+    if (rawCurrentValue === undefined && !StatModifyHandler.MODIFIABLE_PLAYER_STATS.has(target)) {
       console.warn(`Unknown stat: ${target}`);
       return state;
     }
+    const currentValue = rawCurrentValue ?? 0;
     
     // 为内外功提供差异化成长加成
     let adjustedValue = finalValue;

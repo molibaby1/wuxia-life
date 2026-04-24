@@ -1,0 +1,15 @@
+## Codebase Patterns
+
+- Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
+
+## [2026-04-24 10:42] - US-001
+- Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
+- Files changed:
+  - `.gitignore`
+  - `docs/artifact-output-convention.md`
+  - `docs/PRD/project-stabilization.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Use targeted git staging because the repository has many pre-existing unrelated changes.
+  - Keep stabilization story commits narrowly scoped to one acceptance target.
+---

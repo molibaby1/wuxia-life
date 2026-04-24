@@ -378,9 +378,10 @@ export class FlagSetHandler implements EffectHandler {
     }
     
     
-    // 处理阵营互斥机制
+    // 同步维护顶层与 player 下的 flags，避免读取路径不一致导致状态丢失
     let newFlags = {
-      ...state.player?.flags,
+      ...(state.flags || {}),
+      ...(state.player?.flags || {}),
       [flagName]: flagValue,
     };
     
@@ -418,6 +419,7 @@ export class FlagSetHandler implements EffectHandler {
     
     const result = {
       ...state,
+      flags: newFlags,
       player: {
         ...state.player,
         flags: newFlags,

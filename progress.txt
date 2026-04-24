@@ -2,6 +2,7 @@
 
 - Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
 - Real test gate should execute suites sequentially with aggregated exit status (do not short-circuit with shell `&&`), so full regression signal is always visible.
+- Keep `state.flags` and `state.player.flags` synchronized when mutating flags to avoid read-path inconsistencies across engine and tests.
 
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
@@ -89,4 +90,18 @@
   - `progress.txt`
 - **Learnings for future iterations:**
   - Aggregating suite exit codes in a runner preserves complete failure visibility while keeping CI/local gate behavior strict.
+---
+
+## [2026-04-24 13:59] - US-002
+- Fixed `FLAG_SET` behavior by synchronizing flag mutations to both `state.flags` and `state.player.flags` in `FlagSetHandler`.
+- Resolved the core assertion failure in `AllTests` for Flag persistence path.
+- Validation evidence:
+  - `./node_modules/.bin/tsx tests/AllTests.ts` ✅
+  - `npm run build` ✅
+- Files changed:
+  - `src/core/EventExecutor.ts`
+  - `docs/PRD/project-remediation-plan-v2.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Legacy code mixes two flag access paths; effect handlers should update both unless a single source of truth is fully enforced.
 ---

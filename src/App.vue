@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import StartScreen from './components/StartScreen.vue';
-import GameScreen from './components/GameScreen.vue';
-import EndingScreen from './components/EndingScreen.vue';
-import DebugPanel from './components/DebugPanel.vue';
 import { useNewGameEngine } from './composables/useNewGameEngine';
 import { gameEngine } from './core/GameEngineIntegration';
+
+const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
+const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
+const DebugPanel = defineAsyncComponent(() => import('./components/DebugPanel.vue'));
 
 const showDebug = ref(false);
 const gameStarted = ref(false);

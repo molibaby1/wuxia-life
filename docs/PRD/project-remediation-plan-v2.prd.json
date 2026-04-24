@@ -73,7 +73,7 @@
         "No unresolved critical test failures remain"
       ],
       "priority": 6,
-      "passes": false
+      "passes": true
     }
   ]
 }

@@ -148,3 +148,17 @@
 - **Learnings for future iterations:**
   - Regression tests should assert durable invariants (schema/coverage/critical paths) and avoid hard-coding assumptions tied to transient narrative distribution.
 ---
+
+## [2026-04-24 14:03] - US-006
+- Added `docs/release-validation-contract.md` to define the required pre-merge contract (`typecheck + build + real tests`) for both local development and CI.
+- Verified release gate reproducibility with a full local run of `npm run validate`.
+- Validation evidence:
+  - `npm run validate` ✅
+  - No unresolved critical failures remain in the enforced gate
+- Files changed:
+  - `docs/release-validation-contract.md`
+  - `docs/PRD/project-remediation-plan-v2.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keeping a single documented command (`npm run validate`) as the merge contract reduces drift between local checks and CI behavior.
+---

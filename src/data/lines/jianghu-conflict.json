@@ -40,6 +40,7 @@
     },
     "choices": [
       {
+        "id": "accept_challenge",
         "text": "接受挑战，一决高下 (武力检定)",
         "effects": [
           {
@@ -55,6 +56,7 @@
         ]
       },
       {
+        "id": "decline_challenge",
         "text": "婉拒，以和为贵 (侠义 +5)",
         "effects": [
           {
@@ -103,6 +105,7 @@
     },
     "choices": [
       {
+        "id": "fight_grudge",
         "text": "一战泯恩仇 (武力检定)",
         "effects": [
           {
@@ -117,6 +120,7 @@
         ]
       },
       {
+        "id": "peace_grudge",
         "text": "化干戈为玉帛 (人脉 +10)",
         "effects": [
           {
@@ -170,6 +174,7 @@
     },
     "choices": [
       {
+        "id": "rescue_immediate",
         "text": "立即前往救援 (侠义 +20, 声望 +10)",
         "effects": [
           {
@@ -183,19 +188,31 @@
             "target": "reputation",
             "value": 10,
             "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
           }
         ]
       },
       {
+        "id": "send_disciples",
         "text": "派遣弟子前往",
-        "effects": []
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "jianghu_rescue_sent",
+            "value": true
+          }
+        ]
       }
     ]
   },
   {
     "id": "jianghu_demon_sect",
-    "name": "剿灭魔教",
-    "description": "魔教祸乱江湖，正道武林号召你一同剿灭。",
+    "name": "江湖纷争",
+    "description": "传统门派与非传统门派的矛盾加剧，江湖陷入纷争。",
     "version": "1.0.0",
     "category": "jianghu",
     "priority": 90,
@@ -208,7 +225,7 @@
     "eventType": "choice",
     "tags": [
       "jianghu",
-      "demon-sect"
+      "faction-war"
     ],
     "triggers": [
       {
@@ -228,12 +245,13 @@
       }
     },
     "content": {
-      "title": "剿灭魔教",
-      "text": "魔教祸乱江湖，正道武林号召你一同剿灭。"
+      "title": "江湖纷争再起",
+      "text": "传统门派与非传统门派的矛盾日益激化，江湖陷入纷争。但你心里清楚：所谓「正邪」，不过是话语权的争夺。朝廷乐于见到江湖自相残杀，而真正的「邪恶」，或许是这场无休止的争斗本身。"
     },
     "choices": [
       {
-        "text": "率众出征，除魔卫道 (武力检定)",
+        "id": "lead_expedition",
+        "text": "率众出征，维护传统 (武力检定)",
         "effects": [
           {
             "type": "random",
@@ -244,10 +262,16 @@
             "failure": {
               "martialPower": -20
             }
+          },
+          {
+            "type": "karma_change",
+            "good": 20,
+            "evil": 0
           }
         ]
       },
       {
+        "id": "fund_expedition",
         "text": "提供资金支持 (财富 -100)",
         "effects": [
           {
@@ -255,6 +279,11 @@
             "target": "money",
             "value": -100,
             "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
           }
         ]
       }
@@ -301,6 +330,7 @@
     },
     "choices": [
       {
+        "id": "investigate_truth",
         "text": "查明真相，洗刷冤屈 (学识 +10, 人脉 +10)",
         "effects": [
           {
@@ -318,6 +348,7 @@
         ]
       },
       {
+        "id": "fight_doubters",
         "text": "以武服人，打败质疑者 (武力检定)",
         "effects": [
           {
@@ -369,6 +400,7 @@
     },
     "choices": [
       {
+        "id": "attend_meeting",
         "text": "前往参加，结交豪杰 (人脉 +20)",
         "effects": [
           {
@@ -380,6 +412,7 @@
         ]
       },
       {
+        "id": "decline_meeting",
         "text": "婉拒，专心修炼 (外功 +5, 内功 +5)",
         "effects": [
           {
@@ -434,6 +467,7 @@
     },
     "choices": [
       {
+        "id": "fight_for_manual",
         "text": "参与争夺，机缘难得 (武力检定)",
         "effects": [
           {
@@ -449,8 +483,15 @@
         ]
       },
       {
+        "id": "watch_manual",
         "text": "静观其变，不惹纷争",
-        "effects": []
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "jianghu_manual_watched",
+            "value": true
+          }
+        ]
       }
     ]
   },
@@ -495,6 +536,7 @@
     },
     "choices": [
       {
+        "id": "learn_from_master",
         "text": "虚心请教，学习绝学 (外功 +15, 内功 +15)",
         "effects": [
           {
@@ -512,6 +554,7 @@
         ]
       },
       {
+        "id": "spar_with_master",
         "text": "切磋交流，互相学习 (外功 +5, 内功 +5)",
         "effects": [
           {

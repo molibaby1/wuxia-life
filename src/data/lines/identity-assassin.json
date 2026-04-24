@@ -1,0 +1,183 @@
+[
+  {
+    "id": "assassin_first_mission",
+    "name": "首次任务",
+    "description": "你接到了作为刺客的首个正式任务。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 18, "max": 30 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["assassin", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "triggerConditions": { "age": { "min": 18, "max": 30 }, "identity": { "required": ["assassin"] } },
+    "content": { "title": "首杀", "text": "你接到了作为刺客的首个正式任务。目标是一个贪官污吏。" },
+    "choices": [
+      {
+        "id": "complete_mission",
+        "text": "完成任务，为民除害 (侠义 +10, 金钱 +50)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" },
+          { "type": "karma_change", "good": 10, "evil": 0 },
+          { "type": "flag_set", "target": "assassin_first_mission", "value": true }
+        ]
+      },
+      {
+        "id": "fail_mission",
+        "text": "任务失败，暴露身份 (声望 -20)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": -20, "operator": "add" },
+          { "type": "flag_set", "target": "assassin_first_mission", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "assassin_moral_choice",
+    "name": "道德抉择",
+    "description": "组织要求你刺杀一个无辜之人。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": { "min": 25, "max": 40 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["assassin", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "triggerConditions": { "age": { "min": 25, "max": 40 }, "identity": { "required": ["assassin"] } },
+    "content": { "title": "良知", "text": "组织要求你刺杀一个无辜之人。报酬丰厚，但违背你的良心。" },
+    "choices": [
+      {
+        "id": "refuse_mission",
+        "text": "拒绝任务，坚守底线 (侠义 +20, 被组织追杀)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 20, "evil": 0 },
+          { "type": "flag_set", "target": "assassin_moral_choice", "value": true }
+        ]
+      },
+      {
+        "id": "accept_mission",
+        "text": "接受任务，获取报酬 (金钱 +200, 侠义 -20)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -20, "operator": "add" },
+          { "type": "karma_change", "good": 0, "evil": 20 },
+          { "type": "flag_set", "target": "assassin_moral_choice", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "assassin_reputation",
+    "name": "名声鹊起",
+    "description": "你的刺客之名在江湖上传开。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": { "min": 30, "max": 50 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["assassin", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "triggerConditions": { "age": { "min": 30, "max": 50 }, "identity": { "required": ["assassin"] } },
+    "content": { "title": "影杀", "text": "你的刺客之名在江湖上传开，有人称你为义贼，有人视你为恶魔。" },
+    "choices": [
+      {
+        "id": "embrace_reputation",
+        "text": "接受名声，继续行刺 (武力 +15, 声望 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "assassin_reputation", "value": true }
+        ]
+      },
+      {
+        "id": "hide_reputation",
+        "text": "隐藏身份，低调行事 (轻功 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "qinggong", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "assassin_reputation", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "assassin_betrayal",
+    "name": "背叛组织",
+    "description": "你发现了组织的黑暗秘密，考虑背叛。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": { "min": 35, "max": 55 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["assassin", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 35 }],
+    "triggerConditions": { "age": { "min": 35, "max": 55 }, "identity": { "required": ["assassin"] } },
+    "content": { "title": "真相", "text": "你发现了组织的黑暗秘密，他们利用刺客操控朝政。你面临艰难的抉择。" },
+    "choices": [
+      {
+        "id": "betray_org",
+        "text": "背叛组织，揭露真相 (侠义 +30, 被追杀)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 30, "operator": "add" },
+          { "type": "karma_change", "good": 30, "evil": 0 },
+          { "type": "flag_set", "target": "assassin_betrayal", "value": true }
+        ]
+      },
+      {
+        "id": "stay_loyal",
+        "text": "保持忠诚，继续效命 (金钱 +100, 武力 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 0, "evil": 10 },
+          { "type": "flag_set", "target": "assassin_betrayal", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "assassin_retirement",
+    "name": "金盆洗手",
+    "description": "年事已高，你考虑退出江湖。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 50, "max": 70 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["assassin", "identity", "elderly"],
+    "triggers": [{ "type": "age_reach", "value": 50 }],
+    "triggerConditions": { "age": { "min": 50, "max": 70 }, "identity": { "required": ["assassin"] } },
+    "content": { "title": "归隐", "text": "年事已高，你考虑金盆洗手，退出这个血腥的江湖。" },
+    "choices": [
+      {
+        "id": "retire_clean",
+        "text": "金盆洗手，彻底退出 (侠义 +20, 声望 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "karma_change", "good": 20, "evil": 0 },
+          { "type": "flag_set", "target": "assassin_retirement", "value": true }
+        ]
+      },
+      {
+        "id": "train_disciples",
+        "text": "培养传人，传授技艺 (人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "flag_set", "target": "assassin_retirement", "value": true }
+        ]
+      }
+    ]
+  }
+]

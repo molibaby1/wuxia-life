@@ -1,0 +1,482 @@
+[
+  {
+    "id": "hero_first_case",
+    "name": "初出茅庐",
+    "description": "你初次踏入江湖，遇到一伙强盗欺负百姓。",
+    "version": "2.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 20,
+      "max": 30
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "early"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "requirements": {
+      "faction": "orthodox",
+      "identity": ["hero"],
+      "attributes": {
+        "chivalry": { "min": 10 },
+        "martialPower": { "min": 20 }
+      },
+      "lifeStage": "growth"
+    },
+    "triggerConditions": {
+      "age": {
+        "min": 20,
+        "max": 30
+      },
+      "identity": {
+        "required": ["hero"]
+      }
+    },
+    "content": {
+      "title": "路见不平",
+      "text": "你初次踏入江湖，在路边遇到一伙强盗正在欺负百姓。老者跪地求饶，强盗却变本加厉。你握紧拳头，心中热血涌动。"
+    },
+    "choices": [
+      {
+        "id": "fight_bandits",
+        "text": "挺身而出，教训强盗 (侠义 +10, 声望 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_first_case",
+            "value": true
+          },
+          {
+            "type": "lifepath_add_focus",
+            "focusType": "martial",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "help_secretly",
+        "text": "暗中相助，不留姓名 (侠义 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 5,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_first_case",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hero_save_village",
+    "name": "拯救村庄",
+    "description": "一个村庄遭到马贼围攻，村民请求你出手相助。",
+    "version": "2.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 25,
+      "max": 40
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "requirements": {
+      "faction": "orthodox",
+      "identity": ["hero"],
+      "attributes": {
+        "chivalry": { "min": 20 },
+        "martialPower": { "min": 30 }
+      },
+      "lifeStage": "development",
+      "requiredAchievements": ["hero_first_case"]
+    },
+    "triggerConditions": {
+      "age": {
+        "min": 25,
+        "max": 40
+      },
+      "identity": {
+        "required": ["hero"]
+      },
+      "flags": {
+        "required": ["hero_first_case"]
+      }
+    },
+    "content": {
+      "title": "村庄求救",
+      "text": "一个村庄遭到马贼围攻，村长带着几个村民跪在你面前：'大侠，求您救救我们！'远处火光冲天，哭喊声此起彼伏。"
+    },
+    "choices": [
+      {
+        "id": "fight_alone",
+        "text": "孤身赴战，击退马贼 (侠义 +20, 声望 +15, 武力 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 20,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "save_village",
+            "value": true
+          },
+          {
+            "type": "lifepath_add_focus",
+            "focusType": "martial",
+            "value": 10
+          },
+          {
+            "type": "lifepath_record_achievement",
+            "achievement": "saved_village",
+            "description": "拯救村庄"
+          }
+        ]
+      },
+      {
+        "id": "organize_villagers",
+        "text": "组织村民，共同抗敌 (侠义 +10, 人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "save_village",
+            "value": true
+          },
+          {
+            "type": "lifepath_add_focus",
+            "focusType": "leadership",
+            "value": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hero_fight_evil",
+    "name": "除魔卫道",
+    "description": "魔教余孽在江湖上兴风作浪，你决定出手铲除。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 90,
+    "weight": 80,
+    "ageRange": {
+      "min": 35,
+      "max": 50
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "late"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 50
+      },
+      "identity": {
+        "required": ["hero"]
+      },
+      "flags": {
+        "required": ["save_village"]
+      }
+    },
+    "content": {
+      "title": "江湖纷争",
+      "text": "传统门派与非传统门派的矛盾加剧，江湖陷入纷争。武林盟主发出英雄帖，召集各路豪杰。但你已经知道：所谓正邪，不过是胜者的叙事。这一次，你会选择盲目跟随，还是独立思考？"
+    },
+    "choices": [
+      {
+        "text": "带头冲锋，维护传统 (侠义 +30, 声望 +25, 武力 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 30,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 25,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 30,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "defeat_demon Sect",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "出谋划策，指挥作战 (侠义 +15, 声望 +20, 悟性 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 15,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "defeat_demon Sect",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hero_become_legend",
+    "name": "传奇诞生",
+    "description": "你的事迹在江湖上广为流传，成为人们口中的传奇。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 95,
+    "weight": 85,
+    "maxTriggers": 1,
+    "cooldown": 10,
+    "ageRange": {
+      "min": 50,
+      "max": 70
+    },
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["hero", "identity", "ending"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["hero"]
+      },
+      "experience": {
+        "required": ["hero_fight_evil", "jianghu_rescue"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "reputation": { "min": 100 },
+        "chivalry": { "min": 50 }
+      }
+    },
+    "triggerConditions": {
+      "age": {
+        "min": 50,
+        "max": 70
+      },
+      "identity": {
+        "required": ["hero"]
+      },
+      "flags": {
+        "required": ["defeat_demon Sect", "save_village"]
+      }
+    },
+    "content": {
+      "title": "传奇诞生",
+      "text": "你的事迹在江湖上广为流传。茶馆酒肆里，说书人讲述着你的英雄壮举；街头巷尾，孩童们模仿着你的招式。你已经成为武林中人人传颂的传奇英雄。",
+      "autoEffects": [
+        {
+          "type": "stat_modify",
+          "target": "reputation",
+          "value": 50,
+          "operator": "add"
+        },
+        {
+          "type": "karma_change",
+          "good": 50,
+          "evil": 0
+        },
+        {
+          "type": "flag_set",
+          "target": "legendary_hero",
+          "value": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "hero_teach_disciples",
+    "name": "传授弟子",
+    "description": "慕名而来的年轻人请求你传授武艺和侠义之道。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 45,
+      "max": 65
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "teaching"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 45,
+        "max": 65
+      },
+      "identity": {
+        "required": ["hero"]
+      }
+    },
+    "content": {
+      "title": "后辈求教",
+      "text": "一群慕名而来的年轻人跪在你面前：'大侠，请收我们为徒！我们想跟您学习武艺，更要学习您的侠义精神！'看着他们渴望的眼神，你想起了年轻时的自己。"
+    },
+    "choices": [
+      {
+        "text": "悉心教导，传授武艺和侠义 (侠义 +10, 声望 +15)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_teacher",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "只传武艺，不传侠义 (武力 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_teacher",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+]

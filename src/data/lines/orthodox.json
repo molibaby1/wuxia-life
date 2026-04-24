@@ -22,6 +22,7 @@
       {
         "text": "接受邀请，加入正道",
         "effects": [
+          {"type": "flag_set", "flag": "sect_faction", "value": "orthodox"},
           {"type": "flag_set", "flag": "orthodox_member", "value": true},
           {"type": "stat_modify", "stat": "chivalry", "value": 5},
           {"type": "stat_modify", "stat": "reputation", "value": 10}

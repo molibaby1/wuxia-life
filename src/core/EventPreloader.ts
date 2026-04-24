@@ -47,8 +47,6 @@ export class EventPreloader {
       
       const endTime = performance.now();
       performanceMonitor.recordEventExecution(endTime - startTime);
-      
-      console.log(`[EventPreloader] 预加载 ${age}岁事件：${events.length}个`);
     }
   }
   
@@ -56,7 +54,6 @@ export class EventPreloader {
    * 预加载未来年龄段的事件
    */
   public preloadFutureAges(currentAge: number): void {
-    console.log(`[EventPreloader] 开始预加载 ${currentAge}-${currentAge + this.PRELOAD_AGE_RANGE} 岁事件`);
     
     for (let age = currentAge; age <= currentAge + this.PRELOAD_AGE_RANGE; age++) {
       this.preloadAge(age);
@@ -89,7 +86,6 @@ export class EventPreloader {
   public clearAge(age: number): void {
     this.eventPool.delete(age);
     this.loadedAges.delete(age);
-    console.log(`[EventPreloader] 清除 ${age}岁事件缓存`);
   }
   
   /**
@@ -128,12 +124,6 @@ export class EventPreloader {
   public printStatistics(): void {
     const stats = this.getStatistics();
     
-    console.log('\n=== 事件预加载统计 ===');
-    console.log(`已加载年龄段：${stats.loadedAgesCount}个`);
-    console.log(`总事件数：${stats.totalEventsCount}个`);
-    console.log(`年龄范围：${stats.minAge}-${stats.maxAge}岁`);
-    console.log(`事件池大小：${stats.poolSize}`);
-    console.log('=====================\n');
   }
   
   /**
@@ -142,7 +132,6 @@ export class EventPreloader {
   public reset(): void {
     this.eventPool.clear();
     this.loadedAges.clear();
-    console.log('[EventPreloader] 预加载器已重置');
   }
 }
 

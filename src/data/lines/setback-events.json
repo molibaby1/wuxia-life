@@ -1,0 +1,383 @@
+[
+  {
+    "id": "setback_illness",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 50,
+    "weight": 40,
+    "ageRange": {
+      "min": 16,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.04
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "constitution < 60"
+      }
+    ],
+    "content": {
+      "title": "大病一场",
+      "text": "一场突如其来的大病让你卧床不起，连续数日高烧不退。你不得不停下修炼的脚步，安心养病。",
+      "description": "身体是武学的本钱，生病会影响修炼进度"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 0
+      },
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": -15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": -10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "energy",
+        "value": -20,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "setback_illness_active",
+        "value": true
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "moderate",
+    "challengeScene": {
+      "sceneId": "cultivation_breakthrough",
+      "enableFailureCheck": false,
+      "failureText": "面对病痛的折磨，你的修炼计划不得不暂时搁置"
+    },
+    "reputationGate": {
+      "minReputation": -1000,
+      "maxReputation": 1000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "生病", "负面"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "setback_injury",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 45,
+    "weight": 50,
+    "ageRange": {
+      "min": 10,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.08
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "constitution < 50"
+      }
+    ],
+    "content": {
+      "title": "意外受伤",
+      "text": "在一次练功中，你不慎受伤。疼痛让你意识到江湖险恶，需要更加小心谨慎。",
+      "description": "练功受伤需要休养"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": -5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": -3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "setback_injury_active",
+        "value": true
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "minor",
+    "reputationGate": {
+      "minReputation": -1000,
+      "maxReputation": 1000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "受伤", "负面"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "setback_early_death",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 30,
+    "weight": 5,
+    "ageRange": {
+      "min": 18,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.003
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "constitution < 80"
+      }
+    ],
+    "content": {
+      "title": "英年早逝",
+      "text": "天妒英才，你的生命在这一刻画上了句号。江湖上再也没有你的传说...",
+      "description": "命运无常，英雄早逝"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": -50,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "player_died",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "death_reason",
+        "value": "英年早逝"
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "critical",
+    "reputationGate": {
+      "minReputation": -1000,
+      "maxReputation": 2000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "死亡", "严重"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "setback_property_loss",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 40,
+    "weight": 60,
+    "ageRange": {
+      "min": 15,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.10
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "money > 50"
+      }
+    ],
+    "content": {
+      "title": "财产损失",
+      "text": "遭遇盗匪或经营失败，你损失了部分财产。江湖上的风险总是防不胜防。",
+      "description": "财富损失是常见的风险"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "money",
+        "value": -100,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "setback_property_loss_active",
+        "value": true
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "minor",
+    "reputationGate": {
+      "minReputation": -1000,
+      "maxReputation": 1000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "财产", "负面"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "setback_betrayal",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 45,
+    "weight": 35,
+    "ageRange": {
+      "min": 20,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.03
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "connections > 30"
+      }
+    ],
+    "content": {
+      "title": "挚友背叛",
+      "text": "曾经信任的人却背叛了你，让你的心灵受到严重伤害。你开始怀疑这个江湖是否还有真诚。",
+      "description": "人心难测，挚友也可能背叛"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": -10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": -15,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "setback_betrayal_active",
+        "value": true
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "moderate",
+    "reputationGate": {
+      "minReputation": 0,
+      "maxReputation": 1000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "背叛", "负面"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "setback_cultivation_deviation",
+    "version": "1.0.0",
+    "category": "setback",
+    "priority": 50,
+    "weight": 25,
+    "ageRange": {
+      "min": 16,
+      "max": 70
+    },
+    "triggers": [
+      {
+        "type": "random",
+        "value": 0.02
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "internalSkill > 30 && constitution < 70"
+      }
+    ],
+    "content": {
+      "title": "走火入魔",
+      "text": "修炼时心神不宁，你感到内息紊乱，一股邪念在心中滋长。这是每个武者都可能遇到的危机——走火入魔。",
+      "description": "修炼之道最忌心浮气躁"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": -20,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": -15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": -10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "setback_cultivation_deviation_active",
+        "value": true
+      }
+    ],
+    "isSetbackEvent": true,
+    "setbackSeverity": "severe",
+    "reputationGate": {
+      "minReputation": 50,
+      "maxReputation": 1000
+    },
+    "metadata": {
+      "createdAt": 1773893913000,
+      "updatedAt": 1773893913000,
+      "author": "difficulty_system",
+      "tags": ["挫折", "走火入魔", "严重"],
+      "enabled": true
+    }
+  }
+]

@@ -1,0 +1,447 @@
+[
+  {
+    "id": "scholar_first_book",
+    "name": "著书立说",
+    "description": "你决定将自己的学识和见解整理成书。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 20,
+      "max": 35
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["scholar", "identity", "early"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 20,
+        "max": 35
+      },
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "第一部著作",
+      "text": "你决定将自己的学识和见解整理成书。这是一个浩大的工程，需要耗费大量时间和精力。"
+    },
+    "choices": [
+      {
+        "id": "write_detailed",
+        "text": "详实记录，精益求精 (学识 +15, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 5,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_first_book",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "write_simple",
+        "text": "简明扼要，快速完成 (学识 +8)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_first_book",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_academy_invite",
+    "name": "书院邀请",
+    "description": "当地书院邀请你前往讲学。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 25,
+      "max": 45
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["scholar", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 25,
+        "max": 45
+      },
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "书院讲学",
+      "text": "当地书院久仰你的学识，邀请你前往讲学。这是传播知识的好机会，但也需要投入大量时间。"
+    },
+    "choices": [
+      {
+        "id": "accept_invite",
+        "text": "接受邀请，前往讲学 (学识 +10, 声望 +15, 人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_academy_invite",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "decline_invite",
+        "text": "婉拒邀请，专心著述 (学识 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_academy_invite",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_debate",
+    "name": "学术辩论",
+    "description": "一位学者对你的观点提出质疑，要求公开辩论。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {
+      "min": 30,
+      "max": 50
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["scholar", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 30,
+        "max": 50
+      },
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "学术之争",
+      "text": "一位学者对你的观点提出质疑，要求公开辩论。这是检验学识的机会，也可能带来声望的提升或损失。"
+    },
+    "choices": [
+      {
+        "id": "accept_debate",
+        "text": "接受挑战，以理服人 (学识检定，声望 +20/-10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_debate",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "ignore_debate",
+        "text": "不予理会，专心治学 (声望 -5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_debate",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_master_work",
+    "name": "传世之作",
+    "description": "你准备创作一部能够流传后世的经典著作。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 40,
+      "max": 60
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["scholar", "identity", "late"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 60
+      },
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "毕生心血",
+      "text": "你准备创作一部能够流传后世的经典著作。这将是你毕生学识和智慧的结晶。"
+    },
+    "choices": [
+      {
+        "id": "write_masterpiece",
+        "text": "倾尽心血，创作经典 (学识 +25, 声望 +30)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 25,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 30,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 15,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_master_work",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "write_normal",
+        "text": "按部就班，完成著作 (学识 +15, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_master_work",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_legacy",
+    "name": "学术传承",
+    "description": "年事已高，你考虑如何传承自己的学术思想。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 55,
+      "max": 75
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["scholar", "identity", "elderly"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 55
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 55,
+        "max": 75
+      },
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "学术传承",
+      "text": "年事已高，你考虑如何传承自己的学术思想。这是关乎学问能否流传后世的重要决定。"
+    },
+    "choices": [
+      {
+        "id": "teach_disciples",
+        "text": "广收门徒，传授学问 (声望 +20, 人脉 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 20,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_legacy",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "write_books",
+        "text": "著书立说，流传后世 (学识 +20, 声望 +15)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_legacy",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "family_inherit",
+        "text": "传给子女，家学渊源 (学识 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_legacy",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+]

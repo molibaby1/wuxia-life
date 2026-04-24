@@ -7,6 +7,17 @@
     "weight": 40,
     "ageRange": { "min": 22, "max": 28 },
     "triggers": [{ "type": "age_reach", "value": 22 }],
+    "thresholds": {
+      "background": {
+        "required": ["origin_scholar_family"],
+        "forbidden": ["origin_wuxia_family", "origin_merchant_family"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "comprehension": { "min": 12 },
+        "charisma": { "min": 8 }
+      }
+    },
     "conditions": [
       { "type": "expression", "expression": "!flags.has(\"route_official\") && player.comprehension >= 12 && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")" }
     ],

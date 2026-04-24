@@ -3,17 +3,17 @@
     "id": "love_first_meet",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 1,
-    "weight": 50,
+    "priority": 0,
+    "weight": 80,
     "ageRange": { "min": 15, "max": 35 },
     "triggers": [
       {"type": "age_reach", "value": 15},
-      {"type": "random", "value": 0.2}
+      {"type": "random", "value": 0.6}
     ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"love_started\") && !flags.has(\"love_mature_started\") && !flags.has(\"love_elderly_started\") && player.charisma >= 10"
+        "expression": "!flags.has(\"love_started\") && !flags.has(\"love_mature_started\") && !flags.has(\"love_elderly_started\") && !flags.has(\"hasLoveInterest\") && player.charisma >= 5"
       }
     ],
     "content": {
@@ -25,20 +25,96 @@
     "choices": [
       {
         "id": "love_greet",
-        "text": "上前搭话",
-        "effects": [
-          { "type": "flag_set", "target": "love_started" },
-          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 10 } },
-          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
-          { "type": "event_record", "target": "love_first_meet_greet" }
+        "text": "上前搭话，礼貌问候",
+        "description": "你整理衣冠，以礼相待",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "对方被你温文尔雅的气质打动，主动与你多聊了几句。临别时，佳人轻声道：'公子/小姐若不嫌弃，明日此时，可否再会？'你心中暗喜，这或许是缘分的开始。",
+            "condition": {"type": "expression", "expression": "charisma >= 10"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "polite_great"},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 25}},
+              {"type": "stat_modify", "target": "charisma", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "love_first_meet_greet_great"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "对方微微一笑，与你简短交谈后离去。但那一颦一笑已深深刻在你心中。",
+            "condition": {"type": "expression", "expression": "charisma >= 6"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "polite"},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 10}},
+              {"type": "stat_modify", "target": "charisma", "value": 2, "operator": "add"},
+              {"type": "event_record", "target": "love_first_meet_greet"}
+            ]
+          },
+          {
+            "id": "failure",
+            "text": "你鼓起勇气上前搭话，却只换来对方礼貌而疏离的点头。对方匆匆离去，留下你一人站在原地，心中难免有些失落。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "polite_cold"},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 3}},
+              {"type": "event_record", "target": "love_first_meet_greet_cold"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "love_charm",
+        "text": "展示魅力，主动攀谈",
+        "description": "你风流倜傥，展现风采",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你的风采令对方眼前一亮！对方眼中闪过欣赏之色，与你相谈甚欢。临别时轻声道：'江湖路远，能遇公子/小姐这般有趣之人，实乃幸事。'你心中暗喜，这或许是命中注定的缘分。",
+            "condition": {"type": "expression", "expression": "charisma >= 12"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "charming_great"},
+              {"type": "flag_set", "target": "love_secret_met", "value": true},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 35}},
+              {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
+              {"type": "event_record", "target": "love_first_meet_charm_great"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你风度翩翩的举止吸引了对方注意。短暂交谈后，对方眼中闪过一丝欣赏。",
+            "condition": {"type": "expression", "expression": "charisma >= 7"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "charming"},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 15}},
+              {"type": "stat_modify", "target": "charisma", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "love_first_meet_charm"}
+            ]
+          },
+          {
+            "id": "failure",
+            "text": "你试图展现魅力，却显得有些刻意。对方微微一笑，礼貌地结束了交谈。你心中暗叹：'或许她/他不是对的人...'",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_set", "target": "love_approach_method", "value": "charming_failed"},
+              {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 5}},
+              {"type": "event_record", "target": "love_first_meet_charm_failed"}
+            ]
+          }
         ]
       },
       {
         "id": "love_pass",
-        "text": "只是远远一望",
+        "text": "只是远远一望，默默离开",
+        "description": "你选择远远观望",
         "effects": [
-          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
-          { "type": "event_record", "target": "love_first_meet_pass" }
+          {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+          {"type": "event_record", "target": "love_first_meet_pass"}
         ]
       }
     ],
@@ -47,17 +123,66 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["爱情", "初遇", "支线", "once"],
+      "enabled": true,
+      "backgroundWeights": {
+        "scholar": 0.8,
+        "merchant": 0.9,
+        "wuxia": 0.7,
+        "frontier": 0.6
+      }
+    },
+    "storyLine": "love_story",
+    "cooldown": 0.5
+  },
+  {
+    "id": "love_after_greet",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": { "min": 15, "max": 35 },
+    "triggers": [
+      { "type": "flag_set", "flag": "love_started" }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"love_started\") && !flags.has(\"love_after_greet_done\")"
+      }
+    ],
+    "content": {
+      "text": "自从那日相遇，你时常想起那个特别的身影。或许，这就是缘分的开始。",
+      "title": "心动",
+      "description": "情愫暗生。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 5 } },
+      { "type": "flag_set", "target": "love_after_greet_done" },
+      { "type": "event_record", "target": "love_after_greet" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["爱情", "成长", "支线", "once"],
       "enabled": true
-    }
+    },
+    "storyLine": "love_story",
+    "cooldown": 0
   },
   {
     "id": "love_shared_mission",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 1,
-    "weight": 45,
-    "ageRange": { "min": 17, "max": 23 },
-    "triggers": [{ "type": "age_reach", "value": 17 }],
+    "priority": 0,
+    "weight": 70,
+    "ageRange": { "min": 16, "max": 25 },
+    "triggers": [
+      { "type": "age_reach", "value": 16 },
+      { "type": "flag_set", "flag": "love_started" }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -82,16 +207,18 @@
       "author": "development_team",
       "tags": ["爱情", "成长", "支线", "once"],
       "enabled": true
-    }
+    },
+    "storyLine": "love_story",
+    "cooldown": 0.5
   },
   {
     "id": "love_family_obstacle",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 1,
-    "weight": 40,
-    "ageRange": { "min": 19, "max": 25 },
-    "triggers": [{ "type": "age_reach", "value": 19 }],
+    "priority": 0,
+    "weight": 65,
+    "ageRange": { "min": 17, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 17 }],
     "conditions": [
       {
         "type": "expression",
@@ -132,7 +259,9 @@
       "author": "development_team",
       "tags": ["爱情", "冲突", "支线", "once"],
       "enabled": true
-    }
+    },
+    "storyLine": "love_story",
+    "cooldown": 0.5
   },
   {
     "id": "love_rival_appears",
@@ -157,22 +286,36 @@
     "choices": [
       {
         "id": "love_duel",
-        "text": "正面对决",
+        "text": "正面对决 (功力 +3, 焦虑 +1)",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "life_state_change", "target": "anxiety", "value": 1, "operator": "add" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_duel" }
         ]
       },
       {
         "id": "love_withdraw",
-        "text": "暂时退让",
+        "text": "暂时退让 (关系 -6, 焦虑 -1)",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
+          { "type": "life_state_change", "target": "anxiety", "value": -1, "operator": "add" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_withdraw" }
+        ]
+      },
+      {
+        "id": "love_clumsy_mediation",
+        "text": "设法缓和局面 (魅力 +2, 关系 -2, 焦虑 +1)",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -2 } },
+          { "type": "life_state_change", "target": "anxiety", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "love_rival" },
+          { "type": "event_record", "target": "love_rival_mediation" }
         ]
       }
     ],
@@ -228,7 +371,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_separated\") && !flags.has(\"love_reunited\")"
+        "expression": "flags.has(\"love_separated\") && !flags.has(\"love_reunited\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -327,7 +470,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_misunderstood\") && !flags.has(\"love_secret_help\")"
+        "expression": "flags.has(\"love_misunderstood\") && !flags.has(\"love_secret_help\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -361,7 +504,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_secret_help\") && !flags.has(\"love_life_or_death\")"
+        "expression": "flags.has(\"love_secret_help\") && !flags.has(\"love_life_or_death\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -412,7 +555,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_family_reconcile\")"
+        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_family_reconcile\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -445,7 +588,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_committed\") && (flags.has(\"love_family_reconcile\") || flags.has(\"love_life_or_death\")) && !flags.has(\"love_ending_good\")"
+        "expression": "flags.has(\"love_committed\") && (flags.has(\"love_family_reconcile\") || flags.has(\"love_life_or_death\")) && !flags.has(\"love_ending_good\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -512,7 +655,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_ending_sacrifice\") && !flags.has(\"love_ending_good\")"
+        "expression": "flags.has(\"love_life_or_death\") && !flags.has(\"love_ending_sacrifice\") && !flags.has(\"love_ending_good\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -545,7 +688,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_committed\") && flags.has(\"love_family_reconcile\") && !flags.has(\"love_ending_hideaway\") && !flags.has(\"love_ending_good\")"
+        "expression": "flags.has(\"love_committed\") && flags.has(\"love_family_reconcile\") && !flags.has(\"love_ending_hideaway\") && !flags.has(\"love_ending_good\") && !flags.spouse_mingyue"
       }
     ],
     "content": {
@@ -627,29 +770,29 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && flags.has(\"route_demonic\") && !flags.has(\"love_demonic_conflict\")"
+        "expression": "flags.has(\"love_started\") && flags.has(\"route_unconventional\") && !flags.has(\"love_demonic_conflict\")"
       }
     ],
     "content": {
-      "text": "明月得知你投身魔教，痛苦不已，逼你作出选择。",
+      "text": "明月得知你加入了幽影门，痛苦不已。江湖传言幽影门是「魔教」，但她问你：「那些正派人士就真的那么好吗？你选择的这条路，真的那么不堪吗？」",
       "title": "情与立场",
-      "description": "爱与道，无法兼得？"
+      "description": "爱与江湖道路，如何抉择？"
     },
     "eventType": "choice",
     "choices": [
       {
         "id": "love_choose_redemption",
-        "text": "为她回头",
+        "text": "为她离开幽影门",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-          { "type": "flag_set", "target": "demonic_redemption_started" },
+          { "type": "flag_set", "target": "unconventional_redemption_started" },
           { "type": "flag_set", "target": "love_demonic_conflict" },
           { "type": "event_record", "target": "love_demonic_conflict_redemption" }
         ]
       },
       {
         "id": "love_choose_demonic",
-        "text": "坚持魔教道路",
+        "text": "坚持自己的道路",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -8 } },
@@ -662,7 +805,42 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["爱情", "魔教", "冲突", "支线", "once"],
+      "tags": ["爱情", "幽影门", "冲突", "支线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "spouse_mingyue_daily",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 5,
+    "weight": 40,
+    "ageRange": { "min": 21, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 21 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.spouse_mingyue == true && !flags.has(\"spouse_mingyue_daily\")"
+      }
+    ],
+    "content": {
+      "text": "明月作为你的妻子，与你琴瑟和鸣，相濡以沫。江湖中人人称羡你们这对神仙眷侣。",
+      "title": "夫妻同心",
+      "description": "执子之手，与子偕老。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+      { "type": "flag_set", "target": "spouse_mingyue_daily" },
+      { "type": "event_record", "target": "spouse_mingyue_daily" }
+    ],
+    "metadata": {
+      "createdAt": 1773741200000,
+      "updatedAt": 1773741200000,
+      "author": "development_team",
+      "tags": ["爱情", "婚姻", "明月", "配偶", "支线", "once"],
       "enabled": true
     }
   }

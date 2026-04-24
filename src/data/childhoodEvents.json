@@ -676,6 +676,12 @@
       }
     ],
     "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.25,
+        "merchant": 0.25,
+        "wuxia": 0.25,
+        "frontier": 0.25
+      },
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",

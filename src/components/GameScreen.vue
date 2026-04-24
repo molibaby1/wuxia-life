@@ -79,16 +79,24 @@
       
       <div v-if="currentNode" class="story-card card">
         <p class="story-text">{{ currentNode.text }}</p>
+        <div v-if="lastOutcomeText" class="outcome-section">
+          <p class="outcome-text">{{ lastOutcomeText }}</p>
+        </div>
         <div v-if="isAutoPlaying" class="auto-play-indicator">
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
         </div>
+        <div v-else-if="!isAutoPlaying && !availableChoices.length" class="continue-area">
+          <button class="continue-btn btn" @click="continueToNext">
+            继续
+          </button>
+        </div>
       </div>
-      
+
       <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
-        <button 
-          v-for="choice in availableChoices" 
+        <button
+          v-for="choice in availableChoices"
           :key="choice.id"
           class="choice-btn btn"
           @click="makeChoice(choice)"
@@ -96,14 +104,19 @@
           {{ choice.text }}
         </button>
       </div>
+
+      <div v-else-if="engineState.lastOutcomeText" class="debug-info">
+        <p>调试: lastOutcomeText = "{{ engineState.lastOutcomeText }}"</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { talentSystem } from '../core/TalentSystem';
+import { useNewGameEngine } from '../composables/useNewGameEngine';
 import AttributePanel from './AttributePanel.vue';
 import type { StoryChoice, TalentDefinition } from '../types';
 
@@ -117,21 +130,31 @@ const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
 }>();
 
+// 使用 useNewGameEngine 获取 lastOutcomeText
+const { engineState, getNextEvent } = useNewGameEngine();
+
+const lastOutcomeText = computed(() => {
+  return engineState.lastOutcomeText;
+});
+
+// 继续到下一个事件
+const continueToNext = () => {
+  // 清除结果文本
+  engineState.lastOutcomeText = null;
+  // 获取下一个事件
+  getNextEvent();
+};
+
 // 加载天赋定义
 const talentDefinitions = ref<TalentDefinition[]>([]);
 talentSystem.loadTalents();
 talentDefinitions.value = talentSystem.getAllTalents();
 
-// 使用 ref 存储玩家数据，通过 watchEffect 更新
-const playerRef = ref(gameEngine.getGameState().player);
-
-watchEffect(() => {
+// 使用 computed 直接获取最新的游戏状态，确保响应式更新
+const player = computed(() => {
   const state = gameEngine.getGameState();
-  playerRef.value = state.player;
-  console.log('[GameScreen] 玩家数据更新，年龄:', state.player?.age);
+  return state.player;
 });
-
-const player = playerRef;
 
 const relationships = computed(() => {
   return player.value?.relationships || [];
@@ -139,9 +162,18 @@ const relationships = computed(() => {
 
 const routeLabel = computed(() => {
   const flags = gameEngine.getGameState().flags || {};
+  const faction = flags.sect_faction as unknown;
+  
+  // 使用新的 sect_faction 系统
+  if (faction === 'orthodox') return '传统门派';
+  if (faction === 'unconventional') return '非传统门派';
+  if (faction === 'neutral') return '中立门派';
+  
+  // 兼容旧数据
   if (flags.route_orthodox) return '正道';
-  if (flags.route_demonic) return '魔教';
+  if (flags.route_demonic) return '非传统';
   if (flags.route_wanderer) return '游侠';
+  
   return '未定';
 });
 
@@ -367,5 +399,68 @@ const makeChoice = (choice: StoryChoice) => {
 .choice-btn {
   text-align: left;
   color: var(--primary-color) !important;
+}
+
+.outcome-display {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(139, 90, 43, 0.1), rgba(34, 139, 34, 0.1));
+  border-left: 4px solid var(--primary-color);
+  border-radius: 4px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.outcome-text {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.outcome-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-color);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.continue-area {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.continue-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  background: linear-gradient(135deg, var(--primary-color), #8b5a2b);
+  color: white !important;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.continue-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.debug-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #ffeb3b;
+  color: #000;
+  border-radius: 4px;
 }
 </style>

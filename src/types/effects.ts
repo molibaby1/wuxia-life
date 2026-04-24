@@ -1,6 +1,6 @@
 /**
  * 效果系统类型定义
- * 
+ *
  * 声明式效果系统，用于统一处理事件效果
  */
 
@@ -10,54 +10,60 @@
 export type EffectDefinition =
   // 时间推进
   | {
-      type: 'TIME_ADVANCE';
-      unit: 'year' | 'month' | 'day';
+      type: 'time_advance';
+      target: string;
       value: number;
+      timeUnit: 'year' | 'month' | 'day';
     }
-  
+
   // 属性修改
   | {
-      type: 'STAT_MODIFY';
+      type: 'stat_modify';
       stat: StatType;
+      target: string;
       value: number;
       operator: 'add' | 'subtract' | 'multiply' | 'divide';
     }
-  
+
   // 属性设置（绝对值）
   | {
-      type: 'STAT_SET';
+      type: 'stat_set';
       stat: StatType;
+      target: string;
       value: number;
     }
-  
+
   // 标志设置
   | {
-      type: 'FLAG_SET';
+      type: 'flag_set';
       flag: string;
+      target: string;
+      value?: string | boolean | number;
     }
-  
+
   // 标志清除
   | {
-      type: 'FLAG_CLEAR';
+      type: 'flag_unset';
       flag: string;
+      target: string;
     }
-  
+
   // 事件记录
   | {
-      type: 'EVENT_RECORD';
-      event: string;
+      type: 'event_record';
+      target: string;
     }
-  
+
   // 金钱修改
   | {
-      type: 'MONEY_MODIFY';
+      type: 'money_modify';
       value: number;
       operator: 'add' | 'subtract';
     }
-  
+
   // 结局设置
   | {
-      type: 'ENDING_SET';
+      type: 'ending_set';
       reason: string;
       epitaph: string;
     };
@@ -68,62 +74,21 @@ export type EffectDefinition =
 export type StatType =
   | 'age'
   | 'martialPower'
-  | 'externalSkill'
   | 'internalSkill'
+  | 'externalSkill'
   | 'qinggong'
   | 'chivalry'
-  | 'money';
-
-/**
- * 效果执行结果
- */
-export interface EffectResult {
-  // 状态更新
-  updates: Partial<PlayerStateUpdates>;
-  
-  // 时间跨度（如果有）
-  timeSpan?: {
-    value: number;
-    unit: 'year' | 'month' | 'day';
-  };
-  
-  // 是否触发结局
-  ending?: {
-    reason: string;
-    epitaph: string;
-  };
-}
-
-/**
- * 玩家状态更新（不包含 flags 和 events，由系统自动合并）
- */
-export interface PlayerStateUpdates {
-  age?: number;
-  martialPower?: number;
-  externalSkill?: number;
-  internalSkill?: number;
-  qinggong?: number;
-  chivalry?: number;
-  money?: number;
-  sect?: string | null;
-  title?: string | null;
-  alive?: boolean;
-  deathReason?: string | null;
-  children?: number;
-  flags?: Set<string>;
-  events?: Set<string>;
-}
-
-/**
- * 完成标志配置
- */
-export interface OnCompleteConfig {
-  // 自动设置事件完成标志（可选）
-  setEvent?: string;
-  
-  // 自动设置标志（可选）
-  setFlag?: string;
-  
-  // 可选的回调（用于复杂逻辑）
-  callback?: (state: PlayerState) => void;
-}
+  | 'charisma'
+  | 'constitution'
+  | 'comprehension'
+  | 'reputation'
+  | 'influence'
+  | 'connections'
+  | 'knowledge'
+  | 'businessAcumen'
+  | 'money'
+  | 'health'
+  | 'energy'
+  | 'scholarlyHeritage'
+  | 'martialHeritage'
+  | 'merchantNetwork';

@@ -66,6 +66,8 @@
     "category": "elderly",
     "priority": 70,
     "weight": 60,
+    "maxTriggers": 1,
+    "cooldown": 5,
     "ageRange": {
       "min": 52,
       "max": 60
@@ -715,6 +717,8 @@
     "category": "ending",
     "priority": 98,
     "weight": 85,
+    "maxTriggers": 2,
+    "cooldown": 3,
     "ageRange": {
       "min": 75,
       "max": 100

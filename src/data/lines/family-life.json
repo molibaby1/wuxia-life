@@ -36,11 +36,45 @@
     },
     "content": {
       "title": "喜结良缘",
-      "text": "到了成家的年纪，亲友都在为你张罗婚事。"
+      "text": "到了成家的年纪，亲友都在为你张罗婚事。明月也在等待你的回应。"
     },
     "choices": [
       {
-        "text": "接受安排，门当户对 (财富 +50, 人脉 +20)",
+        "text": "迎娶明月 (真爱，财富 -50, 婚姻质量高)",
+        "conditions": [
+          {"type": "expression", "expression": "flags.love_started == true || flags.mingyue_fiancee == true"}
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -50,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "married",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "spouse_mingyue",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "marriage_type_love",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "marriage_quality_high",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "接受安排，门当户对 (财富 +50, 人脉 +20, 婚姻质量一般)",
         "effects": [
           {
             "type": "stat_modify",
@@ -58,11 +92,26 @@
             "type": "flag_set",
             "flag": "married",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "spouse_arranged",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "marriage_type_arranged",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "mingyue_married_other",
+            "value": true
           }
         ]
       },
       {
-        "text": "自由恋爱，寻找真爱 (侠义 +10)",
+        "text": "自由恋爱，寻找真爱 (侠义 +10, 婚姻质量中等)",
         "effects": [
           {
             "type": "stat_modify",
@@ -73,6 +122,16 @@
           {
             "type": "flag_set",
             "flag": "married",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "spouse_love",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "marriage_type_love",
             "value": true
           }
         ]
@@ -138,6 +197,18 @@
             "operator": "add"
           },
           {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
+          },
+          {
             "type": "flag_set",
             "flag": "has_child",
             "value": true
@@ -151,6 +222,40 @@
             "type": "stat_modify",
             "target": "money",
             "value": -10,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_child",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "亲自照料，暂缓外务 (财富 -20, 家庭牵绊 +2, 自律 -1)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -20,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "discipline",
+            "value": -1,
             "operator": "add"
           },
           {
@@ -300,7 +405,7 @@
     },
     "choices": [
       {
-        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20)",
+        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20, 家庭牵绊 +1, 焦虑 +1)",
         "effects": [
           {
             "type": "stat_modify",
@@ -313,16 +418,51 @@
             "target": "reputation",
             "value": 20,
             "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
           }
         ]
       },
       {
-        "text": "尽力而为，量力而行 (财富 -30)",
+        "text": "尽力而为，量力而行 (财富 -30, 焦虑 +1)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "money",
             "value": -30,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "抽身自保，先守住自家日子 (声望 -10, 家庭牵绊 -1)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -10,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": -1,
             "operator": "add"
           }
         ]
@@ -411,6 +551,8 @@
     "category": "family",
     "priority": 68,
     "weight": 60,
+    "maxTriggers": 2,
+    "cooldown": 8,
     "ageRange": {
       "min": 50,
       "max": 70
@@ -464,6 +606,8 @@
     "category": "family",
     "priority": 60,
     "weight": 50,
+    "maxTriggers": 3,
+    "cooldown": 5,
     "ageRange": {
       "min": 40,
       "max": 70
@@ -645,6 +789,8 @@
     "category": "family",
     "priority": 75,
     "weight": 65,
+    "maxTriggers": 3,
+    "cooldown": 5,
     "ageRange": {
       "min": 48,
       "max": 65

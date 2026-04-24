@@ -1,0 +1,509 @@
+[
+  {
+    "id": "prologue_divine_birth",
+    "name": "天命降生",
+    "description": "你的出生带来了荣耀，也带来了沉重的宿命。",
+    "version": "2.0.0",
+    "category": "prologue",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {
+      "min": 0,
+      "max": 0
+    },
+    "type": "prologue",
+    "eventType": "choice",
+    "tags": ["prologue", "birth", "destiny"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 0
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 0,
+        "max": 0
+      },
+      "flags": {
+        "required": []
+      }
+    },
+    "content": {
+      "title": "天命降生",
+      "text": "大周景和三年，冬。你降生在江南第一世家——叶家。据说出生那日，府邸上空有龙凤呈祥之象，族中长老皆言：「此子必能光大宗门。」然而，你的父母却面露忧色，因为他们知道，这个孩子注定要承担太多的责任和期望。"
+    },
+    "choices": [
+      {
+        "id": "accept_destiny",
+        "text": "接受命运的安排（获得家族期望 buff）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "destined_one",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "resist_destiny",
+        "text": "不愿被命运束缚（获得自由意志 buff）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "free_spirit",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "help": {
+      "title": "前言说明",
+      "text": "这是你人生的起点，每一个选择都将影响未来的道路。"
+    }
+  },
+  {
+    "id": "prologue_family_trial",
+    "name": "家族试炼",
+    "description": "三岁那年，家族举行抓周仪式，这是对你的第一次考验。",
+    "version": "2.0.0",
+    "category": "prologue",
+    "priority": 95,
+    "weight": 90,
+    "ageRange": {
+      "min": 3,
+      "max": 3
+    },
+    "type": "prologue",
+    "eventType": "choice",
+    "tags": ["prologue", "childhood", "trial"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 3
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 3,
+        "max": 3
+      }
+    },
+    "content": {
+      "title": "家族试炼",
+      "text": "三岁那年，家族举行抓周仪式。在你面前摆放了剑谱、账本、印章、医书四样物品。全族上下都盯着你，想知道你会选择什么。这不仅仅是一个仪式，更是家族对你未来的期许和考验。"
+    },
+    "choices": [
+      {
+        "id": "choose_sword",
+        "text": "抓起剑谱（武学天赋 +10，家族期望提高）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "chose_sword",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "choose_book",
+        "text": "抓起医书（医术天赋 +10，背离家族期望）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "chose_medicine",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "choose_seal",
+        "text": "抓起印章（权势天赋 +10，符合家族期望）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "chose_seal",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "prologue_strict_master",
+    "name": "严师启蒙",
+    "description": "六岁那年，家族为你请来了第一位师父。",
+    "version": "2.0.0",
+    "category": "prologue",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {
+      "min": 6,
+      "max": 6
+    },
+    "type": "prologue",
+    "eventType": "choice",
+    "tags": ["prologue", "master", "training"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 6
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 6,
+        "max": 6
+      }
+    },
+    "content": {
+      "title": "严师启蒙",
+      "text": "六岁那年，家族为你请来了第一位师父——退隐的剑术大师叶孤鸿。他看着你瘦弱的身躯，摇头道：「习武之人，首重根基。从今日起，每日卯时起床扎马步，不得有误。」你看着师父严厉的眼神，知道真正的考验开始了。"
+    },
+    "choices": [
+      {
+        "id": "train_hard",
+        "text": "刻苦训练（外功 +8，体魄 +5，获得「勤奋」特质）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "diligent",
+            "value": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "complain_train",
+        "text": "抱怨太辛苦（外功 +3，师父失望）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "prologue_peer_competition",
+    "name": "同门较技",
+    "description": "九岁那年的家族比武大会上，你第一次同其他子弟切磋。",
+    "version": "2.0.0",
+    "category": "prologue",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": {
+      "min": 9,
+      "max": 9
+    },
+    "type": "prologue",
+    "eventType": "choice",
+    "tags": ["prologue", "competition", "peer"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 9
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 9,
+        "max": 9
+      }
+    },
+    "content": {
+      "title": "同门较技",
+      "text": "九岁那年的家族比武大会上，你第一次同其他子弟切磋。对手是族中天才少年叶云飞，他比你年长两岁，已经学会了基础剑法。台下的族人们都在议论：「这个新生儿，究竟有没有传说中那么厉害？」你握紧拳头，知道这一战关乎尊严。"
+    },
+    "choices": [
+      {
+        "id": "fight_brave",
+        "text": "勇敢应战（武力检定）",
+        "effects": [
+          {
+            "type": "random",
+            "success": {
+              "reputation": 20,
+              "martialPower": 5
+            },
+            "failure": {
+              "externalSkill": 5,
+              "reputation": -5
+            }
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "avoid_fight",
+        "text": "以和为贵，点到为止（侠义 +10，被认为怯战）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "prologue_youth_oath",
+    "name": "少年立志",
+    "description": "十岁生辰那日，父亲问你未来的路要怎么走。",
+    "version": "2.0.0",
+    "category": "prologue",
+    "priority": 100,
+    "weight": 95,
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "type": "prologue",
+    "eventType": "choice",
+    "tags": ["prologue", "oath", "future"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 10,
+        "max": 10
+      }
+    },
+    "content": {
+      "title": "少年立志",
+      "text": "十岁生辰那日，父亲将你叫到书房，语重心长地说：「你已经长大了，该想想未来的路了。是继承家业，光大宗门？还是行走江湖，行侠仗义？或者隐居山林，逍遥自在？」你望着窗外飘落的树叶，心中有了答案。"
+    },
+    "choices": [
+      {
+        "id": "inherit_family",
+        "text": "继承家业，光大宗门（声望 +15，人脉 +20，获得「继承人」身份倾向）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "prologue_completed",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "path_heir",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "wander_jianghu",
+        "text": "行走江湖，行侠仗义（侠义 +20，武力 +10，获得「少侠」身份倾向）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "prologue_completed",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "path_hero",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "seek_knowledge",
+        "text": "潜心求学，成为学者（学识 +25，获得「学子」身份倾向）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 25,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "prologue_completed",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "path_scholar",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "live_hermit",
+        "text": "隐居山林，逍遥自在（体魄 +10，内功 +10，获得「隐士」身份倾向）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "prologue_completed",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "path_hermit",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+]

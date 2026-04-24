@@ -1,0 +1,454 @@
+[
+  {
+    "id": "hermit_first_retreat",
+    "name": "初入山林",
+    "description": "你决定远离尘世喧嚣，寻找一处清净之地隐居。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 20,
+      "max": 35
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hermit", "identity", "early"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 20,
+        "max": 35
+      },
+      "identity": {
+        "required": ["hermit"]
+      }
+    },
+    "content": {
+      "title": "归隐之心",
+      "text": "你厌倦了江湖纷争，决定远离尘世喧嚣，寻找一处清净之地隐居。"
+    },
+    "choices": [
+      {
+        "id": "deep_mountain",
+        "text": "深入深山老林，与世隔绝 (体魄 +10, 内功 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_first_retreat",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "near_village",
+        "text": "选择近郊小屋，偶尔入市 (人脉 +5, 声望 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_first_retreat",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hermit_meditation",
+    "name": "静坐冥想",
+    "description": "隐居生活中，你有更多时间静坐冥想，参悟武学。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 25,
+      "max": 45
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hermit", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 25,
+        "max": 45
+      },
+      "identity": {
+        "required": ["hermit"]
+      }
+    },
+    "content": {
+      "title": "悟道",
+      "text": "隐居生活中，你有更多时间静坐冥想，参悟武学真谛。"
+    },
+    "choices": [
+      {
+        "id": "meditate_internal",
+        "text": "参悟内功心法 (内功 +15, 体魄 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_meditation",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "meditate_qinggong",
+        "text": "领悟轻功身法 (轻功 +15)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_meditation",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "meditate_philosophy",
+        "text": "参悟人生哲理 (学识 +10, 侠义 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 5,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_meditation",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hermit_visitor",
+    "name": "不速之客",
+    "description": "一位江湖中人寻访至此，希望得到你的指点。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {
+      "min": 30,
+      "max": 50
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hermit", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 30,
+        "max": 50
+      },
+      "identity": {
+        "required": ["hermit"]
+      }
+    },
+    "content": {
+      "title": "访客",
+      "text": "一位江湖中人寻访至此，希望得到你的指点。你已经隐居多年，本不想再问江湖事。"
+    },
+    "choices": [
+      {
+        "id": "help_visitor",
+        "text": "出手相助，指点迷津 (侠义 +15, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_visitor",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "reject_visitor",
+        "text": "婉言谢绝，继续隐居 (声望 -5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_visitor",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hermit_enlightenment",
+    "name": "顿悟",
+    "description": "多年隐居修行，你终于有所顿悟。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 40,
+      "max": 60
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hermit", "identity", "late"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 60
+      },
+      "identity": {
+        "required": ["hermit"]
+      }
+    },
+    "content": {
+      "title": "天人合一",
+      "text": "多年隐居修行，你终于有所顿悟。天地之道，尽在其中。"
+    },
+    "choices": [
+      {
+        "id": "enlightenment_martial",
+        "text": "武学顿悟，融会贯通 (外功 +20, 内功 +20, 轻功 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_enlightenment",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "enlightenment_life",
+        "text": "人生顿悟，超然物外 (侠义 +20, 学识 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 20,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_enlightenment",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hermit_final_choice",
+    "name": "最终抉择",
+    "description": "年事已高，你面临最后的抉择。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 55,
+      "max": 75
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hermit", "identity", "elderly"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 55
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 55,
+        "max": 75
+      },
+      "identity": {
+        "required": ["hermit"]
+      }
+    },
+    "content": {
+      "title": "归途",
+      "text": "年事已高，你面临最后的抉择。是继续隐居，还是重返江湖？"
+    },
+    "choices": [
+      {
+        "id": "stay_hermit",
+        "text": "坚守隐居，终老山林 (体魄 +10, 内功 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "karma_change",
+            "good": 10,
+            "evil": 0
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_final_choice",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "return_world",
+        "text": "重返江湖，了却残愿 (声望 +30, 人脉 +30)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 30,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 30,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hermit_final_choice",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+]

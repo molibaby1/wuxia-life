@@ -12,13 +12,14 @@ import { reactive, ref, computed } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
-import type { StoryChoice } from '../types';
+import type { StoryChoice, ChoiceOutcomeUI } from '../types';
 
 interface EventState {
   currentEvent: EventDefinition | null;
   availableChoices: StoryChoice[];
   isAutoPlaying: boolean;
   lastEffects: Effect[];
+  lastOutcomeText: string | null;
 }
 
 // 单例状态
@@ -35,6 +36,7 @@ function getEngineStateInstance() {
         availableChoices: [],
         isAutoPlaying: false,
         lastEffects: [],
+        lastOutcomeText: null,
       }),
       isProcessing: false,
     };
@@ -46,6 +48,7 @@ export function useNewGameEngine() {
   const instance = getEngineStateInstance();
   const engineState = instance.state;
   const isProcessing = ref(instance.isProcessing);
+  // 不要在这里重置 lastOutcomeText，否则 UI 会看不到
 
   /**
    * 获取下一个事件
@@ -55,16 +58,11 @@ export function useNewGameEngine() {
 
     const gameState = gameEngine.getGameState();
     const age = gameState.player?.age || 0;
-    
-    console.log(`[NewGameEngine] 获取事件，年龄：${age}`);
 
     // 选择一个事件
     const selectedEvent = gameEngine.selectEvent(age);
-    
-    console.log(`[NewGameEngine] 选择结果：${selectedEvent ? selectedEvent.id : 'null'}`);
 
     if (selectedEvent) {
-      console.log(`[NewGameEngine] 设置 currentEvent: ${selectedEvent.id}`);
       engineState.currentEvent = selectedEvent;
       engineState.lastEffects = [];
 
@@ -90,13 +88,13 @@ export function useNewGameEngine() {
         engineState.availableChoices = selectedEvent.choices.map(choice => ({
           id: choice.id,
           text: choice.text,
-          condition: choice.condition ? { type: 'expression', expression: choice.condition.expression } : undefined,
+          description: choice.description,
+          outcomes: choice.outcomes,
           requirements: choice.requirements,
         }));
       }
     } else {
       // 没有可用事件，推进时间
-      console.log(`[NewGameEngine] ${age}岁没有可用事件，推进时间`);
       gameEngine.advanceTime(1);
       getNextEvent();
     }
@@ -106,10 +104,7 @@ export function useNewGameEngine() {
    * 处理自动事件
    */
   const processAutoEvent = async (event: EventDefinition) => {
-    console.log('[NewGameEngine] 开始处理自动事件:', event.id);
-    
     if (!event.autoEffects || event.autoEffects.length === 0) {
-      console.warn('[NewGameEngine] 事件没有效果:', event.id);
       isProcessing.value = false;
       return;
     }
@@ -117,20 +112,10 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = true;
     isProcessing.value = true;
 
-    // 延迟执行，给 UI 渲染时间
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     try {
-      console.log('[NewGameEngine] 执行效果:', event.autoEffects);
-      
       // 执行事件效果
       await gameEngine.executeAutoEvent(event);
       engineState.lastEffects = event.autoEffects;
-
-      // 记录日志
-      if (event.content.text) {
-        console.log(`[Event] ${event.content.title}: ${event.content.text}`);
-      }
 
       // 检查是否是结局事件
       if (event.eventType === 'ending') {
@@ -144,8 +129,8 @@ export function useNewGameEngine() {
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
       
-      // 等待 UI 渲染事件文本（2 秒）
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 等待下一帧，让 Vue 有时间更新 UI
+      await new Promise(resolve => requestAnimationFrame(resolve));
       
       // 只有在玩家还活着的情况下才继续
       const state = gameEngine.getGameState();
@@ -160,6 +145,21 @@ export function useNewGameEngine() {
   };
 
   /**
+   * 判定多结果分支条件
+   */
+  const evaluateOutcomeCondition = (outcome: { condition?: unknown }, state: any): boolean => {
+    if (!outcome.condition) return true;
+    
+    // 函数式条件
+    if (typeof outcome.condition === 'function') {
+      return (outcome.condition as (s: unknown) => boolean)(state);
+    }
+    
+    // 表达式条件 - 默认返回true（实际判定由后端执行）
+    return true;
+  };
+
+  /**
    * 处理选择
    */
   const handleChoice = async (choice: StoryChoice) => {
@@ -170,28 +170,57 @@ export function useNewGameEngine() {
     if (currentEvent.eventType !== 'choice' || !currentEvent.choices) return;
 
     const selectedChoice = currentEvent.choices.find(c => c.id === choice.id);
-    if (!selectedChoice || !selectedChoice.effects) return;
+    if (!selectedChoice) return;
+
+    // 确定要执行的效果
+    let effectsToExecute = selectedChoice.effects || [];
+    let outcomeText: string | null = null;
+
+    // 如果有多结果分支，根据条件判定
+    if (selectedChoice.outcomes && selectedChoice.outcomes.length > 0) {
+      const gameState = gameEngine.getGameState();
+      for (const outcome of selectedChoice.outcomes) {
+        // 检查条件是否满足
+        if (evaluateOutcomeCondition(outcome, gameState)) {
+          effectsToExecute = outcome.effects || [];
+          outcomeText = outcome.text;
+          break;
+        }
+      }
+    }
+
+    // 如果没有匹配到结果文本，尝试使用选项的 description
+    if (!outcomeText && selectedChoice.description) {
+      outcomeText = selectedChoice.description;
+    }
+
+    // 如果还是没有，使用效果生成描述
+    if (!outcomeText && effectsToExecute.length > 0) {
+      outcomeText = generateOutcomeText(effectsToExecute);
+    }
+
+    if (effectsToExecute.length === 0) {
+      console.warn('[NewGameEngine] 选择无可用效果:', choice.id);
+      return;
+    }
 
     isProcessing.value = true;
     engineState.isAutoPlaying = true;
 
     try {
       // 执行选择的效果
-      await gameEngine.executeChoiceEffects(selectedChoice.effects, currentEvent.id);
-      engineState.lastEffects = selectedChoice.effects;
+      await gameEngine.executeChoiceEffects(effectsToExecute, currentEvent.id, selectedChoice.id);
+      engineState.lastEffects = effectsToExecute;
+      engineState.lastOutcomeText = outcomeText;
+      // 清空选项，防止重复点击
+      engineState.availableChoices = [];
 
-      // 记录日志
-      if (currentEvent.content.text) {
-        console.log(`[Choice] 选择：${selectedChoice.text}`);
-      }
+      // 等待下一帧，让 Vue 有时间更新 UI
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
-      // 继续下一个事件
+      // 显示结果，等待用户点击"继续"
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
-      
-      setTimeout(() => {
-        getNextEvent();
-      }, 500);
     } catch (error) {
       console.error('[NewGameEngine] 执行选择失败:', error);
       engineState.isAutoPlaying = false;
@@ -199,17 +228,54 @@ export function useNewGameEngine() {
     }
   };
 
-  const pickAutoChoice = (choices: any[], state: any) => {
+  const pickAutoChoice = (choices: any[], _state: any) => {
     let best = choices[0];
     let bestScore = -Infinity;
 
     for (const choice of choices) {
       let score = typeof choice.weight === 'number' ? choice.weight : 1;
-      if (choice.effects) {
+
+      // 如果有多结果分支，评估最佳结果
+      if (choice.outcomes && choice.outcomes.length > 0) {
+        let bestOutcomeScore = -Infinity;
+        for (const outcome of choice.outcomes) {
+          // 简单条件检查
+          if (outcome.condition && outcome.condition.type === 'expression') {
+            const expr = outcome.condition.expression;
+            // 跳过有玩家属性条件的结果（因为自动游玩时属性可能不满足）
+            if (expr && (expr.includes('>=') || expr.includes('<=') || expr.includes('>'))) {
+              continue;
+            }
+          }
+          let outcomeScore = 0;
+          if (outcome.effects) {
+            for (const effect of outcome.effects) {
+          if (effect.operator === 'add') {
+                const value = typeof effect.value === 'number' ? effect.value : 0;
+            const target = effect.stat || effect.target || '';
+            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+                  outcomeScore += value * 2;
+                } else {
+                  outcomeScore += value;
+                }
+              } else if (effect.operator === 'subtract') {
+                const value = typeof effect.value === 'number' ? effect.value : 0;
+                outcomeScore -= value;
+              }
+            }
+          }
+          if (outcomeScore > bestOutcomeScore) {
+            bestOutcomeScore = outcomeScore;
+          }
+        }
+        score = bestOutcomeScore;
+      } else if (choice.effects) {
+        // 无多结果分支，评估原有效果
         for (const effect of choice.effects) {
           if (effect.operator === 'add') {
             const value = typeof effect.value === 'number' ? effect.value : 0;
-            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(effect.target)) {
+            const target = effect.stat || effect.target || '';
+            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
               score += value * 2;
             } else {
               score += value;
@@ -233,7 +299,6 @@ export function useNewGameEngine() {
    * 开始新游戏
    */
   const startNewGame = (name: string, gender: 'male' | 'female') => {
-    console.log('[NewGameEngine] 开始新游戏');
     gameEngine.startNewGame(name, gender);
     engineState.currentEvent = null;
     engineState.availableChoices = [];
@@ -241,23 +306,170 @@ export function useNewGameEngine() {
     engineState.lastEffects = [];
     isProcessing.value = false;
 
-    // 开始第一个事件
-    setTimeout(() => {
+    // 等待下一帧再开始第一个事件，让 UI 有时间更新
+    requestAnimationFrame(() => {
       getNextEvent();
-    }, 500);
+    });
   };
 
   /**
    * 重置游戏
    */
   const restartGame = () => {
-    console.log('[NewGameEngine] 重置游戏');
     gameEngine.resetGame();
     engineState.currentEvent = null;
     engineState.availableChoices = [];
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     isProcessing.value = false;
+  };
+
+  /**
+   * 根据效果生成叙事性结果描述（不暴露数值）
+   */
+  const generateOutcomeText = (effects: Effect[]): string => {
+    const parts: string[] = [];
+    const flagGains: string[] = [];
+    const relationChanges: string[] = [];
+
+    for (const effect of effects) {
+      switch (effect.type) {
+        case 'stat_modify': {
+          const statName = getStatName(effect.stat || effect.target);
+          const value = typeof effect.value === 'number' ? effect.value : 0;
+          const isPositive = (effect.operator === 'add' && value > 0) ||
+                           (effect.operator === 'subtract' && value < 0);
+
+          if (statName === '武力' || statName === '外功' || statName === '内功' || statName === '轻功') {
+            parts.push(isPositive ? '你的武功有了长进' : '你的武艺似乎有些生疏');
+          } else if (statName === '侠义') {
+            parts.push(isPositive ? '你的侠义之心更加坚定了' : '你的心中似乎多了一丝动摇');
+          } else if (statName === '魅力') {
+            parts.push(isPositive ? '你的气质愈发出众' : '你感觉自己有些黯淡');
+          } else if (statName === '体质') {
+            parts.push(isPositive ? '你的身体更加健壮' : '你似乎更容易感到疲惫');
+          } else if (statName === '悟性') {
+            parts.push(isPositive ? '你对武学的理解更加深刻' : '有些道理似乎变得难以领悟');
+          } else if (statName === '声望') {
+            parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
+          } else if (statName === '学识') {
+            parts.push(isPositive ? '你的见识增长了不少' : '你意识到自己还有太多不懂');
+          } else if (statName === '健康') {
+            parts.push(isPositive ? '你的身体状态好转了' : '你感到有些不适');
+          } else if (statName === '金钱') {
+            parts.push(isPositive ? '你的钱袋鼓了起来' : '你的积蓄少了一些');
+          } else if (statName === '影响力') {
+            parts.push(isPositive ? '你在江湖中的分量更重了' : '你感到自己说话不那么管用了');
+          } else if (statName === '人脉') {
+            parts.push(isPositive ? '你结识了新的朋友' : '某些关系似乎变得淡漠了');
+          } else if (statName === '商路') {
+            parts.push(isPositive ? '你的生意头脑愈发灵活' : '你对商场的感觉有些迟钝');
+          }
+          break;
+        }
+        case 'flag_set': {
+          const flagName = effect.flag || effect.target;
+          if (effect.value === true && flagName) {
+            flagGains.push(flagName);
+          }
+          break;
+        }
+        case 'money_modify': {
+          const value = typeof effect.value === 'number' ? effect.value : 0;
+          if (value > 0) {
+            parts.push('你的钱袋鼓了起来');
+          } else if (value < 0) {
+            parts.push('你的积蓄少了一些');
+          }
+          break;
+        }
+        case 'relation_change': {
+          relationChanges.push('与某人的关系发生了微妙的变化');
+          break;
+        }
+      }
+    }
+
+    // 组合叙事
+    const narrative: string[] = [];
+
+    if (parts.length > 0) {
+      narrative.push(parts[0] || '');
+    }
+
+    if (flagGains.length > 0) {
+      const flagDescriptions = flagGains.slice(0, 2).map(f => describeFlag(f));
+      narrative.push(flagDescriptions.join('，') + '。');
+    }
+
+    if (relationChanges.length > 0) {
+      narrative.push(relationChanges[0] || '');
+    }
+
+    if (narrative.length === 0) {
+      return '你的心中泛起涟漪，但一切似乎又归于平静。';
+    }
+
+    return narrative.join('。') + '。';
+  };
+
+  /**
+   * 描述标志的中文含义
+   */
+  const describeFlag = (flag: string): string => {
+    const descriptions: Record<string, string> = {
+      diligentStudent: '你养成了勤勉的习惯',
+      sect_trial_active: '你在门派中开始了新的修行',
+      shaolinDisciple: '你正式成为少林弟子',
+      wudangDisciple: '你正式成为武当弟子',
+      beggars_disciple: '你加入了丐帮',
+      jianghuTraveler: '你的江湖之路开始了',
+      heroPath: '你选择了行侠仗义的道路',
+      demonPath: '你似乎走向了另一条路',
+      married: '你的生命中多了一个人',
+      has_child: '你有了新的牵挂',
+    };
+
+    if (descriptions[flag]) {
+      return descriptions[flag];
+    }
+
+    // 通用描述
+    if (flag.includes('_done') || flag.includes('_completed')) {
+      return `你完成了某件重要的事`;
+    }
+    if (flag.includes('_active')) {
+      return `新的机遇正在等待你`;
+    }
+    if (flag.includes('_started')) {
+      return `一段新的旅程开始了`;
+    }
+
+    return '你获得了新的体悟';
+  };
+
+  /**
+   * 获取属性中文名
+   */
+  const getStatName = (stat: string): string => {
+    const statNames: Record<string, string> = {
+      martialPower: '武力',
+      internalSkill: '内功',
+      externalSkill: '外功',
+      qinggong: '轻功',
+      chivalry: '侠义',
+      charisma: '魅力',
+      constitution: '体质',
+      comprehension: '悟性',
+      reputation: '声望',
+      influence: '影响力',
+      connections: '人脉',
+      knowledge: '学识',
+      businessAcumen: '商路',
+      money: '金钱',
+      health: '健康',
+    };
+    return statNames[stat] || stat;
   };
 
   /**

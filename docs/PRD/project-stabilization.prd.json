@@ -40,7 +40,8 @@
         "No implicit any remains in critical paths"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "notes": "BLOCKED: vue-tsc/build currently surfaces large pre-existing cross-module type drift (components/core/data/types), requiring broad coordinated refactor beyond single-story scope."
     },
     {
       "id": "US-004",
@@ -54,7 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false
+      "passes": false,
+      "notes": "BLOCKED: state model and engine entry remain fragmented (e.g., duplicated PlayerState definitions and multiple active engine paths) and require resolution of US-003 type-contract divergence first."
     },
     {
       "id": "US-005",
@@ -68,7 +70,8 @@
         "Build passes"
       ],
       "priority": 5,
-      "passes": false
+      "passes": false,
+      "notes": "BLOCKED: CI gate can be wired, but acceptance requires baseline build/test green; build is currently red due unresolved type-system issues tracked in US-003/US-004."
     }
   ]
 }

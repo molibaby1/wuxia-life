@@ -112,22 +112,60 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "教训恶霸（需武力≥80）",
+        "text": "挺身而出，教训恶霸",
+        "description": "路见不平，拔刀相助",
         "conditions": [
           {"type": "expression", "expression": "martialPower >= 80"}
         ],
-        "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 20},
-          {"type": "stat_modify", "stat": "reputation", "value": 25},
-          {"type": "stat_modify", "stat": "martialPower", "value": 5},
-          {"type": "flag_set", "flag": "hero_saved_girl", "value": true}
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你三招两式便将恶霸制服在地！恶霸抱头求饶，围观群众齐声叫好！被救女子盈盈下拜：\"多谢恩公救命之恩，小女子无以为报，唯有...\"她的眼中闪烁着感激与敬意。",
+            "condition": {"type": "expression", "expression": "martialPower >= 90 && charisma >= 25"},
+            "effects": [
+              {"type": "stat_modify", "stat": "chivalry", "value": 25, "operator": "add"},
+              {"type": "stat_modify", "stat": "reputation", "value": 35, "operator": "add"},
+              {"type": "stat_modify", "stat": "martialPower", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "stat": "charisma", "value": 5, "operator": "add"},
+              {"type": "flag_set", "flag": "hero_saved_girl", "value": true},
+              {"type": "flag_set", "flag": "hero_romantic_encounter", "value": true},
+              {"type": "event_record", "target": "hero_ rescue_great"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你出手教训恶霸，几个回合便将其打跑。围观群众拍手称快，被救女子感激不已：\"多谢英雄搭救！\"你挥挥手，转身离去，深藏功与名。",
+            "condition": {"type": "expression", "expression": "martialPower >= 80"},
+            "effects": [
+              {"type": "stat_modify", "stat": "chivalry", "value": 20, "operator": "add"},
+              {"type": "stat_modify", "stat": "reputation", "value": 25, "operator": "add"},
+              {"type": "stat_modify", "stat": "martialPower", "value": 5, "operator": "add"},
+              {"type": "flag_set", "flag": "hero_saved_girl", "value": true},
+              {"type": "event_record", "target": "hero_rescue_normal"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你与恶霸苦战一场，虽将其打跑，但也身负轻伤。女子感激你的仗义，帮你包扎伤口。此事虽不完美，但你的侠义之名更响亮了。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "stat_modify", "stat": "chivalry", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "stat": "health", "value": -10, "operator": "add"},
+              {"type": "flag_set", "flag": "hero_saved_girl", "value": true},
+              {"type": "event_record", "target": "hero_rescue_injured"}
+            ]
+          }
         ]
       },
       {
-        "text": "报官处理",
+        "text": "智取，报官处理",
+        "description": "用计谋解决问题",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 8}
+          {"type": "stat_modify", "stat": "chivalry", "value": 12, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "influence", "value": 5, "operator": "add"},
+          {"type": "event_record", "target": "hero_rescue_official"}
         ]
       }
     ]
@@ -171,12 +209,12 @@
       {"type": "random", "value": 0.12}
     ],
     "conditions": [
-      {"type": "expression", "expression": "chivalry <= -50"}
+      {"type": "expression", "expression": "chivalry <= -50 && !flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown')"}
     ],
     "content": {
-      "title": "魔教招募",
-      "text": "魔教使者找到你，说欣赏你的行事风格，邀请你加入魔教，共创'大业'。",
-      "description": "加入魔教"
+      "title": "幽影门邀请",
+      "text": "幽影门使者找到你，说欣赏你的行事风格。他们不受江湖规矩约束，行事全凭己心。使者邀请你加入幽影门：'我们不求流芳百世，只求问心无愧。正派人士说我们是魔教，不过是害怕我们不受控制。'",
+      "description": "加入幽影门"
     },
     "eventType": "choice",
     "choices": [
@@ -187,7 +225,8 @@
           {"type": "stat_modify", "stat": "martialPower", "value": 10},
           {"type": "stat_modify", "stat": "chivalry", "value": -10},
           {"type": "stat_modify", "stat": "reputation", "value": -20},
-          {"type": "flag_set", "flag": "demonic_member", "value": true}
+          {"type": "flag_set", "flag": "sect_faction", "value": "unconventional"},
+          {"type": "flag_set", "flag": "current_sect", "value": "shadow_sect"}
         ]
       },
       {

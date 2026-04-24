@@ -46,6 +46,7 @@
     },
     "choices": [
       {
+        "id": "create_sect",
         "text": "创建门派 (财富 -100, 声望 +20)",
         "effects": [
           {
@@ -68,8 +69,15 @@
         ]
       },
       {
+        "id": "delay_sect",
         "text": "继续游历，暂不考虑",
-        "effects": []
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "career_foundation_checked",
+            "value": true
+          }
+        ]
       }
     ],
     "help": {
@@ -119,7 +127,8 @@
     },
     "choices": [
       {
-        "text": "闭关创作 (功力 +10, 外功 +10, 内功 +10)",
+        "id": "innovate_full",
+        "text": "闭关创作 (功力 +10, 外功 +10, 内功 +10, 疲惫 +1, 焦虑 +1)",
         "effects": [
           {
             "type": "stat_modify",
@@ -138,10 +147,23 @@
             "target": "internalSkill",
             "value": 10,
             "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "fatigue",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
           }
         ]
       },
       {
+        "id": "innovate_steady",
         "text": "参考古籍，稳步创新 (学识 +5, 外功 +5)",
         "effects": [
           {
@@ -154,6 +176,30 @@
             "type": "stat_modify",
             "target": "externalSkill",
             "value": 5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "id": "innovate_suspend",
+        "text": "先记下心得，暂不强求突破 (悟性 +3, 内功 +2, 焦虑 -1)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": -1,
             "operator": "add"
           }
         ]
@@ -288,7 +334,7 @@
     },
     "choices": [
       {
-        "text": "参加比武，争夺盟主 (武力检定)",
+        "text": "参加比武，争夺盟主 (武力检定, 疲惫 +1)",
         "effects": [
           {
             "type": "random",
@@ -304,6 +350,12 @@
               "value": -10,
               "operator": "add"
             }
+          },
+          {
+            "type": "life_state_change",
+            "target": "fatigue",
+            "value": 1,
+            "operator": "add"
           }
         ]
       },
@@ -320,6 +372,29 @@
             "type": "stat_modify",
             "target": "internalSkill",
             "value": 5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "借机结交同道 (人脉 +15, 声望 +8, 焦虑 +1)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
             "operator": "add"
           }
         ]
@@ -373,7 +448,7 @@
     },
     "choices": [
       {
-        "text": "大规模扩建 (财富 -200, 声望 +30)",
+        "text": "大规模扩建 (财富 -200, 声望 +30, 焦虑 +1)",
         "effects": [
           {
             "type": "stat_modify",
@@ -386,16 +461,51 @@
             "target": "reputation",
             "value": 30,
             "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
           }
         ]
       },
       {
-        "text": "稳步发展，量力而行 (财富 -50)",
+        "text": "稳步发展，量力而行 (财富 -50, 声望 +10)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "money",
             "value": -50,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "暂缓扩建，先整顿门规 (财富 -20, 悟性 +4, 焦虑 -1)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": -1,
             "operator": "add"
           }
         ]
@@ -448,7 +558,7 @@
     },
     "choices": [
       {
-        "text": "倾囊相授，友好交流 (人脉 +20, 外功 +5)",
+        "text": "倾囊相授，友好交流 (人脉 +20, 外功 +5, 焦虑 +1)",
         "effects": [
           {
             "type": "stat_modify",
@@ -461,12 +571,48 @@
             "target": "externalSkill",
             "value": 5,
             "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "anxiety",
+            "value": 1,
+            "operator": "add"
           }
         ]
       },
       {
-        "text": "保留绝学，只作表面交流",
-        "effects": []
+        "text": "保留绝学，只作表面交流 (内功 +2, 声望 -5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "text": "点到即止，彼此试探 (人脉 +8, 内功 +3)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 3,
+            "operator": "add"
+          }
+        ]
       }
     ],
     "help": {
@@ -705,8 +851,8 @@
   },
   {
     "id": "career_good_evil_war",
-    "name": "正邪大战",
-    "description": "魔教卷土重来，武林面临浩劫。作为盟主，你必须领导正道武林对抗魔教。",
+    "name": "江湖终极决战",
+    "description": "传统与非传统门派的最终对决。作为盟主，你必须做出选择。",
     "version": "1.0.0",
     "category": "career",
     "priority": 95,
@@ -740,12 +886,12 @@
       }
     },
     "content": {
-      "title": "正邪大战",
-      "text": "魔教卷土重来，武林面临浩劫。作为盟主，你必须领导正道武林对抗魔教。"
+      "title": "江湖终极决战",
+      "text": "传统门派与非传统门派的战争即将爆发。这一战，将决定江湖的未来。但你已经知道：所谓正邪，不过是胜者的叙事。你会为了「正义」而战，还是开始质疑这场战争的本质？"
     },
     "choices": [
       {
-        "text": "亲征魔教，誓死一战 (武力检定)",
+        "text": "亲征敌营，誓死一战 (武力检定)",
         "effects": [
           {
             "type": "random",
@@ -765,13 +911,17 @@
         ]
       },
       {
-        "text": "派遣弟子出征",
+        "text": "尝试调和双方",
+        "effects": []
+      },
+      {
+        "text": "宣布退出，置身事外",
         "effects": []
       }
     ],
     "help": {
-      "title": "正邪大战",
-      "text": "这是你人生中最大的挑战，胜利将使你成为传奇。"
+      "title": "江湖终极决战",
+      "text": "这是你人生中最大的挑战。选择如何结束这场战争，将定义你的传奇。"
     }
   },
   {

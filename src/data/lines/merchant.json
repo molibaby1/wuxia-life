@@ -33,7 +33,16 @@
           {"type": "stat_modify", "stat": "comprehension", "value": 5}
         ]
       }
-    ]
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.3,
+        "merchant": 1.0,
+        "wuxia": 0.2,
+        "frontier": 0.4
+      },
+      "tags": ["商业", "天赋", "主线"]
+    }
   },
   {
     "id": "merchant_first_shop",
@@ -46,7 +55,7 @@
       {"type": "age_reach", "value": 16}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_talent == true && money >= 100"}
+      {"type": "expression", "expression": "flags.merchant_talent == true && money >= 50"}
     ],
     "content": {
       "title": "开设店铺",
@@ -58,7 +67,7 @@
       {
         "text": "开设杂货铺（稳健）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
           {"type": "stat_modify", "stat": "reputation", "value": 5}
         ]
@@ -66,7 +75,7 @@
       {
         "text": "开设武器铺（高风险）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -80},
+          {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "flag_set", "flag": "merchant_shop_weapon", "value": true},
           {"type": "stat_modify", "stat": "martialPower", "value": 5}
         ]
@@ -74,9 +83,59 @@
       {
         "text": "开设药铺（中庸）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -60},
+          {"type": "stat_modify", "stat": "money", "value": -40},
           {"type": "flag_set", "flag": "merchant_shop_herb", "value": true},
           {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_shop_failure",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 94,
+    "weight": 40,
+    "ageRange": {"min": 17, "max": 24},
+    "triggers": [
+      {"type": "age_reach", "value": 17},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && !flags.merchant_shop_success"}
+    ],
+    "content": {
+      "title": "经营困境",
+      "text": "店铺开业后生意惨淡，或者遭遇竞争对手打压，你面临亏损的困境。",
+      "description": "经营失败"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "追加投资（需金钱≥50，扭转局面）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
+        ]
+      },
+      {
+        "text": "改变经营策略（悟性 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "charisma", "value": 3},
+          {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
+        ]
+      },
+      {
+        "text": "关门大吉（金钱 -20，声望 -5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -20},
+          {"type": "stat_modify", "stat": "reputation", "value": -5},
+          {"type": "flag_set", "flag": "merchant_shop_failed", "value": true}
         ]
       }
     ]
@@ -102,24 +161,24 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "雇佣精锐保镖团队（需金钱≥300，安全率最高）",
+        "text": "雇佣精锐保镖团队（需金钱≥150，安全率最高）",
         "conditions": [
-          {"type": "expression", "expression": "money >= 300"}
+          {"type": "expression", "expression": "money >= 150"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -300},
-          {"type": "stat_modify", "stat": "money", "value": 150},
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "money", "value": 100},
           {"type": "stat_modify", "stat": "reputation", "value": 10},
           {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
         ]
       },
       {
-        "text": "亲自护送（需武力≥40）",
+        "text": "亲自护送（需武力≥30）",
         "conditions": [
-          {"type": "expression", "expression": "martialPower >= 40"}
+          {"type": "expression", "expression": "martialPower >= 30"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 80},
+          {"type": "stat_modify", "stat": "money", "value": 60},
           {"type": "stat_modify", "stat": "martialPower", "value": 5},
           {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
         ]
@@ -127,7 +186,7 @@
       {
         "text": "雇佣普通保镖",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 50},
+          {"type": "stat_modify", "stat": "money", "value": 30},
           {"type": "stat_modify", "stat": "charisma", "value": 3}
         ]
       }
@@ -144,7 +203,7 @@
       {"type": "age_reach", "value": 20}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_caravan_success == true && money >= 200"}
+      {"type": "expression", "expression": "flags.merchant_caravan_success == true && money >= 150"}
     ],
     "content": {
       "title": "垄断市场",
@@ -154,9 +213,9 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "垄断经营（金钱 +100，声望 -10）",
+        "text": "垄断经营（金钱 +80，声望 -10）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "money", "value": 80},
           {"type": "stat_modify", "stat": "reputation", "value": -10},
           {"type": "flag_set", "flag": "merchant_monopoly", "value": true}
         ]
@@ -164,7 +223,7 @@
       {
         "text": "公平竞争",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 50},
+          {"type": "stat_modify", "stat": "money", "value": 40},
           {"type": "stat_modify", "stat": "reputation", "value": 10},
           {"type": "flag_set", "flag": "merchant_fair_trade", "value": true}
         ]
@@ -192,22 +251,22 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "重孝换取特权（需金钱≥800，声望 +25）",
+        "text": "重孝换取特权（需金钱≥500，声望 +25）",
         "conditions": [
-          {"type": "expression", "expression": "money >= 800"}
+          {"type": "expression", "expression": "money >= 500"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "money", "value": -500},
           {"type": "stat_modify", "stat": "reputation", "value": 25},
           {"type": "stat_modify", "stat": "charisma", "value": 12},
-          {"type": "stat_modify", "stat": "money", "value": 200},
+          {"type": "stat_modify", "stat": "money", "value": 150},
           {"type": "flag_set", "flag": "merchant_official_friend", "value": true}
         ]
       },
       {
-        "text": "适度贿赂（金钱 -50，声望 +15）",
+        "text": "适度贿赂（金钱 -30，声望 +15）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "stat_modify", "stat": "charisma", "value": 8},
           {"type": "flag_set", "flag": "merchant_official_friend", "value": true}

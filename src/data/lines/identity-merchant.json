@@ -1,0 +1,386 @@
+[
+  {
+    "id": "merchant_first_trade",
+    "name": "初次经商",
+    "description": "你发现了商机，决定尝试做生意。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {
+      "min": 20,
+      "max": 30
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["merchant", "identity", "early"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 20,
+        "max": 30
+      },
+      "identity": {
+        "required": ["merchant"]
+      }
+    },
+    "content": {
+      "title": "商机初现",
+      "text": "你发现两地之间的物价差异巨大：边塞的皮毛在江南能卖十倍价钱，江南的丝绸在边塞也供不应求。这是一个绝佳的商机！"
+    },
+    "choices": [
+      {
+        "text": "投资皮毛生意 (金钱 +200, 人脉 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 200,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "merchant_first_trade",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "投资丝绸生意 (金钱 +150, 悟性 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 150,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "merchant_first_trade",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_expand_business",
+    "name": "扩大经营",
+    "description": "你的生意越做越大，需要考虑扩大经营规模。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 30,
+      "max": 45
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["merchant", "identity", "mid"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 30,
+        "max": 45
+      },
+      "identity": {
+        "required": ["merchant"]
+      },
+      "flags": {
+        "required": ["merchant_first_trade"]
+      }
+    },
+    "content": {
+      "title": "商业扩张",
+      "text": "你的生意越做越大，现在有足够的资本扩大经营。是开设更多分号，还是投资新兴产业？这是一个关键的决策。"
+    },
+    "choices": [
+      {
+        "text": "开设分号，遍布全国 (金钱 +500, 人脉 +20)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 500,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "business_expansion",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "投资钱庄，涉足金融 (金钱 +300, 声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 300,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "business_expansion",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_crisis",
+    "name": "商业危机",
+    "description": "一场突如其来的危机威胁着你的商业帝国。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 90,
+    "weight": 80,
+    "ageRange": {
+      "min": 40,
+      "max": 55
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["merchant", "identity", "crisis"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 40,
+        "max": 55
+      },
+      "identity": {
+        "required": ["merchant"]
+      },
+      "flags": {
+        "required": ["business_expansion"]
+      }
+    },
+    "content": {
+      "title": "金融危机",
+      "text": "一场突如其来的金融危机席卷全国，你的商号面临巨大损失。是断臂求生，还是冒险一搏？这关系到你半生心血的存亡。"
+    },
+    "choices": [
+      {
+        "text": "变卖资产，度过危机 (金钱 -200, 保住基业)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -200,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "survived_crisis",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "冒险投资，博取转机 (50% 几率金钱 +1000 或 -500)",
+        "effects": [
+          {
+            "type": "random",
+            "target": "money",
+            "randomRange": {
+              "minValue": -500,
+              "maxValue": 1000
+            }
+          },
+          {
+            "type": "flag_set",
+            "target": "survived_crisis",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_empire",
+    "name": "商业帝国",
+    "description": "你的商业帝国建成，富可敌国。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 95,
+    "weight": 85,
+    "maxTriggers": 1,
+    "cooldown": 15,
+    "ageRange": {
+      "min": 50,
+      "max": 70
+    },
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["merchant", "identity", "ending"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "thresholds": {
+      "background": {
+        "required": ["origin_merchant_family"],
+        "forbidden": ["origin_wuxia_family", "origin_scholar_family"],
+        "evaluation": "at_least_one"
+      },
+      "identity": {
+        "required": ["merchant"]
+      },
+      "experience": {
+        "required": ["merchant_expand_business", "merchant_crisis"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "money": { "min": 500 }
+      }
+    },
+    "triggerConditions": {
+      "age": {
+        "min": 50,
+        "max": 70
+      },
+      "identity": {
+        "required": ["merchant"]
+      },
+      "flags": {
+        "required": ["survived_crisis"]
+      }
+    },
+    "content": {
+      "title": "富可敌国",
+      "text": "经过数十年的经营，你的商业帝国终于建成。你的商号遍布大江南北，钱庄开遍各大城市。朝廷都要向你借贷，你的财富影响武林经济命脉。",
+      "autoEffects": [
+        {
+          "type": "stat_modify",
+          "target": "money",
+          "value": 5000,
+          "operator": "add"
+        },
+        {
+          "type": "stat_modify",
+          "target": "reputation",
+          "value": 30,
+          "operator": "add"
+        },
+        {
+          "type": "flag_set",
+          "target": "business_empire",
+          "value": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "merchant_mentor",
+    "name": "培养后人",
+    "description": "你决定培养商业后人，传承商业理念。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {
+      "min": 45,
+      "max": 65
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["merchant", "identity", "teaching"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 45,
+        "max": 65
+      },
+      "identity": {
+        "required": ["merchant"]
+      }
+    },
+    "content": {
+      "title": "商业传承",
+      "text": "你意识到自己终将老去，开始考虑培养商业后人。是选择自己的子女，还是从伙计中挑选人才？"
+    },
+    "choices": [
+      {
+        "text": "培养子女继承家业 (人脉 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "merchant_heir",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "从伙计中挑选人才 (声望 +10)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "merchant_heir",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -112,7 +112,6 @@ export class SaveManager {
     const storage = isBrowser ? localStorage : fileStorage;
     storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
     
-    console.log(`[SaveManager] 游戏已保存：${name} (ID: ${saveData.id})`);
     
     return saveData.id;
   }
@@ -125,7 +124,6 @@ export class SaveManager {
     const save = saves.find(s => s.id === saveId);
     
     if (save) {
-      console.log(`[SaveManager] 游戏已加载：${save.name}`);
       return save;
     }
     
@@ -160,7 +158,6 @@ export class SaveManager {
     if (filteredSaves.length !== saves.length) {
       const storage = isBrowser ? localStorage : fileStorage;
       storage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSaves));
-      console.log(`[SaveManager] 存档已删除：${saveId}`);
       return true;
     }
     
@@ -187,7 +184,6 @@ export class SaveManager {
     try {
       const storage = isBrowser ? localStorage : fileStorage;
       storage.setItem(this.AUTO_SAVE_KEY, JSON.stringify(saveData));
-      console.log('[SaveManager] 自动保存完成');
     } catch (error) {
       console.error('[SaveManager] 自动保存失败:', error);
     }
@@ -203,7 +199,6 @@ export class SaveManager {
       if (!autoSaveJson) return null;
       
       const saveData: SaveData = JSON.parse(autoSaveJson);
-      console.log('[SaveManager] 自动存档已加载');
       return saveData;
     } catch (error) {
       console.error('[SaveManager] 加载自动存档失败:', error);
@@ -217,7 +212,6 @@ export class SaveManager {
   public clearAutoSave(): void {
     const storage = isBrowser ? localStorage : fileStorage;
     storage.removeItem(this.AUTO_SAVE_KEY);
-    console.log('[SaveManager] 自动存档已清除');
   }
   
   /**
@@ -260,7 +254,6 @@ export class SaveManager {
       
       const storage = isBrowser ? localStorage : fileStorage;
       storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
-      console.log('[SaveManager] 存档已导入');
       
       return true;
     } catch (error) {
@@ -276,7 +269,6 @@ export class SaveManager {
     const storage = isBrowser ? localStorage : fileStorage;
     storage.removeItem(this.STORAGE_KEY);
     storage.removeItem(this.AUTO_SAVE_KEY);
-    console.log('[SaveManager] 所有存档已清空');
   }
   
   /**

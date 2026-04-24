@@ -34,7 +34,6 @@ export class TalentSystem {
       talentData.default.forEach((talent: TalentDefinition) => {
         this.talents.set(talent.id, talent);
       });
-      console.log(`[TalentSystem] 加载了 ${this.talents.size} 个天赋`);
     } catch (error) {
       console.error('[TalentSystem] 加载天赋失败:', error);
     }

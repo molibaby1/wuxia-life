@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_beggars\") && (player.chivalry >= 12 || player.qinggong >= 10) && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.chivalry >= 12 || player.qinggong >= 10) && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
       }
     ],
     "content": {
@@ -31,36 +31,60 @@
       {
         "id": "beggars_join",
         "text": "跟随老者入丐帮",
-        "effects": [
+        "description": "你决定加入丐帮",
+        "outcomes": [
           {
-            "type": "time_advance",
-            "target": "age",
-            "value": 10,
-            "timeUnit": "day"
+            "id": "great_success",
+            "text": "老者见你身手不凡、谈吐不俗，大喜道：\"我丐帮近年人才凋零，今日得遇少侠，实乃天意！\"说罢取出一只八袋信物——你竟直接被拜为八袋弟子，众乞儿齐声称贺！",
+            "condition": {"type": "expression", "expression": "chivalry >= 20 && connections >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 8},
+              {"type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "connections", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join_elite"}
+            ]
           },
           {
-            "type": "flag_set",
-            "target": "route_beggars"
+            "id": "success",
+            "text": "老者见你根骨不凡，欣然收你入帮：\"从今往后，你便是丐帮弟子，与众兄弟同甘共苦！\"你换上乞儿装束，开始了江湖底层的闯荡生涯。",
+            "condition": {"type": "expression", "expression": "chivalry >= 12 || qinggong >= 12"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 4},
+              {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "qinggong", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join"}
+            ]
           },
           {
-            "type": "flag_set",
-            "target": "beggars_trial_active"
-          },
-          {
-            "type": "stat_modify",
-            "target": "chivalry",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "event_record",
-            "target": "beggars_encounter_join"
+            "id": "partial",
+            "text": "老者上下打量你，点点头道：\"想入我帮？先从一袋弟子做起吧。江湖规矩，得自己闯出来。\"你从最底层开始了自己的丐帮生涯。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 1},
+              {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join_low"}
+            ]
           }
         ]
       },
       {
         "id": "beggars_decline",
         "text": "婉拒相邀",
+        "description": "你不想加入丐帮",
         "effects": [
           {
             "type": "time_advance",
@@ -1279,6 +1303,10 @@
           { "type": "flag_unset", "target": "route_beggars" },
           { "type": "flag_unset", "target": "beggars_trial_active" },
           { "type": "flag_set", "target": "beggars_departed" },
+          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
+          { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add" },
           { "type": "event_record", "target": "beggars_departure_leave" }
         ]
       },

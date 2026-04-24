@@ -1,0 +1,151 @@
+[
+  {
+    "id": "merchant_family_business",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 90,
+    "weight": 90,
+    "ageRange": {"min": 10, "max": 18},
+    "triggers": [
+      {"type": "age_reach", "value": 10},
+      {"type": "expression", "expression": "flags.origin_merchant_family == true"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 100"}
+    ],
+    "content": {
+      "title": "家族生意",
+      "text": "作为商贾之家的子弟，你开始协助打理家族生意。父亲带你熟悉各种商品行情，教你识别真假货物。",
+      "description": "商业启蒙"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "专心学习（金钱 +30，魅力 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "business_apprentice", "value": true}
+        ]
+      },
+      {
+        "text": "开拓视野（魅力 +8，人际关系 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "connections", "value": 5},
+          {"type": "flag_set", "flag": "network_builder", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.2,
+        "merchant": 1.5,
+        "wuxia": 0.1,
+        "frontier": 0.3
+      },
+      "tags": ["商业", "家族", "继承"]
+    }
+  },
+  {
+    "id": "merchant_trade_route",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": {"min": 14, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 14},
+      {"type": "expression", "expression": "flags.business_apprentice == true"},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 200 && connections >= 5"}
+    ],
+    "content": {
+      "title": "开辟商路",
+      "text": "你发现了一条潜在的贸易路线，可以将本地特产运往远方销售。这是一次高风险高回报的投资机会。",
+      "description": "商业拓展"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "大胆投资（金钱 +100，人际关系 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "connections", "value": 10},
+          {"type": "flag_set", "flag": "successful_trader", "value": true}
+        ]
+      },
+      {
+        "text": "稳妥经营（金钱 +50，声望 +8）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 50},
+          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "flag_set", "flag": "careful_trader", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.1,
+        "merchant": 1.2,
+        "wuxia": 0.05,
+        "frontier": 0.2
+      },
+      "tags": ["贸易", "投资", "风险"]
+    }
+  },
+  {
+    "id": "merchant_guild_invitation",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 80,
+    "weight": 75,
+    "ageRange": {"min": 16, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 16},
+      {"type": "expression", "expression": "flags.successful_trader == true || money >= 500"},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 20 && connections >= 10"}
+    ],
+    "content": {
+      "title": "商会邀请",
+      "text": "当地的商业行会向你发出邀请，希望你加入成为会员。这将为你带来更多的商业机会和资源。",
+      "description": "商业联盟"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "积极加入（金钱 +80，人际关系 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 80},
+          {"type": "stat_modify", "stat": "connections", "value": 15},
+          {"type": "flag_set", "flag": "guild_member", "value": true}
+        ]
+      },
+      {
+        "text": "保持独立（声望 +10，魅力 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "independent_merchant", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.2,
+        "merchant": 1.0,
+        "wuxia": 0.1,
+        "frontier": 0.3
+      },
+      "tags": ["商会", "联盟", "地位"]
+    }
+  }
+]

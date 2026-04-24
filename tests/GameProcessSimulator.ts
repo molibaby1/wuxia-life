@@ -14,6 +14,8 @@
 
 import { gameEngine } from '../src/core/GameEngineIntegration';
 import { saveManager } from '../src/core/SaveManager';
+import { EndingSystem } from '../src/core/EndingSystem';
+import { traitSystem } from '../src/core/TraitSystem';
 import type { GameState, EventDefinition, EventChoice } from '../src/types/eventTypes';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -40,6 +42,7 @@ export interface GameProcessRecord {
   eventType: 'auto' | 'choice' | 'ending';
   selectedChoice?: EventChoice;
   availableChoices?: EventChoice[];
+  outcomeText?: string;
   gameState: GameState;
   timestamp: string;
   currentTime?: { year: number; month: number; day: number };
@@ -70,6 +73,14 @@ export interface GameProcessReport {
     sectStatus?: string;  // 门派地位
     spouse?: string;      // 配偶
     children?: number;    // 子女数量
+    origin?: string;
+    coreTalent?: string;
+    weakness?: string;
+    temperament?: string;
+    lifeStates?: Record<string, number>;
+    dailyEventCount?: number;
+    growthBiasSummary?: string[];
+    endingSummary?: string;
     flags?: Record<string, any>;  // 其他重要标志
   };
 }
@@ -158,6 +169,11 @@ export class GameProcessSimulator {
 
     // 从游戏引擎获取真实年龄（执行事件前）
     const currentState = gameEngine.getGameState();
+    if (this.hasGameEnded(currentState)) {
+      this.ended = true;
+      this.gameState = currentState;
+      return;
+    }
     const ageBeforeEvent = currentState.player?.age || 0;
     
     this.log(`\n━━━ ${ageBeforeEvent}岁 ━━━ (引擎内部年龄：${gameEngine.getGameState().player?.age})`);
@@ -228,9 +244,73 @@ export class GameProcessSimulator {
       });
       this.log(`   ✅ 选择：${record.selectedChoice.text || record.selectedChoice.id}`);
 
-      // 执行选择的效果（传递事件 ID 用于记录）
-      if (record.selectedChoice.effects && record.selectedChoice.effects.length > 0) {
-        await gameEngine.executeChoiceEffects(record.selectedChoice.effects, event.id);
+      // 确定要执行的效果和结果文本
+      let effectsToExecute = record.selectedChoice.effects || [];
+      let outcomeText: string | null = null;
+
+      // 如果有多结果分支，根据条件判定
+      if (record.selectedChoice.outcomes && record.selectedChoice.outcomes.length > 0) {
+        for (const outcome of record.selectedChoice.outcomes) {
+          if (outcome.condition && !this.evaluateCondition(outcome.condition)) {
+            continue;
+          }
+          effectsToExecute = outcome.effects || [];
+          outcomeText = outcome.text || null;
+          break;
+        }
+      }
+
+      // 如果没有 outcome text，生成叙事性描述
+      if (!outcomeText) {
+        outcomeText = this.generateOutcomeText(event, effectsToExecute);
+      }
+
+      // 添加结果文本到记录
+      record.outcomeText = outcomeText;
+      this.log(`   📜 结果：${outcomeText}`);
+
+      // 执行选择的效果（传递事件 ID 和选择 ID 用于记录）
+      if (effectsToExecute.length > 0) {
+        const result = await gameEngine.executeChoiceEffects(effectsToExecute, event.id, record.selectedChoice.id);
+          const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
+          if (eventOutcomeNote) {
+            record.outcomeText = record.outcomeText
+              ? `${record.outcomeText} ${eventOutcomeNote}`
+            : eventOutcomeNote;
+        }
+
+        // 检查是否死亡，如果死亡则停止处理
+        const stateAfterChoice = gameEngine.getGameState();
+        if (!stateAfterChoice.player?.alive || this.hasGameEnded(stateAfterChoice)) {
+          if (this.hasGameEnded(stateAfterChoice)) {
+            this.ended = true;
+          }
+          record.gameState = JSON.parse(JSON.stringify(stateAfterChoice));
+          this.records.push(record);
+          this.log(`\n   💀 死亡原因：${stateAfterChoice.player?.deathReason || '未知'}`);
+          return; // 直接返回，不继续处理
+        }
+
+        // 处理即时触发的事件（如爱情线的"心动"）
+        if (result.triggeredEvent) {
+          this.log(`\n   [即时触发] ${result.triggeredEvent.content?.title || result.triggeredEvent.id}`);
+          this.log(`   描述：${result.triggeredEvent.content?.description || '...'}`);
+          
+          // 记录即时触发的事件 - 使用执行后的实际年龄（不是事件发生前的年龄）
+          const ageAfterImmediateEvent = result.gameState.player?.age || ageBeforeEvent;
+          const immediateRecord: GameProcessRecord = {
+            age: ageAfterImmediateEvent,
+            eventId: result.triggeredEvent.id,
+            eventTitle: result.triggeredEvent.content?.title || result.triggeredEvent.id,
+            eventText: result.triggeredEvent.content?.text || '',
+            eventType: result.triggeredEvent.eventType as 'auto' | 'choice' | 'ending',
+            gameState: JSON.parse(JSON.stringify(result.gameState)),
+            currentTime: result.gameState.currentTime,
+            timestamp: new Date().toISOString()
+          };
+          this.records.push(immediateRecord);
+        }
+        
         // 效果中已包含时间推进，不再调用 advanceTime
       } else {
         // 如果没有效果，手动推进时间
@@ -246,6 +326,33 @@ export class GameProcessSimulator {
       this.log(`   ✅ 自动触发`);
       if (event.autoEffects && event.autoEffects.length > 0) {
         await gameEngine.executeAutoEvent(event);
+        const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
+        const baseOutcomeText = this.generateOutcomeText(event, event.autoEffects);
+        const mergedOutcomeText = eventOutcomeNote
+          ? `${baseOutcomeText} ${eventOutcomeNote}`.trim()
+          : baseOutcomeText;
+
+        // 检查是否死亡，如果死亡则停止处理
+        const stateAfterAuto = gameEngine.getGameState();
+        if (!stateAfterAuto.player?.alive || this.hasGameEnded(stateAfterAuto)) {
+          if (this.hasGameEnded(stateAfterAuto)) {
+            this.ended = true;
+          }
+          const record: GameProcessRecord = {
+            age: ageBeforeEvent,
+            eventId: event.id,
+            eventTitle: title,
+            eventText: text,
+            eventType: eventType as 'auto' | 'choice' | 'ending',
+            outcomeText: mergedOutcomeText || undefined,
+            gameState: JSON.parse(JSON.stringify(stateAfterAuto)),
+            currentTime: stateAfterAuto.currentTime,
+            timestamp: new Date().toISOString()
+          };
+          this.records.push(record);
+          this.log(`\n   💀 死亡原因：${stateAfterAuto.player?.deathReason || '未知'}`);
+          return; // 直接返回，不继续处理
+        }
         // 效果中已包含时间推进，不再调用 advanceTime
       } else {
         // 如果没有效果，手动推进时间
@@ -260,6 +367,16 @@ export class GameProcessSimulator {
         eventTitle: title,
         eventText: text,
         eventType: eventType as 'auto' | 'choice' | 'ending',
+        outcomeText: (() => {
+          const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
+          const baseOutcomeText = event.autoEffects?.length
+            ? this.generateOutcomeText(event, event.autoEffects)
+            : null;
+          if (baseOutcomeText && eventOutcomeNote) {
+            return `${baseOutcomeText} ${eventOutcomeNote}`;
+          }
+          return eventOutcomeNote || baseOutcomeText || undefined;
+        })(),
         gameState: JSON.parse(JSON.stringify(this.gameState)),
         currentTime: this.gameState.currentTime,
         timestamp: new Date().toISOString()
@@ -267,7 +384,7 @@ export class GameProcessSimulator {
       this.records.push(record);
     }
 
-    if (eventType === 'ending') {
+    if (eventType === 'ending' || this.hasGameEnded(this.gameState)) {
       this.log('   🏁 触发结局事件，模拟结束');
       this.ended = true;
     }
@@ -292,9 +409,37 @@ export class GameProcessSimulator {
 
     for (const choice of choices) {
       let score = 0;
-      if (choice.effects) {
+
+      // 如果有多结果分支，评估最佳结果
+      if (choice.outcomes && choice.outcomes.length > 0) {
+        let bestOutcomeScore = -Infinity;
+        for (const outcome of choice.outcomes) {
+          // 检查条件是否满足
+          if (outcome.condition && !this.evaluateCondition(outcome.condition)) {
+            continue; // 条件不满足，跳过
+          }
+
+          let outcomeScore = 0;
+          if (outcome.effects) {
+            for (const effect of outcome.effects) {
+              if (effect.type !== 'stat_modify' || effect.operator !== 'add' || !effect.target) continue;
+              const value = typeof effect.value === 'number' ? effect.value : 0;
+              if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(effect.target)) {
+                outcomeScore += value * 2;
+              } else {
+                outcomeScore += value;
+              }
+            }
+          }
+          if (outcomeScore > bestOutcomeScore) {
+            bestOutcomeScore = outcomeScore;
+          }
+        }
+        score = bestOutcomeScore;
+      } else if (choice.effects) {
+        // 无多结果分支，评估原有效果
         for (const effect of choice.effects) {
-          if (effect.operator !== 'add') continue;
+          if (effect.type !== 'stat_modify' || effect.operator !== 'add' || !effect.target) continue;
           const value = typeof effect.value === 'number' ? effect.value : 0;
           if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(effect.target)) {
             score += value * 2;
@@ -316,6 +461,199 @@ export class GameProcessSimulator {
 
     const randomIndex = Math.floor(Math.random() * choices.length);
     return choices[randomIndex];
+  }
+
+  /**
+   * 评估条件表达式
+   */
+  private evaluateCondition(condition: any): boolean {
+    if (!condition) return true;
+    if (condition.type !== 'expression') return true;
+
+    const expr = condition.expression;
+    if (!expr || typeof expr !== 'string') return true;
+
+    const state = this.gameState;
+    if (!state || !state.player) return false;
+
+    try {
+      // 简单的表达式解析
+      const player = state.player as any;
+
+      // 替换玩家属性
+      let evalExpr = expr
+        .replace(/martialPower/g, 'player.martialPower')
+        .replace(/internalSkill/g, 'player.internalSkill')
+        .replace(/externalSkill/g, 'player.externalSkill')
+        .replace(/qinggong/g, 'player.qinggong')
+        .replace(/chivalry/g, 'player.chivalry')
+        .replace(/charisma/g, 'player.charisma')
+        .replace(/constitution/g, 'player.constitution')
+        .replace(/comprehension/g, 'player.comprehension')
+        .replace(/reputation/g, 'player.reputation')
+        .replace(/health/g, 'player.health')
+        .replace(/connections/g, 'player.connections')
+        .replace(/influence/g, 'player.influence')
+        .replace(/knowledge/g, 'player.knowledge')
+        .replace(/businessAcumen/g, 'player.businessAcumen')
+        .replace(/money/g, 'player.money');
+
+      // 处理 flags 引用
+      evalExpr = evalExpr.replace(/flags\.has\("([^"]+)"\)/g, '((player.flags && player.flags["$1"]) === true)');
+      evalExpr = evalExpr.replace(/flags\.(\w+)/g, '(player.flags ? player.flags.$1 : false)');
+
+      // 安全评估（只允许比较运算）
+      if (!/^[\w\s<>=!&|().'":\-[\]]+$/.test(evalExpr)) {
+        console.warn('[Simulator] 条件表达式包含不支持的字符:', evalExpr);
+        return true;
+      }
+
+      const result = new Function('player', `return ${evalExpr}`)(player);
+      return result === true;
+    } catch (error) {
+      console.warn('[Simulator] 条件评估失败:', condition.expression, error);
+      return true;
+    }
+  }
+
+  /**
+   * 根据效果生成叙事性结果描述
+   */
+  private generateOutcomeText(event: EventDefinition, effects: any[]): string {
+    const eventTitle = event.content?.title || event.id;
+    const eventSpecificText = this.getEventSpecificOutcomeText(eventTitle, effects);
+    if (eventSpecificText) {
+      return eventSpecificText;
+    }
+
+    const parts: string[] = [];
+
+    for (const effect of effects) {
+      if (effect.type === 'stat_modify') {
+        const statName = this.getStatName(effect.target || effect.stat);
+        const value = typeof effect.value === 'number' ? effect.value : 0;
+        const isPositive = (effect.operator === 'add' && value > 0) ||
+                         (effect.operator === 'subtract' && value < 0);
+
+        if (statName === '武力' || statName === '外功' || statName === '内功' || statName === '轻功') {
+          parts.push(isPositive ? '你的武功有了长进' : '你的武艺似乎有些生疏');
+        } else if (statName === '侠义') {
+          parts.push(isPositive ? '你的侠义之心更加坚定了' : '你的心中似乎多了一丝动摇');
+        } else if (statName === '魅力') {
+          parts.push(isPositive ? '你的气质愈发出众' : '你感觉自己有些黯淡');
+        } else if (statName === '体质') {
+          parts.push(isPositive ? '你的身体更加健壮' : '你似乎更容易感到疲惫');
+        } else if (statName === '悟性') {
+          parts.push(isPositive ? '你对武学的理解更加深刻' : '有些道理似乎变得难以领悟');
+        } else if (statName === '声望') {
+          parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
+        } else if (statName === '金钱') {
+          parts.push(isPositive ? '你的钱袋鼓了起来' : '你的积蓄少了一些');
+        } else if (statName === '健康') {
+          parts.push(isPositive ? '你的身体状态好转了' : '你感到有些不适');
+        }
+      } else if (effect.type === 'flag_set' && effect.value === true) {
+        parts.push(`你获得了新的体悟`);
+      } else if (effect.type === 'relation_change') {
+        parts.push('与某人的关系发生了微妙的变化');
+      }
+    }
+
+    if (parts.length === 0) {
+      return '你的心中泛起涟漪，但一切似乎又归于平静。';
+    }
+
+    return parts[0] + '。';
+  }
+
+  private getEventSpecificOutcomeText(eventTitle: string, effects: any[]): string | null {
+    const positiveMoney = effects.some(effect =>
+      effect.type === 'stat_modify' &&
+      (effect.target === 'money' || effect.stat === 'money') &&
+      typeof effect.value === 'number' &&
+      effect.value > 0 &&
+      effect.operator === 'add'
+    );
+    const negativeMoney = effects.some(effect =>
+      effect.type === 'stat_modify' &&
+      (effect.target === 'money' || effect.stat === 'money') &&
+      typeof effect.value === 'number' &&
+      effect.value > 0 &&
+      effect.operator === 'subtract'
+    );
+    const positiveMartial = effects.some(effect =>
+      effect.type === 'stat_modify' &&
+      ['martialPower', 'externalSkill', 'internalSkill', 'qinggong'].includes(effect.target || effect.stat) &&
+      typeof effect.value === 'number' &&
+      effect.value > 0 &&
+      effect.operator === 'add'
+    );
+
+    switch (eventTitle) {
+      case '童年选择':
+        return '你在懵懂里做了第一次像样的选择，这点小小偏向，往后会慢慢长成自己的路。';
+      case '武学启蒙':
+        return positiveMartial
+          ? '你第一次真正摸到了习武的门道，少年人的身手开始有了自己的轮廓。'
+          : '你虽踏进了习武的门槛，却还没真正找到顺手的那股劲。';
+      case '修炼抉择':
+        return positiveMartial
+          ? '你选定了眼下最愿意下功夫的方向，功夫因此往前实实在在走了一步。'
+          : '你心里虽然有了打算，可真正练起来，仍旧没能立刻见到起色。';
+      case '武学创新':
+        return '你试着把旧本事拧出一点新意，虽然还不算成熟，却已经看见了不同的路。';
+      case '武林大会':
+      case '武林大会邀请':
+        return '你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。';
+      case '武学交流':
+        return '这一番切磋让你看见了别人的路数，也让你重新照见了自己手里的功夫。';
+      case '隐世高手':
+        return '你得了高人几句点拨，眼前像是被拨开了一层薄雾。';
+      case '喜得贵子':
+        return negativeMoney
+          ? '家里添了新丁，欢喜是真的，往后要操的心和要花的银钱也都跟着来了。'
+          : '家里添了新丁，往后的日子因此多了更实在的盼头。';
+      case '家族危机':
+        return negativeMoney
+          ? '这场风波逼得你不得不替家里撑住局面，能守住多少，就看你手里还剩多少余力。'
+          : '家里的难关终于摆到了眼前，你再也不能把它当成与己无关的事。';
+      case '门派壮大':
+        return '门下声势一日日大起来，你收获的不只是体面，还有随之而来的忙乱与责任。';
+      case '情敌出现':
+        return '感情里的局面忽然复杂起来，你既想守住心意，也知道事情不会再像从前那样轻松。';
+      case '恩怨情仇':
+        return '旧人旧事重新缠了上来，这一次你很难再把情义和得失分得那么干净。';
+      case '选择传人':
+        return '你开始认真考虑把一身所学交给谁，这不只是挑一个人，也是替往后的人生定下一种去处。';
+      case '传授孙儿':
+        return '你把本事一点点教给晚辈，像是在把自己这些年的路慢慢讲给下一代听。';
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * 获取属性中文名
+   */
+  private getStatName(stat: string): string {
+    const statNames: Record<string, string> = {
+      martialPower: '武力',
+      internalSkill: '内功',
+      externalSkill: '外功',
+      qinggong: '轻功',
+      chivalry: '侠义',
+      charisma: '魅力',
+      constitution: '体质',
+      comprehension: '悟性',
+      reputation: '声望',
+      influence: '影响力',
+      connections: '人脉',
+      knowledge: '学识',
+      businessAcumen: '商路',
+      money: '金钱',
+      health: '健康',
+    };
+    return statNames[stat] || stat;
   }
 
   /**
@@ -343,6 +681,9 @@ export class GameProcessSimulator {
    */
   private generateReport(): GameProcessReport {
     const finalState = this.gameState;
+    const forcedLateLifeEnding = finalState ? EndingSystem.getForcedLateLifeEnding(finalState) : null;
+    const gameEnded = this.hasGameEnded(finalState) || Boolean(forcedLateLifeEnding);
+    const endingName = this.getEndingDisplayName(finalState, gameEnded, forcedLateLifeEnding?.name);
     
     // 统计各年龄段事件
     const childhoodEvents = this.records.filter(r => r.age >= 0 && r.age <= 12).length;
@@ -381,6 +722,19 @@ export class GameProcessSimulator {
     
     const spouse = finalState?.player?.spouse || undefined;
     const children = finalState?.player?.children || 0;
+    const traitNames = traitSystem.getTraitNames(finalState?.player?.traitProfile);
+    const dailyEventCount = this.records.filter(r => r.eventId.startsWith('daily_')).length;
+    let endingSummary: string | undefined;
+    if (finalState && gameEnded) {
+      try {
+        endingSummary = EndingSystem.getEndingSummary(
+          finalState,
+          forcedLateLifeEnding || EndingSystem.determineEnding(finalState)
+        );
+      } catch {
+        endingSummary = undefined;
+      }
+    }
 
     return {
       id: this.generateId(),
@@ -388,8 +742,8 @@ export class GameProcessSimulator {
       config: this.config,
       totalYears: this.records.length,
       finalAge: finalState?.player?.age || 0,
-      isAlive: finalState?.player?.alive || false,
-      deathReason: finalState?.player?.deathReason,
+      isAlive: gameEnded ? false : (finalState?.player?.alive || false),
+      deathReason: finalState?.player?.deathReason || (gameEnded ? endingName : null),
       totalEvents: this.records.length,
       totalChoices: choiceEvents,
       totalSaves: this.saveCount,
@@ -407,11 +761,44 @@ export class GameProcessSimulator {
         sectStatus,
         spouse,
         children,
+        origin: traitNames.origin,
+        coreTalent: traitNames.coreTalent,
+        weakness: traitNames.weakness,
+        temperament: traitNames.temperament,
+        lifeStates: { ...(finalState?.player?.lifeStates || {}) },
+        dailyEventCount,
+        growthBiasSummary: [...(finalState?.player?.growthBiasSummary || [])],
+        endingSummary,
         flags: Object.fromEntries(
           Object.entries(flags).filter(([_, v]) => typeof v === 'boolean' && v)
         ),
       }
     };
+  }
+
+  private hasGameEnded(state: GameState | null | undefined): boolean {
+    if (!state) return false;
+    return state.flags?.ending_triggered === true || Boolean(state.ending);
+  }
+
+  private getEndingDisplayName(state: GameState | null | undefined, gameEnded: boolean, fallbackName?: string): string {
+    if (!state || !gameEnded) {
+      return '结局达成';
+    }
+
+    if (fallbackName && fallbackName.trim()) {
+      return fallbackName;
+    }
+
+    if (state.ending && typeof state.ending.name === 'string' && state.ending.name.trim()) {
+      return state.ending.name;
+    }
+
+    try {
+      return EndingSystem.determineEnding(state).name;
+    } catch {
+      return '结局达成';
+    }
   }
 
   /**
@@ -609,6 +996,16 @@ export class GameProcessSimulator {
       font-size: 13px;
       color: #28a745;
     }
+    .timeline-outcome {
+      margin-top: 8px;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(139, 90, 43, 0.08), rgba(34, 139, 34, 0.08));
+      border-left: 3px solid #8b5a2b;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #5d4037;
+      font-style: italic;
+    }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -770,6 +1167,11 @@ export class GameProcessSimulator {
               ${record.selectedChoice ? `
                 <div class="timeline-choice">
                   选择：${record.selectedChoice.text}
+                </div>
+              ` : ''}
+              ${record.outcomeText ? `
+                <div class="timeline-outcome">
+                  ${record.outcomeText}
                 </div>
               ` : ''}
             </div>

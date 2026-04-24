@@ -26,3 +26,25 @@
 - **Learnings for future iterations:**
   - The current baseline has extensive `vue-tsc` build errors, so story-level checks should distinguish script wiring from full type-system recovery scope.
 ---
+
+## [2026-04-24 10:44] - US-003
+- Attempted type-system recovery validation twice via `npm run build` (`vue-tsc -b && vite build`).
+- Result: blocked by large pre-existing type drift across `src/components`, `src/core`, `src/data`, and `src/types` with hundreds of errors.
+- **Learnings for future iterations:**
+  - This story requires a dedicated, staged refactor plan (types-first alignment) rather than opportunistic single-pass fixes.
+  - Keep blocker metadata in PRD so downstream stories can proceed while preserving traceability.
+---
+
+## [2026-04-24 10:45] - US-004
+- Performed structural scan for state-model and engine-entry consolidation.
+- Found split sources of truth (`PlayerState` defined in both `src/types/index.ts` and `src/types/eventTypes.ts`) and multiple active engine paths (`useGameEngine`, `useNewGameEngine`, `GameEngineIntegration`).
+- **Learnings for future iterations:**
+  - Unification should be sequenced after core type-contract cleanup, otherwise integration changes amplify compile breakage.
+---
+
+## [2026-04-24 10:45] - US-005
+- Evaluated CI/baseline readiness against current repository state.
+- Baseline gate cannot satisfy acceptance yet because build remains red under current type-system divergence; wiring CI now would only enforce known-red checks.
+- **Learnings for future iterations:**
+  - Add CI gate immediately after US-003/US-004 are stabilized to avoid codifying perpetual red pipelines.
+---

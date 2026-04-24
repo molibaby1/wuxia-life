@@ -17,7 +17,6 @@ import generalEventsJson from '../data/lines/general.json';
 import originEventsJson from '../data/lines/origin.json';
 import officialEventsJson from '../data/lines/official.json';
 import loveEventsJson from '../data/lines/love.json';
-import tutorialEventsJson from '../data/lines/tutorial.json';
 import middleAgeCareerEventsJson from '../data/lines/middle-age-career.json';
 import familyLifeEventsJson from '../data/lines/family-life.json';
 import jianghuConflictEventsJson from '../data/lines/jianghu-conflict.json';
@@ -28,12 +27,28 @@ import sectMarginalEventsJson from '../data/lines/sect-marginal.json';
 import sectShaolinEventsJson from '../data/lines/sect-shaolin.json';
 import sectWudangEventsJson from '../data/lines/sect-wudang.json';
 import trainingEventsJson from '../data/lines/training.json';
+// 身份专属事件
+import heroEventsJson from '../data/lines/identity-hero.json';
+import merchantEventsJson from '../data/lines/identity-merchant.json';
+import demonEventsJson from '../data/lines/identity-demon.json';
+import outlawEventsJson from '../data/lines/identity-outlaw.json';
+
+// 身份年度剧情模块
+import identityYearEventsJson from '../data/lines/identity-year-events.json';
+
+// 阵营相关事件
+import factionEventsJson from '../data/lines/faction-revelation.json';
+
+// 难度系统 - 挫折事件
+import setbackEventsJson from '../data/lines/setback-events.json';
+
+// 路线事件（已合并到 identity-outlaw.json）
+// import pathExamplesJson from '../data/lines/path-examples.json';
 
 const generalEvents = generalEventsJson as EventDefinition[];
 const loveEvents = loveEventsJson as EventDefinition[];
 const officialEvents = officialEventsJson as EventDefinition[];
 const originEvents = originEventsJson as EventDefinition[];
-const tutorialEvents = tutorialEventsJson as EventDefinition[];
 const middleAgeCareerEvents = middleAgeCareerEventsJson as EventDefinition[];
 const familyLifeEvents = familyLifeEventsJson as EventDefinition[];
 const jianghuConflictEvents = jianghuConflictEventsJson as EventDefinition[];
@@ -44,6 +59,21 @@ const sectMarginalEvents = sectMarginalEventsJson as EventDefinition[];
 const sectShaolinEvents = sectShaolinEventsJson as EventDefinition[];
 const sectWudangEvents = sectWudangEventsJson as EventDefinition[];
 const trainingEvents = trainingEventsJson as EventDefinition[];
+// 身份专属事件
+const heroEvents = heroEventsJson as EventDefinition[];
+const merchantEvents = merchantEventsJson as EventDefinition[];
+const demonEvents = demonEventsJson as EventDefinition[];
+const outlawEvents = outlawEventsJson as EventDefinition[];
+
+// 身份年度剧情模块
+const identityYearEvents = identityYearEventsJson as EventDefinition[];
+
+// 阵营相关事件
+const factionEvents = factionEventsJson as EventDefinition[];
+
+// 难度系统 - 挫折事件
+const setbackEvents = setbackEventsJson as EventDefinition[];
+
 const eventsIndex = eventsIndexJson as {
   version: string;
   imports: string[];
@@ -80,7 +110,6 @@ export class EventLoader {
       './lines/origin.json': originEvents,
       './lines/general.json': generalEvents,
       './lines/love.json': loveEvents,
-      './lines/tutorial.json': tutorialEvents,
       './lines/official.json': officialEvents,
       './lines/middle-age-career.json': middleAgeCareerEvents,
       './lines/family-life.json': familyLifeEvents,
@@ -92,6 +121,17 @@ export class EventLoader {
       './lines/sect-shaolin.json': sectShaolinEvents,
       './lines/sect-wudang.json': sectWudangEvents,
       './lines/training.json': trainingEvents,
+      // 身份专属事件
+      './lines/identity-hero.json': heroEvents,
+      './lines/identity-merchant.json': merchantEvents,
+      './lines/identity-demon.json': demonEvents,
+      './lines/identity-outlaw.json': outlawEvents,
+      // 身份年度剧情模块
+      './lines/identity-year-events.json': identityYearEvents,
+      // 阵营相关事件
+      './lines/faction-revelation.json': factionEvents,
+      // 难度系统 - 挫折事件
+      './lines/setback-events.json': setbackEvents,
     };
     
     const orderedLines = (eventsIndex.imports || [])
@@ -101,7 +141,6 @@ export class EventLoader {
     // 合并所有事件（按入口文件顺序组织）
     this.allEvents = orderedLines.flat();
     
-    console.log(`[EventLoader] 加载了 ${this.allEvents.length} 个事件`);
     
     // 建立索引
     this.buildIndexes();
@@ -118,7 +157,6 @@ export class EventLoader {
       this.eventsById.set(event.id, event);
     }
     
-    console.log(`[EventLoader] 索引建立完成，事件池大小：${this.allEvents.length}`);
   }
   
   /**
@@ -218,7 +256,8 @@ export class EventLoader {
       }
       
       // 验证自动事件
-      if (event.eventType === 'auto' && !event.autoEffects) {
+      const hasAutoEffects = event.autoEffects || event.content?.autoEffects;
+      if (event.eventType === 'auto' && !hasAutoEffects) {
         errors.push(`自动事件 ${event.id} 缺少 autoEffects`);
       }
       
@@ -252,47 +291,25 @@ export class EventLoader {
    * 打印事件统计信息
    */
   public printStatistics(): void {
-    console.log('\n=== 事件加载统计 ===');
-    console.log(`总事件数：${this.allEvents.length}`);
-    console.log(`入口文件：${eventsIndex.imports.join(', ')}`);
     
-    console.log(`出身线：${originEvents.length} 个`);
-    console.log(`通用事件：${generalEvents.length} 个`);
-    console.log(`爱情线：${loveEvents.length} 个`);
-    console.log(`官场线：${officialEvents.length} 个`);
-    console.log(`丐帮线：${sectBeggarsEvents.length} 个`);
-    console.log(`边地线：${sectBorderEvents.length} 个`);
-    console.log(`江湖争议派：${sectMarginalEvents.length} 个`);
-    console.log(`佛门线：${sectShaolinEvents.length} 个`);
-    console.log(`名门线：${sectWudangEvents.length} 个`);
-    console.log(`修炼线：${trainingEvents.length} 个`);
     
     // 按类型统计
     const autoEvents = this.allEvents.filter(e => e.eventType === 'auto').length;
     const choiceEvents = this.allEvents.filter(e => e.eventType === 'choice').length;
     const endingEvents = this.allEvents.filter(e => e.eventType === 'ending').length;
     
-    console.log(`\n自动事件：${autoEvents} 个`);
-    console.log(`选择事件：${choiceEvents} 个`);
-    console.log(`结局事件：${endingEvents} 个`);
     
     // 按分类统计
     const mainStoryCount = this.getEventsByCategory(EventCategory.MAIN_STORY).length;
     const sideQuestCount = this.getEventsByCategory(EventCategory.SIDE_QUEST).length;
     const specialEventCount = this.getEventsByCategory(EventCategory.SPECIAL_EVENT).length;
     
-    console.log(`\n主线剧情：${mainStoryCount} 个`);
-    console.log(`支线任务：${sideQuestCount} 个`);
-    console.log(`特殊事件：${specialEventCount} 个`);
     
     // 验证结果
     const validation = this.validateEvents();
-    console.log(`\n数据验证：${validation.valid ? '✅ 通过' : '❌ 失败'}`);
     if (!validation.valid) {
-      console.log('错误:', validation.errors);
     }
     
-    console.log('====================\n');
   }
 }
 

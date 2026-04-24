@@ -543,6 +543,16 @@
       { "type": "age_reach", "value": 18 },
       { "type": "random", "value": 0.08 }
     ],
+    "thresholds": {
+      "background": {
+        "required": ["origin_scholar_family"],
+        "forbidden": ["origin_wuxia_family"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "comprehension": { "min": 15 }
+      }
+    },
     "conditions": [
       { "type": "expression", "expression": "knowledge >= 50 && charisma >= 40" }
     ],

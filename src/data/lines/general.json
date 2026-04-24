@@ -490,9 +490,12 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\")"
+        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\")"
       }
     ],
+    "requirements": {
+      "notFlag": ["has_sect"]
+    },
     "content": {
       "text": "到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。",
       "title": "门派选择",
@@ -502,85 +505,122 @@
     "choices": [
       {
         "id": "join_shaolin",
-        "text": "拜入少林派（刚猛外功）",
+        "text": "拜入少林派",
+        "description": "学习刚猛外功",
         "condition": {
           "type": "expression",
           "expression": "player.externalSkill >= 15"
         },
-        "effects": [
+        "outcomes": [
           {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1,
-            "timeUnit": "month"
+            "id": "great_success",
+            "text": "你天资过人，被少林寺主持一眼看中！主持亲自为你摩顶受戒，赐你【易筋经】秘籍。你的武学之路从此一飞冲天！",
+            "condition": {"type": "expression", "expression": "comprehension >= 20 && constitution >= 18"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "flag_set", "target": "shaolin_elite"},
+              {"type": "event_record", "target": "join_shaolin_elite"}
+            ]
           },
           {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 8,
-            "operator": "add"
+            "id": "success",
+            "text": "你顺利拜入少林，成为一名少林弟子。在师父的指导下，你的武艺进步神速。",
+            "condition": {"type": "expression", "expression": "externalSkill >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "event_record", "target": "join_shaolin"}
+            ]
           },
           {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "flag_set",
-            "target": "shaolinDisciple"
-          },
-          {
-            "type": "flag_set",
-            "target": "sect_shaolin"
-          },
-          {
-            "type": "event_record",
-            "target": "join_shaolin"
+            "id": "partial",
+            "text": "你拜入少林，但因资质平平，只能从外门弟子做起。每日做着打杂的活计，但你不放弃，终于在一年后转为正式弟子。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "flag_set", "target": "shaolin_outer"},
+              {"type": "event_record", "target": "join_shaolin_outer"}
+            ]
           }
         ]
       },
       {
         "id": "join_wudang",
-        "text": "拜入武当派（柔韧内功）",
+        "text": "拜入武当派",
+        "description": "学习柔韧内功",
         "condition": {
           "type": "expression",
           "expression": "player.internalSkill >= 15"
         },
-        "effects": [
+        "outcomes": [
           {
-            "type": "flag_set",
-            "target": "sect_trial_active"
+            "id": "great_success",
+            "text": "武当掌门见你资质不凡，决定亲自收你为关门弟子！他将武当九阳神功倾囊相授，你的内功修为突飞猛进！",
+            "condition": {"type": "expression", "expression": "internalSkill >= 20 && comprehension >= 18"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "flag_set", "target": "wudang_elite"},
+              {"type": "event_record", "target": "join_wudang_elite"}
+            ]
           },
           {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1,
-            "timeUnit": "month"
+            "id": "success",
+            "text": "你顺利拜入武当，成为武当弟子。在师父的指导下，你开始学习武当剑法与内功。",
+            "condition": {"type": "expression", "expression": "internalSkill >= 15"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "event_record", "target": "join_wudang"}
+            ]
           },
           {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 8,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "flag_set",
-            "target": "wudangDisciple"
-          },
-          {
-            "type": "flag_set",
-            "target": "sect_wudang"
-          },
-          {
-            "type": "event_record",
-            "target": "join_wudang"
+            "id": "partial",
+            "text": "你拜入武当，但因内功根基不稳，只能做记名弟子。每日跟着师兄们打杂扫地，但你心中暗暗发誓，总有一天要成为正式弟子！",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "flag_set", "target": "wudang_probationary"},
+              {"type": "event_record", "target": "join_wudang_probationary"}
+            ]
           }
         ]
       },
@@ -1029,7 +1069,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "Math.random() < 0.4 && !flags.has(\"hasLoveInterest\")"
+        "expression": "Math.random() < 0.4 && !flags.has(\"hasLoveInterest\") && !flags.has(\"love_started\")"
       }
     ],
     "content": {

@@ -155,27 +155,9 @@ export class PerformanceMonitor {
   public printPerformanceReport(): void {
     const report = this.getPerformanceReport();
     
-    console.log('\n=== 性能报告 ===');
-    console.log(`事件执行 (${report.eventExecution.count} 次):`);
-    console.log(`  平均：${report.eventExecution.average.toFixed(3)}ms`);
-    console.log(`  最小：${report.eventExecution.min.toFixed(3)}ms`);
-    console.log(`  最大：${report.eventExecution.max.toFixed(3)}ms`);
     
-    console.log(`\n条件评估 (${report.conditionEvaluation.count} 次):`);
-    console.log(`  平均：${report.conditionEvaluation.average.toFixed(3)}ms`);
-    console.log(`  最小：${report.conditionEvaluation.min.toFixed(3)}ms`);
-    console.log(`  最大：${report.conditionEvaluation.max.toFixed(3)}ms`);
     
-    console.log(`\n组件渲染 (${report.componentRender.count} 次):`);
-    console.log(`  平均：${report.componentRender.average.toFixed(3)}ms`);
-    console.log(`  最小：${report.componentRender.min.toFixed(3)}ms`);
-    console.log(`  最大：${report.componentRender.max.toFixed(3)}ms`);
     
-    console.log(`\n内存使用:`);
-    console.log(`  已使用：${(report.memory.usedHeapSize / 1024 / 1024).toFixed(2)}MB`);
-    console.log(`  总计：${(report.memory.totalHeapSize / 1024 / 1024).toFixed(2)}MB`);
-    console.log(`  限制：${(report.memory.heapSizeLimit / 1024 / 1024).toFixed(2)}MB`);
-    console.log('==================\n');
   }
   
   /**

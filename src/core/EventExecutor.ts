@@ -17,7 +17,18 @@ import type {
   GameState,
   IEventExecutor,
   EffectHandler,
+  PlayerIdentity,
+  KarmaChange,
+  EventDefinition,
+  FactionType,
+  FocusType,
 } from '../types/eventTypes';
+import { IdentitySystem } from './IdentitySystem';
+import { KarmaManager } from './KarmaSystem';
+import { CriticalChoiceSystem } from './CriticalChoiceSystem';
+import { EndingSystem } from './EndingSystem';
+import { LifePathManager } from './LifePathSystem';
+import { traitSystem } from './TraitSystem';
 
 /**
  * 事件执行器实现
@@ -37,7 +48,17 @@ export class EventExecutor implements IEventExecutor {
     effects: EffectDefinition[],
     state: GameState
   ): Promise<GameState> {
-    let newState = { ...state };
+    // 深拷贝 state，确保 flags 等嵌套对象被正确复制
+    let newState = {
+      ...state,
+      player: state.player ? {
+        ...state.player,
+        flags: { ...(state.player.flags || {}) },
+        events: [...(state.player.events || [])],
+        items: [...(state.player.items || [])],
+        relationships: [...(state.player.relationships || [])],
+      } : undefined,
+    };
     
     for (const effect of effects) {
       const handler = this.handlers.get(effect.type);
@@ -47,7 +68,80 @@ export class EventExecutor implements IEventExecutor {
       newState = await handler.execute(effect, newState);
     }
     
+    // 重新判定身份（如果有变化）
+    const newIdentity = IdentitySystem.determineIdentity(newState);
+    if (newIdentity) {
+      const currentPrimary = newState.identity?.primary;
+      if (newIdentity !== currentPrimary) {
+        newState.identity = {
+          identities: [newIdentity],
+          primary: newIdentity,
+        };
+      }
+    }
+    
+    // 处理结局效果
+    for (const effect of effects) {
+      if (effect.ending_effect) {
+        // 可以在这里添加结局触发逻辑
+        // 例如：设置游戏结束标志、播放结局动画等
+        newState.player.flags = newState.player.flags || {};
+        newState.player.flags['ending_triggered'] = true;
+        newState.player.flags[`ending_${effect.ending_effect.ending_id}`] = true;
+      }
+    }
+    
     return newState;
+  }
+  
+  /**
+   * 检查事件是否可以触发
+   * 验证所有触发条件（包括选择、身份、因果）
+   */
+  static canTriggerEvent(event: EventDefinition, state: GameState): boolean {
+    const conditions = event.triggerConditions;
+    
+    if (!conditions) return true;
+    
+    // 检查选择条件
+    if (conditions.choices) {
+      if (!CriticalChoiceSystem.checkChoiceRequirement(state, conditions.choices)) {
+        return false;
+      }
+    }
+    
+    // 检查身份条件
+    if (conditions.identity) {
+      if (conditions.identity.required && !state.identity) {
+        return false;
+      }
+      const identities = state.identity?.identities || [];
+      if (conditions.identity.required && !conditions.identity.required.some(identity => identities.includes(identity))) {
+        return false;
+      }
+      if (conditions.identity.forbidden && conditions.identity.forbidden.some(identity => identities.includes(identity))) {
+        return false;
+      }
+    }
+    
+    // 检查因果条件
+    if (conditions.karma && state.karma) {
+      if (conditions.karma.good_min !== undefined && state.karma.good_karma < conditions.karma.good_min) {
+        return false;
+      }
+      if (conditions.karma.evil_min !== undefined && state.karma.evil_karma < conditions.karma.evil_min) {
+        return false;
+      }
+      const netKarma = KarmaManager.getNetKarma(state);
+      if (conditions.karma.net_min !== undefined && netKarma < conditions.karma.net_min) {
+        return false;
+      }
+      if (conditions.karma.net_max !== undefined && netKarma > conditions.karma.net_max) {
+        return false;
+      }
+    }
+    
+    return true;
   }
   
   /**
@@ -62,6 +156,19 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.RELATION_CHANGE, new RelationChangeHandler());
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
     this.handlers.set(EffectType.SPECIAL, new SpecialEffectHandler());
+    // 新增：因果变化处理器
+    this.handlers.set(EffectType.KARMA_CHANGE, new KarmaChangeHandler());
+    
+    // 新增：人生轨迹系统处理器
+    this.handlers.set(EffectType.SET_FACTION, new SetFactionHandler());
+    this.handlers.set(EffectType.LIFEPATH_ADD_FOCUS, new LifepathAddFocusHandler());
+    this.handlers.set(EffectType.LIFEPATH_RECORD_ACHIEVEMENT, new LifepathRecordAchievementHandler());
+    this.handlers.set(EffectType.LIFEPATH_ADD_COMMITMENT, new LifepathAddCommitmentHandler());
+    this.handlers.set(EffectType.LIFEPATH_ADD_RELATIONSHIP, new LifepathAddRelationshipHandler());
+    
+    // 新增：触发事件处理器
+    this.handlers.set(EffectType.TRIGGER_EVENT, new TriggerEventHandler());
+    this.handlers.set(EffectType.LIFE_STATE_CHANGE, new LifeStateChangeHandler());
   }
   
   /**
@@ -77,7 +184,13 @@ export class EventExecutor implements IEventExecutor {
  */
 export class StatModifyHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target, value, operator = 'set', randomRange } = effect;
+    const target = effect.target || (effect as any).stat;
+    const { value, operator = 'set', randomRange } = effect;
+
+    if (!target || typeof target !== 'string') {
+      console.warn('[StatModifyHandler] 跳过无效属性修改效果:', effect);
+      return state;
+    }
     
     // 处理随机效果
     let finalValue = value;
@@ -104,6 +217,11 @@ export class StatModifyHandler implements EffectHandler {
       } else if (target === 'externalSkill') {
         const bonus = Math.floor(((state.player as any).constitution || 0) / 20);
         adjustedValue += bonus;
+      }
+
+      if (adjustedValue > 0) {
+        const multiplier = traitSystem.getGrowthMultiplier(state.player, target);
+        adjustedValue = Math.max(1, Math.round(adjustedValue * multiplier));
       }
     }
     
@@ -164,6 +282,31 @@ export class StatModifyHandler implements EffectHandler {
   }
 }
 
+class LifeStateChangeHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const stateKey = effect.target as keyof NonNullable<GameState['player']['lifeStates']>;
+    if (!state.player) {
+      return state;
+    }
+
+    const currentStates = state.player.lifeStates || traitSystem.createInitialLifeStates();
+    const currentValue = currentStates[stateKey] || 0;
+    const delta = Number(effect.value || 0);
+    const nextValue = traitSystem.clampLifeState(stateKey, currentValue + delta);
+
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        lifeStates: {
+          ...currentStates,
+          [stateKey]: nextValue,
+        },
+      },
+    };
+  }
+}
+
 /**
  * 时间推进处理器
  */
@@ -217,21 +360,72 @@ export class TimeAdvanceHandler implements EffectHandler {
 
 /**
  * Flag 设置处理器
+ * 支持阵营互斥机制：当设置 sect_faction 时，自动清除其他阵营标记
+ * 
+ * 支持两种格式：
+ * - 新格式：{ type: 'flag_set', flag: 'xxx', value: 'yyy' }
+ * - 旧格式：{ type: 'flag_set', target: 'xxx', value: 'yyy' }
  */
 export class FlagSetHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target } = effect;
+    // 兼容新格式（flag）和旧格式（target）
+    const flagName = effect.flag || effect.target;
+    const flagValue = effect.value !== undefined ? effect.value : true;
     
-    return {
+    if (!flagName) {
+      console.warn('[FlagSetHandler] 未找到 flag 名称，跳过');
+      return state;
+    }
+    
+    
+    // 处理阵营互斥机制
+    let newFlags = {
+      ...state.player?.flags,
+      [flagName]: flagValue,
+    };
+    
+    // 如果设置 sect_faction，需要清除旧阵营的标记
+    if (flagName === 'sect_faction' && flagValue) {
+      const faction = flagValue as string;
+      
+      // 清除其他阵营标记
+      if (faction === 'orthodox') {
+        newFlags = {
+          ...newFlags,
+          sect_faction: 'orthodox',
+          orthodox_member: true,
+        };
+        // 清除 unconventional 阵营标记
+        delete newFlags['unconventional_member'];
+      } else if (faction === 'unconventional') {
+        newFlags = {
+          ...newFlags,
+          sect_faction: 'unconventional',
+          unconventional_member: true,
+        };
+        // 清除 orthodox 阵营标记
+        delete newFlags['orthodox_member'];
+      } else if (faction === 'neutral' || faction === 'none') {
+        newFlags = {
+          ...newFlags,
+          sect_faction: 'neutral',
+        };
+        // 清除所有阵营标记
+        delete newFlags['orthodox_member'];
+        delete newFlags['unconventional_member'];
+      }
+    }
+    
+    const result = {
       ...state,
       player: {
         ...state.player,
-        flags: {
-          ...state.player.flags,
-          [target]: true,
-        },
+        flags: newFlags,
       },
     };
+
+
+    return result;
   }
 }
 
@@ -343,20 +537,31 @@ export class RelationChangeHandler implements EffectHandler {
  */
 export class EventRecordHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target } = effect;
+    // 支持 event_record 和 EVENT_RECORD 两种格式
+    const target = effect.event || effect.target;
     
     // 将事件记录添加到玩家的事件列表中
-    if (state.player) {
+    if (state.player && target) {
       const eventRecord = {
         eventId: target,
-        timestamp: Date.now(),
+        timestamp: state.currentTime
+          ? {
+              year: state.currentTime.year,
+              month: state.currentTime.month,
+              day: state.currentTime.day,
+            }
+          : {
+              year: state.player.age,
+              month: 1,
+              day: 1,
+            },
         age: state.player.age,
       };
       
       return {
         ...state,
         player: {
-          ...state.player,
+          ...state.player,  // 保留所有 player 属性
           events: [...(state.player.events || []), eventRecord],
         },
       };
@@ -388,6 +593,48 @@ export class RandomEffectHandler implements EffectHandler {
 }
 
 /**
+ * 因果变化处理器
+ */
+export class KarmaChangeHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const effectDef = effect as any;
+    const good = effectDef.good || 0;
+    const evil = effectDef.evil || 0;
+    const description = effect.description || '因果变化';
+    
+    if (good === 0 && evil === 0) {
+      return state;
+    }
+    
+    const timestamp = state.currentTime 
+      ? state.currentTime.year * 10000 + state.currentTime.month * 100 + state.currentTime.day
+      : Date.now();
+    
+    // 处理善行
+    if (good > 0) {
+      state = KarmaManager.addKarma(
+        state,
+        good,
+        description,
+        timestamp
+      );
+    }
+    
+    // 处理恶行
+    if (evil > 0) {
+      state = KarmaManager.addKarma(
+        state,
+        -evil,
+        description,
+        timestamp
+      );
+    }
+    
+    return state;
+  }
+}
+
+/**
  * 复合效果处理器（处理嵌套效果）
  */
 export class CompositeEffectHandler implements EffectHandler {
@@ -412,18 +659,227 @@ export class SpecialEffectHandler implements EffectHandler {
     
     // 处理游戏结束效果
     if (target === 'end_game') {
-      console.log('游戏结束！');
-      // 设置游戏结束标志
+      
+      // 触发结局判定
+      const ending = EndingSystem.determineEnding(state);
+      
+      // 设置游戏结束标志和结局信息
       return {
         ...state,
+        player: state.player ? {
+          ...state.player,
+          alive: false,
+          deathReason: ending.name,
+        } : state.player,
         flags: {
           ...state.flags,
           gameEnded: true,
+          ending_triggered: true,
+          [`ending_${ending.id}`]: true,
+        },
+        ending: {
+          id: ending.id,
+          name: ending.name,
+          description: ending.description,
+          category: ending.category,
         },
       };
     }
     
     // 其他特殊效果可以在这里添加
+    return state;
+  }
+}
+
+/**
+ * 设置阵营处理器
+ */
+export class SetFactionHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { value } = effect;
+    const faction: FactionType = value as FactionType;
+    
+    if (!state.lifePath) {
+      state = LifePathManager.initialize(state);
+    }
+    
+    return {
+      ...state,
+      lifePath: {
+        ...state.lifePath!,
+        faction,
+      },
+    };
+  }
+}
+
+/**
+ * 添加专注度处理器
+ */
+export class LifepathAddFocusHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target, value = 1 } = effect;
+    const focusType: FocusType = target as FocusType;
+    
+    if (!state.lifePath) {
+      state = LifePathManager.initialize(state);
+    }
+    
+    const currentFocus = state.lifePath.focus || { martial: 0, business: 0, academic: 0, leadership: 0 };
+    
+    return {
+      ...state,
+      lifePath: {
+        ...state.lifePath!,
+        focus: {
+          ...currentFocus,
+          [focusType]: (currentFocus[focusType] || 0) + value,
+        },
+      },
+    };
+  }
+}
+
+/**
+ * 记录成就处理器
+ */
+export class LifepathRecordAchievementHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target } = effect;
+    const achievementId = target;
+    
+    if (!state.lifePath) {
+      state = LifePathManager.initialize(state);
+    }
+    
+    const achievements = state.lifePath.achievements || [];
+    if (!achievements.includes(achievementId)) {
+      achievements.push(achievementId);
+    }
+    
+    return {
+      ...state,
+      lifePath: {
+        ...state.lifePath!,
+        achievements,
+      },
+    };
+  }
+}
+
+/**
+ * 添加承诺处理器
+ */
+export class LifepathAddCommitmentHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target, value } = effect;
+    const commitmentType = target as 'cannotJoin' | 'mustProtect' | 'swornEnemies';
+    
+    if (!state.lifePath) {
+      state = LifePathManager.initialize(state);
+    }
+    
+    const commitments = state.lifePath.commitments || { cannotJoin: [], mustProtect: [], swornEnemies: [] };
+    const commitmentList = commitments[commitmentType] || [];
+    
+    if (!commitmentList.includes(value)) {
+      commitmentList.push(value);
+    }
+    
+    return {
+      ...state,
+      lifePath: {
+        ...state.lifePath!,
+        commitments: {
+          ...commitments,
+          [commitmentType]: commitmentList,
+        },
+      },
+    };
+  }
+}
+
+/**
+ * 添加关系处理器
+ */
+export class LifepathAddRelationshipHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target, value } = effect;
+    const relationshipType = target as 'allies' | 'enemies' | 'mentors' | 'disciples';
+    const relationId = value;
+    
+    if (!state.lifePath) {
+      state = LifePathManager.initialize(state);
+    }
+    
+    const relationships = state.lifePath.relationships || { allies: [], enemies: [], mentors: [], disciples: [] };
+    const relationshipList = relationships[relationshipType] || [];
+    
+    if (!relationshipList.includes(relationId)) {
+      relationshipList.push(relationId);
+    }
+    
+    return {
+      ...state,
+      lifePath: {
+        ...state.lifePath!,
+        relationships: {
+          ...relationships,
+          [relationshipType]: relationshipList,
+        },
+      },
+    };
+  }
+}
+
+/**
+ * 触发事件处理器
+ * 用于在事件效果中直接触发另一个事件
+ */
+export class TriggerEventHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    const { target } = effect;
+    const eventId = target as string;
+    
+    
+    // 从 eventLoader 获取事件定义
+    const eventLoader = (this as any).eventLoader;
+    if (!eventLoader) {
+      console.error(`[TriggerEvent] eventLoader 不存在，无法触发 ${eventId}`);
+      return state;
+    }
+    
+    const event = eventLoader.getEventById(eventId);
+    if (!event) {
+      console.error(`[TriggerEvent] 事件 ${eventId} 不存在`);
+      return state;
+    }
+    
+    
+    // 如果是自动事件，直接执行效果
+    if (event.eventType === 'auto' && event.autoEffects) {
+      const updatedState = await this.execute(event.autoEffects, state);
+      return updatedState;
+    }
+    
+    // 否则只记录事件
+    if (state.player) {
+      state.player.events.push({
+        eventId: eventId,
+        timestamp: state.currentTime
+          ? {
+              year: state.currentTime.year,
+              month: state.currentTime.month,
+              day: state.currentTime.day,
+            }
+          : {
+              year: state.player.age,
+              month: 1,
+              day: 1,
+            },
+      });
+    }
+    
     return state;
   }
 }

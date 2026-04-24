@@ -112,7 +112,17 @@ export class ConditionEvaluator implements IConditionEvaluator {
       /flags\.(\w+)/g,
       (_, prop) => {
         const value = state.flags[prop];
-        return value !== undefined ? value : 'undefined';
+        return value !== undefined ? String(value) : 'undefined';
+      }
+    );
+    
+    // 替换直接属性访问（如 chivalry, reputation 等）
+    // 这些属性存储在 state.player 中
+    expression = expression.replace(
+      /\b(chivalry|reputation|martialPower|externalSkill|internalSkill|qinggong|constitution|charisma|comprehension|knowledge|connections|money|age)\b/g,
+      (_, prop) => {
+        const value = (state.player as any)?.[prop];
+        return value !== undefined ? value : '0';
       }
     );
     
@@ -124,10 +134,12 @@ export class ConditionEvaluator implements IConditionEvaluator {
    */
   private replaceFunctionCalls(expression: string, state: GameState): string {
     // 处理 flags.has('xxx') - flags 现在是对象而不是 Set
+    // 支持 state.flags 和 state.player.flags 两种方式
     expression = expression.replace(
       /flags\.has\(['"]([^'"]+)['"]\)/g,
       (_, flagName) => {
-        const hasFlag = !!state.flags[flagName];
+        // 先检查 state.flags（旧格式）
+        const hasFlag = !!state.flags?.[flagName] || !!state.player?.flags?.[flagName];
         return hasFlag ? 'true' : 'false';
       }
     );

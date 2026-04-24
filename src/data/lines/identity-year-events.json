@@ -1,0 +1,515 @@
+[
+  {
+    "id": "commoner_year_farming",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 30,
+    "weight": 60,
+    "ageRange": { "min": 18, "max": 65 },
+    "triggers": [
+      { "type": "age_reach", "value": 18 },
+      { "type": "random", "value": 0.25 }
+    ],
+    "thresholds": {
+      "identity": {
+        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
+      }
+    },
+    "content": {
+      "title": "耕耘收获",
+      "text": "这一年你专注于田间劳作。春天播种，秋天收获，虽然辛苦但生活充实。",
+      "description": "平凡的农耕生活"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "farming_diligent",
+        "text": "勤勉耕作，精耕细作",
+        "effects": [
+          { "type": "stat_modify", "target": "constitution", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" }
+        ]
+      },
+      {
+        "id": "farming_leisure",
+        "text": "适度耕作，多休息",
+        "effects": [
+          { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "health", "value": 5, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "commoner_year_apprentice",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 35,
+    "weight": 50,
+    "ageRange": { "min": 15, "max": 25 },
+    "triggers": [
+      { "type": "age_reach", "value": 15 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "thresholds": {
+      "identity": {
+        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
+      }
+    },
+    "content": {
+      "title": "学徒生涯",
+      "text": "你到镇上的店铺当学徒，学习一门手艺。这是谋生的开始。",
+      "description": "学徒生活"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "apprentice_hard",
+        "text": "勤学苦练，争取早日出师",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "completed_apprenticeship", "value": true }
+        ]
+      },
+      {
+        "id": "apprentice_social",
+        "text": "多交朋友，建立人脉",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "commoner_year_neighbor",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 25,
+    "weight": 55,
+    "ageRange": { "min": 20, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "thresholds": {
+      "identity": {
+        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
+      }
+    },
+    "content": {
+      "title": "邻里人情",
+      "text": "村里有人办喜事，你前去帮忙。乡里乡亲，互相帮助是常事。",
+      "description": "邻里交往"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "neighbor_help",
+        "text": "热心帮忙，结下善缘",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "neighbor_observe",
+        "text": "冷眼旁观，了解人性",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 1, "operator": "add" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "merchant_year_trade",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 50,
+    "weight": 70,
+    "ageRange": { "min": 20, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.35 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["merchant"]
+      }
+    },
+    "content": {
+      "title": "远行贸易",
+      "text": "你整理货物，远赴他乡贸易。这一路见识了各地风土人情，也赚取了丰厚利润。",
+      "description": "商人远行贸易"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "trade_risk",
+        "text": "冒险走小路，缩短行程",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "health", "value": -5, "operator": "add" }
+        ]
+      },
+      {
+        "id": "trade_stable",
+        "text": "走官道，安全第一",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "merchantNetwork", "value": 3, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_year_crisis",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 45,
+    "weight": 50,
+    "ageRange": { "min": 25, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 25 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["merchant"]
+      }
+    },
+    "content": {
+      "title": "商业危机",
+      "text": "市场行情突变，你的生意受到冲击。是时候展现商人的智慧了。",
+      "description": "商业危机处理"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "crisis_innovate",
+        "text": "创新产品，另辟蹊径",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "overcome_crisis", "value": true }
+        ]
+      },
+      {
+        "id": "crisis_retreat",
+        "text": "收缩战线，保本为先",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": -30, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_year_network",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 40,
+    "weight": 60,
+    "ageRange": { "min": 22, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 22 },
+      { "type": "random", "value": 0.25 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["merchant"]
+      }
+    },
+    "content": {
+      "title": "商会交际",
+      "text": "你参加本地商会的年度聚会，结识了许多商界同仁。",
+      "description": "商人社交活动"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "network_alliance",
+        "text": "寻求合作，共谋发展",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "merchantNetwork", "value": 5, "operator": "add" }
+        ]
+      },
+      {
+        "id": "network_observe",
+        "text": "观察局势，不急于表态",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 2, "operator": "add" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "jianghu_year_patrol",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 55,
+    "weight": 70,
+    "ageRange": { "min": 20, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["hero", "warrior", "sect_leader"]
+      }
+    },
+    "content": {
+      "title": "行侠仗义",
+      "text": "你在江湖上行侠仗义，除暴安良。武林中人对你议论纷纷。",
+      "description": "侠客行侠"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "patrol_righteous",
+        "text": "路见不平，拔刀相助",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "patrol_cautious",
+        "text": "审时度势，谨慎行事",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 3, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_year_training",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 60,
+    "weight": 75,
+    "ageRange": { "min": 18, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 18 },
+      { "type": "random", "value": 0.35 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["hero", "warrior", "sect_leader"]
+      }
+    },
+    "content": {
+      "title": "闭关修炼",
+      "text": "你找了一处清静之地，闭关修炼武学。期间对武学有了更深的领悟。",
+      "description": "武林人士修炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "training_internal",
+        "text": "专注内功修炼",
+        "effects": [
+          { "type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "training_external",
+        "text": "专注外功修炼",
+        "effects": [
+          { "type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "training_qinggong",
+        "text": "修炼轻功",
+        "effects": [
+          { "type": "stat_modify", "target": "qinggong", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jianghu_year_disciple",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 45,
+    "weight": 55,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 30 },
+      { "type": "random", "value": 0.25 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["sect_leader"]
+      }
+    },
+    "content": {
+      "title": "指点弟子",
+      "text": "你指点门下弟子练功。看到他们的进步，你仿佛看到了当年的自己。",
+      "description": "掌门指点弟子"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "disciple_strict",
+        "text": "严格要求，精益求精",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "disciple_kind",
+        "text": "因材施教，耐心指导",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "id": "scholar_year_study",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 55,
+    "weight": 70,
+    "ageRange": { "min": 15, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 15 },
+      { "type": "random", "value": 0.35 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "苦读诗书",
+      "text": "你闭门苦读，博览群书。学问就在这日复一日的积累中增长。",
+      "description": "文人读书"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "study_classics",
+        "text": "研读经典，夯实基础",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "study_new",
+        "text": "涉猎新知拓宽视野",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_year_social",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 45,
+    "weight": 60,
+    "ageRange": { "min": 20, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.25 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["scholar"]
+      }
+    },
+    "content": {
+      "title": "文会交际",
+      "text": "你参加文人雅集，与各方名士吟诗作对，谈古论今。",
+      "description": "文人社交"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "social_poetry",
+        "text": "即兴赋诗，展示才华",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "social_listen",
+        "text": "虚心聆听，增长见闻",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scholar_year_write",
+    "version": "1.0.0",
+    "category": "life_year",
+    "priority": 50,
+    "weight": 55,
+    "ageRange": { "min": 25, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 25 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "thresholds": {
+      "identity": {
+        "required": ["scholar"]
+      },
+      "attributes": {
+        "knowledge": { "min": 30 }
+      }
+    },
+    "content": {
+      "title": "著书立说",
+      "text": "你决定将所学整理成书，造福后人。这是文人最大的心愿。",
+      "description": "学者著作"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "write_academic",
+        "text": "撰写学术专著",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "influence", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "published_work", "value": true }
+        ]
+      },
+      {
+        "id": "write_poetry",
+        "text": "整理诗文集",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 8, "operator": "add" }
+        ]
+      }
+    ]
+  }
+]

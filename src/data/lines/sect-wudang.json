@@ -284,35 +284,147 @@
       {
         "id": "service_aid",
         "text": "出手相助",
-        "weight": 3,
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "chivalry", "value": 4, "operator": "add" },
-          { "type": "flag_set", "target": "orthodox_trial_service_done" },
-          { "type": "event_record", "target": "orthodox_trial_service_aid" }
+        "description": "路见不平，拔刀相助",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你武艺高强，三招两式便制服歹徒！受害老者感激涕零：\"少侠好身手！\"此事传开后，武当派对你刮目相看——方丈亲自召见，赞你\"侠义心肠，可造之材\"！",
+            "condition": {"type": "expression", "expression": "martialPower >= 25"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 20, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "flag_set", "target": "orthodox_trial_exceeded"},
+              {"type": "event_record", "target": "orthodox_trial_service_aid_great"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你出手相助，击退歹徒。老者感激不已，连声道谢。你的侠义之举传为美谈。",
+            "condition": {"type": "expression", "expression": "martialPower >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 20, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "chivalry", "value": 4, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_aid"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你与歹徒苦战，虽击退对方，但也身负轻伤。老者感激你的仗义出手。",
+            "condition": {"type": "expression", "expression": "martialPower >= 10"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 22, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "health", "value": -8, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_aid_injury"}
+            ]
+          },
+          {
+            "id": "failure",
+            "text": "你试图出手相助，却因实力不济被歹徒打伤。关键时刻另一位侠客路过相助，你虽败犹伤，老者对你心存感激。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 25, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "health", "value": -15, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_aid_fail"}
+            ]
+          }
         ]
       },
       {
         "id": "service_injury",
-        "text": "救人受伤",
-        "weight": 1,
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 18, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
-          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
-          { "type": "flag_set", "target": "orthodox_trial_service_done" },
-          { "type": "event_record", "target": "orthodox_trial_service_injury" }
+        "text": "舍身救人",
+        "description": "不顾自身安危，救人于危难",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你以身为饵，引开歹徒，救出老者！虽身负重伤，却感天动地。老者竟是武当派长老的故交，在他的推荐下，你直接被收为武当核心弟子！",
+            "condition": {"type": "expression", "expression": "constitution >= 18 && chivalry >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 25, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "health", "value": -20, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 15, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "flag_set", "target": "orthodox_core_recommended"},
+              {"type": "event_record", "target": "orthodox_trial_service_heroic"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你舍身救人，虽然受伤，但成功击退歹徒。老者感激涕零：\"少侠高义！\"",
+            "condition": {"type": "expression", "expression": "constitution >= 12"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 22, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "health", "value": -12, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_injury"}
+            ]
+          },
+          {
+            "id": "failure",
+            "text": "你舍身救人，却因实力不济反被击伤。幸得好心人路过相助，才化险为夷。老者虽感激你的心意，但也不免暗自叹息。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 28, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "health", "value": -25, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_injury_fail"}
+            ]
+          }
         ]
       },
       {
         "id": "service_meditate",
-        "text": "克制旁观",
-        "weight": 2,
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
-          { "type": "flag_set", "target": "orthodox_trial_service_done" },
-          { "type": "event_record", "target": "orthodox_trial_service_meditate" }
+        "text": "冷静观察",
+        "description": "静观其变，分析形势",
+        "outcomes": [
+          {
+            "id": "success",
+            "text": "你冷静观察形势，发现歹徒不过外强中干。你巧设计谋，不费一兵一卒便令歹徒知难而退。老者对你刮目相看：\"少侠好谋略！\"",
+            "condition": {"type": "expression", "expression": "comprehension >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "flag_set", "target": "orthodox_trial_smart"},
+              {"type": "event_record", "target": "orthodox_trial_service_meditate"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你冷静观察，发现自己实力不足以正面对抗。便暗中跟踪歹徒，在他们放松警惕时报官处理。虽然方法迂回，但也解了老者之围。",
+            "condition": {"type": "expression", "expression": "comprehension >= 10"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 18, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "influence", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_meditate_partial"}
+            ]
+          },
+          {
+            "id": "failure",
+            "text": "你冷静旁观，却发现情况超出预料——歹徒伤害了老者后才离开。你心中愧疚，暗自后悔没有及时出手。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 20, "timeUnit": "day"},
+              {"type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add"},
+              {"type": "flag_set", "target": "orthodox_trial_service_done"},
+              {"type": "event_record", "target": "orthodox_trial_service_meditate_fail"}
+            ]
+          }
         ]
       }
     ],
@@ -448,6 +560,10 @@
           { "type": "flag_unset", "target": "route_orthodox" },
           { "type": "flag_unset", "target": "orthodox_trial_active" },
           { "type": "flag_set", "target": "orthodox_departed" },
+          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
+          { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
+          { "type": "stat_modify", "target": "internalSkill", "value": -5, "operator": "add" },
           { "type": "event_record", "target": "orthodox_departure_leave" }
         ]
       },

@@ -1,0 +1,147 @@
+[
+  {
+    "id": "frontier_horse_training",
+    "version": "1.0",
+    "category": "frontier",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": {"min": 8, "max": 16},
+    "triggers": [
+      {"type": "age_reach", "value": 8},
+      {"type": "expression", "expression": "flags.origin_frontier == true"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "constitution >= 12"}
+    ],
+    "content": {
+      "title": "马背训练",
+      "text": "作为边疆民族的孩子，你从小就在马背上长大。今天长辈教你如何驯服烈马，掌握高超的骑术。",
+      "description": "马术传承"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "刻苦训练（轻功 +8，体魄 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": 5},
+          {"type": "flag_set", "flag": "horse_master", "value": true}
+        ]
+      },
+      {
+        "text": "灵活应对（轻功 +5，外功 +3）",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 5},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 3},
+          {"type": "flag_set", "flag": "agile_rider", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.1,
+        "merchant": 0.2,
+        "wuxia": 0.3,
+        "frontier": 1.5
+      },
+      "tags": ["马术", "边疆", "骑术"]
+    }
+  },
+  {
+    "id": "frontier_border_patrol",
+    "version": "1.0",
+    "category": "frontier",
+    "priority": 80,
+    "weight": 75,
+    "ageRange": {"min": 14, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 14},
+      {"type": "expression", "expression": "flags.horse_master == true || qinggong >= 20"},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "externalSkill >= 15 && constitution >= 18"}
+    ],
+    "content": {
+      "title": "边境巡逻",
+      "text": "你被征召参加边境巡逻，维护边疆安宁。在广袤的草原上，你学会了野外生存和战斗技巧。",
+      "description": "边防任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "勇猛作战（外功 +10，体魄 +8）",
+        "effects": [
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "constitution", "value": 8},
+          {"type": "flag_set", "flag": "brave_warrior", "value": true}
+        ]
+      },
+      {
+        "text": "机智应对（轻功 +12，悟性 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 12},
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "flag_set", "flag": "smart_patroller", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.05,
+        "merchant": 0.1,
+        "wuxia": 0.4,
+        "frontier": 1.2
+      },
+      "tags": ["边境", "巡逻", "战斗"]
+    }
+  },
+  {
+    "id": "frontier_cultural_conflict",
+    "version": "1.0",
+    "category": "frontier",
+    "priority": 75,
+    "weight": 70,
+    "ageRange": {"min": 16, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 16},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.origin_frontier == true && (reputation >= 15 || externalSkill >= 25)"}
+    ],
+    "content": {
+      "title": "文化冲突",
+      "text": "随着你在中原武林声名鹊起，一些人对你异族身份表示质疑。你需要证明自己的能力和品格，赢得尊重。",
+      "description": "身份认同"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "以武会友（外功 +15，声望 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "externalSkill", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "respected_warrior", "value": true}
+        ]
+      },
+      {
+        "text": "以德服人（侠义 +12，魅力 +8）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "virtuous_stranger", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.2,
+        "merchant": 0.3,
+        "wuxia": 0.5,
+        "frontier": 1.0
+      },
+      "tags": ["文化", "认同", "挑战"]
+    }
+  }
+]

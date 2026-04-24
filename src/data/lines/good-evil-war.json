@@ -8,18 +8,18 @@
     "ageRange": {"min": 30, "max": 55},
     "triggers": [
       {"type": "age_reach", "value": 30},
-      {"type": "expression", "expression": "martialPower >= 70 && (flags.orthodox_member == true || flags.demonic_member == true)"}
+      {"type": "expression", "expression": "martialPower >= 70 && (flags.sect_faction == 'orthodox' || flags.sect_faction == 'unconventional')"}
     ],
     "conditions": [],
     "content": {
-      "title": "战前准备",
-      "text": "正道与魔教的矛盾日益激化，大战一触即发。各门派开始召集人手，储备物资。你也必须做出选择。",
-      "description": "战前准备"
+      "title": "江湖纷争",
+      "text": "江湖上传统门派与非传统门派的矛盾日益激化，大战一触即发。朝廷乐于见到江湖自相残杀，暗中推波助澜。各门派开始召集人手，储备物资。你也必须做出选择——但你是否想过，这场战争究竟是为了什么？",
+      "description": "江湖纷争将起"
     },
     "eventType": "choice",
     "choices": [
       {
-        "text": "加入正道联盟（需侠义≥40）",
+        "text": "加入传统门派联盟（需侠义≥40）",
         "conditions": [
           {"type": "expression", "expression": "chivalry >= 40"}
         ],
@@ -27,24 +27,32 @@
           {"type": "stat_modify", "stat": "chivalry", "value": 10},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "stat_modify", "stat": "martialPower", "value": 8},
-          {"type": "flag_set", "flag": "war_good_side", "value": true}
+          {"type": "flag_set", "flag": "war_traditional_side", "value": true}
         ]
       },
       {
-        "text": "加入魔教（需侠义≤-20）",
+        "text": "加入非传统门派（需侠义≤-20）",
         "conditions": [
           {"type": "expression", "expression": "chivalry <= -20"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": -10},
           {"type": "stat_modify", "stat": "martialPower", "value": 12},
-          {"type": "flag_set", "flag": "war_evil_side", "value": true}
+          {"type": "flag_set", "flag": "war_unconventional_side", "value": true}
         ]
       },
       {
-        "text": "保持中立",
+        "text": "保持中立，仔细观察",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": -5}
+          {"type": "stat_modify", "stat": "reputation", "value": -5},
+          {"type": "flag_set", "flag": "war_neutral_observer", "value": true}
+        ]
+      },
+      {
+        "text": "质疑这场战争的意义",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "flag_set", "flag": "war_questioner", "value": true}
         ]
       }
     ]

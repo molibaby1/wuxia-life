@@ -1,0 +1,184 @@
+[
+  {
+    "id": "beggar_first_day",
+    "name": "初入江湖",
+    "description": "你沦为乞丐，开始在江湖上乞讨为生。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 15, "max": 30 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["beggar", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 15 }],
+    "triggerConditions": { "age": { "min": 15, "max": 30 }, "identity": { "required": ["beggar"] } },
+    "content": { "title": "乞讨", "text": "你沦为乞丐，开始在江湖上乞讨为生。这是你人生的新起点。" },
+    "choices": [
+      {
+        "id": "beg_honest",
+        "text": "老实乞讨，靠人施舍 (金钱 +5, 体魄 -5)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": -5, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_first_day", "value": true }
+        ]
+      },
+      {
+        "id": "beg_smart",
+        "text": "卖艺乞讨，展示才艺 (金钱 +10, 声望 +5)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_first_day", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "beggar_gang_join",
+    "name": "丐帮邀请",
+    "description": "丐帮弟子邀请你加入丐帮。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": { "min": 18, "max": 35 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["beggar", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "triggerConditions": { "age": { "min": 18, "max": 35 }, "identity": { "required": ["beggar"] } },
+    "content": { "title": "入帮", "text": "丐帮弟子邀请你加入丐帮。这是天下第一大帮，弟子遍布各地。" },
+    "choices": [
+      {
+        "id": "join_beggar",
+        "text": "加入丐帮，成为弟子 (武力 +15, 人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 5, "evil": 0 },
+          { "type": "flag_set", "target": "beggar_gang_join", "value": true }
+        ]
+      },
+      {
+        "id": "reject_beggar",
+        "text": "拒绝加入，独来独往 (声望 +5)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_gang_join", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "beggar_info_network",
+    "name": "消息网络",
+    "description": "作为乞丐，你能听到各种江湖消息。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": { "min": 25, "max": 45 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["beggar", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "triggerConditions": { "age": { "min": 25, "max": 45 }, "identity": { "required": ["beggar"] } },
+    "content": { "title": "情报", "text": "作为乞丐，你能听到各种江湖消息。这些信息或许能卖个好价钱。" },
+    "choices": [
+      {
+        "id": "sell_info",
+        "text": "出售消息，换取金钱 (金钱 +50, 声望 -5)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -5, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_info_network", "value": true }
+        ]
+      },
+      {
+        "id": "share_info",
+        "text": "分享消息，帮助他人 (侠义 +15, 人脉 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 10, "evil": 0 },
+          { "type": "flag_set", "target": "beggar_info_network", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "beggar_martial_art",
+    "name": "乞讨神功",
+    "description": "你从丐帮长老那里学到了打狗棒法。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": { "min": 30, "max": 50 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["beggar", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "triggerConditions": { "age": { "min": 30, "max": 50 }, "identity": { "required": ["beggar"] } },
+    "content": { "title": "神功", "text": "你从丐帮长老那里学到了打狗棒法。这是丐帮的镇帮绝学。" },
+    "choices": [
+      {
+        "id": "learn_staff",
+        "text": "学习打狗棒法 (外功 +25, 武力 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "externalSkill", "value": 25, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 20, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_martial_art", "value": true }
+        ]
+      },
+      {
+        "id": "learn_palm",
+        "text": "学习降龙十八掌 (外功 +30, 体魄 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "externalSkill", "value": 30, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_martial_art", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "beggar_leader",
+    "name": "丐帮长老",
+    "description": "年事已高，你在丐帮中的地位日益巩固。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 50, "max": 70 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["beggar", "identity", "elderly"],
+    "triggers": [{ "type": "age_reach", "value": 50 }],
+    "triggerConditions": { "age": { "min": 50, "max": 70 }, "identity": { "required": ["beggar"] } },
+    "content": { "title": "长老", "text": "年事已高，你在丐帮中的地位日益巩固。需要考虑传承问题。" },
+    "choices": [
+      {
+        "id": "train_successor",
+        "text": "培养接班人，传授绝学 (声望 +25, 人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 25, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 15, "evil": 0 },
+          { "type": "flag_set", "target": "beggar_leader", "value": true }
+        ]
+      },
+      {
+        "id": "expand_gang",
+        "text": "扩大丐帮势力 (声望 +20, 金钱 +50)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" },
+          { "type": "flag_set", "target": "beggar_leader", "value": true }
+        ]
+      }
+    ]
+  }
+]

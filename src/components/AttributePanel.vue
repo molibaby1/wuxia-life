@@ -49,6 +49,42 @@
       </div>
     </div>
 
+    <!-- 门派与身份信息 -->
+    <div class="identity-section" v-if="currentSectInfo || playerIdentities.length > 0">
+      <h4>门派与身份</h4>
+      <div class="identity-content">
+        <!-- 当前门派 -->
+        <div v-if="currentSectInfo" class="sect-badge" :class="currentSectInfo.faction">
+          <span class="sect-name">{{ currentSectInfo.name }}</span>
+          <span class="sect-faction">{{ currentSectInfo.factionName }}</span>
+        </div>
+        
+        <!-- 身份标签 -->
+        <div v-if="playerIdentities.length > 0" class="identity-tags">
+          <span 
+            v-for="identity in playerIdentities" 
+            :key="identity"
+            class="identity-tag"
+            :class="getIdentityClass(identity)"
+          >
+            {{ getIdentityName(identity) }}
+          </span>
+        </div>
+        
+        <!-- 重要标志 -->
+        <div v-if="importantFlags.length > 0" class="important-flags">
+          <span 
+            v-for="flag in importantFlags" 
+            :key="flag.key"
+            class="flag-badge"
+            :class="flag.type"
+          >
+            {{ flag.label }}
+          </span>
+        </div>
+      </div>
+    </div>
+
     <!-- 详细信息（展开） -->
     <div v-if="showDetail" class="stats-detail">
       <!-- 天赋展示 -->
@@ -66,13 +102,13 @@
               <span class="talent-rarity">{{ getRarityName(talent.rarity) }}</span>
             </div>
             <p class="talent-desc">{{ getTalentNarrative(talent.id) }}</p>
-            <div class="talent-effects" v-if="showDetail">
+            <div class="talent-effects" v-if="showDetail && talent.growthBonus">
               <div 
                 v-for="(effect, key) in talent.growthBonus" 
                 :key="key"
                 class="talent-effect"
               >
-                {{ getStatName(key) }} +{{ (effect * 100).toFixed(0) }}%
+                {{ getStatName(key) }} +{{ ((effect || 0) * 100).toFixed(0) }}%
               </div>
             </div>
           </div>
@@ -133,10 +169,10 @@
                 v-for="(req, key) in suggestion.requirements" 
                 :key="key"
                 class="requirement"
-                :class="{ met: req.met }"
+                :class="{ met: req?.met }"
               >
-                {{ req.name }}: {{ req.current }}/{{ req.required }}
-                <check-icon v-if="req.met" class="check-icon" />
+                {{ req?.name || key }}: {{ req?.current || 0 }}/{{ req?.required || 0 }}
+                <check-icon v-if="req?.met" class="check-icon" />
                 <x-icon v-else class="x-icon" />
               </div>
             </div>
@@ -213,6 +249,128 @@ const nonCombatStats = computed(() => {
 const playerTalents = computed(() => {
   if (!props.player.talents) return [];
   return props.talents.filter(t => props.player.talents?.includes(t.id));
+});
+
+// 门派名称映射
+const sectNameMap: Record<string, { name: string; faction: string }> = {
+  'shaolin': { name: '少林寺', faction: 'orthodox' },
+  'wudang': { name: '武当派', faction: 'orthodox' },
+  'beggars': { name: '丐帮', faction: 'neutral' },
+  'shadow_sect': { name: '幽影门', faction: 'unconventional' },
+  'youying': { name: '幽影门', faction: 'unconventional' },
+  'tangmen': { name: '唐门', faction: 'neutral' },
+  'mingjiao': { name: '明教', faction: 'unconventional' },
+  'border': { name: '边关守军', faction: 'neutral' },
+};
+
+// 阵营名称映射
+const factionNameMap: Record<string, string> = {
+  'orthodox': '正道',
+  'unconventional': '非传统',
+  'neutral': '中立',
+};
+
+// 获取当前门派信息
+const currentSectInfo = computed(() => {
+  const currentSect = props.player.flags?.current_sect;
+  if (!currentSect) return null;
+  
+  const sectInfo = sectNameMap[currentSect];
+  if (!sectInfo) {
+    return {
+      name: currentSect,
+      faction: 'neutral',
+      factionName: '未知'
+    };
+  }
+  
+  return {
+    name: sectInfo.name,
+    faction: sectInfo.faction,
+    factionName: factionNameMap[sectInfo.faction] || sectInfo.faction
+  };
+});
+
+// 玩家身份列表
+const playerIdentities = computed(() => {
+  const identities: string[] = [];
+  
+  // 根据 flags 判断身份
+  if (props.player.flags?.route_beggars) identities.push('beggar');
+  if (props.player.flags?.route_border) identities.push('border');
+  if (props.player.flags?.route_demonic || props.player.flags?.sect_faction === 'unconventional') identities.push('outlaw');
+  if (props.player.flags?.route_orthodox || props.player.flags?.sect_shaolin || props.player.flags?.sect_wudang) identities.push('orthodox');
+  if (props.player.flags?.route_official) identities.push('official');
+  if (props.player.flags?.married) identities.push('married');
+  if (props.player.flags?.has_child) identities.push('parent');
+  if (props.player.flags?.retired) identities.push('retired');
+  if (props.player.flags?.is_sect_leader) identities.push('sect_leader');
+  
+  return identities;
+});
+
+// 身份名称映射
+const identityNameMap: Record<string, string> = {
+  'beggar': '丐帮弟子',
+  'border': '边关将士',
+  'outlaw': '绿林好汉',
+  'orthodox': '名门弟子',
+  'official': '朝廷官员',
+  'married': '已婚',
+  'parent': '为人父母',
+  'retired': '退隐江湖',
+  'sect_leader': '一派之主',
+};
+
+// 获取身份名称
+const getIdentityName = (identity: string): string => {
+  return identityNameMap[identity] || identity;
+};
+
+// 获取身份样式类
+const getIdentityClass = (identity: string): string => {
+  const classMap: Record<string, string> = {
+    'beggar': 'tag-neutral',
+    'border': 'tag-neutral',
+    'outlaw': 'tag-unconventional',
+    'orthodox': 'tag-orthodox',
+    'official': 'tag-orthodox',
+    'married': 'tag-normal',
+    'parent': 'tag-normal',
+    'retired': 'tag-normal',
+    'sect_leader': 'tag-special',
+  };
+  return classMap[identity] || 'tag-normal';
+};
+
+// 重要标志列表
+const importantFlags = computed(() => {
+  const flags: { key: string; label: string; type: string }[] = [];
+  
+  if (props.player.flags?.sect_switch_cooldown) {
+    flags.push({
+      key: 'cooldown',
+      label: `门派冷却(${props.player.flags.sect_switch_cooldown}年)`,
+      type: 'warning'
+    });
+  }
+  if (props.player.flags?.beggars_departed) {
+    flags.push({ key: 'beggars_departed', label: '已脱离丐帮', type: 'info' });
+  }
+  if (props.player.flags?.border_departed) {
+    flags.push({ key: 'border_departed', label: '已离开边关', type: 'info' });
+  }
+  if (props.player.flags?.marginal_departed) {
+    flags.push({ key: 'marginal_departed', label: '已脱离幽影门', type: 'info' });
+  }
+  if (props.player.flags?.orthodox_departed) {
+    flags.push({ key: 'orthodox_departed', label: '已离开师门', type: 'info' });
+  }
+  if (props.player.flags?.buddhist_secularized) {
+    flags.push({ key: 'buddhist_secularized', label: '已还俗', type: 'info' });
+  }
+  
+  return flags;
 });
 
 // 获取属性百分比
@@ -320,8 +478,9 @@ const calculateTalentBonus = (statKey: string): number => {
   let bonus = 0;
   props.player.talents.forEach(talentId => {
     const talent = props.talents.find(t => t.id === talentId);
-    if (talent && talent.growthBonus && talent.growthBonus[statKey]) {
-      bonus += talent.growthBonus[statKey];
+    const growthMap = talent?.growthBonus as Record<string, number> | undefined;
+    if (growthMap && growthMap[statKey]) {
+      bonus += growthMap[statKey];
     }
   });
   
@@ -796,5 +955,133 @@ const developmentSuggestions = computed(() => {
 
 .x-icon {
   color: #ef4444;
+}
+
+/* 门派与身份区域 */
+.identity-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.identity-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.identity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 门派徽章 */
+.sect-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.sect-badge.orthodox {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  color: #93c5fd;
+}
+
+.sect-badge.unconventional {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(249, 115, 22, 0.3));
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+}
+
+.sect-badge.neutral {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(234, 179, 8, 0.3));
+  border: 2px solid rgba(234, 179, 8, 0.6);
+  color: #fde047;
+}
+
+.sect-name {
+  font-size: 15px;
+}
+
+.sect-faction {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* 身份标签 */
+.identity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.identity-tag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tag-orthodox {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.tag-unconventional {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.tag-neutral {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.tag-normal {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tag-special {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(249, 115, 22, 0.3));
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.5);
+}
+
+/* 重要标志 */
+.important-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.flag-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.flag-badge.warning {
+  background: rgba(249, 115, 22, 0.3);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.5);
+}
+
+.flag-badge.info {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
 }
 </style>

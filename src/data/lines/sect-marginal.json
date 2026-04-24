@@ -37,6 +37,11 @@
             "target": "route_demonic"
           },
           {
+            "type": "flag_set",
+            "target": "current_sect",
+            "value": "shadow_sect"
+          },
+          {
             "type": "stat_modify",
             "target": "chivalry",
             "value": 8,
@@ -934,7 +939,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"route_demonic\") && !flags.has(\"demonic_leader\") && !flags.has(\"marginal_departed\")"
+        "expression": "flags.has(\"route_demonic\") && !flags.has(\"marginal_departed\")"
       }
     ],
     "content": {
@@ -952,6 +957,10 @@
           { "type": "flag_unset", "target": "route_demonic" },
           { "type": "flag_unset", "target": "demonic_trial_active" },
           { "type": "flag_set", "target": "marginal_departed" },
+          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
+          { "type": "stat_modify", "target": "reputation", "value": -20, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": -10, "operator": "add" },
           { "type": "event_record", "target": "marginal_departure_leave" }
         ]
       },

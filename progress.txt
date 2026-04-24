@@ -13,3 +13,16 @@
   - Use targeted git staging because the repository has many pre-existing unrelated changes.
   - Keep stabilization story commits narrowly scoped to one acceptance target.
 ---
+
+## [2026-04-24 10:43] - US-002
+- Standardized validation scripts in `package.json`: added `test`, `typecheck`, and aggregate `validate`, while retaining build pipeline entry.
+- Added `tsx` runtime to support direct TypeScript test entrypoint execution via `npm test`.
+- Verified command behavior: `npm run typecheck` passes; `npm test` executes valid entrypoint; `npm run build` fails with non-zero exit as expected under current baseline.
+- Files changed:
+  - `package.json`
+  - `package-lock.json`
+  - `docs/PRD/project-stabilization.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - The current baseline has extensive `vue-tsc` build errors, so story-level checks should distinguish script wiring from full type-system recovery scope.
+---

@@ -61,6 +61,7 @@ export interface SectDescription {
     minChivalry?: number;
     maxChivalry?: number;
     minMartialPower?: number;
+    minInternalSkill?: number;
   };
 }
 

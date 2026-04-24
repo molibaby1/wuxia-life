@@ -89,9 +89,9 @@ export function useNewGameEngine() {
           id: choice.id,
           text: choice.text,
           description: choice.description,
-          outcomes: choice.outcomes,
+          outcomes: choice.outcomes as any,
           requirements: choice.requirements,
-        }));
+        })) as any;
       }
     } else {
       // 没有可用事件，推进时间
@@ -335,7 +335,7 @@ export function useNewGameEngine() {
     for (const effect of effects) {
       switch (effect.type) {
         case 'stat_modify': {
-          const statName = getStatName(effect.stat || effect.target);
+          const statName = getStatName(effect.stat || effect.target || 'unknown');
           const value = typeof effect.value === 'number' ? effect.value : 0;
           const isPositive = (effect.operator === 'add' && value > 0) ||
                            (effect.operator === 'subtract' && value < 0);

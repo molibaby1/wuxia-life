@@ -308,7 +308,7 @@ export class IdentitySystem {
   ): number {
     if (!state.identity) return baseValue;
     
-    const effects = this.getIdentityEffects(state.identity);
+    const effects = this.getIdentityEffects(state.identity.primary);
     const bonus = effects.bonuses[statName];
     
     if (bonus) {
@@ -324,7 +324,7 @@ export class IdentitySystem {
   static canTriggerIdentityEvent(state: GameState, eventId: string): boolean {
     if (!state.identity) return true;  // 无身份限制
     
-    const effects = this.getIdentityEffects(state.identity);
+    const effects = this.getIdentityEffects(state.identity.primary);
     return effects.events.includes(eventId);
   }
 
@@ -334,7 +334,7 @@ export class IdentitySystem {
   static canUnlockIdentityEnding(state: GameState, endingId: string): boolean {
     if (!state.identity) return false;
     
-    const effects = this.getIdentityEffects(state.identity);
+    const effects = this.getIdentityEffects(state.identity.primary);
     return effects.endings.includes(endingId);
   }
 }

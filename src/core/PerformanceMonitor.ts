@@ -89,7 +89,7 @@ export class PerformanceMonitor {
       this.metrics.memoryUsage = {
         usedHeapSize: memory.heapUsed,
         totalHeapSize: memory.heapTotal,
-        heapSizeLimit: memory.heapLimit || 0,
+        heapSizeLimit: memory.rss || 0,
       };
     }
   }

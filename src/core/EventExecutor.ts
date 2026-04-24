@@ -49,15 +49,15 @@ export class EventExecutor implements IEventExecutor {
     state: GameState
   ): Promise<GameState> {
     // 深拷贝 state，确保 flags 等嵌套对象被正确复制
-    let newState = {
+    let newState: GameState = {
       ...state,
-      player: state.player ? {
+      player: {
         ...state.player,
         flags: { ...(state.player.flags || {}) },
         events: [...(state.player.events || [])],
         items: [...(state.player.items || [])],
         relationships: [...(state.player.relationships || [])],
-      } : undefined,
+      },
     };
     
     for (const effect of effects) {
@@ -513,10 +513,15 @@ export class RelationChangeHandler implements EffectHandler {
         affinity: next,
       });
     } else {
+      const existing = relationships[existingIndex];
+      if (!existing) {
+        return state;
+      }
       relationships[existingIndex] = {
-        ...relationships[existingIndex],
-        role: (role || relationships[existingIndex].role) as any,
-        name: name || relationships[existingIndex].name,
+        ...existing,
+        id: existing.id || relationId,
+        role: (role || existing.role) as any,
+        name: name || existing.name,
         affinity: next,
       };
     }
@@ -585,6 +590,9 @@ export class RandomEffectHandler implements EffectHandler {
     // 随机选择一个效果执行
     const randomIndex = Math.floor(Math.random() * effects.length);
     const selectedEffect = effects[randomIndex];
+    if (!selectedEffect) {
+      return state;
+    }
     
     // 递归执行选中的效果
     const executor = new EventExecutor();

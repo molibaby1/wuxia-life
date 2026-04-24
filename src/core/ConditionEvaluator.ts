@@ -16,6 +16,8 @@ import type {
   IConditionEvaluator,
 } from '../types/eventTypes';
 
+export type Condition = EventCondition;
+
 /**
  * 条件评估器实现
  */
@@ -148,7 +150,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
     expression = expression.replace(
       /events\.has\(['"]([^'"]+)['"]\)/g,
       (_, eventName) => {
-        const hasEvent = state.triggeredEvents.includes(eventName);
+        const hasEvent = (state.triggeredEvents || []).includes(eventName);
         return hasEvent ? 'true' : 'false';
       }
     );

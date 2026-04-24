@@ -272,7 +272,8 @@ const factionNameMap: Record<string, string> = {
 
 // 获取当前门派信息
 const currentSectInfo = computed(() => {
-  const currentSect = props.player.flags?.current_sect;
+  const playerFlags = (props.player.flags || {}) as Record<string, any>;
+  const currentSect = playerFlags.current_sect as string | undefined;
   if (!currentSect) return null;
   
   const sectInfo = sectNameMap[currentSect];
@@ -293,18 +294,19 @@ const currentSectInfo = computed(() => {
 
 // 玩家身份列表
 const playerIdentities = computed(() => {
+  const playerFlags = (props.player.flags || {}) as Record<string, any>;
   const identities: string[] = [];
   
   // 根据 flags 判断身份
-  if (props.player.flags?.route_beggars) identities.push('beggar');
-  if (props.player.flags?.route_border) identities.push('border');
-  if (props.player.flags?.route_demonic || props.player.flags?.sect_faction === 'unconventional') identities.push('outlaw');
-  if (props.player.flags?.route_orthodox || props.player.flags?.sect_shaolin || props.player.flags?.sect_wudang) identities.push('orthodox');
-  if (props.player.flags?.route_official) identities.push('official');
-  if (props.player.flags?.married) identities.push('married');
-  if (props.player.flags?.has_child) identities.push('parent');
-  if (props.player.flags?.retired) identities.push('retired');
-  if (props.player.flags?.is_sect_leader) identities.push('sect_leader');
+  if (playerFlags.route_beggars) identities.push('beggar');
+  if (playerFlags.route_border) identities.push('border');
+  if (playerFlags.route_demonic || playerFlags.sect_faction === 'unconventional') identities.push('outlaw');
+  if (playerFlags.route_orthodox || playerFlags.sect_shaolin || playerFlags.sect_wudang) identities.push('orthodox');
+  if (playerFlags.route_official) identities.push('official');
+  if (playerFlags.married) identities.push('married');
+  if (playerFlags.has_child) identities.push('parent');
+  if (playerFlags.retired) identities.push('retired');
+  if (playerFlags.is_sect_leader) identities.push('sect_leader');
   
   return identities;
 });

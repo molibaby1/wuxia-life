@@ -23,7 +23,7 @@ export interface Condition {
 export type { EffectOperator, EffectType, EventCategory, EventPriority, TalentDefinition };
 
 export interface Effect {
-  op: EffectOperator;
+  op?: EffectOperator;
   field?: keyof PlayerState;
   value?: any;
   minValue?: number;

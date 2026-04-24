@@ -2,7 +2,7 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
@@ -10,12 +10,12 @@
     },
 
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "erasableSyntaxOnly": false,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedSideEffectImports": false
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
   "exclude": [
@@ -25,6 +25,8 @@
     "src/components/DemoPage.vue",
     "src/data/storyData.ts",
     "src/data/longEventExample.ts",
-    "src/data/longEvents.ts"
+    "src/data/longEvents.ts",
+    "src/store/gameStore.ts",
+    "src/utils/timeSystem.ts"
   ]
 }

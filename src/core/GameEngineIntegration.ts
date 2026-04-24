@@ -381,11 +381,12 @@ export class GameEngineIntegration {
           return false;
         }
       } else if (typeof value === 'object' && value !== null) {
+        const range = value as { min?: number; max?: number };
         // 支持范围检查 { min: 20, max: 50 }
-        if (value.min !== undefined && playerValue < value.min) {
+        if (range.min !== undefined && playerValue < range.min) {
           return false;
         }
-        if (value.max !== undefined && playerValue > value.max) {
+        if (range.max !== undefined && playerValue > range.max) {
           return false;
         }
       }
@@ -502,7 +503,7 @@ export class GameEngineIntegration {
     // 4. 检查身份门槛
     if (thresholds.identity) {
       const id = thresholds.identity;
-      const currentIdentity = gameState.identity?.type;
+      const currentIdentity = gameState.identity?.primary;
       
       if (id.required && id.required.length > 0) {
         if (!currentIdentity || !id.required.includes(currentIdentity)) {

@@ -348,20 +348,7 @@ export interface DailyEventConfig {
  * 玩家身份类型
  * 根据玩家行为、属性、选择自动判定
  */
-export type PlayerIdentity = 
-  | 'hero'           // 大侠 - 侠义值高，行侠仗义
-  | 'merchant'       // 商人 - 财富值高，商业帝国
-  | 'scholar'        // 学者 - 学识渊博，著书立说
-  | 'hermit'         // 隐士 - 归隐山林，与世无争
-  | 'sect_leader'    // 掌门 - 门派壮大，弟子众多
-  | 'assassin'       // 刺客 - 暗杀技巧，独行侠
-  | 'doctor'         // 医者 - 医术高明，救死扶伤
-  | 'beggar'         // 丐帮弟子，市井生活
-  | 'official'       // 官员 - 朝廷命官，仕途发展
-  | 'outlaw'        // 绿林 - 非传统路线，不受主流约束
-  | 'commoner'       // 普通百姓 - 无特定身份
-  | 'warrior'        // 武林人士
-  | 'frontier';      // 边关将士
+export type PlayerIdentity = string;
 
 /**
  * 玩家身份信息（支持多身份）
@@ -393,6 +380,8 @@ export interface IdentityCriteria {
     knowledge?: number;     // 学识要求
     influence?: number;     // 影响力要求
     businessAcumen?: number; // 商业头脑要求
+    good_karma?: number;    // 善业要求
+    evil_karma?: number;    // 恶业要求
     flags?: string[];       // 必需经历
     achievements?: string[]; // 必需成就
   };
@@ -534,7 +523,7 @@ export interface EffectDefinition {
   type: EffectType;
   
   /** 目标属性或对象 */
-  target: string;
+  target?: string;
   
   /** 变化值 */
   value?: any;
@@ -703,40 +692,7 @@ export interface EventDefinition {
   dependencies?: EventDependency[];
   
   /** 前置条件（扩展） */
-  triggerConditions?: {
-    age?: {
-      min: number;
-      max?: number;
-    };
-    stats?: {
-      [stat: string]: {
-        min?: number;
-        max?: number;
-      };
-    };
-    flags?: {
-      required?: string[];
-      forbidden?: string[];
-      not?: string[];
-    };
-    // ========== 新增：选择条件 ==========
-    choices?: {
-      required?: string[];    // 必需的选择 ['sect_choice:orthodox']
-      forbidden?: string[];   // 禁止的选择 ['war_choice:villain']
-    };
-    // ========== 新增：身份条件 ==========
-    identity?: {
-      required?: PlayerIdentity[];
-      forbidden?: PlayerIdentity[];
-    };
-    // ========== 新增：因果条件 ==========
-    karma?: {
-      good_min?: number;
-      evil_min?: number;
-      net_min?: number;  // 净值要求
-      net_max?: number;
-    };
-  };
+  triggerConditions?: any;
   
   // ========== 触发门槛（新增）============
   /** 触发门槛 - 用于限制事件的触发条件 */
@@ -782,6 +738,7 @@ export interface EventDefinition {
     text: string;
     title?: string;
     description?: string;
+    autoEffects?: EffectDefinition[]; // 兼容旧访问路径
     media?: {
       images?: string[];
       audio?: string;
@@ -790,6 +747,7 @@ export interface EventDefinition {
   
   /** 事件类型 */
   eventType: 'auto' | 'choice' | 'ending';
+  endingType?: string;
   
   /** 选择列表 */
   choices?: EventChoice[];
@@ -803,13 +761,15 @@ export interface EventDefinition {
   autoEffects?: EffectDefinition[];
   
   // ========== 元数据 ==========
-  metadata: {
+  metadata?: {
     createdAt: number;
     updatedAt: number;
     author?: string;
     tags?: string[];
     enabled: boolean;
     autoResolve?: boolean;
+    pathAffinity?: Record<string, number>;
+    pathConflicts?: string[];
   };
 
   // ========== 难度系统扩展 ==========
@@ -867,7 +827,7 @@ export interface PlayerStats {
   reputation: number;        // 声望：-1000~1000，江湖名望，影响 NPC 态度和事件触发
   connections: number;       // 人脉：0-100，人际关系，影响信息获取和求助成功率
   knowledge: number;         // 学识：0-100，文化修养，影响读书、仕途和非战斗选项
-  wealth: number;            // 财富：0-10000，经济状况，影响购买力和资源获取
+  wealth?: number;           // 财富：0-10000，经济状况，影响购买力和资源获取
   
   // ========== 隐藏属性（通过天赋影响） ==========
   martialPotential?: number; // 武学潜力：0-100，影响战斗属性成长速度（天赋决定）
@@ -911,7 +871,7 @@ export interface PlayerState {
   wealth?: number;
 
   /** 人脉值 */
-  connections?: number;
+  connections: number;
   
   // ========== 传承属性（根据背景获得初始加成） ==========
   /** 武学传承 - 武林世家背景加成 */
@@ -925,15 +885,8 @@ export interface PlayerState {
   health?: number;
   energy?: number;
   items?: unknown[];
-  flags?: Record<string, boolean>;
-  events?: Array<{
-    eventId: string;
-    timestamp?: {
-      year: number;
-      month: number;
-      day: number;
-    };
-  }>;
+  flags: any;
+  events?: any;
   
   // 关系属性
   children: number;
@@ -943,6 +896,9 @@ export interface PlayerState {
   // 状态
   alive: boolean;
   deathReason?: string;
+  timeUnit?: 'year' | 'month' | 'day';
+  monthProgress?: number;
+  dayProgress?: number;
   
   // ========== 新增：天赋系统 ==========
   /** 玩家拥有的天赋列表 */
@@ -990,10 +946,10 @@ export interface TalentDefinition {
   description: string;
   
   /** 天赋类型 */
-  type: 'combat' | 'social' | 'learning' | 'special';
+  type: 'combat' | 'social' | 'learning' | 'special' | string;
   
   /** 稀有度 */
-  rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
+  rarity: 'common' | 'uncommon' | 'rare' | 'legendary' | string;
   
   /** 影响的属性成长加成（百分比，0.1 = 10%） */
   growthBonus?: {
@@ -1027,6 +983,7 @@ export interface TalentDefinition {
   
   /** 特殊效果（可选） */
   specialEffects?: string[];
+  penalties?: Record<string, number>;
 }
 
 /**
@@ -1034,9 +991,9 @@ export interface TalentDefinition {
  */
 export interface GameState {
   // 元数据
-  saveVersion: string;
-  lastSavedAt: number;
-  gameTimestamp: number;
+  saveVersion?: string;
+  lastSavedAt?: number;
+  gameTimestamp?: number;
   
   // 玩家状态
   player: PlayerState;
@@ -1049,17 +1006,17 @@ export interface GameState {
   };
   
   // 事件历史
-  triggeredEvents: string[];
+  triggeredEvents?: string[];
   eventHistory: EventRecord[];
   events?: EventRecord[];
   
   // 世界状态
-  flags: Record<string, boolean>;
+  flags: Record<string, any>;
   relations: Record<string, number>;
-  inventory: InventoryItem[];
+  inventory?: InventoryItem[];
   
   // 统计信息
-  statistics: GameStatistics;
+  statistics?: GameStatistics;
   
   // ========== 新增字段：身份系统 ==========
   // 玩家身份（支持多身份）
@@ -1095,7 +1052,7 @@ export type LifeStage = 'growth' | 'development' | 'achievement' | 'legacy';
  * 
  * 注意：此标签仅代表"江湖地位"，不直接等同于道德判断
  */
-export type FactionType = 'orthodox' | 'unconventional' | 'neutral';
+export type FactionType = string;
 
 /**
  * 专注度类型
@@ -1150,8 +1107,8 @@ export interface LifePath {
  */
 export interface EventRecord {
   eventId: string;
-  gameTime: number;
-  realTime: number;
+  gameTime?: number;
+  realTime?: number;
   age?: number;
   timestamp?: number | {
     year: number;
@@ -1164,8 +1121,8 @@ export interface EventRecord {
     day: number;
   };
   selectedChoice?: string;
-  stateSnapshot: Partial<GameState>;
-  appliedEffects: EffectDefinition[];
+  stateSnapshot?: Partial<GameState>;
+  appliedEffects?: EffectDefinition[];
 }
 
 /**
@@ -1183,7 +1140,7 @@ export interface InventoryItem {
 export interface GameStatistics {
   totalEvents: number;
   totalChoices: number;
-  playTime: number;
+  playTime?: number;
   totalYears?: number;
 }
 

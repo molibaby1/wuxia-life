@@ -92,14 +92,21 @@ const selectedEvent = ref<EventRecord | null>(null);
 const eventDetails = ref<any>(null);
 
 // 排序事件（最新的在前）
+const toEpoch = (timestamp: EventRecord['timestamp']): number => {
+  if (typeof timestamp === 'number') return timestamp;
+  if (!timestamp) return 0;
+  return new Date(timestamp.year, timestamp.month - 1, timestamp.day).getTime();
+};
+
 const sortedEvents = computed(() => {
-  return [...props.events].sort((a, b) => b.timestamp - a.timestamp);
+  return [...props.events].sort((a, b) => toEpoch(b.timestamp) - toEpoch(a.timestamp));
 });
 
 // 格式化时间（相对时间）
-const formatTime = (timestamp: number): string => {
+const formatTime = (timestamp: EventRecord['timestamp']): string => {
+  const ts = toEpoch(timestamp);
   const now = Date.now();
-  const diff = now - timestamp;
+  const diff = now - ts;
   
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -112,8 +119,8 @@ const formatTime = (timestamp: number): string => {
 };
 
 // 格式化完整时间
-const formatFullTime = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleString('zh-CN', {
+const formatFullTime = (timestamp: EventRecord['timestamp']): string => {
+  return new Date(toEpoch(timestamp)).toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -128,9 +135,8 @@ const toggleCollapse = () => {
 };
 
 // 选择事件
-const selectEvent = (event: EventRecord) => {
+const selectEvent = (_event: EventRecord) => {
   // 可以在这里添加选择事件的处理
-  console.log('选择事件:', event);
 };
 
 // 查看事件详情

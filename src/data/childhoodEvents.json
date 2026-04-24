@@ -1,0 +1,698 @@
+[
+  {
+    "id": "birth_wuxia_family",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 70,
+    "ageRange": {
+      "min": 0,
+      "max": 0
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 0
+      }
+    ],
+    "content": {
+      "text": "你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。",
+      "title": "降生武侠世家",
+      "description": "人生的第一刻，命运的齿轮开始转动。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "bornInWuxiaFamily"
+      },
+      {
+        "type": "event_record",
+        "target": "birth_wuxia_family"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "出生",
+        "主线",
+        "武侠世家"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "birth_with_phenomenon",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 20,
+    "ageRange": {
+      "min": 0,
+      "max": 0
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 0
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "Math.random() < 0.25"
+      }
+    ],
+    "content": {
+      "text": "你出生时天有异象，一道金光从天而降，笼罩了整个府邸。族中长老惊叹：「此子非凡，将来必成大器！」",
+      "title": "天降异象",
+      "description": "特殊的出生预示着不平凡的人生。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "bornWithBlessing"
+      },
+      {
+        "type": "event_record",
+        "target": "birth_with_phenomenon"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "出生",
+        "主线",
+        "异象",
+        "天赋"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "toddler_exploration",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 80,
+    "ageRange": {
+      "min": 1,
+      "max": 1
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 1
+      }
+    ],
+    "content": {
+      "text": "你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。",
+      "title": "探索小能手",
+      "description": "好奇心是成长的开始。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "qinggong",
+        "value": 1,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "curiousChild"
+      },
+      {
+        "type": "event_record",
+        "target": "toddler_exploration"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "探索",
+        "轻功"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "clever_speech",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 3,
+      "max": 3
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 3
+      }
+    ],
+    "content": {
+      "text": "你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。",
+      "title": "伶牙俐齿",
+      "description": "口才也是一种天赋。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "giftedSpeaker"
+      },
+      {
+        "type": "event_record",
+        "target": "clever_speech"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "魅力",
+        "社交"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "childhood_preference",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 4,
+      "max": 4
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 4
+      }
+    ],
+    "content": {
+      "text": "到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。",
+      "title": "童年选择",
+      "description": "人生的重要选择往往从小开始。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "focus_on_study",
+        "text": "专心读书练功",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "diligentStudent"
+          }
+        ],
+        "requirements": {
+          "statRequirements": [
+            {
+              "statName": "chivalry",
+              "minValue": 10
+            }
+          ]
+        }
+      },
+      {
+        "id": "play_outside",
+        "text": "继续玩耍探索",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "freeSpirit"
+          }
+        ]
+      },
+      {
+        "id": "balance_both",
+        "text": "尝试平衡两者",
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 15"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "balancedApproach"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "选择",
+        "成长路径",
+        "平衡"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_arts_enlightenment",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": {
+      "min": 6,
+      "max": 6
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 6
+      }
+    ],
+    "content": {
+      "text": "到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。",
+      "title": "武学启蒙",
+      "description": "武道之路正式开启。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "external_focus",
+        "text": "专注外功修炼",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"diligentStudent\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "externalFocus"
+          }
+        ]
+      },
+      {
+        "id": "internal_focus",
+        "text": "注重内力培养",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"bornWithBlessing\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "internalFocus"
+          }
+        ]
+      },
+      {
+        "id": "agile_path",
+        "text": "专修轻功身法",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "agilePath"
+          }
+        ]
+      },
+      {
+        "id": "balanced_start",
+        "text": "全面发展",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"balancedApproach\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "balancedStart"
+          }
+        ]
+      },
+      {
+        "id": "generic_path",
+        "text": "常规修炼",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "武学",
+        "修炼路径",
+        "个性化"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "childhood_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 1000,
+    "ageRange": {
+      "min": 8,
+      "max": 12
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 8
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"childhoodSummaryDone\")"
+      }
+    ],
+    "content": {
+      "text": "日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。",
+      "title": "童年总结",
+      "description": "成长路上的重要节点。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "childhoodSummaryDone"
+      },
+      {
+        "type": "event_record",
+        "target": "childhood_summary"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "总结",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "origin_background",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": {
+      "min": 1,
+      "max": 1
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 1
+      }
+    ],
+    "content": {
+      "text": "你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。",
+      "title": "出身背景",
+      "description": "起点决定了你未来的方向。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "origin_wuxia_family",
+        "text": "武林世家",
+        "effects": [
+          { "type": "flag_set", "target": "origin_wuxia_family" },
+          { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "externalSkill", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 6, "operator": "add" },
+          { "type": "event_record", "target": "origin_wuxia_family" }
+        ]
+      },
+      {
+        "id": "origin_scholar_family",
+        "text": "书香门第",
+        "effects": [
+          { "type": "flag_set", "target": "origin_scholar_family" },
+          { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "comprehension", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 4, "operator": "add" },
+          { "type": "event_record", "target": "origin_scholar_family" }
+        ]
+      },
+      {
+        "id": "origin_merchant_family",
+        "text": "商贾之家",
+        "effects": [
+          { "type": "flag_set", "target": "origin_merchant_family" },
+          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 6, "operator": "add" },
+          { "type": "event_record", "target": "origin_merchant_family" }
+        ]
+      },
+      {
+        "id": "origin_frontier",
+        "text": "边疆异族",
+        "effects": [
+          { "type": "flag_set", "target": "origin_frontier" },
+          { "type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "qinggong", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "subtract" },
+          { "type": "event_record", "target": "origin_frontier" }
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.25,
+        "merchant": 0.25,
+        "wuxia": 0.25,
+        "frontier": 0.25
+      },
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "出身",
+        "背景",
+        "选择",
+        "once"
+      ],
+      "enabled": true
+    }
+  }
+]

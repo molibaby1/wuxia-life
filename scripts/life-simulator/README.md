@@ -2,13 +2,13 @@
 
 ## 🎯 系统概述
 
-这是一个完整的玩家生命周期自动模拟测试系统，能够：
+这是一个统一的玩家生命周期自动模拟测试入口，能够：
 
 1. **自动模拟**玩家从初始状态到游戏结束的完整生命周期过程
-2. **智能决策**在所有交互节点处采用随机选择算法进行决策
+2. **智能决策**在所有交互节点处采用自动化选择策略
 3. **详细记录**每一次选择的时间戳、选择内容、系统反馈及相关游戏状态变化
 4. **生成报告**结构化的测试报告（JSON + HTML），包含完整的选择路径、关键决策点及系统响应数据
-5. **AI 评估**基于规则的经验对记录过程进行逻辑合理性评估
+5. **报告输出**生成结构化的流程报告（HTML + JSON）
 
 ## 🚀 快速开始
 
@@ -23,16 +23,10 @@ npx tsx scripts/life-simulator/simulator.ts
 
 ```bash
 # 自定义模拟参数
-npx tsx scripts/life-simulator/simulator.ts --years=60 --randomness=0.7 --log=detailed
-
-# 禁用 AI 评估
-npx tsx scripts/life-simulator/simulator.ts --no-ai
+npx tsx scripts/life-simulator/simulator.ts --years=60 --name=测试玩家 --gender=male
 
 # 静默模式（只输出报告）
 npx tsx scripts/life-simulator/simulator.ts --quiet
-
-# 组合使用
-npx tsx scripts/life-simulator/simulator.ts --years=80 --randomness=0.5 --log=verbose --no-ai --quiet
 ```
 
 ## ⚙️ 配置参数
@@ -40,27 +34,17 @@ npx tsx scripts/life-simulator/simulator.ts --years=80 --randomness=0.5 --log=ve
 | 参数 | 说明 | 类型 | 默认值 | 示例 |
 |------|------|------|--------|------|
 | `--years=` | 模拟时长（年数） | number | 80 | `--years=60` |
-| `--randomness=` | 随机性权重 (0-1) | float | 0.5 | `--randomness=0.7` |
-| `--log=` | 日志级别 | string | 'normal' | `--log=verbose` |
-| `--no-ai` | 禁用 AI 评估 | boolean | false | `--no-ai` |
+| `--name=` | 玩家姓名 | string | '测试玩家' | `--name=李四` |
+| `--gender=` | 性别 | string | 'male' | `--gender=female` |
 | `--quiet` | 静默模式 | boolean | false | `--quiet` |
 
-### 日志级别说明
+### 日志说明
 
-- `minimal`: 只记录关键信息
-- `normal`: 记录标准日志（默认）
-- `detailed`: 详细记录每个选择
-- `verbose`: 最详细的调试信息
-
-### 随机性权重说明
-
-- `0.0`: 完全基于属性权重（智能选择）
-- `0.5`: 平衡随机性和权重（默认）
-- `1.0`: 完全随机选择
+`--quiet` 会关闭详细控制台输出，但仍会生成完整报告。
 
 ## 📊 输出报告
 
-系统会生成两个报告文件：
+系统会生成两个报告文件（由统一模拟器生成）：
 
 1. **JSON 报告**: `life-sim-report-{timestamp}.json`
    - 完整的结构化数据
@@ -99,25 +83,8 @@ npx tsx scripts/life-simulator/simulator.ts --years=80 --randomness=0.5 --log=ve
 - 状态变化详情
 - 选择理由和权重信息
 
-#### AI 评估报告（如果启用）
-- 整体合理性评分 (0-100)
-- 各维度评分：
-  - 选择路径连贯性
-  - 系统反馈关联性
-  - 状态转换逻辑性
-  - 决策合理性
-- 发现的逻辑矛盾
-- 关键决策点评估
-- AI 总结意见
-- 改进建议
-
-## 🤖 AI 评估维度
-
-### 1. 选择路径连贯性 (Coherence)
-评估玩家选择的前后一致性：
-- 检测连续随机选择
-- 检测年龄跳跃
-- 检测逻辑不连贯（如刚加入门派就参加其他活动）
+#### 说明
+该入口已统一到 `tests/GameProcessSimulator.ts`，避免重复维护两套模拟系统。
 
 ### 2. 系统反馈关联性 (Feedback Relevance)
 评估选择与反馈的匹配度：

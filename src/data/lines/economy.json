@@ -1,0 +1,461 @@
+[
+  {
+    "id": "economy_first_gold",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 70,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 18},
+      {"type": "expression", "expression": "money >= 100"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "第一桶金",
+      "text": "你通过自己的努力赚到了人生第一桶金。这是你财富积累的起点，如何运用这笔钱将影响你的未来。",
+      "description": "第一桶金"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "投资武学（金钱 -100，武力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15}
+        ]
+      },
+      {
+        "text": "购买丹药（金钱 -100，内力 +12）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 12}
+        ]
+      },
+      {
+        "text": "存起来（金钱 +50 利息）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 50}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "economy_business_opportunity",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 72,
+    "weight": 65,
+    "ageRange": {"min": 22, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 22},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 200"}
+    ],
+    "content": {
+      "title": "经商机会",
+      "text": "你发现了一个绝佳的经商机会，可以低买高卖赚取差价。但需要一定的本金投入。",
+      "description": "经商机会"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "大额投资（需金钱≥500，收益更高）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "money", "value": 800},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "小额投资（需金钱≥200）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "money", "value": 280},
+          {"type": "stat_modify", "stat": "charisma", "value": 3}
+        ]
+      },
+      {
+        "text": "放弃",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_treasure_hunt",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 68,
+    "weight": 55,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "发现宝藏",
+      "text": "你在山中探险时偶然发现了一个古代宝藏。这可能是你发财的机会，但也可能隐藏着危险。",
+      "description": "发现宝藏"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "挖掘宝藏（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 150},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "离开",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_investment_sect",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 75,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 300"}
+    ],
+    "content": {
+      "title": "投资门派",
+      "text": "某个门派资金紧张，希望你能投资。作为回报，门派会提供武学指导和保护。",
+      "description": "投资门派"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "巨额投资（需金钱≥1000，收益最高）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "stat_modify", "stat": "reputation", "value": 40},
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "flag_set", "flag": "sect_patron", "value": true}
+        ]
+      },
+      {
+        "text": "适度投资（需金钱≥300）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_equipment_purchase",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 65,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 100"}
+    ],
+    "content": {
+      "title": "购买装备",
+      "text": "你在市集看到一套精良的武器装备，非常适合你。但价格不菲，需要慎重考虑。",
+      "description": "购买装备"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买顶级装备（需金钱≥500）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 12}
+        ]
+      },
+      {
+        "text": "购买普通装备（需金钱≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "martialPower", "value": 6},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 4}
+        ]
+      },
+      {
+        "text": "不买",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_charity",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 68,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 100 && chivalry >= 30"}
+    ],
+    "content": {
+      "title": "救济百姓",
+      "text": "你看到当地百姓生活困苦，心中不忍，决定施以援手。善有善报，这是一种积累福报的方式。",
+      "description": "救济百姓"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "大额捐赠（需金钱≥500，侠义 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 25}
+        ]
+      },
+      {
+        "text": "适度捐赠（需金钱≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      },
+      {
+        "text": "不捐",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "economy_bribe_official",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 70,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 200"}
+    ],
+    "content": {
+      "title": "贿赂官员",
+      "text": "你需要办理一些事情，但官府设置重重障碍。有人暗示你可以通过'特殊渠道'解决。",
+      "description": "贿赂官员"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "重金贿赂（需金钱≥500，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10}
+        ]
+      },
+      {
+        "text": "适度贿赂（需金钱≥200）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      },
+      {
+        "text": "拒绝贿赂（侠义 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "economy_banquet",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 66,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 100"}
+    ],
+    "content": {
+      "title": "宴请宾客",
+      "text": "你决定举办一场宴会，邀请江湖朋友参加。这是建立人脉、提升声望的好机会。",
+      "description": "宴请宾客"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "豪华宴席（需金钱≥500，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "charisma", "value": 15}
+        ]
+      },
+      {
+        "text": "普通宴席（需金钱≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 6}
+        ]
+      },
+      {
+        "text": "不举办",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_recruitment",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 72,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 300 && reputation >= 200"}
+    ],
+    "content": {
+      "title": "招募人手",
+      "text": "你的势力逐渐扩大，需要招募一些人手来帮你打理事务。这是扩大影响力的好机会。",
+      "description": "招募人手"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "招募精英（需金钱≥800）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "flag_set", "flag": "has_elite_team", "value": true}
+        ]
+      },
+      {
+        "text": "招募普通人（需金钱≥300）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 6}
+        ]
+      },
+      {
+        "text": "不招募",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "economy_inheritance",
+    "version": "1.0",
+    "category": "economy",
+    "priority": 75,
+    "weight": 40,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 50"}
+    ],
+    "content": {
+      "title": "继承遗产",
+      "text": "一位远房亲戚去世，你意外继承了一笔遗产。这是对你多年善行的回报。",
+      "description": "继承遗产"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 500},
+      {"type": "stat_modify", "stat": "reputation", "value": 10},
+      {"type": "stat_modify", "stat": "charisma", "value": 5}
+    ]
+  }
+]

@@ -1,0 +1,552 @@
+[
+  {
+    "id": "war_preparation",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 90,
+    "weight": 70,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "martialPower >= 70 && (flags.sect_faction == 'orthodox' || flags.sect_faction == 'unconventional')"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "江湖纷争",
+      "text": "江湖上传统门派与非传统门派的矛盾日益激化，大战一触即发。朝廷乐于见到江湖自相残杀，暗中推波助澜。各门派开始召集人手，储备物资。你也必须做出选择——但你是否想过，这场战争究竟是为了什么？",
+      "description": "江湖纷争将起"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "加入传统门派联盟（需侠义≥40）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 40"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "flag_set", "flag": "war_traditional_side", "value": true}
+        ]
+      },
+      {
+        "text": "加入非传统门派（需侠义≤-20）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry <= -20"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "flag_set", "flag": "war_unconventional_side", "value": true}
+        ]
+      },
+      {
+        "text": "保持中立，仔细观察",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5},
+          {"type": "flag_set", "flag": "war_neutral_observer", "value": true}
+        ]
+      },
+      {
+        "text": "质疑这场战争的意义",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "flag_set", "flag": "war_questioner", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_vanguard",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.war_good_side == true || flags.war_evil_side == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "先锋交战",
+      "text": "大战爆发，双方先锋部队激烈交战。战场上刀光剑影，血流成河。你被派往前线。",
+      "description": "先锋交战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "主动请缨（需武力≥80，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "constitution", "value": -8},
+          {"type": "flag_set", "flag": "war_vanguard_hero", "value": true}
+        ]
+      },
+      {
+        "text": "跟随大军",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_intelligence",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.war_good_side == true || flags.war_evil_side == true"}
+    ],
+    "content": {
+      "title": "情报收集",
+      "text": "战争期间，情报至关重要。你获得了一个潜入敌方营地获取情报的机会。",
+      "description": "情报收集"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "执行任务（需轻功≥70，声望 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "qinggong >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "comprehension", "value": 8}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "war_tactics",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 84,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.war_good_side == true || flags.war_evil_side == true"}
+    ],
+    "content": {
+      "title": "战术制定",
+      "text": "高层决定召开军事会议，制定下一步的作战计划。你也可以参与讨论。",
+      "description": "战术制定"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "提出建议（需悟性≥60，声望 +12）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "听从安排",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_battle1",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 90,
+    "weight": 80,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.war_vanguard_hero == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "第一场战役",
+      "text": "第一场大规模战役打响，双方投入数万兵力。这是决定战争走向的关键一战。",
+      "description": "第一战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "冲锋陷阵（需武力≥90，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "constitution", "value": -10},
+          {"type": "flag_set", "flag": "war_battle1_victory", "value": true}
+        ]
+      },
+      {
+        "text": "防守反击（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "war_battle1_victory", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_battle2",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 91,
+    "weight": 78,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.war_battle1_victory == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "第二场战役",
+      "text": "乘胜追击，第二场战役紧接着开始。敌军士气低落，但困兽犹斗，不可掉以轻心。",
+      "description": "第二战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "乘胜追击（需武力≥95，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 95"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "constitution", "value": -12},
+          {"type": "flag_set", "flag": "war_battle2_victory", "value": true}
+        ]
+      },
+      {
+        "text": "稳扎稳打（需武力≥90）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "flag_set", "flag": "war_battle2_victory", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_stalemate",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 86,
+    "weight": 65,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "expression", "expression": "flags.war_battle2_victory == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "僵持阶段",
+      "text": "战争进入僵持阶段，双方都损失惨重。战线长期没有变化，士气开始低落。",
+      "description": "僵持"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "constitution", "value": -8},
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "stat_modify", "stat": "comprehension", "value": 5}
+    ]
+  },
+  {
+    "id": "war_turning_point",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 92,
+    "weight": 60,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "random", "value": 0.5}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 100"}
+    ],
+    "content": {
+      "title": "转折点",
+      "text": "战争出现转机，一方获得了强大的外援或者找到了敌方的弱点。这是扭转战局的关键时刻。",
+      "description": "转折点"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "抓住机会（需武力≥100，声望 +35）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 22},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "stat_modify", "stat": "charisma", "value": 15},
+          {"type": "flag_set", "flag": "war_turning_point_success", "value": true}
+        ]
+      },
+      {
+        "text": "错失良机",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_final_prep",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 93,
+    "weight": 70,
+    "ageRange": {"min": 33, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 33},
+      {"type": "expression", "expression": "flags.war_turning_point_success == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "决战前夕",
+      "text": "双方都意识到，最终的决战即将到来。战场上弥漫着紧张的气氛，所有人都知道，这一战将决定江湖的未来。",
+      "description": "决战前夕"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 15},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+      {"type": "stat_modify", "stat": "constitution", "value": -5}
+    ]
+  },
+  {
+    "id": "war_final_battle",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 98,
+    "weight": 65,
+    "ageRange": {"min": 33, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 33},
+      {"type": "expression", "expression": "flags.war_turning_point_success == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "最终决战",
+      "text": "最终决战开始了！双方所有高手尽出，展开生死搏杀。这一战，将载入史册。你必须做出最后的努力。",
+      "description": "最终决战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "决战魔头（需武力≥110，侠义 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 110"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 25},
+          {"type": "stat_modify", "stat": "reputation", "value": 50},
+          {"type": "stat_modify", "stat": "chivalry", "value": 30},
+          {"type": "stat_modify", "stat": "constitution", "value": -15},
+          {"type": "flag_set", "flag": "war_hero", "value": true}
+        ]
+      },
+      {
+        "text": "群体作战（需武力≥105）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 105"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "stat_modify", "stat": "constitution", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_reconstruction",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 85,
+    "weight": 60,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.war_hero == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "战后重建",
+      "text": "战争结束了，但江湖已经满目疮痍。重建工作迫在眉睫，你需要帮助恢复秩序。",
+      "description": "战后重建"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "积极参与（需金钱≥500，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 12}
+        ]
+      },
+      {
+        "text": "出力",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_justice",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 83,
+    "weight": 55,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.war_hero == true && chivalry >= 60"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "清算战犯",
+      "text": "战争结束后，需要对发动战争的罪魁祸首进行审判。你被邀请作为证人或者审判者。",
+      "description": "清算战犯"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "公正审判（需侠义≥70，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      },
+      {
+        "text": "宽恕敌人（侠义 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "war_peace",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 88,
+    "weight": 58,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.war_hero == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "和平协议",
+      "text": "在各方努力下，正道和魔教签订了和平协议。江湖迎来了短暂的和平时期。",
+      "description": "和平协议"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 30},
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "stat_modify", "stat": "chivalry", "value": 10},
+      {"type": "flag_set", "flag": "war_peace_established", "value": true}
+    ]
+  },
+  {
+    "id": "war_balance",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 86,
+    "weight": 55,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.war_peace_established == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "新的平衡",
+      "text": "战争过后，江湖形成了新的平衡。各门派势力重新洗牌，你也在其中获得了应有的地位。",
+      "description": "新的平衡"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 25},
+      {"type": "stat_modify", "stat": "martialPower", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 12}
+    ]
+  },
+  {
+    "id": "war_history",
+    "version": "1.0",
+    "category": "good-evil-war",
+    "priority": 90,
+    "weight": 50,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "flags.war_hero == true && reputation >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "历史记载",
+      "text": "你的事迹被写入武林史册，成为后人传颂的英雄。正邪大战因为你而提前结束，你改变了江湖的历史。",
+      "description": "历史记载"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "charisma", "value": 25},
+      {"type": "flag_set", "flag": "war_legend", "value": true}
+    ]
+  }
+]

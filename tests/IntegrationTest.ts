@@ -100,16 +100,21 @@ async function runIntegrationTests() {
       gameEngine.advanceTime(1);
     }
     
-    const events = gameEngine.getAvailableEvents(12);
+    const currentAge = gameEngine.getGameState().player.age;
+    const events = gameEngine.getAvailableEvents(currentAge);
     const choiceEvent = events.find(e => e.eventType === 'choice');
     
     if (choiceEvent && choiceEvent.choices && choiceEvent.choices.length > 0) {
-      const choice = choiceEvent.choices[0];
+      const choice = choiceEvent.choices.find(c => gameEngine.isChoiceAvailable(c.condition));
+      if (!choice) {
+        console.log('⚠️  跳过：无可用选择\n');
+      } else {
       await gameEngine.executeChoiceEffects(choice.effects, choiceEvent.id);
       const state = gameEngine.getGameState();
       
       console.log('✅ 通过\n');
       passed++;
+      }
     } else {
       console.log('⚠️  跳过：无选择事件\n');
     }
@@ -122,14 +127,14 @@ async function runIntegrationTests() {
   console.log('测试 6: 状态持久化');
   try {
     const state1 = gameEngine.getGameState();
-    const flagsBefore = Array.from(state1.player.flags);
-    const eventsBefore = Array.from(state1.player.events.map(e => e.eventId));
+    const flagsBefore = Object.keys(state1.flags || {});
+    const eventsBefore = state1.player.events.map(e => e.eventId);
     
     gameEngine.advanceTime(1);
     
     const state2 = gameEngine.getGameState();
-    const flagsAfter = Array.from(state2.player.flags);
-    const eventsAfter = Array.from(state2.player.events.map(e => e.eventId));
+    const flagsAfter = Object.keys(state2.flags || {});
+    const eventsAfter = state2.player.events.map(e => e.eventId);
     
     // 验证 flags 和 events 没有被清空
     if (flagsAfter.length >= flagsBefore.length && eventsAfter.length >= eventsBefore.length) {

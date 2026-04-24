@@ -1,0 +1,443 @@
+[
+  {
+    "id": "inheritance_child_birth",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 75,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "喜得贵子",
+      "text": "你的孩子出生了，全家上下欢天喜地。这是你生命的延续，也是武学传承的希望。",
+      "description": "孩子出生"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "stat_modify", "stat": "health", "value": 5},
+      {"type": "flag_set", "flag": "has_child", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_child_education",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 72,
+    "weight": 65,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "子女教育",
+      "text": "孩子到了学习的年龄，你需要决定如何培养他。是习武、读书、还是从商？",
+      "description": "子女教育"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "传授武学（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "child_martial_artist", "value": true}
+        ]
+      },
+      {
+        "text": "培养读书（需悟性≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 6},
+          {"type": "flag_set", "flag": "child_scholar", "value": true}
+        ]
+      },
+      {
+        "text": "学习经商（需金钱≥500）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "flag_set", "flag": "child_merchant", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inheritance_child_talent",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 70,
+    "weight": 55,
+    "ageRange": {"min": 35, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "子女天赋",
+      "text": "孩子展现出了非凡的天赋，在某个领域表现突出。这是家族兴旺的征兆。",
+      "description": "子女天赋"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "stat_modify", "stat": "health", "value": 5},
+      {"type": "flag_set", "flag": "child_talented", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_child_marriage",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 68,
+    "weight": 58,
+    "ageRange": {"min": 40, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "子女婚配",
+      "text": "孩子到了成家的年龄，你需要为他/她选择一个合适的伴侣。这关系到家族的未来。",
+      "description": "子女婚配"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "联姻名门（需声望≥400）",
+        "conditions": [
+          {"type": "expression", "expression": "reputation >= 400"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      },
+      {
+        "text": "自由选择",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "health", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inheritance_grandchildren",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 65,
+    "weight": 55,
+    "ageRange": {"min": 45, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "喜得孙儿",
+      "text": "你的孩子也有了后代，你升级做祖父母了。家族人丁兴旺，四世同堂。",
+      "description": "喜得孙儿"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 10},
+      {"type": "stat_modify", "stat": "charisma", "value": 12},
+      {"type": "flag_set", "flag": "has_grandchild", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_family_wealth",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 70,
+    "weight": 52,
+    "ageRange": {"min": 45, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "expression", "expression": "flags.has_child == true && money >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "家族财富",
+      "text": "你积累了可观的财富，需要考虑如何分配给后代。这是家族传承的重要部分。",
+      "description": "家族财富"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "平分给子女",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 8}
+        ]
+      },
+      {
+        "text": "留给最有出息的子女",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "comprehension", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inheritance_family_reputation",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 72,
+    "weight": 50,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.has_child == true && reputation >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "家族声望",
+      "text": "你的家族在江湖上已经有一定的声望，后代可以继承这份荣耀。",
+      "description": "家族声望"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 30},
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "flag_set", "flag": "family_prestigious", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_passing_down",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 78,
+    "weight": 55,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "传授绝学",
+      "text": "你决定将毕生所学的绝学传授给后代。这是武学传承的关键时刻。",
+      "description": "传授绝学"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "传授给子女（需子女习武）",
+        "conditions": [
+          {"type": "expression", "expression": "flags.child_martial_artist == true"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "martial_art_passed", "value": true}
+        ]
+      },
+      {
+        "text": "记载于秘籍",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inheritance_family_verse",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 68,
+    "weight": 48,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "家训家规",
+      "text": "你制定了家训家规，希望后代能够遵守。这是家族精神传承的重要部分。",
+      "description": "家训家规"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "flag_set", "flag": "family_rules_established", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_retirement",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 75,
+    "weight": 52,
+    "ageRange": {"min": 55, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 55},
+      {"type": "expression", "expression": "flags.has_child == true && flags.martial_art_passed == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "退休养老",
+      "text": "你将家业交给子女，自己退休养老。含饴弄孙，安享晚年。",
+      "description": "退休养老"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 20},
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "flag_set", "flag": "retired", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_family_ceremony",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 80,
+    "weight": 45,
+    "ageRange": {"min": 55, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 55},
+      {"type": "expression", "expression": "flags.family_prestigious == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "家族盛典",
+      "text": "你的家族举办盛典，庆祝家族的繁荣。江湖各派都派人前来祝贺。",
+      "description": "家族盛典"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "charisma", "value": 20},
+      {"type": "stat_modify", "stat": "money", "value": 100}
+    ]
+  },
+  {
+    "id": "inheritance_writing memoirs",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 72,
+    "weight": 42,
+    "ageRange": {"min": 55, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 55},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 70"}
+    ],
+    "content": {
+      "title": "撰写回忆录",
+      "text": "你决定撰写回忆录，记录自己一生的经历和感悟。这将成为后代的宝贵财富。",
+      "description": "撰写回忆录"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "charisma", "value": 15},
+      {"type": "stat_modify", "stat": "reputation", "value": 20},
+      {"type": "flag_set", "flag": "memoirs_written", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_final_teachings",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 78,
+    "weight": 45,
+    "ageRange": {"min": 58, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 58},
+      {"type": "expression", "expression": "flags.has_child == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "临终遗训",
+      "text": "你感觉自己时日无多，召集家人留下最后的遗训。这是你给后代的最后教导。",
+      "description": "临终遗训"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 20},
+      {"type": "stat_modify", "stat": "comprehension", "value": 15},
+      {"type": "flag_set", "flag": "final_teachings_given", "value": true}
+    ]
+  },
+  {
+    "id": "inheritance_continuation",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 85,
+    "weight": 40,
+    "ageRange": {"min": 60, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 60},
+      {"type": "expression", "expression": "flags.has_child == true && flags.martial_art_passed == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "家族延续",
+      "text": "你的家族已经开枝散叶，武学和财富都有人继承。你的血脉和精神将永远传承下去。",
+      "description": "家族延续"
+    },
+    "eventType": "ending",
+    "endingType": "family_continuation",
+    "endingTitle": "家族延续",
+    "endingDescription": "你的家族繁荣昌盛，子孙满堂。你的武学和精神通过后代继续传承，在江湖上留下了深远的影响。",
+    "effects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "charisma", "value": 30},
+      {"type": "stat_modify", "stat": "health", "value": 10}
+    ]
+  },
+  {
+    "id": "inheritance_legacy_complete",
+    "version": "1.0",
+    "category": "inheritance",
+    "priority": 90,
+    "weight": 35,
+    "ageRange": {"min": 60, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 60},
+      {"type": "expression", "expression": "flags.family_prestigious == true && flags.memoirs_written == true && flags.sect_master == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "完美人生",
+      "text": "你的一生堪称完美：建立了强大的门派，培养了优秀的后代，留下了宝贵的著作。你是真正的武林传奇。",
+      "description": "完美人生"
+    },
+    "eventType": "ending",
+    "endingType": "perfect_life",
+    "endingTitle": "完美人生",
+    "endingDescription": "你达到了武林人士梦寐以求的最高成就：门派强大、家族兴旺、著作等身。你的名字将永远铭刻在武林史册上，成为后人敬仰的传奇。",
+    "effects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 150},
+      {"type": "stat_modify", "stat": "charisma", "value": 50},
+      {"type": "stat_modify", "stat": "comprehension", "value": 30}
+    ]
+  }
+]

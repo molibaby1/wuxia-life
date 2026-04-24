@@ -1,0 +1,192 @@
+[
+  {
+    "id": "sect_leader_first_disciple",
+    "name": "收徒传艺",
+    "description": "作为一派掌门，你开始收徒传艺。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 25, "max": 40 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["sect_leader", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "triggerConditions": { "age": { "min": 25, "max": 40 }, "identity": { "required": ["sect_leader"] } },
+    "content": { "title": "开宗立派", "text": "作为一派掌门，你开始收徒传艺，培养下一代。" },
+    "choices": [
+      {
+        "id": "strict_teaching",
+        "text": "严格教导，精益求精 (声望 +15, 外功 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "externalSkill", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 5, "evil": 0 },
+          { "type": "flag_set", "target": "sect_leader_first_disciple", "value": true }
+        ]
+      },
+      {
+        "id": "lenient_teaching",
+        "text": "因材施教，顺其自然 (人脉 +10, 侠义 +5)",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_first_disciple", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sect_leader_alliance",
+    "name": "门派联盟",
+    "description": "其他门派提议结盟，共同对抗魔教。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": { "min": 30, "max": 50 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["sect_leader", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "triggerConditions": { "age": { "min": 30, "max": 50 }, "identity": { "required": ["sect_leader"] } },
+    "content": { "title": "结盟", "text": "其他门派提议结盟，共同对抗魔教。这是一个重要的战略决策。" },
+    "choices": [
+      {
+        "id": "join_alliance",
+        "text": "加入联盟，共抗魔教 (声望 +20, 人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 10, "evil": 0 },
+          { "type": "flag_set", "target": "sect_leader_alliance", "value": true }
+        ]
+      },
+      {
+        "id": "stay_neutral",
+        "text": "保持中立，专注发展 (武力 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_alliance", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sect_leader_crisis",
+    "name": "门派危机",
+    "description": "门派遭遇经济危机，需要你的决策。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": { "min": 35, "max": 55 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["sect_leader", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 35 }],
+    "triggerConditions": { "age": { "min": 35, "max": 55 }, "identity": { "required": ["sect_leader"] } },
+    "content": { "title": "财政危机", "text": "门派遭遇经济危机，你需要做出艰难的财政决策。" },
+    "choices": [
+      {
+        "id": "cut_expenses",
+        "text": "削减开支，共渡难关 (金钱 -50, 声望 +5)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": -50, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_crisis", "value": true }
+        ]
+      },
+      {
+        "id": "seek_donations",
+        "text": "寻求资助，接受捐赠 (金钱 +100, 声望 -10)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -10, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_crisis", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sect_leader_expansion",
+    "name": "开枝散叶",
+    "description": "门派发展壮大，需要建立分舵。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": { "min": 40, "max": 60 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["sect_leader", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "triggerConditions": { "age": { "min": 40, "max": 60 }, "identity": { "required": ["sect_leader"] } },
+    "content": { "title": "扩张", "text": "门派发展壮大，你考虑在各地建立分舵。" },
+    "choices": [
+      {
+        "id": "expand_fast",
+        "text": "快速扩张，广建分舵 (声望 +30, 金钱 -200)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 30, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": -200, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_expansion", "value": true }
+        ]
+      },
+      {
+        "id": "expand_slow",
+        "text": "稳健发展，精兵简政 (声望 +15, 金钱 -50)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": -50, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_expansion", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sect_leader_successor",
+    "name": "选择传人",
+    "description": "年事已高，需要选择下一任掌门。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 55, "max": 75 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["sect_leader", "identity", "elderly"],
+    "triggers": [{ "type": "age_reach", "value": 55 }],
+    "triggerConditions": { "age": { "min": 55, "max": 75 }, "identity": { "required": ["sect_leader"] } },
+    "content": { "title": "传承", "text": "年事已高，你需要选择下一任掌门来继承你的事业。" },
+    "choices": [
+      {
+        "id": "choose_talented",
+        "text": "选择最有天赋的弟子 (声望 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 10, "evil": 0 },
+          { "type": "flag_set", "target": "sect_leader_successor", "value": true }
+        ]
+      },
+      {
+        "id": "choose_virtuous",
+        "text": "选择品德最好的弟子 (侠义 +15, 声望 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 15, "evil": 0 },
+          { "type": "flag_set", "target": "sect_leader_successor", "value": true }
+        ]
+      },
+      {
+        "id": "choose_family",
+        "text": "传给子女 (人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "flag_set", "target": "sect_leader_successor", "value": true }
+        ]
+      }
+    ]
+  }
+]

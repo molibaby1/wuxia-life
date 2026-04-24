@@ -1,0 +1,77 @@
+{
+  "project": "Wuxia Life Engineering Stabilization",
+  "branchName": "ralph/project-stabilization-engineering-recovery",
+  "description": "Stabilize the wuxia-life project by restoring build and type safety, standardizing test/CI entry points, unifying state and engine pathways, and establishing a minimal regression safety net without adding new gameplay features.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Repository Hygiene and Artifact Isolation",
+      "description": "As a developer, I want generated reports and temporary artifacts isolated from source control so that collaboration noise is reduced and reviews focus on meaningful code changes.",
+      "acceptanceCriteria": [
+        "Git working tree no longer gets flooded by generated report files after test/build runs",
+        "Ignore rules cover public report artifacts and other non-source outputs",
+        "Repository artifact/output convention is documented and applied",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Standardized Validation Commands",
+      "description": "As a developer, I want consistent package scripts for test, typecheck, and build so that local validation and CI validation are aligned.",
+      "acceptanceCriteria": [
+        "package.json provides runnable scripts for test, typecheck, build, and aggregated test workflow",
+        "Script failures return non-zero exit codes consistently",
+        "npm test executes a valid test entrypoint",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true
+    },
+    {
+      "id": "US-003",
+      "title": "Type System Recovery to Zero Errors",
+      "description": "As a developer, I want TypeScript errors reduced to zero across components, composables, core modules, and data definitions so that compiler feedback becomes trustworthy.",
+      "acceptanceCriteria": [
+        "npm run typecheck reports 0 TypeScript errors",
+        "npm run build succeeds",
+        "Core effect/type enums and field naming conventions are consistent",
+        "No implicit any remains in critical paths"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Resolved via structured contract alignment across event types, engine integration, event loader, and compatibility typing. `npm run typecheck` and `npm run build` are green."
+    },
+    {
+      "id": "US-004",
+      "title": "Unified State Model and Single Engine Entry",
+      "description": "As a developer, I want a single authoritative state model and one primary game engine entry path so that runtime behavior is predictable and easier to maintain.",
+      "acceptanceCriteria": [
+        "GameState/PlayerState/EventRecord definitions have a single source of truth",
+        "flags/events/connections access patterns are unified",
+        "Frontend uses one engine entry path for the main flow",
+        "Event progression path is verifiable and interruptible",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "State model convergence completed on `eventTypes` contract with `useNewGameEngine` as primary frontend path. Main flow event progression remains verifiable and interruptible."
+    },
+    {
+      "id": "US-005",
+      "title": "Minimal Regression Baseline and CI Gate",
+      "description": "As a team, I want smoke tests and CI quality gates in place so that regressions are detected before merge and release risk is reduced.",
+      "acceptanceCriteria": [
+        "Smoke coverage includes start flow, event progression, choice handling, and ending flow",
+        "npm test passes on the baseline suite",
+        "CI executes typecheck + build + test for pull requests",
+        "Failing quality checks block merge",
+        "Build passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Added CI quality gate at `.github/workflows/ci.yml` to run `typecheck + build + test` on pull requests. Local `npm run validate` is green."
+    }
+  ]
+}

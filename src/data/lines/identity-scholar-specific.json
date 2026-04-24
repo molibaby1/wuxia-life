@@ -1,0 +1,194 @@
+[
+  {
+    "id": "scholar_reading_festival",
+    "version": "1.0",
+    "category": "scholar",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": {"min": 12, "max": 20},
+    "triggers": [
+      {"type": "age_reach", "value": 12},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.origin_scholar_family == true || comprehension >= 15"}
+    ],
+    "content": {
+      "title": "读书节庆",
+      "text": "当地举办一年一度的读书节，文人墨客齐聚一堂，吟诗作对，交流学问。你也受邀参加，感受浓厚的文化氛围。",
+      "description": "文学盛宴"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "积极参与（悟性 +5，声望 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "scholar_festival_participated", "value": true}
+        ]
+      },
+      {
+        "text": "旁观学习（悟性 +3）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 3},
+          {"type": "flag_set", "flag": "scholar_festival_observed", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 1.2,
+        "merchant": 0.4,
+        "wuxia": 0.1,
+        "frontier": 0.1
+      },
+      "tags": ["文人", "学术", "书香门第"]
+    }
+  },
+  {
+    "id": "scholar_poetry_contest",
+    "version": "1.0",
+    "category": "scholar",
+    "priority": 80,
+    "weight": 75,
+    "ageRange": {"min": 14, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 14},
+      {"type": "expression", "expression": "flags.scholar_festival_participated == true"},
+      {"type": "random", "value": 0.5}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 18"}
+    ],
+    "content": {
+      "title": "诗词大赛",
+      "text": "书院举办诗词大赛，各地才子纷纷前来比试。你凭借深厚的文学功底，也跃跃欲试。",
+      "description": "文采飞扬"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参加比赛（悟性 +8，声望 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "poetry_winner", "value": true}
+        ]
+      },
+      {
+        "text": "助兴表演（悟性 +4，声望 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 4},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "poetry_participant", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 1.0,
+        "merchant": 0.3,
+        "wuxia": 0.1,
+        "frontier": 0.05
+      },
+      "tags": ["诗词", "文学", "才华"]
+    }
+  },
+  {
+    "id": "scholar_academic_lecture",
+    "version": "1.0",
+    "category": "scholar",
+    "priority": 75,
+    "weight": 70,
+    "ageRange": {"min": 16, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 16},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 20 && (flags.origin_scholar_family == true || reputation >= 10)"}
+    ],
+    "content": {
+      "title": "学术讲座",
+      "text": "知名学者莅临本地讲学，传授儒家经典与治国之道。许多学子慕名而来，你也有幸聆听教诲。",
+      "description": "求学问道"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "深入探讨（悟性 +10，侠义 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "flag_set", "flag": "academic_deeper_understanding", "value": true}
+        ]
+      },
+      {
+        "text": "虚心请教（悟性 +6，魅力 +3）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "charisma", "value": 3},
+          {"type": "flag_set", "flag": "academic_mentorship", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 1.0,
+        "merchant": 0.4,
+        "wuxia": 0.2,
+        "frontier": 0.1
+      },
+      "tags": ["学术", "儒家", "求知"]
+    }
+  },
+  {
+    "id": "scholar_civil_service_exam",
+    "version": "1.0",
+    "category": "scholar",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 18, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 18},
+      {"type": "expression", "expression": "comprehension >= 25 && reputation >= 15"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.origin_scholar_family == true"}
+    ],
+    "content": {
+      "title": "科举考试",
+      "text": "朝廷举行科举考试，选拔人才。作为书香门第的子弟，你决定参加乡试，为家族争光。",
+      "description": "仕途之路"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "专心备考（悟性 +12，声望 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "civil_service_passed", "value": true}
+        ]
+      },
+      {
+        "text": "兼顾武艺（悟性 +8，外功 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 5},
+          {"type": "flag_set", "flag": "balanced_development", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 1.5,
+        "merchant": 0.3,
+        "wuxia": 0.1,
+        "frontier": 0.05
+      },
+      "tags": ["科举", "仕途", "功名"]
+    }
+  }
+]

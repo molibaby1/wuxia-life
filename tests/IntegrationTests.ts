@@ -14,11 +14,32 @@
 import { GameTestFramework, TestSuite, assert, assertEqual } from './GameTestFramework';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
-import { EffectType, EventCategory, EventPriority, GameState } from '../src/types/eventTypes';
-import { childhoodEvents } from '../src/data/childhoodEvents';
-import { youthEvents } from '../src/data/youthEvents';
-import { adultEvents } from '../src/data/adultEvents';
-import { elderlyEvents } from '../src/data/elderlyEvents';
+import { EffectType, EventCategory, EventPriority, GameState, EventDefinition } from '../src/types/eventTypes';
+import eventsIndexJson from '../src/data/events.json';
+import demonicEventsJson from '../src/data/lines/demonic.json';
+import generalEventsJson from '../src/data/lines/general.json';
+import originEventsJson from '../src/data/lines/origin.json';
+import orthodoxEventsJson from '../src/data/lines/orthodox.json';
+import trainingEventsJson from '../src/data/lines/training.json';
+
+const eventsIndex = eventsIndexJson as { imports: string[] };
+const demonicEvents = demonicEventsJson as EventDefinition[];
+const generalEvents = generalEventsJson as EventDefinition[];
+const originEvents = originEventsJson as EventDefinition[];
+const orthodoxEvents = orthodoxEventsJson as EventDefinition[];
+const trainingEvents = trainingEventsJson as EventDefinition[];
+
+const lineMap: Record<string, EventDefinition[]> = {
+  './lines/demonic.json': demonicEvents,
+  './lines/general.json': generalEvents,
+  './lines/origin.json': originEvents,
+  './lines/orthodox.json': orthodoxEvents,
+  './lines/training.json': trainingEvents,
+};
+
+const allEvents = (eventsIndex.imports || [])
+  .map(path => lineMap[path] || [])
+  .flat();
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
@@ -61,14 +82,14 @@ const fullLifeSimulationSuite: TestSuite = {
         state.player.age = 0;
         
         // 执行出生事件
-        const birthEvent = childhoodEvents.find(e => e.id === 'birth_wuxia_family');
+        const birthEvent = allEvents.find(e => e.id === 'birth_wuxia_family');
         if (birthEvent) {
           state = await executeEventSimple(executor, state, birthEvent);
           assert(state.player.age === 1, '出生后年龄应该为 1 岁');
         }
         
         // 执行童年其他事件
-        const toddlerEvent = childhoodEvents.find(e => e.id === 'toddler_exploration');
+        const toddlerEvent = allEvents.find(e => e.id === 'toddler_exploration');
         if (toddlerEvent) {
           state.player.age = 1;
           state = await executeEventSimple(executor, state, toddlerEvent);
@@ -85,13 +106,14 @@ const fullLifeSimulationSuite: TestSuite = {
         state.player.age = 13;
         
         // 执行青年开始事件
-        const youthEvent = youthEvents.find(e => e.id === 'youth_begins');
+        const youthEvent = allEvents.find(e => e.id === 'youth_begins');
         if (youthEvent) {
           state = await executeEventSimple(executor, state, youthEvent);
           assert(state.player.age === 14, '青年开始后年龄应该为 14 岁');
         }
         
         // 验证青年事件存在
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         assert(youthEvents.length >= 5, '青年事件应该有至少 5 个');
       },
     },
@@ -105,13 +127,14 @@ const fullLifeSimulationSuite: TestSuite = {
         state.player.martialPower = 100;
         
         // 执行一个成年事件
-        const adultEvent = adultEvents.find(e => e.id === 'continued_journey');
+        const adultEvent = allEvents.find(e => e.id === 'continued_journey');
         if (adultEvent) {
           state = await executeEventSimple(executor, state, adultEvent);
           assert(state.player.age === 20, '成年事件后年龄应该增长');
         }
         
         // 验证成年事件存在
+        const adultEvents = allEvents.filter(e => e.ageRange.min >= 19 && (e.ageRange.max ?? e.ageRange.min) <= 54);
         assert(adultEvents.length >= 8, '成年事件应该有至少 8 个');
       },
     },
@@ -126,13 +149,14 @@ const fullLifeSimulationSuite: TestSuite = {
         state.flags['sectFounder'] = true;
         
         // 执行一个中老年事件
-        const elderlyEvent = elderlyEvents.find(e => e.id === 'sect_establishment');
+        const elderlyEvent = allEvents.find(e => e.id === 'sect_establishment');
         if (elderlyEvent) {
           state = await executeEventSimple(executor, state, elderlyEvent);
           assert(state.player.age === 41, '中老年事件后年龄应该增长');
         }
         
         // 验证中老年事件存在
+        const elderlyEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) >= 55);
         assert(elderlyEvents.length >= 8, '中老年事件应该有至少 8 个');
       },
     },
@@ -147,6 +171,7 @@ const eventCoverageSuite: TestSuite = {
       description: '验证童年事件数量是否足够',
       test: async () => {
         // 验证童年事件数量
+        const childhoodEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) <= 12);
         assert(childhoodEvents.length >= 5, `童年事件应该有至少 5 个，实际为${childhoodEvents.length}个`);
         
         // 验证关键事件存在
@@ -159,10 +184,11 @@ const eventCoverageSuite: TestSuite = {
       description: '验证青年事件数量是否足够',
       test: async () => {
         // 验证青年事件数量
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         assert(youthEvents.length >= 6, `青年事件应该有至少 6 个，实际为${youthEvents.length}个`);
         
         // 验证关键事件存在
-        const hasSectChoice = youthEvents.some(e => e.id === 'sect_choice');
+        const hasSectChoice = youthEvents.some(e => e.id === 'sect_choice' || e.id === 'sect_path_choice');
         assert(hasSectChoice, '青年事件应该包含门派选择事件');
       },
     },
@@ -171,6 +197,7 @@ const eventCoverageSuite: TestSuite = {
       description: '验证成年事件数量是否足够',
       test: async () => {
         // 验证成年事件数量
+        const adultEvents = allEvents.filter(e => e.ageRange.min >= 19 && (e.ageRange.max ?? e.ageRange.min) <= 54);
         assert(adultEvents.length >= 8, `成年事件应该有至少 8 个，实际为${adultEvents.length}个`);
         
         // 验证关键事件存在
@@ -183,6 +210,7 @@ const eventCoverageSuite: TestSuite = {
       description: '验证中老年事件数量是否足够',
       test: async () => {
         // 验证中老年事件数量
+        const elderlyEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) >= 55);
         assert(elderlyEvents.length >= 8, `中老年事件应该有至少 8 个，实际为${elderlyEvents.length}个`);
         
         // 验证结局事件存在
@@ -206,6 +234,7 @@ const multiPathSuite: TestSuite = {
         let state1 = framework.createTestState();
         state1.player.age = 14;
         state1.player.externalSkill = 20;
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const sectEvent = youthEvents.find(e => e.id === 'sect_choice');
         if (sectEvent && sectEvent.choices) {
           const shaolinChoice = sectEvent.choices.find(c => c.id === 'join_shaolin');
@@ -250,6 +279,7 @@ const multiPathSuite: TestSuite = {
         let state1 = framework.createTestState();
         state1.player.age = 17;
         state1.player.charisma = 25;
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const loveEvent = youthEvents.find(e => e.id === 'meet_love_interest');
         if (loveEvent && loveEvent.conditions) {
           const evaluator = new ConditionEvaluator();
@@ -287,6 +317,7 @@ const multiPathSuite: TestSuite = {
         state1.player.charisma = 110;
         state1.flags['legendaryStatus'] = true;
         
+        const elderlyEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) >= 55);
         const legendaryEnding = elderlyEvents.find(e => e.id === 'legendary_life');
         if (legendaryEnding && legendaryEnding.conditions) {
           const canTrigger = legendaryEnding.conditions.every(c => evaluator.evaluate(c, state1));
@@ -329,7 +360,6 @@ const dataConsistencySuite: TestSuite = {
       name: '数据一致性 - 事件 ID 唯一性',
       description: '测试所有事件 ID 是否唯一',
       test: () => {
-        const allEvents = [...childhoodEvents, ...youthEvents, ...adultEvents, ...elderlyEvents];
         const eventIds = new Set<string>();
         
         allEvents.forEach(event => {
@@ -343,6 +373,7 @@ const dataConsistencySuite: TestSuite = {
       description: '测试各阶段年龄范围是否连续',
       test: () => {
         // 童年：0-12 岁
+        const childhoodEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) <= 12);
         const childhoodAges = childhoodEvents.map(e => e.ageRange);
         const minChildhoodAge = Math.min(...childhoodAges.map(a => a.min));
         const maxChildhoodAge = Math.max(...childhoodAges.map(a => a.max));
@@ -350,6 +381,7 @@ const dataConsistencySuite: TestSuite = {
         assert(maxChildhoodAge >= 8, '童年应该至少到 8 岁');
         
         // 青年：13-18 岁
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const youthAges = youthEvents.map(e => e.ageRange);
         const minYouthAge = Math.min(...youthAges.map(a => a.min));
         const maxYouthAge = Math.max(...youthAges.map(a => a.max));
@@ -357,6 +389,7 @@ const dataConsistencySuite: TestSuite = {
         assert(maxYouthAge === 18, '青年应该到 18 岁结束');
         
         // 成年：19-35 岁
+        const adultEvents = allEvents.filter(e => e.ageRange.min >= 19 && (e.ageRange.max ?? e.ageRange.min) <= 54);
         const adultAges = adultEvents.map(e => e.ageRange);
         const minAdultAge = Math.min(...adultAges.map(a => a.min));
         const maxAdultAge = Math.max(...adultAges.map(a => a.max));
@@ -364,6 +397,7 @@ const dataConsistencySuite: TestSuite = {
         assert(maxAdultAge === 35, '成年应该到 35 岁结束');
         
         // 中老年：36-80 岁
+        const elderlyEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) >= 55);
         const elderlyAges = elderlyEvents.map(e => e.ageRange);
         const minElderlyAge = Math.min(...elderlyAges.map(a => a.min));
         const maxElderlyAge = Math.max(...elderlyAges.map(a => a.max));
@@ -375,8 +409,6 @@ const dataConsistencySuite: TestSuite = {
       name: '数据一致性 - 事件元数据完整性',
       description: '测试所有事件元数据是否完整',
       test: () => {
-        const allEvents = [...childhoodEvents, ...youthEvents, ...adultEvents, ...elderlyEvents];
-        
         allEvents.forEach(event => {
           assert(!!event.id, `事件 ${event.id} 缺少 ID`);
           assert(!!event.version, `事件 ${event.id} 缺少版本号`);
@@ -394,8 +426,6 @@ const dataConsistencySuite: TestSuite = {
       description: '测试所有效果类型是否有效',
       test: () => {
         const validEffectTypes = Object.values(EffectType);
-        const allEvents = [...childhoodEvents, ...youthEvents, ...adultEvents, ...elderlyEvents];
-        
         allEvents.forEach(event => {
           if (event.autoEffects) {
             event.autoEffects.forEach(effect => {
@@ -427,8 +457,6 @@ const boundaryConditionsSuite: TestSuite = {
       name: '边界条件 - 事件结构完整性',
       description: '验证所有事件结构完整',
       test: async () => {
-        const allEvents = [...childhoodEvents, ...youthEvents, ...adultEvents, ...elderlyEvents];
-        
         // 验证所有事件都有必需字段
         allEvents.forEach(event => {
           assert(!!event.id, `事件缺少 ID`);
@@ -444,21 +472,25 @@ const boundaryConditionsSuite: TestSuite = {
       description: '验证各阶段年龄范围正确',
       test: async () => {
         // 童年：0-12 岁
+        const childhoodEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) <= 12);
         const childhoodAges = childhoodEvents.map(e => e.ageRange);
         const minChildhoodAge = Math.min(...childhoodAges.map(a => a.min));
         assert(minChildhoodAge === 0, '童年应该从 0 岁开始');
         
         // 青年：13-18 岁
+        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const youthAges = youthEvents.map(e => e.ageRange);
         const minYouthAge = Math.min(...youthAges.map(a => a.min));
         assert(minYouthAge === 13, '青年应该从 13 岁开始');
         
         // 成年：19-35 岁
+        const adultEvents = allEvents.filter(e => e.ageRange.min >= 19 && (e.ageRange.max ?? e.ageRange.min) <= 54);
         const adultAges = adultEvents.map(e => e.ageRange);
         const minAdultAge = Math.min(...adultAges.map(a => a.min));
         assert(minAdultAge === 19, '成年应该从 19 岁开始');
         
         // 中老年：40-80 岁
+        const elderlyEvents = allEvents.filter(e => (e.ageRange.max ?? e.ageRange.min) >= 55);
         const elderlyAges = elderlyEvents.map(e => e.ageRange);
         const maxElderlyAge = Math.max(...elderlyAges.map(a => a.max));
         assert(maxElderlyAge === 80, '中老年应该到 80 岁结束');

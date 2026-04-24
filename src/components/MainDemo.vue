@@ -119,12 +119,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useNewGameEngine } from './composables/useNewGameEngine';
-import EventDisplay from './components/EventDisplay.vue';
-import EventHistory from './components/EventHistory.vue';
-import SaveManager from './components/SaveManager.vue';
-import { performanceMonitor } from './core/PerformanceMonitor';
-import { eventPreloader } from './core/EventPreloader';
+import { useNewGameEngine } from '../composables/useNewGameEngine';
+import EventDisplay from './EventDisplay.vue';
+import EventHistory from './EventHistory.vue';
+import SaveManager from './SaveManager.vue';
+import { performanceMonitor } from '../core/PerformanceMonitor';
+import { eventPreloader } from '../core/EventPreloader';
 
 const {
   startNewGame,
@@ -201,14 +201,12 @@ const onHandleChoice = async (choice: any) => {
 
 // 加载存档
 const loadGameFromSave = (gameState: any) => {
-  console.log('加载存档:', gameState);
   // 这里需要实现存档加载逻辑
   gameStarted.value = true;
 };
 
 // 游戏保存回调
 const onGameSaved = (saveId: string) => {
-  console.log('游戏已保存:', saveId);
 };
 
 // 显示性能报告

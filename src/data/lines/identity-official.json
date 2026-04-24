@@ -1,0 +1,185 @@
+[
+  {
+    "id": "official_first_post",
+    "name": "初任官职",
+    "description": "你通过科举或关系获得第一个官职。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 20, "max": 35 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["official", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "triggerConditions": { "age": { "min": 20, "max": 35 }, "identity": { "required": ["official"] } },
+    "content": { "title": "上任", "text": "你通过科举或关系获得第一个官职。这是你仕途的起点。" },
+    "choices": [
+      {
+        "id": "serve_honest",
+        "text": "清廉为官，为民做主 (侠义 +15, 声望 +10, 金钱 -20)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": -20, "operator": "add" },
+          { "type": "karma_change", "good": 15, "evil": 0 },
+          { "type": "flag_set", "target": "official_first_post", "value": true }
+        ]
+      },
+      {
+        "id": "serve_smart",
+        "text": "圆滑处世，积累人脉 (人脉 +20, 金钱 +30)",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" },
+          { "type": "flag_set", "target": "official_first_post", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "official_corruption",
+    "name": "贪污诱惑",
+    "description": "有人送来厚礼，希望你行个方便。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": { "min": 25, "max": 45 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["official", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "triggerConditions": { "age": { "min": 25, "max": 45 }, "identity": { "required": ["official"] } },
+    "content": { "title": "贿赂", "text": "有人送来厚礼，希望你行个方便。这是对你操守的考验。" },
+    "choices": [
+      {
+        "id": "reject_bribe",
+        "text": "严词拒绝，维护清廉 (侠义 +20, 声望 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "karma_change", "good": 20, "evil": 0 },
+          { "type": "flag_set", "target": "official_corruption", "value": true }
+        ]
+      },
+      {
+        "id": "accept_bribe",
+        "text": "收下贿赂，为人方便 (金钱 +200, 侠义 -20)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -20, "operator": "add" },
+          { "type": "karma_change", "good": 0, "evil": 20 },
+          { "type": "flag_set", "target": "official_corruption", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "official_promotion",
+    "name": "升官发财",
+    "description": "因政绩突出，你获得提拔。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": { "min": 30, "max": 50 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["official", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "triggerConditions": { "age": { "min": 30, "max": 50 }, "identity": { "required": ["official"] } },
+    "content": { "title": "升迁", "text": "因政绩突出，你获得提拔。更高的职位意味着更大的权力。" },
+    "choices": [
+      {
+        "id": "promote_good",
+        "text": "利用权力，造福百姓 (侠义 +20, 声望 +25)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 25, "operator": "add" },
+          { "type": "karma_change", "good": 25, "evil": 0 },
+          { "type": "flag_set", "target": "official_promotion", "value": true }
+        ]
+      },
+      {
+        "id": "promote_self",
+        "text": "利用权力，谋取私利 (金钱 +150, 人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 150, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "flag_set", "target": "official_promotion", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "official_faction",
+    "name": "派系斗争",
+    "description": "朝中派系斗争激烈，你需要选边站队。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": { "min": 35, "max": 55 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["official", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 35 }],
+    "triggerConditions": { "age": { "min": 35, "max": 55 }, "identity": { "required": ["official"] } },
+    "content": { "title": "站队", "text": "朝中派系斗争激烈，你需要选边站队。这是一个关乎前途的决定。" },
+    "choices": [
+      {
+        "id": "stay_neutral",
+        "text": "保持中立，不得罪人 (声望 +5)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "official_faction", "value": true }
+        ]
+      },
+      {
+        "id": "join_faction",
+        "text": "加入派系，寻求靠山 (人脉 +30, 风险增加)",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 30, "operator": "add" },
+          { "type": "flag_set", "target": "official_faction", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "official_retirement",
+    "name": "告老还乡",
+    "description": "年事已高，你考虑辞官归隐。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 55, "max": 75 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["official", "identity", "elderly"],
+    "triggers": [{ "type": "age_reach", "value": 55 }],
+    "triggerConditions": { "age": { "min": 55, "max": 75 }, "identity": { "required": ["official"] } },
+    "content": { "title": "归隐", "text": "年事已高，你考虑辞官归隐，回到故乡安度晚年。" },
+    "choices": [
+      {
+        "id": "retire_honor",
+        "text": "光荣退休，两袖清风 (声望 +30, 侠义 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 30, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 20, "evil": 0 },
+          { "type": "flag_set", "target": "official_retirement", "value": true }
+        ]
+      },
+      {
+        "id": "retire_rich",
+        "text": "带着积蓄，富足晚年 (金钱 +200)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
+          { "type": "flag_set", "target": "official_retirement", "value": true }
+        ]
+      }
+    ]
+  }
+]

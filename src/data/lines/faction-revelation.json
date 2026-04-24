@@ -1,0 +1,178 @@
+[
+  {
+    "id": "discover_shaolin_dark_history",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 60,
+    "weight": 30,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true && comprehension >= 30"}
+    ],
+    "content": {
+      "title": "少林旧档",
+      "text": "你在少林藏经阁偶然发现一份陈旧档案。档案记载，百年前少林曾奉命围剿一支「山贼」，却发现那只是一群逃难的饥民。少林方丈曾下令封口此事……你开始怀疑，所谓的「正派」，究竟是正，还是只是权力的附庸？",
+      "description": "发现少林不为人知的历史"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "公开档案，揭露真相",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -30},
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "flag_set", "flag": "revealed_orthodox_secrets", "value": true}
+        ]
+      },
+      {
+        "text": "保持沉默",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "kept_orthodox_secrets", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "discover_wudang_internal_struggle",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 58,
+    "weight": 25,
+    "ageRange": {"min": 22, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true && connections >= 40"}
+    ],
+    "content": {
+      "title": "武当内斗",
+      "text": "你无意中听到武当几位长老的密谈。原来武当内部并非铁板一块，几位长老为了掌门之位明争暗斗，甚至不惜使用阴私手段。你一直尊敬的武当「道法自然」，竟是如此表面……",
+      "description": "发现武当内部派系斗争"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "暗中调查，收集证据",
+        "effects": [
+          {"type": "stat_modify", "stat": "connections", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "flag_set", "flag": "wudang_insider", "value": true}
+        ]
+      },
+      {
+        "text": "假装不知，继续修炼",
+        "effects": [
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "understand_unconventional_truth",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 55,
+    "weight": 35,
+    "ageRange": {"min": 18, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && comprehension >= 25"}
+    ],
+    "content": {
+      "title": "幽影门的真相",
+      "text": "你加入幽影门后，逐渐了解到外界对幽影门的描述有多少是真实的，又有多少是污蔑。幽影门确实不拘泥于传统，但他们的「残忍」往往是对「正派」迫害的反击。门中许多弟子都是被正派逼上绝路的孤儿遗孀……你开始思考，究竟谁才是真正的「邪恶」？",
+      "description": "了解幽影门的真实历史"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 8},
+      {"type": "flag_set", "flag": "understood_unconventional", "value": true}
+    ]
+  },
+  {
+    "id": "court_politics_revealed",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 65,
+    "weight": 25,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 100 || flags.official_faction == true"}
+    ],
+    "content": {
+      "title": "朝廷的棋局",
+      "text": "一位退隐的朝廷官员找到你，道出一个惊人的秘密：所谓「正邪大战」，朝廷一直在暗中推波助澜。江湖自相残杀，对朝廷而言是有百利而无一害。「正道联盟」的背后是朝廷支持，而「魔教」之所以被称为魔教，仅仅是因为他们不愿接受朝廷招安……",
+      "description": "发现朝廷操控江湖的真相"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "将真相公之于众",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -50},
+          {"type": "stat_modify", "stat": "connections", "value": 20},
+          {"type": "flag_set", "flag": "exposed_court_plot", "value": true}
+        ]
+      },
+      {
+        "text": "利用这个秘密",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "money", "value": 500},
+          {"type": "flag_set", "flag": "exploited_court_plot", "value": true}
+        ]
+      },
+      {
+        "text": "保持沉默，远离纷争",
+        "effects": [
+          {"type": "flag_set", "flag": "ignored_court_plot", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "refugee_sect_story",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 50,
+    "weight": 40,
+    "ageRange": {"min": 16, "max": 35},
+    "triggers": [
+      {"type": "age_reach", "value": 16},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "流浪武者",
+      "text": "你在山间遇到一位流浪武者，对方曾是某个小门派的弟子。他告诉你，他们门派因为不愿归顺「正道联盟」，被污蔑为「魔教」分支，遭到围剿灭门。「正道？不过是谁拳头大谁就定义正义罢了。」他冷笑道。",
+      "description": "听到流浪武者的故事"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "同情他的遭遇",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "connections", "value": 10},
+          {"type": "flag_set", "flag": "sympathized_refugee", "value": true}
+        ]
+      },
+      {
+        "text": "保持中立，不发表意见",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+        ]
+      }
+    ]
+  }
+]

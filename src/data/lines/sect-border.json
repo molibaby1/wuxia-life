@@ -1,0 +1,1455 @@
+[
+  {
+    "id": "border_encounter",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 21,
+      "max": 30
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 21
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"route_border\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.qinggong >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+      }
+    ],
+    "content": {
+      "text": "边关商队在荒原上遭遇袭击，你出手相救。领队以异族礼节致谢，邀你随行。",
+      "title": "边地奇缘",
+      "description": "塞外风云初起。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_join",
+        "text": "随行边地",
+        "description": "你决定前往边关投军",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你武艺超群，在商队遭遇突袭时单枪匹马击退数倍敌人！领队惊叹道：\"真英雄也！\"边关守将亲自设宴款待，你被破格提拔为校尉，直接进入军官序列！",
+            "condition": {"type": "expression", "expression": "martialPower >= 30 && constitution >= 20"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_border"},
+              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "flag_set", "target": "border_trial_active"},
+              {"type": "flag_set", "target": "border_rank", "value": "officer"},
+              {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "influence", "value": 5, "operator": "add"},
+              {"type": "event_record", "target": "border_join_officer"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你身手不凡，随商队抵达边关后被守将看中，编入精锐部队。边关将士对你寄予厚望，你的军旅生涯就此开始。",
+            "condition": {"type": "expression", "expression": "constitution >= 15 || martialPower >= 20"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_border"},
+              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "flag_set", "target": "border_trial_active"},
+              {"type": "flag_set", "target": "border_rank", "value": "soldier"},
+              {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "border_join_soldier"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你随商队抵达边关，但守将见你体格一般，便将你编入辎重营。虽非一线作战，但边关生活也让你学会了坚强。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_border"},
+              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "flag_set", "target": "border_trial_active"},
+              {"type": "flag_set", "target": "border_rank", "value": "support"},
+              {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "border_join_support"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "border_decline",
+        "text": "谢绝邀请",
+        "description": "你决定不去边关",
+        "effects": [
+          {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+          {"type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add"},
+          {"type": "event_record", "target": "border_encounter_decline"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "异族",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_trial_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": {
+      "min": 21,
+      "max": 32
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 21
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"border_trial_active\") && !flags.has(\"border_trial_started\")"
+      }
+    ],
+    "content": {
+      "text": "边地试炼并非比武，而是骑射与谋略。你需在猎场与议事之间做选择。",
+      "title": "边地试炼",
+      "description": "塞外之风，最识勇者。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_trial_hunt",
+        "text": "骑射猎场",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 12,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_hunt"
+          },
+          {
+            "type": "event_record",
+            "target": "border_trial_hunt"
+          }
+        ]
+      },
+      {
+        "id": "border_trial_scout",
+        "text": "潜行侦查",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 10,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_scout"
+          },
+          {
+            "type": "event_record",
+            "target": "border_trial_scout"
+          }
+        ]
+      },
+      {
+        "id": "border_trial_council",
+        "text": "议事谋略",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trial_council"
+          },
+          {
+            "type": "event_record",
+            "target": "border_trial_council"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "异族",
+        "试炼"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_trial_followup",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 21,
+      "max": 34
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 21
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"border_trial_active\") && (flags.has(\"border_trial_hunt\") || flags.has(\"border_trial_scout\") || flags.has(\"border_trial_council\")) && !flags.has(\"border_trial_done\")"
+      }
+    ],
+    "content": {
+      "text": "你随骑队巡边，逐渐熟悉塞外风土与部族规矩。",
+      "title": "边地巡行",
+      "description": "风沙磨砺意志。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "month"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_trial_done"
+      },
+      {
+        "type": "flag_unset",
+        "target": "border_trial_active"
+      },
+      {
+        "type": "event_record",
+        "target": "border_trial_followup"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "异族",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_clan_conflict",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 30,
+    "ageRange": {
+      "min": 18,
+      "max": 32
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trial_done\") && !flags.has(\"border_conflict_done\")"
+      }
+    ],
+    "content": {
+      "text": "部族内部因盟约与贡赋发生争执，你被推举为调停者。",
+      "title": "部族纷争",
+      "description": "能否以理服人？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_conflict_force",
+        "text": "以武立威",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 18,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_conflict_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_force"
+          },
+          {
+            "type": "event_record",
+            "target": "border_conflict_force"
+          }
+        ]
+      },
+      {
+        "id": "border_conflict_trade",
+        "text": "以利调和",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 18,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_conflict_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_trade"
+          },
+          {
+            "type": "event_record",
+            "target": "border_conflict_trade"
+          }
+        ]
+      },
+      {
+        "id": "border_conflict_mind",
+        "text": "以智说服",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_conflict_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_mind"
+          },
+          {
+            "type": "event_record",
+            "target": "border_conflict_mind"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "异族",
+        "主线",
+        "纷争"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_ending",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 20,
+    "ageRange": {
+      "min": 25,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_conflict_done\") && !flags.has(\"border_ending\")"
+      }
+    ],
+    "content": {
+      "text": "你在边地多年，既通汉礼又识部族习俗，成为塞外与中原之间的桥梁。",
+      "title": "边关使者",
+      "description": "风起塞外，你自成一方传奇。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_ending"
+      },
+      {
+        "type": "event_record",
+        "target": "border_ending"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "异族",
+        "结局"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_trade_route",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 28,
+    "ageRange": {
+      "min": 22,
+      "max": 35
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && !flags.has(\"border_trade_route\")"
+      }
+    ],
+    "content": {
+      "text": "你参与开辟互市通道，需在护商与谈判之间取舍。",
+      "title": "互市通道",
+      "description": "商路是另一种战场。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_trade_guard",
+        "text": "护商保路",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trade_route"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_guard"
+          },
+          {
+            "type": "event_record",
+            "target": "border_trade_guard"
+          }
+        ]
+      },
+      {
+        "id": "border_trade_negotiate",
+        "text": "谈判通商",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_trade_route"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_negotiate"
+          },
+          {
+            "type": "event_record",
+            "target": "border_trade_negotiate"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "互市",
+        "支线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_career_growth",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": {
+      "min": 24,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 24
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trial_done\") && !flags.has(\"border_career_growth\")"
+      }
+    ],
+    "content": {
+      "text": "你在边地多年，战功赫赫，被提拔为重要职位。你需要决定自己的发展方向。",
+      "title": "职业晋升",
+      "description": "边地崛起的新星。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_career_military",
+        "text": "专注军事（武力 +10）",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_career_growth"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_military"
+          },
+          {
+            "type": "event_record",
+            "target": "border_career_military"
+          }
+        ]
+      },
+      {
+        "id": "border_career_diplomat",
+        "text": "从事外交（魅力 +10）",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_career_growth"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_diplomat"
+          },
+          {
+            "type": "event_record",
+            "target": "border_career_diplomat"
+          }
+        ]
+      },
+      {
+        "id": "border_career_trade",
+        "text": "管理贸易（金钱 +50）",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 50,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_career_growth"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_manager"
+          },
+          {
+            "type": "event_record",
+            "target": "border_career_trade"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "职业发展",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_alliance",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 24,
+    "ageRange": {
+      "min": 19,
+      "max": 32
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 19
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trade_route\") && !flags.has(\"border_alliance\")"
+      }
+    ],
+    "content": {
+      "text": "部族首领提出联姻或盟约以稳固互市，你需要作出选择。",
+      "title": "部族盟约",
+      "description": "情义与利益并行。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_alliance_marriage",
+        "text": "接受联姻",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "relation_change",
+            "target": "lover",
+            "operator": "add",
+            "value": {
+              "id": "lover_saiyin",
+              "name": "赛音",
+              "role": "lover",
+              "delta": 6
+            }
+          },
+          {
+            "type": "flag_set",
+            "target": "border_alliance"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_marriage"
+          },
+          {
+            "type": "event_record",
+            "target": "border_alliance_marriage"
+          }
+        ]
+      },
+      {
+        "id": "border_alliance_contract",
+        "text": "缔结盟约",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_alliance"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_contract"
+          },
+          {
+            "type": "event_record",
+            "target": "border_alliance_contract"
+          }
+        ]
+      },
+      {
+        "id": "border_alliance_decline",
+        "text": "婉拒盟约",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_alliance"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_path_decline"
+          },
+          {
+            "type": "event_record",
+            "target": "border_alliance_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "盟约",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_crisis",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 20,
+    "ageRange": {
+      "min": 21,
+      "max": 36
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 21
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_alliance\") && !flags.has(\"border_crisis\")"
+      }
+    ],
+    "content": {
+      "text": "边关爆发突袭，商路受阻，你必须带队解围。",
+      "title": "边关危机",
+      "description": "塞外风云再起。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_crisis_charge",
+        "text": "正面突击",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": 6,
+            "operator": "subtract"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_crisis"
+          },
+          {
+            "type": "event_record",
+            "target": "border_crisis_charge"
+          }
+        ]
+      },
+      {
+        "id": "border_crisis_ambush",
+        "text": "伏击解围",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 18,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_crisis"
+          },
+          {
+            "type": "event_record",
+            "target": "border_crisis_ambush"
+          }
+        ]
+      },
+      {
+        "id": "border_crisis_ransom",
+        "text": "赎回商路",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 30,
+            "operator": "subtract"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_crisis"
+          },
+          {
+            "type": "event_record",
+            "target": "border_crisis_ransom"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "危机",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_reconciliation",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 18,
+    "ageRange": {
+      "min": 22,
+      "max": 38
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_crisis\") && !flags.has(\"border_reconciliation\")"
+      }
+    ],
+    "content": {
+      "text": "危机平息后，你被请去调停汉地与部族的旧怨。",
+      "title": "旧怨调停",
+      "description": "能否化干戈为玉帛？"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 2,
+        "timeUnit": "month"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_reconciliation"
+      },
+      {
+        "type": "event_record",
+        "target": "border_reconciliation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "调停",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_ending_commander",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 18,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_crisis\") && flags.has(\"border_path_force\") && !flags.has(\"border_ending_commander\")"
+      }
+    ],
+    "content": {
+      "text": "你被推举为边关统领，镇守要塞，威名震塞外。",
+      "title": "边关统领",
+      "description": "铁骑如风，你名动边关。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 7,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_ending_commander"
+      },
+      {
+        "type": "event_record",
+        "target": "border_ending_commander"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "结局",
+        "统领"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_ending_merchant",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 16,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trade_route\") && flags.has(\"border_path_negotiate\") && !flags.has(\"border_ending_merchant\")"
+      }
+    ],
+    "content": {
+      "text": "你掌握互市枢纽，建立跨境商盟，成为塞外第一商领。",
+      "title": "商盟盟主",
+      "description": "财富与信誉汇于你手。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "money",
+        "value": 40,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_ending_merchant"
+      },
+      {
+        "type": "event_record",
+        "target": "border_ending_merchant"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "结局",
+        "商盟"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_ending_envoy",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 14,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_alliance\") && flags.has(\"border_path_contract\") && !flags.has(\"border_ending_envoy\")"
+      }
+    ],
+    "content": {
+      "text": "你以盟约为基，往返中原与塞外，成为两地的使者。",
+      "title": "和亲使者",
+      "description": "风沙万里，使命同行。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_ending_envoy"
+      },
+      {
+        "type": "event_record",
+        "target": "border_ending_envoy"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "结局",
+        "使者"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_ending_home",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 12,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_path_decline\") && !flags.has(\"border_ending_home\")"
+      }
+    ],
+    "content": {
+      "text": "你选择归隐故乡，不再过问边地纷争，静守旧梦。",
+      "title": "归隐故乡",
+      "description": "风尘散尽，心归故土。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "border_ending_home"
+      },
+      {
+        "type": "event_record",
+        "target": "border_ending_home"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "结局",
+        "归隐"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "border_departure",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 2,
+    "weight": 14,
+    "ageRange": { "min": 23, "max": 45 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && !flags.has(\"border_departed\")"
+      }
+    ],
+    "content": {
+      "text": "若要改换人生道路，需先离开边地势力。此后不再受部族约束。",
+      "title": "离开边地",
+      "description": "踏出边关，心向中原。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_leave",
+        "text": "离开边地",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_unset", "target": "route_border" },
+          { "type": "flag_unset", "target": "border_trial_active" },
+          { "type": "flag_set", "target": "border_departed" },
+          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
+          { "type": "stat_modify", "target": "reputation", "value": -10, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": -5, "operator": "add" },
+          { "type": "event_record", "target": "border_departure_leave" }
+        ]
+      },
+      {
+        "id": "border_stay",
+        "text": "继续留在边地",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "event_record", "target": "border_departure_stay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["边地", "退派", "once"],
+      "enabled": true
+    }
+  }
+]

@@ -1,0 +1,934 @@
+[
+  {
+    "id": "orthodox_invitation",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {"min": 14, "max": 18},
+    "triggers": [
+      {"type": "age_reach", "value": 14}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 25 && martialPower >= 20"}
+    ],
+    "content": {
+      "title": "正道邀请",
+      "text": "你的侠义之名传遍江湖，正道盟主亲自发来邀请函，邀请你加入正道联盟。这是成为正道大侠的机会。",
+      "description": "收到正道联盟邀请"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受邀请，加入正道",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_faction", "value": "orthodox"},
+          {"type": "flag_set", "flag": "orthodox_member", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      },
+      {
+        "text": "拒绝邀请，保持自由",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -3},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_master_ceremony",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 95,
+    "weight": 90,
+    "ageRange": {"min": 15, "max": 20},
+    "triggers": [
+      {"type": "age_reach", "value": 15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true"}
+    ],
+    "content": {
+      "title": "拜师仪式",
+      "text": "正道联盟为你举行拜师仪式，你可以选择一位正道前辈作为师父。每位前辈都有独特的绝学。",
+      "description": "选择师父"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "拜入武当派（主修内功）",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_wudang", "value": true},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+        ]
+      },
+      {
+        "text": "拜入峨眉派（主修剑法）",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_emei", "value": true},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 8},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      },
+      {
+        "text": "拜入华山派（主修轻功）",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_huashan", "value": true},
+          {"type": "stat_modify", "stat": "qinggong", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_internal_art",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_wudang == true || flags.sect_emei == true || flags.sect_huashan == true"}
+    ],
+    "content": {
+      "title": "心法传授",
+      "text": "师父开始传授你门派核心心法。这是你武学根基的关键，需要潜心修炼。",
+      "description": "学习门派心法"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+      {"type": "stat_modify", "stat": "constitution", "value": 6},
+      {"type": "flag_set", "flag": "orthodox_internal_art", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_sword_art",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 17, "max": 23},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_internal_art == true"}
+    ],
+    "content": {
+      "title": "剑法初学",
+      "text": "师父开始传授你门派剑法。剑乃百兵之君，正道剑法讲究正气凛然，以快制胜。",
+      "description": "学习剑法"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8},
+      {"type": "flag_set", "flag": "orthodox_sword_art", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_rule_exam",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 24},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_sword_art == true"}
+    ],
+    "content": {
+      "title": "门规考核",
+      "text": "门派要考核你对门规的理解。正道门派最重侠义，你若侠义值不够，将无法通过考核。",
+      "description": "通过门规考核"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受考核（需侠义≥40）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 40"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "orthodox_rule_passed", "value": true},
+          {"type": "flag_set", "flag": "formal_disciple", "value": true}
+        ]
+      },
+      {
+        "text": "推迟考核",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_formal_disciple",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 82,
+    "weight": 70,
+    "ageRange": {"min": 19, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 19}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.formal_disciple == true"}
+    ],
+    "content": {
+      "title": "正式弟子",
+      "text": "你正式成为门派核心弟子，可以学习更多高级武学，也要承担更多责任。",
+      "description": "成为正式弟子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 8},
+      {"type": "stat_modify", "stat": "reputation", "value": 12},
+      {"type": "flag_set", "flag": "orthodox_formal_disciple", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_daily_training",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 75,
+    "weight": 80,
+    "ageRange": {"min": 20, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_formal_disciple == true"}
+    ],
+    "content": {
+      "title": "早课晚修",
+      "text": "作为正式弟子，你每天都要进行严格的修炼。清晨练剑，傍晚打坐，日复一日，武学精进。",
+      "description": "日常修炼"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 6},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 6},
+      {"type": "stat_modify", "stat": "martialPower", "value": 5}
+    ]
+  },
+  {
+    "id": "orthodox_sect_mission",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 80,
+    "weight": 75,
+    "ageRange": {"min": 21, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 21}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_formal_disciple == true"}
+    ],
+    "content": {
+      "title": "师门任务",
+      "text": "师父派你下山除害，消灭一个为祸乡里的土匪窝。这是你证明自己的机会。",
+      "description": "下山除害"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "独自前往（需武力≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "orthodox_mission_success", "value": true}
+        ]
+      },
+      {
+        "text": "请求同门协助",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "chivalry", "value": 4}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_peer_duel",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 78,
+    "weight": 70,
+    "ageRange": {"min": 22, "max": 34},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_mission_success == true"}
+    ],
+    "content": {
+      "title": "同门比武",
+      "text": "门派举办比武大会，你与同门师兄弟切磋武艺。胜者将代表门派参加武林大会。",
+      "description": "同门比武"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力应战（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "flag_set", "flag": "orthodox_peer_winner", "value": true}
+        ]
+      },
+      {
+        "text": "点到为止",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3},
+          {"type": "stat_modify", "stat": "charisma", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_sword_conference",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 76,
+    "weight": 65,
+    "ageRange": {"min": 23, "max": 36},
+    "triggers": [
+      {"type": "age_reach", "value": 23}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_formal_disciple == true"}
+    ],
+    "content": {
+      "title": "论剑大会",
+      "text": "正道各派举办论剑大会，交流武学心得。你代表门派参加，与各路高手切磋。",
+      "description": "参加论剑大会"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "盛装出席并举办宴席（需金钱≥800，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "正常参与",
+        "effects": [
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_demon_suppression",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 24, "max": 38},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true"}
+    ],
+    "content": {
+      "title": "除魔卫道",
+      "text": "魔教在江湖上为非作歹，正道联盟组织围剿。你作为正道弟子，必须参与其中。",
+      "description": "参与围剿魔教"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "担任先锋（需武力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "flag_set", "flag": "orthodox_demon_slayer", "value": true}
+        ]
+      },
+      {
+        "text": "跟随大军",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_help_people",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 72,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true"}
+    ],
+    "content": {
+      "title": "救助百姓",
+      "text": "路遇一村庄遭受山贼洗劫，百姓苦不堪言。你出手相助，赶跑山贼，拯救村民。",
+      "description": "行侠仗义"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "自掏腰包重建村庄（需金钱≥500，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "组织村民自救（侠义 +12，声望 +18）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 18},
+          {"type": "stat_modify", "stat": "charisma", "value": 6}
+        ]
+      },
+      {
+        "text": "只出手赶走山贼",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_secret_exploration",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 80,
+    "weight": 60,
+    "ageRange": {"min": 26, "max": 42},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_demon_slayer == true"}
+    ],
+    "content": {
+      "title": "秘境探险",
+      "text": "你与几位正道好友发现一处古代秘境，据说里面有前辈高人留下的秘籍和宝藏。",
+      "description": "探索秘境"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "深入探索（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 12},
+          {"type": "flag_set", "flag": "orthodox_secret_success", "value": true}
+        ]
+      },
+      {
+        "text": "谨慎行事",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 6},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_manual_contest",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 75,
+    "weight": 55,
+    "ageRange": {"min": 27, "max": 44},
+    "triggers": [
+      {"type": "age_reach", "value": 27}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_formal_disciple == true"}
+    ],
+    "content": {
+      "title": "秘籍争夺",
+      "text": "一本正道秘籍现世，各派都想要得到。为避免冲突，决定通过比武决定归属。",
+      "description": "争夺秘籍"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参与争夺（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 8},
+          {"type": "flag_set", "flag": "orthodox_manual_winner", "value": true}
+        ]
+      },
+      {
+        "text": "放弃争夺",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_master_test",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 82,
+    "weight": 65,
+    "ageRange": {"min": 28, "max": 46},
+    "triggers": [
+      {"type": "age_reach", "value": 28}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_secret_success == true"}
+    ],
+    "content": {
+      "title": "师长考验",
+      "text": "师父要对你进行最后的考验，测试你是否有资格成为护法弟子。这是成为核心弟子的关键。",
+      "description": "接受师长考验"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受考验（需武力≥90，侠义≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90 && chivalry >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "flag_set", "flag": "orthodox_guardian", "value": true}
+        ]
+      },
+      {
+        "text": "准备不足",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_guardian_disciple",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 80,
+    "weight": 60,
+    "ageRange": {"min": 29, "max": 48},
+    "triggers": [
+      {"type": "age_reach", "value": 29}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_guardian == true"}
+    ],
+    "content": {
+      "title": "护法弟子",
+      "text": "你成为门派护法弟子，地位仅次于掌门。你可以参与门派决策，也要承担守护门派的责任。",
+      "description": "成为护法弟子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": 25},
+      {"type": "stat_modify", "stat": "charisma", "value": 8}
+    ]
+  },
+  {
+    "id": "orthodox_alliance_meeting",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_guardian == true"}
+    ],
+    "content": {
+      "title": "正道联盟会议",
+      "text": "正道联盟召开紧急会议，商讨如何应对魔教的威胁。你作为门派代表参加。",
+      "description": "参加联盟会议"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "stat_modify", "stat": "reputation", "value": 15}
+    ]
+  },
+  {
+    "id": "orthodox_save_ally",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 31, "max": 52},
+    "triggers": [
+      {"type": "age_reach", "value": 31}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true"}
+    ],
+    "content": {
+      "title": "拯救同道",
+      "text": "一位正道同道被魔教围困，危在旦夕。你收到求救信号，决定是否前去救援。",
+      "description": "救援同道"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买高级丹药后救援（需金钱≥600，成功率更高）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90 && money >= 600"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -600},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 18},
+          {"type": "stat_modify", "stat": "reputation", "value": 40},
+          {"type": "flag_set", "flag": "orthodox_savior", "value": true}
+        ]
+      },
+      {
+        "text": "立即救援（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "flag_set", "flag": "orthodox_savior", "value": true}
+        ]
+      },
+      {
+        "text": "召集人手再去",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_righteous_duel",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 88,
+    "weight": 70,
+    "ageRange": {"min": 32, "max": 54},
+    "triggers": [
+      {"type": "age_reach", "value": 32}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_demon_slayer == true"}
+    ],
+    "content": {
+      "title": "正邪对决",
+      "text": "魔教护法向你发起挑战，这是宿命的对决。胜者将证明自己道路的正确性。",
+      "description": "与魔教护法对决"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "应战（需武力≥110）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 110"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "flag_set", "flag": "orthodox_duel_winner", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_judgment",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 33, "max": 56},
+    "triggers": [
+      {"type": "age_reach", "value": 33}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_savior == true"}
+    ],
+    "content": {
+      "title": "武林公审",
+      "text": "正道抓获一名魔教头目，召开公审大会。你被选为审判者之一，决定如何处置此人。",
+      "description": "参与武林公审"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "主张严惩",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      },
+      {
+        "text": "主张感化",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orthodox_leader_symbol",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 85,
+    "weight": 55,
+    "ageRange": {"min": 34, "max": 58},
+    "triggers": [
+      {"type": "age_reach", "value": 34}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_duel_winner == true"}
+    ],
+    "content": {
+      "title": "盟主令箭",
+      "text": "正道盟主赐予你盟主令箭，见此令如见盟主。这是正道最高荣誉之一。",
+      "description": "获得盟主令箭"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "stat_modify", "stat": "chivalry", "value": 8}
+    ]
+  },
+  {
+    "id": "orthodox_model",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 80,
+    "weight": 50,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_leader_symbol == true"}
+    ],
+    "content": {
+      "title": "正道楷模",
+      "text": "你的事迹被江湖传颂，成为正道楷模。年轻人以你为榜样，立志成为像你一样的大侠。",
+      "description": "成为正道楷模"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "charisma", "value": 12},
+      {"type": "flag_set", "flag": "orthodox_model", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_alliance_master",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 95,
+    "weight": 100,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_model == true && martialPower >= 180 && chivalry >= 100"}
+    ],
+    "content": {
+      "title": "武林盟主",
+      "text": "你被推举为武林盟主，统一正道，号令江湖。在你的领导下，正道达到前所未有的繁荣。你的名号流传千古。",
+      "description": "成为武林盟主"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_alliance_master",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_alliance_master", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_sect_master",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 92,
+    "weight": 90,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_guardian == true && martialPower >= 160"}
+    ],
+    "content": {
+      "title": "一派宗师",
+      "text": "你成为一派掌门，将门派发扬光大。门下弟子遍布江湖，你的武学传承影响深远。",
+      "description": "成为一派宗师"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_sect_master",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_sect_master", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_model",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_model == true && chivalry >= 120"}
+    ],
+    "content": {
+      "title": "正道楷模",
+      "text": "你一生行侠仗义，被尊为'当代关公'。你的事迹被编成戏曲，在江湖上广为传唱。",
+      "description": "成为正道楷模"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_model",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_model", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_hermit",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_member == true"}
+    ],
+    "content": {
+      "title": "归隐山林",
+      "text": "你看破红尘，选择归隐山林。虽然不在江湖，但江湖仍有你的传说。",
+      "description": "归隐山林"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_hermit",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_hermit", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_sacrifice",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 93,
+    "weight": 70,
+    "ageRange": {"min": 60, "max": 75},
+    "triggers": [
+      {"type": "age_reach", "value": 60}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_demon_slayer == true && chivalry >= 90"}
+    ],
+    "content": {
+      "title": "为国捐躯",
+      "text": "在对抗外敌的战役中，你挺身而出，壮烈牺牲。你的精神激励了无数后人，被追封为'武圣'。",
+      "description": "为国捐躯"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_sacrifice",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_sacrifice", "value": true}
+    ]
+  },
+  {
+    "id": "orthodox_ending_immortal",
+    "version": "1.0",
+    "category": "orthodox",
+    "priority": 96,
+    "weight": 50,
+    "ageRange": {"min": 75, "max": 85},
+    "triggers": [
+      {"type": "age_reach", "value": 75}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.orthodox_model == true && martialPower >= 200 && internalSkill >= 150"}
+    ],
+    "content": {
+      "title": "仙风道骨",
+      "text": "你的修为已臻化境，达到'陆地神仙'的境界。你飘然离去，无人知晓你的去向，只留下无数传说。",
+      "description": "成就仙风道骨"
+    },
+    "eventType": "ending",
+    "endingType": "orthodox_immortal",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_orthodox_immortal", "value": true}
+    ]
+  }
+]

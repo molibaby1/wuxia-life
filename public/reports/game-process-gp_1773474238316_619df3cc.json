@@ -1,0 +1,5484 @@
+{
+  "id": "gp_1773474238316_619df3cc",
+  "timestamp": "2026-03-14T07:43:58.317Z",
+  "config": {
+    "playerName": "测试玩家",
+    "gender": "male",
+    "simulateYears": 20,
+    "maxEvents": 300,
+    "enableAutoSave": true,
+    "enableManualSave": true,
+    "saveInterval": 5,
+    "verbose": true
+  },
+  "totalYears": 30,
+  "finalAge": 20,
+  "isAlive": true,
+  "totalEvents": 30,
+  "totalChoices": 9,
+  "totalSaves": 5,
+  "records": [
+    {
+      "age": 0,
+      "eventId": "birth_wuxia_family",
+      "eventTitle": "降生武侠世家",
+      "eventText": "你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 1,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 0,
+          "chivalry": 0,
+          "charisma": 0,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 100,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 2,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238296
+      },
+      "currentTime": {
+        "year": 2,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.297Z"
+    },
+    {
+      "age": 1,
+      "eventId": "origin_background",
+      "eventTitle": "出身背景",
+      "eventText": "你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "origin_wuxia_family",
+          "text": "武林世家",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_wuxia_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "constitution",
+              "value": 6,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_wuxia_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_scholar_family",
+          "text": "书香门第",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_scholar_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "comprehension",
+              "value": 8,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_scholar_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_merchant_family",
+          "text": "商贾之家",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_merchant_family"
+            },
+            {
+              "type": "stat_modify",
+              "target": "money",
+              "value": 200,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 6,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_merchant_family"
+            }
+          ]
+        },
+        {
+          "id": "origin_frontier",
+          "text": "边疆异族",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "origin_frontier"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "constitution",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 2,
+              "operator": "subtract"
+            },
+            {
+              "type": "event_record",
+              "target": "origin_frontier"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "origin_merchant_family",
+        "text": "商贾之家",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "origin_merchant_family"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 200,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "origin_merchant_family"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 1,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 0,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 2,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238296
+      },
+      "currentTime": {
+        "year": 2,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.298Z"
+    },
+    {
+      "age": 1,
+      "eventId": "toddler_exploration",
+      "eventTitle": "探索小能手",
+      "eventText": "你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 2,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 3,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238298
+      },
+      "currentTime": {
+        "year": 3,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.298Z"
+    },
+    {
+      "age": 2,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 2,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 6,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 3,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238298
+      },
+      "currentTime": {
+        "year": 3,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.298Z"
+    },
+    {
+      "age": 3,
+      "eventId": "clever_speech",
+      "eventTitle": "伶牙俐齿",
+      "eventText": "你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 1,
+          "chivalry": 0,
+          "charisma": 8,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 1,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238299
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.299Z"
+    },
+    {
+      "age": 4,
+      "eventId": "childhood_preference",
+      "eventTitle": "童年选择",
+      "eventText": "到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "focus_on_study",
+          "text": "专心读书练功",
+          "weight": 4,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "sect_trial_active"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1,
+              "timeUnit": "month"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "diligentStudent"
+            }
+          ],
+          "requirements": {
+            "statRequirements": [
+              {
+                "statName": "chivalry",
+                "minValue": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": "play_outside",
+          "text": "继续玩耍探索",
+          "weight": 3,
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1,
+              "timeUnit": "month"
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 3,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "freeSpirit"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "play_outside",
+        "text": "继续玩耍探索",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "freeSpirit"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238299
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 1,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.299Z"
+    },
+    {
+      "age": 4,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 4,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 5,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238299
+      },
+      "currentTime": {
+        "year": 5,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.299Z"
+    },
+    {
+      "age": 5,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 5,
+          "martialPower": 0,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 4,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 6,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238299
+      },
+      "currentTime": {
+        "year": 6,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.301Z"
+    },
+    {
+      "age": 6,
+      "eventId": "martial_arts_enlightenment",
+      "eventTitle": "武学启蒙",
+      "eventText": "到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "agile_path",
+          "text": "专修轻功身法",
+          "condition": {
+            "type": "expression",
+            "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+          },
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "qinggong",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "agilePath"
+            }
+          ]
+        },
+        {
+          "id": "generic_path",
+          "text": "常规修炼",
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 3,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 2,
+              "operator": "add"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "agile_path",
+        "text": "专修轻功身法",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "agilePath"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 7,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 8,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238301
+      },
+      "currentTime": {
+        "year": 7,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.301Z"
+    },
+    {
+      "age": 7,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 7,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 8,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238301
+      },
+      "currentTime": {
+        "year": 8,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.302Z"
+    },
+    {
+      "age": 8,
+      "eventId": "childhood_summary",
+      "eventTitle": "童年总结",
+      "eventText": "日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 9,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 10,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 10,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.302Z"
+    },
+    {
+      "age": 9,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 9,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 10,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 10,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.302Z"
+    },
+    {
+      "age": 10,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 10,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 11,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 11,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.303Z"
+    },
+    {
+      "age": 11,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 11,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 12,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 12,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.303Z"
+    },
+    {
+      "age": 12,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 12,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 0,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            }
+          ],
+          "relationships": []
+        },
+        "currentTime": {
+          "year": 13,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true
+        },
+        "events": [],
+        "relations": {},
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 13,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.303Z"
+    },
+    {
+      "age": 13,
+      "eventId": "sect_path_choice",
+      "eventTitle": "门派抉择",
+      "eventText": "江湖门派开始注意到你的天赋。名门正派与江湖争议门派都向你抛出橄榄枝，你需要作出选择。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "join_orthodox",
+          "text": "拜入正道名门",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "route_orthodox"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_active"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 10,
+              "operator": "add"
+            },
+            {
+              "type": "relation_change",
+              "target": "master",
+              "operator": "add",
+              "value": {
+                "id": "master_qingxu",
+                "name": "清虚真人",
+                "role": "master",
+                "delta": 20
+              }
+            },
+            {
+              "type": "event_record",
+              "target": "sect_path_choice_orthodox"
+            }
+          ]
+        },
+        {
+          "id": "stay_wanderer",
+          "text": "行走江湖，观望时局",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "route_wanderer"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "sect_path_choice_wanderer"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "join_orthodox",
+        "text": "拜入正道名门",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "route_orthodox"
+          },
+          {
+            "type": "flag_set",
+            "target": "orthodox_trial_active"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": {
+              "id": "master_qingxu",
+              "name": "清虚真人",
+              "role": "master",
+              "delta": 20
+            }
+          },
+          {
+            "type": "event_record",
+            "target": "sect_path_choice_orthodox"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 13,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 10,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 20
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 14,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "orthodox_trial_active": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 20
+        },
+        "gameTimestamp": 1773474238302
+      },
+      "currentTime": {
+        "year": 14,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.303Z"
+    },
+    {
+      "age": 13,
+      "eventId": "youth_begins",
+      "eventTitle": "少年初长成",
+      "eventText": "转眼之间，你已从孩童成长为少年。身形逐渐挺拔，武艺也小有成就。家族的长辈们开始考虑你的未来。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 0,
+          "qinggong": 9,
+          "chivalry": 10,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 20
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 2,
+          "day": 1
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "orthodox_trial_active": true,
+          "youthStarted": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 20
+        },
+        "gameTimestamp": 1773474238304
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.304Z"
+    },
+    {
+      "age": 14,
+      "eventId": "orthodox_trial_entry",
+      "eventTitle": "正道试炼",
+      "eventText": "正道入门试炼开启，长老要求你先修心性，再修内劲，最后以仁义解危。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "orthodox_trial_mind",
+          "text": "修心：诵经静坐",
+          "weight": 3,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_started"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 10,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_mind_done"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_mind"
+            }
+          ]
+        },
+        {
+          "id": "orthodox_trial_mind_delay",
+          "text": "修心：迟疑不决，延期复修",
+          "weight": 1,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_started"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 14,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 1,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_mind_delayed"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_mind_delay"
+            }
+          ]
+        },
+        {
+          "id": "orthodox_trial_force",
+          "text": "修劲：内力循环",
+          "weight": 3,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_started"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 12,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 3,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_force_done"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_force"
+            }
+          ]
+        },
+        {
+          "id": "orthodox_trial_force_fail",
+          "text": "修劲：真气逆行受伤",
+          "weight": 1,
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_started"
+            },
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 8,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "health",
+              "value": 8,
+              "operator": "subtract"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_force_failed"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_force_fail"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "orthodox_trial_force",
+        "text": "修劲：内力循环",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "orthodox_trial_started"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 12,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "orthodox_trial_force_done"
+          },
+          {
+            "type": "event_record",
+            "target": "orthodox_trial_force"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 3,
+          "qinggong": 9,
+          "chivalry": 10,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 20
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 2,
+          "day": 13
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "orthodox_trial_active": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 20
+        },
+        "gameTimestamp": 1773474238304
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 2,
+        "day": 1
+      },
+      "timestamp": "2026-03-14T07:43:58.304Z"
+    },
+    {
+      "age": 14,
+      "eventId": "orthodox_initiation",
+      "eventTitle": "正道初行",
+      "eventText": "清虚真人让你首次下山行侠，救助百姓。此行将考验你的心性。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 3,
+          "qinggong": 9,
+          "chivalry": 16,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 3,
+          "day": 13
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "orthodox_trial_active": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238305
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 3,
+        "day": 13
+      },
+      "timestamp": "2026-03-14T07:43:58.305Z"
+    },
+    {
+      "age": 14,
+      "eventId": "orthodox_trial_service",
+      "eventTitle": "正道行善",
+      "eventText": "师门让你下山行善，救济百姓。若能以德服人，便可进入最终考核。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "service_aid",
+          "text": "出手相助",
+          "weight": 3,
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 20,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_service_done"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_service_aid"
+            }
+          ]
+        },
+        {
+          "id": "service_injury",
+          "text": "救人受伤",
+          "weight": 1,
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 18,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "health",
+              "value": 10,
+              "operator": "subtract"
+            },
+            {
+              "type": "stat_modify",
+              "target": "chivalry",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_service_done"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_service_injury"
+            }
+          ]
+        },
+        {
+          "id": "service_meditate",
+          "text": "克制旁观",
+          "weight": 2,
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 15,
+              "timeUnit": "day"
+            },
+            {
+              "type": "stat_modify",
+              "target": "comprehension",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "orthodox_trial_service_done"
+            },
+            {
+              "type": "event_record",
+              "target": "orthodox_trial_service_meditate"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "service_aid",
+        "text": "出手相助",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "orthodox_trial_service_done"
+          },
+          {
+            "type": "event_record",
+            "target": "orthodox_trial_service_aid"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 3,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 4,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "orthodox_trial_active": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238305
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 3,
+        "day": 13
+      },
+      "timestamp": "2026-03-14T07:43:58.305Z"
+    },
+    {
+      "age": 14,
+      "eventId": "orthodox_trial_completion",
+      "eventTitle": "正道试炼完成",
+      "eventText": "你完成师门试炼，被认可为正道正式弟子，获准修习核心心法。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 7,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238306
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.306Z"
+    },
+    {
+      "age": 14,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 14,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 7,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 10,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 15,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238306
+      },
+      "currentTime": {
+        "year": 15,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.306Z"
+    },
+    {
+      "age": 15,
+      "eventId": "training_focus",
+      "eventTitle": "修炼抉择",
+      "eventText": "师门为你制定了新的修炼方案，你可以专精某一方向或平衡发展。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "focus_internal",
+          "text": "专修内功",
+          "effects": [
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 8,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "comprehension",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "training_focus_internal"
+            }
+          ]
+        },
+        {
+          "id": "focus_external",
+          "text": "专修外功",
+          "effects": [
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 8,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "constitution",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "training_focus_external"
+            }
+          ]
+        },
+        {
+          "id": "focus_balance",
+          "text": "内外兼修",
+          "effects": [
+            {
+              "type": "stat_modify",
+              "target": "internalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "externalSkill",
+              "value": 4,
+              "operator": "add"
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "training_focus_balance"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "focus_internal",
+        "text": "专修内功",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "training_focus_internal"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 15,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 15,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 16,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238306
+      },
+      "currentTime": {
+        "year": 16,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.308Z"
+    },
+    {
+      "age": 15,
+      "eventId": "no_event",
+      "eventTitle": "平淡的一年",
+      "eventText": "这一年并无大事发生，岁月静好。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 15,
+          "martialPower": 1,
+          "externalSkill": 0,
+          "internalSkill": 15,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 9,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 16,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238306
+      },
+      "currentTime": {
+        "year": 16,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.309Z"
+    },
+    {
+      "age": 16,
+      "eventId": "jianghu_experience",
+      "eventTitle": "江湖历练",
+      "eventText": "师父认为你已经学有所成，让你下山历练。你行走江湖，见识了各种人物和事端，武艺也在实战中不断精进。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 17,
+          "martialPower": 9,
+          "externalSkill": 0,
+          "internalSkill": 15,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 12,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 18,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25
+        },
+        "gameTimestamp": 1773474238310
+      },
+      "currentTime": {
+        "year": 18,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.310Z"
+    },
+    {
+      "age": 17,
+      "eventId": "love_first_meet",
+      "eventTitle": "初遇",
+      "eventText": "市集中你与一名气质独特的青年/女子擦肩而过，对方回眸一笑，令人难忘。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "love_greet",
+          "text": "上前搭话",
+          "effects": [
+            {
+              "type": "flag_set",
+              "target": "love_started"
+            },
+            {
+              "type": "relation_change",
+              "target": "lover",
+              "operator": "add",
+              "value": {
+                "id": "lover_mingyue",
+                "name": "明月",
+                "role": "lover",
+                "delta": 10
+              }
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 2,
+              "operator": "add"
+            },
+            {
+              "type": "event_record",
+              "target": "love_first_meet_greet"
+            }
+          ]
+        },
+        {
+          "id": "love_pass",
+          "text": "只是远远一望",
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 10,
+              "timeUnit": "day"
+            },
+            {
+              "type": "event_record",
+              "target": "love_first_meet_pass"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "love_greet",
+        "text": "上前搭话",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "love_started"
+          },
+          {
+            "type": "relation_change",
+            "target": "lover",
+            "operator": "add",
+            "value": {
+              "id": "lover_mingyue",
+              "name": "明月",
+              "role": "lover",
+              "delta": 10
+            }
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "love_first_meet_greet"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 17,
+          "martialPower": 9,
+          "externalSkill": 0,
+          "internalSkill": 15,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 14,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            },
+            {
+              "eventId": "love_first_meet_greet",
+              "timestamp": 1773474238311,
+              "age": 17
+            },
+            {
+              "eventId": "love_first_meet",
+              "triggeredAt": 18,
+              "age": 17
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            },
+            {
+              "id": "lover_mingyue",
+              "role": "lover",
+              "name": "明月",
+              "affinity": 10
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 18,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true,
+          "love_started": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25,
+          "lover_mingyue": 10
+        },
+        "gameTimestamp": 1773474238310
+      },
+      "currentTime": {
+        "year": 18,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.311Z"
+    },
+    {
+      "age": 17,
+      "eventId": "martial_improvement",
+      "eventTitle": "武艺精进",
+      "eventText": "你没有被儿女情长所困扰，而是专心致志地修炼武艺。日复一日，你的武功已经达到了一个新的高度。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 18,
+          "martialPower": 21,
+          "externalSkill": 5,
+          "internalSkill": 20,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 14,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            },
+            {
+              "eventId": "love_first_meet_greet",
+              "timestamp": 1773474238311,
+              "age": 17
+            },
+            {
+              "eventId": "love_first_meet",
+              "triggeredAt": 18,
+              "age": 17
+            },
+            {
+              "eventId": "martial_improvement",
+              "timestamp": 1773474238312,
+              "age": 18
+            },
+            {
+              "eventId": "martial_improvement",
+              "triggeredAt": 19,
+              "age": 17
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            },
+            {
+              "id": "lover_mingyue",
+              "role": "lover",
+              "name": "明月",
+              "affinity": 10
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 19,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true,
+          "love_started": true,
+          "martialArtist": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25,
+          "lover_mingyue": 10
+        },
+        "gameTimestamp": 1773474238312
+      },
+      "currentTime": {
+        "year": 19,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.312Z"
+    },
+    {
+      "age": 18,
+      "eventId": "martial_arts_invitation",
+      "eventTitle": "武林大会邀请",
+      "eventText": "你收到了一封武林大会的邀请函。这是江湖盛事，各路英雄豪杰都会参加。师父建议你去见识一下，但也提醒你江湖险恶。",
+      "eventType": "choice",
+      "availableChoices": [
+        {
+          "id": "decline_invitation",
+          "text": "拒绝邀请，继续修炼",
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "martialPower",
+              "value": 8,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "cautious"
+            },
+            {
+              "type": "event_record",
+              "target": "decline_martial_meeting"
+            }
+          ]
+        },
+        {
+          "id": "observe_only",
+          "text": "前去观战，不参与比试",
+          "effects": [
+            {
+              "type": "time_advance",
+              "target": "age",
+              "value": 1
+            },
+            {
+              "type": "stat_modify",
+              "target": "charisma",
+              "value": 5,
+              "operator": "add"
+            },
+            {
+              "type": "flag_set",
+              "target": "willObserveMartialArtsMeeting"
+            },
+            {
+              "type": "event_record",
+              "target": "observe_martial_meeting"
+            }
+          ]
+        }
+      ],
+      "selectedChoice": {
+        "id": "decline_invitation",
+        "text": "拒绝邀请，继续修炼",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "cautious"
+          },
+          {
+            "type": "event_record",
+            "target": "decline_martial_meeting"
+          }
+        ]
+      },
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 19,
+          "martialPower": 29,
+          "externalSkill": 5,
+          "internalSkill": 20,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 14,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            },
+            {
+              "eventId": "love_first_meet_greet",
+              "timestamp": 1773474238311,
+              "age": 17
+            },
+            {
+              "eventId": "love_first_meet",
+              "triggeredAt": 18,
+              "age": 17
+            },
+            {
+              "eventId": "martial_improvement",
+              "timestamp": 1773474238312,
+              "age": 18
+            },
+            {
+              "eventId": "martial_improvement",
+              "triggeredAt": 19,
+              "age": 17
+            },
+            {
+              "eventId": "decline_martial_meeting",
+              "timestamp": 1773474238313,
+              "age": 19
+            },
+            {
+              "eventId": "martial_arts_invitation",
+              "triggeredAt": 20,
+              "age": 18
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            },
+            {
+              "id": "lover_mingyue",
+              "role": "lover",
+              "name": "明月",
+              "affinity": 10
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 20,
+          "month": 5,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true,
+          "love_started": true,
+          "martialArtist": true,
+          "cautious": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25,
+          "lover_mingyue": 10
+        },
+        "gameTimestamp": 1773474238313
+      },
+      "currentTime": {
+        "year": 19,
+        "month": 5,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.313Z"
+    },
+    {
+      "age": 19,
+      "eventId": "love_shared_mission",
+      "eventTitle": "并肩同行",
+      "eventText": "你与明月一同执行一件江湖委托，彼此信任渐深。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 19,
+          "martialPower": 29,
+          "externalSkill": 5,
+          "internalSkill": 20,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 14,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            },
+            {
+              "eventId": "love_first_meet_greet",
+              "timestamp": 1773474238311,
+              "age": 17
+            },
+            {
+              "eventId": "love_first_meet",
+              "triggeredAt": 18,
+              "age": 17
+            },
+            {
+              "eventId": "martial_improvement",
+              "timestamp": 1773474238312,
+              "age": 18
+            },
+            {
+              "eventId": "martial_improvement",
+              "triggeredAt": 19,
+              "age": 17
+            },
+            {
+              "eventId": "decline_martial_meeting",
+              "timestamp": 1773474238313,
+              "age": 19
+            },
+            {
+              "eventId": "martial_arts_invitation",
+              "triggeredAt": 20,
+              "age": 18
+            },
+            {
+              "eventId": "love_shared_mission",
+              "timestamp": 1773474238314,
+              "age": 19
+            },
+            {
+              "eventId": "love_shared_mission",
+              "triggeredAt": 20,
+              "age": 19
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            },
+            {
+              "id": "lover_mingyue",
+              "role": "lover",
+              "name": "明月",
+              "affinity": 18
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 20,
+          "month": 6,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true,
+          "love_started": true,
+          "martialArtist": true,
+          "cautious": true,
+          "love_bonded": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25,
+          "lover_mingyue": 18
+        },
+        "gameTimestamp": 1773474238314
+      },
+      "currentTime": {
+        "year": 20,
+        "month": 6,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.314Z"
+    },
+    {
+      "age": 19,
+      "eventId": "continued_journey",
+      "eventTitle": "江湖历练继续",
+      "eventText": "你没有参加武林大会，而是继续在江湖上游历。这段时间的历练让你的武艺更加扎实，经验也更加丰富。",
+      "eventType": "auto",
+      "gameState": {
+        "player": {
+          "name": "测试玩家",
+          "gender": "male",
+          "age": 20,
+          "martialPower": 39,
+          "externalSkill": 8,
+          "internalSkill": 23,
+          "qinggong": 9,
+          "chivalry": 20,
+          "charisma": 14,
+          "constitution": 10,
+          "comprehension": 14,
+          "money": 300,
+          "health": 100,
+          "energy": 100,
+          "alive": true,
+          "items": [],
+          "flags": {},
+          "events": [
+            {
+              "eventId": "birth_wuxia_family",
+              "timestamp": 1773474238296,
+              "age": 1
+            },
+            {
+              "eventId": "birth_wuxia_family",
+              "triggeredAt": 2,
+              "age": 0
+            },
+            {
+              "eventId": "origin_merchant_family",
+              "timestamp": 1773474238298,
+              "age": 1
+            },
+            {
+              "eventId": "origin_background",
+              "triggeredAt": 2,
+              "age": 1
+            },
+            {
+              "eventId": "toddler_exploration",
+              "timestamp": 1773474238298,
+              "age": 2
+            },
+            {
+              "eventId": "toddler_exploration",
+              "triggeredAt": 3,
+              "age": 1
+            },
+            {
+              "eventId": "clever_speech",
+              "timestamp": 1773474238299,
+              "age": 4
+            },
+            {
+              "eventId": "clever_speech",
+              "triggeredAt": 5,
+              "age": 3
+            },
+            {
+              "eventId": "childhood_preference",
+              "triggeredAt": 5,
+              "age": 4
+            },
+            {
+              "eventId": "martial_arts_enlightenment",
+              "triggeredAt": 8,
+              "age": 6
+            },
+            {
+              "eventId": "childhood_summary",
+              "timestamp": 1773474238302,
+              "age": 9
+            },
+            {
+              "eventId": "childhood_summary",
+              "triggeredAt": 10,
+              "age": 8
+            },
+            {
+              "eventId": "sect_path_choice_orthodox",
+              "timestamp": 1773474238303,
+              "age": 13
+            },
+            {
+              "eventId": "sect_path_choice",
+              "triggeredAt": 14,
+              "age": 13
+            },
+            {
+              "eventId": "youth_begins",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "youth_begins",
+              "triggeredAt": 15,
+              "age": 13
+            },
+            {
+              "eventId": "orthodox_trial_force",
+              "timestamp": 1773474238304,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_entry",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_initiation",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service_aid",
+              "timestamp": 1773474238305,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_service",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "timestamp": 1773474238306,
+              "age": 14
+            },
+            {
+              "eventId": "orthodox_trial_completion",
+              "triggeredAt": 15,
+              "age": 14
+            },
+            {
+              "eventId": "training_focus_internal",
+              "timestamp": 1773474238308,
+              "age": 15
+            },
+            {
+              "eventId": "training_focus",
+              "triggeredAt": 16,
+              "age": 15
+            },
+            {
+              "eventId": "jianghu_experience",
+              "timestamp": 1773474238310,
+              "age": 17
+            },
+            {
+              "eventId": "jianghu_experience",
+              "triggeredAt": 18,
+              "age": 16
+            },
+            {
+              "eventId": "love_first_meet_greet",
+              "timestamp": 1773474238311,
+              "age": 17
+            },
+            {
+              "eventId": "love_first_meet",
+              "triggeredAt": 18,
+              "age": 17
+            },
+            {
+              "eventId": "martial_improvement",
+              "timestamp": 1773474238312,
+              "age": 18
+            },
+            {
+              "eventId": "martial_improvement",
+              "triggeredAt": 19,
+              "age": 17
+            },
+            {
+              "eventId": "decline_martial_meeting",
+              "timestamp": 1773474238313,
+              "age": 19
+            },
+            {
+              "eventId": "martial_arts_invitation",
+              "triggeredAt": 20,
+              "age": 18
+            },
+            {
+              "eventId": "love_shared_mission",
+              "timestamp": 1773474238314,
+              "age": 19
+            },
+            {
+              "eventId": "love_shared_mission",
+              "triggeredAt": 20,
+              "age": 19
+            },
+            {
+              "eventId": "continued_journey",
+              "timestamp": 1773474238315,
+              "age": 20
+            },
+            {
+              "eventId": "continued_journey",
+              "triggeredAt": 21,
+              "age": 19
+            }
+          ],
+          "relationships": [
+            {
+              "id": "master_qingxu",
+              "role": "master",
+              "name": "清虚真人",
+              "affinity": 25
+            },
+            {
+              "id": "lover_mingyue",
+              "role": "lover",
+              "name": "明月",
+              "affinity": 18
+            }
+          ]
+        },
+        "currentTime": {
+          "year": 21,
+          "month": 6,
+          "day": 3
+        },
+        "flags": {
+          "bornInWuxiaFamily": true,
+          "origin_merchant_family": true,
+          "curiousChild": true,
+          "giftedSpeaker": true,
+          "freeSpirit": true,
+          "agilePath": true,
+          "childhoodSummaryDone": true,
+          "route_orthodox": true,
+          "youthStarted": true,
+          "orthodox_trial_started": true,
+          "orthodox_trial_force_done": true,
+          "orthodox_trial_service_done": true,
+          "orthodox_trial_completed": true,
+          "jianghuTraveler": true,
+          "love_started": true,
+          "martialArtist": true,
+          "cautious": true,
+          "love_bonded": true,
+          "steadyProgress": true
+        },
+        "events": [],
+        "relations": {
+          "master_qingxu": 25,
+          "lover_mingyue": 18
+        },
+        "gameTimestamp": 1773474238315
+      },
+      "currentTime": {
+        "year": 21,
+        "month": 6,
+        "day": 3
+      },
+      "timestamp": "2026-03-14T07:43:58.315Z"
+    }
+  ],
+  "statistics": {
+    "childhoodEvents": 15,
+    "youthEvents": 13,
+    "adultEvents": 2,
+    "elderlyEvents": 0,
+    "autoEvents": 21,
+    "choiceEvents": 9,
+    "martialPowerGrowth": 39,
+    "moneyGrowth": 200,
+    "sectJoined": null,
+    "children": 0,
+    "flags": {
+      "bornInWuxiaFamily": true,
+      "origin_merchant_family": true,
+      "curiousChild": true,
+      "giftedSpeaker": true,
+      "freeSpirit": true,
+      "agilePath": true,
+      "childhoodSummaryDone": true,
+      "route_orthodox": true,
+      "youthStarted": true,
+      "orthodox_trial_started": true,
+      "orthodox_trial_force_done": true,
+      "orthodox_trial_service_done": true,
+      "orthodox_trial_completed": true,
+      "jianghuTraveler": true,
+      "love_started": true,
+      "martialArtist": true,
+      "cautious": true,
+      "love_bonded": true,
+      "steadyProgress": true
+    }
+  }
+}

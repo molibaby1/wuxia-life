@@ -1,5 +1,14 @@
-import type { EffectDefinition, OnCompleteConfig } from './effects';
-import type { EffectOperator, EffectType, EventCategory, EventPriority } from './eventTypes';
+import type { EffectDefinition } from './effects';
+import type {
+  EffectOperator,
+  EffectType,
+  EventCategory,
+  EventPriority,
+  TalentDefinition,
+  PlayerState,
+  GameState,
+  EventRecord,
+} from './eventTypes';
 
 export type ConditionOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'hasFlag' | 'hasEvent' | 'not' | 'and' | 'or' | 'random';
 
@@ -11,10 +20,10 @@ export interface Condition {
 }
 
 // 从 eventTypes 重新导出
-export type { EffectOperator, EffectType, EventCategory, EventPriority };
+export type { EffectOperator, EffectType, EventCategory, EventPriority, TalentDefinition };
 
 export interface Effect {
-  op: EffectOperator;
+  op?: EffectOperator;
   field?: keyof PlayerState;
   value?: any;
   minValue?: number;
@@ -23,48 +32,52 @@ export interface Effect {
   effects?: Effect[];
 }
 
-export interface PlayerState {
-  age: number;
-  gender: 'male' | 'female';
-  name: string;
-  sect: string | null;
-  
-  martialPower: number;
-  externalSkill: number;
-  internalSkill: number;
-  qinggong: number;
-  
-  chivalry: number;
-  money: number;
-  
-  flags: Set<string>;
-  events: Set<string>;
-  children: number;
-  
-  alive: boolean;
-  deathReason: string | null;
-  title: string | null;
-  
-  // 时间单位：'year' | 'month' | 'day'
-  timeUnit: 'year' | 'month' | 'day';
-  // 当前时间进度（按月或日计算）
-  monthProgress: number; // 0-11
-  dayProgress: number; // 1-30
+export type { PlayerState, GameState, EventRecord };
+export type { EffectDefinition };
+
+export interface PlayerStateUpdates {
+  [key: string]: unknown;
+  flags?: Set<string>;
+  events?: Set<string>;
+}
+
+export interface EffectResult {
+  updates: PlayerStateUpdates;
+  timeSpan?: {
+    value: number;
+    unit: 'year' | 'month' | 'day';
+  };
+  ending?: {
+    reason: string;
+    epitaph: string;
+  };
 }
 
 export interface StoryChoice {
   id: string;
   text: string;
-  condition?: (state: PlayerState) => boolean;
-  // 支持新旧两种效果格式
+  description?: string;
+  condition?: ((state: PlayerState) => boolean) | { type: string; expression: string };
   effects?: Effect[];
   effect?: (state: PlayerState) => any;
   nextNodeId?: string;
-  // 时间跨度配置
+  outcomes?: ChoiceOutcomeUI[] | Array<{
+    id: string;
+    text: string;
+    condition?: ((state: PlayerState) => boolean) | { type: string; expression: string };
+    effects?: Effect[];
+  }>;
   timeSpan?: {
     value: number;
     unit: 'year' | 'month' | 'day';
   };
+}
+
+export interface ChoiceOutcomeUI {
+  id: string;
+  text: string;
+  condition?: ((state: PlayerState) => boolean) | { type: string; expression: string };
+  effects?: Effect[];
 }
 
 export interface StoryNode {
@@ -79,7 +92,10 @@ export interface StoryNode {
   // 新的声明式效果系统
   effects?: EffectDefinition[];
   // 完成标志（自动设置）
-  onComplete?: OnCompleteConfig;
+  onComplete?: {
+    setEvent?: string;
+    setFlag?: string;
+  };
   autoNext?: boolean;
   condition?: (state: PlayerState) => boolean;
   weight?: number;

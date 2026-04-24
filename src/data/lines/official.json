@@ -1,0 +1,185 @@
+[
+  {
+    "id": "official_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 22, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "thresholds": {
+      "background": {
+        "required": ["origin_scholar_family"],
+        "forbidden": ["origin_wuxia_family", "origin_merchant_family"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "comprehension": { "min": 12 },
+        "charisma": { "min": 8 }
+      }
+    },
+    "conditions": [
+      { "type": "expression", "expression": "!flags.has(\"route_official\") && player.comprehension >= 12 && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")" }
+    ],
+    "content": {
+      "text": "家族希望你参加科举，走仕途之路。",
+      "title": "入仕机会",
+      "description": "仕途之门初开。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "official_accept",
+        "text": "应试入仕",
+        "effects": [
+          { "type": "flag_set", "target": "route_official" },
+          { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
+          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "event_record", "target": "official_entry_accept" }
+        ]
+      },
+      {
+        "id": "official_decline",
+        "text": "婉拒仕途",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "event_record", "target": "official_entry_decline" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["官场", "主线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "official_first_post",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": { "min": 23, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"route_official\") && !flags.has(\"official_first_post\")" }
+    ],
+    "content": {
+      "text": "你被派往地方为官，初识官场复杂。",
+      "title": "初任官职",
+      "description": "仕途艰险初现。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
+      { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+      { "type": "flag_set", "target": "official_first_post" },
+      { "type": "event_record", "target": "official_first_post" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["官场", "主线", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "official_love_obstacle",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 25,
+    "ageRange": { "min": 24, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"route_official\") && flags.has(\"love_started\") && !flags.has(\"official_love_obstacle\")" }
+    ],
+    "content": {
+      "text": "仕途繁忙，明月心生不满，你必须在仕途与爱情间权衡。",
+      "title": "仕途与爱情",
+      "description": "官场之路牵扯感情。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "official_prioritize_love",
+        "text": "暂缓仕途，安抚感情",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 6 } },
+          { "type": "flag_set", "target": "official_love_obstacle" },
+          { "type": "event_record", "target": "official_love_prioritize" }
+        ]
+      },
+      {
+        "id": "official_prioritize_career",
+        "text": "仕途为重",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -5 } },
+          { "type": "flag_set", "target": "official_love_obstacle" },
+          { "type": "event_record", "target": "official_love_career" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["官场", "爱情", "联动", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "official_resign",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 2,
+    "weight": 12,
+    "ageRange": { "min": 25, "max": 45 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_official\") && !flags.has(\"official_resigned\")"
+      }
+    ],
+    "content": {
+      "text": "官场羁绊甚多，若要走回江湖路，需先辞官。",
+      "title": "辞官抉择",
+      "description": "庙堂与江湖，只能择一。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "official_leave",
+        "text": "辞官归隐",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_unset", "target": "route_official" },
+          { "type": "flag_set", "target": "official_resigned" },
+          { "type": "event_record", "target": "official_resign_leave" }
+        ]
+      },
+      {
+        "id": "official_stay",
+        "text": "继续仕途",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "event_record", "target": "official_resign_stay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["官场", "退路", "once"],
+      "enabled": true
+    }
+  }
+]

@@ -1,0 +1,197 @@
+[
+  {
+    "id": "outlaw_path_beginning",
+    "version": "1.0",
+    "category": "main_story",
+    "priority": 95,
+    "weight": 85,
+    "ageRange": {"min": 15, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "!flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown') && (chivalry <= 20 || flags.wandering == true)"}
+    ],
+    "content": {
+      "title": "另一条路",
+      "text": "你在江湖游历时，偶然接触到一些不受「正道联盟」认可的门派。这些门派不受江湖规矩约束，行事全凭己心。幽影门的使者找到你：「所谓正邪，不过是庙堂之人书写的历史。我们不求流芳百世，只求问心无愧。江湖传言我们残忍嗜杀，却不知我们收留的尽是被正派逼上绝路的孤儿遗孀。你，愿意加入我们吗？」",
+      "description": "接触非传统门派"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "加入幽影门",
+        "effects": [
+          {"type": "flag_set", "flag": "sect_faction", "value": "unconventional"},
+          {"type": "flag_set", "flag": "route_demonic"},
+          {"type": "flag_set", "flag": "current_sect", "value": "shadow_sect"},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 3}
+        ]
+      },
+      {
+        "text": "拒绝，保持独立",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "flag_set", "flag": "sect_faction", "value": "neutral"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlaw_training",
+    "version": "1.0",
+    "category": "main_story",
+    "priority": 90,
+    "weight": 80,
+    "ageRange": {"min": 16, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional'"}
+    ],
+    "content": {
+      "title": "幽影门修炼",
+      "text": "幽影门的武学另辟蹊径，不重招式而重心法。与正派「扎根基」的修炼方式不同，幽影门追求的是「快、准、狠」。长老告诉你：「正派说我们是歪门邪道，不过是因为我们的武功他们看不懂。不必在意江湖传言，实力才是最好的证明。」",
+      "description": "开始幽影门修炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "专注实战技巧",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "constitution", "value": -3}
+        ]
+      },
+      {
+        "text": "专注内功心法",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 6},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "comprehension", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlaw_mentor",
+    "version": "1.0",
+    "category": "side_quest",
+    "priority": 80,
+    "weight": 60,
+    "ageRange": {"min": 17, "max": 28},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional'"}
+    ],
+    "content": {
+      "title": "幽冥尊者",
+      "text": "你在幽影门遇到一位神秘的长老——幽冥尊者。他曾是少林寺弟子，因不满少林与朝廷勾结、压迫异己而叛出少林。「正派？」尊者冷笑道，「他们不过是朝廷的走狗。少林、武当，哪个不是朝廷册封的？所谓除魔卫道，不过是清除异己的借口罢了。」",
+      "description": "认识幽影门高层"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "拜他为师",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+          {"type": "flag_set", "flag": "outlaw_mentor", "value": true}
+        ]
+      },
+      {
+        "text": "保持距离",
+        "effects": [
+          {"type": "stat_modify", "stat": "connections", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlaw_mercy_choice",
+    "version": "1.0",
+    "category": "side_quest",
+    "priority": 75,
+    "weight": 50,
+    "ageRange": {"min": 18, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 18},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional'"}
+    ],
+    "content": {
+      "title": "任务与良心",
+      "text": "门主命令你除去一个「叛徒」——一个曾效力于幽影门、但选择投靠正派的旧日同伴。当你找到他时，他恳求你：「我只是想活下去……正派答应给我一条活路……」",
+      "description": "执行任务时的道德抉择"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "执行任务",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "reputation", "value": -15}
+        ]
+      },
+      {
+        "text": "放过他",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "flag_set", "flag": "outlaw_mercy", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlaw_legitimacy_debate",
+    "version": "1.0",
+    "category": "special_event",
+    "priority": 70,
+    "weight": 45,
+    "ageRange": {"min": 20, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && comprehension >= 40"}
+    ],
+    "content": {
+      "title": "存在的意义",
+      "text": "成为幽影门核心弟子后，你开始思考门派的未来。幽影门的存在，究竟是为了对抗正派的压迫，还是仅仅为了生存？门中分为两派：一派主张「人不犯我我不犯人」，一派主张「既然已被定义为魔，何不彻底疯狂」。你，会如何选择？",
+      "description": "幽影门的道路选择"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "主张和平共处",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "flag_set", "flag": "outlaw_peacemaker", "value": true}
+        ]
+      },
+      {
+        "text": "主张以牙还牙",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "outlaw_avenger", "value": true}
+        ]
+      },
+      {
+        "text": "独善其身，不参与纷争",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "flag_set", "flag": "outlaw_neutral", "value": true}
+        ]
+      }
+    ]
+  }
+]

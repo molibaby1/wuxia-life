@@ -1,0 +1,651 @@
+[
+  {
+    "id": "noncombat_reading",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 65,
+    "ageRange": { "min": 10, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 10 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "读书学习",
+      "text": "你找了一处安静的地方，捧起书卷认真阅读。书中自有黄金屋，书中自有颜如玉。",
+      "description": "提升学识"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "reading_classics",
+        "text": "阅读经典（学识 +4~6，悟性 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 5,
+            "operator": "add",
+            "variable": true,
+            "minValue": 4,
+            "maxValue": 6
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "reading_classics"
+          }
+        ]
+      },
+      {
+        "id": "reading_history",
+        "text": "研读史书（学识 +3~5，人脉 +1~2）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 1,
+            "operator": "add",
+            "variable": true,
+            "minValue": 1,
+            "maxValue": 2
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "reading_history"
+          }
+        ]
+      },
+      {
+        "id": "reading_poetry",
+        "text": "吟诗作对（学识 +3~5，魅力 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "reading_poetry"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "读书", "学识"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "noncombat_socialize",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": { "min": 15, "max": 65 },
+    "triggers": [
+      { "type": "age_reach", "value": 15 },
+      { "type": "random", "value": 0.18 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "社交活动",
+      "text": "你参加了一场江湖聚会，各路人士齐聚一堂。这是拓展人脉的好机会。",
+      "description": "提升人脉和声望"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "socialize_generously",
+        "text": "慷慨解囊（金钱 -50，人脉 +5~8，声望 +3~5）",
+        "conditions": [
+          { "type": "expression", "expression": "money >= 50" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -50,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 6,
+            "operator": "add",
+            "variable": true,
+            "minValue": 5,
+            "maxValue": 8
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "socialize_generously"
+          }
+        ]
+      },
+      {
+        "id": "socialize_charmingly",
+        "text": "展现魅力（魅力 +3~5，人脉 +3~5）",
+        "conditions": [
+          { "type": "expression", "expression": "charisma >= 30" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "socialize_charmingly"
+          }
+        ]
+      },
+      {
+        "id": "socialize_casually",
+        "text": "随便聊聊（人脉 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "socialize_casually"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "社交", "人脉"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "noncombat_good_deed",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": { "min": 12, "max": 70 },
+    "triggers": [
+      { "type": "age_reach", "value": 12 },
+      { "type": "random", "value": 0.15 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "行侠仗义",
+      "text": "路遇不平之事，你是否要挺身而出？",
+      "description": "提升侠义和声望"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "good_deed_help",
+        "text": "挺身而出（侠义 +5~8，声望 +3~5，可能树敌）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 6,
+            "operator": "add",
+            "variable": true,
+            "minValue": 5,
+            "maxValue": 8
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "flag_set",
+            "flag": "made_enemy",
+            "chance": 0.3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "good_deed_help"
+          }
+        ]
+      },
+      {
+        "id": "good_deed_ignore",
+        "text": "多一事不如少一事（侠义 -2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": -2,
+            "operator": "add",
+            "variable": true,
+            "minValue": -3,
+            "maxValue": -2
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "good_deed_ignore"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "侠义", "声望"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "noncombat_reputation_boost",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 18, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 18 },
+      { "type": "random", "value": 0.12 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "reputation >= 100" }
+    ],
+    "content": {
+      "title": "名声传播",
+      "text": "你的事迹在江湖上流传，越来越多的人知道了你的名字。",
+      "description": "声望自然增长"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 8,
+        "operator": "add",
+        "variable": true,
+        "minValue": 6,
+        "maxValue": 10
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 3,
+        "timeUnit": "month"
+      },
+      {
+        "type": "event_record",
+        "target": "noncombat_reputation_boost"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "声望", "传播"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "noncombat_networking",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 20, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.1 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "connections >= 30" }
+    ],
+    "content": {
+      "title": "人脉运作",
+      "text": "你开始有意识地经营自己的人脉关系网。通过引荐和牵线搭桥，你的人脉更加广阔。",
+      "description": "深度经营人脉"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "networking_invest",
+        "text": "投资关系（金钱 -100，人脉 +10~15）",
+        "conditions": [
+          { "type": "expression", "expression": "money >= 100" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -100,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 12,
+            "operator": "add",
+            "variable": true,
+            "minValue": 10,
+            "maxValue": 15
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 2,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "networking_invest"
+          }
+        ]
+      },
+      {
+        "id": "networking_help",
+        "text": "帮助他人（人脉 +6~10，侠义 +3~5）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 8,
+            "operator": "add",
+            "variable": true,
+            "minValue": 6,
+            "maxValue": 10
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "networking_help"
+          }
+        ]
+      },
+      {
+        "id": "networking_maintain",
+        "text": "维持现状（人脉 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "networking_maintain"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "人脉", "经营"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "noncombat_academic_exam",
+    "version": "1.0.0",
+    "category": "non_combat",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 18, "max": 40 },
+    "triggers": [
+      { "type": "age_reach", "value": 18 },
+      { "type": "random", "value": 0.08 }
+    ],
+    "thresholds": {
+      "background": {
+        "required": ["origin_scholar_family"],
+        "forbidden": ["origin_wuxia_family"],
+        "evaluation": "at_least_one"
+      },
+      "attributes": {
+        "comprehension": { "min": 15 }
+      }
+    },
+    "conditions": [
+      { "type": "expression", "expression": "knowledge >= 50 && charisma >= 40" }
+    ],
+    "content": {
+      "title": "科举考试",
+      "text": "朝廷举行科举考试，你决定参加吗？这是入仕为官的好机会。",
+      "description": "通过科举入仕"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "exam_take",
+        "text": "参加科举（需学识≥60，成功：声望 +20~30，失败：声望 -5）",
+        "conditions": [
+          { "type": "expression", "expression": "knowledge >= 60" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 25,
+            "operator": "add",
+            "variable": true,
+            "minValue": 20,
+            "maxValue": 30,
+            "successRate": 0.8
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add",
+            "onFailure": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "passed_imperial_exam",
+            "successRate": 0.8
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 3,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "exam_take"
+          }
+        ]
+      },
+      {
+        "id": "exam_prepare",
+        "text": "再准备准备（学识 +5~8）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 6,
+            "operator": "add",
+            "variable": true,
+            "minValue": 5,
+            "maxValue": 8
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 2,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "exam_prepare"
+          }
+        ]
+      },
+      {
+        "id": "exam_decline",
+        "text": "放弃科举",
+        "effects": [
+          {
+            "type": "event_record",
+            "target": "exam_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["非战斗", "科举", "仕途"],
+      "enabled": true
+    }
+  }
+]

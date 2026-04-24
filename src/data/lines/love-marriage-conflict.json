@@ -1,0 +1,372 @@
+[
+  {
+    "id": "marriage_love_reality_choice",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 22, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 22},
+      {"type": "expression", "expression": "flags.love_started == true && flags.mingyue_affection >= 60 && !flags.married"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "player.money < 200 || player.reputation < 30"}
+    ],
+    "content": {
+      "title": "爱情与现实的抉择",
+      "text": "你与明月情投意合，但她的家人提出：若想娶明月，必须有足够的经济基础。与此同时，当地富商提出愿将千金许配给你，并资助你发展事业。",
+      "description": "真爱与现实，如何选择？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "坚持真爱，努力赚钱娶明月",
+        "effects": [
+          {"type": "flag_set", "flag": "love_over_reality", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "connections", "value": -10},
+          {"type": "flag_set", "flag": "mingyue_fiancee", "value": true}
+        ]
+      },
+      {
+        "text": "接受联姻，放弃明月",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_arranged", "value": true},
+          {"type": "flag_set", "flag": "spouse_rich_merchant", "value": true},
+          {"type": "stat_modify", "stat": "money", "value": 300},
+          {"type": "stat_modify", "stat": "connections", "value": 30},
+          {"type": "stat_modify", "stat": "chivalry", "value": -20},
+          {"type": "flag_set", "flag": "mingyue_married_other", "value": true}
+        ]
+      },
+      {
+        "text": "拖延不决，两边敷衍",
+        "effects": [
+          {"type": "flag_set", "flag": "love_hesitant", "value": true},
+          {"type": "stat_modify", "stat": "charisma", "value": -5},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "martial_artist": 20,
+        "merchant": 30
+      },
+      "pathConflicts": {
+        "hermit": 40
+      },
+      "tags": ["爱情", "婚姻", "冲突", "抉择"]
+    }
+  },
+  {
+    "id": "marriage_old_lover_reunion",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 25, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.married == true && flags.mingyue_single == true && !flags.mingyue_fiancee && !flags.spouse_mingyue"}
+    ],
+    "content": {
+      "title": "旧爱重逢",
+      "text": "多年后，你在街头偶遇明月。她依然单身，而你已为人夫。四目相对，往事涌上心头。她轻声问：'如果当初你坚持一下，现在会怎样？'",
+      "description": "旧情难忘，如何抉择？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "断绝往来，专心家庭",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_loyal", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 5, "variable": true},
+          {"type": "stat_modify", "stat": "charisma", "value": -3}
+        ]
+      },
+      {
+        "text": "保持友谊，偶尔联系",
+        "effects": [
+          {"type": "flag_set", "flag": "mingyue_friend", "value": true},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "affair_risk_low", "value": true}
+        ]
+      },
+      {
+        "text": "发展婚外情",
+        "effects": [
+          {"type": "flag_set", "flag": "extramarital_affair", "value": true},
+          {"type": "flag_set", "flag": "affair_mingyue", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": -30},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": -20, "variable": true},
+          {"type": "flag_set", "flag": "affair_discovered_risk", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "martial_artist": 10
+      },
+      "pathConflicts": {
+        "hermit": 60,
+        "official": 40
+      },
+      "tags": ["爱情", "婚姻", "婚外情", "冲突"]
+    }
+  },
+  {
+    "id": "marriage_affair_crisis",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 92,
+    "weight": 75,
+    "ageRange": {"min": 26, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 26},
+      {"type": "expression", "expression": "flags.extramarital_affair == true"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.affair_discovered_risk == true"}
+    ],
+    "content": {
+      "title": "婚外情暴露危机",
+      "text": "你的配偶发现了你与明月来往的蛛丝马迹，情绪激动地质问你。家中气氛紧张到了极点，子女也感受到了父母之间的裂痕。",
+      "description": "危机爆发，如何挽回？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "坦白并结束婚外情",
+        "effects": [
+          {"type": "flag_set", "flag": "affair_ended", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": -15, "variable": true},
+          {"type": "flag_set", "flag": "marriage_repairing", "value": true},
+          {"type": "flag_set", "flag": "mingyue_heartbroken", "value": true}
+        ]
+      },
+      {
+        "text": "继续隐瞒，找借口搪塞",
+        "effects": [
+          {"type": "flag_set", "flag": "affair_continued", "value": true},
+          {"type": "stat_modify", "stat": "charisma", "value": -10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -20},
+          {"type": "flag_set", "flag": "affair_discovered_soon", "value": true}
+        ]
+      },
+      {
+        "text": "承认并选择明月",
+        "effects": [
+          {"type": "flag_set", "flag": "divorce_initiated", "value": true},
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "reputation", "value": -30},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "mingyue_reunion", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "martial_artist": 15
+      },
+      "pathConflicts": {
+        "official": 70,
+        "scholar": 50,
+        "hermit": 30
+      },
+      "tags": ["婚姻", "危机", "婚外情", "抉择"]
+    }
+  },
+  {
+    "id": "marriage_family_pressure_child",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 85,
+    "weight": 70,
+    "ageRange": {"min": 28, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 28},
+      {"type": "expression", "expression": "flags.married == true && !flags.has_child"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "player.age - marriage_age >= 3"}
+    ],
+    "content": {
+      "title": "传宗接代的压力",
+      "text": "成婚多年，你仍未有子嗣。家族长辈开始施压，暗示你可以纳妾续嗣。配偶得知后十分伤心，夫妻之间产生隔阂。",
+      "description": "家族责任与夫妻感情，如何平衡？"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "坚持不纳妾，与配偶共度",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_loyal_no_child", "value": true},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 15, "variable": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "connections", "value": -15},
+          {"type": "flag_set", "flag": "family_pressure_high", "value": true}
+        ]
+      },
+      {
+        "text": "纳妾生子",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_concubine", "value": true},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": -30, "variable": true},
+          {"type": "stat_modify", "stat": "connections", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "has_child", "value": true}
+        ]
+      },
+      {
+        "text": "过继子嗣",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_adoption", "value": true},
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 5, "variable": true},
+          {"type": "flag_set", "flag": "has_child", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "scholar": 20,
+        "official": 30
+      },
+      "pathConflicts": {
+        "hermit": 40
+      },
+      "tags": ["婚姻", "家族", "子嗣", "责任"]
+    }
+  },
+  {
+    "id": "marriage_career_family_balance",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 83,
+    "weight": 65,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.married == true && flags.has_child == true"}
+    ],
+    "content": {
+      "title": "事业与家庭的平衡",
+      "text": "你正处于事业上升期，但配偶抱怨你忽视家庭，子女也与你日渐疏远。一次重要的江湖任务与子女的成长关键时刻冲突。",
+      "description": "事业成功 vs 家庭和睦"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "优先事业，委托家人照顾",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": -15, "variable": true},
+          {"type": "flag_set", "flag": "career_focused", "value": true},
+          {"type": "flag_set", "flag": "family_alienated", "value": true}
+        ]
+      },
+      {
+        "text": "回归家庭，放弃机会",
+        "effects": [
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 20, "variable": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "flag_set", "flag": "family_focused", "value": true}
+        ]
+      },
+      {
+        "text": "带家人同行",
+        "effects": [
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 5, "variable": true},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "family_together", "value": true},
+          {"type": "flag_set", "flag": "risk_high", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "martial_artist": 25,
+        "merchant": 20
+      },
+      "pathConflicts": {
+        "hermit": 50
+      },
+      "tags": ["事业", "家庭", "平衡", "责任"]
+    }
+  },
+  {
+    "id": "marriage_divorce_crisis",
+    "version": "1.0",
+    "category": "love_marriage_conflict",
+    "priority": 95,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "expression", "expression": "flags.marriage_quality <= 30 || flags.divorce_initiated == true"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.married == true"}
+    ],
+    "content": {
+      "title": "婚姻破裂",
+      "text": "多年的矛盾积累，婚姻已走到尽头。配偶提出和离，家族震惊，亲友劝阻。但这段婚姻确实已无法挽回。",
+      "description": "结束痛苦的婚姻"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "同意和离，好聚好散",
+        "effects": [
+          {"type": "flag_set", "flag": "divorced", "value": true},
+          {"type": "flag_set", "flag": "married", "value": false},
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "single_parent", "value": true}
+        ]
+      },
+      {
+        "text": "挽回婚姻，努力修复",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_repairing", "value": true},
+          {"type": "stat_modify", "stat": "marriage_quality", "value": 10, "variable": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "money", "value": -50}
+        ]
+      },
+      {
+        "text": "拖延不离，维持表面",
+        "effects": [
+          {"type": "flag_set", "flag": "marriage_nominal", "value": true},
+          {"type": "stat_modify", "stat": "charisma", "value": -10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "flag_set", "flag": "depression_risk", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "pathAffinity": {
+        "martial_artist": 10
+      },
+      "pathConflicts": {
+        "official": 60,
+        "scholar": 40
+      },
+      "tags": ["婚姻", "离婚", "危机", "抉择"]
+    }
+  }
+]

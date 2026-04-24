@@ -1,0 +1,555 @@
+[
+  {
+    "id": "career_path_choice",
+    "version": "1.0.0",
+    "category": "career",
+    "priority": 1,
+    "weight": 85,
+    "ageRange": { "min": 20, "max": 35 },
+    "triggers": [
+      { "type": "age_reach", "value": 20 },
+      { "type": "random", "value": 0.3 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "!flags.has(\"career_chosen\")" }
+    ],
+    "content": {
+      "title": "人生抉择",
+      "text": "站在人生的十字路口，你需要思考未来的发展方向。是入仕为官、经商致富，还是继续江湖闯荡？",
+      "description": "选择你的职业发展路径"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "career_official",
+        "text": "入仕为官（需求：学识≥60，魅力≥50，人脉≥40）",
+        "conditions": [
+          { "type": "expression", "expression": "knowledge >= 60 && charisma >= 50 && connections >= 40" }
+        ],
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "career_official_chosen"
+          },
+          {
+            "type": "flag_set",
+            "flag": "career_chosen"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "career_official"
+          }
+        ]
+      },
+      {
+        "id": "career_merchant",
+        "text": "经商致富（需求：财富≥500，魅力≥40，人脉≥30）",
+        "conditions": [
+          { "type": "expression", "expression": "wealth >= 500 && charisma >= 40 && connections >= 30" }
+        ],
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "career_merchant_chosen"
+          },
+          {
+            "type": "flag_set",
+            "flag": "career_chosen"
+          },
+          {
+            "type": "stat_modify",
+            "target": "wealth",
+            "value": 50,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "career_merchant"
+          }
+        ]
+      },
+      {
+        "id": "career_hermit",
+        "text": "江湖隐士（需求：侠义≥60，学识≥40）",
+        "conditions": [
+          { "type": "expression", "expression": "chivalry >= 60 && knowledge >= 40" }
+        ],
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "career_hermit_chosen"
+          },
+          {
+            "type": "flag_set",
+            "flag": "career_chosen"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "career_hermit"
+          }
+        ]
+      },
+      {
+        "id": "career_later",
+        "text": "再考虑考虑",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "year"
+          },
+          {
+            "type": "event_record",
+            "target": "career_later"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "选择", "发展"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_official_promotion",
+    "version": "1.0.0",
+    "category": "career",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 25, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 25 },
+      { "type": "random", "value": 0.15 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_official_chosen\") && knowledge >= 70 && charisma >= 60" }
+    ],
+    "content": {
+      "title": "官场升迁",
+      "text": "由于你政绩卓著，上司对你颇为赏识，决定提拔你。",
+      "description": "仕途升迁"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "promotion_accept",
+        "text": "接受提拔（声望 +15~25，人脉 +10~15，金钱 +100）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 20,
+            "operator": "add",
+            "variable": true,
+            "minValue": 15,
+            "maxValue": 25
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 12,
+            "operator": "add",
+            "variable": true,
+            "minValue": 10,
+            "maxValue": 15
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 100,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "official_promoted"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 2,
+            "timeUnit": "year"
+          },
+          {
+            "type": "event_record",
+            "target": "promotion_accept"
+          }
+        ]
+      },
+      {
+        "id": "promotion_decline",
+        "text": "婉拒，保持低调（侠义 +5，声望 -5）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "year"
+          },
+          {
+            "type": "event_record",
+            "target": "promotion_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "仕途", "升迁"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_merchant_opportunity",
+    "version": "1.0.0",
+    "category": "career",
+    "priority": 1,
+    "weight": 65,
+    "ageRange": { "min": 22, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 22 },
+      { "type": "random", "value": 0.12 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_merchant_chosen\") && wealth >= 600" }
+    ],
+    "content": {
+      "title": "商业机会",
+      "text": "有人向你推荐一个赚钱的商机，但需要投入大量资金。",
+      "description": "商业投资"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "merchant_invest_heavy",
+        "text": "大笔投资（金钱 -300，财富 +200~400，30% 概率失败）",
+        "conditions": [
+          { "type": "expression", "expression": "money >= 300" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -300,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "wealth",
+            "value": 300,
+            "operator": "add",
+            "variable": true,
+            "minValue": 200,
+            "maxValue": 400,
+            "successRate": 0.7
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -200,
+            "operator": "add",
+            "onFailure": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "year"
+          },
+          {
+            "type": "event_record",
+            "target": "merchant_invest_heavy"
+          }
+        ]
+      },
+      {
+        "id": "merchant_invest_light",
+        "text": "小额投资（金钱 -100，财富 +50~120）",
+        "conditions": [
+          { "type": "expression", "expression": "money >= 100" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -100,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "wealth",
+            "value": 80,
+            "operator": "add",
+            "variable": true,
+            "minValue": 50,
+            "maxValue": 120
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 6,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "merchant_invest_light"
+          }
+        ]
+      },
+      {
+        "id": "merchant_decline",
+        "text": "拒绝投资",
+        "effects": [
+          {
+            "type": "event_record",
+            "target": "merchant_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "商业", "投资"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_hermit_cultivation",
+    "version": "1.0.0",
+    "category": "career",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": { "min": 25, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 25 },
+      { "type": "random", "value": 0.1 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_hermit_chosen\") && chivalry >= 70" }
+    ],
+    "content": {
+      "title": "隐居修炼",
+      "text": "你选择远离尘世喧嚣，专心修炼。在山水之间，你的心境越发澄明。",
+      "description": "隐居生活"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 8,
+        "operator": "add",
+        "variable": true,
+        "minValue": 6,
+        "maxValue": 10
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 5,
+        "operator": "add",
+        "variable": true,
+        "minValue": 4,
+        "maxValue": 6
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "health",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "event_record",
+        "target": "career_hermit_cultivation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "隐士", "修炼"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_official_ending",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 55, "max": 70 },
+    "triggers": [
+      { "type": "age_reach", "value": 55 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_official_chosen\") && flags.has(\"official_promoted\") && reputation >= 300" }
+    ],
+    "content": {
+      "title": "一代名臣",
+      "text": "你官至高位，政绩卓著，百姓爱戴。朝廷追封你为大学士，流芳百世。",
+      "description": "仕途圆满结局"
+    },
+    "eventType": "ending",
+    "endingType": "career_success",
+    "endingTitle": "一代名臣",
+    "effects": [
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 100,
+        "operator": "add"
+      },
+      {
+        "type": "event_record",
+        "target": "career_official_ending"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "仕途", "结局"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_merchant_ending",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 55, "max": 70 },
+    "triggers": [
+      { "type": "age_reach", "value": 55 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_merchant_chosen\") && wealth >= 3000" }
+    ],
+    "content": {
+      "title": "首富一方",
+      "text": "你的生意遍布大江南北，家财万贯，成为一方首富。商会上，众人推举你为会长。",
+      "description": "商业圆满结局"
+    },
+    "eventType": "ending",
+    "endingType": "career_success",
+    "endingTitle": "首富一方",
+    "effects": [
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 50,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 50,
+        "operator": "add"
+      },
+      {
+        "type": "event_record",
+        "target": "career_merchant_ending"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "商业", "结局"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "career_hermit_ending",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 55, "max": 70 },
+    "triggers": [
+      { "type": "age_reach", "value": 55 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "flags.has(\"career_hermit_chosen\") && chivalry >= 80 && internalSkill >= 70" }
+    ],
+    "content": {
+      "title": "世外高人",
+      "text": "你隐居多年，武功和心境都已臻化境。江湖上流传着你的传说，但很少有人见过你的真容。",
+      "description": "隐士圆满结局"
+    },
+    "eventType": "ending",
+    "endingType": "career_success",
+    "endingTitle": "世外高人",
+    "effects": [
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 80,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 20,
+        "operator": "add"
+      },
+      {
+        "type": "event_record",
+        "target": "career_hermit_ending"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773461322000,
+      "updatedAt": 1773461322000,
+      "author": "development_team",
+      "tags": ["职业", "隐士", "结局"],
+      "enabled": true
+    }
+  }
+]

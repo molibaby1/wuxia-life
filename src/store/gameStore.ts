@@ -15,14 +15,27 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     qinggong: 0,
     
     chivalry: 0,
+    constitution: 0,
+    comprehension: 0,
+    reputation: 0,
+    knowledge: 0,
+    charisma: 0,
+    businessAcumen: 0,
+    influence: 0,
+    martialHeritage: 0,
+    scholarlyHeritage: 0,
+    merchantNetwork: 0,
+    connections: 0,
     money: 0,
     
-    flags: new Set(),
-    events: new Set(),
+    flags: {},
+    events: [],
+    wealth: 0,
     children: 0,
+    spouse: null,
     
     alive: true,
-    deathReason: null,
+    deathReason: undefined,
     title: null,
     
     timeUnit: 'year',
@@ -76,16 +89,13 @@ export function useGameStore() {
     }
     
     if (flags !== undefined) {
-      // 合并 flags，而不是替换
-      const newFlags = flags instanceof Set ? flags : new Set<string>(flags);
-      const mergedFlags = new Set([...state.player.flags, ...newFlags]);
-      state.player.flags = mergedFlags;
+      state.player.flags = {
+        ...(state.player.flags || {}),
+        ...(flags as Record<string, any>),
+      };
     }
     if (events !== undefined) {
-      // 合并 events，而不是替换
-      const newEvents = events instanceof Set ? events : new Set<string>(events);
-      const mergedEvents = new Set([...state.player.events, ...newEvents]);
-      state.player.events = mergedEvents;
+      state.player.events = [...(state.player.events || []), ...(events as any[])];
     }
   };
 

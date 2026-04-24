@@ -1,0 +1,499 @@
+[
+  {
+    "id": "medical_talent_discovery",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {"min": 8, "max": 16},
+    "triggers": [
+      {"type": "age_reach", "value": 8}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 15 && chivalry >= 15"}
+    ],
+    "content": {
+      "title": "医术天赋",
+      "text": "你从小就对草药有天生的敏感度。一次偶然的机会，你用山中采摘的草药治好了村民的疾病，展现出惊人的医术天赋。",
+      "description": "发现医术天赋"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "学习医术",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "flag_set", "flag": "medical_talent", "value": true}
+        ]
+      },
+      {
+        "text": "继续玩耍",
+        "effects": [
+          {"type": "stat_modify", "stat": "constitution", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_master_apprentice",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 95,
+    "weight": 90,
+    "ageRange": {"min": 15, "max": 20},
+    "triggers": [
+      {"type": "age_reach", "value": 15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_talent == true"}
+    ],
+    "content": {
+      "title": "拜师名医",
+      "text": "一位云游神医路过此地，看中你的医术天赋，愿意收你为徒。这是你系统学习医术的机会。",
+      "description": "拜师学医"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "拜师学艺",
+        "effects": [
+          {"type": "flag_set", "flag": "medical_apprentice", "value": true},
+          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": 6}
+        ]
+      },
+      {
+        "text": "自学成才",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "flag_set", "flag": "medical_self_taught", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_herb_gathering",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_apprentice == true || flags.medical_self_taught == true"}
+    ],
+    "content": {
+      "title": "采药炼丹",
+      "text": "师父教你识别各种草药，带你上山采药。你学会了如何辨别药材的品质，以及如何炼制丹药。",
+      "description": "学习采药炼丹"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "constitution", "value": 4},
+      {"type": "flag_set", "flag": "medical_herb_master", "value": true}
+    ]
+  },
+  {
+    "id": "medical_clinic_practice",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": {"min": 18, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_herb_master == true"}
+    ],
+    "content": {
+      "title": "坐诊治病",
+      "text": "你开始在医馆坐诊，为百姓治病。每天的病例让你积累了丰富的临床经验。",
+      "description": "坐诊治病"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 8},
+      {"type": "stat_modify", "stat": "reputation", "value": 12},
+      {"type": "stat_modify", "stat": "comprehension", "value": 5}
+    ]
+  },
+  {
+    "id": "medical_plague_outbreak",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 20, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_apprentice == true"}
+    ],
+    "content": {
+      "title": "瘟疫救治",
+      "text": "附近爆发瘟疫，死人无数。你被请求前去救治。这是对你医术的重大考验。",
+      "description": "救治瘟疫"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力救治（需悟性≥40）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 40"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "flag_set", "flag": "medical_plague_hero", "value": true}
+        ]
+      },
+      {
+        "text": "协助救治",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_poison_temptation",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 82,
+    "weight": 70,
+    "ageRange": {"min": 22, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_herb_master == true"}
+    ],
+    "content": {
+      "title": "毒术诱惑",
+      "text": "有人找到你，希望你用医术制造毒药。毒药可以杀人于无形，报酬丰厚。这是医者与毒者的抉择。",
+      "description": "毒术诱惑"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "拒绝，坚守医德",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "flag_set", "flag": "medical_pure", "value": true}
+        ]
+      },
+      {
+        "text": "学习毒术",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "medical_poison_path", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_dual_cultivation",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 80,
+    "weight": 65,
+    "ageRange": {"min": 24, "max": 35},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_poison_path == true"}
+    ],
+    "content": {
+      "title": "医毒双修",
+      "text": "你发现医毒本同源，开始医毒双修。既能救人，也能杀人。你的实力大幅提升。",
+      "description": "医毒双修"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 18},
+      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "chivalry", "value": -5}
+    ]
+  },
+  {
+    "id": "medical_divine_doctor_fame",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 85,
+    "weight": 70,
+    "ageRange": {"min": 26, "max": 38},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_plague_hero == true || flags.medical_pure == true"}
+    ],
+    "content": {
+      "title": "神医名声",
+      "text": "你的医术名扬天下，被人称为'在世华佗'。各地权贵都请你前去治病，你的名声达到顶峰。",
+      "description": "神医名声"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "charisma", "value": 12},
+      {"type": "stat_modify", "stat": "chivalry", "value": 10}
+    ]
+  },
+  {
+    "id": "medical_imperial_doctor",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 88,
+    "weight": 65,
+    "ageRange": {"min": 28, "max": 42},
+    "triggers": [
+      {"type": "age_reach", "value": 28}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_divine_doctor_fame == true"}
+    ],
+    "content": {
+      "title": "宫廷御医",
+      "text": "皇帝听闻你的医术，下旨召你入宫担任御医。这是无上的荣耀，但也意味着你将卷入宫廷斗争。",
+      "description": "成为御医"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受召见",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "flag_set", "flag": "medical_imperial", "value": true}
+        ]
+      },
+      {
+        "text": "婉拒，继续民间行医",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "medical_folk_doctor", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_palace_intrigue",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_imperial == true"}
+    ],
+    "content": {
+      "title": "宫廷斗争",
+      "text": "宫中各方势力都想拉拢你，利用你的医术为自己服务。你必须在斗争中保持中立，或者选择站队。",
+      "description": "宫廷斗争"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "保持中立",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "支持太子",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "money", "value": 50}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_medical_book",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 80,
+    "weight": 55,
+    "ageRange": {"min": 32, "max": 48},
+    "triggers": [
+      {"type": "age_reach", "value": 32}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_apprentice == true"}
+    ],
+    "content": {
+      "title": "医书传世",
+      "text": "你将毕生所学整理成医书，希望后世医者能够传承你的医术。这是医者最高的成就。",
+      "description": "著书立说"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 50},
+      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "flag_set", "flag": "medical_book_author", "value": true}
+    ]
+  },
+  {
+    "id": "medical_poison_king",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 85,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_poison_path == true && martialPower >= 100"}
+    ],
+    "content": {
+      "title": "毒王",
+      "text": "你的毒术已达化境，被人敬畏地称为'毒王'。你的毒功天下无双，但也人人畏惧。",
+      "description": "成为毒王"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 20},
+      {"type": "stat_modify", "stat": "reputation", "value": -20},
+      {"type": "stat_modify", "stat": "chivalry", "value": -10}
+    ]
+  },
+  {
+    "id": "medical_ending_divine_doctor",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 95,
+    "weight": 100,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_book_author == true && chivalry >= 80 && reputation >= 100"}
+    ],
+    "content": {
+      "title": "一代神医",
+      "text": "你一生救人无数，著书立说，被后人尊为'医圣'。你的医书成为后世医者的必读经典，你的名号流传千古。",
+      "description": "成为一代神医"
+    },
+    "eventType": "ending",
+    "endingType": "medical_divine_doctor",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_medical_divine_doctor", "value": true}
+    ]
+  },
+  {
+    "id": "medical_ending_poison_king",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_poison_path == true && martialPower >= 150"}
+    ],
+    "content": {
+      "title": "毒王",
+      "text": "你以毒术纵横江湖，无人敢惹。你的毒功独步天下，但也因此孤独一生。",
+      "description": "成为毒王"
+    },
+    "eventType": "ending",
+    "endingType": "medical_poison_king",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_medical_poison_king", "value": true}
+    ]
+  },
+  {
+    "id": "medical_ending_imperial_doctor",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_imperial == true"}
+    ],
+    "content": {
+      "title": "宫廷御医",
+      "text": "你一生服务于皇室，历经数代皇帝。你的家族成为医学世家，世代为御医。",
+      "description": "成为御医世家"
+    },
+    "eventType": "ending",
+    "endingType": "medical_imperial",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_medical_imperial", "value": true}
+    ]
+  },
+  {
+    "id": "medical_ending_folk_doctor",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_folk_doctor == true"}
+    ],
+    "content": {
+      "title": "游方神医",
+      "text": "你一生游历四方，为百姓治病。虽然生活清贫，但深受百姓爱戴。你去世后，各地百姓自发为你立碑。",
+      "description": "游方神医"
+    },
+    "eventType": "ending",
+    "endingType": "medical_folk",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_medical_folk", "value": true}
+    ]
+  },
+  {
+    "id": "medical_ending_hermit",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 82,
+    "weight": 70,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_apprentice == true && !flags.medical_book_author == true"}
+    ],
+    "content": {
+      "title": "隐世医者",
+      "text": "你看破红尘，隐居山林。偶尔有有缘人前来求医，你才会出手。你的医术成为传说。",
+      "description": "隐世医者"
+    },
+    "eventType": "ending",
+    "endingType": "medical_hermit",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_medical_hermit", "value": true}
+    ]
+  }
+]

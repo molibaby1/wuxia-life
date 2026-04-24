@@ -1,0 +1,1146 @@
+[
+  {
+    "id": "adventure_ancient_tomb",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 75,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 60"}
+    ],
+    "content": {
+      "title": "古墓探险",
+      "text": "你在山中偶然发现一座古墓，墓碑已斑驳不清。墓中可能有前人留下的秘籍和宝藏，但也机关重重。",
+      "description": "探索古墓"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "深入探索（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "money", "value": 50},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "谨慎探索",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "money", "value": 20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_hermit_master",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 80,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 35"}
+    ],
+    "content": {
+      "title": "隐世高人",
+      "text": "你在深山中发现一位隐居的老者，老者见你资质不凡，愿意指点你几招。这是可遇不可求的机缘。",
+      "description": "遇见隐世高人"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 18},
+      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 12}
+    ]
+  },
+  {
+    "id": "adventure_secret_cave",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 72,
+    "weight": 55,
+    "ageRange": {"min": 20, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "山洞奇遇",
+      "text": "你在追逐猎物时误入一个山洞，发现洞壁上刻着武功秘籍。这似乎是某位前辈高人的隐居之地。",
+      "description": "山洞奇遇"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 12},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 10}
+    ]
+  },
+  {
+    "id": "adventure_array_trial",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 70,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 40"}
+    ],
+    "content": {
+      "title": "阵法考验",
+      "text": "你误入一个古代阵法，被困其中。你必须破解阵法的奥秘才能脱困。",
+      "description": "破解阵法"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "强行破阵（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "智取（需悟性≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_guardian_beast",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 78,
+    "weight": 45,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 80"}
+    ],
+    "content": {
+      "title": "守护兽战斗",
+      "text": "你在秘境中遇到一只守护兽，它守护着一件宝物。想要得到宝物，必须先战胜它。",
+      "description": "对战守护兽"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "挑战守护兽（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "constitution", "value": -8},
+          {"type": "stat_modify", "stat": "money", "value": 80}
+        ]
+      },
+      {
+        "text": "暂时撤退",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_poison_trap",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 65,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "中毒陷阱",
+      "text": "你在探险时不慎触发机关，中了剧毒。必须尽快找到解药，否则性命堪忧。",
+      "description": "中毒陷阱"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "自行解毒（需悟性≥45）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 45"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "constitution", "value": -3}
+        ]
+      },
+      {
+        "text": "寻找解药",
+        "effects": [
+          {"type": "stat_modify", "stat": "constitution", "value": -5},
+          {"type": "stat_modify", "stat": "money", "value": -20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_dream_realm",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 75,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 50"}
+    ],
+    "content": {
+      "title": "梦境奇遇",
+      "text": "你做了一个奇异的梦，梦中有一位仙人传授你武功。醒来后，你发现那些招式竟然真实存在。",
+      "description": "梦境奇遇"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 15},
+      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 10}
+    ]
+  },
+  {
+    "id": "adventure_fate_item",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 70,
+    "weight": 45,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "天命之物",
+      "text": "你在集市上看到一个不起眼的物件，直觉告诉你这不简单。买下后才发现是一件古代宝物。",
+      "description": "获得宝物"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "stat_modify", "stat": "money", "value": -30},
+      {"type": "stat_modify", "stat": "luck", "value": 5}
+    ]
+  },
+  {
+    "id": "adventure_master_legacy",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 82,
+    "weight": 35,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 50 && comprehension >= 45"}
+    ],
+    "content": {
+      "title": "前辈遗愿",
+      "text": "一位垂死的前辈高人将毕生所学传授给你，并托付你一个遗愿。完成遗愿，你将获得他的传承。",
+      "description": "前辈遗愿"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受遗愿",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_reincarnation_memory",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 85,
+    "weight": 30,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.05}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 60"}
+    ],
+    "content": {
+      "title": "前世记忆",
+      "text": "你在一次闭关中出现幻觉，看到了前世的记忆。原来你前世是一位武学宗师，留下了无数传说。",
+      "description": "觉醒前世记忆"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "martialPower", "value": 25},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 18}
+    ]
+  },
+  {
+    "id": "adventure_luck_boost",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 68,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "气运加身",
+      "text": "最近你感觉运气特别好，走路都能捡到宝贝。这种气运加身的状态让你做事事半功倍。",
+      "description": "气运加身"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "luck", "value": 10},
+      {"type": "stat_modify", "stat": "money", "value": 40},
+      {"type": "stat_modify", "stat": "reputation", "value": 5}
+    ]
+  },
+  {
+    "id": "adventure_heavenly_sign",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 80,
+    "weight": 35,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.07}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "天降异象",
+      "text": "天空出现奇异的天象，据说这是绝世高手出世的前兆。你的内心有所感悟，修为大增。",
+      "description": "天降异象"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 15},
+      {"type": "stat_modify", "stat": "martialPower", "value": 12},
+      {"type": "stat_modify", "stat": "comprehension", "value": 8}
+    ]
+  },
+  {
+    "id": "adventure_animal_gratitude",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 65,
+    "weight": 45,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 20"}
+    ],
+    "content": {
+      "title": "动物报恩",
+      "text": "你曾经救过一只受伤的动物，它带你找到一个隐秘的山洞，里面有一些珍贵的药材。",
+      "description": "动物报恩"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "constitution", "value": 8},
+      {"type": "stat_modify", "stat": "chivalry", "value": 5},
+      {"type": "stat_modify", "stat": "money", "value": 20}
+    ]
+  },
+  {
+    "id": "adventure_mysterious_organization",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 72,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 70"}
+    ],
+    "content": {
+      "title": "神秘组织邀请",
+      "text": "一个神秘组织注意到你的实力，邀请你加入。这个组织似乎隐藏着什么大秘密。",
+      "description": "神秘组织邀请"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受邀请",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "money", "value": 40},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_time_travel",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 88,
+    "weight": 25,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.03}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 70"}
+    ],
+    "content": {
+      "title": "时空幻境",
+      "text": "你误入一个时空幻境，回到了古代。在那里，你见证了武学起源，学到了最纯粹的武功。",
+      "description": "时空幻境"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 30},
+      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 25}
+    ]
+  },
+  {
+    "id": "adventure_treasure_map",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 70,
+    "weight": 45,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "宝藏地图",
+      "text": "你偶然得到一张古老的宝藏地图，上面标记着一个神秘的位置。这可能是发财的机会，也可能是陷阱。",
+      "description": "获得宝藏地图"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "按图寻宝（需武力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "出售地图",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 50}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_manual_reveal",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 75,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "秘籍现世",
+      "text": "江湖传闻有一本绝世秘籍现世，引来无数人争夺。你也决定参与其中。",
+      "description": "秘籍现世"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参与争夺（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      },
+      {
+        "text": "静观其变",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_demon_emergence",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 72,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.09}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "魔头出世",
+      "text": "一个沉寂多年的魔头重新出世，在江湖上掀起血雨腥风。正道人士纷纷请缨讨伐。",
+      "description": "魔头出世"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "参与围剿（需侠义≥40，武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "chivalry >= 40 && martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 20}
+        ]
+      },
+      {
+        "text": "明哲保身",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_martial_arts_conference",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 68,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "门派比武",
+      "text": "某个门派举办比武大会，邀请各路高手参加。这是切磋武艺、扬名立万的好机会。",
+      "description": "门派比武"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "报名参加（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "constitution", "value": -3}
+        ]
+      },
+      {
+        "text": "旁观",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_wulin_assembly",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 80,
+    "weight": 35,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.07}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武林大会",
+      "text": "武林盟主召开武林大会，商讨江湖大事。各路英雄豪杰齐聚一堂，这是建立人脉的好机会。",
+      "description": "武林大会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8}
+    ]
+  },
+  {
+    "id": "adventure_bounty_mission",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 65,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "悬赏任务",
+      "text": "你在告示栏看到一个悬赏任务，捉拿一个通缉犯。赏金丰厚，但危险也不小。",
+      "description": "悬赏任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受任务（需武力≥65）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 65"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 80},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "无视",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "adventure_hero_save_beauty",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 70,
+    "weight": 40,
+    "ageRange": {"min": 20, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 20"}
+    ],
+    "content": {
+      "title": "英雄救美",
+      "text": "路遇一女子被恶霸欺负，你挺身而出。女子感激你的救命之恩，对你暗生情愫。",
+      "description": "英雄救美"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "出手相助（需武力≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "视而不见",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_love_at_first_sight",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 65,
+    "weight": 45,
+    "ageRange": {"min": 20, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "一见钟情",
+      "text": "你在酒楼偶遇一人，两人一见如故，相谈甚欢。这或许是缘分的开始。",
+      "description": "一见钟情"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "stat_modify", "stat": "health", "value": 5}
+    ]
+  },
+  {
+    "id": "adventure_misunderstanding",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 62,
+    "weight": 45,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "误会解除",
+      "text": "你与一位江湖朋友产生了误会，经过解释后终于冰释前嫌。误会解除后，你们的友谊更加深厚。",
+      "description": "误会解除"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "stat_modify", "stat": "reputation", "value": 5}
+    ]
+  },
+  {
+    "id": "adventure_rival_challenge",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 68,
+    "weight": 45,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "情敌挑战",
+      "text": "有人因为感情问题向你发起挑战。你不得不迎战，证明自己的实力。",
+      "description": "情敌挑战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受挑战（需武力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": -3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_love_test",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 66,
+    "weight": 40,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "真爱考验",
+      "text": "你的感情面临考验，需要在江湖和爱情之间做出选择。这是一个艰难的决定。",
+      "description": "真爱考验"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "选择爱情",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "health", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      },
+      {
+        "text": "选择江湖",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "stat_modify", "stat": "charisma", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_karma_disaster",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 78,
+    "weight": 35,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "劫难降临",
+      "text": "一场突如其来的劫难降临到你身上，可能是仇家寻仇，也可能是天灾人祸。你必须坚强面对。",
+      "description": "劫难降临"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "正面应对（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "constitution", "value": -8}
+        ]
+      },
+      {
+        "text": "暂避锋芒",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_rebirth_chance",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 85,
+    "weight": 25,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "random", "value": 0.04}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 60"}
+    ],
+    "content": {
+      "title": "重生机会",
+      "text": "你得到一个重生的机会，可以洗去身上的伤势和缺陷。这是上天对你的眷顾。",
+      "description": "重生机会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 50},
+      {"type": "stat_modify", "stat": "constitution", "value": 15},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 20}
+    ]
+  },
+  {
+    "id": "adventure_divine_beast",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 82,
+    "weight": 30,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.05}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 50"}
+    ],
+    "content": {
+      "title": "神兽认主",
+      "text": "一只传说中的神兽被你感化，愿意认你为主。神兽将成为你的伙伴，与你并肩作战。",
+      "description": "神兽认主"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 25},
+      {"type": "stat_modify", "stat": "reputation", "value": 30},
+      {"type": "stat_modify", "stat": "luck", "value": 15}
+    ]
+  },
+  {
+    "id": "adventure_causal_cycle",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 80,
+    "weight": 30,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "random", "value": 0.05}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "因果轮回",
+      "text": "你年轻时的一个善举，在多年后得到了回报。因果轮回，丝毫不爽。",
+      "description": "因果轮回"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 15},
+      {"type": "stat_modify", "stat": "money", "value": 100},
+      {"type": "stat_modify", "stat": "reputation", "value": 20}
+    ]
+  },
+  {
+    "id": "adventure_destiny_mission",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 83,
+    "weight": 28,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.04}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 90"}
+    ],
+    "content": {
+      "title": "天命任务",
+      "text": "你感知到上天赋予你的使命，这是一项艰巨的任务，但完成后将获得无上荣耀。",
+      "description": "天命任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受天命",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "luck", "value": -10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "adventure_mysterious_cave",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 74,
+    "weight": 42,
+    "ageRange": {"min": 28, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 28},
+      {"type": "random", "value": 0.09}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "神秘洞穴",
+      "text": "你在山中探险时发现一个神秘洞穴，洞中似乎有某种强大的力量在召唤你。",
+      "description": "神秘洞穴"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "进入探索（需武力≥75）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 75"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      },
+      {
+        "text": "离开",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "adventure_weather_anomaly",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 64,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.13}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "天气异常",
+      "text": "天空出现异象，雷电交加。你在这种天气中修炼，竟然有意外的收获。",
+      "description": "天气异常"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8}
+    ]
+  },
+  {
+    "id": "adventure_injured_saving",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 67,
+    "weight": 48,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.11}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 30"}
+    ],
+    "content": {
+      "title": "救治伤员",
+      "text": "路遇一个重伤的江湖人士，你出手相救。此人康复后对你感激不尽，成为你的好友。",
+      "description": "救治伤员"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 12},
+      {"type": "stat_modify", "stat": "reputation", "value": 10},
+      {"type": "stat_modify", "stat": "charisma", "value": 6}
+    ]
+  },
+  {
+    "id": "adventure_forget_love",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 63,
+    "weight": 42,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "遗忘的爱情",
+      "text": "你偶然遇到一个似曾相识的人，却发现对方已经完全不记得你。一段往事浮上心头。",
+      "description": "遗忘的爱情"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 5},
+      {"type": "stat_modify", "stat": "health", "value": -3}
+    ]
+  },
+  {
+    "id": "adventure_promise_fulfillment",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 69,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.07}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "诺言兑现",
+      "text": "多年前你许下的一个诺言，现在到了兑现的时候。你信守承诺，赢得了他人的尊重。",
+      "description": "诺言兑现"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 15},
+      {"type": "stat_modify", "stat": "reputation", "value": 18},
+      {"type": "stat_modify", "stat": "charisma", "value": 8}
+    ]
+  },
+  {
+    "id": "adventure_wulin_legend",
+    "version": "1.0",
+    "category": "adventure",
+    "priority": 76,
+    "weight": 38,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 100"}
+    ],
+    "content": {
+      "title": "武林传奇",
+      "text": "你的事迹开始在江湖上流传，有人说你是百年难遇的奇才。你的名声越来越响亮。",
+      "description": "武林传奇"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 35},
+      {"type": "stat_modify", "stat": "martialPower", "value": 15},
+      {"type": "stat_modify", "stat": "charisma", "value": 12}
+    ]
+  }
+]

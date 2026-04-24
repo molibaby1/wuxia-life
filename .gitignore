@@ -36,3 +36,9 @@ tests/reports/*.json
 
 # Test report markdown files
 tests/*.md
+.omx/
+
+# Generated game process reports
+public/reports/*.html
+public/reports/*.json
+!public/reports/manifest.json

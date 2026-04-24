@@ -1,0 +1,976 @@
+[
+  {
+    "id": "daily_morning_cultivation",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 60,
+    "weight": 80,
+    "ageRange": {"min": 20, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "晨练吐纳",
+      "text": "清晨，你迎着第一缕阳光吐纳练气。日复一日的坚持，让你的内力稳步增长。",
+      "description": "晨间修炼"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 4},
+      {"type": "stat_modify", "stat": "constitution", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_weapon_maintenance",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 75,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武器保养",
+      "text": "你仔细擦拭着自己的武器，检查每一处细节。一把好武器需要精心呵护，才能在关键时刻发挥作用。",
+      "description": "保养武器"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 3},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_tea_house_gossip",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 55,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "茶馆听闻",
+      "text": "你在茶馆喝茶时，听到江湖人士谈论最近的武林大事。这些消息让你对江湖局势有了更深的了解。",
+      "description": "茶馆听闻"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 3},
+      {"type": "stat_modify", "stat": "charisma", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_martial_practice",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 62,
+    "weight": 85,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.45}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武艺精进",
+      "text": "你在庭院中练习招式，一招一式都力求完美。汗水浸透了衣衫，但你的武艺也在不知不觉中提升。",
+      "description": "日常练武"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 5},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 4}
+    ]
+  },
+  {
+    "id": "daily_medical_study",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 56,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_talent == true || flags.medical_apprentice == true"}
+    ],
+    "content": {
+      "title": "研读医书",
+      "text": "你挑灯夜读，钻研医术。医书深奥，但每有所悟，都让你欣喜若狂。",
+      "description": "研读医书"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 5},
+      {"type": "stat_modify", "stat": "chivalry", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_business_review",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 54,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_talent == true"}
+    ],
+    "content": {
+      "title": "账目核对",
+      "text": "你仔细核对账本，计算收支。生意场上，细节决定成败。",
+      "description": "核对账目"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 20},
+      {"type": "stat_modify", "stat": "charisma", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_meditation",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 75,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "打坐参悟",
+      "text": "你盘膝而坐，进入冥想状态。心神宁静中，你对武学的理解又深了一层。",
+      "description": "打坐冥想"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 4},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 4}
+    ]
+  },
+  {
+    "id": "daily_social_visit",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 52,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "拜访友人",
+      "text": "你前去拜访一位江湖好友，两人品茶论武，相谈甚欢。人脉关系在江湖上很重要。",
+      "description": "拜访友人"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 5},
+      {"type": "stat_modify", "stat": "reputation", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_breakthrough_attempt",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 65,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 60"}
+    ],
+    "content": {
+      "title": "突破瓶颈",
+      "text": "你感觉到自己的修为到了一个瓶颈，决定闭关冲击更高境界。这是一个艰难的过程。",
+      "description": "突破瓶颈"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力突破（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "constitution", "value": -3}
+        ]
+      },
+      {
+        "text": "稳扎稳打",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "daily_injury_recovery",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 60,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "疗伤休养",
+      "text": "之前的战斗留下了旧伤，你花时间调养身体。健康才是革命的本钱。",
+      "description": "疗伤休养"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "constitution", "value": 6},
+      {"type": "stat_modify", "stat": "health", "value": 10}
+    ]
+  },
+  {
+    "id": "daily_teaching_disciples",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 60,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 100"}
+    ],
+    "content": {
+      "title": "传授弟子",
+      "text": "有年轻人慕名而来，拜你为师。你开始传授自己的武学心得，教学相长。",
+      "description": "传授弟子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 10},
+      {"type": "stat_modify", "stat": "charisma", "value": 6},
+      {"type": "stat_modify", "stat": "comprehension", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_secret_manual_study",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 62,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "研读秘籍",
+      "text": "你得到一本武学秘籍，花费大量时间钻研。秘籍中的招式精妙，让你受益匪浅。",
+      "description": "研读秘籍"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "stat_modify", "stat": "comprehension", "value": 6}
+    ]
+  },
+  {
+    "id": "daily_jianghu_challenge",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 64,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "martialPower >= 50"}
+    ],
+    "content": {
+      "title": "江湖挑战",
+      "text": "有江湖人士慕名前来挑战你。这是检验自己实力的好机会。",
+      "description": "接受挑战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受挑战（需武力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "constitution", "value": -2}
+        ]
+      },
+      {
+        "text": "婉拒",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "daily_charity_work",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 55,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 30"}
+    ],
+    "content": {
+      "title": "行善积德",
+      "text": "你出资帮助贫困百姓，或者免费为人治病。善行虽不求回报，但积累了福报。",
+      "description": "行善积德"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": 8},
+      {"type": "stat_modify", "stat": "money", "value": -20}
+    ]
+  },
+  {
+    "id": "daily_assassination_attempt",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 68,
+    "weight": 40,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 50 || chivalry <= -30"}
+    ],
+    "content": {
+      "title": "遭遇暗杀",
+      "text": "仇家派刺客来暗杀你。你在睡梦中察觉异样，立刻起身应战。",
+      "description": "遭遇暗杀"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "反击刺客（需武力≥90）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 90"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "stat_modify", "stat": "constitution", "value": -3}
+        ]
+      },
+      {
+        "text": "躲避",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "daily_treasure_hunt",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 60,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "意外发现",
+      "text": "你在山中偶然发现一个山洞，里面有一些前人留下的物品。",
+      "description": "意外发现"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 30},
+      {"type": "stat_modify", "stat": "martialPower", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_wine_social",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 54,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "把酒言欢",
+      "text": "你与江湖好友在酒楼聚会，把酒言欢，畅谈武林大事。酒逢知己千杯少。",
+      "description": "酒楼聚会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 5},
+      {"type": "stat_modify", "stat": "reputation", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_cultivation_setback",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 45,
+    "ageRange": {"min": 30, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "走火入魔",
+      "text": "你在修炼时气息紊乱，险些走火入魔。幸好及时收手，但还是受了些内伤。",
+      "description": "走火入魔"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": -5},
+      {"type": "stat_modify", "stat": "constitution", "value": -3},
+      {"type": "stat_modify", "stat": "health", "value": -5}
+    ]
+  },
+  {
+    "id": "daily_enlightenment",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 70,
+    "weight": 35,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "comprehension >= 40"}
+    ],
+    "content": {
+      "title": "顿悟",
+      "text": "你在某个瞬间突然顿悟，对武学有了全新的理解。这种可遇不可求的机缘让你的修为大增。",
+      "description": "顿悟"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8}
+    ]
+  },
+  {
+    "id": "daily_family_time",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 52,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "天伦之乐",
+      "text": "你抽出时间陪伴家人，享受难得的天伦之乐。江湖再大，家永远是最温暖的港湾。",
+      "description": "陪伴家人"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 4},
+      {"type": "stat_modify", "stat": "health", "value": 5}
+    ]
+  },
+  {
+    "id": "daily_cooking",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 50,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "烹饪美食",
+      "text": "你亲自下厨，烹饪了一桌美味的菜肴。美食不仅能填饱肚子，还能让人心情愉悦。",
+      "description": "烹饪美食"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 5},
+      {"type": "stat_modify", "stat": "charisma", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_herb_gathering",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 54,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "采集草药",
+      "text": "你上山采集草药，认识各种药材的习性。这些草药可以用来炼制丹药或治疗伤病。",
+      "description": "采集草药"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 15},
+      {"type": "stat_modify", "stat": "constitution", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_hunting",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 52,
+    "weight": 55,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "打猎",
+      "text": "你进入深山打猎，追踪猎物。打猎不仅能获取食物，还能锻炼身法。",
+      "description": "打猎"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "qinggong", "value": 4},
+      {"type": "stat_modify", "stat": "martialPower", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_calligraphy",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 48,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "琴棋书画",
+      "text": "你闲暇时练习琴棋书画，陶冶情操。武者也需要文化修养，这样才能达到文武双全的境界。",
+      "description": "琴棋书画"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 5},
+      {"type": "stat_modify", "stat": "charisma", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_tea_tasting",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 46,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "品茶",
+      "text": "你泡了一壶好茶，细细品味。茶道如武学，都需要用心去感悟。",
+      "description": "品茶"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 3},
+      {"type": "stat_modify", "stat": "health", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_market_shopping",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 50,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "市集购物",
+      "text": "你去市集购买日常用品，顺便打听江湖消息。市井之间往往流传着最新的武林传闻。",
+      "description": "市集购物"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": -10},
+      {"type": "stat_modify", "stat": "reputation", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_help_beggar",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 55,
+    "weight": 55,
+    "ageRange": {"min": 20, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "帮助乞丐",
+      "text": "路遇一个乞丐，你心生怜悯，施舍了一些银两。乞丐感激涕零，告诉你一个秘密。",
+      "description": "帮助乞丐"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "chivalry", "value": 8},
+      {"type": "stat_modify", "stat": "money", "value": -5},
+      {"type": "stat_modify", "stat": "reputation", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_visitor_reception",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 52,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "接待访客",
+      "text": "有江湖朋友前来拜访，你热情接待。人脉关系在江湖上很重要。",
+      "description": "接待访客"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "charisma", "value": 5},
+      {"type": "stat_modify", "stat": "reputation", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_rest",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 48,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "休闲放松",
+      "text": "你给自己放了一天假，什么都不做，只是放松身心。适当的休息是为了更好地出发。",
+      "description": "休闲放松"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 8},
+      {"type": "stat_modify", "stat": "constitution", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_weapon_upgrade",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 60,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 100"}
+    ],
+    "content": {
+      "title": "武器升级",
+      "text": "你花费重金请名匠为自己的武器进行升级。一把好武器能让你的实力更上一层楼。",
+      "description": "武器升级"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": -100},
+      {"type": "stat_modify", "stat": "martialPower", "value": 8},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 6}
+    ]
+  },
+  {
+    "id": "daily_dan_medicine",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 62,
+    "weight": 45,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 150"}
+    ],
+    "content": {
+      "title": "购买丹药",
+      "text": "你从药铺购买了一些疗伤丹药和修炼辅助丹药。丹药虽好，但不能依赖。",
+      "description": "购买丹药"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": -150},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+      {"type": "stat_modify", "stat": "constitution", "value": 5}
+    ]
+  },
+  {
+    "id": "daily_sparring",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "切磋交流",
+      "text": "你与同门师兄弟切磋武艺，互相学习。切磋不仅能提升实力，还能增进感情。",
+      "description": "切磋交流"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "martialPower", "value": 6},
+      {"type": "stat_modify", "stat": "externalSkill", "value": 5},
+      {"type": "stat_modify", "stat": "charisma", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_reading_history",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 50,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "阅读史书",
+      "text": "你阅读史书，了解历代王朝的兴衰更替。以史为鉴，可以知兴替。",
+      "description": "阅读史书"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "charisma", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_garden_cleanup",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 46,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "整理庭院",
+      "text": "你花时间整理自己的庭院，除草浇花。整洁的环境能让人心情舒畅。",
+      "description": "整理庭院"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 4},
+      {"type": "stat_modify", "stat": "charisma", "value": 2}
+    ]
+  },
+  {
+    "id": "daily_fishing",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 48,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "垂钓",
+      "text": "你在河边垂钓，享受宁静的时光。垂钓能让人心静，对修炼有益。",
+      "description": "垂钓"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "health", "value": 5},
+      {"type": "stat_modify", "stat": "comprehension", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_donation",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 56,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 50"}
+    ],
+    "content": {
+      "title": "捐赠寺庙",
+      "text": "你前往寺庙捐赠香火钱，祈求平安。善有善报，这是一种积累福报的方式。",
+      "description": "捐赠寺庙"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": -50},
+      {"type": "stat_modify", "stat": "chivalry", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": 5}
+    ]
+  },
+  {
+    "id": "daily_qinggong_training",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 60,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "轻功训练",
+      "text": "你在竹林中练习轻功，身轻如燕。轻功在战斗和逃跑时都非常重要。",
+      "description": "轻功训练"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "qinggong", "value": 8},
+      {"type": "stat_modify", "stat": "constitution", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_internal_circulation",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 62,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "内力运转",
+      "text": "你运转体内真气，让内力更加精纯。内力是武学的基础，需要不断锤炼。",
+      "description": "内力运转"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 6},
+      {"type": "stat_modify", "stat": "constitution", "value": 3}
+    ]
+  },
+  {
+    "id": "daily_body_training",
+    "version": "1.0",
+    "category": "daily",
+    "priority": 58,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "体能训练",
+      "text": "你进行力量训练，增强体魄。强健的体魄是习武的基础。",
+      "description": "体能训练"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "constitution", "value": 6},
+      {"type": "stat_modify", "stat": "martialPower", "value": 4}
+    ]
+  }
+]

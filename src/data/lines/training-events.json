@@ -1,0 +1,613 @@
+[
+  {
+    "id": "training_basic_martial",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 10, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 10 },
+      { "type": "random", "value": 0.2 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "基础武功修炼",
+      "text": "你开始系统地练习基础武功，一招一式都认真揣摩。",
+      "description": "日常修炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "training_external",
+        "text": "练习外功招式（外功 +3~5，体魄 +1~2）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 1,
+            "operator": "add",
+            "variable": true,
+            "minValue": 1,
+            "maxValue": 2
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_external"
+          }
+        ]
+      },
+      {
+        "id": "training_internal",
+        "text": "打坐修炼内功（内功 +3~5，悟性 +1）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_internal"
+          }
+        ]
+      },
+      {
+        "id": "training_qinggong",
+        "text": "练习轻功身法（轻功 +3~5，体魄 +1）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 4,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 5
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_qinggong"
+          }
+        ]
+      },
+      {
+        "id": "training_rest",
+        "text": "休息调整（健康 +10）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_rest"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.2,
+        "merchant": 0.3,
+        "wuxia": 1.0,
+        "frontier": 0.8
+      },
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "武功", "日常"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_intensive_martial",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": { "min": 15, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 15 },
+      { "type": "random", "value": 0.15 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "martialPower >= 30" }
+    ],
+    "content": {
+      "title": "闭关修炼",
+      "text": "你决定闭关修炼，全心投入武道。这段时间里，你心无旁骛，日夜苦练。",
+      "description": "高强度修炼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "training_intensive_3months",
+        "text": "闭关 3 个月（外功 +8~12，内功 +8~12，健康 -10）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 10,
+            "operator": "add",
+            "variable": true,
+            "minValue": 8,
+            "maxValue": 12
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add",
+            "variable": true,
+            "minValue": 8,
+            "maxValue": 12
+          },
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": -10,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 3,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_intensive_3months"
+          }
+        ]
+      },
+      {
+        "id": "training_intensive_6months",
+        "text": "闭关 6 个月（外功 +15~20，内功 +15~20，健康 -20）",
+        "conditions": [
+          { "type": "expression", "expression": "health >= 50" }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 17,
+            "operator": "add",
+            "variable": true,
+            "minValue": 15,
+            "maxValue": 20
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 17,
+            "operator": "add",
+            "variable": true,
+            "minValue": 15,
+            "maxValue": 20
+          },
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": -20,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 6,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_intensive_6months"
+          }
+        ]
+      },
+      {
+        "id": "training_intensive_cancel",
+        "text": "还是不要太拼命了",
+        "effects": [
+          {
+            "type": "event_record",
+            "target": "training_intensive_cancel"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "闭关", "高强度"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_meditation",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": { "min": 12, "max": 70 },
+    "triggers": [
+      { "type": "age_reach", "value": 12 },
+      { "type": "random", "value": 0.18 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "打坐冥想",
+      "text": "你找了一处安静的地方，盘膝而坐，开始打坐冥想。内力在经脉中缓缓流动。",
+      "description": "修炼内功"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 5,
+        "operator": "add",
+        "variable": true,
+        "minValue": 4,
+        "maxValue": 6
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "health",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "month"
+      },
+      {
+        "type": "event_record",
+        "target": "training_meditation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "内功", "冥想"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_weapon_practice",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 14, "max": 55 },
+    "triggers": [
+      { "type": "age_reach", "value": 14 },
+      { "type": "random", "value": 0.15 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "兵器练习",
+      "text": "你拿起兵器，开始练习招式。刀光剑影之间，你的外功越发精进。",
+      "description": "练习兵器"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "training_weapon_sword",
+        "text": "练习剑法（外功 +6~8，轻功 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 7,
+            "operator": "add",
+            "variable": true,
+            "minValue": 6,
+            "maxValue": 8
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_weapon_sword"
+          }
+        ]
+      },
+      {
+        "id": "training_weapon_blade",
+        "text": "练习刀法（外功 +7~9，体魄 +2~3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 8,
+            "operator": "add",
+            "variable": true,
+            "minValue": 7,
+            "maxValue": 9
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 2,
+            "operator": "add",
+            "variable": true,
+            "minValue": 2,
+            "maxValue": 3
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_weapon_blade"
+          }
+        ]
+      },
+      {
+        "id": "training_weapon_staff",
+        "text": "练习棍法（外功 +6~8，体魄 +3~4）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 7,
+            "operator": "add",
+            "variable": true,
+            "minValue": 6,
+            "maxValue": 8
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 3,
+            "operator": "add",
+            "variable": true,
+            "minValue": 3,
+            "maxValue": 4
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_weapon_staff"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "兵器", "外功"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_body_tempering",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 12, "max": 50 },
+    "triggers": [
+      { "type": "age_reach", "value": 12 },
+      { "type": "random", "value": 0.12 }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "炼体修炼",
+      "text": "你开始炼体修炼，通过特殊的锻炼方法，让身体变得更加强健。",
+      "description": "修炼体魄"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": 6,
+        "operator": "add",
+        "variable": true,
+        "minValue": 5,
+        "maxValue": 7
+      },
+      {
+        "type": "stat_modify",
+        "target": "externalSkill",
+        "value": 3,
+        "operator": "add",
+        "variable": true,
+        "minValue": 2,
+        "maxValue": 4
+      },
+      {
+        "type": "stat_modify",
+        "target": "health",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "month"
+      },
+      {
+        "type": "event_record",
+        "target": "training_body_tempering"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "炼体", "体魄"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_breakthrough",
+    "version": "1.0.0",
+    "category": "training",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 18, "max": 60 },
+    "triggers": [
+      { "type": "age_reach", "value": 18 },
+      { "type": "random", "value": 0.08 }
+    ],
+    "conditions": [
+      { "type": "expression", "expression": "(externalSkill >= 50 || internalSkill >= 50) && comprehension >= 40" }
+    ],
+    "content": {
+      "title": "瓶颈突破",
+      "text": "修炼多时，你感觉到了一个瓶颈。你静下心来，全力冲击这个瓶颈。",
+      "description": "突破瓶颈"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "training_breakthrough_success",
+        "text": "全力冲击（成功：功力 +10~15，失败：健康 -10）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 12,
+            "operator": "add",
+            "variable": true,
+            "minValue": 10,
+            "maxValue": 15,
+            "successRate": 0.7
+          },
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": -10,
+            "operator": "add",
+            "onFailure": true
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_breakthrough_success"
+          }
+        ]
+      },
+      {
+        "id": "training_breakthrough_wait",
+        "text": "稳扎稳打，等待更好时机（悟性 +3）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "event_record",
+            "target": "training_breakthrough_wait"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773460921000,
+      "updatedAt": 1773460921000,
+      "author": "development_team",
+      "tags": ["修炼", "突破", "瓶颈"],
+      "enabled": true
+    }
+  }
+]

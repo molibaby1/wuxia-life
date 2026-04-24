@@ -1,0 +1,794 @@
+[
+  {
+    "id": "martial_arts_enlightenment",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": {
+      "min": 6,
+      "max": 6
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 6
+      }
+    ],
+    "content": {
+      "text": "到了习武的年纪，家中长辈开始传授你基础武功。根据你之前的表现，他们为你制定了不同的训练计划。",
+      "title": "武学启蒙",
+      "description": "武道之路正式开启。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "external_focus",
+        "text": "专注外功修炼",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"diligentStudent\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "externalFocus"
+          }
+        ]
+      },
+      {
+        "id": "internal_focus",
+        "text": "注重内力培养",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"bornWithBlessing\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "internalFocus"
+          }
+        ]
+      },
+      {
+        "id": "agile_path",
+        "text": "专修轻功身法",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "agilePath"
+          }
+        ]
+      },
+      {
+        "id": "balanced_start",
+        "text": "全面发展",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"balancedApproach\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "balancedStart"
+          }
+        ]
+      },
+      {
+        "id": "generic_path",
+        "text": "常规修炼",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "武学",
+        "修炼路径",
+        "个性化"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 15,
+      "max": 15
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 15
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\")"
+      }
+    ],
+    "content": {
+      "text": "入门一年后，师父安排你参加门派试炼。这是对你修炼成果的检验，也是证明自己的机会。",
+      "title": "门派试炼",
+      "description": "证明自己的时刻到了。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "challenge_master",
+        "text": "挑战师兄师姐",
+        "condition": {
+          "type": "expression",
+          "expression": "player.martialPower >= 30"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "trialVictor"
+          },
+          {
+            "type": "event_record",
+            "target": "trial_victory"
+          }
+        ]
+      },
+      {
+        "id": "complete_tasks",
+        "text": "完成门派任务",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "diligentDisciple"
+          },
+          {
+            "type": "event_record",
+            "target": "trial_completed"
+          }
+        ]
+      },
+      {
+        "id": "meditate",
+        "text": "闭关修炼",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"wudangDisciple\")"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "meditationMaster"
+          },
+          {
+            "type": "event_record",
+            "target": "trial_meditation"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_improvement",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 50,
+    "ageRange": {
+      "min": 17,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 17
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\")"
+      }
+    ],
+    "content": {
+      "text": "你没有被儿女情长所困扰，而是专心致志地修炼武艺。日复一日，你的武功已经达到了一个新的高度。",
+      "title": "武艺精进",
+      "description": "专注是成功的关键。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 12,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "externalSkill",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "martialArtist"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_improvement"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "武艺",
+        "修炼",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "training_focus",
+    "version": "1.0.0",
+    "category": "daily_event",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 15,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 15
+      }
+    ],
+    "content": {
+      "text": "师门为你制定了新的修炼方案，你可以专精某一方向或平衡发展。",
+      "title": "修炼抉择",
+      "description": "方向不同，武路不同。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "focus_internal",
+        "text": "专修内功",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "training_focus_internal"
+          }
+        ]
+      },
+      {
+        "id": "focus_external",
+        "text": "专修外功",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "training_focus_external"
+          }
+        ]
+      },
+      {
+        "id": "focus_balance",
+        "text": "内外兼修",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "training_focus_balance"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.5,
+        "merchant": 0.3,
+        "wuxia": 1.2,
+        "frontier": 0.9
+      },
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "修炼",
+        "选择"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "comprehension_breakthrough",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 15,
+      "max": 18
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 15
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.comprehension >= 30 AND !flags.has(\"comprehension_breakthrough\")"
+      }
+    ],
+    "content": {
+      "text": "你在静坐参悟时忽有所悟，真气自发流转，内功瓶颈被冲破。",
+      "title": "悟性突破",
+      "description": "一念通透，百脉俱开。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "comprehension_breakthrough"
+      },
+      {
+        "type": "event_record",
+        "target": "comprehension_breakthrough"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "悟性",
+        "突破",
+        "once"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "constitution_breakthrough",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 15,
+      "max": 18
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 15
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.constitution >= 30 AND !flags.has(\"constitution_breakthrough\")"
+      }
+    ],
+    "content": {
+      "text": "你连日苦练外功，筋骨强悍到极致，拳脚间劲力暴涨。",
+      "title": "体魄突破",
+      "description": "筋骨如钢，力贯全身。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "externalSkill",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "constitution_breakthrough"
+      },
+      {
+        "type": "event_record",
+        "target": "constitution_breakthrough"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "体魄",
+        "突破",
+        "once"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "continued_journey",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 50,
+    "ageRange": {
+      "min": 19,
+      "max": 19
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 19
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"willAttendMartialArtsMeeting\") && !flags.has(\"willObserveMartialArtsMeeting\")"
+      }
+    ],
+    "content": {
+      "text": "你没有参加武林大会，而是继续在江湖上游历。这段时间的历练让你的武艺更加扎实，经验也更加丰富。",
+      "title": "江湖历练继续",
+      "description": "路漫漫其修远兮，吾将上下而求索。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "externalSkill",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "steadyProgress"
+      },
+      {
+        "type": "event_record",
+        "target": "continued_journey"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "江湖",
+        "修炼",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_peak",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 90,
+    "ageRange": {
+      "min": 33,
+      "max": 33
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 33
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 150"
+      }
+    ],
+    "content": {
+      "text": "经过数十年的修炼，你终于达到了武学的巅峰境界。江湖中人称你为绝世高手，你的名字已载入武林史册。",
+      "title": "武学巅峰",
+      "description": "登峰造极，名垂青史。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 20,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "peakMaster"
+      },
+      {
+        "type": "flag_set",
+        "target": "legendaryStatus"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_peak"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "巅峰",
+        "传奇",
+        "主线"
+      ],
+      "enabled": true
+    }
+  }
+]

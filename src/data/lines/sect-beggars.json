@@ -1,0 +1,1330 @@
+[
+  {
+    "id": "beggars_encounter",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": {
+      "min": 14,
+      "max": 20
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.chivalry >= 12 || player.qinggong >= 10) && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+      }
+    ],
+    "content": {
+      "text": "集市上，一群衣衫褴褛却身手不凡的乞儿替你解围。领头老者笑言：有缘不如入我丐帮。",
+      "title": "丐帮相逢",
+      "description": "江湖底层亦有大义。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_join",
+        "text": "跟随老者入丐帮",
+        "description": "你决定加入丐帮",
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "老者见你身手不凡、谈吐不俗，大喜道：\"我丐帮近年人才凋零，今日得遇少侠，实乃天意！\"说罢取出一只八袋信物——你竟直接被拜为八袋弟子，众乞儿齐声称贺！",
+            "condition": {"type": "expression", "expression": "chivalry >= 20 && connections >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 8},
+              {"type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "connections", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join_elite"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "老者见你根骨不凡，欣然收你入帮：\"从今往后，你便是丐帮弟子，与众兄弟同甘共苦！\"你换上乞儿装束，开始了江湖底层的闯荡生涯。",
+            "condition": {"type": "expression", "expression": "chivalry >= 12 || qinggong >= 12"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 4},
+              {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "qinggong", "value": 3, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "老者上下打量你，点点头道：\"想入我帮？先从一袋弟子做起吧。江湖规矩，得自己闯出来。\"你从最底层开始了自己的丐帮生涯。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
+              {"type": "flag_set", "target": "route_beggars"},
+              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "flag_set", "target": "beggars_trial_active"},
+              {"type": "flag_set", "target": "beggars_rank", "value": 1},
+              {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+              {"type": "event_record", "target": "beggars_encounter_join_low"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "beggars_decline",
+        "text": "婉拒相邀",
+        "description": "你不想加入丐帮",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 5,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_encounter_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "奇遇",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_trial_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 22
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"beggars_trial_active\") && !flags.has(\"beggars_trial_started\")"
+      }
+    ],
+    "content": {
+      "text": "丐帮试炼并非比武，而是“走街串巷，明辨是非”。你需在三件小事中选择立场。",
+      "title": "丐帮试炼",
+      "description": "江湖是人心的试炼场。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_trial_help",
+        "text": "扶危济困",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 12,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_helped"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_trial_help"
+          }
+        ]
+      },
+      {
+        "id": "beggars_trial_share",
+        "text": "分粮济民",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 10,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 10,
+            "operator": "subtract"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_shared"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_trial_share"
+          }
+        ]
+      },
+      {
+        "id": "beggars_trial_wary",
+        "text": "谨慎观望",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 8,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_started"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_trial_wary"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_trial_wary"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "试炼",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_trial_followup",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": {
+      "min": 14,
+      "max": 24
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"beggars_trial_active\") && (flags.has(\"beggars_trial_helped\") || flags.has(\"beggars_trial_shared\") || flags.has(\"beggars_trial_wary\")) && !flags.has(\"beggars_trial_done\")"
+      }
+    ],
+    "content": {
+      "text": "帮内长老认为你心性尚可，安排你随队巡行乡里。",
+      "title": "丐帮行脚",
+      "description": "步步是江湖，处处是人情。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "month"
+      },
+      {
+        "type": "stat_modify",
+        "target": "qinggong",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_trial_done"
+      },
+      {
+        "type": "flag_unset",
+        "target": "beggars_trial_active"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_trial_followup"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "主线",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_rumor_network",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 35,
+    "ageRange": {
+      "min": 16,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 16
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && !flags.has(\"beggars_rumor_network\")"
+      }
+    ],
+    "content": {
+      "text": "你开始负责江湖消息传递，见识到情报的价值。",
+      "title": "丐帮耳目",
+      "description": "江湖有三分在嘴上。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "month"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_rumor_network"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_rumor_network"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "情报",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_internal_strife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 30,
+    "ageRange": {
+      "min": 18,
+      "max": 30
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_rumor_network\") && !flags.has(\"beggars_strife_done\")"
+      }
+    ],
+    "content": {
+      "text": "帮内长老因下一任帮主之事产生分歧，你被推到风口浪尖。",
+      "title": "帮内纷争",
+      "description": "江湖不止刀光，也有心计。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_support_elder",
+        "text": "支持老长老",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_strife_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_elder"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_strife_elder"
+          }
+        ]
+      },
+      {
+        "id": "beggars_support_young",
+        "text": "支持新派",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_strife_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_young"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_strife_young"
+          }
+        ]
+      },
+      {
+        "id": "beggars_stay_neutral",
+        "text": "保持中立",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "comprehension",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_strife_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_neutral"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_strife_neutral"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "主线",
+        "纷争"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_ending",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 20,
+    "ageRange": {
+      "min": 24,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 24
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_strife_done\") && !flags.has(\"beggars_ending\")"
+      }
+    ],
+    "content": {
+      "text": "多年行走江湖，你已成为丐帮中流砥柱，名声传遍市井。",
+      "title": "丐帮中坚",
+      "description": "江湖传闻里，有你的名字。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_ending"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_ending"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "结局"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_assembly",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 28,
+    "ageRange": {
+      "min": 19,
+      "max": 30
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 19
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_rumor_network\") && !flags.has(\"beggars_assembly_done\")"
+      }
+    ],
+    "content": {
+      "text": "丐帮大会召开，各路舵主齐聚，你被推举上台陈述主张。",
+      "title": "丐帮大会",
+      "description": "一言可定未来格局。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_assembly_unity",
+        "text": "主张整合情报系统",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_assembly_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_unity"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_assembly_unity"
+          }
+        ]
+      },
+      {
+        "id": "beggars_assembly_relief",
+        "text": "主张济贫救灾",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_assembly_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_relief"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_assembly_relief"
+          }
+        ]
+      },
+      {
+        "id": "beggars_assembly_trade",
+        "text": "主张走商互助",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_assembly_done"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_trade"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_assembly_trade"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "大会",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_inheritance",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 24,
+    "ageRange": {
+      "min": 20,
+      "max": 32
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_assembly_done\") && !flags.has(\"beggars_inheritance\")"
+      }
+    ],
+    "content": {
+      "text": "老帮主私下召见你，愿传授“降龙残诀”的心法。",
+      "title": "帮主传功",
+      "description": "衣钵传承，非同小可。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_inheritance_accept",
+        "text": "谨慎受教",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 20,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_inheritance"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_inheritance_accept"
+          }
+        ]
+      },
+      {
+        "id": "beggars_inheritance_decline",
+        "text": "推辞以避嫌",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 10,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_inheritance"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_inheritance_decline"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "传承",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_official_tension",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 22,
+    "ageRange": {
+      "min": 20,
+      "max": 34
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && !flags.has(\"beggars_official_tension\")"
+      }
+    ],
+    "content": {
+      "text": "官府密探盯上丐帮情报线，要求你们协助缉捕要犯。",
+      "title": "官府施压",
+      "description": "江湖与官府的距离并不遥远。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_official_coop",
+        "text": "合作以求平安",
+        "weight": 2,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 12,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_official_tension"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_official"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_official_coop"
+          }
+        ]
+      },
+      {
+        "id": "beggars_official_resist",
+        "text": "拒绝协助",
+        "weight": 1,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 12,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_official_tension"
+          },
+          {
+            "type": "flag_set",
+            "target": "beggars_path_resist"
+          },
+          {
+            "type": "event_record",
+            "target": "beggars_official_resist"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "官府",
+        "支线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_tenacity",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 18,
+    "ageRange": {
+      "min": 22,
+      "max": 36
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_inheritance\") && !flags.has(\"beggars_tenacity\")"
+      }
+    ],
+    "content": {
+      "text": "帮中动荡渐息，你被派往几处灾区安抚民心。",
+      "title": "风雨同舟",
+      "description": "江湖不是一个人的江湖。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 2,
+        "timeUnit": "month"
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_tenacity"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_tenacity"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "主线",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_ending_leader",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 18,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_inheritance\") && flags.has(\"beggars_assembly_done\") && !flags.has(\"beggars_ending_leader\")"
+      }
+    ],
+    "content": {
+      "text": "你继任帮主，整合情报与赈济体系，丐帮从此一统而强。",
+      "title": "帮主继位",
+      "description": "江湖众口同声，推你为首。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_ending_leader"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_ending_leader"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "结局",
+        "掌帮"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_ending_retire",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 16,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_tenacity\") && !flags.has(\"beggars_ending_retire\")"
+      }
+    ],
+    "content": {
+      "text": "你功成身退，带着几名旧友退居小城，以民间义举维持帮中名望。",
+      "title": "退隐市井",
+      "description": "江湖仍在，你已远离。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_ending_retire"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_ending_retire"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "结局",
+        "退隐"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_ending_official",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 14,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_path_official\") && !flags.has(\"beggars_ending_official\")"
+      }
+    ],
+    "content": {
+      "text": "你以丐帮情报线协助官府平乱，被授以协办之职，成为江湖与官府之间的纽带。",
+      "title": "官府协办",
+      "description": "江湖与庙堂，终于相接。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "money",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_ending_official"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_ending_official"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "结局",
+        "官府"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_ending_wanderer",
+    "version": "1.0.0",
+    "category": "ending",
+    "priority": 1,
+    "weight": 12,
+    "ageRange": {
+      "min": 26,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && flags.has(\"beggars_path_neutral\") && !flags.has(\"beggars_ending_wanderer\")"
+      }
+    ],
+    "content": {
+      "text": "你不愿涉足帮派权争，独自远行，以游侠之名行走四方。",
+      "title": "江湖独行",
+      "description": "风雪为伴，志在远方。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1,
+        "timeUnit": "year"
+      },
+      {
+        "type": "stat_modify",
+        "target": "qinggong",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "beggars_ending_wanderer"
+      },
+      {
+        "type": "event_record",
+        "target": "beggars_ending_wanderer"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "丐帮",
+        "结局",
+        "独行"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "beggars_departure",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 2,
+    "weight": 14,
+    "ageRange": { "min": 18, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_beggars\") && !flags.has(\"beggars_departed\")"
+      }
+    ],
+    "content": {
+      "text": "你若要改换人生道路，需先脱离丐帮。此后不再受帮规约束。",
+      "title": "脱离丐帮",
+      "description": "离帮之后，江湖路更难。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "beggars_leave",
+        "text": "离帮远行",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "flag_unset", "target": "route_beggars" },
+          { "type": "flag_unset", "target": "beggars_trial_active" },
+          { "type": "flag_set", "target": "beggars_departed" },
+          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
+          { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add" },
+          { "type": "event_record", "target": "beggars_departure_leave" }
+        ]
+      },
+      {
+        "id": "beggars_stay",
+        "text": "继续留在丐帮",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "event_record", "target": "beggars_departure_stay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["丐帮", "退派", "once"],
+      "enabled": true
+    }
+  }
+]

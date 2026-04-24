@@ -1,0 +1,195 @@
+[
+  {
+    "id": "doctor_first_patient",
+    "name": "首位病人",
+    "description": "你开始行医救人，治疗第一位病人。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 18, "max": 30 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["doctor", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "triggerConditions": { "age": { "min": 18, "max": 30 }, "identity": { "required": ["doctor"] } },
+    "content": { "title": "悬壶济世", "text": "你开始行医救人，治疗第一位病人。这是一个重伤的江湖客。" },
+    "choices": [
+      {
+        "id": "treat_free",
+        "text": "免费治疗，救人要紧 (侠义 +15, 声望 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 15, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_first_patient", "value": true }
+        ]
+      },
+      {
+        "id": "treat_paid",
+        "text": "收取诊金，正常收费 (金钱 +30)",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" },
+          { "type": "flag_set", "target": "doctor_first_patient", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "doctor_epidemic",
+    "name": "瘟疫爆发",
+    "description": "当地爆发瘟疫，需要你出手救治。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 80,
+    "ageRange": { "min": 25, "max": 45 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["doctor", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "triggerConditions": { "age": { "min": 25, "max": 45 }, "identity": { "required": ["doctor"] } },
+    "content": { "title": "抗疫", "text": "当地爆发瘟疫，百姓死伤无数。你需要决定是否冒险救治。" },
+    "choices": [
+      {
+        "id": "fight_epidemic",
+        "text": "全力抗疫，拯救百姓 (侠义 +30, 声望 +30, 体魄 -10)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 30, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 30, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": -10, "operator": "add" },
+          { "type": "karma_change", "good": 30, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_epidemic", "value": true }
+        ]
+      },
+      {
+        "id": "help_little",
+        "text": "提供药方，量力而行 (侠义 +10, 声望 +10)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "karma_change", "good": 10, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_epidemic", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "doctor_secret_formula",
+    "name": "秘方传承",
+    "description": "你获得了一份珍贵的医书秘方。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": { "min": 30, "max": 50 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["doctor", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "triggerConditions": { "age": { "min": 30, "max": 50 }, "identity": { "required": ["doctor"] } },
+    "content": { "title": "秘方", "text": "你获得了一份珍贵的医书秘方，可以救治疑难杂症。" },
+    "choices": [
+      {
+        "id": "share_formula",
+        "text": "公开秘方，造福苍生 (侠义 +20, 声望 +25)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 25, "operator": "add" },
+          { "type": "karma_change", "good": 25, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_secret_formula", "value": true }
+        ]
+      },
+      {
+        "id": "keep_secret",
+        "text": "保守秘密，传于后人 (学识 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "doctor_secret_formula", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "doctor_hero_treat",
+    "name": "救治英雄",
+    "description": "一位重伤的武林高手前来求医。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": { "min": 35, "max": 55 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["doctor", "identity"],
+    "triggers": [{ "type": "age_reach", "value": 35 }],
+    "triggerConditions": { "age": { "min": 35, "max": 55 }, "identity": { "required": ["doctor"] } },
+    "content": { "title": "高手", "text": "一位重伤的武林高手前来求医，他身负绝世武功，但仇家众多。" },
+    "choices": [
+      {
+        "id": "treat_hero",
+        "text": "全力救治，不计后果 (侠义 +20, 人脉 +20)",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 20, "operator": "add" },
+          { "type": "karma_change", "good": 20, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_hero_treat", "value": true }
+        ]
+      },
+      {
+        "id": "refuse_treat",
+        "text": "拒绝治疗，避免麻烦 (声望 -5)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": -5, "operator": "add" },
+          { "type": "flag_set", "target": "doctor_hero_treat", "value": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "doctor_legacy",
+    "name": "医学传承",
+    "description": "年事已高，你考虑如何传承医术。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": { "min": 55, "max": 75 },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["doctor", "identity", "elderly"],
+    "triggers": [{ "type": "age_reach", "value": 55 }],
+    "triggerConditions": { "age": { "min": 55, "max": 75 }, "identity": { "required": ["doctor"] } },
+    "content": { "title": "传承", "text": "年事已高，你考虑如何将毕生医术传承下去。" },
+    "choices": [
+      {
+        "id": "teach_many",
+        "text": "广收门徒，传授医术 (声望 +25, 人脉 +25)",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 25, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 25, "operator": "add" },
+          { "type": "karma_change", "good": 25, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_legacy", "value": true }
+        ]
+      },
+      {
+        "id": "write_book",
+        "text": "著书立说，流传后世 (学识 +25, 声望 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 25, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "karma_change", "good": 15, "evil": 0 },
+          { "type": "flag_set", "target": "doctor_legacy", "value": true }
+        ]
+      },
+      {
+        "id": "family_inherit",
+        "text": "传给子女，家传医术 (学识 +15)",
+        "effects": [
+          { "type": "stat_modify", "target": "comprehension", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "doctor_legacy", "value": true }
+        ]
+      }
+    ]
+  }
+]

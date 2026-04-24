@@ -1,0 +1,602 @@
+[
+  {
+    "id": "money_auction_event",
+    "version": "1.0",
+    "category": "money",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 500"}
+    ],
+    "content": {
+      "title": "武林拍卖会",
+      "text": "三年一度的武林拍卖会即将举行，据说有绝世秘籍和神兵利器拍卖。只有身家丰厚者才能入场。",
+      "description": "参加拍卖会"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "竞拍武林秘籍（金钱 -600，武力 +28）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 600"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -600},
+          {"type": "stat_modify", "stat": "martialPower", "value": 28}
+        ]
+      },
+      {
+        "text": "竞拍神兵利器（金钱 -400，武力 +18）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 400"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -400},
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 12}
+        ]
+      },
+      {
+        "text": "竞拍灵丹妙药（金钱 -250，体质 +12）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 250"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -250},
+          {"type": "stat_modify", "stat": "constitution", "value": 12}
+        ]
+      },
+      {
+        "text": "只看不买",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "money_black_market",
+    "version": "1.0",
+    "category": "money",
+    "priority": 82,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 1000"}
+    ],
+    "content": {
+      "title": "地下黑市",
+      "text": "有人悄悄告诉你，城中有个地下黑市，只接待有钱人。那里有各种见不得光的宝物和秘密。",
+      "description": "进入黑市"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买禁术秘籍（金钱 -800，武力 +32，侠义 -15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "martialPower", "value": 32},
+          {"type": "stat_modify", "stat": "chivalry", "value": -15}
+        ]
+      },
+      {
+        "text": "购买毒药暗器（金钱 -300，武力 +12）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "martialPower", "value": 12}
+        ]
+      },
+      {
+        "text": "购买情报（金钱 -200，声望 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      },
+      {
+        "text": "离开",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "money_medical_heal",
+    "version": "1.0",
+    "category": "money",
+    "priority": 78,
+    "weight": 70,
+    "ageRange": {"min": 20, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "身受重伤",
+      "text": "在一次战斗中你身受重伤，需要立即治疗。医馆大夫表示，治疗效果取决于你愿意花多少钱。",
+      "description": "治疗伤势"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "名贵药材全面调理（金钱 -150，全属性 +5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 150"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "constitution", "value": 5}
+        ]
+      },
+      {
+        "text": "普通治疗（金钱 -50，恢复健康）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "health", "value": 50},
+          {"type": "stat_modify", "stat": "constitution", "value": 3}
+        ]
+      },
+      {
+        "text": "硬扛（健康 -30，体质 -5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "health", "value": -30},
+          {"type": "stat_modify", "stat": "constitution", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_martial_training",
+    "version": "1.0",
+    "category": "money",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武馆训练",
+      "text": "城中武馆提供多种训练服务，价格不同，效果也不同。",
+      "description": "付费训练"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "高级训练（金钱 -200，武力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10}
+        ]
+      },
+      {
+        "text": "中级训练（金钱 -80，武力 +8）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -80},
+          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+        ]
+      },
+      {
+        "text": "基础训练（金钱 -20，武力 +3）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 20"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -20},
+          {"type": "stat_modify", "stat": "martialPower", "value": 3}
+        ]
+      },
+      {
+        "text": "免费练习",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 1}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_reputation_banquet",
+    "version": "1.0",
+    "category": "money",
+    "priority": 72,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "建立名声",
+      "text": "你想在江湖上建立名声，请客吃饭是个好方法。",
+      "description": "宴请宾客"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "大摆宴席（金钱 -300，声望 +35）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      },
+      {
+        "text": "中等宴席（金钱 -100，声望 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      },
+      {
+        "text": "小聚亲友（金钱 -30，声望 +5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_bandit_bribe",
+    "version": "1.0",
+    "category": "money",
+    "priority": 70,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "山贼拦路",
+      "text": "此山是我开，此树是我栽！要想从此过，留下买路财！一伙山贼拦住了你的去路。",
+      "description": "应对山贼"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "破财消灾（金钱 -100）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      },
+      {
+        "text": "武力解决（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "money", "value": 50}
+        ]
+      },
+      {
+        "text": "逃跑",
+        "effects": [
+          {"type": "stat_modify", "stat": "qinggong", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_secret_manual",
+    "version": "1.0",
+    "category": "money",
+    "priority": 80,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "神秘商人",
+      "text": "一个神秘商人拦住你，说他手上有绝世秘籍，只卖给有缘人。",
+      "description": "购买秘籍"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买绝世秘籍（金钱 -500，武力 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "martialPower", "value": 25}
+        ]
+      },
+      {
+        "text": "购买普通秘籍（金钱 -150，武力 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 150"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      },
+      {
+        "text": "太贵了，离开",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "money_intelligence_tea",
+    "version": "1.0",
+    "category": "money",
+    "priority": 68,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "茶馆情报",
+      "text": "茶馆里有人低声贩卖江湖情报，据说都是内部消息。",
+      "description": "购买情报"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买高级情报（金钱 -100，获得秘境线索）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "flag_set", "flag": "secret_cave_hint", "value": true}
+        ]
+      },
+      {
+        "text": "购买普通情报（金钱 -30，声望 +5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      },
+      {
+        "text": "只听免费消息",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "money_donation_sect",
+    "version": "1.0",
+    "category": "money",
+    "priority": 75,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "门派募捐",
+      "text": "某正道门派资金紧张，掌门亲自下山募捐。这是拉近关系的好机会。",
+      "description": "门派捐赠"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "大额捐赠（金钱 -500，声望 +40，侠义 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 40},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15}
+        ]
+      },
+      {
+        "text": "小额捐赠（金钱 -100，声望 +10，侠义 +5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "不捐",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "money_weapon_upgrade",
+    "version": "1.0",
+    "category": "money",
+    "priority": 72,
+    "weight": 60,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武器升级",
+      "text": "铁匠铺大师傅表示，可以为你升级武器，但需要上好的材料和工钱。",
+      "description": "升级武器"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "玄铁升级（金钱 -400，武力 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 400"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -400},
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 15}
+        ]
+      },
+      {
+        "text": "精钢升级（金钱 -150，武力 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 150"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      },
+      {
+        "text": "普通打磨（金钱 -30，武力 +3）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "martialPower", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_rescue_loved_one",
+    "version": "1.0",
+    "category": "money",
+    "priority": 85,
+    "weight": 50,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "赎人",
+      "text": "你的亲友被绑匪绑架，要求你带赎金去交换。",
+      "description": "赎人事件"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "支付赎金（金钱 -300，救回亲友）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      },
+      {
+        "text": "武力营救（需武力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "见死不救（侠义 -30，声望 -20）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -30},
+          {"type": "stat_modify", "stat": "reputation", "value": -20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "money_investment_shop",
+    "version": "1.0",
+    "category": "money",
+    "priority": 78,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.07}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 2000"}
+    ],
+    "content": {
+      "title": "投资机会",
+      "text": "有人邀请你合伙开店，说是稳赚不赔的买卖。",
+      "description": "投资店铺"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "投资 2000 两（获得每月收益）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 2000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -2000},
+          {"type": "flag_set", "flag": "has_shop_investment", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝投资",
+        "effects": []
+      }
+    ]
+  }
+]

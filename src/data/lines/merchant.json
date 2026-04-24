@@ -1,0 +1,569 @@
+[
+  {
+    "id": "merchant_talent_discovery",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {"min": 8, "max": 16},
+    "triggers": [
+      {"type": "age_reach", "value": 8}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "charisma >= 12 || money >= 50"}
+    ],
+    "content": {
+      "title": "经商天赋",
+      "text": "你从小就对金钱敏感，善于讨价还价。一次偶然的机会，你低价买入高价卖出，赚取了人生第一桶金，展现出惊人的经商天赋。",
+      "description": "发现经商天赋"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "学习经商",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "stat_modify", "stat": "money", "value": 20},
+          {"type": "flag_set", "flag": "merchant_talent", "value": true}
+        ]
+      },
+      {
+        "text": "专心读书",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+        ]
+      }
+    ],
+    "metadata": {
+      "backgroundWeights": {
+        "scholar": 0.3,
+        "merchant": 1.0,
+        "wuxia": 0.2,
+        "frontier": 0.4
+      },
+      "tags": ["商业", "天赋", "主线"]
+    }
+  },
+  {
+    "id": "merchant_first_shop",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 95,
+    "weight": 90,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_talent == true && money >= 50"}
+    ],
+    "content": {
+      "title": "开设店铺",
+      "text": "你用积攒的财富在镇上开设了一家店铺。这是你商业帝国的起点，需要谨慎经营。",
+      "description": "开设第一家店铺"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "开设杂货铺（稳健）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      },
+      {
+        "text": "开设武器铺（高风险）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "flag_set", "flag": "merchant_shop_weapon", "value": true},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      },
+      {
+        "text": "开设药铺（中庸）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -40},
+          {"type": "flag_set", "flag": "merchant_shop_herb", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_shop_failure",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 94,
+    "weight": 40,
+    "ageRange": {"min": 17, "max": 24},
+    "triggers": [
+      {"type": "age_reach", "value": 17},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && !flags.merchant_shop_success"}
+    ],
+    "content": {
+      "title": "经营困境",
+      "text": "店铺开业后生意惨淡，或者遭遇竞争对手打压，你面临亏损的困境。",
+      "description": "经营失败"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "追加投资（需金钱≥50，扭转局面）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
+        ]
+      },
+      {
+        "text": "改变经营策略（悟性 +5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "charisma", "value": 3},
+          {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
+        ]
+      },
+      {
+        "text": "关门大吉（金钱 -20，声望 -5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -20},
+          {"type": "stat_modify", "stat": "reputation", "value": -5},
+          {"type": "flag_set", "flag": "merchant_shop_failed", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_caravan_guard",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 18, "max": 26},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true"}
+    ],
+    "content": {
+      "title": "商队护送",
+      "text": "你的生意越做越大，需要组织商队到外地贩运货物。但路途遥远，常有山贼出没。",
+      "description": "商队护送"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "雇佣精锐保镖团队（需金钱≥150，安全率最高）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 150"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "money", "value": 100},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
+        ]
+      },
+      {
+        "text": "亲自护送（需武力≥30）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 60},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
+        ]
+      },
+      {
+        "text": "雇佣普通保镖",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_market_monopoly",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 20, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_caravan_success == true && money >= 150"}
+    ],
+    "content": {
+      "title": "垄断市场",
+      "text": "你的商业网络已经形成规模，可以通过控制货源来垄断市场。这是快速积累财富的机会，但会招致同行怨恨。",
+      "description": "垄断市场"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "垄断经营（金钱 +80，声望 -10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 80},
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "flag_set", "flag": "merchant_monopoly", "value": true}
+        ]
+      },
+      {
+        "text": "公平竞争",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 40},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "merchant_fair_trade", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_official_connection",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 22, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_monopoly == true || flags.merchant_fair_trade == true"}
+    ],
+    "content": {
+      "title": "官商勾结",
+      "text": "当地官员注意到你的财富，暗示你可以'孝敬'一些银子换取商业便利。这是官商结合的契机。",
+      "description": "官商关系"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "重孝换取特权（需金钱≥500，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "money", "value": 150},
+          {"type": "flag_set", "flag": "merchant_official_friend", "value": true}
+        ]
+      },
+      {
+        "text": "适度贿赂（金钱 -30，声望 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "merchant_official_friend", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝，保持清白",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_intelligence_network",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 82,
+    "weight": 70,
+    "ageRange": {"min": 24, "max": 34},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_official_friend == true"}
+    ],
+    "content": {
+      "title": "情报买卖",
+      "text": "你利用商业网络收集各地情报，发现情报本身也是商品。你开始涉足情报买卖生意。",
+      "description": "情报交易"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 60},
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "stat_modify", "stat": "reputation", "value": -5},
+      {"type": "flag_set", "flag": "merchant_intelligence", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_chamber_of_commerce",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 80,
+    "weight": 65,
+    "ageRange": {"min": 26, "max": 36},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_intelligence == true && money >= 300"}
+    ],
+    "content": {
+      "title": "商会会长",
+      "text": "你的商业成就得到同行认可，被推举为商会会长。你现在可以影响整个地区的商业政策。",
+      "description": "成为商会会长"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 30},
+      {"type": "stat_modify", "stat": "charisma", "value": 12},
+      {"type": "stat_modify", "stat": "money", "value": 50},
+      {"type": "flag_set", "flag": "merchant_chamber_head", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_wealth_peak",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 28, "max": 38},
+    "triggers": [
+      {"type": "age_reach", "value": 28}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_chamber_head == true"}
+    ],
+    "content": {
+      "title": "富可敌国",
+      "text": "你的财富积累到惊人的程度，可以说富可敌国。你的商业帝国遍布各地，影响力无处不在。",
+      "description": "财富巅峰"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 200},
+      {"type": "stat_modify", "stat": "reputation", "value": 25},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "flag_set", "flag": "merchant_wealthy", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_sect_investment",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 75,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_wealthy == true"}
+    ],
+    "content": {
+      "title": "投资门派",
+      "text": "你意识到财富需要武力保护，开始投资武林门派。这既能获得保护，也能扩大影响力。",
+      "description": "投资门派"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "巨额投资正道（需金钱≥500，侠义 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "flag_set", "flag": "merchant_invest_good", "value": true}
+        ]
+      },
+      {
+        "text": "投资正道门派（侠义 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "merchant_invest_good", "value": true}
+        ]
+      },
+      {
+        "text": "投资魔教（武力 +15）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "flag_set", "flag": "merchant_invest_evil", "value": true}
+        ]
+      },
+      {
+        "text": "多方下注",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "flag_set", "flag": "merchant_invest_both", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_business_empire",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 72,
+    "weight": 50,
+    "ageRange": {"min": 32, "max": 42},
+    "triggers": [
+      {"type": "age_reach", "value": 32}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_invest_good == true || flags.merchant_invest_evil == true || flags.merchant_invest_both == true"}
+    ],
+    "content": {
+      "title": "商业帝国",
+      "text": "你的商业帝国已经成型，各行各业都有你的产业。你的财富和影响力达到顶峰。",
+      "description": "商业帝国"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "money", "value": 150},
+      {"type": "stat_modify", "stat": "reputation", "value": 20},
+      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "flag_set", "flag": "merchant_empire", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_ending_tycoon",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 95,
+    "weight": 100,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_empire == true && money >= 500"}
+    ],
+    "content": {
+      "title": "首富",
+      "text": "你成为天下首富，商业帝国传承数代。你的名字成为财富的代名词，后世商人皆以你为榜样。",
+      "description": "成为首富"
+    },
+    "eventType": "ending",
+    "endingType": "merchant_tycoon",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_merchant_tycoon", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_ending_royal",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 92,
+    "weight": 90,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_official_friend == true && reputation >= 80"}
+    ],
+    "content": {
+      "title": "皇商",
+      "text": "你被皇帝册封为皇商，专门为皇室采购物资。你的家族成为御用商人，享受特权。",
+      "description": "成为皇商"
+    },
+    "eventType": "ending",
+    "endingType": "merchant_royal",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_merchant_royal", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_ending_chamber",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_chamber_head == true"}
+    ],
+    "content": {
+      "title": "商会盟主",
+      "text": "你建立的商会成为天下最大的商业组织，控制着整个江湖的经济命脉。",
+      "description": "商会盟主"
+    },
+    "eventType": "ending",
+    "endingType": "merchant_chamber",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_merchant_chamber", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_ending_bankrupt",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 85,
+    "weight": 70,
+    "ageRange": {"min": 65, "max": 75},
+    "triggers": [
+      {"type": "age_reach", "value": 65}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_talent == true && money <= 50"}
+    ],
+    "content": {
+      "title": "破产",
+      "text": "由于经营不善或遭遇变故，你的商业帝国崩塌，最终破产。晚年生活凄惨，令人唏嘘。",
+      "description": "破产"
+    },
+    "eventType": "ending",
+    "endingType": "merchant_bankrupt",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_merchant_bankrupt", "value": true}
+    ]
+  },
+  {
+    "id": "merchant_ending_hidden_wealth",
+    "version": "1.0",
+    "category": "merchant",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.merchant_fair_trade == true && chivalry >= 50"}
+    ],
+    "content": {
+      "title": "隐富",
+      "text": "你虽然富甲一方，但为人低调，乐善好施。百姓称你为'活财神'，你的善举流传民间。",
+      "description": "隐富"
+    },
+    "eventType": "ending",
+    "endingType": "merchant_hidden",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_merchant_hidden", "value": true}
+    ]
+  }
+]

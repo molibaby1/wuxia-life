@@ -1,0 +1,774 @@
+[
+  {
+    "id": "buddhist_fate_encounter",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 100,
+    "weight": 100,
+    "ageRange": {"min": 5, "max": 16},
+    "triggers": [
+      {"type": "age_reach", "value": 5},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 20 && comprehension >= 15"}
+    ],
+    "content": {
+      "title": "佛缘初现",
+      "text": "你在山中游玩时，偶遇一位老僧在树下打坐。老僧见你眉清目秀，慧根不凡，便与你谈论佛法。你竟能理解其中深意，老僧赞叹不已，说你有佛缘。",
+      "description": "偶遇高僧，展现佛缘"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "向老僧请教佛法",
+        "effects": [
+          {"type": "stat_modify", "stat": "internalSkill", "value": 3},
+          {"type": "stat_modify", "stat": "comprehension", "value": 2},
+          {"type": "stat_modify", "stat": "chivalry", "value": 2},
+          {"type": "flag_set", "flag": "buddhist_fate", "value": true}
+        ]
+      },
+      {
+        "text": "礼貌告别离开",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 1}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_ordination",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 90,
+    "weight": 100,
+    "ageRange": {"min": 14, "max": 20},
+    "triggers": [
+      {"type": "age_reach", "value": 14}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_fate == true"}
+    ],
+    "content": {
+      "title": "剃度仪式",
+      "text": "少林寺方丈亲自前来，邀请你入寺修行。方丈表示，若你愿意正式出家，将亲自传授你少林绝学。这是你人生的重要抉择。",
+      "description": "是否正式出家为僧"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "正式出家，拜入少林",
+        "effects": [
+          {"type": "flag_set", "flag": "buddhist_monk", "value": true},
+          {"type": "flag_set", "flag": "sect_shaolin", "value": true},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 5},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "charisma", "value": -3}
+        ]
+      },
+      {
+        "text": "拒绝出家，保持俗家身份",
+        "effects": [
+          {"type": "flag_set", "flag": "buddhist_layman", "value": true},
+          {"type": "stat_modify", "stat": "chivalry", "value": 2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_sutra_chanting",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 80,
+    "weight": 80,
+    "ageRange": {"min": 15, "max": 25},
+    "triggers": [
+      {"type": "age_reach", "value": 15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_monk == true || flags.buddhist_layman == true"}
+    ],
+    "content": {
+      "title": "诵经修行",
+      "text": "每日清晨，你都要在藏经阁诵读佛经。梵音缭绕中，你逐渐领悟到佛法的博大精深，内力也在不知不觉中增长。",
+      "description": "日常诵经，提升内功"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 4},
+      {"type": "stat_modify", "stat": "comprehension", "value": 3},
+      {"type": "flag_set", "flag": "buddhist_cultivation", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_zen_martial",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 85,
+    "weight": 90,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_cultivation == true"}
+    ],
+    "content": {
+      "title": "禅武合一",
+      "text": "方丈教导你：'禅武合一，乃我少林精髓。'你现在需要选择自己的修行方向，是偏重禅宗佛法，还是偏重少林武学？",
+      "description": "选择修行方向"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "专修禅宗佛法",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 6},
+          {"type": "flag_set", "flag": "buddhist_zen_path", "value": true}
+        ]
+      },
+      {
+        "text": "专修少林武学",
+        "effects": [
+          {"type": "stat_modify", "stat": "externalSkill", "value": 8},
+          {"type": "stat_modify", "stat": "martialPower", "value": 6},
+          {"type": "flag_set", "flag": "buddhist_martial_path", "value": true}
+        ]
+      },
+      {
+        "text": "禅武双修",
+        "effects": [
+          {"type": "stat_modify", "stat": "internalSkill", "value": 4},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 4},
+          {"type": "stat_modify", "stat": "comprehension", "value": 4},
+          {"type": "flag_set", "flag": "buddhist_dual_path", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_trial_dharma",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 88,
+    "weight": 85,
+    "ageRange": {"min": 17, "max": 24},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_monk == true"}
+    ],
+    "content": {
+      "title": "佛法考验",
+      "text": "藏经阁长老要考验你的佛法修为。你需要通过三层考验：背诵金刚经、解答佛理难题、禅定一个时辰。",
+      "description": "通过佛法考验"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "全力应对考验（需悟性≥25）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 25"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
+          {"type": "flag_set", "flag": "buddhist_trial_passed", "value": true},
+          {"type": "flag_set", "flag": "elder_approval", "value": true}
+        ]
+      },
+      {
+        "text": "尽力而为",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 2},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_library_study",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 75,
+    "weight": 70,
+    "ageRange": {"min": 18, "max": 28},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_trial_passed == true"}
+    ],
+    "content": {
+      "title": "藏经阁阅经",
+      "text": "长老允许你进入藏经阁深层，阅读珍贵的佛经秘籍。在这里，你发现了失传已久的《易筋经》残卷。",
+      "description": "阅读佛经，获得秘籍"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+      {"type": "flag_set", "flag": "buddhist_yijinjing_fragment", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_wooden_alley",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 82,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 26},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_martial_path == true || flags.buddhist_dual_path == true"}
+    ],
+    "content": {
+      "title": "木人巷试炼",
+      "text": "少林木人巷是考验武学修为的圣地。十八个木人机关人偶，每一个都精通一门少林武学。你需要闯过木人巷，证明自己的实力。",
+      "description": "闯木人巷，提升武力"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "独闯木人巷（需武力≥40）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 40"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 8},
+          {"type": "stat_modify", "stat": "constitution", "value": 5},
+          {"type": "flag_set", "flag": "buddhist_wooden_alley_passed", "value": true}
+        ]
+      },
+      {
+        "text": "暂时放弃，继续修炼",
+        "effects": [
+          {"type": "stat_modify", "stat": "externalSkill", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_begging",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 70,
+    "weight": 60,
+    "ageRange": {"min": 19, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 19}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_monk == true"}
+    ],
+    "content": {
+      "title": "下山化缘",
+      "text": "按照寺规，你需要下山化缘，体验民间疾苦。在化缘途中，你遇到了各种各样的人，听到了许多江湖传闻。",
+      "description": "下山化缘，增长见识"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受信徒丰厚布施（金钱 +200，声望 -5）",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 200},
+          {"type": "stat_modify", "stat": "charisma", "value": 2},
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      },
+      {
+        "text": "只接受简单斋饭（侠义 +8，声望 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 4}
+        ]
+      },
+      {
+        "text": "将化缘所得施舍给穷人（金钱 -100，侠义 +15，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_exorcise_soul",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 72,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 20}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_zen_path == true || flags.buddhist_dual_path == true"}
+    ],
+    "content": {
+      "title": "超度亡魂",
+      "text": "附近村庄发生命案，死者冤魂不散。村民请你前去超度。你需诵念往生咒，化解亡者的怨气。",
+      "description": "超度亡魂，积累功德"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "隆重做法事（需金钱≥300，侠义 +15，声望 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "internalSkill >= 30 && money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
+          {"type": "flag_set", "flag": "buddhist_merit", "value": true}
+        ]
+      },
+      {
+        "text": "简单超度（需内功≥30，侠义 +8，声望 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "internalSkill >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 3},
+          {"type": "flag_set", "flag": "buddhist_merit", "value": true}
+        ]
+      },
+      {
+        "text": "无能为力",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": -2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_debate",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 68,
+    "weight": 60,
+    "ageRange": {"min": 21, "max": 35},
+    "triggers": [
+      {"type": "age_reach", "value": 21}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_trial_passed == true"}
+    ],
+    "content": {
+      "title": "佛法辩论",
+      "text": "少林寺举办佛法大会，各地高僧齐聚。你被选为代表，与其他寺庙的僧人辩论佛法。这是扬名立万的好机会。",
+      "description": "参与佛法辩论"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "盛装出席并宴请宾客（需金钱≥500，声望 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 35 && money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "buddhist_debate_winner", "value": true}
+        ]
+      },
+      {
+        "text": "积极参与（需悟性≥35）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 35"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 5},
+          {"type": "flag_set", "flag": "buddhist_debate_winner", "value": true}
+        ]
+      },
+      {
+        "text": "旁观学习",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 3}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_seclusion",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 78,
+    "weight": 70,
+    "ageRange": {"min": 22, "max": 38},
+    "triggers": [
+      {"type": "age_reach", "value": 22}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_cultivation == true"}
+    ],
+    "content": {
+      "title": "闭关禅修",
+      "text": "你决定闭关禅修，突破自己的瓶颈。在静室中打坐七七四十九天，你进入了一种玄妙的境界。",
+      "description": "闭关突破修为"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+      {"type": "stat_modify", "stat": "comprehension", "value": 8},
+      {"type": "stat_modify", "stat": "constitution", "value": 5},
+      {"type": "flag_set", "flag": "buddhist_seclusion_done", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_defend_temple",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 23, "max": 40},
+    "triggers": [
+      {"type": "age_reach", "value": 23}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_wooden_alley_passed == true"}
+    ],
+    "content": {
+      "title": "护寺除魔",
+      "text": "魔教中人前来少林寺挑衅，企图抢夺少林秘籍。作为少林弟子，你必须挺身而出，保卫寺庙。",
+      "description": "保卫少林寺"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "迎战魔教（需武力≥60）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 60"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "flag_set", "flag": "buddhist_temple_defender", "value": true}
+        ]
+      },
+      {
+        "text": "协助防守",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 3},
+          {"type": "stat_modify", "stat": "chivalry", "value": 2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_enlightenment",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 76,
+    "weight": 65,
+    "ageRange": {"min": 24, "max": 42},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_seclusion_done == true"}
+    ],
+    "content": {
+      "title": "佛法感悟",
+      "text": "在一次诵经中，你突然顿悟了佛法的真谛。原来一切皆有定数，一切皆空。你的境界再次提升。",
+      "description": "顿悟佛法，突破瓶颈"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "internalSkill", "value": 8},
+      {"type": "flag_set", "flag": "buddhist_enlightenment", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_master_recognition",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 80,
+    "weight": 70,
+    "ageRange": {"min": 25, "max": 45},
+    "triggers": [
+      {"type": "age_reach", "value": 25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_enlightenment == true"}
+    ],
+    "content": {
+      "title": "高僧认可",
+      "text": "少林寺方丈公开认可你的佛法修为，称你为'当代高僧'。你的名声传遍江湖，各地寺庙都邀请你前去讲法。",
+      "description": "获得高僧认可"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 30},
+      {"type": "stat_modify", "stat": "charisma", "value": 8},
+      {"type": "flag_set", "flag": "buddhist_master", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_preach_dharma",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 72,
+    "weight": 60,
+    "ageRange": {"min": 26, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_master == true"}
+    ],
+    "content": {
+      "title": "开坛讲法",
+      "text": "你在少林寺开坛讲法，前来听讲的僧俗弟子达数百人。你的讲解深入浅出，听众无不受益。",
+      "description": "开坛讲法，传播佛法"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 25},
+      {"type": "stat_modify", "stat": "charisma", "value": 6},
+      {"type": "stat_modify", "stat": "chivalry", "value": 5}
+    ]
+  },
+  {
+    "id": "buddhist_treasure",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 75,
+    "weight": 50,
+    "ageRange": {"min": 27, "max": 48},
+    "triggers": [
+      {"type": "age_reach", "value": 27}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_master == true && flags.buddhist_yijinjing_fragment == true"}
+    ],
+    "content": {
+      "title": "佛门至宝",
+      "text": "方丈将少林寺的镇寺之宝——完整的《易筋经》传授给你。这是只有历代方丈才能修习的无上秘籍。",
+      "description": "获得易筋经"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 15},
+      {"type": "stat_modify", "stat": "constitution", "value": 10},
+      {"type": "stat_modify", "stat": "martialPower", "value": 12},
+      {"type": "flag_set", "flag": "buddhist_yijinjing_complete", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_demon_subdue",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 28, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 28}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_temple_defender == true"}
+    ],
+    "content": {
+      "title": "降妖伏魔",
+      "text": "江湖上出现了一个杀人如麻的魔头，无人能制。你决定出手，以佛法感化或以武力降服。",
+      "description": "降服魔头"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "以佛法感化（需悟性≥50，侠义≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 50 && chivalry >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 40},
+          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "flag_set", "flag": "buddhist_demon_converted", "value": true}
+        ]
+      },
+      {
+        "text": "以武力降服（需武力≥100）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 35},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "flag_set", "flag": "buddhist_demon_defeated", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buddhist_perfection",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 78,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_yijinjing_complete == true"}
+    ],
+    "content": {
+      "title": "佛法大成",
+      "text": "经过多年修行，你的佛法和武学都已达到大成境界。你已领悟了'无我相、无人相、无众生相、无寿者相'的真谛。",
+      "description": "佛法大成"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "internalSkill", "value": 12},
+      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "stat_modify", "stat": "martialPower", "value": 10},
+      {"type": "flag_set", "flag": "buddhist_perfection", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_ending_high_monk",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 90,
+    "weight": 100,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_perfection == true && martialPower >= 150 && comprehension >= 80"}
+    ],
+    "content": {
+      "title": "一代高僧",
+      "text": "你佛法精深，武学盖世，被天下人尊为'活佛'。你圆寂之日，天降异象，百鸟朝凤。你的事迹被后人传颂，成为一代传奇。",
+      "description": "成就一代高僧"
+    },
+    "eventType": "ending",
+    "endingType": "buddhist_high_monk",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_buddhist_high_monk", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_ending_martial_master",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 88,
+    "weight": 90,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_martial_path == true && martialPower >= 180"}
+    ],
+    "content": {
+      "title": "武僧宗师",
+      "text": "你以武入道，将少林武学发扬光大。你创立的武僧院培养了无数英才，少林武学因你而达到巅峰。",
+      "description": "成为武僧宗师"
+    },
+    "eventType": "ending",
+    "endingType": "buddhist_martial_master",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_buddhist_martial_master", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_ending_dharma_master",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 86,
+    "weight": 85,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_zen_path == true && comprehension >= 90"}
+    ],
+    "content": {
+      "title": "佛法大师",
+      "text": "你一生钻研佛法，著书立说。你的佛学著作被后世奉为经典，你被尊为'当代玄奘'。",
+      "description": "成为佛法大师"
+    },
+    "eventType": "ending",
+    "endingType": "buddhist_dharma_master",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_buddhist_dharma_master", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_ending_layman",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 84,
+    "weight": 80,
+    "ageRange": {"min": 70, "max": 80},
+    "triggers": [
+      {"type": "age_reach", "value": 70}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_layman == true"}
+    ],
+    "content": {
+      "title": "俗家弟子",
+      "text": "你虽未正式出家，但一生奉行佛法，行善积德。你在江湖上行侠仗义，被人称为'活菩萨'。",
+      "description": "俗家弟子路线"
+    },
+    "eventType": "ending",
+    "endingType": "buddhist_layman",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_buddhist_layman", "value": true}
+    ]
+  },
+  {
+    "id": "buddhist_ending_bodhisattva",
+    "version": "1.0",
+    "category": "buddhist",
+    "priority": 95,
+    "weight": 50,
+    "ageRange": {"min": 75, "max": 85},
+    "triggers": [
+      {"type": "age_reach", "value": 75}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.buddhist_perfection == true && chivalry >= 100 && reputation >= 200"}
+    ],
+    "content": {
+      "title": "肉身菩萨",
+      "text": "你的修为已超凡入圣，达到'肉身菩萨'的境界。你圆寂后肉身不腐，被供奉在寺庙中，千百年后仍有人前来朝拜。",
+      "description": "成就肉身菩萨（最高境界）"
+    },
+    "eventType": "ending",
+    "endingType": "buddhist_bodhisattva",
+    "autoEffects": [
+      {"type": "flag_set", "flag": "ending_buddhist_bodhisattva", "value": true}
+    ]
+  }
+]

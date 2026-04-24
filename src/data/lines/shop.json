@@ -1,0 +1,604 @@
+[
+  {
+    "id": "shop_first_visit",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 80,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 18},
+      {"type": "random", "value": 0.2}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "初访杂货铺",
+      "text": "你来到镇上的杂货铺，这里出售各种江湖人士需要的物品。老板看你面生，热情地招呼你。",
+      "description": "第一次逛商店"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买基础装备（金钱 -50，武力 +5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      },
+      {
+        "text": "购买疗伤药（金钱 -30，健康 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "health", "value": 20}
+        ]
+      },
+      {
+        "text": "随便看看",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "shop_chivalry_discount_high",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 70"}
+    ],
+    "content": {
+      "title": "侠义之士的优待",
+      "text": "商店老板听闻你的侠义事迹，对你敬佩不已。'大侠光临小店，所有商品一律八折优惠！'老板热情地说道。",
+      "description": "侠义值高获得折扣"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买精品装备（原价 200，侠义折扣价 160，武力 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 160"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -160},
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 12}
+        ]
+      },
+      {
+        "text": "购买灵丹妙药（原价 100，侠义折扣价 80，内力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -80},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 15}
+        ]
+      },
+      {
+        "text": "心领了，不需要",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_chivalry_premium_low",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 85,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry <= -50"}
+    ],
+    "content": {
+      "title": "恶名的代价",
+      "text": "商店老板认出了你，眼神中带着恐惧。'本店...本店小本经营，商品价格比平常贵三成，还请见谅。'老板颤抖着说道。",
+      "description": "侠义值低被加价"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "强买强卖（金钱 -260，武力 +20，侠义 -5）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 260"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -260},
+          {"type": "stat_modify", "stat": "martialPower", "value": 20},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5},
+          {"type": "stat_modify", "stat": "reputation", "value": -10}
+        ]
+      },
+      {
+        "text": "忍气吞声购买（金钱 -260，内力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 260"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -260},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 15}
+        ]
+      },
+      {
+        "text": "转身离开",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "shop_reputation_vip",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 82,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.12}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 400"}
+    ],
+    "content": {
+      "title": " VIP 待遇",
+      "text": "你是江湖上有头有脸的人物，各大商铺都把你奉为 VIP 客户。老板亲自接待，并拿出珍藏品。",
+      "description": "声望高享受 VIP 待遇"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买镇店之宝（金钱 -800，全属性 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "constitution", "value": 10}
+        ]
+      },
+      {
+        "text": "购买精品（金钱 -300，武力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15}
+        ]
+      },
+      {
+        "text": "普通购物",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_weapon_shop",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 78,
+    "weight": 70,
+    "ageRange": {"min": 20, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.18}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "武器铺",
+      "text": "你走进一家武器铺，琳琅满目的兵器挂在墙上。铁匠师傅正在打铁，火星四溅。",
+      "description": "购买武器"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买宝剑（金钱 -300，武力 +18）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "martialPower", "value": 18},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 10}
+        ]
+      },
+      {
+        "text": "购买长刀（金钱 -150，武力 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 150"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -150},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      },
+      {
+        "text": "购买匕首（金钱 -50，武力 +4）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -50},
+          {"type": "stat_modify", "stat": "martialPower", "value": 4}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_herb_shop",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 76,
+    "weight": 65,
+    "ageRange": {"min": 20, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 20},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "药铺",
+      "text": "药铺里弥漫着草药的清香。坐堂大夫正在给病人把脉，药柜上摆满了各种丹药。",
+      "description": "购买药品"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买大还丹（金钱 -200，内力 +20，健康 +30）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 20},
+          {"type": "stat_modify", "stat": "health", "value": 30}
+        ]
+      },
+      {
+        "text": "购买金创药（金钱 -80，健康 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -80},
+          {"type": "stat_modify", "stat": "health", "value": 25}
+        ]
+      },
+      {
+        "text": "购买普通草药（金钱 -30，健康 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 30"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -30},
+          {"type": "stat_modify", "stat": "health", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_black_market_entry",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 80,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry <= -30 || reputation <= -100"}
+    ],
+    "content": {
+      "title": "黑市入口",
+      "text": "有人悄悄告诉你，城中有个地下黑市，出售各种见不得光的宝物。只有'特殊人士'才能进入。",
+      "description": "进入黑市"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "进入黑市",
+        "effects": [
+          {"type": "flag_set", "flag": "black_market_access", "value": true}
+        ]
+      },
+      {
+        "text": "离开，不感兴趣",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "shop_black_market_trade",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "expression", "expression": "flags.black_market_access == true"}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 300"}
+    ],
+    "content": {
+      "title": "黑市交易",
+      "text": "黑市里灯火昏暗，买卖双方都戴着面具。这里出售各种禁术、毒药和来路不明的宝物。",
+      "description": "黑市购物"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买禁术秘籍（金钱 -500，武力 +30，侠义 -20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "martialPower", "value": 30},
+          {"type": "stat_modify", "stat": "chivalry", "value": -20}
+        ]
+      },
+      {
+        "text": "购买剧毒（金钱 -200，武力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      },
+      {
+        "text": "购买情报（金钱 -100，声望 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 100"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_auction_house",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 85,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.08}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "money >= 1000 && reputation >= 200"}
+    ],
+    "content": {
+      "title": "拍卖行",
+      "text": "三年一度的武林拍卖会开始了。来自各地的富豪和高手齐聚一堂，竞拍珍稀宝物。",
+      "description": "参加拍卖会"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "竞拍武林秘籍（金钱 -1000，武力 +40）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "stat_modify", "stat": "martialPower", "value": 40},
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
+        ]
+      },
+      {
+        "text": "竞拍神兵（金钱 -600，武力 +25）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 600"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -600},
+          {"type": "stat_modify", "stat": "martialPower", "value": 25},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 15}
+        ]
+      },
+      {
+        "text": "竞拍灵药（金钱 -400，体质 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 400"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -400},
+          {"type": "stat_modify", "stat": "constitution", "value": 20}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_charisma_bargain",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 75,
+    "weight": 60,
+    "ageRange": {"min": 22, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 22},
+      {"type": "random", "value": 0.15}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "charisma >= 60"}
+    ],
+    "content": {
+      "title": "砍价高手",
+      "text": "你凭借出色的口才和人格魅力，成功说服老板给你打折。'少侠真是能说会道，好吧，给你个优惠价！'",
+      "description": "魅力高可以砍价"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "砍价购买精品（原价 200，砍价后 140，武力 +15）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 140"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -140},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 3}
+        ]
+      },
+      {
+        "text": "砍价购买丹药（原价 100，砍价后 70，内力 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -70},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 2}
+        ]
+      },
+      {
+        "text": "不砍价，直接购买",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -100},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_legendary_merchant",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 88,
+    "weight": 45,
+    "ageRange": {"min": 35, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.06}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "reputation >= 600 && money >= 2000"}
+    ],
+    "content": {
+      "title": "神秘商人",
+      "text": "一位神秘的商人找到你，说他手上有传说中的宝物，只卖给有缘人。这是可遇不可求的机会。",
+      "description": "神秘商人"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "购买绝世秘籍（金钱 -2000，武力 +50，领悟 +10）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 2000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -2000},
+          {"type": "stat_modify", "stat": "martialPower", "value": 50},
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "flag_set", "flag": "has_legendary_manual", "value": true}
+        ]
+      },
+      {
+        "text": "购买神兵利器（金钱 -1500，武力 +35）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1500},
+          {"type": "stat_modify", "stat": "martialPower", "value": 35},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 25}
+        ]
+      },
+      {
+        "text": "购买千年灵芝（金钱 -1000，寿命 +10 年）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "stat_modify", "stat": "constitution", "value": 50},
+          {"type": "stat_modify", "stat": "health", "value": 100}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop_grateful_vendor",
+    "version": "1.0",
+    "category": "shop",
+    "priority": 82,
+    "weight": 55,
+    "ageRange": {"min": 25, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "random", "value": 0.1}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "chivalry >= 80"}
+    ],
+    "content": {
+      "title": "感恩的商人",
+      "text": "一位商人认出你是曾经帮助过他的恩人。'恩人！您曾经救过我的性命，小店的所有商品都免费送给您！'",
+      "description": "侠义值极高获得免费物品"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受好意（免费获得装备，武力 +25）",
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 25},
+          {"type": "stat_modify", "stat": "externalSkill", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+        ]
+      },
+      {
+        "text": "婉拒，坚持付钱（金钱 -200，声望 +20）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -200},
+          {"type": "stat_modify", "stat": "martialPower", "value": 25},
+          {"type": "stat_modify", "stat": "reputation", "value": 20}
+        ]
+      },
+      {
+        "text": "只收下一部分（免费获得药品，健康 +50）",
+        "effects": [
+          {"type": "stat_modify", "stat": "health", "value": 50},
+          {"type": "stat_modify", "stat": "internalSkill", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 3}
+        ]
+      }
+    ]
+  }
+]

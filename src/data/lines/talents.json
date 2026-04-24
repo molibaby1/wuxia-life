@@ -1,0 +1,277 @@
+[
+  {
+    "id": "martial_genius",
+    "name": "武学奇才",
+    "description": "天生就是练武的料，战斗属性成长速度大幅提升",
+    "type": "combat",
+    "rarity": "legendary",
+    "growthBonus": {
+      "martialPower": 0.5,
+      "externalSkill": 0.5,
+      "internalSkill": 0.5,
+      "qinggong": 0.5,
+      "constitution": 0.3
+    },
+    "statCapBonus": {
+      "martialPower": 20,
+      "externalSkill": 20,
+      "internalSkill": 20
+    },
+    "initialBonus": {
+      "martialPower": 10,
+      "externalSkill": 5,
+      "internalSkill": 5
+    }
+  },
+  {
+    "id": "natural_strength",
+    "name": "天生神力",
+    "description": "生来力大无穷，外功成长显著优于常人",
+    "type": "combat",
+    "rarity": "rare",
+    "growthBonus": {
+      "externalSkill": 0.4,
+      "constitution": 0.3,
+      "martialPower": 0.2
+    },
+    "statCapBonus": {
+      "externalSkill": 15,
+      "constitution": 10
+    },
+    "initialBonus": {
+      "externalSkill": 15,
+      "constitution": 10
+    }
+  },
+  {
+    "id": "spiritual_meridians",
+    "name": "经脉通灵",
+    "description": "经脉天生通畅，内功修炼速度远超常人",
+    "type": "combat",
+    "rarity": "rare",
+    "growthBonus": {
+      "internalSkill": 0.4,
+      "martialPower": 0.2,
+      "constitution": 0.1
+    },
+    "statCapBonus": {
+      "internalSkill": 15
+    },
+    "initialBonus": {
+      "internalSkill": 15
+    }
+  },
+  {
+    "id": "light_as_feather",
+    "name": "身轻如燕",
+    "description": "身形轻盈，轻功天赋异禀",
+    "type": "combat",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "qinggong": 0.4,
+      "constitution": 0.1
+    },
+    "statCapBonus": {
+      "qinggong": 15
+    },
+    "initialBonus": {
+      "qinggong": 12
+    }
+  },
+  {
+    "id": "iron_body",
+    "name": "铜皮铁骨",
+    "description": "身体强健，体魄成长大幅增强",
+    "type": "combat",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "constitution": 0.4,
+      "externalSkill": 0.1
+    },
+    "statCapBonus": {
+      "constitution": 15
+    },
+    "initialBonus": {
+      "constitution": 12
+    }
+  },
+  {
+    "id": "balanced_talent",
+    "name": "资质均衡",
+    "description": "各方面资质都不错，成长较为均衡",
+    "type": "combat",
+    "rarity": "common",
+    "growthBonus": {
+      "martialPower": 0.15,
+      "externalSkill": 0.15,
+      "internalSkill": 0.15,
+      "qinggong": 0.15,
+      "constitution": 0.15
+    }
+  },
+  {
+    "id": "photographic_memory",
+    "name": "过目不忘",
+    "description": "记忆力超群，学识和技能学习速度极快",
+    "type": "learning",
+    "rarity": "rare",
+    "growthBonus": {
+      "knowledge": 0.5,
+      "comprehension": 0.3
+    },
+    "statCapBonus": {
+      "knowledge": 20
+    },
+    "initialBonus": {
+      "knowledge": 15,
+      "comprehension": 8
+    }
+  },
+  {
+    "id": "quick_learner",
+    "name": "悟性过人",
+    "description": "领悟能力强，学习武学和知识都很快",
+    "type": "learning",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "comprehension": 0.3,
+      "martialPower": 0.1,
+      "knowledge": 0.1
+    },
+    "initialBonus": {
+      "comprehension": 10
+    }
+  },
+  {
+    "id": "social_butterfly",
+    "name": "八面玲珑",
+    "description": "善于交际，魅力和人脉成长速度提升",
+    "type": "social",
+    "rarity": "rare",
+    "growthBonus": {
+      "charisma": 0.4,
+      "connections": 0.4,
+      "reputation": 0.2
+    },
+    "statCapBonus": {
+      "charisma": 15,
+      "connections": 15
+    },
+    "initialBonus": {
+      "charisma": 10,
+      "connections": 8
+    }
+  },
+  {
+    "id": "charismatic",
+    "name": "魅力非凡",
+    "description": "天生具有吸引力，容易获得他人好感",
+    "type": "social",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "charisma": 0.3,
+      "reputation": 0.1
+    },
+    "initialBonus": {
+      "charisma": 12
+    }
+  },
+  {
+    "id": "business_mind",
+    "name": "商贾之才",
+    "description": "精于算计，财富积累速度快于常人",
+    "type": "social",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "wealth": 0.5,
+      "connections": 0.2
+    },
+    "initialBonus": {
+      "wealth": 200
+    }
+  },
+  {
+    "id": "righteous_heart",
+    "name": "侠骨仁心",
+    "description": "心地善良，侠义值自然增长",
+    "type": "special",
+    "rarity": "uncommon",
+    "growthBonus": {
+      "chivalry": 0.02,
+      "reputation": 0.1
+    },
+    "initialBonus": {
+      "chivalry": 20
+    }
+  },
+  {
+    "id": "lone_wolf",
+    "name": "天煞孤星",
+    "description": "孤独命格，社交困难但武道更易精进",
+    "type": "special",
+    "rarity": "rare",
+    "growthBonus": {
+      "martialPower": 0.3,
+      "comprehension": 0.2
+    },
+    "penalties": {
+      "charisma": -0.2,
+      "connections": -0.3
+    },
+    "initialBonus": {
+      "martialPower": 8,
+      "charisma": -5
+    }
+  },
+  {
+    "id": "emperor_star",
+    "name": "紫微帝星",
+    "description": "领导才能出众，容易建立势力",
+    "type": "special",
+    "rarity": "legendary",
+    "growthBonus": {
+      "connections": 0.4,
+      "reputation": 0.3,
+      "charisma": 0.3
+    },
+    "statCapBonus": {
+      "reputation": 200
+    },
+    "initialBonus": {
+      "charisma": 15,
+      "connections": 10
+    }
+  },
+  {
+    "id": "average_talent",
+    "name": "资质平平",
+    "description": "普通人的资质，成长速度一般",
+    "type": "combat",
+    "rarity": "common",
+    "growthBonus": {
+      "martialPower": 0.05,
+      "externalSkill": 0.05,
+      "internalSkill": 0.05,
+      "qinggong": 0.05,
+      "constitution": 0.05
+    }
+  },
+  {
+    "id": "weak_constitution",
+    "name": "体弱多病",
+    "description": "身体素质较差，但可能其他方面有天赋",
+    "type": "special",
+    "rarity": "common",
+    "growthBonus": {
+      "comprehension": 0.2,
+      "knowledge": 0.2
+    },
+    "penalties": {
+      "constitution": -0.2
+    },
+    "initialBonus": {
+      "constitution": -5,
+      "comprehension": 8
+    }
+  }
+]

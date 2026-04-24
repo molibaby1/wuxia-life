@@ -1,0 +1,2694 @@
+[
+  {
+    "id": "birth_wuxia_family",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 70,
+    "ageRange": {
+      "min": 0,
+      "max": 0
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 0
+      }
+    ],
+    "content": {
+      "text": "你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。",
+      "title": "降生武侠世家",
+      "description": "人生的第一刻，命运的齿轮开始转动。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "bornInWuxiaFamily"
+      },
+      {
+        "type": "event_record",
+        "target": "birth_wuxia_family"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "出生",
+        "主线",
+        "武侠世家"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "birth_with_phenomenon",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 20,
+    "ageRange": {
+      "min": 0,
+      "max": 0
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 0
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "Math.random() < 0.25"
+      }
+    ],
+    "content": {
+      "text": "你出生时天有异象，一道金光从天而降，笼罩了整个府邸。族中长老惊叹：「此子非凡，将来必成大器！」",
+      "title": "天降异象",
+      "description": "特殊的出生预示着不平凡的人生。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "bornWithBlessing"
+      },
+      {
+        "type": "event_record",
+        "target": "birth_with_phenomenon"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "出生",
+        "主线",
+        "异象",
+        "天赋"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "toddler_exploration",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 80,
+    "ageRange": {
+      "min": 1,
+      "max": 1
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 1
+      }
+    ],
+    "content": {
+      "text": "你学会了走路，开始在家中四处探索，经常搞些小破坏，但也因此发现了许多有趣的秘密。",
+      "title": "探索小能手",
+      "description": "好奇心是成长的开始。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "qinggong",
+        "value": 1,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "curiousChild"
+      },
+      {
+        "type": "event_record",
+        "target": "toddler_exploration"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "探索",
+        "轻功"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "clever_speech",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 3,
+      "max": 3
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 3
+      }
+    ],
+    "content": {
+      "text": "你已经能说会道，常常逗得家人开怀大笑。长辈们都说你小小年纪就很有灵性。",
+      "title": "伶牙俐齿",
+      "description": "口才也是一种天赋。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "giftedSpeaker"
+      },
+      {
+        "type": "event_record",
+        "target": "clever_speech"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "魅力",
+        "社交"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "childhood_preference",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": {
+      "min": 4,
+      "max": 4
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 4
+      }
+    ],
+    "content": {
+      "text": "到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。",
+      "title": "童年选择",
+      "description": "人生的重要选择往往从小开始。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "focus_on_study",
+        "text": "专心读书练功",
+        "weight": 4,
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "sect_trial_active"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "diligentStudent"
+          }
+        ],
+        "requirements": {
+          "statRequirements": [
+            {
+              "statName": "chivalry",
+              "minValue": 10
+            }
+          ]
+        }
+      },
+      {
+        "id": "play_outside",
+        "text": "继续玩耍探索",
+        "weight": 3,
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "freeSpirit"
+          }
+        ]
+      },
+      {
+        "id": "balance_both",
+        "text": "尝试平衡两者",
+        "weight": 2,
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 15"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "balancedApproach"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "选择",
+        "成长路径",
+        "平衡"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "childhood_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 1000,
+    "ageRange": {
+      "min": 8,
+      "max": 12
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 8
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"childhoodSummaryDone\")"
+      }
+    ],
+    "content": {
+      "text": "日复一日，你的武艺在逐渐进步。童年的时光即将过去，少年的你开始思考未来的道路。",
+      "title": "童年总结",
+      "description": "成长路上的重要节点。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "childhoodSummaryDone"
+      },
+      {
+        "type": "event_record",
+        "target": "childhood_summary"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "总结",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "youth_begins",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 100,
+    "ageRange": {
+      "min": 13,
+      "max": 13
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 13
+      }
+    ],
+    "content": {
+      "text": "转眼之间，你已从孩童成长为少年。身形逐渐挺拔，武艺也小有成就。家族的长辈们开始考虑你的未来。",
+      "title": "少年初长成",
+      "description": "人生的新篇章即将开启。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "youthStarted"
+      },
+      {
+        "type": "event_record",
+        "target": "youth_begins"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "成长",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_choice",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 80,
+    "ageRange": {
+      "min": 14,
+      "max": 14
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\")"
+      }
+    ],
+    "requirements": {
+      "notFlag": ["has_sect"]
+    },
+    "content": {
+      "text": "到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。",
+      "title": "门派选择",
+      "description": "选择将影响你的武学道路。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "join_shaolin",
+        "text": "拜入少林派",
+        "description": "学习刚猛外功",
+        "condition": {
+          "type": "expression",
+          "expression": "player.externalSkill >= 15"
+        },
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "你天资过人，被少林寺主持一眼看中！主持亲自为你摩顶受戒，赐你【易筋经】秘籍。你的武学之路从此一飞冲天！",
+            "condition": {"type": "expression", "expression": "comprehension >= 20 && constitution >= 18"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "flag_set", "target": "shaolin_elite"},
+              {"type": "event_record", "target": "join_shaolin_elite"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你顺利拜入少林，成为一名少林弟子。在师父的指导下，你的武艺进步神速。",
+            "condition": {"type": "expression", "expression": "externalSkill >= 15"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "event_record", "target": "join_shaolin"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你拜入少林，但因资质平平，只能从外门弟子做起。每日做着打杂的活计，但你不放弃，终于在一年后转为正式弟子。",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "shaolinDisciple"},
+              {"type": "flag_set", "target": "sect_shaolin"},
+              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "flag_set", "target": "shaolin_outer"},
+              {"type": "event_record", "target": "join_shaolin_outer"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "join_wudang",
+        "text": "拜入武当派",
+        "description": "学习柔韧内功",
+        "condition": {
+          "type": "expression",
+          "expression": "player.internalSkill >= 15"
+        },
+        "outcomes": [
+          {
+            "id": "great_success",
+            "text": "武当掌门见你资质不凡，决定亲自收你为关门弟子！他将武当九阳神功倾囊相授，你的内功修为突飞猛进！",
+            "condition": {"type": "expression", "expression": "internalSkill >= 20 && comprehension >= 18"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 15, "operator": "add"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 8, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "flag_set", "target": "wudang_elite"},
+              {"type": "event_record", "target": "join_wudang_elite"}
+            ]
+          },
+          {
+            "id": "success",
+            "text": "你顺利拜入武当，成为武当弟子。在师父的指导下，你开始学习武当剑法与内功。",
+            "condition": {"type": "expression", "expression": "internalSkill >= 15"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 10, "operator": "add"},
+              {"type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "event_record", "target": "join_wudang"}
+            ]
+          },
+          {
+            "id": "partial",
+            "text": "你拜入武当，但因内功根基不稳，只能做记名弟子。每日跟着师兄们打杂扫地，但你心中暗暗发誓，总有一天要成为正式弟子！",
+            "condition": {"type": "expression", "expression": "true"},
+            "effects": [
+              {"type": "flag_set", "target": "sect_trial_active"},
+              {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
+              {"type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "wudangDisciple"},
+              {"type": "flag_set", "target": "sect_wudang"},
+              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "flag_set", "target": "wudang_probationary"},
+              {"type": "event_record", "target": "join_wudang_probationary"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "join_emei",
+        "text": "拜入峨眉派（轻灵身法）",
+        "condition": {
+          "type": "expression",
+          "expression": "player.qinggong >= 15"
+        },
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "sect_trial_active"
+          },
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "emeiDisciple"
+          },
+          {
+            "type": "flag_set",
+            "target": "sect_emei"
+          },
+          {
+            "type": "event_record",
+            "target": "join_emei"
+          }
+        ]
+      },
+      {
+        "id": "stay_home",
+        "text": "留在家族继续修炼",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "familyDisciple"
+          },
+          {
+            "type": "event_record",
+            "target": "stay_home"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "jianghu_experience",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 16,
+      "max": 16
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 16
+      }
+    ],
+    "content": {
+      "text": "师父认为你已经学有所成，让你下山历练。你行走江湖，见识了各种人物和事端，武艺也在实战中不断精进。",
+      "title": "江湖历练",
+      "description": "读万卷书不如行万里路。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "jianghuTraveler"
+      },
+      {
+        "type": "event_record",
+        "target": "jianghu_experience"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "江湖",
+        "历练",
+        "成长"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 14,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 14
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && !flags.has(\"sect_trial_started\")"
+      }
+    ],
+    "content": {
+      "text": "拜入门派后，你被安排参与入门试炼。试炼分为基础、身法与心性三关，需逐一完成。",
+      "title": "入门试炼",
+      "description": "门派试炼正式开始。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "trial_basic",
+        "text": "基础关：扎稳马步",
+        "weight": 4,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_basic_done" },
+          { "type": "event_record", "target": "sect_trial_basic" }
+        ]
+      },
+      {
+        "id": "trial_basic_fail",
+        "text": "基础关：失误摔伤",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
+          { "type": "flag_set", "target": "trial_basic_failed" },
+          { "type": "event_record", "target": "sect_trial_basic_fail" }
+        ]
+      },
+      {
+        "id": "trial_agile",
+        "text": "身法关：百步轻身",
+        "weight": 3,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "qinggong", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_agile_done" },
+          { "type": "event_record", "target": "sect_trial_agile" }
+        ]
+      },
+      {
+        "id": "trial_agile_fail",
+        "text": "身法关：失足受伤",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 8, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 8, "operator": "subtract" },
+          { "type": "flag_set", "target": "trial_agile_failed" },
+          { "type": "event_record", "target": "sect_trial_agile_fail" }
+        ]
+      },
+      {
+        "id": "trial_mind",
+        "text": "心性关：静坐悟道",
+        "weight": 3,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "trial_mind_done" },
+          { "type": "event_record", "target": "sect_trial_mind" }
+        ]
+      },
+      {
+        "id": "trial_mind_delay",
+        "text": "心性关：参悟不足，延期再试",
+        "weight": 1,
+        "effects": [
+          { "type": "flag_set", "target": "sect_trial_started" },
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "trial_mind_delayed" },
+          { "type": "event_record", "target": "sect_trial_mind_delay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_followup",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_done\") || flags.has(\"trial_agile_done\") || flags.has(\"trial_mind_done\")) && !flags.has(\"sect_trial_completed\")"
+      }
+    ],
+    "content": {
+      "text": "试炼进展顺利，长老安排你在门内继续修行，等待最终考核。",
+      "title": "试炼进阶",
+      "description": "磨砺心志，积蓄实力。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+      { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+      { "type": "event_record", "target": "sect_trial_followup" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
+      ],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_recover",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_failed\") || flags.has(\"trial_agile_failed\"))"
+      }
+    ],
+    "content": {
+      "text": "试炼中受了伤，你被安排在门内静养，同时补修基础。",
+      "title": "试炼养伤",
+      "description": "疗伤亦是修行。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+      { "type": "stat_modify", "target": "health", "value": 12, "operator": "add" },
+      { "type": "flag_unset", "target": "trial_basic_failed" },
+      { "type": "flag_unset", "target": "trial_agile_failed" },
+      { "type": "event_record", "target": "sect_trial_recover" }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "恢复"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_trial_final",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 14,
+      "max": 18
+    },
+    "triggers": [
+      { "type": "age_reach", "value": 14 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_done\") && flags.has(\"trial_agile_done\") && flags.has(\"trial_mind_done\"))"
+      }
+    ],
+    "content": {
+      "text": "三关皆过，门派长老亲自考核你的心性与武艺。你需在一日内完成最后试炼。",
+      "title": "试炼终章",
+      "description": "一日定乾坤。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "trial_final_success",
+        "text": "全力通过终试",
+        "weight": 3,
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "sect_trial_completed" },
+          { "type": "flag_unset", "target": "sect_trial_active" },
+          { "type": "event_record", "target": "sect_trial_final_success" }
+        ]
+      },
+      {
+        "id": "trial_final_delay",
+        "text": "稳妥应对，延期再战",
+        "weight": 1,
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "event_record", "target": "sect_trial_final_delay" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "门派",
+        "试炼",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "meet_love_interest",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 25,
+    "ageRange": {
+      "min": 17,
+      "max": 17
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 17
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "Math.random() < 0.4 && !flags.has(\"hasLoveInterest\") && !flags.has(\"love_started\")"
+      }
+    ],
+    "content": {
+      "text": "在一次江湖游历中，你偶然遇到了一位令人心动的女子/男子。她/他气质不凡，谈吐优雅，让你印象深刻。",
+      "title": "初遇意中人",
+      "description": "情窦初开，心动时刻。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "approach",
+        "text": "主动上前搭话",
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 20"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hasLoveInterest"
+          },
+          {
+            "type": "flag_set",
+            "target": "romanticApproach"
+          },
+          {
+            "type": "event_record",
+            "target": "meet_love_success"
+          }
+        ]
+      },
+      {
+        "id": "observe",
+        "text": "默默观察",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "flag_set",
+            "target": "hasLoveInterest"
+          },
+          {
+            "type": "flag_set",
+            "target": "romanticObserver"
+          },
+          {
+            "type": "event_record",
+            "target": "meet_love_observe"
+          }
+        ]
+      },
+      {
+        "id": "ignore",
+        "text": "继续赶路",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "flag_set",
+            "target": "focusedOnMartialArt"
+          },
+          {
+            "type": "event_record",
+            "target": "meet_love_ignore"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "爱情",
+        "选择",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "youth_fame",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": {
+      "min": 18,
+      "max": 18
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 50"
+      }
+    ],
+    "content": {
+      "text": "十八岁的你，武艺已经小有成就。江湖上开始流传着你的名号，有人说你是后起之秀，有人说你是百年难遇的奇才。",
+      "title": "青年成名",
+      "description": "名声鹊起，江湖皆知。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "risingStar"
+      },
+      {
+        "type": "event_record",
+        "target": "youth_fame"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "成名",
+        "江湖",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_arts_invitation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": {
+      "min": 18,
+      "max": 18
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      }
+    ],
+    "content": {
+      "text": "你收到了一封武林大会的邀请函。这是江湖盛事，各路英雄豪杰都会参加。师父建议你去见识一下，但也提醒你江湖险恶。",
+      "title": "武林大会邀请",
+      "description": "江湖盛事，英雄汇聚。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_invitation",
+        "text": "接受邀请，参加武林大会",
+        "condition": {
+          "type": "expression",
+          "expression": "player.martialPower >= 60"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "flag_set",
+            "target": "willAttendMartialArtsMeeting"
+          },
+          {
+            "type": "flag_set",
+            "target": "confident"
+          },
+          {
+            "type": "event_record",
+            "target": "accept_martial_meeting"
+          }
+        ]
+      },
+      {
+        "id": "decline_invitation",
+        "text": "拒绝邀请，继续修炼",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "cautious"
+          },
+          {
+            "type": "event_record",
+            "target": "decline_martial_meeting"
+          }
+        ]
+      },
+      {
+        "id": "observe_only",
+        "text": "前去观战，不参与比试",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "willObserveMartialArtsMeeting"
+          },
+          {
+            "type": "event_record",
+            "target": "observe_martial_meeting"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "武林大会",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_arts_beginner",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": {
+      "min": 19,
+      "max": 19
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 19
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"willAttendMartialArtsMeeting\")"
+      }
+    ],
+    "content": {
+      "text": "武林大会如期举行，你怀着激动的心情前往会场。各大门派的高手云集，年轻一代的佼佼者也纷纷登场。",
+      "title": "武林大会初试",
+      "description": "群雄荟萃，各显神通。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "participatedInMartialArtsMeeting"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_arts_beginner"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "武林大会",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_arts_observer",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": {
+      "min": 19,
+      "max": 19
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 19
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"willObserveMartialArtsMeeting\")"
+      }
+    ],
+    "content": {
+      "text": "你来到武林大会现场，作为一名观众静静观战。高手们的精彩对决让你受益匪浅，对武学有了更深的理解。",
+      "title": "武林大会观战",
+      "description": "观他人之长，补己之短。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "observedMartialArtsMeeting"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_arts_observer"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "武林大会",
+        "观察",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "fame_rising",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 23,
+      "max": 23
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 23
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 80"
+      }
+    ],
+    "content": {
+      "text": "经过多年的努力，你在江湖中的名声越来越大。许多人都知道有个年轻高手，武艺高强，品格高尚。",
+      "title": "江湖扬名",
+      "description": "声名远播，威震江湖。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "famousWarrior"
+      },
+      {
+        "type": "event_record",
+        "target": "fame_rising"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "成名",
+        "江湖",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "grudge_and_affection",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 65,
+    "ageRange": {
+      "min": 25,
+      "max": 25
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
+    "content": {
+      "text": "江湖恩怨如流水，你遇到了一些麻烦。有人想要报当年的仇，也有人想要拉拢你加入他们的势力。",
+      "title": "恩怨情仇",
+      "description": "江湖路险，是非难辨。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "face_challenges",
+        "text": "正面应对挑战",
+        "condition": {
+          "type": "expression",
+          "expression": "player.martialPower >= 90"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 12,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "braveWarrior"
+          },
+          {
+            "type": "event_record",
+            "target": "face_challenges"
+          }
+        ]
+      },
+      {
+        "id": "negotiate_peace",
+        "text": "寻求和平解决",
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 50"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "peacefulNegotiator"
+          },
+          {
+            "type": "event_record",
+            "target": "negotiate_peace"
+          }
+        ]
+      },
+      {
+        "id": "avoid_conflict",
+        "text": "暂避锋芒",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "cautiousSurvivor"
+          },
+          {
+            "type": "event_record",
+            "target": "avoid_conflict"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "恩怨",
+        "选择",
+        "江湖",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_contribution",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 75,
+    "ageRange": {
+      "min": 29,
+      "max": 29
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 29
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\")"
+      }
+    ],
+    "content": {
+      "text": "你在门派中的地位日益重要，师父委以重任，让你处理一些重要的事务。这是对你多年来努力的认可。",
+      "title": "门派贡献",
+      "description": "不负师恩，光大门派。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "respectedElder"
+      },
+      {
+        "type": "event_record",
+        "target": "sect_contribution"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "门派",
+        "贡献",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "independent_path",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 85,
+    "ageRange": {
+      "min": 31,
+      "max": 31
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 31
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 120"
+      }
+    ],
+    "content": {
+      "text": "经过多年积累，你已具备独当一面的能力。江湖朋友建议你开创自己的基业，或是另立门派，传承武学。",
+      "title": "独立门户",
+      "description": "自立门户，开创新局。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "start_own_sect",
+        "text": "创立自己的门派",
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 80 && player.martialPower >= 140"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "sectFounder"
+          },
+          {
+            "type": "flag_set",
+            "target": "legendaryMaster"
+          },
+          {
+            "type": "event_record",
+            "target": "start_own_sect"
+          }
+        ]
+      },
+      {
+        "id": "become_free_walker",
+        "text": "成为自由江湖客",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 12,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "freeWalker"
+          },
+          {
+            "type": "event_record",
+            "target": "become_free_walker"
+          }
+        ]
+      },
+      {
+        "id": "serve_government",
+        "text": "为朝廷效力",
+        "condition": {
+          "type": "expression",
+          "expression": "player.chivalry >= 70"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "externalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "loyalGuardian"
+          },
+          {
+            "type": "event_record",
+            "target": "serve_government"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "独立",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": {
+      "min": 35,
+      "max": 35
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "content": {
+      "text": "步入中年，你开始思考武学的传承问题。是著书立说流传后世，还是寻找合适的传人，亦或是将武学融入生活？",
+      "title": "武学传承",
+      "description": "薪火相传，生生不息。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "write_manual",
+        "text": "著书立说",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialScholar"
+          },
+          {
+            "type": "event_record",
+            "target": "write_manual"
+          }
+        ]
+      },
+      {
+        "id": "find_disciple",
+        "text": "寻找传人",
+        "condition": {
+          "type": "expression",
+          "expression": "player.charisma >= 60"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "wiseMaster"
+          },
+          {
+            "type": "event_record",
+            "target": "find_disciple"
+          }
+        ]
+      },
+      {
+        "id": "live_peacefully",
+        "text": "归隐田园",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "peacefulHermit"
+          },
+          {
+            "type": "event_record",
+            "target": "live_peacefully"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "传承",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "middle_age_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 100,
+    "ageRange": {
+      "min": 35,
+      "max": 35
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "content": {
+      "text": "三十五年弹指一挥间，回顾过往，你已在江湖中留下浓墨重彩的一笔。未来的路还很长，是继续追求武学极致，还是享受人生平静？",
+      "title": "中年总结",
+      "description": "人生过半，回首来路。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "flag_set",
+        "target": "middleAgeAchieved"
+      },
+      {
+        "type": "event_record",
+        "target": "middle_age_summary"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": [
+        "成年",
+        "总结",
+        "过渡"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_establishment",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": {
+      "min": 40,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 40
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sectFounder\")"
+      }
+    ],
+    "content": {
+      "text": "经过多年经营，你创立的门派已在江湖上占据一席之地。门徒众多，声名远播。你的武学理念得以传承发扬。",
+      "title": "开宗立派",
+      "description": "开创新局，传承武学。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "sectEstablished"
+      },
+      {
+        "type": "event_record",
+        "target": "sect_establishment"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "门派",
+        "传承",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "disciples_everywhere",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 75,
+    "ageRange": {
+      "min": 45,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"wiseMaster\") OR flags.has(\"sectFounder\")"
+      }
+    ],
+    "content": {
+      "text": "你的弟子们已遍布江湖，其中不乏杰出之辈。他们在各自的领域发光发热，将你的武学精神传承下去。",
+      "title": "桃李满天下",
+      "description": "薪火相传，生生不息。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 20,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "legacySecured"
+      },
+      {
+        "type": "event_record",
+        "target": "disciples_everywhere"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "传承",
+        "弟子",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "status_consolidation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 85,
+    "ageRange": {
+      "min": 50,
+      "max": 50
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 180"
+      }
+    ],
+    "content": {
+      "text": "年过半百，你已是江湖中德高望重的前辈。各大门派都对你敬重有加，江湖事务常来请教你的意见。",
+      "title": "江湖地位巩固",
+      "description": "德高望重，一言九鼎。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "respectedElder"
+      },
+      {
+        "type": "event_record",
+        "target": "status_consolidation"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "中年",
+        "地位",
+        "江湖",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "retirement",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": {
+      "min": 55,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 55
+      }
+    ],
+    "content": {
+      "text": "年岁渐长，你开始考虑退休生活。是继续留在江湖中心，还是归隐田园，享受平静的生活？",
+      "title": "归隐田园",
+      "description": "功成身退，享受人生。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "retire_to_countryside",
+        "text": "归隐田园，远离江湖",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "internalSkill",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "retiredInCountryside"
+          },
+          {
+            "type": "flag_set",
+            "target": "peacefulLife"
+          },
+          {
+            "type": "event_record",
+            "target": "retire_to_countryside"
+          }
+        ]
+      },
+      {
+        "id": "stay_in_jianghu",
+        "text": "继续留在江湖",
+        "condition": {
+          "type": "expression",
+          "expression": "player.martialPower >= 200"
+        },
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "activeInJianghu"
+          },
+          {
+            "type": "event_record",
+            "target": "stay_in_jianghu"
+          }
+        ]
+      },
+      {
+        "id": "travel_world",
+        "text": "游历天下",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1
+          },
+          {
+            "type": "stat_modify",
+            "target": "qinggong",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "worldTraveler"
+          },
+          {
+            "type": "event_record",
+            "target": "travel_world"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "退休",
+        "选择",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 90,
+    "ageRange": {
+      "min": 60,
+      "max": 60
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 60
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"martialScholar\") OR flags.has(\"peakMaster\")"
+      }
+    ],
+    "content": {
+      "text": "花甲之年，你开始总结一生的武学心得。这些经验若能流传后世，将是武林的宝贵财富。",
+      "title": "武学总结",
+      "description": "集大成者，流传后世。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "internalSkill",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "martialLegacyComplete"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_summary"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "总结",
+        "武学",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "family_happiness",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 2,
+    "weight": 60,
+    "ageRange": {
+      "min": 65,
+      "max": 65
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 65
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"hasLoveInterest\")"
+      }
+    ],
+    "content": {
+      "text": "儿孙满堂，天伦之乐。你与伴侣相伴多年，看着子孙们健康成长，心中满是欣慰。",
+      "title": "天伦之乐",
+      "description": "家庭和睦，幸福美满。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "happyFamily"
+      },
+      {
+        "type": "event_record",
+        "target": "family_happiness"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "老年",
+        "家庭",
+        "幸福",
+        "支线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "legendary_life",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": {
+      "min": 70,
+      "max": 70
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 70
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.martialPower >= 250 && player.charisma >= 100 && flags.has(\"legendaryStatus\")"
+      }
+    ],
+    "content": {
+      "text": "古稀之年，你已是一代传奇。江湖中到处流传着你的故事，你的名字将永远载入武林史册。你的一生，是辉煌的武林传奇。",
+      "title": "传奇人生",
+      "description": "一代宗师，名垂青史。"
+    },
+    "eventType": "ending",
+    "endingType": "legendary",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "legendary_life"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "传奇",
+        "完美"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "peaceful_old_age",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": {
+      "min": 75,
+      "max": 75
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 75
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"peacefulLife\") && flags.has(\"happyFamily\")"
+      }
+    ],
+    "content": {
+      "text": "年逾古稀，你过着平静的生活。家人陪伴在侧，子孙孝顺。虽然没有惊天动地的成就，但这一生平淡而幸福。",
+      "title": "幸福晚年",
+      "description": "平淡是真，幸福安康。"
+    },
+    "eventType": "ending",
+    "endingType": "peaceful",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "peaceful_old_age"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "幸福",
+        "平静"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_master",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": {
+      "min": 78,
+      "max": 78
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 78
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sectEstablished\") && flags.has(\"legacySecured\") && player.martialPower >= 220"
+      }
+    ],
+    "content": {
+      "text": "你的门派已传承数代，门徒遍布天下。你的武学理念影响深远，被后人尊为一代宗师。",
+      "title": "武学宗师",
+      "description": "开宗立派，万世流芳。"
+    },
+    "eventType": "ending",
+    "endingType": "master",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "martial_master"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "宗师",
+        "传承"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "ordinary_life",
+    "version": "1.0.0",
+    "category": "special_event",
+    "priority": 0,
+    "weight": 50,
+    "ageRange": {
+      "min": 80,
+      "max": 80
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 80
+      }
+    ],
+    "content": {
+      "text": "八十高龄，你回顾一生。虽然没有惊天动地的成就，但也经历了江湖的风风雨雨，有过欢笑，有过泪水。这就是你的人生，平凡而真实。",
+      "title": "平凡一生",
+      "description": "平凡人生，亦有光彩。"
+    },
+    "eventType": "ending",
+    "endingType": "ordinary",
+    "autoEffects": [
+      {
+        "type": "event_record",
+        "target": "ordinary_life"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774546,
+      "updatedAt": 1773317774546,
+      "author": "development_team",
+      "tags": [
+        "结局",
+        "平凡",
+        "默认"
+      ],
+      "enabled": true
+    }
+  }
+]

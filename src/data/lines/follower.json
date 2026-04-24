@@ -1,0 +1,565 @@
+[
+  {
+    "id": "follower_first_recruit",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {"min": 25, "max": 50},
+    "triggers": [
+      {"type": "age_reach", "value": 25},
+      {"type": "expression", "expression": "reputation >= 150 && martialPower >= 60"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "第一位追随者",
+      "text": "你的名声开始传播，有年轻人慕名而来，希望能追随你学习武艺。这是你建立势力的第一步。",
+      "description": "招收追随者"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "收为弟子（需武力≥70，魅力≥50）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 70 && charisma >= 50"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "has_first_follower", "value": true},
+          {"type": "flag_set", "flag": "follower_count_1", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_recruit_more",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 72,
+    "weight": 60,
+    "ageRange": {"min": 28, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 28},
+      {"type": "expression", "expression": "flags.has_first_follower == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "扩大势力",
+      "text": "有了第一位追随者后，越来越多的人前来投靠。你可以选择扩大势力，也可以保持现状。",
+      "description": "招收更多追随者"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "广收门徒（需声望≥300，金钱≥500）",
+        "conditions": [
+          {"type": "expression", "expression": "reputation >= 300 && money >= 500"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -500},
+          {"type": "stat_modify", "stat": "reputation", "value": 25},
+          {"type": "stat_modify", "stat": "charisma", "value": 15},
+          {"type": "flag_set", "flag": "follower_count_10", "value": true}
+        ]
+      },
+      {
+        "text": "精挑细选（需声望≥200）",
+        "conditions": [
+          {"type": "expression", "expression": "reputation >= 200"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "flag_set", "flag": "follower_count_5", "value": true}
+        ]
+      },
+      {
+        "text": "保持现状",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "follower_loyalty_test",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 70,
+    "weight": 55,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.4}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.follower_count_5 == true || flags.follower_count_10 == true"}
+    ],
+    "content": {
+      "title": "忠诚度考验",
+      "text": "有追随者被敌对势力收买，想要背叛你。你需要测试追随者的忠诚度。",
+      "description": "忠诚度考验"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "设局试探（需悟性≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "flag_set", "flag": "loyalty_verified", "value": true}
+        ]
+      },
+      {
+        "text": "直接询问",
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_betrayal",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 73,
+    "weight": 50,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.25}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.follower_count_5 == true && chivalry <= 30"}
+    ],
+    "content": {
+      "title": "追随者背叛",
+      "text": "一名追随者背叛了你，带走了部分资源投靠他人。这是对你领导能力的考验。",
+      "description": "遭遇背叛"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "追杀叛徒（需武力≥80，侠义 -10）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "money", "value": 50}
+        ]
+      },
+      {
+        "text": "放他一马（侠义 +10）",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 10},
+          {"type": "stat_modify", "stat": "charisma", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_training",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 68,
+    "weight": 60,
+    "ageRange": {"min": 30, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 30},
+      {"type": "random", "value": 0.35}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.follower_count_5 == true || flags.follower_count_10 == true"}
+    ],
+    "content": {
+      "title": "训练追随者",
+      "text": "作为领袖，你需要定期训练追随者，提升他们的实力。这是巩固势力的重要手段。",
+      "description": "训练追随者"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "亲自指导（需武力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 8},
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      },
+      {
+        "text": "请师父指导（需金钱≥300）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 300"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -300},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 8}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_mission",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 74,
+    "weight": 58,
+    "ageRange": {"min": 32, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 32},
+      {"type": "expression", "expression": "flags.follower_count_10 == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "派遣任务",
+      "text": "你可以派遣追随者去执行各种任务，收集情报、护送货物、或者打探消息。",
+      "description": "派遣任务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "收集情报（需魅力≥70）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 70"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "flag_set", "flag": "intelligence_gathered", "value": true}
+        ]
+      },
+      {
+        "text": "护送商队（需武力≥75）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 75"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 150},
+          {"type": "stat_modify", "stat": "reputation", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_elite_recruit",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 78,
+    "weight": 52,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "expression", "expression": "flags.follower_count_10 == true && reputation >= 400"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "招募精英",
+      "text": "有江湖高手愿意加入你的势力，成为你的核心追随者。这是提升势力质量的好机会。",
+      "description": "招募精英"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "重金聘请（需金钱≥800）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -800},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "flag_set", "flag": "has_elite_follower", "value": true}
+        ]
+      },
+      {
+        "text": "以诚相待（需魅力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "flag_set", "flag": "has_elite_follower", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_sect_pressure",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 76,
+    "weight": 55,
+    "ageRange": {"min": 35, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 35},
+      {"type": "random", "value": 0.3}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.follower_count_10 == true"}
+    ],
+    "content": {
+      "title": "门派压力",
+      "text": "你的势力壮大引起了大门派的警惕，他们派人来施压，要求你解散追随者。",
+      "description": "门派压力"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "强硬对抗（需武力≥95）",
+        "conditions": [
+          {"type": "expression", "expression": "martialPower >= 95"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "martialPower", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 20},
+          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+        ]
+      },
+      {
+        "text": "暂时妥协",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "stat_modify", "stat": "charisma", "value": 5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_alliance",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 80,
+    "weight": 50,
+    "ageRange": {"min": 38, "max": 55},
+    "triggers": [
+      {"type": "age_reach", "value": 38},
+      {"type": "expression", "expression": "flags.has_elite_follower == true && reputation >= 500"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "势力联盟",
+      "text": "其他势力的领袖主动提出结盟，共同对抗强大的敌人。这是扩大影响力的好机会。",
+      "description": "势力联盟"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接受联盟（需魅力≥85）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 85"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 15},
+          {"type": "stat_modify", "stat": "reputation", "value": 30},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "flag_set", "flag": "has_alliance", "value": true}
+        ]
+      },
+      {
+        "text": "拒绝",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": -5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_inheritance_prepare",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 75,
+    "weight": 48,
+    "ageRange": {"min": 45, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "expression", "expression": "flags.follower_count_10 == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "选择继承人",
+      "text": "年事已高，你需要从追随者中选择一个合适的继承人，将你的势力和武学传承下去。",
+      "description": "选择继承人"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "选择最有天赋的（需悟性≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "comprehension >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "flag_set", "flag": "heir_selected", "value": true}
+        ]
+      },
+      {
+        "text": "选择最忠诚的（需魅力≥80）",
+        "conditions": [
+          {"type": "expression", "expression": "charisma >= 80"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "flag_set", "flag": "heir_selected", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_legacy",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 85,
+    "weight": 45,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.heir_selected == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "传承基业",
+      "text": "你将毕生积累的势力和武学传授给继承人。你的影响力将通过他继续延续。",
+      "description": "传承基业"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "charisma", "value": 20},
+      {"type": "stat_modify", "stat": "comprehension", "value": 15},
+      {"type": "flag_set", "flag": "legacy_established", "value": true}
+    ]
+  },
+  {
+    "id": "follower_sect_leader",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 88,
+    "weight": 42,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "flags.follower_count_10 == true && reputation >= 700 && martialPower >= 100"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "开宗立派",
+      "text": "你的势力已经足够强大，可以正式开宗立派，成为一代宗师。这是建立门派的绝佳时机。",
+      "description": "开宗立派"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "建立门派（需金钱≥1000，声望≥800）",
+        "conditions": [
+          {"type": "expression", "expression": "money >= 1000 && reputation >= 800"}
+        ],
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": -1000},
+          {"type": "stat_modify", "stat": "reputation", "value": 50},
+          {"type": "stat_modify", "stat": "charisma", "value": 25},
+          {"type": "flag_set", "flag": "sect_founded", "value": true}
+        ]
+      },
+      {
+        "text": "继续发展势力",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "charisma", "value": 10}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "follower_sect_ceremony",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 90,
+    "weight": 40,
+    "ageRange": {"min": 40, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 40},
+      {"type": "expression", "expression": "flags.sect_founded == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "开派大典",
+      "text": "你的门派正式成立，江湖各派都派人前来祝贺。这是你人生的巅峰时刻。",
+      "description": "开派大典"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 60},
+      {"type": "stat_modify", "stat": "charisma", "value": 30},
+      {"type": "stat_modify", "stat": "martialPower", "value": 20},
+      {"type": "flag_set", "flag": "sect_master", "value": true}
+    ]
+  },
+  {
+    "id": "follower_sect_influence",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 85,
+    "weight": 45,
+    "ageRange": {"min": 45, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 45},
+      {"type": "expression", "expression": "flags.sect_master == true"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "门派影响力",
+      "text": "你的门派在江湖上的影响力与日俱增，成为一方势力。你的决策将影响整个江湖格局。",
+      "description": "门派影响力"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 40},
+      {"type": "stat_modify", "stat": "charisma", "value": 25},
+      {"type": "stat_modify", "stat": "martialPower", "value": 15}
+    ]
+  },
+  {
+    "id": "follower_grandmaster",
+    "version": "1.0",
+    "category": "follower",
+    "priority": 95,
+    "weight": 35,
+    "ageRange": {"min": 50, "max": 60},
+    "triggers": [
+      {"type": "age_reach", "value": 50},
+      {"type": "expression", "expression": "flags.sect_master == true && martialPower >= 120 && reputation >= 900"}
+    ],
+    "conditions": [],
+    "content": {
+      "title": "一代宗师",
+      "text": "你成为武林中公认的一代宗师，你的门派是江湖上最强大的势力之一。你的名字将永远铭刻在武林史册上。",
+      "description": "一代宗师"
+    },
+    "eventType": "ending",
+    "endingType": "sect_grandmaster",
+    "endingTitle": "一代宗师",
+    "endingDescription": "你建立了强大的门派，培养了众多弟子，成为武林中受人敬仰的一代宗师。你的武学和思想将传承后世。",
+    "effects": [
+      {"type": "stat_modify", "stat": "reputation", "value": 100},
+      {"type": "stat_modify", "stat": "charisma", "value": 50},
+      {"type": "stat_modify", "stat": "martialPower", "value": 30}
+    ]
+  }
+]

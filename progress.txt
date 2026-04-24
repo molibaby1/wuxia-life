@@ -105,3 +105,17 @@
 - **Learnings for future iterations:**
   - Legacy code mixes two flag access paths; effect handlers should update both unless a single source of truth is fully enforced.
 ---
+
+## [2026-04-24 14:00] - US-003
+- Reworked `tests/IntegrationTests.ts` data loading to resolve event line files dynamically from `src/data/events.json` imports.
+- Removed hard-coded legacy line imports (including missing `./lines/demonic.json`) to align integration tests with current asset layout.
+- Validation evidence:
+  - `./node_modules/.bin/tsx tests/IntegrationTests.ts` ✅ runs without `ERR_MODULE_NOT_FOUND` on `demonic.json`
+  - `npm test` ✅ progresses through `IntegrationTests` stage and reaches `testGameSimulation`
+- Files changed:
+  - `tests/IntegrationTests.ts`
+  - `docs/PRD/project-remediation-plan-v2.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Integration fixtures should derive file lists from `events.json` to avoid drift when narrative line files are renamed/split.
+---

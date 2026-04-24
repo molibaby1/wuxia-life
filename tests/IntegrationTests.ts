@@ -15,31 +15,22 @@ import { GameTestFramework, TestSuite, assert, assertEqual } from './GameTestFra
 import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EffectType, EventCategory, EventPriority, GameState, EventDefinition } from '../src/types/eventTypes';
-import eventsIndexJson from '../src/data/events.json';
-import demonicEventsJson from '../src/data/lines/demonic.json';
-import generalEventsJson from '../src/data/lines/general.json';
-import originEventsJson from '../src/data/lines/origin.json';
-import orthodoxEventsJson from '../src/data/lines/orthodox.json';
-import trainingEventsJson from '../src/data/lines/training.json';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const eventsIndex = eventsIndexJson as { imports: string[] };
-const demonicEvents = demonicEventsJson as EventDefinition[];
-const generalEvents = generalEventsJson as EventDefinition[];
-const originEvents = originEventsJson as EventDefinition[];
-const orthodoxEvents = orthodoxEventsJson as EventDefinition[];
-const trainingEvents = trainingEventsJson as EventDefinition[];
+const testsDir = dirname(fileURLToPath(import.meta.url));
+const dataDir = resolve(testsDir, '../src/data');
+const eventsIndex = JSON.parse(
+  readFileSync(resolve(dataDir, 'events.json'), 'utf-8')
+) as { imports: string[] };
 
-const lineMap: Record<string, EventDefinition[]> = {
-  './lines/demonic.json': demonicEvents,
-  './lines/general.json': generalEvents,
-  './lines/origin.json': originEvents,
-  './lines/orthodox.json': orthodoxEvents,
-  './lines/training.json': trainingEvents,
-};
-
-const allEvents = (eventsIndex.imports || [])
-  .map(path => lineMap[path] || [])
-  .flat();
+const allEvents = (eventsIndex.imports || []).flatMap((relativePath) => {
+  const normalized = relativePath.replace('./', '');
+  const absolutePath = resolve(dataDir, normalized);
+  const lineData = JSON.parse(readFileSync(absolutePath, 'utf-8')) as EventDefinition[];
+  return Array.isArray(lineData) ? lineData : [];
+});
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();

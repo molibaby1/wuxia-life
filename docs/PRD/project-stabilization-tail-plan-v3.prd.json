@@ -1,0 +1,67 @@
+{
+  "project": "Wuxia Life Stabilization Tail V3",
+  "branchName": "ralph/stabilization-tail-v3-quality-closure",
+  "description": "Close the remaining quality gaps after baseline stabilization by completing compatibility assertions, eliminating runtime warning noise, aligning stat dictionaries, and introducing first-stage bundle control with measurable outcomes.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Make Compatibility Tests Executable",
+      "description": "As a developer, I want legacy compatibility checks to be real assertions so that compatibility regressions are detectable in the default gate.",
+      "acceptanceCriteria": [
+        "AllTests no longer prints compatibility tests pending implementation",
+        "Legacy input/output compatibility assertions are executable",
+        "npm test passes"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Unify Stat Dictionary and Validation",
+      "description": "As a developer, I want stat definitions and runtime validation to be consistent so that unknown stat warnings do not occur in normal test runs.",
+      "acceptanceCriteria": [
+        "No Unknown stat: charisma warning appears in the real test gate",
+        "Stat key definitions are aligned across types, data, and executors",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Clean Test Environment Warnings",
+      "description": "As a team, I want test environment initialization to be clean so that warning noise does not mask real issues.",
+      "acceptanceCriteria": [
+        "No localstorage-file invalid path warning appears during test gate execution",
+        "Local and CI environment setup paths are defined and valid",
+        "npm test passes"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "First-Stage Bundle Size Control",
+      "description": "As a frontend engineer, I want to reduce main bundle weight through low-risk splitting so that delivery performance does not degrade as features grow.",
+      "acceptanceCriteria": [
+        "Main bundle size is measurably reduced from the current baseline (~486KB)",
+        "Build remains successful after optimization",
+        "Core gameplay flow remains functional"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Document Release Quality Contract",
+      "description": "As a team, I want a documented release validation contract including warning hygiene so that pre-merge quality checks are explicit and enforceable.",
+      "acceptanceCriteria": [
+        "Documentation defines required checks: typecheck + build + real test gate + key warning-free logs",
+        "Validation workflow is reproducible for local and CI",
+        "No unresolved critical warnings remain in release checklist"
+      ],
+      "priority": 5,
+      "passes": false
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 - Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
 - Real test gate should execute suites sequentially with aggregated exit status (do not short-circuit with shell `&&`), so full regression signal is always visible.
 - Keep `state.flags` and `state.player.flags` synchronized when mutating flags to avoid read-path inconsistencies across engine and tests.
+- Compatibility stories should replace placeholder logs with executable legacy/new-format assertions in `tests/AllTests.ts`.
 
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
@@ -161,4 +162,27 @@
   - `progress.txt`
 - **Learnings for future iterations:**
   - Keeping a single documented command (`npm run validate`) as the merge contract reduces drift between local checks and CI behavior.
+---
+
+## [2026-04-24 14:20] - US-001
+- Implemented executable backward-compatibility assertions in `tests/AllTests.ts` by replacing the pending placeholder with real checks.
+- Added assertions for legacy `stat` input (`STAT_MODIFY`), modern `flag` input (`FLAG_SET`), and legacy `target` input (`FLAG_SET`) to verify state updates remain compatible.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Compatibility coverage should assert both legacy input shape and resulting output-state shape (`flags` + `player.flags`) to prevent silent adapter regressions.
+  - Avoid compatibility placeholders in default gate; convert them to hard assertions so regressions fail fast.
+---
+
+## [2026-04-24 14:48] - US-001
+- Implemented executable backward-compatibility assertions in `tests/AllTests.ts`, replacing the previous pending placeholder log in the compatibility suite.
+- Added concrete compatibility checks for legacy `stat` (`STAT_MODIFY`), modern `flag` (`FLAG_SET`), and legacy `target` (`FLAG_SET`) inputs, with assertions on both `flags` and `player.flags`.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/project-stabilization-tail-plan-v3.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Compatibility tests should always assert both legacy input shape and final state shape to avoid silent adapter regressions.
+  - For effect compatibility, verify both top-level state and nested player state paths when dual-read paths still exist.
 ---

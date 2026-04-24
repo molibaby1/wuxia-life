@@ -334,10 +334,60 @@ const compatibilitySuite: TestSuite = {
     {
       name: '兼容性测试 - 向后兼容',
       description: '测试旧格式事件的兼容性',
-      test: () => {
-        // 这里可以添加旧格式迁移测试
-        // 当前版本所有事件都是新格式，暂时跳过详细测试
-        console.log('  ⚠️  旧格式兼容性测试待实现');
+      test: async () => {
+        const executor = new EventExecutor();
+        const state = framework.createTestState();
+        const initialPower = state.player.martialPower;
+
+        // 旧格式：STAT_MODIFY 使用 stat 字段
+        const legacyStatState = await executor.executeEffects(
+          [
+            {
+              type: EffectType.STAT_MODIFY,
+              stat: 'martialPower',
+              value: 3,
+              operator: 'add' as const,
+            },
+          ],
+          state,
+        );
+        assertEqual(
+          legacyStatState.player.martialPower,
+          initialPower + 3,
+          '旧格式 stat 字段应正确修改属性',
+        );
+
+        // 新格式：FLAG_SET 使用 flag 字段
+        const newFlagState = await executor.executeEffects(
+          [
+            {
+              type: EffectType.FLAG_SET,
+              flag: 'compat_new_flag',
+            },
+          ],
+          legacyStatState,
+        );
+        assert(newFlagState.flags.compat_new_flag === true, '新格式 flag 字段应写入顶层 flags');
+        assert(
+          newFlagState.player.flags.compat_new_flag === true,
+          '新格式 flag 字段应同步写入 player.flags',
+        );
+
+        // 旧格式：FLAG_SET 使用 target 字段（历史写法）
+        const legacyFlagState = await executor.executeEffects(
+          [
+            {
+              type: EffectType.FLAG_SET,
+              target: 'compat_legacy_flag',
+            },
+          ],
+          newFlagState,
+        );
+        assert(legacyFlagState.flags.compat_legacy_flag === true, '旧格式 target 字段应写入顶层 flags');
+        assert(
+          legacyFlagState.player.flags.compat_legacy_flag === true,
+          '旧格式 target 字段应同步写入 player.flags',
+        );
       },
     },
   ],

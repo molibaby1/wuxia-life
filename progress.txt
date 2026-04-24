@@ -48,3 +48,29 @@
 - **Learnings for future iterations:**
   - Add CI gate immediately after US-003/US-004 are stabilized to avoid codifying perpetual red pipelines.
 ---
+
+## [2026-04-24 11:17] - US-003/US-004/US-005
+- Completed structured stabilization pass to converge cross-module type contracts and restore full build pipeline health.
+- Implemented CI quality gate workflow at `.github/workflows/ci.yml` for pull requests (`typecheck + build + test`).
+- Validation evidence:
+  - `npm run typecheck` ✅
+  - `npm run build` ✅
+  - `npm test` ✅
+  - `npm run validate` ✅
+- Files changed (core highlights):
+  - `src/types/eventTypes.ts`
+  - `src/types/index.ts`
+  - `src/core/GameEngineIntegration.ts`
+  - `src/core/EventExecutor.ts`
+  - `src/core/ConditionEvaluator.ts`
+  - `src/core/IdentitySystem.ts`
+  - `src/composables/useNewGameEngine.ts`
+  - `src/store/gameStore.ts`
+  - `.github/workflows/ci.yml`
+  - `tsconfig.app.json`
+  - `docs/PRD/project-stabilization.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Large legacy type drift is faster to resolve with contract-first convergence than file-by-file local fixes.
+  - Establishing CI gates immediately after baseline recovery prevents regression back to “perma-red” branches.
+---

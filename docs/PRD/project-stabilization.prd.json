@@ -40,8 +40,8 @@
         "No implicit any remains in critical paths"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "BLOCKED: vue-tsc/build currently surfaces large pre-existing cross-module type drift (components/core/data/types), requiring broad coordinated refactor beyond single-story scope."
+      "passes": true,
+      "notes": "Resolved via structured contract alignment across event types, engine integration, event loader, and compatibility typing. `npm run typecheck` and `npm run build` are green."
     },
     {
       "id": "US-004",
@@ -55,8 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "BLOCKED: state model and engine entry remain fragmented (e.g., duplicated PlayerState definitions and multiple active engine paths) and require resolution of US-003 type-contract divergence first."
+      "passes": true,
+      "notes": "State model convergence completed on `eventTypes` contract with `useNewGameEngine` as primary frontend path. Main flow event progression remains verifiable and interruptible."
     },
     {
       "id": "US-005",
@@ -70,8 +70,8 @@
         "Build passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "BLOCKED: CI gate can be wired, but acceptance requires baseline build/test green; build is currently red due unresolved type-system issues tracked in US-003/US-004."
+      "passes": true,
+      "notes": "Added CI quality gate at `.github/workflows/ci.yml` to run `typecheck + build + test` on pull requests. Local `npm run validate` is green."
     }
   ]
 }

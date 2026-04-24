@@ -1,0 +1,79 @@
+{
+  "project": "Wuxia Life Remediation V2",
+  "branchName": "ralph/remediation-v2-real-test-gate",
+  "description": "Repair the project from build-only confidence to real regression confidence by enforcing true test gates and fixing the three currently failing critical paths: Flag effect failure, integration resource break, and tutorial/simulation quality regressions.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Real Test Gate as Default",
+      "description": "As a developer, I want npm test to run real regression suites so that validation reflects actual gameplay correctness instead of superficial checks.",
+      "acceptanceCriteria": [
+        "npm test executes AllTests, IntegrationTests, and testGameSimulation",
+        "validate depends on the real test gate",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Fix Flag Effect Core Failure",
+      "description": "As a developer, I want the Flag set effect logic to behave correctly so that core state transitions are reliable.",
+      "acceptanceCriteria": [
+        "AllTests no longer reports the Flag set effect assertion failure",
+        "Flag state is correctly persisted for the tested scenario",
+        "npm run build succeeds"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Restore Integration Resource Consistency",
+      "description": "As a developer, I want integration tests to resolve all referenced data assets so that integration validation can run end-to-end.",
+      "acceptanceCriteria": [
+        "IntegrationTests runs without ERR_MODULE_NOT_FOUND on demonic.json",
+        "Referenced line-data assets are consistent with current data layout",
+        "npm test progresses through integration stage"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Recover Tutorial Trigger Path",
+      "description": "As a designer/developer, I want tutorial events to trigger in simulation so that onboarding progression is not silently broken.",
+      "acceptanceCriteria": [
+        "testGameSimulation no longer reports tutorial events not triggered",
+        "Tutorial trigger age/condition path is verifiable in simulation output",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Stabilize Early Growth Curve Signals",
+      "description": "As a designer/developer, I want core growth signals (learning/combat) to stay within expected baseline so that simulation no longer flags persistent low-growth anomalies.",
+      "acceptanceCriteria": [
+        "testGameSimulation no longer emits persistent core warnings for low knowledge/combat growth",
+        "Weight/trigger adjustments are limited to in-scope event sets",
+        "npm test passes"
+      ],
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "title": "Document and Enforce Release Validation",
+      "description": "As a team, I want a documented pre-merge validation contract so that all contributors follow the same quality gate.",
+      "acceptanceCriteria": [
+        "Documentation clearly defines required checks: typecheck + build + real tests",
+        "Validation workflow is reproducible for local and CI usage",
+        "No unresolved critical test failures remain"
+      ],
+      "priority": 6,
+      "passes": false
+    }
+  ]
+}

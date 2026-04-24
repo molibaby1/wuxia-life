@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "tsx tests/testTypeExports.ts",
+    "test": "tsx tests/runRealTestGate.ts",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
     "validate": "npm run typecheck && npm run build && npm test",

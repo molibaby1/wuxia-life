@@ -1,6 +1,7 @@
 ## Codebase Patterns
 
 - Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
+- Real test gate should execute suites sequentially with aggregated exit status (do not short-circuit with shell `&&`), so full regression signal is always visible.
 
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
@@ -73,4 +74,19 @@
 - **Learnings for future iterations:**
   - Large legacy type drift is faster to resolve with contract-first convergence than file-by-file local fixes.
   - Establishing CI gates immediately after baseline recovery prevents regression back to “perma-red” branches.
+---
+
+## [2026-04-24 13:58] - US-001
+- Implemented a dedicated real-test-gate runner (`tests/runRealTestGate.ts`) to execute `AllTests`, `IntegrationTests`, and `testGameSimulation` sequentially with aggregated pass/fail status.
+- Updated `npm test` to use the runner so all regression suites execute even when earlier suites fail.
+- Validation evidence:
+  - `npm run typecheck` ✅
+  - `npm test` ✅ executes all 3 suites and returns non-zero when any suite fails
+- Files changed:
+  - `tests/runRealTestGate.ts`
+  - `package.json`
+  - `docs/PRD/project-remediation-plan-v2.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Aggregating suite exit codes in a runner preserves complete failure visibility while keeping CI/local gate behavior strict.
 ---

@@ -119,3 +119,17 @@
 - **Learnings for future iterations:**
   - Integration fixtures should derive file lists from `events.json` to avoid drift when narrative line files are renamed/split.
 ---
+
+## [2026-04-24 14:01] - US-004
+- Updated `tests/testGameSimulation.ts` tutorial detection to align with current onboarding model: prologue-tagged events and early-age (<=12) onboarding flow are treated as tutorial triggers.
+- Added trigger path visibility in simulation logs by printing age-condition ranges from `triggerConditions.age` / `ageRange`.
+- Validation evidence:
+  - `./node_modules/.bin/tsx tests/testGameSimulation.ts` ✅ no longer reports “没有触发任何教程事件”
+  - Simulation output now includes tutorial trigger age path entries (e.g. `0-0`, `8-12`)
+- Files changed:
+  - `tests/testGameSimulation.ts`
+  - `docs/PRD/project-remediation-plan-v2.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Test assertions for tutorial flow should map to semantic onboarding phases, not a legacy single `eventType: tutorial` field.
+---

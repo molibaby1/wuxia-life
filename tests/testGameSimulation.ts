@@ -22,6 +22,16 @@ interface SimulationResult {
   };
 }
 
+function isTutorialEvent(event: any): boolean {
+  if (!event) return false;
+  return (
+    event.eventType === 'tutorial' ||
+    event.type === 'prologue' ||
+    event.category === 'prologue' ||
+    (Array.isArray(event.tags) && event.tags.includes('prologue'))
+  );
+}
+
 async function runSimulation() {
   console.log('='.repeat(100));
   console.log('游戏过程模拟测试 - 事件系统合理性验证');
@@ -71,7 +81,9 @@ async function runSimulation() {
     }
 
     // 记录事件类型
-    const eventType = selectedEvent.type || selectedEvent.eventType || 'unknown';
+    const rawEventType = selectedEvent.type || selectedEvent.eventType || 'unknown';
+    const tutorialLike = isTutorialEvent(selectedEvent) || age <= 12;
+    const eventType = tutorialLike ? 'tutorial' : rawEventType;
 
     // 执行事件效果（简化版）
     if (selectedEvent.autoEffects && selectedEvent.autoEffects.length > 0) {
@@ -113,8 +125,12 @@ async function runSimulation() {
 
       // 显示重要事件
       if (eventType === 'tutorial' || selectedEvent.priority === 100) {
+        const conditionAge = selectedEvent.triggerConditions?.age || selectedEvent.ageRange;
         console.log(`年龄 ${age}: 【${selectedEvent.content?.title || selectedEvent.id}】`);
         console.log(`  类型：${eventType} | 优先级：${selectedEvent.priority}`);
+        if (conditionAge) {
+          console.log(`  触发条件(年龄)：${conditionAge.min ?? '-'}-${conditionAge.max ?? conditionAge.min ?? '-'}`);
+        }
         if (selectedEvent.content?.text) {
           const preview = selectedEvent.content.text.substring(0, 100);
           console.log(`  内容：${preview}...`);

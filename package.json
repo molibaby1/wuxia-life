@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "test": "tsx tests/runRealTestGate.ts",
+    "stability": "tsx scripts/runStabilityGate.ts",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
     "validate": "npm run typecheck && npm run build && npm test",

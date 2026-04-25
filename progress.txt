@@ -1,5 +1,6 @@
 ## Codebase Patterns
 
+- Blocker log substrings and gate child `NODE_OPTIONS` hygiene live in `tests/qualityGatePolicy.ts`; import this module from auxiliary runners instead of `runRealTestGate.ts` to avoid accidental suite execution on import.
 - `ConditionEvaluator` must embed replaced `flags.*` / `player.*` string values using `JSON.stringify` (or equivalent) so compared literals like `'unconventional'` never degrade into bare identifiers inside `new Function`.
 - `DifficultyManager` must guard all `localStorage` access with a real browser check (`typeof window !== 'undefined'` + `window.localStorage`); Node's experimental `globalThis.localStorage` triggers `--localstorage-file` warnings during gates.
 - Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
@@ -43,6 +44,22 @@
   - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
   - `progress.txt`
 - Validation evidence: `npm run typecheck` ✅
+---
+
+## [2026-04-25 09:35] - US-004 (quality-gate-hardening-v4)
+- Extracted shared `tests/qualityGatePolicy.ts` (Blocker substrings + `gateChildEnv`) for reuse without executing the real test gate on import.
+- Added `scripts/runStabilityGate.ts` and `npm run stability` (default `STABILITY_RUNS=20`) with per-run exit code + log blocker checks; failures print full captured output for evidence.
+- Documented rules in `docs/stability-gate.md`; taxonomy doc now points at `qualityGatePolicy.ts` as the single source of truth for Blocker strings.
+- Files changed:
+  - `tests/qualityGatePolicy.ts`
+  - `tests/runRealTestGate.ts`
+  - `scripts/runStabilityGate.ts`
+  - `docs/stability-gate.md`
+  - `docs/test-output-severity-taxonomy.md`
+  - `package.json`
+  - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
+  - `progress.txt`
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `STABILITY_RUNS=3 npm run stability` ✅
 ---
 
 ## [2026-04-24 10:42] - US-001

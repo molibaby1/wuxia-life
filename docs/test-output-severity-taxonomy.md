@@ -1,6 +1,6 @@
 # 测试输出严重级别与关键词字典
 
-本文档定义真实测试门禁（`npm test` → `tests/runRealTestGate.ts`）日志的**严重级别**与**关键词字典**，与 `docs/release-validation-contract.md` 一并作为合并前口径。
+本文档定义真实测试门禁（`npm test` → `tests/runRealTestGate.ts`，策略常量见 `tests/qualityGatePolicy.ts`）日志的**严重级别**与**关键词字典**，与 `docs/release-validation-contract.md` 一并作为合并前口径。
 
 ## 严重级别
 
@@ -12,9 +12,9 @@
 
 ## Blocker 与 Warning 的边界
 
-- **Blocker**：在门禁日志中出现即视为失败（**即使进程退出码为 0**）。当前由 `tests/runRealTestGate.ts` 在聚合日志上扫描子串；与退出码检查是 **AND 语义下的「任一命中即失败」**（退出码非 0 **或** 命中 Blocker 子串 → 失败）。
+- **Blocker**：在门禁日志中出现即视为失败（**即使进程退出码为 0**）。当前由 `tests/runRealTestGate.ts`（及 `npm run stability`）在聚合日志上按 `tests/qualityGatePolicy.ts` 扫描子串；与退出码检查是 **AND 语义下的「任一命中即失败」**（退出码非 0 **或** 命中 Blocker 子串 → 失败）。
 - **Warning**：不列入上述子串扫描表；但若属于「曾修复又复发」的已知模式（例如历史中的 `Unknown stat:*`），按发布合同视为 **关键 Warning**，须在合并前清零或显式豁免。
-- **介于两者之间**：若新出现一类错误文本，团队应先在本文档「关键词字典」中归类并（若属 Blocker）同步更新 `tests/runRealTestGate.ts` 中的 `GATE_BLOCKER_SUBSTRINGS`，再合并行为变更。
+- **介于两者之间**：若新出现一类错误文本，团队应先在本文档「关键词字典」中归类并（若属 Blocker）同步更新 `tests/qualityGatePolicy.ts` 中的 `GATE_BLOCKER_SUBSTRINGS`，再合并行为变更。
 
 ## 关键词字典（与代码同步）
 
@@ -31,5 +31,5 @@
 
 ## 维护约定
 
-- 新增 Blocker 模式：更新 `tests/runRealTestGate.ts` 中的 `GATE_BLOCKER_SUBSTRINGS`，并在此表增加一行示例。
+- 新增 Blocker 模式：更新 `tests/qualityGatePolicy.ts` 中的 `GATE_BLOCKER_SUBSTRINGS`，并在此表增加一行示例。
 - 仅文档描述、不更新扫描表的变更**无效**；以代码中的常量为准。

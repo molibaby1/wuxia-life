@@ -1,34 +1,16 @@
 import { spawnSync } from 'node:child_process';
+import {
+  GATE_BLOCKER_SUBSTRINGS,
+  findBlockerKeywordInLog,
+  gateChildEnv,
+} from './qualityGatePolicy.ts';
 
-/** 子进程不继承 NODE_OPTIONS，避免宿主/IDE 注入的 `--localstorage-file` 等污染门禁日志 */
-function gateChildEnv(): NodeJS.ProcessEnv {
-  const env = { ...process.env };
-  delete env.NODE_OPTIONS;
-  return env;
-}
+export { GATE_BLOCKER_SUBSTRINGS, findBlockerKeywordInLog } from './qualityGatePolicy.ts';
 
 type Suite = {
   name: string;
   entry: string;
 };
-
-/**
- * Blocker substrings: if any appear in combined gate output, the gate fails
- * even when all suite exit codes are 0 (false-green prevention).
- */
-export const GATE_BLOCKER_SUBSTRINGS = [
-  'Failed to evaluate expression',
-  'ReferenceError',
-  'Unknown stat',
-  'localstorage-file invalid path',
-] as const;
-
-export function findBlockerKeywordInLog(log: string): (typeof GATE_BLOCKER_SUBSTRINGS)[number] | undefined {
-  for (const s of GATE_BLOCKER_SUBSTRINGS) {
-    if (log.includes(s)) return s;
-  }
-  return undefined;
-}
 
 const suites: Suite[] = [
   { name: 'AllTests', entry: 'tests/AllTests.ts' },

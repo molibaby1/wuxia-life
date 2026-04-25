@@ -31,21 +31,32 @@ while true; do
   story_id="$(jq -r '.id' <<<"$story_json")"
   story_title="$(jq -r '.title' <<<"$story_json")"
 
-  prompt="$(cat <<EOF
-Follow the Ralph autonomous loop described in: file://$RALPH_SKILL
-Workspace root: $ROOT
-PRD file (update passes and append progress here only): $PRD_JSON
-
-Pick exactly ONE user story and implement it completely:
-$story_json
-
-Rules:
-- One story per iteration; commit message: feat: [$story_id] - $story_title
-- Run project checks (at least: npm run typecheck; include npm test when the story touches runtime/tests).
-- Set this story's passes to true in the PRD JSON above; append progress.txt per the skill.
-- Do not bundle multiple stories in one commit.
-EOF
-)"
+  prompt="$(jq -n \
+    --arg skill "file://${RALPH_SKILL}" \
+    --arg root "$ROOT" \
+    --arg prd "$PRD_JSON" \
+    --arg story "$story_json" \
+    --arg sid "$story_id" \
+    --arg stitle "$story_title" \
+    -r '
+      [
+        "Follow the Ralph autonomous loop described in: " + $skill,
+        "Workspace root: " + $root,
+        "PRD file (update passes and append progress here only): " + $prd,
+        "",
+        "Pick exactly ONE user story and implement it completely:",
+        $story,
+        "",
+        "Rules:",
+        "- One story per iteration; git commit message format: feat: STORY_ID - STORY_TITLE (use the id and title from this story).",
+        "- Run project checks (at least: npm run typecheck; include npm test when the story touches runtime/tests).",
+        "- Set this story passes to true in the PRD JSON; append progress.txt per the skill.",
+        "- Do not bundle multiple stories in one commit.",
+        "",
+        "Story id: " + $sid,
+        "Story title: " + $stitle
+      ] | join("\n")
+    ')"
 
   echo "=== Ralph → cursor agent: $story_id ($story_title) ==="
   cursor agent --print --trust --force --workspace "$ROOT" "$prompt"

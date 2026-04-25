@@ -97,6 +97,17 @@ export class ConditionEvaluator implements IConditionEvaluator {
   }
   
   /**
+   * 将状态值嵌入为可在 Function 体中求值的 JS 片段（字符串必须带引号，避免裸标识符 ReferenceError）。
+   */
+  private valueToJsSnippet(value: unknown): string {
+    if (value === undefined) return 'undefined';
+    if (value === null) return 'null';
+    if (typeof value === 'string') return JSON.stringify(value);
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    return JSON.stringify(value);
+  }
+
+  /**
    * 替换属性访问
    */
   private replacePropertyAccess(expression: string, state: GameState): string {
@@ -105,7 +116,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
       /player\.(\w+)/g,
       (_, prop) => {
         const value = (state.player as any)[prop];
-        return value !== undefined ? value : 'undefined';
+        return value !== undefined ? this.valueToJsSnippet(value) : 'undefined';
       }
     );
     
@@ -114,7 +125,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
       /flags\.(\w+)/g,
       (_, prop) => {
         const value = state.flags[prop];
-        return value !== undefined ? String(value) : 'undefined';
+        return value !== undefined ? this.valueToJsSnippet(value) : 'undefined';
       }
     );
     
@@ -124,7 +135,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
       /\b(chivalry|reputation|martialPower|externalSkill|internalSkill|qinggong|constitution|charisma|comprehension|knowledge|connections|money|age)\b/g,
       (_, prop) => {
         const value = (state.player as any)?.[prop];
-        return value !== undefined ? value : '0';
+        return value !== undefined ? this.valueToJsSnippet(value) : '0';
       }
     );
     

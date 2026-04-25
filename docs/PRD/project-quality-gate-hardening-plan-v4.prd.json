@@ -1,0 +1,67 @@
+{
+  "project": "Wuxia Life Quality Gate Hardening V4",
+  "branchName": "ralph/quality-gate-hardening-v4",
+  "description": "Harden the quality gate to eliminate false-green outcomes by combining exit-code checks with blocker-log scanning, warning classification, environment-noise cleanup strategy, and a repeatable stability gate before CI/release closure.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Block False-Green by Log-Aware Gate",
+      "description": "As a maintainer, I want the real test gate to fail on blocker error logs so that runtime errors cannot pass as successful builds.",
+      "acceptanceCriteria": [
+        "Gate policy includes blocker keywords: Failed to evaluate expression, ReferenceError, Unknown stat, localstorage-file invalid path",
+        "Policy defines failure behavior when any blocker keyword is detected",
+        "Validation contract remains compatible with existing real test suites"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Define Error/Warning Classification Standard",
+      "description": "As a team, I want a shared severity taxonomy for test output so that blocker issues are consistently prevented from merging.",
+      "acceptanceCriteria": [
+        "Severity levels (Blocker/Warning/Info) are defined",
+        "Keyword dictionary is documented with examples",
+        "Boundary between blocker and warning is explicit"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Eliminate Environment Warning Noise",
+      "description": "As a maintainer, I want environment initialization standards for local and CI so that noisy warnings do not hide real defects.",
+      "acceptanceCriteria": [
+        "Plan defines valid localstorage path strategy for local and CI",
+        "Warning elimination checklist is documented",
+        "Environment setup requirements are reproducible"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Introduce Stability Gate Specification",
+      "description": "As a team, I want a repeatable multi-run simulation gate so that non-deterministic failures are detected before release.",
+      "acceptanceCriteria": [
+        "Stability gate defines batch-run count and pass/fail rules",
+        "Any blocker occurrence in batch run is specified as failure",
+        "Output requirements include reproducible failure evidence"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "CI and Release Contract Closure",
+      "description": "As a release owner, I want CI/release checks aligned with hardened gate policy so that false-green regressions cannot ship.",
+      "acceptanceCriteria": [
+        "CI required checks include typecheck, build, real gate, and stability gate",
+        "Release checklist includes zero blocker-log requirement",
+        "Team documentation reflects final merged policy"
+      ],
+      "priority": 5,
+      "passes": false
+    }
+  ]
+}

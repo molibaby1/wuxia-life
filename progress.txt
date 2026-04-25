@@ -1,5 +1,7 @@
 ## Codebase Patterns
 
+- `ConditionEvaluator` must embed replaced `flags.*` / `player.*` string values using `JSON.stringify` (or equivalent) so compared literals like `'unconventional'` never degrade into bare identifiers inside `new Function`.
+- `DifficultyManager` must guard all `localStorage` access with a real browser check (`typeof window !== 'undefined'` + `window.localStorage`); Node's experimental `globalThis.localStorage` triggers `--localstorage-file` warnings during gates.
 - Report artifacts are generated under `public/reports/`; keep only `manifest.json` tracked and ignore volatile report files.
 - Real test gate should execute suites sequentially with aggregated exit status (do not short-circuit with shell `&&`), so full regression signal is always visible.
 - Keep `state.flags` and `state.player.flags` synchronized when mutating flags to avoid read-path inconsistencies across engine and tests.
@@ -8,6 +10,22 @@
 - For `STAT_MODIFY`, treat recognized player stat keys with `undefined` values as legacy-uninitialized state (default to `0`) and warn only for truly unknown stat keys.
 - Integration baseline states (e.g., `GameTestFramework.createTestState`) must include every commonly modified stat field (such as `charisma`, `constitution`, `comprehension`) to avoid `Unknown stat` warnings that mask real regressions.
 - Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
+
+## [2026-04-25 09:15] - US-001 (quality-gate-hardening-v4)
+- Extended `tests/runRealTestGate.ts` with log-aware blocker scan (exit code 0 is insufficient if blocker substrings appear in combined stdout/stderr).
+- Fixed false-positive expression evaluation for string flag values (`ConditionEvaluator.valueToJsSnippet`).
+- Stopped Node `localstorage-file` warnings in gates by gating `DifficultyManager` persistence on real browser `window.localStorage` and stripping `NODE_OPTIONS` for gate child processes.
+- Files changed:
+  - `tests/runRealTestGate.ts`
+  - `src/core/ConditionEvaluator.ts`
+  - `src/core/DifficultyManager.ts`
+  - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Any `new Function`-based expression replacer must serialize string state as quoted JS literals.
+  - Avoid touching `localStorage` in Node test paths; prefer `window`-scoped checks consistent with `SaveManager`.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---
 
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.

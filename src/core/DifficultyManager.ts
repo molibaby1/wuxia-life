@@ -16,6 +16,11 @@ import { DIFFICULTY_PRESETS, DEFAULT_DIFFICULTY_CONFIG } from '../types/difficul
 
 const STORAGE_KEY = 'wuxia_difficulty_config';
 
+const isBrowser =
+  typeof window !== 'undefined' &&
+  typeof window.localStorage !== 'undefined' &&
+  typeof window.localStorage.getItem === 'function';
+
 /**
  * 难度配置管理器（响应式单例）
  */
@@ -131,8 +136,9 @@ export const difficultyManager = reactive({
    * 保存配置到 localStorage
    */
   saveConfig(): void {
+    if (!isBrowser) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
     } catch (e) {
       console.warn('[DifficultyManager] 保存配置失败', e);
     }
@@ -143,10 +149,8 @@ export const difficultyManager = reactive({
    */
   loadConfig(): void {
     try {
-      if (typeof localStorage === 'undefined' || typeof localStorage.getItem !== 'function') {
-        return;
-      }
-      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!isBrowser) return;
+      const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         this.config = { ...DEFAULT_DIFFICULTY_CONFIG, ...parsed };

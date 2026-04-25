@@ -37,7 +37,7 @@
         "Environment setup requirements are reproducible"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-004",

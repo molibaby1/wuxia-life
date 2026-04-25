@@ -36,6 +36,15 @@
 - Validation evidence: `npm run typecheck` ✅
 ---
 
+## [2026-04-25 09:28] - US-003 (quality-gate-hardening-v4)
+- Added `docs/test-environment-conventions.md` covering localStorage/file storage split, NODE_OPTIONS hygiene, CI parity, and a pre-merge warning elimination checklist.
+- Files changed:
+  - `docs/test-environment-conventions.md`
+  - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
+  - `progress.txt`
+- Validation evidence: `npm run typecheck` ✅
+---
+
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
 - Files changed:

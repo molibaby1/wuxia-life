@@ -62,6 +62,19 @@
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `STABILITY_RUNS=3 npm run stability` ✅
 ---
 
+## [2026-04-25 09:45] - US-005 (quality-gate-hardening-v4)
+- CI: added `npm run stability` step to `.github/workflows/ci.yml`; local `npm run validate` now includes stability after the real test gate.
+- Release contract: documented log-aware Blocker-zero requirement, stability gate, environment doc cross-links, and optional `scripts/ralph-cursor-agent.sh` for headless Ralph via `cursor agent --print --trust --force`.
+- Files changed:
+  - `.github/workflows/ci.yml`
+  - `package.json`
+  - `docs/release-validation-contract.md`
+  - `scripts/ralph-cursor-agent.sh`
+  - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
+  - `progress.txt`
+- Validation evidence: `npm run validate` ✅ (includes 20-run stability)
+---
+
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
 - Files changed:

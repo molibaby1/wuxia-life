@@ -9,10 +9,11 @@ Run these commands in order:
 1. `npm run typecheck`
 2. `npm run build`
 3. `npm test`
+4. `npm run stability`
 
 Or run the combined gate:
 
-- `npm run validate`
+- `npm run validate` (runs all four stages above)
 
 ## What `npm test` Means
 
@@ -24,6 +25,12 @@ Or run the combined gate:
 
 The gate runs all suites sequentially and returns non-zero if any suite fails.
 
+Additionally, the runner performs **log-aware blocking**: if aggregated stdout/stderr contains any **Blocker** substring defined in `tests/qualityGatePolicy.ts`, the gate fails even when every suite exited with code `0`. See `docs/test-output-severity-taxonomy.md`.
+
+## Stability Gate
+
+`npm run stability` runs `tests/testGameSimulation.ts` repeatedly (default **20** runs, override with `STABILITY_RUNS`). Each run must exit `0` and must not contain Blocker substrings in its captured log. Specification: `docs/stability-gate.md`.
+
 ## Local Workflow
 
 Before opening a PR:
@@ -32,6 +39,8 @@ Before opening a PR:
 2. Run `npm run validate`.
 3. Do not merge while any check is red.
 
+Environment conventions (localStorage, `NODE_OPTIONS`, CI parity): `docs/test-environment-conventions.md`.
+
 ## CI Workflow
 
 CI runs the same gate in `.github/workflows/ci.yml`:
@@ -39,6 +48,7 @@ CI runs the same gate in `.github/workflows/ci.yml`:
 - `npm run typecheck`
 - `npm run build`
 - `npm test`
+- `npm run stability`
 
 Any failure blocks merge readiness.
 
@@ -56,6 +66,16 @@ All items must be true before merge:
 
 - `npm run typecheck` passes
 - `npm run build` passes
-- `npm test` passes (real regression gate)
+- `npm test` passes (real regression gate + log-aware Blocker scan)
+- `npm run stability` passes (default batch count)
+- Gate logs contain **zero** Blocker-keyword hits (see `docs/test-output-severity-taxonomy.md`)
 - Gate logs have no unresolved critical warnings
 - Local run result is reproducible in CI using the same command set
+
+## Autonomous PRD execution (optional)
+
+To drive the Ralph loop via Cursor Agent headless mode (`cursor agent --print --trust --force`), use:
+
+- `scripts/ralph-cursor-agent.sh [path/to.prd.json]`
+
+Requires `cursor`, `jq`, and valid Cursor agent authentication. The script reads the next `passes: false` story by `priority`, invokes the agent with the `ralph-run` skill path, and repeats until all stories are complete.

@@ -61,7 +61,7 @@
         "Team documentation reflects final merged policy"
       ],
       "priority": 5,
-      "passes": false
+      "passes": true
     }
   ]
 }

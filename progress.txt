@@ -27,6 +27,15 @@
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
 
+## [2026-04-25 09:22] - US-002 (quality-gate-hardening-v4)
+- Added `docs/test-output-severity-taxonomy.md` defining Blocker/Warning/Info, keyword dictionary aligned with `GATE_BLOCKER_SUBSTRINGS`, and explicit Blocker vs Warning boundary.
+- Files changed:
+  - `docs/test-output-severity-taxonomy.md`
+  - `docs/PRD/project-quality-gate-hardening-plan-v4.prd.json`
+  - `progress.txt`
+- Validation evidence: `npm run typecheck` ✅
+---
+
 ## [2026-04-24 10:42] - US-001
 - Implemented repository hygiene for generated report artifacts by extending ignore rules and documenting artifact tracking convention.
 - Files changed:

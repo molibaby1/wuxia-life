@@ -25,7 +25,7 @@
         "Boundary between blocker and warning is explicit"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-003",

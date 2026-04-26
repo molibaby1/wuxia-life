@@ -14,11 +14,77 @@
 import { GameTestFramework, TestSuite, assert, assertEqual } from './GameTestFramework';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
+import { useNewGameEngine } from '../src/composables/useNewGameEngine';
+import { gameEngine } from '../src/core/GameEngineIntegration';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
+
+async function runChoiceOutcomeBranchCase(options: {
+  name: string;
+  statePower: number;
+  outcomes: Array<{
+    text: string;
+    condition?: { type: 'expression'; expression: string };
+    effects: Array<{ type: EffectType; target: string }>;
+  }>;
+  expectedOutcomeText: string;
+  expectedEffectTarget: string;
+}) {
+  const engine = useNewGameEngine();
+  const evaluator = new ConditionEvaluator();
+  const state = framework.createTestState();
+  state.player.martialPower = options.statePower;
+
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalGetGameState = gameEngine.getGameState;
+  const originalIsChoiceAvailable = gameEngine.isChoiceAvailable;
+  const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
+
+  let executedEffectTarget = '';
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    (gameEngine as any).getGameState = () => state;
+    (gameEngine as any).isChoiceAvailable = (condition: any) => evaluator.evaluate(condition, state);
+    (gameEngine as any).executeChoiceEffects = async (effects: Array<{ target: string }>) => {
+      executedEffectTarget = effects[0]?.target || '';
+      return state;
+    };
+
+    (engine.engineState as any).currentEvent = {
+      id: `test_choice_event_${options.name}`,
+      eventType: 'choice',
+      choices: [
+        {
+          id: `test_choice_${options.name}`,
+          text: `测试选项-${options.name}`,
+          effects: [{ type: EffectType.FLAG_SET, target: 'default_effect_should_not_hit' }],
+          outcomes: options.outcomes,
+        },
+      ],
+    };
+
+    await engine.handleChoice({ id: `test_choice_${options.name}` } as any);
+
+    assertEqual(engine.engineState.lastOutcomeText, options.expectedOutcomeText, '应命中预期 outcome 文本');
+    assertEqual(executedEffectTarget, options.expectedEffectTarget, '应执行预期 outcome 效果');
+  } finally {
+    (gameEngine as any).getGameState = originalGetGameState;
+    (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
+    (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    (engine.engineState as any).currentEvent = null;
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+  }
+}
 
 // ========== 1. 核心功能测试套件 ==========
 const coreFunctionSuite: TestSuite = {
@@ -171,6 +237,94 @@ const coreFunctionSuite: TestSuite = {
 
         const result = evaluator.evaluate(condition, state);
         assert(result === false, '不满足条件应被判定为 false');
+      },
+    },
+    {
+      name: '多结果分支 - 条件命中时应选择对应结果',
+      description: '测试 expression 条件满足时命中对应 outcome',
+      test: async () => {
+        await runChoiceOutcomeBranchCase({
+          name: 'condition_success',
+          statePower: 30,
+          outcomes: [
+            {
+              text: '命中成功分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 20' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'success_branch' }],
+            },
+            {
+              text: '兜底分支',
+              effects: [{ type: EffectType.FLAG_SET, target: 'fallback_branch' }],
+            },
+          ],
+          expectedOutcomeText: '命中成功分支',
+          expectedEffectTarget: 'success_branch',
+        });
+      },
+    },
+    {
+      name: '多结果分支 - 条件失败时应跳过并命中兜底',
+      description: '测试 expression 条件失败时不会错误命中，且可落入 fallback',
+      test: async () => {
+        await runChoiceOutcomeBranchCase({
+          name: 'condition_failure',
+          statePower: 10,
+          outcomes: [
+            {
+              text: '高门槛分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 99' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'high_threshold_branch' }],
+            },
+            {
+              text: '兜底分支',
+              effects: [{ type: EffectType.FLAG_SET, target: 'fallback_branch' }],
+            },
+          ],
+          expectedOutcomeText: '兜底分支',
+          expectedEffectTarget: 'fallback_branch',
+        });
+      },
+    },
+    {
+      name: '多结果分支 - 仅兜底分支时应正常执行',
+      description: '测试没有条件分支时可直接命中 fallback outcome',
+      test: async () => {
+        await runChoiceOutcomeBranchCase({
+          name: 'fallback_only',
+          statePower: 5,
+          outcomes: [
+            {
+              text: '唯一兜底分支',
+              effects: [{ type: EffectType.FLAG_SET, target: 'fallback_only_branch' }],
+            },
+          ],
+          expectedOutcomeText: '唯一兜底分支',
+          expectedEffectTarget: 'fallback_only_branch',
+        });
+      },
+    },
+    {
+      name: '多结果分支 - 顺序优先级应取第一个命中的分支',
+      description: '测试当多个分支条件都满足时，按定义顺序选择第一个',
+      test: async () => {
+        await runChoiceOutcomeBranchCase({
+          name: 'order_priority',
+          statePower: 50,
+          outcomes: [
+            {
+              text: '第一个命中分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 20' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'first_match_branch' }],
+            },
+            {
+              text: '第二个命中分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 30' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'second_match_branch' }],
+            },
+          ],
+          expectedOutcomeText: '第一个命中分支',
+          expectedEffectTarget: 'first_match_branch',
+        });
       },
     },
     {

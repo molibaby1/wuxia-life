@@ -357,3 +357,16 @@
   - Invalid or unknown condition payloads should fail closed (`false`) so fallback outcomes handle control flow explicitly.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 08:56] - US-005
+- Added multi-outcome branch regression coverage in `AllTests` by exercising `useNewGameEngine().handleChoice` with mocked `gameEngine` methods to validate real branch selection behavior.
+- New tests cover: expression-condition success, expression-condition failure, fallback-only branch, and first-match branch order priority when multiple outcomes are true.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - For branch-order regressions, assert both selected `outcomeText` and executed effect target to avoid false positives from text-only checks.
+  - Use composable entrypoint tests (`handleChoice`) with light method stubs to lock end-to-end branch behavior without introducing UI coupling.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

@@ -1,4 +1,17 @@
 import type { EffectDefinition } from './effects';
+export type {
+  ChoiceFeedbackVisibility,
+  ChoiceFeedbackStatImpact,
+  ChoiceFeedbackRelationshipImpact,
+  ChoiceFeedbackRouteImpact,
+  ChoiceFeedbackLongTermFlag,
+  ChoiceFeedbackRiskHint,
+  ChoiceFeedbackPlayerView,
+  ChoiceFeedbackDiagnosticView,
+  ChoiceFeedbackModel,
+  ChoiceFeedbackFallbackInput,
+} from './choiceFeedback';
+export { createChoiceFeedbackFallback } from './choiceFeedback';
 import type {
   EffectOperator,
   EffectType,

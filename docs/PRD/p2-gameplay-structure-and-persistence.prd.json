@@ -42,7 +42,8 @@
         "Design notes are written"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true,
+      "notes": "Defined `ChoiceFeedbackModel` and fallback contract in `src/types/choiceFeedback.ts`, including narrative/stat/relationship/route/long-term/risk fields with explicit player vs diagnostic visibility boundaries. Added deterministic fallback helper `createChoiceFeedbackFallback` and design notes in `docs/test-reports/us-003-structured-choice-feedback-model.md`."
     },
     {
       "id": "US-004",

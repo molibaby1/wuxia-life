@@ -875,3 +875,19 @@
   - Inventory stories should always bind each feedback target to both data origin and final player-facing render point, otherwise classification becomes ambiguous.
   - For route/relationship feedback, separate "state changed" from "player can see why it changed"; both are needed before implementing structured feedback UX.
 ---
+
+## [2026-04-27 07:51] - US-003
+- Defined a structured choice-feedback schema in `src/types/choiceFeedback.ts` covering narrative result, stat impact, relationship impact, route impact, long-term flags, and risk hints.
+- Separated player-facing and diagnostic-only payloads via explicit `player` and `diagnostic` sections in `ChoiceFeedbackModel`.
+- Added deterministic fallback contract `createChoiceFeedbackFallback(...)` for missing narrative feedback, with traceable fallback flags and source metadata.
+- Wrote design notes in `docs/test-reports/us-003-structured-choice-feedback-model.md`, including field semantics, fallback rules, and rationale for upcoming implementation stories.
+- Files changed:
+  - `src/types/choiceFeedback.ts`
+  - `src/types/index.ts`
+  - `docs/test-reports/us-003-structured-choice-feedback-model.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keep feedback contracts split between player copy and diagnostic payload so UI stories can iterate wording without losing regression traceability.
+  - Define fallback behavior as a typed helper before generator integration to keep missing-data behavior deterministic across manual and auto-resolved choices.
+---

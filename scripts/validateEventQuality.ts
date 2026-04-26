@@ -33,6 +33,21 @@ interface EventQualityIssue {
   issueType: EventQualityIssueType;
   severity: EventQualitySeverity;
   explanation: string;
+  migrationHint?: string;
+}
+
+type EventFormatStatus = 'target' | 'legacy' | 'mixed';
+
+interface EventFormatClassification {
+  status: EventFormatStatus;
+  signals: string[];
+  migrationHints: string[];
+  dangerousReasons: string[];
+}
+
+interface ValidationResult {
+  issues: EventQualityIssue[];
+  formatByEventId: Record<string, EventFormatClassification>;
 }
 
 const RULE_BY_TYPE = new Map(EVENT_QUALITY_RULES.map((rule) => [rule.issueType, rule]));
@@ -60,7 +75,8 @@ function createIssue(
   eventId: string,
   source: string,
   issueType: EventQualityIssueType,
-  explanation: string
+  explanation: string,
+  migrationHint?: string
 ): EventQualityIssue {
   const rule = RULE_BY_TYPE.get(issueType);
   if (!rule) {
@@ -73,6 +89,7 @@ function createIssue(
     issueType,
     severity: rule.severity,
     explanation,
+    migrationHint,
   };
 }
 
@@ -110,6 +127,100 @@ function collectEffects(event: EventDefinition): EffectDefinition[] {
   }
 
   return effects;
+}
+
+function classifyEventFormat(event: EventDefinition): EventFormatClassification {
+  const effects = collectEffects(event);
+  const canonicalSignals: string[] = [];
+  const legacySignals: string[] = [];
+  const migrationHints: string[] = [];
+  const dangerousReasons: string[] = [];
+
+  const hasTopLevelAutoEffects = Array.isArray(event.autoEffects) && event.autoEffects.length > 0;
+  if (hasTopLevelAutoEffects) {
+    canonicalSignals.push('top-level autoEffects');
+  }
+
+  const hasModernConditions = (event.conditions || []).some((condition) => isExpressionCondition(condition));
+  if (hasModernConditions) {
+    canonicalSignals.push('expression-based conditions');
+  }
+
+  if (event.thresholds && typeof event.thresholds === 'object') {
+    canonicalSignals.push('thresholds gate');
+  }
+
+  const hasLegacyContentAutoEffects = Array.isArray(event.content?.autoEffects) && event.content.autoEffects.length > 0;
+  if (hasLegacyContentAutoEffects) {
+    legacySignals.push('content.autoEffects');
+    migrationHints.push('Move `content.autoEffects` to top-level `autoEffects`.');
+  }
+
+  const hasLegacyRequirementsAttributes =
+    event.requirements &&
+    typeof event.requirements === 'object' &&
+    Object.prototype.hasOwnProperty.call(event.requirements, 'attributes');
+  if (hasLegacyRequirementsAttributes) {
+    legacySignals.push('requirements.attributes');
+    migrationHints.push('Move `requirements.attributes` to `thresholds.attributes` and expression `conditions`.');
+  }
+
+  const hasLegacyTriggerConditions = event.triggerConditions && typeof event.triggerConditions === 'object';
+  if (hasLegacyTriggerConditions) {
+    legacySignals.push('triggerConditions payload');
+    migrationHints.push('Replace `triggerConditions` with explicit `conditions` and `thresholds` fields.');
+  }
+
+  let hasAliasWithTarget = false;
+  for (const effect of effects) {
+    const hasTarget = typeof effect.target === 'string' && effect.target.trim().length > 0;
+    if (hasTarget) {
+      canonicalSignals.push('effect.target');
+    }
+
+    if (typeof effect.stat === 'string' && effect.stat.trim().length > 0) {
+      legacySignals.push('effect.stat alias');
+      migrationHints.push('Replace `effect.stat` with canonical `effect.target` for `stat_modify`.');
+      if (hasTarget) {
+        hasAliasWithTarget = true;
+      }
+    }
+
+    if (typeof effect.flag === 'string' && effect.flag.trim().length > 0) {
+      legacySignals.push('effect.flag alias');
+      migrationHints.push('Replace `effect.flag` with canonical `effect.target` for flag effects.');
+      if (hasTarget) {
+        hasAliasWithTarget = true;
+      }
+    }
+
+    if (typeof effect.event === 'string' && effect.event.trim().length > 0) {
+      legacySignals.push('effect.event alias');
+      migrationHints.push('Replace `effect.event` with canonical `effect.target` for event record/trigger effects.');
+      if (hasTarget) {
+        hasAliasWithTarget = true;
+      }
+    }
+  }
+
+  if (hasAliasWithTarget) {
+    dangerousReasons.push('Effect payload mixes canonical target and legacy alias on the same effect object.');
+  }
+
+  if (hasTopLevelAutoEffects && hasLegacyContentAutoEffects) {
+    dangerousReasons.push('Both `autoEffects` and `content.autoEffects` are present in one event.');
+  }
+
+  const canonicalDetected = canonicalSignals.length > 0;
+  const legacyDetected = legacySignals.length > 0;
+  const status: EventFormatStatus = canonicalDetected && legacyDetected ? 'mixed' : legacyDetected ? 'legacy' : 'target';
+
+  return {
+    status,
+    signals: [...new Set([...canonicalSignals, ...legacySignals])],
+    migrationHints: [...new Set(migrationHints)],
+    dangerousReasons,
+  };
 }
 
 function hasExecutableEffects(event: EventDefinition): boolean {
@@ -167,8 +278,9 @@ function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, str
   return sourceMap;
 }
 
-function validateEventQuality(events: EventDefinition[]): EventQualityIssue[] {
+function validateEventQuality(events: EventDefinition[]): ValidationResult {
   const issues: EventQualityIssue[] = [];
+  const formatByEventId: Record<string, EventFormatClassification> = {};
   const sourceById = buildLoadedSourceById(events);
   const sourceOf = (eventId: string) => sourceById.get(eventId) || 'unknown_loaded_source';
 
@@ -203,6 +315,45 @@ function validateEventQuality(events: EventDefinition[]): EventQualityIssue[] {
 
   for (const event of events) {
     const source = sourceOf(event.id);
+    const formatInfo = classifyEventFormat(event);
+    formatByEventId[event.id] = formatInfo;
+
+    if (formatInfo.status === 'legacy') {
+      const hintText = formatInfo.migrationHints.join(' ');
+      issues.push(
+        createIssue(
+          event.id,
+          source,
+          'legacy_format_detected',
+          `Legacy format signals detected: ${formatInfo.signals.join(', ')}.`,
+          hintText
+        )
+      );
+    } else if (formatInfo.status === 'mixed') {
+      const hintText = formatInfo.migrationHints.join(' ');
+      if (formatInfo.dangerousReasons.length > 0) {
+        issues.push(
+          createIssue(
+            event.id,
+            source,
+            'mixed_format_dangerous',
+            `Dangerous mixed format detected: ${formatInfo.dangerousReasons.join(' ')}`,
+            hintText
+          )
+        );
+      } else {
+        issues.push(
+          createIssue(
+            event.id,
+            source,
+            'mixed_format_detected',
+            `Mixed target/legacy format detected: ${formatInfo.signals.join(', ')}.`,
+            hintText
+          )
+        );
+      }
+    }
+
     const maxAge = event.ageRange?.max ?? event.ageRange?.min;
     if (
       typeof event.ageRange?.min !== 'number' ||
@@ -350,18 +501,28 @@ function validateEventQuality(events: EventDefinition[]): EventQualityIssue[] {
     }
   }
 
-  return issues.sort((a, b) => {
+  const sortedIssues = issues.sort((a, b) => {
     if (a.severity === b.severity) {
       return a.eventId.localeCompare(b.eventId);
     }
     const rank: Record<EventQualitySeverity, number> = { blocker: 0, major: 1, minor: 2 };
     return rank[a.severity] - rank[b.severity];
   });
+
+  return {
+    issues: sortedIssues,
+    formatByEventId,
+  };
 }
 
 function main(): void {
   const events = eventLoader.getAllEvents();
-  const issues = validateEventQuality(events);
+  const { issues, formatByEventId } = validateEventQuality(events);
+  const formatSummary = {
+    target: Object.values(formatByEventId).filter((item) => item.status === 'target').length,
+    legacy: Object.values(formatByEventId).filter((item) => item.status === 'legacy').length,
+    mixed: Object.values(formatByEventId).filter((item) => item.status === 'mixed').length,
+  };
 
   const blockerCount = issues.filter((issue) => issue.severity === 'blocker').length;
   const majorCount = issues.filter((issue) => issue.severity === 'major').length;
@@ -375,6 +536,8 @@ function main(): void {
       minor: minorCount,
       total: issues.length,
     },
+    formatSummary,
+    formatByEventId,
     issues,
   };
 

@@ -10,7 +10,10 @@ export type EventQualityIssueType =
   | 'empty_effects'
   | 'invalid_stat'
   | 'same_age_congestion'
-  | 'duplicate_title';
+  | 'duplicate_title'
+  | 'legacy_format_detected'
+  | 'mixed_format_detected'
+  | 'mixed_format_dangerous';
 
 export interface EventQualityRule {
   issueType: EventQualityIssueType;
@@ -85,6 +88,24 @@ export const EVENT_QUALITY_RULES: ReadonlyArray<EventQualityRule> = [
     severity: 'minor',
     blocking: false,
     description: 'Titles should remain unique enough for content management clarity.',
+  },
+  {
+    issueType: 'legacy_format_detected',
+    severity: 'major',
+    blocking: false,
+    description: 'Legacy-only format usage should include actionable migration guidance.',
+  },
+  {
+    issueType: 'mixed_format_detected',
+    severity: 'major',
+    blocking: false,
+    description: 'Mixed target/legacy format usage should be cleaned up before release sign-off.',
+  },
+  {
+    issueType: 'mixed_format_dangerous',
+    severity: 'blocker',
+    blocking: true,
+    description: 'Dangerous mixed format combinations can cause ambiguous runtime behavior.',
   },
 ] as const;
 

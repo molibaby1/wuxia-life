@@ -714,3 +714,18 @@
   - Format-standard stories should define one canonical authoring path and treat all aliases as explicitly deprecated to prevent mixed-shape content drift.
   - Migration windows should include both a content-freeze date and a compatibility-removal planning range, so follow-up validator/migration stories can enforce policy without ambiguity.
 ---
+
+## [2026-04-26 10:23] - US-014
+- Extended `scripts/validateEventQuality.ts` to classify runtime-loaded events as `target`, `legacy`, or `mixed`, and included `formatSummary` + `formatByEventId` in command output for migration-safe observability.
+- Added legacy/mixed format issue handling with migration hints: `legacy_format_detected` (major), `mixed_format_detected` (major), and `mixed_format_dangerous` (blocker for ambiguous dual-shape mixes).
+- Kept migration work non-destructive by only adding validation/reporting logic; no automatic event data rewrite was introduced.
+- Files changed:
+  - `scripts/eventQualityGateRules.ts`
+  - `scripts/validateEventQuality.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Format migration readiness should be tracked with per-event classification output, not only aggregate issue counts, so rollout can be staged safely.
+  - Treat same-effect dual-shape payloads (`target` + legacy alias) as blocker-level ambiguity, because runtime resolution intent is unclear.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run validate:event-quality` ✅
+---

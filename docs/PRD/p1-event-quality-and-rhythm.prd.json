@@ -195,7 +195,8 @@
         "No large automatic event rewrite is performed"
       ],
       "priority": 14,
-      "passes": false
+      "passes": true,
+      "notes": "Extended `scripts/validateEventQuality.ts` to classify every loaded event as `target`/`legacy`/`mixed`, emit migration hints for legacy fields, and raise dedicated severity-based issues for mixed formats (`mixed_format_detected` major, `mixed_format_dangerous` blocker for ambiguous dual-shape cases). Added format issue taxonomy in `scripts/eventQualityGateRules.ts` and output-level `formatSummary` + `formatByEventId` for safe migration tracking without automatic data rewrites. Validation: `npm run typecheck`, `npm test`, and `npm run validate:event-quality` passed."
     },
     {
       "id": "US-015",

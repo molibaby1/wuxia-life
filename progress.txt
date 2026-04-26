@@ -616,3 +616,15 @@
   - Rhythm pause should target skippable regular formal events only; critical/storyline lanes need explicit pre-pause selection to keep progression reliable.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run report:rhythm-baseline` ✅
 ---
+
+## [2026-04-26 09:57] - US-007
+- Added deterministic rhythm regression tests in `tests/AllTests.ts` to lock four pacing-sensitive behaviors: empty formal-candidate fallback to daily, critical-lane protection under rhythm pause, daily intervention when only regular formal events remain and pause is active, and weighted formal candidate selection with fixed weights/random input.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Rhythm regression coverage is more stable when tests stub `dailyEventSystem.selectEvent`, `eventLoader.getWeightForAge`, and `Math.random` directly instead of relying on live data distribution.
+  - Keep layered-lane tests focused on boundary conditions (critical lane immunity vs regular-lane fallback) so future weighting tweaks do not obscure pacing regressions.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

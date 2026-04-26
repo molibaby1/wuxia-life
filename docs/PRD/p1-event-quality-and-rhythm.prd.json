@@ -97,7 +97,8 @@
         "Default test gate passes"
       ],
       "priority": 7,
-      "passes": false
+      "passes": true,
+      "notes": "Added deterministic rhythm regression coverage in `tests/AllTests.ts` for empty-candidate daily fallback, critical-lane protection under rhythm pause, daily intervention when only regular formal events are available and paused, and weighted candidate selection with fixed random input/weights. Validation: `npm run typecheck` and `npm test` passed."
     },
     {
       "id": "US-008",

@@ -664,6 +664,83 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '节奏回归 - 空候选时回退到 daily',
+      description: '测试 formal 候选为空时，选择逻辑稳定回退到 daily 事件',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 18;
+
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+
+        const fallbackDailyEvent = {
+          id: 'daily_fallback_when_empty',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '空档填充', text: '今天风平浪静' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          engine.getAvailableEvents = () => [];
+          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
+
+          const selected = engine.selectEvent(18);
+          assertEqual(selected?.id, 'daily_fallback_when_empty', '空候选时应回退 daily');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
+      },
+    },
+    {
+      name: '节奏回归 - 加权候选选择可复现',
+      description: '测试固定权重与随机数下的正式事件选择稳定命中预期候选',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 30;
+        state.player.reputation = 0;
+        state.eventHistory = [];
+
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalGetWeightForAge = eventLoader.getWeightForAge.bind(eventLoader);
+        const originalMathRandom = Math.random;
+
+        const lowWeightEvent = {
+          id: 'weighted_low',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          content: { title: '低权重事件', text: '被选中概率更低' },
+          metadata: { tags: [] },
+        };
+        const highWeightEvent = {
+          id: 'weighted_high',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          content: { title: '高权重事件', text: '被选中概率更高' },
+          metadata: { tags: [] },
+        };
+
+        try {
+          engine.getAvailableEvents = () => [lowWeightEvent, highWeightEvent];
+          engine.shouldPauseEventsThisYear = () => false;
+          (eventLoader as any).getWeightForAge = (event: { id: string }) => (event.id === 'weighted_low' ? 1 : 5);
+          Math.random = () => 0.95;
+
+          const selected = engine.selectEvent(30);
+          assertEqual(selected?.id, 'weighted_high', '固定随机输入下应命中高权重候选');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (eventLoader as any).getWeightForAge = originalGetWeightForAge;
+          Math.random = originalMathRandom;
+        }
+      },
+    },
+    {
       name: '事件定义验证 - 完整事件结构',
       description: '测试事件定义是否符合标准格式',
       test: () => {

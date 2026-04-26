@@ -506,6 +506,82 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '条件评估器 - 非法字段与语法回归',
+      description: '测试非法字段访问、非法语法和非字符串查询参数均 fail-close',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const state = framework.createTestState();
+
+        const invalidCases = [
+          {
+            expression: 'player.constructor == true',
+            reason: '非法 player 字段访问应返回 false',
+          },
+          {
+            expression: 'player.__proto__ == true',
+            reason: '原型链字段访问应返回 false',
+          },
+          {
+            expression: 'luck >= 10',
+            reason: '未白名单顶层字段应返回 false',
+          },
+          {
+            expression: 'flags.has(testFlag)',
+            reason: 'flags.has 非字符串参数应返回 false',
+          },
+          {
+            expression: '(player.age >= 18',
+            reason: '括号不配对应返回 false',
+          },
+        ];
+
+        for (const testCase of invalidCases) {
+          const result = evaluator.evaluate(
+            {
+              type: 'expression',
+              expression: testCase.expression,
+            },
+            state,
+          );
+          assert(result === false, testCase.reason);
+        }
+      },
+    },
+    {
+      name: '条件评估器 - 恶意与非白名单语法不执行',
+      description: '测试调用、赋值、构造器链与全局访问均不会被执行',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const state = framework.createTestState();
+        (globalThis as any).__conditionEvaluatorUs020Probe = 0;
+
+        const maliciousCases = [
+          'globalThis.process.exit(1)',
+          'player.age >= 0 || (globalThis.__conditionEvaluatorUs020Probe = 1)',
+          'flags.has.constructor("return true")()',
+          'Math.random() > 0',
+          'this.constructor.constructor("return true")()',
+        ];
+
+        for (const expression of maliciousCases) {
+          const result = evaluator.evaluate(
+            {
+              type: 'expression',
+              expression,
+            },
+            state,
+          );
+          assert(result === false, `恶意表达式应 fail-close: ${expression}`);
+        }
+
+        assertEqual(
+          (globalThis as any).__conditionEvaluatorUs020Probe,
+          0,
+          '恶意表达式不得产生任何副作用',
+        );
+      },
+    },
+    {
       name: '运行时门禁 - triggerConditions 不满足时事件不得触发',
       description: '测试 getAvailableEvents 会统一校验 legacy triggerConditions，失败时过滤事件',
       test: () => {

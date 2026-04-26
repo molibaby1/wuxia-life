@@ -278,7 +278,8 @@
         "Default test gate passes"
       ],
       "priority": 20,
-      "passes": false
+      "passes": true,
+      "notes": "Extended condition evaluator regression coverage in `tests/AllTests.ts` for legal grammar baseline plus fail-close checks on invalid fields, invalid syntax, non-string `flags.has` argument, and malicious/non-whitelisted payloads (global access, assignment, constructor chain, and function-call forms) with explicit side-effect guard assertion. Validation passed: `npm run typecheck` and `npm test`."
     },
     {
       "id": "US-021",

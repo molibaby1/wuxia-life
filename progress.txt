@@ -805,3 +805,16 @@
   - Outcome-branch condition gating must share the same evaluator path as choice-availability checks, otherwise simulator reports can diverge from actual gameplay triggering.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅ (`testGameSimulation` report flow passed)
 ---
+
+## [2026-04-26 10:40] - US-020
+- Expanded condition evaluator security/regression coverage in `tests/AllTests.ts` with targeted fail-close cases for invalid field access (`player.constructor`, `player.__proto__`, unknown root identifier), invalid syntax (unmatched parenthesis), and invalid query argument shape (`flags.has(testFlag)` non-string).
+- Added malicious/non-whitelisted syntax tests to prove payloads are rejected and never executed (`globalThis.process.exit`, assignment side-effect attempt, constructor-chain invocation, and global function calls), including explicit side-effect guard assertion on `globalThis`.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Condition security tests should always pair rejection assertions with a concrete side-effect probe, so "parse failed" and "did not execute" are both verified.
+  - Non-whitelisted syntax coverage should include both property-chain access and invocation/assignment forms, because they can fail at different parser stages.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

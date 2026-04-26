@@ -486,3 +486,19 @@
   - Restart/reset acceptance should explicitly include transient event UI fields (for example `lastOutcomeText`) to prevent cross-round state residue.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:14] - US-014
+- Isolated retained deprecated state entry points by adding explicit `@deprecated` compatibility markers on `useGameStore` and `useGameEngine`, clarifying they are historical/demo-only and must not be used in main flow.
+- Removed outdated migration note that still referenced `EndingScreen` direct legacy-store usage, and aligned delivery notes with the current post-migration state.
+- Cleaned obvious dead links from the deprecated store module imports so the legacy compatibility path stays minimal.
+- Files changed:
+  - `src/store/gameStore.ts`
+  - `src/composables/useGameEngine.ts`
+  - `docs/test-reports/p0-delivery-notes.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Deprecated runtime entry points should be marked in-place with explicit compatibility intent so future refactors do not accidentally rewire them into active flow.
+  - Migration notes must be updated immediately after deprecations are removed from main flow, otherwise stale docs become new dead links.
+- Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
+---

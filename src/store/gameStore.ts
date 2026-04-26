@@ -1,5 +1,5 @@
-import { reactive, computed } from 'vue';
-import type { PlayerState, StoryNode, DeathEnding } from '../types';
+import { reactive } from 'vue';
+import type { PlayerState } from '../types';
 import { advanceTime } from '../utils/timeSystem';
 
 function createInitialState(name: string, gender: 'male' | 'female'): PlayerState {
@@ -54,6 +54,9 @@ const state = reactive<{
   history: [],
 });
 
+/**
+ * @deprecated 仅用于历史兼容/演示链路。主流程请使用 gameEngine.gameState。
+ */
 export function useGameStore() {
   const startGame = (name: string, gender: 'male' | 'female') => {
     state.player = createInitialState(name, gender);

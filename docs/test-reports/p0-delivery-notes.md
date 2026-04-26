@@ -15,11 +15,10 @@
 
 ### Deprecated entry points
 
-- `useGameStore` / `gameStore` (`src/store/gameStore.ts`): deprecated for main flow state reads/writes.
-- `useGameEngine` (`src/composables/useGameEngine.ts`): deprecated legacy composable path.
-- `EndingScreen.vue` direct `useGameStore` usage (`src/components/EndingScreen.vue`): deprecated main-flow state entry and should be migrated to `gameEngine` model in follow-up stories.
+- `useGameStore` / `gameStore` (`src/store/gameStore.ts`): deprecated and retained only for historical compatibility/demo paths; do not wire into main flow.
+- `useGameEngine` (`src/composables/useGameEngine.ts`): deprecated legacy composable retained only for historical compatibility/demo paths.
 
 ### Migration guard for future stories
 
 - New P0/P1 fixes touching main flow must treat `gameEngine.gameState` as source of truth.
-- Legacy entry points above are retained only as transitional compatibility surfaces until migration stories complete.
+- Legacy entry points above are isolated compatibility surfaces and must remain outside main gameplay flow.

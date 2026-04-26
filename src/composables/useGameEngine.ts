@@ -4,6 +4,9 @@ import { getAvailableNodes } from '../data/storyData';
 import { effectExecutor } from '../core/EffectExecutor';
 import type { StoryNode, StoryChoice } from '../types';
 
+/**
+ * @deprecated 仅用于历史兼容/演示链路。主流程请使用 useNewGameEngine + gameEngine。
+ */
 export function useGameEngine() {
   const store = useGameStore();
   

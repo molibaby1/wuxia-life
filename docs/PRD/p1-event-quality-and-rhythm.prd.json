@@ -209,7 +209,8 @@
         "Default test gate passes"
       ],
       "priority": 15,
-      "passes": false
+      "passes": true,
+      "notes": "Selected low-risk sample `career_good_evil_war` in `src/data/lines/middle-age-career.json` and migrated legacy `triggerConditions` to canonical expression `conditions` while keeping age-range gating untouched. Added regression coverage in `tests/AllTests.ts` to verify trigger behavior remains equivalent (requires `is_sect_leader` flag). Validation passed: `npm run validate:event-quality` (sample now classified as `target`), `npm run typecheck`, and `npm test`."
     },
     {
       "id": "US-016",

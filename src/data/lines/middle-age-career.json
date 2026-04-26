@@ -874,17 +874,12 @@
         "value": 45
       }
     ],
-    "triggerConditions": {
-      "age": {
-        "min": 45,
-        "max": 60
-      },
-      "flags": {
-        "required": [
-          "is_sect_leader"
-        ]
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.is_sect_leader == true"
       }
-    },
+    ],
     "content": {
       "title": "江湖终极决战",
       "text": "传统门派与非传统门派的战争即将爆发。这一战，将决定江湖的未来。但你已经知道：所谓正邪，不过是胜者的叙事。你会为了「正义」而战，还是开始质疑这场战争的本质？"

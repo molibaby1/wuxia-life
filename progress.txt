@@ -729,3 +729,17 @@
   - Treat same-effect dual-shape payloads (`target` + legacy alias) as blocker-level ambiguity, because runtime resolution intent is unclear.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run validate:event-quality` ✅
 ---
+
+## [2026-04-26 10:27] - US-015
+- Migrated one low-risk event sample (`career_good_evil_war`) from legacy `triggerConditions` to canonical `conditions` expression format in `src/data/lines/middle-age-career.json`, while keeping the original age-range gate and event payload unchanged.
+- Added regression coverage in `tests/AllTests.ts` to prove behavioral equivalence: the event remains unavailable without `is_sect_leader` and available when the flag is present at eligible age.
+- Files changed:
+  - `src/data/lines/middle-age-career.json`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - For low-risk format migration, prioritize events with a single legacy signal (`triggerConditions` only) to minimize runtime behavior risk.
+  - Pair data-shape migration with explicit runtime-gate regression assertions so "format upgraded" also means "trigger semantics preserved".
+- Validation evidence: `npm run validate:event-quality` ✅ (`career_good_evil_war` classified as `target`), `npm run typecheck` ✅, `npm test` ✅
+---

@@ -410,6 +410,31 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '格式迁移样本 - career_good_evil_war 触发语义保持一致',
+      description: '测试迁移到 conditions 后，仍仅在 is_sect_leader=true 且年龄命中时可触发',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 50;
+        state.flags = {};
+        state.player.flags = {};
+
+        const noLeaderEvents = engine.getAvailableEvents(50).map((event: { id: string }) => event.id);
+        assert(
+          !noLeaderEvents.includes('career_good_evil_war'),
+          '未成为盟主时不应触发 career_good_evil_war',
+        );
+
+        state.flags.is_sect_leader = true;
+        state.player.flags.is_sect_leader = true;
+        const leaderEvents = engine.getAvailableEvents(50).map((event: { id: string }) => event.id);
+        assert(
+          leaderEvents.includes('career_good_evil_war'),
+          '成为盟主后应可触发 career_good_evil_war',
+        );
+      },
+    },
+    {
       name: '条件评估器 - 不满足条件不应命中',
       description: '测试表达式条件不满足时返回 false，避免错误选择结果分支',
       test: () => {

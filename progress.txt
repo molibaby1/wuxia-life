@@ -331,3 +331,14 @@
   - Scope debug entry visibility to the actual gameplay phase to avoid leaking non-essential controls into start/end flow.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:02] - US-003
+- Added reproducible P0 main-flow UI validation steps covering new game entry, choice event, continue event, and ending/restart flow to prevent production debug text regressions.
+- Files changed:
+  - `docs/test-reports/p0-main-flow-ui-validation.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - For UI cleanup stories, pair each visual cleanup with a phase-based manual verification checklist (`start` -> `playing` -> `ending`) so regressions are caught early.
+  - Validation notes should assert both interaction continuity (choice/continue/restart) and absence of debug artifacts in gameplay-facing content.
+---

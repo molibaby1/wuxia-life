@@ -237,7 +237,8 @@
         "Existing legal expressions pass tests"
       ],
       "priority": 17,
-      "passes": false
+      "passes": true,
+      "notes": "Replaced expression execution in `ConditionEvaluator` with a controlled tokenizer + recursive-descent parser/evaluator covering P1 grammar constructs (player property access, direct player properties, `flags.has(...)`, `events.has(...)`, comparison/logical operators, and parentheses) with no dynamic function execution. Added fail-close diagnostics that include the original expression and parse reason, plus regression tests for legal grammar combinations and invalid-expression error logging. Validation: `npm run typecheck` and `npm test` passed."
     },
     {
       "id": "US-018",

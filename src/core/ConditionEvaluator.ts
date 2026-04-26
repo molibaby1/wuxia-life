@@ -24,6 +24,26 @@ export type Condition = EventCondition;
 export class ConditionEvaluator implements IConditionEvaluator {
   private handlers: Map<string, CustomConditionHandler>;
   private cache: Map<string, boolean>;
+  static readonly DIRECT_PLAYER_PROPERTIES = new Set([
+    'age',
+    'martialPower',
+    'externalSkill',
+    'internalSkill',
+    'qinggong',
+    'constitution',
+    'charisma',
+    'comprehension',
+    'chivalry',
+    'reputation',
+    'connections',
+    'money',
+    'knowledge',
+    'businessAcumen',
+    'influence',
+    'wealth',
+    'health',
+    'energy',
+  ]);
   
   constructor() {
     this.handlers = new Map();
@@ -59,7 +79,14 @@ export class ConditionEvaluator implements IConditionEvaluator {
     }
     
     // 解析并评估表达式
-    const result = this.parseAndEvaluate(expression, state);
+    let result = false;
+    try {
+      result = this.parseAndEvaluate(expression, state);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      console.warn(`[ConditionEvaluator] Expression rejected "${expression}": ${reason}`);
+      result = false;
+    }
     
     // 缓存结果
     this.cache.set(cacheKey, result);
@@ -71,102 +98,13 @@ export class ConditionEvaluator implements IConditionEvaluator {
    * 解析并评估表达式
    */
   private parseAndEvaluate(expression: string, state: GameState): boolean {
-    // 预处理表达式
-    let processed = expression.trim();
-    
-    // 1. 替换逻辑运算符（AND/OR/NOT → &&/||/!）
-    processed = processed.replace(/\bAND\b/g, '&&');
-    processed = processed.replace(/\bOR\b/g, '||');
-    processed = processed.replace(/\bNOT\b/g, '!');
-    
-    // 2. 替换函数调用（在属性访问之前）
-    processed = this.replaceFunctionCalls(processed, state);
-    
-    // 3. 替换属性访问
-    processed = this.replacePropertyAccess(processed, state);
-    
-    // 4. 评估表达式（使用 Function 构造函数，比 eval 安全）
-    try {
-      // 只允许布尔表达式
-      const result = new Function(`return ${processed}`)();
-      return Boolean(result);
-    } catch (error) {
-      console.error(`Failed to evaluate expression: ${expression}`, error);
-      return false;
+    const normalized = expression.trim();
+    if (!normalized) {
+      throw new Error('Empty expression');
     }
-  }
-  
-  /**
-   * 将状态值嵌入为可在 Function 体中求值的 JS 片段（字符串必须带引号，避免裸标识符 ReferenceError）。
-   */
-  private valueToJsSnippet(value: unknown): string {
-    if (value === undefined) return 'undefined';
-    if (value === null) return 'null';
-    if (typeof value === 'string') return JSON.stringify(value);
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-    return JSON.stringify(value);
-  }
 
-  /**
-   * 替换属性访问
-   */
-  private replacePropertyAccess(expression: string, state: GameState): string {
-    // 替换 player 属性
-    expression = expression.replace(
-      /player\.(\w+)/g,
-      (_, prop) => {
-        const value = (state.player as any)[prop];
-        return value !== undefined ? this.valueToJsSnippet(value) : 'undefined';
-      }
-    );
-    
-    // 替换 flags
-    expression = expression.replace(
-      /flags\.(\w+)/g,
-      (_, prop) => {
-        const value = state.flags[prop];
-        return value !== undefined ? this.valueToJsSnippet(value) : 'undefined';
-      }
-    );
-    
-    // 替换直接属性访问（如 chivalry, reputation 等）
-    // 这些属性存储在 state.player 中
-    expression = expression.replace(
-      /\b(chivalry|reputation|martialPower|externalSkill|internalSkill|qinggong|constitution|charisma|comprehension|knowledge|connections|money|age)\b/g,
-      (_, prop) => {
-        const value = (state.player as any)?.[prop];
-        return value !== undefined ? this.valueToJsSnippet(value) : '0';
-      }
-    );
-    
-    return expression;
-  }
-  
-  /**
-   * 替换函数调用
-   */
-  private replaceFunctionCalls(expression: string, state: GameState): string {
-    // 处理 flags.has('xxx') - flags 现在是对象而不是 Set
-    // 支持 state.flags 和 state.player.flags 两种方式
-    expression = expression.replace(
-      /flags\.has\(['"]([^'"]+)['"]\)/g,
-      (_, flagName) => {
-        // 先检查 state.flags（旧格式）
-        const hasFlag = !!state.flags?.[flagName] || !!state.player?.flags?.[flagName];
-        return hasFlag ? 'true' : 'false';
-      }
-    );
-    
-    // 处理 events.has('xxx') - triggeredEvents 是数组
-    expression = expression.replace(
-      /events\.has\(['"]([^'"]+)['"]\)/g,
-      (_, eventName) => {
-        const hasEvent = (state.triggeredEvents || []).includes(eventName);
-        return hasEvent ? 'true' : 'false';
-      }
-    );
-    
-    return expression;
+    const parser = new ConditionExpressionParser(normalized, state);
+    return parser.evaluate();
   }
   
   /**
@@ -242,6 +180,327 @@ export class ConditionEvaluator implements IConditionEvaluator {
    */
   clearCache() {
     this.cache.clear();
+  }
+}
+
+type TokenType = 'identifier' | 'number' | 'string' | 'boolean' | 'operator' | 'paren' | 'eof';
+
+interface Token {
+  type: TokenType;
+  value: string;
+  position: number;
+}
+
+class ConditionExpressionParser {
+  private readonly tokens: Token[];
+  private index = 0;
+
+  constructor(
+    private readonly expression: string,
+    private readonly state: GameState,
+  ) {
+    this.tokens = this.tokenize(expression);
+  }
+
+  evaluate(): boolean {
+    const value = this.parseExpression();
+    const remaining = this.current();
+    if (remaining.type !== 'eof') {
+      throw this.error(`Unexpected token "${remaining.value}"`, remaining.position);
+    }
+    return this.toBoolean(value);
+  }
+
+  private tokenize(input: string): Token[] {
+    const tokens: Token[] = [];
+    let i = 0;
+
+    while (i < input.length) {
+      const ch = input[i];
+      if (/\s/.test(ch)) {
+        i += 1;
+        continue;
+      }
+
+      const twoCharOp = input.slice(i, i + 2);
+      if (['>=', '<=', '==', '!=', '&&', '||'].includes(twoCharOp)) {
+        tokens.push({ type: 'operator', value: twoCharOp, position: i });
+        i += 2;
+        continue;
+      }
+
+      if (['>', '<', '!'].includes(ch)) {
+        tokens.push({ type: 'operator', value: ch, position: i });
+        i += 1;
+        continue;
+      }
+
+      if (ch === '(' || ch === ')') {
+        tokens.push({ type: 'paren', value: ch, position: i });
+        i += 1;
+        continue;
+      }
+
+      if (ch === "'" || ch === '"') {
+        const quote = ch;
+        const start = i;
+        i += 1;
+        let value = '';
+        while (i < input.length) {
+          const current = input[i];
+          if (current === '\\') {
+            if (i + 1 >= input.length) {
+              throw this.error('Unterminated string literal', start);
+            }
+            value += input[i + 1];
+            i += 2;
+            continue;
+          }
+          if (current === quote) {
+            i += 1;
+            break;
+          }
+          value += current;
+          i += 1;
+        }
+        if (i > input.length || input[i - 1] !== quote) {
+          throw this.error('Unterminated string literal', start);
+        }
+        tokens.push({ type: 'string', value, position: start });
+        continue;
+      }
+
+      if (/[0-9]/.test(ch)) {
+        const start = i;
+        i += 1;
+        while (i < input.length && /[0-9.]/.test(input[i])) {
+          i += 1;
+        }
+        const value = input.slice(start, i);
+        if (!/^\d+(\.\d+)?$/.test(value)) {
+          throw this.error(`Invalid number literal "${value}"`, start);
+        }
+        tokens.push({ type: 'number', value, position: start });
+        continue;
+      }
+
+      if (/[A-Za-z_]/.test(ch)) {
+        const start = i;
+        i += 1;
+        while (i < input.length && /[A-Za-z0-9_.]/.test(input[i])) {
+          i += 1;
+        }
+        const raw = input.slice(start, i);
+        const upperRaw = raw.toUpperCase();
+        if (upperRaw === 'AND' || upperRaw === 'OR' || upperRaw === 'NOT') {
+          tokens.push({
+            type: 'operator',
+            value: upperRaw === 'AND' ? '&&' : upperRaw === 'OR' ? '||' : '!',
+            position: start,
+          });
+          continue;
+        }
+        if (raw === 'true' || raw === 'false') {
+          tokens.push({ type: 'boolean', value: raw, position: start });
+          continue;
+        }
+        tokens.push({ type: 'identifier', value: raw, position: start });
+        continue;
+      }
+
+      throw this.error(`Invalid token "${ch}"`, i);
+    }
+
+    tokens.push({ type: 'eof', value: '<eof>', position: input.length });
+    return tokens;
+  }
+
+  private parseExpression(): unknown {
+    return this.parseOr();
+  }
+
+  private parseOr(): unknown {
+    let left = this.parseAnd();
+    while (this.matchOperator('||')) {
+      const right = this.parseAnd();
+      left = this.toBoolean(left) || this.toBoolean(right);
+    }
+    return left;
+  }
+
+  private parseAnd(): unknown {
+    let left = this.parseUnary();
+    while (this.matchOperator('&&')) {
+      const right = this.parseUnary();
+      left = this.toBoolean(left) && this.toBoolean(right);
+    }
+    return left;
+  }
+
+  private parseUnary(): unknown {
+    if (this.matchOperator('!')) {
+      return !this.toBoolean(this.parseUnary());
+    }
+    return this.parsePrimary();
+  }
+
+  private parsePrimary(): unknown {
+    if (this.matchParen('(')) {
+      const value = this.parseExpression();
+      this.consumeParen(')', 'Expected ")"');
+      return value;
+    }
+    return this.parsePredicate();
+  }
+
+  private parsePredicate(): unknown {
+    const left = this.parseOperandOrQuery();
+    const operator = this.current();
+    if (operator.type === 'operator' && ['>', '>=', '<', '<=', '==', '!='].includes(operator.value)) {
+      this.advance();
+      const right = this.parseOperandOrQuery();
+      return this.compare(left, right, operator.value);
+    }
+    return left;
+  }
+
+  private parseOperandOrQuery(): unknown {
+    const token = this.current();
+    if (token.type === 'number') {
+      this.advance();
+      return Number(token.value);
+    }
+    if (token.type === 'string') {
+      this.advance();
+      return token.value;
+    }
+    if (token.type === 'boolean') {
+      this.advance();
+      return token.value === 'true';
+    }
+    if (token.type !== 'identifier') {
+      throw this.error(`Expected operand, got "${token.value}"`, token.position);
+    }
+    this.advance();
+    return this.resolveIdentifier(token);
+  }
+
+  private resolveIdentifier(token: Token): unknown {
+    const identifier = token.value;
+
+    if (identifier === 'flags.has' || identifier === 'events.has') {
+      this.consumeParen('(', `Expected "(" after ${identifier}`);
+      const argument = this.current();
+      if (argument.type !== 'string') {
+        throw this.error(`${identifier} requires a string literal argument`, argument.position);
+      }
+      this.advance();
+      this.consumeParen(')', `Expected ")" after ${identifier} argument`);
+      return identifier === 'flags.has'
+        ? this.hasFlag(argument.value)
+        : this.hasEvent(argument.value);
+    }
+
+    if (identifier.startsWith('player.')) {
+      const property = identifier.slice('player.'.length);
+      this.assertSafeProperty(property, token.position);
+      return (this.state.player as any)?.[property];
+    }
+
+    if (identifier.startsWith('flags.')) {
+      const flagKey = identifier.slice('flags.'.length);
+      this.assertSafeProperty(flagKey, token.position);
+      return this.hasFlag(flagKey);
+    }
+
+    if (identifier.includes('.')) {
+      throw this.error(`Unsupported property access "${identifier}"`, token.position);
+    }
+
+    if (ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has(identifier)) {
+      return (this.state.player as any)?.[identifier] ?? 0;
+    }
+
+    throw this.error(`Unsupported property "${identifier}"`, token.position);
+  }
+
+  private compare(left: unknown, right: unknown, operator: string): boolean {
+    switch (operator) {
+      case '>':
+        return Number(left) > Number(right);
+      case '>=':
+        return Number(left) >= Number(right);
+      case '<':
+        return Number(left) < Number(right);
+      case '<=':
+        return Number(left) <= Number(right);
+      case '==':
+        return left == right;
+      case '!=':
+        return left != right;
+      default:
+        throw this.error(`Unsupported comparison operator "${operator}"`);
+    }
+  }
+
+  private hasFlag(flagName: string): boolean {
+    return !!this.state.flags?.[flagName] || !!this.state.player?.flags?.[flagName];
+  }
+
+  private hasEvent(eventId: string): boolean {
+    return (this.state.triggeredEvents || []).includes(eventId);
+  }
+
+  private assertSafeProperty(property: string, position: number) {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(property)) {
+      throw this.error(`Unsupported property access "${property}"`, position);
+    }
+  }
+
+  private toBoolean(value: unknown): boolean {
+    return Boolean(value);
+  }
+
+  private matchOperator(operator: string): boolean {
+    const token = this.current();
+    if (token.type === 'operator' && token.value === operator) {
+      this.advance();
+      return true;
+    }
+    return false;
+  }
+
+  private matchParen(value: '(' | ')'): boolean {
+    const token = this.current();
+    if (token.type === 'paren' && token.value === value) {
+      this.advance();
+      return true;
+    }
+    return false;
+  }
+
+  private consumeParen(value: '(' | ')', message: string) {
+    if (!this.matchParen(value)) {
+      const token = this.current();
+      throw this.error(message, token.position);
+    }
+  }
+
+  private current(): Token {
+    return this.tokens[this.index];
+  }
+
+  private advance(): Token {
+    const token = this.tokens[this.index];
+    if (this.index < this.tokens.length - 1) {
+      this.index += 1;
+    }
+    return token;
+  }
+
+  private error(reason: string, position?: number): Error {
+    const prefix = position === undefined ? '' : `at ${position}: `;
+    return new Error(`${prefix}${reason}`);
   }
 }
 

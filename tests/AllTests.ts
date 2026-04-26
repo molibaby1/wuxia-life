@@ -451,6 +451,61 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '条件评估器 - P1 语法组合查询',
+      description: '测试 flags.has/events.has、括号与逻辑组合在受控解析器中可用',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const state = framework.createTestState();
+        state.flags.is_sect_leader = true;
+        state.triggeredEvents = ['starter_event'];
+
+        const condition = {
+          type: 'expression' as const,
+          expression:
+            "(flags.has('is_sect_leader') AND events.has('starter_event')) AND (player.age >= 0)",
+        };
+
+        const result = evaluator.evaluate(condition, state);
+        assert(result === true, 'P1 语法组合查询应返回 true');
+      },
+    },
+    {
+      name: '条件评估器 - 非法表达式错误信息',
+      description: '测试非法表达式会失败关闭并输出包含表达式和原因的告警',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const state = framework.createTestState();
+        const expression = 'player.martialPower >= 20 ? true : false';
+
+        const originalWarn = console.warn;
+        const warnLogs: string[] = [];
+        console.warn = (...args: unknown[]) => {
+          warnLogs.push(args.map(arg => String(arg)).join(' '));
+        };
+
+        try {
+          const result = evaluator.evaluate(
+            {
+              type: 'expression',
+              expression,
+            },
+            state,
+          );
+          assert(result === false, '非法表达式应 fail-close 返回 false');
+          assert(
+            warnLogs.some(log => log.includes(expression)),
+            '错误日志应包含原始表达式',
+          );
+          assert(
+            warnLogs.some(log => log.includes('Invalid token') || log.includes('Unexpected token')),
+            '错误日志应包含可诊断原因',
+          );
+        } finally {
+          console.warn = originalWarn;
+        }
+      },
+    },
+    {
       name: '多结果分支 - 条件命中时应选择对应结果',
       description: '测试 expression 条件满足时命中对应 outcome',
       test: async () => {

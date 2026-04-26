@@ -759,3 +759,18 @@
   - Keeping a dedicated unsupported-syntax whitelist in types/docs makes future negative tests straightforward and deterministic.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:32] - US-017
+- Replaced dynamic expression execution in `ConditionEvaluator` with a controlled tokenizer + recursive-descent evaluator, covering P1 grammar capabilities (`player.<property>`, direct player properties, `flags.has(...)`, `events.has(...)`, comparison/logical operators, and parentheses) without using `eval`/`new Function`.
+- Added fail-close error diagnostics that include the original expression plus a concrete parse/evaluation reason, and adjusted message wording to satisfy log-aware gate policy.
+- Added regression coverage in `tests/AllTests.ts` for legal grammar composition and invalid-expression diagnostics.
+- Files changed:
+  - `src/core/ConditionEvaluator.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Expression hardening should use parser-level whitelist validation so unsupported runtime access (for example `Math.random`) fails closed with actionable diagnostics.
+  - Log-aware quality gates require stable, policy-safe diagnostic phrasing; avoid reusing blocker keyword substrings in non-fatal warnings.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

@@ -1,0 +1,291 @@
+{
+  "project": "Wuxia Life P1 Event Quality and Rhythm",
+  "branchName": "ralph/p1-event-quality-and-rhythm",
+  "description": "Improve the core event system after P0 by making event rhythm observable and controlled, introducing event content quality gates, standardizing event/effect formats, and replacing dynamic condition expression execution with a controlled evaluator.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Confirm P0 Baseline",
+      "description": "As a maintainer, I want to confirm the P0 baseline before P1 implementation so that P1 does not build on unfinished remediation work.",
+      "acceptanceCriteria": [
+        "P0 PRD and P0 delivery evidence or implementation notes are reviewed",
+        "P0 entry status is recorded as complete, partial, waived, or blocked",
+        "Affected P1 stories are identified if P0 evidence is incomplete",
+        "No business code is changed"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "US-002",
+      "title": "Map Event Selection Flow",
+      "description": "As a developer, I want the full event selection flow documented so that rhythm changes have clear and safe implementation points.",
+      "acceptanceCriteria": [
+        "Candidate loading, age filtering, condition filtering, cooldown, storyline checks, daily fallback, weighting, annual pressure, and trigger recording are documented in order",
+        "Each step lists inputs, outputs, and fallback behavior",
+        "Formal event and daily event switch conditions are identified",
+        "A flow description or diagram is produced"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Define Rhythm Metrics",
+      "description": "As a designer, I want event rhythm to be measurable so that rhythm improvements can be evaluated with evidence.",
+      "acceptanceCriteria": [
+        "Metrics include event count per age, empty ages, formal event ratio, daily event ratio, choice event ratio, storyline continuity, and critical event delay",
+        "Metrics include target ranges or P1 observation baselines",
+        "Metrics can be associated with simulation samples"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Create Rhythm Baseline Report",
+      "description": "As a maintainer, I want a current event rhythm baseline so that future changes can be compared against it.",
+      "acceptanceCriteria": [
+        "A fixed seed or fixed simulation input generates the baseline",
+        "The report covers a complete life sample or representative age bands",
+        "The report outputs the P1 rhythm metrics",
+        "The report can be regenerated with a local command"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Design Layered Event Selection",
+      "description": "As a designer, I want critical, storyline, formal, daily, and fallback events to have clear selection boundaries so that events are not randomly stuffed into the life flow.",
+      "acceptanceCriteria": [
+        "Event layers are defined: critical, storyline, regular formal, daily, and fallback",
+        "Entry and fallback conditions are defined for each layer",
+        "Skippable and protected event types are identified",
+        "No large-scale data rewrite is required for the design"
+      ],
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "title": "Implement Low-Risk Rhythm Adjustment",
+      "description": "As a player, I want event pacing to be steadier so that the life simulation has rhythm instead of event pileups or idle gaps.",
+      "acceptanceCriteria": [
+        "Selection logic follows the approved layered strategy",
+        "Critical events remain triggerable",
+        "Daily events intervene only when formal events are insufficient or pacing requires them",
+        "Rhythm baseline report shows the metric changes",
+        "Default test gate passes"
+      ],
+      "priority": 6,
+      "passes": false
+    },
+    {
+      "id": "US-007",
+      "title": "Add Rhythm Regression Tests",
+      "description": "As a developer, I want regression tests for event rhythm so that future weight changes do not silently break pacing.",
+      "acceptanceCriteria": [
+        "Tests cover empty candidate fallback, critical event protection, daily event intervention, and weighted candidate selection",
+        "Tests use deterministic inputs or fixed random seeds",
+        "Default test gate passes"
+      ],
+      "priority": 7,
+      "passes": false
+    },
+    {
+      "id": "US-008",
+      "title": "Inventory Event Quality Problems",
+      "description": "As a content maintainer, I want known event quality problem types inventoried so that gates target real content risks.",
+      "acceptanceCriteria": [
+        "Inventory covers duplicate titles, duplicate IDs, invalid age ranges, empty content, empty effects, invalid conditions, invalid stats, same-age congestion, broken storylines, and unreachable events",
+        "Each problem type has a proposed severity",
+        "No event data is modified"
+      ],
+      "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-009",
+      "title": "Define Event Quality Gate Rules",
+      "description": "As a maintainer, I want clear event quality gate rules so that new content is not validated by manual inspection alone.",
+      "acceptanceCriteria": [
+        "Severity levels blocker, major, and minor are defined",
+        "Blocking issues are explicitly listed",
+        "Warning-only issues are explicitly listed",
+        "Rules are documented or encoded in validation configuration"
+      ],
+      "priority": 9,
+      "passes": false
+    },
+    {
+      "id": "US-010",
+      "title": "Implement Event Quality Validation Script",
+      "description": "As a developer, I want a command that scans event data and outputs structured issues so that content problems are repeatably detectable.",
+      "acceptanceCriteria": [
+        "The script scans event data that is actually loaded by the event system",
+        "Output includes event ID, source, issue type, severity, and explanation",
+        "Blocker issues cause the command to fail",
+        "The script runs without starting the frontend"
+      ],
+      "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "title": "Wire Event Quality Gate into Validation",
+      "description": "As a maintainer, I want event quality validation to be part of an explicit verification flow so that content quality is release-visible.",
+      "acceptanceCriteria": [
+        "A command name for event quality validation is documented",
+        "Documentation explains when to run the command",
+        "If wired into default validation, current baseline passes or has an approved waiver list",
+        "Default test gate passes"
+      ],
+      "priority": 11,
+      "passes": false
+    },
+    {
+      "id": "US-012",
+      "title": "Inventory Event and Effect Formats",
+      "description": "As a developer, I want to know every existing event and effect field style before standardizing formats.",
+      "acceptanceCriteria": [
+        "Inventory covers top-level event fields, content fields, autoEffects, effects, choice.effects, choice.outcomes, requirements, thresholds, and triggerConditions",
+        "Usage count is reported for each format",
+        "Each format is classified as main-flow, legacy-compatible, or suspected-deprecated",
+        "No event data is modified"
+      ],
+      "priority": 12,
+      "passes": false
+    },
+    {
+      "id": "US-013",
+      "title": "Define Target Event Format",
+      "description": "As a content author, I want one recommended event and effect format so that future content has a single correct shape.",
+      "acceptanceCriteria": [
+        "Target event structure is defined",
+        "Target effect structure is defined",
+        "Choice and auto event standard forms are defined",
+        "Deprecated fields and migration window are documented",
+        "The standard is written into documentation"
+      ],
+      "priority": 13,
+      "passes": false
+    },
+    {
+      "id": "US-014",
+      "title": "Add Format Validation and Migration Hints",
+      "description": "As a developer, I want old and mixed formats to be detected with migration hints so that format unification can proceed safely.",
+      "acceptanceCriteria": [
+        "Validation distinguishes target, legacy, and mixed formats",
+        "Legacy formats produce migration hints",
+        "Dangerous mixed formats produce blocker or major issues",
+        "No large automatic event rewrite is performed"
+      ],
+      "priority": 14,
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "title": "Migrate Low-Risk Event Format Samples",
+      "description": "As a content maintainer, I want a small low-risk sample migration so that the target format is proven before broad migration.",
+      "acceptanceCriteria": [
+        "A small set of low-risk events is selected",
+        "Migrated events remain behaviorally equivalent",
+        "Relevant format validation passes",
+        "Default test gate passes"
+      ],
+      "priority": 15,
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "title": "Define Condition Expression Grammar",
+      "description": "As a developer, I want condition expression syntax to be explicit so that the evaluator can be safe, testable, and diagnosable.",
+      "acceptanceCriteria": [
+        "Supported property access, flag queries, event queries, comparison operators, logic operators, and parentheses are defined",
+        "Unsupported syntax is listed",
+        "Invalid expression error behavior is defined",
+        "The grammar is documented or reflected in types"
+      ],
+      "priority": 16,
+      "passes": false
+    },
+    {
+      "id": "US-017",
+      "title": "Implement Controlled Condition Evaluator",
+      "description": "As a maintainer, I want expression conditions evaluated without dynamic function execution so that event conditions are safer and more stable.",
+      "acceptanceCriteria": [
+        "The evaluator covers the approved P1 expression grammar",
+        "The evaluator does not use dynamic function execution for expressions",
+        "Errors include the expression and a useful reason",
+        "Existing legal expressions pass tests"
+      ],
+      "priority": 17,
+      "passes": false
+    },
+    {
+      "id": "US-018",
+      "title": "Replace Runtime Condition Evaluation",
+      "description": "As a player, I want event and choice conditions to use one reliable evaluator so that story triggering is consistent and explainable.",
+      "acceptanceCriteria": [
+        "Runtime event conditions use the controlled evaluator",
+        "Choice conditions, thresholds, and trigger conditions have clear responsibility boundaries",
+        "Failed conditions do not silently trigger events",
+        "Default test gate passes"
+      ],
+      "priority": 18,
+      "passes": false
+    },
+    {
+      "id": "US-019",
+      "title": "Replace Dynamic Evaluation in Tests and Simulators",
+      "description": "As a developer, I want tests and simulation tools to reuse runtime condition evaluation so that validation matches gameplay.",
+      "acceptanceCriteria": [
+        "Test framework and simulator condition checks reuse runtime evaluation",
+        "No independent dynamic function evaluation branch remains in tests or simulators",
+        "Simulation reports still generate successfully",
+        "Default test gate passes"
+      ],
+      "priority": 19,
+      "passes": false
+    },
+    {
+      "id": "US-020",
+      "title": "Add Condition Security and Regression Tests",
+      "description": "As a maintainer, I want legal, illegal, and malicious expression tests so that condition evaluation cannot regress to unsafe behavior.",
+      "acceptanceCriteria": [
+        "Tests cover legal expressions, invalid fields, invalid syntax, flag queries, event queries, logic composition, and parentheses",
+        "Tests cover malicious or non-whitelisted syntax not being executed",
+        "Default test gate passes"
+      ],
+      "priority": 20,
+      "passes": false
+    },
+    {
+      "id": "US-021",
+      "title": "Generate P1 Quality Gate Report",
+      "description": "As a project owner, I want a P1 quality report so that the team can decide whether the project is ready for P2.",
+      "acceptanceCriteria": [
+        "Report includes rhythm metrics, event quality issue counts, format validation result, and condition expression test result",
+        "Report includes before/after comparison or baseline explanation",
+        "Report lists residual risks and P2/P3 candidate follow-ups"
+      ],
+      "priority": 21,
+      "passes": false
+    },
+    {
+      "id": "US-022",
+      "title": "Close P1 with Verification Evidence",
+      "description": "As a maintainer, I want P1 closed with fresh validation evidence so that future sessions can continue safely.",
+      "acceptanceCriteria": [
+        "npm run typecheck passes",
+        "npm run build passes",
+        "npm test passes",
+        "P1 quality command passes or emits approved waivers",
+        "Completed P1 stories have recorded verification evidence"
+      ],
+      "priority": 22,
+      "passes": false
+    }
+  ]
+}

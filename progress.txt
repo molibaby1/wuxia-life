@@ -685,3 +685,19 @@
   - Event-quality validation can tolerate known non-blocking issues (`major`/`minor`) while still preserving strict merge safety through blocker-only failure.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run validate:event-quality` ✅, `npm run validate` ✅
 ---
+
+## [2026-04-26 10:18] - US-012
+- Added format inventory command `npm run report:event-format-inventory` via `scripts/inventoryEventEffectFormats.ts`, scanning runtime-loaded events (`EventLoader.getAllEvents()`) and producing per-format usage counts with explicit classification (`main-flow` / `legacy-compatible` / `suspected-deprecated`).
+- Generated read-only inventory artifact `docs/test-reports/us-012-event-effect-format-inventory.md`, covering top-level event fields, content fields, autoEffects, effects, choice.effects, choice.outcomes, requirements, thresholds, and triggerConditions.
+- Updated P1 PRD story state for `US-012` to `passes: true` with implementation notes; no event data files were modified.
+- Files changed:
+  - `scripts/inventoryEventEffectFormats.ts`
+  - `docs/test-reports/us-012-event-effect-format-inventory.md`
+  - `package.json`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Format-inventory stories should include zero-usage shapes explicitly so standardization work can distinguish "not used" from "not scanned".
+  - Classifying by runtime consumer evidence (main-flow vs compatibility vs unclear) keeps migration priorities actionable without rewriting event data up front.
+- Validation evidence: `npm run report:event-format-inventory` ✅, `npm run typecheck` ✅
+---

@@ -166,7 +166,8 @@
         "No event data is modified"
       ],
       "priority": 12,
-      "passes": false
+      "passes": true,
+      "notes": "Implemented `scripts/inventoryEventEffectFormats.ts` and `npm run report:event-format-inventory` to inventory format usage across top-level event fields, content fields, autoEffects, effects, choice.effects, choice.outcomes, requirements, thresholds, and triggerConditions with per-format usage counts and classification (`main-flow`/`legacy-compatible`/`suspected-deprecated`). Generated read-only artifact `docs/test-reports/us-012-event-effect-format-inventory.md`; no event data was modified."
     },
     {
       "id": "US-013",

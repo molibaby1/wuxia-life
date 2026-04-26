@@ -923,3 +923,17 @@
   - If choice feedback types cross module boundaries, unify the `EffectDefinition` source early (`eventTypes` vs `effects`) to avoid late build failures in UI stories.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run build` ✅
 ---
+
+## [2026-04-27 07:56] - US-006
+- Added choice feedback regression coverage in `tests/AllTests.ts` for both manual choice flow and auto-resolved choice flow.
+- New assertions cover all required feedback dimensions: `statImpacts`, `relationshipImpacts`, `routeImpact`, `longTermFlags`, and narrative fallback text + `fallbackUsed` diagnostic flag when outcome narrative is blank.
+- Implemented immutable-state style test stubs for `gameEngine.getGameState`/`executeChoiceEffects` so route transition (`beforeFlags` -> `afterFlags`) is verifiable instead of being masked by in-place mutation.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Feedback route-transition assertions require snapshot-style before/after state in tests; mutable shared references can hide real transitions.
+  - Auto-resolve feedback fallback can be deterministically exercised by providing blank outcome narrative text while keeping valid effects.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

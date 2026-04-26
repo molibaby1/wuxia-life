@@ -192,6 +192,214 @@ async function runAutoResolveCase() {
   }
 }
 
+async function runChoiceFeedbackManualCoverageCase() {
+  const engine = useNewGameEngine();
+  const initialState = framework.createTestState();
+  initialState.flags = {
+    ...initialState.flags,
+    sect_faction: 'orthodox',
+  };
+  initialState.player.flags = {
+    ...initialState.player.flags,
+    sect_faction: 'orthodox',
+  } as any;
+  let currentState = initialState;
+
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalGetGameState = gameEngine.getGameState;
+  const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    (gameEngine as any).getGameState = () => currentState;
+    (gameEngine as any).executeChoiceEffects = async (
+      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown }>,
+    ) => {
+      const nextFlags = { ...currentState.flags };
+      const nextPlayerFlags = { ...(currentState.player.flags as Record<string, unknown>) };
+      for (const effect of effects) {
+        if (effect.type === EffectType.FLAG_SET) {
+          const flagKey = effect.flag || effect.target;
+          if (flagKey) {
+            nextFlags[flagKey] = effect.value ?? true;
+            nextPlayerFlags[flagKey] = effect.value ?? true;
+          }
+        }
+      }
+      currentState = {
+        ...currentState,
+        flags: nextFlags,
+        player: {
+          ...currentState.player,
+          flags: nextPlayerFlags,
+        },
+      };
+      return currentState;
+    };
+
+    (engine.engineState as any).currentEvent = {
+      id: 'test_manual_feedback_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'manual_feedback_choice',
+          text: '测试反馈覆盖',
+          effects: [],
+          outcomes: [
+            {
+              id: 'manual_feedback_outcome',
+              text: '你在江湖上迈出关键一步',
+              effects: [
+                { type: EffectType.STAT_MODIFY, target: 'martialPower', value: 3, operator: 'add' },
+                { type: EffectType.RELATION_CHANGE, target: 'mentor_master', value: 5 },
+                { type: EffectType.FLAG_SET, target: 'sect_faction', value: 'demonic' },
+                { type: EffectType.FLAG_SET, target: 'long_term_oath' },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const handled = await engine.handleChoice({ id: 'manual_feedback_choice' } as any);
+    assert(handled, '手动选择测试应成功执行');
+
+    const feedback = engine.engineState.lastChoiceFeedback;
+    assert(feedback !== null, '手动选择应生成反馈结构');
+    assertEqual(feedback?.player.statImpacts[0]?.stat, 'martialPower', '应记录属性变化字段');
+    assertEqual(feedback?.player.relationshipImpacts[0]?.relationId, 'mentor_master', '应记录关系变化字段');
+    assertEqual(feedback?.player.routeImpact?.from, 'orthodox', '应记录路线变化起点');
+    assertEqual(feedback?.player.routeImpact?.to, 'demonic', '应记录路线变化终点');
+    assert(
+      feedback?.player.longTermFlags.some(item => item.flag === 'long_term_oath'),
+      '应记录长期标记变化',
+    );
+  } finally {
+    (gameEngine as any).getGameState = originalGetGameState;
+    (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    (engine.engineState as any).currentEvent = null;
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
+  }
+}
+
+async function runChoiceFeedbackAutoResolveFallbackCase() {
+  const engine = useNewGameEngine();
+  const initialState = framework.createTestState();
+  initialState.flags = {
+    ...initialState.flags,
+    sect_faction: 'orthodox',
+  };
+  initialState.player.flags = {
+    ...initialState.player.flags,
+    sect_faction: 'orthodox',
+  } as any;
+  let currentState = initialState;
+
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalGetGameState = gameEngine.getGameState;
+  const originalIsChoiceAvailable = gameEngine.isChoiceAvailable;
+  const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
+  const originalSelectEvent = gameEngine.selectEvent;
+  const originalAdvanceTime = gameEngine.advanceTime;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    (gameEngine as any).getGameState = () => currentState;
+    (gameEngine as any).isChoiceAvailable = () => true;
+    (gameEngine as any).executeChoiceEffects = async (
+      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown }>,
+    ) => {
+      const nextFlags = { ...currentState.flags };
+      const nextPlayerFlags = { ...(currentState.player.flags as Record<string, unknown>) };
+      for (const effect of effects) {
+        if (effect.type === EffectType.FLAG_SET) {
+          const flagKey = effect.flag || effect.target;
+          if (flagKey) {
+            nextFlags[flagKey] = effect.value ?? true;
+            nextPlayerFlags[flagKey] = effect.value ?? true;
+          }
+        }
+      }
+      currentState = {
+        ...currentState,
+        flags: nextFlags,
+        player: {
+          ...currentState.player,
+          flags: nextPlayerFlags,
+        },
+      };
+      return currentState;
+    };
+    (gameEngine as any).advanceTime = () => currentState;
+    (gameEngine as any).selectEvent = () => ({
+      id: 'test_auto_feedback_event',
+      eventType: 'choice',
+      metadata: { autoResolve: true },
+      choices: [
+        {
+          id: 'auto_feedback_choice',
+          text: '自动测试反馈覆盖',
+          effects: [],
+          outcomes: [
+            {
+              id: 'auto_feedback_outcome',
+              text: '   ',
+              effects: [
+                { type: EffectType.STAT_MODIFY, target: 'charisma', value: 2, operator: 'add' },
+                { type: EffectType.RELATION_CHANGE, target: 'ally_friend', value: 4 },
+                { type: EffectType.FLAG_SET, target: 'sect_faction', value: 'wanderer' },
+                { type: EffectType.FLAG_SET, target: 'auto_long_term_mark' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    engine.getNextEvent();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const feedback = engine.engineState.lastChoiceFeedback;
+    assert(feedback !== null, 'autoResolve 应生成反馈结构');
+    assertEqual(feedback?.player.statImpacts[0]?.stat, 'charisma', 'autoResolve 应记录属性变化字段');
+    assertEqual(feedback?.player.relationshipImpacts[0]?.relationId, 'ally_friend', 'autoResolve 应记录关系变化字段');
+    assertEqual(feedback?.player.routeImpact?.from, 'orthodox', 'autoResolve 应记录路线变化起点');
+    assertEqual(feedback?.player.routeImpact?.to, 'wanderer', 'autoResolve 应记录路线变化终点');
+    assert(
+      feedback?.player.longTermFlags.some(item => item.flag === 'auto_long_term_mark'),
+      'autoResolve 应记录长期标记变化',
+    );
+    assert(feedback?.diagnostic.fallbackUsed === true, '应启用缺失叙事兜底标记');
+    assertEqual(
+      feedback?.player.narrativeResult,
+      '你的选择激起了涟漪，后续影响仍在发酵。',
+      '应回退到默认兜底叙事文本',
+    );
+  } finally {
+    (gameEngine as any).getGameState = originalGetGameState;
+    (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
+    (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    (gameEngine as any).advanceTime = originalAdvanceTime;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    (engine.engineState as any).currentEvent = null;
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
+  }
+}
+
 async function runStateConsistencyRegressionCase() {
   const engine = useNewGameEngine();
   const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
@@ -752,6 +960,20 @@ const coreFunctionSuite: TestSuite = {
       description: '测试 autoResolve 不绕过 choice.condition 和 outcome.condition',
       test: async () => {
         await runAutoResolveCase();
+      },
+    },
+    {
+      name: '选择反馈回归 - 手动选择覆盖所有关键反馈字段',
+      description: '测试手动选择可稳定产出属性/关系/路线/长期标记反馈',
+      test: async () => {
+        await runChoiceFeedbackManualCoverageCase();
+      },
+    },
+    {
+      name: '选择反馈回归 - autoResolve 覆盖关键字段与兜底文本',
+      description: '测试 autoResolve 可稳定产出反馈并在叙事缺失时触发兜底文本',
+      test: async () => {
+        await runChoiceFeedbackAutoResolveFallbackCase();
       },
     },
     {

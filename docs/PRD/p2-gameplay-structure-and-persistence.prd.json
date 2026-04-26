@@ -83,7 +83,8 @@
         "npm test passes"
       ],
       "priority": 6,
-      "passes": false
+      "passes": true,
+      "notes": "Added regression coverage in `tests/AllTests.ts` for structured choice feedback fields across manual and auto-resolved choices. Tests now assert stat impacts, relationship impacts, route transitions, long-term flags, and narrative fallback text behavior for missing narrative input. Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-007",

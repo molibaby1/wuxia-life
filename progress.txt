@@ -515,3 +515,16 @@
   - State-unification regression tests should validate both transient UI state (`engineState.currentEvent/lastOutcomeText/lastEffects`) and persisted engine state (`saveManager` round-trip) to catch split-source reintroductions early.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:18] - US-016
+- Completed P0 closure evidence by adding a final delivery summary section in `docs/test-reports/p0-delivery-notes.md`, including changed files, fresh verification results, residual risks, and P1 follow-up recommendations.
+- Updated the PRD story state to mark `US-016` as passed after fresh validation.
+- Files changed:
+  - `docs/test-reports/p0-delivery-notes.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Milestone closure stories should always rerun full project gates immediately before sign-off so delivery notes contain fresh, decision-ready evidence.
+  - Residual-risk sections should distinguish blocking defects from non-blocking balancing signals to keep P1 prioritization clear.
+- Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
+---

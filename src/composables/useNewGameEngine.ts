@@ -10,9 +10,11 @@
 
 import { reactive, ref, computed } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
+import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
 import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
 import type { StoryChoice, ChoiceOutcomeUI } from '../types';
+import type { ChoiceFeedbackModel } from '../types';
 
 interface EventState {
   currentEvent: EventDefinition | null;
@@ -20,6 +22,7 @@ interface EventState {
   isAutoPlaying: boolean;
   lastEffects: Effect[];
   lastOutcomeText: string | null;
+  lastChoiceFeedback: ChoiceFeedbackModel | null;
 }
 
 // 单例状态
@@ -37,6 +40,7 @@ function getEngineStateInstance() {
         isAutoPlaying: false,
         lastEffects: [],
         lastOutcomeText: null,
+        lastChoiceFeedback: null,
       }),
       isProcessing: false,
     };
@@ -215,6 +219,7 @@ export function useNewGameEngine() {
     // 确定要执行的效果
     let effectsToExecute = selectedChoice.effects || [];
     let outcomeText: string | null = null;
+    let selectedOutcomeId: string | undefined;
 
     // 如果有多结果分支，根据条件判定
     if (selectedChoice.outcomes && selectedChoice.outcomes.length > 0) {
@@ -226,6 +231,7 @@ export function useNewGameEngine() {
           hasMatchedOutcome = true;
           effectsToExecute = outcome.effects || [];
           outcomeText = outcome.text;
+          selectedOutcomeId = outcome.id;
           break;
         }
       }
@@ -259,12 +265,26 @@ export function useNewGameEngine() {
 
     isProcessing.value = true;
     engineState.isAutoPlaying = true;
+    const stateBeforeChoice = gameEngine.getGameState();
 
     try {
       // 执行选择的效果
       await gameEngine.executeChoiceEffects(effectsToExecute, currentEvent.id, selectedChoice.id);
+      const stateAfterChoice = gameEngine.getGameState();
+      const feedback = generateChoiceFeedback({
+        narrativeResult: outcomeText,
+        effects: effectsToExecute,
+        sourceEventId: currentEvent.id,
+        sourceChoiceId: selectedChoice.id,
+        sourceOutcomeId: selectedOutcomeId,
+        beforePlayer: stateBeforeChoice.player,
+        afterPlayer: stateAfterChoice.player,
+        beforeFlags: stateBeforeChoice.flags,
+        afterFlags: stateAfterChoice.flags,
+      });
       engineState.lastEffects = effectsToExecute;
-      engineState.lastOutcomeText = outcomeText;
+      engineState.lastOutcomeText = feedback.player.narrativeResult;
+      engineState.lastChoiceFeedback = feedback;
       // 清空选项，防止重复点击
       engineState.availableChoices = [];
 
@@ -364,6 +384,7 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     engineState.lastOutcomeText = null;
+    engineState.lastChoiceFeedback = null;
     isProcessing.value = false;
 
     // 等待下一帧再开始第一个事件，让 UI 有时间更新
@@ -382,6 +403,7 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     engineState.lastOutcomeText = null;
+    engineState.lastChoiceFeedback = null;
     isProcessing.value = false;
   };
 

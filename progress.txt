@@ -891,3 +891,19 @@
   - Keep feedback contracts split between player copy and diagnostic payload so UI stories can iterate wording without losing regression traceability.
   - Define fallback behavior as a typed helper before generator integration to keep missing-data behavior deterministic across manual and auto-resolved choices.
 ---
+
+## [2026-04-27 07:53] - US-004
+- Implemented unified feedback generation entry `generateChoiceFeedback` in `src/core/ChoiceFeedbackGenerator.ts`, consolidating fallback narrative, stat impact, relationship impact, long-term flag extraction, and route-transition detection into one reusable path.
+- Integrated unified feedback into `useNewGameEngine.handleChoice`: both manual choice and auto-resolve now share the same execution path and write `engineState.lastChoiceFeedback` with the same `ChoiceFeedbackModel` shape; `lastOutcomeText` now comes from `feedback.player.narrativeResult`.
+- Added regression assertions in `tests/AllTests.ts` to verify both manual and auto-resolved paths produce feedback structure and that player-facing payload does not expose raw diagnostic fields.
+- Files changed:
+  - `src/core/ChoiceFeedbackGenerator.ts`
+  - `src/composables/useNewGameEngine.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Feedback generation should stay in a standalone core module and be called only after effect execution, so manual and auto-resolve paths cannot drift in payload shape.
+  - Keep UI consumption scoped to `feedback.player` and reserve raw effect traces for `feedback.diagnostic` to preserve player-facing abstraction boundaries.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

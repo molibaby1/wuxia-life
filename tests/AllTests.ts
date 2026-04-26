@@ -79,6 +79,11 @@ async function runChoiceOutcomeBranchCase(options: {
 
     assertEqual(engine.engineState.lastOutcomeText, options.expectedOutcomeText, '应命中预期 outcome 文本');
     assertEqual(executedEffectTarget, options.expectedEffectTarget, '应执行预期 outcome 效果');
+    assert(engine.engineState.lastChoiceFeedback !== null, '应生成统一选择反馈结构');
+    assert(
+      !Object.prototype.hasOwnProperty.call(engine.engineState.lastChoiceFeedback?.player || {}, 'rawEffects'),
+      '玩家反馈不应直接暴露诊断原始字段',
+    );
   } finally {
     (gameEngine as any).getGameState = originalGetGameState;
     (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
@@ -87,6 +92,7 @@ async function runChoiceOutcomeBranchCase(options: {
     (engine.engineState as any).currentEvent = null;
     engine.engineState.lastOutcomeText = null;
     engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
   }
 }
 
@@ -167,6 +173,11 @@ async function runAutoResolveCase() {
 
     assertEqual(executedChoiceId, 'valid_choice', 'autoResolve 只能选择可用选项');
     assertEqual(executedOutcomeTarget, 'valid_fallback_outcome', 'autoResolve 应按真实条件命中可达 outcome');
+    assert(engine.engineState.lastChoiceFeedback !== null, 'autoResolve 应复用统一反馈结构');
+    assert(
+      typeof engine.engineState.lastChoiceFeedback?.player?.narrativeResult === 'string',
+      'autoResolve 反馈应包含玩家可展示叙事结果',
+    );
   } finally {
     (gameEngine as any).getGameState = originalGetGameState;
     (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
@@ -177,6 +188,7 @@ async function runAutoResolveCase() {
     (engine.engineState as any).currentEvent = null;
     engine.engineState.lastOutcomeText = null;
     engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
   }
 }
 

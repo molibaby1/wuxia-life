@@ -937,3 +937,16 @@
   - Auto-resolve feedback fallback can be deterministically exercised by providing blank outcome narrative text while keeping valid effects.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:00] - US-007
+- Completed a read-only inventory for route, identity, faction, sect, karma, relationship, and critical choice fields in `docs/test-reports/us-007-route-identity-faction-field-inventory.md`.
+- For each field group, documented concrete source/type location, write points, read points, and semantic meaning across runtime (`GameEngineIntegration`, `EventExecutor`) and UI consumers.
+- Classified fields into `main-flow`, `legacy-compatible`, and `suspected-deprecated`, and highlighted consolidation gaps (`sect_faction` vs `route_*`/`*_path`, `identity` vs `lifePath.primaryIdentity`, `player.sect` vs `current_sect`).
+- Files changed:
+  - `docs/test-reports/us-007-route-identity-faction-field-inventory.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Conflict-rule stories should lock a single canonical route signal first; otherwise compatibility fields (`route_*`, `*_path`) will keep ambiguity in trigger logic.
+  - Identity/faction decisions should explicitly declare whether `state.identity` or `lifePath` is authoritative to avoid dual-source drift.
+---

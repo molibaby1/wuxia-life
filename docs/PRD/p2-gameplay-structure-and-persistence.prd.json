@@ -97,7 +97,8 @@
         "No business code is changed"
       ],
       "priority": 7,
-      "passes": false
+      "passes": true,
+      "notes": "Completed read-only field inventory in `docs/test-reports/us-007-route-identity-faction-field-inventory.md`. Covered identity, route, faction, sect, critical choice, karma, and relationship fields with concrete source/write/read/meaning mapping from `GameState`, `GameEngineIntegration`, `EventExecutor`, and UI consumers. Classified fields as `main-flow`, `legacy-compatible`, or `suspected-deprecated`, and recorded consolidation gaps for subsequent conflict-rule stories. No business code changed."
     },
     {
       "id": "US-008",

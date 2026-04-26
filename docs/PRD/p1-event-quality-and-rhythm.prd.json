@@ -251,7 +251,8 @@
         "Default test gate passes"
       ],
       "priority": 18,
-      "passes": false
+      "passes": true,
+      "notes": "Unified runtime condition gating in `GameEngineIntegration` via a single guard path (`conditions` + `thresholds` + legacy `triggerConditions`) and fail-close behavior. Choice/outcome runtime now rejects function-form conditions and relies on core evaluator entry to avoid split condition execution paths. Added regression tests for legacy `triggerConditions` filtering and function-condition fail-close fallback behavior. Validation: `npm run typecheck` and `npm test` passed."
     },
     {
       "id": "US-019",

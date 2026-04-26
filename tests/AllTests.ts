@@ -506,6 +506,49 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '运行时门禁 - triggerConditions 不满足时事件不得触发',
+      description: '测试 getAvailableEvents 会统一校验 legacy triggerConditions，失败时过滤事件',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 22;
+        state.identity = {
+          identities: ['hero'],
+          primary: 'hero',
+        };
+
+        const originalGetEventsByAge = eventLoader.getEventsByAge.bind(eventLoader);
+        try {
+          (eventLoader as any).getEventsByAge = () => [
+            {
+              id: 'legacy_trigger_identity_gate',
+              version: '1.0.0',
+              category: EventCategory.SIDE_QUEST,
+              priority: EventPriority.NORMAL,
+              weight: 100,
+              ageRange: { min: 20, max: 30 },
+              triggers: [],
+              conditions: [{ type: 'expression', expression: 'player.age >= 20' }],
+              triggerConditions: {
+                identity: {
+                  required: ['official'],
+                },
+              },
+              content: { text: '身份门槛事件', title: '身份门槛事件' },
+              eventType: 'auto',
+              autoEffects: [{ type: EffectType.FLAG_SET, target: 'should_not_trigger' }],
+              metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+            },
+          ];
+
+          const available = engine.getAvailableEvents(22);
+          assertEqual(available.length, 0, 'triggerConditions 不满足时不应进入可选事件列表');
+        } finally {
+          (eventLoader as any).getEventsByAge = originalGetEventsByAge;
+        }
+      },
+    },
+    {
       name: '多结果分支 - 条件命中时应选择对应结果',
       description: '测试 expression 条件满足时命中对应 outcome',
       test: async () => {
@@ -525,6 +568,29 @@ const coreFunctionSuite: TestSuite = {
           ],
           expectedOutcomeText: '命中成功分支',
           expectedEffectTarget: 'success_branch',
+        });
+      },
+    },
+    {
+      name: '多结果分支 - 函数条件应失败关闭并命中兜底',
+      description: '测试 runtime 不执行函数式 outcome.condition，避免绕开受控 evaluator',
+      test: async () => {
+        await runChoiceOutcomeBranchCase({
+          name: 'function_condition_fail_close',
+          statePower: 80,
+          outcomes: [
+            {
+              text: '函数条件分支',
+              condition: (() => true) as any,
+              effects: [{ type: EffectType.FLAG_SET, target: 'function_condition_branch' }],
+            },
+            {
+              text: '兜底分支',
+              effects: [{ type: EffectType.FLAG_SET, target: 'fallback_branch' }],
+            },
+          ],
+          expectedOutcomeText: '兜底分支',
+          expectedEffectTarget: 'fallback_branch',
         });
       },
     },

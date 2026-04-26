@@ -156,9 +156,10 @@ export function useNewGameEngine() {
     if (!outcome.condition) return true;
 
     try {
-      // 函数式条件（兼容历史数据）
+      // 运行时不再执行函数条件，避免与受控 evaluator 分叉
       if (typeof outcome.condition === 'function') {
-        return (outcome.condition as (s: unknown) => boolean)(state);
+        console.warn('[NewGameEngine] outcome.condition 不支持函数形式，按不满足处理');
+        return false;
       }
 
       // 结构化表达式条件统一复用核心评估入口，避免前端“默认 true”

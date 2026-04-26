@@ -774,3 +774,21 @@
   - Log-aware quality gates require stable, policy-safe diagnostic phrasing; avoid reusing blocker keyword substrings in non-fatal warnings.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:34] - US-018
+- Unified runtime condition routing in `GameEngineIntegration` with a single guard entry (`passesRuntimeEventGuards`) so event `conditions` (controlled evaluator), `thresholds` (structured gates), and legacy `triggerConditions` (via `EventExecutor.canTriggerEvent`) are evaluated in one fail-close path.
+- Clarified responsibility boundaries: expression conditions are handled by `ConditionEvaluator`, structured thresholds remain in `checkThresholds`, and legacy trigger payloads are validated in `EventExecutor.canTriggerEvent` (including fail-close for malformed payload and missing required karma state).
+- Hardened choice runtime behavior in `useNewGameEngine`: function-form `outcome.condition` is no longer executed at runtime and now fails closed, preventing split evaluators and silent trigger drift.
+- Added regression coverage in `tests/AllTests.ts` for (1) `triggerConditions` mismatch filtering at runtime and (2) function-condition outcome fallback behavior.
+- Files changed:
+  - `src/core/GameEngineIntegration.ts`
+  - `src/core/EventExecutor.ts`
+  - `src/composables/useNewGameEngine.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Runtime gating should be centralized before event weighting/selection so condition failures cannot leak through downstream fallback logic.
+  - Legacy compatibility condition payloads can coexist with P1 evaluator grammar only when boundaries are explicit and each branch is fail-close by default.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

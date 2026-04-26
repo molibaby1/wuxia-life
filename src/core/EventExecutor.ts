@@ -102,6 +102,9 @@ export class EventExecutor implements IEventExecutor {
     const conditions = event.triggerConditions;
     
     if (!conditions) return true;
+    if (typeof conditions !== 'object') {
+      return false;
+    }
     
     // 检查选择条件
     if (conditions.choices) {
@@ -125,7 +128,10 @@ export class EventExecutor implements IEventExecutor {
     }
     
     // 检查因果条件
-    if (conditions.karma && state.karma) {
+    if (conditions.karma) {
+      if (!state.karma) {
+        return false;
+      }
       if (conditions.karma.good_min !== undefined && state.karma.good_karma < conditions.karma.good_min) {
         return false;
       }

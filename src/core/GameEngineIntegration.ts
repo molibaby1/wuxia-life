@@ -298,13 +298,9 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
-      // 1. 检查条件
-      if (event.conditions && event.conditions.length > 0) {
-        for (const condition of event.conditions) {
-          if (!this.conditionEvaluator.evaluate(condition, this.gameState)) {
-            return false;
-          }
-        }
+      // 1. 统一运行时门禁：conditions + thresholds + legacy triggerConditions
+      if (!this.passesRuntimeEventGuards(event, this.gameState)) {
+        return false;
       }
       
       // 2. 检查是否已经发生过（对于只触发一次的事件）
@@ -326,11 +322,6 @@ export class GameEngineIntegration {
         if (!this.checkAttributeRequirements(event.requirements.attributes, this.gameState.player)) {
           return false;
         }
-      }
-      
-      // 5. 检查触发门槛（新增）- 包括背景、经历、身份等
-      if (!this.checkThresholds(event, this.gameState)) {
-        return false;
       }
       
       // 6. 检查事件冷却时间（新增）
@@ -361,6 +352,37 @@ export class GameEngineIntegration {
     const limitedEvents = availableEvents.slice(0, MAX_EVENTS_PER_YEAR);
     
     return limitedEvents;
+  }
+
+  /**
+   * 运行时事件门禁统一入口
+   * - conditions: 受控表达式评估器
+   * - thresholds: 结构化门槛（属性/背景/经历/身份）
+   * - triggerConditions: 兼容旧数据的触发门槛（交由 EventExecutor 统一校验）
+   */
+  private passesRuntimeEventGuards(event: EventDefinition, gameState: GameState): boolean {
+    try {
+      if (event.conditions && event.conditions.length > 0) {
+        for (const condition of event.conditions) {
+          if (!this.conditionEvaluator.evaluate(condition, gameState)) {
+            return false;
+          }
+        }
+      }
+
+      if (!this.checkThresholds(event, gameState)) {
+        return false;
+      }
+
+      if (!EventExecutor.canTriggerEvent(event, gameState)) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn(`[GameEngine] Runtime condition guard failed for event "${event.id}"`, error);
+      return false;
+    }
   }
   
   /**

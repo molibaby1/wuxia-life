@@ -69,7 +69,8 @@
         "No large-scale data rewrite is required for the design"
       ],
       "priority": 5,
-      "passes": false
+      "passes": true,
+      "notes": "Defined a five-layer selection strategy (critical, storyline, regular formal, daily, fallback) with explicit entry/fallback rules, skippable vs protected event boundaries, and no-large-data-rewrite constraint in docs/test-reports/us-005-layered-event-selection-design.md."
     },
     {
       "id": "US-006",

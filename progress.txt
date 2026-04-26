@@ -586,3 +586,16 @@
   - Fixed-seed baseline artifacts are easier to diff when they include both whole-life metrics and compressed age-band summaries.
 - Validation evidence: `npm run report:rhythm-baseline` ✅, `npm run typecheck` ✅
 ---
+
+## [2026-04-26 10:00] - US-005
+- Defined a layered event-selection design in `docs/test-reports/us-005-layered-event-selection-design.md` with explicit boundaries for critical, storyline, regular formal, daily, and fallback lanes.
+- Documented entry and fallback conditions per layer, including protected vs skippable event classes and a clear no-large-data-rewrite constraint.
+- Files changed:
+  - `docs/test-reports/us-005-layered-event-selection-design.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Layering can be introduced as orchestration logic over existing selection hooks (`priority`, `category`, `storyLine`, `metadata.tags`) before any data migration work.
+  - Treat critical and mainline tags as explicit protected lanes to prevent future pacing controls from stalling narrative progression.
+- Validation evidence: `npm run typecheck` ✅
+---

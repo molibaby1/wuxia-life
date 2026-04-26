@@ -641,3 +641,17 @@
   - Keep inventory stories implementation-agnostic but detection-oriented (include concise gate hints) so the next validation-script story can translate policy to code directly.
   - Storyline continuity and unreachable-event checks should default to `blocker` severity because they affect core progression correctness, not only content polish.
 ---
+
+## [2026-04-26 10:00] - US-009
+- Defined explicit event quality gate rules in `docs/test-reports/us-009-event-quality-gate-rules.md`, including severity levels (`blocker`/`major`/`minor`), blocking issue list, and warning-only issue list.
+- Encoded the same policy as reusable validation configuration in `scripts/eventQualityGateRules.ts` via typed rule definitions and exported blocking/warning issue sets for follow-up validator implementation.
+- Updated `docs/PRD/p1-event-quality-and-rhythm.prd.json` to mark `US-009` as passed with implementation notes.
+- Files changed:
+  - `scripts/eventQualityGateRules.ts`
+  - `docs/test-reports/us-009-event-quality-gate-rules.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keep gate policy centralized in one typed module so documentation and executable validation logic share the same source of truth.
+  - Separate explicit `blocking` semantics from severity labels to support future release-policy tuning without redefining issue taxonomy.
+---

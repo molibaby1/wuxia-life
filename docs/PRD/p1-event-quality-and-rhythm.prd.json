@@ -124,7 +124,8 @@
         "Rules are documented or encoded in validation configuration"
       ],
       "priority": 9,
-      "passes": false
+      "passes": true,
+      "notes": "Defined blocker/major/minor severity model and explicit blocking vs warning-only issue lists in `docs/test-reports/us-009-event-quality-gate-rules.md`, and encoded the same policy in reusable validation config `scripts/eventQualityGateRules.ts` for follow-up validation script implementation."
     },
     {
       "id": "US-010",

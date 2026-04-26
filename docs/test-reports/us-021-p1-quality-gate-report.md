@@ -2,7 +2,7 @@
 
 ## Scope
 
-- generatedAt: `2026-04-26T02:42:49.263Z`
+- generatedAt: `2026-04-26T03:18:44.418Z`
 - sample: seed=`1`, maxAge=`80`
 - This report aggregates rhythm metrics, event quality validation, format status, and condition expression checks for P1->P2 readiness decision.
 

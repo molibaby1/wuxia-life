@@ -306,7 +306,8 @@
         "Completed P1 stories have recorded verification evidence"
       ],
       "priority": 22,
-      "passes": false
+      "passes": true,
+      "notes": "Closed P1 with fresh validation evidence in `docs/test-reports/us-022-p1-closure-verification.md`. Re-ran `npm run typecheck`, `npm run build`, `npm test`, and `npm run report:p1-quality-gate` (pass with `qualityGate=pass`, `blocker=0`, `major=69`, `minor=12`). Audited completed stories against `progress.txt` and confirmed all previously passed stories (`21/21`) have recorded evidence entries."
     }
   ]
 }

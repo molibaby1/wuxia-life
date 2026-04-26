@@ -835,3 +835,17 @@
   - Validation scripts intended for composition should separate reusable functions from CLI entrypoints to prevent accidental execution during imports.
 - Validation evidence: `npm run report:p1-quality-gate` ✅, `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 11:18] - US-022
+- Closed P1 with fresh verification evidence and added a dedicated closure artifact `docs/test-reports/us-022-p1-closure-verification.md`.
+- Re-ran mandatory closure commands and recorded latest pass results: `npm run typecheck`, `npm run build`, `npm test`, and `npm run report:p1-quality-gate` (`qualityGate=pass`, `blocker=0`).
+- Audited completed P1 stories against `progress.txt` to verify evidence coverage; audit result: `passedCount=21`, `evidenceLoggedInProgress=21`, `missingStoryIds=[]`.
+- Files changed:
+  - `docs/test-reports/us-022-p1-closure-verification.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Milestone-closure stories should include both fresh gate reruns and a machine-checkable evidence audit so cross-session handoff remains safe.
+  - Closure artifacts should store command-level outcomes and audit output together to keep acceptance verification self-contained.
+- Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅, `npm run report:p1-quality-gate` ✅
+---

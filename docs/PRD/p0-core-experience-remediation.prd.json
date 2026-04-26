@@ -149,7 +149,7 @@
         "The decision is recorded in the P0 delivery notes"
       ],
       "priority": 12,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-013",

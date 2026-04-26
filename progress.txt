@@ -458,3 +458,16 @@
   - Save/load integration completeness must be validated at component integration points (`gameLoaded` consumers), not just at storage utility level.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-26 09:14] - US-012
+- Recorded the single main state-source decision in P0 delivery notes: `gameEngine.gameState` (`src/core/GameEngineIntegration.ts`) is the only main-flow source of truth.
+- Named allowed read-only adapters (`useNewGameEngine`, `DebugPanel`, `SaveManager.vue`) and explicitly listed deprecated entry points (`gameStore`, `useGameEngine`, `EndingScreen.vue` direct `useGameStore` read path).
+- Files changed:
+  - `docs/test-reports/p0-delivery-notes.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - State-source remediation should separate "main source of truth" from "read-only adapters" to avoid accidental dual-write paths.
+  - Migration tracking is clearer when deprecated entry points are listed by concrete file/symbol, not just by concept.
+- Validation evidence: `npm run typecheck` ✅
+---

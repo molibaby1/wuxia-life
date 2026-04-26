@@ -569,3 +569,20 @@
   - For continuity metrics, preserving or enriching `event.storyLine` coverage in data will directly improve the signal quality of storyline continuity tracking.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:52] - US-004
+- Added deterministic baseline generator command `npm run report:rhythm-baseline` via `scripts/generateRhythmBaselineReport.ts`, using fixed inputs (`RHYTHM_BASELINE_SEED`, `RHYTHM_BASELINE_MAX_AGE`) and defaulting to complete life sample `seed=1, maxAge=80`.
+- Reused `scripts/reportRhythmMetrics.ts` as a shared module (exported sample simulation + metric computation/formatters) so baseline report emits the same P1 rhythm metrics definitions as `US-003`.
+- Generated baseline artifact `docs/test-reports/us-004-rhythm-baseline.md` containing full metric snapshot and representative age-band summary (`childhood`, `adolescence`, `young_adult`, `midlife`, `late_life`) for before/after comparisons.
+- Files changed:
+  - `scripts/reportRhythmMetrics.ts`
+  - `scripts/generateRhythmBaselineReport.ts`
+  - `docs/test-reports/us-004-rhythm-baseline.md`
+  - `package.json`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Baseline reports should be generated from the same metric pipeline as ongoing observability commands to avoid definition drift across stories.
+  - Fixed-seed baseline artifacts are easier to diff when they include both whole-life metrics and compressed age-band summaries.
+- Validation evidence: `npm run report:rhythm-baseline` ✅, `npm run typecheck` ✅
+---

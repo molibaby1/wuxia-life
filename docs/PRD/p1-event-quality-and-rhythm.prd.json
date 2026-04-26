@@ -55,7 +55,8 @@
         "The report can be regenerated with a local command"
       ],
       "priority": 4,
-      "passes": false
+      "passes": true,
+      "notes": "Added deterministic baseline report generator `npm run report:rhythm-baseline` (`scripts/generateRhythmBaselineReport.ts`) with fixed seed/maxAge inputs, complete life sample (`maxAge=80`), representative age-band summary, and embedded P1 rhythm metrics output. Baseline artifact generated at `docs/test-reports/us-004-rhythm-baseline.md`."
     },
     {
       "id": "US-005",

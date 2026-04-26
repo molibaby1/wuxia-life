@@ -17,14 +17,14 @@ interface SimulatedEvent {
   storyLine: string | null;
 }
 
-interface SimulationSample {
+export interface SimulationSample {
   sampleId: string;
   seed: number;
   maxAge: number;
   timeline: SimulatedEvent[];
 }
 
-interface RhythmMetrics {
+export interface RhythmMetrics {
   sampleId: string;
   seed: number;
   maxAge: number;
@@ -45,7 +45,7 @@ interface RhythmMetrics {
   };
 }
 
-const P1_BASELINES = {
+export const P1_BASELINES = {
   formalEventRatio: { min: 0.5, max: 0.9, label: 'P1 observation baseline' },
   dailyEventRatio: { min: 0.1, max: 0.5, label: 'P1 observation baseline' },
   choiceEventRatio: { min: 0.2, max: 0.8, label: 'P1 observation baseline' },
@@ -107,7 +107,7 @@ function getFirstChoiceEffects(_state: GameState, event: EventDefinition) {
   return firstAvailableChoice.effects || [];
 }
 
-async function simulateSample(seed: number, maxAge: number): Promise<SimulationSample> {
+export async function simulateSample(seed: number, maxAge: number): Promise<SimulationSample> {
   return withSeed(seed, async () => {
     await talentSystem.loadTalents();
     await eventLoader.loadAllEvents();
@@ -165,7 +165,7 @@ async function simulateSample(seed: number, maxAge: number): Promise<SimulationS
   });
 }
 
-function computeMetrics(sample: SimulationSample): RhythmMetrics {
+export function computeMetrics(sample: SimulationSample): RhythmMetrics {
   const ageCounts = new Map<number, number>();
   for (let age = 0; age <= sample.maxAge; age++) {
     ageCounts.set(age, 0);
@@ -236,11 +236,11 @@ function computeMetrics(sample: SimulationSample): RhythmMetrics {
   };
 }
 
-function toPct(value: number): string {
+export function toPct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
 }
 
-function formatMetrics(sample: SimulationSample, metrics: RhythmMetrics): string {
+export function formatMetrics(sample: SimulationSample, metrics: RhythmMetrics): string {
   const lines: string[] = [];
   lines.push('=== P1 Rhythm Metrics Report ===');
   lines.push(`sampleId=${sample.sampleId}`);
@@ -290,7 +290,9 @@ async function main() {
   console.log(formatMetrics(sample, metrics));
 }
 
-main().catch(error => {
-  console.error('[US-003] rhythm metrics report failed:', error);
-  process.exitCode = 1;
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(error => {
+    console.error('[US-003] rhythm metrics report failed:', error);
+    process.exitCode = 1;
+  });
+}

@@ -9,11 +9,14 @@ Run these commands in order:
 1. `npm run typecheck`
 2. `npm run build`
 3. `npm test`
-4. `npm run stability`
+4. `npm run validate:event-quality`
+5. `npm run stability`
 
 Or run the combined gate:
 
-- `npm run validate` (runs all four stages above)
+- `npm run validate` (runs all five stages above)
+
+Run `npm run validate:event-quality` whenever event content, event metadata, or event condition/effect format changes. It is also part of the default merge gate (`npm run validate`) and CI.
 
 ## What `npm test` Means
 
@@ -48,6 +51,7 @@ CI runs the same gate in `.github/workflows/ci.yml`:
 - `npm run typecheck`
 - `npm run build`
 - `npm test`
+- `npm run validate:event-quality`
 - `npm run stability`
 
 Any failure blocks merge readiness.
@@ -67,6 +71,7 @@ All items must be true before merge:
 - `npm run typecheck` passes
 - `npm run build` passes
 - `npm test` passes (real regression gate + log-aware Blocker scan)
+- `npm run validate:event-quality` passes (no Blocker-level content quality issues)
 - `npm run stability` passes (default batch count)
 - Gate logs contain **zero** Blocker-keyword hits (see `docs/test-output-severity-taxonomy.md`)
 - Gate logs have no unresolved critical warnings

@@ -670,3 +670,18 @@
   - Emitting a stable JSON schema for validator output makes downstream CI/report integration straightforward without parsing human-readable logs.
 - Validation evidence: `npm run validate:event-quality` ✅, `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:15] - US-011
+- Wired event quality validation into the explicit default verification flow by adding `npm run validate:event-quality` to `npm run validate`, and added the same step to CI (`.github/workflows/ci.yml`) for release visibility.
+- Updated `docs/release-validation-contract.md` to document the command name, gate order, and when to run it (event content/metadata/condition/effect format changes; also always through default gate/CI).
+- Files changed:
+  - `package.json`
+  - `.github/workflows/ci.yml`
+  - `docs/release-validation-contract.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - When a quality command becomes part of release criteria, wire both local aggregate command and CI steps together to avoid local/CI policy drift.
+  - Event-quality validation can tolerate known non-blocking issues (`major`/`minor`) while still preserving strict merge safety through blocker-only failure.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run validate:event-quality` ✅, `npm run validate` ✅
+---

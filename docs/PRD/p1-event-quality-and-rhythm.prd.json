@@ -152,7 +152,8 @@
         "Default test gate passes"
       ],
       "priority": 11,
-      "passes": false
+      "passes": true,
+      "notes": "Wired `npm run validate:event-quality` into the default validation command (`npm run validate`) and CI workflow (`.github/workflows/ci.yml`) so event content quality is release-visible. Updated `docs/release-validation-contract.md` to document command name, execution order, and run timing (event content/metadata/condition/effect changes, plus default gate/CI). Baseline validation passed after wiring: `npm run typecheck`, `npm test`, `npm run validate:event-quality`, and full `npm run validate`."
     },
     {
       "id": "US-012",

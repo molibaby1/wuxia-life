@@ -34,5 +34,8 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Event quality gate
+        run: npm run validate:event-quality
+
       - name: Stability gate
         run: npm run stability

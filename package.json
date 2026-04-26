@@ -13,7 +13,7 @@
     "report:rhythm-baseline": "tsx scripts/generateRhythmBaselineReport.ts",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
-    "validate": "npm run typecheck && npm run build && npm test && npm run stability",
+    "validate": "npm run typecheck && npm run build && npm test && npm run validate:event-quality && npm run stability",
     "preview": "vite preview"
   },
   "dependencies": {

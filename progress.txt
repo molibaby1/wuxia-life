@@ -307,3 +307,15 @@
   - Start bundle-size control with build-time chunk strategy first; it usually delivers measurable gains with minimal runtime risk.
   - Keep icon packs separated from generic vendor chunks so future icon-library growth does not inflate the main application chunk.
 ---
+
+## [2026-04-26 08:51] - US-001
+- Removed production debug blocks from the main game content area while keeping story, outcome, choice, and continue interactions unchanged.
+- Files changed:
+  - `src/components/GameScreen.vue`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keep developer diagnostics behind dedicated debug entry points (`DebugPanel`) and avoid embedding raw state traces in gameplay-facing components.
+  - When removing debug UI, preserve gameplay state transitions (`lastOutcomeText` display and continue flow) to avoid accidental interaction regressions.
+- Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
+---

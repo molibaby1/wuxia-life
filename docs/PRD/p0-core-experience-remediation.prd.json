@@ -1,0 +1,206 @@
+{
+  "project": "Wuxia Life P0 Core Experience Remediation",
+  "branchName": "ralph/p0-core-experience-remediation",
+  "description": "Fix the P0 gameplay and correctness issues identified in the improvement roadmap: remove production debug UI, make multi-outcome choice conditions real, suppress event repetition with measurable validation, and unify the main game state source through small approved stories.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Remove Production Debug Blocks",
+      "description": "As a player, I want the main game screen to show only game content so that debug fields do not break immersion.",
+      "acceptanceCriteria": [
+        "The main game screen no longer displays debug blocks for currentNode, choices, or lastOutcomeText",
+        "Choice, continue, and event outcome display behavior remains available",
+        "npm run build passes"
+      ],
+      "priority": 1,
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "title": "Preserve Developer Diagnostics",
+      "description": "As a developer, I want diagnostic information to remain available through an explicit debug entry so that UI cleanup does not reduce troubleshooting ability.",
+      "acceptanceCriteria": [
+        "Diagnostics are shown only through an explicit debug panel or debug entry",
+        "The default gameplay flow does not show the diagnostic panel",
+        "The debug toggle behavior is unchanged or clearer than before"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Record Main Flow UI Validation",
+      "description": "As a maintainer, I want reproducible validation steps for P0 UI cleanup so that production debug text does not return unnoticed.",
+      "acceptanceCriteria": [
+        "Validation covers at least two key nodes from new game, choice event, continue event, and ending flow",
+        "Validation steps are documented in a P0 delivery note or test output",
+        "Validation documentation contains no local absolute paths"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Unify Multi-Outcome Condition Evaluation",
+      "description": "As a player, I want multi-outcome choices to resolve according to real conditions so that choices produce trustworthy results.",
+      "acceptanceCriteria": [
+        "Expression conditions are no longer treated as true by default",
+        "Outcome condition evaluation reuses the core condition evaluator or an equivalent controlled entry",
+        "Unconditional outcomes can still act as fallback outcomes",
+        "Unparseable conditions do not silently select an incorrect outcome"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Test Multi-Outcome Branches",
+      "description": "As a developer, I want multi-outcome branch tests so that condition regressions are caught by the default gate.",
+      "acceptanceCriteria": [
+        "Tests cover condition success, condition failure, fallback branch, and branch order priority",
+        "At least one test uses an expression condition",
+        "npm test passes"
+      ],
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "title": "Validate AutoResolve Choice Conditions",
+      "description": "As a developer, I want autoResolve choices to respect the same availability and outcome rules as manual choices so that automatic events do not bypass conditions.",
+      "acceptanceCriteria": [
+        "autoResolve selects only available choices",
+        "autoResolve outcome branches use real condition evaluation",
+        "Failures produce readable diagnostics instead of being silently swallowed"
+      ],
+      "priority": 6,
+      "passes": false
+    },
+    {
+      "id": "US-007",
+      "title": "Create Event Repetition Reproduction",
+      "description": "As a designer, I want a stable reproduction for repeated injury, illness, and economy events so that fixes are grounded in evidence.",
+      "acceptanceCriteria": [
+        "A fixed seed or fixed simulation input reproduces at least one repetition issue",
+        "The reproduction report lists adjacent repeated events or repeated event classes",
+        "The reproduction command can be run locally"
+      ],
+      "priority": 7,
+      "passes": false
+    },
+    {
+      "id": "US-008",
+      "title": "Define Event Repetition Rules",
+      "description": "As a designer, I want clear repetition definitions so that suppression rules do not damage legitimate story progression.",
+      "acceptanceCriteria": [
+        "The rules distinguish same-event repetition, same-class repetition, and same-storyline repetition",
+        "Allowed and disallowed repeat boundaries are documented",
+        "The rules cover injury, illness, economy, romance, identity, main story, and daily events"
+      ],
+      "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-009",
+      "title": "Implement Basic Repetition Suppression",
+      "description": "As a player, I want short-term meaningless event repetition to be suppressed so that the life simulation feels like a story instead of a repeating event table.",
+      "acceptanceCriteria": [
+        "Same events honor maxTriggers and cooldown consistently",
+        "High-negative same-class events have short-term suppression or weight decay",
+        "Daily event repetition rules are distinct from formal story event rules",
+        "Mandatory mainline and critical events are not blocked by the suppression strategy"
+      ],
+      "priority": 9,
+      "passes": false
+    },
+    {
+      "id": "US-010",
+      "title": "Measure Event Repetition Rate",
+      "description": "As a maintainer, I want repetition metrics in simulation output so that future content changes cannot quietly reintroduce repetition problems.",
+      "acceptanceCriteria": [
+        "Simulation output includes adjacent repetition statistics",
+        "Simulation output includes short-window same-class repetition statistics",
+        "Simulation output identifies the most repeated events",
+        "P0 repetition thresholds are documented"
+      ],
+      "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "title": "Audit Current State Sources",
+      "description": "As a maintainer, I want a state-source audit before migration so that unifying state does not accidentally break live flows.",
+      "acceptanceCriteria": [
+        "The audit lists legacy store, new composable, global game engine, save manager, debug panel, and demo component relationships",
+        "Each entry is marked as main flow, demo flow, deprecated flow, or needs confirmation",
+        "No business code is changed as part of the audit story"
+      ],
+      "priority": 11,
+      "passes": false
+    },
+    {
+      "id": "US-012",
+      "title": "Choose the Single Main State Source",
+      "description": "As a developer, I want an explicit state-source decision so that future fixes use one state model.",
+      "acceptanceCriteria": [
+        "The single main state source is named",
+        "Allowed read-only adapters are named",
+        "Deprecated entry points are named",
+        "The decision is recorded in the P0 delivery notes"
+      ],
+      "priority": 12,
+      "passes": false
+    },
+    {
+      "id": "US-013",
+      "title": "Migrate Main Flow off Legacy State",
+      "description": "As a player, I want start, gameplay, ending, and restart flows to read one consistent state so that the UI and engine show the same life.",
+      "acceptanceCriteria": [
+        "The main flow no longer depends on the legacy state source",
+        "The ending screen reads state consistent with the game engine",
+        "Restarting clears the main state and event state consistently",
+        "npm run typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false
+    },
+    {
+      "id": "US-014",
+      "title": "Isolate or Remove Deprecated State Links",
+      "description": "As a maintainer, I want deprecated state links isolated or removed so that future code does not accidentally use old paths.",
+      "acceptanceCriteria": [
+        "Deprecated state entry points have no main-flow references",
+        "Any retained legacy entry is clearly marked as demo or historical compatibility",
+        "No unused imports or obvious dead links remain from the migration",
+        "npm run build passes"
+      ],
+      "priority": 14,
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "title": "Add State Consistency Regression Coverage",
+      "description": "As a developer, I want regression coverage after state unification so that save, ending, and restart flows do not split state again.",
+      "acceptanceCriteria": [
+        "Tests cover key state consistency across new game, event progress, choice handling, ending, or restart",
+        "Failures point to state synchronization problems",
+        "npm test passes"
+      ],
+      "priority": 15,
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "title": "Close P0 with Fresh Verification Evidence",
+      "description": "As a project owner, I want a P0 delivery summary with fresh verification evidence so that the project can decide whether to move into P1.",
+      "acceptanceCriteria": [
+        "npm run typecheck passes",
+        "npm run build passes",
+        "npm test passes",
+        "The P0 delivery summary includes changed files, verification results, residual risks, and follow-up recommendations"
+      ],
+      "priority": 16,
+      "passes": false
+    }
+  ]
+}

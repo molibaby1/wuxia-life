@@ -67,16 +67,6 @@
     </div>
     
     <div class="content-area">
-      <!-- 调试信息 -->
-      <div class="debug-info" style="background: #fff3cd; padding: 10px; margin-bottom: 10px; border: 1px solid #ffc107;">
-        <strong>调试:</strong>
-        <div>currentNode: {{ currentNode ? '有值' : 'null' }}</div>
-        <div v-if="currentNode">ID: {{ currentNode.id }}</div>
-        <div v-if="currentNode">Text: {{ currentNode.text?.substring(0, 50) }}...</div>
-        <div>isAutoPlaying: {{ isAutoPlaying }}</div>
-        <div>choices: {{ availableChoices.length }}</div>
-      </div>
-      
       <div v-if="currentNode" class="story-card card">
         <p class="story-text">{{ currentNode.text }}</p>
         <div v-if="lastOutcomeText" class="outcome-section">
@@ -103,10 +93,6 @@
         >
           {{ choice.text }}
         </button>
-      </div>
-
-      <div v-else-if="engineState.lastOutcomeText" class="debug-info">
-        <p>调试: lastOutcomeText = "{{ engineState.lastOutcomeText }}"</p>
       </div>
     </div>
   </div>
@@ -456,11 +442,4 @@ const makeChoice = (choice: StoryChoice) => {
   }
 }
 
-.debug-info {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #ffeb3b;
-  color: #000;
-  border-radius: 4px;
-}
 </style>

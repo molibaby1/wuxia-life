@@ -528,3 +528,15 @@
   - Residual-risk sections should distinguish blocking defects from non-blocking balancing signals to keep P1 prioritization clear.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:44] - US-001
+- Reviewed P0 baseline inputs before P1 start using `docs/PRD/p0-core-experience-remediation.prd.json` and `docs/test-reports/p0-delivery-notes.md`.
+- Recorded P0 entry status for P1 as `complete`; no missing implementation evidence found.
+- Confirmed there are no affected P1 stories caused by incomplete P0 evidence.
+- Files changed:
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - P1 kickoff should explicitly pin both the upstream PRD pass matrix and closure evidence note to avoid assumption-driven starts.
+  - If upstream milestone closure includes fresh gate evidence (`typecheck/build/test`), downstream baseline confirmation can remain documentation-only and should avoid business code edits.
+---

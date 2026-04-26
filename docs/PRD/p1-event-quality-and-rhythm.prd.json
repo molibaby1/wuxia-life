@@ -14,7 +14,8 @@
         "No business code is changed"
       ],
       "priority": 1,
-      "passes": false
+      "passes": true,
+      "notes": "P0 baseline reviewed against docs/PRD/p0-core-experience-remediation.prd.json and docs/test-reports/p0-delivery-notes.md. Entry status: complete. Affected P1 stories: none."
     },
     {
       "id": "US-002",

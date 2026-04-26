@@ -181,7 +181,8 @@
         "The standard is written into documentation"
       ],
       "priority": 13,
-      "passes": false
+      "passes": true,
+      "notes": "Defined canonical event/effect authoring standard in `docs/test-reports/us-013-target-event-format-standard.md`, including target event structure, canonical effect schema (`type + target + value + operator`), standard forms for auto/choice events, deprecated legacy aliases (`stat`/`flag`/`event`, `content.autoEffects`, broad `triggerConditions`), and a documented migration window."
     },
     {
       "id": "US-014",

@@ -701,3 +701,16 @@
   - Classifying by runtime consumer evidence (main-flow vs compatibility vs unclear) keeps migration priorities actionable without rewriting event data up front.
 - Validation evidence: `npm run report:event-format-inventory` ✅, `npm run typecheck` ✅
 ---
+
+## [2026-04-26 10:21] - US-013
+- Defined canonical event/effect authoring standard in `docs/test-reports/us-013-target-event-format-standard.md`, including target event schema, canonical effect schema (`type + target + value + operator`), and explicit standard forms for `auto` and `choice` events.
+- Documented deprecated compatibility fields (`effect.stat`/`effect.flag`/`effect.event`, `content.autoEffects`, broad `triggerConditions`, and legacy `requirements` gate usage) plus a migration window with freeze and removal-planning milestones.
+- Updated `docs/PRD/p1-event-quality-and-rhythm.prd.json` to mark `US-013` as passed with implementation notes.
+- Files changed:
+  - `docs/test-reports/us-013-target-event-format-standard.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Format-standard stories should define one canonical authoring path and treat all aliases as explicitly deprecated to prevent mixed-shape content drift.
+  - Migration windows should include both a content-freeze date and a compatibility-removal planning range, so follow-up validator/migration stories can enforce policy without ambiguity.
+---

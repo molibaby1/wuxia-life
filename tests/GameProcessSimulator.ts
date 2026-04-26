@@ -251,7 +251,7 @@ export class GameProcessSimulator {
       // 如果有多结果分支，根据条件判定
       if (record.selectedChoice.outcomes && record.selectedChoice.outcomes.length > 0) {
         for (const outcome of record.selectedChoice.outcomes) {
-          if (outcome.condition && !this.evaluateCondition(outcome.condition)) {
+          if (outcome.condition && !gameEngine.isChoiceAvailable(outcome.condition)) {
             continue;
           }
           effectsToExecute = outcome.effects || [];
@@ -415,7 +415,7 @@ export class GameProcessSimulator {
         let bestOutcomeScore = -Infinity;
         for (const outcome of choice.outcomes) {
           // 检查条件是否满足
-          if (outcome.condition && !this.evaluateCondition(outcome.condition)) {
+          if (outcome.condition && !gameEngine.isChoiceAvailable(outcome.condition)) {
             continue; // 条件不满足，跳过
           }
 
@@ -461,59 +461,6 @@ export class GameProcessSimulator {
 
     const randomIndex = Math.floor(Math.random() * choices.length);
     return choices[randomIndex];
-  }
-
-  /**
-   * 评估条件表达式
-   */
-  private evaluateCondition(condition: any): boolean {
-    if (!condition) return true;
-    if (condition.type !== 'expression') return true;
-
-    const expr = condition.expression;
-    if (!expr || typeof expr !== 'string') return true;
-
-    const state = this.gameState;
-    if (!state || !state.player) return false;
-
-    try {
-      // 简单的表达式解析
-      const player = state.player as any;
-
-      // 替换玩家属性
-      let evalExpr = expr
-        .replace(/martialPower/g, 'player.martialPower')
-        .replace(/internalSkill/g, 'player.internalSkill')
-        .replace(/externalSkill/g, 'player.externalSkill')
-        .replace(/qinggong/g, 'player.qinggong')
-        .replace(/chivalry/g, 'player.chivalry')
-        .replace(/charisma/g, 'player.charisma')
-        .replace(/constitution/g, 'player.constitution')
-        .replace(/comprehension/g, 'player.comprehension')
-        .replace(/reputation/g, 'player.reputation')
-        .replace(/health/g, 'player.health')
-        .replace(/connections/g, 'player.connections')
-        .replace(/influence/g, 'player.influence')
-        .replace(/knowledge/g, 'player.knowledge')
-        .replace(/businessAcumen/g, 'player.businessAcumen')
-        .replace(/money/g, 'player.money');
-
-      // 处理 flags 引用
-      evalExpr = evalExpr.replace(/flags\.has\("([^"]+)"\)/g, '((player.flags && player.flags["$1"]) === true)');
-      evalExpr = evalExpr.replace(/flags\.(\w+)/g, '(player.flags ? player.flags.$1 : false)');
-
-      // 安全评估（只允许比较运算）
-      if (!/^[\w\s<>=!&|().'":\-[\]]+$/.test(evalExpr)) {
-        console.warn('[Simulator] 条件表达式包含不支持的字符:', evalExpr);
-        return true;
-      }
-
-      const result = new Function('player', `return ${evalExpr}`)(player);
-      return result === true;
-    } catch (error) {
-      console.warn('[Simulator] 条件评估失败:', condition.expression, error);
-      return true;
-    }
   }
 
   /**

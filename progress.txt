@@ -792,3 +792,16 @@
   - Legacy compatibility condition payloads can coexist with P1 evaluator grammar only when boundaries are explicit and each branch is fail-close by default.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:37] - US-019
+- Replaced simulator-side outcome condition evaluation in `tests/GameProcessSimulator.ts` by removing local expression parsing + `new Function` execution and reusing runtime `gameEngine.isChoiceAvailable` for outcome branch gating.
+- This unifies test/simulator condition checks with gameplay runtime `ConditionEvaluator`, eliminating the independent dynamic evaluation branch in the simulator path.
+- Files changed:
+  - `tests/GameProcessSimulator.ts`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Simulator/test tooling should call runtime condition entrypoints directly (`gameEngine.isChoiceAvailable`) to avoid condition drift and security regressions from local evaluators.
+  - Outcome-branch condition gating must share the same evaluator path as choice-availability checks, otherwise simulator reports can diverge from actual gameplay triggering.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅ (`testGameSimulation` report flow passed)
+---

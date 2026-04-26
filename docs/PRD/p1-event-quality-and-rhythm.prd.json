@@ -265,7 +265,8 @@
         "Default test gate passes"
       ],
       "priority": 19,
-      "passes": false
+      "passes": true,
+      "notes": "Removed simulator-local dynamic expression evaluation in `tests/GameProcessSimulator.ts` and routed choice-outcome condition checks through runtime `gameEngine.isChoiceAvailable`, reusing `ConditionEvaluator` to align test/simulator behavior with gameplay. Eliminated `new Function` condition execution branch from test simulator path while preserving report generation flow through the default simulation suite. Validation: `npm run typecheck` and `npm test` passed (`testGameSimulation` report generation included)."
     },
     {
       "id": "US-020",

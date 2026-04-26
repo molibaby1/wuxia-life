@@ -430,3 +430,18 @@
   - Daily flavor pools and mainline progression require different suppression strictness; one unified boundary causes either narrative stalls or repetitive noise.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-26 09:05] - US-010
+- Added repetition metrics to simulation output in `scripts/reproduceEventRepetition.ts`: adjacent repetition statistics (`same_event`/`same_class` count + rate), short-window (`window=5`) same-class repetition statistics, and top-5 most repeated events.
+- Added explicit P0 threshold constants to output so each run prints both observed rates and target limits (`8%`, `35%`, `45%`) for fast regression detection.
+- Documented P0 repetition thresholds and metric definitions in `docs/test-reports/us-010-repetition-thresholds.md`.
+- Files changed:
+  - `scripts/reproduceEventRepetition.ts`
+  - `docs/test-reports/us-010-repetition-thresholds.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Repetition observability should output both raw counts and normalized rates; percentages alone hide low-sample edge cases.
+  - Keeping threshold values in script constants and docs together reduces policy drift between implementation and design intent.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run repro:event-repetition` ✅
+---

@@ -28,6 +28,13 @@ interface ReproductionResult {
   issues: RepetitionIssue[];
 }
 
+const SHORT_WINDOW_SIZE = 5;
+const P0_REPETITION_THRESHOLDS = {
+  adjacentSameEventRateMax: 0.08,
+  adjacentSameClassRateMax: 0.35,
+  shortWindowSameClassRateMax: 0.45,
+} as const;
+
 function createSeededRandom(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -184,6 +191,51 @@ async function simulateWithSeed(seed: number, maxAge: number): Promise<Reproduct
 
 function formatResult(result: ReproductionResult): string {
   const lines: string[] = [];
+  const adjacentPairs = Math.max(result.timeline.length - 1, 0);
+  const sameEventIssues = result.issues.filter(issue => issue.reason === 'same_event');
+  const sameClassIssues = result.issues.filter(issue => issue.reason === 'same_class');
+
+  const shortWindowClassRepeatCountByClass: Record<EventClass, number> = {
+    injury: 0,
+    illness: 0,
+    economy: 0,
+  };
+  let shortWindowRepeatedEvents = 0;
+  for (let i = 0; i < result.timeline.length; i++) {
+    const current = result.timeline[i];
+    const start = Math.max(0, i - SHORT_WINDOW_SIZE);
+    const recent = result.timeline.slice(start, i);
+    const repeatedInWindow = current.classes.filter(cls =>
+      recent.some(event => event.classes.includes(cls))
+    );
+    if (repeatedInWindow.length > 0) {
+      shortWindowRepeatedEvents += 1;
+      repeatedInWindow.forEach(cls => {
+        shortWindowClassRepeatCountByClass[cls] += 1;
+      });
+    }
+  }
+
+  const eventFrequency = new Map<string, { title: string; count: number }>();
+  result.timeline.forEach(event => {
+    const current = eventFrequency.get(event.eventId);
+    if (current) {
+      current.count += 1;
+      return;
+    }
+    eventFrequency.set(event.eventId, { title: event.eventTitle, count: 1 });
+  });
+  const mostRepeatedEvents = [...eventFrequency.entries()]
+    .filter(([, value]) => value.count > 1)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 5);
+
+  const adjacentSameEventRate = adjacentPairs > 0 ? sameEventIssues.length / adjacentPairs : 0;
+  const adjacentSameClassRate = adjacentPairs > 0 ? sameClassIssues.length / adjacentPairs : 0;
+  const shortWindowSameClassRate = result.timeline.length > 0
+    ? shortWindowRepeatedEvents / result.timeline.length
+    : 0;
+
   lines.push('=== Event Repetition Reproduction Report ===');
   lines.push(`seed=${result.seed}`);
   lines.push(`maxAge=${result.maxAge}`);
@@ -191,17 +243,44 @@ function formatResult(result: ReproductionResult): string {
   lines.push(`adjacentRepetitionIssues=${result.issues.length}`);
   lines.push('');
 
+  lines.push('Adjacent repetition stats:');
+  lines.push(
+    `same_event=${sameEventIssues.length}/${adjacentPairs} (${(adjacentSameEventRate * 100).toFixed(1)}%) threshold<=${(P0_REPETITION_THRESHOLDS.adjacentSameEventRateMax * 100).toFixed(1)}%`
+  );
+  lines.push(
+    `same_class=${sameClassIssues.length}/${adjacentPairs} (${(adjacentSameClassRate * 100).toFixed(1)}%) threshold<=${(P0_REPETITION_THRESHOLDS.adjacentSameClassRateMax * 100).toFixed(1)}%`
+  );
+  lines.push('');
+
+  lines.push(`Short-window same-class stats (window=${SHORT_WINDOW_SIZE}):`);
+  lines.push(
+    `repeated_events=${shortWindowRepeatedEvents}/${result.timeline.length} (${(shortWindowSameClassRate * 100).toFixed(1)}%) threshold<=${(P0_REPETITION_THRESHOLDS.shortWindowSameClassRateMax * 100).toFixed(1)}%`
+  );
+  (Object.keys(shortWindowClassRepeatCountByClass) as EventClass[]).forEach(cls => {
+    lines.push(`class_${cls}_window_repeats=${shortWindowClassRepeatCountByClass[cls]}`);
+  });
+  lines.push('');
+
+  lines.push('Most repeated events (top 5):');
+  if (mostRepeatedEvents.length === 0) {
+    lines.push('No repeated event ids (>1 occurrence) in tracked classes.');
+  } else {
+    mostRepeatedEvents.forEach(([eventId, value], index) => {
+      lines.push(`${index + 1}. ${eventId} count=${value.count} title=${value.title}`);
+    });
+  }
+  lines.push('');
+
   if (result.issues.length === 0) {
     lines.push('No adjacent repetition issue found for this seed.');
-    return lines.join('\n');
+  } else {
+    lines.push('Adjacent repetition issues:');
+    result.issues.forEach((issue, index) => {
+      lines.push(
+        `${index + 1}. age=${issue.age} ${issue.previousEventId} -> ${issue.currentEventId} reason=${issue.reason} repeatedClasses=${issue.repeatedClasses.join(',')}`
+      );
+    });
   }
-
-  lines.push('Adjacent repetition issues:');
-  result.issues.forEach((issue, index) => {
-    lines.push(
-      `${index + 1}. age=${issue.age} ${issue.previousEventId} -> ${issue.currentEventId} reason=${issue.reason} repeatedClasses=${issue.repeatedClasses.join(',')}`
-    );
-  });
 
   lines.push('');
   lines.push('Tracked timeline excerpt:');

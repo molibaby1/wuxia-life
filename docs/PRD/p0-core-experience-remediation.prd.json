@@ -124,7 +124,7 @@
         "P0 repetition thresholds are documented"
       ],
       "priority": 10,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-011",

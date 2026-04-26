@@ -1,4 +1,5 @@
-import type { ChoiceFeedbackModel, EffectDefinition, PlayerState } from '../types';
+import type { ChoiceFeedbackModel } from '../types';
+import type { EffectDefinition, PlayerState } from '../types/eventTypes';
 import { createChoiceFeedbackFallback } from '../types';
 
 interface GenerateChoiceFeedbackInput {

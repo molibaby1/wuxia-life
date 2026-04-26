@@ -69,8 +69,46 @@
     <div class="content-area">
       <div v-if="currentNode" class="story-card card">
         <p class="story-text">{{ currentNode.text }}</p>
-        <div v-if="lastOutcomeText" class="outcome-section">
-          <p class="outcome-text">{{ lastOutcomeText }}</p>
+        <div v-if="displayedNarrative" class="outcome-section">
+          <p class="outcome-text">{{ displayedNarrative }}</p>
+          <p v-if="showNarrativeFallbackHint" class="outcome-fallback-hint">
+            反馈细节暂不完整，后续影响仍在推进。
+          </p>
+          <div v-if="hasStructuredFeedback" class="feedback-structured">
+            <div v-if="visibleStatImpacts.length > 0" class="feedback-group">
+              <p class="feedback-group-title">数值影响</p>
+              <ul class="feedback-list">
+                <li v-for="impact in visibleStatImpacts" :key="`stat-${impact.stat}`">
+                  {{ getStatName(String(impact.label || impact.stat)) }} {{ formatDelta(impact.delta) }}
+                </li>
+              </ul>
+            </div>
+            <div v-if="visibleRelationshipImpacts.length > 0" class="feedback-group">
+              <p class="feedback-group-title">关系影响</p>
+              <ul class="feedback-list">
+                <li
+                  v-for="impact in visibleRelationshipImpacts"
+                  :key="`relation-${impact.relationId}`"
+                >
+                  {{ impact.relationName || impact.relationId }} {{ formatDelta(impact.delta) }}
+                </li>
+              </ul>
+            </div>
+            <div v-if="displayedRouteImpact" class="feedback-group">
+              <p class="feedback-group-title">路线变化</p>
+              <p class="feedback-line">
+                {{ displayedRouteImpact.from || '未定' }} → {{ displayedRouteImpact.to || '未定' }}
+              </p>
+            </div>
+            <div v-if="visibleLongTermFlags.length > 0" class="feedback-group">
+              <p class="feedback-group-title">长期影响</p>
+              <ul class="feedback-list">
+                <li v-for="flag in visibleLongTermFlags" :key="`flag-${flag.flag}`">
+                  {{ describeFlag(flag.flag, flag.value) }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div v-if="isAutoPlaying" class="auto-play-indicator">
           <span class="loading-dot"></span>
@@ -123,10 +161,69 @@ const lastOutcomeText = computed(() => {
   return engineState.lastOutcomeText;
 });
 
+const lastChoiceFeedback = computed(() => {
+  return engineState.lastChoiceFeedback;
+});
+
+const visibleStatImpacts = computed(() => {
+  return (lastChoiceFeedback.value?.player.statImpacts || []).filter(
+    impact => impact.visibility === 'player' && impact.delta !== 0,
+  );
+});
+
+const visibleRelationshipImpacts = computed(() => {
+  return (lastChoiceFeedback.value?.player.relationshipImpacts || []).filter(
+    impact => impact.visibility === 'player' && impact.delta !== 0,
+  );
+});
+
+const displayedRouteImpact = computed(() => {
+  const routeImpact = lastChoiceFeedback.value?.player.routeImpact;
+  if (!routeImpact || routeImpact.visibility !== 'player') {
+    return null;
+  }
+  if (!routeImpact.from && !routeImpact.to) {
+    return null;
+  }
+  return routeImpact;
+});
+
+const visibleLongTermFlags = computed(() => {
+  return (lastChoiceFeedback.value?.player.longTermFlags || []).filter(
+    flag => flag.visibility === 'player',
+  );
+});
+
+const hasStructuredFeedback = computed(() => {
+  return (
+    visibleStatImpacts.value.length > 0 ||
+    visibleRelationshipImpacts.value.length > 0 ||
+    !!displayedRouteImpact.value ||
+    visibleLongTermFlags.value.length > 0
+  );
+});
+
+const displayedNarrative = computed(() => {
+  const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
+  if (narrative) {
+    return narrative;
+  }
+  return lastOutcomeText.value || '你的选择激起了涟漪，后续影响仍在发酵。';
+});
+
+const showNarrativeFallbackHint = computed(() => {
+  if (!displayedNarrative.value) {
+    return false;
+  }
+  const fallbackUsed = lastChoiceFeedback.value?.diagnostic.fallbackUsed ?? false;
+  return fallbackUsed || !hasStructuredFeedback.value;
+});
+
 // 继续到下一个事件
 const continueToNext = () => {
   // 清除结果文本
   engineState.lastOutcomeText = null;
+  engineState.lastChoiceFeedback = null;
   // 获取下一个事件
   getNextEvent();
 };
@@ -190,6 +287,38 @@ const getCurrentDate = () => {
   const state = gameEngine.getGameState();
   const time = state.currentTime || { year: 1, month: 1, day: 1 };
   return `${time.year}年${time.month}月${time.day}日`;
+};
+
+const formatDelta = (value: number) => {
+  if (value > 0) {
+    return `+${value}`;
+  }
+  return `${value}`;
+};
+
+const describeFlag = (flag: string, value: boolean) => {
+  return value ? `触发：${flag}` : `失去：${flag}`;
+};
+
+const getStatName = (stat: string): string => {
+  const statNames: Record<string, string> = {
+    martialPower: '功力',
+    externalSkill: '外功',
+    internalSkill: '内功',
+    qinggong: '轻功',
+    chivalry: '侠义',
+    charisma: '魅力',
+    constitution: '体魄',
+    comprehension: '悟性',
+    reputation: '声望',
+    influence: '影响力',
+    connections: '人脉',
+    knowledge: '学识',
+    businessAcumen: '商路',
+    money: '银两',
+    health: '健康',
+  };
+  return statNames[stat] || stat;
 };
 
 const makeChoice = (choice: StoryChoice) => {
@@ -408,6 +537,40 @@ const makeChoice = (choice: StoryChoice) => {
   padding-top: 1rem;
   border-top: 1px dashed var(--border-color);
   animation: fadeIn 0.3s ease-out;
+}
+
+.outcome-fallback-hint {
+  margin-top: 8px;
+  color: #8b6914;
+  font-size: 12px;
+}
+
+.feedback-structured {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.feedback-group-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #8b6914;
+  font-weight: 700;
+}
+
+.feedback-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-color);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.feedback-line {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .continue-area {

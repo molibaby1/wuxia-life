@@ -70,7 +70,8 @@
         "npm run build passes"
       ],
       "priority": 5,
-      "passes": false
+      "passes": true,
+      "notes": "Integrated structured choice feedback rendering in `src/components/GameScreen.vue`: main flow now displays narrative + structured stat/relationship/route/long-term impacts from `engineState.lastChoiceFeedback.player`, shows narrative fallback hint when structured details are incomplete, and clears feedback state on continue. Fixed `ChoiceFeedbackGenerator` effect type imports (`eventTypes`) to keep build type contracts consistent. Validation passed: `npm run typecheck`, `npm test`, `npm run build`."
     },
     {
       "id": "US-006",

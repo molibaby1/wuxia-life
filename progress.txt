@@ -907,3 +907,19 @@
   - Keep UI consumption scoped to `feedback.player` and reserve raw effect traces for `feedback.diagnostic` to preserve player-facing abstraction boundaries.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 07:55] - US-005
+- Integrated structured choice feedback display into the main flow `GameScreen`: post-choice area now renders narrative result plus player-visible `statImpacts`, `relationshipImpacts`, `routeImpact`, and `longTermFlags` from `engineState.lastChoiceFeedback`.
+- Added narrative fallback behavior for incomplete structured feedback: the UI now keeps a safe fallback narrative and shows a lightweight fallback hint when structured details are absent or feedback fallback was used.
+- Cleared `engineState.lastChoiceFeedback` together with `lastOutcomeText` on continue to prevent cross-event residual feedback.
+- Fixed a build-blocking type mismatch by aligning `ChoiceFeedbackGenerator` effect imports to `eventTypes` (matching `useNewGameEngine` runtime effect payload type).
+- Files changed:
+  - `src/components/GameScreen.vue`
+  - `src/core/ChoiceFeedbackGenerator.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Main-flow feedback UI should consume only `feedback.player` fields and treat `feedback.diagnostic` as control signals (for example fallback hints), not as player-facing content.
+  - If choice feedback types cross module boundaries, unify the `EffectDefinition` source early (`eventTypes` vs `effects`) to avoid late build failures in UI stories.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run build` ✅
+---

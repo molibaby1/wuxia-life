@@ -84,7 +84,8 @@
         "Default test gate passes"
       ],
       "priority": 6,
-      "passes": false
+      "passes": true,
+      "notes": "Implemented layered low-risk selection orchestration in `GameEngineIntegration.selectEvent` (critical -> storyline -> regular formal -> daily -> fallback) while preserving existing weighting, cooldown, and repetition controls. Added regression coverage for daily fallback boundary and critical-lane protection in `tests/AllTests.ts`. Regenerated baseline report (`npm run report:rhythm-baseline`) to capture post-change metrics. Validation: `npm run typecheck` and `npm test` passed."
     },
     {
       "id": "US-007",

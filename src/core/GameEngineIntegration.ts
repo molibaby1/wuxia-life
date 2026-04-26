@@ -854,6 +854,71 @@ export class GameEngineIntegration {
     );
   }
 
+  private isCriticalLayerEvent(event: EventDefinition): boolean {
+    return this.isMandatoryEvent(event);
+  }
+
+  private isStorylineLayerEvent(event: EventDefinition): boolean {
+    return Boolean(event.storyLine) && !this.isCriticalLayerEvent(event);
+  }
+
+  private splitEventLayers(events: EventDefinition[]): {
+    criticalEvents: EventDefinition[];
+    storylineEvents: EventDefinition[];
+    regularFormalEvents: EventDefinition[];
+  } {
+    const criticalEvents = events.filter(event => this.isCriticalLayerEvent(event));
+    const storylineEvents = events.filter(event => this.isStorylineLayerEvent(event));
+    const regularFormalEvents = events.filter(
+      event => !this.isCriticalLayerEvent(event) && !this.isStorylineLayerEvent(event)
+    );
+    return { criticalEvents, storylineEvents, regularFormalEvents };
+  }
+
+  private pickWeightedFormalEvent(
+    events: EventDefinition[],
+    currentAge: number,
+    dominantPaths: string[]
+  ): EventDefinition | null {
+    if (events.length === 0) {
+      return null;
+    }
+
+    if (events.length === 1) {
+      return events[0];
+    }
+
+    const totalWeight = events.reduce((sum, event) => {
+      const baseWeight = eventLoader.getWeightForAge(event, currentAge);
+      const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
+      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
+      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
+      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
+      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      return sum + this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
+    }, 0);
+
+    if (totalWeight <= 0) {
+      return events[events.length - 1];
+    }
+
+    let random = Math.random() * totalWeight;
+
+    for (const event of events) {
+      const pathAdjusted = this.adjustWeightByPath(event, eventLoader.getWeightForAge(event, currentAge), dominantPaths);
+      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
+      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
+      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
+      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      random -= this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
+      if (random <= 0) {
+        return event;
+      }
+    }
+
+    return events[events.length - 1];
+  }
+
   private detectSuppressionClass(event: EventDefinition): 'injury' | 'illness' | 'economy' | null {
     const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
     const textBlob = [event.id, event.content?.title, event.content?.description, ...tags]
@@ -1034,10 +1099,6 @@ export class GameEngineIntegration {
     // 如果没有兼容事件，回退到所有未触发事件
     const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : untriggeredEvents;
 
-    if (finalEvents.length === 0) {
-      return null;
-    }
-
     // 声望门槛检查：过滤不满足声望要求的事件
     const playerReputation = this.gameState.player?.reputation || 0;
     const reputationFilteredEvents = finalEvents.filter(event => {
@@ -1050,42 +1111,40 @@ export class GameEngineIntegration {
 
     const eventsToSelect = reputationFilteredEvents.length > 0 ? reputationFilteredEvents : finalEvents;
 
-    if (this.shouldPauseEventsThisYear(eventsToSelect)) {
+    if (eventsToSelect.length === 0) {
       return dailyEventSystem.selectEvent(this.gameState);
     }
 
-    // 如果只有一个事件，直接返回
-    if (eventsToSelect.length === 1) {
-      return eventsToSelect[0];
+    const { criticalEvents, storylineEvents, regularFormalEvents } = this.splitEventLayers(eventsToSelect);
+
+    // Layer 1: critical lane, never paused by rhythm pressure.
+    const criticalSelection = this.pickWeightedFormalEvent(criticalEvents, currentAge, dominantPaths);
+    if (criticalSelection) {
+      return criticalSelection;
     }
 
-    // 计算带路径权重的总权重
-    const totalWeight = eventsToSelect.reduce((sum, event) => {
-      const baseWeight = eventLoader.getWeightForAge(event, currentAge);
-      const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
-      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
-      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
-      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      return sum + this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
-    }, 0);
-
-    let random = Math.random() * totalWeight;
-
-    for (const event of eventsToSelect) {
-      const pathAdjusted = this.adjustWeightByPath(event, eventLoader.getWeightForAge(event, currentAge), dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
-      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
-      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
-      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      random -= this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
-      if (random <= 0) {
-        return event;
-      }
+    // Layer 2: storyline lane, protected from daily fallback unless empty.
+    const storylineSelection = this.pickWeightedFormalEvent(storylineEvents, currentAge, dominantPaths);
+    if (storylineSelection) {
+      return storylineSelection;
     }
 
-    // 兜底：返回最后一个
-    return eventsToSelect[eventsToSelect.length - 1];
+    // Layer 3: regular formal lane can yield to rhythm pause.
+    if (regularFormalEvents.length === 0) {
+      return dailyEventSystem.selectEvent(this.gameState);
+    }
+
+    if (this.shouldPauseEventsThisYear(regularFormalEvents)) {
+      return dailyEventSystem.selectEvent(this.gameState);
+    }
+
+    const regularSelection = this.pickWeightedFormalEvent(regularFormalEvents, currentAge, dominantPaths);
+    if (regularSelection) {
+      return regularSelection;
+    }
+
+    // Layer 4 + 5: daily fallback then null.
+    return dailyEventSystem.selectEvent(this.gameState);
   }
   
   /**

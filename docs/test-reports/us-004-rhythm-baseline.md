@@ -4,7 +4,7 @@
 
 - seed: `1`
 - maxAge: `80` (complete life sample)
-- generatedAt: `2026-04-26T01:52:11.450Z`
+- generatedAt: `2026-04-26T01:56:14.087Z`
 
 ## Local Regeneration Command
 
@@ -26,12 +26,12 @@ event_count_per_age=[{"age":0,"count":1},{"age":1,"count":1},{"age":2,"count":0}
 empty_ages=[2,5,7]
 formal_event_ratio=98.7% baseline=[50.0%, 90.0%]
 daily_event_ratio=1.3% baseline=[10.0%, 50.0%]
-choice_event_ratio=82.1% baseline=[20.0%, 80.0%]
+choice_event_ratio=83.3% baseline=[20.0%, 80.0%]
 storyline_continuity=0/0 (0.0%) baseline=[30.0%, 100.0%]
-critical_event_delay_avg=2.09y critical_event_delay_max=5y baseline_max<=15y
+critical_event_delay_avg=1.39y critical_event_delay_max=5y baseline_max<=15y
 
 Critical event ages:
-[0,1,3,4,6,8,13,14,16,17,20,23]
+[0,1,3,4,6,8,13,14,15,16,17,18,19,20,21,22,23,24,25]
 
 Sample timeline excerpt:
 1. age=0 id=birth_wuxia_family category=main_story type=auto storyline=-
@@ -45,15 +45,15 @@ Sample timeline excerpt:
 9. age=11 id=setback_injury category=setback type=auto storyline=-
 10. age=12 id=setback_injury category=setback type=auto storyline=-
 11. age=13 id=sect_path_choice category=main_story type=choice storyline=-
-12. age=14 id=sect_trial_entry category=main_story type=choice storyline=-
-13. age=15 id=outlaw_identity_beginning category=identity type=choice storyline=-
-14. age=16 id=outlaw_path_beginning category=main_story type=choice storyline=-
+12. age=14 id=orthodox_initiation category=main_story type=auto storyline=-
+13. age=15 id=outlaw_path_beginning category=main_story type=choice storyline=-
+14. age=16 id=outlaw_training category=main_story type=choice storyline=-
 15. age=17 id=outlaw_training category=main_story type=choice storyline=-
-16. age=18 id=outlaw_mentor category=side_quest type=choice storyline=-
-17. age=19 id=outlaw_mercy_choice category=side_quest type=choice storyline=-
+16. age=18 id=outlaw_training category=main_story type=choice storyline=-
+17. age=19 id=outlaw_training category=main_story type=choice storyline=-
 18. age=20 id=outlaw_training category=main_story type=choice storyline=-
-19. age=21 id=merchant_first_trade category=identity type=choice storyline=-
-20. age=22 id=merchant_first_trade category=identity type=choice storyline=-
+19. age=21 id=outlaw_training category=main_story type=choice storyline=-
+20. age=22 id=outlaw_training category=main_story type=choice storyline=-
 
 Baselines (P1 observation):
 {

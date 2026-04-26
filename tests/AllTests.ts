@@ -17,6 +17,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
+import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { saveManager } from '../src/core/SaveManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
@@ -600,6 +601,66 @@ const coreFunctionSuite: TestSuite = {
           metadata: { tags: ['mainline', 'critical'] },
         };
         assertEqual(engine.getFormalRepetitionSuppressionMultiplier(mandatoryEvent), 1, '主线关键事件应豁免抑制');
+      },
+    },
+    {
+      name: '分层节奏 - daily 仅在 formal 不足或节奏暂停时介入',
+      description: '测试 critical/storyline 优先，regular formal 可被节奏控制降级到 daily',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 25;
+        state.player.reputation = 0;
+        state.eventHistory = [];
+
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+
+        const criticalEvent = {
+          id: 'critical_lane_event',
+          category: EventCategory.MAIN_STORY,
+          priority: EventPriority.CRITICAL,
+          content: { title: '关键主线', text: '主线推进' },
+          metadata: { tags: ['mainline'] },
+        };
+        const regularEvent = {
+          id: 'regular_lane_event',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          content: { title: '普通正式事件', text: '日常推进' },
+          metadata: { tags: [] },
+        };
+        const dailyEvent = {
+          id: 'daily_lane_event',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '日常事件', text: '补充节奏' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          (dailyEventSystem as any).selectEvent = () => dailyEvent;
+
+          engine.getAvailableEvents = () => [criticalEvent, regularEvent];
+          engine.shouldPauseEventsThisYear = () => true;
+          const selectedCritical = engine.selectEvent(25);
+          assertEqual(selectedCritical?.id, 'critical_lane_event', 'critical 层应优先并且不被节奏暂停阻断');
+
+          engine.getAvailableEvents = () => [regularEvent];
+          engine.shouldPauseEventsThisYear = () => true;
+          const selectedDaily = engine.selectEvent(25);
+          assertEqual(selectedDaily?.id, 'daily_lane_event', '仅 regular formal 可用且节奏暂停时应降级到 daily');
+
+          engine.getAvailableEvents = () => [regularEvent];
+          engine.shouldPauseEventsThisYear = () => false;
+          const selectedRegular = engine.selectEvent(25);
+          assertEqual(selectedRegular?.id, 'regular_lane_event', 'regular formal 可用且无需节奏暂停时应保持 formal');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
       },
     },
     {

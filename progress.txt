@@ -599,3 +599,20 @@
   - Treat critical and mainline tags as explicit protected lanes to prevent future pacing controls from stalling narrative progression.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-26 09:56] - US-006
+- Implemented low-risk layered rhythm orchestration in `GameEngineIntegration.selectEvent`: formal selection now executes explicit lanes in order (`critical` -> `storyline` -> `regular formal`), then falls back to `daily` and finally null fallback.
+- Preserved existing low-risk guards (cooldown/maxTriggers, reputation gate, path compatibility, annual pressure, and repetition suppression), while tightening daily intervention boundaries so daily only enters when formal lanes are empty or regular lane is rhythm-paused.
+- Added regression coverage in `tests/AllTests.ts` for layer boundary behavior: critical lane bypasses rhythm pause, regular formal can downgrade to daily only under pause, and regular formal remains selected when pause is not required.
+- Regenerated rhythm baseline artifact with current implementation via `npm run report:rhythm-baseline`.
+- Files changed:
+  - `src/core/GameEngineIntegration.ts`
+  - `tests/AllTests.ts`
+  - `docs/test-reports/us-004-rhythm-baseline.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Layering can be added as a selection orchestration wrapper around existing weighting math, which minimizes risk and keeps tuning knobs stable.
+  - Rhythm pause should target skippable regular formal events only; critical/storyline lanes need explicit pre-pause selection to keep progression reliable.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run report:rhythm-baseline` ✅
+---

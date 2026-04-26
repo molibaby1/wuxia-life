@@ -743,3 +743,19 @@
   - Pair data-shape migration with explicit runtime-gate regression assertions so "format upgraded" also means "trigger semantics preserved".
 - Validation evidence: `npm run validate:event-quality` ✅ (`career_good_evil_war` classified as `target`), `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:29] - US-016
+- Defined explicit condition expression grammar contract in `docs/test-reports/us-016-condition-expression-grammar.md`, covering supported property access, `flags.has(...)` / `events.has(...)`, comparison operators, logic operators, and parentheses.
+- Added type-level grammar artifacts in `src/types/conditionExpression.ts`, including EBNF reference text, supported capability map, explicit unsupported syntax list, and structured invalid-expression error contract (`ConditionExpressionError` + error codes).
+- Wired `EventCondition.expression` to the `ConditionExpression` type in `src/types/eventTypes.ts` so grammar intent is reflected in core event typing.
+- Files changed:
+  - `src/types/conditionExpression.ts`
+  - `src/types/eventTypes.ts`
+  - `docs/test-reports/us-016-condition-expression-grammar.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Establishing grammar and error-code contracts before parser hardening reduces ambiguity for security-focused evaluator implementation stories.
+  - Keeping a dedicated unsupported-syntax whitelist in types/docs makes future negative tests straightforward and deterministic.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

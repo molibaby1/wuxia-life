@@ -223,7 +223,8 @@
         "The grammar is documented or reflected in types"
       ],
       "priority": 16,
-      "passes": false
+      "passes": true,
+      "notes": "Defined explicit P1 condition expression grammar in `docs/test-reports/us-016-condition-expression-grammar.md` and added type-level grammar contract in `src/types/conditionExpression.ts` (supported access/query/operators/parentheses, unsupported syntax list, and structured invalid-expression error behavior via `ConditionExpressionError` codes). Wired `EventCondition.expression` to `ConditionExpression` for type-level reflection."
     },
     {
       "id": "US-017",

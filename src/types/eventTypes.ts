@@ -1,3 +1,5 @@
+import type { ConditionExpression } from './conditionExpression';
+
 /**
  * 事件系统类型定义
  * 
@@ -501,7 +503,7 @@ export interface CustomTrigger {
  */
 export interface EventCondition {
   type: 'expression';
-  expression: string;
+  expression: ConditionExpression;
 }
 
 /**

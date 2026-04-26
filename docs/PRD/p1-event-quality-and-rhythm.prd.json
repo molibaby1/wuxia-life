@@ -291,7 +291,8 @@
         "Report lists residual risks and P2/P3 candidate follow-ups"
       ],
       "priority": 21,
-      "passes": false
+      "passes": true,
+      "notes": "Added aggregated P1 quality gate report generator `scripts/generateP1QualityGateReport.ts` with command `npm run report:p1-quality-gate`, producing `docs/test-reports/us-021-p1-quality-gate-report.md`. Report includes rhythm metrics snapshot, event quality issue counts, format validation result, condition expression check results, deterministic baseline explanation, and residual-risk/P2-P3 follow-up sections."
     },
     {
       "id": "US-022",

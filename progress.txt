@@ -818,3 +818,20 @@
   - Non-whitelisted syntax coverage should include both property-chain access and invocation/assignment forms, because they can fail at different parser stages.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:43] - US-021
+- Implemented a consolidated P1 quality gate report generator `scripts/generateP1QualityGateReport.ts` and command `npm run report:p1-quality-gate`, which aggregates deterministic rhythm metrics snapshot, event-quality issue counts, format validation status, and condition expression check results in one decision-ready artifact.
+- Generated report artifact `docs/test-reports/us-021-p1-quality-gate-report.md` with baseline explanation (reusing US-003/US-004 metric pipeline and US-010/US-014 validation policy), plus residual risks and P2/P3 candidate follow-ups.
+- Refactored `scripts/validateEventQuality.ts` for safe reuse by exporting validator types/function and guarding CLI execution with `import.meta.url` check to avoid import side effects.
+- Files changed:
+  - `scripts/generateP1QualityGateReport.ts`
+  - `scripts/validateEventQuality.ts`
+  - `docs/test-reports/us-021-p1-quality-gate-report.md`
+  - `package.json`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Milestone closure reports are easier to maintain when they reuse existing metric/validator modules instead of re-implementing standalone logic.
+  - Validation scripts intended for composition should separate reusable functions from CLI entrypoints to prevent accidental execution during imports.
+- Validation evidence: `npm run report:p1-quality-gate` ✅, `npm run typecheck` ✅, `npm test` ✅
+---

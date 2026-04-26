@@ -27,7 +27,7 @@ import identityYearEventsJson from '../src/data/lines/identity-year-events.json'
 import factionEventsJson from '../src/data/lines/faction-revelation.json';
 import setbackEventsJson from '../src/data/lines/setback-events.json';
 
-interface EventQualityIssue {
+export interface EventQualityIssue {
   eventId: string;
   source: string;
   issueType: EventQualityIssueType;
@@ -36,16 +36,16 @@ interface EventQualityIssue {
   migrationHint?: string;
 }
 
-type EventFormatStatus = 'target' | 'legacy' | 'mixed';
+export type EventFormatStatus = 'target' | 'legacy' | 'mixed';
 
-interface EventFormatClassification {
+export interface EventFormatClassification {
   status: EventFormatStatus;
   signals: string[];
   migrationHints: string[];
   dangerousReasons: string[];
 }
 
-interface ValidationResult {
+export interface ValidationResult {
   issues: EventQualityIssue[];
   formatByEventId: Record<string, EventFormatClassification>;
 }
@@ -278,7 +278,7 @@ function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, str
   return sourceMap;
 }
 
-function validateEventQuality(events: EventDefinition[]): ValidationResult {
+export function validateEventQuality(events: EventDefinition[]): ValidationResult {
   const issues: EventQualityIssue[] = [];
   const formatByEventId: Record<string, EventFormatClassification> = {};
   const sourceById = buildLoadedSourceById(events);
@@ -548,4 +548,6 @@ function main(): void {
   }
 }
 
-main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}

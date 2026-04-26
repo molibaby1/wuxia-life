@@ -54,13 +54,15 @@ const availableChoices = computed(() => gameEngineComposable.engineState.availab
 
 <template>
   <div id="app">
-    <!-- 调试面板切换按钮 -->
+    <!-- 调试面板入口（仅在游戏流程中显示） -->
     <button 
+      v-if="gamePhase === 'playing'"
       class="debug-toggle" 
       @click="toggleDebug"
-      title="切换调试面板"
+      :title="showDebug ? '关闭调试面板' : '打开调试面板'"
+      :aria-label="showDebug ? '关闭调试面板' : '打开调试面板'"
     >
-      {{ showDebug ? '🔒' : '🔧' }}
+      {{ showDebug ? '关闭调试' : '调试面板' }}
     </button>
     
     <!-- 调试面板（可选显示） -->
@@ -91,8 +93,9 @@ html, body, #app {
   top: 10px;
   right: 10px;
   z-index: 9999;
-  padding: 8px 12px;
-  font-size: 20px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
   background: rgba(0, 0, 0, 0.7);
   color: white;
   border: 2px solid #4ec9b0;

@@ -25,7 +25,7 @@
         "The debug toggle behavior is unchanged or clearer than before"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-003",

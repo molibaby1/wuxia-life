@@ -319,3 +319,15 @@
   - When removing debug UI, preserve gameplay state transitions (`lastOutcomeText` display and continue flow) to avoid accidental interaction regressions.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 08:58] - US-002
+- Preserved diagnostics behind an explicit and clearer debug entry in `App`: gameplay-only debug button with clear open/close labels, while keeping the same toggle behavior and `DebugPanel` diagnostics capability.
+- Files changed:
+  - `src/App.vue`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - For player-facing cleanup, keep developer diagnostics on explicit, labeled controls instead of icon-only affordances to reduce accidental confusion.
+  - Scope debug entry visibility to the actual gameplay phase to avoid leaking non-essential controls into start/end flow.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

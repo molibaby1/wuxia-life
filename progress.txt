@@ -445,3 +445,16 @@
   - Keeping threshold values in script constants and docs together reduces policy drift between implementation and design intent.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run repro:event-repetition` ✅
 ---
+
+## [2026-04-26 09:06] - US-011
+- Completed a migration-prep state-source audit and documented relationships across legacy store, new composable, global game engine, save manager, debug panel, and demo components in `docs/test-reports/us-011-state-source-audit.md`.
+- Classified each entry as `main flow`, `demo flow`, `deprecated flow`, or `needs confirmation`, including explicit relationship chains between `App`, `useNewGameEngine`, and `gameEngine`.
+- Files changed:
+  - `docs/test-reports/us-011-state-source-audit.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Main gameplay has already converged on `useNewGameEngine` + `gameEngine`; migration risk is primarily at demo/legacy edges, not the active player path.
+  - Save/load integration completeness must be validated at component integration points (`gameLoaded` consumers), not just at storage utility level.
+- Validation evidence: `npm run typecheck` ✅
+---

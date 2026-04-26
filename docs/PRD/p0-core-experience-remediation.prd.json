@@ -136,7 +136,7 @@
         "No business code is changed as part of the audit story"
       ],
       "priority": 11,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-012",

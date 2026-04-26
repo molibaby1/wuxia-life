@@ -1,0 +1,314 @@
+{
+  "project": "Wuxia Life P2 Gameplay Structure and Persistence",
+  "branchName": "ralph/p2-gameplay-structure-and-persistence",
+  "description": "Strengthen gameplay structure after P1 by building a clear choice feedback loop, route and identity continuity rules, real gameplay simulation coverage, and reliable save/load integration for the main flow.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Confirm P1 Baseline",
+      "description": "As a maintainer, I want to confirm the P1 baseline before P2 implementation so that P2 does not build on unfinished event quality work.",
+      "acceptanceCriteria": [
+        "P1 PRD and P1 delivery evidence or implementation notes are reviewed",
+        "P1 entry status is recorded as complete, partial, waived, or blocked",
+        "Affected P2 stories are identified if P1 evidence is incomplete",
+        "No business code is changed"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "P1 baseline reviewed against docs/PRD/p1-event-quality-and-rhythm.prd.json and docs/test-reports/us-022-p1-closure-verification.md. Entry status: complete. Affected P2 stories due to incomplete P1 evidence: none."
+    },
+    {
+      "id": "US-002",
+      "title": "Inventory Choice Feedback Sources",
+      "description": "As a developer, I want to know where choice result text, effects, relationship changes, and route changes come from so that feedback design reuses existing data.",
+      "acceptanceCriteria": [
+        "Choice events, outcomes, effects, lastOutcomeText, event history, relationships, and route changes are inventoried",
+        "Each feedback source is classified as immediate, long-term, hidden, or diagnostic",
+        "Current feedback gaps are listed",
+        "No business code is changed"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Define Structured Choice Feedback Model",
+      "description": "As a player, I want choice results to explain what happened, what changed, and what future consequence was opened.",
+      "acceptanceCriteria": [
+        "Feedback model fields include narrative result, stat impact, relationship impact, route impact, long-term flags, and risk hints",
+        "Player-facing fields and test/log-only fields are separated",
+        "Fallback behavior for missing feedback is defined",
+        "Design notes are written"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Implement Choice Feedback Generator",
+      "description": "As a developer, I want a single feedback generation entry so that choices, auto-resolved choices, and simulation reports do not each invent feedback logic.",
+      "acceptanceCriteria": [
+        "A unified feedback generation entry is added or existing feedback logic is consolidated",
+        "Manual choices and auto-resolved choices can produce the same feedback structure",
+        "Raw diagnostic fields are not exposed directly to players",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Display Choice Feedback in Main Flow",
+      "description": "As a player, I want clear post-choice results and key long-term impacts in the main flow.",
+      "acceptanceCriteria": [
+        "Main gameplay displays structured feedback after choices",
+        "Stat, relationship, and route impacts follow the approved display rules",
+        "A narrative fallback is shown when structured feedback is incomplete",
+        "npm run build passes"
+      ],
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "title": "Add Choice Feedback Regression Tests",
+      "description": "As a maintainer, I want feedback tests so that future event content does not regress to vague choice results.",
+      "acceptanceCriteria": [
+        "Tests cover stat changes, relationship changes, route changes, long-term flags, and fallback text",
+        "Tests cover manual choice events and auto-resolved choice events",
+        "npm test passes"
+      ],
+      "priority": 6,
+      "passes": false
+    },
+    {
+      "id": "US-007",
+      "title": "Inventory Route Identity and Faction Fields",
+      "description": "As a designer, I want existing route, identity, faction, sect, karma, relationship, and critical choice fields inventoried before defining conflict rules.",
+      "acceptanceCriteria": [
+        "Identity, route, faction, sect, critical choice, karma, and relationship fields are inventoried",
+        "Each field includes source, write points, read points, and meaning",
+        "Fields are classified as main-flow, legacy-compatible, or suspected-deprecated",
+        "No business code is changed"
+      ],
+      "priority": 7,
+      "passes": false
+    },
+    {
+      "id": "US-008",
+      "title": "Define Route Categories and Lifecycle",
+      "description": "As a player, I want routes to have a clear start, development, lock-in, turn, completion, or failure shape.",
+      "acceptanceCriteria": [
+        "Main route, secondary route, conflicting route, temporary state, completed state, and failed state are defined",
+        "Route lifecycle state machine is documented",
+        "Route switching, lock-in, and ending rules are defined",
+        "Design notes are written"
+      ],
+      "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-009",
+      "title": "Define Route Compatibility Rules",
+      "description": "As a designer, I want route conflict and compatibility rules so that the player does not become contradictory identities at the same time.",
+      "acceptanceCriteria": [
+        "Conflict and compatibility are defined for at least merchant, hero, sect, demonic, official, hermit, or wanderer routes",
+        "Strong mutual exclusion, soft mutual exclusion, and coexistence are distinguished",
+        "Conflict resolution behavior is defined",
+        "Rules are written as a testable table"
+      ],
+      "priority": 9,
+      "passes": false
+    },
+    {
+      "id": "US-010",
+      "title": "Implement Route State Management Base",
+      "description": "As a developer, I want one route state management entry so that events do not hand-write route flags everywhere.",
+      "acceptanceCriteria": [
+        "Route state can be read, written, locked, completed, and failed through a unified entry",
+        "Existing identity and faction fields are not broken",
+        "Key route state changes can be recorded in event or route history",
+        "npm run typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "title": "Apply Route Conflict Checks",
+      "description": "As a player, I want locked-in routes to affect later events and choices so that life choices have lasting consequences.",
+      "acceptanceCriteria": [
+        "Conflicting route events do not trigger in invalid states",
+        "Soft-conflict route transitions are handled through explicit turn events",
+        "Route lock-in state is traceable",
+        "npm test passes"
+      ],
+      "priority": 11,
+      "passes": false
+    },
+    {
+      "id": "US-012",
+      "title": "Add Route Progression and Breakage Tests",
+      "description": "As a designer, I want tests for route completion and breakage so that route structure is not only judged by feel.",
+      "acceptanceCriteria": [
+        "Tests cover route start, progress, lock-in, conflict block, completion, failure, or breakage",
+        "At least two different route types are covered",
+        "npm test passes"
+      ],
+      "priority": 12,
+      "passes": false
+    },
+    {
+      "id": "US-013",
+      "title": "Define Real Gameplay Simulation Metrics",
+      "description": "As a maintainer, I want real gameplay simulation metrics that cover playability, not only whether the loop runs.",
+      "acceptanceCriteria": [
+        "Metrics include choice rate, auto event rate, route completion rate, route breakage rate, death rate, ending distribution, romance/family achievement rate, and save count",
+        "Metrics include target ranges or observation baselines",
+        "Metrics are classified as blocker, warning, or info"
+      ],
+      "priority": 13,
+      "passes": false
+    },
+    {
+      "id": "US-014",
+      "title": "Implement Fixed-Seed Gameplay Simulation",
+      "description": "As a developer, I want gameplay simulation to be repeatable so that regression results can be compared.",
+      "acceptanceCriteria": [
+        "Simulation supports fixed random seeds",
+        "Simulation supports complete-life or specified age-range runs",
+        "Simulation outputs machine-readable results and human-readable summaries",
+        "Simulation runs without browser UI"
+      ],
+      "priority": 14,
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "title": "Add Multi-Route Simulation Samples",
+      "description": "As a designer, I want simulation samples for different origins, routes, and choice tendencies so that one life path does not hide structural issues.",
+      "acceptanceCriteria": [
+        "At least three simulation personas or choice strategies are defined",
+        "Each sample outputs route, ending, choice, death, and relationship summaries",
+        "Samples can be rerun with a local command"
+      ],
+      "priority": 15,
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "title": "Define Simulation Thresholds and Gate",
+      "description": "As a maintainer, I want simulation to produce pass or fail signals instead of only attractive reports.",
+      "acceptanceCriteria": [
+        "Blocking simulation metrics are defined",
+        "Warning-only simulation metrics are defined",
+        "Waiver list support requires reasons",
+        "npm test passes"
+      ],
+      "priority": 16,
+      "passes": false
+    },
+    {
+      "id": "US-017",
+      "title": "Inventory Current Save State Shape",
+      "description": "As a developer, I want to know what the save system persists before wiring it to the main flow.",
+      "acceptanceCriteria": [
+        "Saved fields, loaded fields, version fields, missing fields, and derived fields are inventoried",
+        "Inventory covers player, current event, event history, route, identity, relationship, ending, and time state",
+        "No business code is changed"
+      ],
+      "priority": 17,
+      "passes": false
+    },
+    {
+      "id": "US-018",
+      "title": "Define Save Version and Compatibility Boundary",
+      "description": "As a maintainer, I want a P2 save version strategy so future state changes do not silently corrupt old saves.",
+      "acceptanceCriteria": [
+        "P2 save version or schema marker is defined",
+        "Readable legacy version range is defined",
+        "Unsupported legacy save behavior is defined",
+        "Full historical migration is explicitly out of scope"
+      ],
+      "priority": 18,
+      "passes": false
+    },
+    {
+      "id": "US-019",
+      "title": "Connect Save and Load to Main Flow",
+      "description": "As a player, I want to save and load progress from the real game flow so that long-form life simulation is playable.",
+      "acceptanceCriteria": [
+        "Main flow can save the current life state",
+        "Loading restores player, time, event history, route, relationship, and ending-related state",
+        "Continuing after load does not reset key state",
+        "npm run typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false
+    },
+    {
+      "id": "US-020",
+      "title": "Define Restart Continue and Ending Save Behavior",
+      "description": "As a player, I want restart, continue, and post-ending save behavior to be predictable.",
+      "acceptanceCriteria": [
+        "Restart does not corrupt existing saves",
+        "Continuing after loading a save resumes the correct flow state",
+        "Post-ending save display or load behavior follows the approved design",
+        "npm run build passes"
+      ],
+      "priority": 20,
+      "passes": false
+    },
+    {
+      "id": "US-021",
+      "title": "Add Save Regression Tests",
+      "description": "As a maintainer, I want save regression tests so route, relationship, and event history do not disappear after load.",
+      "acceptanceCriteria": [
+        "Tests cover save, load, continue, restart, and post-ending load",
+        "Tests cover route, identity, relationship, event history, and time fields",
+        "npm test passes"
+      ],
+      "priority": 21,
+      "passes": false
+    },
+    {
+      "id": "US-022",
+      "title": "Include Save Restore in Gameplay Simulation",
+      "description": "As a developer, I want gameplay simulation to periodically save and restore so that long-run persistence is validated.",
+      "acceptanceCriteria": [
+        "Simulation can auto-save by age or event interval",
+        "Simulation restores from at least one save and continues",
+        "Report includes save count, load count, and consistency check results",
+        "npm test passes"
+      ],
+      "priority": 22,
+      "passes": false
+    },
+    {
+      "id": "US-023",
+      "title": "Generate P2 Gameplay Structure Report",
+      "description": "As a project owner, I want P2 output evidence so the project can decide whether it is ready for P3.",
+      "acceptanceCriteria": [
+        "Report includes choice feedback coverage, route completion rate, route breakage rate, simulation metrics, and save consistency",
+        "Report lists residual risks",
+        "Report identifies P3 candidate follow-ups"
+      ],
+      "priority": 23,
+      "passes": false
+    },
+    {
+      "id": "US-024",
+      "title": "Close P2 with Verification Evidence",
+      "description": "As a maintainer, I want P2 closed with fresh validation evidence so future sessions can continue safely.",
+      "acceptanceCriteria": [
+        "npm run typecheck passes",
+        "npm run build passes",
+        "npm test passes",
+        "P2 simulation, save, or route quality commands pass or emit approved waivers",
+        "Completed P2 stories have recorded verification evidence"
+      ],
+      "priority": 24,
+      "passes": false
+    }
+  ]
+}

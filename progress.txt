@@ -849,3 +849,16 @@
   - Closure artifacts should store command-level outcomes and audit output together to keep acceptance verification self-contained.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅, `npm run report:p1-quality-gate` ✅
 ---
+
+## [2026-04-27 07:48] - US-001
+- Reviewed P1 baseline inputs for P2 kickoff using `docs/PRD/p1-event-quality-and-rhythm.prd.json` and `docs/test-reports/us-022-p1-closure-verification.md`.
+- Recorded P1 entry status for P2 as `complete` in `docs/PRD/p2-gameplay-structure-and-persistence.prd.json` (`US-001` notes).
+- Confirmed there are no affected P2 stories caused by incomplete P1 evidence.
+- Files changed:
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - P2 kickoff should explicitly pin both upstream PRD pass matrix and closure verification artifact to keep baseline confirmation auditable.
+  - Baseline confirmation stories should remain documentation-only and avoid gameplay/business code edits.
+- Validation evidence: `npm run typecheck` ✅
+---

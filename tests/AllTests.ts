@@ -17,6 +17,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
+import { saveManager } from '../src/core/SaveManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 
@@ -173,6 +174,98 @@ async function runAutoResolveCase() {
     (gameEngine as any).advanceTime = originalAdvanceTime;
     globalThis.requestAnimationFrame = originalRequestAnimationFrame;
     (engine.engineState as any).currentEvent = null;
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+  }
+}
+
+async function runStateConsistencyRegressionCase() {
+  const engine = useNewGameEngine();
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalSelectEvent = gameEngine.selectEvent;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    saveManager.clearAllSaves();
+    (gameEngine as any).selectEvent = () => ({
+      id: 'state_consistency_bootstrap_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'state_consistency_bootstrap_choice',
+          text: '初始化事件',
+          effects: [{ type: EffectType.FLAG_SET, target: 'state_consistency_bootstrap' }],
+        },
+      ],
+    });
+
+    engine.startNewGame('StateConsistencyHero', 'male');
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const stateAfterNewGame = engine.getGameState();
+    assert(stateAfterNewGame.player.name === 'StateConsistencyHero', '新开局后名字未同步到引擎状态，可能出现状态分裂');
+    assert(stateAfterNewGame.player.alive === true, '新开局后玩家存活状态异常，可能是初始化同步失败');
+
+    (engine.engineState as any).currentEvent = {
+      id: 'state_consistency_choice_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'state_consistency_choice',
+          text: '执行状态同步回归选择',
+          description: '用于验证选择后引擎状态与 UI 状态一致',
+          effects: [{ type: EffectType.FLAG_SET, target: 'state_consistency_choice_done' }],
+        },
+      ],
+    };
+    (engine.engineState as any).availableChoices = [
+      { id: 'state_consistency_choice', text: '执行状态同步回归选择' },
+    ];
+
+    const choiceHandled = await engine.handleChoice({ id: 'state_consistency_choice' } as any);
+    assert(choiceHandled, '选择执行失败，无法验证状态同步链路');
+    assert(engine.engineState.lastEffects.length > 0, '选择后 UI 效果列表为空，可能是执行结果未回写到 engineState');
+    assert(
+      engine.getGameState().flags.state_consistency_choice_done === true,
+      '选择后引擎 flags 未更新，存在状态不同步风险',
+    );
+
+    const saveId = saveManager.saveGame(engine.getGameState(), 'US-015-state-consistency');
+    const loadedSave = saveManager.loadGame(saveId);
+    assert(loadedSave !== null, '保存后无法读取存档，状态持久化链路异常');
+    assert(
+      loadedSave!.gameData.flags.state_consistency_choice_done === true,
+      '存档读回未保留选择后的 flag，状态同步可能在保存流程中断裂',
+    );
+
+    const endingState = engine.getGameState();
+    endingState.player.alive = false;
+    endingState.ending = {
+        id: 'state_consistency_ending',
+        name: '状态一致性结局',
+        description: '用于验证 ending 与主状态一致',
+      } as any;
+    endingState.flags.ending_triggered = true;
+    assert(engine.getGameState().player.alive === false, '结局态存活状态未同步，ending 读取可能来自旧状态源');
+    assert(engine.getGameState().flags.ending_triggered === true, '结局标记未同步到主状态，可能影响结束流程判断');
+
+    engine.restartGame();
+    const stateAfterRestart = engine.getGameState();
+    assert(stateAfterRestart.player.age === 0, '重开后年龄未重置，主状态与重开流程不同步');
+    assert(stateAfterRestart.player.alive === true, '重开后存活状态未恢复，主状态重置不完整');
+    assert((engine.engineState.currentEvent ?? null) === null, '重开后 currentEvent 未清空，UI 状态与主状态不同步');
+    assert(engine.engineState.lastOutcomeText === null, '重开后 lastOutcomeText 未清空，存在跨局残留状态');
+    assert(engine.engineState.lastEffects.length === 0, '重开后 lastEffects 未清空，存在 UI 状态残留');
+  } finally {
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    saveManager.clearAllSaves();
+    (engine.engineState as any).currentEvent = null;
+    (engine.engineState as any).availableChoices = [];
     engine.engineState.lastOutcomeText = null;
     engine.engineState.lastEffects = [];
   }
@@ -521,6 +614,13 @@ const coreFunctionSuite: TestSuite = {
         assert(!!event.ageRange, '事件必须有年龄范围');
         assert(!!event.content, '事件必须有内容');
         assert(!!event.metadata, '事件必须有元数据');
+      },
+    },
+    {
+      name: '状态一致性回归 - 新开局/选择/结局/重开/存档链路',
+      description: '测试主状态源与 UI 状态在关键流程保持一致，失败应直接暴露同步问题',
+      test: async () => {
+        await runStateConsistencyRegressionCase();
       },
     },
   ],

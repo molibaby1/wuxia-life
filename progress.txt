@@ -502,3 +502,16 @@
   - Migration notes must be updated immediately after deprecations are removed from main flow, otherwise stale docs become new dead links.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:16] - US-015
+- Added state-consistency regression coverage in `tests/AllTests.ts` via `runStateConsistencyRegressionCase`, covering main-flow continuity across new game initialization, choice execution state write-back, ending-state read path, restart cleanup, and save/load persistence.
+- Assertions now use synchronization-oriented failure messages so regressions can be traced directly to engine/UI state divergence points.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - `useNewGameEngine.startNewGame` immediately schedules `getNextEvent`; regression tests should provide a stable selectable event stub to avoid infinite `selectEvent -> advanceTime -> getNextEvent` recursion in test doubles.
+  - State-unification regression tests should validate both transient UI state (`engineState.currentEvent/lastOutcomeText/lastEffects`) and persisted engine state (`saveManager` round-trip) to catch split-source reintroductions early.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

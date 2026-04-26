@@ -950,3 +950,17 @@
   - Conflict-rule stories should lock a single canonical route signal first; otherwise compatibility fields (`route_*`, `*_path`) will keep ambiguity in trigger logic.
   - Identity/faction decisions should explicitly declare whether `state.identity` or `lifePath` is authoritative to avoid dual-source drift.
 ---
+
+## [2026-04-27 07:59] - US-008
+- Defined route category taxonomy in `docs/test-reports/us-008-route-categories-and-lifecycle.md`, covering `main route`, `secondary route`, `conflicting route`, `temporary state`, `completed state`, and `failed state` with explicit semantic boundaries.
+- Documented a canonical route lifecycle state machine (`inactive -> temporary -> active -> locked_in -> turned/completed/failed`) and terminal-state semantics.
+- Specified route switching, lock-in, and ending rules for follow-up implementation stories, including turn-event constraints for locked-in route pivots and irreversible terminal transitions.
+- Files changed:
+  - `docs/test-reports/us-008-route-categories-and-lifecycle.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Route conflict logic should be implemented against lifecycle states, not raw route labels, to keep soft/hard conflict handling deterministic.
+  - Lock-in and turn transitions must always produce history records; without timeline evidence, conflict debugging and simulation analysis become unreliable.
+- Validation evidence: `npm run typecheck` ✅
+---

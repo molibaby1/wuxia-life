@@ -111,7 +111,8 @@
         "Design notes are written"
       ],
       "priority": 8,
-      "passes": false
+      "passes": true,
+      "notes": "Defined route categories and lifecycle in `docs/test-reports/us-008-route-categories-and-lifecycle.md`, including main/secondary/conflicting/temporary/completed/failed states, canonical state machine (`inactive -> temporary -> active -> locked_in -> turned/completed/failed`), switching rules, lock-in rules, ending rules, and follow-up implementation guidance for US-009~US-012."
     },
     {
       "id": "US-009",

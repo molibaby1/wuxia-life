@@ -110,7 +110,8 @@
         "No event data is modified"
       ],
       "priority": 8,
-      "passes": false
+      "passes": true,
+      "notes": "Documented event quality problem inventory in `docs/test-reports/us-008-event-quality-problem-inventory.md`, covering duplicate titles, duplicate IDs, invalid age ranges, empty content, empty effects, invalid conditions, invalid stats, same-age congestion, broken storylines, and unreachable events; each type includes a proposed severity. This is a read-only documentation change and does not modify event data."
     },
     {
       "id": "US-009",

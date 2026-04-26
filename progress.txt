@@ -628,3 +628,16 @@
   - Keep layered-lane tests focused on boundary conditions (critical lane immunity vs regular-lane fallback) so future weighting tweaks do not obscure pacing regressions.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 10:06] - US-008
+- Added `docs/test-reports/us-008-event-quality-problem-inventory.md` to inventory known event quality risk types for P1 gate design, covering duplicate titles, duplicate IDs, invalid age ranges, empty content, empty effects, invalid conditions, invalid stats, same-age congestion, broken storylines, and unreachable events.
+- Assigned a proposed severity (`blocker`/`major`/`minor`) to each problem type and documented rationale plus detection hints for follow-up implementation stories.
+- Updated the P1 PRD story state to `passes: true` for `US-008` with explicit note that this iteration is read-only and does not modify event data.
+- Files changed:
+  - `docs/test-reports/us-008-event-quality-problem-inventory.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keep inventory stories implementation-agnostic but detection-oriented (include concise gate hints) so the next validation-script story can translate policy to code directly.
+  - Storyline continuity and unreachable-event checks should default to `blocker` severity because they affect core progression correctness, not only content polish.
+---

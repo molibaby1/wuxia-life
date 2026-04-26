@@ -80,8 +80,13 @@ export function useNewGameEngine() {
             getNextEvent();
             return;
           }
-          const autoChoice = pickAutoChoice(availableChoices, gameEngine.getGameState());
-          handleChoice(autoChoice);
+          const autoChoice = pickAutoChoice(availableChoices, gameEngine.getGameState(), selectedEvent.id);
+          void handleChoice(autoChoice, { source: 'autoResolve', eventId: selectedEvent.id }).then(success => {
+            if (!success) {
+              console.warn('[NewGameEngine] 自动判定执行失败，跳过当前事件:', selectedEvent.id);
+              getNextEvent();
+            }
+          });
           return;
         }
         // 如果是选择事件，准备选择项
@@ -176,15 +181,35 @@ export function useNewGameEngine() {
   /**
    * 处理选择
    */
-  const handleChoice = async (choice: StoryChoice) => {
-    if (isProcessing.value || !engineState.currentEvent) return;
+  const handleChoice = async (
+    choice: StoryChoice,
+    context?: { source?: 'manual' | 'autoResolve'; eventId?: string },
+  ): Promise<boolean> => {
+    if (isProcessing.value || !engineState.currentEvent) return false;
 
     // 查找对应的选择定义
     const currentEvent = engineState.currentEvent;
-    if (currentEvent.eventType !== 'choice' || !currentEvent.choices) return;
+    if (currentEvent.eventType !== 'choice' || !currentEvent.choices) return false;
 
     const selectedChoice = currentEvent.choices.find(c => c.id === choice.id);
-    if (!selectedChoice) return;
+    if (!selectedChoice) {
+      console.warn('[NewGameEngine] 未找到选择项定义:', {
+        source: context?.source ?? 'manual',
+        eventId: context?.eventId ?? currentEvent.id,
+        choiceId: choice.id,
+      });
+      return false;
+    }
+
+    if (selectedChoice.condition && !gameEngine.isChoiceAvailable(selectedChoice.condition)) {
+      console.warn('[NewGameEngine] 选择项条件不满足，已拒绝执行:', {
+        source: context?.source ?? 'manual',
+        eventId: context?.eventId ?? currentEvent.id,
+        choiceId: selectedChoice.id,
+        condition: selectedChoice.condition ?? null,
+      });
+      return false;
+    }
 
     // 确定要执行的效果
     let effectsToExecute = selectedChoice.effects || [];
@@ -193,13 +218,22 @@ export function useNewGameEngine() {
     // 如果有多结果分支，根据条件判定
     if (selectedChoice.outcomes && selectedChoice.outcomes.length > 0) {
       const gameState = gameEngine.getGameState();
+      let hasMatchedOutcome = false;
       for (const outcome of selectedChoice.outcomes) {
         // 检查条件是否满足
         if (evaluateOutcomeCondition(outcome, gameState)) {
+          hasMatchedOutcome = true;
           effectsToExecute = outcome.effects || [];
           outcomeText = outcome.text;
           break;
         }
+      }
+      if (!hasMatchedOutcome) {
+        console.warn('[NewGameEngine] 未命中任何可用 outcome，回退到 choice.effects:', {
+          source: context?.source ?? 'manual',
+          eventId: context?.eventId ?? currentEvent.id,
+          choiceId: selectedChoice.id,
+        });
       }
     }
 
@@ -214,8 +248,12 @@ export function useNewGameEngine() {
     }
 
     if (effectsToExecute.length === 0) {
-      console.warn('[NewGameEngine] 选择无可用效果:', choice.id);
-      return;
+      console.warn('[NewGameEngine] 选择无可用效果:', {
+        source: context?.source ?? 'manual',
+        eventId: context?.eventId ?? currentEvent.id,
+        choiceId: choice.id,
+      });
+      return false;
     }
 
     isProcessing.value = true;
@@ -235,14 +273,16 @@ export function useNewGameEngine() {
       // 显示结果，等待用户点击"继续"
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
+      return true;
     } catch (error) {
       console.error('[NewGameEngine] 执行选择失败:', error);
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
+      return false;
     }
   };
 
-  const pickAutoChoice = (choices: any[], _state: any) => {
+  const pickAutoChoice = (choices: any[], state: any, eventId: string) => {
     let best = choices[0];
     let bestScore = -Infinity;
 
@@ -252,15 +292,12 @@ export function useNewGameEngine() {
       // 如果有多结果分支，评估最佳结果
       if (choice.outcomes && choice.outcomes.length > 0) {
         let bestOutcomeScore = -Infinity;
+        let hasAvailableOutcome = false;
         for (const outcome of choice.outcomes) {
-          // 简单条件检查
-          if (outcome.condition && outcome.condition.type === 'expression') {
-            const expr = outcome.condition.expression;
-            // 跳过有玩家属性条件的结果（因为自动游玩时属性可能不满足）
-            if (expr && (expr.includes('>=') || expr.includes('<=') || expr.includes('>'))) {
-              continue;
-            }
+          if (!evaluateOutcomeCondition(outcome, state)) {
+            continue;
           }
+          hasAvailableOutcome = true;
           let outcomeScore = 0;
           if (outcome.effects) {
             for (const effect of outcome.effects) {
@@ -282,7 +319,14 @@ export function useNewGameEngine() {
             bestOutcomeScore = outcomeScore;
           }
         }
-        score = bestOutcomeScore;
+        if (hasAvailableOutcome) {
+          score = bestOutcomeScore;
+        } else {
+          console.warn('[NewGameEngine] 自动判定选择无可用 outcome，退回 choice.effects 评分:', {
+            eventId,
+            choiceId: choice.id,
+          });
+        }
       } else if (choice.effects) {
         // 无多结果分支，评估原有效果
         for (const effect of choice.effects) {

@@ -370,3 +370,18 @@
   - Use composable entrypoint tests (`handleChoice`) with light method stubs to lock end-to-end branch behavior without introducing UI coupling.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 08:58] - US-006
+- Hardened `useNewGameEngine` autoResolve and choice execution flow so automatic choices follow the same availability and outcome condition gates as manual choices.
+- Added readable diagnostics for autoResolve/choice failures (missing choice definition, unavailable choice condition, no matched outcome fallback, empty effect execution, autoResolve execution failure).
+- Added `AllTests` regression coverage that proves autoResolve excludes unavailable choices and resolves outcome branches via real condition evaluation.
+- Files changed:
+  - `src/composables/useNewGameEngine.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - autoResolve scoring must evaluate only condition-eligible outcomes; heuristic skipping by expression text introduces branch drift.
+  - Returning explicit success/failure from `handleChoice` makes autoResolve failure handling observable instead of silently swallowed.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

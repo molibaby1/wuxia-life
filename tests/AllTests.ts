@@ -52,7 +52,8 @@ async function runChoiceOutcomeBranchCase(options: {
 
   try {
     (gameEngine as any).getGameState = () => state;
-    (gameEngine as any).isChoiceAvailable = (condition: any) => evaluator.evaluate(condition, state);
+    (gameEngine as any).isChoiceAvailable = (condition: any) =>
+      !condition || evaluator.evaluate(condition, state);
     (gameEngine as any).executeChoiceEffects = async (effects: Array<{ target: string }>) => {
       executedEffectTarget = effects[0]?.target || '';
       return state;
@@ -79,6 +80,96 @@ async function runChoiceOutcomeBranchCase(options: {
     (gameEngine as any).getGameState = originalGetGameState;
     (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
     (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    (engine.engineState as any).currentEvent = null;
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+  }
+}
+
+async function runAutoResolveCase() {
+  const engine = useNewGameEngine();
+  const evaluator = new ConditionEvaluator();
+  const state = framework.createTestState();
+  state.player.martialPower = 10;
+
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalGetGameState = gameEngine.getGameState;
+  const originalIsChoiceAvailable = gameEngine.isChoiceAvailable;
+  const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
+  const originalSelectEvent = gameEngine.selectEvent;
+  const originalAdvanceTime = gameEngine.advanceTime;
+
+  let executedChoiceId = '';
+  let executedOutcomeTarget = '';
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    (gameEngine as any).getGameState = () => state;
+    (gameEngine as any).isChoiceAvailable = (condition: any) =>
+      !condition || evaluator.evaluate(condition, state);
+    (gameEngine as any).executeChoiceEffects = async (
+      effects: Array<{ target?: string }>,
+      _eventId: string,
+      choiceId: string,
+    ) => {
+      executedChoiceId = choiceId;
+      executedOutcomeTarget = effects[0]?.target || '';
+      return state;
+    };
+    (gameEngine as any).advanceTime = () => state;
+    (gameEngine as any).selectEvent = () => ({
+      id: 'test_auto_resolve_event',
+      eventType: 'choice',
+      metadata: { autoResolve: true },
+      choices: [
+        {
+          id: 'blocked_choice',
+          text: '不可用选项',
+          condition: { type: 'expression', expression: 'player.martialPower >= 99' },
+          effects: [{ type: EffectType.FLAG_SET, target: 'blocked_choice_should_not_run' }],
+          outcomes: [
+            {
+              text: '不可达高收益分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 99' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'blocked_outcome_should_not_run' }],
+            },
+          ],
+        },
+        {
+          id: 'valid_choice',
+          text: '可用选项',
+          effects: [{ type: EffectType.FLAG_SET, target: 'valid_fallback_effect' }],
+          outcomes: [
+            {
+              text: '不可达高收益分支',
+              condition: { type: 'expression', expression: 'player.martialPower >= 99' },
+              effects: [{ type: EffectType.FLAG_SET, target: 'invalid_high_reward_outcome' }],
+            },
+            {
+              text: '可达兜底分支',
+              effects: [{ type: EffectType.FLAG_SET, target: 'valid_fallback_outcome' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    engine.getNextEvent();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    assertEqual(executedChoiceId, 'valid_choice', 'autoResolve 只能选择可用选项');
+    assertEqual(executedOutcomeTarget, 'valid_fallback_outcome', 'autoResolve 应按真实条件命中可达 outcome');
+  } finally {
+    (gameEngine as any).getGameState = originalGetGameState;
+    (gameEngine as any).isChoiceAvailable = originalIsChoiceAvailable;
+    (gameEngine as any).executeChoiceEffects = originalExecuteChoiceEffects;
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    (gameEngine as any).advanceTime = originalAdvanceTime;
     globalThis.requestAnimationFrame = originalRequestAnimationFrame;
     (engine.engineState as any).currentEvent = null;
     engine.engineState.lastOutcomeText = null;
@@ -325,6 +416,13 @@ const coreFunctionSuite: TestSuite = {
           expectedOutcomeText: '第一个命中分支',
           expectedEffectTarget: 'first_match_branch',
         });
+      },
+    },
+    {
+      name: '自动判定选择 - 只选可用项且 outcome 按真实条件命中',
+      description: '测试 autoResolve 不绕过 choice.condition 和 outcome.condition',
+      test: async () => {
+        await runAutoResolveCase();
       },
     },
     {

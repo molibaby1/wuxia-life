@@ -138,7 +138,8 @@
         "The script runs without starting the frontend"
       ],
       "priority": 10,
-      "passes": false
+      "passes": true,
+      "notes": "Added `scripts/validateEventQuality.ts` and command `npm run validate:event-quality` to scan the event set loaded through `EventLoader` and emit structured issue objects with `eventId`, `source`, `issueType`, `severity`, and `explanation`. The script reuses `scripts/eventQualityGateRules.ts` as severity/blocking source of truth, runs headless in Node, and exits non-zero when blocker issues are found."
     },
     {
       "id": "US-011",

@@ -655,3 +655,18 @@
   - Keep gate policy centralized in one typed module so documentation and executable validation logic share the same source of truth.
   - Separate explicit `blocking` semantics from severity labels to support future release-policy tuning without redefining issue taxonomy.
 ---
+
+## [2026-04-26 10:05] - US-010
+- Implemented executable event quality validator command `npm run validate:event-quality` via `scripts/validateEventQuality.ts`, scanning the exact loaded event set from `EventLoader` and reporting structured issues (`eventId`, `source`, `issueType`, `severity`, `explanation`).
+- Reused `scripts/eventQualityGateRules.ts` as the single source of truth for severity and blocking behavior; validation exits with non-zero status whenever blocker issues are detected.
+- Added source-path attribution for loaded events and covered rule-backed checks for duplicate IDs/titles, age range validity, condition payload shape, empty content/effects, unsupported stat keys, same-age congestion, and storyline chain consistency.
+- Files changed:
+  - `scripts/validateEventQuality.ts`
+  - `package.json`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Quality scripts should resolve issues against the runtime-loaded event set first, then enrich with line-source metadata, to avoid validating dead/unloaded content.
+  - Emitting a stable JSON schema for validator output makes downstream CI/report integration straightforward without parsing human-readable logs.
+- Validation evidence: `npm run validate:event-quality` ✅, `npm run typecheck` ✅, `npm test` ✅
+---

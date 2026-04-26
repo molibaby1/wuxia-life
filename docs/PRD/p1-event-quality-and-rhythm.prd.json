@@ -41,7 +41,8 @@
         "Metrics can be associated with simulation samples"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true,
+      "notes": "Implemented `scripts/reportRhythmMetrics.ts` and `npm run report:rhythm-metrics` to output event count per age, empty ages, formal/daily/choice ratios, storyline continuity, and critical event delay with sample association (`sampleId`, `seed`, `maxAge`) plus P1 observation baselines. Metrics and baseline usage documented in docs/test-reports/us-003-define-rhythm-metrics.md."
     },
     {
       "id": "US-004",

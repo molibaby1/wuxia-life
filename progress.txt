@@ -553,3 +553,19 @@
   - Selection behavior spans both pick-time logic (`selectEvent`) and post-pick accounting (`executeAutoEvent`/`executeChoiceEffects`); rhythm changes must consider both phases together.
   - This codebase already uses layered fallback patterns (path filter fallback, reputation fallback, daily fallback), so new rhythm controls should preserve these non-empty safeguards.
 ---
+
+## [2026-04-26 09:49] - US-003
+- Added deterministic rhythm metric reporting command `npm run report:rhythm-metrics` via `scripts/reportRhythmMetrics.ts`, covering event count per age, empty ages, formal/daily/choice ratios, storyline continuity, and critical event delay.
+- Bound metric output to simulation samples using explicit identifiers (`sampleId`, `seed`, `maxAge`) so future rhythm tuning can compare evidence across reproducible runs.
+- Added P1 observation baselines and usage notes in `docs/test-reports/us-003-define-rhythm-metrics.md`.
+- Files changed:
+  - `scripts/reportRhythmMetrics.ts`
+  - `package.json`
+  - `docs/test-reports/us-003-define-rhythm-metrics.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Rhythm observability scripts should always print sample identity (`seed`, `maxAge`, `sampleId`) alongside metrics to keep cross-run comparisons deterministic and auditable.
+  - For continuity metrics, preserving or enriching `event.storyLine` coverage in data will directly improve the signal quality of storyline continuity tracking.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

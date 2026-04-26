@@ -7,6 +7,7 @@
     "dev": "vite",
     "test": "tsx tests/runRealTestGate.ts",
     "stability": "tsx scripts/runStabilityGate.ts",
+    "repro:event-repetition": "tsx scripts/reproduceEventRepetition.ts",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
     "validate": "npm run typecheck && npm run build && npm test && npm run stability",

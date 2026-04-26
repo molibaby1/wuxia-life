@@ -385,3 +385,19 @@
   - Returning explicit success/failure from `handleChoice` makes autoResolve failure handling observable instead of silently swallowed.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:05] - US-007
+- Added deterministic local reproduction command `npm run repro:event-repetition` via `scripts/reproduceEventRepetition.ts` to simulate event selection with fixed seeded randomness and capture repetition evidence.
+- Reproduction output now explicitly reports adjacent repeated events (`same_event`) and adjacent repeated event classes (`same_class`) for injury/illness/economy-focused events.
+- Captured reproducible evidence in `docs/test-reports/us-007-event-repetition-reproduction.md` (seed `1` reproduced 7 adjacent repetition issues including repeated injury and economy events).
+- Files changed:
+  - `scripts/reproduceEventRepetition.ts`
+  - `package.json`
+  - `docs/test-reports/us-007-event-repetition-reproduction.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - For probabilistic event bugs, seed-controlled `Math.random` replacement is enough to stabilize reproduction without touching core runtime behavior.
+  - Adjacent repetition detection should track both `same_event` and `same_class` to separate duplicate-ID bugs from content-pool clustering issues.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

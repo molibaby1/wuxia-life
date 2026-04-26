@@ -98,7 +98,7 @@
         "The rules cover injury, illness, economy, romance, identity, main story, and daily events"
       ],
       "priority": 8,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-009",

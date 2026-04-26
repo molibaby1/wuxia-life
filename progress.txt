@@ -401,3 +401,17 @@
   - Adjacent repetition detection should track both `same_event` and `same_class` to separate duplicate-ID bugs from content-pool clustering issues.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-26 09:01] - US-008
+- Defined formal repetition taxonomy and boundaries in `docs/test-reports/us-008-event-repetition-rules.md`, explicitly separating `same_event`, `same_class`, and `same_storyline` scopes.
+- Documented allowed/disallowed repeat boundaries and class-specific rules for injury, illness, economy, romance, identity, main story, and daily events.
+- Added implementation constraints for the next suppression story (`US-009`) so runtime logic can preserve critical progression while suppressing low-value repeats.
+- Files changed:
+  - `docs/test-reports/us-008-event-repetition-rules.md`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Repetition policy must separate hard duplication (`same_event`) from diversity control (`same_class`) and chain continuity (`same_storyline`) to avoid over-suppression.
+  - Daily flavor pools and mainline progression require different suppression strictness; one unified boundary causes either narrative stalls or repetitive noise.
+- Validation evidence: `npm run typecheck` ✅
+---

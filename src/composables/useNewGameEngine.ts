@@ -362,6 +362,7 @@ export function useNewGameEngine() {
     engineState.availableChoices = [];
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
+    engineState.lastOutcomeText = null;
     isProcessing.value = false;
 
     // 等待下一帧再开始第一个事件，让 UI 有时间更新
@@ -379,6 +380,7 @@ export function useNewGameEngine() {
     engineState.availableChoices = [];
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
+    engineState.lastOutcomeText = null;
     isProcessing.value = false;
   };
 

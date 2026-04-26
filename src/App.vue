@@ -50,6 +50,7 @@ const currentNode = computed(() => {
 });
 
 const availableChoices = computed(() => gameEngineComposable.engineState.availableChoices);
+const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
 </script>
 
 <template>
@@ -77,7 +78,7 @@ const availableChoices = computed(() => gameEngineComposable.engineState.availab
       :is-auto-playing="isProcessing"
       @choice="handleChoice"
     />
-    <EndingScreen v-else @restart="handleRestart" />
+    <EndingScreen v-else :player="endingPlayer" @restart="handleRestart" />
   </div>
 </template>
 

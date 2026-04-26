@@ -471,3 +471,18 @@
   - Migration tracking is clearer when deprecated entry points are listed by concrete file/symbol, not just by concept.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-26 09:12] - US-013
+- Migrated ending flow off legacy store by removing `EndingScreen` direct `useGameStore` read path and passing player state from `App` via `gameEngine`-based main flow.
+- Aligned restart/new-game cleanup in `useNewGameEngine` so both `gameEngine` state and event UI state (`currentEvent`, choices, effects, `lastOutcomeText`) are cleared consistently.
+- Files changed:
+  - `src/components/EndingScreen.vue`
+  - `src/App.vue`
+  - `src/composables/useNewGameEngine.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Main-flow presentational components should consume engine state via parent/composable adapters instead of directly reading deprecated stores.
+  - Restart/reset acceptance should explicitly include transient event UI fields (for example `lastOutcomeText`) to prevent cross-round state residue.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

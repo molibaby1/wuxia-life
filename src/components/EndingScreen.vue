@@ -64,12 +64,23 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore } from '../store/gameStore';
-
 const emit = defineEmits(['restart']);
-
-const store = useGameStore();
-const player = store.state.player;
+const props = defineProps<{
+  player: {
+    name?: string;
+    title?: string;
+    age?: number;
+    sect?: string;
+    deathReason?: string;
+    martialPower?: number;
+    externalSkill?: number;
+    internalSkill?: number;
+    qinggong?: number;
+    chivalry?: number;
+    money?: number;
+  } | null;
+}>();
+const player = props.player;
 
 const share = () => {
   const shareText = `${player?.name}的武侠人生：${player?.deathReason}，获得称号「${player?.title}」！快来试试你的武侠人生吧！`;

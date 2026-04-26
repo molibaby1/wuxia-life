@@ -540,3 +540,16 @@
   - P1 kickoff should explicitly pin both the upstream PRD pass matrix and closure evidence note to avoid assumption-driven starts.
   - If upstream milestone closure includes fresh gate evidence (`typecheck/build/test`), downstream baseline confirmation can remain documentation-only and should avoid business code edits.
 ---
+
+## [2026-04-26 09:45] - US-002
+- Mapped the full event selection flow across formal selection and daily fallback, centered on `GameEngineIntegration.selectEvent` with execution-stage trigger recording links.
+- Produced ordered step documentation with explicit input/output/fallback for candidate loading, age filtering, condition filtering, cooldown/max trigger checks, storyline checks, fallback switches, weighting, annual pressure gating, and trigger persistence.
+- Added a Mermaid flow diagram and explicit formal-vs-daily switch conditions to make rhythm tuning points and safety fallback behavior implementation-ready.
+- Files changed:
+  - `docs/test-reports/us-002-map-event-selection-flow.md`
+  - `docs/PRD/p1-event-quality-and-rhythm.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Selection behavior spans both pick-time logic (`selectEvent`) and post-pick accounting (`executeAutoEvent`/`executeChoiceEffects`); rhythm changes must consider both phases together.
+  - This codebase already uses layered fallback patterns (path filter fallback, reputation fallback, daily fallback), so new rhythm controls should preserve these non-empty safeguards.
+---

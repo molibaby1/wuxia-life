@@ -28,7 +28,8 @@
         "A flow description or diagram is produced"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true,
+      "notes": "Documented end-to-end flow in docs/test-reports/us-002-map-event-selection-flow.md, including ordered formal selection stages, daily fallback switches, annual pressure behavior, weighted pick factors, and post-selection trigger recording points."
     },
     {
       "id": "US-003",

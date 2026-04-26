@@ -28,7 +28,8 @@
         "No business code is changed"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true,
+      "notes": "Completed read-only inventory in `docs/test-reports/us-002-choice-feedback-source-inventory.md`. Mapped source/read-write paths for choice events, outcomes, effects, `lastOutcomeText`, event history, relationships, and route-change signals; classified each source as immediate/long-term/hidden/diagnostic; documented current feedback gaps (route causality visibility, relationship causality trace, risk hints, hidden long-term impact visibility, and missing unified feedback object). No business code changed."
     },
     {
       "id": "US-003",

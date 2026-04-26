@@ -862,3 +862,16 @@
   - Baseline confirmation stories should remain documentation-only and avoid gameplay/business code edits.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-27 07:49] - US-002
+- Completed read-only inventory for choice feedback sources in `docs/test-reports/us-002-choice-feedback-source-inventory.md`, covering choice events, outcomes, effects, `lastOutcomeText`, event history, relationships, and route change signals.
+- Classified each source as `immediate`, `long-term`, `hidden`, or `diagnostic`, and mapped concrete source/read-write paths across `useNewGameEngine`, `GameEngineIntegration`, `EventExecutor`, and `GameScreen`.
+- Listed current feedback gaps, including route-causality explainability, relationship-causality traceability, risk/uncertainty hints, hidden long-term impact visibility, and missing unified feedback payload.
+- Files changed:
+  - `docs/test-reports/us-002-choice-feedback-source-inventory.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Inventory stories should always bind each feedback target to both data origin and final player-facing render point, otherwise classification becomes ambiguous.
+  - For route/relationship feedback, separate "state changed" from "player can see why it changed"; both are needed before implementing structured feedback UX.
+---

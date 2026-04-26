@@ -15,7 +15,8 @@ import { GameTestFramework, TestSuite, assert, assertEqual } from './GameTestFra
 import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
+import { eventLoader } from '../src/core/EventLoader';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 
@@ -423,6 +424,89 @@ const coreFunctionSuite: TestSuite = {
       description: '测试 autoResolve 不绕过 choice.condition 和 outcome.condition',
       test: async () => {
         await runAutoResolveCase();
+      },
+    },
+    {
+      name: '事件重复抑制 - maxTriggers 与 cooldown 一致生效',
+      description: '测试同一事件在达到最大触发次数或冷却未结束时都被拒绝',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 12;
+        state.eventHistory = [
+          { eventId: 'repeatable_event', age: 10, triggeredAt: 10 },
+        ];
+
+        const repeatableEvent = {
+          id: 'repeatable_event',
+          maxTriggers: 3,
+          cooldown: 3,
+        };
+        assertEqual(engine.checkEventCooldown(repeatableEvent), false, '冷却未结束时应拒绝重复触发');
+
+        state.player.age = 13;
+        assertEqual(engine.checkEventCooldown(repeatableEvent), true, '冷却结束且未达 maxTriggers 时应允许触发');
+
+        state.eventHistory.push({ eventId: 'repeatable_event', age: 11, triggeredAt: 11 });
+        state.eventHistory.push({ eventId: 'repeatable_event', age: 13, triggeredAt: 13 });
+        state.player.age = 16;
+        assertEqual(engine.checkEventCooldown(repeatableEvent), false, '达到 maxTriggers 后应拒绝触发');
+      },
+    },
+    {
+      name: '事件重复抑制 - 高负面同类事件短期降权',
+      description: '测试 injury/illness/economy 同类负面事件在短窗口内会降权',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 20;
+        state.eventHistory = [{ eventId: 'injury_old', age: 19, triggeredAt: 19 }];
+
+        const originalGetEventById = eventLoader.getEventById.bind(eventLoader);
+        (eventLoader as any).getEventById = (eventId: string) => {
+          if (eventId === 'injury_old') {
+            return {
+              id: 'injury_old',
+              category: EventCategory.SIDE_QUEST,
+              priority: EventPriority.HIGH,
+              content: { title: '旧伤复发', text: '伤势反复' },
+              metadata: { tags: ['injury', 'negative'] },
+            };
+          }
+          return undefined;
+        };
+
+        try {
+          const negativeInjuryEvent = {
+            id: 'injury_new',
+            category: EventCategory.SIDE_QUEST,
+            priority: EventPriority.HIGH,
+            content: { title: '再遇伤势', text: '受伤加重' },
+            metadata: { tags: ['injury', 'negative'] },
+          };
+          const multiplier = engine.getFormalRepetitionSuppressionMultiplier(negativeInjuryEvent);
+          assert(multiplier < 1, '高负面同类事件应触发短期降权');
+        } finally {
+          (eventLoader as any).getEventById = originalGetEventById;
+        }
+      },
+    },
+    {
+      name: '事件重复抑制 - 主线与关键事件不被阻断',
+      description: '测试 main_story/critical 事件在重复抑制下保留权重豁免',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 20;
+        state.eventHistory = [{ eventId: 'injury_old', age: 19, triggeredAt: 19 }];
+
+        const mandatoryEvent = {
+          id: 'mainline_critical',
+          category: EventCategory.MAIN_STORY,
+          priority: EventPriority.CRITICAL,
+          metadata: { tags: ['mainline', 'critical'] },
+        };
+        assertEqual(engine.getFormalRepetitionSuppressionMultiplier(mandatoryEvent), 1, '主线关键事件应豁免抑制');
       },
     },
     {

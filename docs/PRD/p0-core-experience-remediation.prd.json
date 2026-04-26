@@ -111,7 +111,7 @@
         "Mandatory mainline and critical events are not blocked by the suppression strategy"
       ],
       "priority": 9,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-010",

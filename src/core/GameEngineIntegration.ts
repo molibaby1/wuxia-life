@@ -839,6 +839,99 @@ export class GameEngineIntegration {
     return Math.max(baseWeight * multiplier, 1);
   }
 
+  private isDailyEvent(event: EventDefinition): boolean {
+    return event.category === 'daily_event' || event.metadata?.tags?.includes('daily_pool') === true;
+  }
+
+  private isMandatoryEvent(event: EventDefinition): boolean {
+    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
+    return (
+      event.priority === EventPriority.CRITICAL ||
+      event.category === 'main_story' ||
+      tags.includes('critical') ||
+      tags.includes('mandatory') ||
+      tags.includes('mainline')
+    );
+  }
+
+  private detectSuppressionClass(event: EventDefinition): 'injury' | 'illness' | 'economy' | null {
+    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
+    const textBlob = [event.id, event.content?.title, event.content?.description, ...tags]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    if (tags.includes('injury') || /injury|wound|受伤|创伤|伤势/.test(textBlob)) {
+      return 'injury';
+    }
+    if (tags.includes('illness') || /illness|disease|sick|病|生病|疾病/.test(textBlob)) {
+      return 'illness';
+    }
+    if (tags.includes('economy') || /economy|merchant|business|trade|money|经济|商|银两|钱|财/.test(textBlob)) {
+      return 'economy';
+    }
+    return null;
+  }
+
+  private isHighNegativeEvent(event: EventDefinition): boolean {
+    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
+    if (event.isSetbackEvent && ['severe', 'critical'].includes(event.setbackSeverity || '')) {
+      return true;
+    }
+    if (tags.some(tag => ['negative', 'setback', 'loss', 'injury', 'illness'].includes(tag))) {
+      return true;
+    }
+    return event.priority === EventPriority.HIGH || event.priority === EventPriority.CRITICAL;
+  }
+
+  private getFormalRepetitionSuppressionMultiplier(event: EventDefinition): number {
+    if (this.isDailyEvent(event) || this.isMandatoryEvent(event)) {
+      return 1;
+    }
+
+    const suppressionClass = this.detectSuppressionClass(event);
+    if (!suppressionClass || !this.isHighNegativeEvent(event)) {
+      return 1;
+    }
+
+    const currentAge = this.gameState.player?.age || 0;
+    const eventHistory = this.gameState.eventHistory || [];
+    if (eventHistory.length === 0) {
+      return 1;
+    }
+
+    let recentSameClass = 0;
+    let recentSameEvent = 0;
+
+    for (const record of eventHistory) {
+      const ageGap = currentAge - (record.age ?? currentAge);
+      if (ageGap < 0 || ageGap > 3) {
+        continue;
+      }
+
+      const historicalEvent = eventLoader.getEventById(record.eventId);
+      if (!historicalEvent || this.isDailyEvent(historicalEvent)) {
+        continue;
+      }
+
+      if (record.eventId === event.id) {
+        recentSameEvent += 1;
+      }
+
+      if (this.detectSuppressionClass(historicalEvent) === suppressionClass) {
+        recentSameClass += 1;
+      }
+    }
+
+    if (recentSameClass === 0 && recentSameEvent === 0) {
+      return 1;
+    }
+
+    const sameClassPenalty = Math.pow(0.55, recentSameClass);
+    const sameEventPenalty = Math.pow(0.45, recentSameEvent);
+    return this.clampWeight(sameClassPenalty * sameEventPenalty, 0.2, 1);
+  }
+
   /**
    * 当年事件已经很密集时，动态提高“今年没有更多大事发生”的概率。
    * 这不是硬限制，而是让剧情自然留出空档。
@@ -973,7 +1066,8 @@ export class GameEngineIntegration {
       const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
       const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
-      return sum + this.adjustWeightByAnnualPressure(event, specializationAdjusted);
+      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      return sum + this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
     }, 0);
 
     let random = Math.random() * totalWeight;
@@ -983,7 +1077,8 @@ export class GameEngineIntegration {
       const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
       const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
-      random -= this.adjustWeightByAnnualPressure(event, specializationAdjusted);
+      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      random -= this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
       if (random <= 0) {
         return event;
       }

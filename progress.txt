@@ -28,6 +28,21 @@
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
 
+## [2026-04-26 09:04] - US-009
+- Implemented formal-event repetition suppression in `GameEngineIntegration`: retained same-event hard gates (`maxTriggers` + `cooldown`), added short-window weight decay for high-negative same-class events (`injury`/`illness`/`economy`), and explicitly bypassed suppression for mandatory mainline/critical events.
+- Kept daily-event repetition behavior distinct by scoping the new suppression multiplier to formal events only; daily events continue to follow `DailyEventSystem`'s lighter repeat penalties.
+- Added regression coverage in `AllTests` for cooldown/maxTriggers consistency, same-class short-term suppression, and mandatory mainline/critical bypass.
+- Files changed:
+  - `src/core/GameEngineIntegration.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Repetition suppression is safer as weight decay (soft control) for same-class pressure, while strict trigger limits should stay on explicit per-event controls (`maxTriggers`/`cooldown`).
+  - Mainline/critical events require explicit bypass in suppression layers to avoid accidental progression stalls when adding anti-repetition logic.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---
+
 ## [2026-04-25 09:22] - US-002 (quality-gate-hardening-v4)
 - Added `docs/test-output-severity-taxonomy.md` defining Blocker/Warning/Info, keyword dictionary aligned with `GATE_BLOCKER_SUBSTRINGS`, and explicit Blocker vs Warning boundary.
 - Files changed:

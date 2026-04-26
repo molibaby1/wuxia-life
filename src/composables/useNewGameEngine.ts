@@ -149,14 +149,28 @@ export function useNewGameEngine() {
    */
   const evaluateOutcomeCondition = (outcome: { condition?: unknown }, state: any): boolean => {
     if (!outcome.condition) return true;
-    
-    // 函数式条件
-    if (typeof outcome.condition === 'function') {
-      return (outcome.condition as (s: unknown) => boolean)(state);
+
+    try {
+      // 函数式条件（兼容历史数据）
+      if (typeof outcome.condition === 'function') {
+        return (outcome.condition as (s: unknown) => boolean)(state);
+      }
+
+      // 结构化表达式条件统一复用核心评估入口，避免前端“默认 true”
+      if (
+        typeof outcome.condition === 'object' &&
+        outcome.condition !== null &&
+        (outcome.condition as { type?: unknown }).type === 'expression'
+      ) {
+        return gameEngine.isChoiceAvailable(outcome.condition as any);
+      }
+
+      console.warn('[NewGameEngine] 未识别的 outcome.condition，按不满足处理:', outcome.condition);
+      return false;
+    } catch (error) {
+      console.warn('[NewGameEngine] outcome.condition 评估失败，按不满足处理:', outcome.condition, error);
+      return false;
     }
-    
-    // 表达式条件 - 默认返回true（实际判定由后端执行）
-    return true;
   };
 
   /**

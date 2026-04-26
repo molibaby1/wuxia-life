@@ -158,6 +158,22 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '条件评估器 - 不满足条件不应命中',
+      description: '测试表达式条件不满足时返回 false，避免错误选择结果分支',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const state = framework.createTestState();
+
+        const condition = {
+          type: 'expression' as const,
+          expression: 'player.martialPower >= 999',
+        };
+
+        const result = evaluator.evaluate(condition, state);
+        assert(result === false, '不满足条件应被判定为 false');
+      },
+    },
+    {
       name: '事件定义验证 - 完整事件结构',
       description: '测试事件定义是否符合标准格式',
       test: () => {

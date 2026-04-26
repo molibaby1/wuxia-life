@@ -342,3 +342,18 @@
   - For UI cleanup stories, pair each visual cleanup with a phase-based manual verification checklist (`start` -> `playing` -> `ending`) so regressions are caught early.
   - Validation notes should assert both interaction continuity (choice/continue/restart) and absence of debug artifacts in gameplay-facing content.
 ---
+
+## [2026-04-26 09:10] - US-004
+- Unified multi-outcome condition evaluation in `useNewGameEngine`: expression-based outcome conditions now call the core evaluator entry (`gameEngine.isChoiceAvailable`) instead of being treated as true by default.
+- Added guarded evaluation for outcome conditions: unsupported condition shape or runtime evaluation failure now resolves to `false` with warnings, allowing unconditional outcomes to remain valid fallback branches.
+- Added a condition regression check in `AllTests` for non-matching expression outcomes.
+- Files changed:
+  - `src/composables/useNewGameEngine.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p0-core-experience-remediation.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Outcome branch predicates must share a single evaluator entry with choice availability checks to avoid front-end/engine divergence.
+  - Invalid or unknown condition payloads should fail closed (`false`) so fallback outcomes handle control flow explicitly.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

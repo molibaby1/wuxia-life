@@ -23,6 +23,7 @@ import { getRouteCompatibilityRule, resolveRouteConflict } from '../src/core/Rou
 import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
+import { evaluateSimulationGate, parseWaiverArg } from '../scripts/gameplaySimulationGate';
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
@@ -492,6 +493,61 @@ async function runStateConsistencyRegressionCase() {
     engine.engineState.lastOutcomeText = null;
     engine.engineState.lastEffects = [];
   }
+}
+
+function createSimulationReportStub(overrides: Partial<import('./GameProcessSimulator').GameProcessReport> = {}): import('./GameProcessSimulator').GameProcessReport {
+  const state = framework.createTestState();
+  return {
+    id: 'stub-report',
+    timestamp: new Date().toISOString(),
+    config: {
+      playerName: 'stub',
+      gender: 'male',
+      simulateYears: 80,
+      runUntilDeath: true,
+      maxEvents: 300,
+      enableAutoSave: true,
+      enableManualSave: true,
+      saveInterval: 5,
+      verbose: false,
+      choiceTendency: 'balanced',
+    },
+    randomSeed: 1,
+    runMode: 'complete_life',
+    ageRange: null,
+    totalYears: 10,
+    finalAge: 10,
+    isAlive: true,
+    deathReason: null,
+    totalEvents: 10,
+    totalChoices: 4,
+    totalSaves: 1,
+    records: [
+      {
+        age: 10,
+        eventId: 'stub_event',
+        eventTitle: 'stub',
+        eventType: 'auto',
+        gameState: state,
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    statistics: {
+      childhoodEvents: 10,
+      youthEvents: 0,
+      adultEvents: 0,
+      elderlyEvents: 0,
+      autoEvents: 6,
+      choiceEvents: 4,
+      martialPowerGrowth: 0,
+      moneyGrowth: 0,
+      sectJoined: null,
+      spouse: undefined,
+      children: 0,
+      flags: {},
+    },
+    ...overrides,
+  };
 }
 
 // ========== 1. 核心功能测试套件 ==========
@@ -1569,6 +1625,77 @@ const coreFunctionSuite: TestSuite = {
         assert(!!event.ageRange, '事件必须有年龄范围');
         assert(!!event.content, '事件必须有内容');
         assert(!!event.metadata, '事件必须有元数据');
+      },
+    },
+    {
+      name: '模拟门禁回归 - blocker 指标失败应阻断',
+      description: '测试 simulation gate 对 blocker 越界返回 fail 信号',
+      test: () => {
+        const failReport = createSimulationReportStub({
+          totalEvents: 20,
+          totalChoices: 1,
+          statistics: {
+            childhoodEvents: 20,
+            youthEvents: 0,
+            adultEvents: 0,
+            elderlyEvents: 0,
+            autoEvents: 19,
+            choiceEvents: 1,
+            martialPowerGrowth: 0,
+            moneyGrowth: 0,
+            sectJoined: null,
+            spouse: undefined,
+            children: 0,
+            flags: {},
+          },
+        });
+        const result = evaluateSimulationGate([failReport], []);
+        assertEqual(result.decision, 'fail', 'blocker 越界时应返回 fail');
+        const choiceRateMetric = result.blockingMetrics.find(metric => metric.key === 'choice_rate');
+        assert(choiceRateMetric?.status === 'fail', 'choice_rate 低于 blocker 阈值时应为 fail');
+      },
+    },
+    {
+      name: '模拟门禁回归 - waiver 必须提供原因',
+      description: '测试 waiver 参数没有原因时必须报错，提供原因后可降级 blocker',
+      test: () => {
+        let thrown = false;
+        try {
+          parseWaiverArg('choice_rate:');
+        } catch (error) {
+          thrown = String(error).includes('reason is empty');
+        }
+        assert(thrown, 'waiver 未提供原因时应抛出错误');
+
+        const failReport = createSimulationReportStub({
+          totalEvents: 20,
+          totalChoices: 1,
+          statistics: {
+            childhoodEvents: 20,
+            youthEvents: 0,
+            adultEvents: 0,
+            elderlyEvents: 0,
+            autoEvents: 19,
+            choiceEvents: 1,
+            martialPowerGrowth: 0,
+            moneyGrowth: 0,
+            sectJoined: null,
+            spouse: undefined,
+            children: 0,
+            flags: {},
+          },
+        });
+
+        const result = evaluateSimulationGate(
+          [failReport],
+          [
+            { metricKey: 'choice_rate', reason: 'US-016 regression triage' },
+            { metricKey: 'ending_distribution', reason: 'single-run concentration is expected' },
+          ],
+        );
+        assertEqual(result.decision, 'pass', 'blocker 被有效 waiver 后应允许通过');
+        const choiceRateMetric = result.blockingMetrics.find(metric => metric.key === 'choice_rate');
+        assert(choiceRateMetric?.waived === true, 'choice_rate 应被标记为 waived');
       },
     },
     {

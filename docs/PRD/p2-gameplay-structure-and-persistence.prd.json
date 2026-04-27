@@ -219,7 +219,8 @@
         "npm test passes"
       ],
       "priority": 16,
-      "passes": false
+      "passes": true,
+      "notes": "Implemented executable simulation gate in `scripts/gameplaySimulationGate.ts` with blocker/warning/info metric evaluation, dynamic ending-distribution escalation, and strict waiver parsing (`metricKey:reason`). Integrated gate output into `scripts/runGameplaySimulation.ts` via `--gate` and `--waive` flags for single-run and sample modes. Added regression tests in `tests/AllTests.ts` validating blocker fail signal and waiver-reason enforcement. Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-017",

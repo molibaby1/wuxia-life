@@ -1080,3 +1080,22 @@
   - Distinct choice tendencies are easier to maintain as scoring-weight profiles over the same effect payload, avoiding duplicated simulation loops.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay:samples` ✅
 ---
+
+## [2026-04-27 08:16] - US-016
+- Added executable simulation gate module `scripts/gameplaySimulationGate.ts` to convert simulation outputs into explicit pass/fail signals with metric-level status.
+- Defined blocker and warning gate behavior from the US-013 metric catalog: blocker checks cover `choice_rate`, `route_breakage_rate`, and dynamic `ending_distribution` escalation; warning checks cover `auto_event_rate`, `route_completion_rate`, `death_rate`, and warning-tier `ending_distribution`.
+- Implemented waiver-list parsing and validation with mandatory reasons (`--waive=metricKey:reason`), rejecting empty reasons and applying waivers as explicit downgraded signals.
+- Integrated gate output into `scripts/runGameplaySimulation.ts` (`--gate`) for both single-run and sample-run execution paths.
+- Added regression tests in `tests/AllTests.ts` for blocker failure signaling and waiver reason enforcement.
+- Files changed:
+  - `scripts/gameplaySimulationGate.ts`
+  - `scripts/runGameplaySimulation.ts`
+  - `tests/AllTests.ts`
+  - `docs/test-reports/us-016-simulation-thresholds-and-gate.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Gate logic should be implemented in a pure module first and imported by CLI entrypoints to keep it testable without shelling out.
+  - Single-life simulation can naturally concentrate ending distribution; using explicit waiver reasons preserves gate strictness while allowing intentional temporary exceptions.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

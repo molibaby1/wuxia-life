@@ -3,6 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
+import { evaluateSimulationGate, parseWaiverArg, type SimulationWaiver } from './gameplaySimulationGate';
 
 type CliArgs = {
   seed?: number;
@@ -14,6 +15,8 @@ type CliArgs = {
   choiceTendency?: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
   samples: boolean;
   quiet: boolean;
+  gate: boolean;
+  waivers: SimulationWaiver[];
 };
 
 type SimulationSample = {
@@ -48,7 +51,7 @@ type SampleSummary = {
 };
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { quiet: false, samples: false };
+  const args: CliArgs = { quiet: false, samples: false, gate: false, waivers: [] };
   for (const raw of argv) {
     if (raw.startsWith('--seed=')) {
       const seed = Number(raw.slice('--seed='.length));
@@ -86,6 +89,11 @@ function parseArgs(argv: string[]): CliArgs {
       args.samples = true;
     } else if (raw === '--quiet') {
       args.quiet = true;
+    } else if (raw === '--gate') {
+      args.gate = true;
+    } else if (raw.startsWith('--waive=')) {
+      const waiverRaw = raw.slice('--waive='.length);
+      args.waivers.push(parseWaiverArg(waiverRaw));
     }
   }
 
@@ -226,6 +234,7 @@ function writeSampleSetOutput(sampleSummaries: SampleSummary[]): string {
 }
 
 async function runSampleSet(args: CliArgs): Promise<void> {
+  const reports: GameProcessReport[] = [];
   const summaries: SampleSummary[] = [];
   for (const sample of DEFAULT_SAMPLES) {
     const simulator = new GameProcessSimulator({
@@ -239,6 +248,7 @@ async function runSampleSet(args: CliArgs): Promise<void> {
     });
 
     const report = await simulator.simulate();
+    reports.push(report);
     writeMachineReadableOutput(report);
     const summary = buildSampleSummary(sample, report);
     summaries.push(summary);
@@ -247,6 +257,31 @@ async function runSampleSet(args: CliArgs): Promise<void> {
 
   const outputPath = writeSampleSetOutput(summaries);
   console.log(`\nSample set JSON: ${path.relative(process.cwd(), outputPath)}`);
+  if (args.gate) {
+    const gate = evaluateSimulationGate(reports, args.waivers);
+    printGateSummary(gate);
+    if (gate.decision === 'fail') {
+      process.exitCode = 1;
+    }
+  }
+}
+
+function printGateSummary(gate: ReturnType<typeof evaluateSimulationGate>): void {
+  const printSection = (title: string, rows: ReturnType<typeof evaluateSimulationGate>['blockingMetrics']) => {
+    console.log(`\n${title}`);
+    for (const row of rows) {
+      const status = row.status.toUpperCase();
+      const waiverSuffix = row.waived ? ` [WAIVED: ${row.waiverReason}]` : '';
+      console.log(`- ${row.key} (${row.severity}) => ${status}${waiverSuffix}`);
+      console.log(`  ${row.detail}`);
+    }
+  };
+
+  console.log('\n=== Simulation Gate ===');
+  printSection('Blocking Metrics', gate.blockingMetrics);
+  printSection('Warning Metrics', gate.warningMetrics);
+  printSection('Info Metrics', gate.infoMetrics);
+  console.log(`\nSimulation gate decision: ${gate.decision.toUpperCase()}`);
 }
 
 async function main(): Promise<void> {
@@ -271,6 +306,13 @@ async function main(): Promise<void> {
   const report = await simulator.simulate();
   const machineOutputPath = writeMachineReadableOutput(report);
   printSummary(report);
+  if (args.gate) {
+    const gate = evaluateSimulationGate([report], args.waivers);
+    printGateSummary(gate);
+    if (gate.decision === 'fail') {
+      process.exitCode = 1;
+    }
+  }
   console.log(`Machine summary JSON: ${path.relative(process.cwd(), machineOutputPath)}`);
 }
 

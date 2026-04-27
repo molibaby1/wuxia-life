@@ -246,7 +246,8 @@
         "Full historical migration is explicitly out of scope"
       ],
       "priority": 18,
-      "passes": false
+      "passes": true,
+      "notes": "Defined P2 save compatibility boundary in `src/core/SaveManager.ts`: added canonical marker `P2_SAVE_SCHEMA_VERSION='2.0.0-p2'`, readable range `1.0.0~2.x`, and explicit fail-close behavior for unsupported saves (missing version, legacy below range, future major above range) in `loadGame`/`loadAutoSave`. Added documentation `docs/test-reports/us-018-save-version-compatibility-boundary.md` and regression checks in `tests/AllTests.ts`. Full historical migration remains explicitly out of scope for P2."
     },
     {
       "id": "US-019",

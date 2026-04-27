@@ -18,7 +18,7 @@ import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
-import { saveManager } from '../src/core/SaveManager';
+import { evaluateSaveCompatibility, P2_SAVE_SCHEMA_VERSION, saveManager } from '../src/core/SaveManager';
 import { getRouteCompatibilityRule, resolveRouteConflict } from '../src/core/RouteCompatibilityRules';
 import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
@@ -1922,6 +1922,42 @@ const compatibilitySuite: TestSuite = {
           legacyFlagState.player.flags.compat_legacy_flag === true,
           '旧格式 target 字段应同步写入 player.flags',
         );
+      },
+    },
+    {
+      name: '兼容性测试 - P2 存档版本标记写入',
+      description: '测试 saveGame 会写入 P2 schema marker，避免后续版本静默混读',
+      test: () => {
+        saveManager.clearAllSaves();
+        const state = framework.createTestState();
+        const saveId = saveManager.saveGame(state, 'us-018-version-marker');
+        const loaded = saveManager.loadGame(saveId);
+        assert(loaded !== null, '当前版本存档应可正常读取');
+        assertEqual(
+          loaded!.gameData.saveVersion,
+          P2_SAVE_SCHEMA_VERSION,
+          '存档应写入统一 P2 saveVersion 标记',
+        );
+      },
+    },
+    {
+      name: '兼容性测试 - P2 可读版本边界',
+      description: '测试 legacy/future 不支持版本会被拒绝，历史全量迁移不在 P2 范围',
+      test: () => {
+        const missingVersion = evaluateSaveCompatibility(undefined);
+        assertEqual(missingVersion.supported, false, '缺失版本号的存档应拒绝加载');
+        assertEqual(missingVersion.status, 'unsupported_missing_version', '缺失版本应返回明确状态');
+
+        const legacyVersion = evaluateSaveCompatibility('0.9.0');
+        assertEqual(legacyVersion.supported, false, '过旧 legacy 版本应拒绝加载');
+        assertEqual(legacyVersion.status, 'unsupported_legacy_version', 'legacy 版本应返回明确状态');
+
+        const futureVersion = evaluateSaveCompatibility('3.0.0');
+        assertEqual(futureVersion.supported, false, '未来版本应拒绝加载');
+        assertEqual(futureVersion.status, 'unsupported_future_version', 'future 版本应返回明确状态');
+
+        const readableLegacy = evaluateSaveCompatibility('1.0.0');
+        assertEqual(readableLegacy.supported, true, '定义范围内的可读 legacy 版本应允许加载');
       },
     },
   ],

@@ -13,6 +13,51 @@ import type { GameState } from '../types/eventTypes';
 import * as fs from 'fs';
 import * as path from 'path';
 
+export const P2_SAVE_SCHEMA_VERSION = '2.0.0-p2';
+export const P2_MIN_READABLE_SAVE_VERSION = '1.0.0';
+export const P2_MAX_READABLE_SAVE_VERSION = '2.x';
+
+export type SaveCompatibilityStatus = 'supported' | 'unsupported_missing_version' | 'unsupported_legacy_version' | 'unsupported_future_version';
+
+export interface SaveCompatibilityResult {
+  status: SaveCompatibilityStatus;
+  supported: boolean;
+}
+
+function parseSemver(version: string): { major: number; minor: number; patch: number } | null {
+  const normalized = version.trim().split('-')[0];
+  const match = normalized.match(/^(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) {
+    return null;
+  }
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+  };
+}
+
+export function evaluateSaveCompatibility(saveVersion?: string): SaveCompatibilityResult {
+  if (!saveVersion) {
+    return { status: 'unsupported_missing_version', supported: false };
+  }
+
+  const parsed = parseSemver(saveVersion);
+  if (!parsed) {
+    return { status: 'unsupported_legacy_version', supported: false };
+  }
+
+  if (parsed.major < 1) {
+    return { status: 'unsupported_legacy_version', supported: false };
+  }
+
+  if (parsed.major > 2) {
+    return { status: 'unsupported_future_version', supported: false };
+  }
+
+  return { status: 'supported', supported: true };
+}
+
 export interface SaveData {
   id: string;
   name: string;
@@ -26,6 +71,15 @@ export interface SaveMetadata {
   playerName: string;
   eventCount: number;
   playTime: number; // 游戏时长（秒）
+}
+
+export function applyP2SaveVersionMarker(gameState: GameState): GameState {
+  return {
+    ...gameState,
+    saveVersion: P2_SAVE_SCHEMA_VERSION,
+    lastSavedAt: Date.now(),
+    gameTimestamp: Date.now(),
+  };
 }
 
 // 检测是否在浏览器环境
@@ -84,16 +138,17 @@ export class SaveManager {
    * 保存游戏
    */
   public saveGame(gameState: GameState, name: string = '自动存档'): string {
+    const normalizedGameState = applyP2SaveVersionMarker(gameState);
     const saveData: SaveData = {
       id: this.generateSaveId(),
       name,
       timestamp: Date.now(),
-      gameData: gameState,
+      gameData: normalizedGameState,
       metadata: {
-        playerAge: gameState.player?.age || 0,
-        playerName: gameState.player?.name || '未知',
-        eventCount: gameState.player?.events?.length || 0,
-        playTime: this.calculatePlayTime(gameState),
+        playerAge: normalizedGameState.player?.age || 0,
+        playerName: normalizedGameState.player?.name || '未知',
+        eventCount: normalizedGameState.player?.events?.length || 0,
+        playTime: this.calculatePlayTime(normalizedGameState),
       },
     };
     
@@ -124,6 +179,13 @@ export class SaveManager {
     const save = saves.find(s => s.id === saveId);
     
     if (save) {
+      const compatibility = evaluateSaveCompatibility(save.gameData?.saveVersion);
+      if (!compatibility.supported) {
+        console.warn(
+          `[SaveManager] 拒绝加载不兼容存档：${saveId}（version=${save.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
+        );
+        return null;
+      }
       return save;
     }
     
@@ -168,16 +230,17 @@ export class SaveManager {
    * 自动保存
    */
   public autoSave(gameState: GameState): void {
+    const normalizedGameState = applyP2SaveVersionMarker(gameState);
     const saveData: SaveData = {
       id: this.generateSaveId(),
       name: '自动存档',
       timestamp: Date.now(),
-      gameData: gameState,
+      gameData: normalizedGameState,
       metadata: {
-        playerAge: gameState.player?.age || 0,
-        playerName: gameState.player?.name || '未知',
-        eventCount: gameState.player?.events?.length || 0,
-        playTime: this.calculatePlayTime(gameState),
+        playerAge: normalizedGameState.player?.age || 0,
+        playerName: normalizedGameState.player?.name || '未知',
+        eventCount: normalizedGameState.player?.events?.length || 0,
+        playTime: this.calculatePlayTime(normalizedGameState),
       },
     };
     
@@ -199,6 +262,13 @@ export class SaveManager {
       if (!autoSaveJson) return null;
       
       const saveData: SaveData = JSON.parse(autoSaveJson);
+      const compatibility = evaluateSaveCompatibility(saveData.gameData?.saveVersion);
+      if (!compatibility.supported) {
+        console.warn(
+          `[SaveManager] 拒绝加载不兼容自动存档（version=${saveData.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
+        );
+        return null;
+      }
       return saveData;
     } catch (error) {
       console.error('[SaveManager] 加载自动存档失败:', error);

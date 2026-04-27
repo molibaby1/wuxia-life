@@ -1113,3 +1113,20 @@
   - Treat composable/UI transient state (`currentEvent`, pending choices, feedback cache) and engine runtime counters as explicit persistence decisions; otherwise save/load expectations drift.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-27 08:27] - US-018
+- Defined executable P2 save compatibility boundary in `src/core/SaveManager.ts`: canonical marker `P2_SAVE_SCHEMA_VERSION='2.0.0-p2'`, readable range `1.0.0~2.x`, and centralized compatibility evaluator `evaluateSaveCompatibility(...)`.
+- Enforced fail-close behavior on read paths (`loadGame` / `loadAutoSave`): unsupported saves (missing version, legacy below range, future major above range) are explicitly rejected with warning logs; no silent load.
+- Added save stamping helper `applyP2SaveVersionMarker(...)` so `saveGame` and `autoSave` always persist version marker and save timestamps (`lastSavedAt`, `gameTimestamp`).
+- Added story artifact `docs/test-reports/us-018-save-version-compatibility-boundary.md`, explicitly declaring full historical migration out of scope for P2.
+- Added compatibility regression coverage in `tests/AllTests.ts` for version marker write and readable/unsupported boundary behavior.
+- Files changed:
+  - `src/core/SaveManager.ts`
+  - `tests/AllTests.ts`
+  - `docs/test-reports/us-018-save-version-compatibility-boundary.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Save compatibility should be enforced as fail-close at read entrypoints, not only documented at type level, to prevent silent schema drift corruption.
+  - Centralizing version range constants and evaluator logic in one module keeps runtime checks and test expectations aligned.
+---

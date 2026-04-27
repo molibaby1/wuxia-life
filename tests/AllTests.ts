@@ -609,6 +609,77 @@ async function runMainFlowSaveLoadCase() {
   }
 }
 
+async function runRestartContinueEndingSaveBehaviorCase() {
+  const engine = useNewGameEngine();
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalSelectEvent = gameEngine.selectEvent;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    saveManager.clearAllSaves();
+    (gameEngine as any).selectEvent = () => ({
+      id: 'us_020_resume_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'us_020_choice',
+          text: '继续推进',
+          effects: [{ type: EffectType.FLAG_SET, target: 'us_020_resumed' }],
+        },
+      ],
+    });
+
+    engine.startNewGame('RestartSaveHero', 'male');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const state = engine.getGameState();
+    state.currentTime = { year: 18, month: 7, day: 3 };
+    state.flags.us_020_checkpoint = true;
+
+    const saveId = engine.saveCurrentGame('US-020-checkpoint');
+    assert(saveId.length > 0, '应生成有效存档 ID');
+
+    engine.restartGame();
+    const stateAfterRestart = engine.getGameState();
+    assertEqual(stateAfterRestart.player.age, 0, '重开后应回到初始化年龄');
+    const savedAfterRestart = saveManager.loadGame(saveId);
+    assert(savedAfterRestart !== null, '重开不应破坏已有存档');
+    assertEqual(savedAfterRestart?.gameData.flags.us_020_checkpoint, true, '重开后旧存档内容应保持不变');
+
+    const loadedAfterRestart = engine.loadGameFromSave(saveId);
+    assert(loadedAfterRestart, '重开后应可继续读取既有存档');
+    const resumedState = engine.getGameState();
+    assertEqual(resumedState.flags.us_020_checkpoint, true, '读档后关键 checkpoint 应恢复');
+    assert(engine.engineState.currentEvent !== null, '读档继续后应恢复到可继续推进的事件流');
+
+    resumedState.player.alive = false;
+    resumedState.ending = {
+      id: 'us_020_ending',
+      name: '终局测试',
+      description: '用于验证结局后读档行为',
+    } as any;
+
+    const loadedFromEnding = engine.loadGameFromSave(saveId);
+    assert(loadedFromEnding, '结局后应可读取历史存档');
+    const restoredFromEnding = engine.getGameState();
+    assertEqual(restoredFromEnding.player.alive, true, '结局后读档应恢复为可继续状态');
+    assertEqual(restoredFromEnding.flags.us_020_checkpoint, true, '结局后读档应恢复关键状态');
+    assert(engine.engineState.currentEvent !== null, '结局后读档应继续主流程事件');
+  } finally {
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    saveManager.clearAllSaves();
+    (engine.engineState as any).currentEvent = null;
+    (engine.engineState as any).availableChoices = [];
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
+  }
+}
+
 function createSimulationReportStub(overrides: Partial<import('./GameProcessSimulator').GameProcessReport> = {}): import('./GameProcessSimulator').GameProcessReport {
   const state = framework.createTestState();
   return {
@@ -1824,6 +1895,13 @@ const coreFunctionSuite: TestSuite = {
       description: '测试主流程可保存当前状态并在加载后恢复关键状态且继续推进',
       test: async () => {
         await runMainFlowSaveLoadCase();
+      },
+    },
+    {
+      name: '存档行为回归 - 重开/继续/结局后读档可预测',
+      description: '测试重开不污染存档、读档后继续正确、结局后可读档恢复主流程',
+      test: async () => {
+        await runRestartContinueEndingSaveBehaviorCase();
       },
     },
   ],

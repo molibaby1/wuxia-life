@@ -274,7 +274,8 @@
         "npm run build passes"
       ],
       "priority": 20,
-      "passes": false
+      "passes": true,
+      "notes": "Defined predictable post-ending persistence behavior by adding ending-screen latest-save resume entry (`src/components/EndingScreen.vue` + `src/App.vue`), so ending phase explicitly supports loading the latest save back into the main flow while restart stays isolated. Added regression case `runRestartContinueEndingSaveBehaviorCase` in `tests/AllTests.ts` covering restart non-corruption of existing saves, load-and-continue flow recovery, and post-ending load recovery. Validation passed: `npm run typecheck`, `npm test`, `npm run build`."
     },
     {
       "id": "US-021",

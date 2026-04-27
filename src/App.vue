@@ -13,7 +13,7 @@ const gameStarted = ref(false);
 
 // 不要解构 engineState，保持完整引用
 const gameEngineComposable = useNewGameEngine();
-const { startNewGame, restartGame, handleChoice, isProcessing } = gameEngineComposable;
+const { startNewGame, restartGame, handleChoice, isProcessing, getAllSaves, loadGameFromSave } = gameEngineComposable;
 
 const gamePhase = computed(() => {
   if (!gameStarted.value) return 'start';
@@ -31,6 +31,28 @@ const handleStart = (name: string, gender: 'male' | 'female') => {
 const handleRestart = () => {
   restartGame();
   gameStarted.value = false;
+};
+
+const latestSave = computed(() => getAllSaves()[0] ?? null);
+
+const latestSaveLabel = computed(() => {
+  if (!latestSave.value) {
+    return '';
+  }
+  return `${latestSave.value.name}（${new Date(latestSave.value.timestamp).toLocaleString('zh-CN')}）`;
+});
+
+const handleLoadLatestSaveFromEnding = () => {
+  if (!latestSave.value) {
+    return;
+  }
+  const loaded = loadGameFromSave(latestSave.value.id);
+  if (!loaded) {
+    window.alert('读取失败，存档可能不兼容');
+    return;
+  }
+  gameStarted.value = true;
+  window.alert(`已从结局页恢复：${latestSave.value.name}`);
 };
 
 const toggleDebug = () => {
@@ -78,7 +100,14 @@ const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
       :is-auto-playing="isProcessing"
       @choice="handleChoice"
     />
-    <EndingScreen v-else :player="endingPlayer" @restart="handleRestart" />
+    <EndingScreen
+      v-else
+      :player="endingPlayer"
+      :has-latest-save="!!latestSave"
+      :latest-save-label="latestSaveLabel"
+      @restart="handleRestart"
+      @load-latest-save="handleLoadLatestSaveFromEnding"
+    />
   </div>
 </template>
 

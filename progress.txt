@@ -12,6 +12,22 @@
 - Integration baseline states (e.g., `GameTestFramework.createTestState`) must include every commonly modified stat field (such as `charisma`, `constitution`, `comprehension`) to avoid `Unknown stat` warnings that mask real regressions.
 - Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
 - Main-flow save/load恢复应通过 `gameEngine.loadGameState(...)` 回填完整引擎状态，再由 `useNewGameEngine.getNextEvent()` 接回事件循环，避免读档后出现“状态恢复了但流程停住”。
+- 结局阶段不应暴露“保存”入口；若需支持结局后继续，优先提供“读取最近存档”并复用 `loadGameFromSave` 回到主流程，避免引入结束态存档语义歧义。
+
+## [2026-04-27 08:24] - US-020
+- Implemented predictable restart/continue/post-ending save behavior in the UI flow by adding an explicit ending-screen "load latest save" action wired in `App`, while keeping restart as state reset only.
+- Added regression coverage `runRestartContinueEndingSaveBehaviorCase` in `tests/AllTests.ts` to prove: restart does not corrupt existing saves, loading after restart resumes flow state, and post-ending load restores an alive resumable state with next event.
+- Files changed:
+  - `src/components/EndingScreen.vue`
+  - `src/App.vue`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Post-ending persistence UX should prefer explicit load-resume entrypoints over saving in ending phase, so save semantics stay tied to active gameplay state.
+  - Regression tests for persistence flow should assert both data restoration and event-loop resumability (`engineState.currentEvent` non-null) to catch "state restored but flow stalled" failures.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run build` ✅
+---
 
 ## [2026-04-25 09:15] - US-001 (quality-gate-hardening-v4)
 - Extended `tests/runRealTestGate.ts` with log-aware blocker scan (exit code 0 is insufficient if blocker substrings appear in combined stdout/stderr).

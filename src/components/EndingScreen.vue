@@ -52,6 +52,19 @@
       </div>
       
       <div class="actions">
+        <button
+          v-if="hasLatestSave"
+          class="btn"
+          @click="loadLatestSave"
+        >
+          读取最近存档继续
+        </button>
+        <p v-if="hasLatestSave" class="save-hint">
+          最近存档：{{ latestSaveLabel }}
+        </p>
+        <p v-else class="save-hint">
+          当前无可读取存档，重开不会影响已有存档。
+        </p>
         <button class="btn btn-primary" @click="share">
           分享给朋友
         </button>
@@ -64,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-const emit = defineEmits(['restart']);
+const emit = defineEmits(['restart', 'load-latest-save']);
 const props = defineProps<{
   player: {
     name?: string;
@@ -79,8 +92,12 @@ const props = defineProps<{
     chivalry?: number;
     money?: number;
   } | null;
+  hasLatestSave?: boolean;
+  latestSaveLabel?: string;
 }>();
 const player = props.player;
+const hasLatestSave = props.hasLatestSave ?? false;
+const latestSaveLabel = props.latestSaveLabel ?? '';
 
 const share = () => {
   const shareText = `${player?.name}的武侠人生：${player?.deathReason}，获得称号「${player?.title}」！快来试试你的武侠人生吧！`;
@@ -101,6 +118,10 @@ const share = () => {
 
 const restart = () => {
   emit('restart');
+};
+
+const loadLatestSave = () => {
+  emit('load-latest-save');
 };
 </script>
 
@@ -213,5 +234,12 @@ const restart = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.save-hint {
+  margin: 0;
+  color: #8b6914;
+  font-size: 13px;
+  text-align: center;
 }
 </style>

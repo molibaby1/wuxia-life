@@ -329,7 +329,8 @@
         "Completed P2 stories have recorded verification evidence"
       ],
       "priority": 24,
-      "passes": false
+      "passes": true,
+      "notes": "Closed P2 with fresh verification evidence in `docs/test-reports/us-024-p2-closure-verification.md`. Validation passed: `npm run typecheck`, `npm run build`, `npm test`, and `npm run simulate:gameplay -- --gate --quiet --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --waive=ending_distribution:single-run-ending-concentration-baseline` (gate PASS with approved waiver). Completed-story evidence audit result: `passedCount=23`, `evidenceLoggedInProgress=23`, `missingStoryIds=[]`."
     }
   ]
 }

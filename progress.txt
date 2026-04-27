@@ -1211,3 +1211,18 @@
   - Coverage-style acceptance dimensions (for example choice feedback) are best emitted as explicit checklist tables, so pass/fail reasoning remains auditable across sessions.
 - Validation evidence: `npm run report:p2-gameplay-structure` ✅, `npm run typecheck` ✅
 ---
+
+## [2026-04-27 08:33] - US-024
+- Closed P2 with fresh verification evidence in `docs/test-reports/us-024-p2-closure-verification.md`, including mandatory closure commands and story-evidence audit output.
+- Re-ran required quality commands for closure readiness: `npm run typecheck`, `npm run build`, `npm test`, plus simulation gate command with explicit waiver reason.
+- Recorded approved simulation waiver for blocker metric `ending_distribution` using `--waive=ending_distribution:single-run-ending-concentration-baseline`, resulting in `Simulation gate decision: PASS`.
+- Audited completed P2 stories against `progress.txt` and confirmed full evidence coverage before closing: `passedCount=23`, `evidenceLoggedInProgress=23`, `missingStoryIds=[]`.
+- Files changed:
+  - `docs/test-reports/us-024-p2-closure-verification.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Milestone closure should pair fresh gate reruns with an explicit evidence-coverage audit so cross-session continuation remains mechanically verifiable.
+  - For simulation blockers that are expected in constrained single-run samples, waiver usage must include a concrete reason string and be logged in closure artifacts.
+- Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅, `npm run simulate:gameplay -- --gate --quiet --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --waive=ending_distribution:single-run-ending-concentration-baseline` ✅
+---

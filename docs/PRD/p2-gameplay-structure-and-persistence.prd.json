@@ -179,7 +179,8 @@
         "Metrics are classified as blocker, warning, or info"
       ],
       "priority": 13,
-      "passes": false
+      "passes": true,
+      "notes": "Defined canonical gameplay simulation metrics in `scripts/gameplaySimulationMetricDefinitions.ts` and documented the full metric contract in `docs/test-reports/us-013-real-gameplay-simulation-metrics.md`. Coverage includes choice rate, auto event rate, route completion rate, route breakage rate, death rate, ending distribution, romance/family achievement rate, and save count. Each metric now has baseline mode/value and severity classification (`blocker`/`warning`/`info`)."
     },
     {
       "id": "US-014",

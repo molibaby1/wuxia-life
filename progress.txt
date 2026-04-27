@@ -1030,3 +1030,18 @@
   - 至少两条路线类型应同时覆盖（主线/次线或不同身份路线），以避免单路线 happy path 掩盖 breakage 分支回归。
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:08] - US-013
+- Defined canonical real gameplay simulation metric contracts in `scripts/gameplaySimulationMetricDefinitions.ts`, covering exactly: `choice_rate`, `auto_event_rate`, `route_completion_rate`, `route_breakage_rate`, `death_rate`, `ending_distribution`, `romance_family_achievement_rate`, and `save_count`.
+- Added explicit severity classification (`blocker` / `warning` / `info`) and baseline metadata (`target_range` / `observation_baseline`) for each metric, including actionable notes for future gate execution stories.
+- Added story-level design/report artifact `docs/test-reports/us-013-real-gameplay-simulation-metrics.md` with tabular metric list, baselines, and escalation rule for ending distribution concentration.
+- Files changed:
+  - `scripts/gameplaySimulationMetricDefinitions.ts`
+  - `docs/test-reports/us-013-real-gameplay-simulation-metrics.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Metrics-definition stories should ship both typed executable definitions and human-readable policy docs to prevent threshold drift before gate implementation.
+  - Keep `observation_baseline` and `target_range` explicit in schema so follow-up gate stories can distinguish monitor-only signals from hard constraints.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

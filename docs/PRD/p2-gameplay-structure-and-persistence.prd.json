@@ -314,7 +314,8 @@
         "Report identifies P3 candidate follow-ups"
       ],
       "priority": 23,
-      "passes": false
+      "passes": true,
+      "notes": "Generated consolidated P2 evidence artifact at `docs/test-reports/us-023-p2-gameplay-structure-report.md` via `scripts/generateP2GameplayStructureReport.ts` + npm command `report:p2-gameplay-structure`. Report includes choice feedback coverage (7/7 regression assertions present), route completion/breakage rates (0.00% / 0.00%), simulation metric table from `evaluateSimulationGate`, save consistency summary (3/3 checks passed), residual risks, and explicit P3 candidate follow-ups. Validation passed: `npm run report:p2-gameplay-structure`, `npm run typecheck`."
     },
     {
       "id": "US-024",

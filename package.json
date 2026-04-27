@@ -10,6 +10,7 @@
     "validate:event-quality": "tsx scripts/validateEventQuality.ts",
     "report:event-format-inventory": "tsx scripts/inventoryEventEffectFormats.ts",
     "report:p1-quality-gate": "tsx scripts/generateP1QualityGateReport.ts",
+    "report:p2-gameplay-structure": "tsx scripts/generateP2GameplayStructureReport.ts",
     "repro:event-repetition": "tsx scripts/reproduceEventRepetition.ts",
     "report:rhythm-metrics": "tsx scripts/reportRhythmMetrics.ts",
     "report:rhythm-baseline": "tsx scripts/generateRhythmBaselineReport.ts",

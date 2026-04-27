@@ -1195,3 +1195,19 @@
   - 模拟报告中的持久化一致性应结构化输出（含失败字段列表），方便后续门禁或报表直接消费。
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay -- --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --quiet` ✅
 ---
+
+## [2026-04-27 08:29] - US-023
+- Implemented a dedicated P2 closure evidence generator `scripts/generateP2GameplayStructureReport.ts` and npm command `report:p2-gameplay-structure`, producing `docs/test-reports/us-023-p2-gameplay-structure-report.md`.
+- Report aggregates required evidence dimensions in one artifact: choice feedback coverage scan (`tests/AllTests.ts`), route completion/breakage rates and full simulation metrics via `evaluateSimulationGate`, and save consistency summary from simulator `persistenceConsistency` checks.
+- Included residual risks and explicit P3 candidate follow-ups in the generated report so the artifact is decision-ready for next-phase planning.
+- Files changed:
+  - `scripts/generateP2GameplayStructureReport.ts`
+  - `package.json`
+  - `docs/test-reports/us-023-p2-gameplay-structure-report.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - P2 closure reports should reuse existing gate modules (`evaluateSimulationGate`) instead of re-implementing metric math, to keep policy and evidence aligned.
+  - Coverage-style acceptance dimensions (for example choice feedback) are best emitted as explicit checklist tables, so pass/fail reasoning remains auditable across sessions.
+- Validation evidence: `npm run report:p2-gameplay-structure` ✅, `npm run typecheck` ✅
+---

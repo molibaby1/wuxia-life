@@ -14,6 +14,7 @@
     "report:rhythm-metrics": "tsx scripts/reportRhythmMetrics.ts",
     "report:rhythm-baseline": "tsx scripts/generateRhythmBaselineReport.ts",
     "simulate:gameplay": "tsx scripts/runGameplaySimulation.ts",
+    "simulate:gameplay:samples": "tsx scripts/runGameplaySimulation.ts --samples --quiet",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
     "validate": "npm run typecheck && npm run build && npm test && npm run validate:event-quality && npm run stability",

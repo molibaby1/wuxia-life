@@ -38,6 +38,7 @@ export interface GameProcessConfig {
   enableManualSave: boolean;  // 启用手动保存
   saveInterval: number;  // 保存间隔（年）
   verbose: boolean;  // 详细日志
+  choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
 }
 
 export interface GameProcessRecord {
@@ -118,6 +119,7 @@ export class GameProcessSimulator {
       enableManualSave: true,
       saveInterval: 5,
       verbose: true,
+      choiceTendency: 'balanced',
       ...config
     };
   }
@@ -415,10 +417,12 @@ export class GameProcessSimulator {
    * 选择事件选项（模拟玩家决策）
    */
   private selectChoice(choices: EventChoice[]): EventChoice {
-    // 智能选择策略：
-    // 1. 优先选择增加属性的选项
-    // 2. 其次选择有趣/有意义的选项
-    // 3. 最后随机选择
+    // 多倾向策略：
+    // - balanced: 综合成长
+    // - martial: 武学成长优先
+    // - wealth: 经济收益优先
+    // - relationship: 关系与情感优先
+    // - risk_averse: 保守规避高代价
 
     let bestChoice = choices[0];
     let bestScore = -Infinity;
@@ -437,15 +441,7 @@ export class GameProcessSimulator {
 
           let outcomeScore = 0;
           if (outcome.effects) {
-            for (const effect of outcome.effects) {
-              if (effect.type !== 'stat_modify' || effect.operator !== 'add' || !effect.target) continue;
-              const value = typeof effect.value === 'number' ? effect.value : 0;
-              if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(effect.target)) {
-                outcomeScore += value * 2;
-              } else {
-                outcomeScore += value;
-              }
-            }
+            outcomeScore = this.scoreEffectsByTendency(outcome.effects);
           }
           if (outcomeScore > bestOutcomeScore) {
             bestOutcomeScore = outcomeScore;
@@ -453,16 +449,7 @@ export class GameProcessSimulator {
         }
         score = bestOutcomeScore;
       } else if (choice.effects) {
-        // 无多结果分支，评估原有效果
-        for (const effect of choice.effects) {
-          if (effect.type !== 'stat_modify' || effect.operator !== 'add' || !effect.target) continue;
-          const value = typeof effect.value === 'number' ? effect.value : 0;
-          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(effect.target)) {
-            score += value * 2;
-          } else {
-            score += value;
-          }
-        }
+        score = this.scoreEffectsByTendency(choice.effects);
       }
 
       if (score > bestScore) {
@@ -477,6 +464,72 @@ export class GameProcessSimulator {
 
     const randomIndex = Math.floor(Math.random() * choices.length);
     return choices[randomIndex];
+  }
+
+  private scoreEffectsByTendency(effects: any[]): number {
+    let score = 0;
+    const tendency = this.config.choiceTendency;
+
+    for (const effect of effects) {
+      if (effect.type === 'stat_modify' && effect.target) {
+        const rawValue = typeof effect.value === 'number' ? effect.value : 0;
+        const normalizedValue = effect.operator === 'subtract' ? -Math.abs(rawValue) : rawValue;
+        const stat = effect.target;
+
+        if (tendency === 'martial') {
+          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'comprehension', 'constitution', 'health'].includes(stat)) {
+            score += normalizedValue * 3;
+          } else if (stat === 'money') {
+            score += normalizedValue * 0.8;
+          } else {
+            score += normalizedValue;
+          }
+          continue;
+        }
+
+        if (tendency === 'wealth') {
+          if (['money', 'businessAcumen', 'reputation', 'connections'].includes(stat)) {
+            score += normalizedValue * 3;
+          } else if (['health', 'constitution'].includes(stat)) {
+            score += normalizedValue * 1.2;
+          } else {
+            score += normalizedValue * 0.7;
+          }
+          continue;
+        }
+
+        if (tendency === 'risk_averse') {
+          if (normalizedValue < 0) {
+            score += normalizedValue * 4;
+          } else if (['health', 'constitution', 'money', 'reputation'].includes(stat)) {
+            score += normalizedValue * 2;
+          } else {
+            score += normalizedValue * 1.2;
+          }
+          continue;
+        }
+
+        // balanced / relationship 默认策略
+        if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution', 'health'].includes(stat)) {
+          score += normalizedValue * 2;
+        } else {
+          score += normalizedValue;
+        }
+      }
+
+      if (effect.type === 'relation_change') {
+        const relationDelta = typeof effect.value === 'number' ? effect.value : 1;
+        if (tendency === 'relationship') {
+          score += relationDelta * 5;
+        } else if (tendency === 'risk_averse') {
+          score += relationDelta * 2;
+        } else {
+          score += relationDelta * 1.5;
+        }
+      }
+    }
+
+    return score;
   }
 
   /**

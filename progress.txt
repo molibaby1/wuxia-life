@@ -1063,3 +1063,20 @@
   - Simulation command output should separate machine-consumable summaries from human-readable CLI text to support both automation and quick manual triage.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay -- --seed=42 --start-age=10 --end-age=20 --quiet` ✅, deterministic re-run check ✅
 ---
+
+## [2026-04-27 08:14] - US-015
+- Added multi-route simulation sample support in `scripts/runGameplaySimulation.ts` with three fixed personas (`martial-riser`, `merchant-weaver`, `bond-keeper`) that vary seed, gender, and `choiceTendency` strategy (`martial`, `wealth`, `relationship`).
+- Extended simulator choice policy in `tests/GameProcessSimulator.ts` by introducing configurable `choiceTendency` scoring (`balanced`, `martial`, `wealth`, `relationship`, `risk_averse`) so sample runs are reproducible and behaviorally distinct.
+- Implemented sample-level summary output (console + JSON) that records required fields per sample: `routeSummary`, `endingSummary`, `choiceSummary`, `deathSummary`, and `relationshipSummary`; summaries are emitted to `public/reports/gameplay-simulation-samples-*.json`.
+- Added local rerun command `npm run simulate:gameplay:samples` in `package.json`.
+- Files changed:
+  - `scripts/runGameplaySimulation.ts`
+  - `tests/GameProcessSimulator.ts`
+  - `package.json`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Multi-sample simulation output should summarize from final runtime state (`records[last].gameState`) rather than only aggregate counters, so route and relationship evidence stays story-level auditable.
+  - Distinct choice tendencies are easier to maintain as scoring-weight profiles over the same effect payload, avoiding duplicated simulation loops.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay:samples` ✅
+---

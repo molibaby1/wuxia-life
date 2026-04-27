@@ -981,3 +981,21 @@
   - Conflict resolution should expose both `level` and `action`; separating classification from behavior keeps lock-in policy changes low-risk.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:04] - US-010
+- Implemented unified route state management base in `src/core/RouteStateManager.ts`, providing one entry for route state read/write/lock/complete/fail and route-flag/faction-flag synchronization.
+- Integrated `FlagSetHandler` (`src/core/EventExecutor.ts`) with `RouteStateManager.syncFromFlagSet(...)` so route-related flag writes no longer need ad-hoc route-state mutations in event flows.
+- Added route persistence surfaces in `GameState` (`routeStates` + `routeHistory`) and ensured key transitions append both `routeHistory` and synthetic `eventHistory` records (`route_state:<route>:<lifecycle>`).
+- Added regression coverage in `tests/AllTests.ts` for lifecycle API behavior, identity/faction compatibility safety, and history recording.
+- Files changed:
+  - `src/core/RouteStateManager.ts`
+  - `src/core/EventExecutor.ts`
+  - `src/types/eventTypes.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Route-state changes should be centralized as explicit lifecycle transitions and history appends; synthetic route transition events keep existing event-history tooling usable without extra adapters.
+  - Route flag synchronization should be one-way into route-state manager and avoid mutating existing identity/lifePath authority fields unless a dedicated migration story defines that ownership shift.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

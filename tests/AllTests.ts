@@ -20,6 +20,7 @@ import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { saveManager } from '../src/core/SaveManager';
 import { getRouteCompatibilityRule, resolveRouteConflict } from '../src/core/RouteCompatibilityRules';
+import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 
@@ -1108,6 +1109,81 @@ const coreFunctionSuite: TestSuite = {
         assertEqual(result.level, 'strong_exclusion', '应按最高冲突级别返回 strong_exclusion');
         assertEqual(result.action, 'block_candidate', '强互斥优先级最高，应直接阻断候选');
         assert(result.conflictWith.includes('hero'), '冲突详情应包含强互斥来源路线');
+      },
+    },
+    {
+      name: '路线状态管理 - 统一入口支持读写锁定完成失败',
+      description: '测试 RouteStateManager 的 read/write/lock/complete/fail 闭环能力',
+      test: () => {
+        let state = framework.createTestState();
+        const initial = RouteStateManager.readRouteState(state, 'hero');
+        assertEqual(initial.lifecycle, 'inactive', '未写入路线时应返回 inactive');
+
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'hero',
+          lifecycle: 'active',
+          category: 'main',
+          eventId: 'route_open_event',
+        });
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'active', '写入后应可读取 active');
+
+        state = RouteStateManager.lockRoute(state, 'hero', 'route_lock_event');
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lockedIn, true, '锁定后 lockedIn 应为 true');
+
+        state = RouteStateManager.completeRoute(state, 'hero', 'route_complete_event');
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'completed', '完成后应进入 completed');
+
+        state = RouteStateManager.failRoute(state, 'hero', 'route_fail_event');
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'failed', '失败后应进入 failed');
+      },
+    },
+    {
+      name: '路线状态管理 - 旗标同步不破坏身份与阵营字段',
+      description: '测试旗标同步通过统一入口更新路线状态，同时保持 identity/lifePath.faction 不被破坏',
+      test: async () => {
+        const executor = new EventExecutor();
+        const state = framework.createTestState();
+        state.identity = {
+          identities: ['heroic'],
+          primary: 'heroic',
+        };
+        state.lifePath = {
+          primaryIdentity: 'heroic',
+          faction: 'orthodox',
+          lifeStage: 'development',
+          achievements: [],
+          relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
+          commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+          focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
+        };
+
+        const nextState = await executor.executeEffects(
+          [{ type: EffectType.FLAG_SET, target: 'sect_faction', value: 'unconventional' }],
+          state,
+        );
+
+        assertEqual(nextState.identity?.primary, 'heroic', 'identity 字段应保持不变');
+        assertEqual(nextState.lifePath?.faction, 'orthodox', 'lifePath.faction 不应被路线状态同步改写');
+        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'active', '阵营旗标应同步为 demonic active');
+      },
+    },
+    {
+      name: '路线状态管理 - 关键变化写入 route 与 event 历史',
+      description: '测试 unified entry 在状态变化时写入 routeHistory 与 eventHistory',
+      test: () => {
+        let state = framework.createTestState();
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'merchant',
+          lifecycle: 'active',
+          category: 'main',
+          eventId: 'merchant_route_open',
+        });
+        state = RouteStateManager.lockRoute(state, 'merchant', 'merchant_route_lock');
+        state = RouteStateManager.completeRoute(state, 'merchant', 'merchant_route_complete');
+
+        assert((state.routeHistory || []).length >= 3, '关键路线状态变化应写入 routeHistory');
+        const historyEventIds = (state.eventHistory || []).map(item => item.eventId);
+        assert(historyEventIds.some(eventId => eventId.startsWith('route_state:merchant:')), '关键路线状态变化应写入 eventHistory');
       },
     },
     {

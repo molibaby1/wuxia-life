@@ -139,7 +139,8 @@
         "npm run typecheck passes"
       ],
       "priority": 10,
-      "passes": false
+      "passes": true,
+      "notes": "Added unified `RouteStateManager` in `src/core/RouteStateManager.ts` with `readRouteState`/`writeRouteState`/`lockRoute`/`completeRoute`/`failRoute` and centralized history recording (`routeHistory` + synthetic `eventHistory` records). Integrated `FlagSetHandler` to sync route-state updates from route/faction flags through the unified entry without mutating existing identity or `lifePath.faction` fields. Added regression coverage in `tests/AllTests.ts` for full route lifecycle operations, flag-sync compatibility, and history recording. Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-011",

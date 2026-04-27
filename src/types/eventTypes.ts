@@ -1036,6 +1036,26 @@ export interface GameState {
   
   // 成就列表
   achievements?: string[];
+  routeStates?: Record<string, {
+    routeId: string;
+    lifecycle: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
+    category: 'main' | 'secondary';
+    lockedIn: boolean;
+    lastChangedAtAge?: number;
+    sourceEventId?: string;
+    reason?: string;
+  }>;
+  routeHistory?: Array<{
+    routeId: string;
+    from: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
+    to: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
+    category: 'main' | 'secondary';
+    lockedIn: boolean;
+    age?: number;
+    eventId?: string;
+    reason?: string;
+    timestamp: number;
+  }>;
   ending?: unknown;
 }
 

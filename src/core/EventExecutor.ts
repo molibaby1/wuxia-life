@@ -29,6 +29,7 @@ import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { EndingSystem } from './EndingSystem';
 import { LifePathManager } from './LifePathSystem';
 import { traitSystem } from './TraitSystem';
+import { RouteStateManager } from './RouteStateManager';
 
 /**
  * 事件执行器实现
@@ -456,9 +457,7 @@ export class FlagSetHandler implements EffectHandler {
         flags: newFlags,
       },
     };
-
-
-    return result;
+    return RouteStateManager.syncFromFlagSet(result, flagName, flagValue);
   }
 }
 

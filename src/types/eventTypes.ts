@@ -772,6 +772,8 @@ export interface EventDefinition {
     autoResolve?: boolean;
     pathAffinity?: Record<string, number>;
     pathConflicts?: string[];
+    routeTransition?: 'turn';
+    routeTargets?: string[];
   };
 
   // ========== 难度系统扩展 ==========

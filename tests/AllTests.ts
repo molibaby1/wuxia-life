@@ -1187,6 +1187,133 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '路线冲突门禁 - 锁定路线下强冲突事件不可触发',
+      description: '测试 locked_in 路线会阻断 strong_exclusion 候选路线事件',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+
+        state.player.age = 22;
+        state.routeStates = {
+          hero: {
+            routeId: 'hero',
+            lifecycle: 'locked_in',
+            category: 'main',
+            lockedIn: true,
+          },
+        };
+
+        const strongConflictEvent = {
+          id: 'route_conflict_official_demonic',
+          version: '1.0.0',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          weight: 100,
+          ageRange: { min: 20, max: 40 },
+          triggers: [],
+          content: { title: '强冲突路线事件', text: '尝试转入魔道主线' },
+          eventType: 'auto',
+          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_demonic' }],
+          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+        } as any;
+
+        const fallbackDailyEvent = {
+          id: 'daily_after_strong_conflict_block',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '日常补位', text: '冲突后未触发正式事件' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          engine.getAvailableEvents = () => [strongConflictEvent];
+          engine.shouldPauseEventsThisYear = () => false;
+          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
+          const selected = engine.selectEvent(22);
+          assertEqual(selected?.id, 'daily_after_strong_conflict_block', '强冲突路线事件应被阻断并回退 daily');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
+      },
+    },
+    {
+      name: '路线冲突门禁 - 软冲突仅允许显式 turn 事件',
+      description: '测试 locked_in 软冲突路线转入必须通过显式 turn 事件',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+
+        state.player.age = 28;
+        state.routeStates = {
+          hero: {
+            routeId: 'hero',
+            lifecycle: 'locked_in',
+            category: 'main',
+            lockedIn: true,
+          },
+        };
+
+        const softConflictNoTurn = {
+          id: 'route_soft_conflict_without_turn',
+          version: '1.0.0',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          weight: 100,
+          ageRange: { min: 20, max: 40 },
+          triggers: [],
+          content: { title: '软冲突未转向', text: '尝试进入商道但未触发转向' },
+          eventType: 'auto',
+          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_merchant' }],
+          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+        } as any;
+
+        const softConflictWithTurn = {
+          ...softConflictNoTurn,
+          id: 'route_soft_conflict_with_turn',
+          metadata: {
+            createdAt: 0,
+            updatedAt: 0,
+            enabled: true,
+            tags: ['route_turn'],
+            routeTransition: 'turn',
+          },
+        } as any;
+
+        const fallbackDailyEvent = {
+          id: 'daily_after_soft_conflict_block',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '日常补位', text: '等待显式转向事件' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
+          engine.shouldPauseEventsThisYear = () => false;
+
+          engine.getAvailableEvents = () => [softConflictNoTurn];
+          const blockedSelection = engine.selectEvent(28);
+          assertEqual(blockedSelection?.id, 'daily_after_soft_conflict_block', '无 turn 标记的软冲突事件应被阻断');
+
+          engine.getAvailableEvents = () => [softConflictWithTurn];
+          const turnSelection = engine.selectEvent(28);
+          assertEqual(turnSelection?.id, 'route_soft_conflict_with_turn', '显式 turn 事件应允许通过软冲突门禁');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
+      },
+    },
+    {
       name: '分层节奏 - daily 仅在 formal 不足或节奏暂停时介入',
       description: '测试 critical/storyline 优先，regular formal 可被节奏控制降级到 daily',
       test: () => {

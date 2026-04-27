@@ -28,6 +28,8 @@ import { calculateFailureProbabilityForEvent, rollForFailure } from './Challenge
 import { checkSetbackEvents, applySetbackEffects, clearExpiredSetbacks } from './SetbackEventSystem';
 import { traitSystem } from './TraitSystem';
 import { dailyEventSystem } from './DailyEventSystem';
+import { isCoreRouteIdentity } from './RouteStateManager';
+import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
 
 /**
  * 游戏引擎集成器类
@@ -704,6 +706,126 @@ export class GameEngineIntegration {
     return paths;
   }
 
+  private getLockedCoreRoutes(): RouteIdentity[] {
+    const routeStates = this.gameState.routeStates || {};
+    return Object.values(routeStates)
+      .filter(routeState => {
+        if (!routeState.lockedIn) {
+          return false;
+        }
+        if (routeState.lifecycle === 'failed') {
+          return false;
+        }
+        return isCoreRouteIdentity(routeState.routeId);
+      })
+      .map(routeState => routeState.routeId as RouteIdentity);
+  }
+
+  private extractRouteCandidatesFromEffects(effects: Effect[] | undefined): RouteIdentity[] {
+    if (!effects || effects.length === 0) {
+      return [];
+    }
+    const candidates = new Set<RouteIdentity>();
+    const factionToRoute: Record<string, RouteIdentity> = {
+      orthodox: 'sect',
+      unconventional: 'demonic',
+      neutral: 'wanderer',
+      none: 'wanderer',
+    };
+
+    for (const effect of effects) {
+      if (effect.type !== 'flag_set') {
+        continue;
+      }
+      const flagName = effect.flag || effect.target;
+      if (!flagName || typeof flagName !== 'string') {
+        continue;
+      }
+
+      if (flagName === 'sect_faction' && typeof effect.value === 'string') {
+        const mappedRoute = factionToRoute[effect.value];
+        if (mappedRoute) {
+          candidates.add(mappedRoute);
+        }
+        continue;
+      }
+
+      if (!flagName.startsWith('route_')) {
+        continue;
+      }
+
+      const rawRouteId = flagName.replace(/^route_/, '').replace(/_(locked|completed|failed)$/, '');
+      const normalizedRoute = rawRouteId === 'demon' ? 'demonic' : rawRouteId;
+      if (isCoreRouteIdentity(normalizedRoute)) {
+        candidates.add(normalizedRoute);
+      }
+    }
+
+    return Array.from(candidates);
+  }
+
+  private getEventRouteCandidates(event: EventDefinition): RouteIdentity[] {
+    const metadataTargets = event.metadata?.routeTargets || [];
+    const candidates = new Set<RouteIdentity>();
+
+    for (const route of metadataTargets) {
+      if (isCoreRouteIdentity(route)) {
+        candidates.add(route);
+      }
+    }
+
+    for (const route of this.extractRouteCandidatesFromEffects(event.autoEffects)) {
+      candidates.add(route);
+    }
+
+    for (const choice of event.choices || []) {
+      for (const route of this.extractRouteCandidatesFromEffects(choice.effects)) {
+        candidates.add(route);
+      }
+      for (const outcome of choice.outcomes || []) {
+        for (const route of this.extractRouteCandidatesFromEffects(outcome.effects)) {
+          candidates.add(route);
+        }
+      }
+    }
+
+    return Array.from(candidates);
+  }
+
+  private isExplicitRouteTurnEvent(event: EventDefinition): boolean {
+    return event.metadata?.routeTransition === 'turn' || event.metadata?.tags?.includes('route_turn') === true;
+  }
+
+  private passesRouteConflictChecks(event: EventDefinition): boolean {
+    const lockedRoutes = this.getLockedCoreRoutes();
+    if (lockedRoutes.length === 0) {
+      return true;
+    }
+
+    const candidateRoutes = this.getEventRouteCandidates(event);
+    if (candidateRoutes.length === 0) {
+      return true;
+    }
+
+    for (const candidateRoute of candidateRoutes) {
+      for (const lockedRoute of lockedRoutes) {
+        const conflict = resolveRouteConflict({
+          currentMainRoute: lockedRoute,
+          candidateRoute,
+          lockedIn: true,
+        });
+        if (conflict.action === 'block_candidate') {
+          return false;
+        }
+        if (conflict.action === 'require_turn_event' && !this.isExplicitRouteTurnEvent(event)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   /**
    * 检查事件是否与当前主导路径冲突
    */
@@ -1107,11 +1229,17 @@ export class GameEngineIntegration {
       return dailyEventSystem.selectEvent(this.gameState);
     }
     
+    const routeConflictCheckedEvents = untriggeredEvents.filter(event => this.passesRouteConflictChecks(event));
+
+    if (routeConflictCheckedEvents.length === 0) {
+      return dailyEventSystem.selectEvent(this.gameState);
+    }
+
     // 获取玩家当前主导路径
     const dominantPaths = this.getDominantPaths();
     
     // 过滤掉与主导路径强烈冲突的事件
-    const compatibleEvents = untriggeredEvents.filter(event => {
+    const compatibleEvents = routeConflictCheckedEvents.filter(event => {
       if (this.isPathConflicting(event, dominantPaths)) {
         return false; // 过滤冲突事件
       }
@@ -1119,7 +1247,7 @@ export class GameEngineIntegration {
     });
     
     // 如果没有兼容事件，回退到所有未触发事件
-    const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : untriggeredEvents;
+    const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : routeConflictCheckedEvents;
 
     // 声望门槛检查：过滤不满足声望要求的事件
     const playerReputation = this.gameState.player?.reputation || 0;

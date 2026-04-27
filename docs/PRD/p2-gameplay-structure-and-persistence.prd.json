@@ -153,7 +153,8 @@
         "npm test passes"
       ],
       "priority": 11,
-      "passes": false
+      "passes": true,
+      "notes": "Integrated locked-route conflict gates in `GameEngineIntegration.selectEvent` using `RouteStateManager` + `resolveRouteConflict`: strong conflicts now block candidate route events, soft conflicts under locked-in routes require explicit turn events (`metadata.routeTransition='turn'` or `metadata.tags` contains `route_turn`), and route intent can be inferred from event route flags or declared `metadata.routeTargets`. Added regression coverage in `tests/AllTests.ts` for strong-conflict blocking and soft-conflict turn-event gating; lock-in traceability remains covered through `routeStates` + route/event history records. Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-012",

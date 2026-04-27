@@ -999,3 +999,20 @@
   - Route flag synchronization should be one-way into route-state manager and avoid mutating existing identity/lifePath authority fields unless a dedicated migration story defines that ownership shift.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:06] - US-011
+- 在 `GameEngineIntegration.selectEvent` 增加路线冲突门禁：读取 `routeStates` 中 `lockedIn=true` 的核心路线后，对候选事件做冲突解析（`resolveRouteConflict`），`strong_exclusion` 直接阻断，`soft_exclusion` 在锁定状态下必须为显式转向事件才允许通过。
+- 新增事件路线意图推导：支持从 `autoEffects` / `choice.effects` / `choice.outcomes.effects` 的 `flag_set(route_*)` 与 `sect_faction` 推导候选路线；也支持 `metadata.routeTargets` 显式声明目标路线。
+- 新增显式转向事件约定：`metadata.routeTransition = "turn"` 或 `metadata.tags` 包含 `route_turn`，用于软冲突锁定状态下的合法转向。
+- 新增回归测试（`tests/AllTests.ts`）：覆盖“锁定路线下强冲突事件被阻断”和“软冲突仅允许显式 turn 事件”；路线锁定可追踪性延续 `routeStates + routeHistory + route_state:* eventHistory` 记录链路。
+- Files changed:
+  - `src/core/GameEngineIntegration.ts`
+  - `src/types/eventTypes.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - 路线冲突门禁应放在正式事件层筛选早期，避免冲突事件进入后续权重计算与节奏分层造成“先选后丢”噪声。
+  - 软冲突转向必须具备显式事件标记（`routeTransition`/`route_turn`），避免隐式 flag 写入绕过锁定路线约束。
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

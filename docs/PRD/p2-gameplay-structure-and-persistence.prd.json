@@ -301,7 +301,8 @@
         "npm test passes"
       ],
       "priority": 22,
-      "passes": false
+      "passes": true,
+      "notes": "Extended `tests/GameProcessSimulator.ts` with configurable autosave policies (`autoSaveMode='age'|'event'`, `saveAgeInterval`, `saveEventInterval`) plus automated restore flow (`enableSaveRestore`) that loads at least one generated save and continues simulation. Added persistence consistency checks over key runtime fields (age/alive/stats/time/history/route state) and exposed report metrics `totalSaves`, `totalLoads`, and `persistenceConsistency`. Updated `scripts/runGameplaySimulation.ts` summary + machine-readable output and CLI args to configure autosave mode/intervals. Validation passed: `npm run typecheck`, `npm test`, `npm run simulate:gameplay -- --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --quiet`."
     },
     {
       "id": "US-023",

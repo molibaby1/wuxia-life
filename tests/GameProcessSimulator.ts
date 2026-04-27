@@ -36,7 +36,11 @@ export interface GameProcessConfig {
   maxEvents: number; // 最大事件数，避免月/日推进导致无限循环
   enableAutoSave: boolean;  // 启用自动保存
   enableManualSave: boolean;  // 启用手动保存
-  saveInterval: number;  // 保存间隔（年）
+  autoSaveMode: 'age' | 'event';
+  saveAgeInterval: number;  // 按年龄自动保存间隔（年）
+  saveEventInterval: number;  // 按事件自动保存间隔（事件数）
+  enableSaveRestore: boolean;  // 启用自动读档恢复验证
+  maxRestoreCount: number;  // 最多自动读档恢复次数
   verbose: boolean;  // 详细日志
   choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
 }
@@ -72,6 +76,18 @@ export interface GameProcessReport {
   totalEvents: number;
   totalChoices: number;
   totalSaves: number;
+  totalLoads: number;
+  persistenceConsistency: {
+    totalChecks: number;
+    passedChecks: number;
+    failedChecks: number;
+    results: {
+      saveId: string;
+      age: number;
+      passed: boolean;
+      mismatchedFields: string[];
+    }[];
+  };
   records: GameProcessRecord[];
   statistics: {
     childhoodEvents: number;
@@ -105,6 +121,15 @@ export class GameProcessSimulator {
   private config: GameProcessConfig;
   private records: GameProcessRecord[] = [];
   private saveCount: number = 0;
+  private loadCount: number = 0;
+  private autoSaveIds: string[] = [];
+  private consistencyChecks: {
+    saveId: string;
+    age: number;
+    passed: boolean;
+    mismatchedFields: string[];
+  }[] = [];
+  private lastAutoSaveAge: number | null = null;
   private gameState: GameState | null = null;
   private ended: boolean = false;
 
@@ -117,7 +142,11 @@ export class GameProcessSimulator {
       maxEvents: 300,
       enableAutoSave: true,
       enableManualSave: true,
-      saveInterval: 5,
+      autoSaveMode: 'age',
+      saveAgeInterval: 5,
+      saveEventInterval: 10,
+      enableSaveRestore: true,
+      maxRestoreCount: 1,
       verbose: true,
       choiceTendency: 'balanced',
       ...config
@@ -132,6 +161,10 @@ export class GameProcessSimulator {
     this.ended = false;
     this.records = [];
     this.saveCount = 0;
+    this.loadCount = 0;
+    this.autoSaveIds = [];
+    this.consistencyChecks = [];
+    this.lastAutoSaveAge = null;
     
     // 0. 重置游戏引擎（确保状态干净）
     this.log('📝 步骤 0: 重置游戏引擎');
@@ -157,11 +190,9 @@ export class GameProcessSimulator {
         
         await this.simulateYear();
         steps += 1;
-        
-        // 定期保存
-        const currentAge = this.gameState.player?.age || 0;
-        if (this.config.enableAutoSave && currentAge % this.config.saveInterval === 0) {
-          this.autoSave();
+
+        if (this.config.enableAutoSave) {
+          this.maybeAutoSaveAndRestore(steps);
         }
       }
     });
@@ -681,15 +712,79 @@ export class GameProcessSimulator {
   }
 
   /**
-   * 自动保存
+   * 按配置执行自动保存与读档恢复验证
    */
-  private autoSave(): void {
+  private maybeAutoSaveAndRestore(steps: number): void {
     if (!this.gameState) return;
-    
-    const saveName = `自动存档-${this.gameState.player?.age}岁`;
+
+    const currentAge = this.gameState.player?.age || 0;
+    let shouldSave = false;
+    if (this.config.autoSaveMode === 'event') {
+      shouldSave = this.config.saveEventInterval > 0 && steps % this.config.saveEventInterval === 0;
+    } else {
+      shouldSave =
+        this.config.saveAgeInterval > 0 &&
+        currentAge > 0 &&
+        currentAge % this.config.saveAgeInterval === 0 &&
+        this.lastAutoSaveAge !== currentAge;
+    }
+
+    if (!shouldSave) {
+      return;
+    }
+
+    const saveName = `自动存档-${currentAge}岁`;
     const saveId = saveManager.saveGame(this.gameState, saveName);
     this.saveCount++;
+    this.autoSaveIds.push(saveId);
+    this.lastAutoSaveAge = currentAge;
     this.log(`   💾 自动保存：${saveName} (ID: ${saveId})`);
+
+    if (this.config.enableSaveRestore && this.loadCount < this.config.maxRestoreCount) {
+      this.restoreFromSave(saveId);
+    }
+  }
+
+  private restoreFromSave(saveId: string): void {
+    const saveEntry = saveManager.loadGame(saveId);
+    if (!saveEntry || !this.gameState) {
+      return;
+    }
+
+    const beforeSaveSnapshot = this.buildConsistencySnapshot(this.gameState);
+    gameEngine.loadGameState(saveEntry.gameData);
+    const restoredState = gameEngine.getGameState();
+    this.gameState = restoredState;
+    this.loadCount++;
+    this.log(`   ♻️ 自动读档恢复：${saveId}`);
+
+    const afterRestoreSnapshot = this.buildConsistencySnapshot(restoredState);
+    const mismatchedFields = Object.entries(beforeSaveSnapshot)
+      .filter(([key, value]) => afterRestoreSnapshot[key] !== value)
+      .map(([key]) => key);
+
+    this.consistencyChecks.push({
+      saveId,
+      age: restoredState.player?.age || 0,
+      passed: mismatchedFields.length === 0,
+      mismatchedFields,
+    });
+  }
+
+  private buildConsistencySnapshot(state: GameState): Record<string, string> {
+    return {
+      age: String(state.player?.age ?? 0),
+      alive: String(Boolean(state.player?.alive)),
+      martialPower: String(state.player?.martialPower ?? 0),
+      money: String(state.player?.money ?? 0),
+      health: String(state.player?.health ?? 0),
+      eventHistoryCount: String(state.eventHistory?.length ?? 0),
+      routeStateCount: String(Object.keys(state.routeStates || {}).length),
+      routeHistoryCount: String(state.routeHistory?.length ?? 0),
+      year: String(state.currentTime?.year ?? 0),
+      month: String(state.currentTime?.month ?? 0),
+      day: String(state.currentTime?.day ?? 0),
+    };
   }
 
   /**
@@ -767,6 +862,13 @@ export class GameProcessSimulator {
       totalEvents: this.records.length,
       totalChoices: choiceEvents,
       totalSaves: this.saveCount,
+      totalLoads: this.loadCount,
+      persistenceConsistency: {
+        totalChecks: this.consistencyChecks.length,
+        passedChecks: this.consistencyChecks.filter(check => check.passed).length,
+        failedChecks: this.consistencyChecks.filter(check => !check.passed).length,
+        results: this.consistencyChecks,
+      },
       records: this.records,
       statistics: {
         childhoodEvents,
@@ -1098,6 +1200,14 @@ export class GameProcessSimulator {
       <div class="summary-card">
         <h3>存档次数</h3>
         <div class="number">${report.totalSaves}</div>
+      </div>
+      <div class="summary-card">
+        <h3>读档次数</h3>
+        <div class="number">${report.totalLoads}</div>
+      </div>
+      <div class="summary-card">
+        <h3>一致性检查</h3>
+        <div class="number">${report.persistenceConsistency.passedChecks}/${report.persistenceConsistency.totalChecks}</div>
       </div>
     </div>
 

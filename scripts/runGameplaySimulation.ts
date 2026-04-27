@@ -13,6 +13,10 @@ type CliArgs = {
   startAge?: number;
   endAge?: number;
   choiceTendency?: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
+  autoSaveMode?: 'age' | 'event';
+  saveAgeInterval?: number;
+  saveEventInterval?: number;
+  disableSaveRestore: boolean;
   samples: boolean;
   quiet: boolean;
   gate: boolean;
@@ -51,7 +55,7 @@ type SampleSummary = {
 };
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { quiet: false, samples: false, gate: false, waivers: [] };
+  const args: CliArgs = { quiet: false, samples: false, gate: false, waivers: [], disableSaveRestore: false };
   for (const raw of argv) {
     if (raw.startsWith('--seed=')) {
       const seed = Number(raw.slice('--seed='.length));
@@ -85,10 +89,27 @@ function parseArgs(argv: string[]): CliArgs {
       if (tendency === 'balanced' || tendency === 'martial' || tendency === 'wealth' || tendency === 'relationship' || tendency === 'risk_averse') {
         args.choiceTendency = tendency;
       }
+    } else if (raw.startsWith('--auto-save-mode=')) {
+      const mode = raw.slice('--auto-save-mode='.length);
+      if (mode === 'age' || mode === 'event') {
+        args.autoSaveMode = mode;
+      }
+    } else if (raw.startsWith('--save-age-interval=')) {
+      const interval = Number(raw.slice('--save-age-interval='.length));
+      if (!Number.isNaN(interval)) {
+        args.saveAgeInterval = Math.floor(interval);
+      }
+    } else if (raw.startsWith('--save-event-interval=')) {
+      const interval = Number(raw.slice('--save-event-interval='.length));
+      if (!Number.isNaN(interval)) {
+        args.saveEventInterval = Math.floor(interval);
+      }
     } else if (raw === '--samples') {
       args.samples = true;
     } else if (raw === '--quiet') {
       args.quiet = true;
+    } else if (raw === '--no-save-restore') {
+      args.disableSaveRestore = true;
     } else if (raw === '--gate') {
       args.gate = true;
     } else if (raw.startsWith('--waive=')) {
@@ -137,6 +158,8 @@ function printSummary(report: GameProcessReport): void {
   console.log(`Total events: ${report.totalEvents}`);
   console.log(`Choice events: ${report.totalChoices} (${choiceRate}%)`);
   console.log(`Auto saves: ${report.totalSaves}`);
+  console.log(`Auto loads: ${report.totalLoads}`);
+  console.log(`Consistency checks: ${report.persistenceConsistency.passedChecks}/${report.persistenceConsistency.totalChecks}`);
   console.log(`Report JSON: public/reports/game-process-${report.id}.json`);
   console.log(`Report HTML: public/reports/game-process-${report.id}.html`);
 }
@@ -160,6 +183,8 @@ function writeMachineReadableOutput(report: GameProcessReport): string {
     totalEvents: report.totalEvents,
     totalChoices: report.totalChoices,
     totalSaves: report.totalSaves,
+    totalLoads: report.totalLoads,
+    persistenceConsistency: report.persistenceConsistency,
     statistics: report.statistics,
   };
 
@@ -244,6 +269,10 @@ async function runSampleSet(args: CliArgs): Promise<void> {
       runUntilDeath: true,
       seed: sample.seed,
       choiceTendency: sample.choiceTendency,
+      autoSaveMode: args.autoSaveMode || 'age',
+      saveAgeInterval: args.saveAgeInterval ?? 5,
+      saveEventInterval: args.saveEventInterval ?? 10,
+      enableSaveRestore: !args.disableSaveRestore,
       verbose: !args.quiet,
     });
 
@@ -300,6 +329,10 @@ async function main(): Promise<void> {
     ageRange,
     seed: args.seed,
     choiceTendency: args.choiceTendency || 'balanced',
+    autoSaveMode: args.autoSaveMode || 'age',
+    saveAgeInterval: args.saveAgeInterval ?? 5,
+    saveEventInterval: args.saveEventInterval ?? 10,
+    enableSaveRestore: !args.disableSaveRestore,
     verbose: !args.quiet,
   });
 

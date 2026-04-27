@@ -844,7 +844,11 @@ function createSimulationReportStub(overrides: Partial<import('./GameProcessSimu
       maxEvents: 300,
       enableAutoSave: true,
       enableManualSave: true,
-      saveInterval: 5,
+      autoSaveMode: 'age',
+      saveAgeInterval: 5,
+      saveEventInterval: 10,
+      enableSaveRestore: true,
+      maxRestoreCount: 1,
       verbose: false,
       choiceTendency: 'balanced',
     },
@@ -858,6 +862,20 @@ function createSimulationReportStub(overrides: Partial<import('./GameProcessSimu
     totalEvents: 10,
     totalChoices: 4,
     totalSaves: 1,
+    totalLoads: 1,
+    persistenceConsistency: {
+      totalChecks: 1,
+      passedChecks: 1,
+      failedChecks: 0,
+      results: [
+        {
+          saveId: 'stub-save',
+          age: 10,
+          passed: true,
+          mismatchedFields: [],
+        },
+      ],
+    },
     records: [
       {
         age: 10,

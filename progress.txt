@@ -13,6 +13,7 @@
 - Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
 - Main-flow save/load恢复应通过 `gameEngine.loadGameState(...)` 回填完整引擎状态，再由 `useNewGameEngine.getNextEvent()` 接回事件循环，避免读档后出现“状态恢复了但流程停住”。
 - 结局阶段不应暴露“保存”入口；若需支持结局后继续，优先提供“读取最近存档”并复用 `loadGameFromSave` 回到主流程，避免引入结束态存档语义歧义。
+- 模拟器的“存档后立即读档一致性”应采用固定关键字段快照（年龄/生存状态/核心属性/时间/历史计数）比对，并把检查结果写入报告结构，避免只看日志无法自动判断是否一致。
 
 ## [2026-04-27 08:24] - US-020
 - Implemented predictable restart/continue/post-ending save behavior in the UI flow by adding an explicit ending-screen "load latest save" action wired in `App`, while keeping restart as state reset only.
@@ -1177,4 +1178,20 @@
   - Persistence regression tests are most effective when they assert both data-shape restoration and flow resumability (`engineState.currentEvent !== null`) at every transition stage, not only immediately after first load.
   - For restart safety, always verify saved snapshot content via `saveManager.loadGame(saveId)` before reloading into runtime state, so storage integrity and hydration integrity are independently covered.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---
+
+## [2026-04-27 08:31] - US-022
+- Extended `GameProcessSimulator` save/restore loop for long-run persistence verification: added autosave policy switch (`autoSaveMode='age'|'event'`) with independent intervals (`saveAgeInterval`, `saveEventInterval`), and enabled in-loop restore (`enableSaveRestore`) that loads at least one generated save and continues simulation.
+- Added persistence consistency checks in simulator reports: save-time vs restore-time snapshots now verify key fields (`age`, `alive`, core stats, time, event/route history counts), and output structured results with mismatch fields.
+- Expanded report contract to include `totalLoads` and `persistenceConsistency` (`totalChecks`, `passedChecks`, `failedChecks`, `results[]`), and exposed these in CLI summary + machine-readable output.
+- Files changed:
+  - `tests/GameProcessSimulator.ts`
+  - `scripts/runGameplaySimulation.ts`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - 对于“读档后继续”的模拟验收，建议默认至少执行一次“保存→立即恢复→继续推进”的闭环，而不是只统计保存次数。
+  - 模拟报告中的持久化一致性应结构化输出（含失败字段列表），方便后续门禁或报表直接消费。
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay -- --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --quiet` ✅
 ---

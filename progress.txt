@@ -1099,3 +1099,17 @@
   - Single-life simulation can naturally concentrate ending distribution; using explicit waiver reasons preserves gate strictness while allowing intentional temporary exceptions.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:18] - US-017
+- Completed read-only save-state inventory in `docs/test-reports/us-017-save-state-shape-inventory.md`, covering saved fields, loaded/read fields, version fields, missing fields, and derived fields.
+- Inventory scope explicitly covers player, current event, event history, route, identity, relationship, ending, and time state.
+- Confirmed current save/load gap is main-flow hydration and version-compatibility boundary, not raw storage write/read mechanics.
+- Files changed:
+  - `docs/test-reports/us-017-save-state-shape-inventory.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Save-shape inventory should separate "payload is persisted" from "payload is actually restored into runtime state", because these are different risks.
+  - Treat composable/UI transient state (`currentEvent`, pending choices, feedback cache) and engine runtime counters as explicit persistence decisions; otherwise save/load expectations drift.
+- Validation evidence: `npm run typecheck` ✅
+---

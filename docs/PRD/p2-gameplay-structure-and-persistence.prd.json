@@ -232,7 +232,8 @@
         "No business code is changed"
       ],
       "priority": 17,
-      "passes": false
+      "passes": true,
+      "notes": "Completed read-only save/load shape inventory in `docs/test-reports/us-017-save-state-shape-inventory.md`. Inventoried saved fields, loaded/read fields, version fields, missing fields, and derived fields across player, current event, event history, route, identity, relationship, ending, and time state. Findings: storage captures broad `GameState` payload, but main-flow restoration/hydration path and version compatibility boundary are not yet implemented. No business code changed."
     },
     {
       "id": "US-018",

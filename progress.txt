@@ -964,3 +964,20 @@
   - Lock-in and turn transitions must always produce history records; without timeline evidence, conflict debugging and simulation analysis become unreliable.
 - Validation evidence: `npm run typecheck` ✅
 ---
+
+## [2026-04-27 08:02] - US-009
+- Implemented executable route compatibility matrix in `src/core/RouteCompatibilityRules.ts`, covering `merchant`, `hero`, `sect`, `demonic`, `official`, `hermit`, and `wanderer`.
+- Distinguished `strong_exclusion`, `soft_exclusion`, and `coexist` with deterministic conflict resolution actions (`block_candidate`, `require_turn_event`, `allow_coexist`) and highest-priority override behavior.
+- Added regression tests in `tests/AllTests.ts` to verify: strong conflict/coexist classification, lock-in vs non-lock-in soft-conflict behavior, and strong-over-soft precedence.
+- Added design evidence report `docs/test-reports/us-009-route-compatibility-rules.md` with the same testable rule table and resolution contract.
+- Files changed:
+  - `src/core/RouteCompatibilityRules.ts`
+  - `tests/AllTests.ts`
+  - `docs/test-reports/us-009-route-compatibility-rules.md`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Keep route-compatibility policy in one executable table so future route-state manager stories can consume the same source of truth without re-encoding rules.
+  - Conflict resolution should expose both `level` and `action`; separating classification from behavior keeps lock-in policy changes low-risk.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

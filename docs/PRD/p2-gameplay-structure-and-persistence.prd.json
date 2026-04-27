@@ -125,7 +125,8 @@
         "Rules are written as a testable table"
       ],
       "priority": 9,
-      "passes": false
+      "passes": true,
+      "notes": "Defined executable route compatibility table and conflict-resolution behavior in `src/core/RouteCompatibilityRules.ts`, covering merchant/hero/sect/demonic/official/hermit/wanderer with explicit strong exclusion, soft exclusion, and coexist rules. Added regression tests in `tests/AllTests.ts` for classification and resolution priority, plus design artifact `docs/test-reports/us-009-route-compatibility-rules.md`."
     },
     {
       "id": "US-010",

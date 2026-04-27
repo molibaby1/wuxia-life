@@ -19,6 +19,7 @@ import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegra
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { saveManager } from '../src/core/SaveManager';
+import { getRouteCompatibilityRule, resolveRouteConflict } from '../src/core/RouteCompatibilityRules';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 
@@ -1057,6 +1058,56 @@ const coreFunctionSuite: TestSuite = {
           metadata: { tags: ['mainline', 'critical'] },
         };
         assertEqual(engine.getFormalRepetitionSuppressionMultiplier(mandatoryEvent), 1, '主线关键事件应豁免抑制');
+      },
+    },
+    {
+      name: '路线兼容规则 - 强互斥与共存规则可判定',
+      description: '测试 hero/demonic 为强互斥，merchant/official 为可共存',
+      test: () => {
+        const strongConflict = getRouteCompatibilityRule('hero', 'demonic');
+        assertEqual(strongConflict.level, 'strong_exclusion', 'hero 与 demonic 应为强互斥');
+        assertEqual(strongConflict.resolution, 'block_candidate', '强互斥默认应阻断候选路线');
+
+        const coexist = getRouteCompatibilityRule('merchant', 'official');
+        assertEqual(coexist.level, 'coexist', 'merchant 与 official 应可共存');
+        assertEqual(coexist.resolution, 'allow_coexist', '共存关系应允许并行');
+      },
+    },
+    {
+      name: '路线兼容规则 - 软互斥在锁定前后解析不同',
+      description: '测试 soft conflict 在 lockedIn=false 时允许并存，lockedIn=true 时要求转向事件',
+      test: () => {
+        const unlockedResult = resolveRouteConflict({
+          currentMainRoute: 'hero',
+          candidateRoute: 'merchant',
+          lockedIn: false,
+        });
+        assertEqual(unlockedResult.level, 'soft_exclusion', 'hero 与 merchant 应识别为软互斥');
+        assertEqual(unlockedResult.action, 'allow_coexist', '未锁定主线时软互斥可先并存');
+
+        const lockedResult = resolveRouteConflict({
+          currentMainRoute: 'hero',
+          candidateRoute: 'merchant',
+          lockedIn: true,
+        });
+        assertEqual(lockedResult.level, 'soft_exclusion', '锁定后仍应识别为软互斥');
+        assertEqual(lockedResult.action, 'require_turn_event', '锁定后进入软互斥应要求转向事件');
+      },
+    },
+    {
+      name: '路线兼容规则 - 强互斥优先级高于软互斥',
+      description: '测试当候选同时命中软互斥和强互斥时，最终动作为 block_candidate',
+      test: () => {
+        const result = resolveRouteConflict({
+          currentMainRoute: 'merchant',
+          currentSecondaryRoutes: ['hero'],
+          candidateRoute: 'demonic',
+          lockedIn: true,
+        });
+
+        assertEqual(result.level, 'strong_exclusion', '应按最高冲突级别返回 strong_exclusion');
+        assertEqual(result.action, 'block_candidate', '强互斥优先级最高，应直接阻断候选');
+        assert(result.conflictWith.includes('hero'), '冲突详情应包含强互斥来源路线');
       },
     },
     {

@@ -11,6 +11,7 @@
 - For `STAT_MODIFY`, treat recognized player stat keys with `undefined` values as legacy-uninitialized state (default to `0`) and warn only for truly unknown stat keys.
 - Integration baseline states (e.g., `GameTestFramework.createTestState`) must include every commonly modified stat field (such as `charisma`, `constitution`, `comprehension`) to avoid `Unknown stat` warnings that mask real regressions.
 - Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
+- Main-flow save/load恢复应通过 `gameEngine.loadGameState(...)` 回填完整引擎状态，再由 `useNewGameEngine.getNextEvent()` 接回事件循环，避免读档后出现“状态恢复了但流程停住”。
 
 ## [2026-04-25 09:15] - US-001 (quality-gate-hardening-v4)
 - Extended `tests/runRealTestGate.ts` with log-aware blocker scan (exit code 0 is insufficient if blocker substrings appear in combined stdout/stderr).
@@ -1129,4 +1130,22 @@
 - **Learnings for future iterations:**
   - Save compatibility should be enforced as fail-close at read entrypoints, not only documented at type level, to prevent silent schema drift corruption.
   - Centralizing version range constants and evaluator logic in one module keeps runtime checks and test expectations aligned.
+---
+
+## [2026-04-27 08:22] - US-019
+- Connected main-flow save/load in live gameplay UI (`GameScreen`): added direct save/load controls so players can persist current run and load from main loop without leaving gameplay.
+- Added composable-level main-flow persistence APIs in `useNewGameEngine` (`saveCurrentGame`, `getAllSaves`, `loadGameFromSave`) and wired load flow to resume event progression immediately.
+- Added engine-level restore entry `gameEngine.loadGameState(...)` and expanded `applyGameState(...)` hydration coverage to include player, time, event history, route state/history, relationships, identity/lifePath/karma, ending, and save metadata.
+- Added regression coverage in `tests/AllTests.ts` (`runMainFlowSaveLoadCase`) to verify save -> mutate -> load roundtrip restores player/time/event history/route/relationship/ending state and can continue without key-state reset.
+- Files changed:
+  - `src/core/GameEngineIntegration.ts`
+  - `src/composables/useNewGameEngine.ts`
+  - `src/components/GameScreen.vue`
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Main-flow load should restore both persistent runtime state and transient UI state boundaries (`currentEvent`/`lastOutcomeText`/`availableChoices`) before resuming selection.
+  - State hydration functions must clear empty collections explicitly (for example `eventHistory`, `routeHistory`) rather than only overwriting when non-empty, otherwise stale state leaks across loads.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---

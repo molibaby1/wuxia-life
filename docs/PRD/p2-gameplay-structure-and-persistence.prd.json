@@ -260,7 +260,8 @@
         "npm run typecheck passes"
       ],
       "priority": 19,
-      "passes": false
+      "passes": true,
+      "notes": "Connected save/load to real main flow by wiring `GameScreen` controls to `useNewGameEngine` persistence APIs (`saveCurrentGame`, `loadGameFromSave`). Added engine restore entry `gameEngine.loadGameState(...)` and expanded state hydration in `applyGameState(...)` to restore player/time/event history/route state+history/relationships/ending and save metadata. Added regression case `runMainFlowSaveLoadCase` in `tests/AllTests.ts` to validate save->load roundtrip and post-load continuation without key-state reset. Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-020",

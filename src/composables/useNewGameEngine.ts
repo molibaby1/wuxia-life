@@ -10,6 +10,7 @@
 
 import { reactive, ref, computed } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
+import { saveManager } from '../core/SaveManager';
 import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
 import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
@@ -407,6 +408,33 @@ export function useNewGameEngine() {
     isProcessing.value = false;
   };
 
+  const saveCurrentGame = (saveName?: string) => {
+    const state = gameEngine.getGameState();
+    const fallbackName = `手动存档-${state.player?.name || '侠客'}-${state.player?.age || 0}岁`;
+    return saveManager.saveGame(state, saveName?.trim() || fallbackName);
+  };
+
+  const getAllSaves = () => {
+    return saveManager.getAllSaves();
+  };
+
+  const loadGameFromSave = (saveId: string) => {
+    const saveData = saveManager.loadGame(saveId);
+    if (!saveData) {
+      return false;
+    }
+    gameEngine.loadGameState(saveData.gameData);
+    engineState.currentEvent = null;
+    engineState.availableChoices = [];
+    engineState.isAutoPlaying = false;
+    engineState.lastEffects = [];
+    engineState.lastOutcomeText = null;
+    engineState.lastChoiceFeedback = null;
+    isProcessing.value = false;
+    getNextEvent();
+    return true;
+  };
+
   /**
    * 根据效果生成叙事性结果描述（不暴露数值）
    */
@@ -580,6 +608,9 @@ export function useNewGameEngine() {
     handleChoice,
     getNextEvent,
     getGameState,
+    saveCurrentGame,
+    loadGameFromSave,
+    getAllSaves,
     printEventStatistics,
     
     // 计算属性

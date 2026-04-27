@@ -6,6 +6,10 @@
         <span class="age">{{ player?.age }}岁 (时间：{{ getCurrentDate() }})</span>
         <span v-if="player?.sect" class="sect">{{ player.sect }}</span>
       </div>
+      <div class="save-controls">
+        <button class="save-btn" @click="saveGame">保存</button>
+        <button class="save-btn" @click="loadLatestSave">读档</button>
+      </div>
     </div>
     
     <!-- 属性面板 -->
@@ -155,7 +159,7 @@ const emit = defineEmits<{
 }>();
 
 // 使用 useNewGameEngine 获取 lastOutcomeText
-const { engineState, getNextEvent } = useNewGameEngine();
+const { engineState, getNextEvent, saveCurrentGame, loadGameFromSave, getAllSaves } = useNewGameEngine();
 
 const lastOutcomeText = computed(() => {
   return engineState.lastOutcomeText;
@@ -324,6 +328,41 @@ const getStatName = (stat: string): string => {
 const makeChoice = (choice: StoryChoice) => {
   emit('choice', choice);
 };
+
+const saveGame = () => {
+  const defaultName = `手动存档-${player.value?.name || '侠客'}-${player.value?.age || 0}岁`;
+  const inputName = window.prompt('请输入存档名称', defaultName);
+  if (inputName === null) {
+    return;
+  }
+  saveCurrentGame(inputName);
+  window.alert('存档完成');
+};
+
+const loadLatestSave = () => {
+  const saves = getAllSaves();
+  if (saves.length === 0) {
+    window.alert('暂无可加载存档');
+    return;
+  }
+  const preview = saves
+    .slice(0, 5)
+    .map((save, index) => `${index + 1}. ${save.name}（${new Date(save.timestamp).toLocaleString('zh-CN')}）`)
+    .join('\n');
+  const selected = window.prompt(`请输入要读取的存档序号（默认 1）:\n${preview}`, '1');
+  if (selected === null) {
+    return;
+  }
+  const parsed = Number.parseInt(selected, 10);
+  const saveIndex = Number.isNaN(parsed) || parsed < 1 ? 0 : parsed - 1;
+  const targetSave = saves[saveIndex] || saves[0];
+  if (!targetSave) {
+    window.alert('未找到对应存档');
+    return;
+  }
+  const loaded = loadGameFromSave(targetSave.id);
+  window.alert(loaded ? `已加载：${targetSave.name}` : '读取失败，存档可能不兼容');
+};
 </script>
 
 <style scoped>
@@ -337,6 +376,10 @@ const makeChoice = (choice: StoryChoice) => {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   padding: 16px 20px;
   color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .player-info {
@@ -344,6 +387,25 @@ const makeChoice = (choice: StoryChoice) => {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.save-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .name {

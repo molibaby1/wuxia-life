@@ -261,10 +261,66 @@ export class GameEngineIntegration {
 
     this.gameState.flags = { ...(nextState.flags || {}) };
     this.gameState.events = [...(nextState.events || [])];
-    if (nextState.eventHistory && nextState.eventHistory.length > 0) {
-      this.gameState.eventHistory = [...(nextState.eventHistory || [])];
-    }
+    this.gameState.eventHistory = [...(nextState.eventHistory || [])];
+    this.gameState.triggeredEvents = [...(nextState.triggeredEvents || [])];
     this.gameState.relations = { ...(nextState.relations || {}) };
+    this.gameState.inventory = [...(nextState.inventory || [])];
+    this.gameState.statistics = nextState.statistics ? { ...nextState.statistics } : undefined;
+    this.gameState.identity = nextState.identity
+      ? {
+          ...nextState.identity,
+          identities: [...(nextState.identity.identities || [])],
+          achievements: [...(nextState.identity.achievements || [])],
+        }
+      : undefined;
+    this.gameState.lifePath = nextState.lifePath
+      ? {
+          ...nextState.lifePath,
+          achievements: [...(nextState.lifePath.achievements || [])],
+          relationships: {
+            allies: [...(nextState.lifePath.relationships?.allies || [])],
+            enemies: [...(nextState.lifePath.relationships?.enemies || [])],
+            mentors: [...(nextState.lifePath.relationships?.mentors || [])],
+            disciples: [...(nextState.lifePath.relationships?.disciples || [])],
+          },
+          commitments: {
+            cannotJoin: [...(nextState.lifePath.commitments?.cannotJoin || [])],
+            mustProtect: [...(nextState.lifePath.commitments?.mustProtect || [])],
+            swornEnemies: [...(nextState.lifePath.commitments?.swornEnemies || [])],
+          },
+          focus: {
+            ...(nextState.lifePath.focus || {
+              martial: 0,
+              business: 0,
+              academic: 0,
+              leadership: 0,
+            }),
+          },
+        }
+      : undefined;
+    this.gameState.karma = nextState.karma
+      ? {
+          ...nextState.karma,
+          history: [...(nextState.karma.history || [])],
+        }
+      : undefined;
+    this.gameState.criticalChoices = nextState.criticalChoices
+      ? { ...nextState.criticalChoices }
+      : undefined;
+    this.gameState.achievements = [...(nextState.achievements || [])];
+    this.gameState.routeStates = nextState.routeStates
+      ? Object.fromEntries(
+          Object.entries(nextState.routeStates).map(([routeId, routeState]) => [
+            routeId,
+            { ...routeState },
+          ]),
+        )
+      : {};
+    this.gameState.routeHistory = [...(nextState.routeHistory || [])];
+    this.gameState.ending = nextState.ending;
+    this.gameState.saveVersion = nextState.saveVersion;
+    this.gameState.lastSavedAt = nextState.lastSavedAt;
+    this.gameState.gameTimestamp = nextState.gameTimestamp;
     
     // 记录更新后的属性值，确认数据确实在变化
     const newMartialPower = this.gameState.player?.martialPower;
@@ -273,6 +329,24 @@ export class GameEngineIntegration {
     if (oldMartialPower !== newMartialPower || oldMoney !== newMoney) {
       console.log(`[GameEngine] 属性更新：功力 ${oldMartialPower}→${newMartialPower}, 银两 ${oldMoney}→${newMoney}`);
     }
+  }
+
+  public loadGameState(savedState: GameState): void {
+    this.applyGameState(savedState);
+    const currentAge = this.gameState.player?.age || 0;
+    const currentYearEvents = (this.gameState.eventHistory || []).filter(
+      record => (record.age ?? currentAge) === currentAge,
+    );
+    this.eventsThisYear = currentYearEvents.length;
+    this.lastYear = currentAge;
+    this.annualEventPressure = currentYearEvents.reduce((sum, record) => {
+      const event = this.getEventDefinition(record.eventId);
+      if (!event) {
+        return sum;
+      }
+      return sum + this.getEventIntensity(event);
+    }, 0);
+    difficultyMonitor.reset();
   }
   
   /**

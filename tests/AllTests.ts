@@ -495,6 +495,120 @@ async function runStateConsistencyRegressionCase() {
   }
 }
 
+async function runMainFlowSaveLoadCase() {
+  const engine = useNewGameEngine();
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalSelectEvent = gameEngine.selectEvent;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    saveManager.clearAllSaves();
+    (gameEngine as any).selectEvent = () => ({
+      id: 'us_019_bootstrap_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'us_019_choice',
+          text: '记录状态',
+          effects: [{ type: EffectType.FLAG_SET, target: 'us_019_event_done' }],
+        },
+      ],
+    });
+
+    engine.startNewGame('SaveLoadHero', 'female');
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const runtimeState = engine.getGameState();
+    runtimeState.currentTime = { year: 33, month: 4, day: 11 };
+    runtimeState.flags = {
+      ...runtimeState.flags,
+      sect_faction: 'orthodox',
+      route_hero: true,
+      us_019_marker: true,
+    };
+    runtimeState.player.flags = {
+      ...runtimeState.player.flags,
+      sect_faction: 'orthodox',
+      route_hero: true,
+    };
+    runtimeState.player.relationships = [
+      { id: 'ally_001', role: 'friend', name: '阿青', affinity: 72 },
+    ];
+    runtimeState.routeStates = {
+      hero: {
+        routeId: 'hero',
+        lifecycle: 'locked_in',
+        category: 'main',
+        lockedIn: true,
+        lastChangedAtAge: runtimeState.player.age,
+      },
+    };
+    runtimeState.routeHistory = [
+      {
+        routeId: 'hero',
+        from: 'active',
+        to: 'locked_in',
+        category: 'main',
+        lockedIn: true,
+        age: runtimeState.player.age,
+        eventId: 'us_019_lock',
+        timestamp: Date.now(),
+      },
+    ];
+    runtimeState.eventHistory = [
+      {
+        eventId: 'us_019_history_event',
+        age: runtimeState.player.age,
+        triggeredAt: runtimeState.currentTime.year,
+      },
+    ];
+    runtimeState.ending = {
+      id: 'us_019_future_ending',
+      name: '未竟之路',
+    } as any;
+
+    const saveId = engine.saveCurrentGame('US-019-main-flow');
+    assert(saveId.length > 0, '主流程存档应返回有效 saveId');
+
+    runtimeState.player.name = 'MutatedAfterSave';
+    runtimeState.currentTime.year = 99;
+    runtimeState.flags.us_019_marker = false;
+    runtimeState.player.relationships = [];
+    runtimeState.routeStates = {};
+    runtimeState.routeHistory = [];
+    runtimeState.eventHistory = [];
+    runtimeState.ending = null;
+
+    const loaded = engine.loadGameFromSave(saveId);
+    assert(loaded, '主流程应可加载刚保存的存档');
+
+    const restored = engine.getGameState();
+    assertEqual(restored.player.name, 'SaveLoadHero', '读档后玩家信息应恢复');
+    assertEqual(restored.currentTime?.year, 33, '读档后时间应恢复');
+    assert((restored.eventHistory || []).length > 0, '读档后事件历史应恢复');
+    assertEqual(restored.routeStates?.hero?.lifecycle, 'locked_in', '读档后路线状态应恢复');
+    assertEqual(restored.player.relationships?.[0]?.name, '阿青', '读档后关系状态应恢复');
+    assertEqual((restored.ending as any)?.id, 'us_019_future_ending', '读档后结局相关状态应恢复');
+
+    const nextEvent = engine.engineState.currentEvent;
+    assert(nextEvent !== null, '读档后应可继续主流程并获得下一事件');
+    assertEqual(restored.flags.us_019_marker, true, '继续流程前关键 flag 不应被重置');
+  } finally {
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    saveManager.clearAllSaves();
+    (engine.engineState as any).currentEvent = null;
+    (engine.engineState as any).availableChoices = [];
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
+  }
+}
+
 function createSimulationReportStub(overrides: Partial<import('./GameProcessSimulator').GameProcessReport> = {}): import('./GameProcessSimulator').GameProcessReport {
   const state = framework.createTestState();
   return {
@@ -1703,6 +1817,13 @@ const coreFunctionSuite: TestSuite = {
       description: '测试主状态源与 UI 状态在关键流程保持一致，失败应直接暴露同步问题',
       test: async () => {
         await runStateConsistencyRegressionCase();
+      },
+    },
+    {
+      name: '主流程存读档回归 - 保存加载后可连续推进',
+      description: '测试主流程可保存当前状态并在加载后恢复关键状态且继续推进',
+      test: async () => {
+        await runMainFlowSaveLoadCase();
       },
     },
   ],

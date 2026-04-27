@@ -1016,3 +1016,17 @@
   - 软冲突转向必须具备显式事件标记（`routeTransition`/`route_turn`），避免隐式 flag 写入绕过锁定路线约束。
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:07] - US-012
+- 在 `tests/AllTests.ts` 新增“路线进展回归 - 启动推进锁定冲突阻断完成与断裂”用例，集中覆盖 `hero`（主路线）与 `merchant`（次路线）两类路线的 start/progress/lock-in/conflict block/completion/failure(breakage) 全链路行为。
+- 用 `RouteStateManager` 串联 `temporary -> active -> lock -> completed/failed` 状态迁移，并断言 `routeHistory` 中关键迁移记录（`inactive->temporary`、`temporary->active`、`active->completed/failed`）完整存在。
+- 增加锁定路线下强冲突阻断断言：将 `hero` 设为 `locked_in` 后，`route_demonic` 候选事件在 `GameEngineIntegration.selectEvent` 中被过滤并回退到 daily 事件，验证 conflict block 生效。
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - 路线结构回归测试可通过“状态机迁移断言 + 选择门禁断言”组合，覆盖生命周期正确性与运行时冲突约束两条主风险链路。
+  - 至少两条路线类型应同时覆盖（主线/次线或不同身份路线），以避免单路线 happy path 掩盖 breakage 分支回归。
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

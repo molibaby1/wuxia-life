@@ -1314,6 +1314,113 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '路线进展回归 - 启动推进锁定冲突阻断完成与断裂',
+      description: '测试 hero 与 merchant 两条路线覆盖 start/progress/lock-in/conflict/completion/failure 链路',
+      test: () => {
+        let state = framework.createTestState();
+        state.player.age = 26;
+
+        // hero 主线：start -> progress -> lock-in -> completion
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'hero',
+          lifecycle: 'temporary',
+          category: 'main',
+          eventId: 'hero_route_start',
+        });
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'hero',
+          lifecycle: 'active',
+          category: 'main',
+          eventId: 'hero_route_progress',
+        });
+        state = RouteStateManager.lockRoute(state, 'hero', 'hero_route_lock');
+        state = RouteStateManager.completeRoute(state, 'hero', 'hero_route_complete');
+
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'completed', 'hero 路线应完成');
+        assertEqual(RouteStateManager.readRouteState(state, 'hero').lockedIn, true, 'hero 完成后应保持锁定');
+
+        // merchant 次路线：start -> progress -> failure(=breakage)
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'merchant',
+          lifecycle: 'temporary',
+          category: 'secondary',
+          eventId: 'merchant_route_start',
+        });
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'merchant',
+          lifecycle: 'active',
+          category: 'secondary',
+          eventId: 'merchant_route_progress',
+        });
+        state = RouteStateManager.failRoute(state, 'merchant', 'merchant_route_breakage', 'route_breakage');
+
+        assertEqual(RouteStateManager.readRouteState(state, 'merchant').lifecycle, 'failed', 'merchant 路线应进入失败/断裂');
+        assertEqual(
+          RouteStateManager.readRouteState(state, 'merchant').reason,
+          'route_breakage',
+          'merchant 失败应记录断裂原因',
+        );
+
+        const engine = new GameEngineIntegration() as any;
+        const engineState = engine.getGameState();
+        engineState.player.age = 26;
+        engineState.routeStates = {
+          hero: {
+            routeId: 'hero',
+            lifecycle: 'locked_in',
+            category: 'main',
+            lockedIn: true,
+          },
+        };
+
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+        const strongConflictEvent = {
+          id: 'hero_locked_conflict_demonic',
+          version: '1.0.0',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          weight: 100,
+          ageRange: { min: 20, max: 40 },
+          triggers: [],
+          content: { title: '冲突事件', text: '试图转入魔道路线' },
+          eventType: 'auto',
+          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_demonic' }],
+          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+        } as any;
+        const fallbackDailyEvent = {
+          id: 'daily_after_route_conflict_block',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '日常补位', text: '冲突被阻断后触发日常' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          engine.getAvailableEvents = () => [strongConflictEvent];
+          engine.shouldPauseEventsThisYear = () => false;
+          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
+          const selected = engine.selectEvent(26);
+          assertEqual(selected?.id, 'daily_after_route_conflict_block', '锁定 hero 后强冲突路线应被阻断');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
+
+        const routeTransitionIds = (state.routeHistory || [])
+          .filter(item => item.routeId === 'hero' || item.routeId === 'merchant')
+          .map(item => `${item.routeId}:${item.from}->${item.to}`);
+        assert(routeTransitionIds.includes('hero:inactive->temporary'), '应记录 hero start 历史');
+        assert(routeTransitionIds.includes('hero:temporary->active'), '应记录 hero progress 历史');
+        assert(routeTransitionIds.includes('hero:active->completed'), '应记录 hero completion 历史');
+        assert(routeTransitionIds.includes('merchant:inactive->temporary'), '应记录 merchant start 历史');
+        assert(routeTransitionIds.includes('merchant:temporary->active'), '应记录 merchant progress 历史');
+        assert(routeTransitionIds.includes('merchant:active->failed'), '应记录 merchant failure/breakage 历史');
+      },
+    },
+    {
       name: '分层节奏 - daily 仅在 formal 不足或节奏暂停时介入',
       description: '测试 critical/storyline 优先，regular formal 可被节奏控制降级到 daily',
       test: () => {

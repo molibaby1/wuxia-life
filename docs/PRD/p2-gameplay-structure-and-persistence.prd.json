@@ -193,7 +193,8 @@
         "Simulation runs without browser UI"
       ],
       "priority": 14,
-      "passes": false
+      "passes": true,
+      "notes": "Implemented fixed-seed gameplay simulation in `tests/GameProcessSimulator.ts` and CLI entry `scripts/runGameplaySimulation.ts`. Added deterministic seeded random scope across character initialization and event loop, complete-life and age-range modes (`runUntilDeath` / `ageRange`), machine-readable summary JSON output, and human-readable terminal summary. Added `npm run simulate:gameplay` command and forwarded seed/age-range args in `scripts/life-simulator/simulator.ts`."
     },
     {
       "id": "US-015",

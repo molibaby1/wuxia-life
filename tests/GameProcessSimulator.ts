@@ -27,6 +27,12 @@ export interface GameProcessConfig {
   playerName: string;
   gender: 'male' | 'female';
   simulateYears: number;  // 模拟多少年
+  runUntilDeath: boolean; // 是否运行到死亡/结局（完整人生）
+  ageRange?: {
+    startAge: number;
+    endAge: number;
+  };
+  seed?: number; // 固定随机种子
   maxEvents: number; // 最大事件数，避免月/日推进导致无限循环
   enableAutoSave: boolean;  // 启用自动保存
   enableManualSave: boolean;  // 启用手动保存
@@ -52,6 +58,12 @@ export interface GameProcessReport {
   id: string;
   timestamp: string;
   config: GameProcessConfig;
+  randomSeed: number | null;
+  runMode: 'complete_life' | 'age_range';
+  ageRange: {
+    startAge: number;
+    endAge: number;
+  } | null;
   totalYears: number;
   finalAge: number;
   isAlive: boolean;
@@ -100,6 +112,7 @@ export class GameProcessSimulator {
       playerName: '测试玩家',
       gender: 'male',
       simulateYears: 80,
+      runUntilDeath: true,
       maxEvents: 300,
       enableAutoSave: true,
       enableManualSave: true,
@@ -115,38 +128,41 @@ export class GameProcessSimulator {
   async simulate(): Promise<GameProcessReport> {
     this.log('🎮 开始游戏过程模拟测试...\n');
     this.ended = false;
+    this.records = [];
+    this.saveCount = 0;
     
     // 0. 重置游戏引擎（确保状态干净）
     this.log('📝 步骤 0: 重置游戏引擎');
     gameEngine.reset();
     
-    // 1. 创建角色
-    this.log('📝 步骤 1: 创建角色');
-    gameEngine.startNewGame(this.config.playerName, this.config.gender);
-    this.gameState = gameEngine.getGameState();
-    this.log(`   ✅ 玩家：${this.gameState.player?.name}`);
-    this.log(`   ✅ 年龄：${this.gameState.player?.age}岁`);
-    this.log(`   ✅ 性别：${this.gameState.player?.gender}\n`);
-
-    // 2. 模拟人生历程
-    this.log('📝 步骤 2: 模拟人生历程');
-    const startAge = this.gameState.player?.age || 0;
-    const endAge = Math.min(startAge + this.config.simulateYears, 120);
-    let steps = 0;
-    
-    while (this.gameState?.player?.alive && !this.ended && this.gameState.player.age < endAge && steps < this.config.maxEvents) {
-      // 在每次循环开始时，从游戏引擎获取最新状态
+    await this.withSeededRandom(this.config.seed, async () => {
+      // 1. 创建角色
+      this.log('📝 步骤 1: 创建角色');
+      gameEngine.startNewGame(this.config.playerName, this.config.gender);
       this.gameState = gameEngine.getGameState();
-      
-      await this.simulateYear();
-      steps += 1;
-      
-      // 定期保存
-      const currentAge = this.gameState.player?.age || 0;
-      if (this.config.enableAutoSave && currentAge % this.config.saveInterval === 0) {
-        this.autoSave();
+      this.log(`   ✅ 玩家：${this.gameState.player?.name}`);
+      this.log(`   ✅ 年龄：${this.gameState.player?.age}岁`);
+      this.log(`   ✅ 性别：${this.gameState.player?.gender}\n`);
+
+      // 2. 模拟人生历程
+      this.log('📝 步骤 2: 模拟人生历程');
+      const ageGate = this.resolveRunAgeGate(this.gameState.player?.age || 0);
+      let steps = 0;
+
+      while (this.gameState?.player?.alive && !this.ended && this.gameState.player.age < ageGate.endAge && steps < this.config.maxEvents) {
+        // 在每次循环开始时，从游戏引擎获取最新状态
+        this.gameState = gameEngine.getGameState();
+        
+        await this.simulateYear();
+        steps += 1;
+        
+        // 定期保存
+        const currentAge = this.gameState.player?.age || 0;
+        if (this.config.enableAutoSave && currentAge % this.config.saveInterval === 0) {
+          this.autoSave();
+        }
       }
-    }
+    });
 
     // 3. 最终统计
     this.log('\n📝 步骤 3: 生成测试报告');
@@ -195,7 +211,7 @@ export class GameProcessSimulator {
         currentTime: currentState.currentTime,
         timestamp: new Date().toISOString()
       };
-      this.records.push(record);
+      this.pushRecord(record);
       
       // 推进时间
       gameEngine.advanceTime(1);
@@ -286,7 +302,7 @@ export class GameProcessSimulator {
             this.ended = true;
           }
           record.gameState = JSON.parse(JSON.stringify(stateAfterChoice));
-          this.records.push(record);
+          this.pushRecord(record);
           this.log(`\n   💀 死亡原因：${stateAfterChoice.player?.deathReason || '未知'}`);
           return; // 直接返回，不继续处理
         }
@@ -308,7 +324,7 @@ export class GameProcessSimulator {
             currentTime: result.gameState.currentTime,
             timestamp: new Date().toISOString()
           };
-          this.records.push(immediateRecord);
+          this.pushRecord(immediateRecord);
         }
         
         // 效果中已包含时间推进，不再调用 advanceTime
@@ -320,7 +336,7 @@ export class GameProcessSimulator {
       // 更新状态并记录
       this.gameState = gameEngine.getGameState();
       record.gameState = JSON.parse(JSON.stringify(this.gameState));
-      this.records.push(record);
+      this.pushRecord(record);
     } else {
       // 自动事件：执行自动效果
       this.log(`   ✅ 自动触发`);
@@ -349,7 +365,7 @@ export class GameProcessSimulator {
             currentTime: stateAfterAuto.currentTime,
             timestamp: new Date().toISOString()
           };
-          this.records.push(record);
+          this.pushRecord(record);
           this.log(`\n   💀 死亡原因：${stateAfterAuto.player?.deathReason || '未知'}`);
           return; // 直接返回，不继续处理
         }
@@ -381,7 +397,7 @@ export class GameProcessSimulator {
         currentTime: this.gameState.currentTime,
         timestamp: new Date().toISOString()
       };
-      this.records.push(record);
+      this.pushRecord(record);
     }
 
     if (eventType === 'ending' || this.hasGameEnded(this.gameState)) {
@@ -631,6 +647,7 @@ export class GameProcessSimulator {
     const forcedLateLifeEnding = finalState ? EndingSystem.getForcedLateLifeEnding(finalState) : null;
     const gameEnded = this.hasGameEnded(finalState) || Boolean(forcedLateLifeEnding);
     const endingName = this.getEndingDisplayName(finalState, gameEnded, forcedLateLifeEnding?.name);
+    const requestedAgeRange = this.getRequestedAgeRange();
     
     // 统计各年龄段事件
     const childhoodEvents = this.records.filter(r => r.age >= 0 && r.age <= 12).length;
@@ -687,6 +704,9 @@ export class GameProcessSimulator {
       id: this.generateId(),
       timestamp: new Date().toISOString(),
       config: this.config,
+      randomSeed: typeof this.config.seed === 'number' ? this.config.seed : null,
+      runMode: requestedAgeRange ? 'age_range' : 'complete_life',
+      ageRange: requestedAgeRange,
       totalYears: this.records.length,
       finalAge: finalState?.player?.age || 0,
       isAlive: gameEnded ? false : (finalState?.player?.alive || false),
@@ -1179,6 +1199,72 @@ export class GameProcessSimulator {
   private log(message: string): void {
     if (this.config.verbose) {
       console.log(message);
+    }
+  }
+
+  private pushRecord(record: GameProcessRecord): void {
+    if (this.shouldIncludeAge(record.age)) {
+      this.records.push(record);
+    }
+  }
+
+  private shouldIncludeAge(age: number): boolean {
+    const range = this.getRequestedAgeRange();
+    if (!range) {
+      return true;
+    }
+
+    return age >= range.startAge && age <= range.endAge;
+  }
+
+  private getRequestedAgeRange(): { startAge: number; endAge: number } | null {
+    const range = this.config.ageRange;
+    if (!range) {
+      return null;
+    }
+
+    const startAge = Math.max(0, Math.floor(range.startAge));
+    const endAge = Math.min(120, Math.floor(range.endAge));
+    if (startAge > endAge) {
+      return null;
+    }
+
+    return { startAge, endAge };
+  }
+
+  private resolveRunAgeGate(initialAge: number): { startAge: number; endAge: number } {
+    const requestedRange = this.getRequestedAgeRange();
+    if (requestedRange) {
+      return requestedRange;
+    }
+
+    const startAge = Math.max(0, Math.floor(initialAge));
+    const configuredEndAge = Math.floor(startAge + this.config.simulateYears);
+    return {
+      startAge,
+      endAge: this.config.runUntilDeath ? 120 : Math.min(configuredEndAge, 120),
+    };
+  }
+
+  private async withSeededRandom(seed: number | undefined, run: () => void | Promise<void>): Promise<void> {
+    if (typeof seed !== 'number' || Number.isNaN(seed)) {
+      await run();
+      return;
+    }
+
+    const originalRandom = Math.random;
+    let state = seed >>> 0;
+    Math.random = () => {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    try {
+      await run();
+    } finally {
+      Math.random = originalRandom;
     }
   }
 }

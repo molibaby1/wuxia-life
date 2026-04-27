@@ -14,6 +14,9 @@ type Args = {
   quiet?: boolean;
   name?: string;
   gender?: 'male' | 'female';
+  seed?: number;
+  startAge?: number;
+  endAge?: number;
 };
 
 function parseArgs(argv: string[]): Args {
@@ -29,6 +32,15 @@ function parseArgs(argv: string[]): Args {
     } else if (raw.startsWith('--gender=')) {
       const value = raw.split('=')[1];
       if (value === 'male' || value === 'female') args.gender = value;
+    } else if (raw.startsWith('--seed=')) {
+      const value = Number(raw.split('=')[1]);
+      if (!Number.isNaN(value)) args.seed = Math.floor(value);
+    } else if (raw.startsWith('--start-age=')) {
+      const value = Number(raw.split('=')[1]);
+      if (!Number.isNaN(value)) args.startAge = Math.floor(value);
+    } else if (raw.startsWith('--end-age=')) {
+      const value = Number(raw.split('=')[1]);
+      if (!Number.isNaN(value)) args.endAge = Math.floor(value);
     }
   }
   return args;
@@ -36,10 +48,19 @@ function parseArgs(argv: string[]): Args {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  const hasAgeRange = typeof args.startAge === 'number' || typeof args.endAge === 'number';
   const simulator = new GameProcessSimulator({
     playerName: args.name || '测试玩家',
     gender: args.gender || 'male',
     simulateYears: args.years ?? 80,
+    runUntilDeath: !hasAgeRange,
+    ageRange: hasAgeRange
+      ? {
+          startAge: Math.max(0, args.startAge ?? 0),
+          endAge: Math.min(120, args.endAge ?? 120),
+        }
+      : undefined,
+    seed: args.seed,
     verbose: !args.quiet,
   });
   

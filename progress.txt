@@ -1045,3 +1045,21 @@
   - Keep `observation_baseline` and `target_range` explicit in schema so follow-up gate stories can distinguish monitor-only signals from hard constraints.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:11] - US-014
+- Implemented fixed-seed gameplay simulation support in `tests/GameProcessSimulator.ts` by introducing `seed`-based deterministic RNG wrapping over both character initialization and yearly simulation loop.
+- Added complete-life and specified age-range run support through new config fields (`runUntilDeath` and `ageRange`) and age-filtered record output for range-focused regression slices.
+- Added headless CLI entry `scripts/runGameplaySimulation.ts` and npm command `simulate:gameplay`, which generate machine-readable JSON summary artifacts and print human-readable terminal summaries.
+- Extended `scripts/life-simulator/simulator.ts` to forward `--seed`, `--start-age`, and `--end-age` parameters so legacy entrypoints can run deterministic/ranged simulations too.
+- Files changed:
+  - `tests/GameProcessSimulator.ts`
+  - `scripts/runGameplaySimulation.ts`
+  - `scripts/life-simulator/simulator.ts`
+  - `package.json`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Fixed-seed repeatability must include pre-loop randomness (for example `startNewGame`) in addition to event-loop randomness, otherwise same seed can still drift.
+  - Simulation command output should separate machine-consumable summaries from human-readable CLI text to support both automation and quick manual triage.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅, `npm run simulate:gameplay -- --seed=42 --start-age=10 --end-age=20 --quiet` ✅, deterministic re-run check ✅
+---

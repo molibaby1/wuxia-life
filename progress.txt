@@ -1165,3 +1165,16 @@
   - State hydration functions must clear empty collections explicitly (for example `eventHistory`, `routeHistory`) rather than only overwriting when non-empty, otherwise stale state leaks across loads.
 - Validation evidence: `npm run typecheck` ✅, `npm test` ✅
 ---
+
+## [2026-04-27 08:25] - US-021
+- Added `runSaveRegressionCoverageCase` in `tests/AllTests.ts` and wired it into the core suite to cover one complete persistence loop: save -> load -> continue -> restart -> post-ending load.
+- Expanded assertions to verify required field restoration across each critical stage: route (`flags.route_hero` + `routeStates.hero.lifecycle`), identity (`identity.primary`), relationship (`player.relationships[0]`), event history (`eventHistory[0]`), and time (`currentTime.year`), while also checking restart does not corrupt existing saves.
+- Files changed:
+  - `tests/AllTests.ts`
+  - `docs/PRD/p2-gameplay-structure-and-persistence.prd.json`
+  - `progress.txt`
+- **Learnings for future iterations:**
+  - Persistence regression tests are most effective when they assert both data-shape restoration and flow resumability (`engineState.currentEvent !== null`) at every transition stage, not only immediately after first load.
+  - For restart safety, always verify saved snapshot content via `saveManager.loadGame(saveId)` before reloading into runtime state, so storage integrity and hydration integrity are independently covered.
+- Validation evidence: `npm run typecheck` ✅, `npm test` ✅
+---

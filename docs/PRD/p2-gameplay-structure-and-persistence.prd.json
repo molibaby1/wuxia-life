@@ -287,7 +287,8 @@
         "npm test passes"
       ],
       "priority": 21,
-      "passes": false
+      "passes": true,
+      "notes": "Added `runSaveRegressionCoverageCase` in `tests/AllTests.ts` to cover save -> load -> continue -> restart -> post-ending load in one regression path, with explicit restoration assertions for route (`flags.route_hero` + `routeStates`), identity (`identity.primary`), relationship (`player.relationships`), event history (`eventHistory`), and time (`currentTime`). Validation passed: `npm run typecheck`, `npm test`."
     },
     {
       "id": "US-022",

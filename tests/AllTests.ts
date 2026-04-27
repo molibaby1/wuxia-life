@@ -680,6 +680,157 @@ async function runRestartContinueEndingSaveBehaviorCase() {
   }
 }
 
+async function runSaveRegressionCoverageCase() {
+  const engine = useNewGameEngine();
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalSelectEvent = gameEngine.selectEvent;
+
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  }) as typeof requestAnimationFrame;
+
+  try {
+    saveManager.clearAllSaves();
+    (gameEngine as any).selectEvent = () => ({
+      id: 'us_021_resume_event',
+      eventType: 'choice',
+      choices: [
+        {
+          id: 'us_021_choice',
+          text: '继续江湖',
+          effects: [{ type: EffectType.FLAG_SET, target: 'us_021_resumed' }],
+        },
+      ],
+    });
+
+    engine.startNewGame('SaveRegressionHero', 'female');
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const state = engine.getGameState();
+    state.currentTime = { year: 27, month: 9, day: 12 };
+    state.flags = {
+      ...state.flags,
+      route_hero: true,
+      sect_faction: 'orthodox',
+      us_021_checkpoint: true,
+    };
+    state.player.flags = {
+      ...state.player.flags,
+      route_hero: true,
+      sect_faction: 'orthodox',
+    };
+    state.player.relationships = [
+      { id: 'ally_021', role: 'friend', name: '赵灵', affinity: 81 },
+    ];
+    state.routeStates = {
+      hero: {
+        routeId: 'hero',
+        lifecycle: 'locked_in',
+        category: 'main',
+        lockedIn: true,
+        lastChangedAtAge: state.player.age,
+      },
+    };
+    state.routeHistory = [
+      {
+        routeId: 'hero',
+        from: 'active',
+        to: 'locked_in',
+        category: 'main',
+        lockedIn: true,
+        age: state.player.age,
+        eventId: 'us_021_lock_route',
+        timestamp: Date.now(),
+      },
+    ];
+    state.eventHistory = [
+      {
+        eventId: 'us_021_history_event',
+        age: state.player.age,
+        triggeredAt: state.currentTime.year,
+      },
+    ];
+    state.identity = {
+      current: ['hero'],
+      unlocked: ['commoner', 'hero'],
+      primary: 'hero',
+      title: '江湖义士',
+      reputations: {},
+    } as any;
+    state.lifePath = {
+      primaryIdentity: 'hero',
+      faction: 'orthodox',
+    } as any;
+
+    const saveId = engine.saveCurrentGame('US-021-regression');
+    assert(saveId.length > 0, 'US-021: 保存阶段应生成有效 saveId');
+
+    state.currentTime.year = 99;
+    state.flags.route_hero = false;
+    state.flags.us_021_checkpoint = false;
+    state.player.flags.route_hero = false;
+    state.player.relationships = [];
+    state.routeStates = {};
+    state.routeHistory = [];
+    state.eventHistory = [];
+    state.identity = undefined;
+    state.lifePath = undefined;
+
+    const loaded = engine.loadGameFromSave(saveId);
+    assert(loaded, 'US-021: 读档阶段应成功恢复存档');
+    const restoredAfterLoad = engine.getGameState();
+    assertEqual(restoredAfterLoad.currentTime?.year, 27, 'US-021: 读档后时间字段应恢复');
+    assertEqual(restoredAfterLoad.flags.route_hero, true, 'US-021: 读档后路线字段应恢复');
+    assertEqual(restoredAfterLoad.flags.us_021_checkpoint, true, 'US-021: 读档后关键 checkpoint 应恢复');
+    assertEqual(restoredAfterLoad.identity?.primary, 'hero', 'US-021: 读档后身份字段应恢复');
+    assertEqual(restoredAfterLoad.player.relationships?.[0]?.name, '赵灵', 'US-021: 读档后关系字段应恢复');
+    assertEqual(restoredAfterLoad.eventHistory?.[0]?.eventId, 'us_021_history_event', 'US-021: 读档后事件历史应恢复');
+    assertEqual(restoredAfterLoad.routeStates?.hero?.lifecycle, 'locked_in', 'US-021: 读档后路线状态应恢复');
+
+    assert(engine.engineState.currentEvent !== null, 'US-021: 继续阶段应恢复到可推进事件流');
+
+    engine.restartGame();
+    const restartedState = engine.getGameState();
+    assertEqual(restartedState.player.age, 0, 'US-021: 重开后应回到初始化状态');
+    const stillSaved = saveManager.loadGame(saveId);
+    assert(stillSaved !== null, 'US-021: 重开后历史存档不应丢失');
+    assertEqual(stillSaved?.gameData.flags.us_021_checkpoint, true, 'US-021: 重开后历史存档内容应保持完整');
+
+    const loadedAfterRestart = engine.loadGameFromSave(saveId);
+    assert(loadedAfterRestart, 'US-021: 重开后应可继续读取历史存档');
+    const restoredAfterRestartLoad = engine.getGameState();
+    assertEqual(restoredAfterRestartLoad.flags.route_hero, true, 'US-021: 重开后读档仍应恢复路线字段');
+    assertEqual(restoredAfterRestartLoad.identity?.primary, 'hero', 'US-021: 重开后读档仍应恢复身份字段');
+
+    restoredAfterRestartLoad.player.alive = false;
+    restoredAfterRestartLoad.ending = {
+      id: 'us_021_ending',
+      name: '终局回归测试',
+    } as any;
+
+    const loadedFromEnding = engine.loadGameFromSave(saveId);
+    assert(loadedFromEnding, 'US-021: 结局后应可读取既有存档');
+    const restoredFromEnding = engine.getGameState();
+    assertEqual(restoredFromEnding.player.alive, true, 'US-021: 结局后读档应恢复为可继续状态');
+    assertEqual(restoredFromEnding.currentTime?.year, 27, 'US-021: 结局后读档时间字段应恢复');
+    assertEqual(restoredFromEnding.flags.route_hero, true, 'US-021: 结局后读档路线字段应恢复');
+    assertEqual(restoredFromEnding.identity?.primary, 'hero', 'US-021: 结局后读档身份字段应恢复');
+    assertEqual(restoredFromEnding.player.relationships?.[0]?.name, '赵灵', 'US-021: 结局后读档关系字段应恢复');
+    assertEqual(restoredFromEnding.eventHistory?.[0]?.eventId, 'us_021_history_event', 'US-021: 结局后读档事件历史应恢复');
+    assert(engine.engineState.currentEvent !== null, 'US-021: 结局后读档应可继续推进流程');
+  } finally {
+    (gameEngine as any).selectEvent = originalSelectEvent;
+    globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    saveManager.clearAllSaves();
+    (engine.engineState as any).currentEvent = null;
+    (engine.engineState as any).availableChoices = [];
+    engine.engineState.lastOutcomeText = null;
+    engine.engineState.lastEffects = [];
+    (engine.engineState as any).lastChoiceFeedback = null;
+  }
+}
+
 function createSimulationReportStub(overrides: Partial<import('./GameProcessSimulator').GameProcessReport> = {}): import('./GameProcessSimulator').GameProcessReport {
   const state = framework.createTestState();
   return {
@@ -1902,6 +2053,13 @@ const coreFunctionSuite: TestSuite = {
       description: '测试重开不污染存档、读档后继续正确、结局后可读档恢复主流程',
       test: async () => {
         await runRestartContinueEndingSaveBehaviorCase();
+      },
+    },
+    {
+      name: 'US-021 存档回归 - 保存/读档/继续/重开/结局后读档全覆盖',
+      description: '测试关键存档流程与 route/identity/relationship/event history/time 字段恢复完整性',
+      test: async () => {
+        await runSaveRegressionCoverageCase();
       },
     },
   ],

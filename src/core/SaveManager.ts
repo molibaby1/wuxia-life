@@ -10,8 +10,6 @@
  */
 
 import type { GameState } from '../types/eventTypes';
-import * as fs from 'fs';
-import * as path from 'path';
 
 export const P2_SAVE_SCHEMA_VERSION = '2.0.0-p2';
 export const P2_MIN_READABLE_SAVE_VERSION = '1.0.0';
@@ -82,42 +80,30 @@ export function applyP2SaveVersionMarker(gameState: GameState): GameState {
   };
 }
 
-// 检测是否在浏览器环境
-const isBrowser = typeof window !== 'undefined' && window.localStorage;
+// 检测是否在浏览器环境（须使用真实 window.localStorage，避免 Node 实验性 globalThis.localStorage）
+const isBrowser = typeof window !== 'undefined' && !!window.localStorage;
 
-// 简单的文件系统存储（用于 Node.js 环境）
-class FileStorage {
-  private savesDir: string;
-  
-  constructor() {
-    this.savesDir = path.join(process.cwd(), '.wuxia_saves');
-    if (!fs.existsSync(this.savesDir)) {
-      fs.mkdirSync(this.savesDir, { recursive: true });
-    }
-  }
-  
+/**
+ * 非浏览器环境（单元测试、CLI 模拟）使用进程内 Map，避免在源码中静态 import `fs`/`path`
+ * 导致 Vite 将 Node 内建模块 externalize 进浏览器包并产生构建告警。
+ */
+class MemoryStorage {
+  private readonly map = new Map<string, string>();
+
   getItem(key: string): string | null {
-    const filePath = path.join(this.savesDir, `${key}.json`);
-    if (fs.existsSync(filePath)) {
-      return fs.readFileSync(filePath, 'utf-8');
-    }
-    return null;
+    return this.map.has(key) ? this.map.get(key)! : null;
   }
-  
+
   setItem(key: string, value: string): void {
-    const filePath = path.join(this.savesDir, `${key}.json`);
-    fs.writeFileSync(filePath, value, 'utf-8');
+    this.map.set(key, value);
   }
-  
+
   removeItem(key: string): void {
-    const filePath = path.join(this.savesDir, `${key}.json`);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    this.map.delete(key);
   }
 }
 
-const fileStorage = new FileStorage();
+const memoryStorage = new MemoryStorage();
 
 export class SaveManager {
   private static instance: SaveManager;
@@ -164,7 +150,7 @@ export class SaveManager {
     }
     
     // 保存到存储
-    const storage = isBrowser ? localStorage : fileStorage;
+    const storage = isBrowser ? localStorage : memoryStorage;
     storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
     
     
@@ -198,7 +184,7 @@ export class SaveManager {
    */
   public getAllSaves(): SaveData[] {
     try {
-      const storage = isBrowser ? localStorage : fileStorage;
+      const storage = isBrowser ? localStorage : memoryStorage;
       const savesJson = storage.getItem(this.STORAGE_KEY);
       if (!savesJson) return [];
       
@@ -218,7 +204,7 @@ export class SaveManager {
     const filteredSaves = saves.filter(s => s.id !== saveId);
     
     if (filteredSaves.length !== saves.length) {
-      const storage = isBrowser ? localStorage : fileStorage;
+      const storage = isBrowser ? localStorage : memoryStorage;
       storage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSaves));
       return true;
     }
@@ -245,7 +231,7 @@ export class SaveManager {
     };
     
     try {
-      const storage = isBrowser ? localStorage : fileStorage;
+      const storage = isBrowser ? localStorage : memoryStorage;
       storage.setItem(this.AUTO_SAVE_KEY, JSON.stringify(saveData));
     } catch (error) {
       console.error('[SaveManager] 自动保存失败:', error);
@@ -257,7 +243,7 @@ export class SaveManager {
    */
   public loadAutoSave(): SaveData | null {
     try {
-      const storage = isBrowser ? localStorage : fileStorage;
+      const storage = isBrowser ? localStorage : memoryStorage;
       const autoSaveJson = storage.getItem(this.AUTO_SAVE_KEY);
       if (!autoSaveJson) return null;
       
@@ -280,7 +266,7 @@ export class SaveManager {
    * 清除自动存档
    */
   public clearAutoSave(): void {
-    const storage = isBrowser ? localStorage : fileStorage;
+    const storage = isBrowser ? localStorage : memoryStorage;
     storage.removeItem(this.AUTO_SAVE_KEY);
   }
   
@@ -322,7 +308,7 @@ export class SaveManager {
         saves.pop();
       }
       
-      const storage = isBrowser ? localStorage : fileStorage;
+      const storage = isBrowser ? localStorage : memoryStorage;
       storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
       
       return true;
@@ -336,7 +322,7 @@ export class SaveManager {
    * 清空所有存档
    */
   public clearAllSaves(): void {
-    const storage = isBrowser ? localStorage : fileStorage;
+    const storage = isBrowser ? localStorage : memoryStorage;
     storage.removeItem(this.STORAGE_KEY);
     storage.removeItem(this.AUTO_SAVE_KEY);
   }

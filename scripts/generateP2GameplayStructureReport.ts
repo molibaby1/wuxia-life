@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
 import { evaluateSimulationGate } from './gameplaySimulationGate';
+import { formatDiagnosticsMarkdownSection } from './gameplaySimulationDiagnostics';
 
 const OUTPUT_PATH = process.env.P2_GAMEPLAY_STRUCTURE_OUTPUT || 'docs/test-reports/us-023-p2-gameplay-structure-report.md';
 
@@ -104,6 +105,7 @@ function buildReport(params: {
   sampleReports: GameProcessReport[];
 }) {
   const { generatedAt, choiceFeedbackCoverage, gate, saveConsistency, sampleReports } = params;
+  const diagnosticsSection = formatDiagnosticsMarkdownSection(sampleReports);
   const routeCompletionRate = findMetricValue(gate.warningMetrics, 'route_completion_rate');
   const routeBreakageRate = findMetricValue(gate.blockingMetrics, 'route_breakage_rate');
   const metricRows = [...gate.blockingMetrics, ...gate.warningMetrics, ...gate.infoMetrics]
@@ -168,6 +170,7 @@ function buildReport(params: {
     `- failed checks: ${saveConsistency.failedChecks}`,
     `- pass rate: ${saveConsistency.passRate.toFixed(2)}%`,
     '',
+    diagnosticsSection,
     '## Residual Risks',
     '',
     '- Current route metrics are aggregated by final route lifecycle state, which can hide per-route progression volatility within one life.',

@@ -1,6 +1,6 @@
 # US-024 - P2 Closure Verification Evidence
 
-Date: 2026-04-27
+Date: 2026-04-27 (post-closure refresh: 2026-05-11)
 
 ## Scope
 
@@ -9,9 +9,13 @@ This closure check provides fresh validation evidence for P2 and confirms that c
 ## Command Evidence
 
 - `npm run typecheck` -> pass
-- `npm run build` -> pass
+- `npm run build` -> pass (must not emit Vite `SaveManager` + `fs`/`path` externalized / `__vite-browser-external` warnings; see `agent_docs/p2-closure-supplement.md`)
 - `npm test` -> pass
 - `npm run simulate:gameplay -- --gate --quiet --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --waive=ending_distribution:single-run-ending-concentration-baseline` -> pass (`Simulation gate decision: PASS`, blocker `ending_distribution` waived with reason)
+
+## P2 post-closure supplement
+
+Structured notes on SaveManager browser bundle fix, event-condition migration, and simulation diagnostics: `agent_docs/p2-closure-supplement.md`.
 
 ## Completed Story Evidence Audit
 

@@ -86,12 +86,6 @@ export const birthWithPhenomenon: EventDefinition = {
   triggers: [
     { type: 'age_reach', value: 0 },
   ],
-  conditions: [
-    {
-      type: 'expression',
-      expression: 'Math.random() < 0.25', // 25% 概率触发
-    },
-  ],
   
   content: {
     text: '你出生时天有异象，一道金光从天而降，笼罩了整个府邸。族中长老惊叹：「此子非凡，将来必成大器！」',

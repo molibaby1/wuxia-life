@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
 import { evaluateSimulationGate, parseWaiverArg, type SimulationWaiver } from './gameplaySimulationGate';
+import { printDiagnosticsToConsole } from './gameplaySimulationDiagnostics';
 
 type CliArgs = {
   seed?: number;
@@ -20,6 +21,7 @@ type CliArgs = {
   samples: boolean;
   quiet: boolean;
   gate: boolean;
+  diagnostics: boolean;
   waivers: SimulationWaiver[];
 };
 
@@ -55,7 +57,7 @@ type SampleSummary = {
 };
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { quiet: false, samples: false, gate: false, waivers: [], disableSaveRestore: false };
+  const args: CliArgs = { quiet: false, samples: false, gate: false, diagnostics: false, waivers: [], disableSaveRestore: false };
   for (const raw of argv) {
     if (raw.startsWith('--seed=')) {
       const seed = Number(raw.slice('--seed='.length));
@@ -112,6 +114,8 @@ function parseArgs(argv: string[]): CliArgs {
       args.disableSaveRestore = true;
     } else if (raw === '--gate') {
       args.gate = true;
+    } else if (raw === '--diagnostics') {
+      args.diagnostics = true;
     } else if (raw.startsWith('--waive=')) {
       const waiverRaw = raw.slice('--waive='.length);
       args.waivers.push(parseWaiverArg(waiverRaw));
@@ -286,6 +290,9 @@ async function runSampleSet(args: CliArgs): Promise<void> {
 
   const outputPath = writeSampleSetOutput(summaries);
   console.log(`\nSample set JSON: ${path.relative(process.cwd(), outputPath)}`);
+  if (args.diagnostics) {
+    printDiagnosticsToConsole(reports);
+  }
   if (args.gate) {
     const gate = evaluateSimulationGate(reports, args.waivers);
     printGateSummary(gate);
@@ -339,6 +346,9 @@ async function main(): Promise<void> {
   const report = await simulator.simulate();
   const machineOutputPath = writeMachineReadableOutput(report);
   printSummary(report);
+  if (args.diagnostics) {
+    printDiagnosticsToConsole([report]);
+  }
   if (args.gate) {
     const gate = evaluateSimulationGate([report], args.waivers);
     printGateSummary(gate);

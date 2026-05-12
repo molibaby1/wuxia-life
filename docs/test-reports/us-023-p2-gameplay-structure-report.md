@@ -2,7 +2,7 @@
 
 ## Scope
 
-- generatedAt: `2026-04-27T00:29:11.649Z`
+- generatedAt: `2026-05-12T03:15:41.559Z`
 - sample strategy: fixed 3 persona samples (`martial-riser`, `merchant-weaver`, `bond-keeper`), complete-life simulation, save-restore enabled
 - evidence sources: `tests/AllTests.ts` (choice feedback coverage), `GameProcessSimulator` sample reports, `gameplaySimulationGate` metric evaluation
 
@@ -30,17 +30,17 @@
 
 | persona | seed | total events | total choices | saves | loads | ending |
 |---|---:|---:|---:|---:|---:|---|
-| 凌霄 | 11 | 142 | 60 | 14 | 1 | 有明显成就，但状态、关系或代价阻止了它成为完美结局。 |
-| 沈绫 | 37 | 146 | 63 | 14 | 1 | 一生持续向上，但始终差一步，留下了明显遗憾。 |
-| 顾晚 | 73 | 148 | 63 | 14 | 1 | 一生持续向上，但始终差一步，留下了明显遗憾。 |
+| 凌霄 | 11 | 144 | 61 | 14 | 1 | 一生持续向上，但始终差一步，留下了明显遗憾。 |
+| 沈绫 | 37 | 141 | 60 | 14 | 1 | 最终重心落在身边人和安稳生活，而不是江湖传说。 |
+| 顾晚 | 73 | 146 | 61 | 14 | 1 | 一生持续向上，但始终差一步，留下了明显遗憾。 |
 
 ## Simulation Metrics
 
 | metric | severity | actual | status | detail |
 |---|---|---:|---|---|
-| choice_rate | blocker | 42.66% | pass | actual=0.4266, min=0.2, max=0.75 |
+| choice_rate | blocker | 42.23% | pass | actual=0.4223, min=0.2, max=0.75 |
 | route_breakage_rate | blocker | 0.00% | pass | actual=0.0000, min=0, max=0.4 |
-| auto_event_rate | warning | 57.34% | pass | actual=0.5734, min=0.25, max=0.8 |
+| auto_event_rate | warning | 57.77% | pass | actual=0.5777, min=0.25, max=0.8 |
 | route_completion_rate | warning | 0.00% | fail | actual=0.0000, min=0.1, max=0.6 (below min) |
 | death_rate | warning | 100.00% | fail | actual=1.0000, min=0.15, max=0.9 (above max) |
 | ending_distribution | info | 66.67% | pass | actual=0.6667 |
@@ -53,6 +53,42 @@
 - passed checks: 3
 - failed checks: 0
 - pass rate: 100.00%
+
+## Experience Diagnostics (P2 closure)
+
+Aggregated across all sample runs: top event IDs by occurrence count (may indicate repetition pressure).
+
+| eventId | totalCount |
+|---|---:|
+| family_reunion | 27 |
+| family_grandchild_born | 27 |
+| family_family_honor | 23 |
+| no_event | 12 |
+| daily_take_odd_job_neg_1 | 7 |
+| daily_night_reflection_neg_1 | 6 |
+| daily_morning_training_neu_1 | 5 |
+| daily_skip_training_neu_1 | 5 |
+| daily_household_burden_neg_1 | 4 |
+| daily_night_reflection_neu_1 | 4 |
+| daily_take_odd_job_neu_1 | 4 |
+| daily_second_guess_neg_1 | 4 |
+| toddler_exploration | 3 |
+| clever_speech | 3 |
+| childhood_preference | 3 |
+
+Romance / family snapshot (per-report aggregates):
+
+- lives with spouse (count / 3): 0
+- lives with children > 0 (count / 3): 0
+- avg relation keys in final state: 2.00
+
+Per-sample: top 5 event IDs by count; routeStates lifecycle histogram.
+
+| sample | persona | ending | top5 events | routeStates lifecycle counts |
+|---:|---|---|---|---|
+| 1 | 凌霄 | 一生持续向上，但始终差一步，留下了明显遗憾。 | family_reunion×11, family_grandchild_born×10, family_family_honor×6, no_event×4, daily_skip_training_neu_1×3 | active:1 |
+| 2 | 沈绫 | 最终重心落在身边人和安稳生活，而不是江湖传说。 | family_reunion×9, family_family_honor×8, family_grandchild_born×8, no_event×4, daily_night_reflection_neg_1×4 | active:2 |
+| 3 | 顾晚 | 一生持续向上，但始终差一步，留下了明显遗憾。 | family_family_honor×9, family_grandchild_born×9, family_reunion×7, daily_take_odd_job_neg_1×5, no_event×4 | active:2 |
 
 ## Residual Risks
 

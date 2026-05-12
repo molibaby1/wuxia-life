@@ -482,7 +482,7 @@ export const meetLoveInterest: EventDefinition = {
   conditions: [
     {
       type: 'expression',
-      expression: 'Math.random() < 0.4 && !flags.has("hasLoveInterest")',
+      expression: '!flags.has("hasLoveInterest") && !flags.has("love_started")',
     },
   ],
   

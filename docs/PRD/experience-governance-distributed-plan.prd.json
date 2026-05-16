@@ -1,0 +1,151 @@
+{
+  "project": "Wuxia Life Experience Governance Distributed Plan",
+  "branchName": "ralph/experience-governance-distributed-plan",
+  "description": "Coordinate a multi-session experience governance phase that addresses event repetition, rhythm distribution, route dominance, and experience health gates without a one-shot rewrite.",
+  "userStories": [
+    {
+      "id": "US-A01",
+      "title": "Audit Event Lifecycle and History Sources",
+      "description": "As a maintainer, I want event lifecycle and history sources audited so repetition fixes target the real runtime path.",
+      "acceptanceCriteria": [
+        "Runtime event history, player event records, and simulation script event execution paths are mapped",
+        "Mismatch between engine execution and script execution is documented",
+        "Events relying on triggerConditions.flags required/not are inventoried",
+        "No business code is changed during the audit"
+      ],
+      "priority": 1
+    },
+    {
+      "id": "US-A02",
+      "title": "Unify Runtime Event Lifecycle Guards",
+      "description": "As a player, I want repeated events to respect lifecycle rules consistently so the life simulation does not feel like a repeated event table.",
+      "acceptanceCriteria": [
+        "Same-event maxTriggers and cooldown are enforced on the real execution path",
+        "triggerConditions.flags required/not behavior is either implemented or migrated with an explicit boundary",
+        "Simulation scripts use the same event history semantics as the runtime engine",
+        "Default validation and fixed-seed repetition checks pass"
+      ],
+      "priority": 2
+    },
+    {
+      "id": "US-A03",
+      "title": "Define Category Lifecycle Boundaries",
+      "description": "As a designer, I want family, romance, setback, career, and economy events to have clear lifecycle boundaries.",
+      "acceptanceCriteria": [
+        "Category-specific repeat boundaries are documented",
+        "Family, romance, setback, career, and economy categories distinguish repeatable flavor from milestone events",
+        "Mandatory mainline events are protected from over-suppression",
+        "Fixed-seed reports show same-event and short-window same-class improvements"
+      ],
+      "priority": 3
+    },
+    {
+      "id": "US-B01",
+      "title": "Audit Age-Band Event Distribution",
+      "description": "As a designer, I want age-band event distribution measured so rhythm changes are based on evidence.",
+      "acceptanceCriteria": [
+        "Childhood, youth, adult, midlife, and elderly event pools are summarized",
+        "Formal, daily, storyline, family, setback, career, route, and ending ratios are reported by band",
+        "Top recurring candidates and high-weight wide-age events are listed",
+        "No business code is changed during the audit"
+      ],
+      "priority": 4
+    },
+    {
+      "id": "US-B02",
+      "title": "Revise Candidate Pool Rhythm Strategy",
+      "description": "As a player, I want the event pool to produce natural life rhythm rather than constant formal-event pressure.",
+      "acceptanceCriteria": [
+        "Candidate pool selection no longer gives uncontrolled dominance to a small top-priority slice",
+        "Formal, daily, and storyline events have explicit selection boundaries",
+        "Daily fallback appears at a healthy rate without blocking mandatory events",
+        "Before/after rhythm metrics are recorded"
+      ],
+      "priority": 5
+    },
+    {
+      "id": "US-B03",
+      "title": "Add Rhythm Regression Evidence",
+      "description": "As a maintainer, I want rhythm changes guarded by fixed-seed evidence so future content does not silently regress the pacing.",
+      "acceptanceCriteria": [
+        "Rhythm report includes formal/daily ratio, empty ages, stage distribution, and top repeated candidates",
+        "At least one complete-life and one focused age-range sample are captured",
+        "Regression thresholds or observation baselines are documented",
+        "Default validation passes"
+      ],
+      "priority": 6
+    },
+    {
+      "id": "US-C01",
+      "title": "Audit Route Loading and Route Metadata",
+      "description": "As a designer, I want to know which route content is actually loaded and which metadata drives route scheduling.",
+      "acceptanceCriteria": [
+        "Declared event imports are compared with the actual loader map",
+        "Route event metadata usage is counted, including routeTargets, routeTransition, pathAffinity, and route completion flags",
+        "Routes stuck in active state are identified from simulation reports",
+        "No business code is changed during the audit"
+      ],
+      "priority": 7
+    },
+    {
+      "id": "US-C02",
+      "title": "Make Route Events Participate in Main Selection",
+      "description": "As a player, I want a chosen life route to shape future events in a visible and sustained way.",
+      "acceptanceCriteria": [
+        "Loaded route events can identify their target route or lifecycle role",
+        "Route-progress events receive scheduling support without starving daily or family events",
+        "At least two core routes show continuous route presence in fixed samples",
+        "Route conflict checks remain valid"
+      ],
+      "priority": 8
+    },
+    {
+      "id": "US-C03",
+      "title": "Add Route Completion and Failure Samples",
+      "description": "As a maintainer, I want route completion and failure paths exercised by simulation so route structure is not only a state field.",
+      "acceptanceCriteria": [
+        "At least two routes can reach completed or failed lifecycle states in fixed samples",
+        "Route completion rate is no longer consistently zero",
+        "Route lifecycle history is visible in reports",
+        "Default validation and route-focused simulation pass"
+      ],
+      "priority": 9
+    },
+    {
+      "id": "US-D01",
+      "title": "Define Experience Health Metrics",
+      "description": "As a maintainer, I want experience health metrics that fail when the simulation is structurally valid but narratively unhealthy.",
+      "acceptanceCriteria": [
+        "Metrics cover repetition, rhythm, route dominance, family/romance achievement, death concentration, and ending concentration",
+        "Each metric is classified as blocker, warning, or info",
+        "Waiver rules require explicit reasons",
+        "Metrics are documented before gate enforcement"
+      ],
+      "priority": 10
+    },
+    {
+      "id": "US-D02",
+      "title": "Implement Multi-Sample Experience Gate",
+      "description": "As a maintainer, I want multi-sample simulation gates so one lucky seed cannot hide unhealthy experience patterns.",
+      "acceptanceCriteria": [
+        "Gate runs multiple fixed seeds and personas",
+        "Gate emits machine-readable and human-readable summaries",
+        "Blocking experience failures return a failing exit code",
+        "Warning and info metrics remain visible in reports"
+      ],
+      "priority": 11
+    },
+    {
+      "id": "US-D03",
+      "title": "Produce Experience Governance Closure Report",
+      "description": "As a project owner, I want a closure report that explains what improved, what remains risky, and which thresholds protect future work.",
+      "acceptanceCriteria": [
+        "Closure report lists changes, validation commands, metric deltas, and residual risks",
+        "Report references package A-D outcomes",
+        "Remaining warning-level risks are explicitly classified",
+        "No unrelated implementation scope is added"
+      ],
+      "priority": 12
+    }
+  ]
+}

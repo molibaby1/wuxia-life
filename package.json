@@ -16,9 +16,12 @@
     "report:rhythm-baseline": "tsx scripts/generateRhythmBaselineReport.ts",
     "simulate:gameplay": "tsx scripts/runGameplaySimulation.ts",
     "simulate:gameplay:samples": "tsx scripts/runGameplaySimulation.ts --samples --quiet",
+    "verify:route-track-samples": "tsx scripts/verifyRouteTrackSamples.ts",
+    "gate:experience": "tsx scripts/runExperienceHealthGate.ts --quiet",
+    "report:experience-governance-closure": "tsx scripts/generateExperienceGovernanceClosureReport.ts",
     "typecheck": "tsc --noEmit",
     "build": "vue-tsc -b && vite build",
-    "validate": "npm run typecheck && npm run build && npm test && npm run validate:event-quality && npm run stability",
+    "validate": "npm run typecheck && npm run build && npm test && npm run validate:event-quality && npm run stability && npm run gate:experience",
     "preview": "vite preview"
   },
   "dependencies": {

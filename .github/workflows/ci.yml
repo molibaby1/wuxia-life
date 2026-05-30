@@ -39,3 +39,6 @@ jobs:
 
       - name: Stability gate
         run: npm run stability
+
+      - name: Experience health gate
+        run: npm run gate:experience

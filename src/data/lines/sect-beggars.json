@@ -114,6 +114,7 @@
         "奇遇",
         "主线"
       ],
+      "routeTargets": ["beggars"],
       "enabled": true
     }
   },
@@ -531,6 +532,7 @@
         "主线",
         "纷争"
       ],
+      "routeTargets": ["beggars"],
       "autoResolve": true,
       "enabled": true
     }
@@ -587,6 +589,10 @@
         "target": "beggars_ending"
       },
       {
+        "type": "flag_set",
+        "target": "route_beggars_completed"
+      },
+      {
         "type": "event_record",
         "target": "beggars_ending"
       }
@@ -599,6 +605,7 @@
         "丐帮",
         "结局"
       ],
+      "routeTargets": ["beggars"],
       "enabled": true
     }
   },

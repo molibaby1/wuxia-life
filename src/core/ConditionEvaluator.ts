@@ -270,6 +270,20 @@ class ConditionExpressionParser {
         continue;
       }
 
+      if (ch === '-' && i + 1 < input.length && /[0-9]/.test(input[i + 1])) {
+        const start = i;
+        i += 1;
+        while (i < input.length && /[0-9.]/.test(input[i])) {
+          i += 1;
+        }
+        const value = input.slice(start, i);
+        if (!/^-\d+(\.\d+)?$/.test(value)) {
+          throw this.error(`Invalid number literal "${value}"`, start);
+        }
+        tokens.push({ type: 'number', value, position: start });
+        continue;
+      }
+
       if (/[0-9]/.test(ch)) {
         const start = i;
         i += 1;

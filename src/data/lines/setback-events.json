@@ -9,6 +9,8 @@
       "min": 16,
       "max": 80
     },
+    "maxTriggers": 3,
+    "cooldown": 4,
     "triggers": [
       {
         "type": "random",
@@ -86,6 +88,8 @@
       "min": 10,
       "max": 80
     },
+    "maxTriggers": 3,
+    "cooldown": 4,
     "triggers": [
       {
         "type": "random",
@@ -207,6 +211,8 @@
       "min": 15,
       "max": 80
     },
+    "maxTriggers": 3,
+    "cooldown": 4,
     "triggers": [
       {
         "type": "random",

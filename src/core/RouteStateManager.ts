@@ -53,6 +53,17 @@ const ROUTE_FLAG_TO_ROUTE_ID: Record<string, string> = {
   wanderer_path: 'wanderer',
 };
 
+/** route_* 玩家标记到 routeStates 键（含非 core 子线） */
+const ROUTE_PLAYER_FLAG_TO_STATE_ID: Record<string, string> = {
+  route_official: 'official',
+  route_beggars: 'beggars',
+  route_demonic: 'demonic',
+  route_orthodox: 'sect',
+  route_border: 'wanderer',
+  route_buddhist: 'wanderer',
+  route_wanderer: 'wanderer',
+};
+
 const FACTION_TO_ROUTE_ID: Record<string, string> = {
   orthodox: 'sect',
   unconventional: 'demonic',
@@ -160,6 +171,9 @@ export class RouteStateManager {
     }
     if (ROUTE_FLAG_TO_ROUTE_ID[flagName]) {
       return ROUTE_FLAG_TO_ROUTE_ID[flagName];
+    }
+    if (ROUTE_PLAYER_FLAG_TO_STATE_ID[flagName]) {
+      return ROUTE_PLAYER_FLAG_TO_STATE_ID[flagName];
     }
     if (flagName.startsWith('route_')) {
       const routeId = flagName.replace(/^route_/, '').replace(/_(locked|completed|failed)$/, '');

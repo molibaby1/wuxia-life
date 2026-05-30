@@ -15,6 +15,8 @@ import { GameTestFramework, TestSuite, assert, assertEqual } from './GameTestFra
 import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
+import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
+import { detectEventClasses } from '../scripts/eventRepetitionClassDetection';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
@@ -24,6 +26,12 @@ import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 import { evaluateSimulationGate, parseWaiverArg } from '../scripts/gameplaySimulationGate';
+import {
+  evaluateExperienceHealthGate,
+  validateExperienceWaivers,
+} from '../scripts/experienceHealthGate';
+import { computeExperienceDerivedMetrics } from '../scripts/computeExperienceMetricsFromReports';
+import { GameProcessSimulator } from './GameProcessSimulator';
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
@@ -1102,6 +1110,46 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '条件评估器 - 负数字面量与魔道侠义条件',
+      description: 'martialPower >= 30 && chivalry <= -10 应正确解析，不产生 Invalid token "-" 告警',
+      test: () => {
+        const evaluator = new ConditionEvaluator();
+        const expression = 'martialPower >= 30 && chivalry <= -10';
+        const condition = { type: 'expression' as const, expression };
+
+        const originalWarn = console.warn;
+        const warnLogs: string[] = [];
+        console.warn = (...args: unknown[]) => {
+          warnLogs.push(args.map(arg => String(arg)).join(' '));
+        };
+
+        try {
+          const passState = framework.createTestState();
+          passState.player.martialPower = 35;
+          passState.player.chivalry = -11;
+          assert(
+            evaluator.evaluate(condition, passState) === true,
+            'chivalry=-11 且功力达标时应为 true',
+          );
+
+          const failState = framework.createTestState();
+          failState.player.martialPower = 35;
+          failState.player.chivalry = 0;
+          assert(
+            evaluator.evaluate(condition, failState) === false,
+            'chivalry=0 时不应满足魔道侠义门槛',
+          );
+
+          assert(
+            !warnLogs.some(log => log.includes('Invalid token "-"')),
+            '负数字面量不应触发 Invalid token "-" 告警',
+          );
+        } finally {
+          console.warn = originalWarn;
+        }
+      },
+    },
+    {
       name: '条件评估器 - 非法表达式错误信息',
       description: '测试非法表达式会失败关闭并输出包含表达式和原因的告警',
       test: () => {
@@ -1455,7 +1503,7 @@ const coreFunctionSuite: TestSuite = {
     },
     {
       name: '事件重复抑制 - 主线与关键事件不被阻断',
-      description: '测试 main_story/critical 事件在重复抑制下保留权重豁免',
+      description: '测试带 critical/mainline 标签或 CRITICAL 优先级的事件豁免抑制；main_story 类别 alone 不豁免',
       test: () => {
         const engine = new GameEngineIntegration() as any;
         const state = engine.getGameState();
@@ -1469,6 +1517,343 @@ const coreFunctionSuite: TestSuite = {
           metadata: { tags: ['mainline', 'critical'] },
         };
         assertEqual(engine.getFormalRepetitionSuppressionMultiplier(mandatoryEvent), 1, '主线关键事件应豁免抑制');
+
+        const plainMainStory = {
+          id: 'outlaw_training',
+          category: EventCategory.MAIN_STORY,
+          priority: EventPriority.HIGH,
+          metadata: { tags: ['jianghu'] },
+        };
+        assertEqual(
+          engine.isMandatoryEvent(plainMainStory),
+          false,
+          'main_story 类别 alone 不应再进入 critical/mandatory 车道'
+        );
+        assertEqual(
+          engine.isMandatoryEvent(mandatoryEvent),
+          true,
+          '带 critical/mainline 标签或 CRITICAL 优先级仍视为 mandatory'
+        );
+      },
+    },
+    {
+      name: '事件触发条件 - triggerConditions.flags 生效',
+      description: '测试 flags.required/not 由 EventExecutor 统一校验',
+      test: () => {
+        const state = framework.createTestState();
+        const marriageEvent = {
+          id: 'flag_guard_event',
+          triggerConditions: {
+            flags: {
+              not: ['married'],
+            },
+          },
+        };
+
+        assertEqual(
+          EventExecutor.canTriggerEvent(marriageEvent as any, state),
+          true,
+          '未结婚时事件应可触发'
+        );
+
+        state.player.flags.married = true;
+        assertEqual(
+          EventExecutor.canTriggerEvent(marriageEvent as any, state),
+          false,
+          '已结婚时 flags.not 应阻止触发'
+        );
+      },
+    },
+    {
+      name: '事件历史 - 引擎执行路径写入 eventHistory',
+      description: '测试 executeAutoEvent 与 executeChoiceEffects 会记录正式事件历史',
+      test: async () => {
+        const engine = new GameEngineIntegration();
+        const state = engine.getGameState();
+        state.player.age = 18;
+
+        await engine.executeAutoEvent({
+          id: 'history_auto_event',
+          autoEffects: [
+            { type: EffectType.FLAG_SET, target: 'history_auto_flag', value: true },
+          ],
+        } as any);
+
+        const autoHistory = engine.getGameState().eventHistory || [];
+        assert(
+          autoHistory.some(entry => entry.eventId === 'history_auto_event' && entry.age === 18),
+          '自动事件执行后应写入 eventHistory'
+        );
+
+        await engine.executeChoiceEffects(
+          [{ type: EffectType.FLAG_SET, target: 'history_choice_flag', value: true }],
+          'history_choice_event'
+        );
+
+        const choiceHistory = engine.getGameState().eventHistory || [];
+        assert(
+          choiceHistory.some(entry => entry.eventId === 'history_choice_event' && entry.age === 18),
+          '选择事件执行后应写入 eventHistory'
+        );
+      },
+    },
+    {
+      name: '复读分类 - 真实受伤事件应识别为 injury',
+      description: 'detectEventClasses 应识别 setback_injury 与「意外受伤」等身体受伤语义',
+      test: () => {
+        const physicalInjury = detectEventClasses({
+          id: 'setback_injury',
+          category: 'setback',
+          content: { title: '意外受伤', description: '练功受伤需要休养' },
+        } as any);
+        assert(physicalInjury.includes('injury'), 'setback_injury / 意外受伤 应归类为 injury');
+
+        const woundTag = detectEventClasses({
+          id: 'custom_wound_event',
+          metadata: { tags: ['injury', 'negative'] },
+          content: { title: '旧伤复发', description: 'trauma from a past wound' },
+        } as any);
+        assert(woundTag.includes('injury'), 'injury/wound 标签或英文描述应归类为 injury');
+      },
+    },
+    {
+      name: '复读分类 - 情感伤人措辞不得误判为 injury',
+      description: 'love_misunderstanding「流言最伤人」及伤心/伤感/伤情不得进入 injury 类',
+      test: () => {
+        const loveMisunderstanding = detectEventClasses({
+          id: 'love_misunderstanding',
+          category: 'side_quest',
+          content: {
+            title: '误会',
+            description: '流言最伤人。',
+            text: '江湖流言纷纷，你百口莫辩。',
+          },
+        } as any);
+        assert(
+          !loveMisunderstanding.includes('injury'),
+          'love_misunderstanding 不应因「伤人」被判为 injury'
+        );
+
+        const emotionalPhrases = detectEventClasses({
+          id: 'love_emotional_stub',
+          content: {
+            title: '心事',
+            description: '令人伤心又伤感，伤情难诉，最伤人者莫过于流言。',
+          },
+        } as any);
+        assert(
+          !emotionalPhrases.includes('injury'),
+          '伤心/伤感/伤情/伤人 等情感措辞 alone 不应判为 injury'
+        );
+      },
+    },
+    {
+      name: '复读分类 - 本钱不得误判为 economy',
+      description: 'setback_illness「身体是武学的本钱」不应进入 economy；财产损失仍应识别',
+      test: () => {
+        const illnessWithBenQian = detectEventClasses({
+          id: 'setback_illness',
+          category: 'setback',
+          content: {
+            title: '大病一场',
+            description: '身体是武学的本钱，生病会影响修炼进度',
+          },
+          metadata: { tags: ['挫折', '生病', '负面'] },
+        } as any);
+        assert(illnessWithBenQian.includes('illness'), 'setback_illness 应仍为 illness');
+        assert(
+          !illnessWithBenQian.includes('economy'),
+          '「本钱」不应使 setback_illness 被判为 economy'
+        );
+
+        const propertyLoss = detectEventClasses({
+          id: 'setback_property_loss',
+          category: 'setback',
+          content: {
+            title: '财产损失',
+            description: '财富损失是常见的风险',
+          },
+          metadata: { tags: ['挫折', '财产', '负面'] },
+        } as any);
+        assert(propertyLoss.includes('economy'), 'setback_property_loss 应识别为 economy');
+      },
+    },
+    {
+      name: '事件重复抑制 - 挫折事件短窗口互斥',
+      description: '近 1-3 年已有挫折时，同类或跨类 setback 应降权',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 27;
+        state.eventHistory = [{ eventId: 'setback_illness', age: 26, triggeredAt: 26 }];
+
+        const originalGetEventById = eventLoader.getEventById.bind(eventLoader);
+        (eventLoader as any).getEventById = (eventId: string) => {
+          if (eventId === 'setback_illness') {
+            return {
+              id: 'setback_illness',
+              category: 'setback',
+              isSetbackEvent: true,
+              setbackSeverity: 'moderate',
+              content: { title: '大病一场', description: '生病' },
+              metadata: { tags: ['挫折', '生病', '负面'] },
+            };
+          }
+          return undefined;
+        };
+
+        try {
+          const propertyLossEvent = {
+            id: 'setback_property_loss',
+            category: 'setback',
+            isSetbackEvent: true,
+            setbackSeverity: 'minor',
+            content: { title: '财产损失', description: '财富损失' },
+            metadata: { tags: ['挫折', '财产', '负面'] },
+          };
+          const multiplier = engine.getFormalRepetitionSuppressionMultiplier(propertyLossEvent);
+          assert(multiplier < 1, '近岁已有挫折时 setback_property_loss 应被降权');
+        } finally {
+          (eventLoader as any).getEventById = originalGetEventById;
+        }
+      },
+    },
+    {
+      name: '选择解析 - resolveFirstChoiceEffects 写入 love_started',
+      description: 'resolveFirstChoiceEffects + executeChoiceEffects 应执行 outcome 并设置 love_started',
+      test: async () => {
+        const engine = new GameEngineIntegration();
+        const state = engine.getGameState();
+        state.player.age = 16;
+        state.player.charisma = 10;
+
+        const loveLikeStub = {
+          id: 'test_love_choice_stub',
+          eventType: 'choice',
+          choices: [
+            {
+              id: 'love_greet_stub',
+              text: '上前搭话',
+              outcomes: [
+                {
+                  id: 'default',
+                  condition: { type: 'expression', expression: 'true' },
+                  effects: [{ type: EffectType.FLAG_SET, target: 'love_started', value: true }],
+                },
+              ],
+            },
+          ],
+        } as const;
+
+        const resolved = resolveFirstChoiceEffects(engine, state, loveLikeStub as any);
+        assert(resolved !== null, 'resolveFirstChoiceEffects 应解析出首个可用 choice/outcome');
+        assert(
+          resolved!.effects.some(
+            effect => effect.type === EffectType.FLAG_SET && effect.target === 'love_started'
+          ),
+          '解析结果应包含 love_started 的 flag_set 效果'
+        );
+
+        await engine.executeChoiceEffects(
+          resolved!.effects,
+          loveLikeStub.id,
+          resolved!.choiceId
+        );
+
+        assertEqual(
+          engine.getGameState().flags.love_started,
+          true,
+          'executeChoiceEffects 后应写入 love_started flag'
+        );
+      },
+    },
+    {
+      name: '路线加载 - events.json 与 EventLoader 一致',
+      description: '测试所有声明的线路文件均已进入 lineMap',
+      test: () => {
+        const missing = eventLoader.getUndeclaredImportPaths();
+        assertEqual(missing.length, 0, `未加载的 import: ${missing.join(', ')}`);
+      },
+    },
+    {
+      name: '路线生命周期 - completion flag 写入 routeStates',
+      description: '测试 route_*_completed 会同步为 completed 生命周期',
+      test: () => {
+        const state = framework.createTestState();
+        state.player.age = 30;
+        state.player.flags.route_beggars = true;
+
+        const afterStart = RouteStateManager.syncFromFlagSet(state, 'route_beggars', true, 'beggars_join');
+        assertEqual(
+          RouteStateManager.readRouteState(afterStart, 'beggars').lifecycle,
+          'active',
+          'route_beggars 应激活 beggars 路线状态'
+        );
+
+        const afterComplete = RouteStateManager.syncFromFlagSet(
+          afterStart,
+          'route_beggars_completed',
+          true,
+          'beggars_ending'
+        );
+        assertEqual(
+          RouteStateManager.readRouteState(afterComplete, 'beggars').lifecycle,
+          'completed',
+          'route_beggars_completed 应完成 beggars 路线'
+        );
+      },
+    },
+    {
+      name: '路线专项样本 - 模拟可推进至 completed',
+      description: '测试 routeTrack 样本在固定 seed 下可产生 completed 路线状态',
+      test: async () => {
+        const { ROUTE_TRACK_SAMPLES } = await import('../scripts/runGameplaySimulation');
+
+        const officialSample = ROUTE_TRACK_SAMPLES.find(sample => sample.routeTrack === 'official');
+        assert(officialSample, '应存在 official-track 路线样本');
+
+        const simulator = new GameProcessSimulator({
+          playerName: officialSample.personaName,
+          gender: officialSample.gender,
+          simulateYears: 50,
+          runUntilDeath: false,
+          seed: officialSample.seed,
+          choiceTendency: officialSample.choiceTendency,
+          routeTrack: officialSample.routeTrack,
+          maxEvents: 120,
+          verbose: false,
+          enableAutoSave: false,
+          enableManualSave: false,
+          enableSaveRestore: false,
+        });
+        const report = await simulator.simulate();
+        const finalState = report.records.length > 0
+          ? report.records[report.records.length - 1].gameState
+          : undefined;
+        const hasCompleted = Object.values(finalState?.routeStates || {}).some(
+          routeState => routeState.lifecycle === 'completed'
+        );
+
+        assert(hasCompleted, '路线专项样本应能将至少一条路线推进至 completed');
+      },
+    },
+    {
+      name: '路线候选池 - 活跃路线保底注入',
+      description: '测试方案乙：活跃路线事件可注入候选池',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 25;
+        state.player.flags.route_official = true;
+        RouteStateManager.syncFromFlagSet(state, 'route_official', true, 'test');
+
+        const pool = engine.getAvailableEvents(25);
+        const hasOfficial = pool.some((event: { id: string }) =>
+          event.id === 'official_first_post' ||
+          event.id === 'official_love_obstacle' ||
+          event.id === 'official_resign'
+        );
+        assert(hasOfficial, '活跃官府路线应在候选池中有代表事件');
       },
     },
     {
@@ -2007,6 +2392,75 @@ const coreFunctionSuite: TestSuite = {
         assertEqual(result.decision, 'fail', 'blocker 越界时应返回 fail');
         const choiceRateMetric = result.blockingMetrics.find(metric => metric.key === 'choice_rate');
         assert(choiceRateMetric?.status === 'fail', 'choice_rate 低于 blocker 阈值时应为 fail');
+      },
+    },
+    {
+      name: '体验健康门禁 - route_load_parity 与复读指标可计算',
+      description: '测试包 D 衍生指标与加载一致性门禁',
+      test: () => {
+        const report = createSimulationReportStub({
+          records: [
+            {
+              age: 10,
+              eventId: 'setback_injury',
+              eventTitle: '意外受伤',
+              eventType: 'auto',
+              gameState: framework.createTestState(),
+              timestamp: new Date().toISOString(),
+            },
+            {
+              age: 11,
+              eventId: 'setback_injury',
+              eventTitle: '意外受伤',
+              eventType: 'auto',
+              gameState: framework.createTestState(),
+              timestamp: new Date().toISOString(),
+            },
+          ],
+          totalEvents: 2,
+        });
+
+        const derived = computeExperienceDerivedMetrics([report]);
+        assertEqual(derived.route_load_parity, 1, 'events.json 应与 EventLoader 一致');
+        assert(
+          (derived.adjacent_same_event_rate ?? 0) > 0,
+          '相邻同事件应可检测到复读率',
+        );
+
+        const gate = evaluateExperienceHealthGate([report], []);
+        const repetitionMetric = gate.blockingMetrics.find(
+          metric => metric.key === 'adjacent_same_event_rate'
+        );
+        assert(repetitionMetric, 'adjacent_same_event_rate 应为 blocker 指标');
+        assertEqual(repetitionMetric?.severity, 'blocker', '复读指标应为 blocker');
+      },
+    },
+    {
+      name: '体验健康门禁 - 不可 waiver 的指标应拒绝',
+      description: '测试 route_breakage_rate / route_load_parity 不可 waiver',
+      test: () => {
+        let thrown = false;
+        try {
+          validateExperienceWaivers([
+            { metricKey: 'route_breakage_rate', reason: 'short' },
+          ]);
+        } catch (error) {
+          thrown = String(error).includes('at least 10 characters');
+        }
+        assert(thrown, '过短 waiver 原因应被拒绝');
+
+        let thrownNonWaivable = false;
+        try {
+          validateExperienceWaivers([
+            {
+              metricKey: 'route_load_parity',
+              reason: 'EG-DEV-attempt-bypass-load-parity-check',
+            },
+          ]);
+        } catch (error) {
+          thrownNonWaivable = String(error).includes('cannot be waived');
+        }
+        assert(thrownNonWaivable, 'route_load_parity 不可 waiver');
       },
     },
     {

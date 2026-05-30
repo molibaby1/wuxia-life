@@ -23,6 +23,8 @@
         "value": 20
       }
     ],
+    "maxTriggers": 1,
+    "cooldown": 10,
     "triggerConditions": {
       "age": {
         "min": 20,

@@ -1,10 +1,9 @@
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
-import { EventExecutor } from '../src/core/EventExecutor';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
-
-type EventClass = 'injury' | 'illness' | 'economy';
+import { detectEventClasses, type EventClass } from './eventRepetitionClassDetection';
 
 interface SimulatedEvent {
   age: number;
@@ -53,63 +52,27 @@ async function withSeed<T>(seed: number, fn: () => Promise<T>): Promise<T> {
   }
 }
 
-function detectEventClasses(event: EventDefinition): EventClass[] {
-  const textParts = [
-    event.id,
-    event.category,
-    event.type,
-    event.eventType,
-    event.content?.title,
-    event.content?.description,
-    ...(event.tags || []),
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  const classes = new Set<EventClass>();
-
-  if (
-    /injury|wound|受伤|伤|创伤/.test(textParts)
-  ) {
-    classes.add('injury');
+async function executeSelectedEvent(
+  gameEngine: GameEngineIntegration,
+  selected: EventDefinition,
+  state: GameState
+): Promise<void> {
+  if (selected.autoEffects && selected.autoEffects.length > 0) {
+    await gameEngine.executeAutoEvent(selected);
+    return;
   }
 
-  if (
-    /illness|disease|sick|medical|生病|疾病|病/.test(textParts)
-  ) {
-    classes.add('illness');
-  }
-
-  if (
-    event.category === 'economy' ||
-    /economy|merchant|business|money|trade|finance|经济|商|钱|财|破产/.test(textParts)
-  ) {
-    classes.add('economy');
-  }
-
-  return [...classes];
-}
-
-function getFirstChoiceEffects(_state: GameState, event: EventDefinition) {
-  if (!event.choices || event.choices.length === 0) {
-    return [];
-  }
-
-  const firstAvailableChoice = event.choices.find(choice => !choice.condition) || event.choices[0];
-
-  if (!firstAvailableChoice) {
-    return [];
-  }
-
-  if (firstAvailableChoice.outcomes && firstAvailableChoice.outcomes.length > 0) {
-    const firstOutcome = firstAvailableChoice.outcomes.find(outcome => !outcome.condition);
-    if (firstOutcome?.effects) {
-      return firstOutcome.effects;
+  if (selected.choices && selected.choices.length > 0) {
+    const resolved = resolveFirstChoiceEffects(gameEngine, state, selected);
+    if (!resolved) {
+      return;
     }
+    await gameEngine.executeChoiceEffects(
+      resolved.effects,
+      selected.id,
+      resolved.choiceId
+    );
   }
-
-  return firstAvailableChoice.effects || [];
 }
 
 async function simulateWithSeed(seed: number, maxAge: number): Promise<ReproductionResult> {
@@ -118,7 +81,6 @@ async function simulateWithSeed(seed: number, maxAge: number): Promise<Reproduct
     await eventLoader.loadAllEvents();
 
     const gameEngine = new GameEngineIntegration();
-    const eventExecutor = new EventExecutor();
     const state = gameEngine.getGameState();
 
     if (state.player) {
@@ -148,19 +110,16 @@ async function simulateWithSeed(seed: number, maxAge: number): Promise<Reproduct
         });
       }
 
-      const effects = selected.autoEffects?.length
-        ? selected.autoEffects
-        : getFirstChoiceEffects(state, selected);
-      if (effects.length > 0) {
-        const nextState = await eventExecutor.executeEffects(effects, state);
-        Object.assign(state, nextState);
-      }
+      await executeSelectedEvent(gameEngine, selected, state);
     }
 
     const issues: RepetitionIssue[] = [];
     for (let i = 1; i < timeline.length; i++) {
       const prev = timeline[i - 1];
       const current = timeline[i];
+      if (current.age - prev.age > 1) {
+        continue;
+      }
 
       if (prev.eventId === current.eventId) {
         issues.push({
@@ -189,9 +148,19 @@ async function simulateWithSeed(seed: number, maxAge: number): Promise<Reproduct
   });
 }
 
+function countCalendarAdjacentPairs(timeline: SimulatedEvent[]): number {
+  let count = 0;
+  for (let i = 1; i < timeline.length; i++) {
+    if (timeline[i].age - timeline[i - 1].age <= 1) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 function formatResult(result: ReproductionResult): string {
   const lines: string[] = [];
-  const adjacentPairs = Math.max(result.timeline.length - 1, 0);
+  const adjacentPairs = countCalendarAdjacentPairs(result.timeline);
   const sameEventIssues = result.issues.filter(issue => issue.reason === 'same_event');
   const sameClassIssues = result.issues.filter(issue => issue.reason === 'same_class');
 
@@ -203,8 +172,10 @@ function formatResult(result: ReproductionResult): string {
   let shortWindowRepeatedEvents = 0;
   for (let i = 0; i < result.timeline.length; i++) {
     const current = result.timeline[i];
-    const start = Math.max(0, i - SHORT_WINDOW_SIZE);
-    const recent = result.timeline.slice(start, i);
+    const windowMinAge = current.age - SHORT_WINDOW_SIZE;
+    const recent = result.timeline.filter(
+      event => event.age < current.age && event.age > windowMinAge
+    );
     const repeatedInWindow = current.classes.filter(cls =>
       recent.some(event => event.classes.includes(cls))
     );
@@ -304,16 +275,14 @@ async function main() {
     const result = await simulateWithSeed(seed, maxAge);
     if (result.issues.length > 0 || explicitSeed !== null) {
       console.log(formatResult(result));
-      if (result.issues.length === 0) {
-        process.exitCode = 1;
-      }
+      process.exitCode = result.issues.length > 0 ? 1 : 0;
       return;
     }
   }
 
   console.log('=== Event Repetition Reproduction Report ===');
   console.log(`Searched seeds 1..${seedsToTry.length}, no adjacent repetition issue found.`);
-  process.exitCode = 1;
+  process.exitCode = 0;
 }
 
 main().catch(error => {

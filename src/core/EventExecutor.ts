@@ -128,6 +128,27 @@ export class EventExecutor implements IEventExecutor {
       }
     }
     
+    if (conditions.flags) {
+      const playerFlags = state.player?.flags || {};
+      const hasFlag = (flagName: string) => Boolean(playerFlags[flagName]);
+
+      if (conditions.flags.required) {
+        for (const flagName of conditions.flags.required) {
+          if (!hasFlag(flagName)) {
+            return false;
+          }
+        }
+      }
+
+      if (conditions.flags.not) {
+        for (const flagName of conditions.flags.not) {
+          if (hasFlag(flagName)) {
+            return false;
+          }
+        }
+      }
+    }
+
     // 检查因果条件
     if (conditions.karma) {
       if (!state.karma) {

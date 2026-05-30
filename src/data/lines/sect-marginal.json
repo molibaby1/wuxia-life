@@ -96,6 +96,7 @@
         "幽影门",
         "奇遇"
       ],
+      "routeTargets": ["demonic"],
       "enabled": true
     }
   },
@@ -840,6 +841,7 @@
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
       { "type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add" },
       { "type": "flag_set", "target": "demonic_ending_rule" },
+      { "type": "flag_set", "target": "route_demonic_completed" },
       { "type": "event_record", "target": "demonic_ending_rule" }
     ],
     "metadata": {
@@ -847,6 +849,7 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["幽影门", "结局", "主线", "once"],
+      "routeTargets": ["demonic"],
       "enabled": true
     }
   },

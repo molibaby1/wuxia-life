@@ -87,6 +87,7 @@ export class EventLoader {
   private static instance: EventLoader;
   private allEvents: EventDefinition[] = [];
   private eventsById: Map<string, EventDefinition> = new Map();
+  private loadedImportPaths = new Set<string>();
   
   private constructor() {
     this.loadAllEvents();
@@ -142,8 +143,22 @@ export class EventLoader {
     this.allEvents = orderedLines.flat();
     
     
+    this.loadedImportPaths = new Set(Object.keys(lineMap));
+
+    const missingImports = (eventsIndex.imports || []).filter(path => !lineMap[path]);
+    if (missingImports.length > 0) {
+      console.warn(
+        `[EventLoader] events.json declares imports not loaded: ${missingImports.join(', ')}`
+      );
+    }
+
     // 建立索引
     this.buildIndexes();
+  }
+
+  /** 声明导入但未进入 lineMap 的路径（应为空） */
+  public getUndeclaredImportPaths(): string[] {
+    return (eventsIndex.imports || []).filter(path => !this.loadedImportPaths.has(path));
   }
   
   /**

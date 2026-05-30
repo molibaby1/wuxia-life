@@ -3,10 +3,11 @@
  * 特别关注新开发的教程事件和属性系统
  */
 
+import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
-import { EventExecutor } from '../src/core/EventExecutor';
+import type { EventDefinition, GameState } from '../src/types/eventTypes';
 
 interface SimulationResult {
   age: number;
@@ -23,7 +24,7 @@ interface SimulationResult {
   };
 }
 
-function isTutorialEvent(event: any): boolean {
+function isTutorialEvent(event: EventDefinition): boolean {
   if (!event) return false;
   return (
     event.eventType === 'tutorial' ||
@@ -33,21 +34,41 @@ function isTutorialEvent(event: any): boolean {
   );
 }
 
+async function executeSelectedEvent(
+  gameEngine: GameEngineIntegration,
+  selected: EventDefinition,
+  state: GameState
+): Promise<void> {
+  if (selected.autoEffects && selected.autoEffects.length > 0) {
+    await gameEngine.executeAutoEvent(selected);
+    return;
+  }
+
+  if (selected.choices && selected.choices.length > 0) {
+    const resolved = resolveFirstChoiceEffects(gameEngine, state, selected);
+    if (!resolved) {
+      return;
+    }
+    await gameEngine.executeChoiceEffects(
+      resolved.effects,
+      selected.id,
+      resolved.choiceId
+    );
+  }
+}
+
 async function runSimulation() {
   console.log('='.repeat(100));
   console.log('游戏过程模拟测试 - 事件系统合理性验证');
   console.log('='.repeat(100));
   console.log('');
 
-  // 初始化
   await talentSystem.loadTalents();
   await eventLoader.loadAllEvents();
-  
+
   const gameEngine = new GameEngineIntegration();
-  const eventExecutor = new EventExecutor();
   const gameState = gameEngine.getGameState();
-  
-  // 设置初始天赋
+
   if (gameState.player) {
     gameState.player.talents = ['martial_genius', 'quick_learner'];
     gameState.player.name = '测试玩家';
@@ -56,59 +77,27 @@ async function runSimulation() {
 
   const results: SimulationResult[] = [];
   const maxAge = 30;
-  const autoEventIds = new Set<string>();
 
   console.log('开始模拟游戏过程...\n');
 
-  // 模拟到 30 岁
   for (let age = 0; age <= maxAge; age++) {
     if (gameState.player) {
       gameState.player.age = age;
     }
 
-    // 获取可用事件
-    const availableEvents = await gameEngine.getAvailableEvents();
-    
-    if (availableEvents.length === 0) {
-      console.log(`年龄 ${age}: 无可用事件`);
-      continue;
-    }
-
-    // 选择事件（加权随机）
     const selectedEvent = gameEngine.selectEvent(age);
-    
+
     if (!selectedEvent) {
       console.log(`年龄 ${age}: 无可用事件或已达年度上限`);
       continue;
     }
 
-    // 记录事件类型
     const rawEventType = selectedEvent.type || selectedEvent.eventType || 'unknown';
     const tutorialLike = isTutorialEvent(selectedEvent) || age <= 12;
     const eventType = tutorialLike ? 'tutorial' : rawEventType;
 
-    // 执行事件效果（使用真实执行器以对齐游戏规则）
-    if (selectedEvent.autoEffects && selectedEvent.autoEffects.length > 0) {
-      const nextState = await eventExecutor.executeEffects(selectedEvent.autoEffects, gameState);
-      Object.assign(gameState, nextState);
-    } else if (selectedEvent.choices && selectedEvent.choices.length > 0) {
-      const firstChoice = selectedEvent.choices[0];
-      if (firstChoice?.effects?.length) {
-        const nextState = await eventExecutor.executeEffects(firstChoice.effects, gameState);
-        Object.assign(gameState, nextState);
-      }
-    }
-    
-    // 记录事件历史
-    if (gameState.player) {
-      gameState.player.events = gameState.player.events || [];
-      gameState.player.events.push({
-        eventId: selectedEvent.id,
-        timestamp: { year: age, month: 1, day: 1 }
-      });
-    }
-    
-    // 记录结果
+    await executeSelectedEvent(gameEngine, selectedEvent, gameState);
+
     if (gameState.player) {
       results.push({
         age,
@@ -125,7 +114,6 @@ async function runSimulation() {
         }
       });
 
-      // 显示重要事件
       if (eventType === 'tutorial' || selectedEvent.priority === 100) {
         const conditionAge = selectedEvent.triggerConditions?.age || selectedEvent.ageRange;
         console.log(`年龄 ${age}: 【${selectedEvent.content?.title || selectedEvent.id}】`);
@@ -143,12 +131,10 @@ async function runSimulation() {
     }
   }
 
-  // 分析报告
   console.log('\n' + '='.repeat(100));
   console.log('测试报告：事件触发合理性分析');
   console.log('='.repeat(100));
 
-  // 1. 教程事件分析
   console.log('\n1️⃣ 教程事件触发情况');
   console.log('-'.repeat(100));
   const tutorialEvents = results.filter(r => r.eventType === 'tutorial');
@@ -163,7 +149,6 @@ async function runSimulation() {
     console.log('  ⚠️  注意：教程事件触发较少，建议检查年龄范围配置');
   }
 
-  // 2. 属性成长分析
   console.log('\n2️⃣ 属性成长曲线');
   console.log('-'.repeat(100));
   const lastResult = results[results.length - 1];
@@ -175,8 +160,7 @@ async function runSimulation() {
     console.log(`  学识：${lastResult.stats.knowledge}`);
     console.log(`  侠义：${lastResult.stats.chivalry}`);
     console.log(`  体魄：${lastResult.stats.constitution}`);
-    
-    // 评估成长是否合理
+
     const totalMartial = lastResult.stats.martialPower + lastResult.stats.externalSkill + lastResult.stats.internalSkill;
     if (totalMartial < 1) {
       console.log('  ⚠️  警告：战斗属性成长过低，建议增加修炼事件权重');
@@ -193,20 +177,18 @@ async function runSimulation() {
     }
   }
 
-  // 3. 事件类型分布
   console.log('\n3️⃣ 事件类型分布');
   console.log('-'.repeat(100));
   const eventTypeCount: { [key: string]: number } = {};
   results.forEach(r => {
     eventTypeCount[r.eventType] = (eventTypeCount[r.eventType] || 0) + 1;
   });
-  
+
   Object.entries(eventTypeCount).forEach(([type, count]) => {
     const percent = ((count / results.length) * 100).toFixed(1);
     console.log(`  ${type}: ${count}次 (${percent}%)`);
   });
 
-  // 4. 年龄分布分析
   console.log('\n4️⃣ 事件年龄分布');
   console.log('-'.repeat(100));
   const ageGroups = [
@@ -221,29 +203,27 @@ async function runSimulation() {
     console.log(`  ${group.name}: ${count}个事件`);
   });
 
-  // 5. 详细事件列表
   console.log('\n5️⃣ 完整事件时间线');
   console.log('-'.repeat(100));
-  results.forEach((r, index) => {
+  results.forEach(r => {
     const marker = r.eventType === 'tutorial' ? '📚' : '  ';
     console.log(`${marker} ${r.age}岁：${r.eventName} [${r.eventType}]`);
   });
 
-  // 6. 总体评价
   console.log('\n' + '='.repeat(100));
   console.log('总体评价与建议');
   console.log('='.repeat(100));
-  
+
   const issues: string[] = [];
-  
+
   if (tutorialEvents.length === 0) {
     issues.push('❌ 教程事件未触发 - 需要检查年龄范围和触发条件');
   }
-  
+
   if (lastResult && lastResult.stats.knowledge < 1) {
     issues.push('❌ 学识属性过低 - 建议增加学习相关事件');
   }
-  
+
   const eventCount = results.length;
   if (eventCount < 15) {
     issues.push('⚠️  事件总数偏少 - 建议扩展事件池');
@@ -263,5 +243,4 @@ async function runSimulation() {
   console.log('\n');
 }
 
-// 运行测试
 runSimulation().catch(console.error);

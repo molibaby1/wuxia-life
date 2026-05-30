@@ -32,15 +32,20 @@ type SimulationSample = {
   seed: number;
   choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
   years: number;
+  routeTrack?: 'official' | 'beggars' | 'demonic';
 };
+
+export type { SimulationSample };
 
 type SampleSummary = {
   sampleId: string;
   personaName: string;
   seed: number;
   choiceTendency: string;
+  routeTrack?: string;
   origin: string;
   routeSummary: string[];
+  routeLifecycleSummary: string[];
   endingSummary: string;
   choiceSummary: {
     totalChoices: number;
@@ -131,6 +136,44 @@ const DEFAULT_SAMPLES: SimulationSample[] = [
   { id: 'bond-keeper', personaName: '顾晚', gender: 'female', seed: 73, choiceTendency: 'relationship', years: 85 },
 ];
 
+/** 路线专项样本：用于验证 route completion / 路线链推进（包 C） */
+export const ROUTE_TRACK_SAMPLES: SimulationSample[] = [
+  {
+    id: 'official-track',
+    personaName: '韩砚',
+    gender: 'male',
+    seed: 201,
+    choiceTendency: 'balanced',
+    years: 85,
+    routeTrack: 'official',
+  },
+  {
+    id: 'beggars-track',
+    personaName: '步尘',
+    gender: 'male',
+    seed: 202,
+    choiceTendency: 'martial',
+    years: 85,
+    routeTrack: 'beggars',
+  },
+  {
+    id: 'demonic-track',
+    personaName: '沈夜',
+    gender: 'male',
+    seed: 203,
+    choiceTendency: 'risk_averse',
+    years: 85,
+    routeTrack: 'demonic',
+  },
+];
+
+export function getGameplaySimulationSamples(includeRouteTracks = true): SimulationSample[] {
+  if (!includeRouteTracks) {
+    return [...DEFAULT_SAMPLES];
+  }
+  return [...DEFAULT_SAMPLES, ...ROUTE_TRACK_SAMPLES];
+}
+
 function resolveAgeRange(args: CliArgs): { startAge: number; endAge: number } | undefined {
   if (typeof args.startAge !== 'number' && typeof args.endAge !== 'number') {
     return undefined;
@@ -202,6 +245,12 @@ function buildSampleSummary(sample: SimulationSample, report: GameProcessReport)
   const routeSummary = Object.keys(flags)
     .filter(key => key.startsWith('route_'))
     .sort();
+  const routeLifecycleSummary = finalState?.routeStates
+    ? Object.entries(finalState.routeStates)
+      .filter(([, state]) => state.lifecycle && state.lifecycle !== 'inactive')
+      .map(([routeId, state]) => `${routeId}:${state.lifecycle}`)
+      .sort()
+    : [];
   const notableRelations = finalState?.relations
     ? Object.entries(finalState.relations)
       .filter(([_, value]) => typeof value === 'number' && value >= 40)
@@ -218,8 +267,10 @@ function buildSampleSummary(sample: SimulationSample, report: GameProcessReport)
     personaName: sample.personaName,
     seed: sample.seed,
     choiceTendency: sample.choiceTendency,
+    routeTrack: sample.routeTrack,
     origin: report.statistics.origin || 'unknown',
     routeSummary: routeSummary.length > 0 ? routeSummary : ['none'],
+    routeLifecycleSummary: routeLifecycleSummary.length > 0 ? routeLifecycleSummary : ['none'],
     endingSummary: report.statistics.endingSummary || report.deathReason || '未触发结局',
     choiceSummary: {
       totalChoices: report.totalChoices,
@@ -240,7 +291,11 @@ function printSampleSummary(sampleSummary: SampleSummary): void {
   console.log(`\n--- Sample ${sampleSummary.sampleId} (${sampleSummary.personaName}) ---`);
   console.log(`Origin: ${sampleSummary.origin}`);
   console.log(`Choice tendency: ${sampleSummary.choiceTendency}`);
+  if (sampleSummary.routeTrack) {
+    console.log(`Route track: ${sampleSummary.routeTrack}`);
+  }
   console.log(`Route summary: ${sampleSummary.routeSummary.join(', ')}`);
+  console.log(`Route lifecycle: ${sampleSummary.routeLifecycleSummary.join(', ')}`);
   console.log(`Ending summary: ${sampleSummary.endingSummary}`);
   console.log(`Choice summary: ${sampleSummary.choiceSummary.totalChoices}/${sampleSummary.choiceSummary.totalEvents} (${sampleSummary.choiceSummary.choiceRate})`);
   console.log(`Death summary: ${sampleSummary.deathSummary}`);
@@ -265,7 +320,9 @@ function writeSampleSetOutput(sampleSummaries: SampleSummary[]): string {
 async function runSampleSet(args: CliArgs): Promise<void> {
   const reports: GameProcessReport[] = [];
   const summaries: SampleSummary[] = [];
-  for (const sample of DEFAULT_SAMPLES) {
+  const samples = getGameplaySimulationSamples(true);
+  console.log(`\nRunning ${samples.length} gameplay samples (${ROUTE_TRACK_SAMPLES.length} route-track)...\n`);
+  for (const sample of samples) {
     const simulator = new GameProcessSimulator({
       playerName: sample.personaName,
       gender: sample.gender,
@@ -273,6 +330,7 @@ async function runSampleSet(args: CliArgs): Promise<void> {
       runUntilDeath: true,
       seed: sample.seed,
       choiceTendency: sample.choiceTendency,
+      routeTrack: sample.routeTrack,
       autoSaveMode: args.autoSaveMode || 'age',
       saveAgeInterval: args.saveAgeInterval ?? 5,
       saveEventInterval: args.saveEventInterval ?? 10,
@@ -359,7 +417,9 @@ async function main(): Promise<void> {
   console.log(`Machine summary JSON: ${path.relative(process.cwd(), machineOutputPath)}`);
 }
 
-main().catch(error => {
-  console.error('❌ Gameplay simulation failed:', error);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(error => {
+    console.error('❌ Gameplay simulation failed:', error);
+    process.exit(1);
+  });
+}

@@ -52,6 +52,7 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["官场", "主线", "once"],
+      "routeTargets": ["official"],
       "enabled": true
     }
   },
@@ -83,6 +84,7 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["官场", "主线", "once"],
+      "routeTargets": ["official"],
       "enabled": true
     }
   },
@@ -131,6 +133,7 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["官场", "爱情", "联动", "once"],
+      "routeTargets": ["official"],
       "enabled": true
     }
   },
@@ -170,6 +173,7 @@
         "text": "继续仕途",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
+          { "type": "flag_set", "target": "route_official_completed" },
           { "type": "event_record", "target": "official_resign_stay" }
         ]
       }
@@ -179,6 +183,7 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["官场", "退路", "once"],
+      "routeTargets": ["official"],
       "enabled": true
     }
   }

@@ -1,7 +1,7 @@
+import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
-import { EventExecutor } from '../src/core/EventExecutor';
 import { EventPriority, type EventDefinition, type GameState } from '../src/types/eventTypes';
 
 interface SimulatedEvent {
@@ -80,31 +80,33 @@ function isCriticalEvent(event: EventDefinition): boolean {
   const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
   return (
     event.priority === EventPriority.CRITICAL ||
-    event.category === 'main_story' ||
     tags.includes('critical') ||
     tags.includes('mandatory') ||
     tags.includes('mainline')
   );
 }
 
-function getFirstChoiceEffects(_state: GameState, event: EventDefinition) {
-  if (!event.choices || event.choices.length === 0) {
-    return [];
+async function executeSelectedEvent(
+  gameEngine: GameEngineIntegration,
+  selected: EventDefinition,
+  state: GameState
+): Promise<void> {
+  if (selected.autoEffects && selected.autoEffects.length > 0) {
+    await gameEngine.executeAutoEvent(selected);
+    return;
   }
 
-  const firstAvailableChoice = event.choices.find(choice => !choice.condition) || event.choices[0];
-  if (!firstAvailableChoice) {
-    return [];
-  }
-
-  if (firstAvailableChoice.outcomes && firstAvailableChoice.outcomes.length > 0) {
-    const firstOutcome = firstAvailableChoice.outcomes.find(outcome => !outcome.condition);
-    if (firstOutcome?.effects) {
-      return firstOutcome.effects;
+  if (selected.choices && selected.choices.length > 0) {
+    const resolved = resolveFirstChoiceEffects(gameEngine, state, selected);
+    if (!resolved) {
+      return;
     }
+    await gameEngine.executeChoiceEffects(
+      resolved.effects,
+      selected.id,
+      resolved.choiceId
+    );
   }
-
-  return firstAvailableChoice.effects || [];
 }
 
 export async function simulateSample(seed: number, maxAge: number): Promise<SimulationSample> {
@@ -113,7 +115,6 @@ export async function simulateSample(seed: number, maxAge: number): Promise<Simu
     await eventLoader.loadAllEvents();
 
     const gameEngine = new GameEngineIntegration();
-    const eventExecutor = new EventExecutor();
     const state = gameEngine.getGameState();
 
     if (state.player) {
@@ -147,13 +148,7 @@ export async function simulateSample(seed: number, maxAge: number): Promise<Simu
         storyLine: selected.storyLine || null,
       });
 
-      const effects = selected.autoEffects?.length
-        ? selected.autoEffects
-        : getFirstChoiceEffects(state, selected);
-      if (effects.length > 0) {
-        const nextState = await eventExecutor.executeEffects(effects, state);
-        Object.assign(state, nextState);
-      }
+      await executeSelectedEvent(gameEngine, selected, state);
     }
 
     return {

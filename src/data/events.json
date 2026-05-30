@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "imports": [
-    "./lines/prologue.json",
     "./lines/origin.json",
     "./lines/general.json",
     "./lines/love.json",
@@ -19,18 +18,10 @@
     "./lines/identity-hero.json",
     "./lines/identity-merchant.json",
     "./lines/identity-demon.json",
-    "./lines/identity-scholar.json",
-    "./lines/identity-hermit.json",
-    "./lines/identity-sect_leader.json",
-    "./lines/identity-assassin.json",
-    "./lines/identity-doctor.json",
-    "./lines/identity-beggar.json",
-    "./lines/identity-official.json",
     "./lines/identity-outlaw.json",
     "./lines/identity-year-events.json",
     "./lines/faction-revelation.json",
-    "./lines/martial-arts-meeting.json",
     "./lines/setback-events.json"
   ],
-  "notes": "Event lines are split by narrative/theme, not age."
+  "notes": "Imports must match EventLoader lineMap. Deferred (not yet wired): prologue, identity-scholar/hermit/sect_leader/assassin/doctor/beggar/official, martial-arts-meeting."
 }

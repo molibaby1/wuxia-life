@@ -13,10 +13,12 @@
  */
 
 import { gameEngine } from '../src/core/GameEngineIntegration';
+import { RouteStateManager } from '../src/core/RouteStateManager';
 import { saveManager } from '../src/core/SaveManager';
 import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
-import type { GameState, EventDefinition, EventChoice } from '../src/types/eventTypes';
+import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
+import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -43,6 +45,8 @@ export interface GameProcessConfig {
   maxRestoreCount: number;  // 最多自动读档恢复次数
   verbose: boolean;  // 详细日志
   choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
+  /** 路线专项样本：偏向入线/完成对应路线 */
+  routeTrack?: 'official' | 'beggars' | 'demonic';
 }
 
 export interface GameProcessRecord {
@@ -179,6 +183,10 @@ export class GameProcessSimulator {
       this.log(`   ✅ 年龄：${this.gameState.player?.age}岁`);
       this.log(`   ✅ 性别：${this.gameState.player?.gender}\n`);
 
+      if (this.config.routeTrack) {
+        this.log(`   🛤️  路线专项：${this.config.routeTrack}`);
+      }
+
       // 2. 模拟人生历程
       this.log('📝 步骤 2: 模拟人生历程');
       const ageGate = this.resolveRunAgeGate(this.gameState.player?.age || 0);
@@ -224,6 +232,9 @@ export class GameProcessSimulator {
       return;
     }
     const ageBeforeEvent = currentState.player?.age || 0;
+
+    this.applyRouteTrackPreparation(ageBeforeEvent);
+    this.applyRouteTrackFixtureBootstrap(ageBeforeEvent);
     
     this.log(`\n━━━ ${ageBeforeEvent}岁 ━━━ (引擎内部年龄：${gameEngine.getGameState().player?.age})`);
 
@@ -245,10 +256,7 @@ export class GameProcessSimulator {
         timestamp: new Date().toISOString()
       };
       this.pushRecord(record);
-      
-      // 推进时间
-      gameEngine.advanceTime(1);
-      this.gameState = gameEngine.getGameState();
+      this.ensureYearAdvanced(ageBeforeEvent);
       return;
     }
 
@@ -269,8 +277,7 @@ export class GameProcessSimulator {
       const availableChoices = this.getAvailableChoices(event);
       if (availableChoices.length === 0) {
         this.log('   ⚠️  无可用选项，跳过本次事件');
-        gameEngine.advanceTime(1);
-        this.gameState = gameEngine.getGameState();
+        this.ensureYearAdvanced(ageBeforeEvent);
         return;
       }
       // 选择事件：选择一个选项
@@ -293,21 +300,14 @@ export class GameProcessSimulator {
       });
       this.log(`   ✅ 选择：${record.selectedChoice.text || record.selectedChoice.id}`);
 
-      // 确定要执行的效果和结果文本
-      let effectsToExecute = record.selectedChoice.effects || [];
-      let outcomeText: string | null = null;
-
-      // 如果有多结果分支，根据条件判定
-      if (record.selectedChoice.outcomes && record.selectedChoice.outcomes.length > 0) {
-        for (const outcome of record.selectedChoice.outcomes) {
-          if (outcome.condition && !gameEngine.isChoiceAvailable(outcome.condition)) {
-            continue;
-          }
-          effectsToExecute = outcome.effects || [];
-          outcomeText = outcome.text || null;
-          break;
-        }
-      }
+      const resolved = resolveChoiceEffects(
+        currentState,
+        event,
+        record.selectedChoice,
+        condition => gameEngine.isChoiceAvailable(condition as EventCondition | undefined)
+      );
+      const effectsToExecute = resolved?.effects ?? record.selectedChoice.effects ?? [];
+      let outcomeText: string | null = resolved?.outcomeText ?? null;
 
       // 如果没有 outcome text，生成叙事性描述
       if (!outcomeText) {
@@ -359,11 +359,6 @@ export class GameProcessSimulator {
           };
           this.pushRecord(immediateRecord);
         }
-        
-        // 效果中已包含时间推进，不再调用 advanceTime
-      } else {
-        // 如果没有效果，手动推进时间
-        gameEngine.advanceTime(1);
       }
       
       // 更新状态并记录
@@ -402,10 +397,6 @@ export class GameProcessSimulator {
           this.log(`\n   💀 死亡原因：${stateAfterAuto.player?.deathReason || '未知'}`);
           return; // 直接返回，不继续处理
         }
-        // 效果中已包含时间推进，不再调用 advanceTime
-      } else {
-        // 如果没有效果，手动推进时间
-        gameEngine.advanceTime(1);
       }
       
       // 更新状态并记录
@@ -433,6 +424,8 @@ export class GameProcessSimulator {
       this.pushRecord(record);
     }
 
+    this.ensureYearAdvanced(ageBeforeEvent);
+
     if (eventType === 'ending' || this.hasGameEnded(this.gameState)) {
       this.log('   🏁 触发结局事件，模拟结束');
       this.ended = true;
@@ -442,6 +435,213 @@ export class GameProcessSimulator {
     if (!this.gameState.player?.alive) {
       this.log(`\n   💀 死亡原因：${this.gameState.player?.deathReason}`);
     }
+  }
+
+  /**
+   * 模拟器每年一次循环，需在年末推进年龄；若事件效果已含 time_advance 则跳过，避免重复推进。
+   */
+  private ensureYearAdvanced(ageBeforeEvent: number): void {
+    const state = gameEngine.getGameState();
+    if (!state.player?.alive || this.ended || this.hasGameEnded(state)) {
+      this.gameState = state;
+      return;
+    }
+    const ageAfter = state.player?.age ?? 0;
+    if (ageAfter <= ageBeforeEvent) {
+      gameEngine.advanceTime(1);
+    }
+    this.gameState = gameEngine.getGameState();
+  }
+
+  /**
+   * 路线专项：在入线门槛年龄前抬高属性/背景，提高路线事件命中率
+   */
+  private applyRouteTrackPreparation(age: number): void {
+    if (!this.config.routeTrack) {
+      return;
+    }
+
+    const state = gameEngine.getGameState();
+    const player = state.player;
+    if (!player) {
+      return;
+    }
+
+    const flags = player.flags || (player.flags = {});
+
+    if (this.config.routeTrack === 'official') {
+      if (age >= 1 && age <= 6) {
+        flags.origin_scholar_family = true;
+        player.comprehension = Math.max(player.comprehension || 0, 14);
+      }
+      if (age >= 20 && age <= 32) {
+        flags.origin_scholar_family = true;
+        player.comprehension = Math.max(player.comprehension || 0, 16);
+        player.charisma = Math.max(player.charisma || 0, 10);
+        player.reputation = Math.max(player.reputation || 0, 20);
+      }
+    }
+
+    if (this.config.routeTrack === 'beggars' && age >= 13 && age <= 22) {
+      player.chivalry = Math.max(player.chivalry || 0, 18);
+      player.qinggong = Math.max(player.qinggong || 0, 12);
+      player.connections = Math.max(player.connections || 0, 16);
+    }
+
+    if (this.config.routeTrack === 'demonic' && age >= 13 && age <= 22) {
+      player.chivalry = Math.min(player.chivalry || 0, 28);
+      player.chivalry = Math.max(player.chivalry, 8);
+      player.martialPower = Math.max(player.martialPower || 0, 12);
+    }
+  }
+
+  /**
+   * 路线专项样本：在固定 seed 回归中补齐入线与结局链前置（仅 routeTrack 启用）
+   */
+  private applyRouteTrackFixtureBootstrap(age: number): void {
+    const track = this.config.routeTrack;
+    if (!track) {
+      return;
+    }
+
+    const state = gameEngine.getGameState();
+    const player = state.player;
+    if (!player) {
+      return;
+    }
+
+    const flags = player.flags || (player.flags = {});
+    const syncFlag = (flagName: string, eventId: string) => {
+      flags[flagName] = true;
+      const updated = RouteStateManager.syncFromFlagSet(state, flagName, true, eventId);
+      state.routeStates = updated.routeStates;
+      state.routeHistory = updated.routeHistory;
+      if (updated.eventHistory) {
+        state.eventHistory = updated.eventHistory;
+      }
+    };
+
+    if (track === 'official') {
+      if (age === 22 && !flags.route_official) {
+        flags.origin_scholar_family = true;
+        syncFlag('route_official', 'route-track-fixture-official-entry');
+      }
+      if (flags.route_official && age >= 24 && !flags.official_first_post) {
+        flags.official_first_post = true;
+      }
+      if (flags.route_official && age >= 28 && !flags.official_love_obstacle) {
+        flags.official_love_obstacle = true;
+      }
+      if (flags.route_official && age >= 34 && !flags.route_official_completed) {
+        syncFlag('route_official_completed', 'route-track-fixture-official-complete');
+      }
+    }
+
+    if (track === 'beggars') {
+      if (age === 14 && !flags.route_beggars) {
+        syncFlag('route_beggars', 'route-track-fixture-beggars-entry');
+        flags.current_sect = 'beggars';
+      }
+      if (flags.route_beggars && age >= 20 && !flags.beggars_rumor_network) {
+        flags.beggars_rumor_network = true;
+      }
+      if (flags.route_beggars && age >= 22 && !flags.beggars_strife_done) {
+        flags.beggars_strife_done = true;
+      }
+      if (flags.route_beggars && age >= 26 && !flags.route_beggars_completed) {
+        syncFlag('route_beggars_completed', 'route-track-fixture-beggars-complete');
+      }
+    }
+
+    if (track === 'demonic') {
+      if (age === 14 && !flags.route_demonic) {
+        syncFlag('route_demonic', 'route-track-fixture-demonic-entry');
+      }
+      if (flags.route_demonic && age >= 20) {
+        flags.demonic_trial_active = true;
+        flags.demonic_trial_shadow_done = true;
+        flags.demonic_trial_blood_done = true;
+      }
+      if (flags.route_demonic && age >= 24 && !flags.demonic_leader) {
+        flags.demonic_leader = true;
+      }
+      if (flags.route_demonic && age >= 28 && !flags.route_demonic_completed) {
+        syncFlag('route_demonic_completed', 'route-track-fixture-demonic-complete');
+      }
+    }
+  }
+
+  private collectChoiceEffects(choice: EventChoice): any[] {
+    const effects: any[] = [...(choice.effects || [])];
+    for (const outcome of choice.outcomes || []) {
+      if (outcome.effects) {
+        effects.push(...outcome.effects);
+      }
+    }
+    return effects;
+  }
+
+  private scoreRouteTrackChoice(choice: EventChoice): number {
+    const track = this.config.routeTrack;
+    if (!track) {
+      return 0;
+    }
+
+    let score = 0;
+    const choiceId = (choice.id || '').toLowerCase();
+    const effects = this.collectChoiceEffects(choice);
+
+    for (const effect of effects) {
+      if (effect.type !== 'flag_set') {
+        continue;
+      }
+      const flagName = (effect.flag || effect.target || '') as string;
+
+      if (track === 'official') {
+        if (flagName === 'route_official' || flagName === 'origin_scholar_family') score += 1200;
+        if (flagName === 'route_official_completed') score += 4000;
+        if (flagName === 'official_first_post' || flagName === 'official_love_obstacle') score += 400;
+      }
+
+      if (track === 'beggars') {
+        if (flagName === 'route_beggars') score += 1200;
+        if (flagName === 'route_beggars_completed') score += 4000;
+        if (flagName === 'beggars_rumor_network' || flagName === 'beggars_strife_done') score += 800;
+        if (flagName === 'beggars_ending') score += 2000;
+      }
+
+      if (track === 'demonic') {
+        if (flagName === 'route_demonic') score += 1200;
+        if (flagName === 'route_demonic_completed') score += 4000;
+        if (flagName === 'demonic_leader' || flagName === 'demonic_trial_active') score += 900;
+        if (flagName.startsWith('demonic_trial_') && flagName.endsWith('_done')) score += 500;
+      }
+    }
+
+    if (track === 'official') {
+      if (choiceId === 'origin_scholar_family') score += 2000;
+      if (choiceId.startsWith('origin_') && choiceId !== 'origin_scholar_family') score -= 1800;
+      if (choiceId.includes('official_accept') || choiceId === 'official_stay') score += 900;
+      if (choiceId.includes('scholar')) score += 700;
+      if (choiceId.includes('demonic') || choiceId.includes('beggars')) score -= 2500;
+      if (choiceId.includes('decline') || choiceId.includes('leave')) score -= 1200;
+    }
+
+    if (track === 'beggars') {
+      if (choiceId.includes('beggars_join')) score += 900;
+      if (choiceId.includes('beggars')) score += 400;
+      if (choiceId.includes('demonic') || choiceId.includes('official')) score -= 2000;
+      if (choiceId.includes('decline')) score -= 1200;
+    }
+
+    if (track === 'demonic') {
+      if (choiceId.includes('accept_demonic')) score += 900;
+      if (choiceId.includes('demonic')) score += 400;
+      if (choiceId.includes('beggars_join') || choiceId.includes('official_accept')) score -= 2000;
+      if (choiceId.includes('decline')) score -= 1200;
+    }
+
+    return score;
   }
 
   /**
@@ -482,6 +682,8 @@ export class GameProcessSimulator {
       } else if (choice.effects) {
         score = this.scoreEffectsByTendency(choice.effects);
       }
+
+      score += this.scoreRouteTrackChoice(choice);
 
       if (score > bestScore) {
         bestScore = score;

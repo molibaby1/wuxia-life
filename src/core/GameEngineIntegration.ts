@@ -30,6 +30,10 @@ import { traitSystem } from './TraitSystem';
 import { dailyEventSystem } from './DailyEventSystem';
 import { isCoreRouteIdentity } from './RouteStateManager';
 import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
+import { appendFormalEventHistory } from './EventHistory';
+
+/** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
+const FORMAL_CANDIDATE_POOL_CAP = 12;
 
 /**
  * 游戏引擎集成器类
@@ -423,10 +427,9 @@ export class GameEngineIntegration {
       return (b.priority ?? EventPriority.NORMAL) - (a.priority ?? EventPriority.NORMAL);
     });
     
-    // 限制每年触发的事件数量（密度控制）
-    const MAX_EVENTS_PER_YEAR = 3;
-    const limitedEvents = availableEvents.slice(0, MAX_EVENTS_PER_YEAR);
-    
+    let limitedEvents = availableEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP);
+    limitedEvents = this.injectActiveRouteCandidates(availableEvents, limitedEvents);
+
     return limitedEvents;
   }
 
@@ -735,49 +738,152 @@ export class GameEngineIntegration {
     return true;
   }
   
+  private getActivePlayerRouteKeys(): string[] {
+    const keys = new Set<string>();
+
+    for (const [routeId, routeState] of Object.entries(this.gameState.routeStates || {})) {
+      if (routeState.lifecycle === 'active' || routeState.lifecycle === 'locked_in' || routeState.lifecycle === 'temporary') {
+        keys.add(routeId);
+      }
+    }
+
+    const flags = this.gameState.player?.flags || {};
+    for (const [flagName, flagValue] of Object.entries(flags)) {
+      if (!flagValue || !flagName.startsWith('route_')) {
+        continue;
+      }
+      if (flagName.endsWith('_completed') || flagName.endsWith('_failed') || flagName.endsWith('_locked')) {
+        continue;
+      }
+      const routeKey = flagName.replace(/^route_/, '');
+      if (routeKey) {
+        keys.add(routeKey);
+      }
+    }
+
+    return [...keys];
+  }
+
+  private eventBelongsToActiveRoute(event: EventDefinition, activeRouteKeys: string[]): boolean {
+    if (activeRouteKeys.length === 0) {
+      return false;
+    }
+
+    const routeTargets = event.metadata?.routeTargets || [];
+    for (const routeKey of activeRouteKeys) {
+      if (routeTargets.includes(routeKey)) {
+        return true;
+      }
+    }
+
+    const coreCandidates = this.getEventRouteCandidates(event);
+    for (const routeKey of activeRouteKeys) {
+      if (coreCandidates.includes(routeKey as RouteIdentity)) {
+        return true;
+      }
+    }
+
+    const serialized = JSON.stringify({
+      conditions: event.conditions,
+      autoEffects: event.autoEffects,
+      choices: event.choices,
+    });
+    for (const routeKey of activeRouteKeys) {
+      if (
+        serialized.includes(`"route_${routeKey}"`) ||
+        serialized.includes(`flags.has("route_${routeKey}")`) ||
+        serialized.includes(`flags.has('route_${routeKey}')`)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   /**
-   * 获取玩家当前主导路径
+   * 方案乙：活跃路线在候选池中至少保留 1 个相关事件（可略超 cap）
+   */
+  private injectActiveRouteCandidates(
+    availableEvents: EventDefinition[],
+    limitedEvents: EventDefinition[]
+  ): EventDefinition[] {
+    const activeRouteKeys = this.getActivePlayerRouteKeys();
+    if (activeRouteKeys.length === 0) {
+      return limitedEvents;
+    }
+
+    const result = [...limitedEvents];
+    const selectedIds = new Set(result.map(event => event.id));
+
+    for (const routeKey of activeRouteKeys) {
+      const alreadyRepresented = result.some(event => this.eventBelongsToActiveRoute(event, [routeKey]));
+      if (alreadyRepresented) {
+        continue;
+      }
+
+      const reserved = availableEvents.find(
+        event => !selectedIds.has(event.id) && this.eventBelongsToActiveRoute(event, [routeKey])
+      );
+      if (reserved) {
+        result.push(reserved);
+        selectedIds.add(reserved.id);
+      }
+    }
+
+    return result;
+  }
+
+  private getRouteSchedulingMultiplier(event: EventDefinition): number {
+    const activeRouteKeys = this.getActivePlayerRouteKeys();
+    if (activeRouteKeys.length === 0) {
+      return 1;
+    }
+    return this.eventBelongsToActiveRoute(event, activeRouteKeys) ? 1.35 : 1;
+  }
+
+  /**
+   * 获取玩家当前主导路径（优先 routeStates / route_* 标记，再回退启发式）
    */
   private getDominantPaths(): string[] {
+    const paths = new Set<string>(this.getActivePlayerRouteKeys());
+
     const flags = this.gameState.player?.flags || {};
-    const paths: string[] = [];
-    
-    // 检查学者路径
-    if (flags.scholar_path || flags.origin_scholar_family || 
+
+    if (flags.scholar_path || flags.origin_scholar_family ||
         (this.gameState.player?.comprehension || 0) >= 50) {
-      paths.push('scholar');
+      paths.add('scholar');
     }
-    
-    // 检查商人路径
+
     if (flags.merchant_path || flags.origin_merchant_family ||
         (this.gameState.player?.money || 0) >= 500) {
-      paths.push('merchant');
+      paths.add('merchant');
     }
-    
-    // 检查武者路径
+
     if (flags.martial_path || flags.origin_wuxia_family ||
         (this.gameState.player?.martialPower || 0) >= 50) {
-      paths.push('martial_artist');
+      paths.add('martial_artist');
     }
-    
-    // 检查魔道路径
+
     if (flags.demon_path || flags.sect_faction === 'unconventional' ||
-        flags.unconventional_member) {
-      paths.push('demon');
+        flags.unconventional_member || flags.route_demonic) {
+      paths.add('demonic');
     }
-    
-    // 检查官员路径
+
     if (flags.official_path || flags.civil_service_passed ||
-        (this.gameState.player?.reputation || 0) >= 100) {
-      paths.push('official');
+        flags.route_official || (this.gameState.player?.reputation || 0) >= 100) {
+      paths.add('official');
     }
-    
-    // 检查隐士路径
+
     if (flags.hermit_path || (this.gameState.player?.chivalry || 0) >= 80) {
-      paths.push('hermit');
+      paths.add('hermit');
     }
-    
-    return paths;
+
+    if (flags.route_beggars) {
+      paths.add('beggars');
+    }
+
+    return [...paths];
   }
 
   private getLockedCoreRoutes(): RouteIdentity[] {
@@ -843,8 +949,10 @@ export class GameEngineIntegration {
     const candidates = new Set<RouteIdentity>();
 
     for (const route of metadataTargets) {
-      if (isCoreRouteIdentity(route)) {
-        candidates.add(route);
+      if (typeof route === 'string' && route.length > 0) {
+        if (isCoreRouteIdentity(route)) {
+          candidates.add(route);
+        }
       }
     }
 
@@ -1065,7 +1173,6 @@ export class GameEngineIntegration {
     const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
     return (
       event.priority === EventPriority.CRITICAL ||
-      event.category === 'main_story' ||
       tags.includes('critical') ||
       tags.includes('mandatory') ||
       tags.includes('mainline')
@@ -1103,7 +1210,10 @@ export class GameEngineIntegration {
     }
 
     if (events.length === 1) {
-      return events[0];
+      const combinedMultiplier =
+        this.getFormalRepetitionSuppressionMultiplier(events[0]) *
+        this.getAdjacentClassSuppressionMultiplier(events[0]);
+      return combinedMultiplier <= 0.2 ? null : events[0];
     }
 
     const totalWeight = events.reduce((sum, event) => {
@@ -1113,7 +1223,9 @@ export class GameEngineIntegration {
       const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      return sum + this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
+      const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
+      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event);
+      return sum + this.adjustWeightByAnnualPressure(event, routeAdjusted);
     }, 0);
 
     if (totalWeight <= 0) {
@@ -1128,13 +1240,60 @@ export class GameEngineIntegration {
       const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      random -= this.adjustWeightByAnnualPressure(event, repetitionAdjusted);
+      const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
+      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event);
+      random -= this.adjustWeightByAnnualPressure(event, routeAdjusted);
       if (random <= 0) {
         return event;
       }
     }
 
     return events[events.length - 1];
+  }
+
+  private getHistoryRecordSuppressionClass(eventId: string): 'injury' | 'illness' | 'economy' | null {
+    const historicalEvent = eventLoader.getEventById(eventId);
+    if (historicalEvent) {
+      return this.detectSuppressionClass(historicalEvent);
+    }
+    if (!eventId.startsWith('daily_')) {
+      return null;
+    }
+    const id = eventId.toLowerCase();
+    if (/trade|merchant|business|economy|money/.test(id)) {
+      return 'economy';
+    }
+    if (/injury|hurt|wound/.test(id)) {
+      return 'injury';
+    }
+    if (/illness|sick|disease/.test(id)) {
+      return 'illness';
+    }
+    return null;
+  }
+
+  private getAdjacentClassSuppressionMultiplier(event: EventDefinition): number {
+    const suppressionClass = this.detectSuppressionClass(event);
+    if (!suppressionClass) {
+      return 1;
+    }
+
+    const currentAge = this.gameState.player?.age || 0;
+    const eventHistory = this.gameState.eventHistory || [];
+    for (let index = eventHistory.length - 1; index >= 0; index -= 1) {
+      const record = eventHistory[index];
+      const ageGap = currentAge - (record.age ?? currentAge);
+      if (ageGap > 1) {
+        break;
+      }
+      if (ageGap < 1) {
+        continue;
+      }
+      if (this.getHistoryRecordSuppressionClass(record.eventId) === suppressionClass) {
+        return 0.12;
+      }
+    }
+    return 1;
   }
 
   private detectSuppressionClass(event: EventDefinition): 'injury' | 'illness' | 'economy' | null {
@@ -1150,17 +1309,24 @@ export class GameEngineIntegration {
     if (tags.includes('illness') || /illness|disease|sick|病|生病|疾病/.test(textBlob)) {
       return 'illness';
     }
-    if (tags.includes('economy') || /economy|merchant|business|trade|money|经济|商|银两|钱|财/.test(textBlob)) {
+    if (tags.includes('economy') || this.hasEconomySuppressionSignal(textBlob)) {
       return 'economy';
     }
     return null;
   }
 
+  private hasEconomySuppressionSignal(textBlob: string): boolean {
+    const stripped = textBlob.replace(/本钱/g, '');
+    return /economy|merchant|business|trade|money|经济|商|银两|破产|财产损失|财富|财产|缺钱|破财|损财/.test(
+      stripped
+    );
+  }
+
   private isHighNegativeEvent(event: EventDefinition): boolean {
-    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
-    if (event.isSetbackEvent && ['severe', 'critical'].includes(event.setbackSeverity || '')) {
+    if (event.isSetbackEvent) {
       return true;
     }
+    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
     if (tags.some(tag => ['negative', 'setback', 'loss', 'injury', 'illness'].includes(tag))) {
       return true;
     }
@@ -1173,7 +1339,11 @@ export class GameEngineIntegration {
     }
 
     const suppressionClass = this.detectSuppressionClass(event);
-    if (!suppressionClass || !this.isHighNegativeEvent(event)) {
+    const isSetback = event.isSetbackEvent === true;
+    if (!isSetback && (!suppressionClass || !this.isHighNegativeEvent(event))) {
+      return 1;
+    }
+    if (!this.isHighNegativeEvent(event)) {
       return 1;
     }
 
@@ -1185,6 +1355,7 @@ export class GameEngineIntegration {
 
     let recentSameClass = 0;
     let recentSameEvent = 0;
+    let recentAnySetback = 0;
 
     for (const record of eventHistory) {
       const ageGap = currentAge - (record.age ?? currentAge);
@@ -1193,7 +1364,16 @@ export class GameEngineIntegration {
       }
 
       const historicalEvent = eventLoader.getEventById(record.eventId);
+      const recordClass = historicalEvent
+        ? this.isDailyEvent(historicalEvent)
+          ? this.getHistoryRecordSuppressionClass(record.eventId)
+          : this.detectSuppressionClass(historicalEvent)
+        : this.getHistoryRecordSuppressionClass(record.eventId);
+
       if (!historicalEvent || this.isDailyEvent(historicalEvent)) {
+        if (suppressionClass && recordClass === suppressionClass) {
+          recentSameClass += 1;
+        }
         continue;
       }
 
@@ -1201,18 +1381,60 @@ export class GameEngineIntegration {
         recentSameEvent += 1;
       }
 
-      if (this.detectSuppressionClass(historicalEvent) === suppressionClass) {
+      if (suppressionClass && recordClass === suppressionClass) {
         recentSameClass += 1;
+      }
+
+      if (historicalEvent.isSetbackEvent) {
+        recentAnySetback += 1;
       }
     }
 
-    if (recentSameClass === 0 && recentSameEvent === 0) {
+    if (recentSameClass === 0 && recentSameEvent === 0 && (!isSetback || recentAnySetback === 0)) {
       return 1;
     }
 
-    const sameClassPenalty = Math.pow(0.55, recentSameClass);
-    const sameEventPenalty = Math.pow(0.45, recentSameEvent);
-    return this.clampWeight(sameClassPenalty * sameEventPenalty, 0.2, 1);
+    let multiplier = 1;
+    if (suppressionClass) {
+      multiplier *= Math.pow(0.55, recentSameClass);
+      multiplier *= Math.pow(0.45, recentSameEvent);
+    }
+    if (isSetback && recentAnySetback > 0) {
+      multiplier *= Math.pow(0.5, recentAnySetback);
+    }
+    return this.clampWeight(multiplier, 0.2, 1);
+  }
+
+  /**
+   * 跨年龄节奏：近期连续 formal 且窗口内无 daily 时，regular formal 让位给 daily。
+   * 不影响 critical / storyline lane。
+   */
+  private static readonly REGULAR_FORMAL_DAILY_CADENCE_WINDOW = 6;
+
+  private isDailyHistoryRecord(eventId: string): boolean {
+    const historicalEvent = eventLoader.getEventById(eventId);
+    if (historicalEvent) {
+      return this.isDailyEvent(historicalEvent);
+    }
+    // DailyEventSystem 动态生成的事件不在 loader 中，用 id 前缀识别。
+    return eventId.startsWith('daily_');
+  }
+
+  private shouldYieldRegularFormalToDailyCadence(): boolean {
+    const eventHistory = this.gameState.eventHistory || [];
+    const windowSize = GameEngineIntegration.REGULAR_FORMAL_DAILY_CADENCE_WINDOW;
+    if (eventHistory.length < windowSize) {
+      return false;
+    }
+
+    const recent = eventHistory.slice(-windowSize);
+    for (const record of recent) {
+      if (this.isDailyHistoryRecord(record.eventId)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -1353,9 +1575,24 @@ export class GameEngineIntegration {
       return storylineSelection;
     }
 
-    // Layer 3: regular formal lane can yield to rhythm pause.
+    // Layer 3: regular formal lane can yield to cross-age daily cadence or rhythm pause.
     if (regularFormalEvents.length === 0) {
       return dailyEventSystem.selectEvent(this.gameState);
+    }
+
+    if (this.shouldYieldRegularFormalToDailyCadence()) {
+      const cadenceDaily = dailyEventSystem.selectEvent(this.gameState);
+      if (cadenceDaily) {
+        const dailyClass = this.getHistoryRecordSuppressionClass(cadenceDaily.id);
+        const eventHistory = this.gameState.eventHistory || [];
+        const lastRecord = eventHistory[eventHistory.length - 1];
+        const lastClass = lastRecord
+          ? this.getHistoryRecordSuppressionClass(lastRecord.eventId)
+          : null;
+        if (!dailyClass || dailyClass !== lastClass) {
+          return cadenceDaily;
+        }
+      }
     }
 
     if (this.shouldPauseEventsThisYear(regularFormalEvents)) {
@@ -1409,12 +1646,14 @@ export class GameEngineIntegration {
    * 执行自动事件
    */
   public async executeAutoEvent(event: EventDefinition): Promise<{ gameState: GameState, event: EventDefinition }> {
+    const ageBeforeEvent = this.gameState.player?.age || 0;
+
     if (!event.autoEffects || event.autoEffects.length === 0) {
+      this.recordEventTrigger(event, ageBeforeEvent);
+      appendFormalEventHistory(this.gameState, event.id, ageBeforeEvent);
       return { gameState: this.gameState, event };
     }
     
-    // 记录事件前的年龄
-    const ageBeforeEvent = this.gameState.player?.age || 0;
     const previousState = this.snapshotState(this.gameState);
     
     // 执行效果
@@ -1427,27 +1666,14 @@ export class GameEngineIntegration {
     
     // 记录事件触发（用于年度事件限制）
     this.recordEventTrigger(event, ageBeforeEvent);
-    
-    // 强制记录事件到历史
-    if (!this.gameState.eventHistory) {
-      this.gameState.eventHistory = [];
-    }
-    const alreadyExists = this.gameState.eventHistory.some(
-      e => e.eventId === event.id && e.age === ageBeforeEvent
-    );
-    if (!alreadyExists) {
-      this.gameState.eventHistory.push({
-        eventId: event.id,
-        triggeredAt: this.gameState.currentTime.year,
-        age: ageBeforeEvent
-      });
-    }
+    appendFormalEventHistory(this.gameState, event.id, ageBeforeEvent);
 
     // 难度系统：每次事件执行时都检查是否触发挫折事件
     const setbackResults = checkSetbackEvents(this.gameState);
     if (setbackResults.triggeredEvents.length > 0) {
       for (const result of setbackResults.triggeredEvents) {
         this.gameState = applySetbackEffects(this.gameState, result.event.id);
+        appendFormalEventHistory(this.gameState, result.event.id, ageBeforeEvent);
       }
     }
 
@@ -1506,16 +1732,8 @@ export class GameEngineIntegration {
       this.recordEventTrigger(this.getEventDefinition(eventId), ageBeforeEvent);
     }
     
-    // 记录事件到历史（使用事件前的年龄）
     if (eventId) {
-      if (!this.gameState.eventHistory) {
-        this.gameState.eventHistory = [];
-      }
-      this.gameState.eventHistory.push({
-        eventId,
-        triggeredAt: this.gameState.currentTime.year,
-        age: ageBeforeEvent
-      });
+      appendFormalEventHistory(this.gameState, eventId, ageBeforeEvent);
     }
     
     // 记录关键选择

@@ -1,0 +1,97 @@
+{
+  "project": "Wuxia Life Product Experience Governance Execution Pack",
+  "branchName": "ralph/product-experience-governance-execution-pack",
+  "description": "Dispatch the product-experience-governance PRD into dependency-aware execution packs for a 0-30 golden life line, active event governance, feedback and payoff standards, priority route lifecycle, experience gates, minimum playable UI clarity, and closure reporting.",
+  "userStories": [
+    {
+      "id": "PXG0",
+      "title": "Scope Freeze and Architecture Guardrails",
+      "description": "Freeze the 0-30 golden life line scope, priority routes, non-goals, and future architecture readiness guardrails before implementation expands.",
+      "acceptanceCriteria": [
+        "Covers US-001 and US-022",
+        "Defines the 0-30 golden life line and excludes full 0-80 completion",
+        "Documents orthodox/sect, wandering hero, and demonic path as priority routes",
+        "States that database, backend API, account, cloud sync, and mini-program runtime are out of scope",
+        "Preserves serializable state, data-driven events, structured choice results, and explicit save schema versioning"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "PXG1",
+      "title": "Event Asset and State Field Audit",
+      "description": "Inventory runtime-loaded and non-loaded event assets, classify every event asset, define active admission rules, and audit route-like state fields.",
+      "acceptanceCriteria": [
+        "Covers US-002, US-003, US-004, and US-014",
+        "Produces runtime-loaded and deferred or not-wired event inventories",
+        "Classifies assets as active, candidate, broken, deferred, or dead",
+        "Defines admission rules for active events",
+        "Audits route, identity, sect, faction, karma, and flag fields"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "PXG2",
+      "title": "Golden Line Spine, Feedback, and Payoff",
+      "description": "Select the active 0-30 golden-line event spine, define choice feedback standards, remove vague feedback, and map key choices to later payoffs.",
+      "acceptanceCriteria": [
+        "Covers US-005, US-006, US-007, and US-008",
+        "Defines a readable 0-30 golden-line timeline",
+        "Defines immediate narrative, visible impact, and future implication feedback layers",
+        "Removes vague active golden-line feedback",
+        "Produces a key-choice-to-payoff map with at least 70% payoff coverage target"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "PXG3",
+      "title": "Priority Route Lifecycle",
+      "description": "Define lifecycle, beats, key choices, payoffs, failure states, and conflict rules for the three priority routes.",
+      "acceptanceCriteria": [
+        "Covers US-009, US-010, US-011, US-012, and US-013",
+        "Defines route lifecycle states and entry, commitment, failure, and abandonment conditions",
+        "Defines orthodox/sect, wandering hero, and demonic path ages 0-30 route beats",
+        "Defines route-specific key choices and later payoffs",
+        "Produces a route conflict table suitable for tests"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "PXG4",
+      "title": "Simulation and Experience Gates",
+      "description": "Create deterministic 0-30 simulation and gates for continuity, feedback completeness, route health, and active-scope quality blockers.",
+      "acceptanceCriteria": [
+        "Covers US-015, US-016, US-017, US-018, and US-019",
+        "Defines deterministic simulation input and comparable output",
+        "Adds or upgrades continuity, feedback completeness, and route health gates",
+        "Distinguishes active golden-line blockers from deferred warnings",
+        "Gate failures identify exact age, event id, and choice id where relevant"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "npm run gate:golden-line, gate:experience golden-line sub-gate; docs/test-reports/product-experience-governance-golden-line-gates.md"
+    },
+    {
+      "id": "PXG5",
+      "title": "Minimum Playable UI and Closure",
+      "description": "Define minimum playable layout requirements, remove debug intrusion from default player flow, update stale documentation claims, and produce governance closure reporting.",
+      "acceptanceCriteria": [
+        "Covers US-020, US-021, US-023, and US-024",
+        "Defines desktop and mobile minimum layout requirements",
+        "Keeps debug panels out of default production-like player flow",
+        "Updates or supersedes stale documentation claims",
+        "Produces closure report with completed stories, verification results, simulation results, residual risks, and architecture-readiness conclusion"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "US-020–021, US-023–024; minimum layout, debug opt-in, doc banner, closure report"
+    }
+  ]
+}

@@ -25,6 +25,7 @@
       {
         "id": "external_focus",
         "text": "专注外功修炼",
+        "description": "你专注外功，拳脚日益刚猛，家人称你有成为外家高手的潜质。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"diligentStudent\")"
@@ -50,12 +51,17 @@
           {
             "type": "flag_set",
             "target": "externalFocus"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialPathDeclared"
           }
         ]
       },
       {
         "id": "internal_focus",
         "text": "注重内力培养",
+        "description": "你注重内力培养，气息渐长，长辈说你更适合走内家路子。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"bornWithBlessing\")"
@@ -81,12 +87,17 @@
           {
             "type": "flag_set",
             "target": "internalFocus"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialPathDeclared"
           }
         ]
       },
       {
         "id": "agile_path",
         "text": "专修轻功身法",
+        "description": "你专修轻功身法，腾挪越发灵活，同辈中少有人能跟上你的脚步。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"freeSpirit\") OR flags.has(\"curiousChild\")"
@@ -112,12 +123,17 @@
           {
             "type": "flag_set",
             "target": "agilePath"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialPathDeclared"
           }
         ]
       },
       {
         "id": "balanced_start",
         "text": "全面发展",
+        "description": "你内外兼修、身法并进，家人说你根基均衡，将来路更宽。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"balancedApproach\")"
@@ -155,12 +171,17 @@
           {
             "type": "flag_set",
             "target": "balancedStart"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialPathDeclared"
           }
         ]
       },
       {
         "id": "generic_path",
         "text": "常规修炼",
+        "description": "你按常规套路修炼，武艺稳步增长，虽无惊艳却也扎实。",
         "effects": [
           {
             "type": "time_advance",
@@ -178,6 +199,10 @@
             "target": "externalSkill",
             "value": 2,
             "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "martialPathDeclared"
           }
         ]
       }
@@ -191,6 +216,68 @@
         "武学",
         "修炼路径",
         "个性化"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "martial_focus_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": {
+      "min": 8,
+      "max": 11
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 8
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"martialPathDeclared\") && !flags.has(\"martial_focus_payoff_done\")"
+      }
+    ],
+    "content": {
+      "text": "数年苦练，你幼年时定下的习武方向已在身上显出端倪：身法、内劲或外功，各有进境，家人与师长都记得你当初的选择。",
+      "title": "习武方向回响",
+      "description": "启蒙时的专注，在此刻得到印证。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "martial_focus_payoff_done"
+      },
+      {
+        "type": "event_record",
+        "target": "martial_focus_payoff"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774543,
+      "updatedAt": 1773317774543,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "武学",
+        "payoff",
+        "once"
       ],
       "enabled": true
     }
@@ -214,7 +301,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\")"
+        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"balancedStart\") OR flags.has(\"martialPathDeclared\")"
       }
     ],
     "content": {
@@ -227,6 +314,7 @@
       {
         "id": "challenge_master",
         "text": "挑战师兄师姐",
+        "description": "你在试炼中击败师兄师姐，名声在门内小震，师父对你刮目相看。",
         "condition": {
           "type": "expression",
           "expression": "player.martialPower >= 30"
@@ -262,6 +350,7 @@
       {
         "id": "complete_tasks",
         "text": "完成门派任务",
+        "description": "你踏实完成门派任务，虽无锋芒毕露，却赢得师长信任。",
         "effects": [
           {
             "type": "time_advance",
@@ -293,6 +382,7 @@
       {
         "id": "meditate",
         "text": "闭关修炼",
+        "description": "你选择闭关静修，内功大有进境，同门称你已有宗师气象。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"wudangDisciple\")"
@@ -337,7 +427,7 @@
     "id": "martial_improvement",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 2,
+    "priority": 0,
     "weight": 50,
     "ageRange": {
       "min": 17,
@@ -352,7 +442,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\")"
+        "expression": "flags.has(\"martialPathDeclared\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"balancedStart\") OR (!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\"))"
       }
     ],
     "content": {
@@ -433,6 +523,7 @@
       {
         "id": "focus_internal",
         "text": "专修内功",
+        "description": "你此后专修内功，气息绵长，师门将你列入内门重点培养名单。",
         "effects": [
           {
             "type": "stat_modify",
@@ -455,6 +546,7 @@
       {
         "id": "focus_external",
         "text": "专修外功",
+        "description": "你此后专修外功，拳脚刚猛，同门切磋时多让你打头阵。",
         "effects": [
           {
             "type": "stat_modify",
@@ -477,6 +569,7 @@
       {
         "id": "focus_balance",
         "text": "内外兼修",
+        "description": "你选择内外兼修，虽进展不快，却几乎没有明显短板。",
         "effects": [
           {
             "type": "stat_modify",

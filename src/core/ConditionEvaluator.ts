@@ -462,7 +462,15 @@ class ConditionExpressionParser {
   }
 
   private hasEvent(eventId: string): boolean {
-    return (this.state.triggeredEvents || []).includes(eventId);
+    if ((this.state.triggeredEvents || []).includes(eventId)) {
+      return true;
+    }
+    const history = this.state.eventHistory || [];
+    if (history.some(entry => entry.eventId === eventId)) {
+      return true;
+    }
+    const choiceRecords = this.state.player?.events || [];
+    return choiceRecords.some(entry => entry.eventId === eventId);
   }
 
   private assertSafeProperty(property: string, position: number) {

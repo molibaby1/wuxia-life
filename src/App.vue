@@ -3,11 +3,13 @@ import { computed, defineAsyncComponent, ref } from 'vue';
 import StartScreen from './components/StartScreen.vue';
 import { useNewGameEngine } from './composables/useNewGameEngine';
 import { gameEngine } from './core/GameEngineIntegration';
+import { isPlayerDebugEnabled } from './utils/debugAccess';
 
 const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
 const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
 const DebugPanel = defineAsyncComponent(() => import('./components/DebugPanel.vue'));
 
+const debugEnabled = isPlayerDebugEnabled();
 const showDebug = ref(false);
 const gameStarted = ref(false);
 
@@ -77,19 +79,18 @@ const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
 
 <template>
   <div id="app">
-    <!-- 调试面板入口（仅在游戏流程中显示） -->
-    <button 
-      v-if="gamePhase === 'playing'"
-      class="debug-toggle" 
+    <!-- 调试入口：仅 dev 且 ?debug=1 或 localStorage wuxia-debug=1 -->
+    <button
+      v-if="debugEnabled && gamePhase === 'playing'"
+      class="debug-toggle"
       @click="toggleDebug"
       :title="showDebug ? '关闭调试面板' : '打开调试面板'"
       :aria-label="showDebug ? '关闭调试面板' : '打开调试面板'"
     >
       {{ showDebug ? '关闭调试' : '调试面板' }}
     </button>
-    
-    <!-- 调试面板（可选显示） -->
-    <DebugPanel v-if="showDebug" />
+
+    <DebugPanel v-if="debugEnabled && showDebug" />
     
     <!-- 游戏主界面 -->
     <StartScreen v-if="gamePhase === 'start'" @start="handleStart" />

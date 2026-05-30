@@ -5,6 +5,11 @@ import * as path from 'path';
 import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
 import { evaluateSimulationGate, parseWaiverArg, type SimulationWaiver } from './gameplaySimulationGate';
 import { printDiagnosticsToConsole } from './gameplaySimulationDiagnostics';
+import {
+  formatDeathCauseSummary,
+  summarizeTopDeathCauses,
+  type DeathRiskTelemetry,
+} from './deathRiskTelemetry';
 
 type CliArgs = {
   seed?: number;
@@ -53,6 +58,7 @@ type SampleSummary = {
     choiceRate: string;
   };
   deathSummary: string;
+  deathRiskTelemetry?: DeathRiskTelemetry | null;
   relationshipSummary: {
     spouse?: string;
     children: number;
@@ -227,6 +233,7 @@ function writeMachineReadableOutput(report: GameProcessReport): string {
     finalAge: report.finalAge,
     isAlive: report.isAlive,
     deathReason: report.deathReason,
+    deathRiskTelemetry: report.deathRiskTelemetry ?? null,
     totalEvents: report.totalEvents,
     totalChoices: report.totalChoices,
     totalSaves: report.totalSaves,
@@ -278,6 +285,7 @@ function buildSampleSummary(sample: SimulationSample, report: GameProcessReport)
       choiceRate,
     },
     deathSummary: report.deathReason || (report.isAlive ? '仍在世' : '结局结束'),
+    deathRiskTelemetry: report.deathRiskTelemetry ?? null,
     relationshipSummary: {
       spouse: report.statistics.spouse,
       children: report.statistics.children || 0,
@@ -299,10 +307,20 @@ function printSampleSummary(sampleSummary: SampleSummary): void {
   console.log(`Ending summary: ${sampleSummary.endingSummary}`);
   console.log(`Choice summary: ${sampleSummary.choiceSummary.totalChoices}/${sampleSummary.choiceSummary.totalEvents} (${sampleSummary.choiceSummary.choiceRate})`);
   console.log(`Death summary: ${sampleSummary.deathSummary}`);
+  if (sampleSummary.deathRiskTelemetry) {
+    const telemetry = sampleSummary.deathRiskTelemetry;
+    console.log(
+      `Death telemetry: cause=${telemetry.deathCauseId} age=${telemetry.deathAge} ` +
+        `warning=${telemetry.warningSatisfied} mitigation=${telemetry.mitigationAvailable}`,
+    );
+  }
   console.log(`Relationship summary: spouse=${sampleSummary.relationshipSummary.spouse || 'none'}, children=${sampleSummary.relationshipSummary.children}, notable=[${sampleSummary.relationshipSummary.notableRelations.join(', ') || 'none'}]`);
 }
 
-function writeSampleSetOutput(sampleSummaries: SampleSummary[]): string {
+function writeSampleSetOutput(
+  sampleSummaries: SampleSummary[],
+  deathCauseSummary: ReturnType<typeof summarizeTopDeathCauses>,
+): string {
   const outputDir = path.join(process.cwd(), 'public/reports');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -312,6 +330,7 @@ function writeSampleSetOutput(sampleSummaries: SampleSummary[]): string {
   fs.writeFileSync(outputPath, JSON.stringify({
     generatedAt: new Date().toISOString(),
     sampleCount: sampleSummaries.length,
+    deathCauseSummary,
     samples: sampleSummaries,
   }, null, 2), 'utf-8');
   return outputPath;
@@ -346,8 +365,18 @@ async function runSampleSet(args: CliArgs): Promise<void> {
     printSampleSummary(summary);
   }
 
-  const outputPath = writeSampleSetOutput(summaries);
+  const deathSummary = summarizeTopDeathCauses(
+    reports.map((report, index) => ({
+      report,
+      sampleId: summaries[index]?.sampleId,
+    })),
+  );
+  const outputPath = writeSampleSetOutput(summaries, deathSummary);
   console.log(`\nSample set JSON: ${path.relative(process.cwd(), outputPath)}`);
+  console.log('\n=== Death Cause Summary ===');
+  for (const line of formatDeathCauseSummary(deathSummary)) {
+    console.log(line);
+  }
   if (args.diagnostics) {
     printDiagnosticsToConsole(reports);
   }

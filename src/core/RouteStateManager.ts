@@ -1,5 +1,5 @@
 import type { GameState } from '../types/eventTypes';
-import type { RouteIdentity } from './RouteCompatibilityRules';
+import { getRouteCompatibilityRule, type RouteIdentity } from './RouteCompatibilityRules';
 
 export type RouteLifecycleState =
   | 'inactive'
@@ -71,6 +71,8 @@ const FACTION_TO_ROUTE_ID: Record<string, string> = {
   none: 'wanderer',
 };
 
+const COMMITTED_ROUTE_LIFECYCLES: RouteLifecycleState[] = ['active', 'locked_in', 'temporary'];
+
 export class RouteStateManager {
   static readRouteState(state: GameState, routeId: string): RouteStateRecord {
     const existing = state.routeStates?.[routeId];
@@ -139,6 +141,69 @@ export class RouteStateManager {
     });
   }
 
+  static turnRoute(state: GameState, routeId: string, eventId?: string, reason?: string): GameState {
+    return RouteStateManager.writeRouteState(state, {
+      routeId,
+      lifecycle: 'turned',
+      lockedIn: false,
+      eventId,
+      reason: reason || 'route_turn',
+    });
+  }
+
+  static deactivateRoute(state: GameState, routeId: string, eventId?: string, reason?: string): GameState {
+    return RouteStateManager.writeRouteState(state, {
+      routeId,
+      lifecycle: 'inactive',
+      lockedIn: false,
+      eventId,
+      reason: reason || 'deactivate_route',
+    });
+  }
+
+  static resolveStrongExclusionsBeforeActivate(
+    state: GameState,
+    candidateRouteId: string,
+    eventId?: string,
+  ): GameState {
+    if (!isCoreRouteIdentity(candidateRouteId)) {
+      return state;
+    }
+    const candidateRoute = candidateRouteId as RouteIdentity;
+    let nextState = state;
+    for (const [routeId, record] of Object.entries(state.routeStates || {})) {
+      if (!isCoreRouteIdentity(routeId) || routeId === candidateRouteId) {
+        continue;
+      }
+      if (!COMMITTED_ROUTE_LIFECYCLES.includes(record.lifecycle)) {
+        continue;
+      }
+      const rule = getRouteCompatibilityRule(routeId as RouteIdentity, candidateRoute);
+      if (rule.level !== 'strong_exclusion') {
+        continue;
+      }
+      nextState = RouteStateManager.turnRoute(
+        nextState,
+        routeId,
+        eventId,
+        `strong_exclusion:activate:${candidateRoute}`,
+      );
+    }
+    return nextState;
+  }
+
+  static syncFromFlagUnset(state: GameState, flagName: string, eventId?: string): GameState {
+    const routeFromFlag = RouteStateManager.resolveRouteFromFlag(flagName, true);
+    if (!routeFromFlag) {
+      return state;
+    }
+    const current = RouteStateManager.readRouteState(state, routeFromFlag);
+    if (current.lifecycle === 'inactive') {
+      return state;
+    }
+    return RouteStateManager.deactivateRoute(state, routeFromFlag, eventId, `unset_flag:${flagName}`);
+  }
+
   static syncFromFlagSet(state: GameState, flagName: string, flagValue: unknown, eventId?: string): GameState {
     const routeFromFlag = RouteStateManager.resolveRouteFromFlag(flagName, flagValue);
     if (!routeFromFlag) {
@@ -153,7 +218,12 @@ export class RouteStateManager {
     if (flagName.startsWith('route_') && flagName.endsWith('_failed')) {
       return RouteStateManager.failRoute(state, routeFromFlag, eventId, 'sync_flag_failed');
     }
-    return RouteStateManager.writeRouteState(state, {
+    const withExclusionsResolved = RouteStateManager.resolveStrongExclusionsBeforeActivate(
+      state,
+      routeFromFlag,
+      eventId,
+    );
+    return RouteStateManager.writeRouteState(withExclusionsResolved, {
       routeId: routeFromFlag,
       lifecycle: 'active',
       category: 'main',

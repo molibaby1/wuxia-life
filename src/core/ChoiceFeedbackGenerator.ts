@@ -1,6 +1,10 @@
 import type { ChoiceFeedbackModel } from '../types';
 import type { EffectDefinition, PlayerState } from '../types/eventTypes';
 import { createChoiceFeedbackFallback } from '../types';
+import {
+  isPlayerVisibleFlag,
+  readRawRouteKeyFromFlags,
+} from '../utils/playerFacingLabels';
 
 interface GenerateChoiceFeedbackInput {
   narrativeResult?: string | null;
@@ -13,8 +17,6 @@ interface GenerateChoiceFeedbackInput {
   beforeFlags?: Record<string, unknown>;
   afterFlags?: Record<string, unknown>;
 }
-
-const ROUTE_FLAGS = new Set(['route_orthodox', 'route_demonic', 'route_wanderer', 'sect_faction']);
 
 export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): ChoiceFeedbackModel {
   const baseFeedback = createChoiceFeedbackFallback({
@@ -46,12 +48,19 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
     }
 
     if (effect.type === 'relation_change') {
-      const relationId = effect.target || 'unknown_relation';
+      const relationId = effect.target || '';
       const delta = typeof effect.value === 'number' ? effect.value : 0;
+      if (!relationId || delta === 0) {
+        continue;
+      }
+      const relationName = input.afterPlayer?.relationships?.find(
+        relationship => relationship.id === relationId,
+      )?.name;
       baseFeedback.player.relationshipImpacts.push({
         relationId,
+        relationName,
         delta,
-        visibility: 'player',
+        visibility: relationName ? 'player' : 'hidden',
       });
       continue;
     }
@@ -64,8 +73,18 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
       baseFeedback.player.longTermFlags.push({
         flag,
         value: Boolean(effect.value ?? true),
+        visibility: isPlayerVisibleFlag(flag) ? 'player' : 'hidden',
+      });
+      continue;
+    }
+
+    if (effect.type === 'special' && effect.target === 'set_spouse' && typeof effect.value === 'string') {
+      baseFeedback.player.statImpacts.push({
+        stat: 'spouse',
+        delta: 1,
         visibility: 'player',
       });
+      continue;
     }
   }
 
@@ -81,8 +100,8 @@ function resolveRouteImpact(
   beforeFlags: Record<string, unknown> | undefined,
   afterFlags: Record<string, unknown> | undefined,
 ) {
-  const beforeRoute = readRouteLabel(beforeFlags);
-  const afterRoute = readRouteLabel(afterFlags);
+  const beforeRoute = readRawRouteKeyFromFlags(beforeFlags);
+  const afterRoute = readRawRouteKeyFromFlags(afterFlags);
   if (beforeRoute === afterRoute) {
     return null;
   }
@@ -94,25 +113,4 @@ function resolveRouteImpact(
     reason: 'flag_transition',
     visibility: 'player' as const,
   };
-}
-
-function readRouteLabel(flags: Record<string, unknown> | undefined): string | null {
-  if (!flags) {
-    return null;
-  }
-
-  const sectFaction = flags.sect_faction;
-  if (typeof sectFaction === 'string' && sectFaction.length > 0) {
-    return sectFaction;
-  }
-
-  for (const routeFlag of ROUTE_FLAGS) {
-    if (routeFlag === 'sect_faction') {
-      continue;
-    }
-    if (flags[routeFlag]) {
-      return routeFlag;
-    }
-  }
-  return null;
 }

@@ -13,6 +13,15 @@ import {
   type SimulationSample,
 } from './runGameplaySimulation';
 import { GameProcessSimulator } from '../tests/GameProcessSimulator';
+import {
+  evaluateGoldenLineGates,
+  type GoldenLineGateResult,
+} from './goldenLineGate';
+import { evaluateMidlifeGate } from './midlifeGate';
+import { runAllP3EvalSimulations } from './goldenLineSimulation';
+import { formatP3RomanceFamilyGateSection } from './experienceHealthGate';
+import type { P3EvalReportEntry } from './experienceHealthGate';
+import { P3_EVAL_COHORT_LABEL } from './p3TrustTargets';
 
 type CliArgs = {
   quiet: boolean;
@@ -44,10 +53,34 @@ function printSection(title: string, rows: ExperienceHealthMetricEvaluation[]): 
   }
 }
 
+function printP3TrustMetrics(gate: ExperienceHealthGateResult): void {
+  const p3Keys = new Set([
+    'death_rate',
+    'death_without_warning_count',
+    'romance_family_primary_sample_pass',
+    'p3_romance_family_achievement_rate',
+  ]);
+  const p3Metrics = [
+    ...gate.blockingMetrics,
+    ...gate.warningMetrics,
+    ...gate.infoMetrics,
+  ].filter(metric => p3Keys.has(metric.key));
+
+  console.log(`\n=== P3 Trust Gate (${P3_EVAL_COHORT_LABEL}, US-029) ===`);
+  if (gate.p3EvalSampleCount) {
+    console.log(`Samples: ${gate.p3EvalSampleCount} deterministic 0–50`);
+  }
+  for (const metric of p3Metrics) {
+    console.log(`- ${metric.key} => ${metric.status.toUpperCase()}: ${metric.detail}`);
+  }
+}
+
 function writeJsonOutput(
   gate: ExperienceHealthGateResult,
   samples: SimulationSample[],
   reportIds: string[],
+  goldenLineGate: GoldenLineGateResult,
+  midlifePass: boolean,
 ): string {
   const outputDir = path.join(process.cwd(), 'public/reports');
   if (!fs.existsSync(outputDir)) {
@@ -58,6 +91,8 @@ function writeJsonOutput(
   const payload = {
     generatedAt: new Date().toISOString(),
     sampleCount: samples.length,
+    p3EvalSampleCount: gate.p3EvalSampleCount ?? 0,
+    p3TrustEnforced: gate.p3TrustEnforced ?? false,
     samples: samples.map(sample => ({
       id: sample.id,
       seed: sample.seed,
@@ -66,7 +101,10 @@ function writeJsonOutput(
     reportIds,
     decision: gate.decision,
     warningsFailed: gate.warningsFailed,
+    goldenLinePass: goldenLineGate.pass,
+    midlifePass,
     derivedMetrics: gate.derivedMetrics,
+    p3RomanceFamily: gate.p3RomanceFamily?.primaryArcReport ?? null,
     metrics: [
       ...gate.blockingMetrics,
       ...gate.warningMetrics,
@@ -90,7 +128,7 @@ async function runSamples(quiet: boolean): Promise<{ reports: Awaited<ReturnType
   const reports = [];
 
   if (!quiet) {
-    console.log(`\n[experience-gate] Running ${samples.length} gameplay samples...\n`);
+    console.log(`\n[experience-gate] Running ${samples.length} P2-LEGACY gameplay samples...\n`);
   }
 
   for (const sample of samples) {
@@ -117,8 +155,37 @@ async function runSamples(quiet: boolean): Promise<{ reports: Awaited<ReturnType
   return { reports, samples };
 }
 
+async function runP3EvalSamples(quiet: boolean): Promise<{
+  entries: P3EvalReportEntry[];
+  runs: Awaited<ReturnType<typeof runAllP3EvalSimulations>>;
+}> {
+  if (!quiet) {
+    console.log(`\n[experience-gate] Running ${P3_EVAL_COHORT_LABEL} deterministic 0–50 samples...\n`);
+  }
+
+  const runs = await runAllP3EvalSimulations();
+  const entries: P3EvalReportEntry[] = runs.map(run => ({
+    report: run.report,
+    sampleId: run.sample.id,
+  }));
+
+  if (!quiet) {
+    for (const run of runs) {
+      console.log(
+        `  ✓ ${run.sample.id} age=${run.report.finalAge} alive=${run.report.isAlive}`,
+      );
+    }
+  }
+
+  return { entries, runs };
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.quiet) {
+    process.env.WUXIA_ENGINE_QUIET = '1';
+  }
 
   if (args.skipSimulation) {
     console.error('--skip-simulation is not supported yet; run full sample simulation.');
@@ -127,22 +194,43 @@ async function main(): Promise<void> {
   }
 
   const { reports, samples } = await runSamples(args.quiet);
-  const gate = evaluateExperienceHealthGate(reports, args.waivers);
-  const jsonPath = writeJsonOutput(
-    gate,
-    samples,
-    reports.map(report => report.id),
-  );
+  const { entries: p3EvalEntries, runs: p3EvalRuns } = await runP3EvalSamples(args.quiet);
+  const gate = evaluateExperienceHealthGate(reports, args.waivers, p3EvalEntries);
+  const goldenLineGate = evaluateGoldenLineGates(p3EvalRuns);
+  const midlifeGate = evaluateMidlifeGate(p3EvalRuns);
+  const jsonPath = writeJsonOutput(gate, samples, reports.map(report => report.id), goldenLineGate, midlifeGate.pass);
 
   console.log('\n=== Experience Health Gate ===');
   printSection('Blocking Metrics', gate.blockingMetrics);
   printSection('Warning Metrics', gate.warningMetrics);
   printSection('Info Metrics', gate.infoMetrics);
+  printP3TrustMetrics(gate);
+  console.log('\n=== P3 Romance/Family Arc (US-010) ===');
+  for (const line of formatP3RomanceFamilyGateSection(gate.p3RomanceFamily)) {
+    console.log(line);
+  }
   console.log(`\nDecision: ${gate.decision.toUpperCase()}`);
   console.log(`Warnings failed (non-blocking): ${gate.warningsFailed}`);
   console.log(`JSON: ${path.relative(process.cwd(), jsonPath)}`);
 
-  if (gate.decision === 'fail') {
+  console.log('\n=== Golden Line Sub-Gate (P3-EVAL 0–50) ===');
+  console.log(`Decision: ${goldenLineGate.pass ? 'PASS' : 'FAIL'}`);
+  console.log(`Active-scope blockers: ${goldenLineGate.activeScope.activeBlockerCount}`);
+  console.log(`Feedback issues: ${goldenLineGate.feedbackIssueCount}`);
+  const payoff = goldenLineGate.payoffEvaluation.summary;
+  console.log(
+    `Payoff: static=${(payoff.staticPayoffRate * 100).toFixed(1)}% simulated gaps=${payoff.missedOpportunityCount}`,
+  );
+
+  console.log('\n=== P3 Midlife Sub-Gate (US-024) ===');
+  console.log(`Decision: ${midlifeGate.pass ? 'PASS' : 'FAIL'}`);
+  console.log(`Priority routes checked: ${midlifeGate.simulations.length}`);
+
+  const experienceFail = gate.decision === 'fail';
+  const goldenFail = !goldenLineGate.pass;
+  const midlifeFail = !midlifeGate.pass;
+
+  if (experienceFail || goldenFail || midlifeFail) {
     process.exitCode = 1;
   }
 }

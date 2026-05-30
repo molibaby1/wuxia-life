@@ -19,6 +19,12 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
+import { buildDeathRiskTelemetry, type DeathRiskTelemetry } from '../scripts/deathRiskTelemetry';
+import {
+  buildRomanceFamilyArcReport,
+  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
+  type RomanceFamilyArcReport,
+} from '../scripts/romanceFamilyArcTelemetry';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -46,7 +52,9 @@ export interface GameProcessConfig {
   verbose: boolean;  // 详细日志
   choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
   /** 路线专项样本：偏向入线/完成对应路线 */
-  routeTrack?: 'official' | 'beggars' | 'demonic';
+  routeTrack?: 'official' | 'beggars' | 'demonic' | 'sect' | 'wanderer';
+  /** P3-EVAL sample id for death-risk telemetry cohort resolution. */
+  sampleId?: string;
 }
 
 export interface GameProcessRecord {
@@ -77,6 +85,10 @@ export interface GameProcessReport {
   finalAge: number;
   isAlive: boolean;
   deathReason: string | null;
+  /** P3 US-005: populated when simulation ends with death or forced ending. */
+  deathRiskTelemetry?: DeathRiskTelemetry | null;
+  /** P3 US-010: romance/family arc regression snapshot when sampleId is set. */
+  romanceFamilyArcReport?: RomanceFamilyArcReport | null;
   totalEvents: number;
   totalChoices: number;
   totalSaves: number;
@@ -173,7 +185,8 @@ export class GameProcessSimulator {
     // 0. 重置游戏引擎（确保状态干净）
     this.log('📝 步骤 0: 重置游戏引擎');
     gameEngine.reset();
-    
+    gameEngine.setSuppressLethalSetbacks(this.shouldSuppressLethalSetbacks());
+
     await this.withSeededRandom(this.config.seed, async () => {
       // 1. 创建角色
       this.log('📝 步骤 1: 创建角色');
@@ -288,7 +301,7 @@ export class GameProcessSimulator {
         eventText: text,
         eventType: eventType as 'auto' | 'choice' | 'ending',
         availableChoices,
-        selectedChoice: this.selectChoice(availableChoices),
+        selectedChoice: this.selectChoice(availableChoices, event.id),
         gameState: JSON.parse(JSON.stringify(currentState)),
         currentTime: currentState.currentTime,
         timestamp: new Date().toISOString()
@@ -424,6 +437,7 @@ export class GameProcessSimulator {
       this.pushRecord(record);
     }
 
+    this.enforceRouteTrackIsolation();
     this.ensureYearAdvanced(ageBeforeEvent);
 
     if (eventType === 'ending' || this.hasGameEnded(this.gameState)) {
@@ -493,6 +507,81 @@ export class GameProcessSimulator {
       player.chivalry = Math.max(player.chivalry, 8);
       player.martialPower = Math.max(player.martialPower || 0, 12);
     }
+
+    if (this.config.routeTrack === 'sect' && age >= 10 && age <= 22) {
+      player.comprehension = Math.max(player.comprehension || 0, 14);
+      player.chivalry = Math.max(player.chivalry || 0, 16);
+      player.martialPower = Math.max(player.martialPower || 0, 10);
+    }
+
+    if (this.config.routeTrack === 'wanderer' && age >= 13 && age <= 22) {
+      player.chivalry = Math.max(player.chivalry || 0, 18);
+      player.qinggong = Math.max(player.qinggong || 0, 12);
+      player.connections = Math.max(player.connections || 0, 14);
+    }
+  }
+
+  /**
+   * Deterministic route-track samples: drop mutually exclusive priority flags after each event tick.
+   */
+  private enforceRouteTrackIsolation(): void {
+    const track = this.config.routeTrack;
+    if (!track || !['sect', 'wanderer', 'demonic'].includes(track)) {
+      return;
+    }
+
+    const state = gameEngine.getGameState();
+    const player = state.player;
+    if (!player) {
+      return;
+    }
+
+    const flags = player.flags || (player.flags = {});
+    const clearFlag = (flagName: string) => {
+      if (!flags[flagName]) {
+        return;
+      }
+      flags[flagName] = false;
+      const updated = RouteStateManager.syncFromFlagSet(state, flagName, false, 'route-track-fixture-clear');
+      state.routeStates = updated.routeStates;
+      state.routeHistory = updated.routeHistory;
+    };
+
+    const deactivateRoute = (routeId: string) => {
+      const updated = RouteStateManager.writeRouteState(state, {
+        routeId,
+        lifecycle: 'inactive',
+        lockedIn: false,
+        reason: 'route-track-isolation',
+      });
+      state.routeStates = updated.routeStates;
+      state.routeHistory = updated.routeHistory;
+    };
+
+    if (track === 'sect') {
+      clearFlag('route_demonic');
+      clearFlag('route_beggars');
+      clearFlag('route_official');
+      deactivateRoute('demonic');
+      deactivateRoute('beggars');
+      deactivateRoute('official');
+    } else if (track === 'wanderer') {
+      clearFlag('route_demonic');
+      clearFlag('route_orthodox');
+      clearFlag('route_beggars');
+      deactivateRoute('demonic');
+      deactivateRoute('sect');
+      deactivateRoute('beggars');
+    } else if (track === 'demonic') {
+      clearFlag('route_orthodox');
+      clearFlag('route_beggars');
+      clearFlag('route_official');
+      deactivateRoute('sect');
+      deactivateRoute('beggars');
+      deactivateRoute('official');
+    }
+
+    this.gameState = state;
   }
 
   /**
@@ -503,6 +592,8 @@ export class GameProcessSimulator {
     if (!track) {
       return;
     }
+
+    this.enforceRouteTrackIsolation();
 
     const state = gameEngine.getGameState();
     const player = state.player;
@@ -564,9 +655,47 @@ export class GameProcessSimulator {
       }
       if (flags.route_demonic && age >= 24 && !flags.demonic_leader) {
         flags.demonic_leader = true;
+        flags.demonic_path_usurp = true;
       }
       if (flags.route_demonic && age >= 28 && !flags.route_demonic_completed) {
         syncFlag('route_demonic_completed', 'route-track-fixture-demonic-complete');
+      }
+    }
+
+    if (track === 'sect') {
+      if (age === 13 && !flags.route_orthodox) {
+        syncFlag('route_orthodox', 'route-track-fixture-sect-entry');
+        flags.orthodox_trial_active = true;
+      }
+      if (flags.route_orthodox && age >= 16) {
+        flags.orthodox_trial_mind_done = true;
+        flags.orthodox_trial_force_done = true;
+      }
+      if (flags.route_orthodox && age >= 18 && !flags.orthodox_trial_service_done) {
+        flags.orthodox_trial_service_done = true;
+      }
+      if (flags.route_orthodox && age >= 20 && !flags.orthodox_trial_completed) {
+        flags.orthodox_trial_completed = true;
+      }
+      if (flags.route_orthodox && age >= 26 && !flags.sect_trial_completed) {
+        flags.sect_trial_completed = true;
+      }
+    }
+
+    if (track === 'wanderer') {
+      if (age === 13 && !flags.route_wanderer) {
+        syncFlag('route_wanderer', 'route-track-fixture-wanderer-entry');
+      }
+      if (flags.route_wanderer && age >= 20 && !flags.hero_first_case) {
+        flags.hero_first_case = true;
+      }
+      if (flags.route_wanderer && age >= 25 && !flags.save_village) {
+        flags.save_village = true;
+      }
+      if (flags.route_wanderer && age >= 31 && age <= 50) {
+        player.chivalry = Math.max(player.chivalry || 0, 35);
+        player.reputation = Math.max(player.reputation || 0, 40);
+        player.connections = Math.max(player.connections || 0, 15);
       }
     }
   }
@@ -616,6 +745,17 @@ export class GameProcessSimulator {
         if (flagName === 'demonic_leader' || flagName === 'demonic_trial_active') score += 900;
         if (flagName.startsWith('demonic_trial_') && flagName.endsWith('_done')) score += 500;
       }
+
+      if (track === 'sect') {
+        if (flagName === 'route_orthodox' || flagName === 'orthodox_trial_active') score += 900;
+        if (flagName === 'orthodox_trial_completed' || flagName === 'sect_trial_completed') score += 400;
+        if (flagName.startsWith('sect_midlife_')) score += 1200;
+      }
+
+      if (track === 'wanderer') {
+        if (flagName === 'route_wanderer' || flagName === 'hero_first_case') score += 900;
+        if (flagName.startsWith('hero_midlife_') || flagName.startsWith('hero_old_case_') || flagName.startsWith('hero_rep_') || flagName.startsWith('hero_ally_') || flagName.startsWith('hero_gray_')) score += 700;
+      }
     }
 
     if (track === 'official') {
@@ -641,13 +781,148 @@ export class GameProcessSimulator {
       if (choiceId.includes('decline')) score -= 1200;
     }
 
+    if (track === 'sect') {
+      if (choiceId === 'join_orthodox') score += 1200;
+      if (choiceId.includes('orthodox')) score += 400;
+      if (choiceId.startsWith('faction_support') || choiceId.startsWith('faction_remain')) score += 900;
+      if (choiceId.startsWith('gray_execute') || choiceId.startsWith('gray_leak')) score += 850;
+      if (choiceId.startsWith('gray_refuse')) score += 700;
+      if (choiceId.startsWith('judgment_')) score += 800;
+      if (choiceId.startsWith('ledger_')) score += 750;
+      if (choiceId === 'orthodox_stay') score += 600;
+      if (choiceId === 'orthodox_leave') score -= 3000;
+      if (choiceId.includes('accept_demonic') || choiceId === 'stay_wanderer') score -= 2000;
+      if (choiceId.includes('beggars')) score -= 1500;
+    }
+
+    if (track === 'wanderer') {
+      if (choiceId === 'stay_wanderer') score += 1200;
+      if (choiceId.includes('wanderer') || choiceId.includes('hero')) score += 400;
+      if (choiceId.startsWith('old_case_') || choiceId.startsWith('rep_') || choiceId.startsWith('ally_') || choiceId.startsWith('gray_') || choiceId.startsWith('settlement_')) score += 800;
+      if (choiceId === 'join_orthodox' || choiceId.includes('accept_demonic')) score -= 2000;
+      if (choiceId.includes('beggars')) score -= 1200;
+    }
+
+    return score;
+  }
+
+  private isRomanceFamilyArcSample(): boolean {
+    return this.config.sampleId === GOLDEN_ROMANCE_FAMILY_SAMPLE_ID;
+  }
+
+  /** US-009/010: P3-RF arc — KC-1/2/3 choice bias for arc_rf_mingyue. */
+  private scoreRomanceArcChoice(choice: EventChoice, eventId?: string): number {
+    if (!this.isRomanceFamilyArcSample() || !eventId) {
+      return 0;
+    }
+
+    const choiceId = (choice.id || '').toLowerCase();
+    let score = 0;
+
+    if (eventId === 'love_first_meet') {
+      if (choiceId === 'love_greet' || choiceId === 'love_charm') {
+        score += 1200;
+      }
+      if (choiceId === 'love_pass') {
+        score -= 2000;
+      }
+    }
+
+    if (eventId === 'love_family_obstacle') {
+      if (choiceId === 'love_prove') {
+        score += 1200;
+      }
+      if (choiceId === 'love_avoid') {
+        score -= 1000;
+      }
+    }
+
+    return score;
+  }
+
+  /** US-009: prefer 迎娶明月 when love line is active at family_marriage. */
+  private scoreRomanceFamilyChoice(choice: EventChoice, eventId?: string): number {
+    if (eventId !== 'family_marriage') {
+      return 0;
+    }
+
+    const flags = gameEngine.getGameState()?.player?.flags ?? {};
+    if (!flags.love_started && !this.isRomanceFamilyArcSample()) {
+      return 0;
+    }
+
+    let score = 0;
+    const effects = this.collectChoiceEffects(choice);
+    for (const effect of effects) {
+      if (effect.type !== 'flag_set') {
+        continue;
+      }
+      const flagName = (effect.flag || effect.target || '') as string;
+      if (flagName === 'spouse_mingyue' || flagName === 'marriage_type_love') {
+        score += 1500;
+      }
+      if (flagName === 'spouse_arranged' || flagName === 'mingyue_married_other') {
+        score -= 1200;
+      }
+    }
+
+    const choiceId = (choice.id || '').toLowerCase();
+    if (choiceId === 'marry_mingyue') {
+      score += 500;
+    }
+
+    return score;
+  }
+
+  /** US-023: golden-demonic midlife arc deterministic choice bias (31–50). */
+  private scoreDemonicMidlifeChoice(choice: EventChoice, eventId?: string): number {
+    if (this.config.routeTrack !== 'demonic' || !eventId) {
+      return 0;
+    }
+
+    const age = gameEngine.getGameState()?.player?.age ?? 0;
+    if (age < 31 || age > 50) {
+      return 0;
+    }
+
+    const choiceId = choice.id || '';
+    let score = 0;
+
+    if (eventId.startsWith('demonic_midlife')) {
+      score += 2000;
+    }
+
+    if (eventId === 'demonic_midlife_expansion' || eventId === 'demonic_midlife_expansion_survivor') {
+      if (choiceId === 'demonic_expand_territory') score += 900;
+      if (choiceId === 'demonic_expand_consolidate') score += 300;
+      if (choiceId === 'demonic_expand_secret_art') score += 100;
+    }
+
+    if (eventId === 'demonic_midlife_betrayal' || eventId === 'demonic_midlife_temptation') {
+      if (choiceId === 'demonic_betrayal_coopt') score += 900;
+      if (choiceId === 'demonic_betrayal_wait') score += 400;
+      if (choiceId === 'demonic_betrayal_purge') score += 100;
+    }
+
+    if (eventId === 'demonic_midlife_fork') {
+      if (choiceId === 'demonic_fork_balance') score += 900;
+      if (choiceId === 'demonic_fork_redemption') score += 500;
+      if (choiceId === 'demonic_fork_escalate') score += 100;
+    }
+
+    if (eventId === 'demonic_midlife_consequence') {
+      if (choiceId === 'demonic_consequence_rule') score += 900;
+      if (choiceId === 'demonic_consequence_withdraw') score += 500;
+      if (choiceId === 'demonic_consequence_exile') score += 400;
+    }
+
     return score;
   }
 
   /**
    * 选择事件选项（模拟玩家决策）
    */
-  private selectChoice(choices: EventChoice[]): EventChoice {
+  private selectChoice(choices: EventChoice[], eventId?: string): EventChoice {
     // 多倾向策略：
     // - balanced: 综合成长
     // - martial: 武学成长优先
@@ -684,6 +959,9 @@ export class GameProcessSimulator {
       }
 
       score += this.scoreRouteTrackChoice(choice);
+      score += this.scoreRomanceArcChoice(choice, eventId);
+      score += this.scoreRomanceFamilyChoice(choice, eventId);
+      score += this.scoreDemonicMidlifeChoice(choice, eventId);
 
       if (score > bestScore) {
         bestScore = score;
@@ -758,6 +1036,27 @@ export class GameProcessSimulator {
           score += relationDelta * 2;
         } else {
           score += relationDelta * 1.5;
+        }
+      }
+
+      if (effect.type === 'flag_set') {
+        const flagName = (effect.flag || effect.target || '') as string;
+        if (tendency === 'relationship' || tendency === 'balanced') {
+          if (flagName === 'spouse_mingyue' || flagName === 'marriage_type_love') {
+            score += 600;
+          }
+          if (flagName === 'love_started') {
+            score += 400;
+          }
+          if (flagName === 'has_child') {
+            score += 300;
+          }
+        }
+      }
+
+      if (effect.type === 'special' && effect.target === 'set_spouse') {
+        if (tendency === 'relationship' || tendency === 'balanced') {
+          score += 500;
         }
       }
     }
@@ -1050,7 +1349,8 @@ export class GameProcessSimulator {
       }
     }
 
-    return {
+    const isAlive = gameEnded ? false : (finalState?.player?.alive || false);
+    const baseReport: GameProcessReport = {
       id: this.generateId(),
       timestamp: new Date().toISOString(),
       config: this.config,
@@ -1059,7 +1359,7 @@ export class GameProcessSimulator {
       ageRange: requestedAgeRange,
       totalYears: this.records.length,
       finalAge: finalState?.player?.age || 0,
-      isAlive: gameEnded ? false : (finalState?.player?.alive || false),
+      isAlive,
       deathReason: finalState?.player?.deathReason || (gameEnded ? endingName : null),
       totalEvents: this.records.length,
       totalChoices: choiceEvents,
@@ -1096,8 +1396,19 @@ export class GameProcessSimulator {
         flags: Object.fromEntries(
           Object.entries(flags).filter(([_, v]) => typeof v === 'boolean' && v)
         ),
-      }
+      },
     };
+
+    baseReport.deathRiskTelemetry = buildDeathRiskTelemetry(baseReport, this.config.sampleId);
+    if (this.config.sampleId) {
+      const endAge = this.config.ageRange?.endAge ?? this.config.simulateYears;
+      baseReport.romanceFamilyArcReport = buildRomanceFamilyArcReport(
+        baseReport,
+        this.config.sampleId,
+        endAge,
+      );
+    }
+    return baseReport;
   }
 
   private hasGameEnded(state: GameState | null | undefined): boolean {
@@ -1609,6 +1920,18 @@ export class GameProcessSimulator {
       startAge,
       endAge: this.config.runUntilDeath ? 120 : Math.min(configuredEndAge, 120),
     };
+  }
+
+  private shouldSuppressLethalSetbacks(): boolean {
+    if (typeof this.config.seed !== 'number' || Number.isNaN(this.config.seed)) {
+      return false;
+    }
+    if (this.config.runUntilDeath) {
+      return false;
+    }
+    const endAge = this.config.ageRange?.endAge
+      ?? Math.floor((this.gameState?.player?.age ?? 0) + this.config.simulateYears);
+    return endAge <= 50;
   }
 
   private async withSeededRandom(seed: number | undefined, run: () => void | Promise<void>): Promise<void> {

@@ -213,6 +213,7 @@ export class EventExecutor implements IEventExecutor {
 export class StatModifyHandler implements EffectHandler {
   private static readonly MODIFIABLE_PLAYER_STATS = new Set<string>([
     'age',
+    'children',
     'martialPower',
     'externalSkill',
     'internalSkill',
@@ -459,6 +460,7 @@ export class FlagSetHandler implements EffectHandler {
         };
         // 清除 orthodox 阵营标记
         delete newFlags['orthodox_member'];
+        delete newFlags['route_orthodox'];
       } else if (faction === 'neutral' || faction === 'none') {
         newFlags = {
           ...newFlags,
@@ -487,18 +489,26 @@ export class FlagSetHandler implements EffectHandler {
  */
 export class FlagUnsetHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target } = effect;
-    
-    const newFlags = { ...state.player.flags };
-    delete newFlags[target];
-    
-    return {
+    const flagName = effect.flag || effect.target;
+    if (!flagName) {
+      return state;
+    }
+
+    const newFlags = {
+      ...(state.flags || {}),
+      ...(state.player?.flags || {}),
+    };
+    delete newFlags[flagName];
+
+    const result = {
       ...state,
+      flags: newFlags,
       player: {
         ...state.player,
         flags: newFlags,
       },
     };
+    return RouteStateManager.syncFromFlagUnset(result, flagName);
   }
 }
 
@@ -718,6 +728,20 @@ export class SpecialEffectHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
     const { target } = effect;
     
+    if (target === 'set_spouse') {
+      const spouseName = typeof effect.value === 'string' ? effect.value : null;
+      if (!state.player || !spouseName) {
+        return state;
+      }
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          spouse: spouseName,
+        },
+      };
+    }
+
     // 处理游戏结束效果
     if (target === 'end_game') {
       

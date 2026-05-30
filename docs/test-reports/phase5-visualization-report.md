@@ -18,7 +18,7 @@ Phase 5 主要关注属性系统的可视化展示和新手引导，包含以下
 
 ### 1. 教程事件系统
 
-**文件**: [`src/data/lines/tutorial.json`](file:///Users/zhouyun/code/wuxia-life/src/data/lines/tutorial.json)
+**文件**: [`src/data/lines/tutorial.json`](src/data/lines/tutorial.json)
 
 创建了 9 个教程事件，在玩家 10-18 岁期间逐步触发：
 
@@ -63,7 +63,7 @@ Phase 5 主要关注属性系统的可视化展示和新手引导，包含以下
 
 ### 2. 天赋文案包装系统
 
-**文件**: [`src/components/AttributePanel.vue`](file:///Users/zhouyun/code/wuxia-life/src/components/AttributePanel.vue)
+**文件**: [`src/components/AttributePanel.vue`](src/components/AttributePanel.vue)
 
 实现了天赋的叙事文本显示，替代原始数值：
 
@@ -104,8 +104,8 @@ const talentNarratives = {
 
 ### 3. AttributePanel 组件集成
 
-**组件文件**: [`src/components/AttributePanel.vue`](file:///Users/zhouyun/code/wuxia-life/src/components/AttributePanel.vue)
-**集成文件**: [`src/components/GameScreen.vue`](file:///Users/zhouyun/code/wuxia-life/src/components/GameScreen.vue)
+**组件文件**: [`src/components/AttributePanel.vue`](src/components/AttributePanel.vue)
+**集成文件**: [`src/components/GameScreen.vue`](src/components/GameScreen.vue)
 
 #### 组件功能
 
@@ -158,7 +158,7 @@ const talentNarratives = {
 
 ### 4. 测试验证
 
-**测试文件**: [`tests/testAttributeSystem.ts`](file:///Users/zhouyun/code/wuxia-life/tests/testAttributeSystem.ts)
+**测试文件**: [`tests/testAttributeSystem.ts`](tests/testAttributeSystem.ts)
 
 运行了 6 个测试用例，全部通过：
 

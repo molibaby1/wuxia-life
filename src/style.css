@@ -22,10 +22,17 @@ body {
 }
 
 #app {
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f0e6 0%, #e8dcc8 100%);
+}
+
+@media (min-width: 768px) {
+  #app {
+    max-width: 960px;
+  }
 }
 
 .btn {

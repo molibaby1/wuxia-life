@@ -1,6 +1,7 @@
 import type { EffectDefinition, PlayerState } from './eventTypes';
 
-export type ChoiceFeedbackVisibility = 'player' | 'diagnostic';
+/** `player` = default UI; `hidden` = tracked but not shown in player flow; `diagnostic` = dev/debug only */
+export type ChoiceFeedbackVisibility = 'player' | 'hidden' | 'diagnostic';
 
 export interface ChoiceFeedbackStatImpact {
   stat: keyof PlayerState | string;

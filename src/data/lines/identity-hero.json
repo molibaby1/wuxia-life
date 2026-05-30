@@ -46,6 +46,7 @@
       {
         "id": "fight_bandits",
         "text": "挺身而出，教训强盗 (侠义 +10, 声望 +5)",
+        "description": "你挺身而出击退强盗，百姓感激涕零，你的侠名开始在附近传开。",
         "effects": [
           {
             "type": "stat_modify",
@@ -70,6 +71,15 @@
             "value": true
           },
           {
+            "type": "flag_set",
+            "target": "hero_first_case_named",
+            "value": true
+          },
+          {
+            "type": "event_record",
+            "target": "fight_bandits"
+          },
+          {
             "type": "lifepath_add_focus",
             "focusType": "martial",
             "value": 5
@@ -79,6 +89,7 @@
       {
         "id": "help_secretly",
         "text": "暗中相助，不留姓名 (侠义 +5)",
+        "description": "你暗中相助后悄然离去，虽不留姓名，侠义之举仍被目击者传颂。",
         "effects": [
           {
             "type": "stat_modify",
@@ -95,6 +106,15 @@
             "type": "flag_set",
             "target": "hero_first_case",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_first_case_secret",
+            "value": true
+          },
+          {
+            "type": "event_record",
+            "target": "help_secretly"
           }
         ]
       }
@@ -219,6 +239,15 @@
             "value": true
           },
           {
+            "type": "flag_set",
+            "target": "organize_villagers",
+            "value": true
+          },
+          {
+            "type": "event_record",
+            "target": "organize_villagers"
+          },
+          {
             "type": "lifepath_add_focus",
             "focusType": "leadership",
             "value": 10
@@ -233,8 +262,8 @@
     "description": "魔教余孽在江湖上兴风作浪，你决定出手铲除。",
     "version": "1.0.0",
     "category": "identity",
-    "priority": 90,
-    "weight": 80,
+    "priority": 55,
+    "weight": 50,
     "ageRange": {
       "min": 35,
       "max": 50
@@ -248,6 +277,12 @@
         "value": 35
       }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has(\"route_wanderer\") && flags.has(\"save_village\")"
+      }
+    ],
     "triggerConditions": {
       "age": {
         "min": 35,
@@ -257,7 +292,8 @@
         "required": ["hero"]
       },
       "flags": {
-        "required": ["save_village"]
+        "required": ["save_village"],
+        "not": ["route_wanderer"]
       }
     },
     "content": {
@@ -478,5 +514,632 @@
         ]
       }
     ]
+  },
+  {
+    "id": "hero_road_peril",
+    "name": "江湖险路",
+    "description": "押镖途中遇伏，须在高风险与退避之间抉择。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 75,
+    "weight": 65,
+    "ageRange": {
+      "min": 24,
+      "max": 40
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "risk"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 24
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 24,
+        "max": 40
+      },
+      "identity": {
+        "required": ["hero"]
+      }
+    },
+    "content": {
+      "title": "险路缠斗",
+      "text": "押镖途中遇伏，对方人数远超预料，前路危机四伏。",
+      "description": "此行有伤筋动骨之险，宜备退路。"
+    },
+    "choices": [
+      {
+        "id": "hero_peril_fight",
+        "text": "硬闯脱困",
+        "description": "你硬闯险路——可能身负重伤，但可保镖不失。",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "health",
+            "value": 12,
+            "operator": "subtract"
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_road_peril",
+            "value": true
+          },
+          {
+            "type": "event_record",
+            "target": "hero_peril_fight"
+          }
+        ]
+      },
+      {
+        "id": "hero_peril_retreat",
+        "text": "退避寻援",
+        "description": "你暂缓押镖，先寻援手，以保全身而退。",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 3,
+            "operator": "subtract"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "hero_road_peril",
+            "value": true
+          },
+          {
+            "type": "event_record",
+            "target": "hero_peril_retreat"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hero_old_case_returns",
+    "name": "旧案重提",
+    "description": "数年前路见不平的旧账被人翻出来，自由行走的你无人替你分说。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 82,
+    "weight": 72,
+    "maxTriggers": 1,
+    "ageRange": {
+      "min": 31,
+      "max": 38
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "once"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 31
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && flags.has(\"hero_first_case\") && player.chivalry >= 15 && !flags.has(\"hero_midlife_beat_old_case\")"
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 31,
+        "max": 38
+      },
+      "flags": {
+        "required": ["route_wanderer", "hero_first_case"],
+        "not": ["route_demonic", "hero_midlife_beat_old_case"]
+      }
+    },
+    "content": {
+      "title": "旧案重提",
+      "text": "数年前你介入的那桩「路见不平」被人翻旧账——仇家认出了你的脸，也有无辜者因当年的留名或不留名而遭牵连。无门无派，这口锅只能你自己背。",
+      "description": "若你当年暗中相助，沉默或许是最少再掀波澜的选择。"
+    },
+    "choices": [
+      {
+        "id": "old_case_reveal_truth",
+        "text": "公开澄清当年真相 (声望 +8, 侠义 +5)",
+        "description": "你当众还原当年经过，百姓侧目，仇家暂退，但江湖议论再起。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "hero_old_case_truth", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_old_case", "value": true },
+          { "type": "event_record", "target": "old_case_reveal_truth" }
+        ]
+      },
+      {
+        "id": "old_case_stay_silent_secret",
+        "text": "沉默不语，避免再掀波澜 (声望 -5, 人脉 +3)",
+        "description": "你当年本就不留姓名，此刻再开口只会牵连更多无辜——沉默是代价最小的路。",
+        "condition": {
+          "type": "expression",
+          "expression": "events.has(\"help_secretly\") || flags.has(\"hero_first_case_secret\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "subtract" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "hero_old_case_silent", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_old_case", "value": true },
+          { "type": "event_record", "target": "old_case_stay_silent" }
+        ]
+      },
+      {
+        "id": "old_case_stay_silent",
+        "text": "沉默不语，避免再掀波澜 (声望 -5, 人脉 +3)",
+        "description": "你选择不再开口——侠名既已传开，沉默也可能累及无辜。",
+        "condition": {
+          "type": "expression",
+          "expression": "!events.has(\"help_secretly\") && !flags.has(\"hero_first_case_secret\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "subtract" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "hero_old_case_silent", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_old_case", "value": true },
+          { "type": "event_record", "target": "old_case_stay_silent" }
+        ]
+      },
+      {
+        "id": "old_case_redirect",
+        "text": "将矛头引向他处 (声望 +3, 邪念 +8)",
+        "description": "你把祸水东引——侠名或许无损，但有人要替你承担后果。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "karma_change", "good": 0, "evil": 8 },
+          { "type": "flag_set", "target": "hero_old_case_burden", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_old_case", "value": true },
+          { "type": "event_record", "target": "old_case_redirect" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": ["hero", "游侠", "midlife", "once"],
+      "routeTargets": ["wanderer"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "hero_reputation_backlash",
+    "name": "声望反噬",
+    "description": "侠名传开，自由行走的空间被声望挤压。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 81,
+    "weight": 70,
+    "maxTriggers": 1,
+    "ageRange": {
+      "min": 33,
+      "max": 42
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "once"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 33
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && flags.has(\"hero_first_case\") && player.reputation >= 25 && (flags.has(\"save_village\") || player.reputation >= 40) && !flags.has(\"hero_midlife_beat_reputation\")"
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 33,
+        "max": 42
+      },
+      "flags": {
+        "required": ["route_wanderer", "hero_first_case"],
+        "not": ["route_demonic", "hero_midlife_beat_reputation"]
+      }
+    },
+    "content": {
+      "title": "声望反噬",
+      "text": "茶馆把你的事迹说成了「独行大侠」——武林盟、地方官、江湖小派纷纷递帖。自由行走的空间，正被你自己的侠名一点点挤占。",
+      "description": "若你曾组织村民抗敌，分功给同伴或许能缓和这场风波。"
+    },
+    "choices": [
+      {
+        "id": "rep_accept_mantle",
+        "text": "认下侠名，应帖行事 (声望 +12, 侠义 +8, 人脉 +5)",
+        "description": "你接下「独行大侠」的名头——从此走到哪里，都有眼睛盯着你。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 12, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "hero_rep_mantle", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_reputation", "value": true },
+          { "type": "event_record", "target": "rep_accept_mantle" }
+        ]
+      },
+      {
+        "id": "rep_decline_fame",
+        "text": "推辞虚名，继续漂泊 (声望 -8, 人脉 -3)",
+        "description": "你婉拒各路帖子，继续独行——侠名稍损，但自由尚在。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "subtract" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_rep_declined", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_reputation", "value": true },
+          { "type": "event_record", "target": "rep_decline_fame" }
+        ]
+      },
+      {
+        "id": "rep_share_credit",
+        "text": "分功给同伴与村民 (声望 +5, 人脉 +10)",
+        "description": "你把功劳推给曾与你并肩的村民与同伴——独行传说，变成了领路英雄。",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"save_village\") && (flags.has(\"organize_villagers\") || events.has(\"organize_villagers\"))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "hero_rep_shared", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_reputation", "value": true },
+          { "type": "event_record", "target": "rep_share_credit" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": ["hero", "游侠", "midlife", "once"],
+      "routeTargets": ["wanderer"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "hero_ally_pays_price",
+    "name": "盟友代价",
+    "description": "因你的侠名，同伴与家小受累——自由让你无法常伴左右。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 80,
+    "weight": 68,
+    "maxTriggers": 1,
+    "ageRange": {
+      "min": 36,
+      "max": 45
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "once", "risk"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 36
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && (player.connections >= 10 || (flags.has(\"married\") && flags.has(\"spouse_mingyue\"))) && (flags.has(\"hero_midlife_beat_old_case\") || flags.has(\"hero_midlife_beat_reputation\")) && !flags.has(\"hero_midlife_beat_ally\")"
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 36,
+        "max": 45
+      },
+      "flags": {
+        "required": ["route_wanderer"],
+        "not": ["route_demonic", "hero_midlife_beat_ally"]
+      }
+    },
+    "content": {
+      "title": "盟友代价",
+      "text": "因你的侠名或旧案，同伴与明月被仇家盯上——你常年漂泊在外，他们却代你承受Targeting。",
+      "description": "此劫凶险，须慎选退路；以声望担责可保他们平安，切割或涉险各有代价。"
+    },
+    "choices": [
+      {
+        "id": "ally_shield_reputation",
+        "text": "以声望换他们平安 (声望 -15, 侠义 +10)",
+        "description": "你公开担责，让仇家冲你来——自身无大碍，但侠名受损。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "subtract" },
+          { "type": "stat_modify", "target": "chivalry", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "hero_ally_shielded", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
+          { "type": "event_record", "target": "ally_shield_reputation" }
+        ]
+      },
+      {
+        "id": "ally_cut_ties",
+        "text": "切割关系，让他们与你撇清 (人脉 -12)",
+        "description": "你主动划清界限——他们或可脱身，但情分大伤；若你当年险路退避，怨意更深。",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 12, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_ally_abandoned", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
+          { "type": "event_record", "target": "ally_cut_ties" }
+        ]
+      },
+      {
+        "id": "ally_pay_ransom_supported",
+        "text": "江湖朋友凑份子营救 (银两 -10)",
+        "description": "旧日江湖朋友闻讯凑份子——你不必独自倾囊，也能换他们平安。",
+        "condition": {
+          "type": "expression",
+          "expression": "player.connections >= 20"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 10, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_ally_ransomed", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
+          { "type": "event_record", "target": "ally_pay_ransom" }
+        ]
+      },
+      {
+        "id": "ally_pay_ransom",
+        "text": "倾囊涉险营救 (银两 -20 或 健康 -10)",
+        "description": "你倾囊或涉险营救——可能身负重伤，但可换他们脱困。",
+        "condition": {
+          "type": "expression",
+          "expression": "player.connections < 20"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 20, "operator": "subtract" },
+          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_ally_ransomed", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
+          { "type": "event_record", "target": "ally_pay_ransom" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": ["hero", "游侠", "midlife", "once", "risk"],
+      "routeTargets": ["wanderer"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "hero_gray_judgment",
+    "name": "道德灰区",
+    "description": "恩义与法理冲突，无人替你定义正邪。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 79,
+    "weight": 66,
+    "maxTriggers": 1,
+    "ageRange": {
+      "min": 38,
+      "max": 48
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "once"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 38
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && player.chivalry >= 30 && (flags.has(\"hero_old_case_truth\") || flags.has(\"hero_old_case_silent\") || flags.has(\"hero_old_case_burden\") || flags.has(\"hero_rep_mantle\") || flags.has(\"hero_rep_declined\") || flags.has(\"hero_rep_shared\")) && !flags.has(\"hero_midlife_beat_gray\")"
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 38,
+        "max": 48
+      },
+      "flags": {
+        "required": ["route_wanderer"],
+        "not": ["route_demonic", "hero_midlife_beat_gray"]
+      }
+    },
+    "content": {
+      "title": "道德灰区",
+      "text": "你曾受一人之恩，却发现此人现为官府通缉犯；当年旧案与今日侠名，都压在这一判之间——无门无派，无人替你定义正邪。",
+      "description": "守律、护人或拒判，每条路都有代价。"
+    },
+    "choices": [
+      {
+        "id": "gray_uphold_law",
+        "text": "守律举报，不助逃犯 (声望 +5, 侠义 -5)",
+        "description": "你选择守律——官府记你一功，但恩义难全。",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_gray_lawful", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_gray", "value": true },
+          { "type": "event_record", "target": "gray_uphold_law" }
+        ]
+      },
+      {
+        "id": "gray_shield_debtor",
+        "text": "护短瞒天，不助官府 (侠义 +10, 声望 -10)",
+        "description": "你瞒天过海护他脱身——恩义得偿，侠名受损。",
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "subtract" },
+          { "type": "karma_change", "good": 5, "evil": 0 },
+          { "type": "flag_set", "target": "hero_gray_debtor", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_gray", "value": true },
+          { "type": "event_record", "target": "gray_shield_debtor" }
+        ]
+      },
+      {
+        "id": "gray_refuse_judge",
+        "text": "拒判抽身，不再过问 (人脉 -5)",
+        "description": "你拒判抽身——若你自幼爱自由，此刻反而看得更透。",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_gray_neutral", "value": true },
+          { "type": "flag_set", "target": "hero_midlife_beat_gray", "value": true },
+          { "type": "event_record", "target": "gray_refuse_judge" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": ["hero", "游侠", "midlife", "once"],
+      "routeTargets": ["wanderer"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "hero_freedom_settlement",
+    "name": "自由之价",
+    "description": "中年收束：自由与侠名的代价一并落地。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 78,
+    "weight": 64,
+    "maxTriggers": 1,
+    "ageRange": {
+      "min": 45,
+      "max": 50
+    },
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["hero", "identity", "midlife", "once"],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 45
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && !flags.has(\"hero_freedom_settlement_done\") && ((flags.has(\"hero_midlife_beat_old_case\") && flags.has(\"hero_midlife_beat_reputation\") && flags.has(\"hero_midlife_beat_ally\")) || (flags.has(\"hero_midlife_beat_old_case\") && flags.has(\"hero_midlife_beat_reputation\") && flags.has(\"hero_midlife_beat_gray\")) || (flags.has(\"hero_midlife_beat_old_case\") && flags.has(\"hero_midlife_beat_ally\") && flags.has(\"hero_midlife_beat_gray\")) || (flags.has(\"hero_midlife_beat_reputation\") && flags.has(\"hero_midlife_beat_ally\") && flags.has(\"hero_midlife_beat_gray\")))"
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 45,
+        "max": 50
+      },
+      "flags": {
+        "required": ["route_wanderer"],
+        "not": ["route_demonic", "hero_freedom_settlement_done"]
+      }
+    },
+    "content": {
+      "title": "自由之价",
+      "text": "人到中年，你仍行走在路上——只是这条路上的代价，如今都写在了脸上。",
+      "description": "无门无派的自由，从来都不是没有价格。"
+    },
+    "choices": [
+      {
+        "id": "settlement_reclusive",
+        "text": "无名之侠",
+        "description": "你推辞虚名，却以声望护住了身边人——江湖记得你的义，却不记得你的名字。",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"hero_rep_declined\") && flags.has(\"hero_ally_shielded\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "hero_midlife_reclusive", "value": true },
+          { "type": "flag_set", "target": "hero_freedom_settlement_done", "value": true },
+          { "type": "event_record", "target": "hero_midlife_reclusive" }
+        ]
+      },
+      {
+        "id": "settlement_legend",
+        "text": "名满江湖",
+        "description": "你认下侠名，也守住了律——名满江湖，路却更窄。",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"hero_rep_mantle\") && flags.has(\"hero_gray_lawful\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "hero_midlife_legend_seed", "value": true },
+          { "type": "flag_set", "target": "hero_freedom_settlement_done", "value": true },
+          { "type": "event_record", "target": "hero_midlife_legend_seed" }
+        ]
+      },
+      {
+        "id": "settlement_burdened",
+        "text": "侠名带伤",
+        "description": "旧案与切割留下的伤，都刻在了你的侠名上。",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"hero_old_case_burden\") || flags.has(\"hero_ally_abandoned\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "subtract" },
+          { "type": "flag_set", "target": "hero_midlife_burdened", "value": true },
+          { "type": "flag_set", "target": "hero_freedom_settlement_done", "value": true },
+          { "type": "event_record", "target": "hero_midlife_burdened" }
+        ]
+      },
+      {
+        "id": "settlement_family",
+        "text": "漂泊有家",
+        "description": "你仍漂泊在外，但明月信你——家不在山门，在人心里。",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has(\"married\") && flags.has(\"hero_ally_shielded\")"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "hero_midlife_family_tether", "value": true },
+          { "type": "flag_set", "target": "hero_freedom_settlement_done", "value": true },
+          { "type": "event_record", "target": "hero_midlife_family_tether" }
+        ]
+      },
+      {
+        "id": "settlement_ongoing",
+        "text": "仍在路上",
+        "description": "自由有价，但你仍选择走下去——代价已知，路还在前头。",
+        "condition": {
+          "type": "expression",
+          "expression": "!(flags.has(\"hero_rep_declined\") && flags.has(\"hero_ally_shielded\")) && !(flags.has(\"hero_rep_mantle\") && flags.has(\"hero_gray_lawful\")) && !(flags.has(\"hero_old_case_burden\") || flags.has(\"hero_ally_abandoned\")) && !(flags.has(\"married\") && flags.has(\"hero_ally_shielded\"))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "hero_midlife_ongoing", "value": true },
+          { "type": "flag_set", "target": "hero_freedom_settlement_done", "value": true },
+          { "type": "event_record", "target": "hero_midlife_ongoing" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774545,
+      "updatedAt": 1773317774545,
+      "author": "development_team",
+      "tags": ["hero", "游侠", "midlife", "once"],
+      "routeTargets": ["wanderer"],
+      "autoResolve": true,
+      "enabled": true
+    }
   }
 ]

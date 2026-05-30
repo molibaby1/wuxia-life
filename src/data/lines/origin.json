@@ -25,6 +25,7 @@
       {
         "id": "origin_wuxia_family",
         "text": "武林世家",
+        "description": "你出身武林世家，自幼耳濡目染，拳脚根基比同龄人更扎实。",
         "effects": [
           {
             "type": "flag_set",
@@ -57,6 +58,7 @@
       {
         "id": "origin_scholar_family",
         "text": "书香门第",
+        "description": "你生在书香门第，家学渊源让你悟性过人，也更重仁义礼法。",
         "effects": [
           {
             "type": "flag_set",
@@ -89,6 +91,7 @@
       {
         "id": "origin_merchant_family",
         "text": "商贾之家",
+        "description": "你生在商贾之家，家中殷实，你也学会了察言观色与待人接物。",
         "effects": [
           {
             "type": "flag_set",
@@ -115,6 +118,7 @@
       {
         "id": "origin_frontier",
         "text": "边疆异族",
+        "description": "你生在边疆异族之家，骑射与身法自幼练起，性情也更刚烈自由。",
         "effects": [
           {
             "type": "flag_set",

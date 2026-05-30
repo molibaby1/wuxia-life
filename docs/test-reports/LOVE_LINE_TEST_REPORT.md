@@ -10,7 +10,7 @@
 
 ## 测试方法
 
-使用 [`testFullLoveLine.ts`](file:///Users/zhouyun/code/wuxia-life/tests/testFullLoveLine.ts) 脚本：
+使用 [`testFullLoveLine.ts`](tests/testFullLoveLine.ts) 脚本：
 - 从 0 岁模拟到 30 岁
 - 自动检测并执行所有感情事件
 - 记录所有 flags 和 events 的变化
@@ -111,8 +111,8 @@ npx tsx tests/testSaveLoadLoveFlags.ts
 
 ## 测试脚本
 
-- [`testFullLoveLine.ts`](file:///Users/zhouyun/code/wuxia-life/tests/testFullLoveLine.ts) - 完整感情线测试
-- [`testLoveLine.ts`](file:///Users/zhouyun/code/wuxia-life/tests/testLoveLine.ts) - 单点感情事件测试
+- [`testFullLoveLine.ts`](tests/testFullLoveLine.ts) - 完整感情线测试
+- [`testLoveLine.ts`](tests/testLoveLine.ts) - 单点感情事件测试
 
 ## 运行测试
 

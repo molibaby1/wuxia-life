@@ -1,9 +1,22 @@
 import { computeExperienceDerivedMetrics } from './computeExperienceMetricsFromReports';
+import { buildDeathRiskTelemetry } from './deathRiskTelemetry';
+import {
+  buildRomanceFamilyArcReport,
+  evaluateP3RomanceFamilyAchievementRate,
+  formatRomanceFamilyArcReportLines,
+  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
+  type RomanceFamilyArcReport,
+} from './romanceFamilyArcTelemetry';
 import {
   EXPERIENCE_HEALTH_METRIC_DEFINITIONS,
   type ExperienceHealthMetricDefinition,
   type ExperienceHealthMetricKey,
 } from './experienceHealthMetricDefinitions';
+import {
+  P3_DEATH_RATE_MAX,
+  P3_EVAL_COHORT_LABEL,
+  P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN,
+} from './p3TrustTargets';
 import {
   evaluateSimulationGate,
   parseWaiverArg,
@@ -37,7 +50,28 @@ export interface ExperienceHealthGateResult {
   infoMetrics: ExperienceHealthMetricEvaluation[];
   p2Gate: SimulationGateResult;
   derivedMetrics: ReturnType<typeof computeExperienceDerivedMetrics>;
+  p3EvalSampleCount?: number;
+  p3RomanceFamily?: P3RomanceFamilyGateSnapshot;
+  /** US-029: P3-EVAL trust metrics enforced as blockers when present. */
+  p3TrustEnforced?: boolean;
 }
+
+export type P3EvalReportEntry = {
+  report: GameProcessReport;
+  sampleId: string;
+};
+
+export type P3RomanceFamilyGateSnapshot = {
+  primaryArcReport: RomanceFamilyArcReport | null;
+  p3EvalAchievementRate: number | null;
+};
+
+const P3_ONLY_KEYS = new Set<ExperienceHealthMetricKey>([
+  'death_without_warning_count',
+  'p2_legacy_death_rate',
+  'romance_family_primary_sample_pass',
+  'p3_romance_family_achievement_rate',
+]);
 
 const DEFINITION_MAP = new Map(
   EXPERIENCE_HEALTH_METRIC_DEFINITIONS.map(def => [def.key, def] as const),
@@ -187,9 +221,164 @@ function evaluateDerivedMetric(
   };
 }
 
+function evaluateP3DeathMetrics(entries: P3EvalReportEntry[]): {
+  deathRate: number | null;
+  deathWithoutWarningCount: number;
+} {
+  if (entries.length === 0) {
+    return { deathRate: null, deathWithoutWarningCount: 0 };
+  }
+
+  const deaths = entries.filter(entry => !entry.report.isAlive).length;
+  let deathWithoutWarningCount = 0;
+  for (const entry of entries) {
+    const telemetry = buildDeathRiskTelemetry(entry.report, entry.sampleId);
+    if (telemetry?.deathWithoutWarning) {
+      deathWithoutWarningCount += 1;
+    }
+  }
+
+  return {
+    deathRate: deaths / entries.length,
+    deathWithoutWarningCount,
+  };
+}
+
+function applyP3DeathEvaluations(
+  evaluations: ExperienceHealthMetricEvaluation[],
+  p3EvalEntries: P3EvalReportEntry[],
+  p2Reports: GameProcessReport[],
+  waiverMap: Map<string, string>,
+): void {
+  const { deathRate, deathWithoutWarningCount } = evaluateP3DeathMetrics(p3EvalEntries);
+  const deathMetric = evaluations.find(metric => metric.key === 'death_rate');
+  if (deathMetric) {
+    const status: ExperienceHealthGateStatus =
+      deathRate !== null && deathRate > P3_DEATH_RATE_MAX ? 'fail' : 'pass';
+    const waiverReason = waiverMap.get('death_rate');
+    const waived = Boolean(waiverReason);
+    deathMetric.severity = 'blocker';
+    deathMetric.actualValue = deathRate;
+    deathMetric.thresholdMin = undefined;
+    deathMetric.thresholdMax = P3_DEATH_RATE_MAX;
+    deathMetric.detail = `${P3_EVAL_COHORT_LABEL} actual=${deathRate?.toFixed(4) ?? 'n/a'}, max=${P3_DEATH_RATE_MAX}, samples=${p3EvalEntries.length}`;
+    deathMetric.status = status === 'fail' && waived ? 'warning' : status;
+    deathMetric.waived = waived;
+    deathMetric.waiverReason = waiverReason;
+    deathMetric.nonWaivable = true;
+  }
+
+  const dwwDefinition = DEFINITION_MAP.get('death_without_warning_count');
+  if (dwwDefinition) {
+    const status: ExperienceHealthGateStatus =
+      deathWithoutWarningCount > 0 ? 'fail' : 'pass';
+    const waiverReason = waiverMap.get('death_without_warning_count');
+    const waived = Boolean(waiverReason);
+    evaluations.push({
+      key: 'death_without_warning_count',
+      label: dwwDefinition.label,
+      severity: dwwDefinition.severity,
+      actualValue: deathWithoutWarningCount,
+      thresholdMax: dwwDefinition.baseline.max,
+      status: status === 'fail' && waived ? 'warning' : status,
+      detail: `P3-EVAL actual=${deathWithoutWarningCount}, max=0, samples=${p3EvalEntries.length}`,
+      waived,
+      waiverReason,
+      nonWaivable: dwwDefinition.nonWaivable ?? false,
+    });
+  }
+
+  const p2LegacyDefinition = DEFINITION_MAP.get('p2_legacy_death_rate');
+  if (p2LegacyDefinition) {
+    const p2Deaths = p2Reports.filter(report => !report.isAlive).length;
+    const p2DeathRate = p2Reports.length > 0 ? p2Deaths / p2Reports.length : null;
+    const range = evaluateRange(p2LegacyDefinition, p2DeathRate);
+    const waiverReason = waiverMap.get('p2_legacy_death_rate');
+    const waived = Boolean(waiverReason);
+    const finalStatus = range.status === 'fail' && waived ? 'warning' : range.status;
+    evaluations.push({
+      key: 'p2_legacy_death_rate',
+      label: p2LegacyDefinition.label,
+      severity: p2LegacyDefinition.severity,
+      actualValue: p2DeathRate,
+      thresholdMin: p2LegacyDefinition.baseline.min,
+      thresholdMax: p2LegacyDefinition.baseline.max,
+      status: finalStatus === 'fail' && p2LegacyDefinition.severity === 'info' ? 'warning' : finalStatus,
+      detail: `P2-LEGACY ${range.detail}, samples=${p2Reports.length}`,
+      waived,
+      waiverReason,
+      nonWaivable: false,
+    });
+  }
+}
+
+function applyP3RomanceFamilyEvaluations(
+  evaluations: ExperienceHealthMetricEvaluation[],
+  p3EvalEntries: P3EvalReportEntry[],
+  waiverMap: Map<string, string>,
+): P3RomanceFamilyGateSnapshot {
+  const primaryEntry = p3EvalEntries.find(
+    entry => entry.sampleId === GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
+  );
+  const primaryArcReport = primaryEntry
+    ? buildRomanceFamilyArcReport(primaryEntry.report, primaryEntry.sampleId)
+    : null;
+
+  const passValue = primaryArcReport?.primarySamplePass ? 1 : 0;
+  const passDefinition = DEFINITION_MAP.get('romance_family_primary_sample_pass');
+  if (passDefinition) {
+    const status: ExperienceHealthGateStatus = passValue === 1 ? 'pass' : 'fail';
+    const waiverReason = waiverMap.get('romance_family_primary_sample_pass');
+    const waived = Boolean(waiverReason);
+    const outcome = primaryArcReport?.arcOutcome ?? 'n/a';
+    evaluations.push({
+      key: 'romance_family_primary_sample_pass',
+      label: passDefinition.label,
+      severity: passDefinition.severity,
+      actualValue: passValue,
+      thresholdMin: passDefinition.baseline.min,
+      thresholdMax: passDefinition.baseline.max,
+      status: status === 'fail' && waived ? 'warning' : status,
+      detail: `P3-RF ${GOLDEN_ROMANCE_FAMILY_SAMPLE_ID} arc_outcome=${outcome}, pass=${passValue === 1}`,
+      waived,
+      waiverReason,
+      nonWaivable: passDefinition.nonWaivable ?? false,
+    });
+  }
+
+  const p3EvalAchievementRate = evaluateP3RomanceFamilyAchievementRate(p3EvalEntries);
+  const romanceMetric = evaluations.find(metric => metric.key === 'romance_family_achievement_rate');
+  if (romanceMetric && p3EvalAchievementRate !== null) {
+    romanceMetric.detail = `${romanceMetric.detail}; ${P3_EVAL_COHORT_LABEL} rate=${p3EvalAchievementRate.toFixed(4)} (${p3EvalEntries.length} samples)`;
+  }
+
+  const p3RateDefinition = DEFINITION_MAP.get('p3_romance_family_achievement_rate');
+  if (p3RateDefinition && p3EvalAchievementRate !== null) {
+    const status: ExperienceHealthGateStatus =
+      p3EvalAchievementRate >= P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN ? 'pass' : 'fail';
+    const waiverReason = waiverMap.get('p3_romance_family_achievement_rate');
+    const waived = Boolean(waiverReason);
+    evaluations.push({
+      key: 'p3_romance_family_achievement_rate',
+      label: p3RateDefinition.label,
+      severity: p3RateDefinition.severity,
+      actualValue: p3EvalAchievementRate,
+      thresholdMin: P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN,
+      status: status === 'fail' && waived ? 'warning' : status,
+      detail: `${P3_EVAL_COHORT_LABEL} actual=${p3EvalAchievementRate.toFixed(4)}, min=${P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN}, samples=${p3EvalEntries.length}`,
+      waived,
+      waiverReason,
+      nonWaivable: p3RateDefinition.nonWaivable ?? false,
+    });
+  }
+
+  return { primaryArcReport, p3EvalAchievementRate };
+}
+
 export function evaluateExperienceHealthGate(
   reports: GameProcessReport[],
   waivers: SimulationWaiver[] = [],
+  p3EvalEntries: P3EvalReportEntry[] = [],
 ): ExperienceHealthGateResult {
   validateExperienceWaivers(waivers);
   const waiverMap = new Map(waivers.map(item => [item.metricKey, item.reason] as const));
@@ -209,11 +398,17 @@ export function evaluateExperienceHealthGate(
   }
 
   for (const definition of EXPERIENCE_HEALTH_METRIC_DEFINITIONS) {
-    if (P2_KEYS.has(definition.key)) {
+    if (P2_KEYS.has(definition.key) || P3_ONLY_KEYS.has(definition.key)) {
       continue;
     }
     const value = derivedMetrics[definition.key as keyof typeof derivedMetrics] ?? null;
     evaluations.push(evaluateDerivedMetric(definition, value, waiverMap));
+  }
+
+  let p3RomanceFamily: P3RomanceFamilyGateSnapshot | undefined;
+  if (p3EvalEntries.length > 0) {
+    applyP3DeathEvaluations(evaluations, p3EvalEntries, reports, waiverMap);
+    p3RomanceFamily = applyP3RomanceFamilyEvaluations(evaluations, p3EvalEntries, waiverMap);
   }
 
   const blockingMetrics = evaluations.filter(metric => metric.severity === 'blocker');
@@ -232,5 +427,21 @@ export function evaluateExperienceHealthGate(
     infoMetrics,
     p2Gate,
     derivedMetrics,
+    p3EvalSampleCount: p3EvalEntries.length > 0 ? p3EvalEntries.length : undefined,
+    p3RomanceFamily,
+    p3TrustEnforced: p3EvalEntries.length > 0,
   };
+}
+
+export function formatP3RomanceFamilyGateSection(
+  snapshot: P3RomanceFamilyGateSnapshot | undefined,
+): string[] {
+  if (!snapshot?.primaryArcReport) {
+    return ['P3-RF romance/family: (no golden-romance-family sample in queue)'];
+  }
+  return [
+    'P3-RF romance/family arc (golden-romance-family):',
+    ...formatRomanceFamilyArcReportLines(snapshot.primaryArcReport).map(line => `  ${line}`),
+    `  P3-EVAL romance_family_achievement_rate=${snapshot.p3EvalAchievementRate?.toFixed(4) ?? 'n/a'}`,
+  ];
 }

@@ -55,20 +55,7 @@
       </div>
     </div>
 
-    <div class="relations-bar">
-      <div class="relation-summary">
-        <span class="relation-label">路线</span>
-        <span class="relation-value">{{ routeLabel }}</span>
-      </div>
-      <div v-if="relationships.length > 0" class="relation-list">
-        <div v-for="rel in relationships" :key="rel.id" class="relation-item">
-          <span class="relation-role">{{ formatRole(rel.role) }}</span>
-          <span class="relation-name">{{ rel.name }}</span>
-          <span class="relation-affinity">好感 {{ rel.affinity }}</span>
-        </div>
-      </div>
-      <div v-else class="relation-empty">暂无关键关系</div>
-    </div>
+    <LifeMemoryPanel :summary="lifeMemorySummary" />
     
     <div class="content-area">
       <div v-if="currentNode" class="story-card card">
@@ -94,14 +81,14 @@
                   v-for="impact in visibleRelationshipImpacts"
                   :key="`relation-${impact.relationId}`"
                 >
-                  {{ impact.relationName || impact.relationId }} {{ formatDelta(impact.delta) }}
+                  {{ impact.relationName || '某位关系人' }} {{ formatDelta(impact.delta) }}
                 </li>
               </ul>
             </div>
             <div v-if="displayedRouteImpact" class="feedback-group">
               <p class="feedback-group-title">路线变化</p>
               <p class="feedback-line">
-                {{ displayedRouteImpact.from || '未定' }} → {{ displayedRouteImpact.to || '未定' }}
+                {{ formatRouteLabel(displayedRouteImpact.from) }} → {{ formatRouteLabel(displayedRouteImpact.to) }}
               </p>
             </div>
             <div v-if="visibleLongTermFlags.length > 0" class="feedback-group">
@@ -146,7 +133,13 @@ import { gameEngine } from '../core/GameEngineIntegration';
 import { talentSystem } from '../core/TalentSystem';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
 import AttributePanel from './AttributePanel.vue';
+import LifeMemoryPanel from './LifeMemoryPanel.vue';
+import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
 import type { StoryChoice, TalentDefinition } from '../types';
+import {
+  formatLongTermFlag,
+  formatRouteLabel,
+} from '../utils/playerFacingLabels';
 
 const props = defineProps<{
   currentNode: any;
@@ -243,49 +236,11 @@ const player = computed(() => {
   return state.player;
 });
 
-const relationships = computed(() => {
-  return player.value?.relationships || [];
+const lifeMemorySummary = computed(() => {
+  void engineState.lastChoiceFeedback;
+  void engineState.currentEvent;
+  return deriveLifeMemorySummary(gameEngine.getGameState());
 });
-
-const routeLabel = computed(() => {
-  const flags = gameEngine.getGameState().flags || {};
-  const faction = flags.sect_faction as unknown;
-  
-  // 使用新的 sect_faction 系统
-  if (faction === 'orthodox') return '传统门派';
-  if (faction === 'unconventional') return '非传统门派';
-  if (faction === 'neutral') return '中立门派';
-  
-  // 兼容旧数据
-  if (flags.route_orthodox) return '正道';
-  if (flags.route_demonic) return '非传统';
-  if (flags.route_wanderer) return '游侠';
-  
-  return '未定';
-});
-
-const formatRole = (role: string) => {
-  switch (role) {
-    case 'master':
-      return '师父';
-    case 'lover':
-      return '恋人';
-    case 'sworn':
-      return '结义';
-    case 'rival':
-      return '宿敌';
-    case 'friend':
-      return '友人';
-    case 'family':
-      return '亲族';
-    case 'enemy':
-      return '仇敌';
-    case 'patron':
-      return '恩主';
-    default:
-      return role;
-  }
-};
 
 const getCurrentDate = () => {
   const state = gameEngine.getGameState();
@@ -300,9 +255,7 @@ const formatDelta = (value: number) => {
   return `${value}`;
 };
 
-const describeFlag = (flag: string, value: boolean) => {
-  return value ? `触发：${flag}` : `失去：${flag}`;
-};
+const describeFlag = (flag: string, value: boolean) => formatLongTermFlag(flag, value);
 
 const getStatName = (stat: string): string => {
   const statNames: Record<string, string> = {
@@ -434,68 +387,6 @@ const loadLatestSave = () => {
   padding: 12px;
   background: white;
   border-bottom: 1px solid rgba(139, 69, 19, 0.1);
-}
-
-.relations-bar {
-  background: #fffaf0;
-  border-bottom: 1px solid rgba(139, 69, 19, 0.08);
-  padding: 10px 12px;
-  display: grid;
-  gap: 8px;
-}
-
-.relation-summary {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.relation-label {
-  font-size: 12px;
-  color: #8b6914;
-}
-
-.relation-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.relation-list {
-  display: grid;
-  gap: 6px;
-}
-
-.relation-item {
-  display: grid;
-  grid-template-columns: 64px 1fr auto;
-  gap: 8px;
-  align-items: center;
-  background: white;
-  border-radius: 10px;
-  padding: 6px 10px;
-  border: 1px solid rgba(139, 69, 19, 0.08);
-}
-
-.relation-role {
-  font-size: 12px;
-  color: #8b6914;
-}
-
-.relation-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.relation-affinity {
-  font-size: 12px;
-  color: #8b6914;
-}
-
-.relation-empty {
-  font-size: 12px;
-  color: #b08a44;
 }
 
 .stat-item {
@@ -664,6 +555,51 @@ const loadLatestSave = () => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .save-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .story-text,
+  .outcome-text {
+    font-size: 15px;
+  }
+
+  .content-area {
+    padding: 16px 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .game-screen {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .content-area {
+    padding: 24px 32px;
+  }
+
+  .choices-area {
+    max-width: 720px;
+    margin: 0 auto;
   }
 }
 

@@ -288,7 +288,12 @@ export class EventLoader {
             if (!choice.text) {
               errors.push(`事件 ${event.id} 的第 ${index} 个选择缺少文本`);
             }
-            if (!choice.effects || choice.effects.length === 0) {
+            const hasDirectEffects = Array.isArray(choice.effects) && choice.effects.length > 0;
+            const hasOutcomeEffects = Array.isArray(choice.outcomes)
+              && choice.outcomes.some(
+                outcome => Array.isArray(outcome.effects) && outcome.effects.length > 0,
+              );
+            if (!hasDirectEffects && !hasOutcomeEffects) {
               errors.push(`事件 ${event.id} 的第 ${index} 个选择缺少效果`);
             }
           });

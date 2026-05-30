@@ -772,7 +772,7 @@ export interface EventDefinition {
     autoResolve?: boolean;
     pathAffinity?: Record<string, number>;
     pathConflicts?: string[];
-    routeTransition?: 'turn';
+    routeTransition?: 'turn' | 'betrayal' | 'corruption' | 'redemption' | 'exile';
     routeTargets?: string[];
   };
 

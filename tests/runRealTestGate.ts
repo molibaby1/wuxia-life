@@ -16,6 +16,7 @@ const suites: Suite[] = [
   { name: 'AllTests', entry: 'tests/AllTests.ts' },
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },
+  { name: 'testLifeMemorySummary', entry: 'tests/testLifeMemorySummary.ts' },
 ];
 
 let failed = false;

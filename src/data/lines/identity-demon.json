@@ -17,11 +17,11 @@
     "triggerConditions": {
       "age": {"min": 15, "max": 25},
       "flags": {
-        "not": ["outlaw_identity_done", "current_sect"]
+        "not": ["outlaw_identity_done", "current_sect", "route_orthodox"]
       }
     },
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !flags.has('current_sect') && !flags.has('sect_switch_cooldown')"}
+      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !flags.has('current_sect') && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox')"}
     ],
     "content": {
       "title": "幽影门之路",
@@ -38,7 +38,9 @@
             "text": "使者眼中闪过一丝赞赏：\"好！老夫等这一天很久了！\"他传授你幽影门不传秘笈——【幽冥神功】！你的实力突飞猛进，正式成为幽影门核心弟子！",
             "condition": {"type": "expression", "expression": "martialPower >= 30 && chivalry <= -10"},
             "effects": [
+              {"type": "flag_unset", "target": "route_orthodox"},
               {"type": "flag_set", "target": "outlaw_identity_done"},
+              {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_core_disciple", "value": true},
@@ -53,7 +55,9 @@
             "text": "使者点点头：\"你有此决心，很好。\"他传授你幽影门入门功法，你正式成为幽影门弟子。从此与正道分道扬镳，江湖路远。",
             "condition": {"type": "expression", "expression": "martialPower >= 20"},
             "effects": [
+              {"type": "flag_unset", "target": "route_orthodox"},
               {"type": "flag_set", "target": "outlaw_identity_done"},
+              {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
               {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
@@ -66,7 +70,9 @@
             "text": "使者上下打量你，沉吟片刻：\"根骨尚可，但心性未稳。先从外围做起吧。\"你成为幽影门的外围人员，需要证明自己的忠诚。",
             "condition": {"type": "expression", "expression": "true"},
             "effects": [
+              {"type": "flag_unset", "target": "route_orthodox"},
               {"type": "flag_set", "target": "outlaw_identity_done"},
+              {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming外围", "value": true},
@@ -87,7 +93,9 @@
             "text": "使者微微一笑：\"保留底线？也好。我幽影门虽被视为邪道，但也自有规矩。\"你成为幽影门弟子，在正邪之间寻找自己的道路。",
             "condition": {"type": "expression", "expression": "chivalry >= 0"},
             "effects": [
+              {"type": "flag_unset", "target": "route_orthodox"},
               {"type": "flag_set", "target": "outlaw_identity_done"},
+              {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_principled", "value": true},
@@ -113,7 +121,9 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773717774544,
       "author": "development_team",
-      "tags": ["幽影门", "身份", "早期", "once"],
+      "tags": ["幽影门", "身份", "早期", "once", "route_turn"],
+      "routeTargets": ["demonic"],
+      "routeTransition": "corruption",
       "enabled": true
     }
   },
@@ -149,6 +159,7 @@
       {
         "id": "cultivate_aggressive",
         "text": "全力修炼，追求力量 (武力 +20)",
+        "description": "你全力修炼幽影门秘籍，力量暴涨，但也感到心性愈发冷硬。",
         "effects": [
           {"type": "stat_modify", "target": "martialPower", "value": 20, "operator": "add"}
         ]
@@ -156,6 +167,7 @@
       {
         "id": "cultivate_balanced",
         "text": "适度修炼，保持理智 (武力 +10, 悟性 +5)",
+        "description": "你适度修炼并保留理智，在力量增长与自我掌控之间找到平衡。",
         "effects": [
           {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
           {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"}
@@ -300,7 +312,7 @@
       }
     },
     "conditions": [
-      {"type": "expression", "expression": "flags.has('outlaw_identity_done')"}
+      {"type": "expression", "expression": "flags.has('outlaw_identity_done') && !flags.has('demonic_midlife_expansion_done')"}
     ],
     "content": {
       "title": "江湖终极决战",
@@ -336,6 +348,587 @@
       "updatedAt": 1773717774544,
       "author": "development_team",
       "tags": ["幽影门", "最终抉择", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_expansion",
+    "name": "魔道中年扩张",
+    "description": "幽影门进入二次扩张窗口，权力与代价并存。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 88,
+    "weight": 80,
+    "ageRange": {"min": 31, "max": 38},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 31}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && !flags.has('demonic_midlife_expansion_done') && (flags.has('demonic_leader') || martialPower >= 40 || flags.has('demonic_ending_rule'))"
+      }
+    ],
+    "content": {
+      "title": "门主扩张",
+      "text": "幽影门总坛进入二次扩张窗口——周边势力或惧或服，门内亦有人催促你再进一步。此路有权势，也有江湖代价。",
+      "description": "中年魔道须择扩张之道；每条路都有声望与人脉的账单。"
+    },
+    "choices": [
+      {
+        "id": "demonic_expand_territory",
+        "text": "兼并周边，扩大门势",
+        "description": "以铁腕吞并周边小派，门势大振，但江湖名望将再受重创。",
+        "effects": [
+          {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "subtract"},
+          {"type": "stat_modify", "target": "connections", "value": 4, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_martial"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_territory"}
+        ]
+      },
+      {
+        "id": "demonic_expand_secret_art",
+        "text": "闭关炼化禁术",
+        "description": "闭关冲击镇派禁术——心志与侠义恐被侵蚀，若曾走暗影试炼，旧债亦会在关内翻涌。",
+        "effects": [
+          {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 6, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_secret"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_secret_art"}
+        ]
+      },
+      {
+        "id": "demonic_expand_consolidate",
+        "text": "固守既有地盘",
+        "description": "你暂缓扩张，先稳住总坛与旧部，代价最小，但门势增长亦最慢。",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_stable"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_consolidate"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "扩张", "once", "route", "mainline"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_expansion_survivor",
+    "name": "魔道余孽借势",
+    "description": "夺位未成或退隐后，余孽仍逼你在中年再择扩张之道。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 31, "max": 38},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 31}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && !flags.has('demonic_midlife_expansion_done') && !flags.has('demonic_leader') && (martialPower >= 40 || flags.has('demonic_ending_rule') || flags.has('demonic_usurp_failed'))"
+      }
+    ],
+    "content": {
+      "title": "余孽借势",
+      "text": "你虽未能稳坐门主之位，旧部与余孽仍推你在中年再掀波澜。扩张或闭关，都将把旧日权斗的账一并翻出。",
+      "description": "夺位余波未平，扩张一步都可能引来清算。"
+    },
+    "choices": [
+      {
+        "id": "demonic_expand_territory",
+        "text": "借势吞并，以战养战",
+        "description": "率余部兼并弱派，短期得势，但江湖仇家亦会闻风而动。",
+        "effects": [
+          {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "subtract"},
+          {"type": "stat_modify", "target": "connections", "value": 4, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_martial"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_territory_survivor"}
+        ]
+      },
+      {
+        "id": "demonic_expand_secret_art",
+        "text": "闭关炼化禁术",
+        "description": "闭关冲击禁术——心志恐被魔功侵蚀，若曾走暗影试炼，旧债会在关内翻涌。",
+        "effects": [
+          {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 6, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_secret"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_secret_art_survivor"}
+        ]
+      },
+      {
+        "id": "demonic_expand_consolidate",
+        "text": "按兵不动，先保全身",
+        "description": "你暂缓扩张，先稳住余部与退路，代价最小。",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_stable"},
+          {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
+          {"type": "event_record", "target": "demonic_expand_consolidate_survivor"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "扩张", "once", "route", "mainline"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_isolation",
+    "name": "魔道中年孤立",
+    "description": "扩张之后，江湖与旧识的代价逐一浮现。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 65,
+    "weight": 70,
+    "ageRange": {"min": 33, "max": 42},
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 33}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && !flags.has('demonic_midlife_isolation_done')"
+      }
+    ],
+    "content": {
+      "title": "江湖避你如蛇蝎",
+      "text": "正道中人见你绕道，旧友来信渐稀。若你曾迎娶明月，她亦在夜里问你：这条路，还要走多远？",
+      "description": "扩张的权势换来孤立——名望与关系正在流失。"
+    },
+    "autoEffects": [
+      {"type": "stat_modify", "target": "reputation", "value": 6, "operator": "subtract"},
+      {"type": "flag_set", "target": "demonic_midlife_isolation_done"},
+      {"type": "event_record", "target": "demonic_midlife_isolation"}
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "孤立", "once", "route"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_isolation_martial",
+    "name": "魔道中年孤立（铁腕扩张）",
+    "description": "铁腕扩张后，江湖反弹更为剧烈。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 66,
+    "weight": 72,
+    "ageRange": {"min": 33, "max": 42},
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 33}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && flags.has('demonic_midlife_expansion_martial') && !flags.has('demonic_midlife_isolation_done')"
+      }
+    ],
+    "content": {
+      "title": "铁腕之后的寒夜",
+      "text": "兼并周边的消息传遍江湖，仇家与旧友皆离你更远。若明月仍在身侧，她质问你：为了门势，还要牺牲多少？",
+      "description": "铁腕扩张换来更重的名望与人脉代价。"
+    },
+    "autoEffects": [
+      {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "subtract"},
+      {"type": "flag_set", "target": "demonic_midlife_isolation_done"},
+      {"type": "event_record", "target": "demonic_midlife_isolation_martial"}
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "孤立", "once", "route"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_isolation_principled",
+    "name": "魔道中年孤立（底线犹存）",
+    "description": "曾保留底线者，面对孤立时亦有自省。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 66,
+    "weight": 71,
+    "ageRange": {"min": 33, "max": 42},
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 33}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && !flags.has('demonic_midlife_expansion_martial') && chivalry >= 10 && !flags.has('demonic_midlife_isolation_done')"
+      }
+    ],
+    "content": {
+      "title": "底线与孤立的撕扯",
+      "text": "你曾婉拒或保留底线，如今却仍需在魔道与孤立之间行走。旧友疏远，江湖惧名，你心里清楚：每一步都在放大早年的选择。",
+      "description": "早年的底线未能免你于孤立，却让你更清楚代价从何而来。"
+    },
+    "autoEffects": [
+      {"type": "stat_modify", "target": "reputation", "value": 6, "operator": "subtract"},
+      {"type": "flag_set", "target": "demonic_midlife_isolation_done"},
+      {"type": "event_record", "target": "demonic_midlife_isolation_principled"}
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "孤立", "once", "route"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_isolation_spouse",
+    "name": "魔道中年孤立（明月）",
+    "description": "已婚者面对扩张后的家庭压力。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 67,
+    "weight": 73,
+    "ageRange": {"min": 33, "max": 42},
+    "type": "identity",
+    "eventType": "auto",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route", "family"],
+    "triggers": [{"type": "age_reach", "value": 33}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && flags.spouse_mingyue == true && !flags.has('demonic_midlife_isolation_done')"
+      }
+    ],
+    "autoEffects": [
+      {"type": "stat_modify", "target": "reputation", "value": 6, "operator": "subtract"},
+      {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -8}},
+      {"type": "flag_set", "target": "demonic_midlife_isolation_done"},
+      {"type": "event_record", "target": "demonic_midlife_isolation_spouse"}
+    ],
+    "content": {
+      "title": "明月问你还要走多远",
+      "text": "江湖正道避你如蛇蝎，旧友疏远。明月在灯下问你：当年迎娶时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？",
+      "description": "扩张的权势正在侵蚀家庭信任。"
+    },
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "孤立", "once", "route", "family"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_betrayal",
+    "name": "魔道中年背叛",
+    "description": "亲信泄密，门内权斗余波在中年爆发。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 86,
+    "weight": 78,
+    "ageRange": {"min": 36, "max": 45},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route", "risk"],
+    "triggers": [{"type": "age_reach", "value": 36}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_isolation_done') && !flags.has('demonic_midlife_betrayal_done') && (flags.has('demonic_path_usurp') || flags.has('demonic_leader') || flags.has('demonic_usurp_failed'))"
+      }
+    ],
+    "content": {
+      "title": "亲信泄密",
+      "text": "副门主或亲传弟子暗中联络外敌，幽影门风声鹤唳。若夺位曾败，旧部亦可能卖你换赦免——此局须慎选。",
+      "description": "门内背叛已至眼前，清洗、反利用或静观，各有代价。"
+    },
+    "choices": [
+      {
+        "id": "demonic_betrayal_purge",
+        "text": "铁腕清洗",
+        "description": "你下令清洗内奸——门内立威，但可能身负重伤，人脉亦将大损。",
+        "effects": [
+          {"type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 10, "operator": "subtract"},
+          {"type": "stat_modify", "target": "health", "value": 8, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_purge"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_purge"}
+        ]
+      },
+      {
+        "id": "demonic_betrayal_coopt",
+        "text": "反利用，设局反杀",
+        "description": "你将计就计，借泄密反杀外敌，代价是江湖名望再受质疑。",
+        "effects": [
+          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_coopt"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_coopt"}
+        ]
+      },
+      {
+        "id": "demonic_betrayal_wait",
+        "text": "按兵不动，静观其变",
+        "description": "你暂缓动手，保留余地；若夺位曾败，清算风险仍在，须早谋退路。",
+        "effects": [
+          {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_wait"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_wait"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "背叛", "once", "route", "risk", "mainline"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_temptation",
+    "name": "魔道中年诱惑",
+    "description": "远离权斗者，中年面临正派招安与洗名诱惑。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 76,
+    "ageRange": {"min": 36, "max": 45},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 36}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_isolation_done') && !flags.has('demonic_midlife_betrayal_done') && (flags.has('demonic_path_renounce') || chivalry >= 10) && !flags.has('demonic_path_usurp') && !flags.has('demonic_leader') && !flags.has('demonic_usurp_failed')"
+      }
+    ],
+    "content": {
+      "title": "洗名换情报",
+      "text": "正派使者或旧识暗中接触：若你交出部分门中情报，可换一次洗名之机。诱惑与背叛，在此同屏。",
+      "description": "远离权斗并未让你免于世局——洗名诱惑已至。"
+    },
+    "choices": [
+      {
+        "id": "demonic_betrayal_purge",
+        "text": "拒诱立威，清洗试探者",
+        "description": "你拒诱并清洗试探者——门内立威，但可能身负重伤。",
+        "effects": [
+          {"type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 10, "operator": "subtract"},
+          {"type": "stat_modify", "target": "health", "value": 8, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_purge"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_purge_temptation"}
+        ]
+      },
+      {
+        "id": "demonic_betrayal_coopt",
+        "text": "假意接触，反利用局",
+        "description": "你假意接触，设局反杀，代价是江湖名望再受质疑。",
+        "effects": [
+          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_coopt"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_coopt_temptation"}
+        ]
+      },
+      {
+        "id": "demonic_betrayal_wait",
+        "text": "按兵不动，静观其变",
+        "description": "你暂缓回应，保留余地与退路。",
+        "effects": [
+          {"type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_wait"},
+          {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
+          {"type": "event_record", "target": "demonic_betrayal_wait_temptation"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "诱惑", "once", "route"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_fork",
+    "name": "魔道中年分岔",
+    "description": "赎罪契机与禁术加码同屏，须择其一。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 86,
+    "weight": 77,
+    "ageRange": {"min": 38, "max": 48},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route", "risk"],
+    "triggers": [{"type": "age_reach", "value": 38}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_betrayal_done') && !flags.has('demonic_midlife_fork_done')"
+      }
+    ],
+    "content": {
+      "title": "赎罪或加码",
+      "text": "暗中使者再给你一次抽身洗名的契机；与此同时，幽影门镇派禁术也在召唤——若曾闭关禁术，诱惑会更难抗拒。",
+      "description": "这是中年最关键的分岔：抽身赎罪、魔功加码，或维持现状。"
+    },
+    "choices": [
+      {
+        "id": "demonic_fork_redemption",
+        "text": "接受赎罪契机，交出一部分权柄",
+        "description": "你交出一部分权柄换取洗名契机，武力稍减，侠义回升。",
+        "effects": [
+          {"type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "martialPower", "value": 4, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_redemption_path"},
+          {"type": "flag_set", "target": "demonic_midlife_fork_done"},
+          {"type": "event_record", "target": "demonic_fork_redemption"}
+        ]
+      },
+      {
+        "id": "demonic_fork_escalate",
+        "text": "炼化禁术，力量再上一层",
+        "description": "你决意炼化镇派禁术——武力暴涨，但心志与气血恐遭重创，须备退路。",
+        "effects": [
+          {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "target": "chivalry", "value": 10, "operator": "subtract"},
+          {"type": "stat_modify", "target": "health", "value": 12, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_escalated"},
+          {"type": "flag_set", "target": "demonic_midlife_fork_done"},
+          {"type": "event_record", "target": "demonic_fork_escalate"}
+        ]
+      },
+      {
+        "id": "demonic_fork_balance",
+        "text": "维持现状，既不洗名也不加码",
+        "description": "你暂缓极端选择，在权力与底线之间维持平衡。",
+        "effects": [
+          {"type": "stat_modify", "target": "comprehension", "value": 4, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_balanced"},
+          {"type": "flag_set", "target": "demonic_midlife_fork_done"},
+          {"type": "event_record", "target": "demonic_fork_balance"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "分岔", "once", "route", "risk", "mainline"],
+      "routeTargets": ["demonic"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "demonic_midlife_consequence",
+    "name": "魔道中年后果",
+    "description": "至五十岁前的定格：立规、退隐或远遁。",
+    "version": "1.0.0",
+    "category": "identity",
+    "priority": 85,
+    "weight": 75,
+    "ageRange": {"min": 45, "max": 50},
+    "type": "identity",
+    "eventType": "choice",
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "triggers": [{"type": "age_reach", "value": 45}],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_fork_done') && !flags.has('demonic_midlife_consequence_done')"
+      }
+    ],
+    "content": {
+      "title": "中年定格",
+      "text": "至五十岁前，你须以何种身份面对江湖与家人——铁腕立规、金盆洗手，或远遁切断门内纠葛。早年的夺位与扩张，皆在此刻回响。",
+      "description": "路线中年后果落定，此后江湖将如何记住你？"
+    },
+    "choices": [
+      {
+        "id": "demonic_consequence_rule",
+        "text": "铁腕立规，秩序化魔道",
+        "description": "你以铁腕重整门规，幽影门进入秩序化魔道时代。",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add"},
+          {"type": "flag_set", "target": "demonic_midlife_legacy_rule"},
+          {"type": "flag_set", "target": "demonic_midlife_consequence_done"},
+          {"type": "event_record", "target": "demonic_consequence_rule"}
+        ]
+      },
+      {
+        "id": "demonic_consequence_withdraw",
+        "text": "金盆洗手，交权退隐",
+        "description": "你交权退隐，换得侠义回升与一段相对平静的中年末声。",
+        "effects": [
+          {"type": "stat_modify", "target": "chivalry", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_legacy_withdraw"},
+          {"type": "flag_set", "target": "demonic_midlife_consequence_done"},
+          {"type": "event_record", "target": "demonic_consequence_withdraw"}
+        ]
+      },
+      {
+        "id": "demonic_consequence_exile",
+        "text": "远遁江湖，切断门内纠葛",
+        "description": "你远遁江湖，切断门内纠葛——若曾按兵不动且夺位失败，此路尤为可行。",
+        "effects": [
+          {"type": "stat_modify", "target": "qinggong", "value": 6, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 8, "operator": "subtract"},
+          {"type": "flag_set", "target": "demonic_midlife_legacy_exile"},
+          {"type": "flag_set", "target": "demonic_midlife_consequence_done"},
+          {"type": "event_record", "target": "demonic_consequence_exile"}
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773717774544,
+      "updatedAt": 1773717774544,
+      "author": "development_team",
+      "tags": ["幽影门", "中年", "后果", "once", "route", "mainline"],
+      "routeTargets": ["demonic"],
       "enabled": true
     }
   }

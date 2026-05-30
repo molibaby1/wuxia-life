@@ -11,7 +11,7 @@
 
 ### 1. 教程事件年龄配置修复
 
-**文件**: [`src/data/lines/tutorial.json`](file:///Users/zhouyun/code/wuxia-life/src/data/lines/tutorial.json)
+**文件**: [`src/data/lines/tutorial.json`](src/data/lines/tutorial.json)
 
 **修复前**:
 ```json
@@ -54,7 +54,7 @@
 
 ### 2. 事件加载器集成
 
-**文件**: [`src/core/EventLoader.ts`](file:///Users/zhouyun/code/wuxia-life/src/core/EventLoader.ts)
+**文件**: [`src/core/EventLoader.ts`](src/core/EventLoader.ts)
 
 **修改内容**:
 ```typescript
@@ -72,7 +72,7 @@ const lineMap: Record<string, EventDefinition[]> = {
 
 ### 3. 事件索引配置
 
-**文件**: [`src/data/events.json`](file:///Users/zhouyun/code/wuxia-life/src/data/events.json)
+**文件**: [`src/data/events.json`](src/data/events.json)
 
 **修改内容**:
 ```json
@@ -92,7 +92,7 @@ const lineMap: Record<string, EventDefinition[]> = {
 
 ### 4. 年度事件限制优化
 
-**文件**: [`src/core/GameEngineIntegration.ts`](file:///Users/zhouyun/code/wuxia-life/src/core/GameEngineIntegration.ts)
+**文件**: [`src/core/GameEngineIntegration.ts`](src/core/GameEngineIntegration.ts)
 
 **修改内容**:
 ```typescript

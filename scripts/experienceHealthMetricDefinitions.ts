@@ -8,8 +8,12 @@ export type ExperienceHealthMetricKey =
   | 'route_completion_rate'
   | 'route_breakage_rate'
   | 'death_rate'
+  | 'death_without_warning_count'
+  | 'p2_legacy_death_rate'
   | 'ending_distribution'
   | 'romance_family_achievement_rate'
+  | 'romance_family_primary_sample_pass'
+  | 'p3_romance_family_achievement_rate'
   | 'save_count'
   | 'adjacent_same_event_rate'
   | 'adjacent_same_class_rate'
@@ -142,6 +146,51 @@ const EXPERIENCE_ONLY_METRIC_DEFINITIONS: ReadonlyArray<ExperienceHealthMetricDe
     baseline: {
       max: 0.7,
       note: '观察路线只启动不完成的问题。',
+    },
+  },
+  {
+    key: 'death_without_warning_count',
+    label: 'Death Without Warning Count',
+    description: 'P3-EVAL 0–50 deterministic 样本中无预警死亡数量（US-006 / US-029 blocker）。',
+    severity: 'blocker',
+    nonWaivable: true,
+    baseline: {
+      max: 0,
+      note: '跨 P3-EVAL 样本聚合，须为 0。',
+    },
+  },
+  {
+    key: 'p2_legacy_death_rate',
+    label: 'P2 Legacy Death Rate',
+    description: 'P2-LEGACY 样本死亡率，观测队列（runUntilDeath 设计预期 ≈1.0）。',
+    severity: 'info',
+    baseline: {
+      min: 0.15,
+      max: 0.9,
+      note: 'US-002 N1：非 P3 blocker，仅回归对比。',
+    },
+  },
+  {
+    key: 'romance_family_primary_sample_pass',
+    label: 'Romance/Family Primary Sample Pass',
+    description: 'P3-RF golden-romance-family 样本 arc_rf_mingyue 是否 completed 且达成 achievement。',
+    severity: 'blocker',
+    nonWaivable: true,
+    baseline: {
+      min: 1,
+      max: 1,
+      note: 'US-010 / US-029：1=pass；arc_outcome=completed 且 spouse/children 满足 gate。',
+    },
+  },
+  {
+    key: 'p3_romance_family_achievement_rate',
+    label: 'P3-EVAL Romance/Family Achievement Rate',
+    description: 'P3-EVAL 队列中达成恋爱或家庭里程碑的比例（US-002 §3.2, US-029）。',
+    severity: 'blocker',
+    nonWaivable: true,
+    baseline: {
+      min: 0.2,
+      note: '至少 1/5 样本达成；阈值 0.20。',
     },
   },
 ];

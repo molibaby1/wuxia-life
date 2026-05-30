@@ -27,6 +27,9 @@
         "id": "love_greet",
         "text": "上前搭话，礼貌问候",
         "description": "你整理衣冠，以礼相待",
+        "effects": [
+          {"type": "event_record", "target": "love_greet_selected"}
+        ],
         "outcomes": [
           {
             "id": "great_success",
@@ -69,6 +72,9 @@
         "id": "love_charm",
         "text": "展示魅力，主动攀谈",
         "description": "你风流倜傥，展现风采",
+        "effects": [
+          {"type": "event_record", "target": "love_charm_selected"}
+        ],
         "outcomes": [
           {
             "id": "great_success",
@@ -111,7 +117,7 @@
       {
         "id": "love_pass",
         "text": "只是远远一望，默默离开",
-        "description": "你选择远远观望",
+        "description": "你选择远远一望后离去，这段缘分尚未开始，但已在心底留下淡淡印记。",
         "effects": [
           {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
           {"type": "event_record", "target": "love_first_meet_pass"}
@@ -147,7 +153,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && !flags.has(\"love_after_greet_done\")"
+        "expression": "flags.has(\"love_started\") && !flags.has(\"love_after_greet_done\") && (!flags.has(\"route_wanderer\") || flags.has(\"jianghuTraveler\")) && (!flags.has(\"orthodox_trial_active\") || flags.has(\"orthodox_trial_completed\"))"
       }
     ],
     "content": {
@@ -186,7 +192,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && !flags.has(\"love_bonded\")"
+        "expression": "flags.has(\"love_started\") && !flags.has(\"love_bonded\") && (!flags.has(\"orthodox_trial_active\") || flags.has(\"orthodox_trial_completed\"))"
       }
     ],
     "content": {

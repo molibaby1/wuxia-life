@@ -1,0 +1,271 @@
+{
+  "version": "1.0.0",
+  "description": "Key golden-line choices and their later payoffs within ages 0-50 (PXG2 / US-008, P3 midlife US-019).",
+  "generatedAt": "2026-05-31",
+  "keyChoiceDefinition": "A choice that writes durable state (flag, route, relationship, identity) and is tagged as spine-critical in golden-line-spine.json.",
+  "payoffDefinition": "A later event that reads the durable state via trigger condition, altered availability, or player-facing text/choice change.",
+  "summary": {
+    "keyChoiceCount": 11,
+    "withPayoffCount": 11,
+    "payoffRate": 1.0,
+    "threshold": 0.7
+  },
+  "entries": [
+    {
+      "keyChoiceEventId": "childhood_preference",
+      "choiceIds": ["focus_on_study", "play_outside", "balance_both"],
+      "durableWrites": ["diligentStudent", "freeSpirit", "balancedApproach", "sect_trial_active"],
+      "payoffs": [
+        {
+          "eventId": "martial_arts_enlightenment",
+          "ageRange": [6, 6],
+          "readMechanism": "choice.condition reads childhood flags",
+          "payoffType": "altered_choice_availability"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "martial_arts_enlightenment",
+      "choiceIds": ["external_focus", "internal_focus", "agile_path", "balanced_start", "generic_path"],
+      "durableWrites": ["externalFocus", "internalFocus", "agilePath", "balancedStart"],
+      "payoffs": [
+        {
+          "eventId": "martial_focus_payoff",
+          "ageRange": [8, 11],
+          "readMechanism": "flags.has(\"martialPathDeclared\") or focus flags from enlightenment choice",
+          "payoffType": "text_callback"
+        },
+        {
+          "eventId": "martial_improvement",
+          "ageRange": [17, 17],
+          "readMechanism": "training arc continues from focus flags",
+          "payoffType": "route_state"
+        },
+        {
+          "eventId": "sect_trial",
+          "ageRange": [15, 15],
+          "readMechanism": "martial foundation affects trial outcomes",
+          "payoffType": "altered_text"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "sect_path_choice",
+      "choiceIds": ["join_orthodox", "stay_wanderer"],
+      "durableWrites": ["route_orthodox", "route_wanderer", "orthodox_trial_active"],
+      "payoffs": [
+        {
+          "eventId": "orthodox_initiation",
+          "ageRange": [14, 16],
+          "readMechanism": "flags.has('route_orthodox')",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "jianghu_experience",
+          "ageRange": [16, 16],
+          "readMechanism": "wanderer / shared youth arc",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "demonic_encounter",
+          "ageRange": [14, 17],
+          "readMechanism": "route_wanderer or low chivalry branch",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "hero_old_case_returns",
+          "ageRange": [31, 50],
+          "readMechanism": "flags.has('route_wanderer') gates wandering hero midlife arc",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "hero_freedom_settlement",
+          "ageRange": [45, 50],
+          "readMechanism": "midlife beat flags aggregate into settlement branch",
+          "payoffType": "text_callback"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "orthodox_trial_entry",
+      "choiceIds": ["orthodox_trial_mind", "orthodox_trial_force", "orthodox_trial_mind_delay", "orthodox_trial_force_fail"],
+      "durableWrites": ["orthodox_trial_mind_done", "orthodox_trial_force_done", "orthodox_trial_mind_delayed", "orthodox_trial_force_failed"],
+      "payoffs": [
+        {
+          "eventId": "orthodox_trial_service",
+          "ageRange": [13, 17],
+          "readMechanism": "requires mind_done OR force_done",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "orthodox_trial_recovery",
+          "ageRange": [13, 18],
+          "readMechanism": "reads orthodox_trial_force_failed",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "sect_midlife_stewardship",
+          "ageRange": [31, 37],
+          "readMechanism": "mind_done vs force_done stewardship choice branches",
+          "payoffType": "altered_text"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "orthodox_trial_service",
+      "choiceIds": ["service_aid", "service_injury"],
+      "durableWrites": ["orthodox_trial_service_done", "orthodox_trial_exceeded"],
+      "payoffs": [
+        {
+          "eventId": "orthodox_trial_completion",
+          "ageRange": [13, 18],
+          "readMechanism": "flags.has('orthodox_trial_service_done')",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "sect_midlife_gray_mission",
+          "ageRange": [36, 45],
+          "readMechanism": "service aid/meditate/injury event_record alters gray mission options",
+          "payoffType": "text_callback"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "demonic_encounter",
+      "choiceIds": ["accept_demonic"],
+      "durableWrites": ["route_demonic", "current_sect"],
+      "payoffs": [
+        {
+          "eventId": "demonic_trial",
+          "ageRange": [14, 16],
+          "readMechanism": "flags.has('route_demonic')",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "demonic_trial_shadow",
+          "ageRange": [14, 18],
+          "readMechanism": "demonic_trial_active chain",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "understand_unconventional_truth",
+          "ageRange": [18, 40],
+          "readMechanism": "sect_faction unconventional after demonic arc",
+          "payoffType": "altered_text"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "demonic_power_struggle",
+      "choiceIds": ["demonic_usurp", "demonic_renounce"],
+      "durableWrites": ["demonic_path_usurp", "demonic_path_renounce", "demonic_struggle_done"],
+      "payoffs": [
+        {
+          "eventId": "demonic_usurpation",
+          "ageRange": [17, 30],
+          "readMechanism": "flags.has('demonic_path_usurp')",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "demonic_renounce_path",
+          "ageRange": [17, 28],
+          "readMechanism": "flags.has('demonic_path_renounce')",
+          "payoffType": "altered_event_availability"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "sect_trial_final",
+      "choiceIds": ["trial_final_success", "trial_final_delay"],
+      "durableWrites": ["sect_trial_completed"],
+      "payoffs": [
+        {
+          "eventId": "sect_trial",
+          "ageRange": [15, 15],
+          "readMechanism": "sect disciple progression gate",
+          "payoffType": "route_state"
+        },
+        {
+          "eventId": "martial_improvement",
+          "ageRange": [17, 17],
+          "readMechanism": "post-trial martial growth",
+          "payoffType": "altered_event_availability"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "hero_first_case",
+      "choiceIds": ["fight_bandits", "help_secretly"],
+      "durableWrites": ["hero_first_case", "hero_first_case_named", "hero_first_case_secret"],
+      "payoffs": [
+        {
+          "eventId": "hero_save_village",
+          "ageRange": [25, 30],
+          "readMechanism": "requiredAchievements / flags hero_first_case",
+          "payoffType": "altered_event_availability"
+        },
+        {
+          "eventId": "hero_old_case_returns",
+          "ageRange": [31, 38],
+          "readMechanism": "hero_first_case_secret alters silent branch availability",
+          "payoffType": "text_callback"
+        },
+        {
+          "eventId": "continued_journey",
+          "ageRange": [19, 19],
+          "readMechanism": "wanderer martial arc after first heroic act",
+          "payoffType": "route_state"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "sect_midlife_faction_pressure",
+      "choiceIds": [
+        "faction_support_elder",
+        "faction_support_reform",
+        "faction_remain_neutral"
+      ],
+      "durableWrites": [
+        "sect_midlife_faction_pressure_done",
+        "sect_midlife_lean_conservative",
+        "sect_midlife_lean_reform",
+        "sect_midlife_lean_neutral"
+      ],
+      "payoffs": [
+        {
+          "eventId": "sect_midlife_gray_mission",
+          "ageRange": [36, 45],
+          "readMechanism": "requires sect_midlife_faction_pressure_done; lean flags alter gray mission tone",
+          "payoffType": "altered_event_availability"
+        }
+      ]
+    },
+    {
+      "keyChoiceEventId": "sect_midlife_gray_mission",
+      "choiceIds": [
+        "gray_execute_order",
+        "gray_leak_warning",
+        "gray_refuse_order"
+      ],
+      "durableWrites": [
+        "sect_midlife_gray_executed",
+        "sect_midlife_gray_leaked",
+        "sect_midlife_gray_refused"
+      ],
+      "payoffs": [
+        {
+          "eventId": "sect_midlife_public_judgment",
+          "ageRange": [40, 48],
+          "readMechanism": "gray flags + youth service event_record alter judgment options",
+          "payoffType": "text_callback"
+        },
+        {
+          "eventId": "sect_midlife_ledger",
+          "ageRange": [45, 50],
+          "readMechanism": "MC-1/MC-2 + orthodox_trial_entry path flags select outcome branch",
+          "payoffType": "route_state"
+        }
+      ]
+    }
+  ]
+}

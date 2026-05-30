@@ -31,6 +31,7 @@
       {
         "id": "join_orthodox",
         "text": "拜入正道名门",
+        "description": "你拜入正道名门，清虚真人收你为徒，从此走上行侠仗义之路。",
         "effects": [
           {
             "type": "flag_set",
@@ -66,6 +67,7 @@
       {
         "id": "stay_wanderer",
         "text": "行走江湖，观望时局",
+        "description": "你谢绝门派邀约，独自踏入江湖，先看天下再定去留。",
         "effects": [
           {
             "type": "flag_set",
@@ -101,7 +103,7 @@
     "id": "orthodox_initiation",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 1,
+    "priority": 0,
     "weight": 70,
     "ageRange": {
       "min": 14,
@@ -195,6 +197,7 @@
       {
         "id": "orthodox_trial_mind",
         "text": "修心：诵经静坐",
+        "description": "你每日诵经静坐，心性渐稳，师门认可你的定力。",
         "weight": 3,
         "effects": [
           { "type": "flag_set", "target": "orthodox_trial_started" },
@@ -207,6 +210,7 @@
       {
         "id": "orthodox_trial_mind_delay",
         "text": "修心：迟疑不决，延期复修",
+        "description": "你迟迟无法入定，师长按规矩让你延期再修，你也更知心性不足。",
         "weight": 1,
         "effects": [
           { "type": "flag_set", "target": "orthodox_trial_started" },
@@ -219,6 +223,7 @@
       {
         "id": "orthodox_trial_force",
         "text": "修劲：内力循环",
+        "description": "你循师门心法运转内力，内劲循环渐顺，修为稳步提升。",
         "weight": 3,
         "effects": [
           { "type": "flag_set", "target": "orthodox_trial_started" },
@@ -231,6 +236,7 @@
       {
         "id": "orthodox_trial_force_fail",
         "text": "修劲：真气逆行受伤",
+        "description": "你急于求成导致真气逆行，虽被师兄救下，却也领教了修行不可冒进。",
         "weight": 1,
         "effects": [
           { "type": "flag_set", "target": "orthodox_trial_started" },
@@ -259,7 +265,7 @@
     "id": "orthodox_trial_service",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 1,
+    "priority": 0,
     "weight": 60,
     "ageRange": {
       "min": 13,
@@ -285,6 +291,9 @@
         "id": "service_aid",
         "text": "出手相助",
         "description": "路见不平，拔刀相助",
+        "effects": [
+          {"type": "event_record", "target": "service_aid_selected"}
+        ],
         "outcomes": [
           {
             "id": "great_success",
@@ -342,6 +351,9 @@
         "id": "service_injury",
         "text": "舍身救人",
         "description": "不顾自身安危，救人于危难",
+        "effects": [
+          {"type": "event_record", "target": "service_injury_selected"}
+        ],
         "outcomes": [
           {
             "id": "great_success",
@@ -388,6 +400,9 @@
         "id": "service_meditate",
         "text": "冷静观察",
         "description": "静观其变，分析形势",
+        "effects": [
+          {"type": "event_record", "target": "service_meditate_selected"}
+        ],
         "outcomes": [
           {
             "id": "success",
@@ -446,19 +461,20 @@
     "id": "orthodox_trial_completion",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 1,
-    "weight": 60,
+    "priority": 0,
+    "weight": 150,
     "ageRange": {
       "min": 13,
       "max": 18
     },
     "triggers": [
-      { "type": "age_reach", "value": 13 }
+      { "type": "age_reach", "value": 13 },
+      { "type": "flag_set", "flag": "orthodox_trial_service_done" }
     ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"orthodox_trial_active\") && flags.has(\"orthodox_trial_service_done\")"
+        "expression": "flags.has(\"orthodox_trial_active\") && flags.has(\"orthodox_trial_service_done\") && !flags.has(\"orthodox_trial_completed\")"
       }
     ],
     "content": {
@@ -482,7 +498,8 @@
         "青年",
         "正道",
         "试炼",
-        "主线"
+        "主线",
+        "mandatory"
       ],
       "enabled": true
     }
@@ -581,6 +598,413 @@
       "updatedAt": 1773317774544,
       "author": "development_team",
       "tags": ["正道", "退派", "once"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_midlife_stewardship",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 185,
+    "ageRange": { "min": 31, "max": 37 },
+    "triggers": [{ "type": "age_reach", "value": 31 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\") && !flags.has(\"sect_midlife_stewardship_done\")"
+      }
+    ],
+    "content": {
+      "title": "代行门规",
+      "text": "入门多年，师门将督练弟子、代掌刑堂与下山调停之责交到你肩上。门规从此在你一念之间。",
+      "description": "中年门派责任加重"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "stewardship_mind_path",
+        "text": "领受内政治理之职",
+        "description": "清虚真人命你整理门规条文、协调各院弟子纠纷——当年修心试炼的定力，如今成了门内倚仗。【责任加重】",
+        "condition": { "type": "expression", "expression": "flags.has(\"orthodox_trial_mind_done\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_stewardship_done" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "energy", "value": -5, "operator": "add" },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": { "id": "master_qingxu", "name": "清虚真人", "role": "master", "delta": 5 }
+          },
+          { "type": "event_record", "target": "sect_midlife_stewardship_mind" }
+        ]
+      },
+      {
+        "id": "stewardship_force_path",
+        "text": "领受武试督练之职",
+        "description": "师门要你主理对外震慑与弟子武试——当年修劲之路，如今化为山门屏障。【责任加重】",
+        "condition": { "type": "expression", "expression": "flags.has(\"orthodox_trial_force_done\") && !flags.has(\"orthodox_trial_mind_done\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_stewardship_done" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "energy", "value": -5, "operator": "add" },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": { "id": "master_qingxu", "name": "清虚真人", "role": "master", "delta": 5 }
+          },
+          { "type": "event_record", "target": "sect_midlife_stewardship_force" }
+        ]
+      },
+      {
+        "id": "stewardship_default_path",
+        "text": "领受代行令",
+        "description": "你接下代行门规之令，督练后辈、代掌刑堂。山门重任，再不能如少年时只顾自身修行。【责任加重】",
+        "condition": { "type": "expression", "expression": "!flags.has(\"orthodox_trial_mind_done\") && !flags.has(\"orthodox_trial_force_done\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_stewardship_done" },
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "energy", "value": -5, "operator": "add" },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": { "id": "master_qingxu", "name": "清虚真人", "role": "master", "delta": 5 }
+          },
+          { "type": "event_record", "target": "sect_midlife_stewardship_default" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_midlife_faction_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 190,
+    "ageRange": { "min": 33, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 33 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\") && flags.has(\"sect_midlife_stewardship_done\") && !flags.has(\"sect_midlife_faction_pressure_done\")"
+      }
+    ],
+    "content": {
+      "title": "门内派系",
+      "text": "长老争权、资源分配不均，师门暗流涌动。你必须表态，或装作只办差事。",
+      "description": "门内倾轧，站队或守中立"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "faction_support_elder",
+        "text": "支持保守派长老",
+        "description": "你公开声援守旧一脉，门派内声望上升，却也卷入派系，恐难脱身。【L2 门内风险】",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_faction_pressure_done" },
+          { "type": "flag_set", "target": "sect_midlife_lean_conservative" },
+          { "type": "stat_modify", "target": "connections", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_faction_elder" }
+        ]
+      },
+      {
+        "id": "faction_support_reform",
+        "text": "支持革律一脉",
+        "description": "你力挺革律长老，侠义之名更盛，却得罪部分同门。【L2 门内风险】",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_faction_pressure_done" },
+          { "type": "flag_set", "target": "sect_midlife_lean_reform" },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_faction_reform" }
+        ]
+      },
+      {
+        "id": "faction_remain_neutral",
+        "text": "守中立，只办差",
+        "description": "你不偏不倚，省下心力办差，却也易遭双方指责。【L1 两面不讨好】",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_faction_pressure_done" },
+          { "type": "flag_set", "target": "sect_midlife_lean_neutral" },
+          { "type": "stat_modify", "target": "energy", "value": 4, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_faction_neutral" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_midlife_gray_mission",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 195,
+    "ageRange": { "min": 36, "max": 45 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\") && flags.has(\"sect_midlife_faction_pressure_done\") && !flags.has(\"sect_midlife_gray_executed\") && !flags.has(\"sect_midlife_gray_leaked\") && !flags.has(\"sect_midlife_gray_refused\")"
+      }
+    ],
+    "content": {
+      "title": "灰色剿令",
+      "text": "师门下达剿灭令，目标竟是当年你下山行善所救之人。长老以大局压你，要你瞒天过海。",
+      "description": "为大局妥协，或守侠义底线"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "gray_execute_order",
+        "text": "奉命行事",
+        "description": "你按令行事，门派嘉奖，侠义之名却蒙尘。【L2 道德代价】",
+        "condition": { "type": "expression", "expression": "!events.has(\"orthodox_trial_service_meditate\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_gray_executed" },
+          { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -8, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_gray_execute" }
+        ]
+      },
+      {
+        "id": "gray_execute_order_meditate",
+        "text": "奉命行事（心中犹疑）",
+        "description": "你当年以智谋退敌，如今却要亲手了结曾救之人。师门嘉奖，你却夜不能寐。【L2 道德代价】",
+        "condition": { "type": "expression", "expression": "events.has(\"orthodox_trial_service_meditate\") || events.has(\"orthodox_trial_service_meditate_partial\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_gray_executed" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -10, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_gray_execute_meditate" }
+        ]
+      },
+      {
+        "id": "gray_leak_warning",
+        "text": "暗中放走并瞒报",
+        "description": "你悄悄示警，瞒过上级。侠义尚在，但若东窗事发则名节尽毁。【L2 东窗事发】",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_gray_leaked" },
+          { "type": "stat_modify", "target": "chivalry", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -5, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_gray_leak" }
+        ]
+      },
+      {
+        "id": "gray_refuse_order",
+        "text": "拒令请罪",
+        "description": "你当殿拒令，愿受门规惩处。清虚真人震怒，却念你昔日功绩从轻发落。【L1 可避重罚】",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_gray_refused" },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": { "id": "master_qingxu", "name": "清虚真人", "role": "master", "delta": -8 }
+          },
+          { "type": "stat_modify", "target": "chivalry", "value": 4, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_gray_refuse" }
+        ]
+      },
+      {
+        "id": "gray_refuse_order_lenient",
+        "text": "拒令请罪（师门念旧）",
+        "description": "你拒令请罪。清虚真人叹道：「当年行善过甚，今日不忍再杀。」仅罚你禁闭思过。【L1 减罚】",
+        "condition": { "type": "expression", "expression": "flags.has(\"orthodox_trial_exceeded\") || events.has(\"orthodox_trial_service_aid_great\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_gray_refused" },
+          {
+            "type": "relation_change",
+            "target": "master",
+            "operator": "add",
+            "value": { "id": "master_qingxu", "name": "清虚真人", "role": "master", "delta": -3 }
+          },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_gray_refuse_lenient" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_midlife_public_judgment",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 188,
+    "ageRange": { "min": 40, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\") && (flags.has(\"sect_midlife_gray_executed\") || flags.has(\"sect_midlife_gray_leaked\") || flags.has(\"sect_midlife_gray_refused\")) && !flags.has(\"sect_midlife_public_judgment_done\")"
+      }
+    ],
+    "content": {
+      "title": "江湖公审",
+      "text": "江湖传言与门内审计齐至。有人翻出你青年下山旧案，也有人追问灰色剿令——你必须给出一个说法。",
+      "description": "名节与旧案并发"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "judgment_confess",
+        "text": "公开担责",
+        "description": "你当众承认放水或过失，江湖侧目，门派戒慎。",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_gray_leaked\") || events.has(\"orthodox_trial_service_aid_injury\") || events.has(\"orthodox_trial_service_injury\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_public_judgment_done" },
+          { "type": "flag_set", "target": "sect_midlife_judgment_confess" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_judgment_confess" }
+        ]
+      },
+      {
+        "id": "judgment_deflect",
+        "text": "推给政敌",
+        "description": "你将舆论引向对立派系，短期过关，人脉却受损。",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_lean_conservative\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_public_judgment_done" },
+          { "type": "flag_set", "target": "sect_midlife_judgment_deflect" },
+          { "type": "stat_modify", "target": "connections", "value": -6, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_judgment_deflect" }
+        ]
+      },
+      {
+        "id": "judgment_silence",
+        "text": "沉默应对",
+        "description": "你选择不置一词，保守派与革律派皆怨。【L1 两面不讨好】",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_lean_neutral\") || (!flags.has(\"sect_midlife_lean_conservative\") && !flags.has(\"sect_midlife_judgment_confess\"))" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_public_judgment_done" },
+          { "type": "flag_set", "target": "sect_midlife_judgment_silence" },
+          { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_judgment_silence" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "autoResolve": true,
+      "enabled": true
+    }
+  },
+  {
+    "id": "sect_midlife_ledger",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 200,
+    "ageRange": { "min": 45, "max": 50 },
+    "triggers": [{ "type": "age_reach", "value": 45 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_orthodox\") && flags.has(\"sect_midlife_public_judgment_done\") && !flags.has(\"sect_midlife_ledger_done\")"
+      }
+    ],
+    "content": {
+      "title": "中年账本",
+      "text": "五十岁将至，师门要为你这二十年立下定论：是清誉守山，还是蒙污留任，抑或请辞下山？",
+      "description": "门派中年收束"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_upright_guardian",
+        "text": "清誉守山",
+        "description": "你拒令担责，终得清誉，师门命你镇守山门。",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_gray_refused\") && flags.has(\"sect_midlife_judgment_confess\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_ledger_done" },
+          { "type": "flag_set", "target": "sect_midlife_outcome", "value": "upright_guardian" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 6, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_ledger_upright" }
+        ]
+      },
+      {
+        "id": "ledger_sect_enforcer",
+        "text": "蒙污留任",
+        "description": "你奉命行事、依附保守派，门派重用你，江湖却窃窃私语。",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_gray_executed\") && flags.has(\"sect_midlife_lean_conservative\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_ledger_done" },
+          { "type": "flag_set", "target": "sect_midlife_outcome", "value": "sect_enforcer" },
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -4, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_ledger_enforcer" }
+        ]
+      },
+      {
+        "id": "ledger_hidden_mercy",
+        "text": "暗中仁义",
+        "description": "你瞒报救人，江湖暗中称道，门派对你戒慎有加。",
+        "condition": { "type": "expression", "expression": "flags.has(\"sect_midlife_gray_leaked\") && chivalry >= 12" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_ledger_done" },
+          { "type": "flag_set", "target": "sect_midlife_outcome", "value": "hidden_mercy" },
+          { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_ledger_mercy" }
+        ]
+      },
+      {
+        "id": "ledger_weary_steward",
+        "text": "倦怠守成",
+        "description": "年少试炼曾延，中年又沉默应对——师门仍留你，你却知心力已倦。",
+        "condition": { "type": "expression", "expression": "(events.has(\"sect_trial_final_delay\") || flags.has(\"orthodox_trial_mind_delayed\")) && flags.has(\"sect_midlife_judgment_silence\")" },
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_ledger_done" },
+          { "type": "flag_set", "target": "sect_midlife_outcome", "value": "weary_steward" },
+          { "type": "stat_modify", "target": "energy", "value": -6, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_ledger_weary" }
+        ]
+      },
+      {
+        "id": "ledger_steadfast_elder",
+        "text": "平稳收束",
+        "description": "无大起大落，你仍守山门，中年平稳落定。",
+        "effects": [
+          { "type": "flag_set", "target": "sect_midlife_ledger_done" },
+          { "type": "flag_set", "target": "sect_midlife_outcome", "value": "steadfast_elder" },
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "event_record", "target": "sect_midlife_ledger_steadfast" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "autoResolve": true,
       "enabled": true
     }
   }

@@ -32,6 +32,36 @@ import {
 } from '../scripts/experienceHealthGate';
 import { computeExperienceDerivedMetrics } from '../scripts/computeExperienceMetricsFromReports';
 import { GameProcessSimulator } from './GameProcessSimulator';
+import {
+  buildDeathRiskTelemetry,
+  inferSimulationCohort,
+  resolveDeathLifePhase,
+  summarizeTopDeathCauses,
+} from '../scripts/deathRiskTelemetry';
+import {
+  GOLDEN_LINE_SAMPLES,
+  GOLDEN_ROMANCE_FAMILY_SAMPLE,
+  P3_EVAL_END_AGE,
+  P3_EVAL_SAMPLES,
+  runP3EvalSimulation,
+  type GoldenLineReplayRecord,
+  type GoldenLineSimulationRun,
+} from '../scripts/goldenLineSimulation';
+import { buildP3EvalSegmentReport } from '../scripts/goldenLineSegmentMetrics';
+import { evaluatePayoffGate } from '../scripts/goldenLinePayoffGate';
+import { evaluateGoldenLineGates } from '../scripts/goldenLineGate';
+import {
+  evaluateMidlifeGate,
+  isMidlifeRouteEvent,
+  MIN_MIDLIFE_MANUAL_CHOICES,
+  MIN_MIDLIFE_ROUTE_EVENTS,
+} from '../scripts/midlifeGate';
+import {
+  ARC_RF_MINGYUE_ID,
+  buildRomanceFamilyArcReport,
+  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
+  resolveRomanceArcOutcome,
+} from '../scripts/romanceFamilyArcTelemetry';
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
@@ -1963,6 +1993,36 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '路线状态管理 - sect_faction 侧路激活会转向互斥 sect',
+      description: '测试 unconventional 阵营同步时 strong_exclusion 会将已 active 的 sect 标记为 turned',
+      test: async () => {
+        const executor = new EventExecutor();
+        let state = framework.createTestState();
+        state = RouteStateManager.writeRouteState(state, {
+          routeId: 'sect',
+          lifecycle: 'active',
+          category: 'main',
+          eventId: 'sect_path_choice',
+          reason: 'sync_flag:route_orthodox',
+        });
+        state.flags = { ...(state.flags || {}), route_orthodox: true };
+        state.player.flags = state.flags;
+
+        const nextState = await executor.executeEffects(
+          [{ type: EffectType.FLAG_SET, target: 'sect_faction', value: 'unconventional' }],
+          state,
+        );
+
+        assertEqual(
+          RouteStateManager.readRouteState(nextState, 'sect').lifecycle,
+          'turned',
+          'sect 应在 demonic 激活前被 strong_exclusion 转向',
+        );
+        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'active', 'demonic 应成为 active');
+        assertEqual(nextState.flags?.route_orthodox, undefined, 'route_orthodox 应在转入魔道时清除');
+      },
+    },
+    {
       name: '路线状态管理 - 关键变化写入 route 与 event 历史',
       description: '测试 unified entry 在状态变化时写入 routeHistory 与 eventHistory',
       test: () => {
@@ -1979,6 +2039,61 @@ const coreFunctionSuite: TestSuite = {
         assert((state.routeHistory || []).length >= 3, '关键路线状态变化应写入 routeHistory');
         const historyEventIds = (state.eventHistory || []).map(item => item.eventId);
         assert(historyEventIds.some(eventId => eventId.startsWith('route_state:merchant:')), '关键路线状态变化应写入 eventHistory');
+      },
+    },
+    {
+      name: '路线冲突门禁 - active 未锁定路线下强冲突事件不可触发',
+      description: '测试 active 但未 locked_in 的 sect 会阻断 demonic 候选事件',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+
+        state.player.age = 23;
+        state.routeStates = {
+          sect: {
+            routeId: 'sect',
+            lifecycle: 'active',
+            category: 'main',
+            lockedIn: false,
+          },
+        };
+
+        const strongConflictEvent = {
+          id: 'route_conflict_sect_demonic_unlocked',
+          version: '1.0.0',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.NORMAL,
+          weight: 100,
+          ageRange: { min: 20, max: 40 },
+          triggers: [],
+          content: { title: '强冲突路线事件', text: '尝试转入魔道主线' },
+          eventType: 'auto',
+          autoEffects: [{ type: EffectType.FLAG_SET, target: 'sect_faction', value: 'unconventional' }],
+          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+        } as any;
+
+        const fallbackDailyEvent = {
+          id: 'daily_after_active_sect_conflict_block',
+          category: 'daily_event',
+          priority: EventPriority.LOW,
+          content: { title: '日常补位', text: 'active sect 阻断魔道侧路' },
+          metadata: { tags: ['daily_pool'] },
+        };
+
+        try {
+          engine.getAvailableEvents = () => [strongConflictEvent];
+          engine.shouldPauseEventsThisYear = () => false;
+          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
+          const selected = engine.selectEvent(23);
+          assertEqual(selected?.id, 'daily_after_active_sect_conflict_block', 'active sect 应阻断 demonic 侧路事件');
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+        }
       },
     },
     {
@@ -2507,6 +2622,714 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '死亡风险遥测 - 强制晚龄结局分源',
+      description: 'P3 US-005: forced late-life ending 应记 engine:forced_late_life_ending',
+      test: () => {
+        const state = framework.createTestState();
+        state.player.age = 72;
+        state.player.alive = true;
+        const report = createSimulationReportStub({
+          isAlive: false,
+          finalAge: 72,
+          deathReason: '有成有憾',
+          config: {
+            playerName: 'stub',
+            gender: 'male',
+            simulateYears: 85,
+            runUntilDeath: true,
+            maxEvents: 300,
+            enableAutoSave: false,
+            enableManualSave: false,
+            autoSaveMode: 'age',
+            saveAgeInterval: 5,
+            saveEventInterval: 10,
+            enableSaveRestore: false,
+            maxRestoreCount: 0,
+            verbose: false,
+            choiceTendency: 'balanced',
+          },
+          records: [
+            {
+              age: 72,
+              eventId: 'continued_journey',
+              eventTitle: '继续旅程',
+              eventType: 'auto',
+              gameState: state,
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+
+        const telemetry = buildDeathRiskTelemetry(report, 'martial-riser');
+        assert(telemetry !== null, '死亡报告应生成遥测');
+        assertEqual(
+          telemetry?.deathCauseId,
+          'engine:forced_late_life_ending',
+          '晚龄强制结局应使用 engine:forced_late_life_ending',
+        );
+        assertEqual(telemetry?.deathCauseCategory, 'forced_ending', '类别应为 forced_ending');
+        assertEqual(telemetry?.deathLifePhase, 'late_life', '72 岁应为 late_life');
+        assertEqual(telemetry?.deathWithoutWarning, false, 'forced_ending 不应计为 without warning');
+        assertEqual(inferSimulationCohort(report, 'martial-riser'), 'p2_legacy', '85 岁样本应为 p2_legacy');
+      },
+    },
+    {
+      name: '死亡风险遥测 - early_death 与 top causes 汇总',
+      description: 'P3 US-005: 英年早逝应分源为 engine:early_death，汇总按 cause 计数',
+      test: () => {
+        const deadState = framework.createTestState();
+        deadState.player.age = 28;
+        deadState.player.alive = false;
+        deadState.player.deathReason = '英年早逝';
+        deadState.eventHistory = [{ eventId: 'early_death', age: 28, timestamp: Date.now() }];
+
+        const deadReport = createSimulationReportStub({
+          isAlive: false,
+          finalAge: 28,
+          deathReason: '英年早逝',
+          records: [
+            {
+              age: 26,
+              eventId: 'sect_path_choice',
+              eventTitle: '门派抉择',
+              eventType: 'choice',
+              selectedChoice: { id: 'choose_sect', text: '入正派', effects: [] },
+              gameState: framework.createTestState(),
+              timestamp: new Date().toISOString(),
+            },
+            {
+              age: 28,
+              eventId: 'jianghu_experience',
+              eventTitle: '江湖历练',
+              eventType: 'auto',
+              outcomeText: '命数已尽，英雄早逝',
+              gameState: deadState,
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+
+        const telemetry = buildDeathRiskTelemetry(deadReport);
+        assertEqual(telemetry?.deathCauseId, 'engine:early_death', '英年早逝应映射 engine:early_death');
+        assertEqual(telemetry?.deathEventId, 'jianghu_experience', '应记录触发窗口事件 id');
+        assert(telemetry?.recentKeyChoices.some(choice => choice.eventId === 'sect_path_choice'), '应包含近期 key choice');
+        assertEqual(telemetry?.warningSatisfied, false, 'ENG-01 默认 warning 未满足');
+        assertEqual(telemetry?.mitigationAvailable, true, '体质豁免视为 mitigationAvailable');
+
+        const aliveReport = createSimulationReportStub({ isAlive: true, finalAge: 30 });
+        const summary = summarizeTopDeathCauses([
+          { report: deadReport },
+          { report: aliveReport },
+          { report: deadReport, sampleId: 'golden-sect' },
+        ]);
+        assertEqual(summary.totalDeaths, 2, '应统计两次死亡');
+        assertEqual(summary.byCause[0]?.deathCauseId, 'engine:early_death', 'top cause 应为 early_death');
+        assertEqual(summary.byCohort.p3_eval[0]?.count, 1, 'golden 样本应归入 p3_eval');
+        assertEqual(summary.byCohort.p2_legacy[0]?.count, 1, '无 sampleId 的 complete life 死亡应归入 p2_legacy');
+        assertEqual(resolveDeathLifePhase(28), 'young_adult', '28 岁应为 young_adult');
+      },
+    },
+    {
+      name: 'P3 US-006 - ENG-01 在 deterministic 0–50 可被抑制',
+      description: 'golden-sect deterministic 0–50 应存活且抑制随机英年早逝',
+      test: async () => {
+        const sim = new GameProcessSimulator({
+          playerName: '顾清和',
+          gender: 'male',
+          seed: 301,
+          simulateYears: 50,
+          runUntilDeath: false,
+          ageRange: { startAge: 0, endAge: 50 },
+          routeTrack: 'sect',
+          sampleId: 'golden-sect',
+          verbose: false,
+          enableAutoSave: false,
+          enableManualSave: false,
+          enableSaveRestore: false,
+        });
+        const report = await sim.simulate();
+        assertEqual(report.finalAge, 50, '应跑至 50 岁');
+        assertEqual(report.isAlive, true, 'P3 deterministic 应抑制 ENG-01 并存活');
+      },
+    },
+    {
+      name: 'P3 US-006 - P3-EVAL death_rate 与 without_warning gate',
+      description: '存活至 50 的 golden 样本应通过 P3 death 指标',
+      test: () => {
+        const p3EvalEntries = ['golden-sect', 'golden-wanderer'].map(sampleId => ({
+          sampleId,
+          report: createSimulationReportStub({
+            isAlive: true,
+            finalAge: 50,
+            config: {
+              seed: 301,
+              runUntilDeath: false,
+              ageRange: { startAge: 0, endAge: 50 },
+            },
+          }),
+        }));
+
+        const p2Reports = [
+          createSimulationReportStub({
+            isAlive: false,
+            finalAge: 85,
+            config: { runUntilDeath: true, simulateYears: 85 },
+          }),
+        ];
+
+        const gate = evaluateExperienceHealthGate(p2Reports, [], p3EvalEntries);
+        assertEqual(gate.p3TrustEnforced, true, '应启用 P3 trust enforce');
+        const deathRate = gate.blockingMetrics.find(metric => metric.key === 'death_rate');
+        const dww = gate.blockingMetrics.find(metric => metric.key === 'death_without_warning_count');
+        assertEqual(deathRate?.status, 'pass', 'P3-EVAL death_rate 应为 pass');
+        assertEqual(deathRate?.actualValue, 0, 'P3-EVAL death_rate 应为 0');
+        assertEqual(dww?.status, 'pass', 'death_without_warning_count 应为 pass');
+        assertEqual(dww?.actualValue, 0, 'death_without_warning_count 应为 0');
+      },
+    },
+    {
+      name: 'P3 US-006 - demonic_ending_purge 可读可避',
+      description: 'purge 事件应为 choice 且含亡命脱身缓解选项',
+      test: () => {
+        const event = eventLoader.getEventById('demonic_ending_purge');
+        assert(event, 'demonic_ending_purge 应已加载');
+        assertEqual(event?.eventType, 'choice', 'purge 应为 choice 事件');
+        const flee = event?.choices?.find(choice => choice.id === 'demonic_purge_flee');
+        const fight = event?.choices?.find(choice => choice.id === 'demonic_purge_fight');
+        assert(flee, '应有亡命脱身缓解选项');
+        assert(fight, '应有硬抗选项');
+        assert(/危|伤|性命|清算/.test(fight?.description ?? ''), '硬抗选项应有 L2+ 风险文案');
+      },
+    },
+    {
+      name: 'P3 US-006 - wandering hero 险路事件含缓解',
+      description: 'hero_road_peril 应提供硬闯与退避两条路径',
+      test: () => {
+        const event = eventLoader.getEventById('hero_road_peril');
+        assert(event, 'hero_road_peril 应已加载');
+        assertEqual(event?.choices?.length, 2, '应有双选项缓解结构');
+        const retreat = event?.choices?.find(choice => choice.id === 'hero_peril_retreat');
+        assert(retreat, '应有退避寻援缓解选项');
+      },
+    },
+    {
+      name: 'P3 US-021 - wandering hero midlife arc 事件加载',
+      description: '游侠 31-50 中年弧五事件应加载且含 route_wanderer gate',
+      test: () => {
+        const arcIds = [
+          'hero_old_case_returns',
+          'hero_reputation_backlash',
+          'hero_ally_pays_price',
+          'hero_gray_judgment',
+          'hero_freedom_settlement',
+        ];
+        for (const eventId of arcIds) {
+          const event = eventLoader.getEventById(eventId);
+          assert(event, `${eventId} 应已加载`);
+          assertEqual(event?.eventType, 'choice', `${eventId} 应为 choice 事件`);
+          const gate = event?.conditions?.find(
+            condition => condition.type === 'expression' && condition.expression?.includes('route_wanderer'),
+          );
+          assert(gate, `${eventId} 应含 route_wanderer gate`);
+        }
+        const ally = eventLoader.getEventById('hero_ally_pays_price');
+        const shield = ally?.choices?.find(choice => choice.id === 'ally_shield_reputation');
+        const supported = ally?.choices?.find(choice => choice.id === 'ally_pay_ransom_supported');
+        assert(shield, '盟友代价应有公开担责选项');
+        assert(supported, '盟友代价应有江湖凑份子缓解选项');
+        assert(/危|险|代价|伤/.test(ally?.content?.description ?? ''), '盟友代价应有 L2 风险文案');
+      },
+    },
+    {
+      name: 'P3 US-023 - demonic midlife 事件可读风险',
+      description: 'midlife fork/betrayal 高风险选项须有 L2 文案与缓解选项',
+      test: () => {
+        const fork = eventLoader.getEventById('demonic_midlife_fork');
+        assert(fork, 'demonic_midlife_fork 应已加载');
+        const escalate = fork?.choices?.find(choice => choice.id === 'demonic_fork_escalate');
+        const redemption = fork?.choices?.find(choice => choice.id === 'demonic_fork_redemption');
+        const balance = fork?.choices?.find(choice => choice.id === 'demonic_fork_balance');
+        assert(escalate && redemption && balance, 'fork 应含 escalate/redemption/balance 三缓解');
+        assert(/禁术|重创|气血|退路/.test(escalate?.description ?? ''), 'escalate 应有 L2 风险文案');
+
+        const betrayal = eventLoader.getEventById('demonic_midlife_betrayal');
+        assert(betrayal, 'demonic_midlife_betrayal 应已加载');
+        const purge = betrayal?.choices?.find(choice => choice.id === 'demonic_betrayal_purge');
+        const coopt = betrayal?.choices?.find(choice => choice.id === 'demonic_betrayal_coopt');
+        assert(purge && coopt, 'betrayal 应有清洗与反利用缓解');
+        assert(/重伤|人脉/.test(purge?.description ?? ''), 'purge 应有 L2 风险文案');
+
+        const expansion = eventLoader.getEventById('demonic_midlife_expansion');
+        const survivor = eventLoader.getEventById('demonic_midlife_expansion_survivor');
+        assert(expansion && survivor, 'expansion 应有门主/余孽两版 CB-2');
+        assertEqual(expansion?.content?.title, '门主扩张', 'demonic_leader 应用门主扩张标题');
+        assertEqual(survivor?.content?.title, '余孽借势', '非门主应用余孽借势标题');
+      },
+    },
+    {
+      name: 'P3 US-023 - golden-demonic 31-50 midlife arc',
+      description: '确定性样本应命中 ≥3 route 事件、≥2 手动选择且存活至 50',
+      test: async () => {
+        const sample = GOLDEN_LINE_SAMPLES.find(s => s.id === 'golden-demonic');
+        assert(sample, '应有 golden-demonic 样本');
+        const run = await runP3EvalSimulation(sample);
+        assertEqual(run.report.finalAge, 50, 'golden-demonic 应跑至 50 岁');
+        assertEqual(run.report.isAlive, true, 'golden-demonic 应存活');
+
+        const midlifeRecords = run.report.records.filter(
+          record => record.age >= 31 && record.age <= 50,
+        );
+        const midlifeRouteEvents = midlifeRecords.filter(record =>
+          record.eventId.startsWith('demonic_midlife'),
+        );
+        assert(
+          midlifeRouteEvents.length >= 3,
+          `31-50 应至少 3 个 demonic_midlife 事件，实际 ${midlifeRouteEvents.length}`,
+        );
+
+        const manualChoices = midlifeRecords.filter(
+          record => record.eventType === 'choice' && record.eventId.startsWith('demonic_midlife'),
+        );
+        assert(
+          manualChoices.length >= 2,
+          `31-50 应至少 2 次 midlife 手动选择，实际 ${manualChoices.length}`,
+        );
+
+        const hitIds = new Set(midlifeRouteEvents.map(record => record.eventId));
+        assert(hitIds.has('demonic_midlife_expansion'), '应命中 expansion');
+        assert(
+          hitIds.has('demonic_midlife_betrayal') || hitIds.has('demonic_midlife_temptation'),
+          '应命中 betrayal 或 temptation',
+        );
+        assert(hitIds.has('demonic_midlife_fork'), '应命中 fork');
+      },
+    },
+    {
+      name: 'P3 US-024 - midlife gate priority routes',
+      description: '三条 priority route 0–50 样本应通过 midlife gate',
+      test: async () => {
+        const runs: GoldenLineSimulationRun[] = [];
+        for (const sample of GOLDEN_LINE_SAMPLES.filter(s => s.routeTrack)) {
+          runs.push(await runP3EvalSimulation(sample));
+        }
+
+        const gate = evaluateMidlifeGate(runs);
+        assert(gate.pass, `midlife gate 应 PASS；failures=${gate.failures.map(f => f.metric).join(', ')}`);
+
+        for (const run of runs) {
+          const track = run.sample.routeTrack!;
+          const midlife = run.report.records.filter(
+            record => record.age >= 31 && record.age <= 50,
+          );
+          const routeEvents = midlife.filter(record =>
+            isMidlifeRouteEvent(track, record.eventId),
+          );
+          const manualChoices = routeEvents.filter(record => record.eventType === 'choice');
+          assert(
+            routeEvents.length >= MIN_MIDLIFE_ROUTE_EVENTS,
+            `${run.sample.id} midlife route events 不足`,
+          );
+          assert(
+            manualChoices.length >= MIN_MIDLIFE_MANUAL_CHOICES,
+            `${run.sample.id} midlife manual choices 不足`,
+          );
+        }
+      },
+    },
+    {
+      name: 'P3 US-010 - romance arc 终态分类',
+      description: 'arc_outcome 应区分 completed / separated / skipped / failed',
+      test: () => {
+        const completed = createSimulationReportStub({
+          finalAge: 50,
+          isAlive: true,
+          statistics: { spouse: '明月', children: 1 } as import('./GameProcessSimulator').GameProcessReport['statistics'],
+          records: [
+            {
+              age: 18,
+              eventId: 'love_first_meet',
+              eventTitle: '初见',
+              eventType: 'choice',
+              selectedChoice: { id: 'love_greet', text: '搭话', effects: [] },
+              gameState: {
+                ...framework.createTestState(),
+                player: {
+                  ...framework.createTestState().player,
+                  flags: {
+                    love_started: true,
+                    married: true,
+                    spouse_mingyue: true,
+                  },
+                },
+              },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+        assertEqual(
+          resolveRomanceArcOutcome(completed, 50),
+          'completed',
+          '有 spouse/children 且存活至 50 应为 completed',
+        );
+
+        const separated = createSimulationReportStub({
+          finalAge: 50,
+          isAlive: true,
+          records: [
+            {
+              age: 20,
+              eventId: 'love_separation',
+              eventTitle: '分离',
+              eventType: 'auto',
+              gameState: {
+                ...framework.createTestState(),
+                player: {
+                  ...framework.createTestState().player,
+                  flags: { love_started: true, love_separation: true },
+                },
+              },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+        assertEqual(resolveRomanceArcOutcome(separated, 50), 'separated', '分离 flag 应为 separated');
+
+        const skipped = createSimulationReportStub({
+          finalAge: 50,
+          isAlive: true,
+          records: [
+            {
+              age: 10,
+              eventId: 'daily',
+              eventTitle: '日常',
+              eventType: 'auto',
+              gameState: framework.createTestState(),
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+        assertEqual(resolveRomanceArcOutcome(skipped, 50), 'skipped', '未开启 love_started 应为 skipped');
+      },
+    },
+    {
+      name: 'P3 US-010 - experience gate 暴露 P3-RF 指标',
+      description: 'romance_family_primary_sample_pass 应出现在 gate 输出',
+      test: () => {
+        const passReport = createSimulationReportStub({
+          finalAge: 50,
+          isAlive: true,
+          statistics: {
+            spouse: '明月',
+            children: 1,
+          } as import('./GameProcessSimulator').GameProcessReport['statistics'],
+          records: [
+            {
+              age: 22,
+              eventId: 'family_marriage',
+              eventTitle: '成家',
+              eventType: 'choice',
+              selectedChoice: { id: 'marry_mingyue', text: '迎娶明月', effects: [] },
+              gameState: {
+                ...framework.createTestState(),
+                player: {
+                  ...framework.createTestState().player,
+                  flags: { love_started: true, married: true, spouse_mingyue: true },
+                },
+              },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        });
+        const gate = evaluateExperienceHealthGate([], [], [
+          { sampleId: GOLDEN_ROMANCE_FAMILY_SAMPLE_ID, report: passReport },
+        ]);
+        const metric = gate.blockingMetrics.find(m => m.key === 'romance_family_primary_sample_pass');
+        assert(metric, '应包含 romance_family_primary_sample_pass');
+        assertEqual(metric?.severity, 'blocker', 'US-029 应为 blocker');
+        assertEqual(metric?.status, 'pass', 'completed arc 应 pass');
+        assertEqual(gate.p3RomanceFamily?.primaryArcReport?.arcId, ARC_RF_MINGYUE_ID, 'arc_id 应对齐');
+        assertEqual(gate.p3RomanceFamily?.primaryArcReport?.arcOutcome, 'completed', 'arc_outcome 应为 completed');
+      },
+    },
+    {
+      name: 'P3 US-014 - payoff gate 区分 static 与 simulated',
+      description: '静态 map 全绿时 priority-route 仿真缺口应为 blocker',
+      test: () => {
+        const replay: GoldenLineReplayRecord[] = [
+          {
+            age: 4,
+            eventId: 'childhood_preference',
+            choiceId: 'balance_both',
+            routeStates: {},
+            routeFlags: [],
+          },
+          {
+            age: 6,
+            eventId: 'martial_arts_enlightenment',
+            choiceId: 'agile_path',
+            routeStates: {},
+            routeFlags: [],
+          },
+        ];
+        const run: GoldenLineSimulationRun = {
+          sample: {
+            id: 'golden-sect',
+            personaName: '顾清和',
+            gender: 'male',
+            seed: 301,
+            choiceTendency: 'martial',
+            routeTrack: 'sect',
+            description: 'mock',
+          },
+          report: {
+            finalAge: 30,
+            isAlive: true,
+            totalChoices: 8,
+            totalEvents: 20,
+            records: [],
+          } as import('./GameProcessSimulator').GameProcessReport,
+          replay,
+        };
+        const evaluation = evaluatePayoffGate([run]);
+        assertEqual(evaluation.summary.staticPayoffRate, 1, '静态 map 应为 100%');
+        assert(
+          evaluation.summary.missedOpportunityCount >= 1,
+          '应有 simulated_gap',
+        );
+        const gap = evaluation.missedOpportunities.find(
+          opportunity =>
+            opportunity.findingType === 'simulated_gap' &&
+            opportunity.keyChoiceEventId === 'martial_arts_enlightenment',
+        );
+        assert(gap, '应报告 martial_arts_enlightenment 缺口');
+        assertEqual(gap?.choiceId, 'agile_path', '应含 choice id');
+        assert(
+          gap?.expectedPayoffEventIds.includes('martial_improvement'),
+          '应含 expected payoff id',
+        );
+        assertEqual(gap?.blockReason, 'static_data_mismatch', '应推断 block reason');
+        const blocker = evaluation.findings.find(
+          finding =>
+            finding.sampleId === 'golden-sect' &&
+            finding.severity === 'blocker' &&
+            finding.status === 'fail',
+        );
+        assert(blocker, 'priority-route 仿真不足应为 blocker');
+      },
+    },
+    {
+      name: 'P3 US-029 - neutral 仿真 payoff 为 blocker',
+      description: 'golden-neutral-baseline 仿真不足在 US-029 应为 blocker',
+      test: () => {
+        const replay: GoldenLineReplayRecord[] = [
+          {
+            age: 4,
+            eventId: 'childhood_preference',
+            choiceId: 'balance_both',
+            routeStates: {},
+            routeFlags: [],
+          },
+          {
+            age: 6,
+            eventId: 'martial_arts_enlightenment',
+            choiceId: 'agile_path',
+            routeStates: {},
+            routeFlags: [],
+          },
+        ];
+        const run: GoldenLineSimulationRun = {
+          sample: {
+            id: 'golden-neutral-baseline',
+            personaName: '林素心',
+            gender: 'female',
+            seed: 304,
+            choiceTendency: 'balanced',
+            description: 'mock',
+          },
+          report: {
+            finalAge: 30,
+            isAlive: true,
+            totalChoices: 8,
+            totalEvents: 20,
+            records: [],
+          } as import('./GameProcessSimulator').GameProcessReport,
+          replay,
+        };
+        const evaluation = evaluatePayoffGate([run]);
+        const blocker = evaluation.findings.find(
+          finding =>
+            finding.sampleId === 'golden-neutral-baseline' &&
+            finding.severity === 'blocker' &&
+            finding.status === 'fail',
+        );
+        assert(blocker, 'neutral 样本仿真不足应为 blocker');
+      },
+    },
+    {
+      name: 'P3 US-029 - P3-EVAL romance 聚合阈值',
+      description: 'p3_romance_family_achievement_rate < 0.20 应 fail',
+      test: () => {
+        const stub = (achieved: boolean) =>
+          createSimulationReportStub({
+            finalAge: 50,
+            isAlive: true,
+            statistics: achieved
+              ? ({ spouse: 'x', children: 0 } as import('./GameProcessSimulator').GameProcessReport['statistics'])
+              : ({} as import('./GameProcessSimulator').GameProcessReport['statistics']),
+          });
+        const lowRateEntries = Array.from({ length: 5 }, (_, index) => ({
+          sampleId: `sample-${index}`,
+          report: stub(false),
+        }));
+        const lowGate = evaluateExperienceHealthGate([], [], lowRateEntries);
+        const lowMetric = lowGate.blockingMetrics.find(
+          m => m.key === 'p3_romance_family_achievement_rate',
+        );
+        assert(lowMetric, '应有 P3 romance 聚合指标');
+        assertEqual(lowMetric?.status, 'fail', '0% 应 fail');
+
+        const passEntries = [
+          { sampleId: 'a', report: stub(true) },
+          ...Array.from({ length: 4 }, (_, index) => ({
+            sampleId: `b-${index}`,
+            report: stub(false),
+          })),
+        ];
+        const passGate = evaluateExperienceHealthGate([], [], passEntries);
+        const passMetric = passGate.blockingMetrics.find(
+          m => m.key === 'p3_romance_family_achievement_rate',
+        );
+        assertEqual(passMetric?.status, 'pass', '20% 应 pass');
+      },
+    },
+    {
+      name: 'P3 US-014 - golden line gate 集成 payoff 阻断',
+      description: '仿真 payoff blocker 应使 evaluateGoldenLineGates 失败',
+      test: () => {
+        const replay: GoldenLineReplayRecord[] = [
+          {
+            age: 4,
+            eventId: 'childhood_preference',
+            choiceId: 'balance_both',
+            routeStates: {},
+            routeFlags: [],
+          },
+          {
+            age: 6,
+            eventId: 'martial_arts_enlightenment',
+            choiceId: 'agile_path',
+            routeStates: {},
+            routeFlags: [],
+          },
+        ];
+        const run: GoldenLineSimulationRun = {
+          sample: {
+            id: 'golden-demonic',
+            personaName: '沈夜',
+            gender: 'male',
+            seed: 303,
+            choiceTendency: 'risk_averse',
+            routeTrack: 'demonic',
+            description: 'mock',
+          },
+          report: {
+            finalAge: 30,
+            isAlive: true,
+            totalChoices: 8,
+            totalEvents: 20,
+            records: [],
+          } as import('./GameProcessSimulator').GameProcessReport,
+          replay,
+        };
+        const gate = evaluateGoldenLineGates([run]);
+        assertEqual(gate.pass, false, '仿真 payoff 未达标时 gate 应 fail');
+        assert(
+          gate.payoffEvaluation.summary.staticPayoffRate >= 0.7,
+          '静态 map 仍应通过阈值',
+        );
+        assert(
+          gate.findings.some(
+            finding => finding.gate === 'payoff' && finding.severity === 'blocker',
+          ),
+          '应含 payoff blocker finding',
+        );
+      },
+    },
+    {
+      name: 'P3 US-017 - deterministic 样本存活至 50',
+      description: 'P3-GL 四样本应通过 runP3EvalSimulation 跑到终点年龄',
+      test: async () => {
+        for (const sample of GOLDEN_LINE_SAMPLES) {
+          const run = await runP3EvalSimulation(sample);
+          assertEqual(run.report.finalAge, P3_EVAL_END_AGE, `${sample.id} 应跑至 50 岁`);
+          assertEqual(run.report.isAlive, true, `${sample.id} 应存活`);
+        }
+      },
+    },
+    {
+      name: 'P3 US-017 - 分段指标含 31-50 必填字段',
+      description: '仿真报告应分离 0-30 与 31-50，且中年段含 route/relationship/death/payoff',
+      test: async () => {
+        const run = await runP3EvalSimulation(GOLDEN_LINE_SAMPLES[0]);
+        const segmentReport = buildP3EvalSegmentReport(run);
+        assert(segmentReport.youth.segment === '0-30', 'youth 分段标签');
+        assert(segmentReport.midlife.segment === '31-50', 'midlife 分段标签');
+        assert(
+          segmentReport.youth.eventCount + segmentReport.midlife.eventCount > 0,
+          '应有事件计数',
+        );
+        assert(
+          segmentReport.youth.ageRange.max === 30 && segmentReport.midlife.ageRange.min === 31,
+          '年龄边界',
+        );
+        const m = segmentReport.midlife;
+        assert(typeof m.eventCount === 'number', 'midlife eventCount');
+        assert(typeof m.choiceCount === 'number', 'midlife choiceCount');
+        assert(typeof m.routeState === 'object', 'midlife routeState');
+        assert(Array.isArray(m.routeFlags), 'midlife routeFlags');
+        assert(m.relationshipState !== undefined, 'midlife relationshipState');
+        assert(m.deathStatus !== undefined, 'midlife deathStatus');
+        assert(m.payoffStatus !== undefined, 'midlife payoffStatus');
+        assert(typeof m.payoffStatus.simulatedPayoffRate === 'number', 'payoff rate');
+      },
+    },
+    {
+      name: 'P3 US-017 - P3-EVAL 队列分段报告',
+      description: 'P3-EVAL 全样本应产出 youth/midlife 双分段指标',
+      test: async () => {
+        assertEqual(P3_EVAL_SAMPLES.length, 5, 'P3-EVAL 应为 5 个样本');
+        for (const sample of P3_EVAL_SAMPLES) {
+          const run = await runP3EvalSimulation(sample);
+          const report = buildP3EvalSegmentReport(run);
+          assert(report.youth.eventCount >= 1, `${sample.id} youth 应有事件`);
+          assert(report.midlife.eventCount >= 1, `${sample.id} midlife 应有事件`);
+          assertEqual(report.finalAge, P3_EVAL_END_AGE, `${sample.id} finalAge`);
+        }
+      },
+    },
+    {
+      name: 'P3 US-010 - golden-romance-family 0–50 回归样本',
+      description: 'P3-RF 样本应存活至 50 并完成 arc_rf_mingyue',
+      test: async () => {
+        const run = await runP3EvalSimulation(GOLDEN_ROMANCE_FAMILY_SAMPLE);
+        const arc = run.report.romanceFamilyArcReport;
+        assert(arc, '报告应包含 romanceFamilyArcReport');
+        assertEqual(run.report.finalAge, 50, '应跑至 50 岁');
+        assertEqual(run.report.isAlive, true, '情感线样本应存活');
+        assertEqual(arc.arcOutcome, 'completed', `arc 应 completed，实际=${arc.arcOutcome}`);
+        assert(arc.achievement, '应达成 romance/family achievement');
+        assert(arc.primarySamplePass, 'primarySamplePass 应为 true');
+        assert(
+          arc.keyChoices.find(kc => kc.id === 'KC-1')?.triggered,
+          'KC-1 love_first_meet 应触发',
+        );
+        assert(
+          arc.keyChoices.find(kc => kc.id === 'KC-3')?.choiceId === 'marry_mingyue',
+          'KC-3 应选迎娶明月',
+        );
+      },
+    },
+    {
       name: '状态一致性回归 - 新开局/选择/结局/重开/存档链路',
       description: '测试主状态源与 UI 状态在关键流程保持一致，失败应直接暴露同步问题',
       test: async () => {
@@ -2669,13 +3492,25 @@ const performanceSuite: TestSuite = {
     },
     {
       name: '性能测试 - 内存使用',
-      description: '测试内存使用情况',
-      test: () => {
-        const memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024;
-        console.log(`  当前内存使用：${memoryUsage.toFixed(2)}MB`);
-        
-        // 内存要求：< 50MB
-        assert(memoryUsage < 50, `内存使用过高：${memoryUsage.toFixed(2)}MB (要求 < 50MB)`);
+      description: '测试受控 workload 的内存增长（非进程绝对堆，避免测试套件加载数据后误报）',
+      test: async () => {
+        const executor = new EventExecutor();
+        const baselineHeap = process.memoryUsage().heapUsed;
+        const effects = [
+          { type: EffectType.STAT_MODIFY, target: 'martialPower', value: 5, operator: 'add' as const },
+          { type: EffectType.TIME_ADVANCE, target: 'age', value: 1 },
+          { type: EffectType.FLAG_SET, target: 'perfMemoryProbe' },
+        ];
+
+        for (let i = 0; i < 500; i++) {
+          const state = framework.createTestState();
+          await executor.executeEffects(effects, state);
+        }
+
+        const growthMB = (process.memoryUsage().heapUsed - baselineHeap) / 1024 / 1024;
+        console.log(`  受控 workload 内存增长：${growthMB.toFixed(2)}MB`);
+
+        assert(growthMB < 30, `内存增长过高：${growthMB.toFixed(2)}MB (要求 < 30MB)`);
       },
     },
   ],

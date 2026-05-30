@@ -23,17 +23,30 @@ export interface SetbackCheckResult {
   suppressedEvents: string[];
 }
 
+export type SetbackCheckOptions = {
+  /** P3 deterministic runs: skip ENG-01 early_death (US-006 / WR-ENG-02). */
+  suppressLethalSetbacks?: boolean;
+};
+
+const LETHAL_SETBACK_IDS = new Set(['early_death']);
+
 /**
  * 检查所有可能触发的挫折事件
  * 每次年度事件触发前调用
  */
-export function checkSetbackEvents(state: GameState): SetbackCheckResult {
+export function checkSetbackEvents(
+  state: GameState,
+  options?: SetbackCheckOptions,
+): SetbackCheckResult {
   const player = state.player;
   const globalMultiplier = difficultyManager.config.setbackEventProbability;
   const triggeredEvents: SetbackEventResult[] = [];
   const suppressedEvents: string[] = [];
 
   for (const event of SETBACK_EVENTS) {
+    if (options?.suppressLethalSetbacks && LETHAL_SETBACK_IDS.has(event.id)) {
+      continue;
+    }
     const result = processSetbackEvent(event, player, globalMultiplier);
 
     if (result.triggered) {

@@ -20,5 +20,6 @@ export function findBlockerKeywordInLog(log: string): (typeof GATE_BLOCKER_SUBST
 export function gateChildEnv(): NodeJS.ProcessEnv {
   const env = { ...process.env };
   delete env.NODE_OPTIONS;
+  env.WUXIA_ENGINE_QUIET = '1';
   return env;
 }

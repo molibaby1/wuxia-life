@@ -22,7 +22,6 @@
 ### 运行游戏过程模拟测试
 
 ```bash
-cd /Users/zhouyun/code/wuxia-life
 npx tsx tests/runGameProcessTest.ts
 ```
 
@@ -113,8 +112,8 @@ await simulator.simulate();
 
 ### 配置文件位置
 
-- 模拟器：[`tests/GameProcessSimulator.ts`](file:///Users/zhouyun/code/wuxia-life/tests/GameProcessSimulator.ts)
-- 执行脚本：[`tests/runGameProcessTest.ts`](file:///Users/zhouyun/code/wuxia-life/tests/runGameProcessTest.ts)
+- 模拟器：[`tests/GameProcessSimulator.ts`](tests/GameProcessSimulator.ts)
+- 执行脚本：[`tests/runGameProcessTest.ts`](tests/runGameProcessTest.ts)
 
 ---
 
@@ -368,14 +367,14 @@ wuxia-life/
 
 ### 查看相关文档
 
-- [快速测试指南](file:///Users/zhouyun/code/wuxia-life/scripts/QUICK_TEST.md)
-- [完整测试指南](file:///Users/zhouyun/code/wuxia-life/scripts/TESTING_GUIDE.md)
-- [Phase 2 测试报告](file:///Users/zhouyun/code/wuxia-life/tests/reports/PHASE2_FULL_TEST_REPORT_2026-03-12.md)
+- [快速测试指南](scripts/QUICK_TEST.md)
+- [完整测试指南](scripts/TESTING_GUIDE.md)
+- [Phase 2 测试报告](tests/reports/PHASE2_FULL_TEST_REPORT_2026-03-12.md)
 
 ### 查看报告
 
-- [最新游戏过程报告](file:///Users/zhouyun/code/wuxia-life/scripts/life-simulator/reports/game-process-gp_1773288081745_ebfafa57.html)
-- [报告中心页面](file:///Users/zhouyun/code/wuxia-life/scripts/life-simulator/index-full.html)
+- [最新游戏过程报告](scripts/life-simulator/reports/game-process-gp_1773288081745_ebfafa57.html)
+- [报告中心页面](scripts/life-simulator/index-full.html)
 
 ---
 

@@ -31,6 +31,7 @@
       {
         "id": "accept_demonic",
         "text": "接受幽影门传授",
+        "description": "你接受幽冥尊者传功，正式踏上幽影门之路，江湖也将视你为异类。",
         "effects": [
           {
             "type": "flag_set",
@@ -73,6 +74,7 @@
       {
         "id": "decline_demonic",
         "text": "婉拒对方，保持本心",
+        "description": "你婉拒幽影门邀约，守住本心，但这段奇遇已在心底留下痕迹。",
         "effects": [
           {
             "type": "stat_modify",
@@ -176,6 +178,7 @@
       {
         "id": "demonic_trial_shadow_success",
         "text": "潜入成功",
+        "description": "你趁夜色潜入敌营，取回信物全身而退，幽冥尊者对你的身法颇为满意。",
         "weight": 3,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
@@ -187,6 +190,7 @@
       {
         "id": "demonic_trial_shadow_injury",
         "text": "潜入受伤",
+        "description": "你虽完成任务，却在撤退时负伤，幽影门记下了你的狠劲与代价。",
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
@@ -199,6 +203,7 @@
       {
         "id": "demonic_trial_shadow_delay",
         "text": "潜行延误",
+        "description": "你因犹豫延误时机，虽勉强完成试炼，却也暴露了心性上的短板。",
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
@@ -383,6 +388,7 @@
       {
         "id": "demonic_usurp",
         "text": "策动夺权",
+        "description": "你选择卷入权斗并策动夺位——若失手，恐有清算之危。",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
           { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
@@ -394,6 +400,7 @@
       {
         "id": "demonic_renounce",
         "text": "远离权斗",
+        "description": "你主动远离门内权斗，把精力放回修行，也为自己留下一条退路。",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
           { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
@@ -440,6 +447,7 @@
       {
         "id": "demonic_usurp_success",
         "text": "权位到手",
+        "description": "血色夜袭得手，你在幽影门中站稳脚跟，权位与杀伐之名同时加身。",
         "weight": 3,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
@@ -452,6 +460,7 @@
       {
         "id": "demonic_usurp_fail",
         "text": "夺位失败",
+        "description": "夺位失败，你在乱局中负伤脱身——幽影门或将清算旧账，须早谋退路。",
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
@@ -642,7 +651,7 @@
     "content": {
       "text": "为证明诚意，你被要求护送百姓离开战乱地区。",
       "title": "赎罪试炼",
-      "description": "以善行赎过往。"
+      "description": "途中或有伤险，须备后手。"
     },
     "eventType": "choice",
     "choices": [
@@ -661,6 +670,7 @@
       {
         "id": "demonic_redemption_fail",
         "text": "护送失败",
+        "description": "护送途中遇袭，你身负重伤——此路险象环生，下次宜更谨慎。",
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 18, "timeUnit": "day" },
@@ -912,16 +922,37 @@
       }
     ],
     "content": {
-      "text": "夺位失败后，你被幽影门追杀，最终死于清算。",
+      "text": "夺位失败后，幽影门派出杀手清算旧账。门内风声鹤唳，你已无路可退。",
       "title": "清算覆灭",
-      "description": "江湖恩怨终有报。"
+      "description": "此劫凶险，须慎选退路。"
     },
-    "eventType": "auto",
-    "autoEffects": [
-      { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
-      { "type": "stat_modify", "target": "health", "value": 100, "operator": "subtract" },
-      { "type": "flag_set", "target": "demonic_ending_purge" },
-      { "type": "event_record", "target": "demonic_ending_purge" }
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "demonic_purge_flee",
+        "text": "亡命脱身",
+        "description": "你借夜色逃离总坛，放弃门内权位，换取一条生路。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "subtract" },
+          { "type": "flag_set", "target": "demonic_withdrawn" },
+          { "type": "flag_set", "target": "demonic_ending_exile" },
+          { "type": "flag_set", "target": "demonic_ending_purge" },
+          { "type": "event_record", "target": "demonic_purge_flee" }
+        ]
+      },
+      {
+        "id": "demonic_purge_fight",
+        "text": "硬抗清算",
+        "description": "你选择正面硬抗——性命可能不保，身负重伤亦难幸免。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
+          { "type": "stat_modify", "target": "health", "value": 25, "operator": "subtract" },
+          { "type": "flag_set", "target": "demonic_purge_wounded" },
+          { "type": "flag_set", "target": "demonic_ending_purge" },
+          { "type": "event_record", "target": "demonic_purge_fight" }
+        ]
+      }
     ],
     "metadata": {
       "createdAt": 1773317774544,

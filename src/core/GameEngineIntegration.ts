@@ -35,6 +35,10 @@ import { appendFormalEventHistory } from './EventHistory';
 /** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
 const FORMAL_CANDIDATE_POOL_CAP = 12;
 
+function engineDiagnosticsEnabled(): boolean {
+  return process.env.WUXIA_ENGINE_QUIET !== '1';
+}
+
 /**
  * 游戏引擎集成器类
  */
@@ -49,7 +53,8 @@ export class GameEngineIntegration {
   private eventCooldown: Map<string, number> = new Map(); // 事件冷却时间记录
   private activeStoryLines: Set<string> = new Set(); // 当前激活的剧情线
   private pendingEventOutcomeNote: string | null = null;
-  
+  private suppressLethalSetbacks = false;
+
   constructor() {
     this.eventExecutor = new EventExecutor();
     this.conditionEvaluator = new ConditionEvaluator();
@@ -331,7 +336,9 @@ export class GameEngineIntegration {
     const newMoney = this.gameState.player?.money;
     
     if (oldMartialPower !== newMartialPower || oldMoney !== newMoney) {
-      console.log(`[GameEngine] 属性更新：功力 ${oldMartialPower}→${newMartialPower}, 银两 ${oldMoney}→${newMoney}`);
+      if (engineDiagnosticsEnabled()) {
+        console.log(`[GameEngine] 属性更新：功力 ${oldMartialPower}→${newMartialPower}, 银两 ${oldMoney}→${newMoney}`);
+      }
     }
   }
 
@@ -835,11 +842,94 @@ export class GameEngineIntegration {
   }
 
   private getRouteSchedulingMultiplier(event: EventDefinition): number {
+    const romanceFamilyMultiplier = this.getRomanceFamilySchedulingMultiplier(event);
+    const wandererMidlifeMultiplier = this.getWandererMidlifeSchedulingMultiplier(event);
     const activeRouteKeys = this.getActivePlayerRouteKeys();
-    if (activeRouteKeys.length === 0) {
+    const routeMultiplier =
+      activeRouteKeys.length === 0
+        ? 1
+        : this.eventBelongsToActiveRoute(event, activeRouteKeys)
+          ? 1.35
+          : 1;
+    return routeMultiplier * romanceFamilyMultiplier * wandererMidlifeMultiplier;
+  }
+
+  /** US-021: boost wandering hero midlife arc events for route_wanderer players ages 31–50. */
+  private getWandererMidlifeSchedulingMultiplier(event: EventDefinition): number {
+    const player = this.gameState.player;
+    if (!player) {
       return 1;
     }
-    return this.eventBelongsToActiveRoute(event, activeRouteKeys) ? 1.35 : 1;
+
+    const age = player.age ?? 0;
+    const flags = player.flags ?? {};
+    const wandererMidlifeIds = [
+      'hero_old_case_returns',
+      'hero_reputation_backlash',
+      'hero_ally_pays_price',
+      'hero_gray_judgment',
+      'hero_freedom_settlement',
+    ];
+
+    if (
+      !wandererMidlifeIds.includes(event.id) ||
+      !flags.route_wanderer ||
+      flags.route_demonic ||
+      age < 31 ||
+      age > 50
+    ) {
+      return 1;
+    }
+
+    if (event.id === 'hero_freedom_settlement' && age >= 48) {
+      return 6;
+    }
+    if (flags.hero_rep_mantle && event.id === 'hero_ally_pays_price') {
+      return 5;
+    }
+    return 4;
+  }
+
+  /** US-009: guarantee family_marriage / family_child_born fire inside their age windows when love line is active. */
+  private getRomanceFamilySchedulingMultiplier(event: EventDefinition): number {
+    const player = this.gameState.player;
+    if (!player) {
+      return 1;
+    }
+
+    const age = player.age ?? 0;
+    const flags = player.flags ?? {};
+
+    if (event.id === 'family_marriage' && !flags.married && flags.love_started && age >= 20 && age <= 30) {
+      if (age >= 28) {
+        return 8;
+      }
+      if (age >= 25) {
+        return 5;
+      }
+      return 3.5;
+    }
+
+    if (
+      event.id === 'family_child_born' &&
+      flags.married &&
+      !flags.has_child &&
+      age >= 25 &&
+      age <= 40
+    ) {
+      return 3;
+    }
+
+    return 1;
+  }
+
+  private isRomanceFamilyCriticalEvent(event: EventDefinition): boolean {
+    if (event.id !== 'family_marriage') {
+      return false;
+    }
+    const age = this.gameState.player?.age ?? 0;
+    const flags = this.gameState.player?.flags ?? {};
+    return age >= 26 && age <= 30 && !flags.married && Boolean(flags.love_started);
   }
 
   /**
@@ -899,6 +989,24 @@ export class GameEngineIntegration {
         return isCoreRouteIdentity(routeState.routeId);
       })
       .map(routeState => routeState.routeId as RouteIdentity);
+  }
+
+  private getActiveCoreRoutes(): Array<{ routeId: RouteIdentity; lockedIn: boolean }> {
+    const routeStates = this.gameState.routeStates || {};
+    return Object.values(routeStates)
+      .filter(routeState => {
+        if (!isCoreRouteIdentity(routeState.routeId)) {
+          return false;
+        }
+        if (routeState.lifecycle === 'failed' || routeState.lifecycle === 'turned') {
+          return false;
+        }
+        return ['active', 'locked_in', 'temporary'].includes(routeState.lifecycle);
+      })
+      .map(routeState => ({
+        routeId: routeState.routeId as RouteIdentity,
+        lockedIn: routeState.lockedIn,
+      }));
   }
 
   private extractRouteCandidatesFromEffects(effects: Effect[] | undefined): RouteIdentity[] {
@@ -974,13 +1082,23 @@ export class GameEngineIntegration {
     return Array.from(candidates);
   }
 
-  private isExplicitRouteTurnEvent(event: EventDefinition): boolean {
-    return event.metadata?.routeTransition === 'turn' || event.metadata?.tags?.includes('route_turn') === true;
+  private isExplicitRouteTransitionEvent(event: EventDefinition): boolean {
+    const transition = event.metadata?.routeTransition;
+    if (
+      transition === 'turn' ||
+      transition === 'betrayal' ||
+      transition === 'corruption' ||
+      transition === 'redemption' ||
+      transition === 'exile'
+    ) {
+      return true;
+    }
+    return event.metadata?.tags?.includes('route_turn') === true;
   }
 
   private passesRouteConflictChecks(event: EventDefinition): boolean {
-    const lockedRoutes = this.getLockedCoreRoutes();
-    if (lockedRoutes.length === 0) {
+    const activeRoutes = this.getActiveCoreRoutes();
+    if (activeRoutes.length === 0) {
       return true;
     }
 
@@ -989,17 +1107,24 @@ export class GameEngineIntegration {
       return true;
     }
 
+    const allowsTransition = this.isExplicitRouteTransitionEvent(event);
+
     for (const candidateRoute of candidateRoutes) {
-      for (const lockedRoute of lockedRoutes) {
-        const conflict = resolveRouteConflict({
-          currentMainRoute: lockedRoute,
-          candidateRoute,
-          lockedIn: true,
-        });
-        if (conflict.action === 'block_candidate') {
-          return false;
+      for (const { routeId: existingRoute, lockedIn } of activeRoutes) {
+        if (existingRoute === candidateRoute) {
+          continue;
         }
-        if (conflict.action === 'require_turn_event' && !this.isExplicitRouteTurnEvent(event)) {
+        const conflict = resolveRouteConflict({
+          currentMainRoute: existingRoute,
+          candidateRoute,
+          lockedIn,
+        });
+        if (conflict.level === 'strong_exclusion' && conflict.action === 'block_candidate') {
+          if (!allowsTransition) {
+            return false;
+          }
+        }
+        if (conflict.action === 'require_turn_event' && !allowsTransition) {
           return false;
         }
       }
@@ -1180,7 +1305,7 @@ export class GameEngineIntegration {
   }
 
   private isCriticalLayerEvent(event: EventDefinition): boolean {
-    return this.isMandatoryEvent(event);
+    return this.isMandatoryEvent(event) || this.isRomanceFamilyCriticalEvent(event);
   }
 
   private isStorylineLayerEvent(event: EventDefinition): boolean {
@@ -1669,7 +1794,9 @@ export class GameEngineIntegration {
     appendFormalEventHistory(this.gameState, event.id, ageBeforeEvent);
 
     // 难度系统：每次事件执行时都检查是否触发挫折事件
-    const setbackResults = checkSetbackEvents(this.gameState);
+    const setbackResults = checkSetbackEvents(this.gameState, {
+      suppressLethalSetbacks: this.suppressLethalSetbacks,
+    });
     if (setbackResults.triggeredEvents.length > 0) {
       for (const result of setbackResults.triggeredEvents) {
         this.gameState = applySetbackEffects(this.gameState, result.event.id);
@@ -1870,7 +1997,13 @@ export class GameEngineIntegration {
     this.eventsThisYear = 0;
     this.lastYear = -1;
     this.annualEventPressure = 0;
+    this.suppressLethalSetbacks = false;
     difficultyMonitor.reset();
+  }
+
+  /** P3 deterministic 0–50: disable ENG-01 random early death (WR-ENG-02). */
+  public setSuppressLethalSetbacks(value: boolean): void {
+    this.suppressLethalSetbacks = value;
   }
   
   /**
@@ -1924,7 +2057,9 @@ export class GameEngineIntegration {
     this.applyLifeStateRecovery(value, unit);
     
     const unitLabel = unit === 'year' ? '年' : unit === 'month' ? '月' : '天';
-    console.log(`[GameEngine] 时间推进 ${value} ${unitLabel}`);
+    if (engineDiagnosticsEnabled()) {
+      console.log(`[GameEngine] 时间推进 ${value} ${unitLabel}`);
+    }
   }
 
   private applyLifeStateRecovery(value: number, unit: 'year' | 'month' | 'day'): void {

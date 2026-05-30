@@ -240,6 +240,7 @@
       {
         "id": "focus_on_study",
         "text": "专心读书练功",
+        "description": "你收起玩心，每日苦读勤练，师长都夸你勤勉有恒。",
         "weight": 4,
         "effects": [
           {
@@ -281,6 +282,7 @@
       {
         "id": "play_outside",
         "text": "继续玩耍探索",
+        "description": "你仍把大半时光花在户外，跑跳攀爬间身法越发灵活。",
         "weight": 3,
         "effects": [
           {
@@ -310,6 +312,7 @@
       {
         "id": "balance_both",
         "text": "尝试平衡两者",
+        "description": "你试着在读书练功与玩耍探索之间找平衡，心性越发沉稳。",
         "weight": 2,
         "condition": {
           "type": "expression",
@@ -417,6 +420,122 @@
     }
   },
   {
+    "id": "preteen_training",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 90,
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
+    "content": {
+      "text": "十岁的你已能扎稳马步、背诵心法口诀。长辈们说你根基渐成，再练几年便可下山见世面。",
+      "title": "少年根基",
+      "description": "童年尾声的武艺积累。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "constitution",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "externalSkill",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "preteenTrainingDone"
+      },
+      {
+        "type": "event_record",
+        "target": "preteen_training"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "修炼",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
+    "id": "late_childhood_prep",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 2,
+    "weight": 90,
+    "ageRange": {
+      "min": 12,
+      "max": 12
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 12
+      }
+    ],
+    "content": {
+      "text": "十二岁这年，家人开始与你谈论江湖与门派。你知道少年时代即将结束，更大的世界在等你。",
+      "title": "少年将临",
+      "description": "衔接少年阶段的心理准备。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "time_advance",
+        "target": "age",
+        "value": 1
+      },
+      {
+        "type": "stat_modify",
+        "target": "comprehension",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "lateChildhoodPrepDone"
+      },
+      {
+        "type": "event_record",
+        "target": "late_childhood_prep"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "童年",
+        "成长",
+        "主线"
+      ],
+      "enabled": true
+    }
+  },
+  {
     "id": "youth_begins",
     "version": "1.0.0",
     "category": "main_story",
@@ -484,7 +603,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\")"
+        "expression": "!flags.has(\"route_wanderer\") && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\")"
       }
     ],
     "requirements": {
@@ -718,8 +837,8 @@
     "id": "jianghu_experience",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 2,
-    "weight": 60,
+    "priority": 0,
+    "weight": 120,
     "ageRange": {
       "min": 16,
       "max": 16
@@ -728,6 +847,12 @@
       {
         "type": "age_reach",
         "value": 16
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"jianghuTraveler\")"
       }
     ],
     "content": {
@@ -771,8 +896,10 @@
         "青年",
         "江湖",
         "历练",
-        "成长"
+        "成长",
+        "mandatory"
       ],
+      "routeTargets": ["wanderer"],
       "enabled": true
     }
   },
@@ -808,6 +935,7 @@
       {
         "id": "trial_basic",
         "text": "基础关：扎稳马步",
+        "description": "你扎稳马步，根基关顺利通过，师门对你的底子有了信心。",
         "weight": 4,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -820,6 +948,7 @@
       {
         "id": "trial_basic_fail",
         "text": "基础关：失误摔伤",
+        "description": "你马步不稳摔伤，虽未完成关隘，却也记住了不可轻忽基本功。",
         "weight": 1,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -832,6 +961,7 @@
       {
         "id": "trial_agile",
         "text": "身法关：百步轻身",
+        "description": "你身轻如燕，百步之内来去无声，身法关顺利过关。",
         "weight": 3,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -844,6 +974,7 @@
       {
         "id": "trial_agile_fail",
         "text": "身法关：失足受伤",
+        "description": "你在身法关失足受伤，师门让你养伤后再战，你也更知轻功不可躁进。",
         "weight": 1,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -856,6 +987,7 @@
       {
         "id": "trial_mind",
         "text": "心性关：静坐悟道",
+        "description": "你静坐参悟，心性关过关，长老称你已有入门弟子之风。",
         "weight": 3,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -868,6 +1000,7 @@
       {
         "id": "trial_mind_delay",
         "text": "心性关：参悟不足，延期再试",
+        "description": "你参悟未足，被允许延期再试，师门仍给你改正的机会。",
         "weight": 1,
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
@@ -1010,6 +1143,7 @@
       {
         "id": "trial_final_success",
         "text": "全力通过终试",
+        "description": "你一日内通过终试，正式被门派认可为核心弟子。",
         "weight": 3,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "day" },
@@ -1023,6 +1157,7 @@
       {
         "id": "trial_final_delay",
         "text": "稳妥应对，延期再战",
+        "description": "你选择稳妥应对，终试延期再战，师门更看重你的谨慎而非冒进。",
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },

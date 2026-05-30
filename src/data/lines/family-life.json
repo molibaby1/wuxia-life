@@ -5,8 +5,8 @@
     "description": "到了成家的年纪，该考虑终身大事了。",
     "version": "1.0.0",
     "category": "family",
-    "priority": 85,
-    "weight": 75,
+    "priority": 92,
+    "weight": 85,
     "ageRange": {
       "min": 20,
       "max": 30
@@ -17,6 +17,7 @@
       "family",
       "marriage"
     ],
+    "storyLine": "love_story",
     "triggers": [
       {
         "type": "age_reach",
@@ -42,6 +43,7 @@
     },
     "choices": [
       {
+        "id": "marry_mingyue",
         "text": "迎娶明月 (真爱，财富 -50, 婚姻质量高)",
         "conditions": [
           {"type": "expression", "expression": "flags.love_started == true || flags.mingyue_fiancee == true"}
@@ -52,6 +54,11 @@
             "target": "money",
             "value": -50,
             "operator": "add"
+          },
+          {
+            "type": "special",
+            "target": "set_spouse",
+            "value": "明月"
           },
           {
             "type": "flag_set",
@@ -76,6 +83,7 @@
         ]
       },
       {
+        "id": "marry_arranged",
         "text": "接受安排，门当户对 (财富 +50, 人脉 +20, 婚姻质量一般)",
         "effects": [
           {
@@ -89,6 +97,11 @@
             "target": "connections",
             "value": 20,
             "operator": "add"
+          },
+          {
+            "type": "special",
+            "target": "set_spouse",
+            "value": "发妻"
           },
           {
             "type": "flag_set",
@@ -113,6 +126,7 @@
         ]
       },
       {
+        "id": "marry_free_love",
         "text": "自由恋爱，寻找真爱 (侠义 +10, 婚姻质量中等)",
         "effects": [
           {
@@ -120,6 +134,11 @@
             "target": "chivalry",
             "value": 10,
             "operator": "add"
+          },
+          {
+            "type": "special",
+            "target": "set_spouse",
+            "value": "爱人"
           },
           {
             "type": "flag_set",
@@ -146,8 +165,8 @@
     "description": "你的孩子出生了，全家都沉浸在喜悦之中。",
     "version": "1.0.0",
     "category": "family",
-    "priority": 80,
-    "weight": 70,
+    "priority": 88,
+    "weight": 80,
     "ageRange": {
       "min": 25,
       "max": 40
@@ -158,6 +177,7 @@
       "family",
       "child"
     ],
+    "storyLine": "love_story",
     "triggers": [
       {
         "type": "age_reach",
@@ -211,6 +231,12 @@
             "operator": "add"
           },
           {
+            "type": "stat_modify",
+            "target": "children",
+            "value": 1,
+            "operator": "add"
+          },
+          {
             "type": "flag_set",
             "flag": "has_child",
             "value": true
@@ -218,6 +244,7 @@
         ]
       },
       {
+        "id": "child_born_simple",
         "text": "简单庆祝，低调行事 (财富 -10)",
         "effects": [
           {
@@ -233,6 +260,12 @@
             "operator": "add"
           },
           {
+            "type": "stat_modify",
+            "target": "children",
+            "value": 1,
+            "operator": "add"
+          },
+          {
             "type": "flag_set",
             "flag": "has_child",
             "value": true
@@ -240,6 +273,7 @@
         ]
       },
       {
+        "id": "child_born_care",
         "text": "亲自照料，暂缓外务 (财富 -20, 家庭牵绊 +2, 自律 -1)",
         "effects": [
           {
@@ -258,6 +292,12 @@
             "type": "life_state_change",
             "target": "discipline",
             "value": -1,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "children",
+            "value": 1,
             "operator": "add"
           },
           {
@@ -389,6 +429,7 @@
       "family",
       "crisis"
     ],
+    "storyLine": "love_story",
     "triggers": [
       {
         "type": "age_reach",
@@ -403,7 +444,7 @@
     },
     "content": {
       "title": "家族危机",
-      "text": "家族遭遇困难，需要你出面解决。"
+      "text": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？"
     },
     "choices": [
       {

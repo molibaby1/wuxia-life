@@ -1,0 +1,438 @@
+{
+  "project": "Wuxia Life P5 Headless Engine and Catalog Read Service",
+  "branchName": "ralph/p5-headless-engine-and-catalog-read-service",
+  "description": "Prove the P4 service boundaries in executable code by extracting a Node-runnable headless engine session, adding a versioned in-memory event catalog read interface, separating snapshot conversion from runtime state, and validating behavioral parity against the current Web runtime across deterministic 0-50 replay scenarios without adding HTTP, database, accounts, cloud saves, or mini-program integration.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Rebaseline Runtime Coupling",
+      "description": "As a maintainer, I want a fresh map of runtime dependencies so that headless extraction addresses real Vue and browser coupling.",
+      "acceptanceCriteria": [
+        "Inventory Vue reactive imports used by engine execution paths",
+        "Inventory global singleton usage in engine, composable, save, and event-loading paths",
+        "Inventory DOM, browser storage, prompt, alert, and animation-frame dependencies",
+        "Classify each dependency as core logic, Web adapter responsibility, test/report-only, or deprecated",
+        "Produce a P5 runtime-coupling baseline report",
+        "Do not modify business code",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Define P5 Runtime Behavior Guardrails",
+      "description": "As a project owner, I want explicit guardrails so that extraction does not silently change gameplay.",
+      "acceptanceCriteria": [
+        "Document that P5 must preserve event selection, choice outcomes, feedback, route state, life memory, and event history behavior",
+        "Document that P5 may add headless modules, adapters, fixtures, and parity tests",
+        "Define prohibited changes: new gameplay systems, event rebalance, UI redesign, HTTP, database, account, cloud-save, or mini-program implementation",
+        "Define regression commands required after each implementation wave",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Define Headless Engine Session Interface",
+      "description": "As a backend developer, I want a stable headless session interface so that future services can execute gameplay without UI runtime dependencies.",
+      "acceptanceCriteria": [
+        "Define an interface for creating a session from initial state or hydrated snapshot",
+        "Define methods for `hydrate`, `getNextEvent`, automatic progression, `executeChoice`, `serialize`, restart, terminal-state read, and life-memory read",
+        "Define method inputs, outputs, error categories, and async behavior",
+        "Define session ownership and mutation rules",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Define Headless Dependency Injection Boundary",
+      "description": "As a developer, I want explicit engine dependencies so that headless sessions do not reach into browser or global state.",
+      "acceptanceCriteria": [
+        "Define required dependencies for event catalog access, random source, time source, logging, and snapshot conversion",
+        "Define default in-memory or deterministic implementations for tests",
+        "Define which dependencies are optional",
+        "Document that Vue, DOM APIs, and browser storage are forbidden dependencies for headless modules",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add Random Source Adapter",
+      "description": "As a maintainer, I want random behavior behind an adapter so that deterministic replay remains possible outside the browser.",
+      "acceptanceCriteria": [
+        "Add a random source interface",
+        "Add a deterministic seeded implementation for tests and replay",
+        "Add a default runtime implementation using existing platform capability",
+        "Headless modules consume the adapter instead of direct random calls where extracted behavior requires randomness",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add Time Source Adapter",
+      "description": "As a maintainer, I want time access behind an adapter so that snapshots and replay logs are deterministic when needed.",
+      "acceptanceCriteria": [
+        "Add a time source interface",
+        "Add fixed and runtime implementations",
+        "Headless session metadata and generated records can use an injected time source",
+        "No browser-only time dependency is introduced",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Define Catalog Read Interface",
+      "description": "As a backend planner, I want a versioned event catalog read interface so that engine execution can stop depending on static imports later.",
+      "acceptanceCriteria": [
+        "Define catalog read methods for catalog metadata, event bundle retrieval, and event lookup by id",
+        "Define query support for catalog version, age, route, and event status",
+        "Define error behavior for unknown catalog version and missing event id",
+        "Document that final trigger eligibility remains engine-side",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Implement In-Memory Catalog Adapter",
+      "description": "As a developer, I want an in-memory catalog adapter so that P5 can prove service boundaries without HTTP or database work.",
+      "acceptanceCriteria": [
+        "Implement the catalog read interface using current event data",
+        "Adapter returns versioned event bundles",
+        "Adapter supports age, route, and status query fields",
+        "Adapter does not change current `EventLoader` behavior",
+        "No HTTP server or network client is added",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add Catalog Adapter Contract Tests",
+      "description": "As a maintainer, I want tests for the in-memory catalog adapter so that future HTTP implementations have a behavioral reference.",
+      "acceptanceCriteria": [
+        "Test catalog metadata retrieval",
+        "Test event lookup by id",
+        "Test age filtering",
+        "Test route and status query behavior",
+        "Test unknown version and missing id errors",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Define Snapshot Conversion Boundary",
+      "description": "As a developer, I want explicit conversion between runtime state and `GameStateSnapshot` so that persistence transport is not mixed with engine internals.",
+      "acceptanceCriteria": [
+        "Define runtime-state-to-snapshot conversion",
+        "Define snapshot-to-runtime-state hydration",
+        "Document persisted, derived, volatile, deprecated, and forbidden field treatment",
+        "Define conversion error behavior",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Implement Snapshot Serialization Adapter",
+      "description": "As a maintainer, I want a snapshot adapter so that headless sessions can serialize and hydrate without browser storage.",
+      "acceptanceCriteria": [
+        "Implement runtime-state-to-snapshot serialization",
+        "Implement snapshot-to-runtime-state hydration",
+        "Preserve route state, relationships, event history, choice history, and life-memory source fields",
+        "Do not import browser storage or Vue",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Add Snapshot Adapter Round-Trip Tests",
+      "description": "As a maintainer, I want round-trip tests for snapshots so that headless hydration does not lose gameplay state.",
+      "acceptanceCriteria": [
+        "Test runtime state to snapshot to runtime state round trip",
+        "Test route state preservation",
+        "Test relationship preservation",
+        "Test event and choice history preservation",
+        "Test life-memory summary equivalence after hydration",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Implement Headless Session Construction",
+      "description": "As a backend developer, I want to construct a headless session without Vue so that gameplay can run in Node.",
+      "acceptanceCriteria": [
+        "Add a headless session implementation that accepts injected dependencies",
+        "Session can start from initial state",
+        "Session can hydrate from a valid snapshot",
+        "Headless modules do not import Vue, DOM APIs, localStorage, prompt, alert, or UI components",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Implement Headless Next Event Selection",
+      "description": "As a backend developer, I want the headless session to select the next event so that future services can advance gameplay.",
+      "acceptanceCriteria": [
+        "Session exposes next-event selection",
+        "Event candidates come from the catalog read interface",
+        "Final trigger checks remain in engine logic",
+        "Selection result includes event id and player-safe event payload",
+        "Existing Web runtime behavior is not changed",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Implement Headless Automatic Progression",
+      "description": "As a backend developer, I want automatic events to progress without UI timers so that Node execution can complete non-interactive chains.",
+      "acceptanceCriteria": [
+        "Session processes automatic events without `requestAnimationFrame`, timeout-driven UI pacing, or DOM dependencies",
+        "Session records applied effects and history",
+        "Session stops when player choice is required, terminal state is reached, or configured safety limit is reached",
+        "Safety-limit failures return a structured error",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Implement Headless Choice Execution",
+      "description": "As a backend developer, I want headless choice execution so that future APIs can apply trusted server-side decisions.",
+      "acceptanceCriteria": [
+        "Session executes a choice using the P4 choice-execution request concept",
+        "Session validates current event id and available choice id",
+        "Session returns next snapshot, player feedback, diagnostics, history append, route changes, relationship changes, and life-memory delta",
+        "Session rejects invalid or stale choices with structured errors",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Implement Headless Restart and Terminal State",
+      "description": "As a platform developer, I want restart and ending-state behavior in headless sessions so that clients can manage a complete game lifecycle.",
+      "acceptanceCriteria": [
+        "Session exposes terminal-state read",
+        "Session stops progressing after terminal state",
+        "Session exposes restart or new-session behavior",
+        "Restart resets gameplay, event, route, relationship, and life-memory source state according to current runtime rules",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Implement Headless Life Memory Read",
+      "description": "As a client developer, I want life memory derived from headless state so that Web and future mini-program clients can share the same summary.",
+      "acceptanceCriteria": [
+        "Session exposes life-memory summary read",
+        "Summary uses existing life-memory derivation rules",
+        "Summary remains serializable",
+        "Headless life memory does not import UI components",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Define Web Runtime Adapter Boundary",
+      "description": "As a frontend developer, I want a documented adapter boundary so that the Web client can migrate incrementally without behavior changes.",
+      "acceptanceCriteria": [
+        "Document current Web composable responsibilities",
+        "Document which responsibilities should call headless session later",
+        "Document which UI pacing concerns remain Web-only",
+        "Document that P5 does not require switching the production Web flow to headless execution",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Add Headless Unit Test Entry",
+      "description": "As a maintainer, I want a dedicated headless test entry so that Node execution can be verified independently.",
+      "acceptanceCriteria": [
+        "Add a test command for headless session tests",
+        "Test command does not require browser, network, HTTP server, or database",
+        "Tests cover construction, hydration, next event, automatic progression, choice execution, serialization, restart, terminal state, and life memory",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Define Dual-Track Parity Model",
+      "description": "As a maintainer, I want a parity model between current runtime and headless runtime so that extraction regressions are detected.",
+      "acceptanceCriteria": [
+        "Define parity comparison fields: snapshot hash, feedback, route state, life memory, and event history",
+        "Define normalization rules for volatile timestamps and diagnostic-only fields",
+        "Define mismatch categories and report format",
+        "Define when a mismatch blocks P5",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Implement Dual-Track Parity Harness",
+      "description": "As a maintainer, I want an automated parity harness so that current and headless runtime outputs can be compared.",
+      "acceptanceCriteria": [
+        "Harness runs equivalent inputs against current runtime reference path and headless session path",
+        "Harness compares normalized snapshot hash, feedback, route state, life memory, and event history",
+        "Harness reports exact mismatch field and step",
+        "Harness runs without browser, HTTP server, or database",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Add Deterministic 0-50 Replay Parity Samples",
+      "description": "As a maintainer, I want replay parity for the proven P3 samples so that extraction preserves real gameplay behavior.",
+      "acceptanceCriteria": [
+        "Add parity coverage for orthodox/sect, wandering hero, demonic path, neutral baseline, and romance/family 0-50 deterministic samples",
+        "Each sample replays fixed seed and choice log inputs",
+        "Each sample compares final snapshot, feedback history, route state, life memory, and event history",
+        "Any mismatch fails the parity suite",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Add Catalog Version Pinning Checks",
+      "description": "As a maintainer, I want snapshots and replay sessions to pin catalog versions so that event drift cannot silently alter outcomes.",
+      "acceptanceCriteria": [
+        "Headless session requires or records `eventCatalogVersion`",
+        "Snapshot serialization preserves catalog version",
+        "Replay metadata preserves catalog version",
+        "Unknown or mismatched catalog versions return structured errors",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Add P5 Extraction Gate",
+      "description": "As a maintainer, I want a dedicated P5 gate so that headless extraction cannot regress contracts or gameplay parity.",
+      "acceptanceCriteria": [
+        "Gate runs contract tests",
+        "Gate runs headless unit tests",
+        "Gate runs dual-track 0-50 replay parity tests",
+        "Gate runs P3 experience, golden-line, and midlife gates",
+        "Gate returns non-zero exit code on any blocker",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Update Architecture Documentation",
+      "description": "As a maintainer, I want architecture documentation updated after extraction so that future backend implementation starts from the proven headless path.",
+      "acceptanceCriteria": [
+        "Document headless session interface and dependencies",
+        "Document in-memory catalog adapter and future HTTP replacement point",
+        "Document snapshot adapter, Web adapter boundary, and parity harness",
+        "State explicitly that P5 does not add HTTP, database, accounts, cloud saves, or mini-program implementation",
+        "Documentation contains no local absolute paths",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Produce P5 Closure Report",
+      "description": "As a project owner, I want a P5 closure report so that the project can decide whether to start persistence and API implementation.",
+      "acceptanceCriteria": [
+        "Report lists completed P5 user stories",
+        "Report includes headless modules, catalog adapter, snapshot adapter, parity harness, and test commands",
+        "Report confirms whether Web runtime behavior remained stable",
+        "Report includes P3/P4 regression and P5 extraction-gate results",
+        "Report recommends whether to proceed to snapshot persistence and API PRD",
+        "Documentation contains no local absolute paths",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

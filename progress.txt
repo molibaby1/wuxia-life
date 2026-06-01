@@ -1,6 +1,7 @@
 ## Codebase Patterns
 
 - P5 headless work starts from `docs/test-reports/p5-runtime-coupling-baseline.md`; new headless modules must not import Vue, DOM, `localStorage`, `prompt`, `alert`, or `requestAnimationFrame`.
+- Headless package lives under `src/headless/`; run `npm run test:headless` for Node suite and `npm run test:headless:parity` for full 0–50 dual-track samples (blocked until simulator fixture replay aligns).
 - Blocker log substrings and gate child `NODE_OPTIONS` hygiene live in `tests/qualityGatePolicy.ts`; import this module from auxiliary runners instead of `runRealTestGate.ts` to avoid accidental suite execution on import.
 - `ConditionEvaluator` must embed replaced `flags.*` / `player.*` string values using `JSON.stringify` (or equivalent) so compared literals like `'unconventional'` never degrade into bare identifiers inside `new Function`.
 - `DifficultyManager` must guard all `localStorage` access with a real browser check (`typeof window !== 'undefined'` + `window.localStorage`); Node's experimental `globalThis.localStorage` triggers `--localstorage-file` warnings during gates.

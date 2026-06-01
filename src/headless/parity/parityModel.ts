@@ -2,9 +2,11 @@
  * Dual-track parity model (P5 US-021).
  */
 
+import * as crypto from 'node:crypto';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import type { LifeMemorySummary } from '../../types/lifeMemory';
 import type { GameState } from '../../types/eventTypes';
+import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
 
 export type ParityMismatchCategory =
   | 'snapshot_hash'
@@ -46,21 +48,79 @@ export function normalizeSnapshotForHash(snapshot: unknown): unknown {
       delete metadata[key];
     }
   }
+  const state = clone.state as Record<string, unknown> | undefined;
+  if (state) {
+    for (const key of VOLATILE_SNAPSHOT_KEYS) {
+      delete state[key];
+    }
+  }
   return clone;
 }
 
-export function digestGameState(state: GameState): ParityComparisonFields {
-  const routeStateJson = JSON.stringify(state.routeStates ?? {});
-  const lifeMemoryJson = JSON.stringify(
-    stripVolatileLifeMemory(deriveLifeMemorySummary(state)),
-  );
-  const eventHistoryDigest = JSON.stringify(
-    (state.eventHistory ?? []).map(e => ({
+function sortedEventHistory(state: GameState) {
+  return [...(state.eventHistory ?? [])]
+    .map(e => ({
       eventId: e.eventId,
       age: e.age,
       selectedChoice: e.selectedChoice,
-    })),
+    }))
+    .sort((a, b) => {
+      const ageDelta = (a.age ?? 0) - (b.age ?? 0);
+      if (ageDelta !== 0) return ageDelta;
+      return a.eventId.localeCompare(b.eventId);
+    });
+}
+
+const MISSING_HISTORY_CHOICE = '__MISSING__';
+
+export function digestRecordAlignedEventHistory(
+  state: GameState,
+  records: GameProcessRecord[],
+): string {
+  const history = sortedEventHistory(state);
+  const aligned = records
+    .filter(record => record.eventId !== 'no_event')
+    .map(record => {
+      const match = history.find(
+        entry => entry.eventId === record.eventId && entry.age === record.age,
+      );
+      const selectedChoice = match?.selectedChoice ?? MISSING_HISTORY_CHOICE;
+      return {
+        eventId: record.eventId,
+        age: record.age,
+        selectedChoice,
+      };
+    });
+  return JSON.stringify(aligned);
+}
+
+/** Canonical end-state fingerprint for parity (route + memory + events + feedback). */
+export function buildParityFingerprint(digest: ParityComparisonFields): string {
+  return crypto
+    .createHash('sha256')
+    .update(
+      [
+        digest.routeStateJson,
+        digest.lifeMemoryJson,
+        digest.eventHistoryDigest,
+        digest.feedbackDigest,
+      ].join('\n'),
+    )
+    .digest('hex');
+}
+
+export function digestGameState(state: GameState): ParityComparisonFields {
+  const routeFlags = Object.fromEntries(
+    Object.entries(state.flags ?? {}).filter(([key]) => key.startsWith('route_')),
   );
+  const routeStateJson = JSON.stringify({
+    routeStates: state.routeStates ?? {},
+    routeFlags,
+  });
+  const lifeMemoryJson = JSON.stringify(
+    stripVolatileLifeMemory(deriveLifeMemorySummary(state)),
+  );
+  const eventHistoryDigest = JSON.stringify(sortedEventHistory(state));
   return {
     snapshotHash: '',
     feedbackDigest: '',
@@ -81,6 +141,8 @@ export function compareParityFields(
 ): ParityReport {
   const mismatches: ParityMismatch[] = [];
   const pairs: Array<[ParityMismatchCategory, keyof ParityComparisonFields]> = [
+    ['snapshot_hash', 'snapshotHash'],
+    ['feedback', 'feedbackDigest'],
     ['route_state', 'routeStateJson'],
     ['life_memory', 'lifeMemoryJson'],
     ['event_history', 'eventHistoryDigest'],

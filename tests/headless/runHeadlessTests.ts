@@ -9,6 +9,7 @@ import { runSnapshotAdapterTests } from './snapshotAdapter.test';
 import { runHeadlessSessionTests } from './headlessSession.test';
 import { runCatalogVersionPinningTests } from './catalogVersionPinning.test';
 import { runParityHarnessTests } from './parityHarness.test';
+import { runParitySamplesTests } from './paritySamples.test';
 
 async function main(): Promise<void> {
   runRandomSourceTests();
@@ -18,6 +19,7 @@ async function main(): Promise<void> {
   runCatalogVersionPinningTests();
   await runHeadlessSessionTests();
   runParityHarnessTests();
+  await runParitySamplesTests();
   console.log('headless test suite: ok');
 }
 

@@ -30,6 +30,13 @@ import type {
   PlayerSafeEventPayload,
   ProgressAutomaticResult,
 } from './sessionTypes';
+import type { RouteTrack } from '../parity/routeTrackFixtures';
+import {
+  prepareEngineForSimulatorReplay,
+  replaySimulatorRecords,
+  type SimulatorReplayResult,
+} from '../parity/simulatorRecordReplay';
+import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
 
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 const DEFAULT_AUTO_LIMIT = 32;
@@ -109,6 +116,26 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       engine.startNewGame(options.playerName, options.gender);
     });
     return impl;
+  }
+
+  /** Session for parity replay — does not consume RNG before `replaySimulatorRecords`. */
+  static createForReplay(
+    options: Pick<HeadlessSessionCreateOptions, 'randomSeed' | 'catalogVersion'>,
+    partialDeps?: Partial<HeadlessSessionDependencies>,
+  ): HeadlessEngineSessionImpl {
+    const catalog = partialDeps?.catalog ?? createDefaultInMemoryCatalogAdapter();
+    const snapshot = partialDeps?.snapshot ?? defaultSnapshotConverter;
+    const deps = resolveHeadlessDependencies({ ...partialDeps, catalog, snapshot });
+    const engine = new GameEngineIntegration();
+    const sessionId = `headless-replay-${deps.time.now()}`;
+    const catalogVersion = options.catalogVersion ?? DEFAULT_CATALOG_VERSION;
+    return new HeadlessEngineSessionImpl(
+      sessionId,
+      deps,
+      engine,
+      catalogVersion,
+      options.randomSeed,
+    );
   }
 
   private randomSourceForSession() {
@@ -387,6 +414,31 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   getLifeMemory() {
     return deriveLifeMemorySummary(this.engine.getGameState());
+  }
+
+  getRuntimeState(): GameState {
+    return this.engine.getGameState();
+  }
+
+  async replaySimulatorRecords(
+    sample: {
+      playerName: string;
+      gender: 'male' | 'female';
+      routeTrack?: RouteTrack;
+    },
+    records: GameProcessRecord[],
+  ): Promise<SimulatorReplayResult> {
+    return this.runWithRandomAsync(async () => {
+      prepareEngineForSimulatorReplay(this.engine, {
+        playerName: sample.playerName,
+        gender: sample.gender,
+        suppressLethalSetbacks: true,
+      });
+      return replaySimulatorRecords(this.engine, this.dependencies.catalog, {
+        routeTrack: sample.routeTrack,
+        catalogVersion: this.catalogVersion,
+      }, records);
+    });
   }
 
   private getAvailableChoices(event: EventDefinition): EventChoice[] {

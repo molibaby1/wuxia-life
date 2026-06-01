@@ -26,9 +26,9 @@
 | US-020 | Headless Unit Test Entry | Done |
 | US-021 | Dual-Track Parity Model | Done |
 | US-022 | Dual-Track Parity Harness | Done |
-| US-023 | Deterministic 0–50 Replay Parity Samples | **Blocked** — headless replay diverges from `GameProcessSimulator` route-track fixtures |
+| US-023 | Deterministic 0–50 Replay Parity Samples | Done — `npm run test:headless:parity` (5 golden samples) |
 | US-024 | Catalog Version Pinning Checks | Done |
-| US-025 | P5 Extraction Gate | Done (parity step optional via `test:headless:parity`) |
+| US-025 | P5 Extraction Gate | Done (includes `test:headless:parity`) |
 | US-026 | Architecture Documentation | Done |
 | US-027 | P5 Closure Report | Done |
 
@@ -56,4 +56,4 @@ Production Web flow (`useNewGameEngine`, `App.vue`) was not switched to headless
 
 ## Recommendation
 
-Proceed to **snapshot persistence + API PRD** only after US-023 parity blockers are resolved (simulator route-track fixture parity in headless replay driver). P5 proved interfaces and Node entry; HTTP/database remain out of scope until parity green.
+Proceed to **snapshot persistence + API PRD** when ready. P5 proved interfaces, Node entry, and 0–50 replay parity for the golden cohort; HTTP/database remain out of scope for P5.

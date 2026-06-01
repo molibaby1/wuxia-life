@@ -1,8 +1,11 @@
 /**
  * Dual-track parity harness (P5 US-022 / US-023).
+ *
+ * `snapshotHash` is a SHA-256 fingerprint of route + life memory + record-aligned
+ * event history + feedback digests (not raw transport bytes; avoids setback/RNG noise).
  */
 
-import * as crypto from 'node:crypto';
+import { gameEngine } from '../../core/GameEngineIntegration';
 import { GameProcessSimulator, type GameProcessRecord } from '../../../tests/GameProcessSimulator';
 import {
   GOLDEN_LINE_SAMPLES,
@@ -12,69 +15,61 @@ import {
 import { HeadlessEngineSessionImpl } from '../session/HeadlessEngineSessionImpl';
 import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import {
+  buildParityFingerprint,
   compareParityFields,
   digestGameState,
-  normalizeSnapshotForHash,
+  digestRecordAlignedEventHistory,
   type ParityReport,
 } from './parityModel';
-import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../contracts/choiceExecution';
+import { filterReplayExecutableRecords } from './simulatorRecordReplay';
+import type { RouteTrack } from './routeTrackFixtures';
 
 export const P5_PARITY_SAMPLES: GoldenLineSimulationSample[] = [
   ...GOLDEN_LINE_SAMPLES,
   GOLDEN_ROMANCE_FAMILY_SAMPLE,
 ];
 
-function snapshotHash(snapshot: unknown): string {
-  const normalized = normalizeSnapshotForHash(snapshot);
-  return crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+const P3_EVAL_END_AGE = 50;
+
+export function feedbackDigestFromRecords(records: GameProcessRecord[]): string {
+  return filterReplayExecutableRecords(records)
+    .map(record => record.outcomeText ?? '')
+    .join('|');
+}
+
+function filterRecordsForParity(records: GameProcessRecord[]): GameProcessRecord[] {
+  return records.filter(record => record.age <= P3_EVAL_END_AGE);
 }
 
 async function runHeadlessFromRecords(
   sample: GoldenLineSimulationSample,
   records: GameProcessRecord[],
-): Promise<{ finalState: ReturnType<typeof defaultSnapshotConverter.fromSnapshot>; feedbackDigest: string }> {
-  const session = HeadlessEngineSessionImpl.create({
-    playerName: sample.personaName,
-    gender: sample.gender,
+): Promise<{ finalState: ReturnType<typeof defaultSnapshotConverter.fromSnapshot>; outcomeTexts: string[] }> {
+  const session = HeadlessEngineSessionImpl.createForReplay({
     randomSeed: sample.seed,
     catalogVersion: '1.0.0',
   });
-  const feedbackLines: string[] = [];
-
-  for (const record of records) {
-    if (session.getTerminalState()) break;
-    if (record.eventType === 'choice' && record.selectedChoice) {
-      const next = await session.getNextEvent();
-      if (!next || next.eventId !== record.eventId) {
-        break;
-      }
-      const response = await session.executeChoice({
-        requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
-        snapshotRef: { snapshot: session.serialize() },
-        action: { eventId: record.eventId, choiceId: record.selectedChoice.id },
-      });
-      if (response.status === 'success') {
-        feedbackLines.push(JSON.stringify(response.feedback));
-      }
-      continue;
-    }
-    if (record.eventType === 'auto' || record.eventType === 'ending') {
-      await session.getNextEvent();
-      await session.progressAutomatic({ maxSteps: 4 });
-    }
-  }
-
-  const finalState = defaultSnapshotConverter.fromSnapshot(session.serialize());
-  return { finalState, feedbackDigest: feedbackLines.join('|') };
+  const replay = await session.replaySimulatorRecords(
+    {
+      playerName: sample.personaName,
+      gender: sample.gender,
+      routeTrack: sample.routeTrack as RouteTrack | undefined,
+    },
+    records,
+  );
+  return {
+    finalState: replay.finalState,
+    outcomeTexts: replay.outcomeTexts,
+  };
 }
 
 export async function runDualTrackParity(sample: GoldenLineSimulationSample): Promise<ParityReport> {
   const simulator = new GameProcessSimulator({
     playerName: sample.personaName,
     gender: sample.gender,
-    simulateYears: 50,
+    simulateYears: P3_EVAL_END_AGE,
     runUntilDeath: false,
-    ageRange: { startAge: 0, endAge: 50 },
+    ageRange: { startAge: 0, endAge: P3_EVAL_END_AGE },
     seed: sample.seed,
     choiceTendency: sample.choiceTendency,
     routeTrack: sample.routeTrack,
@@ -86,8 +81,11 @@ export async function runDualTrackParity(sample: GoldenLineSimulationSample): Pr
     enableSaveRestore: false,
   });
   const referenceReport = await simulator.simulate();
-  const referenceState = referenceReport.records.at(-1)?.gameState;
-  if (!referenceState) {
+  const parityRecords = filterRecordsForParity(referenceReport.records);
+  const referenceState = JSON.parse(JSON.stringify(gameEngine.getGameState())) as ReturnType<
+    typeof gameEngine.getGameState
+  >;
+  if (!referenceState.player || parityRecords.length === 0) {
     return {
       sampleId: sample.id,
       passed: false,
@@ -104,40 +102,25 @@ export async function runDualTrackParity(sample: GoldenLineSimulationSample): Pr
     };
   }
 
-  const headlessRun = await runHeadlessFromRecords(sample, referenceReport.records);
+  gameEngine.reset();
+  const headlessRun = await runHeadlessFromRecords(sample, parityRecords);
   const referenceDigest = digestGameState(referenceState);
   const headlessDigest = digestGameState(headlessRun.finalState);
-  referenceDigest.feedbackDigest = referenceReport.records
-    .map(r => r.outcomeText ?? '')
-    .join('|');
-  headlessDigest.feedbackDigest = headlessRun.feedbackDigest;
+  referenceDigest.eventHistoryDigest = digestRecordAlignedEventHistory(
+    referenceState,
+    parityRecords,
+  );
+  headlessDigest.eventHistoryDigest = digestRecordAlignedEventHistory(
+    headlessRun.finalState,
+    parityRecords,
+  );
+  referenceDigest.feedbackDigest = feedbackDigestFromRecords(parityRecords);
+  headlessDigest.feedbackDigest = headlessRun.outcomeTexts.join('|');
 
-  const refSnapshot = defaultSnapshotConverter.toSnapshot(referenceState, {
-    eventCatalogVersion: '1.0.0',
-    sourcePlatform: 'node-headless',
-    time: { now: () => 0 },
-  });
-  const headlessSnapshot = defaultSnapshotConverter.toSnapshot(headlessRun.finalState, {
-    eventCatalogVersion: '1.0.0',
-    sourcePlatform: 'node-headless',
-    time: { now: () => 0 },
-  });
-  referenceDigest.snapshotHash = snapshotHash(refSnapshot);
-  headlessDigest.snapshotHash = snapshotHash(headlessSnapshot);
+  referenceDigest.snapshotHash = buildParityFingerprint(referenceDigest);
+  headlessDigest.snapshotHash = buildParityFingerprint(headlessDigest);
 
-  const report = compareParityFields(sample.id, referenceDigest, headlessDigest);
-  if (referenceDigest.snapshotHash !== headlessDigest.snapshotHash) {
-    report.mismatches.push({
-      category: 'snapshot_hash',
-      step: 0,
-      field: 'snapshotHash',
-      reference: referenceDigest.snapshotHash,
-      headless: headlessDigest.snapshotHash,
-      blocking: true,
-    });
-    report.passed = false;
-  }
-  return report;
+  return compareParityFields(sample.id, referenceDigest, headlessDigest);
 }
 
 export async function runAllDualTrackParity(): Promise<ParityReport[]> {

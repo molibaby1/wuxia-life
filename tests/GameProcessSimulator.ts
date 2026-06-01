@@ -21,6 +21,13 @@ import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
 import { buildDeathRiskTelemetry, type DeathRiskTelemetry } from '../scripts/deathRiskTelemetry';
 import {
+  applyRouteTrackFixtureBootstrap,
+  applyRouteTrackPreparation,
+  ensureYearAdvanced as ensureSimulatorYearAdvanced,
+  enforceRouteTrackIsolation,
+  hasGameEnded as sharedHasGameEnded,
+} from '../src/headless/parity/routeTrackFixtures';
+import {
   buildRomanceFamilyArcReport,
   GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
   type RomanceFamilyArcReport,
@@ -239,7 +246,7 @@ export class GameProcessSimulator {
 
     // 从游戏引擎获取真实年龄（执行事件前）
     const currentState = gameEngine.getGameState();
-    if (this.hasGameEnded(currentState)) {
+    if (sharedHasGameEnded(currentState)) {
       this.ended = true;
       this.gameState = currentState;
       return;
@@ -248,7 +255,8 @@ export class GameProcessSimulator {
 
     this.applyRouteTrackPreparation(ageBeforeEvent);
     this.applyRouteTrackFixtureBootstrap(ageBeforeEvent);
-    
+    const stateForRecord = JSON.parse(JSON.stringify(gameEngine.getGameState())) as GameState;
+
     this.log(`\n━━━ ${ageBeforeEvent}岁 ━━━ (引擎内部年龄：${gameEngine.getGameState().player?.age})`);
 
     // 1. 选择一个事件（加权随机，每年只触发一个事件，不传年龄参数，让引擎自己获取）
@@ -264,8 +272,8 @@ export class GameProcessSimulator {
         eventTitle: '平淡的一年',
         eventText: '这一年并无大事发生，岁月静好。',
         eventType: 'auto',
-        gameState: JSON.parse(JSON.stringify(currentState)),
-        currentTime: currentState.currentTime,
+        gameState: stateForRecord,
+        currentTime: stateForRecord.currentTime,
         timestamp: new Date().toISOString()
       };
       this.pushRecord(record);
@@ -302,8 +310,8 @@ export class GameProcessSimulator {
         eventType: eventType as 'auto' | 'choice' | 'ending',
         availableChoices,
         selectedChoice: this.selectChoice(availableChoices, event.id),
-        gameState: JSON.parse(JSON.stringify(currentState)),
-        currentTime: currentState.currentTime,
+        gameState: stateForRecord,
+        currentTime: stateForRecord.currentTime,
         timestamp: new Date().toISOString()
       };
       
@@ -343,8 +351,8 @@ export class GameProcessSimulator {
 
         // 检查是否死亡，如果死亡则停止处理
         const stateAfterChoice = gameEngine.getGameState();
-        if (!stateAfterChoice.player?.alive || this.hasGameEnded(stateAfterChoice)) {
-          if (this.hasGameEnded(stateAfterChoice)) {
+        if (!stateAfterChoice.player?.alive || sharedHasGameEnded(stateAfterChoice)) {
+          if (sharedHasGameEnded(stateAfterChoice)) {
             this.ended = true;
           }
           record.gameState = JSON.parse(JSON.stringify(stateAfterChoice));
@@ -379,8 +387,19 @@ export class GameProcessSimulator {
       record.gameState = JSON.parse(JSON.stringify(this.gameState));
       this.pushRecord(record);
     } else {
-      // 自动事件：执行自动效果
+      // 自动事件：与选择事件一致，记录执行前快照以便 headless 重放
       this.log(`   ✅ 自动触发`);
+      const record: GameProcessRecord = {
+        age: ageBeforeEvent,
+        eventId: event.id,
+        eventTitle: title,
+        eventText: text,
+        eventType: eventType as 'auto' | 'choice' | 'ending',
+        gameState: stateForRecord,
+        currentTime: stateForRecord.currentTime,
+        timestamp: new Date().toISOString(),
+      };
+
       if (event.autoEffects && event.autoEffects.length > 0) {
         await gameEngine.executeAutoEvent(event);
         const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
@@ -388,59 +407,39 @@ export class GameProcessSimulator {
         const mergedOutcomeText = eventOutcomeNote
           ? `${baseOutcomeText} ${eventOutcomeNote}`.trim()
           : baseOutcomeText;
+        record.outcomeText = mergedOutcomeText || undefined;
 
-        // 检查是否死亡，如果死亡则停止处理
         const stateAfterAuto = gameEngine.getGameState();
-        if (!stateAfterAuto.player?.alive || this.hasGameEnded(stateAfterAuto)) {
-          if (this.hasGameEnded(stateAfterAuto)) {
+        if (!stateAfterAuto.player?.alive || sharedHasGameEnded(stateAfterAuto)) {
+          if (sharedHasGameEnded(stateAfterAuto)) {
             this.ended = true;
           }
-          const record: GameProcessRecord = {
-            age: ageBeforeEvent,
-            eventId: event.id,
-            eventTitle: title,
-            eventText: text,
-            eventType: eventType as 'auto' | 'choice' | 'ending',
-            outcomeText: mergedOutcomeText || undefined,
-            gameState: JSON.parse(JSON.stringify(stateAfterAuto)),
-            currentTime: stateAfterAuto.currentTime,
-            timestamp: new Date().toISOString()
-          };
+          record.gameState = JSON.parse(JSON.stringify(stateAfterAuto));
           this.pushRecord(record);
           this.log(`\n   💀 死亡原因：${stateAfterAuto.player?.deathReason || '未知'}`);
-          return; // 直接返回，不继续处理
+          return;
         }
       }
-      
-      // 更新状态并记录
+
       this.gameState = gameEngine.getGameState();
-      const record: GameProcessRecord = {
-        age: ageBeforeEvent,
-        eventId: event.id,
-        eventTitle: title,
-        eventText: text,
-        eventType: eventType as 'auto' | 'choice' | 'ending',
-        outcomeText: (() => {
-          const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
-          const baseOutcomeText = event.autoEffects?.length
-            ? this.generateOutcomeText(event, event.autoEffects)
-            : null;
-          if (baseOutcomeText && eventOutcomeNote) {
-            return `${baseOutcomeText} ${eventOutcomeNote}`;
-          }
-          return eventOutcomeNote || baseOutcomeText || undefined;
-        })(),
-        gameState: JSON.parse(JSON.stringify(this.gameState)),
-        currentTime: this.gameState.currentTime,
-        timestamp: new Date().toISOString()
-      };
+      if (!record.outcomeText) {
+        const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
+        const baseOutcomeText = event.autoEffects?.length
+          ? this.generateOutcomeText(event, event.autoEffects)
+          : null;
+        if (baseOutcomeText && eventOutcomeNote) {
+          record.outcomeText = `${baseOutcomeText} ${eventOutcomeNote}`;
+        } else {
+          record.outcomeText = eventOutcomeNote || baseOutcomeText || undefined;
+        }
+      }
       this.pushRecord(record);
     }
 
     this.enforceRouteTrackIsolation();
     this.ensureYearAdvanced(ageBeforeEvent);
 
-    if (eventType === 'ending' || this.hasGameEnded(this.gameState)) {
+    if (eventType === 'ending' || sharedHasGameEnded(this.gameState)) {
       this.log('   🏁 触发结局事件，模拟结束');
       this.ended = true;
     }
@@ -456,248 +455,25 @@ export class GameProcessSimulator {
    */
   private ensureYearAdvanced(ageBeforeEvent: number): void {
     const state = gameEngine.getGameState();
-    if (!state.player?.alive || this.ended || this.hasGameEnded(state)) {
+    if (!state.player?.alive || this.ended || sharedHasGameEnded(state)) {
       this.gameState = state;
       return;
     }
-    const ageAfter = state.player?.age ?? 0;
-    if (ageAfter <= ageBeforeEvent) {
-      gameEngine.advanceTime(1);
-    }
+    ensureSimulatorYearAdvanced(gameEngine, ageBeforeEvent);
     this.gameState = gameEngine.getGameState();
   }
 
-  /**
-   * 路线专项：在入线门槛年龄前抬高属性/背景，提高路线事件命中率
-   */
   private applyRouteTrackPreparation(age: number): void {
-    if (!this.config.routeTrack) {
-      return;
-    }
-
-    const state = gameEngine.getGameState();
-    const player = state.player;
-    if (!player) {
-      return;
-    }
-
-    const flags = player.flags || (player.flags = {});
-
-    if (this.config.routeTrack === 'official') {
-      if (age >= 1 && age <= 6) {
-        flags.origin_scholar_family = true;
-        player.comprehension = Math.max(player.comprehension || 0, 14);
-      }
-      if (age >= 20 && age <= 32) {
-        flags.origin_scholar_family = true;
-        player.comprehension = Math.max(player.comprehension || 0, 16);
-        player.charisma = Math.max(player.charisma || 0, 10);
-        player.reputation = Math.max(player.reputation || 0, 20);
-      }
-    }
-
-    if (this.config.routeTrack === 'beggars' && age >= 13 && age <= 22) {
-      player.chivalry = Math.max(player.chivalry || 0, 18);
-      player.qinggong = Math.max(player.qinggong || 0, 12);
-      player.connections = Math.max(player.connections || 0, 16);
-    }
-
-    if (this.config.routeTrack === 'demonic' && age >= 13 && age <= 22) {
-      player.chivalry = Math.min(player.chivalry || 0, 28);
-      player.chivalry = Math.max(player.chivalry, 8);
-      player.martialPower = Math.max(player.martialPower || 0, 12);
-    }
-
-    if (this.config.routeTrack === 'sect' && age >= 10 && age <= 22) {
-      player.comprehension = Math.max(player.comprehension || 0, 14);
-      player.chivalry = Math.max(player.chivalry || 0, 16);
-      player.martialPower = Math.max(player.martialPower || 0, 10);
-    }
-
-    if (this.config.routeTrack === 'wanderer' && age >= 13 && age <= 22) {
-      player.chivalry = Math.max(player.chivalry || 0, 18);
-      player.qinggong = Math.max(player.qinggong || 0, 12);
-      player.connections = Math.max(player.connections || 0, 14);
-    }
+    applyRouteTrackPreparation(gameEngine.getGameState(), this.config.routeTrack, age);
   }
 
-  /**
-   * Deterministic route-track samples: drop mutually exclusive priority flags after each event tick.
-   */
   private enforceRouteTrackIsolation(): void {
-    const track = this.config.routeTrack;
-    if (!track || !['sect', 'wanderer', 'demonic'].includes(track)) {
-      return;
-    }
-
-    const state = gameEngine.getGameState();
-    const player = state.player;
-    if (!player) {
-      return;
-    }
-
-    const flags = player.flags || (player.flags = {});
-    const clearFlag = (flagName: string) => {
-      if (!flags[flagName]) {
-        return;
-      }
-      flags[flagName] = false;
-      const updated = RouteStateManager.syncFromFlagSet(state, flagName, false, 'route-track-fixture-clear');
-      state.routeStates = updated.routeStates;
-      state.routeHistory = updated.routeHistory;
-    };
-
-    const deactivateRoute = (routeId: string) => {
-      const updated = RouteStateManager.writeRouteState(state, {
-        routeId,
-        lifecycle: 'inactive',
-        lockedIn: false,
-        reason: 'route-track-isolation',
-      });
-      state.routeStates = updated.routeStates;
-      state.routeHistory = updated.routeHistory;
-    };
-
-    if (track === 'sect') {
-      clearFlag('route_demonic');
-      clearFlag('route_beggars');
-      clearFlag('route_official');
-      deactivateRoute('demonic');
-      deactivateRoute('beggars');
-      deactivateRoute('official');
-    } else if (track === 'wanderer') {
-      clearFlag('route_demonic');
-      clearFlag('route_orthodox');
-      clearFlag('route_beggars');
-      deactivateRoute('demonic');
-      deactivateRoute('sect');
-      deactivateRoute('beggars');
-    } else if (track === 'demonic') {
-      clearFlag('route_orthodox');
-      clearFlag('route_beggars');
-      clearFlag('route_official');
-      deactivateRoute('sect');
-      deactivateRoute('beggars');
-      deactivateRoute('official');
-    }
-
-    this.gameState = state;
+    enforceRouteTrackIsolation(gameEngine.getGameState(), this.config.routeTrack);
+    this.gameState = gameEngine.getGameState();
   }
 
-  /**
-   * 路线专项样本：在固定 seed 回归中补齐入线与结局链前置（仅 routeTrack 启用）
-   */
   private applyRouteTrackFixtureBootstrap(age: number): void {
-    const track = this.config.routeTrack;
-    if (!track) {
-      return;
-    }
-
-    this.enforceRouteTrackIsolation();
-
-    const state = gameEngine.getGameState();
-    const player = state.player;
-    if (!player) {
-      return;
-    }
-
-    const flags = player.flags || (player.flags = {});
-    const syncFlag = (flagName: string, eventId: string) => {
-      flags[flagName] = true;
-      const updated = RouteStateManager.syncFromFlagSet(state, flagName, true, eventId);
-      state.routeStates = updated.routeStates;
-      state.routeHistory = updated.routeHistory;
-      if (updated.eventHistory) {
-        state.eventHistory = updated.eventHistory;
-      }
-    };
-
-    if (track === 'official') {
-      if (age === 22 && !flags.route_official) {
-        flags.origin_scholar_family = true;
-        syncFlag('route_official', 'route-track-fixture-official-entry');
-      }
-      if (flags.route_official && age >= 24 && !flags.official_first_post) {
-        flags.official_first_post = true;
-      }
-      if (flags.route_official && age >= 28 && !flags.official_love_obstacle) {
-        flags.official_love_obstacle = true;
-      }
-      if (flags.route_official && age >= 34 && !flags.route_official_completed) {
-        syncFlag('route_official_completed', 'route-track-fixture-official-complete');
-      }
-    }
-
-    if (track === 'beggars') {
-      if (age === 14 && !flags.route_beggars) {
-        syncFlag('route_beggars', 'route-track-fixture-beggars-entry');
-        flags.current_sect = 'beggars';
-      }
-      if (flags.route_beggars && age >= 20 && !flags.beggars_rumor_network) {
-        flags.beggars_rumor_network = true;
-      }
-      if (flags.route_beggars && age >= 22 && !flags.beggars_strife_done) {
-        flags.beggars_strife_done = true;
-      }
-      if (flags.route_beggars && age >= 26 && !flags.route_beggars_completed) {
-        syncFlag('route_beggars_completed', 'route-track-fixture-beggars-complete');
-      }
-    }
-
-    if (track === 'demonic') {
-      if (age === 14 && !flags.route_demonic) {
-        syncFlag('route_demonic', 'route-track-fixture-demonic-entry');
-      }
-      if (flags.route_demonic && age >= 20) {
-        flags.demonic_trial_active = true;
-        flags.demonic_trial_shadow_done = true;
-        flags.demonic_trial_blood_done = true;
-      }
-      if (flags.route_demonic && age >= 24 && !flags.demonic_leader) {
-        flags.demonic_leader = true;
-        flags.demonic_path_usurp = true;
-      }
-      if (flags.route_demonic && age >= 28 && !flags.route_demonic_completed) {
-        syncFlag('route_demonic_completed', 'route-track-fixture-demonic-complete');
-      }
-    }
-
-    if (track === 'sect') {
-      if (age === 13 && !flags.route_orthodox) {
-        syncFlag('route_orthodox', 'route-track-fixture-sect-entry');
-        flags.orthodox_trial_active = true;
-      }
-      if (flags.route_orthodox && age >= 16) {
-        flags.orthodox_trial_mind_done = true;
-        flags.orthodox_trial_force_done = true;
-      }
-      if (flags.route_orthodox && age >= 18 && !flags.orthodox_trial_service_done) {
-        flags.orthodox_trial_service_done = true;
-      }
-      if (flags.route_orthodox && age >= 20 && !flags.orthodox_trial_completed) {
-        flags.orthodox_trial_completed = true;
-      }
-      if (flags.route_orthodox && age >= 26 && !flags.sect_trial_completed) {
-        flags.sect_trial_completed = true;
-      }
-    }
-
-    if (track === 'wanderer') {
-      if (age === 13 && !flags.route_wanderer) {
-        syncFlag('route_wanderer', 'route-track-fixture-wanderer-entry');
-      }
-      if (flags.route_wanderer && age >= 20 && !flags.hero_first_case) {
-        flags.hero_first_case = true;
-      }
-      if (flags.route_wanderer && age >= 25 && !flags.save_village) {
-        flags.save_village = true;
-      }
-      if (flags.route_wanderer && age >= 31 && age <= 50) {
-        player.chivalry = Math.max(player.chivalry || 0, 35);
-        player.reputation = Math.max(player.reputation || 0, 40);
-        player.connections = Math.max(player.connections || 0, 15);
-      }
-    }
+    applyRouteTrackFixtureBootstrap(gameEngine.getGameState(), this.config.routeTrack, age);
   }
 
   private collectChoiceEffects(choice: EventChoice): any[] {

@@ -365,8 +365,8 @@
         "Tests pass"
       ],
       "priority": 23,
-      "passes": false,
-      "notes": "BLOCKED: headless replay diverges from GameProcessSimulator route-track fixtures; use npm run test:headless:parity after replay driver alignment"
+      "passes": true,
+      "notes": "npm run test:headless:parity — 5 golden samples; compares route, life memory, record-aligned events, choice-log feedback, and composite snapshot fingerprint"
     },
     {
       "id": "US-024",

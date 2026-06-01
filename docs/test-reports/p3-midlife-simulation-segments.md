@@ -1,6 +1,6 @@
 # P3 Midlife — Deterministic Simulation Segments (US-017)
 
-生成时间：2026-05-30T18:21:44.853Z
+生成时间：2026-06-01T03:56:31.974Z
 
 终点年龄：**50**；评估队列：golden-sect, golden-wanderer, golden-demonic, golden-neutral-baseline, golden-romance-family
 

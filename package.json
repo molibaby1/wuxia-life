@@ -6,6 +6,12 @@
   "scripts": {
     "dev": "vite",
     "test": "tsx tests/runRealTestGate.ts",
+    "test:contracts": "tsx tests/contracts/runContractTests.ts",
+    "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
+    "test:contracts:choice": "tsx tests/contracts/choiceExecutionContract.test.ts",
+    "test:contracts:replay": "tsx tests/contracts/replayContract.test.ts",
+    "test:contracts:validation": "tsx tests/contracts/contractValidation.test.ts",
+    "test:contracts:save-schema": "tsx tests/contracts/saveSchemaContract.test.ts",
     "stability": "tsx scripts/runStabilityGate.ts",
     "validate:event-quality": "tsx scripts/validateEventQuality.ts",
     "report:event-format-inventory": "tsx scripts/inventoryEventEffectFormats.ts",

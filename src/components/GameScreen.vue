@@ -8,7 +8,7 @@
       </div>
       <div class="save-controls">
         <button class="save-btn" @click="saveGame">保存</button>
-        <button class="save-btn" @click="loadLatestSave">读档</button>
+        <button v-if="!apiMode" class="save-btn" @click="loadLatestSave">读档</button>
       </div>
     </div>
     
@@ -145,10 +145,12 @@ const props = defineProps<{
   currentNode: any;
   availableChoices: StoryChoice[];
   isAutoPlaying: boolean;
+  apiMode?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
+  (e: 'manual-save'): void;
 }>();
 
 // 使用 useNewGameEngine 获取 lastOutcomeText
@@ -283,6 +285,10 @@ const makeChoice = (choice: StoryChoice) => {
 };
 
 const saveGame = () => {
+  if (props.apiMode) {
+    emit('manual-save');
+    return;
+  }
   const defaultName = `手动存档-${player.value?.name || '侠客'}-${player.value?.age || 0}岁`;
   const inputName = window.prompt('请输入存档名称', defaultName);
   if (inputName === null) {

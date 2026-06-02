@@ -47,9 +47,9 @@ function toPlayerSafeEvent(
 ): PlayerSafeEventPayload {
   return {
     eventId: event.id,
-    title: event.title ?? event.id,
-    text: event.text ?? '',
-    eventType: event.eventType ?? event.type ?? 'choice',
+    title: event.content?.title ?? event.id,
+    text: event.content?.text ?? '',
+    eventType: event.eventType ?? 'choice',
     autoEffects: Boolean(event.autoEffects?.length),
     choices: event.choices?.map(choice => ({
       id: choice.id,

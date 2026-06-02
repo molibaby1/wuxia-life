@@ -1,25 +1,58 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 import StartScreen from './components/StartScreen.vue';
+import SaveSlotStartScreen from './components/SaveSlotStartScreen.vue';
 import { useNewGameEngine } from './composables/useNewGameEngine';
+import { isApiModeEnabled, useApiGameEngine } from './composables/useApiGameEngine';
 import { gameEngine } from './core/GameEngineIntegration';
 import { isPlayerDebugEnabled } from './utils/debugAccess';
+import { webPlatformStorage } from './adapters/platform/webPlatformStorage';
 
 const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
 const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
 const DebugPanel = defineAsyncComponent(() => import('./components/DebugPanel.vue'));
 
+const apiMode = isApiModeEnabled();
 const debugEnabled = isPlayerDebugEnabled();
 const showDebug = ref(false);
 const gameStarted = ref(false);
+const pendingOverwriteSlot = ref<number | null>(null);
+const apiPlayerName = ref('');
+const apiGender = ref<'male' | 'female'>('male');
 
-// 不要解构 engineState，保持完整引用
 const gameEngineComposable = useNewGameEngine();
-const { startNewGame, restartGame, handleChoice, isProcessing, getAllSaves, loadGameFromSave } = gameEngineComposable;
+const { startNewGame, restartGame, handleChoice, isProcessing, getAllSaves, loadGameFromSave } =
+  gameEngineComposable;
+
+const apiEngine = useApiGameEngine();
+const {
+  flowState,
+  flowMessage,
+  saveSlots,
+  engineState: apiEngineState,
+  isProcessing: apiIsProcessing,
+  bootstrap,
+  startNewGameInSlot,
+  continueSlot,
+  handleChoice: apiHandleChoice,
+  saveCurrentGame: apiSaveCurrentGame,
+  activeSession,
+} = apiEngine;
+
+onMounted(() => {
+  if (apiMode) {
+    void bootstrap();
+  }
+});
 
 const gamePhase = computed(() => {
   if (!gameStarted.value) return 'start';
-  
+  if (apiMode) {
+    const terminal =
+      activeSession.value?.nextEvent === null && apiEngineState.availableChoices.length === 0;
+    if (terminal) return 'ending';
+    return 'playing';
+  }
   const state = gameEngine.getGameState();
   if (!state.player?.alive) return 'ending';
   return 'playing';
@@ -30,24 +63,56 @@ const handleStart = (name: string, gender: 'male' | 'female') => {
   gameStarted.value = true;
 };
 
+const handleApiNewGame = async (slotIndex: number, name: string, gender: 'male' | 'female') => {
+  const slot = saveSlots.value.find(s => s.slotIndex === slotIndex);
+  if (slot?.occupied && pendingOverwriteSlot.value !== slotIndex) {
+    const ok = window.confirm(`槽位 ${slotIndex} 已有存档，确定开启新人生并覆盖？`);
+    if (!ok) return;
+    pendingOverwriteSlot.value = slotIndex;
+  }
+  const started = await startNewGameInSlot(
+    slotIndex,
+    name,
+    gender,
+    slot?.occupied ? true : undefined,
+  );
+  if (started) gameStarted.value = true;
+};
+
+const onApiNewGameSlot = (slotIndex: number) => {
+  if (!apiPlayerName.value.trim()) return;
+  void handleApiNewGame(slotIndex, apiPlayerName.value.trim(), apiGender.value);
+};
+
+const onApiContinueSlot = async (slotIndex: number) => {
+  const ok = await continueSlot(slotIndex);
+  if (ok) gameStarted.value = true;
+};
+
 const handleRestart = () => {
-  restartGame();
+  if (apiMode) {
+    apiEngine.activeSession.value = null;
+    webPlatformStorageClearSession();
+    void bootstrap();
+  } else {
+    restartGame();
+  }
   gameStarted.value = false;
 };
+
+function webPlatformStorageClearSession(): void {
+  webPlatformStorage.clearSessionAuth();
+}
 
 const latestSave = computed(() => getAllSaves()[0] ?? null);
 
 const latestSaveLabel = computed(() => {
-  if (!latestSave.value) {
-    return '';
-  }
+  if (!latestSave.value) return '';
   return `${latestSave.value.name}（${new Date(latestSave.value.timestamp).toLocaleString('zh-CN')}）`;
 });
 
 const handleLoadLatestSaveFromEnding = () => {
-  if (!latestSave.value) {
-    return;
-  }
+  if (!latestSave.value) return;
   const loaded = loadGameFromSave(latestSave.value.id);
   if (!loaded) {
     window.alert('读取失败，存档可能不兼容');
@@ -61,8 +126,17 @@ const toggleDebug = () => {
   showDebug.value = !showDebug.value;
 };
 
-// 计算属性，保持响应性 - 直接引用 gameEngineComposable.engineState
 const currentNode = computed(() => {
+  if (apiMode) {
+    const event = apiEngineState.currentEvent;
+    if (!event) return null;
+    return {
+      id: event.eventId,
+      text: event.text || '(无文本)',
+      title: event.title || '',
+      choices: apiEngineState.availableChoices,
+    };
+  }
   const event = gameEngineComposable.engineState.currentEvent;
   if (!event) return null;
   return {
@@ -73,15 +147,33 @@ const currentNode = computed(() => {
   };
 });
 
-const availableChoices = computed(() => gameEngineComposable.engineState.availableChoices);
-const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
+const availableChoices = computed(() =>
+  apiMode ? apiEngineState.availableChoices : gameEngineComposable.engineState.availableChoices,
+);
+
+const endingPlayer = computed(() => {
+  if (apiMode) return null;
+  return gameEngine.getGameState().player ?? null;
+});
+
+const onChoice = (choice: { id: string; text: string }) => {
+  if (apiMode) {
+    void apiHandleChoice(choice);
+    return;
+  }
+  void handleChoice(choice);
+};
+
+const onApiManualSave = async () => {
+  const ok = await apiSaveCurrentGame();
+  window.alert(ok ? '进度已保存到服务器' : flowMessage.value || '保存失败');
+};
 </script>
 
 <template>
   <div id="app">
-    <!-- 调试入口：仅 dev 且 ?debug=1 或 localStorage wuxia-debug=1 -->
     <button
-      v-if="debugEnabled && gamePhase === 'playing'"
+      v-if="debugEnabled && gamePhase === 'playing' && !apiMode"
       class="debug-toggle"
       @click="toggleDebug"
       :title="showDebug ? '关闭调试面板' : '打开调试面板'"
@@ -90,21 +182,34 @@ const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
       {{ showDebug ? '关闭调试' : '调试面板' }}
     </button>
 
-    <DebugPanel v-if="debugEnabled && showDebug" />
-    
-    <!-- 游戏主界面 -->
-    <StartScreen v-if="gamePhase === 'start'" @start="handleStart" />
-    <GameScreen 
+    <DebugPanel v-if="debugEnabled && showDebug && !apiMode" />
+
+    <SaveSlotStartScreen
+      v-if="gamePhase === 'start' && apiMode"
+      v-model:player-name="apiPlayerName"
+      v-model:gender="apiGender"
+      :slots="saveSlots"
+      :flow-state="flowState"
+      :flow-message="flowMessage"
+      :busy="apiIsProcessing"
+      @continue-slot="onApiContinueSlot"
+      @new-game-slot="onApiNewGameSlot"
+      @retry="bootstrap"
+    />
+    <StartScreen v-else-if="gamePhase === 'start'" @start="handleStart" />
+    <GameScreen
       v-else-if="gamePhase === 'playing'"
+      :api-mode="apiMode"
       :current-node="currentNode"
       :available-choices="availableChoices"
-      :is-auto-playing="isProcessing"
-      @choice="handleChoice"
+      :is-auto-playing="apiMode ? apiIsProcessing : isProcessing"
+      @choice="onChoice"
+      @manual-save="onApiManualSave"
     />
     <EndingScreen
       v-else
       :player="endingPlayer"
-      :has-latest-save="!!latestSave"
+      :has-latest-save="!!latestSave && !apiMode"
       :latest-save-label="latestSaveLabel"
       @restart="handleRestart"
       @load-latest-save="handleLoadLatestSaveFromEnding"
@@ -113,7 +218,9 @@ const endingPlayer = computed(() => gameEngine.getGameState().player ?? null);
 </template>
 
 <style>
-html, body, #app {
+html,
+body,
+#app {
   margin: 0;
   padding: 0;
   height: 100%;

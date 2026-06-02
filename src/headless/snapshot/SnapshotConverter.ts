@@ -78,7 +78,6 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         createdAt: state.lastSavedAt ?? now,
         updatedAt: now,
         sourcePlatform: options.sourcePlatform,
-        saveVersion: state.saveVersion,
       },
       state: {
         player: {
@@ -107,7 +106,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
 
   fromSnapshot(snapshot: GameStateSnapshot): GameState {
     for (const key of FORBIDDEN_TOP_LEVEL) {
-      if (key in (snapshot.state as Record<string, unknown>)) {
+      if (key in (snapshot.state as unknown as Record<string, unknown>)) {
         throw new SnapshotConversionError(
           'SNAPSHOT_FORBIDDEN_FIELD',
           `Forbidden snapshot field: ${key}`,
@@ -126,7 +125,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         flags: mergedFlags,
       } as GameState['player'],
       flags: mergedFlags,
-      saveVersion: snapshot.metadata.saveVersion ?? snapshot.state.saveVersion,
+      saveVersion: snapshot.state.saveVersion,
       lastSavedAt: snapshot.metadata.updatedAt,
       gameTimestamp: snapshot.metadata.updatedAt,
     };

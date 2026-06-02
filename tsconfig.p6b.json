@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.p6b.tsbuildinfo",
+    "types": ["node"],
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true
+  },
+  "include": [
+    "server/**/*.ts",
+    "scripts/p6b/**/*.ts",
+    "tests/server/**/*.ts",
+    "scripts/runP6bGate.ts"
+  ]
+}

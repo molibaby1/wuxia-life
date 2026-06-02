@@ -1201,8 +1201,9 @@ export class GameProcessSimulator {
       return fallbackName;
     }
 
-    if (state.ending && typeof state.ending.name === 'string' && state.ending.name.trim()) {
-      return state.ending.name;
+    const ending = state.ending as { name?: string } | null | undefined;
+    if (ending && typeof ending.name === 'string' && ending.name.trim()) {
+      return ending.name;
     }
 
     try {

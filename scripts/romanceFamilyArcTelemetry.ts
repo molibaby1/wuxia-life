@@ -100,7 +100,7 @@ function readFinalFlags(report: GameProcessReport): Record<string, boolean> {
 
 function readLoverMingyueAffection(report: GameProcessReport): number | null {
   const final = report.records[report.records.length - 1]?.gameState;
-  const affection = final?.relations?.lover_mingyue?.affection;
+  const affection = final?.relations?.lover_mingyue;
   return typeof affection === 'number' ? affection : null;
 }
 

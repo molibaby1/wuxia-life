@@ -11,6 +11,7 @@ import {
   EventCategory,
   EventPriority,
   type DailyEventVariantConfig,
+  type EffectDefinition,
   type EventCondition,
   type EventDefinition,
   type GameState,

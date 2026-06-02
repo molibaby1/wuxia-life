@@ -345,7 +345,8 @@ export function buildDeathRiskTelemetry(
   }
 
   const deathRecord = findDeathRecord(report);
-  const finalState = deathRecord?.gameState ?? report.records.at(-1)?.gameState;
+  const lastRecord = report.records[report.records.length - 1];
+  const finalState = deathRecord?.gameState ?? lastRecord?.gameState;
   const deathAge = deathRecord?.age ?? report.finalAge;
   const { deathCauseId, deathEventId, category } = resolveDeathCauseId(
     report,

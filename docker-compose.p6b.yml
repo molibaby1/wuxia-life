@@ -1,0 +1,25 @@
+# Local PostgreSQL for P6B API development.
+# Usage: docker compose -f docker-compose.p6b.yml up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: wuxia-p6b-postgres
+    restart: unless-stopped
+    ports:
+      # 5432 is often taken on macOS dev machines; use 5433 locally.
+      - '5532:5432'
+    environment:
+      POSTGRES_USER: wuxia
+      POSTGRES_PASSWORD: wuxia
+      POSTGRES_DB: wuxia_p6b
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U wuxia -d wuxia_p6b']
+      interval: 3s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - wuxia_p6b_pgdata:/var/lib/postgresql/data
+
+volumes:
+  wuxia_p6b_pgdata:

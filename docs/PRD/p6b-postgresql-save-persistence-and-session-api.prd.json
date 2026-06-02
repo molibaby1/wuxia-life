@@ -1,0 +1,528 @@
+{
+  "project": "Wuxia Life P6B PostgreSQL Save Persistence and Session API",
+  "branchName": "ralph/p6b-postgresql-save-persistence-and-session-api",
+  "description": "Build the first deployable backend foundation for Wuxia Life with a lightweight TypeScript Node HTTP service backed by self-hosted PostgreSQL, making the backend authoritative for anonymous device identity, sessions, three save slots, immutable snapshots, append-only replay actions, versioned event catalog reads, and trusted choice execution while switching the existing Web client to the API-backed save and resume loop without expanding into accounts, mini-program work, gameplay rebalance, or visual redesign.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Rebaseline P6B Integration Boundaries",
+      "description": "As a maintainer, I want a read-only inventory of the current P5 headless, Web runtime, snapshot, catalog, and save boundaries so that backend work starts from the proven path.",
+      "acceptanceCriteria": [
+        "Inventory current P5 headless session construction and dependency injection points",
+        "Inventory current Web new-game, continue-game, choice, save, and load entry points",
+        "Inventory snapshot conversion, replay, catalog, and version validation helpers",
+        "Identify service-path blockers caused by Vue reactivity, global singletons, browser storage, or direct console logging",
+        "Produce a P6B integration-baseline report",
+        "Do not modify business code",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Define P6B Runtime and Scope Guardrails",
+      "description": "As a project owner, I want explicit P6B guardrails so that backend implementation does not silently expand into accounts, mini-program work, or gameplay changes.",
+      "acceptanceCriteria": [
+        "Document the server-authoritative session and persistence model",
+        "Document permitted surgical service-path fixes",
+        "Prohibit gameplay rebalance, event expansion, UI redesign, account registration, login UI, cloud account sync, conflict merge UI, admin tools, and mini-program implementation",
+        "Define required regression commands after each implementation wave",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Define PostgreSQL Schema",
+      "description": "As a backend developer, I want an explicit PostgreSQL schema so that ownership, saves, snapshots, replay actions, and catalog versions are persisted consistently.",
+      "acceptanceCriteria": [
+        "Define tables for `anonymous_devices`, `game_sessions`, `save_slots`, `game_snapshots`, `replay_actions`, and `event_catalog_versions`",
+        "Define primary keys, foreign keys, unique constraints, indexes, timestamps, and deletion rules",
+        "Define a migration bookkeeping table or equivalent migration runner state",
+        "Use PostgreSQL-native JSONB for snapshots and structured replay payloads",
+        "Document why derived life-memory summaries and volatile UI state are not canonical stored data",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Add Ordered SQL Migration Runner",
+      "description": "As an operator, I want repository-managed SQL migrations so that a fresh PostgreSQL instance can be prepared reproducibly.",
+      "acceptanceCriteria": [
+        "Add ordered SQL migration files for the P6B schema",
+        "Add a command that applies pending migrations in order",
+        "Applied migrations are recorded and are not executed twice",
+        "Migration command fails with a non-zero exit code when a migration fails",
+        "Fresh-database migration test passes",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add Backend Environment Validation",
+      "description": "As an operator, I want backend environment variables validated at startup so that configuration failures are visible before requests are accepted.",
+      "acceptanceCriteria": [
+        "Validate PostgreSQL connection configuration",
+        "Validate HTTP host, HTTP port, environment mode, and token-hashing secret or equivalent secret material",
+        "Validate current engine version and event catalog version configuration",
+        "Startup fails with a clear error when required configuration is missing or invalid",
+        "Secrets are not printed in logs",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add Database Connection and Transaction Boundary",
+      "description": "As a backend developer, I want a PostgreSQL connection and transaction boundary so that save updates and replay appends commit atomically.",
+      "acceptanceCriteria": [
+        "Add a PostgreSQL connection pool",
+        "Expose a transaction helper used by repositories and application services",
+        "Roll back all writes when any operation inside a transaction fails",
+        "Close the pool gracefully on process shutdown",
+        "Add integration tests against a PostgreSQL test database",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add Anonymous Device Bootstrap",
+      "description": "As a Web player, I want an anonymous device identity so that my save slots can be recovered without creating an account.",
+      "acceptanceCriteria": [
+        "Add `POST /v1/devices/bootstrap`",
+        "New bootstrap returns an opaque `deviceToken`",
+        "Reusing a valid device token returns the same anonymous device identity without creating a duplicate row",
+        "Store only a one-way token hash in PostgreSQL",
+        "Invalid tokens receive a structured authentication error",
+        "Logs never include raw device tokens",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add Three Save Slots Per Device",
+      "description": "As a Web player, I want three save slots so that I can keep separate lives without creating an account.",
+      "acceptanceCriteria": [
+        "Each anonymous device can own slot indexes `1`, `2`, and `3`",
+        "Database constraints prevent a fourth slot and prevent duplicate slot indexes for one device",
+        "Slot rows include label, current snapshot reference, integer version, created time, and updated time",
+        "Empty slots are returned consistently in the save-list response",
+        "Typecheck passes",
+        "Repository tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add Immutable Snapshot Repository",
+      "description": "As a backend developer, I want immutable snapshot rows so that every persisted progression step has an auditable canonical state.",
+      "acceptanceCriteria": [
+        "Store each `GameStateSnapshot` as a new `game_snapshots` row",
+        "Store snapshot id, slot id, session id, slot version, schema version, engine version, event catalog version, content hash, snapshot JSONB, and created time",
+        "Never update snapshot JSONB in place",
+        "Validate snapshot contracts before insert",
+        "Recompute integrity metadata server-side; do not trust client-provided hashes",
+        "Typecheck passes",
+        "Repository tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Add Event Catalog Version Persistence",
+      "description": "As a backend developer, I want immutable event catalog versions so that saved lives do not silently drift when content changes.",
+      "acceptanceCriteria": [
+        "Store catalog version, content hash, status, metadata JSONB, bundle JSONB, and created time",
+        "Add a seed or migration step for the current active bundled event catalog",
+        "Reject mutation of an existing catalog version when its content hash changes",
+        "Support lookup by catalog version",
+        "Typecheck passes",
+        "Repository tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add Event Catalog Read API",
+      "description": "As a Web client, I want to read the pinned event catalog bundle through HTTP so that the client no longer depends on an undeclared catalog source.",
+      "acceptanceCriteria": [
+        "Add `GET /v1/catalog/bundle?version=<eventCatalogVersion>`",
+        "Return the P4/P5 event catalog response shape",
+        "Return a structured error for an unknown or unsupported catalog version",
+        "Preserve engine-side final trigger eligibility",
+        "Add HTTP-level contract tests against the P5 in-memory adapter reference behavior",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Add Gameplay Session Repository",
+      "description": "As a backend developer, I want gameplay sessions persisted so that every active engine mutation is scoped to one anonymous owner.",
+      "acceptanceCriteria": [
+        "Store session id, device id, optional slot id, session-token hash, engine version, event catalog version, status, created time, and updated time",
+        "Store only a one-way session-token hash",
+        "Session status supports at least `active`, `terminal`, and `revoked`",
+        "Session lookups verify both ownership and token validity",
+        "Logs never include raw session tokens",
+        "Typecheck passes",
+        "Repository tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add New Game Session API",
+      "description": "As a Web player, I want to start a new game in a selected slot so that my new life is persisted immediately.",
+      "acceptanceCriteria": [
+        "Add `POST /v1/sessions`",
+        "Require a valid `deviceToken`, selected slot index, and source platform",
+        "Construct a fresh P5 headless session with the configured engine and catalog versions",
+        "Persist the session, initial immutable snapshot, current slot pointer, and initial replay marker atomically",
+        "Return opaque `sessionToken`, session metadata, slot metadata, current snapshot, and next event",
+        "Starting a new life in an occupied slot requires an explicit overwrite confirmation field",
+        "Missing overwrite confirmation returns a structured conflict",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add Save List API",
+      "description": "As a Web player, I want to see my three save slots so that I can choose whether to continue or start a new life.",
+      "acceptanceCriteria": [
+        "Add `GET /v1/saves`",
+        "Require a valid `deviceToken`",
+        "Return exactly three slots ordered by slot index",
+        "Each occupied slot includes slot id, slot index, label, slot version, updated time, snapshot id, age, terminal status, engine version, and event catalog version",
+        "Empty slots contain no fabricated snapshot metadata",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add Restore Session API",
+      "description": "As a Web player, I want to resume an occupied save slot so that I can continue a previous life after refreshing or returning later.",
+      "acceptanceCriteria": [
+        "Add `POST /v1/sessions/restore`",
+        "Require a valid `deviceToken` and occupied slot index",
+        "Load the canonical current snapshot from PostgreSQL",
+        "Validate schema, engine, and catalog compatibility before hydration",
+        "Hydrate a new P5 headless session and derive the next event after load",
+        "Persist the resumed gameplay session and restore replay marker",
+        "Return opaque `sessionToken`, slot metadata, current snapshot, and next event",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add Append-Only Replay Action Repository",
+      "description": "As a maintainer, I want append-only replay actions so that persisted lives can be audited and reproduced.",
+      "acceptanceCriteria": [
+        "Store replay action id, session id, slot id, sequence number, action type, event id, optional choice id, snapshot hash before, snapshot hash after, payload JSONB, and created time",
+        "Sequence numbers are unique and monotonic within a session",
+        "Existing replay actions cannot be updated or deleted through application repositories",
+        "Support at least `session_created`, `session_restored`, `choice_executed`, `automatic_progression`, `manual_save`, and `terminal` action types",
+        "Typecheck passes",
+        "Repository tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add Server-Authoritative Choice Execution API",
+      "description": "As a Web player, I want my selected choice executed by the backend so that saved progression is trusted and portable across clients.",
+      "acceptanceCriteria": [
+        "Add `POST /v1/sessions/{sessionId}/choices`",
+        "Require valid session ownership, `sessionToken`, expected slot version, expected snapshot id, event id, and choice id",
+        "Load canonical state from PostgreSQL; do not accept client-provided state deltas as authoritative",
+        "Hydrate the P5 headless session, validate the pending event and choice, execute the choice, and process automatic progression until the next choice or terminal state",
+        "Persist new immutable snapshot, replay actions, current slot pointer, slot-version increment, and session status atomically",
+        "Return updated slot version, snapshot, feedback, diagnostics safe for clients, replay append summary, terminal state, life memory, and next event",
+        "Invalid event or choice receives a structured validation error",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add Optimistic Concurrency Protection",
+      "description": "As a player, I want stale browser tabs prevented from overwriting newer progress so that server saves remain trustworthy.",
+      "acceptanceCriteria": [
+        "Save mutations compare the request `expectedSlotVersion` and `expectedSnapshotId` with the current slot row",
+        "Slot update uses an atomic compare-and-swap condition inside the same transaction as snapshot and replay writes",
+        "Stale requests return HTTP `409` with a stable `STALE_SLOT_VERSION` or `STALE_SNAPSHOT` error code",
+        "Conflict responses include current slot version and snapshot id but do not leak another device's data",
+        "Concurrent integration test proves that only one of two stale-equivalent writes commits",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Add Explicit Manual Save API",
+      "description": "As a Web player, I want to save the current server-owned session explicitly so that I can understand when progress is durable.",
+      "acceptanceCriteria": [
+        "Add `POST /v1/sessions/{sessionId}/save`",
+        "Require valid session ownership, `sessionToken`, expected slot version, and expected snapshot id",
+        "Persist a new immutable snapshot only when the current server session state differs from the slot snapshot",
+        "Append a `manual_save` replay action",
+        "Return updated slot metadata and snapshot metadata",
+        "Apply the same optimistic concurrency rules as choice execution",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Add Automatic Save Policy",
+      "description": "As a Web player, I want successful progression saved automatically so that closing the browser does not lose meaningful progress.",
+      "acceptanceCriteria": [
+        "Persist the initial snapshot when a new game session is created",
+        "Persist after each successful choice and its automatic progression chain",
+        "Persist terminal state",
+        "Do not persist failed or rejected actions",
+        "Document that UI-only pacing changes do not trigger a save",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Add Health Check Endpoints",
+      "description": "As an operator, I want health checks so that deployment systems can distinguish process liveness from database readiness.",
+      "acceptanceCriteria": [
+        "Add `GET /health/live`",
+        "Add `GET /health/ready`",
+        "Liveness does not depend on PostgreSQL",
+        "Readiness verifies PostgreSQL connectivity and required catalog availability",
+        "Health responses do not expose secrets or internal stack traces",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Add Structured Backend Logging",
+      "description": "As an operator, I want structured logs so that API failures are diagnosable without flooding stdout with engine debug messages.",
+      "acceptanceCriteria": [
+        "Log request id, route, method, status, duration, session id when safe, and stable error code",
+        "Do not log raw device tokens, raw session tokens, full snapshots, or PostgreSQL credentials",
+        "Route engine logs through an injected logger for the backend path",
+        "Production backend execution does not emit verbose attribute-by-attribute engine debug logs by default",
+        "Tests verify token redaction and production log suppression",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Add Consistent API Error Envelope",
+      "description": "As a Web developer, I want stable API errors so that the client can handle authentication, validation, conflicts, and compatibility failures predictably.",
+      "acceptanceCriteria": [
+        "Define error envelope fields: stable code, message, request id, optional safe details",
+        "Map validation failures to HTTP `400` or `422`",
+        "Map invalid or missing tokens to HTTP `401` or `403`",
+        "Map missing resources to HTTP `404`",
+        "Map stale writes and overwrite-confirmation failures to HTTP `409`",
+        "Map unexpected failures to HTTP `500` without exposing stack traces",
+        "Reuse P4 contract error codes where applicable",
+        "Typecheck passes",
+        "API integration tests pass"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Add Web API Client Adapter",
+      "description": "As a frontend developer, I want a typed Web API client adapter so that Vue components do not embed transport details.",
+      "acceptanceCriteria": [
+        "Add typed methods for device bootstrap, session creation, save list, restore, manual save, choice execution, catalog read, and health checks where needed",
+        "Store `deviceToken` and active `sessionToken` only through the Web platform adapter",
+        "Keep API base URL configurable for local and deployed environments",
+        "Normalize API errors into client-safe categories",
+        "Do not add API calls directly inside presentation-only components",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Add Web Save Slot Selection Flow",
+      "description": "As a Web player, I want to choose one of three slots when starting or continuing so that multiple lives are manageable.",
+      "acceptanceCriteria": [
+        "Display all three slots with empty or occupied state",
+        "Allow continuing an occupied slot",
+        "Allow starting a new life in an empty slot",
+        "Require explicit confirmation before overwriting an occupied slot",
+        "Show loading, authentication failure, server unavailable, compatibility failure, and stale-conflict states",
+        "Preserve desktop and mobile usability without a visual redesign",
+        "Typecheck passes",
+        "Build passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Switch Web Gameplay Progression to API Sessions",
+      "description": "As a Web player, I want gameplay choices and saves routed through the backend so that refresh and future platform clients share one authoritative progression model.",
+      "acceptanceCriteria": [
+        "New game uses `POST /v1/sessions`",
+        "Continue game uses `POST /v1/sessions/restore`",
+        "Choice execution uses `POST /v1/sessions/{sessionId}/choices`",
+        "Manual save uses `POST /v1/sessions/{sessionId}/save`",
+        "Refreshing the browser allows an occupied slot to resume from PostgreSQL",
+        "Disable duplicate choice submission while a request is pending",
+        "Handle HTTP `409` by stopping further mutation and prompting the player to reload the current save",
+        "Existing UI pacing remains a Web concern",
+        "Typecheck passes",
+        "Build passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Add PostgreSQL and API Integration Test Entry",
+      "description": "As a maintainer, I want a dedicated P6B integration-test entry so that persistence and API behavior can be verified independently.",
+      "acceptanceCriteria": [
+        "Add a command that runs migrations against an isolated PostgreSQL test database",
+        "Test bootstrap, three-slot listing, new session, overwrite confirmation, restore, choice execution, automatic save, manual save, replay append, catalog read, health checks, and token rejection",
+        "Test schema, engine, and catalog incompatibility rejection",
+        "Test optimistic concurrency with two competing writes",
+        "Test transaction rollback after an injected failure",
+        "Tests clean up their own isolated database state",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Add P6B Persistence and API Gate",
+      "description": "As a maintainer, I want a dedicated P6B gate so that backend foundation work cannot regress proven gameplay behavior.",
+      "acceptanceCriteria": [
+        "Gate runs typecheck",
+        "Gate runs Web build",
+        "Gate runs P4 contract tests",
+        "Gate runs P5 headless unit and deterministic parity tests",
+        "Gate runs P6B PostgreSQL and API integration tests",
+        "Gate runs P3 golden-line, midlife, and experience-health gates",
+        "Gate returns a non-zero exit code on any blocker",
+        "Tests pass"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Update Backend Deployment Documentation",
+      "description": "As an operator, I want backend setup documentation so that the service and PostgreSQL dependency can be deployed consistently.",
+      "acceptanceCriteria": [
+        "Document required environment variables without embedding secrets",
+        "Document PostgreSQL creation, migration, catalog seeding, backend startup, Web API URL configuration, and health-check commands",
+        "Document backup expectations for PostgreSQL before production deployment",
+        "Document that HTTPS termination is required in deployed environments because tokens are bearer credentials",
+        "Document known P6B limitations and deferred work",
+        "Documentation contains no local absolute paths",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Produce P6B Closure Report",
+      "description": "As a project owner, I want a P6B closure report so that the project can decide whether to proceed to account migration, mini-program integration, or runtime hardening.",
+      "acceptanceCriteria": [
+        "Report lists completed P6B user stories",
+        "Report includes migration, schema, repository, API, Web integration, and gate commands",
+        "Report confirms whether fresh database migration, save restore, refresh resume, stale-write rejection, replay append, and catalog pinning work",
+        "Report records remaining Vue-reactivity, singleton, direct randomness, direct time, and logging risks if any remain",
+        "Report recommends the next phase with evidence",
+        "Documentation contains no local absolute paths",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

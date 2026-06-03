@@ -32,6 +32,7 @@ import {
 } from '../scripts/experienceHealthGate';
 import { computeExperienceDerivedMetrics } from '../scripts/computeExperienceMetricsFromReports';
 import { GameProcessSimulator } from './GameProcessSimulator';
+import { runAllP7Tests } from './p7ActivePlanningTests';
 import {
   buildDeathRiskTelemetry,
   inferSimulationCohort,
@@ -3355,6 +3356,13 @@ const coreFunctionSuite: TestSuite = {
       description: '测试关键存档流程与 route/identity/relationship/event history/time 字段恢复完整性',
       test: async () => {
         await runSaveRegressionCoverageCase();
+      },
+    },
+    {
+      name: 'P7 主动人生规划 - action resolver / cache / annual jump / reports',
+      description: 'P7 active planning closure tests',
+      test: async () => {
+        await runAllP7Tests();
       },
     },
   ],

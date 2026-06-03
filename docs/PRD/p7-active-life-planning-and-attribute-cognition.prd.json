@@ -1,0 +1,591 @@
+{
+  "project": "Wuxia Life P7 Active Life Planning and Attribute Cognition",
+  "branchName": "ralph/p7-active-life-planning-and-attribute-cognition",
+  "description": "Rework the core playable loop from random-event-driven life playback into an active life planning experience. The execution plan is intentionally split into one-iteration stories: each story has one primary change surface, clear validation, and no hidden expansion into full talent, item, worldbuilding, account, backend, or visual-redesign scope.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit Active and Deferred Event Sources",
+      "description": "As a maintainer, I want a read-only inventory of active and deferred event sources so that P7 only plans against reachable runtime content.",
+      "acceptanceCriteria": [
+        "List active runtime event files",
+        "List not-wired or deferred event files",
+        "Identify event files whose attribute logic is currently unreachable",
+        "Produce a short baseline note",
+        "Do not modify business code"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit Time Advancement Entry Points",
+      "description": "As a maintainer, I want the current time advancement paths mapped so that annual-skip fixes target the real sources.",
+      "acceptanceCriteria": [
+        "List main-flow time advancement entry points",
+        "List simulator and report time advancement entry points",
+        "Classify each entry point as event-defined, fallback, forced annual, or unknown",
+        "Produce a short baseline note",
+        "Do not modify business code"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Audit Attribute Consumption",
+      "description": "As a maintainer, I want to know which active events and systems consume each player attribute so that attribute meaning is based on real gameplay.",
+      "acceptanceCriteria": [
+        "Map active event conditions to player attributes",
+        "Map outcome branches to player attributes",
+        "Map identity, ending, and report consumers to player attributes",
+        "Classify attributes as active, hidden, weakly used, or unused",
+        "Do not modify business code"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Audit Choice Requirement Visibility",
+      "description": "As a maintainer, I want to compare choice conditions with player-facing UI so that locked or unavailable choices are not silently hidden by implementation details.",
+      "acceptanceCriteria": [
+        "List where choice conditions are evaluated",
+        "List where choice requirements are displayed or omitted",
+        "Identify silent rejection paths",
+        "Produce a gap note for UI and runtime follow-up",
+        "Do not modify business code"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Define P7 Guardrails",
+      "description": "As a project owner, I want P7 scope locked so that active planning does not expand into a complete open world, item system, or talent system.",
+      "acceptanceCriteria": [
+        "Document allowed P7 mechanisms",
+        "Document prohibited P7 mechanisms",
+        "Document that random events become disturbances and opportunities",
+        "Document that ordinary progression must not default to one year",
+        "Document required validation by wave"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Define Active Action Categories",
+      "description": "As a designer, I want a small stable action taxonomy so that ordinary life planning has clear player verbs.",
+      "acceptanceCriteria": [
+        "Define training, study, socializing, travel, business, health, romance, and jianghu action categories",
+        "Define which categories are in the P7 minimum implementation",
+        "Define which categories are deferred",
+        "Document category names, player-facing intent, and non-goals"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Define Action Duration Units",
+      "description": "As a designer, I want action durations to use month, quarter, and short-stage units so that ordinary life does not jump by years.",
+      "acceptanceCriteria": [
+        "Define month, quarter, short-stage, year, and milestone duration rules",
+        "Assign default duration for each P7 minimum action category",
+        "Define when year-scale advancement is allowed",
+        "Document same-year multi-event display requirements"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Define Action Reward and Risk Rules",
+      "description": "As a designer, I want each action category to have reward, cost, risk, and possible disturbance rules so that actions are not equivalent buttons.",
+      "acceptanceCriteria": [
+        "Define reward channels for each P7 minimum action",
+        "Define cost or opportunity-cost channels for each P7 minimum action",
+        "Define risk levels for each P7 minimum action",
+        "Define how repeated focus changes reward or risk"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add Active Action Types",
+      "description": "As a developer, I want typed action definitions so that runtime, UI, reports, and tests can share the same action model.",
+      "acceptanceCriteria": [
+        "Add TypeScript types for action id, category, duration, reward, cost, risk, and metadata",
+        "Types are not wired into gameplay runtime yet",
+        "Types compile",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Add Minimum Action Catalog",
+      "description": "As a developer, I want a small action catalog for training, study, and socializing so that the first active-planning loop has concrete options.",
+      "acceptanceCriteria": [
+        "Add training action definition",
+        "Add study action definition",
+        "Add socializing action definition",
+        "Each action has duration, reward, cost, and risk metadata",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add Action Result Resolver",
+      "description": "As a developer, I want a focused resolver for one selected action so that action execution can be tested before UI integration.",
+      "acceptanceCriteria": [
+        "Resolver accepts current state and one action id",
+        "Resolver returns state deltas and action result metadata",
+        "Resolver supports training, study, and socializing",
+        "Resolver does not trigger random disturbances yet",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Test Action Result Resolver",
+      "description": "As a maintainer, I want action resolver tests so that action rewards and durations do not drift silently.",
+      "acceptanceCriteria": [
+        "Test training action output",
+        "Test study action output",
+        "Test socializing action output",
+        "Test action duration is below one year for minimum actions",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Expose Actions When No Forced Event Exists",
+      "description": "As a player, I want the main flow to offer active actions when no forced story event is pending.",
+      "acceptanceCriteria": [
+        "Main flow detects the no-forced-event state",
+        "Main flow returns available minimum actions",
+        "Existing forced events still take precedence",
+        "No UI redesign is introduced",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Execute Selected Active Action",
+      "description": "As a player, I want selecting an active action to update the game state and advance the correct short duration.",
+      "acceptanceCriteria": [
+        "Selected action executes through the action resolver",
+        "State deltas are applied once",
+        "Time advances by action duration rather than one year",
+        "Action result is available to the current feedback path",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Record Action History Entries",
+      "description": "As a player, I want active actions recorded in history so that reports can distinguish planned life from random events.",
+      "acceptanceCriteria": [
+        "Action execution appends a history or report entry",
+        "Entry includes action id, duration, deltas, and source kind",
+        "Entry distinguishes active action from story event",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Fix Main-Flow Annual Fallback",
+      "description": "As a player, I want the main gameplay fallback not to advance a full year when ordinary progression is available.",
+      "acceptanceCriteria": [
+        "Identify the main-flow annual fallback",
+        "Replace fallback with action offering or short-duration advancement as appropriate",
+        "Forced milestone events retain explicit year-scale advancement",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Fix Simulator Annual Progression",
+      "description": "As a maintainer, I want the simulator to respect event and action duration instead of forcing one event per year.",
+      "acceptanceCriteria": [
+        "Simulator no longer hardcodes one event per year for ordinary progression",
+        "Simulator records same-year multiple events",
+        "Milestone annual advancement remains possible when explicitly defined",
+        "Relevant simulator check passes"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add Annual Jump Regression Check",
+      "description": "As a maintainer, I want a regression check that reports unintended annual jumps with exact entry points.",
+      "acceptanceCriteria": [
+        "Check detects ordinary progression that advances one full year",
+        "Check allows explicit milestone advancement",
+        "Failure output includes event id, action id, or source entry point",
+        "Relevant check passes"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Define Attribute Visibility Tiers",
+      "description": "As a designer, I want explicit, implicit, and semi-implicit attribute visibility tiers so that the player can understand abilities without losing discovery.",
+      "acceptanceCriteria": [
+        "Define explicit attribute tier",
+        "Define semi-implicit attribute tier",
+        "Define implicit attribute tier",
+        "Assign current major attributes to tiers",
+        "Document always-visible attributes"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Define Self-Awareness Visibility Rules",
+      "description": "As a designer, I want self-awareness to control how clearly hidden attributes appear in the attribute panel.",
+      "acceptanceCriteria": [
+        "Define self-awareness scale or bands",
+        "Define fuzzy labels for low visibility",
+        "Define numeric or precise labels for high visibility",
+        "Define how self-awareness can improve",
+        "Document non-goals for this stage"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Add Attribute Meaning Definitions",
+      "description": "As a developer, I want a data source for player-facing attribute meanings so that the panel does not hardcode stale route advice.",
+      "acceptanceCriteria": [
+        "Add definitions for core explicit attributes",
+        "Add definitions for selected implicit attributes",
+        "Definitions include purpose, examples, and visibility tier",
+        "Definitions are not coupled to stale hardcoded route thresholds",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Render Explicit Attribute Meanings",
+      "description": "As a player, I want explicit attributes to show useful meaning in the attribute panel instead of only numbers.",
+      "acceptanceCriteria": [
+        "Attribute panel shows purpose text for explicit attributes",
+        "Display fits current panel structure",
+        "No unrelated visual redesign is introduced",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Render Implicit Attribute Visibility",
+      "description": "As a player, I want implicit attributes to appear as fuzzy or precise information based on self-awareness.",
+      "acceptanceCriteria": [
+        "Panel renders fuzzy descriptions for low-visibility implicit attributes",
+        "Panel renders more precise values or labels for high-visibility implicit attributes",
+        "Always-hidden implementation details remain hidden",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Remove Stale Attribute Panel Suggestions",
+      "description": "As a player, I want attribute guidance to come from current definitions or active content, not outdated hardcoded route requirements.",
+      "acceptanceCriteria": [
+        "Identify hardcoded suggestions that do not match active runtime content",
+        "Remove or replace stale suggestions",
+        "Panel still provides useful guidance after removal",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Fix Condition Cache State Hash",
+      "description": "As a maintainer, I want condition cache keys to include all direct player properties that can affect event and choice eligibility.",
+      "acceptanceCriteria": [
+        "Condition hash includes all direct player properties used by expressions",
+        "Charisma, money, comprehension, reputation, connections, and constitution are covered",
+        "Flags and triggered events remain covered",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Test Condition Cache Attribute Drift",
+      "description": "As a maintainer, I want tests proving that changing an attribute used by a condition causes reevaluation.",
+      "acceptanceCriteria": [
+        "Test charisma-dependent condition reevaluates after charisma changes",
+        "Test money-dependent condition reevaluates after money changes",
+        "Test comprehension-dependent condition reevaluates after comprehension changes",
+        "Relevant tests pass"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Define Choice Tradeoff Metadata",
+      "description": "As a designer, I want structured metadata for reward, cost, risk, and opportunity cost so that choices can be compared without making one option obviously optimal.",
+      "acceptanceCriteria": [
+        "Define reward metadata",
+        "Define cost metadata",
+        "Define risk metadata",
+        "Define opportunity-cost metadata",
+        "Document unacceptable one-sided choice patterns"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Add Choice Requirement Explanation Model",
+      "description": "As a developer, I want a model for explaining choice requirements without exposing raw condition expressions.",
+      "acceptanceCriteria": [
+        "Define explanation output for met requirements",
+        "Define explanation output for unmet requirements",
+        "Define exact and fuzzy gap representations",
+        "Define fallback behavior for unsupported conditions",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Render Locked Choice State",
+      "description": "As a player, I want unavailable choices to show a locked state and readable reason before I click them.",
+      "acceptanceCriteria": [
+        "Unavailable choices are visually or textually marked as locked",
+        "Lock reason uses player-facing language",
+        "Raw condition expressions are not shown",
+        "Available choices remain selectable",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Handle Unavailable Choice Clicks",
+      "description": "As a player, I want clicking an unavailable choice to produce clear feedback instead of only a console warning.",
+      "acceptanceCriteria": [
+        "Unavailable choice clicks are rejected without state mutation",
+        "Player-facing feedback explains why the choice is unavailable",
+        "Console-only rejection is no longer the only signal",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Render Action Risk Summary",
+      "description": "As a player, I want action choices to show broad reward, cost, and risk before I commit.",
+      "acceptanceCriteria": [
+        "Action choices display reward summary",
+        "Action choices display cost or opportunity-cost summary",
+        "Action choices display risk level",
+        "Risk summary does not reveal hidden branches",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Define Random Disturbance Pool",
+      "description": "As a designer, I want a small disturbance model so random events become plan modifiers rather than the whole life driver.",
+      "acceptanceCriteria": [
+        "Define disturbance trigger sources",
+        "Define minimum disturbance metadata",
+        "Define how action type influences disturbance weight",
+        "Define how disturbance returns to the action loop"
+      ],
+      "priority": 32,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Add Minimal Disturbance Resolver",
+      "description": "As a developer, I want a focused resolver that can optionally select a disturbance after an action.",
+      "acceptanceCriteria": [
+        "Resolver accepts action result and current state",
+        "Resolver can return no disturbance",
+        "Resolver can return one disturbance candidate",
+        "Resolver is deterministic in tests when given a deterministic random source",
+        "Typecheck passes"
+      ],
+      "priority": 33,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Wire Disturbance After Action",
+      "description": "As a player, I want active actions to sometimes create opportunities or accidents and then return control to the action loop.",
+      "acceptanceCriteria": [
+        "Action execution can invoke disturbance resolver",
+        "Resolved disturbance is recorded separately from active action",
+        "After disturbance resolution the flow returns to normal progression",
+        "No multi-year random-only chain is introduced",
+        "Typecheck passes"
+      ],
+      "priority": 34,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Define Report Causal Fields",
+      "description": "As a maintainer, I want report fields that distinguish active plans, story events, random disturbances, and automatic progression.",
+      "acceptanceCriteria": [
+        "Define source kind field",
+        "Define action summary field",
+        "Define attribute threshold hit or miss field",
+        "Define lock reason summary field",
+        "Define annual jump diagnostic field"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Report Action Distribution",
+      "description": "As a maintainer, I want reports to show how much life was player-planned versus event-driven.",
+      "acceptanceCriteria": [
+        "Report lists action counts by category",
+        "Report lists story event count",
+        "Report lists random disturbance count",
+        "Report output is deterministic for fixed simulation input",
+        "Relevant report check passes"
+      ],
+      "priority": 36,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-037",
+      "title": "Report Time Granularity Diagnostics",
+      "description": "As a maintainer, I want reports to expose same-year event counts and unintended annual jumps.",
+      "acceptanceCriteria": [
+        "Report lists same-year event or action counts",
+        "Report lists annual jumps",
+        "Report distinguishes explicit milestones from unintended jumps",
+        "Relevant report check passes"
+      ],
+      "priority": 37,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-038",
+      "title": "Report Attribute Threshold Outcomes",
+      "description": "As a maintainer, I want reports to show when attributes unlocked, blocked, or altered outcomes.",
+      "acceptanceCriteria": [
+        "Report lists key threshold hits",
+        "Report lists key threshold misses",
+        "Report links threshold outcomes to event, choice, or action ids",
+        "Relevant report check passes"
+      ],
+      "priority": 38,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-039",
+      "title": "Define Extension Boundaries",
+      "description": "As a project owner, I want future talents, items, worldbuilding, regions, and factions to plug into the P7 loop without being implemented now.",
+      "acceptanceCriteria": [
+        "Define how talents affect action rewards, cognition, and event weights",
+        "Define how items affect actions, thresholds, risks, and branches",
+        "Define how worldbuilding, regions, and factions affect action availability and disturbance pools",
+        "Document that P7 does not implement complete talent, item, or worldbuilding content"
+      ],
+      "priority": 39,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-040",
+      "title": "Run P7 Closure Validation",
+      "description": "As a project owner, I want proof that P7 changes the game from random life playback into an active planning experience.",
+      "acceptanceCriteria": [
+        "A fixed simulation covers at least one active planning path from age 0 to 30",
+        "The player has understandable active actions in every non-forced stage",
+        "Ordinary progression no longer behaves as one event per year",
+        "The attribute panel explains key attribute meaning and visibility",
+        "At least three choices demonstrate non-obvious tradeoffs",
+        "Reports explain causal links between key actions, attributes, and results",
+        "Closure report lists residual risks and follow-up recommendations"
+      ],
+      "priority": 40,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

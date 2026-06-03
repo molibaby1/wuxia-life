@@ -21,7 +21,7 @@ const apiPlayerName = ref('');
 const apiGender = ref<'male' | 'female'>('male');
 
 const gameEngineComposable = useNewGameEngine();
-const { startNewGame, restartGame, handleChoice, isProcessing, getAllSaves, loadGameFromSave } =
+const { startNewGame, restartGame, handleChoice, handleActiveAction, isProcessing, getAllSaves, loadGameFromSave } =
   gameEngineComposable;
 
 const apiEngine = useApiGameEngine();
@@ -138,7 +138,26 @@ const currentNode = computed(() => {
     };
   }
   const event = gameEngineComposable.engineState.currentEvent;
-  if (!event) return null;
+  if (!event) {
+    if (gameEngineComposable.engineState.isActiveActionMode) {
+      return {
+        id: 'active_planning',
+        text: '本期暂无强求的江湖变故，你可安排日常行动。',
+        title: '规划本期人生',
+        choices: [],
+      };
+    }
+    const pendingOutcome = gameEngineComposable.engineState.lastOutcomeText;
+    if (pendingOutcome) {
+      return {
+        id: 'action_or_choice_result',
+        text: pendingOutcome,
+        title: '本期小结',
+        choices: [],
+      };
+    }
+    return null;
+  }
   return {
     id: event.id,
     text: event.content?.text || '(无文本)',
@@ -147,18 +166,37 @@ const currentNode = computed(() => {
   };
 });
 
-const availableChoices = computed(() =>
-  apiMode ? apiEngineState.availableChoices : gameEngineComposable.engineState.availableChoices,
-);
+const availableChoices = computed(() => {
+  if (apiMode) return apiEngineState.availableChoices;
+  if (gameEngineComposable.engineState.isActiveActionMode) {
+    return gameEngineComposable.engineState.availableActiveActions.map(action => ({
+      id: action.id,
+      text: action.text,
+      description: `${action.description}｜收益：${action.rewardSummary}｜消耗：${action.costSummary}｜风险：${action.riskLevel}`,
+      actionId: action.actionId,
+      isActiveAction: true,
+    }));
+  }
+  return gameEngineComposable.engineState.availableChoices;
+});
 
 const endingPlayer = computed(() => {
   if (apiMode) return null;
   return gameEngine.getGameState().player ?? null;
 });
 
-const onChoice = (choice: { id: string; text: string }) => {
+const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {
   if (apiMode) {
     void apiHandleChoice(choice);
+    return;
+  }
+  if (choice.isActiveAction) {
+    void handleActiveAction(choice.actionId ?? choice.id.replace(/^active_/, ''));
+    return;
+  }
+  if (choice.locked) {
+    const msg = gameEngine.consumePlayerFeedbackMessage() ?? '该选项尚未解锁';
+    window.alert(msg);
     return;
   }
   void handleChoice(choice);

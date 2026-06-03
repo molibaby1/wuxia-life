@@ -21,6 +21,7 @@ import type {
   PlayerState,
   GameState,
   EventRecord,
+  EventCondition,
 } from './eventTypes';
 
 export type ConditionOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'hasFlag' | 'hasEvent' | 'not' | 'and' | 'or' | 'random';
@@ -70,20 +71,27 @@ export interface StoryChoice {
   id: string;
   text: string;
   description?: string;
-  condition?: ((state: PlayerState) => boolean) | { type: string; expression: string };
+  condition?: ((state: PlayerState) => boolean) | EventCondition | { type: string; expression: string };
   effects?: Effect[];
   effect?: (state: PlayerState) => any;
   nextNodeId?: string;
   outcomes?: ChoiceOutcomeUI[] | Array<{
     id: string;
     text: string;
-    condition?: ((state: PlayerState) => boolean) | { type: string; expression: string };
+    condition?: ((state: PlayerState) => boolean) | EventCondition | { type: string; expression: string };
     effects?: Effect[];
   }>;
   timeSpan?: {
     value: number;
     unit: 'year' | 'month' | 'day';
   };
+  locked?: boolean;
+  lockReason?: string;
+  actionId?: string;
+  isActiveAction?: boolean;
+  rewardSummary?: string;
+  costSummary?: string;
+  riskLevel?: string;
 }
 
 export interface ChoiceOutcomeUI {

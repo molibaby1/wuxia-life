@@ -23,10 +23,13 @@ import { buildDeathRiskTelemetry, type DeathRiskTelemetry } from '../scripts/dea
 import {
   applyRouteTrackFixtureBootstrap,
   applyRouteTrackPreparation,
-  ensureYearAdvanced as ensureSimulatorYearAdvanced,
   enforceRouteTrackIsolation,
   hasGameEnded as sharedHasGameEnded,
 } from '../src/headless/parity/routeTrackFixtures';
+import {
+  ACTIVE_ACTION_REPLAY_RANDOM,
+  toActiveActionReplayEventId,
+} from '../src/core/activePlanning/activeActionReplay';
 import {
   buildRomanceFamilyArcReport,
   GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
@@ -76,6 +79,10 @@ export interface GameProcessRecord {
   gameState: GameState;
   timestamp: string;
   currentTime?: { year: number; month: number; day: number };
+  /** P7: distinguishes catalog events from player-planned actions in replay. */
+  progressionKind?: 'story_event' | 'active_action';
+  /** P7: catalog action id when progressionKind is active_action. */
+  activeActionId?: string;
 }
 
 export interface GameProcessReport {
@@ -263,21 +270,27 @@ export class GameProcessSimulator {
     const event = gameEngine.selectEvent();  // 不传参数，使用引擎内部年龄
     
     if (!event) {
-      this.log(`   ⚠️  无可用事件`);
-      
-      // 即使没有事件，也要记录这一年
+      const actionId = 'action_training_basic';
+      this.log(`   ⚠️  无可用事件 — 执行主动行动（练功）`);
+
+      const execution = gameEngine.executeActiveAction(actionId, { random: ACTIVE_ACTION_REPLAY_RANDOM });
+      const stateAfterAction = gameEngine.getGameState();
+      const feedbackText = execution?.feedbackText ?? gameEngine.consumeLastEventOutcomeNote() ?? '本期安排练功';
       const record: GameProcessRecord = {
         age: ageBeforeEvent,
-        eventId: 'no_event',
-        eventTitle: '平淡的一年',
-        eventText: '这一年并无大事发生，岁月静好。',
+        eventId: toActiveActionReplayEventId(actionId),
+        eventTitle: '主动练功',
+        eventText: feedbackText,
+        outcomeText: feedbackText,
         eventType: 'auto',
+        progressionKind: 'active_action',
+        activeActionId: actionId,
         gameState: stateForRecord,
-        currentTime: stateForRecord.currentTime,
-        timestamp: new Date().toISOString()
+        currentTime: stateAfterAction.currentTime,
+        timestamp: new Date().toISOString(),
       };
       this.pushRecord(record);
-      this.ensureYearAdvanced(ageBeforeEvent);
+      this.ensureProgressionCatchUp(ageBeforeEvent);
       return;
     }
 
@@ -298,7 +311,7 @@ export class GameProcessSimulator {
       const availableChoices = this.getAvailableChoices(event);
       if (availableChoices.length === 0) {
         this.log('   ⚠️  无可用选项，跳过本次事件');
-        this.ensureYearAdvanced(ageBeforeEvent);
+        this.ensureProgressionCatchUp(ageBeforeEvent);
         return;
       }
       // 选择事件：选择一个选项
@@ -437,7 +450,7 @@ export class GameProcessSimulator {
     }
 
     this.enforceRouteTrackIsolation();
-    this.ensureYearAdvanced(ageBeforeEvent);
+    this.ensureProgressionCatchUp(ageBeforeEvent);
 
     if (eventType === 'ending' || sharedHasGameEnded(this.gameState)) {
       this.log('   🏁 触发结局事件，模拟结束');
@@ -451,16 +464,25 @@ export class GameProcessSimulator {
   }
 
   /**
-   * 模拟器每年一次循环，需在年末推进年龄；若事件效果已含 time_advance 则跳过，避免重复推进。
+   * Simulator loop pacing: ensure at least one calendar year per iteration when age unchanged.
+   * Active actions may advance months first; this catch-up preserves gate rhythm expectations.
    */
-  private ensureYearAdvanced(ageBeforeEvent: number): void {
+  private ensureProgressionCatchUp(ageBeforeEvent: number): void {
     const state = gameEngine.getGameState();
     if (!state.player?.alive || this.ended || sharedHasGameEnded(state)) {
       this.gameState = state;
       return;
     }
-    ensureSimulatorYearAdvanced(gameEngine, ageBeforeEvent);
+    const ageAfter = state.player?.age ?? 0;
+    if (ageAfter <= ageBeforeEvent) {
+      gameEngine.advanceTime(1, 'year');
+    }
     this.gameState = gameEngine.getGameState();
+  }
+
+  /** @deprecated use ensureProgressionCatchUp */
+  private ensureYearAdvanced(ageBeforeEvent: number): void {
+    this.ensureProgressionCatchUp(ageBeforeEvent);
   }
 
   private applyRouteTrackPreparation(age: number): void {
@@ -553,7 +575,7 @@ export class GameProcessSimulator {
     if (track === 'demonic') {
       if (choiceId.includes('accept_demonic')) score += 900;
       if (choiceId.includes('demonic')) score += 400;
-      if (choiceId.includes('beggars_join') || choiceId.includes('official_accept')) score -= 2000;
+      if (choiceId === 'join_orthodox' || choiceId.includes('beggars_join') || choiceId.includes('official_accept')) score -= 2000;
       if (choiceId.includes('decline')) score -= 1200;
     }
 

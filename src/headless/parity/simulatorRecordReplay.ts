@@ -23,6 +23,11 @@ import {
   hasGameEnded,
   type RouteTrack,
 } from './routeTrackFixtures';
+import {
+  ACTIVE_ACTION_REPLAY_RANDOM,
+  isActiveActionReplayEventId,
+  resolveActiveActionIdFromReplayEvent,
+} from '../../core/activePlanning/activeActionReplay';
 
 const P3_PARITY_END_AGE = 50;
 
@@ -209,6 +214,27 @@ export async function replaySimulatorRecords(
 
     if (record.eventId === 'no_event') {
       outcomeTexts.push('');
+      if (nextRecord === undefined || nextRecord.age !== record.age) {
+        finishYear(record.age);
+      }
+      continue;
+    }
+
+    const activeActionId =
+      record.progressionKind === 'active_action'
+        ? record.activeActionId
+        : isActiveActionReplayEventId(record.eventId)
+          ? resolveActiveActionIdFromReplayEvent(record.eventId)
+          : null;
+
+    if (activeActionId) {
+      const result = engine.executeActiveAction(activeActionId, { random: ACTIVE_ACTION_REPLAY_RANDOM });
+      if (!result) {
+        throw new Error(`Active action replay failed: ${activeActionId} at age ${record.age}`);
+      }
+      engine.consumeLastEventOutcomeNote();
+      enforceRouteTrackIsolation(engine.getGameState(), options.routeTrack);
+      outcomeTexts.push(record.outcomeText ?? result.feedbackText ?? '');
       if (nextRecord === undefined || nextRecord.age !== record.age) {
         finishYear(record.age);
       }

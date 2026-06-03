@@ -7,6 +7,10 @@ import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import type { LifeMemorySummary } from '../../types/lifeMemory';
 import type { GameState } from '../../types/eventTypes';
 import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
+import {
+  ACTIVE_ACTION_EVENT_PREFIX,
+  isActiveActionReplayEventId,
+} from '../../core/activePlanning/activeActionReplay';
 
 export type ParityMismatchCategory =
   | 'snapshot_hash'
@@ -73,13 +77,21 @@ function sortedEventHistory(state: GameState) {
 
 const MISSING_HISTORY_CHOICE = '__MISSING__';
 
+function isParityFormalEventRecord(record: GameProcessRecord): boolean {
+  if (record.eventId === 'no_event') return false;
+  if (record.progressionKind === 'active_action') return false;
+  if (isActiveActionReplayEventId(record.eventId)) return false;
+  if (record.eventId.startsWith(ACTIVE_ACTION_EVENT_PREFIX)) return false;
+  return true;
+}
+
 export function digestRecordAlignedEventHistory(
   state: GameState,
   records: GameProcessRecord[],
 ): string {
   const history = sortedEventHistory(state);
   const aligned = records
-    .filter(record => record.eventId !== 'no_event')
+    .filter(isParityFormalEventRecord)
     .map(record => {
       const match = history.find(
         entry => entry.eventId === record.eventId && entry.age === record.age,

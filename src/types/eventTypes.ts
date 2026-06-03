@@ -645,6 +645,9 @@ export interface EventChoice {
   metadata?: {
     hidden?: boolean;
     visibleCondition?: EventCondition;
+    rewardSummary?: string;
+    costSummary?: string;
+    riskLevel?: string;
   };
 }
 
@@ -1059,6 +1062,15 @@ export interface GameState {
     timestamp: number;
   }>;
   ending?: unknown;
+
+  /** P7: active action history entries */
+  actionHistory?: import('./activeActionTypes').ActionHistoryEntry[];
+  /** P7: consecutive same-category action streak */
+  actionFocusStreak?: import('./activeActionTypes').ActionFocusStreak;
+  /** P7: self-awareness for implicit attribute visibility (0–100) */
+  selfAwareness?: number;
+  /** P7: transient player-facing feedback (e.g. locked choice) */
+  playerFeedbackMessage?: string;
 }
 
 /**

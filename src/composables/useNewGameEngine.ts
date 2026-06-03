@@ -20,6 +20,16 @@ import type { ChoiceFeedbackModel } from '../types';
 interface EventState {
   currentEvent: EventDefinition | null;
   availableChoices: StoryChoice[];
+  availableActiveActions: Array<{
+    id: string;
+    text: string;
+    description: string;
+    actionId: string;
+    rewardSummary: string;
+    costSummary: string;
+    riskLevel: string;
+  }>;
+  isActiveActionMode: boolean;
   isAutoPlaying: boolean;
   lastEffects: Effect[];
   lastOutcomeText: string | null;
@@ -38,6 +48,8 @@ function getEngineStateInstance() {
       state: reactive<EventState>({
         currentEvent: null,
         availableChoices: [],
+        availableActiveActions: [],
+        isActiveActionMode: false,
         isAutoPlaying: false,
         lastEffects: [],
         lastOutcomeText: null,
@@ -68,6 +80,8 @@ export function useNewGameEngine() {
     const selectedEvent = gameEngine.selectEvent(age);
 
     if (selectedEvent) {
+      engineState.isActiveActionMode = false;
+      engineState.availableActiveActions = [];
       engineState.currentEvent = selectedEvent;
       engineState.lastEffects = [];
 
@@ -95,18 +109,36 @@ export function useNewGameEngine() {
           return;
         }
         // 如果是选择事件，准备选择项
-        engineState.availableChoices = selectedEvent.choices.map(choice => ({
-          id: choice.id,
-          text: choice.text,
-          description: choice.description,
-          outcomes: choice.outcomes as any,
-          requirements: choice.requirements,
-        })) as any;
+        engineState.availableChoices = selectedEvent.choices.map(choice => {
+          const explanation = choice.condition
+            ? gameEngine.explainChoice(choice.id, choice.condition)
+            : null;
+          return {
+            id: choice.id,
+            text: choice.text,
+            description: choice.description,
+            outcomes: choice.outcomes as any,
+            requirements: choice.requirements,
+            condition: choice.condition,
+            locked: explanation ? !explanation.available : false,
+            lockReason: explanation?.summary,
+            rewardSummary: choice.metadata?.rewardSummary,
+            costSummary: choice.metadata?.costSummary,
+            riskLevel: choice.metadata?.riskLevel,
+          };
+        }) as any;
       }
     } else {
-      // 没有可用事件，推进时间
-      gameEngine.advanceTime(1);
-      getNextEvent();
+      const actions = gameEngine.getAvailableActiveActions();
+      if (actions.length > 0) {
+        engineState.currentEvent = null;
+        engineState.availableChoices = [];
+        engineState.availableActiveActions = actions;
+        engineState.isActiveActionMode = true;
+      } else {
+        gameEngine.advanceTime(3, 'month');
+        getNextEvent();
+      }
     }
   };
 
@@ -208,6 +240,8 @@ export function useNewGameEngine() {
     }
 
     if (selectedChoice.condition && !gameEngine.isChoiceAvailable(selectedChoice.condition)) {
+      const explanation = gameEngine.explainChoice(selectedChoice.id, selectedChoice.condition);
+      gameEngine.setPlayerFeedbackMessage(explanation.summary);
       console.warn('[NewGameEngine] 选择项条件不满足，已拒绝执行:', {
         source: context?.source ?? 'manual',
         eventId: context?.eventId ?? currentEvent.id,
@@ -304,6 +338,46 @@ export function useNewGameEngine() {
     }
   };
 
+  /**
+   * P7: 执行主动行动
+   */
+  const handleActiveAction = async (actionId: string): Promise<boolean> => {
+    if (isProcessing.value || !engineState.isActiveActionMode) return false;
+
+    isProcessing.value = true;
+    engineState.isAutoPlaying = true;
+    const ageBefore = gameEngine.getGameState().player?.age ?? 0;
+
+    try {
+      const result = gameEngine.executeActiveAction(actionId, { random: Math.random });
+      if (!result) {
+        isProcessing.value = false;
+        engineState.isAutoPlaying = false;
+        return false;
+      }
+
+      engineState.lastOutcomeText = result.feedbackText;
+      engineState.lastChoiceFeedback = null;
+      engineState.availableActiveActions = [];
+      engineState.isActiveActionMode = false;
+      engineState.isAutoPlaying = false;
+      isProcessing.value = false;
+
+      const ageAfter = gameEngine.getGameState().player?.age ?? 0;
+      if (ageAfter - ageBefore >= 1) {
+        console.warn('[NewGameEngine] Active action caused year-scale advance', actionId);
+      }
+
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      return true;
+    } catch (error) {
+      console.error('[NewGameEngine] 执行主动行动失败:', error);
+      engineState.isAutoPlaying = false;
+      isProcessing.value = false;
+      return false;
+    }
+  };
+
   const pickAutoChoice = (choices: any[], state: any, eventId: string) => {
     let best = choices[0];
     let bestScore = -Infinity;
@@ -382,6 +456,8 @@ export function useNewGameEngine() {
     gameEngine.startNewGame(name, gender);
     engineState.currentEvent = null;
     engineState.availableChoices = [];
+    engineState.availableActiveActions = [];
+    engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     engineState.lastOutcomeText = null;
@@ -401,6 +477,8 @@ export function useNewGameEngine() {
     gameEngine.resetGame();
     engineState.currentEvent = null;
     engineState.availableChoices = [];
+    engineState.availableActiveActions = [];
+    engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     engineState.lastOutcomeText = null;
@@ -426,6 +504,8 @@ export function useNewGameEngine() {
     gameEngine.loadGameState(saveData.gameData);
     engineState.currentEvent = null;
     engineState.availableChoices = [];
+    engineState.availableActiveActions = [];
+    engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     engineState.lastOutcomeText = null;
@@ -606,6 +686,7 @@ export function useNewGameEngine() {
     startNewGame,
     restartGame,
     handleChoice,
+    handleActiveAction,
     getNextEvent,
     getGameState,
     saveCurrentGame,
@@ -616,6 +697,8 @@ export function useNewGameEngine() {
     // 计算属性
     currentEvent: computed(() => engineState.currentEvent),
     availableChoices: computed(() => engineState.availableChoices),
+    availableActiveActions: computed(() => engineState.availableActiveActions),
+    isActiveActionMode: computed(() => engineState.isActiveActionMode),
     isAutoPlaying: computed(() => engineState.isAutoPlaying),
     lastEffects: computed(() => engineState.lastEffects),
   };

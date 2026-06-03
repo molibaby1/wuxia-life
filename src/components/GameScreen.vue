@@ -118,9 +118,12 @@
           v-for="choice in availableChoices"
           :key="choice.id"
           class="choice-btn btn"
+          :class="{ 'choice-locked': choice.locked }"
           @click="makeChoice(choice)"
         >
-          {{ choice.text }}
+          <span class="choice-text">{{ choice.text }}</span>
+          <span v-if="choice.locked" class="lock-hint">🔒 {{ choice.lockReason || '条件不足' }}</span>
+          <span v-else-if="choice.description" class="choice-desc">{{ choice.description }}</span>
         </button>
       </div>
     </div>
@@ -468,6 +471,25 @@ const loadLatestSave = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.choice-btn.choice-locked {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.lock-hint {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.choice-desc {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }
 
 .choice-btn {

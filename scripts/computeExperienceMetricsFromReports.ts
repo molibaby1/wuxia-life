@@ -33,7 +33,13 @@ function buildTimeline(report: GameProcessReport): TimelineEvent[] {
   const timeline: TimelineEvent[] = [];
 
   for (const record of report.records) {
-      if (!record.eventId || record.eventId === 'no_event') {
+      if (
+        !record.eventId ||
+        record.eventId === 'no_event' ||
+        record.progressionKind === 'active_action' ||
+        record.eventId.startsWith('active_action:') ||
+        record.eventId.startsWith('active_action_')
+      ) {
         continue;
       }
       const title = record.eventTitle || record.eventId;

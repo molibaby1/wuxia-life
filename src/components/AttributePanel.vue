@@ -14,6 +14,7 @@
         <h4>战斗属性</h4>
         <div class="stat-item" v-for="stat in combatStats" :key="stat.key">
           <span class="stat-name">{{ stat.name }}</span>
+          <span v-if="stat.purpose" class="stat-purpose">{{ stat.purpose }}</span>
           <div class="stat-value-wrapper">
             <span class="stat-value">{{ stat.value }}</span>
             <span class="stat-max" v-if="stat.max">/{{ stat.max }}</span>
@@ -37,6 +38,8 @@
         <h4>非战斗属性</h4>
         <div class="stat-item" v-for="stat in nonCombatStats" :key="stat.key">
           <span class="stat-name">{{ stat.name }}</span>
+          <span v-if="stat.purpose" class="stat-purpose">{{ stat.purpose }}</span>
+          <span v-if="stat.displayLabel" class="stat-fuzzy">{{ stat.displayLabel }}</span>
           <div class="stat-value-wrapper">
             <span class="stat-value">{{ stat.value }}</span>
             <span class="stat-growth" v-if="stat.growth">
@@ -149,33 +152,20 @@
         </div>
       </div>
 
-      <!-- 发展建议 -->
+      <!-- 属性认知指引（P7） -->
       <div class="suggestions-section">
-        <h4>发展建议</h4>
+        <h4>属性认知</h4>
         <div class="suggestion-list">
-          <div 
-            v-for="suggestion in developmentSuggestions" 
-            :key="suggestion.id"
-            class="suggestion-item"
-            :class="suggestion.priority"
+          <div
+            v-for="tip in attributeGuidanceTips"
+            :key="tip.key"
+            class="suggestion-item recommended"
           >
             <div class="suggestion-header">
-              <span class="suggestion-title">{{ suggestion.title }}</span>
-              <span class="suggestion-path">{{ suggestion.path }}</span>
+              <span class="suggestion-title">{{ tip.name }}</span>
             </div>
-            <p class="suggestion-desc">{{ suggestion.description }}</p>
-            <div class="suggestion-requirements">
-              <div 
-                v-for="(req, key) in suggestion.requirements" 
-                :key="key"
-                class="requirement"
-                :class="{ met: req?.met }"
-              >
-                {{ req?.name || key }}: {{ req?.current || 0 }}/{{ req?.required || 0 }}
-                <check-icon v-if="req?.met" class="check-icon" />
-                <x-icon v-else class="x-icon" />
-              </div>
-            </div>
+            <p class="suggestion-desc">{{ tip.purpose }}</p>
+            <p v-if="tip.example" class="suggestion-desc">{{ tip.example }}</p>
           </div>
         </div>
       </div>
@@ -186,7 +176,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { ArrowUpIcon, ArrowDownIcon, CheckIcon, XIcon } from 'lucide-vue-next';
-import type { PlayerState, TalentDefinition } from '@/types/eventTypes';
+import type { PlayerState, TalentDefinition } from '../types/eventTypes';
+import {
+  attributeMeaningCatalog,
+  defaultSelfAwareness,
+  fuzzyLabelForStat,
+  getAttributeMeaning,
+  preciseLabelForStat,
+} from '../data/attributeMeanings';
 
 interface Props {
   player: PlayerState;
@@ -225,25 +222,64 @@ const nonCombatStatConfigs = [
 ];
 
 // 获取战斗属性
+const selfAwarenessScore = computed(() => defaultSelfAwareness(props.player));
+
+const statPurpose = (key: string): string | undefined => getAttributeMeaning(key)?.purpose;
+
+const implicitDisplayLabel = (key: string, value: number): string | undefined => {
+  const meaning = getAttributeMeaning(key);
+  if (!meaning || meaning.visibilityTier === 'explicit' || meaning.visibilityTier === 'hidden') {
+    return undefined;
+  }
+  if (meaning.visibilityTier === 'implicit' && selfAwarenessScore.value < 40) {
+    return fuzzyLabelForStat(key);
+  }
+  if (meaning.visibilityTier === 'semi_implicit' && selfAwarenessScore.value < 55) {
+    return fuzzyLabelForStat(key);
+  }
+  if (meaning.visibilityTier === 'implicit' || meaning.visibilityTier === 'semi_implicit') {
+    return preciseLabelForStat(key, value);
+  }
+  return undefined;
+};
+
 const combatStats = computed(() => {
   return combatStatConfigs.map(config => ({
     key: config.key,
     name: config.name,
     value: props.player[config.key as keyof PlayerState] as number || 0,
     max: config.max || 100,
-    growth: 0 // TODO: 从成长系统获取
+    growth: 0,
+    purpose: statPurpose(config.key),
   }));
 });
 
 // 获取非战斗属性
 const nonCombatStats = computed(() => {
-  return nonCombatStatConfigs.map(config => ({
-    key: config.key,
-    name: config.name,
-    value: props.player[config.key as keyof PlayerState] as number || 0,
-    growth: 0 // TODO: 从成长系统获取
-  }));
+  return nonCombatStatConfigs.map(config => {
+    const value = props.player[config.key as keyof PlayerState] as number || 0;
+    return {
+      key: config.key,
+      name: config.name,
+      value,
+      growth: 0,
+      purpose: statPurpose(config.key),
+      displayLabel: implicitDisplayLabel(config.key, value),
+    };
+  });
 });
+
+const attributeGuidanceTips = computed(() =>
+  attributeMeaningCatalog
+    .filter(entry => entry.visibilityTier === 'explicit' || entry.visibilityTier === 'semi_implicit')
+    .slice(0, 6)
+    .map(entry => ({
+      key: entry.key,
+      name: entry.name,
+      purpose: entry.purpose,
+      example: entry.examples[0] ? `例：${entry.examples[0]}` : '',
+    })),
+);
 
 // 获取玩家天赋
 const playerTalents = computed(() => {
@@ -489,127 +525,6 @@ const calculateTalentBonus = (statKey: string): number => {
   return bonus;
 };
 
-// 发展建议
-const developmentSuggestions = computed(() => {
-  const suggestions = [];
-  
-  // 仕途线建议
-  const officialReq = {
-    knowledge: 60,
-    charisma: 50,
-    connections: 40
-  };
-  const officialMet = {
-    knowledge: (props.player.knowledge || 0) >= officialReq.knowledge,
-    charisma: (props.player.charisma || 0) >= officialReq.charisma,
-    connections: (props.player.connections || 0) >= officialReq.connections
-  };
-  const officialAllMet = Object.values(officialMet).every(v => v);
-  
-  suggestions.push({
-    id: 'official',
-    title: '入仕为官',
-    path: '仕途',
-    priority: officialAllMet ? 'recommended' : 'locked',
-    description: '通过科举入仕，官至高位，流芳百世',
-    requirements: {
-      knowledge: {
-        name: '学识',
-        current: props.player.knowledge || 0,
-        required: officialReq.knowledge,
-        met: officialMet.knowledge
-      },
-      charisma: {
-        name: '魅力',
-        current: props.player.charisma || 0,
-        required: officialReq.charisma,
-        met: officialMet.charisma
-      },
-      connections: {
-        name: '人脉',
-        current: props.player.connections || 0,
-        required: officialReq.connections,
-        met: officialMet.connections
-      }
-    }
-  });
-  
-  // 商业线建议
-  const merchantReq = {
-    wealth: 500,
-    charisma: 40,
-    connections: 30
-  };
-  const merchantMet = {
-    wealth: (props.player.wealth || 0) >= merchantReq.wealth,
-    charisma: (props.player.charisma || 0) >= merchantReq.charisma,
-    connections: (props.player.connections || 0) >= merchantReq.connections
-  };
-  const merchantAllMet = Object.values(merchantMet).every(v => v);
-  
-  suggestions.push({
-    id: 'merchant',
-    title: '经商致富',
-    path: '商业',
-    priority: merchantAllMet ? 'recommended' : 'locked',
-    description: '投资经商，积累财富，成一方首富',
-    requirements: {
-      wealth: {
-        name: '财富',
-        current: props.player.wealth || 0,
-        required: merchantReq.wealth,
-        met: merchantMet.wealth
-      },
-      charisma: {
-        name: '魅力',
-        current: props.player.charisma || 0,
-        required: merchantReq.charisma,
-        met: merchantMet.charisma
-      },
-      connections: {
-        name: '人脉',
-        current: props.player.connections || 0,
-        required: merchantReq.connections,
-        met: merchantMet.connections
-      }
-    }
-  });
-  
-  // 隐士线建议
-  const hermitReq = {
-    chivalry: 60,
-    knowledge: 40
-  };
-  const hermitMet = {
-    chivalry: (props.player.chivalry || 0) >= hermitReq.chivalry,
-    knowledge: (props.player.knowledge || 0) >= hermitReq.knowledge
-  };
-  const hermitAllMet = Object.values(hermitMet).every(v => v);
-  
-  suggestions.push({
-    id: 'hermit',
-    title: '江湖隐士',
-    path: '隐士',
-    priority: hermitAllMet ? 'recommended' : 'locked',
-    description: '远离尘世，专心修炼，成世外高人',
-    requirements: {
-      chivalry: {
-        name: '侠义',
-        current: props.player.chivalry || 0,
-        required: hermitReq.chivalry,
-        met: hermitMet.chivalry
-      },
-      knowledge: {
-        name: '学识',
-        current: props.player.knowledge || 0,
-        required: hermitReq.knowledge,
-        met: hermitMet.knowledge
-      }
-    }
-  });
-  
-  return suggestions;
-});
 </script>
 
 <style scoped>
@@ -671,6 +586,22 @@ const developmentSuggestions = computed(() => {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 4px;
+}
+
+.stat-purpose {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.stat-fuzzy {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 215, 128, 0.75);
+  margin-bottom: 4px;
+  font-style: italic;
 }
 
 .stat-value-wrapper {

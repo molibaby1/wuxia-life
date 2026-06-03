@@ -31,6 +31,13 @@ import { dailyEventSystem } from './DailyEventSystem';
 import { isCoreRouteIdentity } from './RouteStateManager';
 import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
 import { appendFormalEventHistory } from './EventHistory';
+import {
+  buildActiveActionChoices,
+  executeActiveActionOnState,
+  hasPendingForcedEvent as checkPendingForcedEvent,
+} from './activePlanning/ActivePlanningService';
+import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
+import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
 
 /** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
 const FORMAL_CANDIDATE_POOL_CAP = 12;
@@ -2464,6 +2471,45 @@ export class GameEngineIntegration {
     const note = this.pendingEventOutcomeNote;
     this.pendingEventOutcomeNote = null;
     return note;
+  }
+
+  /** P7: whether a critical/mandatory event is pending at current age */
+  public hasPendingForcedEvent(): boolean {
+    const age = this.gameState.player?.age ?? 0;
+    return checkPendingForcedEvent(age => this.getAvailableEvents(age), age);
+  }
+
+  /** P7: minimum active actions when no story event was selected */
+  public getAvailableActiveActions() {
+    return buildActiveActionChoices();
+  }
+
+  /** P7: execute one active action (resolver + time + history) */
+  public executeActiveAction(actionId: string, options?: { random?: () => number }): ActiveActionExecutionResult | null {
+    this.conditionEvaluator.clearCache();
+    const result = executeActiveActionOnState(this.gameState, actionId, {
+      random: options?.random,
+      includeDisturbance: true,
+    });
+    if (result) {
+      this.pendingEventOutcomeNote = result.feedbackText;
+    }
+    return result;
+  }
+
+  /** P7: explain choice lock state for UI */
+  public explainChoice(choiceId: string, condition: Condition | undefined) {
+    return explainChoiceRequirement(choiceId, condition as import('../types/eventTypes').EventCondition | undefined, this.gameState, this.conditionEvaluator);
+  }
+
+  public setPlayerFeedbackMessage(message: string | null): void {
+    this.gameState.playerFeedbackMessage = message ?? undefined;
+  }
+
+  public consumePlayerFeedbackMessage(): string | null {
+    const msg = this.gameState.playerFeedbackMessage ?? null;
+    this.gameState.playerFeedbackMessage = undefined;
+    return msg;
   }
 }
 

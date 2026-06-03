@@ -18,7 +18,14 @@
 - Release validation should treat warning hygiene as a first-class gate: pass checks must be accompanied by no unresolved critical warnings in test/build logs.
 - Main-flow save/load恢复应通过 `gameEngine.loadGameState(...)` 回填完整引擎状态，再由 `useNewGameEngine.getNextEvent()` 接回事件循环，避免读档后出现“状态恢复了但流程停住”。
 - 结局阶段不应暴露“保存”入口；若需支持结局后继续，优先提供“读取最近存档”并复用 `loadGameFromSave` 回到主流程，避免引入结束态存档语义歧义。
-- 模拟器的“存档后立即读档一致性”应采用固定关键字段快照（年龄/生存状态/核心属性/时间/历史计数）比对，并把检查结果写入报告结构，避免只看日志无法自动判断是否一致。
+- P7 active planning: when `selectEvent()` returns null, main flow offers `getAvailableActiveActions()` (training/study/socializing) via `executeActiveAction` with quarter/month time — do not `advanceTime(1)` as ordinary fallback. Simulator catch-up uses `advanceTime(3, 'month')`. Action/history types live under `src/types/activeActionTypes.ts` and `src/core/activePlanning/`.
+
+## [2026-06-03 08:16] - P7 US-001..US-040 (active-life-planning-and-attribute-cognition)
+- Completed full P7 Ralph run: baselines (US-001–004), design guardrails (US-005–008, 019–020, 027, 032, 035, 039), action layer (US-009–015), time granularity (US-016–018), attribute cognition (US-021–026), choice UX (US-028–031), disturbance (US-033–034), reports (US-036–038), closure (US-040).
+- Key files: `src/core/activePlanning/*`, `src/data/activeActionCatalog.ts`, `src/data/attributeMeanings.ts`, `tests/p7ActivePlanningTests.ts`, `docs/test-reports/p7-*`, `docs/designs/p7-*`.
+- **Learnings:** Condition cache hash must iterate `ConditionEvaluator.DIRECT_PLAYER_PROPERTIES`; post-action UI needs synthetic `currentNode` when `currentEvent` is null but `lastOutcomeText` is set.
+- Validation: `npm run typecheck` ✅, `npm test` ✅
+---
 
 ## [2026-04-27 08:24] - US-020
 - Implemented predictable restart/continue/post-ending save behavior in the UI flow by adding an explicit ending-screen "load latest save" action wired in `App`, while keeping restart as state reset only.

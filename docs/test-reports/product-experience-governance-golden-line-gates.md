@@ -1,6 +1,6 @@
 # Product Experience Governance — Golden Line Gates (PXG4)
 
-生成时间：2026-06-02T00:54:21.580Z
+生成时间：2026-06-03T00:33:06.346Z
 
 结果：**PASS**
 
@@ -18,8 +18,8 @@
 | golden-sect | sect | 50 | 24 |
 | golden-wanderer | wanderer | 50 | 29 |
 | golden-demonic | demonic | 50 | 22 |
-| golden-neutral-baseline | neutral | 50 | 25 |
-| golden-romance-family | neutral | 50 | 24 |
+| golden-neutral-baseline | neutral | 50 | 27 |
+| golden-romance-family | neutral | 50 | 26 |
 
 ## Payoff coverage (static vs simulated)
 

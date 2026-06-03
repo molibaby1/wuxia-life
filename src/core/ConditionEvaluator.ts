@@ -15,6 +15,7 @@ import type {
   GameState,
   IConditionEvaluator,
 } from '../types/eventTypes';
+import { readPlayerNumeric } from '../utils/playerStatAccess';
 
 export type Condition = EventCondition;
 
@@ -111,16 +112,12 @@ export class ConditionEvaluator implements IConditionEvaluator {
    * 获取状态哈希（用于缓存）
    */
   private getStateHash(state: GameState): string {
-    // 简化的哈希，只考虑关键属性
+    const playerSlice: Record<string, unknown> = {};
+    for (const key of ConditionEvaluator.DIRECT_PLAYER_PROPERTIES) {
+      playerSlice[key] = readPlayerNumeric(state.player, key);
+    }
     return JSON.stringify({
-      player: {
-        age: state.player.age,
-        martialPower: state.player.martialPower,
-        externalSkill: state.player.externalSkill,
-        internalSkill: state.player.internalSkill,
-        qinggong: state.player.qinggong,
-        chivalry: state.player.chivalry,
-      },
+      player: playerSlice,
       flags: state.flags,
       triggeredEvents: state.triggeredEvents,
     });

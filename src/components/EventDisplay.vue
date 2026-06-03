@@ -33,7 +33,7 @@
       >
         <span class="choice-text">{{ choice.text }}</span>
         <span v-if="choice.condition && !isChoiceAvailable(choice)" class="choice-locked">
-          🔒 条件不足
+          🔒 {{ choice.lockReason || '条件不足' }}
         </span>
       </button>
     </div>
@@ -52,8 +52,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { EventDefinition, Effect } from '../types/eventTypes';
+import type { EventDefinition, Effect, EventCondition } from '../types/eventTypes';
 import type { StoryChoice } from '../types';
+import { gameEngine } from '../core/GameEngineIntegration';
+
+function asEventCondition(
+  condition: StoryChoice['condition'],
+): EventCondition | undefined {
+  if (!condition || typeof condition === 'function') {
+    return undefined;
+  }
+  if (typeof condition === 'object' && condition.type === 'expression' && 'expression' in condition) {
+    return condition as EventCondition;
+  }
+  return undefined;
+}
 
 interface Props {
   event: EventDefinition | null;
@@ -74,17 +87,19 @@ const emit = defineEmits<{
 
 // 检查选择是否可用
 const isChoiceAvailable = (choice: StoryChoice): boolean => {
-  if (!choice.condition) return true;
-  
-  // 这里可以集成条件评估器
-  // 暂时简化处理
-  return true;
+  if (choice.locked) return false;
+  const condition = asEventCondition(choice.condition);
+  if (!condition) return true;
+  return gameEngine.isChoiceAvailable(condition);
 };
 
-// 处理选择
 const handleChoice = (choice: StoryChoice) => {
   if (isChoiceAvailable(choice)) {
     emit('choice', choice);
+  } else {
+    const condition = asEventCondition(choice.condition);
+    const explanation = gameEngine.explainChoice(choice.id, condition);
+    gameEngine.setPlayerFeedbackMessage(explanation.summary);
   }
 };
 

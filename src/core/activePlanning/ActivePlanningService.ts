@@ -15,12 +15,20 @@ import { EventPriority } from '../../types/eventTypes';
 import type { EventDefinition } from '../../types/eventTypes';
 import { resolveActiveAction } from './ActionResultResolver';
 import { resolveDisturbanceAfterAction } from './DisturbanceResolver';
+import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
+import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
+import type {
+  ActiveActionSummaryDisplay,
+  DisturbanceNarrativeDisplay,
+} from '../../types/activeActionTypes';
 
 export interface ActiveActionExecutionResult {
   actionResult: ActionResult;
   disturbanceId: string | null;
   disturbanceTitle: string | null;
   feedbackText: string;
+  activeActionSummary: ActiveActionSummaryDisplay;
+  disturbanceNarrative: DisturbanceNarrativeDisplay | null;
 }
 
 function durationToAdvanceUnit(duration: ActionDuration): { value: number; unit: 'month' | 'year' } {
@@ -116,6 +124,7 @@ export function executeActiveActionOnState(
 
   let disturbanceId: string | null = null;
   let disturbanceTitle: string | null = null;
+  let disturbanceNarrative: DisturbanceNarrativeDisplay | null = null;
   if (options?.includeDisturbance !== false) {
     const disturbance = resolveDisturbanceAfterAction({
       state,
@@ -131,17 +140,34 @@ export function executeActiveActionOnState(
         duration: { value: 0, unit: 'month' },
         deltas: {},
         sourceKind: 'random_disturbance',
+        narrativeShownToPlayer: false,
       });
+      disturbanceNarrative = buildDisturbanceNarrativeDisplay(
+        disturbance.id,
+        disturbance.title,
+        resolved,
+      );
     }
   }
 
-  const feedbackText = `${resolved.metadata.category === 'training' ? '练功' : resolved.metadata.category === 'study' ? '读书' : '交游'}告一段落。${resolved.metadata.rewardSummary}${disturbanceTitle ? `；${disturbanceTitle}` : ''}`;
+  const activeActionSummary = buildActiveActionSummaryDisplay(resolved, {
+    hasPendingDisturbance: disturbanceNarrative !== null,
+  });
+  const categoryLabel =
+    resolved.metadata.category === 'training'
+      ? '练功'
+      : resolved.metadata.category === 'study'
+        ? '读书'
+        : '交游';
+  const feedbackText = `${categoryLabel}告一段落。${resolved.metadata.rewardSummary}`;
 
   return {
     actionResult: resolved,
     disturbanceId,
     disturbanceTitle,
     feedbackText,
+    activeActionSummary,
+    disturbanceNarrative,
   };
 }
 

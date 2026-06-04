@@ -56,11 +56,43 @@
     </div>
 
     <LifeMemoryPanel :summary="lifeMemorySummary" />
-    
+
     <div class="content-area">
+      <p v-if="apiMode" class="api-boundary-notice">
+        服务端模式暂不支持主动人生规划。当前进度由服务器推送剧情事件驱动；若需安排练功、读书与交游，请使用本地模式开始游戏。
+      </p>
+
       <div v-if="currentNode" class="story-card card">
-        <p class="story-text">{{ currentNode.text }}</p>
+        <p
+          v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay"
+          class="story-text"
+        >
+          {{ currentNode.text }}
+        </p>
+
+        <div v-if="activeActionSummaryDisplay" class="progression-card active-action-summary-card">
+          <span class="progression-source-label">{{ activeActionSummaryDisplay.sourceLabel }}</span>
+          <h3 class="progression-card-title">{{ activeActionSummaryDisplay.actionName }}</h3>
+          <dl class="progression-detail-list">
+            <div><dt>耗时</dt><dd>{{ activeActionSummaryDisplay.durationLabel }}</dd></div>
+            <div><dt>收益</dt><dd>{{ activeActionSummaryDisplay.rewardSummary }}</dd></div>
+            <div><dt>消耗</dt><dd>{{ activeActionSummaryDisplay.costSummary }}</dd></div>
+            <div><dt>风险</dt><dd>{{ activeActionSummaryDisplay.riskSummary }}</dd></div>
+          </dl>
+          <p class="progression-hint">{{ activeActionSummaryDisplay.nextStepHint }}</p>
+        </div>
+
+        <div v-if="disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
+          <span class="progression-source-label">{{ disturbanceNarrativeDisplay.sourceLabel }}</span>
+          <h3 class="progression-card-title">{{ disturbanceNarrativeDisplay.title }}</h3>
+          <p class="disturbance-body">{{ disturbanceNarrativeDisplay.bodyText }}</p>
+          <p class="progression-meta">缘起：{{ disturbanceNarrativeDisplay.sourceActionName }}</p>
+          <p class="progression-meta">{{ disturbanceNarrativeDisplay.impactSummary }}</p>
+          <p class="progression-hint">{{ disturbanceNarrativeDisplay.returnToPlanHint }}</p>
+        </div>
+
         <div v-if="displayedNarrative" class="outcome-section">
+          <span v-if="storyEventSourceLabel" class="progression-source-label">{{ storyEventSourceLabel }}</span>
           <p class="outcome-text">{{ displayedNarrative }}</p>
           <p v-if="showNarrativeFallbackHint" class="outcome-fallback-hint">
             反馈细节暂不完整，后续影响仍在推进。
@@ -157,7 +189,8 @@ const emit = defineEmits<{
 }>();
 
 // 使用 useNewGameEngine 获取 lastOutcomeText
-const { engineState, getNextEvent, saveCurrentGame, loadGameFromSave, getAllSaves } = useNewGameEngine();
+const { engineState, continueProgressionFlow, saveCurrentGame, loadGameFromSave, getAllSaves } =
+  useNewGameEngine();
 
 const lastOutcomeText = computed(() => {
   return engineState.lastOutcomeText;
@@ -205,12 +238,39 @@ const hasStructuredFeedback = computed(() => {
   );
 });
 
+const activeActionSummaryDisplay = computed(() => {
+  if (engineState.showingDisturbanceNarrative) return null;
+  return engineState.lastActiveActionSummary;
+});
+
+const disturbanceNarrativeDisplay = computed(() => {
+  if (!engineState.showingDisturbanceNarrative) return null;
+  return engineState.pendingDisturbanceNarrative;
+});
+
+const storyEventSourceLabel = computed(() => {
+  if (activeActionSummaryDisplay.value || disturbanceNarrativeDisplay.value) return null;
+  if (!props.currentNode?.id || props.currentNode.id.startsWith('active_')) return null;
+  if (props.currentNode.id === 'action_or_choice_result' || props.currentNode.id === 'disturbance_narrative') {
+    return null;
+  }
+  const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
+  if (!narrative) return null;
+  return '剧情事件';
+});
+
 const displayedNarrative = computed(() => {
+  if (activeActionSummaryDisplay.value || disturbanceNarrativeDisplay.value) {
+    return null;
+  }
   const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
   if (narrative) {
     return narrative;
   }
-  return lastOutcomeText.value || '你的选择激起了涟漪，后续影响仍在发酵。';
+  if (lastOutcomeText.value) {
+    return lastOutcomeText.value;
+  }
+  return null;
 });
 
 const showNarrativeFallbackHint = computed(() => {
@@ -221,13 +281,8 @@ const showNarrativeFallbackHint = computed(() => {
   return fallbackUsed || !hasStructuredFeedback.value;
 });
 
-// 继续到下一个事件
 const continueToNext = () => {
-  // 清除结果文本
-  engineState.lastOutcomeText = null;
-  engineState.lastChoiceFeedback = null;
-  // 获取下一个事件
-  getNextEvent();
+  continueProgressionFlow();
 };
 
 // 加载天赋定义
@@ -511,6 +566,87 @@ const loadLatestSave = () => {
   font-size: 0.95rem;
   line-height: 1.6;
   margin: 0;
+}
+
+.api-boundary-notice {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(139, 105, 20, 0.12);
+  border: 1px solid rgba(139, 105, 20, 0.35);
+  color: #5c4a1a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.progression-card {
+  margin-top: 1rem;
+  padding: 14px 16px;
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.active-action-summary-card {
+  background: linear-gradient(135deg, rgba(34, 139, 34, 0.08), rgba(139, 90, 43, 0.1));
+  border-left: 4px solid #2e7d32;
+}
+
+.disturbance-narrative-card {
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.1), rgba(139, 90, 43, 0.06));
+  border-left: 4px solid #4682b4;
+}
+
+.progression-source-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b6914;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.progression-card-title {
+  margin: 0 0 10px;
+  font-size: 17px;
+  color: var(--primary-color);
+}
+
+.progression-detail-list {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.progression-detail-list div {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.progression-detail-list dt {
+  margin: 0;
+  color: #8b6914;
+  font-weight: 600;
+}
+
+.progression-detail-list dd {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.progression-meta,
+.disturbance-body,
+.progression-hint {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.progression-hint {
+  color: #5c4a1a;
+  font-style: italic;
 }
 
 .outcome-section {

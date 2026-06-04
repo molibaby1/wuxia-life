@@ -33,6 +33,7 @@ import {
 import { computeExperienceDerivedMetrics } from '../scripts/computeExperienceMetricsFromReports';
 import { GameProcessSimulator } from './GameProcessSimulator';
 import { runAllP7Tests } from './p7ActivePlanningTests';
+import { runAllP71Tests } from './p71ActiveActionExperienceTests';
 import {
   buildDeathRiskTelemetry,
   inferSimulationCohort,
@@ -3363,6 +3364,13 @@ const coreFunctionSuite: TestSuite = {
       description: 'P7 active planning closure tests',
       test: async () => {
         await runAllP7Tests();
+      },
+    },
+    {
+      name: 'P7.1 active action experience closure',
+      description: 'P7.1 summary cards, disturbance narrative, visibility report',
+      test: async () => {
+        await runAllP71Tests();
       },
     },
   ],

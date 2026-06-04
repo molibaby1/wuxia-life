@@ -45,6 +45,7 @@
     "test:p6b:db": "bash scripts/p6b/runWithEnv.sh tsx tests/server/runP6bDbTests.ts",
     "gate:p6b": "tsx scripts/runP6bGate.ts",
     "report:experience-governance-closure": "tsx scripts/generateExperienceGovernanceClosureReport.ts",
+    "report:p7-1-closure": "tsx scripts/generateP71ClosureReport.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
     "build": "vue-tsc -b && vite build",

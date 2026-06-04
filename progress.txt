@@ -19,6 +19,13 @@
 - Main-flow save/load恢复应通过 `gameEngine.loadGameState(...)` 回填完整引擎状态，再由 `useNewGameEngine.getNextEvent()` 接回事件循环，避免读档后出现“状态恢复了但流程停住”。
 - 结局阶段不应暴露“保存”入口；若需支持结局后继续，优先提供“读取最近存档”并复用 `loadGameFromSave` 回到主流程，避免引入结束态存档语义歧义。
 - P7 active planning: when `selectEvent()` returns null, main flow offers `getAvailableActiveActions()` (training/study/socializing) via `executeActiveAction` with quarter/month time — do not `advanceTime(1)` as ordinary fallback. Simulator catch-up uses `advanceTime(3, 'month')`. Action/history types live under `src/types/activeActionTypes.ts` and `src/core/activePlanning/`.
+- P7.1 experience closure: `executeActiveActionOnState` returns `activeActionSummary` + optional `disturbanceNarrative`; Web uses `continueProgressionFlow()` for summary → disturbance → `getNextEvent()`. Disturbance copy in `disturbanceNarrativeCatalog.ts`; visibility via `actionHistory[].narrativeShownToPlayer` and `buildDisturbanceVisibilityReport()`. API mode shows boundary notice in `GameScreen`; local-only cards. Tests: `tests/p71ActiveActionExperienceTests.ts`.
+
+## [2026-06-04 11:02] - P7.1 US-001..US-017 (active-action-experience-closure)
+- Structured active-action summary card, disturbance narrative card, source labels (主动行动/江湖扰动/剧情事件), API boundary notice, report visibility fields, closure report script.
+- Files: `src/core/activePlanning/*`, `src/components/GameScreen.vue`, `src/App.vue`, `src/composables/useNewGameEngine.ts`, `tests/p71ActiveActionExperienceTests.ts`, `docs/designs/p7-1-*`, `docs/test-reports/p7-1-*`.
+- Validation: typecheck ✅ build ✅ test ✅ gate:p5 ✅ gate:experience ✅ gate:golden-line ✅
+---
 
 ## [2026-06-03 08:16] - P7 US-001..US-040 (active-life-planning-and-attribute-cognition)
 - Completed full P7 Ralph run: baselines (US-001–004), design guardrails (US-005–008, 019–020, 027, 032, 035, 039), action layer (US-009–015), time granularity (US-016–018), attribute cognition (US-021–026), choice UX (US-028–031), disturbance (US-033–034), reports (US-036–038), closure (US-040).

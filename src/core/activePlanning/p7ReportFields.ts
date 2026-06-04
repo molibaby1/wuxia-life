@@ -17,6 +17,12 @@ export interface P7ActionDistributionReport {
   activeActionCount: number;
 }
 
+export interface P71DisturbanceVisibilityReport {
+  resolvedDisturbanceCount: number;
+  playerVisibleDisturbanceCount: number;
+  disturbanceVisibilityMismatch: boolean;
+}
+
 export interface P7TimeGranularityReport {
   sameYearCounts: Record<number, number>;
   annualJumps: Array<{ age: number; sourceId: string; sourceKind: string; explicitMilestone: boolean }>;
@@ -25,6 +31,20 @@ export interface P7TimeGranularityReport {
 export interface P7ThresholdOutcomeReport {
   hits: Array<{ attribute: string; eventOrActionId: string; kind: string }>;
   misses: Array<{ attribute: string; eventOrActionId: string; kind: string }>;
+}
+
+export function buildDisturbanceVisibilityReport(state: GameState): P71DisturbanceVisibilityReport {
+  const history = state.actionHistory ?? [];
+  const disturbances = history.filter(entry => entry.sourceKind === 'random_disturbance');
+  const resolvedDisturbanceCount = disturbances.length;
+  const playerVisibleDisturbanceCount = disturbances.filter(
+    entry => entry.narrativeShownToPlayer === true,
+  ).length;
+  return {
+    resolvedDisturbanceCount,
+    playerVisibleDisturbanceCount,
+    disturbanceVisibilityMismatch: resolvedDisturbanceCount > playerVisibleDisturbanceCount,
+  };
 }
 
 export function buildActionDistributionReport(state: GameState): P7ActionDistributionReport {
@@ -73,24 +93,44 @@ export function buildThresholdOutcomeReport(
   };
 }
 
+export function buildP71ClosureReport(state: GameState): {
+  distribution: P7ActionDistributionReport;
+  disturbanceVisibility: P71DisturbanceVisibilityReport;
+  timeGranularity: P7TimeGranularityReport;
+  residualRisks: string[];
+  recommendations: string[];
+} {
+  const distribution = buildActionDistributionReport(state);
+  const disturbanceVisibility = buildDisturbanceVisibilityReport(state);
+  const timeGranularity = buildTimeGranularityReport(state.actionHistory ?? [], []);
+  return {
+    distribution,
+    disturbanceVisibility,
+    timeGranularity,
+    residualRisks: [
+      'API mode does not expose server-backed active planning (local Web only in P7.1)',
+      'Deferred event files still contain unreachable attribute branches',
+      'Travel/business/romance action categories not yet implemented',
+    ],
+    recommendations: [
+      'P8: prioritize API active-action endpoints before talent/item systems',
+      'Keep disturbance narratives lightweight — avoid full event-chain state',
+      'Expand self-awareness gain from study actions',
+    ],
+  };
+}
+
 export function buildP7ClosureReport(state: GameState): {
   distribution: P7ActionDistributionReport;
   timeGranularity: P7TimeGranularityReport;
   residualRisks: string[];
   recommendations: string[];
 } {
-  const distribution = buildActionDistributionReport(state);
-  const timeGranularity = buildTimeGranularityReport(state.actionHistory ?? [], []);
+  const p71 = buildP71ClosureReport(state);
   return {
-    distribution,
-    timeGranularity,
-    residualRisks: [
-      'Deferred event files still contain unreachable attribute branches',
-      'Travel/business/romance action categories not yet implemented',
-    ],
-    recommendations: [
-      'Wire disturbance pool to lightweight daily-event snippets',
-      'Expand self-awareness gain from study actions',
-    ],
+    distribution: p71.distribution,
+    timeGranularity: p71.timeGranularity,
+    residualRisks: p71.residualRisks,
+    recommendations: p71.recommendations,
   };
 }

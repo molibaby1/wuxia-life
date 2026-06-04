@@ -147,6 +147,24 @@ const currentNode = computed(() => {
         choices: [],
       };
     }
+    if (gameEngineComposable.engineState.showingDisturbanceNarrative) {
+      const narrative = gameEngineComposable.engineState.pendingDisturbanceNarrative;
+      return {
+        id: 'disturbance_narrative',
+        text: narrative?.bodyText ?? '江湖中泛起一丝涟漪。',
+        title: narrative?.title ?? '江湖扰动',
+        choices: [],
+      };
+    }
+    if (gameEngineComposable.engineState.lastActiveActionSummary) {
+      const summary = gameEngineComposable.engineState.lastActiveActionSummary;
+      return {
+        id: 'action_or_choice_result',
+        text: `${summary.actionName}已结束（${summary.durationLabel}）。`,
+        title: '本期小结',
+        choices: [],
+      };
+    }
     const pendingOutcome = gameEngineComposable.engineState.lastOutcomeText;
     if (pendingOutcome) {
       return {

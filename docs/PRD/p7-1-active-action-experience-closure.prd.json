@@ -1,0 +1,263 @@
+{
+  "project": "Wuxia Life P7.1 Active Action Experience Closure",
+  "branchName": "ralph/p7-1-active-action-experience-closure",
+  "description": "Close the player-facing experience gaps left after P7 by improving local Web active-action summaries, adding lightweight disturbance narrative cards, clarifying API-mode capability boundaries, strengthening source labeling and reports, and preserving existing build/test/P5/experience/golden-line gates without implementing backend active-action APIs, wiring deferred event files, or expanding into talent, item, region, faction, or worldbuilding systems.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit Current Active Action UI Flow",
+      "description": "As a maintainer, I want a read-only baseline of current active-action UI, disturbance handling, continue flow, and API-mode branch so that P7.1 targets real gaps.",
+      "acceptanceCriteria": [
+        "Inventory where local active actions are offered",
+        "Inventory how action results are displayed",
+        "Inventory how disturbance titles are currently surfaced",
+        "Inventory how the continue flow returns to planning",
+        "Inventory API-mode behavior when no local active actions are available",
+        "Produce a short P7.1 UI baseline note",
+        "Do not modify business code"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Define P7.1 Scope Guardrails",
+      "description": "As a project owner, I want P7.1 scope locked so that experience closure does not expand into backend APIs or content wiring.",
+      "acceptanceCriteria": [
+        "Document that P7.1 may improve local Web active-action UI",
+        "Document that P7.1 may add lightweight disturbance narrative display",
+        "Document that P7.1 must not implement backend active-action APIs",
+        "Document that P7.1 must not batch-wire deferred event files",
+        "Document required validation commands for closure"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Define API Mode Capability Boundary",
+      "description": "As a player, I want API mode to clearly communicate whether active planning is supported so that server-backed play does not feel broken.",
+      "acceptanceCriteria": [
+        "Define the player-facing API-mode message when active actions are not supported",
+        "Define where the message appears in the Web flow",
+        "Document the future backend endpoint boundary without implementing it",
+        "Document that local mode remains the P7.1 implementation target"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Define Active Action Summary Model",
+      "description": "As a developer, I want a focused display model for active-action summaries so that UI can stop relying on a single concatenated text line.",
+      "acceptanceCriteria": [
+        "Define action name field",
+        "Define duration field",
+        "Define reward summary field",
+        "Define cost or opportunity-cost field",
+        "Define risk summary field",
+        "Define next-step hint field",
+        "Typecheck passes if types are added"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Render Active Action Summary Card",
+      "description": "As a player, I want a readable summary after selecting an active action so that I understand what this period of life accomplished.",
+      "acceptanceCriteria": [
+        "Action result displays as a summary card or equivalent structured block",
+        "Summary includes action name, duration, reward, cost, and risk",
+        "Summary fits the existing GameScreen visual structure",
+        "No broad UI redesign is introduced",
+        "Build passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Test Active Action Summary Without Disturbance",
+      "description": "As a maintainer, I want a deterministic test for a plain active action summary so that result display does not regress.",
+      "acceptanceCriteria": [
+        "Test executes an active action with disturbance disabled or deterministic no-disturbance random source",
+        "Test verifies action result summary fields exist",
+        "Test verifies duration is shown as short-period progression",
+        "Relevant tests pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Define Disturbance Narrative Model",
+      "description": "As a developer, I want a minimal narrative model for disturbances so that random opportunities are visible without becoming full event chains.",
+      "acceptanceCriteria": [
+        "Define disturbance title field",
+        "Define disturbance body text field",
+        "Define source action field",
+        "Define impact summary field",
+        "Define return-to-plan hint field",
+        "Typecheck passes if types are added"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add Minimal Disturbance Narrative Catalog",
+      "description": "As a narrative designer, I want the current minimal disturbances to have lightweight text so that they read as events rather than labels.",
+      "acceptanceCriteria": [
+        "Add narrative text for sparring invitation disturbance",
+        "Add narrative text for market rumor disturbance",
+        "Add narrative text for minor injury disturbance",
+        "Each text is short and returns control to planning",
+        "No new disturbance chain state is added"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Render Disturbance Narrative Card",
+      "description": "As a player, I want a disturbance to appear as a lightweight narrative moment after an active action.",
+      "acceptanceCriteria": [
+        "When a disturbance is resolved, UI displays its title and body text",
+        "Disturbance display is visually distinct from the action summary",
+        "Disturbance display is visually distinct from formal story events",
+        "No full event-chain branching is introduced",
+        "Build passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Return From Disturbance To Planning Flow",
+      "description": "As a player, I want to acknowledge a disturbance and continue naturally to the next planning step.",
+      "acceptanceCriteria": [
+        "After disturbance display, continue returns to the existing next-event or action-offering flow",
+        "No repeated disturbance loop is introduced",
+        "No action result is applied twice",
+        "Browser flow is manually verified"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Test Disturbance Narrative Paths",
+      "description": "As a maintainer, I want deterministic tests for disturbance and no-disturbance paths so that lightweight narrative display remains stable.",
+      "acceptanceCriteria": [
+        "Test deterministic no-disturbance path",
+        "Test deterministic disturbance path",
+        "Test disturbance history remains separate from active action history",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Render Progression Source Labels",
+      "description": "As a player, I want UI labels to distinguish active actions, random disturbances, and formal story events.",
+      "acceptanceCriteria": [
+        "Active-action summary has a source label",
+        "Disturbance narrative has a source label",
+        "Formal story events are not mislabeled as disturbances",
+        "Labels use player-facing Chinese text",
+        "Build passes"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add Report Signal For Disturbance Visibility",
+      "description": "As a maintainer, I want reports to state whether resolved disturbances were player-visible so that hidden-disturbance regressions are detectable.",
+      "acceptanceCriteria": [
+        "Report data can count resolved disturbances",
+        "Report data can count player-visible disturbance narratives",
+        "Report flags mismatches between resolved and visible disturbances",
+        "Relevant report check passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Generate P7.1 Closure Report",
+      "description": "As a project owner, I want a P7.1 closure report that records what was improved and what remains deferred.",
+      "acceptanceCriteria": [
+        "Report summarizes active-action summary behavior",
+        "Report summarizes disturbance narrative behavior",
+        "Report records API mode active-action boundary",
+        "Report records deferred event files remain out of scope",
+        "Report lists validation commands and results"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Run Local Browser Acceptance",
+      "description": "As a player, I want the local Web flow to prove active action, disturbance, continue, and return-to-planning behavior in the browser.",
+      "acceptanceCriteria": [
+        "Open the local Web app in browser",
+        "Start or load a local-mode game",
+        "Trigger an active action",
+        "Verify action summary is visible",
+        "Verify disturbance narrative is visible when deterministic setup produces one",
+        "Verify continue returns to normal flow"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Run P7.1 Full Regression Gate",
+      "description": "As a maintainer, I want the full known regression set to pass after P7.1 so that experience closure does not break prior gates.",
+      "acceptanceCriteria": [
+        "npm run build passes",
+        "npm test passes",
+        "npm run gate:p5 passes",
+        "npm run gate:experience passes",
+        "npm run gate:golden-line passes"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Close P7.1 Delivery",
+      "description": "As a project owner, I want final delivery notes so the next stage can start from a clear boundary.",
+      "acceptanceCriteria": [
+        "List changed files",
+        "List validation results",
+        "List residual risks",
+        "Recommend whether P8 should start with talents, items, or API active actions",
+        "Do not hide API or deferred-content limitations"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

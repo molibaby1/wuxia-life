@@ -16,6 +16,11 @@ import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
 import type { StoryChoice, ChoiceOutcomeUI } from '../types';
 import type { ChoiceFeedbackModel } from '../types';
+import type {
+  ActiveActionSummaryDisplay,
+  DisturbanceNarrativeDisplay,
+} from '../types/activeActionTypes';
+import { markDisturbanceNarrativeShown } from '../core/activePlanning/disturbanceNarrativeBuilder';
 
 interface EventState {
   currentEvent: EventDefinition | null;
@@ -34,6 +39,9 @@ interface EventState {
   lastEffects: Effect[];
   lastOutcomeText: string | null;
   lastChoiceFeedback: ChoiceFeedbackModel | null;
+  lastActiveActionSummary: ActiveActionSummaryDisplay | null;
+  pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
+  showingDisturbanceNarrative: boolean;
 }
 
 // 单例状态
@@ -54,6 +62,9 @@ function getEngineStateInstance() {
         lastEffects: [],
         lastOutcomeText: null,
         lastChoiceFeedback: null,
+        lastActiveActionSummary: null,
+        pendingDisturbanceNarrative: null,
+        showingDisturbanceNarrative: false,
       }),
       isProcessing: false,
     };
@@ -358,6 +369,9 @@ export function useNewGameEngine() {
 
       engineState.lastOutcomeText = result.feedbackText;
       engineState.lastChoiceFeedback = null;
+      engineState.lastActiveActionSummary = result.activeActionSummary;
+      engineState.pendingDisturbanceNarrative = result.disturbanceNarrative;
+      engineState.showingDisturbanceNarrative = false;
       engineState.availableActiveActions = [];
       engineState.isActiveActionMode = false;
       engineState.isAutoPlaying = false;
@@ -449,6 +463,30 @@ export function useNewGameEngine() {
     return best;
   };
 
+  const clearProgressionPresentation = () => {
+    engineState.lastOutcomeText = null;
+    engineState.lastChoiceFeedback = null;
+    engineState.lastActiveActionSummary = null;
+    engineState.pendingDisturbanceNarrative = null;
+    engineState.showingDisturbanceNarrative = false;
+  };
+
+  /** P7.1: two-step continue — action summary, then optional disturbance, then next event */
+  const continueProgressionFlow = () => {
+    if (engineState.pendingDisturbanceNarrative && !engineState.showingDisturbanceNarrative) {
+      engineState.showingDisturbanceNarrative = true;
+      engineState.lastActiveActionSummary = null;
+      engineState.lastOutcomeText = engineState.pendingDisturbanceNarrative.bodyText;
+      markDisturbanceNarrativeShown(
+        gameEngine.getGameState(),
+        engineState.pendingDisturbanceNarrative.disturbanceId,
+      );
+      return;
+    }
+    clearProgressionPresentation();
+    getNextEvent();
+  };
+
   /**
    * 开始新游戏
    */
@@ -460,8 +498,7 @@ export function useNewGameEngine() {
     engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
-    engineState.lastOutcomeText = null;
-    engineState.lastChoiceFeedback = null;
+    clearProgressionPresentation();
     isProcessing.value = false;
 
     // 等待下一帧再开始第一个事件，让 UI 有时间更新
@@ -481,8 +518,7 @@ export function useNewGameEngine() {
     engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
-    engineState.lastOutcomeText = null;
-    engineState.lastChoiceFeedback = null;
+    clearProgressionPresentation();
     isProcessing.value = false;
   };
 
@@ -508,8 +544,7 @@ export function useNewGameEngine() {
     engineState.isActiveActionMode = false;
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
-    engineState.lastOutcomeText = null;
-    engineState.lastChoiceFeedback = null;
+    clearProgressionPresentation();
     isProcessing.value = false;
     getNextEvent();
     return true;
@@ -687,6 +722,7 @@ export function useNewGameEngine() {
     restartGame,
     handleChoice,
     handleActiveAction,
+    continueProgressionFlow,
     getNextEvent,
     getGameState,
     saveCurrentGame,

@@ -76,6 +76,30 @@ export interface ActionHistoryEntry {
   sourceKind: ProgressionSourceKind;
   age: number;
   timestamp: { year: number; month: number; day: number };
+  /** P7.1: whether a random_disturbance entry was shown as player-visible narrative */
+  narrativeShownToPlayer?: boolean;
+}
+
+/** P7.1: structured active-action result for Web UI */
+export interface ActiveActionSummaryDisplay {
+  sourceLabel: string;
+  actionName: string;
+  durationLabel: string;
+  rewardSummary: string;
+  costSummary: string;
+  riskSummary: string;
+  nextStepHint: string;
+}
+
+/** P7.1: lightweight disturbance narrative for Web UI */
+export interface DisturbanceNarrativeDisplay {
+  sourceLabel: string;
+  disturbanceId: string;
+  title: string;
+  bodyText: string;
+  sourceActionName: string;
+  impactSummary: string;
+  returnToPlanHint: string;
 }
 
 export interface ActionFocusStreak {

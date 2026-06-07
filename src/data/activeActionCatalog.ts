@@ -1,6 +1,12 @@
 import type { ActiveActionDefinition } from '../types/activeActionTypes';
 
-export const P7_MINIMUM_ACTION_IDS = ['action_training_basic', 'action_study_basic', 'action_socializing_basic'] as const;
+export const P7_MINIMUM_ACTION_IDS = [
+  'action_training_basic',
+  'action_study_basic',
+  'action_socializing_basic',
+  'action_business_basic',
+  'action_travel_basic',
+] as const;
 
 export type P7MinimumActionId = (typeof P7_MINIMUM_ACTION_IDS)[number];
 
@@ -56,6 +62,42 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'money', amount: 20 }],
     risk: 'medium',
     metadata: { focusTag: 'social' },
+  },
+  {
+    id: 'action_business_basic',
+    category: 'business',
+    name: '营商',
+    playerIntent: '经营小本买卖，积累银两与声望',
+    duration: { value: 1, unit: 'quarter' },
+    rewards: [
+      { stat: 'money', min: 15, max: 35 },
+      { stat: 'businessAcumen', min: 1, max: 3 },
+      { stat: 'reputation', min: 0, max: 2 },
+    ],
+    costs: [
+      { stat: 'energy', amount: 4 },
+      { stat: 'money', amount: 25 },
+    ],
+    risk: 'medium',
+    metadata: { focusTag: 'wealth', useCase: '缺钱或想走商路时优先' },
+  },
+  {
+    id: 'action_travel_basic',
+    category: 'travel',
+    name: '游历',
+    playerIntent: '行走四方，增长见闻与人脉',
+    duration: { value: 1, unit: 'month' },
+    rewards: [
+      { stat: 'knowledge', min: 1, max: 3 },
+      { stat: 'connections', min: 1, max: 2 },
+      { stat: 'reputation', min: 0, max: 1 },
+    ],
+    costs: [
+      { stat: 'money', amount: 15 },
+      { stat: 'energy', amount: 6 },
+    ],
+    risk: 'medium',
+    metadata: { focusTag: 'exploration', useCase: '想开视野或触发奇遇时优先' },
   },
 ];
 

@@ -1,0 +1,537 @@
+{
+  "project": "Wuxia Life P8 Playability Gate and Human Test Slice",
+  "branchName": "ralph/p8-playability-gate-and-human-test-slice",
+  "description": "Establish a repeatable P8 playability gate for the 0-40 age slice, upgrade simulation from fixed fallback behavior to persona-driven strategy, produce evidence-rich automated reports, and prepare a 20-30 minute human-testable slice without expanding into talents, inventory, world map, or other endgame systems.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Baseline Current Simulation and Gate Coverage",
+      "description": "As a maintainer, I want a read-only baseline of current simulation, gate, and browser coverage so that P8 starts from measured reality.",
+      "acceptanceCriteria": [
+        "Document current commands for gameplay simulation, experience health, golden-line, headless parity, and browser runtime checks",
+        "Document which current outputs already reflect playability and which do not",
+        "Document current blind spots for active action choice, player agency, UI comprehension, and replay motivation",
+        "Save the baseline under docs/test-reports/",
+        "Do not modify business code"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Define P8 Metric Schema",
+      "description": "As a project owner, I want explicit playability metric keys so that P8 evaluates player value instead of feature count.",
+      "acceptanceCriteria": [
+        "Define metric keys for agency, causality, achievement, frustration, replayability, pacing, and narrative memory",
+        "Each metric definition includes intent and scoring surface",
+        "Each metric declares whether it is measured by simulation, browser check, or human testing only",
+        "Save the metric schema in a P8 design note"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Define Metric Thresholds and Severities",
+      "description": "As a maintainer, I want default thresholds and severities for each P8 metric so that the gate can make stable pass or fail decisions.",
+      "acceptanceCriteria": [
+        "Each P8 metric declares blocker, warning, or info severity behavior",
+        "Each simulation metric has a default threshold for the small-sample P8 gate",
+        "Human-only metrics are explicitly marked as non-blocking for automation",
+        "Save thresholds beside the metric definition"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Define Persona Data Model",
+      "description": "As a designer, I want a stable persona model so that simulation inputs remain deterministic and reviewable.",
+      "acceptanceCriteria": [
+        "Define persona fields for stable id, name, gender, seed, strategy, and route preference",
+        "Define persona fields for risk preference and relationship preference",
+        "Define persona fields for 0-20, 20-30, and 30-40 short-term goals",
+        "Save the persona model in a P8 design note"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Define Fixed Persona Roster",
+      "description": "As a designer, I want a fixed set of simulated player personas so that automated runs cover distinct motivations.",
+      "acceptanceCriteria": [
+        "Define 6-10 personas with stable ids, names, and seeds",
+        "Roster includes martial, scholarly, social, wealth-seeking, risk-averse, and deviant route tendencies",
+        "Each persona declares a primary strategy summary",
+        "Save the roster under docs/designs/"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Define Persona Goal Profiles",
+      "description": "As a project owner, I want each persona to have concrete short-term goals so that achievement can be measured against explicit intent.",
+      "acceptanceCriteria": [
+        "Each persona defines 2-4 expected short goals",
+        "Each goal names the age band it belongs to",
+        "Each goal declares the evidence types that can satisfy it",
+        "Save the goal profile rules with the persona roster"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Audit Action Fallback and Choice Scoring Entry Points",
+      "description": "As a maintainer, I want to map the runtime entry points for no-event fallback and choice scoring so that P8 strategy changes land in the correct places.",
+      "acceptanceCriteria": [
+        "Document where no-event active action fallback is selected today",
+        "Document where event choice scoring is applied today",
+        "Document current replay and sample commands that depend on these paths",
+        "Produce a short audit note without modifying business code"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Define Persona-Driven Action Strategy Interface",
+      "description": "As a developer, I want a focused strategy interface for no-event active action selection so that persona behavior can evolve without broad simulator rewrites.",
+      "acceptanceCriteria": [
+        "Define the strategy input contract for persona, current state, and available action candidates",
+        "Define the strategy output contract for selected action and selection reason",
+        "Define minimum supported action directions: training, study, socializing, wealth or business, and exploration where available",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Implement Strategy-Based No-Event Action Selection",
+      "description": "As a maintainer, I want simulated players to select active actions by persona strategy so that P8 no longer overfits to fixed training fallback.",
+      "acceptanceCriteria": [
+        "Replace or extend the fixed no-event action_training_basic fallback with persona-driven selection",
+        "Selection considers available action categories supported by the current runtime",
+        "Selected action records why it was chosen",
+        "Existing replay records remain replayable",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Test Persona Action Selection Behavior",
+      "description": "As a maintainer, I want deterministic tests for strategy-based active action selection so that no-event behavior does not silently regress.",
+      "acceptanceCriteria": [
+        "Add deterministic tests for at least three different persona strategies",
+        "Tests verify selection reason is recorded",
+        "Tests verify unsupported categories degrade to available choices without crashing",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Map Existing Choice Tendency to P8 Persona Bias",
+      "description": "As a designer, I want current choice scoring to express persona intent so that simulations represent different player motivations without deleting route-track behavior.",
+      "acceptanceCriteria": [
+        "Extend or map existing choiceTendency scoring to P8 persona dimensions",
+        "Preserve current route-track behavior",
+        "Choice scoring considers goal alignment, risk preference, relationship preference, and route preference where applicable",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Record Choice Diagnostics for P8",
+      "description": "As a maintainer, I want choice scoring diagnostics captured in the simulator so that persona intent can be reviewed in reports.",
+      "acceptanceCriteria": [
+        "Simulator records the selected choice score",
+        "Simulator records the top competing choice score",
+        "Diagnostics are attached to the simulation output in a machine-readable form",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Verify Persona Bias with Gameplay Samples",
+      "description": "As a maintainer, I want the existing gameplay sample runner to keep working after persona bias changes so that P8 builds on stable simulation tooling.",
+      "acceptanceCriteria": [
+        "simulate:gameplay:samples still runs successfully",
+        "At least two personas produce visibly different choice patterns in the sample output",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Implement Agency Metric Data Collection",
+      "description": "As a project owner, I want the simulator to measure player agency so that random playback regressions are caught automatically.",
+      "acceptanceCriteria": [
+        "Collect active action count, story event count, choice event count, and forced event count per persona",
+        "Collect active action diversity by category",
+        "Detect repeated no-event turns on the same action without route, goal, or narrative change",
+        "Write agency metric output to machine-readable JSON",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Implement Causality Echo Metric",
+      "description": "As a player, I want earlier choices to visibly affect later outcomes so that the reported life feels authored rather than random.",
+      "acceptanceCriteria": [
+        "Count later requirements, unlocked choices, feedback text, route state changes, or report fields that reference earlier actions or choices",
+        "Distinguish direct causality from generic stat growth",
+        "Flag personas with too few causality echoes by age 40",
+        "Record strongest causality examples in structured output",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Implement Achievement Metric",
+      "description": "As a project owner, I want the report to evaluate whether personas achieve concrete short-term goals so that early-life payoff can be judged.",
+      "acceptanceCriteria": [
+        "Report marks each persona goal as achieved, missed, or unavailable",
+        "Goal evidence references concrete flags, route states, stats, relationships, or event ids",
+        "Gate warns if most personas reach age 40 with no achieved goal",
+        "Write achievement metric output to machine-readable JSON",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Implement Frustration and Recovery Metric",
+      "description": "As a player, I want setbacks to feel fair so that failure creates retry desire rather than distrust.",
+      "acceptanceCriteria": [
+        "Detect negative outcomes and classify them as warned, explained, recoverable, or opaque",
+        "Report the ratio of opaque negative outcomes per persona",
+        "Record at least one concrete example for each opaque setback",
+        "Gate fails when opaque setbacks exceed the blocker threshold",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Implement Replay Difference Metric",
+      "description": "As a project owner, I want different personas and seeds to produce measurably different lives so that replay value can be evaluated before adding larger systems.",
+      "acceptanceCriteria": [
+        "Compare personas by route tags, key choices, active action distribution, relationship state, major stats, and age-40 summary",
+        "Compute machine-readable similarity scores",
+        "Report similarity clusters",
+        "Gate warns when multiple personas produce nearly identical route and summary outputs",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Implement Pacing and Boredom Metric",
+      "description": "As a player, I want frequent meaningful change so that the 0-40 slice does not feel empty.",
+      "acceptanceCriteria": [
+        "Detect long windows with no new choice, no route change, no relationship change, no meaningful stat threshold, and no new summary line",
+        "Report the longest low-impact span per persona",
+        "Gate fails when a persona hits a blocker-level low-impact span",
+        "Preserve existing gate:experience repetition blockers",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Implement Narrative Memory Summary Metric",
+      "description": "As a tester, I want each simulated life to produce a readable narrative summary so that automation output can be reviewed like a player story.",
+      "acceptanceCriteria": [
+        "Generate a three-part summary for each persona covering early life, turning point, and age-40 identity",
+        "Include at least three cited evidence points from events, actions, or route changes",
+        "Mark missing identity or missing turning point as a warning",
+        "Write summary data to JSON-ready structures",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Assemble Machine-Readable P8 Report",
+      "description": "As a maintainer, I want one machine-readable report schema for all P8 metrics so that the gate and follow-up tooling consume stable output.",
+      "acceptanceCriteria": [
+        "Aggregate per-persona and overall P8 metric output into one JSON report",
+        "Report includes metric verdicts, thresholds, and evidence references",
+        "Report path is stable under docs/test-reports/ or public/reports/",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Assemble Human-Readable P8 Markdown Report",
+      "description": "As a designer, I want the automated playability output rendered as a readable report so that I can review it without opening raw JSON.",
+      "acceptanceCriteria": [
+        "Generate a Markdown report for each P8 run",
+        "Report explains planning, causality, frustration, route differentiation, and replay differences in readable language",
+        "Report includes concrete evidence snippets instead of only numeric scores",
+        "Report links or references the machine-readable JSON output",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Add Gate Playability Command",
+      "description": "As a maintainer, I want one repeatable command for P8 playability checks so that future sessions can run the same acceptance gate.",
+      "acceptanceCriteria": [
+        "Add a package script such as gate:playability",
+        "The command runs the fixed P8 persona set and produces a pass or fail decision",
+        "The command exits non-zero on blocker failures",
+        "The command writes stable JSON and Markdown reports",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Document P8 Human Slice Admission Scope",
+      "description": "As a project owner, I want a precise definition of the 0-40 human test slice so that implementation does not drift into the full game.",
+      "acceptanceCriteria": [
+        "Define the intended 20-30 minute experience from age 0 to 40",
+        "List required early routes, active actions, feedback surfaces, and summary surfaces",
+        "List explicit content minimums and non-goals",
+        "Clarify that the slice does not cover full endgame, complete item economy, or complete world map"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Audit Current Game Against the Human Slice",
+      "description": "As a maintainer, I want a gap audit between the current game and the P8 human slice so that only necessary blockers are pulled into scope.",
+      "acceptanceCriteria": [
+        "Audit current 0-40 route availability, active action categories, attribute visibility, relationship feedback, and summary UI",
+        "Classify each gap as blocker, warning, or defer",
+        "Do not implement fixes in this story",
+        "Save the audit under docs/test-reports/"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Implement Minimum Active Action Coverage for the Slice",
+      "description": "As a player, I want multiple viable things to do when no event forces me so that planning feels active in the local Web slice.",
+      "acceptanceCriteria": [
+        "The 0-40 slice exposes at least training, study, social, and wealth or exploration-oriented active action directions where design allows",
+        "Each direction has visible reward, cost, risk, and likely use case",
+        "No large new subsystem is introduced beyond the minimum slice need",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Verify Active Action Coverage in Browser",
+      "description": "As a maintainer, I want local browser verification of the expanded active action coverage so that the slice works in the actual Web flow.",
+      "acceptanceCriteria": [
+        "Each minimum active action direction can be selected in the local Web flow",
+        "Reward, cost, risk, and likely use case are visible to the player",
+        "gate:playability passes or reports only known non-blocking warnings after the change",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Implement Minimum Route Differentiation for the Slice",
+      "description": "As a player, I want early life choices to lead toward different identities so that replaying the 0-40 slice feels meaningful.",
+      "acceptanceCriteria": [
+        "The 0-40 slice supports at least three distinct early identities or route tendencies",
+        "At least two personas reach meaningfully different route or identity states by age 40 in the P8 gate",
+        "No new large route system is introduced beyond the minimum slice need",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Verify Route Differentiation in Browser",
+      "description": "As a maintainer, I want browser confirmation that route identity is actually visible to players in the human test slice.",
+      "acceptanceCriteria": [
+        "Route identity or tendency is visible in UI or life summary",
+        "The local Web flow can surface at least two visibly different identity outcomes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Implement Attribute Meaning and Visibility Slice Polish",
+      "description": "As a player, I want key attributes to explain what they affect so that growth feels meaningful instead of opaque.",
+      "acceptanceCriteria": [
+        "The attribute panel shows player-facing meaning for key visible attributes",
+        "Hidden or implicit attributes are not exposed as exact numbers unless current self-awareness rules allow it",
+        "At least three choices or active actions visibly reference relevant attribute meaning",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Verify Attribute Meaning in Browser",
+      "description": "As a maintainer, I want browser confirmation that attribute meaning is understandable in the local slice.",
+      "acceptanceCriteria": [
+        "Key visible attributes show player-facing meaning in the local Web flow",
+        "At least three visible references connect attributes to choices or active actions",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 31,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Implement Age-40 Life Summary for Human Testing",
+      "description": "As a tester, I want the game to summarize the life so far so that I can judge whether the slice created a memorable story.",
+      "acceptanceCriteria": [
+        "At or before age 40 the game can show a summary of goals, major choices, setbacks, route identity, and unexplored hints",
+        "Summary distinguishes player-driven active actions from forced story events",
+        "Summary includes at least one replay hook when available",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 32,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Verify Age-40 Summary in Browser",
+      "description": "As a maintainer, I want local browser verification of the age-40 summary flow so that human testers will see a coherent slice ending.",
+      "acceptanceCriteria": [
+        "The local Web flow can reach the summary surface at or before age 40",
+        "Summary shows goals, route identity, setbacks, and replay hook when available",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 33,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Write Human Test Script and Observation Sheet",
+      "description": "As a project owner, I want a repeatable test script and observation sheet so that human feedback can be compared across players.",
+      "acceptanceCriteria": [
+        "Create a test script for 5-8 players and 20-30 minutes each",
+        "Include pre-test instructions that do not over-explain hidden systems",
+        "Include post-test questions about goal, causality, achievement, frustration, replay desire, and memorable story",
+        "Include an observer checklist for confusion, hesitation, boredom, and restart intent",
+        "Save the script under docs/test-reports/ or docs/designs/"
+      ],
+      "priority": 34,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Run Browser Acceptance for the Human Slice",
+      "description": "As a maintainer, I want to verify the local Web flow before inviting human testers so that obvious runtime blockers are caught first.",
+      "acceptanceCriteria": [
+        "Start a local Web session from the start screen",
+        "Play through enough turns to reach active action selection and at least one route or identity signal",
+        "Verify there are no blocking console errors during start, active action, choice, summary, and save or load if used",
+        "Capture notes for UX blockers that automation cannot judge",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Write P8 Closure Report",
+      "description": "As a project owner, I want a final P8 closure report so that the next product decision is based on evidence instead of momentum.",
+      "acceptanceCriteria": [
+        "Report automated gate result, major warnings, and blocker status",
+        "Report whether the human test slice meets the admission line",
+        "List remaining risks before human testing",
+        "Recommend one of run human testing, fix blockers first, or stop or reshape project direction",
+        "Include commands used for verification"
+      ],
+      "priority": 36,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

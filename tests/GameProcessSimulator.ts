@@ -30,6 +30,15 @@ import {
   ACTIVE_ACTION_REPLAY_RANDOM,
   toActiveActionReplayEventId,
 } from '../src/core/activePlanning/activeActionReplay';
+import { getActionById } from '../src/data/activeActionCatalog';
+import { getP8PersonaById } from '../src/p8/personas';
+import type { P8Persona } from '../src/p8/types';
+import { selectPersonaActiveAction } from '../src/p8/personaActionStrategy';
+import {
+  applyPersonaChoiceBias,
+  rankChoiceScores,
+} from '../src/p8/personaChoiceBias';
+import type { ChoiceScoreDiagnostic } from '../src/p8/types';
 import {
   buildRomanceFamilyArcReport,
   GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
@@ -61,6 +70,8 @@ export interface GameProcessConfig {
   maxRestoreCount: number;  // 最多自动读档恢复次数
   verbose: boolean;  // 详细日志
   choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
+  /** P8: fixed persona id for strategy-driven simulation */
+  p8PersonaId?: string;
   /** 路线专项样本：偏向入线/完成对应路线 */
   routeTrack?: 'official' | 'beggars' | 'demonic' | 'sect' | 'wanderer';
   /** P3-EVAL sample id for death-risk telemetry cohort resolution. */
@@ -83,6 +94,14 @@ export interface GameProcessRecord {
   progressionKind?: 'story_event' | 'active_action';
   /** P7: catalog action id when progressionKind is active_action. */
   activeActionId?: string;
+  /** P8: why this active action was selected in simulation. */
+  activeActionSelectionReason?: string;
+  /** P8: choice scoring diagnostics for this choice event. */
+  choiceScoreDiagnostic?: {
+    selectedScore: number;
+    runnerUpScore: number | null;
+    runnerUpChoiceId: string | null;
+  };
 }
 
 export interface GameProcessReport {
@@ -142,6 +161,9 @@ export interface GameProcessReport {
     endingSummary?: string;
     flags?: Record<string, any>;  // 其他重要标志
   };
+  /** P8: aggregated choice diagnostics for reports */
+  p8ChoiceDiagnostics?: ChoiceScoreDiagnostic[];
+  p8ActiveActionReasons?: Array<{ age: number; actionId: string; reason: string }>;
 }
 
 /**
@@ -162,6 +184,8 @@ export class GameProcessSimulator {
   private lastAutoSaveAge: number | null = null;
   private gameState: GameState | null = null;
   private ended: boolean = false;
+  private p8ChoiceDiagnostics: ChoiceScoreDiagnostic[] = [];
+  private p8ActiveActionReasons: Array<{ age: number; actionId: string; reason: string }> = [];
 
   constructor(config: Partial<GameProcessConfig> = {}) {
     this.config = {
@@ -195,6 +219,8 @@ export class GameProcessSimulator {
     this.autoSaveIds = [];
     this.consistencyChecks = [];
     this.lastAutoSaveAge = null;
+    this.p8ChoiceDiagnostics = [];
+    this.p8ActiveActionReasons = [];
     
     // 0. 重置游戏引擎（确保状态干净）
     this.log('📝 步骤 0: 重置游戏引擎');
@@ -270,21 +296,55 @@ export class GameProcessSimulator {
     const event = gameEngine.selectEvent();  // 不传参数，使用引擎内部年龄
     
     if (!event) {
-      const actionId = 'action_training_basic';
-      this.log(`   ⚠️  无可用事件 — 执行主动行动（练功）`);
+      const persona = this.resolveP8Persona();
+      let actionId: string;
+      let selectionReason: string | undefined;
+
+      if (persona) {
+        const available = gameEngine.getAvailableActiveActions();
+        const stateNow = gameEngine.getGameState();
+        const selection = selectPersonaActiveAction({
+          persona,
+          availableActions: available.map(a => ({
+            actionId: a.actionId,
+            category: getActionById(a.actionId)?.category ?? 'training',
+            name: a.text,
+          })),
+          age: ageBeforeEvent,
+          focusStreakCategory: stateNow.actionFocusStreak?.category ?? null,
+          focusStreakCount: stateNow.actionFocusStreak?.count ?? 0,
+        });
+        actionId = selection.actionId;
+        selectionReason = selection.reason;
+        this.p8ActiveActionReasons.push({
+          age: ageBeforeEvent,
+          actionId,
+          reason: selection.reason,
+        });
+      } else {
+        actionId = 'action_training_basic';
+        selectionReason = undefined;
+      }
+
+      const actionDef = getActionById(actionId);
+      this.log(`   ⚠️  无可用事件 — 执行主动行动（${actionDef?.name ?? actionId}）`);
+      if (selectionReason) {
+        this.log(`   📋 选择原因：${selectionReason}`);
+      }
 
       const execution = gameEngine.executeActiveAction(actionId, { random: ACTIVE_ACTION_REPLAY_RANDOM });
       const stateAfterAction = gameEngine.getGameState();
-      const feedbackText = execution?.feedbackText ?? gameEngine.consumeLastEventOutcomeNote() ?? '本期安排练功';
+      const feedbackText = execution?.feedbackText ?? gameEngine.consumeLastEventOutcomeNote() ?? `本期安排${actionDef?.name ?? '主动行动'}`;
       const record: GameProcessRecord = {
         age: ageBeforeEvent,
         eventId: toActiveActionReplayEventId(actionId),
-        eventTitle: '主动练功',
+        eventTitle: actionDef?.name ? `主动${actionDef.name}` : '主动行动',
         eventText: feedbackText,
         outcomeText: feedbackText,
         eventType: 'auto',
         progressionKind: 'active_action',
         activeActionId: actionId,
+        activeActionSelectionReason: selectionReason,
         gameState: stateForRecord,
         currentTime: stateAfterAction.currentTime,
         timestamp: new Date().toISOString(),
@@ -315,6 +375,8 @@ export class GameProcessSimulator {
         return;
       }
       // 选择事件：选择一个选项
+      const selectedChoice = this.selectChoice(availableChoices, event.id);
+      const lastDiagnostic = this.p8ChoiceDiagnostics[this.p8ChoiceDiagnostics.length - 1];
       const record: GameProcessRecord = {
         age: ageBeforeEvent,
         eventId: event.id,
@@ -322,7 +384,15 @@ export class GameProcessSimulator {
         eventText: text,
         eventType: eventType as 'auto' | 'choice' | 'ending',
         availableChoices,
-        selectedChoice: this.selectChoice(availableChoices, event.id),
+        selectedChoice,
+        choiceScoreDiagnostic:
+          lastDiagnostic && lastDiagnostic.eventId === event.id
+            ? {
+                selectedScore: lastDiagnostic.selectedScore,
+                runnerUpScore: lastDiagnostic.runnerUpScore,
+                runnerUpChoiceId: lastDiagnostic.runnerUpChoiceId,
+              }
+            : undefined,
         gameState: stateForRecord,
         currentTime: stateForRecord.currentTime,
         timestamp: new Date().toISOString()
@@ -717,6 +787,13 @@ export class GameProcessSimulator {
     return score;
   }
 
+  private resolveP8Persona(): P8Persona | null {
+    if (!this.config.p8PersonaId) {
+      return null;
+    }
+    return getP8PersonaById(this.config.p8PersonaId) ?? null;
+  }
+
   /**
    * 选择事件选项（模拟玩家决策）
    */
@@ -730,6 +807,8 @@ export class GameProcessSimulator {
 
     let bestChoice = choices[0];
     let bestScore = -Infinity;
+    const persona = this.resolveP8Persona();
+    const scoreBoard: Array<{ choiceId: string; score: number }> = [];
 
     for (const choice of choices) {
       let score = 0;
@@ -761,10 +840,35 @@ export class GameProcessSimulator {
       score += this.scoreRomanceFamilyChoice(choice, eventId);
       score += this.scoreDemonicMidlifeChoice(choice, eventId);
 
+      const effects = choice.outcomes?.[0]?.effects ?? choice.effects ?? [];
+      if (persona) {
+        score = applyPersonaChoiceBias({
+          persona,
+          baseScore: score,
+          choiceId: choice.id ?? '',
+          eventId,
+          effects,
+        });
+      }
+
+      scoreBoard.push({ choiceId: choice.id ?? '', score });
+
       if (score > bestScore) {
         bestScore = score;
         bestChoice = choice;
       }
+    }
+
+    if (bestScore > -Infinity && eventId && persona) {
+      const ranked = rankChoiceScores(scoreBoard);
+      this.p8ChoiceDiagnostics.push({
+        eventId,
+        selectedChoiceId: ranked.selectedChoiceId,
+        selectedScore: ranked.selectedScore,
+        runnerUpChoiceId: ranked.runnerUpChoiceId,
+        runnerUpScore: ranked.runnerUpScore,
+        personaId: persona.id,
+      });
     }
 
     if (bestScore > -Infinity) {
@@ -1206,6 +1310,8 @@ export class GameProcessSimulator {
         endAge,
       );
     }
+    baseReport.p8ChoiceDiagnostics = [...this.p8ChoiceDiagnostics];
+    baseReport.p8ActiveActionReasons = [...this.p8ActiveActionReasons];
     return baseReport;
   }
 

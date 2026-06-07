@@ -3,7 +3,7 @@ import type { BackendEnv } from '../config/env.js';
 
 const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Device-Token, X-Session-Token';
 
-/** Apply dev CORS so Vite (localhost:5173) can call the API. Returns true if OPTIONS was handled. */
+/** Apply dev CORS so Vite (localhost:5200) can call the API. Returns true if OPTIONS was handled. */
 export function handleCors(req: IncomingMessage, res: ServerResponse, env: BackendEnv): boolean {
   if (env.nodeEnv === 'production') {
     return req.method === 'OPTIONS';

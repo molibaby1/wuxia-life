@@ -20,6 +20,13 @@
 - 结局阶段不应暴露“保存”入口；若需支持结局后继续，优先提供“读取最近存档”并复用 `loadGameFromSave` 回到主流程，避免引入结束态存档语义歧义。
 - P7 active planning: when `selectEvent()` returns null, main flow offers `getAvailableActiveActions()` (training/study/socializing) via `executeActiveAction` with quarter/month time — do not `advanceTime(1)` as ordinary fallback. Simulator catch-up uses `advanceTime(3, 'month')`. Action/history types live under `src/types/activeActionTypes.ts` and `src/core/activePlanning/`.
 - P7.1 experience closure: `executeActiveActionOnState` returns `activeActionSummary` + optional `disturbanceNarrative`; Web uses `continueProgressionFlow()` for summary → disturbance → `getNextEvent()`. Disturbance copy in `disturbanceNarrativeCatalog.ts`; visibility via `actionHistory[].narrativeShownToPlayer` and `buildDisturbanceVisibilityReport()`. API mode shows boundary notice in `GameScreen`; local-only cards. Tests: `tests/p71ActiveActionExperienceTests.ts`.
+- P8 playability: modules under `src/p8/`; gate via `npm run gate:playability` (8 personas, age 0–40). Persona strategy applies only when `GameProcessConfig.p8PersonaId` is set — legacy `simulate:gameplay` paths keep fixed `action_training_basic` fallback. Reports: `docs/test-reports/p8-playability-gate-latest.{json,md}`. Local slice browser test: unset `VITE_P6B_API_URL` (`.env.development.local` enables API mode otherwise).
+
+## [2026-06-07] - P8 US-001..US-036 (playability-gate-and-human-test-slice)
+- Baselines, metric schema, 8 personas, persona action/choice strategy, seven metrics, gate command, human slice docs, browser notes, closure report.
+- Key files: `src/p8/*`, `scripts/runP8PlayabilityGate.ts`, `tests/p8PlayabilityTests.ts`, `tests/GameProcessSimulator.ts`, `src/data/activeActionCatalog.ts`.
+- Validation: typecheck ✅ npm test ✅ gate:playability ✅ simulate:gameplay:samples ✅
+---
 
 ## [2026-06-04 11:02] - P7.1 US-001..US-017 (active-action-experience-closure)
 - Structured active-action summary card, disturbance narrative card, source labels (主动行动/江湖扰动/剧情事件), API boundary notice, report visibility fields, closure report script.

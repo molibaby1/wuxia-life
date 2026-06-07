@@ -47,6 +47,8 @@
     "report:experience-governance-closure": "tsx scripts/generateExperienceGovernanceClosureReport.ts",
     "report:p7-1-closure": "tsx scripts/generateP71ClosureReport.ts",
     "gate:playability": "tsx scripts/runP8PlayabilityGate.ts",
+    "gate:p9-triage": "tsx scripts/runP9WarningTriage.ts",
+    "report:p9-verification": "tsx scripts/runP9VerificationReports.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
     "build": "vue-tsc -b && vite build",

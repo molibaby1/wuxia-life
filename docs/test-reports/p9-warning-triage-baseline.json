@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "p9-triage-v1",
+  "generatedAt": "2026-06-07T08:44:18.864Z",
+  "sourceReport": "docs/test-reports/p8-playability-gate-latest.json",
+  "baselineDecision": "pass",
+  "totalWarnings": 11,
+  "byBucket": {
+    "replayability": [
+      {
+        "metric": "replayability",
+        "personaId": "unknown",
+        "personaName": "unknown",
+        "detail": "8 near-duplicate pairs",
+        "bucket": "replayability",
+        "evidence": [
+          "p8-martial-lin ~ p8-cautious-han (0.91)",
+          "p8-martial-lin ~ p8-deviant-ye (0.85)",
+          "p8-martial-lin ~ p8-explorer-lu (0.89)",
+          "p8-social-gu ~ p8-wealth-shen (0.95)",
+          "p8-social-gu ~ p8-cautious-han (0.84)",
+          "p8-wealth-shen ~ p8-cautious-han (0.84)",
+          "p8-deviant-ye ~ p8-explorer-lu (0.95)",
+          "p8-deviant-ye ~ p8-balanced-wei (0.85)"
+        ]
+      }
+    ],
+    "pacing": [
+      {
+        "metric": "pacing",
+        "personaId": "p8-martial-lin",
+        "personaName": "林破竹",
+        "detail": "p8-martial-lin: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-scholar-su",
+        "personaName": "苏文澜",
+        "detail": "p8-scholar-su: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-social-gu",
+        "personaName": "顾清仪",
+        "detail": "p8-social-gu: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-wealth-shen",
+        "personaName": "沈聚财",
+        "detail": "p8-wealth-shen: low-impact span 7y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-cautious-han",
+        "personaName": "韩守拙",
+        "detail": "p8-cautious-han: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-deviant-ye",
+        "personaName": "叶走邪",
+        "detail": "p8-deviant-ye: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-explorer-lu",
+        "personaName": "陆行远",
+        "detail": "p8-explorer-lu: low-impact span 6y",
+        "bucket": "pacing",
+        "evidence": []
+      },
+      {
+        "metric": "pacing",
+        "personaId": "p8-balanced-wei",
+        "personaName": "卫中和",
+        "detail": "p8-balanced-wei: low-impact span 7y",
+        "bucket": "pacing",
+        "evidence": []
+      }
+    ],
+    "causality": [
+      {
+        "metric": "causality",
+        "personaId": "p8-scholar-su",
+        "personaName": "苏文澜",
+        "detail": "p8-scholar-su: direct echoes 0",
+        "bucket": "causality",
+        "evidence": []
+      },
+      {
+        "metric": "causality",
+        "personaId": "p8-social-gu",
+        "personaName": "顾清仪",
+        "detail": "p8-social-gu: direct echoes 0",
+        "bucket": "causality",
+        "evidence": []
+      }
+    ],
+    "other": []
+  },
+  "allWarnings": [
+    {
+      "metric": "pacing",
+      "personaId": "p8-martial-lin",
+      "personaName": "林破竹",
+      "detail": "p8-martial-lin: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "causality",
+      "personaId": "p8-scholar-su",
+      "personaName": "苏文澜",
+      "detail": "p8-scholar-su: direct echoes 0",
+      "bucket": "causality",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-scholar-su",
+      "personaName": "苏文澜",
+      "detail": "p8-scholar-su: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "causality",
+      "personaId": "p8-social-gu",
+      "personaName": "顾清仪",
+      "detail": "p8-social-gu: direct echoes 0",
+      "bucket": "causality",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-social-gu",
+      "personaName": "顾清仪",
+      "detail": "p8-social-gu: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-wealth-shen",
+      "personaName": "沈聚财",
+      "detail": "p8-wealth-shen: low-impact span 7y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-cautious-han",
+      "personaName": "韩守拙",
+      "detail": "p8-cautious-han: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-deviant-ye",
+      "personaName": "叶走邪",
+      "detail": "p8-deviant-ye: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-explorer-lu",
+      "personaName": "陆行远",
+      "detail": "p8-explorer-lu: low-impact span 6y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "pacing",
+      "personaId": "p8-balanced-wei",
+      "personaName": "卫中和",
+      "detail": "p8-balanced-wei: low-impact span 7y",
+      "bucket": "pacing",
+      "evidence": []
+    },
+    {
+      "metric": "replayability",
+      "personaId": "unknown",
+      "personaName": "unknown",
+      "detail": "8 near-duplicate pairs",
+      "bucket": "replayability",
+      "evidence": [
+        "p8-martial-lin ~ p8-cautious-han (0.91)",
+        "p8-martial-lin ~ p8-deviant-ye (0.85)",
+        "p8-martial-lin ~ p8-explorer-lu (0.89)",
+        "p8-social-gu ~ p8-wealth-shen (0.95)",
+        "p8-social-gu ~ p8-cautious-han (0.84)",
+        "p8-wealth-shen ~ p8-cautious-han (0.84)",
+        "p8-deviant-ye ~ p8-explorer-lu (0.95)",
+        "p8-deviant-ye ~ p8-balanced-wei (0.85)"
+      ]
+    }
+  ]
+}

@@ -29,6 +29,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     ],
     risk: 'low',
     metadata: { focusTag: 'martial' },
+    onCompleteFlags: ['p9_echo_training_hook', 'p9_early_training_focus'],
   },
   {
     id: 'action_study_basic',
@@ -47,6 +48,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     ],
     risk: 'low',
     metadata: { focusTag: 'scholarly' },
+    onCompleteFlags: ['p9_echo_study_hook'],
   },
   {
     id: 'action_socializing_basic',
@@ -62,6 +64,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'money', amount: 20 }],
     risk: 'medium',
     metadata: { focusTag: 'social' },
+    onCompleteFlags: ['p9_echo_social_hook', 'p9_early_social_focus'],
   },
   {
     id: 'action_business_basic',
@@ -80,6 +83,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     ],
     risk: 'medium',
     metadata: { focusTag: 'wealth', useCase: '缺钱或想走商路时优先' },
+    onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
   },
   {
     id: 'action_travel_basic',
@@ -98,6 +102,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     ],
     risk: 'medium',
     metadata: { focusTag: 'exploration', useCase: '想开视野或触发奇遇时优先' },
+    onCompleteFlags: ['p9_echo_travel_hook', 'p9_early_travel_focus'],
   },
 ];
 

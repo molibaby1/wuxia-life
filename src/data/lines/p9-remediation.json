@@ -1,0 +1,607 @@
+[
+  {
+    "id": "p9_merchant_midlife_caravan",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 28, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_business_focus\")"
+      }
+    ],
+    "content": {
+      "title": "商路初成",
+      "text": "你早年坚持 action_business_basic 营商打下的底子，如今终于派上用场。一支商队愿意让你带队走塞外皮毛之路——这是营商一途的中段分水岭。",
+      "description": "营商路线中段分化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "lead_caravan",
+        "text": "亲自带队，成商路之主",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 300, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_caravan_master" },
+          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+        ]
+      },
+      {
+        "id": "hire_agent",
+        "text": "雇人代行，坐收利钱",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 150, "operator": "add" },
+          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_investor" },
+          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "wealth", "mandatory", "mainline", "once"],
+      "pathAffinity": { "wealth": 1.0 }
+    }
+  },
+  {
+    "id": "p9_wanderer_midlife_discovery",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 28, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_travel_focus\")"
+      }
+    ],
+    "content": {
+      "title": "远游记名",
+      "text": "你当年第一次 action_travel_basic 游历时的胆气，如今已在江湖传开。一位老行脚僧邀你绘制三州险道图——这是游侠一途的中段分水岭。",
+      "description": "游历路线中段分化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "chart_routes",
+        "text": "绘制险道，成江湖活地图",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_map_legend" },
+          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true }
+        ]
+      },
+      {
+        "id": "guard_caravan",
+        "text": "护送商队，以武养游",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_guardian" },
+          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "wanderer", "mandatory", "mainline", "once"],
+      "pathAffinity": { "wanderer": 1.0 }
+    }
+  },
+  {
+    "id": "p9_childhood_sword_trial",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_martial\")"
+      }
+    ],
+    "content": {
+      "title": "童子试剑",
+      "text": "族中长辈见你幼年练功已有模样，特设童子试剑。这一战不算生死，却是你武道路上第一次被正式看见。",
+      "description": "童年练功里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_sword_trial", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "martial_talent_acknowledged" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_dark_spark",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 96,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_demonic\")"
+      }
+    ],
+    "content": {
+      "title": "暗劲初萌",
+      "text": "你幼年练功时总爱在无人处多练几式狠招。族中长辈皱眉说你「心太野」，你却第一次感到邪路偏锋并非只是传闻——这是走邪一途最早被看见的瞬间。",
+      "description": "邪路童年里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_dark_spark", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "demonic_childhood_spark" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_steady_gate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_conservative\")"
+      }
+    ],
+    "content": {
+      "title": "稳健入门",
+      "text": "族中教头见你幼年练功不求冒进、步步为营，特允你走稳健入门之路——这是守拙一途第一次被正式认可。",
+      "description": "保守练功童年里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "health", "value": 5, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_steady_gate", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "cautious_steady_foundation" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_balanced_posture",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_balanced\")"
+      }
+    ],
+    "content": {
+      "title": "文武并试",
+      "text": "先生让你文武并试，既考拳脚也考见识。你不偏废一端，第一次被看出有均衡成长的路线潜质。",
+      "description": "均衡童年里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_balanced_posture", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "balanced_martial_base" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_study_recital",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 94,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\")"
+      }
+    ],
+    "content": {
+      "title": "蒙学诵典",
+      "text": "蒙学先生让你当众诵典，你幼年坚持 action_study_basic 读书打下的底子显露无疑——第一次被称赞有治学天资。",
+      "description": "童年读书里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_study_recital", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "scholar_childhood_recital" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_social_circle",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 94,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_social_hook\")"
+      }
+    ],
+    "content": {
+      "title": "童子结社",
+      "text": "镇上童子结社，你因幼年 action_socializing_basic 交游时结下的人缘，被推举为社中联络之人——人脉路线第一次有了名字。",
+      "description": "童年交游里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_social_circle", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "social_childhood_circle" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_first_trade",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 94,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_business_focus\")"
+      }
+    ],
+    "content": {
+      "title": "第一笔生意",
+      "text": "你把幼年 action_business_basic 营商时攒下的铜板换成一批小货，在集市上卖出了人生第一笔像样的利钱——营商一途第一次见回响。",
+      "description": "童年营商里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "money", "value": 40, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_first_trade", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "merchant_childhood_first_trade" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_childhood_first_journey",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 94,
+    "ageRange": { "min": 10, "max": 10 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_travel_focus\")"
+      }
+    ],
+    "content": {
+      "title": "初行远路",
+      "text": "你独自走到邻县返来，把幼年 action_travel_basic 游历时练出的胆气化成了第一次远路见闻——游历路线第一次被记入心里。",
+      "description": "童年游历里程碑"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+      { "type": "flag_set", "target": "p9_childhood_first_journey", "value": true },
+      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "wanderer_childhood_first_journey" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_cautious_sect_steady",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 88,
+    "ageRange": { "min": 24, "max": 24 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_conservative\") && flags.has(\"p9_childhood_steady_gate\")"
+      }
+    ],
+    "content": {
+      "title": "守拙持重",
+      "text": "门中长老见你历年行事稳健、少涉险地，特命你主持库房清点——守拙一途在中段终于落地为可被人看见的身份。",
+      "description": "保守路线中段确认"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_cautious_echo", "value": true },
+      { "type": "flag_set", "target": "p9_route_identity_cautious", "value": "cautious_steward" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_deviant_fork_temptation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": { "min": 23, "max": 23 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_demonic\") && flags.has(\"p9_echo_training_hook\")"
+      }
+    ],
+    "content": {
+      "title": "邪路初染",
+      "text": "江湖暗处有人递来一本偏门心法，说可速成。你想起幼年练功时埋下的狠劲，竟在此刻第一次偏向邪路——这是走邪一途无法回避的分水岭。",
+      "description": "邪路中段分化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_dark_manual",
+        "text": "收下偏门心法",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "demonic_path_touched", "value": true },
+          { "type": "flag_set", "target": "p9_explicit_deviant_echo", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_fork_chosen" }
+        ]
+      },
+      {
+        "id": "reject_dark_manual",
+        "text": "拒而不受",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_fork_refused" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_deviant_midlife_escalation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 92,
+    "ageRange": { "min": 29, "max": 29 },
+    "triggers": [{ "type": "age_reach", "value": 29 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_demonic\") && flags.has(\"demonic_path_touched\")"
+      }
+    ],
+    "content": {
+      "title": "邪影成形",
+      "text": "偏门心法练至中段，你的出手已带几分邪异劲力。江湖中开始有人称你「邪影」，而非寻常武人——邪路身份在此刻真正立住。",
+      "description": "邪路后段身份确认"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_deviant_escalation", "value": true },
+      { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_shadow_master" },
+      { "type": "flag_set", "target": "p9_summary_echo_deviant", "value": "邪路偏锋的习惯延续至今" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_training_echo_midlife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": { "min": 26, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && !flags.has(\"p8_route_demonic\")"
+      }
+    ],
+    "content": {
+      "title": "功底显现",
+      "text": "今日与人过招，你忽然想起幼年坚持 action_training_basic 练功打下的底子——那一贯的沉劲，竟在此刻化成了真正的优势。",
+      "description": "早期练功显性回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_training_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_training", "value": "幼年练功的习惯延续至今" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_deviant_training_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 91,
+    "ageRange": { "min": 26, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_demonic\")"
+      }
+    ],
+    "content": {
+      "title": "邪劲回响",
+      "text": "与人争锋时，你忽然想起幼年坚持 action_training_basic 练功时偏练的那些狠招——那股邪劲，竟在此刻化成了真正的杀伐优势。",
+      "description": "邪路练功显性回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_deviant_training_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_deviant", "value": "邪路练功的狠劲延续至今" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_business_echo_midlife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 88,
+    "ageRange": { "min": 29, "max": 29 },
+    "triggers": [{ "type": "age_reach", "value": 29 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_business_hook\")"
+      }
+    ],
+    "content": {
+      "title": "营商旧梦",
+      "text": "你翻出当年第一次尝试 action_business_basic 营商时的账本，那些笨拙的记录如今看来，竟是最早的商路种子。",
+      "description": "早期营商显性回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_study_echo_midlife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 90,
+    "ageRange": { "min": 25, "max": 25 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\")"
+      }
+    ],
+    "content": {
+      "title": "学识回响",
+      "text": "门中议事时，你引经据典、条理分明。同僚恍然：你幼年坚持 action_study_basic 读书打下的底子，原来早已化成了此刻的见识与分寸。",
+      "description": "早期读书显性回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
+      { "type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_study_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_study", "value": "幼年读书的习惯延续至今" },
+      { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_lecturer" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_social_echo_midlife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 88,
+    "ageRange": { "min": 27, "max": 27 },
+    "triggers": [{ "type": "age_reach", "value": 27 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_social_hook\")"
+      }
+    ],
+    "content": {
+      "title": "人脉回响",
+      "text": "一场宴席上，几位旧友同时提起你当年第一次 action_socializing_basic 交游时的热忱——那时结下的人情，如今竟成了你行走江湖最稳的凭仗。",
+      "description": "早期交游显性回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_social_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_social", "value": "幼年交游的习惯延续至今" },
+      { "type": "flag_set", "target": "p9_route_identity_social", "value": "social_network_hub" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  }
+]

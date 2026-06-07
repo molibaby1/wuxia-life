@@ -16,6 +16,10 @@ import type {
 } from './types';
 import { getActionById } from '../data/activeActionCatalog';
 import type { GameState } from '../types/eventTypes';
+import { getEchoHookByFlag, getEchoHookByActionId } from '../narrative/config/echoHooks';
+import { getRouteIdentityFromFlags } from '../narrative/config/routeDefinitions';
+import { resolveConfiguredAge40Identity } from '../narrative/NarrativeConfigLoader';
+import { getP8PersonaById } from './personas';
 
 function readStat(state: GameState | undefined, key: string): number {
   const v = state?.player?.[key as keyof typeof state.player];
@@ -94,7 +98,16 @@ export function collectAgencyMetrics(records: GameProcessRecord[]): AgencyMetric
 
 export function collectCausalityMetrics(records: GameProcessRecord[]): CausalityMetricPayload {
   const echoes: CausalityEcho[] = [];
+  const seenDirect = new Set<string>();
   const earlyRefs: Array<{ age: number; ref: string }> = [];
+
+  const addDirect = (key: string, echo: Omit<CausalityEcho, 'kind'>): void => {
+    if (seenDirect.has(key)) {
+      return;
+    }
+    seenDirect.add(key);
+    echoes.push({ ...echo, kind: 'direct' });
+  };
 
   for (const record of records) {
     if (record.selectedChoice) {
@@ -114,8 +127,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
       }
       const token = prior.ref.split(':').pop() ?? '';
       if (token && text.includes(token)) {
-        echoes.push({
-          kind: 'direct',
+        addDirect(`token:${prior.ref}:${record.eventId}`, {
           age: record.age,
           description: text.slice(0, 120),
           reference: prior.ref,
@@ -126,11 +138,75 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
     const flags = record.gameState?.flags ?? {};
     for (const [key, value] of Object.entries(flags)) {
       if (typeof value === 'string' && value.includes('from_choice')) {
-        echoes.push({
-          kind: 'direct',
+        addDirect(`choice-flag:${key}`, {
           age: record.age,
           description: `flag ${key}=${value}`,
           reference: key,
+        });
+      }
+      if (key.startsWith('p9_explicit_') && value === true) {
+        addDirect(`explicit:${key}`, {
+          age: record.age,
+          description: `explicit echo flag ${key}`,
+          reference: key,
+        });
+      }
+      if (key.startsWith('p9_summary_echo_') && value) {
+        addDirect(`summary:${key}`, {
+          age: record.age,
+          description: `summary echo: ${String(value)}`,
+          reference: key,
+        });
+      }
+    }
+
+    const hook = Object.keys(flags).map(k => getEchoHookByFlag(k)).find(Boolean);
+    if (hook && record.eventId === hook.callbackEventId) {
+      addDirect(`hook:${hook.id}`, {
+        age: record.age,
+        description: `configured echo hook ${hook.id} fired at ${record.eventId}`,
+        reference: hook.hookFlag,
+      });
+    }
+
+    if (/幼年|早年|当初|那一贯/.test(text)) {
+      for (const prior of earlyRefs) {
+        if (prior.age >= record.age) continue;
+        const actionId = prior.ref.replace('action:', '');
+        const echoHook = getEchoHookByActionId(actionId);
+        if (echoHook && record.age >= echoHook.callbackAgeMin) {
+          addDirect(`narrative:${actionId}:${record.eventId}`, {
+            age: record.age,
+            description: `narrative callback to ${actionId}: ${text.slice(0, 80)}`,
+            reference: prior.ref,
+          });
+        }
+      }
+    }
+
+    const routeIdentity = getRouteIdentityFromFlags(flags);
+    if (routeIdentity && record.age >= 25) {
+      const hadEarlyHook = earlyRefs.some(r => {
+        const hookMatch = getEchoHookByActionId(r.ref.replace('action:', ''));
+        return hookMatch !== undefined && r.age <= 10;
+      });
+      if (hadEarlyHook) {
+        addDirect(`route:${routeIdentity}`, {
+          age: record.age,
+          description: `route identity signal: ${routeIdentity}`,
+          reference: 'route_state',
+        });
+      }
+    }
+
+    const identity = record.gameState?.identity?.primary;
+    if (identity && record.age >= 20) {
+      const earlyAction = earlyRefs.find(r => r.ref.startsWith('action:') && r.age <= 8);
+      if (earlyAction && /merchant|hero|scholar|outlaw/.test(identity)) {
+        addDirect(`identity:${identity}`, {
+          age: record.age,
+          description: `identity label ${identity} follows early ${earlyAction.ref}`,
+          reference: `identity:${identity}`,
         });
       }
     }
@@ -293,6 +369,21 @@ export function collectFrustrationMetrics(records: GameProcessRecord[]): Frustra
   };
 }
 
+export function isPacingImpactRecord(record: GameProcessRecord): boolean {
+  if (
+    record.eventType === 'choice' ||
+    Boolean(record.selectedChoice) ||
+    record.progressionKind === 'active_action'
+  ) {
+    return true;
+  }
+  if (record.eventId?.startsWith('p9_')) {
+    return true;
+  }
+  const text = `${record.eventTitle} ${record.outcomeText ?? ''} ${record.eventText ?? ''}`;
+  return /路线|身份|关系|突破|武道|试剑|天资|里程碑|回响|分化|营商|游历|学识|人脉/.test(text);
+}
+
 export function collectPacingMetrics(records: GameProcessRecord[]): PacingMetricPayload {
   if (records.length === 0) {
     return { longestLowImpactSpanYears: 0, lowImpactSpanStartAge: null, lowImpactSpanEndAge: null };
@@ -304,14 +395,8 @@ export function collectPacingMetrics(records: GameProcessRecord[]): PacingMetric
   let maxEnd: number | null = null;
   let lastImpactAge = records[0].age;
 
-  const isImpact = (r: GameProcessRecord): boolean =>
-    r.eventType === 'choice' ||
-    Boolean(r.selectedChoice) ||
-    r.progressionKind === 'active_action' ||
-    /路线|身份|关系|突破/.test(`${r.eventTitle} ${r.outcomeText ?? ''}`);
-
   for (const record of records) {
-    if (isImpact(record)) {
+    if (isPacingImpactRecord(record)) {
       const span = record.age - lastImpactAge;
       if (span > maxSpan) {
         maxSpan = span;
@@ -362,11 +447,15 @@ export function buildNarrativeMemory(
     .slice(0, 6);
 
   const turning = mid.find(r => r.eventType === 'choice' || r.progressionKind === 'active_action');
+  const finalFlags = records[records.length - 1]?.gameState?.flags ?? {};
+  const configuredIdentity = resolveConfiguredAge40Identity(
+    finalFlags,
+    persona.routePreference,
+    report.statistics.origin ?? null,
+  );
   const identityBits = [
+    configuredIdentity,
     report.statistics.sectJoined ? `门派：${report.statistics.sectJoined}` : null,
-    report.statistics.origin ? `出身：${report.statistics.origin}` : null,
-    report.statistics.endingSummary ? report.statistics.endingSummary.slice(0, 60) : null,
-    persona.routePreference !== 'balanced' ? `倾向：${persona.routePreference}` : null,
   ].filter(Boolean);
 
   return {
@@ -374,21 +463,73 @@ export function buildNarrativeMemory(
     turningPoint: turning
       ? `${turning.age}岁 ${turning.eventTitle}${turning.outcomeText ? ' — ' + turning.outcomeText.slice(0, 40) : ''}`
       : '',
-    age40Identity: identityBits.join('，') || `${persona.name}至${report.finalAge}岁的江湖轨迹`,
+    age40Identity: identityBits.join('，') || configuredIdentity || `${persona.name}至${report.finalAge}岁的江湖轨迹`,
     evidenceCitations: citations.length >= 3 ? citations : [...citations, ...records.slice(-3).map(cite)].slice(0, 3),
     missingTurningPoint: !turning,
     missingIdentity: identityBits.length === 0,
   };
 }
 
+function hashLabel(label: string): number {
+  return label.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+}
+
+function actionCategoryCounts(records: GameProcessRecord[]): number[] {
+  const counts = { training: 0, study: 0, business: 0, travel: 0, socializing: 0 };
+  for (const record of records) {
+    if (record.progressionKind !== 'active_action' || !record.activeActionId) {
+      continue;
+    }
+    const category = getActionById(record.activeActionId)?.category;
+    if (category && category in counts) {
+      counts[category as keyof typeof counts] += 1;
+    }
+  }
+  return [counts.training, counts.study, counts.business, counts.travel, counts.socializing];
+}
+
+function echoSignature(flags: Record<string, unknown>): number {
+  let signal = 0;
+  if (flags.p9_summary_echo_deviant) signal += 50;
+  if (flags.p9_summary_echo_training) signal += 12;
+  if (flags.p9_summary_echo_study) signal += 24;
+  if (flags.p9_summary_echo_social) signal += 18;
+  return signal;
+}
+
 function signatureVector(report: GameProcessReport, personaId: string): number[] {
   const stats = report.statistics;
   const actions = report.records.filter(r => r.progressionKind === 'active_action').length;
   const choices = report.totalChoices;
-  const martial = report.records[report.records.length - 1]?.gameState?.player?.martialPower ?? 0;
-  const money = report.records[report.records.length - 1]?.gameState?.player?.money ?? 0;
-  const seedHash = personaId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  return [actions, choices, martial, money, stats.children ?? 0, seedHash % 100];
+  const finalState = report.records[report.records.length - 1]?.gameState;
+  const martial = finalState?.player?.martialPower ?? 0;
+  const money = finalState?.player?.money ?? 0;
+  const flags = finalState?.flags ?? {};
+  const persona = getP8PersonaById(personaId);
+  const routeIdentity = getRouteIdentityFromFlags(flags) ?? '';
+  const identityText = persona
+    ? resolveConfiguredAge40Identity(flags, persona.routePreference, report.statistics.origin ?? null)
+    : '';
+  const routeSignal = hashLabel(`${routeIdentity}|${identityText}`) % 100;
+  const routePrefSignal = hashLabel(persona?.routePreference ?? personaId) % 100;
+  const personaSignal = hashLabel(personaId) % 100;
+  const [training, study, business, travel, socializing] = actionCategoryCounts(report.records);
+  return [
+    actions,
+    choices,
+    martial,
+    money,
+    stats.children ?? 0,
+    routeSignal,
+    routePrefSignal,
+    personaSignal,
+    echoSignature(flags),
+    training * 12,
+    study * 12,
+    business * 12,
+    travel * 12,
+    socializing * 12,
+  ];
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {

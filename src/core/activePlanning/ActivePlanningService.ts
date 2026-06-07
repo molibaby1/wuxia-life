@@ -1,4 +1,4 @@
-import { getMinimumActions } from '../../data/activeActionCatalog';
+import { getMinimumActions, getActionById } from '../../data/activeActionCatalog';
 import type {
   ActionDuration,
   ActionFocusStreak,
@@ -121,6 +121,16 @@ export function executeActiveActionOnState(
     deltas: resolved.deltas,
     sourceKind: 'active_action',
   });
+
+  const actionDef = getActionById(resolved.actionId);
+  if (actionDef?.onCompleteFlags?.length) {
+    if (!state.flags) state.flags = {};
+    if (!state.player.flags) state.player.flags = {};
+    for (const flag of actionDef.onCompleteFlags) {
+      state.flags[flag] = true;
+      state.player.flags[flag] = true;
+    }
+  }
 
   let disturbanceId: string | null = null;
   let disturbanceTitle: string | null = null;

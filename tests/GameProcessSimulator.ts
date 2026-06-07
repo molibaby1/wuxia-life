@@ -232,6 +232,14 @@ export class GameProcessSimulator {
       this.log('📝 步骤 1: 创建角色');
       gameEngine.startNewGame(this.config.playerName, this.config.gender);
       this.gameState = gameEngine.getGameState();
+      const p8Persona = this.resolveP8Persona();
+      if (p8Persona) {
+        if (!this.gameState.flags) {
+          this.gameState.flags = {};
+        }
+        this.gameState.flags[`p8_route_${p8Persona.routePreference}`] = true;
+        this.gameState.flags.p8_persona_id = p8Persona.id;
+      }
       this.log(`   ✅ 玩家：${this.gameState.player?.name}`);
       this.log(`   ✅ 年龄：${this.gameState.player?.age}岁`);
       this.log(`   ✅ 性别：${this.gameState.player?.gender}\n`);

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "p9-causality-v1",
+  "generatedAt": "2026-06-07T08:44:20.218Z",
+  "personas": [
+    {
+      "personaId": "p8-scholar-su",
+      "personaName": "苏文澜",
+      "directEchoCount": 0,
+      "classification": "implicit-only-echo",
+      "evidenceExample": "age 25: identity=none (route signal not counted by gate)",
+      "implicitSignals": [
+        "age 25: identity=none (route signal not counted by gate)",
+        "age 26: identity=none (route signal not counted by gate)",
+        "age 27: identity=none (route signal not counted by gate)",
+        "age 28: identity=none (route signal not counted by gate)",
+        "age 29: identity=none (route signal not counted by gate)"
+      ]
+    },
+    {
+      "personaId": "p8-social-gu",
+      "personaName": "顾清仪",
+      "directEchoCount": 0,
+      "classification": "implicit-only-echo",
+      "evidenceExample": "age 25: identity=none (route signal not counted by gate)",
+      "implicitSignals": [
+        "age 25: identity=none (route signal not counted by gate)",
+        "age 26: identity=none (route signal not counted by gate)",
+        "age 27: identity=none (route signal not counted by gate)",
+        "age 28: identity=none (route signal not counted by gate)",
+        "age 29: identity=none (route signal not counted by gate)"
+      ]
+    }
+  ]
+}

@@ -21,6 +21,15 @@
 - P7 active planning: when `selectEvent()` returns null, main flow offers `getAvailableActiveActions()` (training/study/socializing) via `executeActiveAction` with quarter/month time — do not `advanceTime(1)` as ordinary fallback. Simulator catch-up uses `advanceTime(3, 'month')`. Action/history types live under `src/types/activeActionTypes.ts` and `src/core/activePlanning/`.
 - P7.1 experience closure: `executeActiveActionOnState` returns `activeActionSummary` + optional `disturbanceNarrative`; Web uses `continueProgressionFlow()` for summary → disturbance → `getNextEvent()`. Disturbance copy in `disturbanceNarrativeCatalog.ts`; visibility via `actionHistory[].narrativeShownToPlayer` and `buildDisturbanceVisibilityReport()`. API mode shows boundary notice in `GameScreen`; local-only cards. Tests: `tests/p71ActiveActionExperienceTests.ts`.
 - P8 playability: modules under `src/p8/`; gate via `npm run gate:playability` (8 personas, age 0–40). Persona strategy applies only when `GameProcessConfig.p8PersonaId` is set — legacy `simulate:gameplay` paths keep fixed `action_training_basic` fallback. Reports: `docs/test-reports/p8-playability-gate-latest.{json,md}`. Local slice browser test: unset `VITE_P6B_API_URL` (`.env.development.local` enables API mode otherwise).
+- P9 narrative config: stage/route/echo/summary under `src/narrative/config/`; loader at `src/narrative/NarrativeConfigLoader.ts`. Triage via `npm run gate:p9-triage`; verification via `npm run report:p9-verification`. P9 content events in `src/data/lines/p9-remediation.json`. Active actions set echo/route flags via `onCompleteFlags` in `activeActionCatalog.ts` → `executeActiveActionOnState`. Mandatory P9 events use `priority: 0` + metadata tags `mandatory`/`mainline`/`once` for critical lane selection.
+
+## [2026-06-07] - P9 US-001..US-027 (warning-remediation-and-config-driven-narrative-runtime)
+- Phase A: warning triage, pacing annotation, replay pair comparison, causality root-cause classification, ranked root causes (`src/p9/*`, `npm run gate:p9-triage`).
+- Phase B: first-wave route divergence (wealth/explorer), midlife milestone (martial sword trial), explicit echoes, expanded causality detector.
+- Phase C/D: stage/route/echo/summary config skeleton + runtime read paths; world profile boundary note; regression gate + closure report.
+- Key files: `src/narrative/*`, `src/data/lines/p9-remediation.json`, `tests/p9PlayabilityTests.ts`, `scripts/runP9WarningTriage.ts`, `scripts/runP9VerificationReports.ts`.
+- Validation: typecheck ✅ npm test ✅ gate:playability ✅ (warnings 17→11; wealth~explorer pair diverged) gate:p9-triage ✅ report:p9-verification ✅
+---
 
 ## [2026-06-07] - P8 US-001..US-036 (playability-gate-and-human-test-slice)
 - Baselines, metric schema, 8 personas, persona action/choice strategy, seven metrics, gate command, human slice docs, browser notes, closure report.

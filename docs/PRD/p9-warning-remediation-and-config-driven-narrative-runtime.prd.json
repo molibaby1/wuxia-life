@@ -1,0 +1,394 @@
+{
+  "project": "Wuxia Life P9 Warning Remediation and Config-Driven Narrative Runtime",
+  "branchName": "ralph/p9-warning-remediation-and-config-driven-narrative-runtime",
+  "description": "Reduce P8 playability warnings by first isolating real root causes in replayability, pacing, and causality, then fixing the highest-value content-structure gaps, and finally extracting stage, route, echo, and summary behavior into config-driven narrative structures that keep the current wuxia slice working while preparing for future world-pack reuse.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Generate P9 Warning Triage Baseline",
+      "description": "As a maintainer, I want one baseline report that expands the current P8 warnings into persona-level evidence so that remediation starts from exact failure surfaces rather than summary counts.",
+      "acceptanceCriteria": [
+        "Produce a warning triage report from the latest playability gate output",
+        "List every warning by metric, persona, and detail text",
+        "Group warnings into replayability, pacing, and causality buckets",
+        "Save the report under docs/test-reports/",
+        "Do not modify gameplay logic"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Annotate Low-Impact Span Windows",
+      "description": "As a designer, I want each pacing warning expanded into an age-window timeline so that empty years can be inspected as concrete content gaps.",
+      "acceptanceCriteria": [
+        "For each pacing warning, report the start age and end age of the low-impact span",
+        "For each low-impact span, report what events, actions, route changes, and summary changes occurred inside the span",
+        "Classify each span as no-content, weak-feedback, or weak-differentiation",
+        "Save the annotated pacing output under docs/test-reports/"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Annotate Near-Duplicate Persona Pairs",
+      "description": "As a designer, I want each replayability warning expanded into concrete pairwise similarities so that I know which persona paths are collapsing together.",
+      "acceptanceCriteria": [
+        "List each near-duplicate persona pair from the current gate output",
+        "For each pair, compare route tags, active action distributions, summary identity, and major achievement outcomes",
+        "Identify which comparison dimensions are too similar",
+        "Save the replayability comparison report under docs/test-reports/"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Classify Causality Warning Root Causes",
+      "description": "As a maintainer, I want causality warnings split into real missing echoes versus under-detected echoes so that remediation targets the right layer.",
+      "acceptanceCriteria": [
+        "Review each persona with direct echoes equal to 0",
+        "Classify each case as missing content echo, implicit-only echo, or detector-too-strict",
+        "Record at least one evidence example per persona",
+        "Save the causality root-cause note under docs/test-reports/"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Rank Top P9 Root Causes",
+      "description": "As a project owner, I want one ranked root-cause summary so that the first remediation wave fixes the highest-value structural problems.",
+      "acceptanceCriteria": [
+        "Produce a top-five root-cause list across replayability, pacing, and causality",
+        "Each root cause identifies affected personas and age bands",
+        "Each root cause identifies whether the likely fix belongs to content, config, or runtime support",
+        "Save the ranked summary under docs/test-reports/"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Define First-Wave Route Divergence Targets",
+      "description": "As a designer, I want the first replayability remediation wave scoped to a small set of collapsing persona pairs so that the content fix remains iteration-sized.",
+      "acceptanceCriteria": [
+        "Select the first 2 to 3 near-duplicate persona pairs for remediation",
+        "For each selected pair, define the intended divergence in route, identity, or major life outcome",
+        "Document the minimum content surfaces that must diverge",
+        "Do not implement the divergence in this story"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Define First-Wave Midlife Milestone Targets",
+      "description": "As a designer, I want specific low-impact windows chosen for remediation so that pacing improvements land in the emptiest parts of the 0-40 slice.",
+      "acceptanceCriteria": [
+        "Select the first 2 to 3 low-impact windows for remediation",
+        "For each window, define the missing milestone type such as route signal, relationship shift, achievement, or setback",
+        "Document the intended player-facing change for each selected window",
+        "Do not implement the milestones in this story"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Define First-Wave Explicit Echo Targets",
+      "description": "As a designer, I want a small set of early actions and choices chosen for explicit later-life callbacks so that causality remediation stays focused.",
+      "acceptanceCriteria": [
+        "Select the first 3 to 5 early actions or choices that should gain explicit later echoes",
+        "For each selected action or choice, define the intended later event, identity, or summary callback",
+        "Document whether the echo should appear in event text, route signal, summary text, or multiple surfaces",
+        "Do not implement the echoes in this story"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Implement First Route Divergence Content Pack",
+      "description": "As a player, I want at least one collapsing persona pair to produce clearly different midlife outcomes so that replaying feels meaningfully different.",
+      "acceptanceCriteria": [
+        "Implement the planned divergence for the first selected near-duplicate persona pair",
+        "The two personas produce different route or identity signals by age 40",
+        "The two personas produce different summary outcomes by age 40",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Verify First Route Divergence Pair",
+      "description": "As a maintainer, I want a focused verification of the first divergence pack so that replayability improvements are evidenced rather than assumed.",
+      "acceptanceCriteria": [
+        "Run the playability gate or focused simulation for the remediated persona pair",
+        "Confirm the pair no longer produces the previous near-duplicate result shape",
+        "Record the before and after evidence in a report under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Implement First Midlife Milestone Content Pack",
+      "description": "As a player, I want at least one previously empty midlife window to produce a meaningful milestone so that the slice feels less like empty year advancement.",
+      "acceptanceCriteria": [
+        "Implement one milestone for the first selected low-impact window",
+        "The milestone is visible as route signal, relationship shift, achievement, setback, or identity confirmation",
+        "The change affects the human-readable life summary or event text",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Verify First Midlife Milestone Window",
+      "description": "As a maintainer, I want evidence that the first pacing remediation shortened or enriched the targeted low-impact window.",
+      "acceptanceCriteria": [
+        "Run the playability gate or focused simulation for the remediated persona window",
+        "Record whether the longest low-impact span changed",
+        "Record the new player-facing milestone evidence",
+        "Save the verification note under docs/test-reports/"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Implement First Explicit Echo Content Pack",
+      "description": "As a player, I want at least one early action or choice to be called back later in life so that my earlier decisions feel authored.",
+      "acceptanceCriteria": [
+        "Implement one explicit later-life callback for the first selected early action or choice",
+        "The callback appears in event text, route signal, summary text, or a combination of these",
+        "The callback is player-visible rather than hidden in only raw flags",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Verify First Explicit Echo Callback",
+      "description": "As a maintainer, I want evidence that the first causality remediation is actually visible in simulation output.",
+      "acceptanceCriteria": [
+        "Run the playability gate or focused simulation for the remediated persona path",
+        "Record the new explicit echo evidence in the report",
+        "State whether the echo is now detectable by the current gate output",
+        "Save the verification note under docs/test-reports/"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Expand Causality Detection Beyond Hard Token Matches",
+      "description": "As a maintainer, I want causality detection to recognize more explicit callbacks so that the gate stops undercounting visible authored outcomes.",
+      "acceptanceCriteria": [
+        "Extend causality detection to consider route state, identity labels, summary references, or equivalent explicit signals",
+        "Do not count generic stat growth as direct echo",
+        "Document the new detectable signal types",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Verify Causality Detector Revision",
+      "description": "As a maintainer, I want a focused regression check on the revised causality detector so that detection improvements do not inflate false positives.",
+      "acceptanceCriteria": [
+        "Run focused causality checks against at least one explicit callback case",
+        "Run a negative check showing generic stat-only progression is not counted as direct echo",
+        "Record the detector behavior in a short note under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Extract Stage Configuration Skeleton",
+      "description": "As a content designer, I want the 0-40 slice divided into explicit stage configuration so that pacing and milestone expectations stop living only in implicit flow.",
+      "acceptanceCriteria": [
+        "Define stage configuration for 0-10, 10-20, 20-30, and 30-40",
+        "Each stage declares intended content purpose and minimum feedback expectations",
+        "Do not migrate all content in this story",
+        "Typecheck passes if new config types are added"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Wire Runtime Read Access to Stage Configuration",
+      "description": "As a developer, I want the runtime to read stage configuration so that later pacing and milestone behavior can be driven by config instead of scattered assumptions.",
+      "acceptanceCriteria": [
+        "Runtime can load the new stage configuration structure",
+        "Existing gameplay flow remains functional",
+        "No broad gameplay rebalance is introduced in this story",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Extract Route Definition Skeleton",
+      "description": "As a content designer, I want route entry, reinforcement, divergence, and identity signals expressed in route definitions so that route differentiation becomes configurable.",
+      "acceptanceCriteria": [
+        "Define a route definition structure for entry signals, reinforcement points, divergence points, and identity signals",
+        "Document the first wuxia routes that will use the structure",
+        "Do not migrate every route in this story",
+        "Typecheck passes if new config types are added"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Wire Runtime Read Access to Route Definitions",
+      "description": "As a developer, I want the runtime to read route definitions so that future route differentiation work is mostly config-driven.",
+      "acceptanceCriteria": [
+        "Runtime can load the new route definition structure",
+        "At least one existing route path reads identity or divergence data from the route definition",
+        "Existing gameplay flow remains functional",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Extract Echo Hook Skeleton",
+      "description": "As a content designer, I want early actions and choices to declare future callback hooks in config so that causality does not depend on hand-written one-off logic.",
+      "acceptanceCriteria": [
+        "Define an echo hook structure for early action or choice to later callback mapping",
+        "Support at least event text, route signal, and summary callback targets",
+        "Do not migrate all existing content in this story",
+        "Typecheck passes if new config types are added"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Wire Runtime Read Access to Echo Hooks",
+      "description": "As a developer, I want the runtime or report layer to read echo hooks so that explicit callbacks can be driven by config.",
+      "acceptanceCriteria": [
+        "The runtime or report layer can read the new echo hook structure",
+        "At least one existing explicit callback path uses configured hook data",
+        "Existing gameplay flow remains functional",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Extract Summary Template Skeleton",
+      "description": "As a content designer, I want life summary structure expressed in templates so that world-specific identity and turning-point language can be configured.",
+      "acceptanceCriteria": [
+        "Define summary templates for early life, turning point, and age-40 identity",
+        "Support world-specific wording while preserving the current three-part summary shape",
+        "Do not migrate every summary path in this story",
+        "Typecheck passes if new config types are added"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Wire Runtime Read Access to Summary Templates",
+      "description": "As a developer, I want the summary generator to read summary templates so that future world packs can change wording and emphasis without rewriting core summary logic.",
+      "acceptanceCriteria": [
+        "Summary generation can load the new template structure",
+        "At least one current summary path uses configured template data",
+        "Existing summary output remains functional",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Define World Profile Boundary Note",
+      "description": "As a project owner, I want a boundary note for future world profiles so that cross-theme reuse is planned intentionally rather than implied vaguely.",
+      "acceptanceCriteria": [
+        "Document a world profile structure covering stats, resources, identity tracks, actions, goals, and summary signals",
+        "Explain how wuxia maps onto the structure",
+        "List at least two hypothetical alternate themes such as football career and modern business career",
+        "Do not implement alternate themes in this story"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Run P9 Regression Gate After First-Wave Remediation",
+      "description": "As a maintainer, I want to rerun the playability and regression checks after the first remediation wave so that improvements are measured against the original P8 baseline.",
+      "acceptanceCriteria": [
+        "Run gate:playability after the first remediation wave",
+        "Record warning deltas versus the original P8 baseline",
+        "Run the required regression checks for touched runtime surfaces",
+        "Save the results under docs/test-reports/"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Write P9 Closure Report",
+      "description": "As a project owner, I want a closure report for the first P9 wave so that the next decision is based on measured warning reduction and configuration progress.",
+      "acceptanceCriteria": [
+        "Report which warnings were reduced, unchanged, or newly surfaced",
+        "Report which runtime structures became config-driven",
+        "Report residual risks before a larger world-pack generalization phase",
+        "List commands and evidence used for verification"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

@@ -48,6 +48,8 @@ export interface ActiveActionDefinition {
   costs: ActionCostChannel[];
   risk: RiskLevel;
   metadata?: Record<string, unknown>;
+  /** P9: flags set on action completion for echo/route hooks */
+  onCompleteFlags?: string[];
 }
 
 export interface ActionResultMetadata {

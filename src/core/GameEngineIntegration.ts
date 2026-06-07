@@ -120,6 +120,8 @@ export class GameEngineIntegration {
       flags: {},
       events: [],
       eventHistory: [],
+      actionHistory: [],
+      actionFocusStreak: { category: null, count: 0 },
       relations: {},
       statistics: {
         totalEvents: 0,
@@ -278,6 +280,10 @@ export class GameEngineIntegration {
     this.gameState.flags = { ...(nextState.flags || {}) };
     this.gameState.events = [...(nextState.events || [])];
     this.gameState.eventHistory = [...(nextState.eventHistory || [])];
+    this.gameState.actionHistory = [...(nextState.actionHistory || [])];
+    this.gameState.actionFocusStreak = nextState.actionFocusStreak
+      ? { ...nextState.actionFocusStreak }
+      : { category: null, count: 0 };
     this.gameState.triggeredEvents = [...(nextState.triggeredEvents || [])];
     this.gameState.relations = { ...(nextState.relations || {}) };
     this.gameState.inventory = [...(nextState.inventory || [])];
@@ -2005,6 +2011,7 @@ export class GameEngineIntegration {
     this.lastYear = -1;
     this.annualEventPressure = 0;
     this.suppressLethalSetbacks = false;
+    this.conditionEvaluator.clearCache();
     difficultyMonitor.reset();
   }
 

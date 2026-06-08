@@ -19,7 +19,74 @@ export function applyPersonaChoiceBias(ctx: PersonaChoiceBiasContext): number {
   let bonus = 0;
   const { persona, effects = [] } = ctx;
 
+  const choiceLower = ctx.choiceId.toLowerCase();
+
+  if (persona.routePreference === 'demonic') {
+    if (choiceLower.includes('orthodox') || choiceLower.includes('righteous')) {
+      bonus -= 140;
+    }
+    if (
+      choiceLower.includes('dark')
+      || choiceLower.includes('demonic')
+      || choiceLower.includes('unconventional')
+      || choiceLower.includes('shadow')
+    ) {
+      bonus += 90;
+    }
+  }
+
+  if (persona.routePreference === 'martial') {
+    if (
+      choiceLower.includes('orthodox')
+      || choiceLower.includes('righteous')
+      || choiceLower.includes('challenge')
+      || choiceLower.includes('duel')
+      || choiceLower.includes('join_sect')
+      || choiceLower.includes('accept_duel')
+    ) {
+      bonus += 55;
+    }
+    if (choiceLower.includes('decline') || choiceLower.includes('observe_only') || choiceLower.includes('dark')) {
+      bonus -= 45;
+    }
+  }
+
+  if (persona.routePreference === 'conservative') {
+    if (
+      choiceLower.includes('decline')
+      || choiceLower.includes('refuse')
+      || choiceLower.includes('observe')
+      || choiceLower.includes('steady')
+      || choiceLower.includes('simple')
+    ) {
+      bonus += 35;
+    }
+    if (choiceLower.includes('challenge') || choiceLower.includes('dark') || choiceLower.includes('risk')) {
+      bonus -= 45;
+    }
+  }
+
+  if (persona.routePreference === 'balanced') {
+    if (choiceLower.includes('study') || choiceLower.includes('mediate') || choiceLower.includes('peace')) {
+      bonus += 30;
+    }
+  }
+
   for (const effect of effects) {
+    if (effect.type === 'flag_set') {
+      const flagName = String(effect.target ?? (effect as { flag?: string }).flag ?? '').toLowerCase();
+      if (persona.routePreference === 'demonic' && (flagName.includes('orthodox') || flagName === 'joined_sect')) {
+        bonus -= 120;
+      }
+      if (persona.routePreference === 'martial' && (flagName.includes('martial') || flagName.includes('orthodox'))) {
+        bonus += 35;
+      }
+      if (persona.routePreference === 'conservative' && flagName.includes('injury')) {
+        bonus -= 80;
+      }
+      continue;
+    }
+
     if (effect.type !== 'stat_modify' || !effect.target) {
       continue;
     }

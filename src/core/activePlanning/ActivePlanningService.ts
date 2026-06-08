@@ -126,7 +126,13 @@ export function executeActiveActionOnState(
   if (actionDef?.onCompleteFlags?.length) {
     if (!state.flags) state.flags = {};
     if (!state.player.flags) state.player.flags = {};
+    const demonicRoute = state.flags?.p8_route_demonic === true;
     for (const flag of actionDef.onCompleteFlags) {
+      if (demonicRoute && flag === 'p9_early_travel_focus') {
+        state.flags.p9_demonic_restless_journey = true;
+        state.player.flags.p9_demonic_restless_journey = true;
+        continue;
+      }
       state.flags[flag] = true;
       state.player.flags[flag] = true;
     }

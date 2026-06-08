@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-08T11:54:40.848Z
+Generated: 2026-06-08T14:43:03.668Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -10,7 +10,6 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### Warnings
 - causality: p8-wealth-shen: direct echoes 1
 - causality: p8-explorer-lu: direct echoes 2
-- replayability: 2 near-duplicate pairs
 
 ## Persona Highlights
 
@@ -21,22 +20,22 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Sample selection: age 2 → action_childhood_training (persona_strategy:training prefers training)
 
 **Causality**
-- Direct echoes: 3
+- Direct echoes: 4
   - 26岁: configured echo hook echo_training_basic fired at p9_trainin
   - 27岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [missed] 打下武功根基 (0-20): martialPower=6 < 25
+- [missed] 打下武功根基 (0-20): martialPower=21 < 25
 - [achieved] 坚持练功规划 (0-20): training actions=3
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
-- [missed] 三十岁前功力达标 (30-40): martialPower=6 < 45
+- [missed] 三十岁前功力达标 (30-40): martialPower=21 < 45
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
-- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你在大会上仍
+- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
 - Age-40 identity: 出身：寒门，路线：武道（martial_talent_acknowledged），幼年练功的习惯延续至今
 
 ### 苏文澜 (p8-scholar-su)
@@ -141,25 +140,25 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 叶走邪 (p8-deviant-ye)
 
 **Planning / Agency**
-- Active actions: 3; categories: {"training":3}
+- Active actions: 3; categories: {"training":2,"travel":1}
 - Sample selection: age 2 → action_childhood_training (persona_strategy:training prefers training)
 
 **Causality**
 - Direct echoes: 4
-  - 23岁: explicit echo flag p9_explicit_deviant_echo
-  - 27岁: explicit echo flag p9_explicit_deviant_training_echo
+  - 11岁: explicit echo flag p9_explicit_deviant_childhood_echo
+  - 26岁: explicit echo flag p9_explicit_deviant_echo
 
 **Achievement**
 - [achieved] 邪路信号出现 (0-20): flag demonic_path_touched=true
 - [missed] 做出高风险选择 (20-30): event demonic_midlife_fork not seen
-- [missed] 邪路功力成长 (30-40): martialPower=28 < 40
+- [achieved] 邪路功力成长 (30-40): martialPower=52 >= 40
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
-- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
+- Turning: 20岁 喜结良缘 — 你的积蓄少了一些。
 - Age-40 identity: 出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，邪路偏锋的习惯延续至今
 
 ### 陆行远 (p8-explorer-lu)
@@ -189,17 +188,17 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 卫中和 (p8-balanced-wei)
 
 **Planning / Agency**
-- Active actions: 3; categories: {"training":3}
+- Active actions: 3; categories: {"training":1,"study":1,"travel":1}
 - Sample selection: age 2 → action_childhood_training (persona_strategy:balanced prefers training)
 
 **Causality**
-- Direct echoes: 4
-  - 26岁: configured echo hook echo_training_basic fired at p9_trainin
-  - 27岁: explicit echo flag p9_explicit_training_echo
+- Direct echoes: 8
+  - 26岁: explicit echo flag p9_explicit_study_echo
+  - 26岁: summary echo: 幼年读书的习惯延续至今
 
 **Achievement**
-- [missed] 文武均衡 (0-20): martialPower=7 < 15
-- [missed] 多种主动行动并用 (20-30): study actions=0 < 1
+- [missed] 文武均衡 (0-20): martialPower=0 < 15
+- [achieved] 多种主动行动并用 (20-30): study actions=1
 - [missed] 形成稳定身份标签 (30-40): —
 
 **Frustration**
@@ -208,8 +207,4 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
-- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今
-
-## Replay Similarity
-- p8-martial-lin ~ p8-deviant-ye (0.84)
-- p8-cautious-han ~ p8-balanced-wei (0.93)
+- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今，幼年读书的习惯延续至今，幼年交游的习惯延续至今

@@ -583,6 +583,12 @@ export class GameProcessSimulator {
         p9_early_training_focus: true,
         p9_echo_training_hook: true,
       },
+      balanced: {
+        p9_echo_study_hook: true,
+        p9_echo_social_hook: true,
+        p9_early_social_focus: true,
+        p16_deferred_study_upbringing: true,
+      },
     };
     const seeds = strategySeeds[persona.strategy];
     if (seeds) {

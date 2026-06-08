@@ -99,6 +99,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     ],
     divergencePoints: [
       { kind: 'divergence', ageBand: '26-28', eventId: 'p9_training_echo_midlife', description: '功底显现' },
+      { kind: 'divergence', ageBand: '26-32', eventId: 'p9_martial_midlife_proving', flagKey: 'p9_route_identity_martial', description: '武道立名' },
     ],
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_milestone_route_signal', description: '武道天资确认' },

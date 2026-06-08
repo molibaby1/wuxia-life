@@ -1,28 +1,28 @@
 # P9 Explicit Echo Verification
 
-Generated: 2026-06-07T08:44:19.404Z
+Generated: 2026-06-08T14:40:31.752Z
 
 ## Persona: p8-martial-lin (training echo)
 
-- Direct echoes: 48
+- Direct echoes: 4
 - Echo examples: [
   {
-    "kind": "direct",
-    "age": 25,
-    "description": "route identity signal: martial_talent_acknowledged",
-    "reference": "route_state"
+    "age": 26,
+    "description": "configured echo hook echo_training_basic fired at p9_training_echo_midlife",
+    "reference": "p9_echo_training_hook",
+    "kind": "direct"
   },
   {
-    "kind": "direct",
-    "age": 26,
-    "description": "你的武功有了长进。 今日与人过招，你忽然想起幼年坚持 action_training_basic 练功打下的底子——那一贯的沉劲，竟在此刻化成了真正的优势。 功底显现",
-    "reference": "action:action_training_basic"
+    "age": 27,
+    "description": "explicit echo flag p9_explicit_training_echo",
+    "reference": "p9_explicit_training_echo",
+    "kind": "direct"
   },
   {
-    "kind": "direct",
-    "age": 26,
-    "description": "你的武功有了长进。 今日与人过招，你忽然想起幼年坚持 action_training_basic 练功打下的底子——那一贯的沉劲，竟在此刻化成了真正的优势。 功底显现",
-    "reference": "action:action_training_basic"
+    "age": 27,
+    "description": "summary echo: 幼年练功的习惯延续至今",
+    "reference": "p9_summary_echo_training",
+    "kind": "direct"
   }
 ]
 - Training echo event: true

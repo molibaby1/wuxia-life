@@ -137,6 +137,13 @@ export function resolveChildhoodActionPalette(
     return fallback ? [fallback] : childhoodActionCatalog.slice(0, 1);
   }
 
+  if (flags?.p8_route_demonic === true && age >= 5 && age <= 9) {
+    const travelAction = childhoodLiteForCategory('travel');
+    if (travelAction && !seen.has(travelAction.id)) {
+      palette.push(travelAction);
+    }
+  }
+
   return palette;
 }
 
@@ -217,12 +224,19 @@ function childhoodRouteLocked(flags: Record<string, unknown>): {
 export function promoteYouthRouteEntryFromUpbringing(state: GameState): void {
   const flags = state.flags;
   const locked = childhoodRouteLocked(flags);
+  const demonicRoute = hasTruthyFlag(flags, 'p8_route_demonic');
 
   if (locked.business) {
     flags.p9_early_business_focus = true;
   }
   if (locked.travel) {
-    flags.p9_early_travel_focus = true;
+    if (demonicRoute) {
+      if (hasTruthyFlag(flags, 'p9_echo_travel_hook')) {
+        flags.p9_demonic_restless_journey = true;
+      }
+    } else {
+      flags.p9_early_travel_focus = true;
+    }
   }
   if (locked.social) {
     flags.p9_early_social_focus = true;
@@ -237,6 +251,7 @@ export function promoteYouthRouteEntryFromUpbringing(state: GameState): void {
     flags.p9_early_business_focus = true;
   }
   if (
+    !demonicRoute &&
     hasTruthyFlag(flags, 'p16_deferred_travel_upbringing') &&
     !locked.travel &&
     !locked.business

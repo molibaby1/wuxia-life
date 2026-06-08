@@ -71,7 +71,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_travel_hook\") && !flags.has(\"p9_early_business_focus\")"
+        "expression": "flags.has(\"p9_echo_travel_hook\") && !flags.has(\"p9_early_business_focus\") && !flags.has(\"p8_route_demonic\")"
       }
     ],
     "content": {
@@ -169,13 +169,13 @@
     "version": "1.0.0",
     "category": "main_story",
     "priority": 0,
-    "weight": 96,
+    "weight": 97,
     "ageRange": { "min": 10, "max": 10 },
     "triggers": [{ "type": "age_reach", "value": 10 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p8_route_demonic\") && (flags.has(\"p9_echo_training_hook\") || flags.has(\"p9_demonic_restless_journey\"))"
       }
     ],
     "content": {
@@ -188,6 +188,7 @@
       { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
       { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
       { "type": "flag_set", "target": "p9_childhood_dark_spark", "value": true },
+      { "type": "flag_set", "target": "p9_explicit_deviant_childhood_echo", "value": true },
       { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "demonic_childhood_spark" }
     ],
     "metadata": {
@@ -361,7 +362,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_travel_focus\")"
+        "expression": "flags.has(\"p9_early_travel_focus\") && !flags.has(\"p8_route_demonic\")"
       }
     ],
     "content": {
@@ -416,8 +417,8 @@
     "version": "1.0.0",
     "category": "main_story",
     "priority": 0,
-    "weight": 90,
-    "ageRange": { "min": 23, "max": 23 },
+    "weight": 120,
+    "ageRange": { "min": 23, "max": 26 },
     "triggers": [{ "type": "age_reach", "value": 23 }],
     "conditions": [
       {
@@ -453,7 +454,20 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "mandatory", "once"]
+      "tags": ["p9", "route_divergence", "demonic", "mandatory", "mainline", "once"],
+      "pathAffinity": { "demonic": 1.0, "deviant": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence", "age40_identity"],
+        "routePoints": [
+          {
+            "routeId": "route_deviant",
+            "kind": "divergence",
+            "ageBand": "23-29",
+            "eventId": "p9_deviant_fork_temptation",
+            "flagKey": "p9_route_identity_deviant"
+          }
+        ]
+      }
     }
   },
   {
@@ -484,7 +498,20 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "mandatory", "once"]
+      "tags": ["p9", "route_divergence", "demonic", "mandatory", "mainline", "once"],
+      "pathAffinity": { "demonic": 1.0, "deviant": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence", "age40_identity"],
+        "routePoints": [
+          {
+            "routeId": "route_deviant",
+            "kind": "divergence",
+            "ageBand": "23-29",
+            "eventId": "p9_deviant_midlife_escalation",
+            "flagKey": "p9_route_identity_deviant"
+          }
+        ]
+      }
     }
   },
   {
@@ -606,6 +633,84 @@
     "metadata": {
       "enabled": true,
       "tags": ["p9", "causality_echo", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_martial_midlife_proving",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 93,
+    "ageRange": { "min": 28, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_martial\") && flags.has(\"p9_childhood_sword_trial\")"
+      }
+    ],
+    "content": {
+      "title": "武道立名",
+      "text": "你在城外遇上一名成名武人挑衅，想起童子试剑时埋下的锋芒，终于以正面对决立下武道名分——这是林破竹一路不同于邪路走法的分水岭。",
+      "description": "武道路线中段身份确认"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 28, "operator": "add" },
+      { "type": "stat_modify", "target": "externalSkill", "value": 15, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 12, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_martial_proving_echo", "value": true },
+      { "type": "flag_set", "target": "p9_route_identity_martial", "value": "martial_proven_champion" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "martial", "mandatory", "mainline", "once"],
+      "pathAffinity": { "martial": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence", "age40_identity"],
+        "routePoints": [
+          {
+            "routeId": "route_martial",
+            "kind": "divergence",
+            "ageBand": "26-28",
+            "eventId": "p9_martial_midlife_proving",
+            "flagKey": "p9_route_identity_martial"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p9_balanced_midlife_harmony",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 91,
+    "ageRange": { "min": 28, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_balanced\") && (flags.has(\"p9_echo_study_hook\") || flags.has(\"p9_childhood_balanced_posture\"))"
+      }
+    ],
+    "content": {
+      "title": "文武调和",
+      "text": "门中议事时，你既能引经据典，也能镇住场面。同僚说你走的是均衡一途——不是偏科猛士，也不是守成之人，而是真正调和文武的中段身份。",
+      "description": "均衡路线中段身份确认"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 10, "operator": "add" },
+      { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p9_explicit_balanced_harmony_echo", "value": true },
+      { "type": "flag_set", "target": "p9_route_identity_balanced", "value": "balanced_harmony_steward" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "mandatory", "once"]
     }
   },
   {

@@ -39,10 +39,32 @@ function pickByCategory(
  * Select active action when no story event is available.
  * Degrades to first available candidate if preferred categories missing.
  */
+function rotatedPriorities(
+  priorities: string[],
+  startIndex: number,
+): string[] {
+  if (priorities.length === 0) {
+    return priorities;
+  }
+  const offset = ((startIndex % priorities.length) + priorities.length) % priorities.length;
+  return [...priorities.slice(offset), ...priorities.slice(0, offset)];
+}
+
 export function selectPersonaActiveAction(
   input: PersonaActionStrategyInput,
 ): PersonaActionStrategyOutput {
-  const priorities = STRATEGY_CATEGORY_PRIORITY[input.persona.strategy] ?? STRATEGY_CATEGORY_PRIORITY.balanced;
+  let priorities = STRATEGY_CATEGORY_PRIORITY[input.persona.strategy] ?? STRATEGY_CATEGORY_PRIORITY.balanced;
+
+  if (input.persona.strategy === 'balanced') {
+    priorities = rotatedPriorities(priorities, Math.floor(input.age / 3));
+  } else if (input.persona.routePreference === 'demonic' && input.age === 7) {
+    const travel = pickByCategory(input, 'travel');
+    if (travel) {
+      return { ...travel, reason: `${travel.reason}; demonic_restless_age7` };
+    }
+  } else if (input.persona.routePreference === 'conservative') {
+    priorities = ['training', 'study', 'socializing', 'business', 'travel'];
+  }
 
   for (const category of priorities) {
     const picked = pickByCategory(input, category);

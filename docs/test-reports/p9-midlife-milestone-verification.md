@@ -1,14 +1,14 @@
 # P9 Midlife Milestone Verification
 
-Generated: 2026-06-07T08:44:19.403Z
+Generated: 2026-06-08T14:40:31.751Z
 
 ## Persona: p8-martial-lin
 
 ### Before
-- Longest low-impact span: 6y (7–13)
+- Longest low-impact span: 3y (15–18)
 
 ### After
-- Longest low-impact span: 6y (7–13)
+- Longest low-impact span: 3y (15–18)
 - Sword trial event seen: true
 - Milestone flag: true
 

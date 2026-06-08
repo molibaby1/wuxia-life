@@ -57,7 +57,11 @@ function routeHasEntrySignal(routeId: string, flags: Record<string, unknown>): b
 function resolveActiveRouteIds(flags: Record<string, unknown>, routePreference?: string | null): string[] {
   const routeDefinitions = getWorldProfile('wuxia').routeDefinitions;
   const active: string[] = [];
+  const demonicLocked = hasRouteFlag(flags, 'p8_route_demonic');
   for (const route of routeDefinitions) {
+    if (demonicLocked && route.id === 'route_wanderer') {
+      continue;
+    }
     const hasEntry = routeHasEntrySignal(route.id, flags);
     const hasIdentity = route.identityResolution.candidates.some(
       candidate => flags[candidate.flagKey],
@@ -96,7 +100,10 @@ function resolveRoutePreferenceFromState(state: GameState): string | null {
   if (hasRouteFlag(flags, 'p9_early_business_focus') || hasRouteFlag(flags, 'p16_deferred_business_upbringing')) {
     return 'wealth';
   }
-  if (hasRouteFlag(flags, 'p9_early_travel_focus') || hasRouteFlag(flags, 'p16_deferred_travel_upbringing')) {
+  if (
+    !hasRouteFlag(flags, 'p8_route_demonic') &&
+    (hasRouteFlag(flags, 'p9_early_travel_focus') || hasRouteFlag(flags, 'p16_deferred_travel_upbringing'))
+  ) {
     return 'wanderer';
   }
   if (hasRouteFlag(flags, 'p9_early_social_focus') || hasRouteFlag(flags, 'p16_deferred_social_upbringing')) {

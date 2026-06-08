@@ -236,6 +236,34 @@ function testYouthRouteEntryPromotion(): void {
     businessLocked.flags.p9_early_travel_focus !== true,
     'childhood business path blocks deferred travel promotion',
   );
+
+  const demonicTravelEcho: GameState = {
+    flags: { p8_route_demonic: true, p9_echo_travel_hook: true },
+    player: { age: 13 } as PlayerState,
+  } as GameState;
+  promoteYouthRouteEntryFromUpbringing(demonicTravelEcho);
+  assert(
+    demonicTravelEcho.flags.p9_early_travel_focus !== true,
+    'demonic childhood travel echo must not promote wanderer focus',
+  );
+  assert(
+    demonicTravelEcho.flags.p9_demonic_restless_journey === true,
+    'demonic childhood travel echo promotes restless journey instead',
+  );
+
+  const demonicDeferredTravel: GameState = {
+    flags: { p8_route_demonic: true, p16_deferred_travel_upbringing: true },
+    player: { age: 13, traitProfile: { origin: 'streetborn' } } as PlayerState,
+  } as GameState;
+  promoteYouthRouteEntryFromUpbringing(demonicDeferredTravel);
+  assert(
+    demonicDeferredTravel.flags.p9_early_travel_focus !== true,
+    'demonic deferred travel upbringing must not promote wanderer focus',
+  );
+  assert(
+    demonicDeferredTravel.flags.p9_echo_travel_hook !== true,
+    'demonic deferred travel upbringing must not seed wanderer echo hook',
+  );
 }
 
 function run(): void {

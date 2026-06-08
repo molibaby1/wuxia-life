@@ -1,4 +1,4 @@
-import type { GameProcessRecord } from '../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../types/simulationRecordTypes';
 import type {
   CausalityPersonaClassification,
   CausalityRootCauseClass,

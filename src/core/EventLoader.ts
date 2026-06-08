@@ -42,6 +42,7 @@ import factionEventsJson from '../data/lines/faction-revelation.json';
 // 难度系统 - 挫折事件
 import setbackEventsJson from '../data/lines/setback-events.json';
 import p9RemediationEventsJson from '../data/lines/p9-remediation.json';
+import p11ValidationEventsJson from '../data/lines/p11-validation.json';
 
 // 路线事件（已合并到 identity-outlaw.json）
 // import pathExamplesJson from '../data/lines/path-examples.json';
@@ -75,6 +76,7 @@ const factionEvents = factionEventsJson as EventDefinition[];
 // 难度系统 - 挫折事件
 const setbackEvents = setbackEventsJson as EventDefinition[];
 const p9RemediationEvents = p9RemediationEventsJson as EventDefinition[];
+const p11ValidationEvents = p11ValidationEventsJson as EventDefinition[];
 
 const eventsIndex = eventsIndexJson as {
   version: string;
@@ -136,6 +138,7 @@ export class EventLoader {
       // 难度系统 - 挫折事件
       './lines/setback-events.json': setbackEvents,
       './lines/p9-remediation.json': p9RemediationEvents,
+      './lines/p11-validation.json': p11ValidationEvents,
     };
     
     const orderedLines = (eventsIndex.imports || [])

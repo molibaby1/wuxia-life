@@ -777,6 +777,17 @@ export interface EventDefinition {
     pathConflicts?: string[];
     routeTransition?: 'turn' | 'betrayal' | 'corruption' | 'redemption' | 'exile';
     routeTargets?: string[];
+    /** P11: stage/route scheduling coverage declarations */
+    narrativeScheduling?: {
+      stageSignals?: string[];
+      routePoints?: Array<{
+        routeId: string;
+        kind: 'entry' | 'reinforcement' | 'divergence' | 'identity';
+        ageBand: string;
+        eventId?: string;
+        flagKey?: string;
+      }>;
+    };
   };
 
   // ========== 难度系统扩展 ==========

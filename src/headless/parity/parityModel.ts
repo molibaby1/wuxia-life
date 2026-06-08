@@ -6,7 +6,7 @@ import * as crypto from 'node:crypto';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import type { LifeMemorySummary } from '../../types/lifeMemory';
 import type { GameState } from '../../types/eventTypes';
-import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import {
   ACTIVE_ACTION_EVENT_PREFIX,
   isActiveActionReplayEventId,

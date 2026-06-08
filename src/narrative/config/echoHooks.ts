@@ -3,6 +3,21 @@
  */
 
 export type EchoCallbackTarget = 'event_text' | 'route_signal' | 'summary_text';
+export type EchoSummarySlot = 'early_life' | 'turning_point' | 'age40_identity';
+export type EchoSummaryTextSourceKind = 'flag_value' | 'description';
+
+export interface EchoSummaryTextSource {
+  kind: EchoSummaryTextSourceKind;
+  flagKey?: string;
+}
+
+export interface EchoSummaryContribution {
+  enabled: boolean;
+  slot: EchoSummarySlot;
+  variableName: string;
+  order: number;
+  textSources: EchoSummaryTextSource[];
+}
 
 export interface EchoHook {
   id: string;
@@ -13,7 +28,7 @@ export interface EchoHook {
   callbackAgeMin: number;
   callbackAgeMax: number;
   targets: EchoCallbackTarget[];
-  summaryFlag?: string;
+  summaryContribution?: EchoSummaryContribution;
   description: string;
 }
 
@@ -26,7 +41,13 @@ export const WUXIA_ECHO_HOOKS: EchoHook[] = [
     callbackAgeMin: 26,
     callbackAgeMax: 28,
     targets: ['event_text', 'summary_text'],
-    summaryFlag: 'p9_summary_echo_training',
+    summaryContribution: {
+      enabled: true,
+      slot: 'age40_identity',
+      variableName: 'echo_suffix',
+      order: 10,
+      textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_training' }, { kind: 'description' }],
+    },
     description: '幼年练功 → 中段功底显现',
   },
   {
@@ -57,7 +78,13 @@ export const WUXIA_ECHO_HOOKS: EchoHook[] = [
     callbackAgeMin: 24,
     callbackAgeMax: 28,
     targets: ['event_text', 'summary_text'],
-    summaryFlag: 'p9_summary_echo_study',
+    summaryContribution: {
+      enabled: true,
+      slot: 'age40_identity',
+      variableName: 'echo_suffix',
+      order: 20,
+      textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_study' }, { kind: 'description' }],
+    },
     description: '幼年读书 → 学识回响',
   },
   {
@@ -67,9 +94,31 @@ export const WUXIA_ECHO_HOOKS: EchoHook[] = [
     callbackEventId: 'p9_social_echo_midlife',
     callbackAgeMin: 26,
     callbackAgeMax: 30,
-    targets: ['event_text', 'route_signal'],
-    summaryFlag: 'p9_summary_echo_social',
+    targets: ['event_text', 'route_signal', 'summary_text'],
+    summaryContribution: {
+      enabled: true,
+      slot: 'age40_identity',
+      variableName: 'echo_suffix',
+      order: 30,
+      textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_social' }, { kind: 'description' }],
+    },
     description: '幼年交游 → 人脉回响',
+  },
+  {
+    id: 'echo_deviant_identity',
+    hookFlag: 'p9_route_identity_deviant',
+    callbackEventId: 'p9_deviant_fork_temptation',
+    callbackAgeMin: 23,
+    callbackAgeMax: 29,
+    targets: ['route_signal', 'summary_text'],
+    summaryContribution: {
+      enabled: true,
+      slot: 'age40_identity',
+      variableName: 'echo_suffix',
+      order: 40,
+      textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_deviant' }, { kind: 'description' }],
+    },
+    description: '邪路偏锋的习惯延续至今',
   },
 ];
 

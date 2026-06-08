@@ -1,5 +1,4 @@
 ## Codebase Patterns
-
 - P6B backend lives under `server/` with SQL migrations in `server/migrations/`; run `npm run p6b:migrate`, `npm run p6b:seed-catalog`, `npm run p6b:serve` with `DATABASE_URL` and `TOKEN_HASH_SECRET` set (see `.env.p6b.example`).
 - Web API mode activates when `VITE_P6B_API_URL` is set at build time; tokens stay in `webPlatformStorage`, not Vue components.
 - P6B unit tests (`npm run test:p6b:unit`) need no PostgreSQL; full gate and `npm run test:p6b` also run `test:p6b:db`, which fails without `DATABASE_URL`.
@@ -22,6 +21,13 @@
 - P7.1 experience closure: `executeActiveActionOnState` returns `activeActionSummary` + optional `disturbanceNarrative`; Web uses `continueProgressionFlow()` for summary → disturbance → `getNextEvent()`. Disturbance copy in `disturbanceNarrativeCatalog.ts`; visibility via `actionHistory[].narrativeShownToPlayer` and `buildDisturbanceVisibilityReport()`. API mode shows boundary notice in `GameScreen`; local-only cards. Tests: `tests/p71ActiveActionExperienceTests.ts`.
 - P8 playability: modules under `src/p8/`; gate via `npm run gate:playability` (8 personas, age 0–40). Persona strategy applies only when `GameProcessConfig.p8PersonaId` is set — legacy `simulate:gameplay` paths keep fixed `action_training_basic` fallback. Reports: `docs/test-reports/p8-playability-gate-latest.{json,md}`. Local slice browser test: unset `VITE_P6B_API_URL` (`.env.development.local` enables API mode otherwise).
 - P9 narrative config: stage/route/echo/summary under `src/narrative/config/`; loader at `src/narrative/NarrativeConfigLoader.ts`. Triage via `npm run gate:p9-triage`; verification via `npm run report:p9-verification`. P9 content events in `src/data/lines/p9-remediation.json`. Active actions set echo/route flags via `onCompleteFlags` in `activeActionCatalog.ts` → `executeActiveActionOnState`. Mandatory P9 events use `priority: 0` + metadata tags `mandatory`/`mainline`/`once` for critical lane selection.
+- P11 stage/route scheduling: modules under `src/p11/`; signal detection + scheduling context + policy multipliers wired into `GameEngineIntegration.getRouteSchedulingMultiplier`. Content declares `metadata.narrativeScheduling.stageSignals/routePoints`. Validation pack in `src/data/lines/p11-validation.json`. Gates: `npm run report:p11-stage-baseline`, `npm run gate:p11-scheduling`, `npm run report:p11-closure`. Reports: `docs/test-reports/p11-*`. Stage bias respects `pathAffinity` to avoid cross-persona homogenization.
+
+## [2026-06-07] - P11 US-001..US-018 (stage-route-driven-narrative-scheduling)
+- Stage/route baseline reports, normalized signal vocabulary, shared detection helpers, scheduling context, stage/route priority bias in GameEngineIntegration, narrativeScheduling metadata, p11-validation content pack, wiring verification notes, scheduling gate, closure report.
+- Key files: `src/p11/*`, `src/data/lines/p11-validation.json`, `tests/p11SchedulingTests.ts`, `scripts/runP11*.ts`.
+- Validation: typecheck ✅ npm test ✅ gate:playability ✅ (0 warnings) gate:p11-scheduling ✅ (warning: 2 route points never scheduled for scholar/deviant reinforcement)
+---
 
 ## [2026-06-07] - P9 US-001..US-027 (warning-remediation-and-config-driven-narrative-runtime)
 - Phase A: warning triage, pacing annotation, replay pair comparison, causality root-cause classification, ranked root causes (`src/p9/*`, `npm run gate:p9-triage`).

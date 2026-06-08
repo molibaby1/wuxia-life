@@ -28,6 +28,9 @@ import { calculateFailureProbabilityForEvent, rollForFailure } from './Challenge
 import { checkSetbackEvents, applySetbackEffects, clearExpiredSetbacks } from './SetbackEventSystem';
 import { traitSystem } from './TraitSystem';
 import { dailyEventSystem } from './DailyEventSystem';
+import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
+import type { NarrativeSchedulingContext } from '../p11/types';
+import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
 import { isCoreRouteIdentity } from './RouteStateManager';
 import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
 import { appendFormalEventHistory } from './EventHistory';
@@ -854,7 +857,10 @@ export class GameEngineIntegration {
     return result;
   }
 
-  private getRouteSchedulingMultiplier(event: EventDefinition): number {
+  private getRouteSchedulingMultiplier(
+    event: EventDefinition,
+    narrativeContext?: NarrativeSchedulingContext,
+  ): number {
     const romanceFamilyMultiplier = this.getRomanceFamilySchedulingMultiplier(event);
     const wandererMidlifeMultiplier = this.getWandererMidlifeSchedulingMultiplier(event);
     const activeRouteKeys = this.getActivePlayerRouteKeys();
@@ -864,7 +870,9 @@ export class GameEngineIntegration {
         : this.eventBelongsToActiveRoute(event, activeRouteKeys)
           ? 1.35
           : 1;
-    return routeMultiplier * romanceFamilyMultiplier * wandererMidlifeMultiplier;
+    const context = narrativeContext ?? buildNarrativeSchedulingContextFromState(this.gameState);
+    const narrativeMultiplier = getNarrativeSchedulingMultiplier(event, context);
+    return routeMultiplier * romanceFamilyMultiplier * wandererMidlifeMultiplier * narrativeMultiplier;
   }
 
   /** US-021: boost wandering hero midlife arc events for route_wanderer players ages 31–50. */
@@ -1354,6 +1362,8 @@ export class GameEngineIntegration {
       return combinedMultiplier <= 0.2 ? null : events[0];
     }
 
+    const narrativeContext = buildNarrativeSchedulingContextFromState(this.gameState);
+
     const totalWeight = events.reduce((sum, event) => {
       const baseWeight = eventLoader.getWeightForAge(event, currentAge);
       const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
@@ -1362,7 +1372,7 @@ export class GameEngineIntegration {
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
-      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event);
+      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
       return sum + this.adjustWeightByAnnualPressure(event, routeAdjusted);
     }, 0);
 
@@ -1379,7 +1389,7 @@ export class GameEngineIntegration {
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
-      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event);
+      const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
       random -= this.adjustWeightByAnnualPressure(event, routeAdjusted);
       if (random <= 0) {
         return event;

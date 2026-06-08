@@ -1,0 +1,284 @@
+{
+  "project": "Wuxia Life P11 Stage-Route-Driven Narrative Scheduling",
+  "branchName": "ralph/p11-stage-route-driven-narrative-scheduling",
+  "description": "Turn stageConfig and routeDefinitions from readable narrative config into real runtime scheduling inputs by adding shared stage and route signal detection, wiring stage-aware and route-aware priority logic into the event scheduling flow, attaching minimal wuxia content metadata and validation content packs, and proving the behavior through a dedicated P11 scheduling gate and closure report without expanding into a second world pack or a large strategy rewrite.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Generate stage expectation baseline report",
+      "description": "As a maintainer, I want a baseline report of stage expectations versus actual signals so that P11 starts from measured scheduling gaps instead of assumptions.",
+      "acceptanceCriteria": [
+        "Produce a report for ages 0-10, 10-20, 20-30, and 30-40 using current simulation output",
+        "For each stage, list expected signals from stageConfig.feedbackExpectation.expectedSignals",
+        "For each stage, list actual signals observed in records, grouped by signal type",
+        "Save the report under docs/test-reports/",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Classify stage coverage gaps",
+      "description": "As a maintainer, I want stage baseline gaps classified by cause so that later P11 stories target real scheduling failures instead of content guesses.",
+      "acceptanceCriteria": [
+        "Classify each missing stage signal as no-content, weak-scheduling, or weak-detection",
+        "Record at least one example for each classification that appears in the baseline report",
+        "Keep the output in docs/test-reports/ as a follow-up note or appended section",
+        "Do not modify scheduling logic in this story",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Generate route scheduling baseline audit",
+      "description": "As a designer, I want a route-level audit of reinforcement and divergence coverage so that I can see where route definitions are not yet affecting the runtime.",
+      "acceptanceCriteria": [
+        "For each primary wuxia route used in P8 personas, report configured entry, reinforcement, divergence, and identity points",
+        "For each route point, report whether simulation records show a matching event, flag, or summary signal",
+        "Identify which route points are configured but never scheduled",
+        "Save the route audit under docs/test-reports/",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Define normalized stage and route signal vocabulary",
+      "description": "As a developer, I want one shared vocabulary for narrative signals so that scheduler logic and reports stop inventing parallel names for the same stage and route outcomes.",
+      "acceptanceCriteria": [
+        "Define normalized signal keys for stage expectations such as origin, route_entry, relationship_shift, achievement, and age40_identity",
+        "Define normalized signal keys for route reinforcement, divergence, and identity coverage",
+        "Document the signal vocabulary in code comments or a small design note near the implementation",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Implement shared signal detection helpers",
+      "description": "As a developer, I want stable signal detection helpers so that runtime scheduling and reports evaluate stage and route coverage through one shared ruleset.",
+      "acceptanceCriteria": [
+        "Add a shared helper that maps simulation records and state to the normalized signal vocabulary",
+        "The helper supports stage expectation checks for all four 0-40 age bands",
+        "The helper supports route point checks for entry, reinforcement, divergence, and identity signals",
+        "Existing reports can call the helper without duplicating parsing logic",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Wire stage feedback state into scheduling context",
+      "description": "As a developer, I want the active stage and its missing expected signals available inside the scheduler so that later priority rules can use real stage state.",
+      "acceptanceCriteria": [
+        "Scheduling context reads the current life stage from stageConfig",
+        "Scheduling context computes which expected stage signals are already satisfied and which remain missing",
+        "No event priority changes are introduced in this story beyond exposing the data",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add stage-aware priority bias for missing signals",
+      "description": "As a player, I want low-feedback stages to bias toward missing signal types so that each life stage produces visible narrative progress instead of empty advancement.",
+      "acceptanceCriteria": [
+        "Add a scheduling policy that reads the current stage and its missing expected signals before selecting candidate content",
+        "When a stage is missing one of its expected signals, scheduling increases priority for content that can supply that signal",
+        "The policy changes priority weights rather than forcing one exact event every run",
+        "Existing non-stage-gated content can still trigger when valid",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Expose route reinforcement needs in scheduling context",
+      "description": "As a developer, I want the scheduler to know which configured reinforcement points are currently relevant so that route support can be driven by routeDefinitions instead of hardcoded branches.",
+      "acceptanceCriteria": [
+        "Scheduling context reads routeDefinitions.reinforcementPoints for the active run",
+        "The context can identify relevant reinforcement points by age band and configured event or flag hints",
+        "No reinforcement priority change is introduced in this story beyond exposing the data",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add route reinforcement priority bias",
+      "description": "As a player, I want my early route tendency to receive reinforcing content in the correct age band so that my path feels deliberately supported.",
+      "acceptanceCriteria": [
+        "Runtime reads configured route reinforcement points during event scheduling or prioritization",
+        "At least one reinforcement point for martial, scholar, social, wealth, and wanderer routes can affect scheduling outcome",
+        "Reinforcement scheduling uses configured age band and configured event or flag hints rather than hardcoded persona branches",
+        "Existing route identity summaries remain functional",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Expose route divergence needs in scheduling context",
+      "description": "As a developer, I want the scheduler to know which configured divergence points are currently relevant so that route separation can be driven by routeDefinitions instead of persona-specific casework.",
+      "acceptanceCriteria": [
+        "Scheduling context reads routeDefinitions.divergencePoints for the active run",
+        "The context can identify relevant divergence points by age band and configured event or flag hints",
+        "No divergence priority change is introduced in this story beyond exposing the data",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add route divergence priority bias",
+      "description": "As a player, I want midlife route divergence to be triggered by configured route points so that different personas do not collapse into the same experience.",
+      "acceptanceCriteria": [
+        "Runtime reads configured route divergence points during event scheduling or prioritization",
+        "At least one configured divergence point for wealth vs wanderer and one for martial vs deviant can affect scheduling outcome",
+        "Divergence scheduling can prefer content that confirms route separation by event, flag, or summary-visible identity signal",
+        "The behavior is driven by route config, not a hardcoded persona id list",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Add stage and route coverage metadata to targeted content",
+      "description": "As a developer, I want targeted content items to declare which stage signal or route point they satisfy so that scheduling can prioritize them without hidden runtime maps.",
+      "acceptanceCriteria": [
+        "Add metadata fields or equivalent config declarations for stage signal coverage on targeted content items",
+        "Add metadata fields or equivalent config declarations for route reinforcement or divergence coverage on targeted content items",
+        "Keep the metadata inside existing narrative config or content structures rather than creating a second parallel schema",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add first stage-gap validation content slice",
+      "description": "As a designer, I want one small wuxia content slice that satisfies a 20-30 stage feedback gap so that the new stage-aware scheduler has real content to select.",
+      "acceptanceCriteria": [
+        "Add or revise the minimum content needed to cover at least one 20-30 stage feedback gap",
+        "The content item declares which stage signal it satisfies",
+        "No unrelated system expansion is introduced",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add first route-divergence validation content slice",
+      "description": "As a designer, I want one small wuxia content slice that satisfies a 30-40 route divergence gap so that the new route-aware scheduler has real content to separate targeted paths.",
+      "acceptanceCriteria": [
+        "Add or revise the minimum content needed to cover at least one 30-40 route divergence gap",
+        "The content item declares which route divergence point it satisfies",
+        "The content remains limited to the minimum P11 validation pack",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Verify scheduler-content wiring for stage bias",
+      "description": "As a maintainer, I want proof that stage-aware scheduling actually changed content selection so that the validation content is not being triggered by accident.",
+      "acceptanceCriteria": [
+        "Add focused diagnostics or tests showing the scheduler considered missing stage feedback when choosing targeted content",
+        "Record at least one positive example where missing stage feedback changed candidate priority",
+        "Save the verification note under docs/test-reports/",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Verify scheduler-content wiring for route bias",
+      "description": "As a maintainer, I want proof that route-aware scheduling actually changed content selection so that divergence and reinforcement improvements are attributable to route config.",
+      "acceptanceCriteria": [
+        "Add focused diagnostics or tests showing the scheduler considered route reinforcement or divergence requirements when choosing targeted content",
+        "Record at least one positive example where route-aware scheduling changed candidate priority",
+        "Save the verification note under docs/test-reports/",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add P11 scheduling gate or report command",
+      "description": "As a project owner, I want a dedicated P11 scheduling gate or report so that stage-route-driven scheduling can be verified independently of the broader playability gate.",
+      "acceptanceCriteria": [
+        "Add one stable command or scripted report for P11 scheduling verification",
+        "The output reports stage expectation coverage for all four age bands",
+        "The output reports route reinforcement and divergence coverage for the targeted routes",
+        "The output clearly marks pass, warning, or fail for scheduling coverage",
+        "Save machine-readable and human-readable output under stable paths",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Generate P11 regression and closure report",
+      "description": "As a maintainer, I want a closure report comparing pre-P11 and post-P11 scheduling evidence so that the next phase starts from verified progress.",
+      "acceptanceCriteria": [
+        "Run npm run gate:playability after P11 changes",
+        "Run the P11 scheduling gate or report after P11 changes",
+        "Compare before and after stage signal coverage for each age band",
+        "Compare before and after route reinforcement and divergence coverage for targeted routes",
+        "Summarize residual gaps that still require later persona strategy or second-theme work",
+        "Save the closure report under docs/test-reports/",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

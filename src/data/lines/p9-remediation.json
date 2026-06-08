@@ -45,7 +45,19 @@
     "metadata": {
       "enabled": true,
       "tags": ["p9", "route_divergence", "wealth", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wealth": 1.0 }
+      "pathAffinity": { "wealth": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence", "age40_identity"],
+        "routePoints": [
+          {
+            "routeId": "route_wealth",
+            "kind": "divergence",
+            "ageBand": "28-32",
+            "eventId": "p9_merchant_midlife_caravan",
+            "flagKey": "p9_merchant_midlife_path"
+          }
+        ]
+      }
     }
   },
   {
@@ -94,7 +106,19 @@
     "metadata": {
       "enabled": true,
       "tags": ["p9", "route_divergence", "wanderer", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wanderer": 1.0 }
+      "pathAffinity": { "wanderer": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence", "age40_identity"],
+        "routePoints": [
+          {
+            "routeId": "route_wanderer",
+            "kind": "divergence",
+            "ageBand": "28-32",
+            "eventId": "p9_wanderer_midlife_discovery",
+            "flagKey": "p9_wanderer_midlife_path"
+          }
+        ]
+      }
     }
   },
   {
@@ -125,7 +149,19 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": ["p9", "pacing_milestone", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["training_milestone"],
+        "routePoints": [
+          {
+            "routeId": "route_martial",
+            "kind": "reinforcement",
+            "ageBand": "10-20",
+            "eventId": "p9_childhood_sword_trial",
+            "flagKey": "p9_childhood_sword_trial"
+          }
+        ]
+      }
     }
   },
   {

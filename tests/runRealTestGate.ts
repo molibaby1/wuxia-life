@@ -15,6 +15,7 @@ type Suite = {
 const suites: Suite[] = [
   { name: 'p8PlayabilityTests', entry: 'tests/p8PlayabilityTests.ts' },
   { name: 'p9PlayabilityTests', entry: 'tests/p9PlayabilityTests.ts' },
+  { name: 'p11SchedulingTests', entry: 'tests/p11SchedulingTests.ts' },
   { name: 'AllTests', entry: 'tests/AllTests.ts' },
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },

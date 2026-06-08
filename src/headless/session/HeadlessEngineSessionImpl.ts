@@ -36,7 +36,7 @@ import {
   replaySimulatorRecords,
   type SimulatorReplayResult,
 } from '../parity/simulatorRecordReplay';
-import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 const DEFAULT_AUTO_LIMIT = 32;

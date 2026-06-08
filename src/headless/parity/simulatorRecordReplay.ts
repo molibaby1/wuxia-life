@@ -16,7 +16,7 @@ import {
   type EventDefinition,
   type GameState,
 } from '../../types/eventTypes';
-import type { GameProcessRecord } from '../../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import {
   ensureYearAdvanced,
   enforceRouteTrackIsolation,

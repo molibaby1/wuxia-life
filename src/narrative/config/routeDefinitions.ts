@@ -4,6 +4,17 @@
 
 export type RouteSignalKind = 'entry' | 'reinforcement' | 'divergence' | 'identity';
 
+export interface RouteIdentityCandidate {
+  flagKey: string;
+  priority: number;
+}
+
+export interface RouteIdentityResolution {
+  candidates: RouteIdentityCandidate[];
+  defaultIdentity: string;
+  routePreferenceFallbacks: string[];
+}
+
 export interface RouteSignalPoint {
   kind: RouteSignalKind;
   ageBand: string;
@@ -19,6 +30,7 @@ export interface RouteDefinition {
   reinforcementPoints: RouteSignalPoint[];
   divergencePoints: RouteSignalPoint[];
   identitySignals: RouteSignalPoint[];
+  identityResolution: RouteIdentityResolution;
 }
 
 export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
@@ -29,7 +41,13 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
       { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_business_focus', description: '幼年营商行动' },
     ],
     reinforcementPoints: [
-      { kind: 'reinforcement', ageBand: '20-30', eventId: 'merchant_first_trade', description: '初次经商' },
+      {
+        kind: 'reinforcement',
+        ageBand: '20-30',
+        eventId: 'p11_wealth_reinforcement_first_deal',
+        flagKey: 'p11_wealth_reinforcement_seen',
+        description: '初次经商',
+      },
     ],
     divergencePoints: [
       { kind: 'divergence', ageBand: '28-32', eventId: 'p9_merchant_midlife_caravan', flagKey: 'p9_merchant_midlife_path', description: '商路中段分化' },
@@ -37,6 +55,11 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_merchant_master', description: '商路之主或投资者' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_merchant_master', priority: 100 }],
+      defaultIdentity: 'merchant_path',
+      routePreferenceFallbacks: ['wealth', 'merchant'],
+    },
   },
   {
     id: 'route_wanderer',
@@ -45,7 +68,13 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
       { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_travel_focus', description: '幼年游历行动' },
     ],
     reinforcementPoints: [
-      { kind: 'reinforcement', ageBand: '20-30', description: '路上结识人脉' },
+      {
+        kind: 'reinforcement',
+        ageBand: '20-30',
+        eventId: 'p11_wanderer_reinforcement_connections',
+        flagKey: 'p11_wanderer_reinforcement_seen',
+        description: '路上结识人脉',
+      },
     ],
     divergencePoints: [
       { kind: 'divergence', ageBand: '28-32', eventId: 'p9_wanderer_midlife_discovery', flagKey: 'p9_wanderer_midlife_path', description: '远游记名' },
@@ -53,6 +82,11 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_wanderer', description: '活地图或游侠护卫' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_wanderer', priority: 95 }],
+      defaultIdentity: 'wanderer_path',
+      routePreferenceFallbacks: ['wanderer', 'explorer', 'travel'],
+    },
   },
   {
     id: 'route_martial',
@@ -69,6 +103,11 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_milestone_route_signal', description: '武道天资确认' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_milestone_route_signal', priority: 50 }],
+      defaultIdentity: 'martial_path',
+      routePreferenceFallbacks: ['martial'],
+    },
   },
   {
     id: 'route_deviant',
@@ -85,6 +124,11 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_deviant', description: '邪影之主' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_deviant', priority: 90 }],
+      defaultIdentity: 'deviant_path',
+      routePreferenceFallbacks: ['demonic', 'deviant'],
+    },
   },
   {
     id: 'route_scholar',
@@ -99,6 +143,11 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_scholar', description: '讲学名士' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_scholar', priority: 80 }],
+      defaultIdentity: 'scholar_path',
+      routePreferenceFallbacks: ['scholar', 'scholarly'],
+    },
   },
   {
     id: 'route_social',
@@ -106,13 +155,54 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     entrySignals: [
       { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_social_focus', description: '幼年交游行动' },
     ],
-    reinforcementPoints: [],
+    reinforcementPoints: [
+      {
+        kind: 'reinforcement',
+        ageBand: '20-30',
+        eventId: 'p11_social_reinforcement_gathering',
+        flagKey: 'p11_social_reinforcement_seen',
+        description: '雅集论交强化',
+      },
+    ],
     divergencePoints: [
       { kind: 'divergence', ageBand: '26-30', eventId: 'p9_social_echo_midlife', description: '人脉回响' },
     ],
     identitySignals: [
       { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_social', description: '人脉枢纽' },
     ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_social', priority: 75 }],
+      defaultIdentity: 'social_path',
+      routePreferenceFallbacks: ['social'],
+    },
+  },
+  {
+    id: 'route_cautious',
+    label: '守拙持重',
+    entrySignals: [],
+    reinforcementPoints: [],
+    divergencePoints: [],
+    identitySignals: [
+      { kind: 'identity', ageBand: '30-40', flagKey: 'p9_route_identity_cautious', description: '守拙持重' },
+    ],
+    identityResolution: {
+      candidates: [{ flagKey: 'p9_route_identity_cautious', priority: 70 }],
+      defaultIdentity: 'cautious_path',
+      routePreferenceFallbacks: ['conservative', 'cautious'],
+    },
+  },
+  {
+    id: 'route_balanced',
+    label: '文武兼修',
+    entrySignals: [],
+    reinforcementPoints: [],
+    divergencePoints: [],
+    identitySignals: [],
+    identityResolution: {
+      candidates: [],
+      defaultIdentity: 'balanced_path',
+      routePreferenceFallbacks: ['balanced'],
+    },
   },
 ];
 
@@ -120,27 +210,32 @@ export function getRouteDefinition(routeId: string): RouteDefinition | undefined
   return WUXIA_ROUTE_DEFINITIONS.find(r => r.id === routeId);
 }
 
-export function getRouteIdentityFromFlags(flags: Record<string, unknown>): string | null {
-  if (flags.p9_route_identity_merchant_master) {
-    return String(flags.p9_route_identity_merchant_master);
+export function getRouteIdentityFromFlags(
+  flags: Record<string, unknown>,
+  routePreference?: string | null,
+  routes: RouteDefinition[] = WUXIA_ROUTE_DEFINITIONS,
+): string | null {
+  const matches = routes.flatMap(route =>
+    route.identityResolution.candidates
+      .filter(candidate => flags[candidate.flagKey] !== undefined && flags[candidate.flagKey] !== false)
+      .map(candidate => ({
+        priority: candidate.priority,
+        value: String(flags[candidate.flagKey]),
+      })),
+  ).sort((a, b) => b.priority - a.priority);
+
+  if (matches.length > 0) {
+    return matches[0].value;
   }
-  if (flags.p9_route_identity_wanderer) {
-    return String(flags.p9_route_identity_wanderer);
+
+  if (routePreference) {
+    const fallback = routes.find(route =>
+      route.identityResolution.routePreferenceFallbacks.includes(routePreference),
+    );
+    if (fallback) {
+      return fallback.identityResolution.defaultIdentity;
+    }
   }
-  if (flags.p9_route_identity_deviant) {
-    return String(flags.p9_route_identity_deviant);
-  }
-  if (flags.p9_route_identity_cautious) {
-    return String(flags.p9_route_identity_cautious);
-  }
-  if (flags.p9_route_identity_scholar) {
-    return String(flags.p9_route_identity_scholar);
-  }
-  if (flags.p9_route_identity_social) {
-    return String(flags.p9_route_identity_social);
-  }
-  if (flags.p9_milestone_route_signal) {
-    return String(flags.p9_milestone_route_signal);
-  }
+
   return null;
 }

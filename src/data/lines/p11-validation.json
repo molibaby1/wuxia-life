@@ -1,0 +1,251 @@
+[
+  {
+    "id": "p11_relationship_shift_midlife",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 85,
+    "ageRange": { "min": 24, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.connections >= 12 && flags.has(\"p9_early_social_focus\")"
+      }
+    ],
+    "content": {
+      "title": "旧友重逢",
+      "text": "你在二十余岁行走江湖，一位早年结识的旧友突然寻来。对方带来一则关乎取舍的消息——这段关系将改变你此后数年的走向。",
+      "description": "P11 20-30 阶段关系转折验证"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "deepen_bond",
+        "text": "加深情谊，共担风险",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p11_relationship_shift_seen", "value": true }
+        ]
+      },
+      {
+        "id": "keep_distance",
+        "text": "保持距离，各自前行",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "p11_relationship_shift_seen", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p11", "stage_feedback", "relationship", "social"],
+      "pathAffinity": { "social": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["relationship_shift"],
+        "routePoints": []
+      }
+    }
+  },
+  {
+    "id": "p11_wealth_wanderer_divergence_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 90,
+    "ageRange": { "min": 30, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_business_focus\") || flags.has(\"p9_early_travel_focus\")"
+      }
+    ],
+    "content": {
+      "title": "岔路口的抉择",
+      "text": "三十而立，你在一条岔路口停下：一侧通向商队与账本，一侧通向远路与险道。你必须做出一次无法回头的选择。",
+      "description": "P11 30-40 路线分歧验证"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "choose_wealth_path",
+        "text": "押注商路，积累资财",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "flags.has(\"p9_early_business_focus\")"
+          }
+        ],
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
+          { "type": "flag_set", "target": "p11_route_divergence_wealth", "value": true }
+        ]
+      },
+      {
+        "id": "choose_wanderer_path",
+        "text": "继续远游，换见闻与自由",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "flags.has(\"p9_early_travel_focus\")"
+          }
+        ],
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "p11_route_divergence_wanderer", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p11", "route_divergence", "wealth", "wanderer"],
+      "narrativeScheduling": {
+        "stageSignals": ["route_divergence"],
+        "routePoints": [
+          {
+            "routeId": "route_wealth",
+            "kind": "divergence",
+            "ageBand": "28-32",
+            "eventId": "p11_wealth_wanderer_divergence_fork",
+            "flagKey": "p11_route_divergence_wealth"
+          },
+          {
+            "routeId": "route_wanderer",
+            "kind": "divergence",
+            "ageBand": "28-32",
+            "eventId": "p11_wealth_wanderer_divergence_fork",
+            "flagKey": "p11_route_divergence_wanderer"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p11_social_reinforcement_gathering",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": { "min": 22, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_social_focus\")"
+      }
+    ],
+    "content": {
+      "title": "雅集论交",
+      "text": "因为你早年便重交游，一场雅集特意邀你居中调解。这是交游一途在二十余岁的强化节点。",
+      "description": "P11 交游路线强化验证"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
+      { "type": "flag_set", "target": "p11_social_reinforcement_seen", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p11", "route_reinforcement", "social"],
+      "narrativeScheduling": {
+        "stageSignals": ["route_reinforcement"],
+        "routePoints": [
+          {
+            "routeId": "route_social",
+            "kind": "reinforcement",
+            "ageBand": "20-30",
+            "eventId": "p11_social_reinforcement_gathering",
+            "flagKey": "p11_social_reinforcement_seen"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p11_wealth_reinforcement_first_deal",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 100,
+    "weight": 95,
+    "ageRange": { "min": 22, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_business_focus\")"
+      }
+    ],
+    "content": {
+      "title": "首笔生意",
+      "text": "你早年坚持 action_business_basic 营商攒下的本钱，如今终于做成第一笔像样买卖。街坊开始把你当作正经行商，而非一时投机。",
+      "description": "P11 营商路线强化验证"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p11_wealth_reinforcement_seen", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p11", "route_reinforcement", "wealth", "mandatory", "mainline", "once"],
+      "pathAffinity": { "wealth": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_reinforcement"],
+        "routePoints": [
+          {
+            "routeId": "route_wealth",
+            "kind": "reinforcement",
+            "ageBand": "20-30",
+            "eventId": "p11_wealth_reinforcement_first_deal",
+            "flagKey": "p11_wealth_reinforcement_seen"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "p11_wanderer_reinforcement_connections",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 85,
+    "ageRange": { "min": 22, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_early_travel_focus\")"
+      }
+    ],
+    "content": {
+      "title": "路上结缘",
+      "text": "你在二十出头行走三州，因早年 action_travel_basic 游历练出的胆气，陆续结识行脚商、镖师与说书人。人脉开始在江湖里替你传名。",
+      "description": "P11 游历路线强化验证"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "connections", "value": 12, "operator": "add" },
+      { "type": "stat_modify", "target": "knowledge", "value": 6, "operator": "add" },
+      { "type": "flag_set", "target": "p11_wanderer_reinforcement_seen", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p11", "route_reinforcement", "wanderer", "mandatory", "mainline", "once"],
+      "pathAffinity": { "wanderer": 1.0 },
+      "narrativeScheduling": {
+        "stageSignals": ["route_reinforcement"],
+        "routePoints": [
+          {
+            "routeId": "route_wanderer",
+            "kind": "reinforcement",
+            "ageBand": "20-30",
+            "eventId": "p11_wanderer_reinforcement_connections",
+            "flagKey": "p11_wanderer_reinforcement_seen"
+          }
+        ]
+      }
+    }
+  }
+]

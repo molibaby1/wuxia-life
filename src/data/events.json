@@ -22,7 +22,8 @@
     "./lines/identity-year-events.json",
     "./lines/faction-revelation.json",
     "./lines/setback-events.json",
-    "./lines/p9-remediation.json"
+    "./lines/p9-remediation.json",
+    "./lines/p11-validation.json"
   ],
   "notes": "Imports must match EventLoader lineMap. Deferred (not yet wired): prologue, identity-scholar/hermit/sect_leader/assassin/doctor/beggar/official, martial-arts-meeting."
 }

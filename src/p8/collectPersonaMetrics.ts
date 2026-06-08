@@ -1,4 +1,5 @@
-import type { GameProcessRecord, GameProcessReport } from '../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../types/simulationRecordTypes';
+import type { GameProcessReport } from '../../tests/GameProcessSimulator';
 import type { P8Persona } from './types';
 import type {
   AgencyMetricPayload,
@@ -16,7 +17,7 @@ import type {
 } from './types';
 import { getActionById } from '../data/activeActionCatalog';
 import type { GameState } from '../types/eventTypes';
-import { getEchoHookByFlag, getEchoHookByActionId } from '../narrative/config/echoHooks';
+import { getAllEchoHooks, getEchoHookByFlag, getEchoHookByActionId } from '../narrative/config/echoHooks';
 import { getRouteIdentityFromFlags } from '../narrative/config/routeDefinitions';
 import { resolveConfiguredAge40Identity } from '../narrative/NarrativeConfigLoader';
 import { getP8PersonaById } from './personas';
@@ -100,6 +101,13 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
   const echoes: CausalityEcho[] = [];
   const seenDirect = new Set<string>();
   const earlyRefs: Array<{ age: number; ref: string }> = [];
+  const configuredSummaryFlags = new Set(
+    getAllEchoHooks()
+      .map(hook => hook.summaryContribution?.textSources ?? [])
+      .flat()
+      .filter(source => source.kind === 'flag_value' && source.flagKey)
+      .map(source => source.flagKey as string),
+  );
 
   const addDirect = (key: string, echo: Omit<CausalityEcho, 'kind'>): void => {
     if (seenDirect.has(key)) {
@@ -151,7 +159,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
           reference: key,
         });
       }
-      if (key.startsWith('p9_summary_echo_') && value) {
+      if (configuredSummaryFlags.has(key) && value) {
         addDirect(`summary:${key}`, {
           age: record.age,
           description: `summary echo: ${String(value)}`,
@@ -490,10 +498,21 @@ function actionCategoryCounts(records: GameProcessRecord[]): number[] {
 
 function echoSignature(flags: Record<string, unknown>): number {
   let signal = 0;
-  if (flags.p9_summary_echo_deviant) signal += 50;
-  if (flags.p9_summary_echo_training) signal += 12;
-  if (flags.p9_summary_echo_study) signal += 24;
-  if (flags.p9_summary_echo_social) signal += 18;
+  for (const hook of getAllEchoHooks()) {
+    const contribution = hook.summaryContribution;
+    if (!contribution?.enabled) {
+      continue;
+    }
+    for (const source of contribution.textSources) {
+      if (source.kind !== 'flag_value' || !source.flagKey) {
+        continue;
+      }
+      if (flags[source.flagKey]) {
+        signal += contribution.order;
+        break;
+      }
+    }
+  }
   return signal;
 }
 
@@ -506,7 +525,7 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
   const money = finalState?.player?.money ?? 0;
   const flags = finalState?.flags ?? {};
   const persona = getP8PersonaById(personaId);
-  const routeIdentity = getRouteIdentityFromFlags(flags) ?? '';
+  const routeIdentity = getRouteIdentityFromFlags(flags, persona?.routePreference) ?? '';
   const identityText = persona
     ? resolveConfiguredAge40Identity(flags, persona.routePreference, report.statistics.origin ?? null)
     : '';

@@ -6,7 +6,8 @@
  */
 
 import { gameEngine } from '../../core/GameEngineIntegration';
-import { GameProcessSimulator, type GameProcessRecord } from '../../../tests/GameProcessSimulator';
+import { GameProcessSimulator } from '../../../tests/GameProcessSimulator';
+import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import {
   GOLDEN_LINE_SAMPLES,
   GOLDEN_ROMANCE_FAMILY_SAMPLE,

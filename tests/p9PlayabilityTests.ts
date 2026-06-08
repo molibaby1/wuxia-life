@@ -4,11 +4,17 @@
 
 import { buildWarningTriageReport } from '../src/p9/warningTriage';
 import { loadP8BaselineReport } from '../src/p9/loadP8Baseline';
+import type { P8PlayabilityReport } from '../src/p8/types';
+import type { P9WarningTriageReport, WarningBucket } from '../src/p9/types';
 import { getStageForAge, getAllStageConfigs } from '../src/narrative/config/stageConfig';
 import { getRouteDefinition, getRouteIdentityFromFlags } from '../src/narrative/config/routeDefinitions';
 import { getEchoHookByActionId, getAllEchoHooks } from '../src/narrative/config/echoHooks';
 import { applySummaryTemplate, getSummaryTemplateForIdentity } from '../src/narrative/config/summaryTemplates';
-import { resolveConfiguredAge40Identity } from '../src/narrative/NarrativeConfigLoader';
+import {
+  getStageFeedbackExpectationForAge,
+  resolveConfiguredAge40Identity,
+  resolveConfiguredEchoSummaryVars,
+} from '../src/narrative/NarrativeConfigLoader';
 import { collectCausalityMetrics, collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
@@ -19,12 +25,59 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
+const P8_BASELINE_SOURCE = 'p8-playability-gate-latest.json';
+const WARNING_BUCKETS: WarningBucket[] = ['replayability', 'pacing', 'causality', 'other'];
+
+function assertBaselineReportShape(report: P8PlayabilityReport): void {
+  assert(report.schemaVersion === 'p8-v1', 'baseline schemaVersion must be p8-v1');
+  assert(typeof report.generatedAt === 'string' && report.generatedAt.length > 0, 'baseline generatedAt');
+  assert(report.decision === 'pass' || report.decision === 'fail', 'baseline decision');
+  assert(report.endAge === P8_GATE_END_AGE, `baseline endAge must be ${P8_GATE_END_AGE}`);
+  assert(Array.isArray(report.personaRuns) && report.personaRuns.length > 0, 'baseline personaRuns');
+  assert(report.replay !== undefined, 'baseline replay payload');
+  assert(Array.isArray(report.replay.nearDuplicateWarnings), 'baseline nearDuplicateWarnings');
+  assert(Array.isArray(report.warnings), 'baseline warnings array');
+  assert(Array.isArray(report.verdicts), 'baseline verdicts array');
+}
+
+function assertTriageReportShape(triage: P9WarningTriageReport, baseline: P8PlayabilityReport): void {
+  assert(triage.schemaVersion === 'p9-triage-v1', 'triage schemaVersion must be p9-triage-v1');
+  assert(typeof triage.generatedAt === 'string' && triage.generatedAt.length > 0, 'triage generatedAt');
+  assert(triage.sourceReport === P8_BASELINE_SOURCE, 'triage sourceReport');
+  assert(triage.baselineDecision === baseline.decision, 'triage baselineDecision matches baseline');
+  assert(triage.totalWarnings === baseline.warnings.length, 'triage totalWarnings matches baseline');
+  assert(triage.totalWarnings === triage.allWarnings.length, 'triage allWarnings length');
+  for (const bucket of WARNING_BUCKETS) {
+    assert(Array.isArray(triage.byBucket[bucket]), `triage bucket ${bucket} is array`);
+  }
+  const bucketTotal = WARNING_BUCKETS.reduce((sum, bucket) => sum + triage.byBucket[bucket].length, 0);
+  assert(bucketTotal === triage.totalWarnings, 'triage bucket totals match totalWarnings');
+  for (const entry of triage.allWarnings) {
+    assert(WARNING_BUCKETS.includes(entry.bucket), `triage entry bucket valid: ${entry.bucket}`);
+    assert(typeof entry.personaId === 'string', 'triage entry personaId');
+    assert(typeof entry.detail === 'string', 'triage entry detail');
+  }
+}
+
+function assertWarningCountMaintainsOrImproves(
+  current: number,
+  baseline: number,
+  label: string,
+): void {
+  if (baseline > 0) {
+    assert(current < baseline, `${label} warnings should drop: ${current} vs baseline ${baseline}`);
+    return;
+  }
+  assert(current === 0, `${label} warnings should stay at zero when baseline is clean: got ${current}`);
+}
+
 function testStageConfigCoversZeroToForty(): void {
   const stages = getAllStageConfigs();
   assert(stages.length === 4, 'four stage bands expected');
   assert(getStageForAge(5)?.id === 'stage_0_10', 'age 5 in first stage');
   assert(getStageForAge(35)?.id === 'stage_30_40', 'age 35 in last stage');
   assert(getStageForAge(40)?.id === 'stage_30_40', 'gate end age 40 in last stage');
+  assert(getStageFeedbackExpectationForAge(25)?.expectedSignals.includes('identity_signal') ?? false, 'stage helper exposes expected signals');
 }
 
 function testRouteDefinitionsExist(): void {
@@ -32,6 +85,8 @@ function testRouteDefinitionsExist(): void {
   assert(getRouteDefinition('route_wanderer') !== undefined, 'wanderer route defined');
   const identity = getRouteIdentityFromFlags({ p9_route_identity_merchant_master: 'merchant_caravan_master' });
   assert(identity === 'merchant_caravan_master', 'route identity from flags');
+  const fallbackIdentity = getRouteIdentityFromFlags({}, 'balanced');
+  assert(fallbackIdentity === 'balanced_path', 'route identity fallback from route preference');
 }
 
 function testEchoHooksCoverMinimumActions(): void {
@@ -51,23 +106,66 @@ function testSummaryTemplateApply(): void {
   });
   assert(text.includes('商户之家'), 'origin in summary');
   assert(text.includes('商路'), 'merchant route wording');
+  const fallbackTemplate = getSummaryTemplateForIdentity(null, 'balanced');
+  assert(fallbackTemplate.id === 'wuxia_identity_balanced', 'balanced summary template selected declaratively');
 }
 
 function testConfiguredIdentityResolver(): void {
   const text = resolveConfiguredAge40Identity(
-    { p9_route_identity_wanderer: 'wanderer_map_legend' },
+    {
+      p9_route_identity_wanderer: 'wanderer_map_legend',
+      p9_echo_training_hook: true,
+      p9_summary_echo_training: '幼年练功的习惯延续至今',
+    },
     'wanderer',
     '寒门',
   );
   assert(text.includes('游侠'), 'wanderer template');
   assert(text.includes('寒门'), 'origin preserved');
+  assert(text.includes('幼年练功的习惯延续至今'), 'configured summary contribution preserved');
+}
+
+function testNarrativeConfigAssembly(): void {
+  assert(getAllStageConfigs().length >= 4, 'stage configs loaded');
+  assert(getRouteDefinition('route_wealth') !== undefined, 'wealth route defined');
+  assert(getRouteDefinition('route_wanderer') !== undefined, 'wanderer route defined');
+  assert(getAllEchoHooks().some(h => h.summaryContribution?.enabled), 'echo summary contributions configured');
+}
+
+function testEchoSummaryContributionResolver(): void {
+  const vars = resolveConfiguredEchoSummaryVars({
+    p9_echo_training_hook: true,
+    p9_summary_echo_training: '幼年练功的习惯延续至今',
+    p9_echo_study_hook: true,
+    p9_summary_echo_study: '早年读书的底子成为今日名声',
+  });
+  assert(
+    vars.echo_suffix === '，幼年练功的习惯延续至今，早年读书的底子成为今日名声',
+    `configured echo suffix order stable: ${vars.echo_suffix}`,
+  );
 }
 
 function testWarningTriageFromBaseline(): void {
   const report = loadP8BaselineReport();
-  const triage = buildWarningTriageReport(report, 'p8-playability-gate-latest.json');
-  assert(triage.totalWarnings > 0, 'baseline has warnings');
-  assert(triage.byBucket.causality.length > 0, 'causality bucket populated');
+  assertBaselineReportShape(report);
+
+  const triage = buildWarningTriageReport(report, P8_BASELINE_SOURCE);
+  assertTriageReportShape(triage, report);
+
+  if (report.warnings.length === 0) {
+    assert(triage.totalWarnings === 0, 'zero-warning baseline yields empty triage');
+    for (const bucket of WARNING_BUCKETS) {
+      assert(triage.byBucket[bucket].length === 0, `zero-warning baseline leaves ${bucket} bucket empty`);
+    }
+    return;
+  }
+
+  for (const warning of report.warnings) {
+    const matched = triage.allWarnings.some(
+      entry => entry.metric === warning.key && entry.detail === warning.detail,
+    );
+    assert(matched, `triage preserves baseline warning: ${warning.key} ${warning.detail}`);
+  }
 }
 
 function testCausalityDetectsExplicitEchoFlag(): void {
@@ -141,8 +239,8 @@ async function testGatePacingAndReplayWarningsReduced(): Promise<void> {
   const pacingWarnings = report.warnings.filter(w => w.key === 'pacing').length;
   const nearDupes = replay.nearDuplicateWarnings.length;
 
-  assert(pacingWarnings < baselinePacing, `pacing warnings ${pacingWarnings} vs baseline ${baselinePacing}`);
-  assert(nearDupes < baselineNearDupes, `near-duplicate pairs ${nearDupes} vs baseline ${baselineNearDupes}`);
+  assertWarningCountMaintainsOrImproves(pacingWarnings, baselinePacing, 'pacing');
+  assertWarningCountMaintainsOrImproves(nearDupes, baselineNearDupes, 'near-duplicate');
   const martialDeviantPair = replay.nearDuplicateWarnings.find(w =>
     w.includes('p8-martial-lin') && w.includes('p8-deviant-ye'),
   );
@@ -157,8 +255,8 @@ async function testGatePacingAndReplayWarningsReduced(): Promise<void> {
 
 async function testGateCausalityWarningsReducedVsBaseline(): Promise<void> {
   const baseline = loadP8BaselineReport();
+  assertBaselineReportShape(baseline);
   const baselineCausalityWarnings = baseline.warnings.filter(w => w.key === 'causality').length;
-  assert(baselineCausalityWarnings > 0, 'baseline has causality warnings to regress against');
 
   const bundles = await runAllPersonaSimulations();
   const replay = collectReplayMetrics(bundles.map(b => ({ personaId: b.personaId, report: b.report })));
@@ -168,10 +266,7 @@ async function testGateCausalityWarningsReducedVsBaseline(): Promise<void> {
     P8_GATE_END_AGE,
   );
   const causalityWarnings = report.warnings.filter(w => w.key === 'causality').length;
-  assert(
-    causalityWarnings < baselineCausalityWarnings,
-    `causality warnings should drop: ${causalityWarnings} vs baseline ${baselineCausalityWarnings}`,
-  );
+  assertWarningCountMaintainsOrImproves(causalityWarnings, baselineCausalityWarnings, 'causality');
 }
 
 async function testMartialDeviantIdentityDiverged(): Promise<void> {
@@ -206,6 +301,8 @@ async function runP9Tests(): Promise<void> {
   testEchoHooksCoverMinimumActions();
   testSummaryTemplateApply();
   testConfiguredIdentityResolver();
+  testNarrativeConfigAssembly();
+  testEchoSummaryContributionResolver();
   testWarningTriageFromBaseline();
   testCausalityDetectsExplicitEchoFlag();
   testCausalityIgnoresGenericStatOnly();

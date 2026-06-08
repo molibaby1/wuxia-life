@@ -19,6 +19,8 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
+import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
+export type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 import { buildDeathRiskTelemetry, type DeathRiskTelemetry } from '../scripts/deathRiskTelemetry';
 import {
   applyRouteTrackFixtureBootstrap,
@@ -76,32 +78,6 @@ export interface GameProcessConfig {
   routeTrack?: 'official' | 'beggars' | 'demonic' | 'sect' | 'wanderer';
   /** P3-EVAL sample id for death-risk telemetry cohort resolution. */
   sampleId?: string;
-}
-
-export interface GameProcessRecord {
-  age: number;
-  eventId: string;
-  eventTitle: string;
-  eventText?: string;
-  eventType: 'auto' | 'choice' | 'ending';
-  selectedChoice?: EventChoice;
-  availableChoices?: EventChoice[];
-  outcomeText?: string;
-  gameState: GameState;
-  timestamp: string;
-  currentTime?: { year: number; month: number; day: number };
-  /** P7: distinguishes catalog events from player-planned actions in replay. */
-  progressionKind?: 'story_event' | 'active_action';
-  /** P7: catalog action id when progressionKind is active_action. */
-  activeActionId?: string;
-  /** P8: why this active action was selected in simulation. */
-  activeActionSelectionReason?: string;
-  /** P8: choice scoring diagnostics for this choice event. */
-  choiceScoreDiagnostic?: {
-    selectedScore: number;
-    runnerUpScore: number | null;
-    runnerUpChoiceId: string | null;
-  };
 }
 
 export interface GameProcessReport {

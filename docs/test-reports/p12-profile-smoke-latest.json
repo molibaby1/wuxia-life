@@ -1,0 +1,63 @@
+{
+  "worldId": "wuxia",
+  "sections": [
+    {
+      "key": "stats",
+      "present": true,
+      "count": 14,
+      "required": true
+    },
+    {
+      "key": "resources",
+      "present": true,
+      "count": 3,
+      "required": true
+    },
+    {
+      "key": "identityTracks",
+      "present": true,
+      "count": 8,
+      "required": true
+    },
+    {
+      "key": "actionFamilies",
+      "present": true,
+      "count": 5,
+      "required": true
+    },
+    {
+      "key": "summarySignals",
+      "present": true,
+      "count": 4,
+      "required": true
+    },
+    {
+      "key": "stageConfig",
+      "present": true,
+      "count": 4,
+      "required": true
+    },
+    {
+      "key": "routeDefinitions",
+      "present": true,
+      "count": 8,
+      "required": true
+    },
+    {
+      "key": "echoHooks",
+      "present": true,
+      "count": 6,
+      "required": true
+    },
+    {
+      "key": "summaryTemplates",
+      "present": true,
+      "count": 11,
+      "required": true
+    }
+  ],
+  "missingRequired": [],
+  "decision": "pass",
+  "messages": [],
+  "warnings": []
+}

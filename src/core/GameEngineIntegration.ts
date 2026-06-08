@@ -42,6 +42,7 @@ import {
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
 import { getMinimumActions } from '../data/activeActionCatalog';
+import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import {
@@ -883,7 +884,17 @@ export class GameEngineIntegration {
           : 1;
     const context = narrativeContext ?? buildNarrativeSchedulingContextFromState(this.gameState);
     const narrativeMultiplier = getNarrativeSchedulingMultiplier(event, context);
-    return routeMultiplier * romanceFamilyMultiplier * wandererMidlifeMultiplier * narrativeMultiplier;
+    const { multiplier: laterLifeConsequenceMultiplier } = getLaterLifeConsequenceMultiplier(
+      this.gameState,
+      event,
+    );
+    return (
+      routeMultiplier *
+      romanceFamilyMultiplier *
+      wandererMidlifeMultiplier *
+      narrativeMultiplier *
+      laterLifeConsequenceMultiplier
+    );
   }
 
   /** US-021: boost wandering hero midlife arc events for route_wanderer players ages 31–50. */

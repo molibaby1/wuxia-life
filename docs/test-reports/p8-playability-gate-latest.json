@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-06-08T08:58:52.601Z",
+  "generatedAt": "2026-06-08T11:54:40.848Z",
   "decision": "pass",
   "endAge": 40,
   "personaRuns": [
@@ -51,7 +51,7 @@
             "ageBand": "0-20",
             "status": "missed",
             "evidence": [
-              "martialPower=3 < 25"
+              "martialPower=6 < 25"
             ]
           },
           {
@@ -78,7 +78,7 @@
             "ageBand": "30-40",
             "status": "missed",
             "evidence": [
-              "martialPower=3 < 45"
+              "martialPower=6 < 45"
             ]
           }
         ],
@@ -115,7 +115,7 @@
           {
             "age": 39,
             "kind": "auto",
-            "text": "财产损失"
+            "text": "挚友背叛"
           },
           {
             "age": 1,
@@ -617,7 +617,7 @@
             "ageBand": "0-20",
             "status": "achieved",
             "evidence": [
-              "connections=41 >= 15"
+              "connections=42 >= 15"
             ]
           },
           {
@@ -681,7 +681,7 @@
           {
             "age": 39,
             "kind": "choice",
-            "text": "江湖恩怨"
+            "text": "武林大会"
           },
           {
             "age": 1,
@@ -787,10 +787,10 @@
           "personaId": "p8-social-gu"
         },
         {
-          "eventId": "refugee_sect_story",
-          "selectedChoiceId": "",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "",
+          "eventId": "jianghu_challenge",
+          "selectedChoiceId": "decline_challenge",
+          "selectedScore": 10,
+          "runnerUpChoiceId": "accept_challenge",
           "runnerUpScore": 0,
           "personaId": "p8-social-gu"
         },
@@ -819,6 +819,14 @@
           "personaId": "p8-social-gu"
         },
         {
+          "eventId": "sect_midlife_gray_mission",
+          "selectedChoiceId": "gray_refuse_order",
+          "selectedScore": 13,
+          "runnerUpChoiceId": "gray_leak_warning",
+          "runnerUpScore": -0.5,
+          "personaId": "p8-social-gu"
+        },
+        {
           "eventId": "jianghu_rescue",
           "selectedChoiceId": "rescue_immediate",
           "selectedScore": 65,
@@ -832,14 +840,6 @@
           "selectedScore": 57.5,
           "runnerUpChoiceId": "",
           "runnerUpScore": 20,
-          "personaId": "p8-social-gu"
-        },
-        {
-          "eventId": "jianghu_grudge",
-          "selectedChoiceId": "peace_grudge",
-          "selectedScore": 25,
-          "runnerUpChoiceId": "fight_grudge",
-          "runnerUpScore": 0,
           "personaId": "p8-social-gu"
         }
       ],
@@ -896,7 +896,7 @@
             "ageBand": "0-20",
             "status": "missed",
             "evidence": [
-              "money=50 < 200"
+              "money=0 < 200"
             ]
           },
           {
@@ -914,7 +914,7 @@
             "ageBand": "20-30",
             "status": "achieved",
             "evidence": [
-              "reputation=20 >= 10"
+              "reputation=40 >= 10"
             ]
           },
           {
@@ -923,7 +923,7 @@
             "ageBand": "30-40",
             "status": "missed",
             "evidence": [
-              "money=50 < 500"
+              "money=0 < 500"
             ]
           }
         ],
@@ -960,7 +960,7 @@
           {
             "age": 39,
             "kind": "auto",
-            "text": "夫妻同心"
+            "text": "英年早逝"
           },
           {
             "age": 1,
@@ -1058,14 +1058,6 @@
           "personaId": "p8-wealth-shen"
         },
         {
-          "eventId": "commoner_year_neighbor",
-          "selectedChoiceId": "neighbor_help",
-          "selectedScore": 19.4,
-          "runnerUpChoiceId": "neighbor_observe",
-          "runnerUpScore": 2.0999999999999996,
-          "personaId": "p8-wealth-shen"
-        },
-        {
           "eventId": "p9_merchant_midlife_caravan",
           "selectedChoiceId": "lead_caravan",
           "selectedScore": 1314,
@@ -1074,11 +1066,11 @@
           "personaId": "p8-wealth-shen"
         },
         {
-          "eventId": "refugee_sect_story",
+          "eventId": "family_child_education",
           "selectedChoiceId": "",
-          "selectedScore": 0,
+          "selectedScore": 210,
           "runnerUpChoiceId": "",
-          "runnerUpScore": 0,
+          "runnerUpScore": 43,
           "personaId": "p8-wealth-shen"
         },
         {
@@ -1098,19 +1090,27 @@
           "personaId": "p8-wealth-shen"
         },
         {
-          "eventId": "family_child_education",
-          "selectedChoiceId": "",
-          "selectedScore": 210,
-          "runnerUpChoiceId": "",
-          "runnerUpScore": 43,
+          "eventId": "jianghu_grudge",
+          "selectedChoiceId": "peace_grudge",
+          "selectedScore": 36,
+          "runnerUpChoiceId": "fight_grudge",
+          "runnerUpScore": 0,
           "personaId": "p8-wealth-shen"
         },
         {
-          "eventId": "jianghu_secret_manual",
-          "selectedChoiceId": "fight_for_manual",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "watch_manual",
+          "eventId": "jianghu_rescue",
+          "selectedChoiceId": "rescue_immediate",
+          "selectedScore": 50,
+          "runnerUpChoiceId": "send_disciples",
           "runnerUpScore": 0,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "commoner_year_neighbor",
+          "selectedChoiceId": "neighbor_help",
+          "selectedScore": 19.4,
+          "runnerUpChoiceId": "neighbor_observe",
+          "runnerUpScore": 2.0999999999999996,
           "personaId": "p8-wealth-shen"
         }
       ],
@@ -1355,11 +1355,11 @@
           "personaId": "p8-cautious-han"
         },
         {
-          "eventId": "jianghu_challenge",
-          "selectedChoiceId": "decline_challenge",
-          "selectedScore": 6,
-          "runnerUpChoiceId": "accept_challenge",
-          "runnerUpScore": 0,
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 100,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 24,
           "personaId": "p8-cautious-han"
         },
         {
@@ -1395,10 +1395,10 @@
           "personaId": "p8-cautious-han"
         },
         {
-          "eventId": "jianghu_grudge",
-          "selectedChoiceId": "peace_grudge",
-          "selectedScore": 12,
-          "runnerUpChoiceId": "fight_grudge",
+          "eventId": "jianghu_challenge",
+          "selectedChoiceId": "decline_challenge",
+          "selectedScore": 6,
+          "runnerUpChoiceId": "accept_challenge",
           "runnerUpScore": 0,
           "personaId": "p8-cautious-han"
         },
@@ -2325,77 +2325,77 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-scholar-su",
-        "score": 0.4703609876793689
+        "score": 0.7418992652625858
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-social-gu",
-        "score": 0.35086193658889214
+        "score": 0.5541965773029642
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-wealth-shen",
-        "score": 0.7689279662207075
+        "score": 0.6673269576767777
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-cautious-han",
-        "score": 0.7553520325497513
+        "score": 0.6691904439281977
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-deviant-ye",
-        "score": 0.8443613906704392
+        "score": 0.8376784209977459
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-explorer-lu",
-        "score": 0.8457334516387239
+        "score": 0.7705126705607056
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-balanced-wei",
-        "score": 0.4207185633111155
+        "score": 0.6668715793707658
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-social-gu",
-        "score": 0.7458393679683474
+        "score": 0.7473384825941358
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-wealth-shen",
-        "score": 0.7061545918036392
+        "score": 0.8182337390229933
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-cautious-han",
-        "score": 0.539060839880771
+        "score": 0.6030881058928872
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-deviant-ye",
-        "score": 0.49464578192352443
+        "score": 0.476338308023872
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-explorer-lu",
-        "score": 0.6459265958051138
+        "score": 0.6404642791913137
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-balanced-wei",
-        "score": 0.6161476677198382
+        "score": 0.6136918918502577
       },
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-wealth-shen",
-        "score": 0.6398896221785306
+        "score": 0.7399640484348777
       },
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-cautious-han",
-        "score": 0.6218108616860073
+        "score": 0.7054361947343236
       },
       {
         "personaA": "p8-social-gu",
@@ -2415,37 +2415,37 @@
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-cautious-han",
-        "score": 0.7675599051644864
+        "score": 0.6898751877760103
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-deviant-ye",
-        "score": 0.5765081073685938
+        "score": 0.35113142655410257
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-explorer-lu",
-        "score": 0.8510627132249053
+        "score": 0.6304975021169139
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-balanced-wei",
-        "score": 0.5926844599331036
+        "score": 0.6853763168144923
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-deviant-ye",
-        "score": 0.6631005051632385
+        "score": 0.4655607401766859
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-explorer-lu",
-        "score": 0.7674499624084378
+        "score": 0.5416176649944529
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-balanced-wei",
-        "score": 0.8186175325367805
+        "score": 0.9306186950587225
       },
       {
         "personaA": "p8-deviant-ye",
@@ -2469,18 +2469,13 @@
         "p8-deviant-ye"
       ],
       [
-        "p8-martial-lin",
-        "p8-explorer-lu"
-      ],
-      [
-        "p8-wealth-shen",
-        "p8-explorer-lu"
+        "p8-cautious-han",
+        "p8-balanced-wei"
       ]
     ],
     "nearDuplicateWarnings": [
       "p8-martial-lin ~ p8-deviant-ye (0.84)",
-      "p8-martial-lin ~ p8-explorer-lu (0.85)",
-      "p8-wealth-shen ~ p8-explorer-lu (0.85)"
+      "p8-cautious-han ~ p8-balanced-wei (0.93)"
     ]
   },
   "verdicts": [
@@ -2807,11 +2802,10 @@
       "key": "replayability",
       "status": "warning",
       "severity": "warning",
-      "detail": "3 near-duplicate pairs",
+      "detail": "2 near-duplicate pairs",
       "evidence": [
         "p8-martial-lin ~ p8-deviant-ye (0.84)",
-        "p8-martial-lin ~ p8-explorer-lu (0.85)",
-        "p8-wealth-shen ~ p8-explorer-lu (0.85)"
+        "p8-cautious-han ~ p8-balanced-wei (0.93)"
       ]
     }
   ],
@@ -2859,11 +2853,10 @@
       "key": "replayability",
       "status": "warning",
       "severity": "warning",
-      "detail": "3 near-duplicate pairs",
+      "detail": "2 near-duplicate pairs",
       "evidence": [
         "p8-martial-lin ~ p8-deviant-ye (0.84)",
-        "p8-martial-lin ~ p8-explorer-lu (0.85)",
-        "p8-wealth-shen ~ p8-explorer-lu (0.85)"
+        "p8-cautious-han ~ p8-balanced-wei (0.93)"
       ]
     }
   ]

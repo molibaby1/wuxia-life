@@ -160,6 +160,123 @@ export interface WorldProfile {
   childhoodShapingRules?: ChildhoodShapingRule[];
   /** P16: luck-weighted opportunity lines. */
   rareEventLines?: RareEventLineConfig[];
+  /** P17: sustained relationship consequence patterns. */
+  relationshipConsequencePatterns?: RelationshipConsequencePattern[];
+  /** P17: faction and social-identity consequence patterns. */
+  factionIdentityConsequencePatterns?: FactionIdentityConsequencePattern[];
+  /** P17: post-achievement maintenance requirements. */
+  achievementMaintenancePatterns?: AchievementMaintenancePattern[];
+}
+
+export type RelationshipConsequenceKind =
+  | 'support'
+  | 'obligation'
+  | 'entanglement'
+  | 'feud'
+  | 'betrayal_risk'
+  | 'social_shielding';
+
+export type RelationshipLifePathSignal =
+  | 'ally'
+  | 'enemy'
+  | 'mentor'
+  | 'disciple'
+  | 'must_protect'
+  | 'sworn_enemy';
+
+export interface ConsequenceTagWeight {
+  tag: string;
+  multiplier: number;
+}
+
+export interface RelationshipConsequencePattern {
+  id: string;
+  label: string;
+  consequenceKind: RelationshipConsequenceKind;
+  /** Flags that activate this pattern (any match). */
+  triggerFlags?: string[];
+  /** lifePath bucket signals (any non-empty bucket). */
+  lifePathSignals?: RelationshipLifePathSignal[];
+  baseIntensity: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  summarySignal?: string;
+}
+
+export type FactionConsequenceKind =
+  | 'protection'
+  | 'access'
+  | 'duty'
+  | 'exposure'
+  | 'rivalry'
+  | 'political_cost';
+
+export interface FactionIdentityConsequencePattern {
+  id: string;
+  label: string;
+  layer: 'organization' | 'social_status';
+  consequenceKind: FactionConsequenceKind;
+  triggerFlags?: string[];
+  baseIntensity: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  summarySignal?: string;
+}
+
+export type MaintenanceDimension =
+  | 'reputation'
+  | 'followers'
+  | 'resources'
+  | 'alliances'
+  | 'internal_stability'
+  | 'external_threat';
+
+export interface MaintenanceDimensionRequirement {
+  dimension: MaintenanceDimension;
+  /** Target level 0–1 inferred from stats/flags. */
+  requiredLevel: number;
+  /** Risk-tag boost per unit of unmet pressure. */
+  neglectRiskMultiplier: number;
+  /** Stat or flag keys used to infer satisfaction (documentation + resolver). */
+  satisfactionSignals: string[];
+}
+
+export interface AchievementMaintenancePattern {
+  id: string;
+  label: string;
+  achievementFlags: string[];
+  dimensions: MaintenanceDimensionRequirement[];
+  opportunityTags?: ConsequenceTagWeight[];
+  neglectRiskTags?: ConsequenceTagWeight[];
+  summarySignal?: string;
+}
+
+export interface ResolvedConsequencePattern {
+  patternId: string;
+  label: string;
+  kind: string;
+  intensity: number;
+  source: string;
+}
+
+export interface UnmetMaintenancePressure {
+  patternId: string;
+  dimension: MaintenanceDimension;
+  requiredLevel: number;
+  currentLevel: number;
+  pressure: number;
+}
+
+export interface LaterLifeConsequenceReport {
+  age: number;
+  activeRelationshipPatterns: ResolvedConsequencePattern[];
+  activeFactionPatterns: ResolvedConsequencePattern[];
+  activeMaintenancePatterns: string[];
+  unmetMaintenance: UnmetMaintenancePressure[];
+  aggregateUnmetPressure: number;
+  opportunityMultiplier: number;
+  riskMultiplier: number;
+  combinedMultiplier: number;
 }
 
 /** Sections required for a playable world profile — used by P12 verification. */

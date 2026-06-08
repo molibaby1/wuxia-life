@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-08T08:58:52.601Z
+Generated: 2026-06-08T11:54:40.848Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -10,7 +10,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### Warnings
 - causality: p8-wealth-shen: direct echoes 1
 - causality: p8-explorer-lu: direct echoes 2
-- replayability: 3 near-duplicate pairs
+- replayability: 2 near-duplicate pairs
 
 ## Persona Highlights
 
@@ -26,10 +26,10 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 27岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [missed] 打下武功根基 (0-20): martialPower=3 < 25
+- [missed] 打下武功根基 (0-20): martialPower=6 < 25
 - [achieved] 坚持练功规划 (0-20): training actions=3
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
-- [missed] 三十岁前功力达标 (30-40): martialPower=3 < 45
+- [missed] 三十岁前功力达标 (30-40): martialPower=6 < 45
 
 **Frustration**
 - Opaque setbacks: 0 / 0
@@ -76,7 +76,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 28岁: explicit echo flag p9_explicit_social_echo
 
 **Achievement**
-- [achieved] 拓展人脉 (0-20): connections=41 >= 15
+- [achieved] 拓展人脉 (0-20): connections=42 >= 15
 - [achieved] 坚持交游规划 (0-20): socializing actions=3
 - [achieved] 建立重要关系 (20-30): spouse=明月
 - [missed] 魅力成长 (30-40): charisma=30 < 35
@@ -100,10 +100,10 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 28岁: explicit echo flag p9_explicit_business_echo
 
 **Achievement**
-- [missed] 积累财富 (0-20): money=50 < 200
+- [missed] 积累财富 (0-20): money=0 < 200
 - [achieved] 坚持营商规划 (0-20): business actions=3
-- [achieved] 声望起步 (20-30): reputation=20 >= 10
-- [missed] 四十岁前的经济基础 (30-40): money=50 < 500
+- [achieved] 声望起步 (20-30): reputation=40 >= 10
+- [missed] 四十岁前的经济基础 (30-40): money=0 < 500
 
 **Frustration**
 - Opaque setbacks: 0 / 0
@@ -212,5 +212,4 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 
 ## Replay Similarity
 - p8-martial-lin ~ p8-deviant-ye (0.84)
-- p8-martial-lin ~ p8-explorer-lu (0.85)
-- p8-wealth-shen ~ p8-explorer-lu (0.85)
+- p8-cautious-han ~ p8-balanced-wei (0.93)

@@ -1,0 +1,134 @@
+{
+  "gate": {
+    "generatedAt": "2026-06-08T11:55:05.034Z",
+    "decision": "pass",
+    "relationship": {
+      "patternCount": 5,
+      "upsideKinds": [
+        "social_shielding"
+      ],
+      "burdenKinds": [
+        "obligation",
+        "feud",
+        "entanglement"
+      ]
+    },
+    "factionIdentity": {
+      "patternCount": 7,
+      "organizationCount": 3,
+      "socialStatusCount": 4
+    },
+    "achievementMaintenance": {
+      "patternCount": 3,
+      "dimensionFamilies": [
+        "resources",
+        "internal_stability",
+        "reputation",
+        "external_threat",
+        "alliances",
+        "followers"
+      ]
+    },
+    "balance": {
+      "relationshipUpsideAndBurden": true,
+      "factionProtectionAndDuty": true,
+      "achievementPrestigeAndUpkeep": true
+    },
+    "sampleReports": {
+      "swornAlly": [
+        "multiplier=1.64",
+        "patterns=p17_sworn_shielding"
+      ],
+      "feudEnemy": [
+        "risk=1.67",
+        "patterns=p17_feud_pressure"
+      ],
+      "orthodoxDuty": [
+        "risk=1.68",
+        "patterns=p17_orthodox_protection,p17_sect_duty_exposure"
+      ],
+      "neglectedHero": [
+        "p17_hero_reputation_upkeep:reputation required=0.60 current=0.15 pressure=0.45",
+        "p17_hero_reputation_upkeep:external_threat required=0.45 current=0.16 pressure=0.29"
+      ]
+    },
+    "messages": [
+      "relationship patterns: 5",
+      "faction/identity patterns: 7",
+      "maintenance patterns: 3"
+    ],
+    "warnings": []
+  },
+  "midLateLifeSlice": {
+    "slice": "mid_late_life_consequences",
+    "cases": [
+      {
+        "caseId": "baseline",
+        "description": "No relationship/faction/achievement carryover",
+        "combinedMultiplier": 1,
+        "riskMultiplier": 1,
+        "opportunityMultiplier": 1,
+        "activeRelationshipPatterns": [],
+        "activeFactionPatterns": [],
+        "unmetMaintenanceCount": 0,
+        "materiallyDifferent": false
+      },
+      {
+        "caseId": "sworn_ally",
+        "description": "Sworn sibling backing shifts opportunity space",
+        "combinedMultiplier": 1.64125,
+        "riskMultiplier": 1,
+        "opportunityMultiplier": 1.64125,
+        "activeRelationshipPatterns": [
+          "p17_sworn_shielding"
+        ],
+        "activeFactionPatterns": [],
+        "unmetMaintenanceCount": 0,
+        "materiallyDifferent": true
+      },
+      {
+        "caseId": "feud_enemy",
+        "description": "Sworn enemy raises conflict pressure",
+        "combinedMultiplier": 1.6742400000000002,
+        "riskMultiplier": 1.6742400000000002,
+        "opportunityMultiplier": 1,
+        "activeRelationshipPatterns": [
+          "p17_feud_pressure"
+        ],
+        "activeFactionPatterns": [],
+        "unmetMaintenanceCount": 0,
+        "materiallyDifferent": true
+      },
+      {
+        "caseId": "orthodox_duty",
+        "description": "Orthodox sect master adds duty not just reward",
+        "combinedMultiplier": 1.7075953125,
+        "riskMultiplier": 1.6843750000000002,
+        "opportunityMultiplier": 1.7075953125,
+        "activeRelationshipPatterns": [],
+        "activeFactionPatterns": [
+          "p17_orthodox_protection",
+          "p17_sect_duty_exposure"
+        ],
+        "unmetMaintenanceCount": 1,
+        "materiallyDifferent": true
+      },
+      {
+        "caseId": "neglected_hero",
+        "description": "Hero mantle fragile when reputation neglected",
+        "combinedMultiplier": 1.8104047242399997,
+        "riskMultiplier": 1.8104047242399997,
+        "opportunityMultiplier": 1,
+        "activeRelationshipPatterns": [],
+        "activeFactionPatterns": [
+          "p17_hero_mantle_status"
+        ],
+        "unmetMaintenanceCount": 2,
+        "materiallyDifferent": true
+      }
+    ],
+    "allyChangesOpportunity": true,
+    "factionAddsDuty": true,
+    "achievementFragileWhenNeglected": true
+  }
+}

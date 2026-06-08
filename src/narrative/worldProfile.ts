@@ -11,6 +11,11 @@ import { WUXIA_PROFILE_RESOURCES } from './profile/wuxiaResources';
 import { WUXIA_PROFILE_STATS } from './profile/wuxiaStats';
 import { WUXIA_PROFILE_SUMMARY_SIGNALS } from './profile/wuxiaSummarySignals';
 import {
+  WUXIA_ACHIEVEMENT_MAINTENANCE_PATTERNS,
+  WUXIA_FACTION_IDENTITY_CONSEQUENCE_PATTERNS,
+  WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS,
+} from './profile/wuxiaConsequenceSurfaces';
+import {
   WUXIA_CHILDHOOD_SHAPING_RULES,
   WUXIA_COMPOSITE_DESTINY_OUTCOMES,
   WUXIA_ORIGIN_SURFACES,
@@ -49,6 +54,9 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   compositeDestinyOutcomes: WUXIA_COMPOSITE_DESTINY_OUTCOMES,
   childhoodShapingRules: WUXIA_CHILDHOOD_SHAPING_RULES,
   rareEventLines: WUXIA_RARE_EVENT_LINES,
+  relationshipConsequencePatterns: WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS,
+  factionIdentityConsequencePatterns: WUXIA_FACTION_IDENTITY_CONSEQUENCE_PATTERNS,
+  achievementMaintenancePatterns: WUXIA_ACHIEVEMENT_MAINTENANCE_PATTERNS,
 };
 
 export function getWorldProfile(worldId = 'wuxia'): WorldProfile {

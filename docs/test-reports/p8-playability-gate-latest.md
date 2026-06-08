@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-07T06:46:40.232Z
+Generated: 2026-06-08T08:58:52.601Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -8,18 +8,9 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ## Summary
 
 ### Warnings
-- causality: p8-martial-lin: direct echoes 0
-- pacing: p8-martial-lin: low-impact span 7y
-- causality: p8-scholar-su: direct echoes 0
-- pacing: p8-scholar-su: low-impact span 6y
-- causality: p8-social-gu: direct echoes 0
-- pacing: p8-social-gu: low-impact span 6y
-- causality: p8-wealth-shen: direct echoes 0
-- pacing: p8-wealth-shen: low-impact span 7y
-- causality: p8-cautious-han: direct echoes 0
-- pacing: p8-cautious-han: low-impact span 7y
-- causality: p8-deviant-ye: direct echoes 0
-- pacing: p8-deviant-ye: low-impact span 6y
+- causality: p8-wealth-shen: direct echoes 1
+- causality: p8-explorer-lu: direct echoes 2
+- replayability: 3 near-duplicate pairs
 
 ## Persona Highlights
 
@@ -27,172 +18,187 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 
 **Planning / Agency**
 - Active actions: 3; categories: {"training":3}
-- Sample selection: age 2 → action_training_basic (persona_strategy:training prefers training)
+- Sample selection: age 2 → action_childhood_training (persona_strategy:training prefers training)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 3
+  - 26岁: configured echo hook echo_training_basic fired at p9_trainin
+  - 27岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [achieved] 打下武功根基 (0-20): martialPower=52 >= 25
+- [missed] 打下武功根基 (0-20): martialPower=3 < 25
 - [achieved] 坚持练功规划 (0-20): training actions=3
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
-- [achieved] 三十岁前功力达标 (30-40): martialPower=52 >= 45
+- [missed] 三十岁前功力达标 (30-40): martialPower=3 < 45
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动练功；3岁 伶牙俐齿；4岁 童年选择
-- Turning: 19岁 家族阻碍 — 你的武功有了长进。
-- Age-40 identity: 出身：寒门，倾向：martial
+- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
+- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你在大会上仍
+- Age-40 identity: 出身：寒门，路线：武道（martial_talent_acknowledged），幼年练功的习惯延续至今
 
 ### 苏文澜 (p8-scholar-su)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"study":3}
-- Sample selection: age 2 → action_study_basic (persona_strategy:study prefers study)
+- Sample selection: age 2 → action_study_lite (persona_strategy:study prefers study)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 3
+  - 25岁: configured echo hook echo_study_basic fired at p9_study_echo
+  - 26岁: explicit echo flag p9_explicit_study_echo
 
 **Achievement**
-- [missed] 积累学识 (0-20): knowledge=15 < 20
+- [achieved] 积累学识 (0-20): knowledge=20 >= 20
 - [achieved] 坚持读书规划 (0-20): study actions=3
-- [missed] 悟性提升 (20-30): comprehension=23 < 30
+- [missed] 悟性提升 (20-30): comprehension=25 < 30
 - [missed] 文路身份显现 (30-40): flag scholar_path_started=undefined
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 天降异象；1岁 出身背景；2岁 主动读书；3岁 伶牙俐齿；4岁 童年选择
+- Early: 0岁 天降异象；1岁 出身背景；2岁 主动听先生讲课；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：商户之家，倾向：scholarly
+- Age-40 identity: 出身：商户之家，路线：治学名士（scholar_lecturer），幼年读书的习惯延续至今
 
 ### 顾清仪 (p8-social-gu)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"socializing":3}
-- Sample selection: age 2 → action_socializing_basic (persona_strategy:socializing prefers socializing)
+- Sample selection: age 2 → action_socializing_lite (persona_strategy:socializing prefers socializing)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 3
+  - 27岁: configured echo hook echo_social_basic fired at p9_social_ec
+  - 28岁: explicit echo flag p9_explicit_social_echo
 
 **Achievement**
-- [achieved] 拓展人脉 (0-20): connections=16 >= 15
+- [achieved] 拓展人脉 (0-20): connections=41 >= 15
 - [achieved] 坚持交游规划 (0-20): socializing actions=3
-- [missed] 建立重要关系 (20-30): no spouse relationship
-- [missed] 魅力成长 (30-40): charisma=29 < 35
+- [achieved] 建立重要关系 (20-30): spouse=明月
+- [missed] 魅力成长 (30-40): charisma=30 < 35
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 天降异象；1岁 出身背景；2岁 主动交游；3岁 伶牙俐齿；4岁 童年选择
-- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：边地军户，倾向：social
+- Early: 0岁 天降异象；1岁 出身背景；2岁 主动与玩伴相处；3岁 伶牙俐齿；4岁 童年选择
+- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
+- Age-40 identity: 出身：边地军户，路线：交游枢纽（social_network_hub），幼年交游的习惯延续至今
 
 ### 沈聚财 (p8-wealth-shen)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"business":3}
-- Sample selection: age 2 → action_business_basic (persona_strategy:business prefers business)
+- Sample selection: age 2 → action_household_apprentice (persona_strategy:business prefers business)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 1
+  - 28岁: explicit echo flag p9_explicit_business_echo
 
 **Achievement**
-- [missed] 积累财富 (0-20): money=0 < 200
+- [missed] 积累财富 (0-20): money=50 < 200
 - [achieved] 坚持营商规划 (0-20): business actions=3
-- [achieved] 声望起步 (20-30): reputation=38 >= 10
-- [missed] 四十岁前的经济基础 (30-40): money=0 < 500
+- [achieved] 声望起步 (20-30): reputation=20 >= 10
+- [missed] 四十岁前的经济基础 (30-40): money=50 < 500
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 天降异象；1岁 出身背景；2岁 主动营商；3岁 伶牙俐齿；4岁 童年选择
-- Turning: 17岁 家族阻碍 — 你的武功有了长进。
-- Age-40 identity: 出身：市井草根，倾向：wealth
+- Early: 0岁 天降异象；1岁 出身背景；2岁 主动帮家里打杂；3岁 伶牙俐齿；4岁 童年选择
+- Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
+- Age-40 identity: 出身：市井草根，路线：商路之主（merchant_caravan_master）
 
 ### 韩守拙 (p8-cautious-han)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"training":3}
-- Sample selection: age 2 → action_training_basic (persona_strategy:training prefers training)
+- Sample selection: age 2 → action_childhood_training (persona_strategy:training prefers training)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 4
+  - 25岁: explicit echo flag p9_explicit_cautious_echo
+  - 26岁: configured echo hook echo_training_basic fired at p9_trainin
 
 **Achievement**
-- [achieved] 保持健康 (0-20): health=100 >= 70
+- [achieved] 保持健康 (0-20): health=105 >= 70
 - [achieved] 稳健练功 (0-20): training actions=3
 - [achieved] 少遭重创 (20-30): no flag major_injury
-- [achieved] 四十岁稳定生存 (30-40): health=100 >= 60
+- [achieved] 四十岁稳定生存 (30-40): health=105 >= 60
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动练功；3岁 伶牙俐齿；4岁 童年选择
+- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：市井草根，倾向：conservative
+- Age-40 identity: 出身：市井草根，路线：守拙持重（cautious_steward），幼年练功的习惯延续至今
 
 ### 叶走邪 (p8-deviant-ye)
 
 **Planning / Agency**
-- Active actions: 3; categories: {"training":2,"study":1}
-- Sample selection: age 2 → action_training_basic (persona_strategy:training prefers training)
+- Active actions: 3; categories: {"training":3}
+- Sample selection: age 2 → action_childhood_training (persona_strategy:training prefers training)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 4
+  - 23岁: explicit echo flag p9_explicit_deviant_echo
+  - 27岁: explicit echo flag p9_explicit_deviant_training_echo
 
 **Achievement**
-- [missed] 邪路信号出现 (0-20): flag demonic_path_touched unset
+- [achieved] 邪路信号出现 (0-20): flag demonic_path_touched=true
 - [missed] 做出高风险选择 (20-30): event demonic_midlife_fork not seen
-- [missed] 邪路功力成长 (30-40): martialPower=0 < 40
+- [missed] 邪路功力成长 (30-40): martialPower=28 < 40
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动练功；3岁 伶牙俐齿；4岁 童年选择
+- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：武林世家，倾向：demonic
+- Age-40 identity: 出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，邪路偏锋的习惯延续至今
 
 ### 陆行远 (p8-explorer-lu)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"travel":3}
-- Sample selection: age 2 → action_travel_basic (persona_strategy:travel prefers travel)
+- Sample selection: age 2 → action_errand_nearby (persona_strategy:travel prefers travel)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 2
+  - 28岁: explicit echo flag p9_explicit_travel_echo
+  - 28岁: configured echo hook echo_travel_basic fired at p9_wanderer_
 
 **Achievement**
 - [achieved] 坚持游历规划 (0-20): travel actions=3
-- [achieved] 路上结识人脉 (20-30): connections=31 >= 20
-- [missed] 见闻积累 (30-40): knowledge=19 < 25
+- [achieved] 路上结识人脉 (20-30): connections=41 >= 20
+- [achieved] 见闻积累 (30-40): knowledge=43 >= 25
 
 **Frustration**
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动游历；3岁 伶牙俐齿；4岁 童年选择
+- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动街坊跑腿；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：寒门，倾向：wanderer
+- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend）
 
 ### 卫中和 (p8-balanced-wei)
 
 **Planning / Agency**
 - Active actions: 3; categories: {"training":3}
-- Sample selection: age 2 → action_training_basic (persona_strategy:balanced prefers training)
+- Sample selection: age 2 → action_childhood_training (persona_strategy:balanced prefers training)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 4
+  - 26岁: configured echo hook echo_training_basic fired at p9_trainin
+  - 27岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [achieved] 文武均衡 (0-20): martialPower=69 >= 15
+- [missed] 文武均衡 (0-20): martialPower=7 < 15
 - [missed] 多种主动行动并用 (20-30): study actions=0 < 1
 - [missed] 形成稳定身份标签 (30-40): —
 
@@ -200,16 +206,11 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Opaque setbacks: 0 / 0
 
 **Narrative**
-- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动练功；3岁 伶牙俐齿；4岁 童年选择
+- Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
-- Age-40 identity: 出身：寒门
+- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今
 
 ## Replay Similarity
-- p8-scholar-su ~ p8-wealth-shen (0.84)
-- p8-scholar-su ~ p8-deviant-ye (0.84)
-- p8-scholar-su ~ p8-explorer-lu (0.93)
-- p8-social-gu ~ p8-cautious-han (0.89)
-- p8-wealth-shen ~ p8-explorer-lu (0.96)
-- p8-wealth-shen ~ p8-balanced-wei (0.96)
-- p8-cautious-han ~ p8-deviant-ye (0.95)
-- p8-explorer-lu ~ p8-balanced-wei (0.96)
+- p8-martial-lin ~ p8-deviant-ye (0.84)
+- p8-martial-lin ~ p8-explorer-lu (0.85)
+- p8-wealth-shen ~ p8-explorer-lu (0.85)

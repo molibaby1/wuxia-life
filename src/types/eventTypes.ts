@@ -1082,6 +1082,11 @@ export interface GameState {
   selfAwareness?: number;
   /** P7: transient player-facing feedback (e.g. locked choice) */
   playerFeedbackMessage?: string;
+
+  /** P16: accumulated childhood tendency shaping (optional; save-compatible) */
+  p16TendencyShaping?: import('../narrative/profile/types').OriginWorldviewShaping;
+  /** P16: rare event line ids that fired */
+  p16RareLineLog?: string[];
 }
 
 /**

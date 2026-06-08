@@ -1,3 +1,4 @@
+import { getChildhoodActionById } from './childhoodActionCatalog';
 import { getProfileMinimumActionIds } from '../narrative/worldProfile';
 import type { ActiveActionDefinition } from '../types/activeActionTypes';
 
@@ -108,7 +109,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
 ];
 
 export function getActionById(actionId: string): ActiveActionDefinition | undefined {
-  return activeActionCatalog.find(action => action.id === actionId);
+  return activeActionCatalog.find(action => action.id === actionId) ?? getChildhoodActionById(actionId);
 }
 
 export function getMinimumActions(): ActiveActionDefinition[] {

@@ -173,7 +173,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_business_focus\")"
+        "expression": "flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\")"
       }
     ],
     "content": {
@@ -216,7 +216,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_travel_focus\")"
+        "expression": "flags.has(\"p9_early_travel_focus\") || flags.has(\"p16_deferred_travel_upbringing\")"
       }
     ],
     "content": {

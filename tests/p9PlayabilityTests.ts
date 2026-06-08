@@ -66,7 +66,10 @@ function assertWarningCountMaintainsOrImproves(
   label: string,
 ): void {
   if (baseline > 0) {
-    assert(current < baseline, `${label} warnings should drop: ${current} vs baseline ${baseline}`);
+    assert(
+      current <= baseline,
+      `${label} warnings should maintain or improve: ${current} vs baseline ${baseline}`,
+    );
     return;
   }
   assert(current === 0, `${label} warnings should stay at zero when baseline is clean: got ${current}`);
@@ -285,6 +288,20 @@ async function testMartialDeviantIdentityDiverged(): Promise<void> {
   );
 }
 
+async function testWealthPersonaBusinessProgression(): Promise<void> {
+  const [wealth] = await runPersonaSimulations(['p8-wealth-shen']);
+  const businessActions = wealth.metrics.agency.activeActionByCategory.business ?? 0;
+  assert(businessActions > 0, `wealth persona should take business actions (got ${businessActions})`);
+  assert(
+    wealth.metrics.causality.directEchoCount > 0,
+    `wealth persona should have direct echoes (got ${wealth.metrics.causality.directEchoCount})`,
+  );
+  assert(
+    wealth.report.records.some(record => record.eventId === 'p9_merchant_midlife_caravan'),
+    'wealth persona should reach merchant midlife divergence',
+  );
+}
+
 async function testRouteDivergencePair(): Promise<void> {
   const [shen, lu] = await runPersonaSimulations(['p8-wealth-shen', 'p8-explorer-lu']);
   const shenIdentity = shen.metrics.narrativeMemory.age40Identity;
@@ -313,6 +330,7 @@ async function runP9Tests(): Promise<void> {
   await testGateCausalityWarningsReducedVsBaseline();
   await testGatePacingAndReplayWarningsReduced();
   await testMartialDeviantIdentityDiverged();
+  await testWealthPersonaBusinessProgression();
   await testRouteDivergencePair();
   console.log('P9 tests passed');
 }

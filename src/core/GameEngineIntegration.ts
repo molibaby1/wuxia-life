@@ -41,6 +41,17 @@ import {
 } from './activePlanning/ActivePlanningService';
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
+import { getMinimumActions } from '../data/activeActionCatalog';
+import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
+import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
+import {
+  applyRareLineFlags,
+  rollRareEventLines,
+} from '../p16/rareEventLines';
+import {
+  applyChildhoodShapingFromEvent,
+  createEmptyTendencyAccumulator,
+} from '../p16/tendencyShaping';
 
 /** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
 const FORMAL_CANDIDATE_POOL_CAP = 12;
@@ -1368,7 +1379,13 @@ export class GameEngineIntegration {
       const baseWeight = eventLoader.getWeightForAge(event, currentAge);
       const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
       const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
-      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
+      const originAdjusted =
+        traitAdjusted *
+        getOriginChildhoodEventMultiplier(
+          this.gameState.player,
+          traitSystem.getEventBiasTags(event),
+        );
+      const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
@@ -1385,7 +1402,13 @@ export class GameEngineIntegration {
     for (const event of events) {
       const pathAdjusted = this.adjustWeightByPath(event, eventLoader.getWeightForAge(event, currentAge), dominantPaths);
       const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
-      const stateAdjusted = traitAdjusted * this.getFormalEventStateMultiplier(event);
+      const originAdjusted =
+        traitAdjusted *
+        getOriginChildhoodEventMultiplier(
+          this.gameState.player,
+          traitSystem.getEventBiasTags(event),
+        );
+      const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
@@ -1799,6 +1822,7 @@ export class GameEngineIntegration {
     if (!event.autoEffects || event.autoEffects.length === 0) {
       this.recordEventTrigger(event, ageBeforeEvent);
       appendFormalEventHistory(this.gameState, event.id, ageBeforeEvent);
+      this.applyP16PostEventHooks(event);
       return { gameState: this.gameState, event };
     }
     
@@ -1843,7 +1867,34 @@ export class GameEngineIntegration {
     // 难度系统：清除过期的挫折状态
     this.gameState = clearExpiredSetbacks(this.gameState);
 
+    this.applyP16PostEventHooks(event);
+
     return { gameState: this.gameState, event };
+  }
+
+  private applyP16PostEventHooks(event: EventDefinition): void {
+    const accumulator = this.gameState.p16TendencyShaping ?? createEmptyTendencyAccumulator();
+    this.gameState.p16TendencyShaping = applyChildhoodShapingFromEvent(
+      accumulator,
+      event,
+      this.gameState.player,
+    );
+  }
+
+  private applyP16RareLineCheckpoints(previousAge: number, newAge: number): void {
+    const checkpoints = [10, 15, 20];
+    for (const checkpoint of checkpoints) {
+      if (previousAge >= checkpoint || newAge < checkpoint) continue;
+      const rollFlag = `p16_rare_rolled_${checkpoint}`;
+      if (this.gameState.flags[rollFlag]) continue;
+      const results = rollRareEventLines(this.gameState.player, this.gameState.flags);
+      this.gameState.flags = applyRareLineFlags(this.gameState.flags, results);
+      this.gameState.flags[rollFlag] = true;
+      const triggered = results.filter(result => result.triggered).map(result => result.lineId);
+      if (triggered.length > 0) {
+        this.gameState.p16RareLineLog = [...(this.gameState.p16RareLineLog ?? []), ...triggered];
+      }
+    }
   }
   
   /**
@@ -1884,6 +1935,10 @@ export class GameEngineIntegration {
     
     if (eventId) {
       appendFormalEventHistory(this.gameState, eventId, ageBeforeEvent);
+      const choiceEvent = this.getEventDefinition(eventId);
+      if (choiceEvent) {
+        this.applyP16PostEventHooks(choiceEvent);
+      }
     }
     
     // 记录关键选择
@@ -2076,8 +2131,11 @@ export class GameEngineIntegration {
       }
     }
 
+    const previousAge = this.gameState.player.age;
     this.gameState.player.age = age;
     this.gameState.currentTime = { year, month, day };
+    applyYouthTransitionSeeds(this.gameState, previousAge, age);
+    this.applyP16RareLineCheckpoints(previousAge, age);
     this.applyLifeStateRecovery(value, unit);
     
     const unitLabel = unit === 'year' ? '年' : unit === 'month' ? '月' : '天';
@@ -2498,7 +2556,13 @@ export class GameEngineIntegration {
 
   /** P7: minimum active actions when no story event was selected */
   public getAvailableActiveActions() {
-    return buildActiveActionChoices();
+    const age = this.gameState.player?.age ?? 0;
+    const actions = resolveChildhoodActionPalette({
+      age,
+      player: this.gameState.player,
+      flags: this.gameState.flags,
+    });
+    return buildActiveActionChoices(actions);
   }
 
   /** P7: execute one active action (resolver + time + history) */

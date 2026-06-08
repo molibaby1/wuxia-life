@@ -34,11 +34,31 @@ function readMergedFlags(state?: GameState): Record<string, unknown> {
   };
 }
 
+const ROUTE_ENTRY_FLAG_ALIASES: Record<string, string[]> = {
+  route_wealth: ['p9_echo_business_hook', 'p16_deferred_business_upbringing'],
+  route_wanderer: ['p9_echo_travel_hook', 'p16_deferred_travel_upbringing'],
+  route_social: ['p9_echo_social_hook', 'p16_deferred_social_upbringing'],
+};
+
+function routeHasEntrySignal(routeId: string, flags: Record<string, unknown>): boolean {
+  const route = getWorldProfile('wuxia').routeDefinitions.find(item => item.id === routeId);
+  if (!route) {
+    return false;
+  }
+  const declaredEntry = route.entrySignals.some(
+    point => point.flagKey && hasRouteFlag(flags, point.flagKey),
+  );
+  if (declaredEntry) {
+    return true;
+  }
+  return (ROUTE_ENTRY_FLAG_ALIASES[routeId] ?? []).some(key => hasRouteFlag(flags, key));
+}
+
 function resolveActiveRouteIds(flags: Record<string, unknown>, routePreference?: string | null): string[] {
   const routeDefinitions = getWorldProfile('wuxia').routeDefinitions;
   const active: string[] = [];
   for (const route of routeDefinitions) {
-    const hasEntry = route.entrySignals.some(point => point.flagKey && flags[point.flagKey]);
+    const hasEntry = routeHasEntrySignal(route.id, flags);
     const hasIdentity = route.identityResolution.candidates.some(
       candidate => flags[candidate.flagKey],
     );
@@ -73,13 +93,13 @@ function resolveRoutePreferenceFromState(state: GameState): string | null {
     }
   }
 
-  if (hasRouteFlag(flags, 'p9_early_business_focus')) {
+  if (hasRouteFlag(flags, 'p9_early_business_focus') || hasRouteFlag(flags, 'p16_deferred_business_upbringing')) {
     return 'wealth';
   }
-  if (hasRouteFlag(flags, 'p9_early_travel_focus')) {
+  if (hasRouteFlag(flags, 'p9_early_travel_focus') || hasRouteFlag(flags, 'p16_deferred_travel_upbringing')) {
     return 'wanderer';
   }
-  if (hasRouteFlag(flags, 'p9_early_social_focus')) {
+  if (hasRouteFlag(flags, 'p9_early_social_focus') || hasRouteFlag(flags, 'p16_deferred_social_upbringing')) {
     return 'social';
   }
   if (hasRouteFlag(flags, 'p9_echo_study_hook')) {

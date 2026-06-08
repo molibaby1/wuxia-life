@@ -389,7 +389,15 @@ export function isPacingImpactRecord(record: GameProcessRecord): boolean {
   ) {
     return true;
   }
-  if (record.eventId?.startsWith('p9_')) {
+  if (record.eventId?.startsWith('p9_') || record.eventId?.startsWith('p16_')) {
+    return true;
+  }
+  if (
+    record.eventId &&
+    /origin_background|childhood_preference|childhood_summary|preteen_training|toddler_exploration|clever_speech/.test(
+      record.eventId,
+    )
+  ) {
     return true;
   }
   const text = `${record.eventTitle} ${record.outcomeText ?? ''} ${record.eventText ?? ''}`;

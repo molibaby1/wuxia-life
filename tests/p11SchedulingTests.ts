@@ -4,6 +4,7 @@
 
 import { getAllStageConfigs } from '../src/narrative/config/stageConfig';
 import { eventLoader } from '../src/core/EventLoader';
+import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import {
   detectStageSignalsForStage,
   eventCoversMissingStageSignal,
@@ -113,6 +114,28 @@ function testStageSchedulingMultiplier(): void {
   );
 }
 
+function testWealthReinforcementAcceptsDeferredUpbringing(): void {
+  const event = eventLoader.getEventById('p11_wealth_reinforcement_first_deal');
+  assert(event !== undefined, 'wealth reinforcement event loaded');
+  const evaluator = new ConditionEvaluator();
+  const deferredOnly = {
+    player: { age: 22, flags: {} },
+    flags: { p16_deferred_business_upbringing: true },
+  } as GameState;
+  assert(
+    evaluator.evaluate(event!.conditions![0], deferredOnly),
+    'p11_wealth_reinforcement_first_deal should accept p16_deferred_business_upbringing',
+  );
+  const earlyFocus = {
+    player: { age: 22, flags: { p9_early_business_focus: true } },
+    flags: { p9_early_business_focus: true },
+  } as GameState;
+  assert(
+    evaluator.evaluate(event!.conditions![0], earlyFocus),
+    'p11_wealth_reinforcement_first_deal should accept p9_early_business_focus',
+  );
+}
+
 function testRouteReinforcementAndDivergenceMultipliers(): void {
   const socialEvent = eventLoader.getEventById('p11_social_reinforcement_gathering');
   const divergenceEvent = eventLoader.getEventById('p11_wealth_wanderer_divergence_fork');
@@ -158,6 +181,23 @@ async function testPersonaSimulationAndGate(): Promise<void> {
   assert(wealthHit !== undefined, 'wealth persona should trigger p11_wealth_reinforcement_first_deal');
   assert(wealthHit!.age === 22, 'wealth reinforcement should fire at age 22');
 
+  const wealthCaravan = wealth!.records.find(record => record.eventId === 'p9_merchant_midlife_caravan');
+  assert(wealthCaravan !== undefined, 'wealth persona should trigger p9_merchant_midlife_caravan');
+  assert(
+    wealthCaravan!.age >= 28 && wealthCaravan!.age <= 32,
+    `merchant caravan should fire in 28-32 band (got age ${wealthCaravan!.age})`,
+  );
+
+  const wealthFinalFlags = {
+    ...(wealth!.records.at(-1)?.gameState?.flags ?? {}),
+    ...(wealth!.records.at(-1)?.gameState?.player?.flags ?? {}),
+  };
+  assert(
+    wealthFinalFlags.p9_route_identity_merchant_master !== undefined &&
+      wealthFinalFlags.p9_route_identity_merchant_master !== false,
+    'wealth persona should resolve merchant_master identity by age 40',
+  );
+
   const wandererHit = wanderer!.records.find(
     record => record.eventId === 'p11_wanderer_reinforcement_connections',
   );
@@ -171,10 +211,20 @@ async function testPersonaSimulationAndGate(): Promise<void> {
   const routeBaseline = buildRouteBaseline(personaBundles);
   assert(routeBaseline.some(route => route.routeId === 'route_wealth'), 'wealth route audited');
 
+  const wealthRoute = routeBaseline.find(route => route.routeId === 'route_wealth');
+  assert(wealthRoute !== undefined, 'wealth route baseline entry');
+  assert(
+    wealthRoute!.neverScheduledPoints.length === 0,
+    `route_wealth should schedule all divergence/identity points (missing: ${wealthRoute!.neverScheduledPoints.map(p => p.point.description).join(', ')})`,
+  );
+
   const gate = assembleP11SchedulingGateReport(personaBundles);
   assert(gate.schemaVersion === 'p11-scheduling-v1', 'gate schema');
-  assert(gate.decision === 'pass', 'P11 scheduling gate should pass');
-  assert(gate.summary.routePointsNeverScheduled === 0, 'no route reinforcement points left unscheduled');
+  assert(gate.decision === 'pass', `P11 scheduling gate should pass (got ${gate.decision})`);
+  assert(
+    gate.summary.routePointsNeverScheduled === 0,
+    `all configured route points should schedule in persona runs (got ${gate.summary.routePointsNeverScheduled})`,
+  );
 }
 
 function testSchedulerWiringDiagnostics(): void {
@@ -225,6 +275,7 @@ export async function runP11SchedulingTests(): Promise<void> {
   testGapClassification();
   testSchedulingContext();
   testStageSchedulingMultiplier();
+  testWealthReinforcementAcceptsDeferredUpbringing();
   testRouteReinforcementAndDivergenceMultipliers();
   testSchedulerWiringDiagnostics();
   testContentMetadataCoverage();

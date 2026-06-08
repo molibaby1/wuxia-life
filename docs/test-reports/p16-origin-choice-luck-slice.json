@@ -1,0 +1,19 @@
+{
+  "slice": "origin_choice_luck",
+  "compositeUnlockCase": {
+    "outcomeId": "lone_sword_legend",
+    "requiresRareLine": true,
+    "requiresChoiceFlags": false,
+    "unlockedWithBoth": true,
+    "lockedWithoutRare": true
+  },
+  "rareLineDivergence": {
+    "seedA": "low",
+    "seedB": "high",
+    "lineA": [],
+    "lineB": [
+      "hidden_master_line"
+    ],
+    "diverged": true
+  }
+}

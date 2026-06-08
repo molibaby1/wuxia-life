@@ -10,7 +10,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_business_focus\")"
+        "expression": "flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\")"
       }
     ],
     "content": {
@@ -71,7 +71,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_travel_focus\")"
+        "expression": "flags.has(\"p9_echo_travel_hook\") && !flags.has(\"p9_early_business_focus\")"
       }
     ],
     "content": {
@@ -619,7 +619,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_social_hook\")"
+        "expression": "flags.has(\"p9_echo_social_hook\") || flags.has(\"p9_early_social_focus\") || flags.has(\"p16_deferred_social_upbringing\")"
       }
     ],
     "content": {

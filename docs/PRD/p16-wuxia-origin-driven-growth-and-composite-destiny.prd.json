@@ -15,7 +15,7 @@
         "Do not modify gameplay behavior in this story"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -30,7 +30,7 @@
         "Do not modify gameplay behavior in this story"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -44,7 +44,7 @@
         "Save the rules under docs/designs/ or docs/"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -58,7 +58,7 @@
         "Save the rules under docs/designs/ or docs/"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -73,7 +73,7 @@
         "Relevant tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -88,7 +88,7 @@
         "Relevant tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -103,7 +103,7 @@
         "Relevant tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -118,7 +118,7 @@
         "Relevant tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -133,7 +133,7 @@
         "Relevant tests pass"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -148,7 +148,7 @@
         "Relevant tests pass"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -163,7 +163,7 @@
         "Relevant tests pass"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -178,7 +178,7 @@
         "Relevant tests pass"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -193,7 +193,7 @@
         "Relevant tests pass"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -208,7 +208,7 @@
         "Relevant tests pass"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -223,7 +223,7 @@
         "Relevant tests pass"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -238,7 +238,7 @@
         "Relevant tests pass"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -253,7 +253,7 @@
         "Relevant tests pass"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -268,7 +268,7 @@
         "Relevant tests pass"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -283,7 +283,7 @@
         "Relevant tests pass"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -297,7 +297,7 @@
         "Relevant tests pass"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -311,7 +311,7 @@
         "Relevant tests pass"
       ],
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -326,7 +326,7 @@
         "Relevant tests pass"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -341,7 +341,7 @@
         "Relevant tests pass"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -356,7 +356,7 @@
         "Relevant tests pass"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -370,7 +370,7 @@
         "Relevant tests pass"
       ],
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -385,7 +385,7 @@
         "Relevant tests pass"
       ],
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -399,7 +399,7 @@
         "Save the final closure report under docs/test-reports/"
       ],
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]

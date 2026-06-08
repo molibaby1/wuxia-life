@@ -10,6 +10,12 @@ import { WUXIA_PROFILE_IDENTITY_TRACKS } from './profile/wuxiaIdentityTracks';
 import { WUXIA_PROFILE_RESOURCES } from './profile/wuxiaResources';
 import { WUXIA_PROFILE_STATS } from './profile/wuxiaStats';
 import { WUXIA_PROFILE_SUMMARY_SIGNALS } from './profile/wuxiaSummarySignals';
+import {
+  WUXIA_CHILDHOOD_SHAPING_RULES,
+  WUXIA_COMPOSITE_DESTINY_OUTCOMES,
+  WUXIA_ORIGIN_SURFACES,
+  WUXIA_RARE_EVENT_LINES,
+} from './profile/wuxiaOriginSurfaces';
 import type { WorldProfile } from './profile/types';
 
 export type {
@@ -39,6 +45,10 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   routeDefinitions: WUXIA_ROUTE_DEFINITIONS,
   echoHooks: WUXIA_ECHO_HOOKS,
   summaryTemplates: WUXIA_SUMMARY_TEMPLATES,
+  originSurfaces: WUXIA_ORIGIN_SURFACES,
+  compositeDestinyOutcomes: WUXIA_COMPOSITE_DESTINY_OUTCOMES,
+  childhoodShapingRules: WUXIA_CHILDHOOD_SHAPING_RULES,
+  rareEventLines: WUXIA_RARE_EVENT_LINES,
 };
 
 export function getWorldProfile(worldId = 'wuxia'): WorldProfile {

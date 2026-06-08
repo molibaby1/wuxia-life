@@ -272,6 +272,7 @@ export class GameProcessSimulator {
 
     this.applyRouteTrackPreparation(ageBeforeEvent);
     this.applyRouteTrackFixtureBootstrap(ageBeforeEvent);
+    this.applyP16PersonaYouthRouteSeeds(ageBeforeEvent);
     const stateForRecord = JSON.parse(JSON.stringify(gameEngine.getGameState())) as GameState;
 
     this.log(`\n━━━ ${ageBeforeEvent}岁 ━━━ (引擎内部年龄：${gameEngine.getGameState().player?.age})`);
@@ -550,6 +551,43 @@ export class GameProcessSimulator {
 
   private applyRouteTrackFixtureBootstrap(age: number): void {
     applyRouteTrackFixtureBootstrap(gameEngine.getGameState(), this.config.routeTrack, age);
+  }
+
+  /** P16: persona simulations seed youth route intent without infant commerce/travel actions. */
+  private applyP16PersonaYouthRouteSeeds(age: number): void {
+    const persona = this.resolveP8Persona();
+    if (!persona || age !== 13) {
+      return;
+    }
+    const state = gameEngine.getGameState();
+    const strategySeeds: Record<string, Record<string, boolean>> = {
+      business: {
+        p9_early_business_focus: true,
+        p9_echo_business_hook: true,
+        p16_deferred_business_upbringing: true,
+      },
+      travel: {
+        p9_early_travel_focus: true,
+        p16_deferred_travel_upbringing: true,
+      },
+      socializing: {
+        p9_early_social_focus: true,
+        p9_echo_social_hook: true,
+        p16_deferred_social_upbringing: true,
+      },
+      study: {
+        p9_echo_study_hook: true,
+        p16_deferred_study_upbringing: true,
+      },
+      training: {
+        p9_early_training_focus: true,
+        p9_echo_training_hook: true,
+      },
+    };
+    const seeds = strategySeeds[persona.strategy];
+    if (seeds) {
+      Object.assign(state.flags, seeds);
+    }
   }
 
   private collectChoiceEffects(choice: EventChoice): any[] {

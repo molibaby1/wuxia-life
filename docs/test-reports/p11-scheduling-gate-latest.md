@@ -1,6 +1,6 @@
 # P11 Scheduling Gate Report
 
-Generated: 2026-06-08T00:25:36.028Z
+Generated: 2026-06-08T09:06:41.436Z
 Decision: **PASS**
 
 ## Summary
@@ -9,7 +9,7 @@ Decision: **PASS**
 
 # P11 Stage Expectation Baseline
 
-Generated: 2026-06-08T00:25:36.029Z
+Generated: 2026-06-08T09:06:41.437Z
 
 ## 0-10 (stage_0_10)
 
@@ -21,7 +21,7 @@ Generated: 2026-06-08T00:25:36.029Z
 ### Detected signals
 - **origin** @ ages 1, 1, 1, 1, 1, 1, 1, 1 — event:origin_background; event:origin_background; event:origin_background
 - **childhood_choice** @ ages 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6, 1, 4, 6 — event:origin_background; event:childhood_preference; event:martial_arts_enlightenment
-- **early_active_action** @ ages 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7 — action:action_training_basic; action:action_training_basic; action:action_training_basic
+- **early_active_action** @ ages 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7, 2, 5, 7 — action:action_childhood_training; action:action_childhood_training; action:action_childhood_training
 
 ### Missing signals
 - (none)
@@ -36,7 +36,7 @@ Generated: 2026-06-08T00:25:36.029Z
 ### Detected signals
 - **route_entry** @ ages 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 — event:p9_childhood_sword_trial; event:childhood_summary; event:late_childhood_prep
 - **training_milestone** @ ages 10, 10 — event:p9_childhood_sword_trial; event:p9_childhood_dark_spark
-- **first_turning_point** @ ages 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19 — event:love_first_meet; event:daily_home_letter_pos_1; event:martial_improvement
+- **first_turning_point** @ ages 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19 — event:love_first_meet; event:daily_skip_training_neu_1; event:martial_improvement
 
 ### Missing signals
 - (none)
@@ -50,8 +50,8 @@ Generated: 2026-06-08T00:25:36.029Z
 
 ### Detected signals
 - **route_reinforcement** @ ages 22, 22, 22 — event:p11_social_reinforcement_gathering; event:p11_wealth_reinforcement_first_deal; event:p11_wanderer_reinforcement_connections
-- **identity_signal** @ ages 26, 27, 28, 29, 28, 29, 28, 29, 25, 26, 27, 28, 29, 23, 24, 25, 26, 27, 28, 29, 28, 29 — identity:balanced_martial_base; event:family_child_born; event:commoner_year_farming
-- **relationship_shift** @ ages 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 — event:family_marriage; event:setback_property_loss; event:setback_injury
+- **identity_signal** @ ages 26, 27, 28, 29, 28, 29, 28, 29, 25, 26, 27, 28, 29, 23, 24, 25, 26, 27, 28, 29, 28, 29, 28, 29 — identity:wanderer_map_legend; event:family_child_born; event:commoner_year_neighbor
+- **relationship_shift** @ ages 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 — event:family_marriage; event:refugee_sect_story; event:setback_illness
 
 ### Missing signals
 - (none)
@@ -64,9 +64,9 @@ Generated: 2026-06-08T00:25:36.029Z
 - age40_identity
 
 ### Detected signals
-- **route_divergence** @ ages 28, 29, 28 — event:p9_merchant_midlife_caravan; event:p9_deviant_midlife_escalation; event:p9_wanderer_midlife_discovery
+- **route_divergence** @ ages 28, 29, 28, 28 — event:p9_merchant_midlife_caravan; event:p9_deviant_midlife_escalation; event:p9_wanderer_midlife_discovery
 - **achievement** @ ages  — stat:threshold_met
-- **age40_identity** @ ages 39 — identity:balanced_martial_base
+- **age40_identity** @ ages 39 — identity:wanderer_map_legend
 
 ### Missing signals
 - (none)
@@ -74,7 +74,7 @@ Generated: 2026-06-08T00:25:36.029Z
 
 # P11 Route Scheduling Baseline Audit
 
-Generated: 2026-06-08T00:25:36.029Z
+Generated: 2026-06-08T09:06:41.437Z
 
 ## 习武成名 (route_martial)
 Personas: p8-martial-lin

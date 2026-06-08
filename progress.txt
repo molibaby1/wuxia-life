@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- P16 origin/destiny: modules under `src/p16/`; profile surfaces in `src/narrative/profile/wuxiaOriginSurfaces.ts` on `WorldProfile`. Gates: `npm run gate:p16`, `npm run report:p16-closure`. Reports: `docs/test-reports/p16-*`. Childhood agency: `resolveChildhoodActionPalette` (origin + `p8_persona_id` scores) over `src/data/childhoodActionCatalog.ts` lite actions; adult P7 minimum actions blocked until age 13. Persona sims seed youth route flags at age 13 in `GameProcessSimulator.applyP16PersonaYouthRouteSeeds`.
 - P6B backend lives under `server/` with SQL migrations in `server/migrations/`; run `npm run p6b:migrate`, `npm run p6b:seed-catalog`, `npm run p6b:serve` with `DATABASE_URL` and `TOKEN_HASH_SECRET` set (see `.env.p6b.example`).
 - Web API mode activates when `VITE_P6B_API_URL` is set at build time; tokens stay in `webPlatformStorage`, not Vue components.
 - P6B unit tests (`npm run test:p6b:unit`) need no PostgreSQL; full gate and `npm run test:p6b` also run `test:p6b:db`, which fails without `DATABASE_URL`.
@@ -23,6 +24,12 @@
 - P9 narrative config: stage/route/echo/summary under `src/narrative/config/`; loader at `src/narrative/NarrativeConfigLoader.ts`. Triage via `npm run gate:p9-triage`; verification via `npm run report:p9-verification`. P9 content events in `src/data/lines/p9-remediation.json`. Active actions set echo/route flags via `onCompleteFlags` in `activeActionCatalog.ts` → `executeActiveActionOnState`. Mandatory P9 events use `priority: 0` + metadata tags `mandatory`/`mainline`/`once` for critical lane selection.
 - P11 stage/route scheduling: modules under `src/p11/`; signal detection + scheduling context + policy multipliers wired into `GameEngineIntegration.getRouteSchedulingMultiplier`. Content declares `metadata.narrativeScheduling.stageSignals/routePoints`. Validation pack in `src/data/lines/p11-validation.json`. Gates: `npm run report:p11-stage-baseline`, `npm run gate:p11-scheduling`, `npm run report:p11-closure`. Reports: `docs/test-reports/p11-*`. Stage bias respects `pathAffinity` to avoid cross-persona homogenization.
 - P12 world profile: executable `WorldProfile` under `src/narrative/worldProfile.ts` + theme metadata in `src/narrative/profile/`; verification in `src/p12/`. Gates: `npm run gate:p12-profile`, `npm run report:p12-closure`. Reports: `docs/test-reports/p12-*`. Profile-first readers use `getWorldProfile()` helpers; save schema unchanged.
+
+## [2026-06-08] - P16 US-001..US-027 (origin-driven-growth-and-composite-destiny)
+- Audits/design rules, `WorldProfile.originSurfaces` + composite destiny + rare lines + childhood shaping, engine wiring (event weight, agency filter, tendency/rare checkpoints), P16 gate/validation slices/closure.
+- Key files: `src/p16/*`, `src/narrative/profile/wuxiaOriginSurfaces.ts`, `tests/p16OriginDestinyTests.ts`, `scripts/runP16Gate.ts`, `scripts/runP16ClosureReport.ts`.
+- Validation: typecheck ✅ npm test ✅ gate:playability ✅ gate:p12-profile ✅ gate:p16 ✅ (p11 scheduling warning ≤2 never-scheduled route points — baseline parity)
+---
 
 ## [2026-06-08] - P12 US-001..US-019 (wuxia-world-profile-formalization)
 - Inventory, formal WorldProfile schema (stats/resources/identity/actionFamilies/summarySignals + narrative sections), profile-first P10/P11/P8 readers, action-family wiring, P12 gate/report/closure.

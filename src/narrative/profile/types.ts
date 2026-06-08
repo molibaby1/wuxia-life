@@ -46,6 +46,91 @@ export interface WorldProfileSummarySignal {
   sourceRole: 'origin' | 'route_identity' | 'route_preference' | 'echo' | 'template';
 }
 
+/** Theme-neutral 0–1 scale for origin-linked material and social conditions. */
+export interface OriginResourceExposure {
+  familyResources: number;
+  guidanceQuality: number;
+  socialCapital: number;
+  hardshipExposure: number;
+  regionalBackground: string;
+}
+
+/** Shaping deltas applied over childhood; distinct from immediate resource snapshot. */
+export interface OriginWorldviewShaping {
+  discipline: number;
+  endurance: number;
+  caution: number;
+  empathy: number;
+  ambition: number;
+  socialEase: number;
+}
+
+export interface WorldProfileOriginSurface {
+  originId: string;
+  label: string;
+  resources: OriginResourceExposure;
+  /** Snapshot applied when resolving childhood material/guidance weighting. */
+  immediateConditions: OriginResourceExposure;
+  shapingTendencies: OriginWorldviewShaping;
+  eventBiasTags: Array<{ tag: string; multiplier: number }>;
+}
+
+export type DestinyDimension =
+  | 'skill_growth'
+  | 'social_capital'
+  | 'resources'
+  | 'reputation'
+  | 'key_choices'
+  | 'special_event';
+
+export interface CompositeDestinyRequirement {
+  dimension: DestinyDimension;
+  minValue?: number;
+  requiredFlags?: string[];
+  blockedByFlags?: string[];
+}
+
+export interface CompositeDestinyOutcome {
+  id: string;
+  label: string;
+  requirements: CompositeDestinyRequirement[];
+  requireAll?: boolean;
+}
+
+export interface CompositeDestinyDimensionProgress {
+  dimension: DestinyDimension;
+  status: 'satisfied' | 'missing' | 'blocked';
+  currentValue?: number;
+  requiredValue?: number;
+  detail: string;
+}
+
+export interface CompositeDestinyProgressReport {
+  outcomeId: string;
+  outcomeLabel: string;
+  unlocked: boolean;
+  dimensions: CompositeDestinyDimensionProgress[];
+}
+
+export interface ChildhoodShapingRule {
+  id: string;
+  sourceTag: string;
+  tendency: keyof OriginWorldviewShaping;
+  increment: number;
+  thresholdForSurfacing: number;
+}
+
+export interface RareEventLineConfig {
+  id: string;
+  label: string;
+  baseProbability: number;
+  originConditions?: string[];
+  stageConditions?: { minAge?: number; maxAge?: number };
+  priorChoiceFlags?: string[];
+  unlocksFlags?: string[];
+  altersOpportunityTags?: string[];
+}
+
 /**
  * Executable world pack contract for a single theme.
  *
@@ -67,6 +152,14 @@ export interface WorldProfile {
   routeDefinitions: RouteDefinition[];
   echoHooks: EchoHook[];
   summaryTemplates: SummaryTemplatePart[];
+  /** P16: profile-first origin resource, exposure, and shaping surfaces. */
+  originSurfaces?: WorldProfileOriginSurface[];
+  /** P16: multi-factor high-level outcome requirements. */
+  compositeDestinyOutcomes?: CompositeDestinyOutcome[];
+  /** P16: childhood experience → tendency mapping. */
+  childhoodShapingRules?: ChildhoodShapingRule[];
+  /** P16: luck-weighted opportunity lines. */
+  rareEventLines?: RareEventLineConfig[];
 }
 
 /** Sections required for a playable world profile — used by P12 verification. */

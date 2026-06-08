@@ -61,6 +61,8 @@ export type {
 import { getRouteIdentityFromFlags } from './config/routeDefinitions';
 import { getSummaryTemplateForIdentity, applySummaryTemplate } from './config/summaryTemplates';
 import { getWorldProfile } from './worldProfile';
+import { buildTendencySurfaceSummary } from '../p16/tendencyShaping';
+import type { OriginWorldviewShaping } from './profile/types';
 
 export function resolveConfiguredEchoSummaryVars(
   flags: Record<string, unknown>,
@@ -116,10 +118,21 @@ export function resolveConfiguredEchoSummaryVars(
   return vars;
 }
 
+export function resolveTendencySummaryFromShaping(
+  shaping: OriginWorldviewShaping | undefined,
+  worldId = 'wuxia',
+): string {
+  if (!shaping) return '';
+  const parts = buildTendencySurfaceSummary(shaping, worldId);
+  if (parts.length === 0) return '';
+  return `幼年塑形：${parts.join('、')}`;
+}
+
 export function resolveConfiguredAge40Identity(
   flags: Record<string, unknown>,
   routePreference: string,
   origin: string | null,
+  tendencyShaping?: OriginWorldviewShaping,
 ): string {
   const profile = getWorldProfile('wuxia');
   const routeIdentity = profile.routeDefinitions.length > 0
@@ -127,12 +140,14 @@ export function resolveConfiguredAge40Identity(
     : null;
   const template = getSummaryTemplateForIdentity(routeIdentity, routePreference, profile.id);
   const echoVars = resolveConfiguredEchoSummaryVars(flags, profile.id);
-  return applySummaryTemplate(template, {
+  const tendencySuffix = resolveTendencySummaryFromShaping(tendencyShaping, profile.id);
+  const base = applySummaryTemplate(template, {
     origin: origin ?? '未知',
     route_identity: routeIdentity ?? routePreference,
     route_preference: routePreference,
     ...echoVars,
   });
+  return tendencySuffix ? `${base}，${tendencySuffix}` : base;
 }
 
 export function getStagePurposeForAge(age: number): string | null {

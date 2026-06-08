@@ -1,0 +1,406 @@
+{
+  "project": "Wuxia Life P16 Origin-Driven Growth And Composite Destiny",
+  "branchName": "ralph/p16-wuxia-origin-driven-growth-and-composite-destiny",
+  "description": "Strengthen wuxia-life by making childhood more origin-shaped and age-appropriate, adding config-first origin and tendency surfaces, introducing theme-neutral composite destiny and rare-line support, and validating that origin, choice, and luck can combine into materially different 0-40 life outcomes without regressing current gates.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit current early-life variance surfaces",
+      "description": "As a maintainer, I want a read-only audit of current origin, childhood, and route-entry variance so that P16 targets the highest-impact wuxia experience gaps first.",
+      "acceptanceCriteria": [
+        "Audit current early-life variance across origin, family resources, early teaching, social exposure, and childhood event pools",
+        "Mark each early-life surface as config-driven, partially config-driven, or runtime-bound",
+        "Record the current source of truth for each surface",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit age-inappropriate childhood agency points",
+      "description": "As a maintainer, I want a read-only inventory of age-inappropriate childhood agency points so that P16 can remove the most immersion-breaking early choices first.",
+      "acceptanceCriteria": [
+        "Record the current childhood choices or route-entry moments that feel too strong or age-inappropriate",
+        "Identify which early actions are direct-adult behaviors, strategic build choices, or other childhood-fit violations",
+        "Note whether each problem is config-only, content-only, or runtime-bound",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Write stage agency design rules",
+      "description": "As a designer, I want explicit agency rules for childhood, youth, and adulthood so that later P16 implementation stories optimize toward a coherent wuxia-life model.",
+      "acceptanceCriteria": [
+        "Define the target agency split for childhood, youth, and adult stages",
+        "Define the principle that childhood should be shaped more by origin and circumstance than by direct route choice",
+        "Define which kinds of actions are invalid, suppressed, or strongly limited in early childhood",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Write origin-shaping design rules",
+      "description": "As a designer, I want explicit origin-shaping rules so that later config and runtime changes model upbringing consistently rather than as isolated tweaks.",
+      "acceptanceCriteria": [
+        "Define how origin can influence hardship tolerance, discipline, family obligation, learning access, and early worldview",
+        "Define which early-life differences should remain recognizable without becoming fully deterministic",
+        "Record which origin effects are expected to stay explicit versus implicit in later outputs",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add explicit origin resource and exposure config fields",
+      "description": "As a developer, I want explicit config fields for origin-linked resources and exposure so that upbringing differences can be tuned without embedding wuxia flavor into runtime logic.",
+      "acceptanceCriteria": [
+        "Add or refine config fields for family resources, guidance quality, social capital, hardship exposure, or regional background",
+        "Field names and semantics are explicit enough for later config-only tuning",
+        "Schema remains compatible with current profile-first loading or a controlled migration path is documented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add explicit origin worldview and shaping config fields",
+      "description": "As a developer, I want explicit config fields for early worldview and shaping tendencies so that childhood personality effects can be authored without reading hidden runtime assumptions.",
+      "acceptanceCriteria": [
+        "Add or refine config fields covering early discipline, endurance, caution, empathy, ambition, or social ease shaping",
+        "Field semantics distinguish immediate childhood conditions from later tendency effects",
+        "Schema remains profile-first and theme-neutral in shared logic naming",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Wire origin resource inputs into childhood event selection",
+      "description": "As a player, I want childhood event selection to read origin-linked material conditions so that early life feels different based on where I came from.",
+      "acceptanceCriteria": [
+        "Childhood event selection or weighting reads origin-related resource and exposure inputs through the existing world-profile path",
+        "At least 2 distinct origin resource patterns produce materially different childhood event tendencies",
+        "The wiring path remains theme-neutral in shared runtime logic",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Wire origin guidance inputs into childhood event selection",
+      "description": "As a player, I want childhood event selection to read origin-linked guidance and social inputs so that upbringing differences feel believable rather than cosmetic.",
+      "acceptanceCriteria": [
+        "Childhood event selection or weighting reads origin-related guidance quality, social capital, or worldview inputs through the existing world-profile path",
+        "At least 1 additional origin pattern beyond material resources produces materially different childhood event tendencies",
+        "The resulting differences are traceable in test or report output",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Restrict direct-adult childhood actions",
+      "description": "As a player, I want direct-adult behaviors removed from early childhood so that the life simulation feels grounded instead of prematurely strategic.",
+      "acceptanceCriteria": [
+        "Limit, suppress, or replace direct commerce and other clearly adult route-entry actions in childhood",
+        "The restricted actions no longer appear as normal early-childhood options",
+        "Replacement or suppression follows the approved childhood agency rules",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Preserve limited meaningful childhood choice",
+      "description": "As a player, I want childhood to retain a small amount of meaningful choice so that the stage remains interactive without turning into a premature build-optimization phase.",
+      "acceptanceCriteria": [
+        "Preserve a small number of meaningful childhood choices that fit the target age band",
+        "Childhood outcomes are driven more by experience framing and environment than by explicit career-like decisions",
+        "The retained choices align with the approved stage agency split",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add inspectable childhood-to-tendency shaping rules",
+      "description": "As a designer, I want childhood experiences to map into later tendencies through inspectable rules so that early hardship and upbringing have visible downstream payoff.",
+      "acceptanceCriteria": [
+        "Add or refine config-driven links between childhood experiences and later tendencies such as endurance, discipline, ambition, caution, empathy, or social ease",
+        "At least 2 childhood shaping patterns are encoded without relying on wuxia-specific names in shared logic",
+        "The shaping path can be inspected in structured test or report output",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Surface tendency shaping in later callbacks or summaries",
+      "description": "As a player, I want later-stage outputs to reflect childhood shaping so that origin and upbringing have visible narrative payoff beyond hidden weights.",
+      "acceptanceCriteria": [
+        "At least 2 childhood shaping patterns can be observed in later-stage callbacks, route pressure, or summary output",
+        "The surfaced effects remain legible without requiring manual log reading",
+        "The output path uses existing profile-first or summary pipelines rather than ad hoc debug-only hooks",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Define composite destiny requirement schema",
+      "description": "As a designer, I want a general configuration model for multi-factor destiny requirements so that major wuxia outcomes are not unlocked by a single axis alone.",
+      "acceptanceCriteria": [
+        "Define a configuration model for multi-factor outcome requirements",
+        "The model supports conditions across at least skill growth, social capital, resources, reputation, key choices, and special-event progression",
+        "The shared logic remains theme-neutral and avoids wuxia-specific naming",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add composite destiny progress reporting",
+      "description": "As a maintainer, I want composite destiny requirements to report partial progress and blocking dimensions so that balancing and debugging do not depend on manual code tracing.",
+      "acceptanceCriteria": [
+        "Composite destiny evaluation supports partial progress or unmet-requirement reporting",
+        "Reports identify which dimensions are satisfied, missing, or blocked for a candidate outcome",
+        "The reporting path is usable from tests or report artifacts",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Implement martial-plus-nonmartial composite destiny outcome",
+      "description": "As a player, I want at least one major wuxia outcome to require more than martial strength so that high-status destinies feel earned rather than linear.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative high-level wuxia outcome using the composite rule model",
+        "The outcome requires more than martial growth alone",
+        "Composite destiny progress reporting explains the satisfied and missing dimensions for this outcome",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Implement organization-and-cultivation composite destiny outcome",
+      "description": "As a player, I want at least one major wuxia outcome to combine social or organizational requirements with personal cultivation so that social standing matters alongside individual power.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative high-level wuxia outcome that combines social or organizational requirements with personal cultivation",
+        "The outcome is authored through the shared composite rule model rather than custom one-off logic",
+        "Composite destiny progress reporting explains the satisfied and missing dimensions for this outcome",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Implement blocked-by-missing-dimension composite destiny outcome",
+      "description": "As a player, I want at least one major wuxia outcome to stay locked when a critical dimension is missing so that destinies do not collapse into single-axis progression.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative high-level wuxia outcome that is blocked when a critical dimension is missing even if one axis is strong",
+        "The blocked state is visible in composite destiny progress reporting",
+        "By the end of this story the phase has at least 3 representative composite destiny outcomes implemented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add rare event line config model",
+      "description": "As a designer, I want rare event lines represented in config so that luck-based opportunities can interact with origin, stage, and prior choices without custom hardcoded branches.",
+      "acceptanceCriteria": [
+        "Define how rare event lines are represented in config and linked to origin, stage, or prior choice conditions",
+        "The config model stays compatible with current profile-first loading or documents a controlled migration path",
+        "The shared logic remains theme-neutral in field naming",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Wire rare event probability and opportunity impact",
+      "description": "As a player, I want rare lines to be possible but not guaranteed, and to materially alter later opportunity space when they occur.",
+      "acceptanceCriteria": [
+        "Otherwise similar lives can diverge on whether a rare line occurs",
+        "Rare lines can materially alter later opportunity space rather than only adding flavor text",
+        "The wiring can be observed in tests or structured report output",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Build origin variance validation slice",
+      "description": "As a maintainer, I want a validation slice that compares multiple lives across different origins so that P16 proves origin meaningfully changes the early life arc.",
+      "acceptanceCriteria": [
+        "Add a validation slice or report that compares multiple lives with controlled origin differences",
+        "Demonstrate at least 1 case where origin meaningfully changes the early life arc",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Build origin-plus-choice-plus-luck validation slice",
+      "description": "As a maintainer, I want a validation slice that demonstrates destinies emerging from the interaction of origin, accumulated choices, and rare opportunities so that P16 proves the intended wuxia-life pattern.",
+      "acceptanceCriteria": [
+        "Add a validation slice or report that compares multiple lives with controlled differences in origin, choices, and rare-line outcomes",
+        "Demonstrate at least 1 case where a composite destiny unlock depends on both accumulated choices and a rare opportunity",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Tune the childhood portion of the 0-40 wuxia slice",
+      "description": "As a project owner, I want the childhood portion of the 0-40 wuxia slice tuned around the new origin and agency model so that the phase improves more than isolated samples.",
+      "acceptanceCriteria": [
+        "Apply P16 tuning across the childhood portion of the wuxia slice",
+        "Reduce clearly age-inappropriate early routing behavior in the childhood slice",
+        "Increase visible differentiation between at least 3 childhood trajectories that begin from different origins",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Tune the youth and adulthood portions of the 0-40 wuxia slice",
+      "description": "As a project owner, I want the youth and adulthood portions of the 0-40 wuxia slice tuned around composite destiny and rare-line payoff so that the new model carries through later life stages.",
+      "acceptanceCriteria": [
+        "Apply P16 tuning across the youth and adulthood portions of the wuxia slice",
+        "Preserve or improve current route readability and summary coherence",
+        "At least 3 life trajectories remain visibly differentiated from origin through later payoff",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Add a P16 experience gate or report scaffold",
+      "description": "As a maintainer, I want a dedicated P16 verification scaffold so that origin variance, childhood agency sanity, composite destiny coverage, and rare-line observability can be checked through evidence rather than impressions.",
+      "acceptanceCriteria": [
+        "Add or update a P16-specific gate or report scaffold covering origin variance, childhood agency sanity, composite destiny coverage, and rare-line observability",
+        "The scaffold writes output under docs/test-reports/",
+        "The scaffold is usable by later verification stories without ad hoc manual inspection",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Record P16 before-and-after findings",
+      "description": "As a maintainer, I want before-and-after findings recorded for the main P16 issues so that phase acceptance can rely on explicit evidence.",
+      "acceptanceCriteria": [
+        "Record before-and-after findings for the main early-life and destiny issues targeted by P16",
+        "Include findings for origin variance, childhood agency sanity, composite destiny coverage, and rare-line observability",
+        "Save the findings under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Re-run playability and profile/runtime gate bundle for P16",
+      "description": "As a maintainer, I want the existing major gates re-run after P16 changes so that the phase does not regress validated runtime and profile behavior.",
+      "acceptanceCriteria": [
+        "Re-run npm run gate:playability",
+        "Re-run the current narrative or profile gates affected by P16",
+        "Re-run the current runtime or multi-theme gates affected by P16",
+        "Record the command outcomes in a verification note under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Write the P16 closure report",
+      "description": "As a project owner, I want a final P16 closure report so that future sessions can understand what changed, what was validated, and what remains intentionally out of scope.",
+      "acceptanceCriteria": [
+        "Summarize the implemented origin-driven childhood changes, composite destiny coverage, and rare-line integration",
+        "State whether P16 preserved or improved current playability, scheduling, profile, and multi-theme gate outcomes",
+        "Restate the main P16 non-goals and any remaining follow-up questions",
+        "Save the final closure report under docs/test-reports/"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -52,6 +52,8 @@
     "report:p11-stage-baseline": "tsx scripts/runP11StageBaselineReport.ts",
     "gate:p11-scheduling": "tsx scripts/runP11SchedulingGate.ts",
     "report:p11-closure": "tsx scripts/runP11ClosureReport.ts",
+    "gate:p12-profile": "tsx scripts/runP12ProfileGate.ts",
+    "report:p12-closure": "tsx scripts/runP12ClosureReport.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
     "build": "vue-tsc -b && vite build",

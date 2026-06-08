@@ -17,7 +17,11 @@ import type {
 } from './types';
 import { getActionById } from '../data/activeActionCatalog';
 import type { GameState } from '../types/eventTypes';
-import { getAllEchoHooks, getEchoHookByFlag, getEchoHookByActionId } from '../narrative/config/echoHooks';
+import {
+  getProfileEchoHookByActionId,
+  getProfileEchoHookByFlag,
+  getWorldProfile,
+} from '../narrative/worldProfile';
 import { getRouteIdentityFromFlags } from '../narrative/config/routeDefinitions';
 import { resolveConfiguredAge40Identity } from '../narrative/NarrativeConfigLoader';
 import { getP8PersonaById } from './personas';
@@ -102,7 +106,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
   const seenDirect = new Set<string>();
   const earlyRefs: Array<{ age: number; ref: string }> = [];
   const configuredSummaryFlags = new Set(
-    getAllEchoHooks()
+    getWorldProfile().echoHooks
       .map(hook => hook.summaryContribution?.textSources ?? [])
       .flat()
       .filter(source => source.kind === 'flag_value' && source.flagKey)
@@ -168,7 +172,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
       }
     }
 
-    const hook = Object.keys(flags).map(k => getEchoHookByFlag(k)).find(Boolean);
+    const hook = Object.keys(flags).map(k => getProfileEchoHookByFlag(k)).find(Boolean);
     if (hook && record.eventId === hook.callbackEventId) {
       addDirect(`hook:${hook.id}`, {
         age: record.age,
@@ -181,7 +185,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
       for (const prior of earlyRefs) {
         if (prior.age >= record.age) continue;
         const actionId = prior.ref.replace('action:', '');
-        const echoHook = getEchoHookByActionId(actionId);
+        const echoHook = getProfileEchoHookByActionId(actionId);
         if (echoHook && record.age >= echoHook.callbackAgeMin) {
           addDirect(`narrative:${actionId}:${record.eventId}`, {
             age: record.age,
@@ -195,7 +199,7 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
     const routeIdentity = getRouteIdentityFromFlags(flags);
     if (routeIdentity && record.age >= 25) {
       const hadEarlyHook = earlyRefs.some(r => {
-        const hookMatch = getEchoHookByActionId(r.ref.replace('action:', ''));
+        const hookMatch = getProfileEchoHookByActionId(r.ref.replace('action:', ''));
         return hookMatch !== undefined && r.age <= 10;
       });
       if (hadEarlyHook) {
@@ -498,7 +502,7 @@ function actionCategoryCounts(records: GameProcessRecord[]): number[] {
 
 function echoSignature(flags: Record<string, unknown>): number {
   let signal = 0;
-  for (const hook of getAllEchoHooks()) {
+  for (const hook of getWorldProfile().echoHooks) {
     const contribution = hook.summaryContribution;
     if (!contribution?.enabled) {
       continue;

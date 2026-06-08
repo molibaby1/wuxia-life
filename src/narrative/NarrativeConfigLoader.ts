@@ -41,18 +41,35 @@ export {
 } from './config/summaryTemplates';
 export type { SummaryTemplateMatch, SummaryTemplatePart } from './config/summaryTemplates';
 
-import { getStageForAge } from './config/stageConfig';
+export {
+  getWorldProfile,
+  WUXIA_WORLD_PROFILE,
+  getProfileMinimumActionIds,
+  PLAYABLE_PROFILE_SECTION_KEYS,
+} from './worldProfile';
+export type {
+  WorldProfile,
+  WorldProfileIdentityTrack,
+  WorldProfileSummarySignal,
+  WorldProfileStatEntry,
+  WorldProfileResourceEntry,
+  WorldProfileActionFamily,
+  PlayableProfileSectionKey,
+  ProfileValidationResult,
+} from './worldProfile';
+
 import { getRouteIdentityFromFlags } from './config/routeDefinitions';
-import { getAllEchoHooks, getEchoHookByFlag } from './config/echoHooks';
 import { getSummaryTemplateForIdentity, applySummaryTemplate } from './config/summaryTemplates';
+import { getWorldProfile } from './worldProfile';
 
 export function resolveConfiguredEchoSummaryVars(
   flags: Record<string, unknown>,
   worldId = 'wuxia',
 ): Record<string, string> {
+  const profile = getWorldProfile(worldId);
   const grouped = new Map<string, Array<{ order: number; text: string }>>();
 
-  for (const hook of getAllEchoHooks()) {
+  for (const hook of profile.echoHooks) {
     const contribution = hook.summaryContribution;
     if (!contribution?.enabled) {
       continue;
@@ -104,9 +121,12 @@ export function resolveConfiguredAge40Identity(
   routePreference: string,
   origin: string | null,
 ): string {
-  const routeIdentity = getRouteIdentityFromFlags(flags, routePreference);
-  const template = getSummaryTemplateForIdentity(routeIdentity, routePreference, 'wuxia');
-  const echoVars = resolveConfiguredEchoSummaryVars(flags, 'wuxia');
+  const profile = getWorldProfile('wuxia');
+  const routeIdentity = profile.routeDefinitions.length > 0
+    ? getRouteIdentityFromFlags(flags, routePreference, profile.routeDefinitions)
+    : null;
+  const template = getSummaryTemplateForIdentity(routeIdentity, routePreference, profile.id);
+  const echoVars = resolveConfiguredEchoSummaryVars(flags, profile.id);
   return applySummaryTemplate(template, {
     origin: origin ?? '未知',
     route_identity: routeIdentity ?? routePreference,
@@ -116,23 +136,31 @@ export function resolveConfiguredAge40Identity(
 }
 
 export function getStagePurposeForAge(age: number): string | null {
-  return getStageForAge(age)?.purpose ?? null;
+  return getWorldProfile('wuxia').stageConfig.find(stage => age >= stage.ageMin && age < stage.ageMax)?.purpose ?? null;
 }
 
 export function getStageFeedbackExpectationForAge(age: number) {
-  return getStageForAge(age)?.feedbackExpectation ?? null;
+  return getWorldProfile('wuxia').stageConfig.find(stage => age >= stage.ageMin && age < stage.ageMax)?.feedbackExpectation ?? null;
 }
 
-export function resolveEchoHookForFlags(flags: Record<string, unknown>) {
+export function resolveEchoHookForFlags(
+  flags: Record<string, unknown>,
+  worldId = 'wuxia',
+) {
+  const profile = getWorldProfile(worldId);
   for (const key of Object.keys(flags)) {
-    const hook = getEchoHookByFlag(key);
+    const hook = profile.echoHooks.find(entry => entry.hookFlag === key);
     if (hook) return hook;
   }
   return undefined;
 }
 
-export function resolveEchoHooksForFlags(flags: Record<string, unknown>) {
+export function resolveEchoHooksForFlags(
+  flags: Record<string, unknown>,
+  worldId = 'wuxia',
+) {
+  const profile = getWorldProfile(worldId);
   return Object.keys(flags)
-    .map(key => getEchoHookByFlag(key))
+    .map(key => profile.echoHooks.find(entry => entry.hookFlag === key))
     .filter((hook): hook is NonNullable<typeof hook> => hook !== undefined);
 }

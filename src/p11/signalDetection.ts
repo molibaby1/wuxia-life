@@ -1,7 +1,7 @@
 import type { EventDefinition } from '../types/eventTypes';
 import type { RouteSignalPoint } from '../narrative/config/routeDefinitions';
 import { getRouteIdentityFromFlags } from '../narrative/config/routeDefinitions';
-import { getStageForAge, getAllStageConfigs } from '../narrative/config/stageConfig';
+import { getProfileStageConfigs, getProfileStageForAge } from '../narrative/worldProfile';
 import type { GameProcessRecord } from '../types/simulationRecordTypes';
 import type { GameState } from '../types/eventTypes';
 import type {
@@ -403,7 +403,7 @@ export function detectStageSignalsForStage(
   stageId: string,
   input: SignalDetectionInput,
 ): DetectedSignal[] {
-  const stage = getAllStageConfigs().find(item => item.id === stageId);
+  const stage = getProfileStageConfigs().find(item => item.id === stageId);
   if (!stage) {
     return [];
   }
@@ -478,7 +478,7 @@ export function observeRoutePoint(
 }
 
 export function getStageExpectedSignals(age: number): StageSignalKey[] {
-  const stage = getStageForAge(age);
+  const stage = getProfileStageForAge(age);
   if (!stage) {
     return [];
   }

@@ -1,5 +1,4 @@
-import { getAllStageConfigs } from '../narrative/config/stageConfig';
-import { WUXIA_ROUTE_DEFINITIONS } from '../narrative/config/routeDefinitions';
+import { getProfileStageConfigs, getWorldProfile } from '../narrative/worldProfile';
 import type { GameProcessRecord } from '../types/simulationRecordTypes';
 import { detectStageSignalsForStage, observeRoutePoint } from './signalDetection';
 import { classifyMissingSignals } from './gapClassification';
@@ -36,7 +35,7 @@ export function buildStageBaseline(
   const lastBundle = personaBundles.length > 0 ? personaBundles[personaBundles.length - 1] : undefined;
   const finalState = lastBundle ? lastRecordOf(lastBundle.records)?.gameState : undefined;
 
-  return getAllStageConfigs().map(stage => {
+  return getProfileStageConfigs().map(stage => {
     const expectedSignals = stage.feedbackExpectation.expectedSignals.filter(isStageSignalKey);
     const detectedSignals = detectStageSignalsForStage(stage.id, {
       records: allRecords,
@@ -64,7 +63,7 @@ export function buildStageGapReport(
   const observedAcrossPersonas = new Set<StageSignalKey>();
 
   for (const bundle of personaBundles) {
-    for (const stage of getAllStageConfigs()) {
+    for (const stage of getProfileStageConfigs()) {
       const detected = detectStageSignalsForStage(stage.id, {
         records: bundle.records,
         finalState: lastRecordOf(bundle.records)?.gameState,
@@ -111,7 +110,7 @@ export function buildRouteBaseline(
   ];
 
   return primaryRoutes.map(routeId => {
-    const route = WUXIA_ROUTE_DEFINITIONS.find(item => item.id === routeId)!;
+    const route = getWorldProfile('wuxia').routeDefinitions.find(item => item.id === routeId)!;
     const personaIds = routePersonas.get(routeId) ?? [];
     const records = personaBundles
       .filter(bundle => personaIds.includes(bundle.personaId))

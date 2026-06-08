@@ -1,8 +1,9 @@
-import { getStageForAge, getAllStageConfigs } from '../narrative/config/stageConfig';
 import {
-  WUXIA_ROUTE_DEFINITIONS,
-  getRouteDefinition,
-} from '../narrative/config/routeDefinitions';
+  getProfileRouteDefinition,
+  getProfileStageForAge,
+  getProfileStageConfigs,
+  getWorldProfile,
+} from '../narrative/worldProfile';
 import type { GameProcessRecord } from '../types/simulationRecordTypes';
 import type { GameState } from '../types/eventTypes';
 import type { RouteSignalPoint } from '../narrative/config/routeDefinitions';
@@ -34,8 +35,9 @@ function readMergedFlags(state?: GameState): Record<string, unknown> {
 }
 
 function resolveActiveRouteIds(flags: Record<string, unknown>, routePreference?: string | null): string[] {
+  const routeDefinitions = getWorldProfile('wuxia').routeDefinitions;
   const active: string[] = [];
-  for (const route of WUXIA_ROUTE_DEFINITIONS) {
+  for (const route of routeDefinitions) {
     const hasEntry = route.entrySignals.some(point => point.flagKey && flags[point.flagKey]);
     const hasIdentity = route.identityResolution.candidates.some(
       candidate => flags[candidate.flagKey],
@@ -48,7 +50,7 @@ function resolveActiveRouteIds(flags: Record<string, unknown>, routePreference?:
     }
   }
   if (active.length === 0 && routePreference) {
-    const fallback = WUXIA_ROUTE_DEFINITIONS.find(route =>
+    const fallback = routeDefinitions.find(route =>
       route.identityResolution.routePreferenceFallbacks.includes(routePreference),
     );
     if (fallback) {
@@ -155,7 +157,7 @@ export function buildNarrativeSchedulingContext(
   state: GameState,
 ): NarrativeSchedulingContext {
   const age = state.player?.age ?? 0;
-  const stage = getStageForAge(age);
+  const stage = getProfileStageForAge(age);
   const flags = readMergedFlags(state);
   const expectedStageSignals = getStageExpectedSignals(age);
   const satisfiedStageSignals = getSatisfiedStageSignals(records, state, age + 1);
@@ -166,7 +168,7 @@ export function buildNarrativeSchedulingContext(
   const activeRouteIds = resolveActiveRouteIds(flags, routePreference);
 
   const relevantReinforcementPoints = activeRouteIds.flatMap(routeId => {
-    const route = getRouteDefinition(routeId);
+    const route = getProfileRouteDefinition(routeId);
     if (!route) {
       return [];
     }
@@ -174,7 +176,7 @@ export function buildNarrativeSchedulingContext(
   });
 
   const relevantDivergencePoints = activeRouteIds.flatMap(routeId => {
-    const route = getRouteDefinition(routeId);
+    const route = getProfileRouteDefinition(routeId);
     if (!route) {
       return [];
     }
@@ -202,7 +204,7 @@ export function buildStageSignalSnapshot(
   detected: ReturnType<typeof detectStageSignalsForStage>;
   missing: StageSignalKey[];
 } {
-  const stageConfig = getAllStageConfigs().find(item => item.id === stageId);
+  const stageConfig = getProfileStageConfigs().find(item => item.id === stageId);
   if (!stageConfig) {
     return { expected: [], detected: [], missing: [] };
   }

@@ -1,3 +1,4 @@
+import { getProfileMinimumActionIds } from '../narrative/worldProfile';
 import type { ActiveActionDefinition } from '../types/activeActionTypes';
 
 export const P7_MINIMUM_ACTION_IDS = [
@@ -111,5 +112,7 @@ export function getActionById(actionId: string): ActiveActionDefinition | undefi
 }
 
 export function getMinimumActions(): ActiveActionDefinition[] {
-  return activeActionCatalog.filter(action => P7_MINIMUM_ACTION_IDS.includes(action.id as P7MinimumActionId));
+  const profileActionIds = getProfileMinimumActionIds();
+  const ids = profileActionIds.length > 0 ? profileActionIds : [...P7_MINIMUM_ACTION_IDS];
+  return activeActionCatalog.filter(action => ids.includes(action.id));
 }

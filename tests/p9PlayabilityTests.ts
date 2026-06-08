@@ -14,6 +14,7 @@ import {
   getStageFeedbackExpectationForAge,
   resolveConfiguredAge40Identity,
   resolveConfiguredEchoSummaryVars,
+  WUXIA_WORLD_PROFILE,
 } from '../src/narrative/NarrativeConfigLoader';
 import { collectCausalityMetrics, collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
@@ -125,11 +126,13 @@ function testConfiguredIdentityResolver(): void {
   assert(text.includes('幼年练功的习惯延续至今'), 'configured summary contribution preserved');
 }
 
-function testNarrativeConfigAssembly(): void {
-  assert(getAllStageConfigs().length >= 4, 'stage configs loaded');
-  assert(getRouteDefinition('route_wealth') !== undefined, 'wealth route defined');
-  assert(getRouteDefinition('route_wanderer') !== undefined, 'wanderer route defined');
-  assert(getAllEchoHooks().some(h => h.summaryContribution?.enabled), 'echo summary contributions configured');
+function testWorldProfileAssembly(): void {
+  assert(WUXIA_WORLD_PROFILE.id === 'wuxia', 'world profile id');
+  assert(WUXIA_WORLD_PROFILE.stats.length >= 10, 'world profile carries stats metadata');
+  assert(WUXIA_WORLD_PROFILE.resources.length >= 2, 'world profile carries resources metadata');
+  assert(WUXIA_WORLD_PROFILE.actionFamilies.length >= 5, 'world profile carries action families');
+  assert(WUXIA_WORLD_PROFILE.routeDefinitions.length >= 6, 'world profile carries route definitions');
+  assert(WUXIA_WORLD_PROFILE.echoHooks.some(h => h.summaryContribution?.enabled), 'world profile carries summary contributions');
 }
 
 function testEchoSummaryContributionResolver(): void {
@@ -301,7 +304,7 @@ async function runP9Tests(): Promise<void> {
   testEchoHooksCoverMinimumActions();
   testSummaryTemplateApply();
   testConfiguredIdentityResolver();
-  testNarrativeConfigAssembly();
+  testWorldProfileAssembly();
   testEchoSummaryContributionResolver();
   testWarningTriageFromBaseline();
   testCausalityDetectsExplicitEchoFlag();

@@ -1,0 +1,38 @@
+{
+  "slice": "legacy_continuity_comparison",
+  "cases": [
+    {
+      "caseId": "baseline",
+      "description": "No successor cultivation signals",
+      "successionQualityScore": 0.14444444444444446,
+      "combinedMultiplier": 1,
+      "riskMultiplier": 1,
+      "activeLegacyOutcomes": [],
+      "materiallyDifferent": false
+    },
+    {
+      "caseId": "invested_transmission",
+      "description": "Disciple cultivation + martial transmission",
+      "successionQualityScore": 0.5932142857142857,
+      "combinedMultiplier": 2.556027716517857,
+      "riskMultiplier": 1,
+      "activeLegacyOutcomes": [
+        "p18_outcome_transmission_success",
+        "p18_outcome_underinvestment"
+      ],
+      "materiallyDifferent": true
+    },
+    {
+      "caseId": "neglected_disciples",
+      "description": "High personal stats but unmet cultivation pressure",
+      "successionQualityScore": 0.03254027777777779,
+      "combinedMultiplier": 2.010642875487958,
+      "riskMultiplier": 2.010642875487958,
+      "activeLegacyOutcomes": [
+        "p18_outcome_underinvestment"
+      ],
+      "materiallyDifferent": true
+    }
+  ],
+  "cultivationChangesStability": true
+}

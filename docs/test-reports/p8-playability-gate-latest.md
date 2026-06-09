@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-08T14:43:03.668Z
+Generated: 2026-06-09T00:58:53.731Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json

@@ -1,5 +1,19 @@
 ## Codebase Patterns
+- P19 endgame/historical memory: modules under `src/p19/`; profile surfaces in `src/narrative/profile/wuxiaEndgameSurfaces.ts` on `WorldProfile` (`endgameCategoryConfigs`, `preEndgameRecoveryPatterns`, `historicalMemoryPatterns`). Final summary via `composeP19FinalSummary` in `EndingSystem.getEndingSummary` / `generateEndingReview`. Late-life wiring via `getLaterLifeEndgameRecoveryMultiplier` composed in `GameEngineIntegration.getRouteSchedulingMultiplier`. Gates: `npm run gate:p19`, `npm run report:p19-closure`. Reports: `docs/test-reports/p19-*`.
+- P18 legacy/disciples/heirs: modules under `src/p18/`; profile surfaces in `src/narrative/profile/wuxiaLegacySurfaces.ts` on `WorldProfile` (`successorRoleConfigs`, `inheritanceChannelPatterns`, `successorCultivationCostPatterns`, `legacyOutcomePatterns`). Later-life wiring via `getLaterLifeLegacyMultiplier` composed in `GameEngineIntegration.getRouteSchedulingMultiplier` (age ≥ 25, only when legacy engagement signals active for quality modulation). Gates: `npm run gate:p18`, `npm run report:p18-closure`. Reports: `docs/test-reports/p18-*`.
 - P17 mid/late-life consequences: modules under `src/p17/`; profile surfaces in `src/narrative/profile/wuxiaConsequenceSurfaces.ts` on `WorldProfile` (`relationshipConsequencePatterns`, `factionIdentityConsequencePatterns`, `achievementMaintenancePatterns`). Later-life wiring via `getLaterLifeConsequenceMultiplier` in `GameEngineIntegration.getRouteSchedulingMultiplier` (age ≥ 25). Gates: `npm run gate:p17`, `npm run report:p17-closure`. Reports: `docs/test-reports/p17-*`. Route persona differentiation via `p17_route_martial_focus` / `p17_route_demonic_risk` patterns on `p8_route_*` flags.
+
+## [2026-06-09] - P19 US-001..US-022 (endgame-echo-and-historical-memory-closure)
+- Audits (endgame/closure/memory), design rules, profile endgame schema, `src/p19/*` resolvers + late-life wiring, representative closure/memory samples, final summary upgrade, validation slices, gate/closure reports.
+- Key files: `src/p19/*`, `src/narrative/profile/wuxiaEndgameSurfaces.ts`, `tests/p19EndgameTests.ts`, `scripts/runP19Gate.ts`, `scripts/runP19ClosureReport.ts`, `src/data/lines/elderly-legacy.json` (P19 closure flags/events).
+- Validation: typecheck ✅ p19EndgameTests ✅ gate:p19 ✅ npm test ✅
+---
+
+## [2026-06-08] - P18 US-001..US-024 (legacy-disciples-and-heirs-closure)
+- Audits (cultivation/inheritance/divergence), design rules, profile legacy schema, `src/p18/*` resolvers + later-life wiring, representative legacy samples, validation slices, gate/closure reports.
+- Key files: `src/p18/*`, `src/narrative/profile/wuxiaLegacySurfaces.ts`, `tests/p18LegacyTests.ts`, `scripts/runP18Gate.ts`, `scripts/runP18ClosureReport.ts`, `src/data/lines/elderly-legacy.json` (teaching choice effects).
+- Validation: typecheck ✅ p18LegacyTests ✅ gate:p18 ✅ gate:playability ✅ gate:p17 ✅ report:p18-closure ✅
+---
 
 ## [2026-06-08] - P17 US-001..US-026 (mid-late-life-consequence-and-faction-relationship-closure)
 - Audits (relationship/faction/achievement), design rules, profile consequence schema, `src/p17/*` resolvers + later-life wiring, representative samples, validation slice, gate/closure reports.

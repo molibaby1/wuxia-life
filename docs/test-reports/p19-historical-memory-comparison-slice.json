@@ -1,0 +1,7 @@
+{
+  "slice": "historical_memory_comparison",
+  "admiredTone": "admired",
+  "disputedTone": "disputed",
+  "divergenceScore": 0.45,
+  "memoryDiffersFromSelfUnderstanding": true
+}

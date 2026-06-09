@@ -16,6 +16,17 @@ import {
   WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS,
 } from './profile/wuxiaConsequenceSurfaces';
 import {
+  WUXIA_INHERITANCE_CHANNEL_PATTERNS,
+  WUXIA_LEGACY_OUTCOME_PATTERNS,
+  WUXIA_SUCCESSOR_CULTIVATION_COST_PATTERNS,
+  WUXIA_SUCCESSOR_ROLE_CONFIGS,
+} from './profile/wuxiaLegacySurfaces';
+import {
+  WUXIA_ENDGAME_CATEGORY_CONFIGS,
+  WUXIA_HISTORICAL_MEMORY_PATTERNS,
+  WUXIA_PRE_ENDGAME_RECOVERY_PATTERNS,
+} from './profile/wuxiaEndgameSurfaces';
+import {
   WUXIA_CHILDHOOD_SHAPING_RULES,
   WUXIA_COMPOSITE_DESTINY_OUTCOMES,
   WUXIA_ORIGIN_SURFACES,
@@ -57,6 +68,13 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   relationshipConsequencePatterns: WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS,
   factionIdentityConsequencePatterns: WUXIA_FACTION_IDENTITY_CONSEQUENCE_PATTERNS,
   achievementMaintenancePatterns: WUXIA_ACHIEVEMENT_MAINTENANCE_PATTERNS,
+  successorRoleConfigs: WUXIA_SUCCESSOR_ROLE_CONFIGS,
+  inheritanceChannelPatterns: WUXIA_INHERITANCE_CHANNEL_PATTERNS,
+  successorCultivationCostPatterns: WUXIA_SUCCESSOR_CULTIVATION_COST_PATTERNS,
+  legacyOutcomePatterns: WUXIA_LEGACY_OUTCOME_PATTERNS,
+  endgameCategoryConfigs: WUXIA_ENDGAME_CATEGORY_CONFIGS,
+  preEndgameRecoveryPatterns: WUXIA_PRE_ENDGAME_RECOVERY_PATTERNS,
+  historicalMemoryPatterns: WUXIA_HISTORICAL_MEMORY_PATTERNS,
 };
 
 export function getWorldProfile(worldId = 'wuxia'): WorldProfile {

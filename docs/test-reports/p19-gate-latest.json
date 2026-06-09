@@ -1,0 +1,124 @@
+{
+  "gate": {
+    "generatedAt": "2026-06-09T02:18:58.665Z",
+    "decision": "pass",
+    "endgameCategories": {
+      "configCount": 5,
+      "kinds": [
+        "legendary_echo",
+        "bittersweet_closure",
+        "quiet_continuity",
+        "isolated_fade",
+        "infamous_echo"
+      ]
+    },
+    "preEndgameRecovery": {
+      "patternCount": 7,
+      "dimensions": [
+        "relationship",
+        "vendetta",
+        "faction",
+        "inheritance",
+        "obligation"
+      ],
+      "recoveryKinds": [
+        "reconciliation",
+        "retribution",
+        "reward",
+        "collapse"
+      ]
+    },
+    "historicalMemory": {
+      "patternCount": 6,
+      "dimensions": [
+        "jianghu_reputation",
+        "moral_ambiguity",
+        "distorted_legacy",
+        "local_remembrance",
+        "legacy_testimony"
+      ],
+      "tones": [
+        "admired",
+        "feared",
+        "disputed",
+        "respected",
+        "forgotten"
+      ]
+    },
+    "balance": {
+      "categoryCoverage": true,
+      "recoveryKindCoverage": true,
+      "memoryToneCoverage": true,
+      "livedRealityDivergenceSample": true
+    },
+    "sampleReports": {
+      "legendaryEcho": "【传奇余响】有成有憾——有所成就，但代价明显。",
+      "infamousEcho": "【争议回响】有成有憾——有所成就，但代价明显。",
+      "admiredMemory": "后世江湖仍传颂你的侠行，名望超越寻常武者。 弟子与门派档案记载了你的传功与守责。",
+      "disputedMemory": "有人称颂你的壮举，也有人记得你手段中的阴影。 与你自觉的「你自觉行侠仗义，问心无愧」不同，后世记忆另有侧重。",
+      "recoveryClosure": [
+        "所传之道有人接续，身后仍留一脉未断的传承。",
+        "晚年与旧识言和，未竟之情终得收束。"
+      ]
+    },
+    "validationSlices": {
+      "categoryComparison": {
+        "slice": "endgame_category_comparison",
+        "baselineCategory": "isolated_fade",
+        "factionShiftedCategory": "infamous_echo",
+        "legacyShiftedCategory": "legendary_echo",
+        "categoryChangesBeyondAge": true
+      },
+      "memoryComparison": {
+        "slice": "historical_memory_comparison",
+        "admiredTone": "admired",
+        "disputedTone": "disputed",
+        "divergenceScore": 0.45,
+        "memoryDiffersFromSelfUnderstanding": true
+      },
+      "closureComparison": {
+        "slice": "pre_endgame_closure_comparison",
+        "withoutRecoverySummaryLines": 0,
+        "withRecoverySummaryLines": 2,
+        "closureMateriallyChangesSummary": true,
+        "withRecoveryComposedLength": 106,
+        "withoutRecoveryComposedLength": 98
+      }
+    },
+    "readability": {
+      "summaryCoherenceNotes": [
+        "Final summary composes category, recovery, legacy, and historical memory in one path",
+        "P19 multipliers compose with P17/P18 without scheduler rewrite"
+      ],
+      "routeLegibilityPreserved": true
+    },
+    "messages": [
+      "Endgame categories: 5",
+      "Recovery patterns: 7",
+      "Historical memory patterns: 6"
+    ],
+    "warnings": []
+  },
+  "endgameCategoryComparison": {
+    "slice": "endgame_category_comparison",
+    "baselineCategory": "isolated_fade",
+    "factionShiftedCategory": "infamous_echo",
+    "legacyShiftedCategory": "legendary_echo",
+    "categoryChangesBeyondAge": true
+  },
+  "historicalMemoryComparison": {
+    "slice": "historical_memory_comparison",
+    "admiredTone": "admired",
+    "disputedTone": "disputed",
+    "divergenceScore": 0.45,
+    "memoryDiffersFromSelfUnderstanding": true
+  },
+  "preEndgameClosureComparison": {
+    "slice": "pre_endgame_closure_comparison",
+    "withoutRecoverySummaryLines": 0,
+    "withRecoverySummaryLines": 2,
+    "closureMateriallyChangesSummary": true,
+    "withRecoveryComposedLength": 106,
+    "withoutRecoveryComposedLength": 98
+  }
+}

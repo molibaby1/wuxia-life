@@ -43,6 +43,8 @@ import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExpl
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
 import { getMinimumActions } from '../data/activeActionCatalog';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
+import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
+import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSelection';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import {
@@ -888,12 +890,22 @@ export class GameEngineIntegration {
       this.gameState,
       event,
     );
+    const { multiplier: laterLifeLegacyMultiplier } = getLaterLifeLegacyMultiplier(
+      this.gameState,
+      event,
+    );
+    const { multiplier: laterLifeEndgameRecoveryMultiplier } = getLaterLifeEndgameRecoveryMultiplier(
+      this.gameState,
+      event,
+    );
     return (
       routeMultiplier *
       romanceFamilyMultiplier *
       wandererMidlifeMultiplier *
       narrativeMultiplier *
-      laterLifeConsequenceMultiplier
+      laterLifeConsequenceMultiplier *
+      laterLifeLegacyMultiplier *
+      laterLifeEndgameRecoveryMultiplier
     );
   }
 

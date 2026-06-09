@@ -166,6 +166,20 @@ export interface WorldProfile {
   factionIdentityConsequencePatterns?: FactionIdentityConsequencePattern[];
   /** P17: post-achievement maintenance requirements. */
   achievementMaintenancePatterns?: AchievementMaintenancePattern[];
+  /** P18: successor role definitions (disciple, heir, offspring, etc.). */
+  successorRoleConfigs?: SuccessorRoleConfig[];
+  /** P18: inheritable asset and burden channels. */
+  inheritanceChannelPatterns?: InheritanceChannelPattern[];
+  /** P18: successor cultivation cost and underinvestment pressure. */
+  successorCultivationCostPatterns?: SuccessorCultivationCostPattern[];
+  /** P18: representative legacy outcome patterns (transmission, rupture, etc.). */
+  legacyOutcomePatterns?: LegacyOutcomePattern[];
+  /** P19: representative endgame category configs. */
+  endgameCategoryConfigs?: EndgameCategoryConfig[];
+  /** P19: pre-endgame closure recovery patterns. */
+  preEndgameRecoveryPatterns?: PreEndgameRecoveryPattern[];
+  /** P19: posthumous historical-memory evaluation patterns. */
+  historicalMemoryPatterns?: HistoricalMemoryPattern[];
 }
 
 export type RelationshipConsequenceKind =
@@ -277,6 +291,263 @@ export interface LaterLifeConsequenceReport {
   opportunityMultiplier: number;
   riskMultiplier: number;
   combinedMultiplier: number;
+}
+
+export type SuccessorRoleKind =
+  | 'disciple'
+  | 'heir'
+  | 'offspring'
+  | 'adopted_successor'
+  | 'inheriting_student';
+
+export interface SuccessorRoleConfig {
+  id: string;
+  label: string;
+  roleKind: SuccessorRoleKind;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  /** Weight applied to inferred successor quality for this role. */
+  cultivationCapacityWeight: number;
+  /** Inheritance channel ids this role may overlap in the first P18 pass. */
+  inheritanceChannelOverlap: string[];
+  qualitySignals: string[];
+}
+
+export type InheritanceChannelKind =
+  | 'martial_teaching'
+  | 'technical_skill'
+  | 'social_capital'
+  | 'wealth_industry'
+  | 'reputation'
+  | 'vendetta'
+  | 'responsibility';
+
+export type InheritancePolarity = 'asset' | 'burden' | 'mixed';
+
+export interface InheritanceChannelPattern {
+  id: string;
+  label: string;
+  channelKind: InheritanceChannelKind;
+  polarity: InheritancePolarity;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  baseIntensity: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  /** Minimum successor quality to avoid burden collapse (burden/mixed channels). */
+  requiredQualityForStability?: number;
+  summarySignal?: string;
+}
+
+export type CultivationCostDimension =
+  | 'time'
+  | 'attention'
+  | 'resources'
+  | 'political_exposure'
+  | 'emotional_burden'
+  | 'deferred_progress';
+
+export interface CultivationCostRequirement {
+  dimension: CultivationCostDimension;
+  requiredLevel: number;
+  underinvestmentRiskMultiplier: number;
+  satisfactionSignals: string[];
+}
+
+export interface SuccessorCultivationCostPattern {
+  id: string;
+  label: string;
+  successorRoleFlags: string[];
+  costDimensions: CultivationCostRequirement[];
+  opportunityTags?: ConsequenceTagWeight[];
+  neglectRiskTags?: ConsequenceTagWeight[];
+  summarySignal?: string;
+}
+
+export type LegacyOutcomeKind =
+  | 'transmission_success'
+  | 'network_obligation'
+  | 'inherited_burden'
+  | 'underinvestment'
+  | 'burden_without_capability'
+  | 'rupture_betrayal';
+
+export interface LegacyOutcomePattern {
+  id: string;
+  label: string;
+  outcomeKind: LegacyOutcomeKind;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  baseIntensity: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  successionQualityDelta: number;
+  summarySignal?: string;
+}
+
+export interface UnmetCultivationPressure {
+  patternId: string;
+  dimension: CultivationCostDimension;
+  requiredLevel: number;
+  currentLevel: number;
+  pressure: number;
+}
+
+export interface LaterLifeLegacyReport {
+  age: number;
+  activeSuccessorRoles: string[];
+  activeInheritanceChannels: ResolvedConsequencePattern[];
+  activeCultivationCostPatterns: string[];
+  activeLegacyOutcomes: string[];
+  unmetCultivationPressure: UnmetCultivationPressure[];
+  aggregateUnmetPressure: number;
+  successionQualityScore: number;
+  opportunityMultiplier: number;
+  riskMultiplier: number;
+  combinedMultiplier: number;
+}
+
+export type EndgameCategoryKind =
+  | 'legendary_echo'
+  | 'bittersweet_closure'
+  | 'isolated_fade'
+  | 'infamous_echo'
+  | 'quiet_continuity';
+
+export interface EndgameCategoryTrajectoryWeights {
+  relationshipScore?: number;
+  factionScore?: number;
+  legacyScore?: number;
+  achievementScore?: number;
+  burdenScore?: number;
+}
+
+export interface EndgameCategoryConfig {
+  id: string;
+  label: string;
+  categoryKind: EndgameCategoryKind;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  trajectoryWeights: EndgameCategoryTrajectoryWeights;
+  baseWeight: number;
+  summarySignal?: string;
+}
+
+export type PreEndgameRecoveryKind = 'reconciliation' | 'reward' | 'collapse' | 'retribution';
+
+export type PreEndgameRecoveryDimension =
+  | 'relationship'
+  | 'vendetta'
+  | 'faction'
+  | 'inheritance'
+  | 'obligation';
+
+export interface PreEndgameRecoveryPattern {
+  id: string;
+  label: string;
+  dimension: PreEndgameRecoveryDimension;
+  recoveryKind: PreEndgameRecoveryKind;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  baseIntensity: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  summaryLine?: string;
+  explicitInSummary: boolean;
+}
+
+export type HistoricalMemoryDimension =
+  | 'local_remembrance'
+  | 'jianghu_reputation'
+  | 'faction_memory'
+  | 'legacy_testimony'
+  | 'moral_ambiguity'
+  | 'distorted_legacy';
+
+export type HistoricalMemoryTone =
+  | 'admired'
+  | 'respected'
+  | 'feared'
+  | 'disputed'
+  | 'forgotten'
+  | 'mixed';
+
+export interface HistoricalMemoryPattern {
+  id: string;
+  label: string;
+  dimension: HistoricalMemoryDimension;
+  memoryTone: HistoricalMemoryTone;
+  triggerFlags?: string[];
+  lifePathSignals?: string[];
+  baseIntensity: number;
+  livedRealityDelta?: number;
+  summaryLine?: string;
+  classificationReason?: string;
+  /** When true, every triggerFlag must be active (default: any match). */
+  requireAllTriggerFlags?: boolean;
+}
+
+export interface ResolvedEndgameCategory {
+  categoryId: string;
+  label: string;
+  kind: EndgameCategoryKind;
+  weight: number;
+  source: string;
+}
+
+export interface EndgameCategoryReport {
+  age: number;
+  selectedCategory: ResolvedEndgameCategory;
+  candidates: ResolvedEndgameCategory[];
+  trajectoryInputs: Record<string, number>;
+}
+
+export interface ResolvedPreEndgameRecovery {
+  patternId: string;
+  label: string;
+  dimension: PreEndgameRecoveryDimension;
+  recoveryKind: PreEndgameRecoveryKind;
+  intensity: number;
+  summaryLine?: string;
+}
+
+export interface PreEndgameRecoveryReport {
+  age: number;
+  activeRecoveries: ResolvedPreEndgameRecovery[];
+  reconciliatoryCount: number;
+  destructiveCount: number;
+  explicitSummaryLines: string[];
+  opportunityMultiplier: number;
+  riskMultiplier: number;
+  combinedMultiplier: number;
+}
+
+export interface ResolvedHistoricalMemory {
+  patternId: string;
+  label: string;
+  dimension: HistoricalMemoryDimension;
+  memoryTone: HistoricalMemoryTone;
+  intensity: number;
+  livedRealityDelta: number;
+}
+
+export interface HistoricalMemoryReport {
+  selectedTone: HistoricalMemoryTone;
+  dominantDimension: HistoricalMemoryDimension;
+  activePatterns: ResolvedHistoricalMemory[];
+  livedSelfUnderstanding: string;
+  posthumousReputation: string;
+  divergenceScore: number;
+  classificationLines: string[];
+}
+
+export interface P19FinalSummaryComposition {
+  endgameCategory: ResolvedEndgameCategory;
+  personalFateLine: string;
+  recoveryLines: string[];
+  legacyContinuationLine: string;
+  historicalMemoryLines: string[];
+  composedSummary: string;
 }
 
 /** Sections required for a playable world profile — used by P12 verification. */

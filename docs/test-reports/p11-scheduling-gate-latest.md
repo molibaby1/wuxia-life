@@ -1,15 +1,16 @@
 # P11 Scheduling Gate Report
 
-Generated: 2026-06-08T09:06:41.436Z
-Decision: **PASS**
+Generated: 2026-06-08T14:33:43.300Z
+Decision: **WARNING**
 
 ## Summary
 - Stage bands with gaps: 0/4
-- Route points never scheduled: 0
+- Route points never scheduled: 1
+- 1 configured route points never scheduled in persona runs.
 
 # P11 Stage Expectation Baseline
 
-Generated: 2026-06-08T09:06:41.437Z
+Generated: 2026-06-08T14:33:43.301Z
 
 ## 0-10 (stage_0_10)
 
@@ -35,7 +36,7 @@ Generated: 2026-06-08T09:06:41.437Z
 
 ### Detected signals
 - **route_entry** @ ages 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 — event:p9_childhood_sword_trial; event:childhood_summary; event:late_childhood_prep
-- **training_milestone** @ ages 10, 10 — event:p9_childhood_sword_trial; event:p9_childhood_dark_spark
+- **training_milestone** @ ages 10 — event:p9_childhood_sword_trial
 - **first_turning_point** @ ages 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19, 15, 16, 17, 18, 19 — event:love_first_meet; event:daily_skip_training_neu_1; event:martial_improvement
 
 ### Missing signals
@@ -49,8 +50,8 @@ Generated: 2026-06-08T09:06:41.437Z
 - relationship_shift
 
 ### Detected signals
-- **route_reinforcement** @ ages 22, 22, 22 — event:p11_social_reinforcement_gathering; event:p11_wealth_reinforcement_first_deal; event:p11_wanderer_reinforcement_connections
-- **identity_signal** @ ages 26, 27, 28, 29, 28, 29, 28, 29, 25, 26, 27, 28, 29, 23, 24, 25, 26, 27, 28, 29, 28, 29, 28, 29 — identity:wanderer_map_legend; event:family_child_born; event:commoner_year_neighbor
+- **route_reinforcement** @ ages 22, 22, 22, 22 — event:p11_social_reinforcement_gathering; event:p11_wealth_reinforcement_first_deal; event:p11_wanderer_reinforcement_connections
+- **identity_signal** @ ages 29, 26, 27, 28, 29, 28, 29, 28, 29, 25, 26, 27, 28, 29, 23, 24, 25, 26, 27, 28, 29, 28, 29, 26, 27, 28, 29 — identity:wanderer_map_legend; event:spouse_mingyue_daily; event:family_child_born
 - **relationship_shift** @ ages 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 — event:family_marriage; event:refugee_sect_story; event:setback_illness
 
 ### Missing signals
@@ -64,7 +65,7 @@ Generated: 2026-06-08T09:06:41.437Z
 - age40_identity
 
 ### Detected signals
-- **route_divergence** @ ages 28, 29, 28, 28 — event:p9_merchant_midlife_caravan; event:p9_deviant_midlife_escalation; event:p9_wanderer_midlife_discovery
+- **route_divergence** @ ages 28, 28, 28, 29, 28, 28 — event:p9_martial_midlife_proving; event:p9_merchant_midlife_caravan; event:p9_wanderer_midlife_discovery
 - **achievement** @ ages  — stat:threshold_met
 - **age40_identity** @ ages 39 — identity:wanderer_map_legend
 
@@ -74,7 +75,7 @@ Generated: 2026-06-08T09:06:41.437Z
 
 # P11 Route Scheduling Baseline Audit
 
-Generated: 2026-06-08T09:06:41.437Z
+Generated: 2026-06-08T14:33:43.301Z
 
 ## 习武成名 (route_martial)
 Personas: p8-martial-lin
@@ -165,9 +166,8 @@ Personas: p8-deviant-ye
 - [OBSERVED] entry @ 0-10: 幼年练功
   - flagKey: p9_echo_training_hook
   - sources: flag:p9_echo_training_hook@age3, flag:p9_echo_training_hook@age4, flag:p9_echo_training_hook@age5, flag:p9_echo_training_hook@age6, flag:p9_echo_training_hook@age7, flag:p9_echo_training_hook@age8, flag:p9_echo_training_hook@age9, flag:p9_echo_training_hook@age10, flag:p9_echo_training_hook@final
-- [OBSERVED] reinforcement @ 10-20: 暗劲初萌
+- [MISSING] reinforcement @ 10-20: 暗劲初萌
   - eventId: p9_childhood_dark_spark
-  - sources: event:p9_childhood_dark_spark@age10
 - [OBSERVED] divergence @ 23-29: 邪路初染与邪影成形
   - eventId: p9_deviant_fork_temptation
   - flagKey: p9_route_identity_deviant
@@ -175,3 +175,6 @@ Personas: p8-deviant-ye
 - [OBSERVED] identity @ 30-40: 邪影之主
   - flagKey: p9_route_identity_deviant
   - sources: flag:p9_route_identity_deviant@age30, flag:p9_route_identity_deviant@age31, flag:p9_route_identity_deviant@age32, flag:p9_route_identity_deviant@age33, flag:p9_route_identity_deviant@age34, flag:p9_route_identity_deviant@age35, flag:p9_route_identity_deviant@age36, flag:p9_route_identity_deviant@age37, flag:p9_route_identity_deviant@age38, flag:p9_route_identity_deviant@age39, flag:p9_route_identity_deviant@final
+
+### Never scheduled
+- reinforcement @ 10-20: 暗劲初萌

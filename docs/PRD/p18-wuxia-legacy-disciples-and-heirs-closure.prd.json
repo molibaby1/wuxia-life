@@ -1,0 +1,361 @@
+{
+  "project": "Wuxia Life P18 Legacy, Disciples, And Heirs Closure",
+  "branchName": "ralph/p18-wuxia-legacy-disciples-and-heirs-closure",
+  "description": "Complete late-life wuxia legacy closure by making disciples, heirs, inheritable assets, burdens, and cultivation tradeoffs produce materially different successor-facing outcomes through profile-first configuration, minimal theme-neutral runtime support, representative legacy samples, and evidence-based validation without adding UI work, new themes, or a large runtime rewrite.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit successor cultivation surfaces",
+      "description": "As a maintainer, I want a read-only audit of current disciple, offspring, heir, and successor cultivation surfaces so that P18 targets the highest-impact late-life training gaps first.",
+      "acceptanceCriteria": [
+        "Audit the current disciple, offspring, heir, adopted-successor, or inheriting-student cultivation surfaces",
+        "Mark each cultivation surface as config-driven, partially config-driven, or runtime-bound",
+        "Record where current successor-facing outcomes stop at summary text instead of creating persistent downstream consequence",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit inheritable asset and burden surfaces",
+      "description": "As a maintainer, I want a read-only audit of current inheritance surfaces so that P18 can close the biggest gaps in what late-life achievements actually pass on.",
+      "acceptanceCriteria": [
+        "Audit the current inheritance surfaces for martial teachings, technical skills, social capital, wealth or industry, reputation, vendettas, and responsibilities",
+        "Mark each inheritance surface as config-driven, partially config-driven, or runtime-bound",
+        "Record where major achievements currently end as personal summary only instead of shaping successor-facing outcome space",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Audit late-life legacy divergence gaps",
+      "description": "As a maintainer, I want a read-only inventory of weak legacy divergence points so that P18 implementation can focus on the places where different cultivation choices still collapse into similar endings.",
+      "acceptanceCriteria": [
+        "Record the current late-life points where successor quality, inheritance mix, or cultivation effort should create divergence but currently do not",
+        "Identify which low-divergence cases are config-only, content-only, or runtime-bound",
+        "Record where burden, instability, or betrayal paths are missing or too weak to matter",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Write successor role rules",
+      "description": "As a designer, I want explicit rules for disciples, heirs, children, and adopted successors so that later P18 stories converge on one coherent legacy model.",
+      "acceptanceCriteria": [
+        "Define the shared and distinct roles of disciples, heirs, children, adopted successors, and inheriting students",
+        "Define which successor types can overlap on inheritance channels and which should stay partially distinct in the first P18 pass",
+        "Record what counts as meaningful successor quality, capacity, loyalty, or instability in P18",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Write inheritance scope and burden rules",
+      "description": "As a designer, I want explicit inheritance rules so that P18 models both continuity and burden instead of treating legacy as reward-only carryover.",
+      "acceptanceCriteria": [
+        "Define which inheritance channels are in scope for P18 and which are deferred beyond it",
+        "Define how positive inheritance and inherited burden should differ across teachings, skills, networks, assets, reputations, vendettas, and responsibilities",
+        "Record which inheritance effects should stay explicit in summaries or reports versus which may remain partially implicit in downstream weighting",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Write cultivation investment and outcome rules",
+      "description": "As a designer, I want explicit cultivation investment rules so that successor building competes with the protagonist's own late-life opportunities and can end in success, mediocrity, rupture, or transcendence.",
+      "acceptanceCriteria": [
+        "Define how cultivation investment trades against the protagonist's own late-life opportunity space",
+        "Define the target balance across time, resources, attention, emotional burden, political exposure, and deferred personal progress",
+        "Record how success, mediocrity, betrayal, loss, incapacity, or transcendence can appear as legacy outcomes in the first P18 pass",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add successor role configuration surface",
+      "description": "As a developer, I want explicit config structures for disciple and heir roles so that successor behavior can be tuned without hidden wuxia-specific runtime coupling.",
+      "acceptanceCriteria": [
+        "Add or refine config structures for disciple, heir, offspring, adopted-successor, or inheriting-student roles",
+        "Field names and semantics are explicit enough for later config-only tuning",
+        "Schema remains compatible with current profile-first loading or a controlled migration path is documented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add inheritance channel configuration surface",
+      "description": "As a developer, I want explicit config structures for inheritable channels so that what gets passed down can be tuned without scheduler rewrites or one-off logic.",
+      "acceptanceCriteria": [
+        "Add or refine config structures for inheritability across martial teachings, technical skills, social capital, wealth or industry, reputation, vendettas, and responsibilities",
+        "The config can represent both positive inheritance and inherited burden",
+        "Schema remains profile-first and authoring-friendly",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add cultivation cost and pressure configuration surface",
+      "description": "As a developer, I want a general configuration model for successor cultivation cost and pressure so that legacy building is not a consequence-free late-game bonus.",
+      "acceptanceCriteria": [
+        "Define a configuration model for disciple and heir cultivation cost and tradeoff",
+        "Support cost dimensions across time, attention, resources, political exposure, emotional burden, or reduced personal opportunity",
+        "Support visible unmet-pressure or underinvestment reporting for debugging and balancing",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Wire successor cultivation inputs into late-life selection",
+      "description": "As a player, I want disciple and heir cultivation to affect later-life opportunity selection so that successor training shapes more than my own ending summary.",
+      "acceptanceCriteria": [
+        "Late-life opportunity or event selection reads disciple and heir cultivation inputs through the existing world-profile path",
+        "Cultivation differences across at least disciples and offspring or heir-like successors can influence downstream selection",
+        "The wiring path remains theme-neutral in shared runtime logic",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Wire inheritance channels into successor-facing outcomes",
+      "description": "As a player, I want inheritable assets and burdens to alter later-life successor outcomes so that achievements do not stop as personal flavor text.",
+      "acceptanceCriteria": [
+        "Late-life opportunity, stability, or succession evaluation reads the inheritance channel surface through the existing profile-first path",
+        "Inherited assets and inherited burden both influence successor-facing outcome space",
+        "No wuxia-only hardcoded branch is required to consume the new inheritance surface",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Wire cultivation cost pressure into downstream consequence",
+      "description": "As a player, I want successor cultivation costs to create visible downstream pressure so that investment choices carry tradeoffs and risk.",
+      "acceptanceCriteria": [
+        "Late-life opportunity, setback, or stability evaluation reads cultivation cost and underinvestment pressure through the existing profile-first path",
+        "Unmet cultivation pressure can influence downstream weighting, risk, or weakened succession quality",
+        "The wiring path exposes inspectable pressure output for tests or reports",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add ability-transmission legacy sample",
+      "description": "As a player, I want at least one successor path to successfully inherit ability or school direction so that strong cultivation can create meaningful continuity.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative legacy pattern that emphasizes successful transmission of martial ability, technical skill, or school direction",
+        "The pattern produces observable later-life successor quality or continuity effects through the new legacy surface",
+        "The behavior is authored through config and shared consequence paths rather than custom one-off logic",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add network and obligation inheritance sample",
+      "description": "As a player, I want at least one successor path to inherit networks or obligations so that legacy can produce protection and burden at the same time.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative legacy pattern that emphasizes inheritance of network, obligation, social shielding, or political burden",
+        "The pattern produces observable later-life protection, duty, exposure, or constrained opportunity effects through the new legacy surface",
+        "By the end of this story, legacy samples cover more than ability transmission alone",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add inherited vendetta or responsibility sample",
+      "description": "As a player, I want at least one successor path to inherit unfinished burdens so that legacy can remain dangerous even after personal success.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative legacy pattern that emphasizes inherited vendetta, responsibility, or unresolved burden",
+        "The pattern produces observable successor-facing pressure, instability, or narrowed outcome space through the new legacy surface",
+        "By the end of this story, inherited burden is materially different from pure positive carryover",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add underinvestment succession sample",
+      "description": "As a player, I want underinvestment in disciples or heirs to visibly weaken legacy outcomes so that neglect is a real strategic choice rather than a harmless omission.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative cultivation result where underinvestment weakens successor quality, continuity, or late-life stability",
+        "The weaker result is attributable to the cultivation cost or tradeoff model rather than random flavor alone",
+        "The behavior is inspectable in test or report output",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add burden-without-capability succession sample",
+      "description": "As a player, I want at least one successor path to inherit burden without enough capability so that legacy can become tragic instead of purely additive.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative cultivation result where a successor inherits responsibility, network pressure, or vendetta without fully inheriting capability",
+        "The pattern produces observable fragility, instability, or compromised succession quality",
+        "By the end of this story, cultivation results include both triumph and disappointment",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add rupture or betrayal succession sample",
+      "description": "As a player, I want at least one successor path to fail through rupture, betrayal, collapse, or incapacity so that legacy uncertainty remains dramatic even for accomplished protagonists.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative negative succession outcome such as betrayal, collapse, incapacity, or comparable rupture",
+        "The failure path is linked to neglect, misjudgment, conflict, instability, or misaligned inheritance rather than isolated flavor text",
+        "By the end of this story, the phase has at least 3 materially different successor outcome patterns",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Add continuity comparison validation slice",
+      "description": "As a maintainer, I want a validation slice that compares multiple successor trajectories so that P18 proves cultivation and inheritance produce real late-life divergence.",
+      "acceptanceCriteria": [
+        "Add a validation slice or report that compares multiple later-life trajectories with controlled differences in disciple or heir cultivation and inherited asset mix",
+        "Demonstrate at least 1 case where successor cultivation meaningfully changes late-life stability or final legacy quality",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Add inherited burden comparison validation slice",
+      "description": "As a maintainer, I want a validation slice that isolates inherited burden so that P18 can prove successor-facing pressure is not just additive reward dressing.",
+      "acceptanceCriteria": [
+        "Add a validation slice or report that compares similar later-life trajectories with and without inherited burden or vendetta pressure",
+        "Demonstrate at least 1 case where inherited burden materially alters the successor-facing outcome space",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Add underinvestment versus personal-achievement validation slice",
+      "description": "As a maintainer, I want a validation slice that compares raw personal success against weak legacy transfer so that P18 proves achievement alone no longer guarantees satisfying closure.",
+      "acceptanceCriteria": [
+        "Add a validation slice or report that compares strong personal achievement with weaker successor cultivation or misaligned inheritance",
+        "Demonstrate at least 1 case where underinvestment or misaligned inheritance produces a weaker legacy result than raw personal achievement would suggest",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Tune representative late-life legacy trajectories",
+      "description": "As a project owner, I want P18 tuning applied across representative later-life slices so that legacy closure is not limited to isolated showcase samples.",
+      "acceptanceCriteria": [
+        "Apply P18 tuning across representative later-life and end-of-life portions of the wuxia slice",
+        "Increase visible differentiation between at least 3 legacy trajectories shaped by different cultivation and inheritance choices",
+        "Reduce cases where major lifetime achievement ends without meaningful transmission, burden, or succession consequence",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Tune route readability and legacy summary coherence",
+      "description": "As a player, I want legacy-heavy later-life runs to remain readable so that added successor complexity improves meaning instead of creating opaque outcomes.",
+      "acceptanceCriteria": [
+        "Preserve or improve current route readability after successor cultivation and inheritance tuning",
+        "Preserve or improve consequence legibility and summary coherence across representative late-life slices",
+        "Record the main readability and coherence checks in report output or closure notes",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Produce P18 gate and closure report",
+      "description": "As a maintainer, I want a dedicated P18 closure report so that the phase can be accepted on evidence rather than impressions.",
+      "acceptanceCriteria": [
+        "Add or update a P18-specific gate or report covering successor cultivation, inheritance coverage, positive and negative legacy outcomes, and cultivation tradeoff visibility",
+        "Record before and after findings for the main late-life closure issues targeted by P18",
+        "Confirm gate:playability and current profile or runtime gates do not regress",
+        "Save the final closure report under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

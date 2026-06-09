@@ -14,6 +14,9 @@
  */
 
 import type { GameState, PlayerIdentity } from '../types/eventTypes';
+import { profileHasP19Sections } from '../p19/reportBuilder';
+import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
+import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
 
 /**
  * 结局类型
@@ -456,8 +459,23 @@ export class EndingSystem {
   static generateEndingReview(state: GameState, ending: EndingInfo): string {
     const { player, karma } = state;
     
-    let review = `【${ending.name}】\n\n`;
-    review += `${ending.description}\n\n`;
+    let review = '';
+    
+    if (profileHasP19Sections()) {
+      const composition = composeP19FinalSummary(state, ending);
+      const memoryReport = buildHistoricalMemoryReport(state);
+      review += `【${ending.name}】\n\n`;
+      review += `${composition.composedSummary}\n`;
+      if (memoryReport.classificationLines.length > 0) {
+        review += `\n=== 历史记忆分类 ===\n`;
+        memoryReport.classificationLines.forEach(line => {
+          review += `• ${line}\n`;
+        });
+      }
+    } else {
+      review += `【${ending.name}】\n\n`;
+      review += `${ending.description}\n\n`;
+    }
     
     // 人生总结
     review += '=== 人生总结 ===\n';
@@ -493,6 +511,10 @@ export class EndingSystem {
   }
 
   static getEndingSummary(state: GameState, ending: EndingInfo): string {
+    if (profileHasP19Sections()) {
+      return composeP19FinalSummary(state, ending).composedSummary;
+    }
+
     const lifeStates = state.player.lifeStates || {
       fatigue: 0,
       discipline: 0,

@@ -54,7 +54,29 @@
       },
       {
         "text": "口传心授，传给弟子",
-        "effects": []
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "martial_transmission",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "disciple_training_active",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_disciples",
+            "value": true
+          },
+          {
+            "type": "stat_modify",
+            "target": "martialHeritage",
+            "value": 25,
+            "operator": "add"
+          }
+        ]
       }
     ]
   },
@@ -126,6 +148,11 @@
             "target": "reputation",
             "value": 5,
             "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "hero_rep_mantle",
+            "value": true
           }
         ]
       }
@@ -178,6 +205,21 @@
           {
             "type": "flag_set",
             "flag": "has_successor",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "martial_transmission",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "inheritance_legacy_complete",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "disciple_training_active",
             "value": true
           }
         ]
@@ -764,5 +806,143 @@
         }
       ]
     }
+  },
+  {
+    "id": "elderly_faction_closure",
+    "name": "门派余波",
+    "description": "暮年之际，你在门派中的身份与江湖牵连一并迎来收束。",
+    "version": "1.0.0",
+    "category": "elderly",
+    "priority": 72,
+    "weight": 58,
+    "ageRange": {
+      "min": 58,
+      "max": 72
+    },
+    "type": "elderly",
+    "eventType": "choice",
+    "tags": [
+      "elderly",
+      "faction",
+      "legacy"
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 58,
+        "max": 72
+      },
+      "flags": {
+        "any": [
+          "sectLeader",
+          "sectMember",
+          "sect_elder_honored"
+        ]
+      }
+    },
+    "content": {
+      "title": "门派余波",
+      "text": "门派事务与江湖牵连到了必须收束的时候。是借组织之力护住晚年，还是让门户牵连一并曝光？"
+    },
+    "choices": [
+      {
+        "text": "借门派荫庇，安度晚年",
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "sect_protection",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "sect_elder_honored",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "门户牵连曝光，独自承担",
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "sect_exposure",
+            "value": true
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -15,
+            "operator": "add"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "elderly_feud_reconciliation",
+    "name": "旧怨收束",
+    "description": "宿怨与旧识，在暮年终于有机会做一个了断。",
+    "version": "1.0.0",
+    "category": "elderly",
+    "priority": 74,
+    "weight": 55,
+    "ageRange": {
+      "min": 55,
+      "max": 75
+    },
+    "type": "elderly",
+    "eventType": "choice",
+    "tags": [
+      "elderly",
+      "relationship",
+      "conflict"
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 55,
+        "max": 75
+      },
+      "flags": {
+        "any": [
+          "unresolved_feud",
+          "blood_feud_active"
+        ]
+      }
+    },
+    "content": {
+      "title": "旧怨收束",
+      "text": "多年恩怨到了必须面对的时刻。是言和收束，还是以刀兵了结？"
+    },
+    "choices": [
+      {
+        "text": "与旧识言和，释去心结",
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "feud_reconciled",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "ally_reunion",
+            "value": true
+          }
+        ]
+      },
+      {
+        "text": "血债血偿，彻底了结",
+        "effects": [
+          {
+            "type": "flag_set",
+            "flag": "blood_feud_settled",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "sworn_enemy_defeated",
+            "value": true
+          }
+        ]
+      }
+    ]
   }
 ]

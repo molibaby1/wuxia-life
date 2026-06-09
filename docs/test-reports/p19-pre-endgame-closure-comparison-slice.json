@@ -1,0 +1,8 @@
+{
+  "slice": "pre_endgame_closure_comparison",
+  "withoutRecoverySummaryLines": 0,
+  "withRecoverySummaryLines": 2,
+  "closureMateriallyChangesSummary": true,
+  "withRecoveryComposedLength": 106,
+  "withoutRecoveryComposedLength": 98
+}

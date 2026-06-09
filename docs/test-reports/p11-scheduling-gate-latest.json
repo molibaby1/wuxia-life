@@ -1,7 +1,7 @@
 {
   "schemaVersion": "p11-scheduling-v1",
-  "generatedAt": "2026-06-08T09:06:41.436Z",
-  "decision": "pass",
+  "generatedAt": "2026-06-08T14:33:43.300Z",
+  "decision": "warning",
   "stageCoverage": [
     {
       "stageId": "stage_0_10",
@@ -136,13 +136,13 @@
             "action:action_childhood_training",
             "action:action_childhood_training",
             "action:action_childhood_training",
-            "action:action_childhood_training",
             "action:action_errand_nearby",
             "action:action_errand_nearby",
             "action:action_errand_nearby",
+            "action:action_errand_nearby",
             "action:action_childhood_training",
-            "action:action_childhood_training",
-            "action:action_childhood_training"
+            "action:action_study_lite",
+            "action:action_errand_nearby"
           ]
         }
       ],
@@ -292,16 +292,16 @@
             "event:martial_improvement",
             "event:martial_arts_invitation",
             "event:commoner_year_farming",
-            "event:p9_childhood_dark_spark",
+            "event:p9_childhood_first_journey",
             "event:childhood_summary",
-            "event:late_childhood_prep",
+            "event:setback_injury",
             "event:sect_path_choice",
-            "event:orthodox_initiation",
+            "event:demonic_encounter",
             "event:love_first_meet",
-            "event:daily_skip_training_pos_1",
-            "event:martial_improvement",
+            "event:love_shared_mission",
+            "event:love_family_obstacle",
             "event:martial_arts_invitation",
-            "event:setback_early_death",
+            "event:daily_night_reflection_pos_1",
             "event:p9_childhood_first_journey",
             "event:childhood_summary",
             "event:setback_injury",
@@ -312,27 +312,25 @@
             "event:martial_improvement",
             "event:martial_arts_invitation",
             "event:commoner_year_apprentice",
-            "event:p9_childhood_balanced_posture",
+            "event:p9_childhood_study_recital",
             "event:childhood_summary",
             "event:setback_injury",
-            "event:youth_begins",
-            "event:sect_choice",
+            "event:sect_path_choice",
+            "event:orthodox_initiation",
             "event:love_first_meet",
-            "event:love_after_greet",
-            "event:love_shared_mission",
+            "event:daily_tight_budget_pos_1",
+            "event:martial_improvement",
             "event:martial_arts_invitation",
-            "event:love_family_obstacle"
+            "event:commoner_year_apprentice"
           ]
         },
         {
           "key": "training_milestone",
           "ages": [
-            10,
             10
           ],
           "sources": [
-            "event:p9_childhood_sword_trial",
-            "event:p9_childhood_dark_spark"
+            "event:p9_childhood_sword_trial"
           ]
         },
         {
@@ -406,20 +404,20 @@
             "event:martial_arts_invitation",
             "event:commoner_year_farming",
             "event:love_first_meet",
-            "event:daily_skip_training_pos_1",
-            "event:martial_improvement",
+            "event:love_shared_mission",
+            "event:love_family_obstacle",
             "event:martial_arts_invitation",
-            "event:setback_early_death",
+            "event:daily_night_reflection_pos_1",
             "event:love_first_meet",
             "event:daily_home_letter_neu_1",
             "event:martial_improvement",
             "event:martial_arts_invitation",
             "event:commoner_year_apprentice",
             "event:love_first_meet",
-            "event:love_after_greet",
-            "event:love_shared_mission",
+            "event:daily_tight_budget_pos_1",
+            "event:martial_improvement",
             "event:martial_arts_invitation",
-            "event:love_family_obstacle"
+            "event:commoner_year_apprentice"
           ]
         }
       ],
@@ -439,17 +437,20 @@
           "ages": [
             22,
             22,
+            22,
             22
           ],
           "sources": [
             "event:p11_social_reinforcement_gathering",
             "event:p11_wealth_reinforcement_first_deal",
+            "event:p11_wanderer_reinforcement_connections",
             "event:p11_wanderer_reinforcement_connections"
           ]
         },
         {
           "key": "identity_signal",
           "ages": [
+            29,
             26,
             27,
             28,
@@ -472,35 +473,40 @@
             29,
             28,
             29,
+            26,
+            27,
             28,
             29
           ],
           "sources": [
             "identity:wanderer_map_legend",
+            "event:spouse_mingyue_daily",
             "event:family_child_born",
             "event:commoner_year_neighbor",
-            "event:setback_injury",
+            "event:setback_illness",
             "event:daily_skip_training_neu_1",
-            "event:setback_property_loss",
+            "event:setback_betrayal",
             "event:daily_shared_meal_neg_1",
             "event:p9_merchant_midlife_caravan",
-            "event:setback_injury",
+            "event:daily_home_letter_neg_1",
             "event:family_child_born",
             "event:p9_training_echo_midlife",
             "event:commoner_year_neighbor",
             "event:spouse_mingyue_daily",
             "event:daily_tight_budget_pos_1",
             "event:p9_deviant_fork_temptation",
-            "event:commoner_year_neighbor",
+            "event:commoner_year_farming",
             "event:family_child_born",
             "event:p9_deviant_training_echo",
-            "event:refugee_sect_story",
-            "event:daily_take_odd_job_neu_1",
+            "event:daily_skip_training_neu_1",
+            "event:p9_wanderer_midlife_discovery",
             "event:p9_deviant_midlife_escalation",
             "event:p9_wanderer_midlife_discovery",
             "event:daily_morning_training_pos_1",
+            "event:p9_training_echo_midlife",
+            "event:p9_social_echo_midlife",
             "event:p9_wanderer_midlife_discovery",
-            "event:family_child_education"
+            "event:family_child_born"
           ]
         },
         {
@@ -595,9 +601,9 @@
             "event:commoner_year_neighbor",
             "event:family_child_born",
             "event:p9_training_echo_midlife",
-            "event:setback_injury",
+            "event:setback_property_loss",
+            "event:p9_martial_midlife_proving",
             "event:spouse_mingyue_daily",
-            "event:commoner_year_farming",
             "event:family_marriage",
             "event:setback_injury",
             "event:refugee_sect_story",
@@ -606,7 +612,7 @@
             "event:p9_study_echo_midlife",
             "event:family_child_born",
             "event:commoner_year_neighbor",
-            "event:setback_injury",
+            "event:setback_illness",
             "event:daily_skip_training_neu_1",
             "event:family_marriage",
             "event:commoner_year_neighbor",
@@ -616,7 +622,7 @@
             "event:family_child_born",
             "event:p11_relationship_shift_midlife",
             "event:p9_social_echo_midlife",
-            "event:setback_property_loss",
+            "event:setback_betrayal",
             "event:daily_shared_meal_neg_1",
             "event:family_marriage",
             "event:love_family_obstacle",
@@ -625,9 +631,9 @@
             "event:setback_property_loss",
             "event:family_child_born",
             "event:commoner_year_farming",
-            "event:commoner_year_neighbor",
+            "event:spouse_mingyue_daily",
             "event:p9_merchant_midlife_caravan",
-            "event:setback_injury",
+            "event:daily_home_letter_neg_1",
             "event:family_marriage",
             "event:setback_property_loss",
             "event:commoner_year_apprentice",
@@ -639,14 +645,14 @@
             "event:spouse_mingyue_daily",
             "event:daily_tight_budget_pos_1",
             "event:family_marriage",
+            "event:setback_property_loss",
             "event:spouse_mingyue_daily",
-            "event:daily_training_bottleneck_pos_1",
             "event:p9_deviant_fork_temptation",
-            "event:commoner_year_neighbor",
+            "event:commoner_year_farming",
             "event:family_child_born",
             "event:p9_deviant_training_echo",
-            "event:refugee_sect_story",
-            "event:daily_take_odd_job_neu_1",
+            "event:daily_skip_training_neu_1",
+            "event:p9_wanderer_midlife_discovery",
             "event:p9_deviant_midlife_escalation",
             "event:family_marriage",
             "event:setback_injury",
@@ -659,15 +665,15 @@
             "event:p9_wanderer_midlife_discovery",
             "event:daily_morning_training_pos_1",
             "event:family_marriage",
-            "event:daily_small_trade_pos_1",
-            "event:commoner_year_apprentice",
-            "event:refugee_sect_story",
+            "event:setback_injury",
+            "event:p11_wanderer_reinforcement_connections",
+            "event:daily_household_burden_pos_1",
             "event:setback_illness",
-            "event:family_child_born",
+            "event:p9_study_echo_midlife",
             "event:p9_training_echo_midlife",
-            "event:daily_training_bottleneck_neu_1",
+            "event:p9_social_echo_midlife",
             "event:p9_wanderer_midlife_discovery",
-            "event:family_child_education"
+            "event:family_child_born"
           ]
         }
       ],
@@ -686,12 +692,16 @@
           "key": "route_divergence",
           "ages": [
             28,
+            28,
+            28,
             29,
             28,
             28
           ],
           "sources": [
+            "event:p9_martial_midlife_proving",
             "event:p9_merchant_midlife_caravan",
+            "event:p9_wanderer_midlife_discovery",
             "event:p9_deviant_midlife_escalation",
             "event:p9_wanderer_midlife_discovery",
             "event:p9_wanderer_midlife_discovery"
@@ -1225,10 +1235,8 @@
             "eventId": "p9_childhood_dark_spark",
             "description": "暗劲初萌"
           },
-          "observed": true,
-          "observationSources": [
-            "event:p9_childhood_dark_spark@age10"
-          ]
+          "observed": false,
+          "observationSources": []
         },
         {
           "routeId": "route_deviant",
@@ -1278,12 +1286,27 @@
           ]
         }
       ],
-      "neverScheduledPoints": []
+      "neverScheduledPoints": [
+        {
+          "routeId": "route_deviant",
+          "routeLabel": "邪路偏锋",
+          "point": {
+            "kind": "reinforcement",
+            "ageBand": "10-20",
+            "eventId": "p9_childhood_dark_spark",
+            "description": "暗劲初萌"
+          },
+          "observed": false,
+          "observationSources": []
+        }
+      ]
     }
   ],
   "summary": {
     "stageBandsWithGaps": 0,
-    "routePointsNeverScheduled": 0,
-    "notes": []
+    "routePointsNeverScheduled": 1,
+    "notes": [
+      "1 configured route points never scheduled in persona runs."
+    ]
   }
 }

@@ -7,59 +7,84 @@ import {
   P20_SCHOLAR_STATESMAN,
   P20_WEALTH_MERCHANT,
 } from '../narrative/profile/wuxiaReplayabilitySurfaces';
-import type { GameState } from '../types/eventTypes';
+import {
+  EventCategory,
+  EventPriority,
+  type EventDefinition,
+  type GameState,
+  type PlayerState,
+} from '../types/eventTypes';
 import { buildArchetypeCoverageReport, resolveArchetypeCandidates } from './archetypeCoverage';
 import { buildRepetitionPressureReport } from './repetitionPressure';
 import { buildWholeLifePacingReport, formatPacingComparisonMarkdown } from './wholeLifePacing';
 
-function baseState(partial: Partial<GameState> = {}): GameState {
+const FIXTURE_EVENT_TIMESTAMP = 1_700_000_000_000;
+
+function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
+  const { flags: overrideFlags, ...rest } = overrides;
   return {
-    player: {
-      age: 18,
-      name: 'slice',
-      gender: 'male',
-      martialPower: 30,
-      externalSkill: 28,
-      internalSkill: 25,
-      qinggong: 22,
-      chivalry: 30,
-      constitution: 50,
-      comprehension: 40,
-      sect: null,
-      title: null,
-      reputation: 15,
-      money: 200,
-      knowledge: 25,
-      charisma: 30,
-      businessAcumen: 20,
-      influence: 15,
-      connections: 10,
-      martialHeritage: 5,
-      scholarlyHeritage: 5,
-      merchantNetwork: 5,
-      children: 0,
-      spouse: null,
-      flags: {},
-      alive: true,
-      origin: 'martial_family',
-      ...(partial.player ?? {}),
-    },
-    flags: partial.flags ?? {},
+    age: 18,
+    name: 'slice',
+    gender: 'male',
+    martialPower: 30,
+    externalSkill: 28,
+    internalSkill: 25,
+    qinggong: 22,
+    chivalry: 30,
+    constitution: 50,
+    comprehension: 40,
+    sect: null,
+    title: null,
+    reputation: 15,
+    money: 200,
+    knowledge: 25,
+    charisma: 30,
+    businessAcumen: 20,
+    influence: 15,
+    connections: 10,
+    martialHeritage: 5,
+    scholarlyHeritage: 5,
+    merchantNetwork: 5,
+    children: 0,
+    spouse: null,
+    alive: true,
+    ...rest,
+    flags: { ...(overrideFlags ?? {}) },
+  };
+}
+
+type GameStateFixtureInput = Omit<Partial<GameState>, 'player'> & {
+  player?: Partial<PlayerState>;
+};
+
+function baseState(partial: GameStateFixtureInput = {}): GameState {
+  return {
+    player: basePlayer(partial.player),
+    flags: { origin_id: 'martial_family', ...(partial.flags ?? {}) },
+    relations: partial.relations ?? {},
     lifePath: partial.lifePath,
     achievements: partial.achievements ?? [],
     eventHistory: partial.eventHistory ?? [],
-  } as GameState;
+  };
 }
 
-function fakeEvent(id: string, tags: string[] = []) {
+function fakeEvent(id: string, tags: string[] = []): EventDefinition {
   return {
     id,
-    title: id,
-    description: '',
-    category: tags[0] ?? 'general',
-    metadata: { tags },
-    choices: [],
-    effects: [],
+    version: '1.0.0',
+    category: EventCategory.RANDOM_ENCOUNTER,
+    priority: EventPriority.NORMAL,
+    weight: 1,
+    ageRange: { min: 0, max: 99 },
+    triggers: [],
+    content: { text: id, title: id, description: '' },
+    eventType: 'auto',
+    metadata: {
+      enabled: true,
+      createdAt: FIXTURE_EVENT_TIMESTAMP,
+      updatedAt: FIXTURE_EVENT_TIMESTAMP,
+      tags,
+    },
   };
 }
 
@@ -123,7 +148,7 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       has_disciples: true,
       martial_transmission: true,
     },
-    player: { age: 45, martialPower: 80, martialHeritage: 50, flags: { training_habit: true } } as GameState['player'],
+    player: { age: 45, martialPower: 80, martialHeritage: 50, flags: { training_habit: true } },
     lifePath: {
       primaryIdentity: 'martial',
       faction: 'orthodox',
@@ -148,11 +173,11 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       knowledge: 75,
       scholarlyHeritage: 40,
       flags: { scholar_path_started: true },
-    } as GameState['player'],
+    },
     lifePath: {
       primaryIdentity: 'scholarly',
       faction: 'neutral',
-      lifeStage: 'mature',
+      lifeStage: 'achievement',
       achievements: [],
       relationships: { allies: ['a1'], enemies: [], mentors: ['m1'], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
@@ -172,11 +197,11 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       money: 2500,
       merchantNetwork: 45,
       businessAcumen: 60,
-    } as GameState['player'],
+    },
     lifePath: {
       primaryIdentity: 'wealth',
       faction: 'neutral',
-      lifeStage: 'mature',
+      lifeStage: 'achievement',
       achievements: [],
       relationships: { allies: ['t1'], enemies: [], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
@@ -192,7 +217,7 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       sect_exposure: true,
       inherited_burden: true,
     },
-    player: { age: 48, flags: { demonic_reputation: true } } as GameState['player'],
+    player: { age: 48, flags: { demonic_reputation: true } },
     lifePath: {
       primaryIdentity: 'martial',
       faction: 'evil',
@@ -206,7 +231,7 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
 
   const hermit = baseState({
     flags: { origin_id: 'poor_family', hermit_withdrawal: true, lonely_elder: true, fade_legacy: true },
-    player: { age: 62, flags: { hermit_withdrawal: true } } as GameState['player'],
+    player: { age: 62, flags: { hermit_withdrawal: true } },
   });
 
   const martialFamily = buildArchetypeCoverageReport(martial).selectedFamily.familyId;
@@ -259,11 +284,11 @@ export function runRepetitionOverlapSlice(): RepetitionOverlapSliceResult {
 export function runPacingDifferentiationSlice(): PacingDifferentiationSliceResult {
   const martial = baseState({
     flags: { origin_id: 'martial_family', training_habit: true, martial_talent_acknowledged: true },
-    player: { age: 15 } as GameState['player'],
+    player: { age: 15 },
   });
   const scholar = baseState({
     flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true },
-    player: { age: 15, knowledge: 30 } as GameState['player'],
+    player: { age: 15, knowledge: 30 },
   });
 
   const martialPacing = buildWholeLifePacingReport(martial);
@@ -292,7 +317,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       signals: ['origin', 'growth'],
       state: baseState({
         flags: { origin_id: 'martial_family', training_habit: true, martial_talent_acknowledged: true },
-        player: { age: 12 } as GameState['player'],
+        player: { age: 12 },
       }),
     },
     {
@@ -302,11 +327,11 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       signals: ['route', 'social'],
       state: baseState({
         flags: { demonic_reputation: true, blood_feud_active: true, sect_exposure: true },
-        player: { age: 35 } as GameState['player'],
+        player: { age: 35 },
         lifePath: {
           primaryIdentity: 'martial',
           faction: 'evil',
-          lifeStage: 'mature',
+          lifeStage: 'achievement',
           achievements: [],
           relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
           commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
@@ -321,7 +346,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       signals: ['legacy', 'growth'],
       state: baseState({
         flags: { scholar_path_started: true, teaching_legacy: true, mentor_bond: true },
-        player: { age: 58, scholarlyHeritage: 35 } as GameState['player'],
+        player: { age: 58, scholarlyHeritage: 35 },
       }),
     },
     {
@@ -331,7 +356,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       signals: ['origin', 'growth'],
       state: baseState({
         flags: { origin_id: 'merchant_house', business_habit: true, merchant_network_growing: true },
-        player: { age: 32, merchantNetwork: 30 } as GameState['player'],
+        player: { age: 32, merchantNetwork: 30 },
       }),
     },
     {
@@ -341,7 +366,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       signals: ['social', 'endgame'],
       state: baseState({
         flags: { hermit_withdrawal: true, lonely_elder: true, fade_legacy: true },
-        player: { age: 66 } as GameState['player'],
+        player: { age: 66 },
       }),
     },
   ];
@@ -375,7 +400,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
           martial_transmission: true,
           has_disciples: true,
         },
-        player: { age: 50, martialPower: 85 } as GameState['player'],
+        player: { age: 50, martialPower: 85 },
       }),
     },
     {
@@ -388,7 +413,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
           study_habit: true,
           teaching_legacy: true,
         },
-        player: { age: 48, knowledge: 70 } as GameState['player'],
+        player: { age: 48, knowledge: 70 },
       }),
     },
     {
@@ -396,7 +421,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       label: P20_WEALTH_MERCHANT.label,
       state: baseState({
         flags: { origin_id: 'merchant_house', business_habit: true, family_heir: true },
-        player: { age: 44, money: 1800 } as GameState['player'],
+        player: { age: 44, money: 1800 },
       }),
     },
     {
@@ -404,7 +429,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       label: P20_HERMIT_WITHDRAWAL.label,
       state: baseState({
         flags: { hermit_withdrawal: true, lonely_elder: true, fade_legacy: true },
-        player: { age: 64 } as GameState['player'],
+        player: { age: 64 },
       }),
     },
     {
@@ -412,7 +437,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       label: P20_DEMONIC_OUTLAW.label,
       state: baseState({
         flags: { demonic_reputation: true, blood_feud_active: true, inherited_burden: true },
-        player: { age: 46 } as GameState['player'],
+        player: { age: 46 },
         lifePath: {
           primaryIdentity: 'martial',
           faction: 'evil',
@@ -464,7 +489,7 @@ export function runReplayabilityValidationComparison(): {
   const scholarCandidate = resolveArchetypeCandidates(
     baseState({
       flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true, mentor_bond: true },
-      player: { age: 40, knowledge: 55 } as GameState['player'],
+      player: { age: 40, knowledge: 55 },
     }),
   )[0];
 

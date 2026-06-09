@@ -1,8 +1,744 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-06-09T04:09:58.773Z",
-  "totalReports": 4489,
+  "generatedAt": "2026-06-09T04:21:59.558Z",
+  "totalReports": 4521,
   "reports": [
+    {
+      "id": "gp_1780978919505_e2a88086",
+      "fileName": "game-process-gp_1780978919505_e2a88086.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:59.505Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 16,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978918698_03104f32",
+      "fileName": "game-process-gp_1780978918698_03104f32.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:58.698Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 21,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978918163_5a879439",
+      "fileName": "game-process-gp_1780978918163_5a879439.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:58.163Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978917478_c0fc761b",
+      "fileName": "game-process-gp_1780978917478_c0fc761b.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:57.478Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978916979_07da1350",
+      "fileName": "game-process-gp_1780978916979_07da1350.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:56.979Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978916351_11795d85",
+      "fileName": "game-process-gp_1780978916351_11795d85.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:56.351Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978915668_d81e4119",
+      "fileName": "game-process-gp_1780978915668_d81e4119.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:55.668Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978915182_ef9f5507",
+      "fileName": "game-process-gp_1780978915182_ef9f5507.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:21:55.183Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978748744_ab434996",
+      "fileName": "game-process-gp_1780978748744_ab434996.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:08.744Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 16,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978748101_8e21acc9",
+      "fileName": "game-process-gp_1780978748101_8e21acc9.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:08.101Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 21,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978747620_63971421",
+      "fileName": "game-process-gp_1780978747620_63971421.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:07.620Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978746916_1024f029",
+      "fileName": "game-process-gp_1780978746916_1024f029.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:06.916Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978746430_5a77e914",
+      "fileName": "game-process-gp_1780978746430_5a77e914.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:06.430Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978745813_c802bb49",
+      "fileName": "game-process-gp_1780978745813_c802bb49.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:05.813Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978745224_4033e4c0",
+      "fileName": "game-process-gp_1780978745224_4033e4c0.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:05.225Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978744755_e1f815da",
+      "fileName": "game-process-gp_1780978744755_e1f815da.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:19:04.755Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978739664_1475549d",
+      "fileName": "game-process-gp_1780978739664_1475549d.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:59.664Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 16,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978739070_0c80dc7c",
+      "fileName": "game-process-gp_1780978739070_0c80dc7c.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:59.070Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 21,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978738637_b6f0be2d",
+      "fileName": "game-process-gp_1780978738637_b6f0be2d.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:58.637Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978737951_4660afce",
+      "fileName": "game-process-gp_1780978737951_4660afce.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:57.951Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978737449_4c66fdf7",
+      "fileName": "game-process-gp_1780978737449_4c66fdf7.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:57.449Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978736490_294fbbbe",
+      "fileName": "game-process-gp_1780978736490_294fbbbe.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:56.490Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978735883_d8eb99c1",
+      "fileName": "game-process-gp_1780978735883_d8eb99c1.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:55.883Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978735395_ac8cfcb8",
+      "fileName": "game-process-gp_1780978735395_ac8cfcb8.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:18:55.395Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978430647_de8d96cd",
+      "fileName": "game-process-gp_1780978430647_de8d96cd.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:50.647Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 16,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978430044_4d98d282",
+      "fileName": "game-process-gp_1780978430044_4d98d282.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:50.044Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 21,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978429606_11fc0b2b",
+      "fileName": "game-process-gp_1780978429606_11fc0b2b.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:49.606Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978428954_37cdb977",
+      "fileName": "game-process-gp_1780978428954_37cdb977.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:48.954Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978428469_8f99f10d",
+      "fileName": "game-process-gp_1780978428469_8f99f10d.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:48.469Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978427876_280fa747",
+      "fileName": "game-process-gp_1780978427876_280fa747.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:47.876Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978427301_ca739094",
+      "fileName": "game-process-gp_1780978427301_ca739094.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:47.301Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 17,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
+    {
+      "id": "gp_1780978426845_2cf8f313",
+      "fileName": "game-process-gp_1780978426845_2cf8f313.json",
+      "name": "游戏过程模拟 2026/6/9",
+      "type": "game_process",
+      "generatedAt": "2026-06-09T04:13:46.845Z",
+      "config": {
+        "startAge": 0,
+        "endAge": 80,
+        "randomnessWeight": 0.5,
+        "simulationYears": 40
+      },
+      "statistics": {
+        "totalChoices": 18,
+        "totalStateChanges": 40,
+        "lifespan": 40,
+        "sect": "无",
+        "children": 1,
+        "deathReason": "在世"
+      },
+      "aiEvaluation": null,
+      "duration": 0
+    },
     {
       "id": "gp_1780978198761_3c5f188b",
       "fileName": "game-process-gp_1780978198761_3c5f188b.json",

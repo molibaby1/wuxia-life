@@ -27,60 +27,85 @@ import {
   runReplayabilityValidationComparison,
   runRepetitionOverlapSlice,
 } from '../src/p20/validationSlices';
-import type { GameState } from '../src/types/eventTypes';
+import {
+  EventCategory,
+  EventPriority,
+  type EventDefinition,
+  type GameState,
+  type PlayerState,
+} from '../src/types/eventTypes';
+
+const FIXTURE_EVENT_TIMESTAMP = 1_700_000_000_000;
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function makeState(overrides: Partial<GameState> = {}): GameState {
+function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
+  const { flags: overrideFlags, ...rest } = overrides;
   return {
-    player: {
-      age: 20,
-      name: 't',
-      gender: 'male',
-      martialPower: 35,
-      externalSkill: 30,
-      internalSkill: 28,
-      qinggong: 25,
-      chivalry: 35,
-      constitution: 50,
-      comprehension: 40,
-      sect: null,
-      title: null,
-      reputation: 20,
-      money: 300,
-      knowledge: 30,
-      charisma: 32,
-      businessAcumen: 25,
-      influence: 18,
-      connections: 12,
-      martialHeritage: 8,
-      scholarlyHeritage: 5,
-      merchantNetwork: 5,
-      children: 0,
-      spouse: null,
-      flags: {},
-      alive: true,
-      origin: 'martial_family',
-      ...(overrides.player ?? {}),
-    },
-    flags: overrides.flags ?? {},
+    age: 20,
+    name: 't',
+    gender: 'male',
+    martialPower: 35,
+    externalSkill: 30,
+    internalSkill: 28,
+    qinggong: 25,
+    chivalry: 35,
+    constitution: 50,
+    comprehension: 40,
+    sect: null,
+    title: null,
+    reputation: 20,
+    money: 300,
+    knowledge: 30,
+    charisma: 32,
+    businessAcumen: 25,
+    influence: 18,
+    connections: 12,
+    martialHeritage: 8,
+    scholarlyHeritage: 5,
+    merchantNetwork: 5,
+    children: 0,
+    spouse: null,
+    alive: true,
+    ...rest,
+    flags: { ...(overrideFlags ?? {}) },
+  };
+}
+
+type GameStateFixtureInput = Omit<Partial<GameState>, 'player'> & {
+  player?: Partial<PlayerState>;
+};
+
+function makeState(overrides: GameStateFixtureInput = {}): GameState {
+  return {
+    player: basePlayer(overrides.player),
+    flags: { origin_id: 'martial_family', ...(overrides.flags ?? {}) },
+    relations: overrides.relations ?? {},
     lifePath: overrides.lifePath,
     achievements: overrides.achievements ?? [],
     eventHistory: overrides.eventHistory ?? [],
-  } as GameState;
+  };
 }
 
-function fakeEvent(id: string, tags: string[] = []) {
+function fakeEvent(id: string, tags: string[] = []): EventDefinition {
   return {
     id,
-    title: id,
-    description: '',
-    category: tags[0] ?? 'general',
-    metadata: { tags },
-    choices: [],
-    effects: [],
+    version: '1.0.0',
+    category: EventCategory.RANDOM_ENCOUNTER,
+    priority: EventPriority.NORMAL,
+    weight: 1,
+    ageRange: { min: 0, max: 99 },
+    triggers: [],
+    content: { text: id, title: id, description: '' },
+    eventType: 'auto',
+    metadata: {
+      enabled: true,
+      createdAt: FIXTURE_EVENT_TIMESTAMP,
+      updatedAt: FIXTURE_EVENT_TIMESTAMP,
+      tags,
+    },
   };
 }
 
@@ -113,7 +138,7 @@ function testArchetypeSelection(): void {
       martial_talent_acknowledged: true,
       has_disciples: true,
     },
-    player: { age: 40, martialPower: 70 } as GameState['player'],
+    player: { age: 40, martialPower: 70 },
   });
   const family = selectArchetypeFamily(martial);
   assert(family.familyId === P20_MARTIAL_ASCENDANT.id, `martial family got ${family.familyId}`);
@@ -140,7 +165,7 @@ function testRepetitionPressure(): void {
 function testWholeLifePacing(): void {
   const scholar = makeState({
     flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true },
-    player: { age: 14, knowledge: 25 } as GameState['player'],
+    player: { age: 14, knowledge: 25 },
   });
   const report = buildWholeLifePacingReport(scholar);
   assert(report.comparisonLines.length >= 3, 'pacing comparison lines');

@@ -45,6 +45,9 @@ import { getMinimumActions } from '../data/activeActionCatalog';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
 import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSelection';
+import { getArchetypeSchedulingMultiplier } from '../p20/archetypeCoverage';
+import { getProfileRepetitionPressureMultiplier } from '../p20/repetitionPressure';
+import { getWholeLifePacingMultiplier } from '../p20/wholeLifePacing';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import {
@@ -898,6 +901,8 @@ export class GameEngineIntegration {
       this.gameState,
       event,
     );
+    const archetypeMultiplier = getArchetypeSchedulingMultiplier(this.gameState, event);
+    const pacingMultiplier = getWholeLifePacingMultiplier(this.gameState, event);
     return (
       routeMultiplier *
       romanceFamilyMultiplier *
@@ -905,7 +910,9 @@ export class GameEngineIntegration {
       narrativeMultiplier *
       laterLifeConsequenceMultiplier *
       laterLifeLegacyMultiplier *
-      laterLifeEndgameRecoveryMultiplier
+      laterLifeEndgameRecoveryMultiplier *
+      archetypeMultiplier *
+      pacingMultiplier
     );
   }
 
@@ -1392,6 +1399,7 @@ export class GameEngineIntegration {
     if (events.length === 1) {
       const combinedMultiplier =
         this.getFormalRepetitionSuppressionMultiplier(events[0]) *
+        this.getProfileRepetitionPressureMultiplier(events[0]) *
         this.getAdjacentClassSuppressionMultiplier(events[0]);
       return combinedMultiplier <= 0.2 ? null : events[0];
     }
@@ -1411,7 +1419,9 @@ export class GameEngineIntegration {
       const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
+      const profileRepetitionAdjusted =
+        repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
+      const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
       const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
       return sum + this.adjustWeightByAnnualPressure(event, routeAdjusted);
     }, 0);
@@ -1434,7 +1444,9 @@ export class GameEngineIntegration {
       const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
       const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
-      const adjacentAdjusted = repetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
+      const profileRepetitionAdjusted =
+        repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
+      const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
       const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
       random -= this.adjustWeightByAnnualPressure(event, routeAdjusted);
       if (random <= 0) {
@@ -1597,6 +1609,14 @@ export class GameEngineIntegration {
       multiplier *= Math.pow(0.5, recentAnySetback);
     }
     return this.clampWeight(multiplier, 0.2, 1);
+  }
+
+  /** P20: profile-first repetition pressure layered on formal event selection. */
+  private getProfileRepetitionPressureMultiplier(event: EventDefinition): number {
+    if (this.isDailyEvent(event) || this.isMandatoryEvent(event)) {
+      return 1;
+    }
+    return getProfileRepetitionPressureMultiplier(this.gameState, event);
   }
 
   /**

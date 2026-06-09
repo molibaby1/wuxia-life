@@ -1,0 +1,74 @@
+{
+  "matrix": "archetype_regression",
+  "rows": [
+    {
+      "archetypeId": "p20_martial_ascendant",
+      "label": "武道登峰",
+      "emerges": true,
+      "arcDistinctive": true,
+      "endingCoherent": true,
+      "matchedSignals": [
+        "origin",
+        "growth",
+        "social",
+        "legacy",
+        "endgame"
+      ]
+    },
+    {
+      "archetypeId": "p20_scholar_statesman",
+      "label": "文士仕林",
+      "emerges": true,
+      "arcDistinctive": true,
+      "endingCoherent": true,
+      "matchedSignals": [
+        "origin",
+        "growth",
+        "legacy",
+        "endgame"
+      ]
+    },
+    {
+      "archetypeId": "p20_wealth_merchant",
+      "label": "商贾识途",
+      "emerges": true,
+      "arcDistinctive": true,
+      "endingCoherent": true,
+      "matchedSignals": [
+        "origin",
+        "growth",
+        "legacy",
+        "endgame"
+      ]
+    },
+    {
+      "archetypeId": "p20_hermit_withdrawal",
+      "label": "隐逸归舟",
+      "emerges": true,
+      "arcDistinctive": true,
+      "endingCoherent": true,
+      "matchedSignals": [
+        "growth",
+        "social",
+        "legacy",
+        "endgame"
+      ]
+    },
+    {
+      "archetypeId": "p20_demonic_outlaw",
+      "label": "邪路孤狼",
+      "emerges": true,
+      "arcDistinctive": true,
+      "endingCoherent": true,
+      "matchedSignals": [
+        "origin",
+        "growth",
+        "route",
+        "social",
+        "legacy",
+        "endgame"
+      ]
+    }
+  ],
+  "allRepresentativeEmerge": true
+}

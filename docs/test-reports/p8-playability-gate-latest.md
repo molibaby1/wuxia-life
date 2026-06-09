@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-09T00:58:53.731Z
+Generated: 2026-06-09T04:09:58.791Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -151,7 +151,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Achievement**
 - [achieved] 邪路信号出现 (0-20): flag demonic_path_touched=true
 - [missed] 做出高风险选择 (20-30): event demonic_midlife_fork not seen
-- [achieved] 邪路功力成长 (30-40): martialPower=52 >= 40
+- [achieved] 邪路功力成长 (30-40): martialPower=44 >= 40
 
 **Frustration**
 - Opaque setbacks: 0 / 0

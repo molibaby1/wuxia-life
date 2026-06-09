@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-06-09T00:58:53.731Z",
+  "generatedAt": "2026-06-09T04:09:58.791Z",
   "decision": "pass",
   "endAge": 40,
   "personaRuns": [
@@ -10,7 +10,7 @@
       "agency": {
         "activeActionCount": 3,
         "storyEventCount": 37,
-        "choiceEventCount": 17,
+        "choiceEventCount": 18,
         "forcedEventCount": 0,
         "activeActionByCategory": {
           "training": 3
@@ -120,8 +120,8 @@
           },
           {
             "age": 39,
-            "kind": "auto",
-            "text": "英年早逝"
+            "kind": "choice",
+            "text": "辞别师门"
           },
           {
             "age": 1,
@@ -272,6 +272,14 @@
           "selectedScore": 16,
           "runnerUpChoiceId": "fight_grudge",
           "runnerUpScore": 0,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "orthodox_departure",
+          "selectedChoiceId": "orthodox_stay",
+          "selectedScore": 55,
+          "runnerUpChoiceId": "orthodox_leave",
+          "runnerUpScore": 45,
           "personaId": "p8-martial-lin"
         }
       ],
@@ -833,10 +841,10 @@
           "personaId": "p8-social-gu"
         },
         {
-          "eventId": "jianghu_secret_manual",
-          "selectedChoiceId": "fight_for_manual",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "watch_manual",
+          "eventId": "jianghu_rescue",
+          "selectedChoiceId": "rescue_immediate",
+          "selectedScore": 65,
+          "runnerUpChoiceId": "send_disciples",
           "runnerUpScore": 0,
           "personaId": "p8-social-gu"
         },
@@ -1441,7 +1449,7 @@
       "agency": {
         "activeActionCount": 3,
         "storyEventCount": 37,
-        "choiceEventCount": 20,
+        "choiceEventCount": 18,
         "forcedEventCount": 0,
         "activeActionByCategory": {
           "training": 2,
@@ -1507,7 +1515,7 @@
             "ageBand": "30-40",
             "status": "achieved",
             "evidence": [
-              "martialPower=52 >= 40"
+              "martialPower=44 >= 40"
             ]
           }
         ],
@@ -1522,9 +1530,9 @@
         "opaqueExamples": []
       },
       "pacing": {
-        "longestLowImpactSpanYears": 3,
-        "lowImpactSpanStartAge": 15,
-        "lowImpactSpanEndAge": 18
+        "longestLowImpactSpanYears": 4,
+        "lowImpactSpanStartAge": 31,
+        "lowImpactSpanEndAge": 35
       },
       "narrativeMemory": {
         "earlyLife": "0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择",
@@ -1544,7 +1552,7 @@
           {
             "age": 39,
             "kind": "choice",
-            "text": "江湖调解"
+            "text": "英雄聚会"
           },
           {
             "age": 1,
@@ -1618,11 +1626,11 @@
           "personaId": "p8-deviant-ye"
         },
         {
-          "eventId": "love_misunderstanding",
-          "selectedChoiceId": "love_clarify",
-          "selectedScore": 1.5,
-          "runnerUpChoiceId": "love_silent",
-          "runnerUpScore": 1.5,
+          "eventId": "demonic_redemption_offer",
+          "selectedChoiceId": "demonic_redemption_reject",
+          "selectedScore": 146,
+          "runnerUpChoiceId": "demonic_redemption_accept",
+          "runnerUpScore": 144,
           "personaId": "p8-deviant-ye"
         },
         {
@@ -1682,14 +1690,6 @@
           "personaId": "p8-deviant-ye"
         },
         {
-          "eventId": "refugee_sect_story",
-          "selectedChoiceId": "",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "",
-          "runnerUpScore": 0,
-          "personaId": "p8-deviant-ye"
-        },
-        {
           "eventId": "family_crisis",
           "selectedChoiceId": "",
           "selectedScore": -21,
@@ -1698,27 +1698,19 @@
           "personaId": "p8-deviant-ye"
         },
         {
-          "eventId": "jianghu_grudge",
-          "selectedChoiceId": "peace_grudge",
-          "selectedScore": 16,
-          "runnerUpChoiceId": "fight_grudge",
+          "eventId": "jianghu_rescue",
+          "selectedChoiceId": "rescue_immediate",
+          "selectedScore": 36,
+          "runnerUpChoiceId": "send_disciples",
           "runnerUpScore": 0,
           "personaId": "p8-deviant-ye"
         },
         {
-          "eventId": "commoner_year_farming",
-          "selectedChoiceId": "farming_diligent",
-          "selectedScore": 33,
-          "runnerUpChoiceId": "farming_leisure",
-          "runnerUpScore": 18,
-          "personaId": "p8-deviant-ye"
-        },
-        {
-          "eventId": "career_mediate_conflict",
-          "selectedChoiceId": "",
-          "selectedScore": 80,
-          "runnerUpChoiceId": "",
-          "runnerUpScore": 0,
+          "eventId": "jianghu_hero_meeting",
+          "selectedChoiceId": "attend_meeting",
+          "selectedScore": 32,
+          "runnerUpChoiceId": "decline_meeting",
+          "runnerUpScore": 30,
           "personaId": "p8-deviant-ye"
         }
       ],
@@ -2252,6 +2244,14 @@
           "personaId": "p8-balanced-wei"
         },
         {
+          "eventId": "commoner_year_neighbor",
+          "selectedChoiceId": "neighbor_help",
+          "selectedScore": 9,
+          "runnerUpChoiceId": "neighbor_observe",
+          "runnerUpScore": 5,
+          "personaId": "p8-balanced-wei"
+        },
+        {
           "eventId": "sect_midlife_stewardship",
           "selectedChoiceId": "stewardship_default_path",
           "selectedScore": -0.5,
@@ -2281,14 +2281,6 @@
           "selectedScore": 9.5,
           "runnerUpChoiceId": "gray_leak_warning",
           "runnerUpScore": 7,
-          "personaId": "p8-balanced-wei"
-        },
-        {
-          "eventId": "jianghu_secret_manual",
-          "selectedChoiceId": "fight_for_manual",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "watch_manual",
-          "runnerUpScore": 0,
           "personaId": "p8-balanced-wei"
         },
         {
@@ -2324,67 +2316,67 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-scholar-su",
-        "score": 0.7569134652908867
+        "score": 0.7731044295937767
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-social-gu",
-        "score": 0.5654121407308123
+        "score": 0.5660462852855829
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-wealth-shen",
-        "score": 0.6808319992585218
+        "score": 0.6813115018946939
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-cautious-han",
-        "score": 0.7206959029172398
+        "score": 0.7210344874649027
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-deviant-ye",
-        "score": 0.7254343945854876
+        "score": 0.8103478446832183
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-explorer-lu",
-        "score": 0.6003462486370829
+        "score": 0.6005755360704225
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-balanced-wei",
-        "score": 0.5786545801009261
+        "score": 0.5785083886550296
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-social-gu",
-        "score": 0.7473384825941358
+        "score": 0.7458393679683474
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-wealth-shen",
-        "score": 0.8182337390229933
+        "score": 0.8165924129116641
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-cautious-han",
-        "score": 0.6030881058928872
+        "score": 0.6136314702462194
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-deviant-ye",
-        "score": 0.4656037234019493
+        "score": 0.5708583678472297
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-explorer-lu",
-        "score": 0.6404642791913137
+        "score": 0.6459265958051138
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-balanced-wei",
-        "score": 0.6496455544038441
+        "score": 0.648342405730428
       },
       {
         "personaA": "p8-social-gu",
@@ -2399,7 +2391,7 @@
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-deviant-ye",
-        "score": 0.3343050561119369
+        "score": 0.38438048970863004
       },
       {
         "personaA": "p8-social-gu",
@@ -2419,7 +2411,7 @@
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-deviant-ye",
-        "score": 0.34498810296560484
+        "score": 0.3964106499502246
       },
       {
         "personaA": "p8-wealth-shen",
@@ -2434,7 +2426,7 @@
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-deviant-ye",
-        "score": 0.4532749006151627
+        "score": 0.5041594046233696
       },
       {
         "personaA": "p8-cautious-han",
@@ -2449,12 +2441,12 @@
       {
         "personaA": "p8-deviant-ye",
         "personaB": "p8-explorer-lu",
-        "score": 0.6807565275073315
+        "score": 0.5532611459075628
       },
       {
         "personaA": "p8-deviant-ye",
         "personaB": "p8-balanced-wei",
-        "score": 0.5045271162388818
+        "score": 0.58369730635028
       },
       {
         "personaA": "p8-explorer-lu",

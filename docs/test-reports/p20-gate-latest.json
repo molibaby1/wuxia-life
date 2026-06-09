@@ -1,0 +1,173 @@
+{
+  "gate": {
+    "generatedAt": "2026-06-09T04:10:19.300Z",
+    "decision": "pass",
+    "archetypeCoverage": {
+      "familyCount": 5,
+      "familyKinds": [
+        "martial_ascendant",
+        "scholar_statesman",
+        "wealth_merchant",
+        "hermit_withdrawal",
+        "demonic_outlaw"
+      ],
+      "pacingProfileCount": 5,
+      "replaySliceCount": 5
+    },
+    "repetitionPressure": {
+      "configCount": 3,
+      "hasThematicFloor": true,
+      "hasNoveltyPreference": true
+    },
+    "wholeLifePacing": {
+      "profileCount": 5,
+      "closureRhythms": [
+        "standard",
+        "delayed",
+        "early",
+        "fragmented"
+      ]
+    },
+    "validation": {
+      "archetypeDifferentiation": true,
+      "repetitionReduced": true,
+      "pacingDiffers": true,
+      "replaySlicesPass": true,
+      "regressionMatrixPass": true
+    },
+    "messages": [
+      "Archetype families: 5",
+      "Repetition configs: 3",
+      "Pacing profiles: 5",
+      "Replay slices: 5"
+    ],
+    "warnings": []
+  },
+  "archetypeDifferentiation": {
+    "slice": "archetype_differentiation",
+    "martialFamily": "p20_martial_ascendant",
+    "scholarFamily": "p20_scholar_statesman",
+    "wealthFamily": "p20_wealth_merchant",
+    "demonicFamily": "p20_demonic_outlaw",
+    "hermitFamily": "p20_hermit_withdrawal",
+    "atLeastThreeDistinct": true,
+    "beyondRouteLabel": true
+  },
+  "repetitionOverlap": {
+    "slice": "repetition_overlap",
+    "baselineExactRepeatDecay": 0.45,
+    "tunedExactRepeatDecay": 0.5,
+    "overlapMateriallyReduced": true,
+    "noveltyImproved": true
+  },
+  "pacingDifferentiation": {
+    "slice": "pacing_differentiation",
+    "martialDensity": 1.1,
+    "scholarDensity": 1.05,
+    "densityDelta": 0.050000000000000044,
+    "pacingMeaningfullyDiffers": true,
+    "comparisonMarkdown": "# P20 Pacing Comparison\n\n| Metric | Baseline (p20_martial_ascendant) | Tuned (p20_scholar_statesman) |\n| --- | --- | --- |\n| Stage | stage_10_20 | stage_10_20 |\n| Density | 1.10 | 1.05 |\n| Closure rhythm | standard | delayed |"
+  },
+  "replayabilityValidation": {
+    "archetype": {
+      "slice": "archetype_differentiation",
+      "martialFamily": "p20_martial_ascendant",
+      "scholarFamily": "p20_scholar_statesman",
+      "wealthFamily": "p20_wealth_merchant",
+      "demonicFamily": "p20_demonic_outlaw",
+      "hermitFamily": "p20_hermit_withdrawal",
+      "atLeastThreeDistinct": true,
+      "beyondRouteLabel": true
+    },
+    "repetition": {
+      "slice": "repetition_overlap",
+      "baselineExactRepeatDecay": 0.45,
+      "tunedExactRepeatDecay": 0.5,
+      "overlapMateriallyReduced": true,
+      "noveltyImproved": true
+    },
+    "pacing": {
+      "slice": "pacing_differentiation",
+      "martialDensity": 1.1,
+      "scholarDensity": 1.05,
+      "densityDelta": 0.050000000000000044,
+      "pacingMeaningfullyDiffers": true,
+      "comparisonMarkdown": "# P20 Pacing Comparison\n\n| Metric | Baseline (p20_martial_ascendant) | Tuned (p20_scholar_statesman) |\n| --- | --- | --- |\n| Stage | stage_10_20 | stage_10_20 |\n| Density | 1.10 | 1.05 |\n| Closure rhythm | standard | delayed |"
+    },
+    "weakArchetypeImproved": true
+  },
+  "archetypeRegressionMatrix": {
+    "matrix": "archetype_regression",
+    "rows": [
+      {
+        "archetypeId": "p20_martial_ascendant",
+        "label": "武道登峰",
+        "emerges": true,
+        "arcDistinctive": true,
+        "endingCoherent": true,
+        "matchedSignals": [
+          "origin",
+          "growth",
+          "social",
+          "legacy",
+          "endgame"
+        ]
+      },
+      {
+        "archetypeId": "p20_scholar_statesman",
+        "label": "文士仕林",
+        "emerges": true,
+        "arcDistinctive": true,
+        "endingCoherent": true,
+        "matchedSignals": [
+          "origin",
+          "growth",
+          "legacy",
+          "endgame"
+        ]
+      },
+      {
+        "archetypeId": "p20_wealth_merchant",
+        "label": "商贾识途",
+        "emerges": true,
+        "arcDistinctive": true,
+        "endingCoherent": true,
+        "matchedSignals": [
+          "origin",
+          "growth",
+          "legacy",
+          "endgame"
+        ]
+      },
+      {
+        "archetypeId": "p20_hermit_withdrawal",
+        "label": "隐逸归舟",
+        "emerges": true,
+        "arcDistinctive": true,
+        "endingCoherent": true,
+        "matchedSignals": [
+          "growth",
+          "social",
+          "legacy",
+          "endgame"
+        ]
+      },
+      {
+        "archetypeId": "p20_demonic_outlaw",
+        "label": "邪路孤狼",
+        "emerges": true,
+        "arcDistinctive": true,
+        "endingCoherent": true,
+        "matchedSignals": [
+          "origin",
+          "growth",
+          "route",
+          "social",
+          "legacy",
+          "endgame"
+        ]
+      }
+    ],
+    "allRepresentativeEmerge": true
+  }
+}

@@ -62,6 +62,8 @@
     "report:p18-closure": "tsx scripts/runP18ClosureReport.ts",
     "gate:p19": "tsx scripts/runP19Gate.ts",
     "report:p19-closure": "tsx scripts/runP19ClosureReport.ts",
+    "gate:p20": "tsx scripts/runP20Gate.ts",
+    "report:p20-closure": "tsx scripts/runP20ClosureReport.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
     "build": "vue-tsc -b && vite build",

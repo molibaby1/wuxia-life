@@ -27,6 +27,12 @@ import {
   WUXIA_PRE_ENDGAME_RECOVERY_PATTERNS,
 } from './profile/wuxiaEndgameSurfaces';
 import {
+  WUXIA_ARCHETYPE_FAMILY_CONFIGS,
+  WUXIA_ARCHETYPE_PACING_PROFILES,
+  WUXIA_REPETITION_PRESSURE_CONFIGS,
+  WUXIA_REPLAY_SLICE_CONFIGS,
+} from './profile/wuxiaReplayabilitySurfaces';
+import {
   WUXIA_CHILDHOOD_SHAPING_RULES,
   WUXIA_COMPOSITE_DESTINY_OUTCOMES,
   WUXIA_ORIGIN_SURFACES,
@@ -75,6 +81,10 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   endgameCategoryConfigs: WUXIA_ENDGAME_CATEGORY_CONFIGS,
   preEndgameRecoveryPatterns: WUXIA_PRE_ENDGAME_RECOVERY_PATTERNS,
   historicalMemoryPatterns: WUXIA_HISTORICAL_MEMORY_PATTERNS,
+  archetypeFamilyConfigs: WUXIA_ARCHETYPE_FAMILY_CONFIGS,
+  repetitionPressureConfigs: WUXIA_REPETITION_PRESSURE_CONFIGS,
+  archetypePacingProfiles: WUXIA_ARCHETYPE_PACING_PROFILES,
+  replaySliceConfigs: WUXIA_REPLAY_SLICE_CONFIGS,
 };
 
 export function getWorldProfile(worldId = 'wuxia'): WorldProfile {

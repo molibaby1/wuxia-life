@@ -180,6 +180,14 @@ export interface WorldProfile {
   preEndgameRecoveryPatterns?: PreEndgameRecoveryPattern[];
   /** P19: posthumous historical-memory evaluation patterns. */
   historicalMemoryPatterns?: HistoricalMemoryPattern[];
+  /** P20: representative archetype family coverage configs. */
+  archetypeFamilyConfigs?: ArchetypeFamilyConfig[];
+  /** P20: repetition pressure and novelty distribution configs. */
+  repetitionPressureConfigs?: RepetitionPressureConfig[];
+  /** P20: per-archetype whole-life pacing profiles. */
+  archetypePacingProfiles?: ArchetypePacingProfile[];
+  /** P20: representative replay slice definitions. */
+  replaySliceConfigs?: ReplaySliceConfig[];
 }
 
 export type RelationshipConsequenceKind =
@@ -548,6 +556,129 @@ export interface P19FinalSummaryComposition {
   legacyContinuationLine: string;
   historicalMemoryLines: string[];
   composedSummary: string;
+}
+
+export type ArchetypeFamilyKind =
+  | 'martial_ascendant'
+  | 'scholar_statesman'
+  | 'wealth_merchant'
+  | 'hermit_withdrawal'
+  | 'demonic_outlaw';
+
+export interface ArchetypeLifecycleSignals {
+  originIds?: string[];
+  originTags?: string[];
+  growthPatternFlags?: string[];
+  routeIdentityKeys?: string[];
+  socialRoleFlags?: string[];
+  legacyShapeFlags?: string[];
+  endgameCategoryKinds?: EndgameCategoryKind[];
+  historicalMemoryTones?: HistoricalMemoryTone[];
+}
+
+export interface ArchetypeFamilyConfig {
+  id: string;
+  label: string;
+  familyKind: ArchetypeFamilyKind;
+  lifecycleSignals: ArchetypeLifecycleSignals;
+  baseWeight: number;
+  opportunityTags?: ConsequenceTagWeight[];
+  riskTags?: ConsequenceTagWeight[];
+  summarySignal?: string;
+}
+
+export interface RepetitionPressureConfig {
+  id: string;
+  label: string;
+  /** Per exact repeat within lookback window (0–1 decay factor). */
+  exactRepeatSuppression: number;
+  /** Boost for event ids not seen in lookback window. */
+  noveltyPreference: number;
+  /** Minimum weight retained for same-theme tagged events. */
+  thematicContinuityFloor: number;
+  /** Extra variance for non-dominant route events. */
+  routeVarianceBoost: number;
+  /** Target diversity 0–1 for event-pool spread. */
+  poolDiversityTarget: number;
+  /** Minimum years between same payoff-class events. */
+  crossStagePayoffMinSpacing: number;
+  lookbackYears?: number;
+  eventClassTags?: string[];
+}
+
+export interface StagePacingProfile {
+  stageId: string;
+  densityMultiplier: number;
+  routePressureOffsetYears: number;
+  payoffSpacingMultiplier: number;
+  callbackCadenceYears: number;
+}
+
+export type EndgameClosureRhythm = 'early' | 'standard' | 'delayed' | 'fragmented';
+
+export interface ArchetypePacingProfile {
+  archetypeFamilyId: string;
+  stageProfiles: StagePacingProfile[];
+  endgameClosureRhythm: EndgameClosureRhythm;
+}
+
+export type ReplaySliceEmphasis =
+  | 'origin_early_growth'
+  | 'midlife_consequence'
+  | 'legacy_endgame_memory';
+
+export interface ReplaySliceConfig {
+  id: string;
+  label: string;
+  emphasis: ReplaySliceEmphasis;
+  archetypeFamilyId: string;
+  seedFlags: string[];
+  validationSignals: string[];
+}
+
+export interface ResolvedArchetypeFamily {
+  familyId: string;
+  label: string;
+  kind: ArchetypeFamilyKind;
+  score: number;
+  matchedSignals: string[];
+}
+
+export interface ArchetypeCoverageReport {
+  age: number;
+  selectedFamily: ResolvedArchetypeFamily;
+  candidates: ResolvedArchetypeFamily[];
+  lifecycleCoverage: Record<string, number>;
+  distinctiveBeyondRouteLabel: boolean;
+}
+
+export interface RepetitionPressureReport {
+  age: number;
+  exactRepeatDecay: number;
+  noveltyBoost: number;
+  thematicFloor: number;
+  recentExactRepeats: number;
+  unseenEventRatio: number;
+  combinedMultiplier: number;
+}
+
+export interface StagePacingSnapshot {
+  stageId: string;
+  densityMultiplier: number;
+  routePressureOffsetYears: number;
+  payoffSpacingMultiplier: number;
+  callbackCadenceYears: number;
+  effectiveDensity: number;
+}
+
+export interface WholeLifePacingReport {
+  age: number;
+  archetypeFamilyId: string;
+  currentStageId: string;
+  stageSnapshots: StagePacingSnapshot[];
+  endgameClosureRhythm: EndgameClosureRhythm;
+  pacingMultiplier: number;
+  comparisonLines: string[];
 }
 
 /** Sections required for a playable world profile — used by P12 verification. */

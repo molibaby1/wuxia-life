@@ -1,5 +1,13 @@
 ## Codebase Patterns
+- P21 content production/tuning closure: modules under `src/p21/`; profile surfaces in `src/narrative/profile/wuxiaContentProductionSurfaces.ts` on `WorldProfile` (`contentStyleConstraints`, `contentDuplicateConstraints`, `llmContentContract`, `llmTuningContract`, `tuningSampleConfigs`). Authoring semantics in `src/narrative/config/authoringSchema.ts` + optional `metadata.authoringSemantics` on events, `authoringContract` on echo hooks, `authoringGuide` on summary templates. Content samples in `src/data/lines/p21-content-samples.json`. Gates: `npm run gate:p21`, `npm run report:p21-closure`. Reports: `docs/test-reports/p21-*`. Design rules: `docs/designs/p21-*`.
 - P20 replayability/archetype coverage: modules under `src/p20/`; profile surfaces in `src/narrative/profile/wuxiaReplayabilitySurfaces.ts` on `WorldProfile` (`archetypeFamilyConfigs`, `repetitionPressureConfigs`, `archetypePacingProfiles`, `replaySliceConfigs`). Wiring via `getArchetypeSchedulingMultiplier` + `getWholeLifePacingMultiplier` in `GameEngineIntegration.getRouteSchedulingMultiplier`, and `getProfileRepetitionPressureMultiplier` in formal event selection. Gates: `npm run gate:p20`, `npm run report:p20-closure`. Reports: `docs/test-reports/p20-*`.
+## [2026-06-09] - P21 US-001..US-025 (content-production-and-tuning-closure)
+- Audits (surfaces/pain-points), design rules (workflow/quality/boundaries), authoringSchema + profile constraint surfaces, `src/p21/*` (constraints, LLM contracts, production matrix, validation slices), 3 content samples + 3 tuning samples, optimization wave, gate/closure reports.
+- Key files: `src/p21/*`, `src/narrative/profile/wuxiaContentProductionSurfaces.ts`, `src/narrative/config/authoringSchema.ts`, `src/data/lines/p21-content-samples.json`, `tests/p21ContentProductionTests.ts`, `scripts/runP21Gate.ts`, `scripts/runP21ClosureReport.ts`.
+- Self-check fix: removed duplicate `action_study_basic` echo hook (broke p9 `getEchoHookByActionId`); P21 callback sample uses `p9_echo_study_hook` + `authoringContract` on existing `echo_study_basic`.
+- Validation: typecheck ✅ p21ContentProductionTests ✅ gate:p21 ✅ npm test ✅ report:p21-closure ✅ (playability + p12 + p20 upstream)
+---
+
 ## [2026-06-09] - P20 US-001..US-021 (replayability-and-archetype-coverage-optimization)
 - Audits (archetype/overlap/pacing), design rules, profile replayability schema, `src/p20/*` resolvers + scheduling wiring, 5 replay slices, pacing comparison output, regression matrix, validation slices, gate/closure reports.
 - Key files: `src/p20/*`, `src/narrative/profile/wuxiaReplayabilitySurfaces.ts`, `tests/p20ReplayabilityTests.ts`, `scripts/runP20Gate.ts`, `scripts/runP20ClosureReport.ts`.

@@ -33,6 +33,13 @@ import {
   WUXIA_REPLAY_SLICE_CONFIGS,
 } from './profile/wuxiaReplayabilitySurfaces';
 import {
+  WUXIA_CONTENT_DUPLICATE_CONSTRAINTS,
+  WUXIA_CONTENT_STYLE_CONSTRAINTS,
+  WUXIA_LLM_CONTENT_CONTRACT,
+  WUXIA_LLM_TUNING_CONTRACT,
+  WUXIA_TUNING_SAMPLE_CONFIGS,
+} from './profile/wuxiaContentProductionSurfaces';
+import {
   WUXIA_CHILDHOOD_SHAPING_RULES,
   WUXIA_COMPOSITE_DESTINY_OUTCOMES,
   WUXIA_ORIGIN_SURFACES,
@@ -85,6 +92,11 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   repetitionPressureConfigs: WUXIA_REPETITION_PRESSURE_CONFIGS,
   archetypePacingProfiles: WUXIA_ARCHETYPE_PACING_PROFILES,
   replaySliceConfigs: WUXIA_REPLAY_SLICE_CONFIGS,
+  contentStyleConstraints: WUXIA_CONTENT_STYLE_CONSTRAINTS,
+  contentDuplicateConstraints: WUXIA_CONTENT_DUPLICATE_CONSTRAINTS,
+  llmContentContract: WUXIA_LLM_CONTENT_CONTRACT,
+  llmTuningContract: WUXIA_LLM_TUNING_CONTRACT,
+  tuningSampleConfigs: WUXIA_TUNING_SAMPLE_CONFIGS,
 };
 
 export function getWorldProfile(worldId = 'wuxia'): WorldProfile {

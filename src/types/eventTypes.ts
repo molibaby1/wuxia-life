@@ -1,4 +1,5 @@
 import type { ConditionExpression } from './conditionExpression';
+import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
 
 /**
  * 事件系统类型定义
@@ -788,6 +789,8 @@ export interface EventDefinition {
         flagKey?: string;
       }>;
     };
+    /** P21: explicit authoring semantics for LLM-safe content production */
+    authoringSemantics?: EventAuthoringSemantics;
   };
 
   // ========== 难度系统扩展 ==========

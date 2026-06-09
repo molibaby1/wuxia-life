@@ -1,0 +1,360 @@
+{
+  "project": "Wuxia Life P21 Content Production And Tuning Closure",
+  "branchName": "ralph/p21-wuxia-content-production-and-tuning-closure",
+  "description": "Complete a productionization pass for wuxia content authoring and tuning by auditing the current authoring surfaces, defining explicit workflow and quality rules, refining profile-first content and constraint surfaces for safer LLM participation, proving the workflow with representative production and tuning samples, and closing the phase with validation evidence without adding UI work, new themes, or a large runtime rewrite.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit current content authoring surfaces",
+      "description": "As a maintainer, I want a read-only audit of the current wuxia content authoring surfaces so that P21 targets the real production bottlenecks first.",
+      "acceptanceCriteria": [
+        "Audit the current authoring surfaces for events, callbacks, summaries, route weighting, stage pacing, legacy or endgame content, and replayability tuning",
+        "Mark each surface as config-driven, partially config-driven, or runtime-bound",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit workflow pain points and hidden coupling",
+      "description": "As a maintainer, I want the main content workflow pain points documented so that P21 fixes the most expensive authoring friction instead of adding broad new process.",
+      "acceptanceCriteria": [
+        "Record the current pain points for adding or tuning wuxia content across authoring, validation, and regression checking",
+        "Identify which pain points come from hidden field semantics, runtime knowledge, or missing reports",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Write content addition workflow rules",
+      "description": "As a designer, I want explicit rules for adding wuxia content so that future content work follows one coherent production model.",
+      "acceptanceCriteria": [
+        "Define the expected workflow for adding new wuxia content from authoring through validation",
+        "Define the minimum required artifacts or reports for content additions",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Write tuning and validation workflow rules",
+      "description": "As a designer, I want explicit rules for tuning wuxia content so that weight or distribution changes are made through a stable loop instead of ad hoc patching.",
+      "acceptanceCriteria": [
+        "Define the expected workflow for tuning weights, distribution, or pacing inputs",
+        "Define how tuning changes are validated through reports, samples, or gate evidence",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Write quality and recurrence guardrails",
+      "description": "As a designer, I want explicit rules for wuxia quality, thematic recurrence, and slop boundaries so that future content work stays recognizable and intentional.",
+      "acceptanceCriteria": [
+        "Define what counts as acceptable thematic recurrence versus harmful repetition or slop",
+        "Define the minimum expectations for route fit, stage fit, tone consistency, and wuxia flavor",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Write config-only and deferred-scope boundaries",
+      "description": "As a designer, I want explicit boundaries for config-only work versus runtime work so that P21 does not quietly expand into a broad engine rewrite.",
+      "acceptanceCriteria": [
+        "Define which content changes are safe through config or content files alone",
+        "Define which changes require minimal runtime support",
+        "Define which production or tuning problems are explicitly deferred beyond P21",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Refine event authoring schema semantics",
+      "description": "As a developer, I want event authoring fields to have explicit semantics so that later LLM-assisted edits do not depend on hidden runtime knowledge.",
+      "acceptanceCriteria": [
+        "Add or refine content or config structures for event authoring where current semantics are too implicit",
+        "Field names or metadata make required authoring semantics explicit enough for later LLM-assisted editing",
+        "Schema remains compatible with current profile-first loading or a controlled migration path is documented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Refine callback and summary authoring semantics",
+      "description": "As a developer, I want callback and summary authoring fields to be explicit so that downstream content edits can be made with lower coupling risk.",
+      "acceptanceCriteria": [
+        "Add or refine content or config structures for callback wiring or summary composition where current semantics are too implicit",
+        "The resulting authoring surface is explicit enough for config editors or LLMs to update without broad code reading",
+        "Schema remains profile-first and authoring-friendly",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Refine tuning metadata semantics",
+      "description": "As a developer, I want tuning metadata to be explicit so that later distribution changes can be made safely without editing shared runtime logic directly.",
+      "acceptanceCriteria": [
+        "Add or refine content or config structures for route weighting, stage pacing, or coverage tuning metadata where semantics are too implicit",
+        "The resulting metadata is explicit enough for later config-only tuning",
+        "Schema remains compatible with the current save or runtime model unless a bounded migration is documented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Add style and fit constraint surface",
+      "description": "As a maintainer, I want explicit style and fit constraints so that wuxia content remains recognizable as content volume grows.",
+      "acceptanceCriteria": [
+        "Add or refine config or rule surfaces for theme fit, route fit, stage fit, and tone consistency",
+        "The resulting surface stays profile-first and authoring-friendly",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add duplicate-risk and coverage constraint surface",
+      "description": "As a maintainer, I want explicit duplicate-risk and coverage constraints so that content growth does not collapse into repeated-feel output.",
+      "acceptanceCriteria": [
+        "Add or refine config or rule surfaces for duplicate-risk checking, recurrence pressure, or coverage expectations",
+        "The resulting surface can express both harmful overlap and acceptable recurrence boundaries",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Expose constraint surfaces to reports and tooling",
+      "description": "As a maintainer, I want quality and style constraints to feed reports or validation tooling so that problems are caught with evidence instead of taste alone.",
+      "acceptanceCriteria": [
+        "Constraint surfaces can be consumed by reports, validation scripts, or LLM-facing guidance",
+        "At least one report or machine-readable output can show style, fit, or duplicate-risk findings from the new surface",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Define bounded LLM content input-output contract",
+      "description": "As a maintainer, I want a bounded contract for LLM-generated content additions so that the model can help add material without open-ended authoring drift.",
+      "acceptanceCriteria": [
+        "Define or implement a bounded input or output workflow for LLM-assisted event, callback, or summary content additions",
+        "The workflow specifies required inputs, allowed outputs, and validation expectations",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add validation path for LLM-generated content",
+      "description": "As a maintainer, I want low-quality or invalid generated content to be caught by reports or checks so that manual review is not the only safety net.",
+      "acceptanceCriteria": [
+        "Invalid or low-quality content outputs can be detected through existing or new reports",
+        "The validation path covers at least event or callback content added through the bounded workflow",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Define bounded LLM tuning input-output contract",
+      "description": "As a maintainer, I want a bounded contract for LLM-assisted tuning changes so that the model can help rebalance the game without direct runtime code edits.",
+      "acceptanceCriteria": [
+        "Define or implement a bounded input or output workflow for LLM-assisted weight, distribution, or coverage tuning",
+        "The workflow covers at least route or event distribution tuning plus archetype or stage-balance tuning",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add validation path for LLM-generated tuning outputs",
+      "description": "As a maintainer, I want tuning outputs validated by coverage and quality evidence so that rebalancing changes do not rely on intuition only.",
+      "acceptanceCriteria": [
+        "Tuning outputs can be validated through coverage, replayability, pacing, or quality reports",
+        "The validation path can detect at least one class of low-quality or off-target tuning output",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add route-sensitive content sample",
+      "description": "As a player, I want at least one route-sensitive content sample added through the new workflow so that scaling content still preserves route identity.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-production sample that adds or refines route-sensitive content",
+        "The sample is authored through the new workflow rather than one-off runtime logic",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add stage-sensitive or callback-sensitive content sample",
+      "description": "As a player, I want at least one stage-sensitive or callback-sensitive content sample added through the new workflow so that lifecycle structure remains visible as content volume grows.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-production sample that adds or refines stage-sensitive or callback-sensitive content",
+        "The sample produces observable lifecycle or callback-sensitive differences through the new workflow",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Add endgame, legacy, or archetype-sensitive content sample",
+      "description": "As a player, I want at least one late-life or identity-sensitive content sample added through the new workflow so that the system scales beyond early-stage event patches.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-production sample that adds or refines endgame, legacy, or archetype-sensitive content",
+        "By the end of this story, representative production samples cover route-sensitive, stage or callback-sensitive, and late-life or identity-sensitive content",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Add route and event distribution tuning sample",
+      "description": "As a player, I want at least one representative tuning sample to improve route or event distribution so that the new workflow proves it can rebalance actual run structure.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts route or event distribution through the new workflow",
+        "The tuning sample produces measurable before-or-after differences in route presence or event distribution",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Add stage pacing or payoff spacing tuning sample",
+      "description": "As a player, I want at least one representative tuning sample to improve stage pacing so that future rhythm fixes can be driven mainly through content or config updates.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts stage pacing or payoff spacing through the new workflow",
+        "The tuning sample produces measurable before-or-after differences in pacing or payoff distribution",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Add archetype, replayability, or endgame tuning sample",
+      "description": "As a player, I want at least one representative tuning sample to improve late-life or replayability coherence so that the production workflow covers more than early-run distribution changes.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts archetype coverage, replayability, or endgame distribution through the new workflow",
+        "By the end of this story, representative tuning samples cover route or event distribution, stage pacing or payoff spacing, and archetype or late-life coverage tuning",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Add production validation matrix",
+      "description": "As a maintainer, I want a stable validation matrix for content production and tuning so that future changes can be checked systematically rather than impressionistically.",
+      "acceptanceCriteria": [
+        "Add a matrix or machine-readable report that tracks representative content quality, route fit, stage fit, archetype fit, and duplication risk",
+        "Track whether LLM-assisted or config-only changes preserve thematic and structural coherence",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Run one bounded optimization wave sample",
+      "description": "As a project owner, I want one representative content optimization wave executed through the new workflow so that P21 proves the system is usable in practice.",
+      "acceptanceCriteria": [
+        "Run one bounded content-and-tuning optimization wave using the new production workflow",
+        "Demonstrate at least 1 case where content was added or refined without runtime edits",
+        "Demonstrate at least 1 case where weight or distribution tuning improved a measured experience property",
+        "Demonstrate at least 1 case where validation reports caught or prevented low-quality content drift",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Write P21 closure gate and final report",
+      "description": "As a maintainer, I want a dedicated P21 closure report so that the phase can be accepted based on evidence rather than impressions.",
+      "acceptanceCriteria": [
+        "Add or update a P21-specific gate or report covering production workflow health, style and quality constraint coverage, LLM-loop safety, and representative sample quality",
+        "Record before-and-after findings for the main productionization and tuning-closure issues targeted by P21",
+        "Confirm gate:playability and current profile or runtime gates do not regress",
+        "Save the final closure report under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

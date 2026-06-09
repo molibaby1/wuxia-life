@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-09T04:21:59.576Z
+Generated: 2026-06-09T05:48:08.880Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -50,7 +50,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 26岁: explicit echo flag p9_explicit_study_echo
 
 **Achievement**
-- [achieved] 积累学识 (0-20): knowledge=20 >= 20
+- [achieved] 积累学识 (0-20): knowledge=25 >= 20
 - [achieved] 坚持读书规划 (0-20): study actions=3
 - [missed] 悟性提升 (20-30): comprehension=25 < 30
 - [missed] 文路身份显现 (30-40): flag scholar_path_started=undefined

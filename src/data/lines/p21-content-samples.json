@@ -1,0 +1,170 @@
+[
+  {
+    "id": "p21_scholar_route_reinforcement",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 88,
+    "ageRange": { "min": 22, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"scholar_path_started\") || flags.has(\"study_habit\")"
+      }
+    ],
+    "content": {
+      "title": "仕林初议",
+      "text": "你在二十余岁行走江湖，一位前辈学者邀你论道于书院。席间谈及天下大势与修身之道——这一席话将加深你在文士仕林中的名望。",
+      "description": "P21 路线敏感内容样板：文士路线强化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_scholarly_debate",
+        "text": "欣然论道，博采众长",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p21_scholar_route_reinforced", "value": true }
+        ]
+      },
+      {
+        "id": "decline_politely",
+        "text": "婉言谢绝，继续游历",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "p21_scholar_route_reinforced", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780900000000,
+      "updatedAt": 1780900000000,
+      "enabled": true,
+      "tags": ["p21", "route_sensitive", "scholarly"],
+      "pathAffinity": { "scholarly": 1.0, "academic": 0.9 },
+      "narrativeScheduling": {
+        "stageSignals": ["scholarly_identity"],
+        "routePoints": [
+          {
+            "routeId": "scholarly",
+            "kind": "reinforcement",
+            "ageBand": "20-30",
+            "eventId": "p21_scholar_route_reinforcement",
+            "flagKey": "p21_scholar_route_reinforced"
+          }
+        ]
+      },
+      "authoringSemantics": {
+        "contentRole": "route_sensitive",
+        "routeFit": ["scholarly", "academic"],
+        "stageFit": ["scholarly_identity"],
+        "toneMarkers": ["江湖", "修身", "仕林"],
+        "duplicateRiskClass": "route_reinforcement",
+        "authoringNotes": "Route-sensitive sample via config-only workflow.",
+        "llmEditableFields": ["content.text", "content.title", "choices"]
+      }
+    }
+  },
+  {
+    "id": "p21_study_echo_callback",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 82,
+    "ageRange": { "min": 25, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p9_echo_study_hook\")"
+      }
+    ],
+    "content": {
+      "title": "旧学新用",
+      "text": "当年幼时埋首书卷的习惯，在此刻化作应对变局的底气。你在一场突发纷争中引经据典、化解僵局，旁人这才知你并非只会纸上谈兵。",
+      "description": "P21 阶段/回调敏感内容样板"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
+      { "type": "flag_set", "target": "p21_study_echo_seen", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_study", "value": "，昔年苦读今见效" }
+    ],
+    "metadata": {
+      "createdAt": 1780900000000,
+      "updatedAt": 1780900000000,
+      "enabled": true,
+      "tags": ["p21", "callback_sensitive", "echo"],
+      "pathAffinity": { "scholarly": 0.8 },
+      "narrativeScheduling": {
+        "stageSignals": ["study_echo_payoff"],
+        "routePoints": []
+      },
+      "authoringSemantics": {
+        "contentRole": "callback_sensitive",
+        "routeFit": ["scholarly"],
+        "stageFit": ["study_echo_payoff"],
+        "toneMarkers": ["书卷", "江湖"],
+        "duplicateRiskClass": "echo_callback",
+        "authoringNotes": "Callback-sensitive sample; triggered by p9_echo_study_hook flag.",
+        "llmEditableFields": ["content.text", "content.title"]
+      }
+    }
+  },
+  {
+    "id": "p21_archetype_legacy_closure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 75,
+    "ageRange": { "min": 35, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 35 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"teaching_legacy\") || flags.has(\"scholarly_heritage_high\")"
+      }
+    ],
+    "content": {
+      "title": "文脉余韵",
+      "text": "年近不惑，你将一生所学整理成册，托付给后辈。江湖人提起你时，不再只说武功高低，而说你留住了文脉与师门余韵。",
+      "description": "P21 终局/传承/谱系敏感内容样板"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+      { "type": "flag_set", "target": "p21_archetype_legacy_closed", "value": true },
+      { "type": "flag_set", "target": "p19_historical_memory_scholar", "value": true }
+    ],
+    "metadata": {
+      "createdAt": 1780900000000,
+      "updatedAt": 1780900000000,
+      "enabled": true,
+      "tags": ["p21", "endgame_sensitive", "archetype_sensitive", "legacy"],
+      "pathAffinity": { "scholarly": 0.95 },
+      "narrativeScheduling": {
+        "stageSignals": ["legacy_closure"],
+        "routePoints": [
+          {
+            "routeId": "scholarly",
+            "kind": "identity",
+            "ageBand": "30-40",
+            "eventId": "p21_archetype_legacy_closure",
+            "flagKey": "p21_archetype_legacy_closed"
+          }
+        ]
+      },
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": ["scholarly"],
+        "stageFit": ["legacy_closure"],
+        "toneMarkers": ["江湖", "文脉", "师门"],
+        "duplicateRiskClass": "endgame_identity",
+        "authoringNotes": "Late-life archetype/legacy sample via config-only workflow.",
+        "llmEditableFields": ["content.text", "content.title"]
+      }
+    }
+  }
+]

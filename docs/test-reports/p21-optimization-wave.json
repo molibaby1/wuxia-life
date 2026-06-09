@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-06-09T05:48:04.169Z",
+  "configOnlyContentAdded": true,
+  "tuningImprovedMetric": true,
+  "validationCaughtDrift": true,
+  "waveDecision": "pass",
+  "cases": [
+    {
+      "caseId": "config_only_content",
+      "description": "P21 content samples added via JSON without runtime edits",
+      "passed": true
+    },
+    {
+      "caseId": "tuning_improved_metric",
+      "description": "Scholar route/pacing/archetype tuning shows measurable deltas",
+      "passed": true
+    },
+    {
+      "caseId": "validation_caught_drift",
+      "description": "Low-quality draft and off-target tuning detected by validation path",
+      "passed": true
+    },
+    {
+      "caseId": "echo_wiring",
+      "description": "P21 echo hook has authoring contract and callback event",
+      "passed": true
+    }
+  ]
+}

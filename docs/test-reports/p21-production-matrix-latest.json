@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-06-09T05:48:04.169Z",
+  "rows": [
+    {
+      "eventId": "p21_scholar_route_reinforcement",
+      "contentRole": "route_sensitive",
+      "routeFitScore": 1,
+      "stageFitScore": 1,
+      "archetypeFitScore": 0.6,
+      "toneScore": 1,
+      "duplicateRiskScore": 1,
+      "llmAssisted": false,
+      "configOnly": true,
+      "coherent": true
+    },
+    {
+      "eventId": "p21_study_echo_callback",
+      "contentRole": "callback_sensitive",
+      "routeFitScore": 1,
+      "stageFitScore": 1,
+      "archetypeFitScore": 0.6,
+      "toneScore": 1,
+      "duplicateRiskScore": 1,
+      "llmAssisted": false,
+      "configOnly": true,
+      "coherent": true
+    },
+    {
+      "eventId": "p21_archetype_legacy_closure",
+      "contentRole": "archetype_sensitive",
+      "routeFitScore": 1,
+      "stageFitScore": 1,
+      "archetypeFitScore": 0.85,
+      "toneScore": 1,
+      "duplicateRiskScore": 1,
+      "llmAssisted": false,
+      "configOnly": true,
+      "coherent": true
+    }
+  ],
+  "summary": {
+    "totalSamples": 3,
+    "coherentCount": 3,
+    "configOnlyCount": 3,
+    "avgRouteFit": 1,
+    "avgDuplicateRisk": 1
+  },
+  "decision": "pass"
+}

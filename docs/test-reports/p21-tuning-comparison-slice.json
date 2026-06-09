@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-06-09T05:48:04.169Z",
+  "routeDistribution": {
+    "metric": "scholar_pathAffinity",
+    "before": 0.85,
+    "after": 1,
+    "improved": true
+  },
+  "stagePacing": {
+    "metric": "scholar_payoff_spacing_stage_20_30",
+    "before": 1.25,
+    "after": 1.06,
+    "improved": true
+  },
+  "archetypeCoverage": {
+    "metric": "scholar_baseWeight",
+    "before": 1,
+    "after": 1.15,
+    "improved": true
+  },
+  "allThreeCovered": true
+}

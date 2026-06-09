@@ -11,12 +11,20 @@ export interface SummaryTemplateMatch {
   priority: number;
 }
 
+export interface SummaryAuthoringGuide {
+  templateVariables: string[];
+  matchSemantics: string;
+  llmEditableFields: Array<'template'>;
+}
+
 export interface SummaryTemplatePart {
   id: string;
   slot: 'early_life' | 'turning_point' | 'age40_identity';
   template: string;
   worldId: string;
   match: SummaryTemplateMatch;
+  /** P21: summary composition semantics for config editors */
+  authoringGuide?: SummaryAuthoringGuide;
 }
 
 export const WUXIA_SUMMARY_TEMPLATES: SummaryTemplatePart[] = [
@@ -40,6 +48,11 @@ export const WUXIA_SUMMARY_TEMPLATES: SummaryTemplatePart[] = [
     worldId: 'wuxia',
     template: '出身：{origin}，路线：商路之主（{route_identity}）{echo_suffix}',
     match: { worldId: 'wuxia', routeIdentityIncludes: ['merchant'], routePreferences: ['wealth', 'merchant'], priority: 100 },
+    authoringGuide: {
+      templateVariables: ['origin', 'route_identity', 'echo_suffix'],
+      matchSemantics: 'Matches merchant route identity or wealth preference.',
+      llmEditableFields: ['template'],
+    },
   },
   {
     id: 'wuxia_identity_wanderer',

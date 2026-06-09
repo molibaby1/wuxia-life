@@ -1,0 +1,332 @@
+{
+  "gate": {
+    "generatedAt": "2026-06-09T05:48:04.169Z",
+    "decision": "pass",
+    "productionSurfaces": {
+      "styleConstraintCount": 4,
+      "duplicateConstraintCount": 3,
+      "hasLlmContentContract": true,
+      "hasLlmTuningContract": true,
+      "tuningSampleCount": 3,
+      "p21EventCount": 3
+    },
+    "validation": {
+      "contentSamplesPass": true,
+      "echoWiringPass": true,
+      "constraintReportPass": true,
+      "productionMatrixPass": true,
+      "tuningComparisonPass": true,
+      "optimizationWavePass": true
+    },
+    "messages": [
+      "Style constraints: 4",
+      "Duplicate constraints: 3",
+      "Tuning samples: 3",
+      "P21 events loaded: 3"
+    ],
+    "warnings": []
+  },
+  "productionMatrix": {
+    "generatedAt": "2026-06-09T05:48:04.169Z",
+    "rows": [
+      {
+        "eventId": "p21_scholar_route_reinforcement",
+        "contentRole": "route_sensitive",
+        "routeFitScore": 1,
+        "stageFitScore": 1,
+        "archetypeFitScore": 0.6,
+        "toneScore": 1,
+        "duplicateRiskScore": 1,
+        "llmAssisted": false,
+        "configOnly": true,
+        "coherent": true
+      },
+      {
+        "eventId": "p21_study_echo_callback",
+        "contentRole": "callback_sensitive",
+        "routeFitScore": 1,
+        "stageFitScore": 1,
+        "archetypeFitScore": 0.6,
+        "toneScore": 1,
+        "duplicateRiskScore": 1,
+        "llmAssisted": false,
+        "configOnly": true,
+        "coherent": true
+      },
+      {
+        "eventId": "p21_archetype_legacy_closure",
+        "contentRole": "archetype_sensitive",
+        "routeFitScore": 1,
+        "stageFitScore": 1,
+        "archetypeFitScore": 0.85,
+        "toneScore": 1,
+        "duplicateRiskScore": 1,
+        "llmAssisted": false,
+        "configOnly": true,
+        "coherent": true
+      }
+    ],
+    "summary": {
+      "totalSamples": 3,
+      "coherentCount": 3,
+      "configOnlyCount": 3,
+      "avgRouteFit": 1,
+      "avgDuplicateRisk": 1
+    },
+    "decision": "pass"
+  },
+  "constraintReport": {
+    "generatedAt": "2026-06-09T05:48:04.169Z",
+    "eventCount": 3,
+    "findings": [
+      {
+        "constraintId": "p21_route_identity_fit",
+        "dimension": "route_fit",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "路线身份契合: score 1.00 (min 0.6)"
+      },
+      {
+        "constraintId": "p21_stage_lifecycle_fit",
+        "dimension": "stage_fit",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "阶段生命周期契合: score 1.00 (min 0.55)"
+      },
+      {
+        "constraintId": "p21_wuxia_tone_consistency",
+        "dimension": "tone_consistency",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "武侠语气一致: score 1.00 (min 0.5)"
+      },
+      {
+        "constraintId": "p21_theme_recurrence_floor",
+        "dimension": "theme_fit",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 0.7,
+        "passed": true,
+        "detail": "主题回响下限: score 0.70 (min 0.45)"
+      },
+      {
+        "constraintId": "p21_exact_repeat_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "精确重复压控: class route_reinforcement"
+      },
+      {
+        "constraintId": "p21_route_homogenization_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "路线同质化风险: class route_reinforcement"
+      },
+      {
+        "constraintId": "p21_slop_cluster_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_scholar_route_reinforcement",
+        "score": 1,
+        "passed": true,
+        "detail": "Slop 簇集风险: class route_reinforcement"
+      },
+      {
+        "constraintId": "p21_route_identity_fit",
+        "dimension": "route_fit",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "路线身份契合: score 1.00 (min 0.6)"
+      },
+      {
+        "constraintId": "p21_stage_lifecycle_fit",
+        "dimension": "stage_fit",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "阶段生命周期契合: score 1.00 (min 0.55)"
+      },
+      {
+        "constraintId": "p21_wuxia_tone_consistency",
+        "dimension": "tone_consistency",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "武侠语气一致: score 1.00 (min 0.5)"
+      },
+      {
+        "constraintId": "p21_theme_recurrence_floor",
+        "dimension": "theme_fit",
+        "eventId": "p21_study_echo_callback",
+        "score": 0.7,
+        "passed": true,
+        "detail": "主题回响下限: score 0.70 (min 0.45)"
+      },
+      {
+        "constraintId": "p21_exact_repeat_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "精确重复压控: class echo_callback"
+      },
+      {
+        "constraintId": "p21_route_homogenization_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "路线同质化风险: class echo_callback"
+      },
+      {
+        "constraintId": "p21_slop_cluster_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_study_echo_callback",
+        "score": 1,
+        "passed": true,
+        "detail": "Slop 簇集风险: class echo_callback"
+      },
+      {
+        "constraintId": "p21_route_identity_fit",
+        "dimension": "route_fit",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "路线身份契合: score 1.00 (min 0.6)"
+      },
+      {
+        "constraintId": "p21_stage_lifecycle_fit",
+        "dimension": "stage_fit",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "阶段生命周期契合: score 1.00 (min 0.55)"
+      },
+      {
+        "constraintId": "p21_wuxia_tone_consistency",
+        "dimension": "tone_consistency",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "武侠语气一致: score 1.00 (min 0.5)"
+      },
+      {
+        "constraintId": "p21_theme_recurrence_floor",
+        "dimension": "theme_fit",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 0.7,
+        "passed": true,
+        "detail": "主题回响下限: score 0.70 (min 0.45)"
+      },
+      {
+        "constraintId": "p21_exact_repeat_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "精确重复压控: class endgame_identity"
+      },
+      {
+        "constraintId": "p21_route_homogenization_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "路线同质化风险: class endgame_identity"
+      },
+      {
+        "constraintId": "p21_slop_cluster_guard",
+        "dimension": "duplicate_risk",
+        "eventId": "p21_archetype_legacy_closure",
+        "score": 1,
+        "passed": true,
+        "detail": "Slop 簇集风险: class endgame_identity"
+      }
+    ],
+    "stylePassRate": 1,
+    "duplicateRiskPassRate": 1,
+    "decision": "pass"
+  },
+  "tuningComparison": {
+    "generatedAt": "2026-06-09T05:48:04.169Z",
+    "routeDistribution": {
+      "metric": "scholar_pathAffinity",
+      "before": 0.85,
+      "after": 1,
+      "improved": true
+    },
+    "stagePacing": {
+      "metric": "scholar_payoff_spacing_stage_20_30",
+      "before": 1.25,
+      "after": 1.06,
+      "improved": true
+    },
+    "archetypeCoverage": {
+      "metric": "scholar_baseWeight",
+      "before": 1,
+      "after": 1.15,
+      "improved": true
+    },
+    "allThreeCovered": true
+  },
+  "contentSamples": [
+    {
+      "sliceId": "route_sensitive",
+      "eventId": "p21_scholar_route_reinforcement",
+      "contentRole": "route_sensitive",
+      "hasAuthoringSemantics": true,
+      "hasNarrativeScheduling": true,
+      "passed": true
+    },
+    {
+      "sliceId": "callback_sensitive",
+      "eventId": "p21_study_echo_callback",
+      "contentRole": "callback_sensitive",
+      "hasAuthoringSemantics": true,
+      "hasNarrativeScheduling": true,
+      "passed": true
+    },
+    {
+      "sliceId": "archetype_sensitive",
+      "eventId": "p21_archetype_legacy_closure",
+      "contentRole": "archetype_sensitive",
+      "hasAuthoringSemantics": true,
+      "hasNarrativeScheduling": true,
+      "passed": true
+    }
+  ],
+  "optimizationWave": {
+    "generatedAt": "2026-06-09T05:48:04.169Z",
+    "configOnlyContentAdded": true,
+    "tuningImprovedMetric": true,
+    "validationCaughtDrift": true,
+    "waveDecision": "pass",
+    "cases": [
+      {
+        "caseId": "config_only_content",
+        "description": "P21 content samples added via JSON without runtime edits",
+        "passed": true
+      },
+      {
+        "caseId": "tuning_improved_metric",
+        "description": "Scholar route/pacing/archetype tuning shows measurable deltas",
+        "passed": true
+      },
+      {
+        "caseId": "validation_caught_drift",
+        "description": "Low-quality draft and off-target tuning detected by validation path",
+        "passed": true
+      },
+      {
+        "caseId": "echo_wiring",
+        "description": "P21 echo hook has authoring contract and callback event",
+        "passed": true
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 # P20 Replayability Gate (latest)
 
 **Decision:** pass
-**Generated:** 2026-06-09T04:21:53.682Z
+**Generated:** 2026-06-09T05:22:29.129Z
 
 ## Coverage
 - Archetype families: 5

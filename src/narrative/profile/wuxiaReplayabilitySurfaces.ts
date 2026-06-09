@@ -33,7 +33,7 @@ export const P20_SCHOLAR_STATESMAN: ArchetypeFamilyConfig = {
   id: 'p20_scholar_statesman',
   label: '文士仕林',
   familyKind: 'scholar_statesman',
-  baseWeight: 1,
+  baseWeight: 1.15,
   lifecycleSignals: {
     originIds: ['scholar_house', 'poor_family'],
     originTags: ['study', 'scholarly'],
@@ -204,7 +204,7 @@ export const WUXIA_ARCHETYPE_PACING_PROFILES: ArchetypePacingProfile[] = [
   {
     archetypeFamilyId: P20_SCHOLAR_STATESMAN.id,
     endgameClosureRhythm: 'delayed',
-    stageProfiles: buildStageProfiles([1.0, 1.05, 0.95, 0.9], [0, 1, 2, 2], [1.1, 1.2, 1.25, 1.3], [4, 4, 5, 5]),
+    stageProfiles: buildStageProfiles([1.0, 1.05, 0.95, 0.9], [0, 1, 2, 2], [1.1, 1.2, 1.06, 1.3], [4, 4, 5, 5]),
   },
   {
     archetypeFamilyId: P20_WEALTH_MERCHANT.id,

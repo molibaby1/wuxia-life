@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-06-09T04:21:59.576Z",
+  "generatedAt": "2026-06-09T05:48:08.880Z",
   "decision": "pass",
   "endAge": 40,
   "personaRuns": [
@@ -307,7 +307,7 @@
       "agency": {
         "activeActionCount": 3,
         "storyEventCount": 37,
-        "choiceEventCount": 17,
+        "choiceEventCount": 18,
         "forcedEventCount": 0,
         "activeActionByCategory": {
           "study": 3
@@ -348,7 +348,7 @@
             "ageBand": "0-20",
             "status": "achieved",
             "evidence": [
-              "knowledge=20 >= 20"
+              "knowledge=25 >= 20"
             ]
           },
           {
@@ -412,7 +412,7 @@
           {
             "age": 39,
             "kind": "choice",
-            "text": "江湖恩怨"
+            "text": "江湖调解"
           },
           {
             "age": 1,
@@ -502,19 +502,11 @@
           "personaId": "p8-scholar-su"
         },
         {
-          "eventId": "commoner_year_neighbor",
-          "selectedChoiceId": "neighbor_help",
-          "selectedScore": 9,
-          "runnerUpChoiceId": "neighbor_observe",
-          "runnerUpScore": 5,
-          "personaId": "p8-scholar-su"
-        },
-        {
-          "eventId": "career_foundation_sect",
-          "selectedChoiceId": "delay_sect",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "create_sect",
-          "runnerUpScore": -480,
+          "eventId": "commoner_year_farming",
+          "selectedChoiceId": "farming_diligent",
+          "selectedScore": 36,
+          "runnerUpChoiceId": "farming_leisure",
+          "runnerUpScore": 12,
           "personaId": "p8-scholar-su"
         },
         {
@@ -523,6 +515,14 @@
           "selectedScore": -20.5,
           "runnerUpChoiceId": null,
           "runnerUpScore": null,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "career_foundation_sect",
+          "selectedChoiceId": "delay_sect",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "create_sect",
+          "runnerUpScore": -480,
           "personaId": "p8-scholar-su"
         },
         {
@@ -558,10 +558,18 @@
           "personaId": "p8-scholar-su"
         },
         {
-          "eventId": "jianghu_grudge",
-          "selectedChoiceId": "peace_grudge",
-          "selectedScore": 10,
-          "runnerUpChoiceId": "fight_grudge",
+          "eventId": "commoner_year_neighbor",
+          "selectedChoiceId": "neighbor_help",
+          "selectedScore": 9,
+          "runnerUpChoiceId": "neighbor_observe",
+          "runnerUpScore": 5,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "career_mediate_conflict",
+          "selectedChoiceId": "",
+          "selectedScore": 50,
+          "runnerUpChoiceId": "",
           "runnerUpScore": 0,
           "personaId": "p8-scholar-su"
         }
@@ -2244,14 +2252,6 @@
           "personaId": "p8-balanced-wei"
         },
         {
-          "eventId": "commoner_year_neighbor",
-          "selectedChoiceId": "neighbor_help",
-          "selectedScore": 9,
-          "runnerUpChoiceId": "neighbor_observe",
-          "runnerUpScore": 5,
-          "personaId": "p8-balanced-wei"
-        },
-        {
           "eventId": "sect_midlife_stewardship",
           "selectedChoiceId": "stewardship_default_path",
           "selectedScore": -0.5,
@@ -2268,6 +2268,14 @@
           "personaId": "p8-balanced-wei"
         },
         {
+          "eventId": "career_foundation_sect",
+          "selectedChoiceId": "delay_sect",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "create_sect",
+          "runnerUpScore": -80,
+          "personaId": "p8-balanced-wei"
+        },
+        {
           "eventId": "family_crisis",
           "selectedChoiceId": "",
           "selectedScore": -10,
@@ -2276,11 +2284,11 @@
           "personaId": "p8-balanced-wei"
         },
         {
-          "eventId": "sect_midlife_gray_mission",
-          "selectedChoiceId": "gray_refuse_order",
-          "selectedScore": 9.5,
-          "runnerUpChoiceId": "gray_leak_warning",
-          "runnerUpScore": 7,
+          "eventId": "jianghu_rescue",
+          "selectedChoiceId": "rescue_immediate",
+          "selectedScore": 80,
+          "runnerUpChoiceId": "send_disciples",
+          "runnerUpScore": 0,
           "personaId": "p8-balanced-wei"
         },
         {
@@ -2316,7 +2324,7 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-scholar-su",
-        "score": 0.7731044295937767
+        "score": 0.7651501291289778
       },
       {
         "personaA": "p8-martial-lin",
@@ -2351,32 +2359,32 @@
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-social-gu",
-        "score": 0.7458393679683474
+        "score": 0.7476322695142845
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-wealth-shen",
-        "score": 0.8165924129116641
+        "score": 0.818545513102056
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-cautious-han",
-        "score": 0.6136314702462194
+        "score": 0.6088176889709587
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-deviant-ye",
-        "score": 0.5708583678472297
+        "score": 0.5534408150814677
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-explorer-lu",
-        "score": 0.6459265958051138
+        "score": 0.643648563893314
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-balanced-wei",
-        "score": 0.648342405730428
+        "score": 0.6496244172152598
       },
       {
         "personaA": "p8-social-gu",

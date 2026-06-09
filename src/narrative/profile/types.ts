@@ -188,6 +188,146 @@ export interface WorldProfile {
   archetypePacingProfiles?: ArchetypePacingProfile[];
   /** P20: representative replay slice definitions. */
   replaySliceConfigs?: ReplaySliceConfig[];
+  /** P21: style and fit constraint rules for content production. */
+  contentStyleConstraints?: ContentStyleConstraint[];
+  /** P21: duplicate-risk and recurrence boundary rules. */
+  contentDuplicateConstraints?: ContentDuplicateConstraint[];
+  /** P21: bounded LLM content addition contract. */
+  llmContentContract?: LlmContentContractConfig;
+  /** P21: bounded LLM tuning contract. */
+  llmTuningContract?: LlmTuningContractConfig;
+  /** P21: representative tuning sample configs. */
+  tuningSampleConfigs?: TuningSampleConfig[];
+}
+
+export type ContentConstraintDimension =
+  | 'route_fit'
+  | 'stage_fit'
+  | 'tone_consistency'
+  | 'theme_fit';
+
+export interface ContentStyleConstraint {
+  id: string;
+  label: string;
+  dimension: ContentConstraintDimension;
+  requiredSignals: string[];
+  blockedPatterns: string[];
+  minimumScore: number;
+  toneMarkers?: string[];
+  authoringNotes: string;
+}
+
+export interface ContentDuplicateConstraint {
+  id: string;
+  label: string;
+  riskClass: string;
+  maxSameClassInLookback: number;
+  lookbackYears: number;
+  acceptableRecurrence: string;
+  harmfulOverlapThreshold: number;
+  authoringNotes: string;
+}
+
+export interface LlmContentContractConfig {
+  id: string;
+  label: string;
+  allowedContentRoles: string[];
+  requiredInputs: string[];
+  allowedOutputs: string[];
+  requiredOutputFields: string[];
+  validationSteps: string[];
+  disallowedOutputs: string[];
+}
+
+export interface LlmTuningContractConfig {
+  id: string;
+  label: string;
+  allowedTuningClasses: string[];
+  requiredInputs: string[];
+  allowedOutputFields: string[];
+  validationSteps: string[];
+  disallowedOutputs: string[];
+}
+
+export type TuningSampleClass =
+  | 'route_distribution'
+  | 'stage_pacing'
+  | 'archetype_coverage'
+  | 'repetition_pressure'
+  | 'endgame_distribution';
+
+export interface TuningSampleConfig {
+  id: string;
+  label: string;
+  tuningClass: TuningSampleClass;
+  targetFieldPath: string;
+  baselineValue: number;
+  tunedValue: number;
+  validationMetric: string;
+  expectedDelta: string;
+  authoringNotes: string;
+}
+
+export interface ContentConstraintFinding {
+  constraintId: string;
+  dimension: ContentConstraintDimension | 'duplicate_risk';
+  eventId?: string;
+  score: number;
+  passed: boolean;
+  detail: string;
+}
+
+export interface ContentConstraintReport {
+  generatedAt: string;
+  eventCount: number;
+  findings: ContentConstraintFinding[];
+  stylePassRate: number;
+  duplicateRiskPassRate: number;
+  decision: 'pass' | 'warning' | 'fail';
+}
+
+export interface LlmContentValidationResult {
+  valid: boolean;
+  missingFields: string[];
+  blockedOutputs: string[];
+  constraintFindings: ContentConstraintFinding[];
+  decision: 'pass' | 'warning' | 'fail';
+}
+
+export interface LlmTuningValidationResult {
+  valid: boolean;
+  tuningClass: string;
+  fieldPath: string;
+  withinBounds: boolean;
+  measurableDelta: boolean;
+  detail: string;
+  decision: 'pass' | 'warning' | 'fail';
+}
+
+export interface ProductionMatrixRow {
+  eventId: string;
+  contentRole: string;
+  routeFitScore: number;
+  stageFitScore: number;
+  archetypeFitScore: number;
+  toneScore: number;
+  duplicateRiskScore: number;
+  llmAssisted: boolean;
+  configOnly: boolean;
+  coherent: boolean;
+}
+
+export interface ProductionValidationMatrix {
+  generatedAt: string;
+  rows: ProductionMatrixRow[];
+  summary: {
+    totalSamples: number;
+    coherentCount: number;
+    configOnlyCount: number;
+    avgRouteFit: number;
+    avgDuplicateRisk: number;
+  };
+  decision: 'pass' | 'warning' | 'fail';
 }
 
 export type RelationshipConsequenceKind =

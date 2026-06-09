@@ -43,6 +43,7 @@ import factionEventsJson from '../data/lines/faction-revelation.json';
 import setbackEventsJson from '../data/lines/setback-events.json';
 import p9RemediationEventsJson from '../data/lines/p9-remediation.json';
 import p11ValidationEventsJson from '../data/lines/p11-validation.json';
+import p21ContentSamplesJson from '../data/lines/p21-content-samples.json';
 
 // 路线事件（已合并到 identity-outlaw.json）
 // import pathExamplesJson from '../data/lines/path-examples.json';
@@ -77,6 +78,7 @@ const factionEvents = factionEventsJson as EventDefinition[];
 const setbackEvents = setbackEventsJson as EventDefinition[];
 const p9RemediationEvents = p9RemediationEventsJson as EventDefinition[];
 const p11ValidationEvents = p11ValidationEventsJson as EventDefinition[];
+const p21ContentSamples = p21ContentSamplesJson as EventDefinition[];
 
 const eventsIndex = eventsIndexJson as {
   version: string;
@@ -139,6 +141,7 @@ export class EventLoader {
       './lines/setback-events.json': setbackEvents,
       './lines/p9-remediation.json': p9RemediationEvents,
       './lines/p11-validation.json': p11ValidationEvents,
+      './lines/p21-content-samples.json': p21ContentSamples,
     };
     
     const orderedLines = (eventsIndex.imports || [])

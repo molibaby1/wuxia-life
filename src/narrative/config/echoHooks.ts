@@ -19,6 +19,13 @@ export interface EchoSummaryContribution {
   textSources: EchoSummaryTextSource[];
 }
 
+export interface EchoHookAuthoringContract {
+  requiredCompanionFiles: string[];
+  triggerSemantics: string;
+  callbackConditionPattern: string;
+  llmEditableFields: string[];
+}
+
 export interface EchoHook {
   id: string;
   sourceActionId?: string;
@@ -30,6 +37,8 @@ export interface EchoHook {
   targets: EchoCallbackTarget[];
   summaryContribution?: EchoSummaryContribution;
   description: string;
+  /** P21: explicit callback wiring semantics for LLM/human authoring */
+  authoringContract?: EchoHookAuthoringContract;
 }
 
 export const WUXIA_ECHO_HOOKS: EchoHook[] = [
@@ -49,6 +58,15 @@ export const WUXIA_ECHO_HOOKS: EchoHook[] = [
       textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_training' }, { kind: 'description' }],
     },
     description: '幼年练功 → 中段功底显现',
+    authoringContract: {
+      requiredCompanionFiles: [
+        'src/data/activeActionCatalog.ts',
+        'src/data/lines/p9-remediation.json',
+      ],
+      triggerSemantics: 'action_training_basic.onCompleteFlags sets p9_echo_training_hook',
+      callbackConditionPattern: 'flags.has("p9_echo_training_hook")',
+      llmEditableFields: ['description', 'callbackAgeMin', 'callbackAgeMax'],
+    },
   },
   {
     id: 'echo_business_basic',
@@ -86,6 +104,16 @@ export const WUXIA_ECHO_HOOKS: EchoHook[] = [
       textSources: [{ kind: 'flag_value', flagKey: 'p9_summary_echo_study' }, { kind: 'description' }],
     },
     description: '幼年读书 → 学识回响',
+    authoringContract: {
+      requiredCompanionFiles: [
+        'src/data/activeActionCatalog.ts',
+        'src/data/lines/p9-remediation.json',
+        'src/data/lines/p21-content-samples.json',
+      ],
+      triggerSemantics: 'action_study_basic.onCompleteFlags sets p9_echo_study_hook',
+      callbackConditionPattern: 'flags.has("p9_echo_study_hook")',
+      llmEditableFields: ['description', 'callbackAgeMin', 'callbackAgeMax'],
+    },
   },
   {
     id: 'echo_social_basic',

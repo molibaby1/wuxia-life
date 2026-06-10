@@ -1,0 +1,79 @@
+{
+  "phase": "P23",
+  "title": "Experience Acceptance And Live Balance Closure",
+  "generatedAt": "2026-06-10T08:45:41.071Z",
+  "beforeAfter": {
+    "acceptanceGap": "P16–P22 gates proved system health and content volume but lacked unified experience acceptance baselines.",
+    "comparisonGap": "Tuning waves could pass without demonstrating player-experience improvement over volume growth.",
+    "balanceGap": "Long-term balance relied on scattered P20/P22 metrics without wave-to-wave indicator set.",
+    "decisionGap": "Low-value content waves were not systematically detectable or redirectable."
+  },
+  "implemented": {
+    "experienceDimensions": 7,
+    "acceptanceBaselines": 4,
+    "comparisonSamples": 4,
+    "balanceIndicators": 5,
+    "liveBalanceSamples": 4,
+    "runtimeModules": [
+      "experienceBaselines",
+      "comparisonReporting",
+      "balanceIndicators",
+      "liveBalanceSamples",
+      "validationMatrix",
+      "validationSlices"
+    ]
+  },
+  "validation": {
+    "baselinesPass": true,
+    "comparisonsPass": true,
+    "indicatorsHealthy": true,
+    "matrixPass": true,
+    "fullLifeOperationPass": true,
+    "lowValueDetectionPass": true,
+    "tuningRedirectionPass": true,
+    "gateDecision": "pass",
+    "matrixDecision": "pass",
+    "fullLifeDecision": "pass",
+    "indicatorHealth": [
+      {
+        "id": "p23_ind_archetype_stability",
+        "value": 0.93,
+        "healthy": true
+      },
+      {
+        "id": "p23_ind_replay_novelty",
+        "value": 0.76,
+        "healthy": true
+      },
+      {
+        "id": "p23_ind_stage_pacing_health",
+        "value": 0.6500000000000001,
+        "healthy": true
+      },
+      {
+        "id": "p23_ind_mid_late_payoff",
+        "value": 0.8315625000000002,
+        "healthy": true
+      },
+      {
+        "id": "p23_ind_legacy_endgame_resonance",
+        "value": 0.8857727500000001,
+        "healthy": true
+      }
+    ]
+  },
+  "upstreamGates": {
+    "playability": {
+      "ok": true,
+      "detail": "Warnings: 2 JSON: /Users/zhouyun/code/wuxia-life/docs/test-reports/p8-playability-gate-latest.json Markdown: /Users/zhouyun/code/wuxia-life/docs/test-reports/p8-playability-gate-latest.md"
+    },
+    "p12Profile": {
+      "ok": true,
+      "detail": "P12 profile gate decision: pass Wrote docs/test-reports/p12-profile-gate-latest.{json,md} Wrote docs/test-reports/p12-profile-smoke-latest.json"
+    },
+    "p22": {
+      "ok": true,
+      "detail": "> tsx scripts/runP22Gate.ts  P22 gate decision: pass"
+    }
+  }
+}

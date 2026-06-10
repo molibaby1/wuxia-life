@@ -1,0 +1,362 @@
+{
+  "project": "Wuxia Life P22 Content Library Expansion And Live Ops Baseline",
+  "branchName": "ralph/p22-wuxia-content-library-expansion-and-live-ops-baseline",
+  "description": "Expand the wuxia content library through a bounded live-ops baseline pass by auditing weak pools, defining baseline coverage rules, adding explicit coverage reporting surfaces, shipping representative early, mid, and late content-wave samples with matching tuning samples, and proving via validation artifacts that future experience gains can come mainly from content-library growth and configuration tuning without UI work, new themes, or a large runtime rewrite.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit early-life content-library coverage",
+      "description": "As a maintainer, I want a read-only audit of origin, childhood shaping, and early route-divergence pools so that P22 targets the highest-value early-life holes first.",
+      "acceptanceCriteria": [
+        "Audit current origin, childhood shaping, and early route-divergence content pools",
+        "Mark each audited pool as strong, weak, sparse, or repetitive",
+        "Record the main early-life player-experience risks caused by thin or repetitive coverage",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit mid-life consequence coverage",
+      "description": "As a maintainer, I want a read-only audit of relationship, faction, and social-role continuation pools so that P22 can prioritize the weakest mid-life consequence surfaces.",
+      "acceptanceCriteria": [
+        "Audit current relationship consequence, faction consequence, and social-role continuation content pools",
+        "Mark each audited pool as strong, weak, sparse, or repetitive",
+        "Record the main mid-life player-experience risks caused by weak route differentiation or weak sustained-role support",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Audit legacy and endgame coverage",
+      "description": "As a maintainer, I want a read-only audit of legacy, disciple or heir, endgame, and historical-memory pools so that P22 can target thin late-life closure surfaces instead of expanding blindly.",
+      "acceptanceCriteria": [
+        "Audit current legacy, disciple or heir outcome, endgame closure, and historical-memory content pools",
+        "Mark each audited pool as strong, weak, sparse, or repetitive",
+        "Record the main late-life player-experience risks caused by weak closure, weak legacy continuity, or weak historical-memory differentiation",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Write P22 expansion prioritization rules",
+      "description": "As a designer, I want explicit prioritization rules for content-library expansion so that future waves fill high-value holes before decorative growth.",
+      "acceptanceCriteria": [
+        "Define how P22 prioritizes high-value gaps versus nice-to-have thematic expansion",
+        "Define what counts as acceptable pool redundancy versus harmful thinness or duplication",
+        "Record which expansion opportunities are intentionally deferred beyond P22",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Define representative baseline pool sets",
+      "description": "As a maintainer, I want explicit baseline pool sets so that future live-ops waves target stable foundations rather than implicit expectations.",
+      "acceptanceCriteria": [
+        "Define 3-5 representative baseline content pools for long-term operation",
+        "For each baseline pool, record minimum coverage expectations and known thin areas",
+        "Ensure the baseline pool set is suitable for future production-wave comparison",
+        "Save the definition under docs/test-reports/ or docs/designs/",
+        "Do not require runtime redesign in this story"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Write live-ops baseline scope and deferral rules",
+      "description": "As a designer, I want explicit live-ops baseline rules so that P22 proves a sustainable operating model without overreaching into unrelated feature work.",
+      "acceptanceCriteria": [
+        "Define the target baseline content pools and wave scope that P22 must prove in practice",
+        "Define which content-library or live-ops problems are explicitly deferred beyond P22",
+        "Define how future waves should compare against baseline pools after P22",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add library coverage schema surface",
+      "description": "As a developer, I want an explicit coverage schema so that content-pool health can be tracked without hidden runtime-specific knowledge.",
+      "acceptanceCriteria": [
+        "Add or refine config or reporting structures for content-pool coverage and density tracking",
+        "Field names and semantics are explicit enough for later content-library management and LLM-assisted tuning",
+        "Schema remains compatible with current profile-first loading or a controlled migration path is documented",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add weak-spot and duplication reporting surface",
+      "description": "As a developer, I want an explicit weak-spot detection surface so that sparse pools and duplication risks are visible before low-value content expansion lands.",
+      "acceptanceCriteria": [
+        "Add or refine config or reporting structures for weak-spot detection and duplication-risk reporting",
+        "The reporting surface can distinguish thin coverage from over-concentrated or repetitive coverage",
+        "The field semantics remain theme-neutral enough for later shared tooling use",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add library coverage validation matrix surface",
+      "description": "As a maintainer, I want a stable machine-readable validation matrix so that future expansion waves can be judged systematically rather than impressionistically.",
+      "acceptanceCriteria": [
+        "Add a matrix or machine-readable report surface for representative content-pool coverage, thin areas, archetype support, and duplication risk",
+        "The output is suitable for future live-ops style comparison across waves",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Expand one high-value origin or background pool",
+      "description": "As a player, I want stronger start-of-life variety so that different run openings feel materially supported rather than collapsing into familiar starts.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across origin or starting-background content",
+        "The additions materially improve support for at least 1 previously weak early-life archetype",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Expand one childhood shaping pool",
+      "description": "As a player, I want stronger childhood shaping variety so that formative years create more differentiated early trajectories.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across childhood shaping or formative-growth content",
+        "The additions materially improve support for at least 1 previously weak stage band or formative trajectory",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Expand one early route-divergence pool",
+      "description": "As a player, I want stronger early route divergence so that early-life choices branch into more distinct supported paths.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across early route reinforcement or divergence content",
+        "The additions materially improve support for at least 1 previously weak route-differentiation surface",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Expand one relationship consequence pool",
+      "description": "As a player, I want stronger relationship consequence support so that social ties continue to matter after early growth.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across relationship consequence content",
+        "The additions materially improve support for at least 1 previously weak mid-life relational trajectory",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Expand one faction or social-role continuation pool",
+      "description": "As a player, I want stronger faction and social-role continuation so that sustained identities remain supported beyond the early game.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across faction identity, organizational consequence, or social-role continuation content",
+        "The additions materially improve support for at least 1 previously weak mid or late-life trajectory",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Expand one legacy continuity pool",
+      "description": "As a player, I want stronger legacy continuity support so that what I leave behind remains meaningful across more run types.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across legacy, disciple, heir, or succession content",
+        "The additions materially improve support for at least 1 previously weak late-life continuity archetype",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Expand one endgame or historical-memory pool",
+      "description": "As a player, I want stronger endgame closure variety so that late-life outcomes remain deep across more different runs.",
+      "acceptanceCriteria": [
+        "Expand or refine 1 high-value content pool across endgame closure or historical-memory content",
+        "The additions materially improve support for at least 1 previously weak endgame or late-life closure archetype",
+        "The content is wired through the existing profile-first content path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Ship early-life content-wave sample",
+      "description": "As a player, I want at least one representative early-life content wave produced through the P21 workflow so that expansion quality stays cohesive.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-wave sample that targets an early-life or growth-pool weakness",
+        "The sample follows the new production workflow rather than an ad hoc path",
+        "The resulting content remains consistent with the chosen baseline pool rules",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Ship mid-life content-wave sample",
+      "description": "As a player, I want at least one representative mid-life content wave produced through the P21 workflow so that consequence and identity pools expand coherently.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-wave sample that targets a mid or late-life consequence or identity weakness",
+        "The sample follows the new production workflow rather than an ad hoc path",
+        "The resulting content remains consistent with the chosen baseline pool rules",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Ship legacy or endgame content-wave sample",
+      "description": "As a player, I want at least one representative late-life content wave produced through the P21 workflow so that expansion strengthens closure instead of only the early game.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative content-wave sample that targets a legacy, endgame, or historical-memory weakness",
+        "The sample follows the new production workflow rather than an ad hoc path",
+        "The resulting content remains consistent with the chosen baseline pool rules",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Ship route and distribution tuning sample",
+      "description": "As a maintainer, I want at least one tuning sample tied to the new content waves so that expansion includes distribution correction instead of only raw content growth.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts route or event distribution after pool expansion",
+        "Demonstrate how the tuning sample stabilizes newly expanded content rather than bypassing it",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Ship density and closure weighting tuning sample",
+      "description": "As a maintainer, I want at least one tuning sample for stage density or closure weighting so that new pools remain paced and coherent across runs.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts stage density, payoff spacing, or closure weighting after pool expansion",
+        "Demonstrate how the tuning sample improves pacing or closure support for a newly expanded pool",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Ship archetype support tuning sample",
+      "description": "As a maintainer, I want at least one tuning sample for archetype support so that weak run types gain coverage rather than being crowded out by dominant pools.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative tuning sample that adjusts archetype or replayability support affected by newly expanded pools",
+        "Demonstrate how the tuning sample improves support for at least 1 previously weak archetype",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Run one bounded full expansion wave",
+      "description": "As a project owner, I want one representative full expansion-and-tuning wave executed through the new workflow so that P22 proves the operating model in practice rather than only in theory.",
+      "acceptanceCriteria": [
+        "Run 1 bounded expansion-and-tuning wave across representative early, mid, and late content pools",
+        "Demonstrate at least 1 case where a previously weak content area becomes materially better supported",
+        "Demonstrate at least 1 case where a tuning adjustment was required to stabilize new pool additions",
+        "Demonstrate at least 1 case where validation reports caught or prevented low-value or duplicative expansion",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Publish P22 closure and gate report",
+      "description": "As a maintainer, I want a dedicated P22 closure report so that the phase can be accepted based on evidence instead of impressions.",
+      "acceptanceCriteria": [
+        "Add or update a P22-specific gate or report covering content-library coverage, baseline-pool health, wave quality, and expansion-driven tuning stability",
+        "Record before and after findings for the main content-library and live-ops baseline issues targeted by P22",
+        "Confirm gate:playability and current profile or runtime gates do not regress",
+        "Save the final closure report under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

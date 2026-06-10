@@ -1,0 +1,70 @@
+{
+  "phase": "P22",
+  "title": "Content Library Expansion And Live Ops Baseline",
+  "generatedAt": "2026-06-10T07:10:47.968Z",
+  "beforeAfter": {
+    "coverageGap": "Content pools were audited in P16–P20 but lacked unified coverage matrix and baseline pool comparison.",
+    "weakSpotGap": "Thin vs repetitive coverage was impressionistic; P22 weak-spot detection surfaces distinguish both.",
+    "waveGap": "P21 proved production workflow for samples; P22 runs three live-ops waves across early/mid/late pools.",
+    "tuningGap": "Pool expansion without distribution correction crowded weak archetypes; P22 tuning samples stabilize wealth/hermit support."
+  },
+  "implemented": {
+    "baselinePoolConfigs": 5,
+    "coverageExpectations": 5,
+    "liveOpsWaves": 3,
+    "liveOpsTuningSamples": 3,
+    "p22ExpansionEvents": 10,
+    "runtimeModules": [
+      "poolInventory",
+      "coverageEvaluation",
+      "weakSpotDetection",
+      "coverageMatrix",
+      "validationSlices"
+    ]
+  },
+  "validation": {
+    "expansionsPass": true,
+    "wavesPass": true,
+    "coverageMatrixPass": true,
+    "tuningComparisonPass": true,
+    "expansionWavePass": true,
+    "gateDecision": "pass",
+    "tuningAllThree": true,
+    "poolHealth": [
+      {
+        "poolId": "p22_pool_origin",
+        "health": "strong"
+      },
+      {
+        "poolId": "p22_pool_childhood_shaping",
+        "health": "strong"
+      },
+      {
+        "poolId": "p22_pool_early_route",
+        "health": "strong"
+      },
+      {
+        "poolId": "p22_pool_midlife_consequence",
+        "health": "strong"
+      },
+      {
+        "poolId": "p22_pool_legacy_endgame",
+        "health": "strong"
+      }
+    ]
+  },
+  "upstreamGates": {
+    "playability": {
+      "ok": true,
+      "detail": "Warnings: 2 JSON: /Users/zhouyun/code/wuxia-life/docs/test-reports/p8-playability-gate-latest.json Markdown: /Users/zhouyun/code/wuxia-life/docs/test-reports/p8-playability-gate-latest.md"
+    },
+    "p12Profile": {
+      "ok": true,
+      "detail": "P12 profile gate decision: pass Wrote docs/test-reports/p12-profile-gate-latest.{json,md} Wrote docs/test-reports/p12-profile-smoke-latest.json"
+    },
+    "p21": {
+      "ok": true,
+      "detail": "> tsx scripts/runP21Gate.ts  P21 gate decision: pass"
+    }
+  }
+}

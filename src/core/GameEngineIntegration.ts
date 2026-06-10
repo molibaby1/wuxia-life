@@ -48,6 +48,7 @@ import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSe
 import { getArchetypeSchedulingMultiplier } from '../p20/archetypeCoverage';
 import { getProfileRepetitionPressureMultiplier } from '../p20/repetitionPressure';
 import { getWholeLifePacingMultiplier } from '../p20/wholeLifePacing';
+import { applyLiveOpsActivationToState } from '../p22/liveOpsActivation';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import {
@@ -418,6 +419,10 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
+      if (!this.isLiveOpsExpansionSelectable(event)) {
+        return false;
+      }
+
       // 1. 统一运行时门禁：conditions + thresholds + legacy triggerConditions
       if (!this.passesRuntimeEventGuards(event, this.gameState)) {
         return false;
@@ -1457,6 +1462,16 @@ export class GameEngineIntegration {
     return events[events.length - 1];
   }
 
+  /** P22 live-ops expansion events stay in catalog until explicitly activated. */
+  private isLiveOpsExpansionSelectable(event: EventDefinition): boolean {
+    const tags = event.metadata?.tags ?? [];
+    if (!tags.includes('live_ops_expansion')) {
+      return true;
+    }
+    const flags = this.gameState.flags ?? this.gameState.player?.flags ?? {};
+    return Boolean(flags.p22_live_ops_active);
+  }
+
   private getHistoryRecordSuppressionClass(eventId: string): 'injury' | 'illness' | 'economy' | null {
     const historicalEvent = eventLoader.getEventById(eventId);
     if (historicalEvent) {
@@ -2096,7 +2111,11 @@ export class GameEngineIntegration {
   /**
    * 开始新游戏
    */
-  public startNewGame(name: string, gender: 'male' | 'female'): void {
+  public startNewGame(
+    name: string,
+    gender: 'male' | 'female',
+    options?: { enableLiveOpsActivation?: boolean },
+  ): void {
     const nextState = this.createInitialState();
     const profile = traitSystem.generateProfile();
     nextState.player = traitSystem.applyProfile(
@@ -2107,7 +2126,10 @@ export class GameEngineIntegration {
       },
       profile
     );
-    this.applyGameState(nextState);
+    const enableLiveOps = options?.enableLiveOpsActivation !== false;
+    this.applyGameState(
+      enableLiveOps ? applyLiveOpsActivationToState(nextState, profile) : nextState,
+    );
   }
   
   /**

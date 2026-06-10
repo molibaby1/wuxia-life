@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-06-10T08:45:41.048Z",
+  "rows": [
+    {
+      "poolId": "p22_pool_origin",
+      "lifePhase": "origin",
+      "healthClass": "strong",
+      "eventCount": 11,
+      "meetsMinimum": true,
+      "archetypeSupportScore": 1,
+      "duplicationRiskScore": 0.44999999999999996,
+      "weakArchetypeTargets": [
+        "frontier_military",
+        "streetborn"
+      ]
+    },
+    {
+      "poolId": "p22_pool_childhood_shaping",
+      "lifePhase": "childhood",
+      "healthClass": "strong",
+      "eventCount": 25,
+      "meetsMinimum": true,
+      "archetypeSupportScore": 1,
+      "duplicationRiskScore": 0.1,
+      "weakArchetypeTargets": [
+        "streetborn",
+        "poor_family"
+      ]
+    },
+    {
+      "poolId": "p22_pool_early_route",
+      "lifePhase": "early_route",
+      "healthClass": "strong",
+      "eventCount": 48,
+      "meetsMinimum": true,
+      "archetypeSupportScore": 1,
+      "duplicationRiskScore": 0.1,
+      "weakArchetypeTargets": [
+        "wealth_merchant",
+        "explorer_wanderer"
+      ]
+    },
+    {
+      "poolId": "p22_pool_midlife_consequence",
+      "lifePhase": "midlife_consequence",
+      "healthClass": "strong",
+      "eventCount": 72,
+      "meetsMinimum": true,
+      "archetypeSupportScore": 1,
+      "duplicationRiskScore": 0.1,
+      "weakArchetypeTargets": [
+        "wealth_merchant",
+        "social_connector"
+      ]
+    },
+    {
+      "poolId": "p22_pool_legacy_endgame",
+      "lifePhase": "legacy_endgame",
+      "healthClass": "strong",
+      "eventCount": 38,
+      "meetsMinimum": true,
+      "archetypeSupportScore": 1,
+      "duplicationRiskScore": 0.1,
+      "weakArchetypeTargets": [
+        "hermit_withdrawal",
+        "wealth_merchant"
+      ]
+    }
+  ],
+  "weakSpots": [
+    {
+      "poolId": "p22_pool_origin",
+      "findingKind": "thin_coverage",
+      "severity": "low",
+      "metric": "knownThinArea",
+      "value": 0,
+      "threshold": 1,
+      "detail": "Known thin area for future waves: streetborn"
+    },
+    {
+      "poolId": "p22_pool_origin",
+      "findingKind": "thin_coverage",
+      "severity": "low",
+      "metric": "knownThinArea",
+      "value": 0,
+      "threshold": 1,
+      "detail": "Known thin area for future waves: scholar_house variance"
+    },
+    {
+      "poolId": "p22_pool_childhood_shaping",
+      "findingKind": "thin_coverage",
+      "severity": "low",
+      "metric": "knownThinArea",
+      "value": 0,
+      "threshold": 1,
+      "detail": "Known thin area for future waves: streetborn formative band"
+    },
+    {
+      "poolId": "p22_pool_childhood_shaping",
+      "findingKind": "thin_coverage",
+      "severity": "low",
+      "metric": "knownThinArea",
+      "value": 0,
+      "threshold": 1,
+      "detail": "Known thin area for future waves: guidance-conditioned milestones"
+    },
+    {
+      "poolId": "p22_pool_early_route",
+      "findingKind": "thin_coverage",
+      "severity": "low",
+      "metric": "knownThinArea",
+      "value": 0,
+      "threshold": 1,
+      "detail": "Known thin area for future waves: explorer wanderer reinforcement"
+    }
+  ],
+  "summary": {
+    "poolCount": 5,
+    "strongCount": 5,
+    "weakOrSparseCount": 0,
+    "repetitiveCount": 0,
+    "expansionEventCount": 10
+  },
+  "decision": "pass"
+}

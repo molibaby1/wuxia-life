@@ -206,7 +206,9 @@ export class GameProcessSimulator {
     await this.withSeededRandom(this.config.seed, async () => {
       // 1. 创建角色
       this.log('📝 步骤 1: 创建角色');
-      gameEngine.startNewGame(this.config.playerName, this.config.gender);
+      gameEngine.startNewGame(this.config.playerName, this.config.gender, {
+        enableLiveOpsActivation: false,
+      });
       this.gameState = gameEngine.getGameState();
       const p8Persona = this.resolveP8Persona();
       if (p8Persona) {

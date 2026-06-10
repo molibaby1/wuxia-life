@@ -1,0 +1,804 @@
+[
+  {
+    "id": "p22_origin_frontier_orphan",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 48,
+    "ageRange": {
+      "min": 1,
+      "max": 3
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 1
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"origin_frontier_family\") || flags.has(\"origin_poor_family\")"
+      }
+    ],
+    "content": {
+      "title": "边关遗孤",
+      "text": "你生于边关营寨之外，父母亡于战乱。邻里偶有接济，更多时候你要在风沙与残垣间学会自保——这段童年将在你身上刻下坚韧与警觉。",
+      "description": "P22 出身池扩展：边关/贫寒开局"
+    },
+    "eventType": "auto",
+    "effects": [
+      {
+        "type": "stat_modify",
+        "target": "endurance",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "caution",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p22_frontier_orphan_shaped",
+        "value": true
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "origin",
+        "p22",
+        "frontier",
+        "childhood",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "stage_sensitive",
+        "stageFit": [
+          "origin_frontier"
+        ],
+        "toneMarkers": [
+          "边关",
+          "江湖",
+          "童年"
+        ],
+        "duplicateRiskClass": "origin_milestone",
+        "authoringNotes": "Supports frontier_military and poor_family weak origin variance.",
+        "llmEditableFields": [
+          "content.text",
+          "content.title"
+        ]
+      }
+    }
+  },
+  {
+    "id": "p22_childhood_street_shaping",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 46,
+    "ageRange": {
+      "min": 6,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 6
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"origin_streetborn\") || flags.has(\"p22_frontier_orphan_shaped\")"
+      }
+    ],
+    "content": {
+      "title": "市井塑形",
+      "text": "你在集市巷口长大，见惯讨价还价与江湖骗术。一次险境中你靠机敏脱身，从此更信自己的判断而非他人的规矩。",
+      "description": "P22 童年塑形池扩展：市井成长轨迹"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "learn_trade_tricks",
+        "text": "向老商贩学辨货识人",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_street_shaping_trade",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "learn_self_defense",
+        "text": "跟流浪武师学几招防身",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martial",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_street_shaping_martial",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "childhood",
+        "formative",
+        "p22",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "stage_sensitive",
+        "stageFit": [
+          "childhood_formative"
+        ],
+        "toneMarkers": [
+          "江湖",
+          "市井"
+        ],
+        "duplicateRiskClass": "formative_milestone",
+        "authoringNotes": "Differentiates streetborn formative trajectory from martial training loop."
+      }
+    }
+  },
+  {
+    "id": "p22_early_wealth_route_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 47,
+    "ageRange": {
+      "min": 18,
+      "max": 24
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
+      }
+    ],
+    "content": {
+      "title": "商路初分",
+      "text": "十八岁后你面临抉择：是固守家族商号，还是独行开拓新商路。这一分岔将决定你日后在江湖中是商贾识途还是泛泛而行。",
+      "description": "P22 早期路线分歧：商贾路线强化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "expand_trade_route",
+        "text": "押注新商路，博一把远途之利",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 50,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_wealth_route_forked",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "consolidate_family_trade",
+        "text": "守成家族商号，稳中求进",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_wealth_route_forked",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "route",
+        "p22",
+        "business",
+        "live_ops_expansion"
+      ],
+      "pathAffinity": {
+        "wealth": 1,
+        "merchant": 0.95
+      },
+      "narrativeScheduling": {
+        "stageSignals": [
+          "wealth_identity"
+        ],
+        "routePoints": [
+          {
+            "routeId": "wealth",
+            "kind": "divergence",
+            "ageBand": "18-24",
+            "eventId": "p22_early_wealth_route_fork",
+            "flagKey": "p22_wealth_route_forked"
+          }
+        ]
+      },
+      "authoringSemantics": {
+        "contentRole": "route_sensitive",
+        "routeFit": [
+          "wealth",
+          "merchant"
+        ],
+        "stageFit": [
+          "wealth_identity"
+        ],
+        "toneMarkers": [
+          "商路",
+          "江湖"
+        ],
+        "duplicateRiskClass": "route_reinforcement",
+        "authoringNotes": "Wealth merchant early route fork — tuned pathAffinity.wealth=1.0."
+      }
+    }
+  },
+  {
+    "id": "p22_relationship_mentor_obligation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": {
+      "min": 28,
+      "max": 38
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mentor_bond\") || flags.has(\"ally_network\")"
+      }
+    ],
+    "content": {
+      "title": "师恩未报",
+      "text": "昔日恩师遭仇家追杀，来信求援。你中年之际仍须抉择：是赴约担责，还是守成家业——这一选择将重塑你与师门、盟友之间的羁绊。",
+      "description": "P22 关系后果池扩展：师门义务延续"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "answer_mentor_call",
+        "text": "放下手头事务，赴师门之约",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_mentor_obligation_honored",
+            "value": true
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "id": "send_aid_instead",
+        "text": "遣人送援，自己暂不出面",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_mentor_obligation_partial",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "relationship",
+        "consequence",
+        "p17",
+        "p22",
+        "mentor",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": [
+          "scholarly",
+          "social"
+        ],
+        "stageFit": [
+          "midlife_consequence"
+        ],
+        "toneMarkers": [
+          "师徒",
+          "恩怨",
+          "江湖"
+        ],
+        "duplicateRiskClass": "relationship_consequence",
+        "authoringNotes": "Sustains mentor_bond mid-life relational trajectory."
+      }
+    }
+  },
+  {
+    "id": "p22_faction_sect_continuation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 44,
+    "ageRange": {
+      "min": 30,
+      "max": 42
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"sect_exposure\") || flags.has(\"joined_sect\")"
+      }
+    ],
+    "content": {
+      "title": "门派续责",
+      "text": "门派长老召你回山议事：边境分舵遭袭，需有人主持善后。你既已身在江湖多年，这一责仍落在你肩上。",
+      "description": "P22 阵营身份延续池扩展"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_sect_duty",
+        "text": "回山主持，担起门派责任",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_faction_continuation_active",
+            "value": true
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 4,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "id": "decline_sect_duty",
+        "text": "婉拒回山，继续独行",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_faction_continuation_declined",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "faction",
+        "sect",
+        "consequence",
+        "p22",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "route_sensitive",
+        "routeFit": [
+          "orthodox",
+          "martial"
+        ],
+        "stageFit": [
+          "midlife_consequence"
+        ],
+        "toneMarkers": [
+          "门派",
+          "江湖"
+        ],
+        "duplicateRiskClass": "faction_consequence",
+        "authoringNotes": "Sustains sect_exposure social-role beyond early game."
+      }
+    }
+  },
+  {
+    "id": "p22_legacy_teaching_succession",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 43,
+    "ageRange": {
+      "min": 52,
+      "max": 62
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 52
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"teaching_legacy\") || flags.has(\"has_disciples\")"
+      }
+    ],
+    "content": {
+      "title": "薪火相传",
+      "text": "你的弟子已能独当一面，却仍在关键抉择前求教于你。晚年前夕，你须定夺传承之法：严训、放手，或另择传人。",
+      "description": "P22 传承延续池扩展"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "formal_succession",
+        "text": "举行传功仪式，正式定继承人",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_teaching_succession_formal",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "inheritance_legacy_complete",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "gradual_handoff",
+        "text": "徐徐放手，任其历练",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_teaching_succession_gradual",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "legacy",
+        "p18",
+        "p22",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": [
+          "scholarly",
+          "martial"
+        ],
+        "stageFit": [
+          "legacy_continuity"
+        ],
+        "toneMarkers": [
+          "师徒",
+          "传承",
+          "江湖"
+        ],
+        "duplicateRiskClass": "legacy_milestone",
+        "authoringNotes": "Teaching legacy continuity for scholar/martial archetypes."
+      }
+    }
+  },
+  {
+    "id": "p22_endgame_hermit_memory",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 42,
+    "ageRange": {
+      "min": 58,
+      "max": 70
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 58
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"hermit_withdrawal\") || flags.has(\"lonely_elder\") || flags.has(\"fade_legacy\")"
+      }
+    ],
+    "content": {
+      "title": "隐逸余响",
+      "text": "你择地隐居，江湖渐远。偶有过路侠客提及你的旧名，或敬或疑——这段淡出将成为你身后独特的历史记忆色调。",
+      "description": "P22 终局/历史记忆池扩展：隐逸淡出"
+    },
+    "eventType": "auto",
+    "effects": [
+      {
+        "type": "flag_set",
+        "target": "p22_hermit_memory_forgotten",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p19_historical_memory_tone",
+        "value": "forgotten"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "endgame",
+        "memory",
+        "p19",
+        "p22",
+        "withdrawal",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": [
+          "hermit",
+          "conservative"
+        ],
+        "stageFit": [
+          "endgame_closure"
+        ],
+        "toneMarkers": [
+          "隐逸",
+          "江湖",
+          "淡出"
+        ],
+        "duplicateRiskClass": "endgame_closure",
+        "authoringNotes": "Hermit withdrawal endgame closure and forgotten historical memory tone."
+      }
+    }
+  },
+  {
+    "id": "p22_wave_early_frontier_growth",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": {
+      "min": 12,
+      "max": 16
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 12
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p22_frontier_orphan_shaped\") || flags.has(\"p22_street_shaping_trade\")"
+      }
+    ],
+    "content": {
+      "title": "边市初行",
+      "text": "你第一次独自远行边市，见识了比巷口更广阔的价码与人心。这一程为日后的路线抉择埋下伏笔。",
+      "description": "P22 早期成长内容波次样板事件"
+    },
+    "eventType": "auto",
+    "effects": [
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p22_wave_early_complete",
+        "value": true
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "p22",
+        "route",
+        "childhood",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "stage_sensitive",
+        "stageFit": [
+          "early_growth_wave"
+        ],
+        "toneMarkers": [
+          "江湖",
+          "边市"
+        ],
+        "duplicateRiskClass": "wave_sample",
+        "authoringNotes": "Early-life content wave sample via P21 workflow manifest."
+      }
+    }
+  },
+  {
+    "id": "p22_wave_mid_merchant_identity",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 41,
+    "ageRange": {
+      "min": 35,
+      "max": 42
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p22_wealth_route_forked\") || flags.has(\"merchant_network_growing\")"
+      }
+    ],
+    "content": {
+      "title": "商号名望",
+      "text": "你的商号在数城之间有了名望，江湖中开始有人因利益而非出身与你结交。中年身份由此更加清晰。",
+      "description": "P22 中年后果内容波次样板事件"
+    },
+    "eventType": "auto",
+    "effects": [
+      {
+        "type": "flag_set",
+        "target": "p22_wave_mid_complete",
+        "value": true
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 4,
+        "operator": "add"
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "p22",
+        "consequence",
+        "business",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": [
+          "wealth",
+          "merchant"
+        ],
+        "stageFit": [
+          "midlife_wave"
+        ],
+        "toneMarkers": [
+          "商号",
+          "江湖"
+        ],
+        "duplicateRiskClass": "wave_sample",
+        "authoringNotes": "Mid-life content wave sample for wealth merchant identity."
+      }
+    }
+  },
+  {
+    "id": "p22_wave_late_fade_closure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 39,
+    "ageRange": {
+      "min": 62,
+      "max": 72
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 62
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p22_hermit_memory_forgotten\") || flags.has(\"p22_teaching_succession_formal\")"
+      }
+    ],
+    "content": {
+      "title": "暮年收束",
+      "text": "暮年已至，你将余生的重心放在收束恩怨、安顿身后事。无论传承或淡出，这一章都为整局画上句号。",
+      "description": "P22 晚期传承终局内容波次样板事件"
+    },
+    "eventType": "auto",
+    "effects": [
+      {
+        "type": "flag_set",
+        "target": "p22_wave_late_complete",
+        "value": true
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "p22",
+        "legacy",
+        "endgame",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "stageFit": [
+          "late_life_wave"
+        ],
+        "toneMarkers": [
+          "暮年",
+          "江湖",
+          "传承"
+        ],
+        "duplicateRiskClass": "wave_sample",
+        "authoringNotes": "Late-life content wave sample for closure pool expansion."
+      }
+    }
+  }
+]

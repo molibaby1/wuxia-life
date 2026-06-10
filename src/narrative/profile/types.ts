@@ -198,6 +198,111 @@ export interface WorldProfile {
   llmTuningContract?: LlmTuningContractConfig;
   /** P21: representative tuning sample configs. */
   tuningSampleConfigs?: TuningSampleConfig[];
+  /** P22: baseline content pools for live-ops comparison. */
+  baselinePoolConfigs?: BaselinePoolConfig[];
+  /** P22: minimum coverage expectations per pool band. */
+  libraryCoverageExpectations?: LibraryCoverageExpectation[];
+  /** P22: representative live-ops content wave manifests. */
+  liveOpsWaveConfigs?: LiveOpsContentWaveConfig[];
+  /** P22: tuning samples tied to expansion waves. */
+  liveOpsTuningSampleConfigs?: TuningSampleConfig[];
+  /** P23: representative experience dimensions for acceptance review. */
+  experienceDimensionConfigs?: ExperienceDimensionConfig[];
+  /** P23: stronger/weaker slice acceptance baselines per dimension. */
+  experienceAcceptanceBaselineConfigs?: ExperienceAcceptanceBaselineConfig[];
+  /** P23: wave-to-wave experience comparison samples. */
+  experienceComparisonSampleConfigs?: ExperienceComparisonSampleConfig[];
+  /** P23: long-term balance indicators for sustained tuning. */
+  longTermBalanceIndicatorConfigs?: LongTermBalanceIndicatorConfig[];
+  /** P23: live-balance wave samples (high-value, low-value, redirection). */
+  liveBalanceWaveSampleConfigs?: LiveBalanceWaveSampleConfig[];
+}
+
+export type CoverageHealthClass = 'strong' | 'weak' | 'sparse' | 'repetitive';
+
+export type BaselinePoolLifePhase =
+  | 'origin'
+  | 'childhood'
+  | 'early_route'
+  | 'midlife_consequence'
+  | 'legacy_endgame';
+
+export interface BaselinePoolConfig {
+  id: string;
+  label: string;
+  lifePhase: BaselinePoolLifePhase;
+  sourcePaths: string[];
+  eventTagPrefixes: string[];
+  minimumEventCount: number;
+  knownThinAreas: string[];
+  comparisonNotes: string;
+}
+
+export interface LibraryCoverageExpectation {
+  poolId: string;
+  minimumEventCount: number;
+  minimumDistinctRouteSignals: number;
+  minimumArchetypeTags: number;
+  thinCoverageThreshold: number;
+  repetitiveOverlapThreshold: number;
+  authoringNotes: string;
+}
+
+export interface LiveOpsContentWaveConfig {
+  id: string;
+  label: string;
+  lifePhase: 'early_life' | 'mid_life' | 'late_life';
+  targetPoolId: string;
+  targetWeakness: string;
+  eventIds: string[];
+  workflowSteps: string[];
+}
+
+export interface LibraryCoveragePoolSnapshot {
+  poolId: string;
+  label: string;
+  eventCount: number;
+  distinctRouteSignals: number;
+  archetypeTagCount: number;
+  healthClass: CoverageHealthClass;
+  thinCoverage: boolean;
+  repetitiveRisk: boolean;
+  detail: string;
+}
+
+export interface WeakSpotFinding {
+  poolId: string;
+  findingKind: 'thin_coverage' | 'over_concentration' | 'duplicate_risk';
+  severity: 'low' | 'medium' | 'high';
+  metric: string;
+  value: number;
+  threshold: number;
+  detail: string;
+}
+
+export interface LibraryCoverageMatrixRow {
+  poolId: string;
+  lifePhase: BaselinePoolLifePhase;
+  healthClass: CoverageHealthClass;
+  eventCount: number;
+  meetsMinimum: boolean;
+  archetypeSupportScore: number;
+  duplicationRiskScore: number;
+  weakArchetypeTargets: string[];
+}
+
+export interface LibraryCoverageValidationMatrix {
+  generatedAt: string;
+  rows: LibraryCoverageMatrixRow[];
+  weakSpots: WeakSpotFinding[];
+  summary: {
+    poolCount: number;
+    strongCount: number;
+    weakOrSparseCount: number;
+    repetitiveCount: number;
+    expansionEventCount: number;
+  };
+  decision: 'pass' | 'warning' | 'fail';
 }
 
 export type ContentConstraintDimension =
@@ -819,6 +924,145 @@ export interface WholeLifePacingReport {
   endgameClosureRhythm: EndgameClosureRhythm;
   pacingMultiplier: number;
   comparisonLines: string[];
+}
+
+export type ExperienceDimension =
+  | 'archetype_strength'
+  | 'replay_distinctiveness'
+  | 'route_differentiation'
+  | 'stage_pacing_health'
+  | 'mid_late_payoff'
+  | 'legacy_resonance'
+  | 'endgame_aftertaste';
+
+export type ExperienceMeasurabilityClass = 'explicit' | 'partial' | 'inferred';
+
+export interface ExperienceDimensionConfig {
+  id: ExperienceDimension;
+  label: string;
+  lifePhases: string[];
+  measurabilityClass: ExperienceMeasurabilityClass;
+  interpretationGuide: string;
+  evidenceSources: string[];
+}
+
+export interface ExperienceAcceptanceBaselineConfig {
+  id: string;
+  label: string;
+  dimension: ExperienceDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  minimumScoreDelta: number;
+  scoringFields: string[];
+  authoringNotes: string;
+}
+
+export interface ExperienceComparisonSampleConfig {
+  id: string;
+  label: string;
+  dimension: ExperienceDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  comparisonMetric: string;
+  wholeLife: boolean;
+  sliceLevel: boolean;
+  authoringNotes: string;
+}
+
+export interface LongTermBalanceIndicatorConfig {
+  id: string;
+  label: string;
+  dimension: ExperienceDimension;
+  interpretation: string;
+  healthyRange: { min: number; max: number };
+  baselineValue: number;
+  comparisonNotes: string;
+}
+
+export type LiveBalanceWaveClass =
+  | 'high_value_tuning'
+  | 'low_value_detection'
+  | 'tuning_redirection'
+  | 'full_life_operation';
+
+export interface LiveBalanceWaveSampleConfig {
+  id: string;
+  label: string;
+  waveClass: LiveBalanceWaveClass;
+  targetDimension: ExperienceDimension;
+  contentVolumeDelta: number;
+  experienceDeltaExpected: number;
+  redirectedFromWaveId?: string;
+  authoringNotes: string;
+}
+
+export interface ExperienceBaselineScore {
+  baselineId: string;
+  dimension: ExperienceDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  strongerScore: number;
+  weakerScore: number;
+  scoreDelta: number;
+  orderingCorrect: boolean;
+  passed: boolean;
+}
+
+export interface ExperienceComparisonOutcome {
+  sampleId: string;
+  dimension: ExperienceDimension;
+  strongerScore: number;
+  weakerScore: number;
+  delta: number;
+  wholeLifeScore?: number;
+  sliceLevelScore?: number;
+  distinguishesStrongerWeaker: boolean;
+  passed: boolean;
+}
+
+export interface LongTermBalanceIndicatorSnapshot {
+  indicatorId: string;
+  label: string;
+  dimension: ExperienceDimension;
+  currentValue: number;
+  baselineValue: number;
+  healthyRange: { min: number; max: number };
+  inHealthyRange: boolean;
+  deltaFromBaseline: number;
+}
+
+export interface ExperienceAcceptanceMatrixRow {
+  dimension: ExperienceDimension;
+  baselinePassed: boolean;
+  comparisonPassed: boolean;
+  indicatorHealthy: boolean;
+  weakAreaImproved: boolean;
+  strongAreaProtected: boolean;
+  detail: string;
+}
+
+export interface ExperienceAcceptanceValidationMatrix {
+  generatedAt: string;
+  rows: ExperienceAcceptanceMatrixRow[];
+  baselineScores: ExperienceBaselineScore[];
+  comparisonOutcomes: ExperienceComparisonOutcome[];
+  balanceIndicators: LongTermBalanceIndicatorSnapshot[];
+  liveBalanceSamples: Array<{
+    sampleId: string;
+    waveClass: string;
+    passed: boolean;
+    detail: string;
+    redirected?: boolean;
+  }>;
+  summary: {
+    dimensionCount: number;
+    baselinesPassing: number;
+    comparisonsPassing: number;
+    indicatorsHealthy: number;
+    lowValueWavesDetected: number;
+    tuningRedirections: number;
+  };
+  decision: 'pass' | 'warning' | 'fail';
 }
 
 /** Sections required for a playable world profile — used by P12 verification. */

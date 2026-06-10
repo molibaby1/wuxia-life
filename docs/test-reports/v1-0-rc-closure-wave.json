@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-06-10T10:50:00.705Z",
+  "weakDimensionImproved": true,
+  "internalMissedPlayerProblem": true,
+  "rcRedirectedFix": true,
+  "waveDecision": "pass",
+  "cases": [
+    {
+      "caseId": "early_mid_late_endgame_surfaces",
+      "description": "Bounded RC wave covers early, mid, and late/end playtest comparison bands",
+      "passed": true
+    },
+    {
+      "caseId": "weak_dimension_improved",
+      "description": "Previously weak human-facing dimension becomes measurably stronger after fix",
+      "passed": true
+    },
+    {
+      "caseId": "internal_missed_player_problem",
+      "description": "Internal metrics alone would have missed player-facing problem",
+      "passed": true
+    },
+    {
+      "caseId": "rc_redirected_fix",
+      "description": "RC reporting redirected or sharpened the final fix choice",
+      "passed": true
+    },
+    {
+      "caseId": "p23_upstream_acceptance",
+      "description": "P23 experience acceptance matrix remains compatible upstream",
+      "passed": true
+    },
+    {
+      "caseId": "archetype_pacing_preserved",
+      "description": "Archetype and pacing differentiation preserved during RC wave",
+      "passed": true
+    }
+  ]
+}

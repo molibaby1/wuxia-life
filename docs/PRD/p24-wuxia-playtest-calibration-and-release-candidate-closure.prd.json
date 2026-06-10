@@ -1,0 +1,331 @@
+{
+  "project": "Wuxia Life P24 Playtest Calibration And Release Candidate Closure",
+  "branchName": "ralph/p24-wuxia-playtest-calibration-and-release-candidate-closure",
+  "description": "Complete a player-facing playtest calibration and release-candidate closure pass for wuxia-life by auditing current external-validation blind spots, defining explicit playtest and RC judgment rules, extending profile-first calibration and reporting surfaces with minimal theme-neutral support, shipping representative comparison samples and a machine-readable validation matrix, and proving through one bounded RC wave plus a final closure report that internal acceptance signals align more reliably with real player-facing experience without adding UI work, a new theme, or a large runtime rewrite.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Audit current playtest and RC surfaces",
+      "description": "As a maintainer, I want a read-only audit of current playtest, external-feedback, and release-candidate surfaces so that P24 starts from the real calibration gaps instead of extending internal metrics blindly.",
+      "acceptanceCriteria": [
+        "Audit the current external-validation surfaces across first-run clarity, onboarding readability, replay motivation, route differentiation, late-game payoff, and ending resonance",
+        "Record which surfaces are already observable through human feedback versus internal reports only",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Audit measurable versus weakly calibrated experience gaps",
+      "description": "As a maintainer, I want a read-only audit of measurable, partially proxyable, and still-uncalibrated experience surfaces so that later P24 work targets the weakest evidence boundaries first.",
+      "acceptanceCriteria": [
+        "Identify which experience surfaces are already testable with human feedback, partially proxyable by internal reports, or still not meaningfully calibrated",
+        "Record the main risks where internal acceptance can pass while real-player experience still fails",
+        "Save the audit under docs/test-reports/ or docs/designs/",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Write representative playtest-dimension rules",
+      "description": "As a designer, I want explicit playtest dimensions in scope for P24 so that calibration work evaluates one coherent player-facing model instead of scattered intuitions.",
+      "acceptanceCriteria": [
+        "Define the representative playtest dimensions in scope for P24",
+        "Define how calibration should combine first-run readability, replay desire, route distinction, consequence weight, and ending aftertaste",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Write RC-quality improvement and deferral rules",
+      "description": "As a designer, I want explicit RC-quality and deferral rules so that release decisions are judged by player-facing value rather than cleaner internal reports alone.",
+      "acceptanceCriteria": [
+        "Define what counts as an RC-quality improvement versus a merely cleaner internal report",
+        "Define which playtest or release-candidate problems are explicitly deferred beyond P24",
+        "Save the rules under docs/designs/ or docs/"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Define internal-external alignment indicator set",
+      "description": "As a maintainer, I want a stable alignment indicator set so that internal quality signals can be compared against human playtest outcomes instead of being treated as self-validating.",
+      "acceptanceCriteria": [
+        "Define 3-5 representative alignment indicators across onboarding clarity, replay motivation, route readability, payoff strength, and ending resonance",
+        "Ensure each indicator has a clear meaning for deciding whether internal reports are overestimating or underestimating player experience",
+        "Ensure the indicator set is suitable for future RC comparisons",
+        "Save the definition under docs/test-reports/ or docs/designs/",
+        "Do not require runtime redesign in this story"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add playtest feedback schema surface",
+      "description": "As a developer, I want an explicit playtest feedback schema so that human-facing judgments can be captured without hidden runtime-specific assumptions.",
+      "acceptanceCriteria": [
+        "Add or refine config or reporting structures for playtest feedback capture",
+        "Ensure field semantics are explicit enough for later playtest review and LLM-assisted triage support",
+        "Keep the schema compatible with current profile-first loading or provide a controlled migration path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add RC evaluation reporting surface",
+      "description": "As a developer, I want an explicit RC evaluation surface so that candidate-build judgments do not depend on implicit maintainer knowledge.",
+      "acceptanceCriteria": [
+        "Add or refine config or reporting structures for RC evaluation inputs and outputs",
+        "Ensure field semantics are explicit enough for later RC review and comparison",
+        "Keep the surface compatible with current profile-first loading or provide a controlled migration path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add internal-to-external comparison reporting surface",
+      "description": "As a developer, I want an explicit alignment comparison surface so that internal acceptance signals and human-facing judgments can be compared in a machine-readable way.",
+      "acceptanceCriteria": [
+        "Add or refine config or reporting structures for internal-to-external comparison",
+        "Ensure field semantics make overestimation and underestimation cases reviewable later",
+        "Keep the field naming authoring-friendly and suitable for future RC waves",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Define first-run readability baseline",
+      "description": "As a player, I want the first run to be readable and compelling so that the game earns continued play before deeper systems become visible.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for first-run readability and early-stage clarity",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative first-run slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Define onboarding motivation baseline",
+      "description": "As a player, I want the onboarding phase to create momentum to continue so that first-session drop-off is judged as an experience problem rather than a vague impression.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for initial motivation to continue playing",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative onboarding slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Define replay distinctiveness baseline",
+      "description": "As a player, I want later runs to remain meaningfully distinct so that replay value is judged by experience difference instead of content count alone.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for replay distinctiveness",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative multi-run slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Define route differentiation baseline",
+      "description": "As a player, I want routes to remain legible and meaningfully different so that route quality does not collapse into internal structure alone.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for route differentiation and route readability",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative route slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Define late-game payoff baseline",
+      "description": "As a player, I want later-life payoff and consequence weight to remain memorable so that the most important parts of a run are calibrated explicitly.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for late-game payoff and consequence weight",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative late-game slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Define ending aftertaste baseline",
+      "description": "As a player, I want endings and post-run aftertaste to remain distinct and resonant so that RC closure protects the final memory of a run.",
+      "acceptanceCriteria": [
+        "Define or implement a calibration baseline for endgame closure and post-run aftertaste",
+        "Ensure the baseline can distinguish between at least 1 stronger and 1 weaker representative endgame slice",
+        "Ensure the baseline is wired through the existing profile-first content and reporting path",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add representative playtest comparison samples",
+      "description": "As a maintainer, I want representative playtest comparison samples so that future tuning waves can be judged by player-facing outcomes rather than internal structure alone.",
+      "acceptanceCriteria": [
+        "Implement 3 representative playtest comparison samples using the new calibration surface",
+        "At least 1 sample compares first-run or onboarding quality",
+        "At least 1 sample compares replay or route-distinction quality",
+        "At least 1 sample compares late-game payoff or ending aftertaste quality",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add RC weak-outward-experience sample",
+      "description": "As a project owner, I want a representative RC sample where internal health looks strong but outward readability or appeal is weak so that false-positive release confidence becomes visible.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative release-candidate comparison sample where internal health is strong but external-facing readability or appeal is weak",
+        "Ensure the sample uses the new RC workflow rather than ad hoc commentary",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add RC feedback-redirection sample",
+      "description": "As a project owner, I want a representative RC sample where real-player feedback changes the preferred tuning direction so that release choices are grounded in outward experience.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative release-candidate comparison sample where real-player feedback changes the preferred tuning direction",
+        "Ensure the sample makes the redirection visible through the new RC reporting surface",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add RC targeted-fix validation sample",
+      "description": "As a project owner, I want a representative RC sample where targeted fixes measurably improve outward experience so that release-candidate closure can be defended with evidence.",
+      "acceptanceCriteria": [
+        "Implement at least 1 representative release-candidate comparison sample where RC reporting validates that a targeted fix meaningfully improved outward experience",
+        "Ensure the sample uses the new RC workflow rather than ad hoc commentary",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Add playtest and RC validation matrix",
+      "description": "As a maintainer, I want a stable machine-readable validation matrix so that future candidate builds can be reviewed systematically rather than conversationally.",
+      "acceptanceCriteria": [
+        "Add a matrix or machine-readable report that tracks representative playtest baselines, RC comparison outcomes, and alignment indicators",
+        "Track whether internal quality improvements are reflected in external-facing experience improvements",
+        "Ensure the output is suitable for future candidate-build comparison",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Run bounded RC calibration wave",
+      "description": "As a project owner, I want one bounded calibration-and-fix wave executed through the new workflow so that P24 proves the playtest and RC model is usable in practice.",
+      "acceptanceCriteria": [
+        "Run 1 bounded calibration-and-fix wave across representative early, mid, late, and endgame experience surfaces",
+        "Demonstrate at least 1 case where a previously weak human-facing experience dimension becomes measurably stronger",
+        "Demonstrate at least 1 case where internal metrics alone would have missed a player-facing problem",
+        "Demonstrate at least 1 case where RC reporting redirected or sharpened the final fix choice",
+        "Save report output under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Run full wuxia RC closure pass",
+      "description": "As a project owner, I want the complete release-candidate closure loop to improve so that the current wuxia build can be judged as a near-shippable product rather than only a strong internal prototype.",
+      "acceptanceCriteria": [
+        "Apply P24 calibration, comparison, and RC-reporting changes across representative full-life experience surfaces",
+        "Increase the share of release decisions that can be justified by aligned human-feedback and internal-acceptance evidence rather than internal reporting alone",
+        "Reduce cases where candidate builds appear healthy internally but still have weak onboarding, weak replay desire, or weak ending aftertaste",
+        "Preserve or improve current summary coherence, route readability, replayability signals, and endgame resonance",
+        "Typecheck passes",
+        "Relevant tests pass"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Publish P24 experience gate and closure report",
+      "description": "As a maintainer, I want a dedicated P24 gate and closure summary so that the phase can be accepted based on evidence rather than impressions.",
+      "acceptanceCriteria": [
+        "Add or update a P24-specific gate or report covering playtest baseline health, internal-external alignment quality, RC comparison quality, and release-readiness usefulness",
+        "Record before and after findings for the main playtest-calibration and RC-closure issues targeted by P24",
+        "Confirm gate:playability and current profile or runtime gates do not regress",
+        "Save the final closure report under docs/test-reports/",
+        "Relevant tests pass"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

@@ -216,6 +216,22 @@ export interface WorldProfile {
   longTermBalanceIndicatorConfigs?: LongTermBalanceIndicatorConfig[];
   /** P23: live-balance wave samples (high-value, low-value, redirection). */
   liveBalanceWaveSampleConfigs?: LiveBalanceWaveSampleConfig[];
+  /** P24: playtest dimension configs for outward calibration. */
+  playtestDimensionConfigs?: PlaytestDimensionConfig[];
+  /** P24: playtest feedback capture schema fields. */
+  playtestFeedbackSchema?: PlaytestFeedbackSchemaConfig;
+  /** P24: RC evaluation input/output field definitions. */
+  rcEvaluationSchema?: RcEvaluationSchemaConfig;
+  /** P24: internal-to-external alignment comparison configs. */
+  alignmentComparisonConfigs?: AlignmentComparisonConfig[];
+  /** P24: stronger/weaker playtest calibration baselines. */
+  playtestCalibrationBaselineConfigs?: PlaytestCalibrationBaselineConfig[];
+  /** P24: representative playtest comparison samples. */
+  playtestComparisonSampleConfigs?: PlaytestComparisonSampleConfig[];
+  /** P24: internal-external alignment indicators. */
+  alignmentIndicatorConfigs?: AlignmentIndicatorConfig[];
+  /** P24: RC comparison samples (weak outward, redirection, targeted fix). */
+  rcComparisonSampleConfigs?: RcComparisonSampleConfig[];
 }
 
 export type CoverageHealthClass = 'strong' | 'weak' | 'sparse' | 'repetitive';
@@ -1061,6 +1077,213 @@ export interface ExperienceAcceptanceValidationMatrix {
     indicatorsHealthy: number;
     lowValueWavesDetected: number;
     tuningRedirections: number;
+  };
+  decision: 'pass' | 'warning' | 'fail';
+}
+
+export type PlaytestDimension =
+  | 'first_run_readability'
+  | 'onboarding_motivation'
+  | 'replay_distinctiveness'
+  | 'route_differentiation'
+  | 'late_game_payoff'
+  | 'ending_aftertaste';
+
+export type PlaytestMeasurabilityClass = 'human_testable' | 'partial_proxy' | 'uncalibrated';
+
+export interface PlaytestDimensionConfig {
+  id: PlaytestDimension;
+  label: string;
+  lifePhases: string[];
+  measurabilityClass: PlaytestMeasurabilityClass;
+  interpretationGuide: string;
+  evidenceSources: string[];
+}
+
+export interface PlaytestFeedbackFieldConfig {
+  fieldId: string;
+  label: string;
+  fieldType: 'string' | 'number' | 'enum' | 'text';
+  required: boolean;
+  semantics: string;
+  enumValues?: string[];
+}
+
+export interface PlaytestFeedbackSchemaConfig {
+  schemaVersion: string;
+  capturePurpose: string;
+  fields: PlaytestFeedbackFieldConfig[];
+  triageHints: string[];
+}
+
+export interface RcEvaluationFieldConfig {
+  fieldId: string;
+  label: string;
+  direction: 'input' | 'output';
+  fieldType: 'string' | 'number' | 'enum' | 'boolean' | 'text';
+  semantics: string;
+  enumValues?: string[];
+}
+
+export const RC_RELEASE_READINESS_STATES = ['ship', 'hold', 'redirect'] as const;
+export type RcReleaseReadiness = (typeof RC_RELEASE_READINESS_STATES)[number];
+
+export const RC_BIAS_DIRECTIONS = ['overestimate', 'underestimate', 'aligned'] as const;
+export type RcBiasDirection = (typeof RC_BIAS_DIRECTIONS)[number];
+
+export interface RcEvaluationSchemaConfig {
+  schemaVersion: string;
+  evaluationPurpose: string;
+  fields: RcEvaluationFieldConfig[];
+  releaseReadinessThresholds: {
+    minInternalHealth: number;
+    minExternalAppeal: number;
+    maxAlignmentGap: number;
+  };
+}
+
+export interface AlignmentComparisonConfig {
+  id: string;
+  label: string;
+  dimension: PlaytestDimension;
+  internalEvidenceSource: string;
+  externalEvidenceSource: string;
+  overestimateThreshold: number;
+  underestimateThreshold: number;
+  authoringNotes: string;
+}
+
+export interface PlaytestCalibrationBaselineConfig {
+  id: string;
+  label: string;
+  dimension: PlaytestDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  minimumScoreDelta: number;
+  scoringFields: string[];
+  authoringNotes: string;
+}
+
+export interface PlaytestComparisonSampleConfig {
+  id: string;
+  label: string;
+  dimension: PlaytestDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  comparisonMetric: string;
+  lifePhaseBand: 'early' | 'mid' | 'late_end';
+  authoringNotes: string;
+}
+
+export interface AlignmentIndicatorConfig {
+  id: string;
+  label: string;
+  dimension: PlaytestDimension;
+  interpretation: string;
+  healthyRange: { min: number; max: number };
+  baselineValue: number;
+  comparisonNotes: string;
+}
+
+export type RcComparisonSampleClass =
+  | 'weak_outward_experience'
+  | 'feedback_redirection'
+  | 'targeted_fix_validation';
+
+export interface RcComparisonSampleConfig {
+  id: string;
+  label: string;
+  sampleClass: RcComparisonSampleClass;
+  targetDimension: PlaytestDimension;
+  internalHealthScore: number;
+  externalAppealScore: number;
+  expectedAlignmentBias: 'overestimate' | 'underestimate' | 'aligned';
+  fixDescription?: string;
+  redirectedFromSampleId?: string;
+  authoringNotes: string;
+}
+
+export interface PlaytestBaselineScore {
+  baselineId: string;
+  dimension: PlaytestDimension;
+  strongerSliceId: string;
+  weakerSliceId: string;
+  strongerScore: number;
+  weakerScore: number;
+  scoreDelta: number;
+  orderingCorrect: boolean;
+  passed: boolean;
+}
+
+export interface PlaytestComparisonOutcome {
+  sampleId: string;
+  dimension: PlaytestDimension;
+  strongerScore: number;
+  weakerScore: number;
+  delta: number;
+  lifePhaseBand: string;
+  distinguishesStrongerWeaker: boolean;
+  passed: boolean;
+}
+
+export interface AlignmentIndicatorSnapshot {
+  indicatorId: string;
+  label: string;
+  dimension: PlaytestDimension;
+  internalScore: number;
+  externalProxyScore: number;
+  alignmentGap: number;
+  biasDirection: 'overestimate' | 'underestimate' | 'aligned';
+  currentValue: number;
+  baselineValue: number;
+  healthyRange: { min: number; max: number };
+  inHealthyRange: boolean;
+}
+
+export interface RcComparisonSampleResult {
+  sampleId: string;
+  sampleClass: RcComparisonSampleClass;
+  targetDimension: PlaytestDimension;
+  internalHealthScore: number;
+  externalAppealScore: number;
+  alignmentGap: number;
+  biasDirection: string;
+  passed: boolean;
+  detail: string;
+  redirected?: boolean;
+  fixValidated?: boolean;
+}
+
+export interface PlaytestCalibrationMatrixRow {
+  dimension: PlaytestDimension;
+  baselinePassed: boolean;
+  comparisonCovered: boolean;
+  comparisonPassed: boolean;
+  indicatorAligned: boolean;
+  rcSamplePassed: boolean;
+  detail: string;
+}
+
+export interface PlaytestCalibrationValidationMatrix {
+  generatedAt: string;
+  rows: PlaytestCalibrationMatrixRow[];
+  baselineScores: PlaytestBaselineScore[];
+  comparisonOutcomes: PlaytestComparisonOutcome[];
+  alignmentIndicators: AlignmentIndicatorSnapshot[];
+  rcComparisonResults: RcComparisonSampleResult[];
+  summary: {
+    dimensionCount: number;
+    baselinesPassing: number;
+    comparisonsPassing: number;
+    comparisonsRequired: number;
+    comparisonsCovered: number;
+    comparisonCoverageComplete: boolean;
+    comparisonsDimensionPassing: number;
+    indicatorsAligned: number;
+    rcSamplesPassing: number;
+    falsePositiveDetected: number;
+    redirectionsValidated: number;
+    targetedFixesValidated: number;
   };
   decision: 'pass' | 'warning' | 'fail';
 }

@@ -1,7 +1,7 @@
 {
   "phase": "v1.0",
   "title": "Release Candidate And Launch Readiness Closure",
-  "generatedAt": "2026-06-10T10:50:09.125Z",
+  "generatedAt": "2026-06-10T23:45:00.207Z",
   "beforeAfter": {
     "launchSurfaceGap": "P8–P23 gates proved internal health but lacked v1.0 launch classification and freeze boundary.",
     "alignmentGap": "Internal acceptance could pass while first-run readability or ending aftertaste failed in human review.",
@@ -11,7 +11,7 @@
   "implemented": {
     "launchDimensions": 6,
     "calibrationBaselines": 6,
-    "comparisonSamples": 4,
+    "comparisonSamples": 6,
     "alignmentIndicators": 5,
     "rcComparisonSamples": 3,
     "launchRulesPass": true,
@@ -26,14 +26,14 @@
   "validation": {
     "launchRulesPass": true,
     "baselinesHealthy": true,
-    "playtestComparisonsHealthy": false,
+    "playtestComparisonsHealthy": true,
     "alignmentHealthy": true,
     "falsePositiveDetected": true,
     "redirectionValidated": true,
     "blockerFixValidated": true,
     "closureWavePass": true,
-    "gateDecision": "warning",
-    "matrixDecision": "warning",
+    "gateDecision": "pass",
+    "matrixDecision": "pass",
     "rcWaveDecision": "pass",
     "fullClosureDecision": "pass",
     "alignedDecisionShare": 1,

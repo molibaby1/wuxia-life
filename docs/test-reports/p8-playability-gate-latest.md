@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-10T10:50:07.222Z
+Generated: 2026-06-11T01:41:52.573Z
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
@@ -8,8 +8,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ## Summary
 
 ### Warnings
-- causality: p8-wealth-shen: direct echoes 1
-- causality: p8-explorer-lu: direct echoes 2
+- replayability: 2 near-duplicate pairs
 
 ## Persona Highlights
 
@@ -95,8 +94,9 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Sample selection: age 2 → action_household_apprentice (persona_strategy:business prefers business)
 
 **Causality**
-- Direct echoes: 1
+- Direct echoes: 3
   - 28岁: explicit echo flag p9_explicit_business_echo
+  - 28岁: summary echo: 幼年帮工营商的习惯延续至今
 
 **Achievement**
 - [missed] 积累财富 (0-20): money=0 < 200
@@ -110,7 +110,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Narrative**
 - Early: 0岁 天降异象；1岁 出身背景；2岁 主动帮家里打杂；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
-- Age-40 identity: 出身：市井草根，路线：商路之主（merchant_caravan_master）
+- Age-40 identity: 出身：市井草根，路线：商路之主（merchant_caravan_master），幼年帮工营商的习惯延续至今
 
 ### 韩守拙 (p8-cautious-han)
 
@@ -159,7 +159,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 20岁 喜结良缘 — 你的积蓄少了一些。
-- Age-40 identity: 出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，邪路偏锋的习惯延续至今
+- Age-40 identity: 出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，幼年游历 → 远游记名，邪路偏锋的习惯延续至今
 
 ### 陆行远 (p8-explorer-lu)
 
@@ -168,9 +168,9 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Sample selection: age 2 → action_errand_nearby (persona_strategy:travel prefers travel)
 
 **Causality**
-- Direct echoes: 2
+- Direct echoes: 3
   - 28岁: explicit echo flag p9_explicit_travel_echo
-  - 28岁: configured echo hook echo_travel_basic fired at p9_wanderer_
+  - 28岁: summary echo: 幼年游历的习惯延续至今
 
 **Achievement**
 - [achieved] 坚持游历规划 (0-20): travel actions=3
@@ -183,7 +183,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动街坊跑腿；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让
-- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend）
+- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年游历的习惯延续至今
 
 ### 卫中和 (p8-balanced-wei)
 
@@ -192,7 +192,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Sample selection: age 2 → action_childhood_training (persona_strategy:balanced prefers training)
 
 **Causality**
-- Direct echoes: 8
+- Direct echoes: 9
   - 26岁: explicit echo flag p9_explicit_study_echo
   - 26岁: summary echo: 幼年读书的习惯延续至今
 
@@ -207,4 +207,8 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择
 - Turning: 18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。
-- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今，幼年读书的习惯延续至今，幼年交游的习惯延续至今
+- Age-40 identity: 出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今，幼年游历的习惯延续至今，幼年读书的习惯延续至今，幼年交游的习惯延续至今
+
+## Replay Similarity
+- p8-martial-lin ~ p8-deviant-ye (0.85)
+- p8-social-gu ~ p8-wealth-shen (0.84)

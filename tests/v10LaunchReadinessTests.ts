@@ -112,17 +112,12 @@ function testV10Gate(): void {
     gate.launchReadiness.playtestComparisonsHealthy === matrixComparisonsPass(matrix),
     'playtest comparisons flag must match matrix row results',
   );
-  if (!matrix.summary.comparisonCoverageComplete) {
-    assert(!gate.launchReadiness.playtestComparisonsHealthy, 'playtest comparisons unhealthy when coverage incomplete');
-    assert(
-      gate.decision === 'warning' || gate.decision === 'fail',
-      `gate must warn/fail on comparison coverage gap, got ${gate.decision}`,
-    );
-  }
+  assert(matrix.summary.comparisonCoverageComplete, 'comparison coverage must be complete');
+  assert(gate.launchReadiness.playtestComparisonsHealthy, 'playtest comparisons healthy when coverage complete');
   assert(gate.launchReadiness.falsePositiveDetected, 'false-positive sample');
   assert(gate.launchReadiness.redirectionValidated, 'redirection sample');
   assert(gate.launchReadiness.blockerFixValidated, 'blocker-fix sample');
-  assert(gate.decision !== 'fail', `gate decision: ${gate.decision}`);
+  assert(gate.decision === 'pass', `gate decision: ${gate.decision}`);
 }
 
 function testValidationMatrix(): void {

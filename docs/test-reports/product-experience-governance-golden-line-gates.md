@@ -1,13 +1,13 @@
 # Product Experience Governance — Golden Line Gates (PXG4)
 
-生成时间：2026-06-04T10:59:53.432Z
+生成时间：2026-06-11T00:56:45.711Z
 
 结果：**PASS**
 
 ## Active scope summary
 
 - active blockers: **0**
-- total quality issues: 95
+- total quality issues: 109
 - deferred warnings (major+): 31
 - candidate warnings (major+): 6
 
@@ -15,10 +15,10 @@
 
 | Sample | Route track | Final age | Choices |
 | --- | --- | --- | --- |
-| golden-sect | sect | 50 | 24 |
+| golden-sect | sect | 50 | 25 |
 | golden-wanderer | wanderer | 50 | 29 |
-| golden-demonic | demonic | 50 | 22 |
-| golden-neutral-baseline | neutral | 50 | 27 |
+| golden-demonic | demonic | 50 | 24 |
+| golden-neutral-baseline | neutral | 50 | 26 |
 | golden-romance-family | neutral | 50 | 26 |
 
 ## Payoff coverage (static vs simulated)

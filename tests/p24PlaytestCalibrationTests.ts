@@ -32,7 +32,7 @@ function testProfileSections(): void {
   assert(profileHasP24Sections(WUXIA_WORLD_PROFILE), 'P24 profile sections must be present');
   assert(WUXIA_PLAYTEST_DIMENSION_CONFIGS.length >= 6, 'playtest dimensions');
   assert(WUXIA_PLAYTEST_CALIBRATION_BASELINE_CONFIGS.length >= 6, 'calibration baselines');
-  assert(WUXIA_PLAYTEST_COMPARISON_SAMPLE_CONFIGS.length >= 3, 'comparison samples');
+  assert(WUXIA_PLAYTEST_COMPARISON_SAMPLE_CONFIGS.length >= 6, 'comparison samples');
   assert(WUXIA_ALIGNMENT_INDICATOR_CONFIGS.length >= 5, 'alignment indicators');
   assert(WUXIA_RC_COMPARISON_SAMPLE_CONFIGS.length >= 3, 'RC samples');
   assert(!!WUXIA_PLAYTEST_FEEDBACK_SCHEMA.fields.length, 'playtest feedback schema');
@@ -81,14 +81,14 @@ function testPlaytestSliceScoring(): void {
 
 function testComparisons(): void {
   const comparisons = runAllPlaytestComparisons();
-  assert(comparisons.length >= 3, 'comparison count');
+  assert(comparisons.length >= 6, 'comparison count');
   assert(comparisons.every(c => c.distinguishesStrongerWeaker), `comparisons: ${JSON.stringify(comparisons)}`);
   const early = comparisons.filter(c => c.lifePhaseBand === 'early');
   const mid = comparisons.filter(c => c.lifePhaseBand === 'mid');
   const late = comparisons.filter(c => c.lifePhaseBand === 'late_end');
   assert(early.length >= 1, 'early band sample');
-  assert(mid.length >= 1, 'mid band sample');
-  assert(late.length >= 1, 'late/end band sample');
+  assert(mid.length >= 2, 'mid band samples');
+  assert(late.length >= 2, 'late/end band samples');
 }
 
 function testAlignmentIndicators(): void {
@@ -121,33 +121,31 @@ function testValidationMatrix(): void {
   const matrix = buildPlaytestCalibrationMatrix();
   assert(matrix.rows.length >= 6, 'matrix rows');
   assert(matrix.summary.baselinesPassing >= 6, 'baselines in matrix');
-  assert(matrix.summary.comparisonsPassing >= 3, 'comparison samples passing');
+  assert(matrix.summary.comparisonsPassing >= 6, 'comparison samples passing');
   assert(matrix.summary.comparisonsRequired === matrix.rows.length, 'comparisons required = dimensions');
+  assert(matrix.summary.comparisonsCovered === matrix.summary.comparisonsRequired, 'all dimensions covered');
+  assert(matrix.summary.comparisonsDimensionPassing === matrix.summary.comparisonsRequired, 'all dimensions passing');
   assert(matrix.decision !== 'fail', `matrix decision ${matrix.decision}`);
 }
 
 function testComparisonCoverageConsistency(): void {
   const matrix = buildPlaytestCalibrationMatrix();
-  const uncovered = matrix.rows.filter(r => !r.comparisonCovered);
   const routeRow = matrix.rows.find(r => r.dimension === 'route_differentiation');
   const payoffRow = matrix.rows.find(r => r.dimension === 'late_game_payoff');
-  assert(!!routeRow && !routeRow.comparisonCovered, 'route_differentiation must lack comparison sample');
-  assert(!!payoffRow && !payoffRow.comparisonCovered, 'late_game_payoff must lack comparison sample');
-  assert(!routeRow?.comparisonPassed, 'uncovered route row must not pass');
-  assert(!payoffRow?.comparisonPassed, 'uncovered payoff row must not pass');
-  assert(!matrix.summary.comparisonCoverageComplete, 'coverage must be incomplete on current profile');
-  assert(matrix.summary.comparisonsCovered < matrix.summary.comparisonsRequired, 'covered < required');
-  assert(!matrixComparisonsPass(matrix), 'matrixComparisonsPass must be false when dimensions uncovered');
+  assert(!!routeRow && routeRow.comparisonCovered, 'route_differentiation must have comparison sample');
+  assert(!!payoffRow && payoffRow.comparisonCovered, 'late_game_payoff must have comparison sample');
+  assert(!!routeRow?.comparisonPassed, 'route row must pass');
+  assert(!!payoffRow?.comparisonPassed, 'payoff row must pass');
+  assert(matrix.summary.comparisonCoverageComplete, 'coverage must be complete on current profile');
+  assert(matrix.summary.comparisonsCovered === matrix.summary.comparisonsRequired, 'covered = required');
+  assert(matrixComparisonsPass(matrix), 'matrixComparisonsPass must be true when all dimensions pass');
 
   const gate = assembleP24GateReport(WUXIA_WORLD_PROFILE);
-  assert(!gate.validation.comparisonsPass, 'gate comparisonsPass must match row-level failures');
+  assert(gate.validation.comparisonsPass, 'gate comparisonsPass must match row-level passes');
+  assert(gate.decision === 'pass', `gate must pass after coverage closure, got ${gate.decision}`);
   assert(
-    gate.decision === 'warning' || gate.decision === 'fail',
-    `gate must warn/fail on coverage gap, got ${gate.decision}`,
-  );
-  assert(
-    gate.warnings.some(w => w.includes('route_differentiation') || w.includes('coverage incomplete')),
-    `expected coverage warning, got: ${gate.warnings.join('; ')}`,
+    !gate.warnings.some(w => w.includes('route_differentiation') || w.includes('coverage incomplete')),
+    `coverage warning should be removed, got: ${gate.warnings.join('; ')}`,
   );
 }
 
@@ -164,11 +162,7 @@ function testFullRcClosure(): void {
   const closure = runFullRcClosurePass(matrix);
   assert(closure.alignedDecisionShare >= 0.5, 'aligned decision share');
   assert(closure.falsePositiveCasesReduced, 'false positive reduced');
-  if (matrix.summary.comparisonCoverageComplete) {
-    assert(closure.strongDimensionsPreserved, 'strong dimensions preserved when coverage complete');
-  } else {
-    assert(!closure.strongDimensionsPreserved, 'strong dimensions not preserved when comparison coverage incomplete');
-  }
+  assert(closure.strongDimensionsPreserved, 'strong dimensions preserved when comparison coverage complete');
   assert(closure.closureDecision !== 'fail', `closure ${closure.closureDecision}`);
 }
 

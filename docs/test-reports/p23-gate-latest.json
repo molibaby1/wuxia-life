@@ -1,6 +1,6 @@
 {
   "gate": {
-    "generatedAt": "2026-06-10T10:50:09.097Z",
+    "generatedAt": "2026-06-11T00:44:43.395Z",
     "decision": "pass",
     "acceptanceSurfaces": {
       "dimensionCount": 7,
@@ -29,7 +29,7 @@
     "warnings": []
   },
   "matrix": {
-    "generatedAt": "2026-06-10T10:50:09.100Z",
+    "generatedAt": "2026-06-11T00:44:43.398Z",
     "rows": [
       {
         "dimension": "archetype_strength",
@@ -290,7 +290,7 @@
     "decision": "pass"
   },
   "fullLife": {
-    "generatedAt": "2026-06-10T10:50:09.106Z",
+    "generatedAt": "2026-06-11T00:44:43.403Z",
     "weakDimensionImproved": true,
     "lowValueRedirected": true,
     "indicatorChangedDirection": true,

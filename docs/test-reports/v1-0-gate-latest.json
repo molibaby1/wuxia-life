@@ -1,8 +1,8 @@
 {
   "gate": {
-    "generatedAt": "2026-06-10T10:50:00.701Z",
+    "generatedAt": "2026-06-10T23:42:25.728Z",
     "phase": "v1.0",
-    "decision": "warning",
+    "decision": "pass",
     "launchRules": {
       "contractVersion": "v1.0-rules-v1",
       "ok": true,
@@ -21,12 +21,12 @@
       }
     },
     "playtestCalibration": {
-      "generatedAt": "2026-06-10T10:50:00.695Z",
-      "decision": "warning",
+      "generatedAt": "2026-06-10T23:42:25.564Z",
+      "decision": "pass",
       "calibrationSurfaces": {
         "dimensionCount": 6,
         "baselineCount": 6,
-        "comparisonSampleCount": 4,
+        "comparisonSampleCount": 6,
         "alignmentIndicatorCount": 5,
         "rcComparisonSampleCount": 3,
         "hasPlaytestFeedbackSchema": true,
@@ -34,7 +34,7 @@
       },
       "validation": {
         "baselinesPass": true,
-        "comparisonsPass": false,
+        "comparisonsPass": true,
         "indicatorsHealthy": true,
         "matrixPass": true,
         "rcWavePass": true,
@@ -46,21 +46,19 @@
       "messages": [
         "Dimensions: 6",
         "Baselines passing: 6/6",
-        "Comparison samples passing: 4/4",
-        "Comparison dimension coverage: 4/6",
-        "Comparison dimensions passing: 4/6",
-        "Matrix decision: warning",
+        "Comparison samples passing: 6/6",
+        "Comparison dimension coverage: 6/6",
+        "Comparison dimensions passing: 6/6",
+        "Matrix decision: pass",
         "RC wave: pass",
         "Full closure: pass"
       ],
-      "warnings": [
-        "Playtest comparison coverage incomplete (missing: route_differentiation, late_game_payoff)"
-      ]
+      "warnings": []
     },
     "launchReadiness": {
       "launchRulesPass": true,
       "baselinesHealthy": true,
-      "playtestComparisonsHealthy": false,
+      "playtestComparisonsHealthy": true,
       "alignmentHealthy": true,
       "falsePositiveDetected": true,
       "redirectionValidated": true,
@@ -71,22 +69,20 @@
       "v1.0 launch rules contract v1.0-rules-v1 satisfied",
       "Dimensions: 6",
       "Baselines passing: 6/6",
-      "Comparison samples passing: 4/4",
-      "Comparison dimension coverage: 4/6",
-      "Comparison dimensions passing: 4/6",
-      "Matrix decision: warning",
+      "Comparison samples passing: 6/6",
+      "Comparison dimension coverage: 6/6",
+      "Comparison dimensions passing: 6/6",
+      "Matrix decision: pass",
       "RC wave: pass",
       "Full closure: pass",
-      "Launch matrix: warning",
+      "Launch matrix: pass",
       "RC wave: pass",
       "Full closure: pass"
     ],
-    "warnings": [
-      "Playtest comparison coverage incomplete (missing: route_differentiation, late_game_payoff)"
-    ]
+    "warnings": []
   },
   "matrix": {
-    "generatedAt": "2026-06-10T10:50:00.703Z",
+    "generatedAt": "2026-06-10T23:42:25.782Z",
     "rows": [
       {
         "dimension": "first_run_readability",
@@ -118,20 +114,20 @@
       {
         "dimension": "route_differentiation",
         "baselinePassed": true,
-        "comparisonCovered": false,
-        "comparisonPassed": false,
+        "comparisonCovered": true,
+        "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
-        "detail": "baseline Δ=0.105; no comparison sample (required); gap=-0.042 aligned"
+        "detail": "baseline Δ=0.105; comparison Δ=0.105; gap=-0.042 aligned"
       },
       {
         "dimension": "late_game_payoff",
         "baselinePassed": true,
-        "comparisonCovered": false,
-        "comparisonPassed": false,
+        "comparisonCovered": true,
+        "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
-        "detail": "baseline Δ=0.254; no comparison sample (required); gap=0.008 aligned"
+        "detail": "baseline Δ=0.254; comparison Δ=0.254; gap=0.008 aligned"
       },
       {
         "dimension": "ending_aftertaste",
@@ -239,6 +235,26 @@
         "weakerScore": 0.42607142857142855,
         "delta": 0.4367857142857142,
         "lifePhaseBand": "mid",
+        "distinguishesStrongerWeaker": true,
+        "passed": true
+      },
+      {
+        "sampleId": "p24_cmp_route_differentiation",
+        "dimension": "route_differentiation",
+        "strongerScore": 0.8628571428571428,
+        "weakerScore": 0.7578571428571428,
+        "delta": 0.10499999999999998,
+        "lifePhaseBand": "mid",
+        "distinguishesStrongerWeaker": true,
+        "passed": true
+      },
+      {
+        "sampleId": "p24_cmp_late_game_payoff",
+        "dimension": "late_game_payoff",
+        "strongerScore": 0.74375,
+        "weakerScore": 0.48937499999999995,
+        "delta": 0.2543750000000001,
+        "lifePhaseBand": "late_end",
         "distinguishesStrongerWeaker": true,
         "passed": true
       },
@@ -375,21 +391,21 @@
     "summary": {
       "dimensionCount": 6,
       "baselinesPassing": 6,
-      "comparisonsPassing": 4,
+      "comparisonsPassing": 6,
       "comparisonsRequired": 6,
-      "comparisonsCovered": 4,
-      "comparisonCoverageComplete": false,
-      "comparisonsDimensionPassing": 4,
+      "comparisonsCovered": 6,
+      "comparisonCoverageComplete": true,
+      "comparisonsDimensionPassing": 6,
       "indicatorsAligned": 5,
       "rcSamplesPassing": 3,
       "falsePositiveDetected": 1,
       "redirectionsValidated": 1,
       "targetedFixesValidated": 1
     },
-    "decision": "warning"
+    "decision": "pass"
   },
   "rcWave": {
-    "generatedAt": "2026-06-10T10:50:00.705Z",
+    "generatedAt": "2026-06-10T23:42:25.792Z",
     "weakDimensionImproved": true,
     "internalMissedPlayerProblem": true,
     "rcRedirectedFix": true,

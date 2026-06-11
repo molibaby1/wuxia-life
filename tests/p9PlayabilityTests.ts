@@ -99,6 +99,22 @@ function testEchoHooksCoverMinimumActions(): void {
   assert(getEchoHookByActionId('action_training_basic') !== undefined, 'training hook');
   assert(getEchoHookByActionId('action_study_basic')?.callbackEventId === 'p9_study_echo_midlife', 'study hook');
   assert(getEchoHookByActionId('action_socializing_basic')?.callbackEventId === 'p9_social_echo_midlife', 'social hook');
+  assert(
+    getEchoHookByActionId('action_business_basic')?.callbackEventId === 'p9_merchant_midlife_caravan',
+    'business hook callbacks merchant midlife divergence',
+  );
+  assert(
+    getEchoHookByActionId('action_travel_basic')?.callbackEventId === 'p9_wanderer_midlife_discovery',
+    'travel hook callbacks wanderer midlife divergence',
+  );
+  assert(
+    getEchoHookByActionId('action_business_basic')?.summaryContribution?.enabled === true,
+    'business hook contributes summary echo',
+  );
+  assert(
+    getEchoHookByActionId('action_travel_basic')?.summaryContribution?.enabled === true,
+    'travel hook contributes summary echo',
+  );
 }
 
 function testSummaryTemplateApply(): void {
@@ -293,12 +309,36 @@ async function testWealthPersonaBusinessProgression(): Promise<void> {
   const businessActions = wealth.metrics.agency.activeActionByCategory.business ?? 0;
   assert(businessActions > 0, `wealth persona should take business actions (got ${businessActions})`);
   assert(
-    wealth.metrics.causality.directEchoCount > 0,
-    `wealth persona should have direct echoes (got ${wealth.metrics.causality.directEchoCount})`,
+    wealth.metrics.causality.directEchoCount >= 3,
+    `wealth persona should meet direct echo threshold (got ${wealth.metrics.causality.directEchoCount})`,
   );
+  assert(!wealth.metrics.causality.tooFewEchoes, 'wealth passes causality threshold');
   assert(
     wealth.report.records.some(record => record.eventId === 'p9_merchant_midlife_caravan'),
     'wealth persona should reach merchant midlife divergence',
+  );
+  assert(
+    wealth.metrics.causality.strongestExamples.some(example => example.reference === 'p9_summary_echo_business'),
+    'wealth persona should surface summary echo flag',
+  );
+}
+
+async function testExplorerPersonaTravelEchoes(): Promise<void> {
+  const [explorer] = await runPersonaSimulations(['p8-explorer-lu']);
+  const travelActions = explorer.metrics.agency.activeActionByCategory.travel ?? 0;
+  assert(travelActions > 0, `explorer persona should take travel actions (got ${travelActions})`);
+  assert(
+    explorer.metrics.causality.directEchoCount >= 3,
+    `explorer persona should meet direct echo threshold (got ${explorer.metrics.causality.directEchoCount})`,
+  );
+  assert(!explorer.metrics.causality.tooFewEchoes, 'explorer passes causality threshold');
+  assert(
+    explorer.report.records.some(record => record.eventId === 'p9_wanderer_midlife_discovery'),
+    'explorer persona should reach wanderer midlife divergence',
+  );
+  assert(
+    explorer.metrics.causality.strongestExamples.some(example => example.reference === 'p9_summary_echo_travel'),
+    'explorer persona should surface summary echo flag',
   );
 }
 
@@ -331,6 +371,7 @@ async function runP9Tests(): Promise<void> {
   await testGatePacingAndReplayWarningsReduced();
   await testMartialDeviantIdentityDiverged();
   await testWealthPersonaBusinessProgression();
+  await testExplorerPersonaTravelEchoes();
   await testRouteDivergencePair();
   console.log('P9 tests passed');
 }

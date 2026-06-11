@@ -1,11 +1,11 @@
 {
   "gate": {
-    "generatedAt": "2026-06-10T09:44:42.383Z",
+    "generatedAt": "2026-06-11T00:44:43.395Z",
     "decision": "pass",
     "calibrationSurfaces": {
       "dimensionCount": 6,
       "baselineCount": 6,
-      "comparisonSampleCount": 4,
+      "comparisonSampleCount": 6,
       "alignmentIndicatorCount": 5,
       "rcComparisonSampleCount": 3,
       "hasPlaytestFeedbackSchema": true,
@@ -25,7 +25,9 @@
     "messages": [
       "Dimensions: 6",
       "Baselines passing: 6/6",
-      "Comparisons passing: 4/4",
+      "Comparison samples passing: 6/6",
+      "Comparison dimension coverage: 6/6",
+      "Comparison dimensions passing: 6/6",
       "Matrix decision: pass",
       "RC wave: pass",
       "Full closure: pass"
@@ -33,11 +35,12 @@
     "warnings": []
   },
   "matrix": {
-    "generatedAt": "2026-06-10T09:44:42.385Z",
+    "generatedAt": "2026-06-11T00:44:43.400Z",
     "rows": [
       {
         "dimension": "first_run_readability",
         "baselinePassed": true,
+        "comparisonCovered": true,
         "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
@@ -46,6 +49,7 @@
       {
         "dimension": "onboarding_motivation",
         "baselinePassed": true,
+        "comparisonCovered": true,
         "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
@@ -54,6 +58,7 @@
       {
         "dimension": "replay_distinctiveness",
         "baselinePassed": true,
+        "comparisonCovered": true,
         "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
@@ -62,22 +67,25 @@
       {
         "dimension": "route_differentiation",
         "baselinePassed": true,
-        "comparisonPassed": false,
+        "comparisonCovered": true,
+        "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
-        "detail": "baseline Δ=0.105; no comparison; gap=-0.042 aligned"
+        "detail": "baseline Δ=0.105; comparison Δ=0.105; gap=-0.042 aligned"
       },
       {
         "dimension": "late_game_payoff",
         "baselinePassed": true,
-        "comparisonPassed": false,
+        "comparisonCovered": true,
+        "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
-        "detail": "baseline Δ=0.254; no comparison; gap=0.008 aligned"
+        "detail": "baseline Δ=0.254; comparison Δ=0.254; gap=0.008 aligned"
       },
       {
         "dimension": "ending_aftertaste",
         "baselinePassed": true,
+        "comparisonCovered": true,
         "comparisonPassed": true,
         "indicatorAligned": true,
         "rcSamplePassed": true,
@@ -180,6 +188,26 @@
         "weakerScore": 0.42607142857142855,
         "delta": 0.4367857142857142,
         "lifePhaseBand": "mid",
+        "distinguishesStrongerWeaker": true,
+        "passed": true
+      },
+      {
+        "sampleId": "p24_cmp_route_differentiation",
+        "dimension": "route_differentiation",
+        "strongerScore": 0.8628571428571428,
+        "weakerScore": 0.7578571428571428,
+        "delta": 0.10499999999999998,
+        "lifePhaseBand": "mid",
+        "distinguishesStrongerWeaker": true,
+        "passed": true
+      },
+      {
+        "sampleId": "p24_cmp_late_game_payoff",
+        "dimension": "late_game_payoff",
+        "strongerScore": 0.74375,
+        "weakerScore": 0.48937499999999995,
+        "delta": 0.2543750000000001,
+        "lifePhaseBand": "late_end",
         "distinguishesStrongerWeaker": true,
         "passed": true
       },
@@ -316,7 +344,11 @@
     "summary": {
       "dimensionCount": 6,
       "baselinesPassing": 6,
-      "comparisonsPassing": 4,
+      "comparisonsPassing": 6,
+      "comparisonsRequired": 6,
+      "comparisonsCovered": 6,
+      "comparisonCoverageComplete": true,
+      "comparisonsDimensionPassing": 6,
       "indicatorsAligned": 5,
       "rcSamplesPassing": 3,
       "falsePositiveDetected": 1,
@@ -326,7 +358,7 @@
     "decision": "pass"
   },
   "rcWave": {
-    "generatedAt": "2026-06-10T09:44:42.386Z",
+    "generatedAt": "2026-06-11T00:44:43.402Z",
     "weakDimensionImproved": true,
     "internalMissedPlayerProblem": true,
     "rcRedirectedFix": true,

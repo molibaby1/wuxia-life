@@ -1,14 +1,14 @@
 # P9 Closure Report — First Wave
 
-Generated: 2026-06-08T14:40:34.395Z
+Generated: 2026-06-11T00:59:09.554Z
 
 ## Warning changes
 
 | Category | P8 baseline | P9 after | Change |
 |----------|-------------|----------|--------|
-| Total warnings | 2 | 2 | 0 |
-| Near-duplicate pairs | 0 | 0 | 0 |
-| Causality (direct echo 0) | 2 | 2 | reduced where echoes fire |
+| Total warnings | 1 | 1 | 0 |
+| Near-duplicate pairs | 2 | 2 | 0 |
+| Causality (direct echo 0) | 0 | 0 | reduced where echoes fire |
 | Pacing (span > 5y) | 0 | 0 | milestone events add impact |
 
 ## Config-driven structures

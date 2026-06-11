@@ -15,7 +15,7 @@
     ],
     "content": {
       "title": "商路初成",
-      "text": "你早年坚持 action_business_basic 营商打下的底子，如今终于派上用场。一支商队愿意让你带队走塞外皮毛之路——这是营商一途的中段分水岭。",
+      "text": "你幼年帮工学徒、后来坚持 action_business_basic 营商打下的底子，如今终于派上用场。一支商队愿意让你带队走塞外皮毛之路——这是营商一途的中段分水岭。",
       "description": "营商路线中段分化"
     },
     "eventType": "choice",
@@ -28,7 +28,8 @@
           { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
           { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
           { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_caravan_master" },
-          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
+          { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
         ]
       },
       {
@@ -38,7 +39,8 @@
           { "type": "stat_modify", "target": "money", "value": 150, "operator": "add" },
           { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
           { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_investor" },
-          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
+          { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
         ]
       }
     ],
@@ -76,7 +78,7 @@
     ],
     "content": {
       "title": "远游记名",
-      "text": "你当年第一次 action_travel_basic 游历时的胆气，如今已在江湖传开。一位老行脚僧邀你绘制三州险道图——这是游侠一途的中段分水岭。",
+      "text": "你幼年街坊跑腿、后来第一次 action_travel_basic 游历时的胆气，如今已在江湖传开。一位老行脚僧邀你绘制三州险道图——这是游侠一途的中段分水岭。",
       "description": "游历路线中段分化"
     },
     "eventType": "choice",
@@ -89,7 +91,8 @@
           { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
           { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
           { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_map_legend" },
-          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true }
+          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true },
+          { "type": "flag_set", "target": "p9_summary_echo_travel", "value": "幼年游历的习惯延续至今" }
         ]
       },
       {
@@ -99,7 +102,8 @@
           { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
           { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
           { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_guardian" },
-          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true }
+          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true },
+          { "type": "flag_set", "target": "p9_summary_echo_travel", "value": "幼年游历的习惯延续至今" }
         ]
       }
     ],
@@ -585,18 +589,19 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_business_hook\")"
+        "expression": "flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_merchant_midlife_path\")"
       }
     ],
     "content": {
       "title": "营商旧梦",
-      "text": "你翻出当年第一次尝试 action_business_basic 营商时的账本，那些笨拙的记录如今看来，竟是最早的商路种子。",
+      "text": "你翻出当年第一次尝试 action_business_basic 营商时的账本，那些笨拙的记录如今看来，竟是最早的商路种子——幼年帮工营商的习惯延续至今。",
       "description": "早期营商显性回响"
     },
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true }
+      { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
     ],
     "metadata": {
       "enabled": true,

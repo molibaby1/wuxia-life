@@ -1,14 +1,14 @@
 # P9 Regression Gate Comparison
 
-Generated: 2026-06-08T14:40:34.395Z
+Generated: 2026-06-11T00:59:09.554Z
 
 ## Warning deltas vs P8 baseline
 
 | Metric | P8 | P9 |
 |--------|----|----|
-| Total warnings | 2 | 2 |
-| Near-duplicate pairs | 0 | 0 |
-| Causality warnings | 2 | 2 |
+| Total warnings | 1 | 1 |
+| Near-duplicate pairs | 2 | 2 |
+| Causality warnings | 0 | 0 |
 | Pacing warnings | 0 | 0 |
 
 ## Gate decision

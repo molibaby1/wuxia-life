@@ -1,7 +1,7 @@
 # v1.0 Release Candidate Gate
 
-- Decision: **warning**
-- Generated: 2026-06-10T10:50:00.701Z
+- Decision: **pass**
+- Generated: 2026-06-10T23:42:25.728Z
 
 ## v1.0 launch rules (semantic)
 - Contract: v1.0-rules-v1
@@ -18,7 +18,7 @@
 ## Launch readiness (P24-backed signals)
 - launchRulesPass: PASS
 - baselinesHealthy: PASS
-- playtestComparisonsHealthy: FAIL
+- playtestComparisonsHealthy: PASS
 - alignmentHealthy: PASS
 - falsePositiveDetected: PASS
 - redirectionValidated: PASS
@@ -26,13 +26,13 @@
 - closureWavePass: PASS
 
 ## Playtest calibration (P24 surfaces)
-- Decision: **warning**
-- Generated: 2026-06-10T10:50:00.695Z
+- Decision: **pass**
+- Generated: 2026-06-10T23:42:25.564Z
 
 ## Surfaces
 - Dimensions: 6
 - Baselines: 6
-- Comparison samples: 4
+- Comparison samples: 6
 - Alignment indicators: 5
 - RC samples: 3
 - Playtest feedback schema: yes
@@ -40,7 +40,7 @@
 
 ## Validation
 - baselinesPass: PASS
-- comparisonsPass: FAIL
+- comparisonsPass: PASS
 - indicatorsHealthy: PASS
 - matrixPass: PASS
 - rcWavePass: PASS
@@ -52,29 +52,23 @@
 ## Messages
 - Dimensions: 6
 - Baselines passing: 6/6
-- Comparison samples passing: 4/4
-- Comparison dimension coverage: 4/6
-- Comparison dimensions passing: 4/6
-- Matrix decision: warning
+- Comparison samples passing: 6/6
+- Comparison dimension coverage: 6/6
+- Comparison dimensions passing: 6/6
+- Matrix decision: pass
 - RC wave: pass
 - Full closure: pass
-
-## Warnings
-- Playtest comparison coverage incomplete (missing: route_differentiation, late_game_payoff)
 
 ## Messages
 - v1.0 launch rules contract v1.0-rules-v1 satisfied
 - Dimensions: 6
 - Baselines passing: 6/6
-- Comparison samples passing: 4/4
-- Comparison dimension coverage: 4/6
-- Comparison dimensions passing: 4/6
-- Matrix decision: warning
+- Comparison samples passing: 6/6
+- Comparison dimension coverage: 6/6
+- Comparison dimensions passing: 6/6
+- Matrix decision: pass
 - RC wave: pass
 - Full closure: pass
-- Launch matrix: warning
+- Launch matrix: pass
 - RC wave: pass
 - Full closure: pass
-
-## Warnings
-- Playtest comparison coverage incomplete (missing: route_differentiation, late_game_payoff)

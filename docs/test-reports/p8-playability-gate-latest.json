@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-06-10T10:50:07.222Z",
+  "generatedAt": "2026-06-11T01:41:52.573Z",
   "decision": "pass",
   "endAge": 40,
   "personaRuns": [
@@ -898,7 +898,7 @@
         "repeatedStreakExamples": []
       },
       "causality": {
-        "directEchoCount": 1,
+        "directEchoCount": 3,
         "genericEchoCount": 0,
         "strongestExamples": [
           {
@@ -906,9 +906,21 @@
             "description": "explicit echo flag p9_explicit_business_echo",
             "reference": "p9_explicit_business_echo",
             "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "summary echo: 幼年帮工营商的习惯延续至今",
+            "reference": "p9_summary_echo_business",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "configured echo hook echo_business_basic fired at p9_merchant_midlife_caravan",
+            "reference": "p9_echo_business_hook",
+            "kind": "direct"
           }
         ],
-        "tooFewEchoes": true
+        "tooFewEchoes": false
       },
       "achievement": {
         "goals": [
@@ -967,7 +979,7 @@
       "narrativeMemory": {
         "earlyLife": "0岁 天降异象；1岁 出身背景；2岁 主动帮家里打杂；3岁 伶牙俐齿；4岁 童年选择",
         "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
-        "age40Identity": "出身：市井草根，路线：商路之主（merchant_caravan_master）",
+        "age40Identity": "出身：市井草根，路线：商路之主（merchant_caravan_master），幼年帮工营商的习惯延续至今",
         "evidenceCitations": [
           {
             "age": 0,
@@ -1545,7 +1557,7 @@
       "narrativeMemory": {
         "earlyLife": "0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择",
         "turningPoint": "20岁 喜结良缘 — 你的积蓄少了一些。",
-        "age40Identity": "出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，邪路偏锋的习惯延续至今",
+        "age40Identity": "出身：武林世家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，幼年游历 → 远游记名，邪路偏锋的习惯延续至今",
         "evidenceCitations": [
           {
             "age": 0,
@@ -1755,7 +1767,7 @@
         "repeatedStreakExamples": []
       },
       "causality": {
-        "directEchoCount": 2,
+        "directEchoCount": 3,
         "genericEchoCount": 0,
         "strongestExamples": [
           {
@@ -1766,12 +1778,18 @@
           },
           {
             "age": 28,
+            "description": "summary echo: 幼年游历的习惯延续至今",
+            "reference": "p9_summary_echo_travel",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
             "description": "configured echo hook echo_travel_basic fired at p9_wanderer_midlife_discovery",
             "reference": "p9_echo_travel_hook",
             "kind": "direct"
           }
         ],
-        "tooFewEchoes": true
+        "tooFewEchoes": false
       },
       "achievement": {
         "goals": [
@@ -1821,7 +1839,7 @@
       "narrativeMemory": {
         "earlyLife": "0岁 降生武侠世家；1岁 出身背景；2岁 主动街坊跑腿；3岁 伶牙俐齿；4岁 童年选择",
         "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。 你借着大会让",
-        "age40Identity": "出身：寒门，路线：江湖游侠（wanderer_map_legend）",
+        "age40Identity": "出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年游历的习惯延续至今",
         "evidenceCitations": [
           {
             "age": 0,
@@ -2057,7 +2075,7 @@
         "repeatedStreakExamples": []
       },
       "causality": {
-        "directEchoCount": 8,
+        "directEchoCount": 9,
         "genericEchoCount": 0,
         "strongestExamples": [
           {
@@ -2139,7 +2157,7 @@
       "narrativeMemory": {
         "earlyLife": "0岁 降生武侠世家；1岁 出身背景；2岁 主动玩耍练功；3岁 伶牙俐齿；4岁 童年选择",
         "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
-        "age40Identity": "出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今，幼年读书的习惯延续至今，幼年交游的习惯延续至今",
+        "age40Identity": "出身：寒门，路线：江湖游侠（wanderer_map_legend），幼年练功的习惯延续至今，幼年游历的习惯延续至今，幼年读书的习惯延续至今，幼年交游的习惯延续至今",
         "evidenceCitations": [
           {
             "age": 0,
@@ -2334,7 +2352,7 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-wealth-shen",
-        "score": 0.6813115018946939
+        "score": 0.6475598926366666
       },
       {
         "personaA": "p8-martial-lin",
@@ -2344,17 +2362,17 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-deviant-ye",
-        "score": 0.8103478446832183
+        "score": 0.8502148251365301
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-explorer-lu",
-        "score": 0.6005755360704225
+        "score": 0.6184727657197362
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-balanced-wei",
-        "score": 0.5785083886550296
+        "score": 0.5614176085880124
       },
       {
         "personaA": "p8-scholar-su",
@@ -2364,7 +2382,7 @@
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-wealth-shen",
-        "score": 0.818545513102056
+        "score": 0.8172184971578003
       },
       {
         "personaA": "p8-scholar-su",
@@ -2374,22 +2392,22 @@
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-deviant-ye",
-        "score": 0.5534408150814677
+        "score": 0.7021159941689454
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-explorer-lu",
-        "score": 0.643648563893314
+        "score": 0.6899940954582789
       },
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-balanced-wei",
-        "score": 0.6496244172152598
+        "score": 0.6545109364430661
       },
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-wealth-shen",
-        "score": 0.7399640484348777
+        "score": 0.8408338744534057
       },
       {
         "personaA": "p8-social-gu",
@@ -2399,71 +2417,83 @@
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-deviant-ye",
-        "score": 0.38438048970863004
+        "score": 0.6706432729654019
       },
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-explorer-lu",
-        "score": 0.48599231261458026
+        "score": 0.5908789497394277
       },
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-balanced-wei",
-        "score": 0.6190812708189596
+        "score": 0.6765899775631719
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-cautious-han",
-        "score": 0.6898751877760103
+        "score": 0.7558745355200303
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-deviant-ye",
-        "score": 0.3964106499502246
+        "score": 0.667859780065229
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-explorer-lu",
-        "score": 0.6304975021169139
+        "score": 0.6720886971709115
       },
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-balanced-wei",
-        "score": 0.6047994186466752
+        "score": 0.6987488532908503
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-deviant-ye",
-        "score": 0.5041594046233696
+        "score": 0.7524805177146011
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-explorer-lu",
-        "score": 0.5416176649944529
+        "score": 0.61324498496618
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-balanced-wei",
-        "score": 0.789471016706596
+        "score": 0.798173107975718
       },
       {
         "personaA": "p8-deviant-ye",
         "personaB": "p8-explorer-lu",
-        "score": 0.5532611459075628
+        "score": 0.7023062371941865
       },
       {
         "personaA": "p8-deviant-ye",
         "personaB": "p8-balanced-wei",
-        "score": 0.58369730635028
+        "score": 0.7261629505252819
       },
       {
         "personaA": "p8-explorer-lu",
         "personaB": "p8-balanced-wei",
-        "score": 0.5720868372154169
+        "score": 0.6393764464523491
       }
     ],
-    "similarityClusters": [],
-    "nearDuplicateWarnings": []
+    "similarityClusters": [
+      [
+        "p8-martial-lin",
+        "p8-deviant-ye"
+      ],
+      [
+        "p8-social-gu",
+        "p8-wealth-shen"
+      ]
+    ],
+    "nearDuplicateWarnings": [
+      "p8-martial-lin ~ p8-deviant-ye (0.85)",
+      "p8-social-gu ~ p8-wealth-shen (0.84)"
+    ]
   },
   "verdicts": [
     {
@@ -2584,19 +2614,10 @@
     },
     {
       "key": "causality",
-      "status": "warning",
+      "status": "pass",
       "severity": "warning",
-      "detail": "p8-wealth-shen: direct echoes 1",
-      "evidence": [
-        {
-          "age": 28,
-          "description": "explicit echo flag p9_explicit_business_echo",
-          "reference": "p9_explicit_business_echo",
-          "kind": "direct"
-        }
-      ],
-      "actualValue": 1,
-      "threshold": 3
+      "detail": "p8-wealth-shen: direct echoes 3",
+      "evidence": []
     },
     {
       "key": "pacing",
@@ -2701,25 +2722,10 @@
     },
     {
       "key": "causality",
-      "status": "warning",
+      "status": "pass",
       "severity": "warning",
-      "detail": "p8-explorer-lu: direct echoes 2",
-      "evidence": [
-        {
-          "age": 28,
-          "description": "explicit echo flag p9_explicit_travel_echo",
-          "reference": "p9_explicit_travel_echo",
-          "kind": "direct"
-        },
-        {
-          "age": 28,
-          "description": "configured echo hook echo_travel_basic fired at p9_wanderer_midlife_discovery",
-          "reference": "p9_echo_travel_hook",
-          "kind": "direct"
-        }
-      ],
-      "actualValue": 2,
-      "threshold": 3
+      "detail": "p8-explorer-lu: direct echoes 3",
+      "evidence": []
     },
     {
       "key": "pacing",
@@ -2754,7 +2760,7 @@
       "key": "causality",
       "status": "pass",
       "severity": "warning",
-      "detail": "p8-balanced-wei: direct echoes 8",
+      "detail": "p8-balanced-wei: direct echoes 9",
       "evidence": []
     },
     {
@@ -2787,51 +2793,26 @@
     },
     {
       "key": "replayability",
-      "status": "pass",
+      "status": "warning",
       "severity": "warning",
-      "detail": "persona outputs sufficiently distinct",
-      "evidence": []
+      "detail": "2 near-duplicate pairs",
+      "evidence": [
+        "p8-martial-lin ~ p8-deviant-ye (0.85)",
+        "p8-social-gu ~ p8-wealth-shen (0.84)"
+      ]
     }
   ],
   "blockingFailures": [],
   "warnings": [
     {
-      "key": "causality",
+      "key": "replayability",
       "status": "warning",
       "severity": "warning",
-      "detail": "p8-wealth-shen: direct echoes 1",
+      "detail": "2 near-duplicate pairs",
       "evidence": [
-        {
-          "age": 28,
-          "description": "explicit echo flag p9_explicit_business_echo",
-          "reference": "p9_explicit_business_echo",
-          "kind": "direct"
-        }
-      ],
-      "actualValue": 1,
-      "threshold": 3
-    },
-    {
-      "key": "causality",
-      "status": "warning",
-      "severity": "warning",
-      "detail": "p8-explorer-lu: direct echoes 2",
-      "evidence": [
-        {
-          "age": 28,
-          "description": "explicit echo flag p9_explicit_travel_echo",
-          "reference": "p9_explicit_travel_echo",
-          "kind": "direct"
-        },
-        {
-          "age": 28,
-          "description": "configured echo hook echo_travel_basic fired at p9_wanderer_midlife_discovery",
-          "reference": "p9_echo_travel_hook",
-          "kind": "direct"
-        }
-      ],
-      "actualValue": 2,
-      "threshold": 3
+        "p8-martial-lin ~ p8-deviant-ye (0.85)",
+        "p8-social-gu ~ p8-wealth-shen (0.84)"
+      ]
     }
   ]
 }

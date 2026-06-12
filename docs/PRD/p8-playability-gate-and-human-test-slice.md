@@ -285,5 +285,5 @@ P8 的目标不是扩成终局系统，而是在继续投入大系统之前建�
 - Should age 40 be a hard stop in the UI for testing, or only a report checkpoint?
 - Which three early route identities should be treated as mandatory for the first真人切片?
 - Should the P8 gate be part of `npm run validate`, or remain a separate product gate due to report generation cost?
-- Should API mode be excluded from P8 human testing until server-backed active planning exists?
+- ~~Should API mode be excluded from P8 human testing until server-backed active planning exists?~~ **Resolved (P8.1):** API + headless 为 canonical 验收环境；见 `docs/PRD/p8-1-api-mode-playability-acceptance.md` 与 `docs/designs/p8-1-api-human-slice.md`。
 

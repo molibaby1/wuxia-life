@@ -164,7 +164,7 @@ export function formatV10GateMarkdown(gate: V10GateReport): string {
 export function assembleV10ClosurePayload(
   profile: WorldProfile = getWorldProfile(),
   options?: AssembleV10GateReportOptions,
-): ReturnType<typeof assembleP24ClosurePayload> & { gate: V10GateReport } {
+): Omit<ReturnType<typeof assembleP24ClosurePayload>, 'gate'> & { gate: V10GateReport } {
   const p24 = assembleP24ClosurePayload(profile);
   const launchRules = validateLaunchReadinessSemantics({
     profile,

@@ -1,4 +1,5 @@
 import { computed, reactive, ref } from 'vue';
+import type { SessionProgressionPayload } from '../contracts/sessionProgression';
 import {
   createWebApiClient,
   WebApiClientError,
@@ -22,6 +23,29 @@ export function isApiModeEnabled(): boolean {
   return apiClient !== null;
 }
 
+function applyProgressionToEngine(
+  engineState: {
+    sessionPhase: SessionProgressionPayload['sessionPhase'];
+    planningOptions: SessionProgressionPayload['planningOptions'];
+    activeActionSummary: SessionProgressionPayload['activeActionSummary'];
+    disturbanceNarrative: SessionProgressionPayload['disturbanceNarrative'];
+    currentEvent: SessionStartResponse['nextEvent'];
+    availableChoices: Array<{ id: string; text: string }>;
+    showingDisturbanceNarrative: boolean;
+  },
+  payload: SessionProgressionPayload,
+): void {
+  engineState.sessionPhase = payload.sessionPhase;
+  engineState.planningOptions = payload.planningOptions ?? [];
+  engineState.activeActionSummary = payload.activeActionSummary;
+  engineState.disturbanceNarrative = payload.disturbanceNarrative;
+  engineState.currentEvent = payload.nextEvent;
+  engineState.availableChoices =
+    payload.nextEvent?.choices?.filter(choice => choice.available) ?? [];
+  engineState.showingDisturbanceNarrative =
+    payload.sessionPhase === 'disturbance_narrative';
+}
+
 export function useApiGameEngine() {
   const flowState = ref<ApiFlowState>('idle');
   const flowMessage = ref('');
@@ -31,6 +55,11 @@ export function useApiGameEngine() {
   const isProcessing = ref(false);
 
   const engineState = reactive({
+    sessionPhase: 'story_event' as SessionProgressionPayload['sessionPhase'],
+    planningOptions: [] as SessionProgressionPayload['planningOptions'],
+    activeActionSummary: null as SessionProgressionPayload['activeActionSummary'],
+    disturbanceNarrative: null as SessionProgressionPayload['disturbanceNarrative'],
+    showingDisturbanceNarrative: false,
     currentEvent: null as SessionStartResponse['nextEvent'],
     availableChoices: [] as Array<{ id: string; text: string }>,
     lastChoiceFeedback: null as string | null,
@@ -42,11 +71,24 @@ export function useApiGameEngine() {
 
   function applySessionResponse(response: SessionStartResponse): void {
     activeSession.value = response;
-    engineState.currentEvent = response.nextEvent;
-    engineState.availableChoices =
-      response.nextEvent?.choices?.filter(choice => choice.available) ?? [];
+    applyProgressionToEngine(engineState, response);
     engineState.lastChoiceFeedback = null;
     engineState.lastOutcomeText = null;
+  }
+
+  function applyProgressionResponse(payload: SessionProgressionPayload): void {
+    if (!activeSession.value) return;
+    activeSession.value = {
+      ...activeSession.value,
+      ...payload,
+      slot: {
+        ...activeSession.value.slot,
+        version: payload.slotVersion,
+        snapshotId: payload.snapshotId,
+      },
+      snapshot: { ...activeSession.value.snapshot, id: payload.snapshotId },
+    };
+    applyProgressionToEngine(engineState, payload);
   }
 
   function mapApiError(error: unknown): void {
@@ -151,26 +193,61 @@ export function useApiGameEngine() {
         expectedSnapshotId: activeSession.value.snapshot.id,
         eventId,
         choiceId: choice.id,
-      }) as {
-        slotVersion: number;
-        snapshotId: string;
-        nextEvent: SessionStartResponse['nextEvent'];
-        feedback?: { summary?: string };
-      };
-      activeSession.value = {
-        ...activeSession.value,
-        slot: {
-          ...activeSession.value.slot,
-          version: result.slotVersion,
-          snapshotId: result.snapshotId,
-        },
-        snapshot: { ...activeSession.value.snapshot, id: result.snapshotId },
-        nextEvent: result.nextEvent,
-      };
-      engineState.currentEvent = result.nextEvent;
-      engineState.availableChoices =
-        result.nextEvent?.choices?.filter(c => c.available) ?? [];
+      });
+      applyProgressionResponse(result);
       engineState.lastChoiceFeedback = result.feedback?.summary ?? null;
+    } catch (error) {
+      mapApiError(error);
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
+  async function handleActiveAction(actionId: string): Promise<void> {
+    if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
+    if (engineState.sessionPhase !== 'active_planning') return;
+    isProcessing.value = true;
+    try {
+      const sessionId = webPlatformStorage.getSessionId();
+      const sessionToken = webPlatformStorage.getSessionToken();
+      if (!sessionId || !sessionToken) throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+      const result = await apiClient.executeActiveAction({
+        deviceToken: deviceToken.value,
+        sessionId,
+        sessionToken,
+        expectedSlotVersion: activeSession.value.slot.version,
+        expectedSnapshotId: activeSession.value.snapshot.id,
+        actionId,
+      });
+      applyProgressionResponse(result);
+    } catch (error) {
+      mapApiError(error);
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
+  async function handleProgressionAck(): Promise<void> {
+    if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
+    const ackKind =
+      engineState.sessionPhase === 'disturbance_narrative' ? 'disturbance' : 'action_summary';
+    if (engineState.sessionPhase !== 'action_summary' && engineState.sessionPhase !== 'disturbance_narrative') {
+      return;
+    }
+    isProcessing.value = true;
+    try {
+      const sessionId = webPlatformStorage.getSessionId();
+      const sessionToken = webPlatformStorage.getSessionToken();
+      if (!sessionId || !sessionToken) throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+      const result = await apiClient.acknowledgeProgression({
+        deviceToken: deviceToken.value,
+        sessionId,
+        sessionToken,
+        expectedSlotVersion: activeSession.value.slot.version,
+        expectedSnapshotId: activeSession.value.snapshot.id,
+        ackKind,
+      });
+      applyProgressionResponse(result);
     } catch (error) {
       mapApiError(error);
     } finally {
@@ -225,6 +302,8 @@ export function useApiGameEngine() {
     startNewGameInSlot,
     continueSlot,
     handleChoice,
+    handleActiveAction,
+    handleProgressionAck,
     saveCurrentGame,
   };
 }

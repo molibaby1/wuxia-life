@@ -5,6 +5,8 @@ export type ReplayActionType =
   | 'session_created'
   | 'session_restored'
   | 'choice_executed'
+  | 'active_action'
+  | 'progression_ack'
   | 'automatic_progression'
   | 'manual_save'
   | 'terminal';

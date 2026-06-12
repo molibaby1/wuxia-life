@@ -11,7 +11,10 @@ import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../../src/contracts/choiceE
 import type { HeadlessLogger } from '../../../src/headless/dependencies/HeadlessSessionDependencies.js';
 import { noopLogger } from '../../../src/headless/dependencies/HeadlessSessionDependencies.js';
 import { SeededRandomSource } from '../../../src/headless/adapters/randomSource.js';
+import { progressUntilChoiceOrTerminal } from '../../../src/headless/progressionLoop.js';
 import type { BackendEnv } from '../config/env.js';
+
+export { progressUntilChoiceOrTerminal };
 
 function serverSessionDeps(logger?: HeadlessLogger, seed = 1) {
   return {
@@ -93,17 +96,15 @@ export async function executeChoiceOnSession(
   return session.executeChoice(request);
 }
 
-export async function progressUntilChoiceOrTerminal(
-  session: HeadlessEngineSession,
-): Promise<void> {
-  let guard = 0;
-  while (guard < 32) {
-    guard += 1;
-    const next = await session.getNextEvent();
-    if (!next) break;
-    if (!next.isAutomatic) break;
-    const progress = await session.progressAutomatic({ maxSteps: 8 });
-    if (progress.stoppedReason === 'terminal') break;
-    if (progress.stepsExecuted === 0) break;
+/** After auto progress, surface active_planning instead of null dead-end. */
+export async function resolveSessionAfterAutoProgress(session: HeadlessEngineSession) {
+  const phase = session.getSessionPhase();
+  if (phase === 'terminal' || phase === 'action_summary' || phase === 'disturbance_narrative') {
+    return { nextEvent: null, phase };
   }
+  if (phase === 'active_planning') {
+    return { nextEvent: null, phase };
+  }
+  const next = await session.getNextEvent();
+  return { nextEvent: next, phase: session.getSessionPhase() };
 }

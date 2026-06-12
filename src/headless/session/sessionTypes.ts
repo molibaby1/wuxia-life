@@ -3,6 +3,11 @@
  */
 
 import type { ChoiceFeedbackModel } from '../../types/choiceFeedback';
+import type {
+  ActiveActionSummaryDisplay,
+  DisturbanceNarrativeDisplay,
+} from '../../types/activeActionTypes';
+import type { SessionPhase } from '../../contracts/sessionProgression';
 import type { EventDefinition } from '../../types/eventTypes';
 
 export type HeadlessErrorCode =
@@ -16,7 +21,10 @@ export type HeadlessErrorCode =
   | 'STALE_CHOICE'
   | 'TERMINAL_STATE'
   | 'AUTOMATIC_PROGRESSION_LIMIT'
-  | 'SESSION_NOT_INITIALIZED';
+  | 'SESSION_NOT_INITIALIZED'
+  | 'INVALID_SESSION_PHASE'
+  | 'INVALID_ACTION'
+  | 'INVALID_ACK_KIND';
 
 export interface HeadlessSessionError {
   code: HeadlessErrorCode;
@@ -60,8 +68,33 @@ export interface HeadlessTerminalState {
   age: number;
 }
 
-export interface HeadlessSessionVolatileState {
+export interface HeadlessProgressionVolatileState {
+  pendingActionSummary: ActiveActionSummaryDisplay | null;
+  pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
+}
+
+export interface HeadlessSessionVolatileState extends HeadlessProgressionVolatileState {
   currentEvent: EventDefinition | null;
   lastFeedback: ChoiceFeedbackModel | null;
   lastOutcomeText: string | null;
 }
+
+export class HeadlessProgressionError extends Error {
+  readonly code: Extract<
+    HeadlessErrorCode,
+    'INVALID_SESSION_PHASE' | 'INVALID_ACTION' | 'INVALID_ACK_KIND'
+  >;
+
+  constructor(
+    code: Extract<HeadlessErrorCode, 'INVALID_SESSION_PHASE' | 'INVALID_ACTION' | 'INVALID_ACK_KIND'>,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'HeadlessProgressionError';
+    this.code = code;
+  }
+}
+
+export type ProgressionAckKind = 'action_summary' | 'disturbance';
+
+export type { SessionPhase };

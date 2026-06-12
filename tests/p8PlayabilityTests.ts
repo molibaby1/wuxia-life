@@ -3,11 +3,13 @@
  */
 
 import { selectPersonaActiveAction } from '../src/p8/personaActionStrategy';
+import { resolvePersonaYouthRouteSeeds } from '../src/p8/personaYouthRouteSeeds';
 import { applyPersonaChoiceBias, rankChoiceScores } from '../src/p8/personaChoiceBias';
 import { getP8GatePersonas, getP8PersonaById } from '../src/p8/personas';
 import { collectAgencyMetrics } from '../src/p8/collectPersonaMetrics';
 import { evaluateP8Gate, assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { renderP8MarkdownReport } from '../src/p8/reportBuilder';
+import { runHeadlessPersona } from '../src/headless/playability/headlessPersonaRunner';
 import type { GameProcessRecord } from './GameProcessSimulator';
 import { P8_METRIC_DEFINITIONS } from '../src/p8/metricDefinitions';
 
@@ -46,6 +48,75 @@ function testPersonaActionStrategyBusiness(): void {
     focusStreakCount: 0,
   });
   assert(result.actionId === 'action_business_basic', 'wealth persona should pick business');
+}
+
+function testDeviantYouthRouteSeeds(): void {
+  const deviant = getP8PersonaById('p8-deviant-ye')!;
+  const martial = getP8PersonaById('p8-martial-lin')!;
+  const deviantSeeds = resolvePersonaYouthRouteSeeds(deviant);
+  const martialSeeds = resolvePersonaYouthRouteSeeds(martial);
+  assert(deviantSeeds.p8_route_demonic === true, 'deviant gets demonic route flag');
+  assert(martialSeeds.p9_early_training_focus === true, 'martial keeps training focus');
+  assert(deviantSeeds.p9_early_training_focus !== true, 'deviant should not mirror martial training focus');
+}
+
+function testDeviantActionStrategyStudyMix(): void {
+  const persona = getP8PersonaById('p8-deviant-ye')!;
+  const childhoodStudy = selectPersonaActiveAction({
+    persona,
+    availableActions: [
+      { actionId: 'action_training_basic', category: 'training', name: '练功' },
+      { actionId: 'action_study_basic', category: 'study', name: '读书' },
+    ],
+    age: 5,
+    focusStreakCategory: null,
+    focusStreakCount: 0,
+  });
+  assert(childhoodStudy.actionId === 'action_study_basic', 'deviant should study-spike at age 5');
+  assert(childhoodStudy.reason.includes('demonic_childhood_study_spike'), 'deviant childhood study reason');
+
+  const shadowTrade = selectPersonaActiveAction({
+    persona,
+    availableActions: [
+      { actionId: 'action_training_basic', category: 'training', name: '练功' },
+      { actionId: 'action_business_basic', category: 'business', name: '营商' },
+    ],
+    age: 9,
+    focusStreakCategory: null,
+    focusStreakCount: 0,
+  });
+  assert(shadowTrade.actionId === 'action_business_basic', 'deviant should shadow-trade at age 9');
+  assert(shadowTrade.reason.includes('demonic_childhood_shadow_trade'), 'deviant shadow trade reason');
+
+  const adultStudyMix = selectPersonaActiveAction({
+    persona,
+    availableActions: [
+      { actionId: 'action_training_basic', category: 'training', name: '练功' },
+      { actionId: 'action_study_basic', category: 'study', name: '读书' },
+    ],
+    age: 16,
+    focusStreakCategory: null,
+    focusStreakCount: 0,
+  });
+  assert(adultStudyMix.actionId === 'action_study_basic', 'deviant should study-mix at age 16');
+  assert(adultStudyMix.reason.includes('demonic_study_mix'), 'deviant adult study reason');
+}
+
+function testLowRiskPersonaBreaksFocusStreak(): void {
+  const persona = getP8PersonaById('p8-scholar-su')!;
+  assert(persona.riskPreference === 'low', 'scholar fixture is low risk');
+  const result = selectPersonaActiveAction({
+    persona,
+    availableActions: [
+      { actionId: 'action_study_basic', category: 'study', name: '读书' },
+      { actionId: 'action_training_basic', category: 'training', name: '练功' },
+    ],
+    age: 16,
+    focusStreakCategory: 'study',
+    focusStreakCount: 4,
+  });
+  assert(result.actionId === 'action_training_basic', 'low-risk persona should break study streak at 4');
+  assert(result.reason.includes('broke_focus_streak'), 'streak break reason recorded');
 }
 
 function testPersonaActionStrategyDegrade(): void {
@@ -140,16 +211,47 @@ function testGateAssemblySmoke(): void {
   assert(md.includes('P8 Playability Gate Report'), 'markdown renders');
 }
 
-function runAll(): void {
+async function testHeadlessGateReportRuntimePath(): Promise<void> {
+  const report = assemblePlayabilityReport([], { pairwiseSimilarities: [], similarityClusters: [], nearDuplicateWarnings: [] }, 40, {
+    runtimePath: 'headless_server',
+    catalogVersion: '1.0.0',
+    engineVersion: 'test',
+  });
+  assert(report.runtimePath === 'headless_server', 'runtimePath should be headless_server');
+  const md = renderP8MarkdownReport(report, 'test.json');
+  assert(md.includes('headless_server'), 'markdown includes runtimePath');
+}
+
+async function testHeadlessRunnerSmokeOnePersona(): Promise<void> {
+  const persona = getP8PersonaById('p8-martial-lin')!;
+  const result = await runHeadlessPersona({
+    persona,
+    endAge: 15,
+    catalogVersion: '1.0.0',
+    maxSteps: 300,
+  });
+  assert(result.finalAge >= 15, 'headless smoke reaches target age');
+  assert(result.totalActiveActions >= 1, 'headless smoke records active actions');
+}
+
+async function runAll(): Promise<void> {
   testPersonaActionStrategyTraining();
+  testDeviantYouthRouteSeeds();
+  testDeviantActionStrategyStudyMix();
   testPersonaActionStrategyBusiness();
+  testLowRiskPersonaBreaksFocusStreak();
   testPersonaActionStrategyDegrade();
   testChoiceDiagnosticsRanking();
   testPersonaChoiceBias();
   testAgencyRepeatedStreak();
   testMetricDefinitionsComplete();
   testGateAssemblySmoke();
+  await testHeadlessGateReportRuntimePath();
+  await testHeadlessRunnerSmokeOnePersona();
   console.log('✔ p8PlayabilityTests passed');
 }
 
-runAll();
+runAll().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

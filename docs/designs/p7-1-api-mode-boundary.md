@@ -1,5 +1,9 @@
 # P7.1 API 模式主动规划能力边界
 
+> **SUPERSEDED by P7.2** — API 模式现已支持服务端权威主动规划。请参阅 [P7.2 PRD](../PRD/p7-2-server-authoritative-active-planning.md) 与 [P7.2 Session Progression API](./p7-2-session-progression-api.md)。本文档保留作历史记录，勿再向玩家展示「请使用本地模式」类文案。
+
+# P7.1 API 模式主动规划能力边界（历史）
+
 ## 玩家可见文案（P7.1 实现）
 
 当 Web 以 API 模式运行（构建时设置 `VITE_P6B_API_URL`）且处于对局中时，在 `GameScreen` 顶部展示：

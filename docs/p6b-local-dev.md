@@ -2,6 +2,18 @@
 
 三终端工作流：数据库 → API → Vite 前端。
 
+## 模式定位（P7.2 之后）
+
+- **API 模式（默认产品 / QA 路径）**：设置 `VITE_P6B_API_URL` 后，主动人生规划、行动小结与扰动确认均由服务端权威会话驱动（见 `docs/PRD/p7-2-server-authoritative-active-planning.md`）。
+- **本地模式（仅开发 / 离线兜底）**：不设置 `VITE_P6B_API_URL` 时走 `useNewGameEngine` + 浏览器 `localStorage` 存档；用于无数据库时的快速调试，**不是** P8 人工验收的主路径。
+
+**推荐联调命令（API 栈）：**
+
+```bash
+npm run p6b:setup && npm run p6b:serve   # 终端 A
+npm run dev                               # 终端 B（需 VITE_P6B_API_URL）
+```
+
 ## 0. 一次性准备
 
 ```bash
@@ -117,6 +129,21 @@ npm run test:p6b
 
 默认使用 **5433**，避免与本机已有 Postgres（常占用 5432）冲突。若改端口，请同步 `docker-compose.p6b.yml` 与 `.env.p6b` 中的 `DATABASE_URL`。
 
-## 8. 不使用 Docker 时
+## 8. P8 可玩性门禁（P8.1 默认 headless）
+
+自动化可玩性指标与 P8 persona 集由 **headless 同源路径**驱动（与 `p6b:serve` 使用相同 `HeadlessEngineSession`），**不需要**启动 API 或浏览器：
+
+```bash
+npm run gate:playability                    # 默认 headless_server
+npm run gate:playability -- --mode local_direct   # 仅 dev 对比
+```
+
+报告输出：`docs/test-reports/p8-playability-gate-latest.{json,md}`（含 `runtimePath` 字段）。
+
+**真人 0–40 切片**仍走 API 双终端栈（本节 0–4 步），见 `docs/test-reports/p8-1-api-human-test-script.md`。
+
+本地引擎模式（清空 `VITE_P6B_API_URL`）仅作离线 fallback，不作为 P8 验收标准。
+
+## 9. 不使用 Docker 时
 
 使用本机 PostgreSQL，自行创建库与用户后，只改 `.env.p6b` 的 `DATABASE_URL`，其余步骤相同。

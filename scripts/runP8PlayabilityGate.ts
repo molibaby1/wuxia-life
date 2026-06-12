@@ -8,18 +8,38 @@ import { getP8GatePersonas } from '../src/p8/personas';
 import { buildPersonaRunMetrics, collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { renderP8MarkdownReport } from '../src/p8/reportBuilder';
+import { runHeadlessPersona } from '../src/headless/playability/headlessPersonaRunner';
+import { adaptHeadlessRunToGameProcessReport } from '../src/headless/playability/adaptToGameProcessReport';
+import type { P8PlayabilityRuntimePath } from '../src/p8/types';
 
 const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
 const JSON_NAME = 'p8-playability-gate-latest.json';
 const MD_NAME = 'p8-playability-gate-latest.md';
+const DEFAULT_CATALOG_VERSION = '1.0.0';
+const ENGINE_VERSION = 'p8-headless-gate';
 
-type CliArgs = { quiet: boolean };
+type CliArgs = {
+  quiet: boolean;
+  mode: P8PlayabilityRuntimePath;
+};
 
 function parseArgs(argv: string[]): CliArgs {
-  return { quiet: argv.includes('--quiet') };
+  let mode: P8PlayabilityRuntimePath = 'headless_server';
+  for (let i = 0; i < argv.length; i += 1) {
+    if (argv[i] === '--mode' && argv[i + 1]) {
+      const raw = argv[i + 1];
+      if (raw === 'headless_server' || raw === 'local_direct') {
+        mode = raw;
+      } else {
+        throw new Error(`Unknown --mode ${raw}; use headless_server or local_direct`);
+      }
+      i += 1;
+    }
+  }
+  return { quiet: argv.includes('--quiet'), mode };
 }
 
-async function runPersonaSimulation(persona: ReturnType<typeof getP8GatePersonas>[0]) {
+async function runLocalPersonaSimulation(persona: ReturnType<typeof getP8GatePersonas>[0]) {
   const simulator = new GameProcessSimulator({
     playerName: persona.name,
     gender: persona.gender,
@@ -36,8 +56,19 @@ async function runPersonaSimulation(persona: ReturnType<typeof getP8GatePersonas
     verbose: false,
     sampleId: persona.id,
   });
-  const report = await simulator.simulate();
-  return report;
+  return simulator.simulate();
+}
+
+async function runHeadlessPersonaSimulation(persona: ReturnType<typeof getP8GatePersonas>[0]) {
+  const result = await runHeadlessPersona({
+    persona,
+    endAge: P8_GATE_END_AGE,
+    catalogVersion: DEFAULT_CATALOG_VERSION,
+  });
+  return adaptHeadlessRunToGameProcessReport(
+    { persona, endAge: P8_GATE_END_AGE, catalogVersion: DEFAULT_CATALOG_VERSION },
+    result,
+  );
 }
 
 async function main(): Promise<void> {
@@ -45,16 +76,21 @@ async function main(): Promise<void> {
   const personas = getP8GatePersonas();
 
   if (!args.quiet) {
-    console.log(`P8 Playability Gate — ${personas.length} personas, age 0–${P8_GATE_END_AGE}`);
+    console.log(
+      `P8 Playability Gate — ${personas.length} personas, age 0–${P8_GATE_END_AGE}, mode=${args.mode}`,
+    );
   }
 
-  const runs: Array<Awaited<ReturnType<typeof runPersonaSimulation>> & { personaId: string }> = [];
+  const runs: Array<Awaited<ReturnType<typeof runLocalPersonaSimulation>> & { personaId: string }> = [];
 
   for (const persona of personas) {
     if (!args.quiet) {
       console.log(`\n▶ ${persona.id} (${persona.name}) seed=${persona.seed}`);
     }
-    const report = await runPersonaSimulation(persona);
+    const report =
+      args.mode === 'local_direct'
+        ? await runLocalPersonaSimulation(persona)
+        : await runHeadlessPersonaSimulation(persona);
     runs.push(Object.assign(report, { personaId: persona.id }));
     if (!args.quiet) {
       console.log(`  events=${report.totalEvents} choices=${report.totalChoices} age=${report.finalAge}`);
@@ -75,7 +111,11 @@ async function main(): Promise<void> {
     runs.map(r => ({ personaId: r.personaId, report: r })),
   );
 
-  const p8Report = assemblePlayabilityReport(personaRuns, replay, P8_GATE_END_AGE);
+  const p8Report = assemblePlayabilityReport(personaRuns, replay, P8_GATE_END_AGE, {
+    runtimePath: args.mode,
+    catalogVersion: DEFAULT_CATALOG_VERSION,
+    engineVersion: ENGINE_VERSION,
+  });
 
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
   const jsonPath = path.join(REPORTS_DIR, JSON_NAME);
@@ -86,6 +126,7 @@ async function main(): Promise<void> {
 
   if (!args.quiet) {
     console.log(`\nDecision: ${p8Report.decision.toUpperCase()}`);
+    console.log(`Runtime: ${p8Report.runtimePath}`);
     console.log(`Blockers: ${p8Report.blockingFailures.length}`);
     console.log(`Warnings: ${p8Report.warnings.length}`);
     console.log(`JSON: ${jsonPath}`);

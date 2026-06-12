@@ -5,6 +5,7 @@ export function renderP8MarkdownReport(report: P8PlayabilityReport, jsonPath: st
     '# P8 Playability Gate Report',
     '',
     `Generated: ${report.generatedAt}`,
+    ...(report.runtimePath ? [`Runtime: ${report.runtimePath}`] : []),
     `Decision: **${report.decision.toUpperCase()}**`,
     `End age: ${report.endAge}`,
     `Machine-readable: ${jsonPath}`,

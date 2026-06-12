@@ -1,4 +1,10 @@
-import type { P8MetricVerdict, P8PersonaRunMetrics, P8PlayabilityReport, ReplayMetricPayload } from './types';
+import type {
+  P8MetricVerdict,
+  P8PersonaRunMetrics,
+  P8PlayabilityReport,
+  P8PlayabilityRuntimePath,
+  ReplayMetricPayload,
+} from './types';
 import { P8_METRIC_DEFINITIONS } from './metricDefinitions';
 
 function verdict(
@@ -169,15 +175,26 @@ export function evaluateP8Gate(
   return { verdicts, decision };
 }
 
+export interface AssemblePlayabilityReportOptions {
+  runtimePath?: P8PlayabilityRuntimePath;
+  catalogVersion?: string;
+  engineVersion?: string;
+}
+
 export function assemblePlayabilityReport(
   personaRuns: P8PersonaRunMetrics[],
   replay: ReplayMetricPayload,
   endAge: number,
+  options: AssemblePlayabilityReportOptions = {},
 ): P8PlayabilityReport {
   const { verdicts, decision } = evaluateP8Gate(personaRuns, replay);
+  const generatedAt = new Date().toISOString();
   return {
     schemaVersion: 'p8-v1',
-    generatedAt: new Date().toISOString(),
+    generatedAt,
+    runtimePath: options.runtimePath,
+    catalogVersion: options.catalogVersion,
+    engineVersion: options.engineVersion,
     decision,
     endAge,
     personaRuns,

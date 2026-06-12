@@ -9,9 +9,11 @@ export interface RandomSource {
   readonly seedLabel?: string | number;
 }
 
+const nativeRandom = Math.random.bind(Math);
+
 export class PlatformRandomSource implements RandomSource {
   next(): number {
-    return Math.random();
+    return nativeRandom();
   }
 }
 

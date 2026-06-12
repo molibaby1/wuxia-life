@@ -1,5 +1,7 @@
 # P8 Human Test Slice — Admission Scope
 
+> **P8.1 更新：** API 模式验收见 `docs/designs/p8-1-api-human-slice.md`。下文「本地 Web 切片」仅作历史参考，不再作为默认验收路径。
+
 生成时间：2026-06-07
 
 ## 1. 体验范围

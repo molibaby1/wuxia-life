@@ -146,7 +146,13 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
             id: result.snapshot.id,
             contentHash: result.snapshot.content_hash,
           },
+          slotVersion: result.slotVersion,
+          snapshotId: result.snapshotId,
+          sessionPhase: result.sessionPhase,
           nextEvent: result.nextEvent,
+          planningOptions: result.planningOptions,
+          activeActionSummary: result.activeActionSummary,
+          disturbanceNarrative: result.disturbanceNarrative,
           terminal: result.terminal,
           lifeMemory: result.lifeMemory,
         });
@@ -176,7 +182,13 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
             id: result.snapshot.id,
             contentHash: result.snapshot.content_hash,
           },
+          slotVersion: result.slotVersion,
+          snapshotId: result.snapshotId,
+          sessionPhase: result.sessionPhase,
           nextEvent: result.nextEvent,
+          planningOptions: result.planningOptions,
+          activeActionSummary: result.activeActionSummary,
+          disturbanceNarrative: result.disturbanceNarrative,
           terminal: result.terminal,
           lifeMemory: result.lifeMemory,
         });
@@ -211,10 +223,60 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           feedback: result.response.status === 'success' ? result.response.feedback : undefined,
           diagnostics:
             result.response.status === 'success' ? result.response.diagnostics : result.response.diagnostics,
+          sessionPhase: result.sessionPhase,
+          nextEvent: result.nextEvent,
+          planningOptions: result.planningOptions,
+          activeActionSummary: result.activeActionSummary,
+          disturbanceNarrative: result.disturbanceNarrative,
           terminal: result.terminal,
           lifeMemory: result.lifeMemory,
-          nextEvent: result.nextEvent,
         });
+      },
+    },
+    {
+      method: 'POST',
+      pattern: /^\/v1\/sessions\/([^/]+)\/active-action$/,
+      handler: async (req, res, ctx, params) => {
+        const deviceToken = getBearerToken(req, 'x-device-token');
+        const sessionToken = getBearerToken(req, 'x-session-token');
+        const body = await readJsonBody<{
+          expectedSlotVersion: number;
+          expectedSnapshotId: string;
+          actionId: string;
+        }>(req);
+        const db = getPool(env.databaseUrl);
+        const result = await gameService.executeActiveAction(db, ctx.env, {
+          deviceToken: deviceToken!,
+          sessionId: params.sessionId!,
+          sessionToken: sessionToken!,
+          expectedSlotVersion: body.expectedSlotVersion,
+          expectedSnapshotId: body.expectedSnapshotId,
+          actionId: body.actionId,
+        });
+        sendJson(res, 200, result);
+      },
+    },
+    {
+      method: 'POST',
+      pattern: /^\/v1\/sessions\/([^/]+)\/progression-ack$/,
+      handler: async (req, res, ctx, params) => {
+        const deviceToken = getBearerToken(req, 'x-device-token');
+        const sessionToken = getBearerToken(req, 'x-session-token');
+        const body = await readJsonBody<{
+          expectedSlotVersion: number;
+          expectedSnapshotId: string;
+          ackKind: 'action_summary' | 'disturbance';
+        }>(req);
+        const db = getPool(env.databaseUrl);
+        const result = await gameService.acknowledgeProgression(db, ctx.env, {
+          deviceToken: deviceToken!,
+          sessionId: params.sessionId!,
+          sessionToken: sessionToken!,
+          expectedSlotVersion: body.expectedSlotVersion,
+          expectedSnapshotId: body.expectedSnapshotId,
+          ackKind: body.ackKind,
+        });
+        sendJson(res, 200, result);
       },
     },
     {

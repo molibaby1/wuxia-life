@@ -57,23 +57,48 @@ export function selectPersonaActiveAction(
 
   if (input.persona.strategy === 'balanced') {
     priorities = rotatedPriorities(priorities, Math.floor(input.age / 3));
-  } else if (input.persona.routePreference === 'demonic' && input.age === 7) {
-    const travel = pickByCategory(input, 'travel');
-    if (travel) {
-      return { ...travel, reason: `${travel.reason}; demonic_restless_age7` };
+  } else if (input.persona.routePreference === 'demonic') {
+    priorities = ['training', 'study', 'travel', 'socializing', 'business'];
+    if (input.age < 13) {
+      if (input.age === 5 || input.age === 11) {
+        const study = pickByCategory(input, 'study');
+        if (study) {
+          return { ...study, reason: `${study.reason}; demonic_childhood_study_spike` };
+        }
+      }
+      if (input.age === 9) {
+        const business = pickByCategory(input, 'business');
+        if (business) {
+          return { ...business, reason: `${business.reason}; demonic_childhood_shadow_trade` };
+        }
+      }
+    }
+    if (input.age % 3 === 1 && input.age >= 13) {
+      const study = pickByCategory(input, 'study');
+      if (study) {
+        return { ...study, reason: `${study.reason}; demonic_study_mix` };
+      }
     }
   } else if (input.persona.routePreference === 'conservative') {
     priorities = ['training', 'study', 'socializing', 'business', 'travel'];
+    if (input.age < 13) {
+      if (input.age === 12) {
+        const study = pickByCategory(input, 'study');
+        if (study) {
+          return { ...study, reason: `${study.reason}; cautious_childhood_study_once` };
+        }
+      }
+      const steady = pickByCategory(input, 'training');
+      if (steady) {
+        return { ...steady, reason: `${steady.reason}; cautious_childhood_steady` };
+      }
+    }
   }
 
   for (const category of priorities) {
     const picked = pickByCategory(input, category);
     if (picked) {
-      if (
-        input.focusStreakCategory === category &&
-        input.focusStreakCount >= 4 &&
-        input.persona.riskPreference !== 'low'
-      ) {
+      if (input.focusStreakCategory === category && input.focusStreakCount >= 4) {
         const altCategory = priorities.find(c => c !== category);
         if (altCategory) {
           const alt = pickByCategory(input, altCategory);

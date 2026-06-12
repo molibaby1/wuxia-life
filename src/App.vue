@@ -35,6 +35,8 @@ const {
   startNewGameInSlot,
   continueSlot,
   handleChoice: apiHandleChoice,
+  handleActiveAction: apiHandleActiveAction,
+  handleProgressionAck: apiHandleProgressionAck,
   saveCurrentGame: apiSaveCurrentGame,
   activeSession,
 } = apiEngine;
@@ -48,9 +50,7 @@ onMounted(() => {
 const gamePhase = computed(() => {
   if (!gameStarted.value) return 'start';
   if (apiMode) {
-    const terminal =
-      activeSession.value?.nextEvent === null && apiEngineState.availableChoices.length === 0;
-    if (terminal) return 'ending';
+    if (apiEngineState.sessionPhase === 'terminal') return 'ending';
     return 'playing';
   }
   const state = gameEngine.getGameState();
@@ -128,6 +128,32 @@ const toggleDebug = () => {
 
 const currentNode = computed(() => {
   if (apiMode) {
+    if (apiEngineState.sessionPhase === 'active_planning') {
+      return {
+        id: 'active_planning',
+        text: '本期暂无强求的江湖变故，你可安排日常行动。',
+        title: '规划本期人生',
+        choices: [],
+      };
+    }
+    if (apiEngineState.sessionPhase === 'disturbance_narrative' && apiEngineState.disturbanceNarrative) {
+      const narrative = apiEngineState.disturbanceNarrative;
+      return {
+        id: 'disturbance_narrative',
+        text: narrative.bodyText,
+        title: narrative.title,
+        choices: [],
+      };
+    }
+    if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
+      const summary = apiEngineState.activeActionSummary;
+      return {
+        id: 'action_or_choice_result',
+        text: `${summary.actionName}已结束（${summary.durationLabel}）。`,
+        title: '本期小结',
+        choices: [],
+      };
+    }
     const event = apiEngineState.currentEvent;
     if (!event) return null;
     return {
@@ -185,6 +211,15 @@ const currentNode = computed(() => {
 });
 
 const availableChoices = computed(() => {
+  if (apiMode && apiEngineState.sessionPhase === 'active_planning') {
+    return apiEngineState.planningOptions.map(option => ({
+      id: `active_${option.actionId}`,
+      text: option.text,
+      description: `${option.description}｜收益：${option.rewardSummary}｜消耗：${option.costSummary}｜风险：${option.riskLevel}`,
+      actionId: option.actionId,
+      isActiveAction: true,
+    }));
+  }
   if (apiMode) return apiEngineState.availableChoices;
   if (gameEngineComposable.engineState.isActiveActionMode) {
     return gameEngineComposable.engineState.availableActiveActions.map(action => ({
@@ -205,6 +240,10 @@ const endingPlayer = computed(() => {
 
 const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {
   if (apiMode) {
+    if (choice.isActiveAction) {
+      void apiHandleActiveAction(choice.actionId ?? choice.id.replace(/^active_/, ''));
+      return;
+    }
     void apiHandleChoice(choice);
     return;
   }
@@ -218,6 +257,10 @@ const onChoice = (choice: { id: string; text: string; actionId?: string; isActiv
     return;
   }
   void handleChoice(choice);
+};
+
+const onApiProgressionAck = () => {
+  void apiHandleProgressionAck();
 };
 
 const onApiManualSave = async () => {
@@ -259,8 +302,12 @@ const onApiManualSave = async () => {
       :current-node="currentNode"
       :available-choices="availableChoices"
       :is-auto-playing="apiMode ? apiIsProcessing : isProcessing"
+      :api-active-action-summary="apiMode ? apiEngineState.activeActionSummary : null"
+      :api-disturbance-narrative="apiMode ? apiEngineState.disturbanceNarrative : null"
+      :api-session-phase="apiMode ? apiEngineState.sessionPhase : null"
       @choice="onChoice"
       @manual-save="onApiManualSave"
+      @api-progression-ack="onApiProgressionAck"
     />
     <EndingScreen
       v-else

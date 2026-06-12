@@ -22,14 +22,21 @@ import {
 import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCatalogAdapter';
 import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './HeadlessEngineSession';
+import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
+import type { PlanningOptionDto } from '../../contracts/sessionProgression';
+import type { SessionPhase } from '../../contracts/sessionProgression';
+import { getActionById } from '../../data/activeActionCatalog';
 import type {
+  HeadlessProgressionVolatileState,
   HeadlessSessionError,
   HeadlessSessionVolatileState,
   HeadlessTerminalState,
   NextEventResult,
   PlayerSafeEventPayload,
+  ProgressionAckKind,
   ProgressAutomaticResult,
 } from './sessionTypes';
+import { HeadlessProgressionError as ProgressionError } from './sessionTypes';
 import type { RouteTrack } from '../parity/routeTrackFixtures';
 import {
   prepareEngineForSimulatorReplay,
@@ -69,6 +76,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     currentEvent: null,
     lastFeedback: null,
     lastOutcomeText: null,
+    pendingActionSummary: null,
+    pendingDisturbanceNarrative: null,
   };
   private lastError: HeadlessSessionError | null = null;
   private randomSeed?: number;
@@ -164,6 +173,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.currentEvent = null;
     this.volatile.lastFeedback = null;
     this.volatile.lastOutcomeText = null;
+    this.volatile.pendingActionSummary = null;
+    this.volatile.pendingDisturbanceNarrative = null;
   }
 
   getLastError(): HeadlessSessionError | null {
@@ -381,7 +392,13 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   async restart(options: HeadlessSessionCreateOptions): Promise<void> {
     this.catalogVersion = options.catalogVersion ?? DEFAULT_CATALOG_VERSION;
     this.randomSeed = options.randomSeed;
-    this.volatile = { currentEvent: null, lastFeedback: null, lastOutcomeText: null };
+    this.volatile = {
+      currentEvent: null,
+      lastFeedback: null,
+      lastOutcomeText: null,
+      pendingActionSummary: null,
+      pendingDisturbanceNarrative: null,
+    };
     this.lastError = null;
     this.engine = new GameEngineIntegration();
     await this.runWithRandomAsync(async () => {
@@ -416,8 +433,112 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     return deriveLifeMemorySummary(this.engine.getGameState());
   }
 
+  getSessionPhase(): SessionPhase {
+    if (this.getTerminalState()) return 'terminal';
+    if (this.volatile.pendingActionSummary) return 'action_summary';
+    if (this.volatile.pendingDisturbanceNarrative) return 'disturbance_narrative';
+    if (this.volatile.currentEvent) return 'story_event';
+    const player = this.engine.getGameState().player;
+    if (player?.alive !== false) return 'active_planning';
+    return 'terminal';
+  }
+
+  getProgressionVolatileState() {
+    return {
+      pendingActionSummary: this.volatile.pendingActionSummary,
+      pendingDisturbanceNarrative: this.volatile.pendingDisturbanceNarrative,
+    };
+  }
+
+  applyProgressionVolatileState(state: HeadlessProgressionVolatileState): void {
+    this.volatile.pendingActionSummary = state.pendingActionSummary;
+    this.volatile.pendingDisturbanceNarrative = state.pendingDisturbanceNarrative;
+  }
+
+  getPlanningOptions(): PlanningOptionDto[] {
+    if (this.getTerminalState()) return [];
+    const choices = this.engine.getAvailableActiveActions();
+    return choices.map(choice => ({
+      actionId: choice.actionId,
+      text: choice.text,
+      description: choice.description,
+      rewardSummary: choice.rewardSummary,
+      costSummary: choice.costSummary,
+      riskLevel: choice.riskLevel,
+      category: getActionById(choice.actionId)?.category ?? 'training',
+    }));
+  }
+
+  async executeActiveAction(actionId: string): Promise<void> {
+    this.lastError = null;
+    if (this.getSessionPhase() !== 'active_planning') {
+      throw new ProgressionError('INVALID_SESSION_PHASE', 'Active action requires active_planning phase');
+    }
+    const result = await this.runWithRandomAsync(async () =>
+      this.engine.executeActiveAction(actionId, { random: Math.random }),
+    );
+    if (!result) {
+      throw new ProgressionError('INVALID_ACTION', `Unknown or unavailable action: ${actionId}`);
+    }
+    this.volatile.currentEvent = null;
+    this.volatile.pendingActionSummary = result.activeActionSummary;
+    this.volatile.pendingDisturbanceNarrative = result.disturbanceNarrative;
+    this.volatile.lastOutcomeText = result.feedbackText;
+  }
+
+  async acknowledgeProgression(ackKind: ProgressionAckKind): Promise<void> {
+    this.lastError = null;
+    const phase = this.getSessionPhase();
+    if (ackKind === 'action_summary') {
+      if (phase !== 'action_summary') {
+        throw new ProgressionError('INVALID_SESSION_PHASE', 'action_summary ack requires action_summary phase');
+      }
+      this.volatile.pendingActionSummary = null;
+      if (this.volatile.pendingDisturbanceNarrative) {
+        return;
+      }
+      await this.resolveAfterPlanningAck();
+      return;
+    }
+    if (ackKind === 'disturbance') {
+      if (phase !== 'disturbance_narrative') {
+        throw new ProgressionError('INVALID_SESSION_PHASE', 'disturbance ack requires disturbance_narrative phase');
+      }
+      const disturbanceId = this.volatile.pendingDisturbanceNarrative?.disturbanceId;
+      if (disturbanceId) {
+        markDisturbanceNarrativeShown(this.engine.getGameState(), disturbanceId);
+      }
+      this.volatile.pendingDisturbanceNarrative = null;
+      await this.resolveAfterPlanningAck();
+      return;
+    }
+    throw new ProgressionError('INVALID_ACK_KIND', `Unknown ackKind: ${ackKind}`);
+  }
+
+  private async resolveAfterPlanningAck(): Promise<void> {
+    this.volatile.currentEvent = null;
+    let guard = 0;
+    while (guard < 8) {
+      guard += 1;
+      const next = await this.getNextEvent();
+      if (next) return;
+      const actions = this.engine.getAvailableActiveActions();
+      if (actions.length > 0) return;
+      await this.runWithRandomAsync(async () => {
+        this.engine.advanceTime(3, 'month');
+      });
+    }
+  }
+
   getRuntimeState(): GameState {
     return this.engine.getGameState();
+  }
+
+  async advanceCalendar(amount: number, unit: 'year' | 'month'): Promise<void> {
+    await this.runWithRandomAsync(async () => {
+      this.engine.advanceTime(amount, unit);
+    });
+    this.volatile.currentEvent = null;
   }
 
   async replaySimulatorRecords(

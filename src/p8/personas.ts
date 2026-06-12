@@ -107,7 +107,7 @@ export const P8_PERSONA_ROSTER: P8Persona[] = [
     gender: 'male',
     seed: 806,
     strategy: 'training',
-    strategySummary: '偏邪路高风险，仍保持主动规划',
+    strategySummary: '偏邪路高风险，练功之余兼修诡术与游历',
     routePreference: 'demonic',
     riskPreference: 'high',
     relationshipPreference: 'low',

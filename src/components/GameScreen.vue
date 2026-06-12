@@ -58,10 +58,6 @@
     <LifeMemoryPanel :summary="lifeMemorySummary" />
 
     <div class="content-area">
-      <p v-if="apiMode" class="api-boundary-notice">
-        服务端模式暂不支持主动人生规划。当前进度由服务器推送剧情事件驱动；若需安排练功、读书与交游，请使用本地模式开始游戏。
-      </p>
-
       <div v-if="currentNode" class="story-card card">
         <p
           v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay"
@@ -176,16 +172,23 @@ import {
   formatRouteLabel,
 } from '../utils/playerFacingLabels';
 
+import type { ActiveActionSummaryDisplay, DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
+import type { SessionPhase } from '../contracts/sessionProgression';
+
 const props = defineProps<{
   currentNode: any;
   availableChoices: StoryChoice[];
   isAutoPlaying: boolean;
   apiMode?: boolean;
+  apiActiveActionSummary?: ActiveActionSummaryDisplay | null;
+  apiDisturbanceNarrative?: DisturbanceNarrativeDisplay | null;
+  apiSessionPhase?: SessionPhase | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'choice', choice: StoryChoice): void;
   (e: 'manual-save'): void;
+  (e: 'api-progression-ack'): void;
 }>();
 
 // 使用 useNewGameEngine 获取 lastOutcomeText
@@ -239,11 +242,19 @@ const hasStructuredFeedback = computed(() => {
 });
 
 const activeActionSummaryDisplay = computed(() => {
+  if (props.apiMode) {
+    if (props.apiSessionPhase === 'disturbance_narrative') return null;
+    return props.apiActiveActionSummary ?? null;
+  }
   if (engineState.showingDisturbanceNarrative) return null;
   return engineState.lastActiveActionSummary;
 });
 
 const disturbanceNarrativeDisplay = computed(() => {
+  if (props.apiMode) {
+    if (props.apiSessionPhase !== 'disturbance_narrative') return null;
+    return props.apiDisturbanceNarrative ?? null;
+  }
   if (!engineState.showingDisturbanceNarrative) return null;
   return engineState.pendingDisturbanceNarrative;
 });
@@ -282,6 +293,13 @@ const showNarrativeFallbackHint = computed(() => {
 });
 
 const continueToNext = () => {
+  if (
+    props.apiMode &&
+    (props.apiSessionPhase === 'action_summary' || props.apiSessionPhase === 'disturbance_narrative')
+  ) {
+    emit('api-progression-ack');
+    return;
+  }
   continueProgressionFlow();
 };
 
@@ -566,17 +584,6 @@ const loadLatestSave = () => {
   font-size: 0.95rem;
   line-height: 1.6;
   margin: 0;
-}
-
-.api-boundary-notice {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: rgba(139, 105, 20, 0.12);
-  border: 1px solid rgba(139, 105, 20, 0.35);
-  color: #5c4a1a;
-  font-size: 14px;
-  line-height: 1.6;
 }
 
 .progression-card {

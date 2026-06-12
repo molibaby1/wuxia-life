@@ -218,9 +218,22 @@ export interface ReplayMetricPayload {
   nearDuplicateWarnings: string[];
 }
 
+export type P8PlayabilityRuntimePath = 'headless_server' | 'local_direct';
+
+export interface P8PlayabilityReportMeta {
+  runtimePath: P8PlayabilityRuntimePath;
+  catalogVersion: string;
+  engineVersion: string;
+  p8GateEndAge: number;
+  generatedAt: string;
+}
+
 export interface P8PlayabilityReport {
   schemaVersion: 'p8-v1';
   generatedAt: string;
+  runtimePath?: P8PlayabilityRuntimePath;
+  catalogVersion?: string;
+  engineVersion?: string;
   decision: 'pass' | 'fail';
   endAge: number;
   personaRuns: P8PersonaRunMetrics[];

@@ -82,6 +82,17 @@ export {
 } from './fixtures/eventCatalogFixtures';
 
 export {
+  type SessionPhase,
+  type PlanningOptionDto,
+  type StoryEventDto,
+  type ActiveActionRequest,
+  type ProgressionAckKind,
+  type ProgressionAckRequest,
+  type SessionProgressionPayload,
+  type HeadlessTerminalDto,
+} from './sessionProgression';
+
+export {
   validateChoiceExecutionRequest,
   validateChoiceExecutionResponse,
   validateEventCatalogBundle,

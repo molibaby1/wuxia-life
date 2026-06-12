@@ -9,7 +9,10 @@ import type { GameStateSnapshot } from '../../contracts/gameStateSnapshot';
 import type { LifeMemorySummary } from '../../types/lifeMemory';
 import type { EventDefinition } from '../../types/eventTypes';
 import type { HeadlessSessionDependencies } from '../dependencies/HeadlessSessionDependencies';
+import type { PlanningOptionDto } from '../../contracts/sessionProgression';
+import type { ProgressionAckKind, SessionPhase } from './sessionTypes';
 import type {
+  HeadlessProgressionVolatileState,
   HeadlessSessionError,
   HeadlessTerminalState,
   NextEventResult,
@@ -56,6 +59,30 @@ export interface HeadlessEngineSession {
 
   /** Last structured error for observability (cleared on success). */
   getLastError(): HeadlessSessionError | null;
+
+  /** P7.2: authoritative phase for API / client routing. */
+  getSessionPhase(): SessionPhase;
+
+  /** P7.2: volatile summary/disturbance UI state (not in serialize()). */
+  getProgressionVolatileState(): HeadlessProgressionVolatileState;
+
+  /** P7.2: restore volatile UI state after snapshot hydrate (server request boundary). */
+  applyProgressionVolatileState(state: HeadlessProgressionVolatileState): void;
+
+  /** P7.2: planning options when phase is active_planning. */
+  getPlanningOptions(): PlanningOptionDto[];
+
+  /** P7.2: execute one active action; mutates engine state and volatile summary. */
+  executeActiveAction(actionId: string): Promise<void>;
+
+  /** P7.2: ack summary or disturbance; may re-resolve story/planning without snapshot write. */
+  acknowledgeProgression(ackKind: ProgressionAckKind): Promise<void>;
+
+  /** P8.1: advance in-game calendar when phase loop does not advance age. */
+  advanceCalendar(amount: number, unit: 'year' | 'month'): Promise<void>;
+
+  /** Read mutable engine state (playability runner / tests). */
+  getRuntimeState(): import('../../types/eventTypes').GameState;
 }
 
 export type HeadlessEngineSessionFactory = (

@@ -7,18 +7,34 @@ import * as saveSlotRepo from '../repositories/saveSlotRepository.js';
 import * as snapshotRepo from '../repositories/snapshotRepository.js';
 import * as sessionRepo from '../repositories/sessionRepository.js';
 import * as replayRepo from '../repositories/replayRepository.js';
+import { HeadlessProgressionError } from '../../../src/headless/session/sessionTypes.js';
+import type { ProgressionAckKind } from '../../../src/contracts/sessionProgression.js';
 import {
   buildChoiceRequest,
   createHeadlessSessionFromNewGame,
   createHeadlessSessionFromSnapshot,
-  deriveNextEvent,
   executeChoiceOnSession,
   progressUntilChoiceOrTerminal,
   createProductionLogger,
+  resolveSessionAfterAutoProgress,
 } from './headlessRuntime.js';
+import { mapSessionProgression } from './sessionProgressionMapper.js';
+import {
+  clearSessionVolatileState,
+  getSnapshotVolatileState,
+  resolveVolatileState,
+  setSessionVolatileState,
+} from './headlessVolatileCache.js';
 import { issueSessionToken } from './sessionStore.js';
 import { resolveDevice } from './deviceService.js';
 import { resolveSession } from './sessionStore.js';
+
+function mapProgressionError(error: unknown): never {
+  if (error instanceof HeadlessProgressionError) {
+    throw validationError(error.message, { code: error.code });
+  }
+  throw error;
+}
 
 export interface SlotListItem {
   slotIndex: number;
@@ -34,15 +50,22 @@ export interface SlotListItem {
   eventCatalogVersion?: string;
 }
 
-function mapNextEvent(session: Awaited<ReturnType<typeof deriveNextEvent>>) {
-  if (!session) return null;
-  return {
-    eventId: session.event.eventId,
-    title: session.event.title,
-    text: session.event.text,
-    isAutomatic: session.isAutomatic,
-    choices: session.event.choices,
-  };
+function buildProgressionResponse(
+  headless: Awaited<ReturnType<typeof createHeadlessSessionFromNewGame>>,
+  slotVersion: number,
+  snapshotId: string,
+  resolved?: Awaited<ReturnType<typeof resolveSessionAfterAutoProgress>>,
+) {
+  const terminal = headless.getTerminalState();
+  const lifeMemory = headless.getLifeMemory();
+  return mapSessionProgression(
+    headless,
+    slotVersion,
+    snapshotId,
+    terminal,
+    lifeMemory,
+    resolved?.nextEvent ?? null,
+  );
 }
 
 export async function listSaves(
@@ -157,7 +180,7 @@ export async function createNewSession(
       payload: { slotIndex: params.slotIndex, sourcePlatform: params.sourcePlatform },
     });
 
-    const next = await deriveNextEvent(headless);
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     const terminal = headless.getTerminalState();
     if (terminal) {
       await sessionRepo.updateSessionStatus(client, session.id, 'terminal');
@@ -174,9 +197,7 @@ export async function createNewSession(
       sessionToken,
       slot: updatedSlot,
       snapshot: snapRow,
-      nextEvent: mapNextEvent(next),
-      terminal,
-      lifeMemory: headless.getLifeMemory(),
+      ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved),
     };
   });
 }
@@ -203,7 +224,14 @@ export async function restoreSession(
       catalogVersion: env.eventCatalogVersion,
       logger,
     });
-    await progressUntilChoiceOrTerminal(headless);
+    const restoredVolatile = getSnapshotVolatileState(snap.id);
+    if (restoredVolatile) {
+      headless.applyProgressionVolatileState(restoredVolatile);
+    }
+    const restoredPhase = headless.getSessionPhase();
+    if (restoredPhase !== 'action_summary' && restoredPhase !== 'disturbance_narrative') {
+      await progressUntilChoiceOrTerminal(headless);
+    }
 
     const { sessionToken, tokenHash } = issueSessionToken(env);
     const session = await sessionRepo.insertSession(client, {
@@ -224,15 +252,17 @@ export async function restoreSession(
       payload: { slotIndex: params.slotIndex },
     });
 
-    const next = await deriveNextEvent(headless);
+    const volatile = headless.getProgressionVolatileState();
+    if (volatile.pendingActionSummary || volatile.pendingDisturbanceNarrative) {
+      setSessionVolatileState(session.id, snap.id, volatile);
+    }
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     return {
       sessionId: session.id,
       sessionToken,
       slot,
       snapshot: snap,
-      nextEvent: mapNextEvent(next),
-      terminal: headless.getTerminalState(),
-      lifeMemory: headless.getLifeMemory(),
+      ...buildProgressionResponse(headless, slot.version, snap.id, resolved),
     };
   });
 }
@@ -287,7 +317,7 @@ export async function executeChoice(
       logger,
     });
     const hashBefore = currentSnap.content_hash;
-    await deriveNextEvent(headless);
+    await resolveSessionAfterAutoProgress(headless);
     const request = buildChoiceRequest({
       snapshot: currentSnap.snapshot,
       snapshotId: currentSnap.id,
@@ -347,15 +377,188 @@ export async function executeChoice(
       });
     }
 
-    const next = await deriveNextEvent(headless);
+    const resolved = await resolveSessionAfterAutoProgress(headless);
     return {
       slot: updatedSlot,
       snapshot: snapRow,
       response,
-      nextEvent: mapNextEvent(next),
-      terminal,
-      lifeMemory: headless.getLifeMemory(),
+      ...buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved),
     };
+  });
+}
+
+async function loadHeadlessForMutation(
+  client: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+  },
+) {
+  const { deviceId } = await resolveDevice(client, env, params.deviceToken);
+  const { session } = await resolveSession(
+    client,
+    env,
+    params.sessionId,
+    params.sessionToken,
+    deviceId,
+  );
+  if (!session.save_slot_id) throw notFound('Session has no save slot');
+  const slot = (await saveSlotRepo.ensureDeviceSlots(client, deviceId)).find(
+    s => s.id === session.save_slot_id,
+  );
+  if (!slot) throw notFound('Save slot not found');
+  if (slot.version !== params.expectedSlotVersion) {
+    throw conflict('STALE_SLOT_VERSION', 'Stale slot version', {
+      currentSlotVersion: slot.version,
+      currentSnapshotId: slot.current_snapshot_id,
+    });
+  }
+  if (slot.current_snapshot_id !== params.expectedSnapshotId) {
+    throw conflict('STALE_SNAPSHOT', 'Stale snapshot id', {
+      currentSlotVersion: slot.version,
+      currentSnapshotId: slot.current_snapshot_id,
+    });
+  }
+  const currentSnap = await snapshotRepo.getSnapshotById(client, params.expectedSnapshotId);
+  if (!currentSnap) throw notFound('Snapshot not found');
+  snapshotRepo.assertSnapshotCompatibility(currentSnap, env.engineVersion, env.eventCatalogVersion);
+  const logger = createProductionLogger(env);
+  const headless = await createHeadlessSessionFromSnapshot({
+    snapshot: currentSnap.snapshot,
+    catalogVersion: env.eventCatalogVersion,
+    logger,
+  });
+  const cachedVolatile = resolveVolatileState(session.id, params.expectedSnapshotId);
+  if (cachedVolatile) {
+    headless.applyProgressionVolatileState(cachedVolatile);
+  }
+  await resolveSessionAfterAutoProgress(headless);
+  return { session, slot, currentSnap, headless, deviceId };
+}
+
+export async function executeActiveAction(
+  db: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    actionId: string;
+  },
+) {
+  return withTransaction(env.databaseUrl, async client => {
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(client, env, params);
+    const hashBefore = currentSnap.content_hash;
+    try {
+      await headless.executeActiveAction(params.actionId);
+    } catch (error) {
+      mapProgressionError(error);
+    }
+    const newSnapshot = headless.serialize();
+    newSnapshot.metadata.engineVersion = env.engineVersion;
+    newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;
+    const snapRow = await snapshotRepo.insertSnapshot(client, {
+      saveSlotId: slot.id,
+      sessionId: session.id,
+      slotVersion: slot.version + 1,
+      snapshot: newSnapshot,
+      engineVersion: env.engineVersion,
+      eventCatalogVersion: env.eventCatalogVersion,
+    });
+    const updatedSlot = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
+    if (!updatedSlot) {
+      throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during active action', {
+        currentSlotVersion: slot.version,
+        currentSnapshotId: slot.current_snapshot_id,
+      });
+    }
+    await replayRepo.appendReplayAction(client, {
+      sessionId: session.id,
+      saveSlotId: slot.id,
+      actionType: 'active_action',
+      snapshotHashBefore: hashBefore,
+      snapshotHashAfter: snapRow.content_hash,
+      payload: { actionId: params.actionId },
+    });
+    setSessionVolatileState(session.id, snapRow.id, headless.getProgressionVolatileState());
+    const resolved = await resolveSessionAfterAutoProgress(headless);
+    return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
+  });
+}
+
+export async function acknowledgeProgression(
+  db: Queryable,
+  env: BackendEnv,
+  params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    ackKind: ProgressionAckKind;
+  },
+) {
+  return withTransaction(env.databaseUrl, async client => {
+    const { session, slot, currentSnap, headless } = await loadHeadlessForMutation(client, env, params);
+    const hashBefore = currentSnap.content_hash;
+    try {
+      await headless.acknowledgeProgression(params.ackKind);
+    } catch (error) {
+      mapProgressionError(error);
+    }
+    const serialized = headless.serialize();
+    const newIntegrity = snapshotRepo.buildSnapshotIntegrity(serialized);
+    let snapRow = currentSnap;
+    let updatedSlot = slot;
+    if (newIntegrity.contentHash !== hashBefore) {
+      snapRow = await snapshotRepo.insertSnapshot(client, {
+        saveSlotId: slot.id,
+        sessionId: session.id,
+        slotVersion: slot.version + 1,
+        snapshot: serialized,
+        engineVersion: env.engineVersion,
+        eventCatalogVersion: env.eventCatalogVersion,
+      });
+      const swapped = await saveSlotRepo.updateSlotPointer(client, slot.id, slot.version, snapRow.id);
+      if (!swapped) {
+        throw conflict('STALE_SLOT_VERSION', 'Slot version conflict during progression ack', {
+          currentSlotVersion: slot.version,
+          currentSnapshotId: slot.current_snapshot_id,
+        });
+      }
+      updatedSlot = swapped;
+    }
+    await replayRepo.appendReplayAction(client, {
+      sessionId: session.id,
+      saveSlotId: slot.id,
+      actionType: 'progression_ack',
+      snapshotHashBefore: hashBefore,
+      snapshotHashAfter: snapRow.content_hash,
+      payload: { ackKind: params.ackKind },
+    });
+    const terminal = headless.getTerminalState();
+    if (terminal) {
+      await sessionRepo.updateSessionStatus(client, session.id, 'terminal');
+      clearSessionVolatileState(session.id, snapRow.id);
+    } else {
+      const volatile = headless.getProgressionVolatileState();
+      if (
+        headless.getSessionPhase() === 'action_summary' ||
+        headless.getSessionPhase() === 'disturbance_narrative'
+      ) {
+        setSessionVolatileState(session.id, snapRow.id, volatile);
+      } else {
+        clearSessionVolatileState(session.id, snapRow.id);
+      }
+    }
+    const resolved = await resolveSessionAfterAutoProgress(headless);
+    return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
   });
 }
 

@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import type { SessionProgressionPayload } from '../../contracts/sessionProgression';
 import { webPlatformStorage } from '../platform/webPlatformStorage';
 
 export type ApiClientErrorCategory =
@@ -52,19 +53,19 @@ export interface SaveSlotDto {
   terminal?: boolean;
 }
 
-export interface SessionStartResponse {
+export interface SessionStartResponse extends SessionProgressionPayload {
   sessionId: string;
   sessionToken: string;
   slot: { id: string; slotIndex: number; version: number; snapshotId: string | null };
   snapshot: { id: string; contentHash: string };
-  nextEvent: {
-    eventId: string;
-    title: string;
-    text: string;
-    isAutomatic: boolean;
-    choices?: Array<{ id: string; text: string; available: boolean }>;
-  } | null;
 }
+
+export type ChoiceResponse = SessionProgressionPayload & {
+  slotVersion: number;
+  snapshotId: string;
+  contentHash?: string;
+  feedback?: { summary?: string };
+};
 
 export class WebApiClient {
   private readonly baseUrl: string;
@@ -166,8 +167,8 @@ export class WebApiClient {
     expectedSnapshotId: string;
     eventId: string;
     choiceId: string;
-  }) {
-    return this.request('/v1/sessions/' + params.sessionId + '/choices', {
+  }): Promise<ChoiceResponse> {
+    return this.request<ChoiceResponse>('/v1/sessions/' + params.sessionId + '/choices', {
       method: 'POST',
       deviceToken: params.deviceToken,
       sessionToken: params.sessionToken,
@@ -178,6 +179,52 @@ export class WebApiClient {
         choiceId: params.choiceId,
       }),
     });
+  }
+
+  async executeActiveAction(params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    actionId: string;
+  }): Promise<SessionProgressionPayload> {
+    return this.request<SessionProgressionPayload>(
+      '/v1/sessions/' + params.sessionId + '/active-action',
+      {
+        method: 'POST',
+        deviceToken: params.deviceToken,
+        sessionToken: params.sessionToken,
+        body: JSON.stringify({
+          expectedSlotVersion: params.expectedSlotVersion,
+          expectedSnapshotId: params.expectedSnapshotId,
+          actionId: params.actionId,
+        }),
+      },
+    );
+  }
+
+  async acknowledgeProgression(params: {
+    deviceToken: string;
+    sessionId: string;
+    sessionToken: string;
+    expectedSlotVersion: number;
+    expectedSnapshotId: string;
+    ackKind: 'action_summary' | 'disturbance';
+  }): Promise<SessionProgressionPayload> {
+    return this.request<SessionProgressionPayload>(
+      '/v1/sessions/' + params.sessionId + '/progression-ack',
+      {
+        method: 'POST',
+        deviceToken: params.deviceToken,
+        sessionToken: params.sessionToken,
+        body: JSON.stringify({
+          expectedSlotVersion: params.expectedSlotVersion,
+          expectedSnapshotId: params.expectedSnapshotId,
+          ackKind: params.ackKind,
+        }),
+      },
+    );
   }
 
   async manualSave(params: {

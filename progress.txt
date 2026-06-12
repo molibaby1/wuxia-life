@@ -1,4 +1,17 @@
 ## Codebase Patterns
+## [2026-06-12] - P8.1 US-001..US-035 (api-mode-playability-acceptance)
+- Headless persona gate: `src/headless/playability/` + `runHeadlessPersona()`; default `npm run gate:playability` → `runtimePath=headless_server`; comparison `npm run gate:playability -- --mode local_direct`.
+- API human acceptance: `p6b:serve` + `VITE_P6B_API_URL` + `npm run dev`; docs in `docs/test-reports/p8-1-api-*`, `docs/designs/p8-1-api-human-slice.md`.
+- `public/reports/manifest.json` gitignored; gate writes `docs/test-reports/p8-playability-gate-latest.{json,md}` only.
+- Self-check: runner stall fix (`advanceCalendar` + streak-based catch-up); scholar agency streak (`personaActionStrategy` breaks focus streak for low-risk personas); parity ratio test; `adaptToGameProcessReport` sectJoined null.
+- Validation: typecheck ✅ build ✅ npm test ✅ test:headless ✅ gate:playability ✅ test:p6b:db ✅
+---
+## [2026-06-11] - P7.2 US-001..US-058 (server-authoritative-active-planning)
+- Inventories, guardrails, session progression API design; contracts; headless phase machine; server routes + volatile cache; Web API wiring; boundary notice removed; headless/integration/parity tests; closure report.
+- Self-check fixes: `PlatformRandomSource` native RNG binding (nested `withRandomSource`); server `headlessVolatileCache` for ack phase; `assembleV10ClosurePayload` gate type; integration test ordering.
+- Validation: build ✅ test:headless ✅ test:p6b:unit ✅ test:p6b:db ✅; npm test ❌ (pre-existing p9 persona near-duplicate on branch).
+---
+- P7.2 server-authoritative active planning: contracts in `src/contracts/sessionProgression.ts`; headless phase APIs on `HeadlessEngineSession`; server `mapSessionProgression` + `headlessVolatileCache` (in-process volatile between HTTP requests); routes `active-action` / `progression-ack`; Web `useApiGameEngine` progression fields. API mode canonical; local dev fallback in `docs/p6b-local-dev.md`. Reports: `docs/test-reports/p7-2-*`. Design: `docs/designs/p7-2-session-progression-api.md`.
 - v1.0 launch readiness: thin layer in `src/v10/` wrapping P24 playtest calibration; doc registry in `v10/launchReadinessDocs.ts`. Gates: `npm run gate:v1-0`, `npm run report:v1-0-closure`. Reports: `docs/test-reports/v1-0-*`. Design rules: `docs/designs/v1-0-*` (dimensions, blocker/deferral, freeze, post-launch cadence). `assembleV10ClosurePayload` must spread P24 first then override `gate` with v10 gate (P24 payload also exports `gate`).
 - P24 playtest calibration/RC closure: modules under `src/p24/`; profile surfaces in `src/narrative/profile/wuxiaPlaytestCalibrationSurfaces.ts` on `WorldProfile` (`playtestDimensionConfigs`, `playtestFeedbackSchema`, `rcEvaluationSchema`, `alignmentComparisonConfigs`, `playtestCalibrationBaselineConfigs`, `playtestComparisonSampleConfigs`, `alignmentIndicatorConfigs`, `rcComparisonSampleConfigs`). Slice scoring via `scorePlaytestSlice` in `p24/sliceFixtures.ts` (proxies P23 + playtest-specific penalties). Gates: `npm run gate:p24`, `npm run report:p24-closure`. Reports: `docs/test-reports/p24-*`. Design rules: `docs/designs/p24-*`.
 ## [2026-06-10] - v1.0 US-001..US-025 (release-candidate-and-launch-readiness)

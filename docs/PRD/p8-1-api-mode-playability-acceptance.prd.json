@@ -1,0 +1,493 @@
+{
+  "project": "Wuxia Life P8.1 API Mode Playability Acceptance",
+  "branchName": "ralph/p8-1-api-mode-playability-acceptance",
+  "description": "Move P8 playability gate and human 0-40 slice acceptance to the server-authoritative headless path after P7.2. Reuse existing P8 personas, metrics, and strategies; default gate:playability to headless; refresh baseline; API-first dev docs and human test assets. One runner slice, one gate flag, or one doc artifact per story.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Inventory P8 Local Gate Execution Path",
+      "description": "As a maintainer, I want a read-only inventory of how gate:playability runs today so that P8.1 migration targets the exact local-direct coupling.",
+      "acceptanceCriteria": [
+        "Document GameProcessSimulator entry used by scripts/runP8PlayabilityGate.ts",
+        "Document how active actions and choices are executed in the local path",
+        "Document metric collection via buildPersonaRunMetrics and assemblePlayabilityReport",
+        "List report output paths and baseline consumers (P9 tests)",
+        "Do not modify business code"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "W0 baseline"
+    },
+    {
+      "id": "US-002",
+      "title": "Inventory P7.2 Headless Progression Path",
+      "description": "As a maintainer, I want a read-only inventory of the P7.2 headless phase machine so that the playability runner reuses the canonical loop.",
+      "acceptanceCriteria": [
+        "Document sessionPhase transitions and headless methods used in P7.2",
+        "Document how persona simulation should call executeActiveAction and acknowledgeProgression",
+        "Reference p7-2-session-progression-api.md and integration.test.ts patterns",
+        "Do not modify business code"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "W0 baseline"
+    },
+    {
+      "id": "US-003",
+      "title": "Write P8.1 Local Vs Headless Gap Report",
+      "description": "As a maintainer, I want a short gap report so that P8.1 implementation does not re-audit paths each story.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/p8-1-local-vs-headless-gap.md",
+        "List behavioral differences that would invalidate old local-only gate results",
+        "List modules to reuse vs modules to add",
+        "State explicit non-goals for P8.1",
+        "Do not modify business code"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "W0 baseline"
+    },
+    {
+      "id": "US-004",
+      "title": "Document P8.1 Scope Guardrails",
+      "description": "As a project owner, I want P8.1 guardrails written down so that work does not expand into new systems or HTTP E2E gate runs.",
+      "acceptanceCriteria": [
+        "Add agent_docs/p8-1-scope-guardrails.md",
+        "State headless_server is canonical gate runtime after P8.1",
+        "State API browser stack is canonical human acceptance environment",
+        "State local_direct remains dev comparison only",
+        "List required validation commands"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "W0 baseline"
+    },
+    {
+      "id": "US-005",
+      "title": "Lock P8.1 Gate Design Decisions",
+      "description": "As a developer, I want design decisions locked before implementation so that gate mode and parity rules do not fork mid-stream.",
+      "acceptanceCriteria": [
+        "Create docs/designs/p8-1-headless-playability-gate.md",
+        "Lock default gate:playability mode to headless_server",
+        "Lock --mode local as optional comparison fallback",
+        "Lock parity tolerance policy for headless vs local runs",
+        "Document runtimePath field on P8 report JSON"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "W0 baseline"
+    },
+    {
+      "id": "US-006",
+      "title": "Define HeadlessPersonaRunner Types",
+      "description": "As a developer, I want typed runner config and result shapes so that headless playability integrates cleanly with existing P8 metrics.",
+      "acceptanceCriteria": [
+        "Add types under src/p8/ or src/headless/playability/ for runner config and result",
+        "Runner config includes persona id, seed, endAge, catalogVersion",
+        "Result shape compatible with buildPersonaRunMetrics inputs or documents adapter",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-007",
+      "title": "Create Headless Session For Persona Run",
+      "description": "As a maintainer, I want a helper that boots HeadlessEngineSession for a persona new game so that gate runs do not duplicate P6B bootstrap logic.",
+      "acceptanceCriteria": [
+        "Helper creates headless session with persona name, gender, seed",
+        "Applies P16/P8 youth route seeds at the same lifecycle point as GameProcessSimulator",
+        "Returns session ready for phase loop",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-008",
+      "title": "Implement story_event Choice Step",
+      "description": "As a maintainer, I want the runner to execute persona-biased choices on story_event phase using headless executeChoice.",
+      "acceptanceCriteria": [
+        "When sessionPhase is story_event, rank choices via applyPersonaChoiceBias",
+        "Execute selected choice through headless session",
+        "Record choice diagnostics compatible with P8 choice diagnostics shape",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-009",
+      "title": "Implement active_planning Action Step",
+      "description": "As a maintainer, I want the runner to select and execute persona active actions on active_planning phase.",
+      "acceptanceCriteria": [
+        "When sessionPhase is active_planning, select action via selectPersonaActiveAction",
+        "Call headless executeActiveAction with selected actionId",
+        "Record active action reasons compatible with P8 activeActionSelectionReasons",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-010",
+      "title": "Implement progression-ack Steps",
+      "description": "As a maintainer, I want the runner to acknowledge action_summary and disturbance_narrative phases so that headless runs do not stall.",
+      "acceptanceCriteria": [
+        "When sessionPhase is action_summary, call acknowledgeProgression with ackKind action_summary",
+        "When sessionPhase is disturbance_narrative, call acknowledgeProgression with ackKind disturbance",
+        "Runner advances until next story_event or active_planning or terminal",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-011",
+      "title": "Implement Headless Persona Main Loop",
+      "description": "As a maintainer, I want a guarded main loop that runs a persona to endAge through the P7.2 phase machine.",
+      "acceptanceCriteria": [
+        "Loop stops at endAge, terminal, or maxSteps guard",
+        "Handles auto story progression after choices same as server resolve path",
+        "Returns GameProcessReport-compatible payload or documented adapter output",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-012",
+      "title": "Test Single Persona Headless Run To Age 20",
+      "description": "As a maintainer, I want a deterministic test that one persona reaches age 20 on the headless runner without stalling.",
+      "acceptanceCriteria": [
+        "Fixed seed persona run completes with finalAge >= 20",
+        "Assert at least one active action and one choice were recorded",
+        "Assert session never stuck in action_summary beyond max ack attempts",
+        "npm test passes"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-013",
+      "title": "Smoke Test All Gate Personas Headless",
+      "description": "As a maintainer, I want a smoke test that all getP8GatePersonas complete on headless runner to gate end age.",
+      "acceptanceCriteria": [
+        "Each gate persona completes or fails with explicit error",
+        "No infinite loop across 8 personas",
+        "Test runtime reasonable for CI (document if marked slow)",
+        "npm test passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-014",
+      "title": "Adapt Headless Report To P8 Metrics",
+      "description": "As a maintainer, I want headless runner output fed into buildPersonaRunMetrics so that gate verdict logic stays unchanged.",
+      "acceptanceCriteria": [
+        "Adapter maps headless run records to GameProcessReport fields used by collectPersonaMetrics",
+        "buildPersonaRunMetrics works without forking metric formulas",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "W1 runner"
+    },
+    {
+      "id": "US-015",
+      "title": "Add runtimePath To P8 Report Types",
+      "description": "As a maintainer, I want P8PlayabilityReport to record runtimePath so that reports distinguish headless vs local runs.",
+      "acceptanceCriteria": [
+        "Extend src/p8/types.ts report meta with runtimePath and generatedAt",
+        "assemblePlayabilityReport accepts runtimePath parameter",
+        "renderP8MarkdownReport includes runtimePath in header",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-016",
+      "title": "Wire Headless Runner Into runP8PlayabilityGate",
+      "description": "As a maintainer, I want scripts/runP8PlayabilityGate.ts to run personas through the headless runner.",
+      "acceptanceCriteria": [
+        "Gate script uses headless runner for persona simulations",
+        "Produces same JSON and MD output paths as today",
+        "Report runtimePath is headless_server",
+        "npm run gate:playability succeeds"
+      ],
+      "priority": 16,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-017",
+      "title": "Add gate:playability --mode Flag",
+      "description": "As a developer, I want an explicit CLI mode flag so that local_direct comparison remains available without being canonical.",
+      "acceptanceCriteria": [
+        "Support --mode headless_server and --mode local_direct",
+        "Default mode is headless_server when flag omitted",
+        "Document flag in p8-1-headless-playability-gate.md",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-018",
+      "title": "Preserve Local Direct Mode In Gate Script",
+      "description": "As a developer, I want local_direct mode to keep using GameProcessSimulator so that dev comparison does not break.",
+      "acceptanceCriteria": [
+        "--mode local_direct uses existing GameProcessSimulator path",
+        "Report runtimePath is local_direct in that mode",
+        "npm run gate:playability -- --mode local_direct still works",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-019",
+      "title": "Add Headless Vs Local Parity Test",
+      "description": "As a maintainer, I want a fixed-seed parity test between headless runner and GameProcessSimulator for one persona.",
+      "acceptanceCriteria": [
+        "Same persona seed run on both paths",
+        "Compare finalAge, martialPower or agreed core stats, action history length",
+        "Failures document tolerance policy from design doc",
+        "npm test passes"
+      ],
+      "priority": 19,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-020",
+      "title": "Refresh P8 Playability Baseline",
+      "description": "As a maintainer, I want p8-playability-gate-latest baseline regenerated from headless_server gate run.",
+      "acceptanceCriteria": [
+        "Run npm run gate:playability with default headless mode",
+        "Commit updated docs/test-reports/p8-playability-gate-latest.json and .md",
+        "Baseline JSON includes runtimePath headless_server",
+        "Gate decision documented in closure notes"
+      ],
+      "priority": 20,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-021",
+      "title": "Update P9 Baseline Comparison For New Report",
+      "description": "As a maintainer, I want P9 playability tests to remain valid after P8.1 baseline refresh.",
+      "acceptanceCriteria": [
+        "tests/p9PlayabilityTests.ts loads refreshed baseline or updated comparison rules",
+        "P9 near-duplicate and pacing guards still meaningful on headless baseline",
+        "npm test passes"
+      ],
+      "priority": 21,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-022",
+      "title": "Add p8PlayabilityTests Headless Gate Regression",
+      "description": "As a maintainer, I want tests/p8PlayabilityTests.ts to assert headless gate path basics so that default mode cannot regress silently.",
+      "acceptanceCriteria": [
+        "Test that gate report assembly works with runtimePath headless_server",
+        "Test headless runner smoke for at least one persona",
+        "npm test passes"
+      ],
+      "priority": 22,
+      "passes": true,
+      "notes": "W2 gate"
+    },
+    {
+      "id": "US-023",
+      "title": "Update env Example For API Default Dev",
+      "description": "As a developer, I want .env.development.local.example to default to API URL so that new dev sessions use the product path.",
+      "acceptanceCriteria": [
+        "VITE_P6B_API_URL=http://localhost:8787 present in example file",
+        "Comment states local-only mode requires clearing this variable",
+        "No secrets committed"
+      ],
+      "priority": 23,
+      "passes": true,
+      "notes": "W3 docs"
+    },
+    {
+      "id": "US-024",
+      "title": "Update p6b-local-dev For API First Workflow",
+      "description": "As a developer, I want p6b-local-dev.md to describe API-first dev and gate acceptance.",
+      "acceptanceCriteria": [
+        "Document two-terminal API dev stack as default",
+        "Document gate:playability headless as canonical metrics path",
+        "Local mode positioned as offline fallback only"
+      ],
+      "priority": 24,
+      "passes": true,
+      "notes": "W3 docs"
+    },
+    {
+      "id": "US-025",
+      "title": "Supersede P8 Human Slice Local Mode Wording",
+      "description": "As a project owner, I want human slice docs to stop recommending local-only Web testing.",
+      "acceptanceCriteria": [
+        "Update docs/designs/p8-human-test-slice-scope.md or create p8-1-api-human-slice.md",
+        "Replace local Web / unset API URL instructions with API stack setup",
+        "Link to p7-2-browser-acceptance-notes.md for progression UI checks"
+      ],
+      "priority": 25,
+      "passes": true,
+      "notes": "W3 docs"
+    },
+    {
+      "id": "US-026",
+      "title": "Cross Link P7.2 And P8.1 Acceptance Docs",
+      "description": "As a maintainer, I want P7.2 and P8.1 acceptance docs linked so agents do not fork acceptance environments.",
+      "acceptanceCriteria": [
+        "p7-2-closure-report.md or p8-1 docs reference each other for API acceptance",
+        "p8-playability-gate PRD open question 288 marked resolved in design note",
+        "No contradictory local-mode-first instructions remain in active docs"
+      ],
+      "priority": 26,
+      "passes": true,
+      "notes": "W3 docs"
+    },
+    {
+      "id": "US-027",
+      "title": "Create API Human Test Script",
+      "description": "As a project owner, I want a repeatable 20-30 minute API mode test script for 5-8 players.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/p8-1-api-human-test-script.md",
+        "Includes pre-test setup with p6b:serve and VITE_P6B_API_URL",
+        "Includes play tasks through active planning, choices, summary, disturbance",
+        "Includes post-test questions on goal, causality, achievement, frustration, replay"
+      ],
+      "priority": 27,
+      "passes": true,
+      "notes": "W4 human slice"
+    },
+    {
+      "id": "US-028",
+      "title": "Create Observer Checklist For API Slice",
+      "description": "As an observer, I want a checklist for confusion, hesitation, boredom, and restart intent during API playtests.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/p8-1-api-observer-checklist.md",
+        "Checklist items map to P8 metrics where possible",
+        "Includes notes column for qualitative feedback"
+      ],
+      "priority": 28,
+      "passes": true,
+      "notes": "W4 human slice"
+    },
+    {
+      "id": "US-029",
+      "title": "Create API Browser Acceptance Checklist",
+      "description": "As a maintainer, I want a structured browser checklist for API 0-40 slice before inviting external playtesters.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/p8-1-api-browser-checklist.md",
+        "Covers slot UI, planning, action summary, disturbance ack, story choices, life memory",
+        "Includes pass/fail column and blocker severity",
+        "References dev-browser skill for execution"
+      ],
+      "priority": 29,
+      "passes": true,
+      "notes": "W4 human slice"
+    },
+    {
+      "id": "US-030",
+      "title": "Run API Browser Acceptance And Record Notes",
+      "description": "As a product owner, I want one recorded API browser acceptance pass or explicit blocked status.",
+      "acceptanceCriteria": [
+        "Run API dev stack and execute checklist items",
+        "Record results in docs/test-reports/p8-1-api-browser-acceptance-notes.md",
+        "List any blockers with repro steps",
+        "Verify in browser using dev-browser skill if environment available"
+      ],
+      "priority": 30,
+      "passes": true,
+      "notes": "W4 human slice"
+    },
+    {
+      "id": "US-031",
+      "title": "Define Human Slice Go No Go Criteria",
+      "description": "As a project owner, I want explicit go/no-go rules for proceeding to external playtests after P8.1.",
+      "acceptanceCriteria": [
+        "Document in p8-1-api-human-test-script.md or closure report",
+        "States minimum automated gate pass requirements",
+        "States maximum allowed blocker-level browser findings",
+        "Recommends proceed, fix blockers, or defer external playtest"
+      ],
+      "priority": 31,
+      "passes": true,
+      "notes": "W4 human slice"
+    },
+    {
+      "id": "US-032",
+      "title": "Update progress.txt P8.1 Patterns",
+      "description": "As a maintainer, I want progress.txt to record P8.1 runtime defaults for future agents.",
+      "acceptanceCriteria": [
+        "Add P8.1 entry with headless default gate path and API human acceptance",
+        "Note manifest.json is gitignored under public/reports/",
+        "Note gate:playability --mode local_direct as comparison only"
+      ],
+      "priority": 32,
+      "passes": true,
+      "notes": "W5 closure"
+    },
+    {
+      "id": "US-033",
+      "title": "Generate P8.1 Closure Report",
+      "description": "As a project owner, I want a closure report with gate results, parity evidence, and human slice readiness.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/p8-1-closure-report.md",
+        "Include gate:playability headless decision and warning summary",
+        "Include parity test outcome",
+        "Include human slice go/no-go recommendation",
+        "List residual risks"
+      ],
+      "priority": 33,
+      "passes": true,
+      "notes": "W5 closure"
+    },
+    {
+      "id": "US-034",
+      "title": "Run P8.1 Full Regression Gate",
+      "description": "As a maintainer, I want full regression after P8.1 so headless gate migration does not break prior phases.",
+      "acceptanceCriteria": [
+        "npm run build passes",
+        "npm test passes",
+        "npm run gate:playability passes with default headless mode",
+        "npm run test:p6b:db passes",
+        "Record results in p8-1-closure-report.md"
+      ],
+      "priority": 34,
+      "passes": true,
+      "notes": "W5 closure"
+    },
+    {
+      "id": "US-035",
+      "title": "Mark P8 PRD API Mode Open Question Resolved",
+      "description": "As a maintainer, I want the P8 PRD open question about API human testing marked resolved so future work does not re-litigate.",
+      "acceptanceCriteria": [
+        "Add resolved note to docs/PRD/p8-playability-gate-and-human-test-slice.md section 9 or design cross-link",
+        "Point to P8.1 PRD as authority for API mode human acceptance",
+        "Do not rewrite entire P8 PRD"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": "W5 closure"
+    }
+  ]
+}

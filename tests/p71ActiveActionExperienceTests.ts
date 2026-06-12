@@ -82,7 +82,6 @@ export async function runP71ReportChecks(): Promise<void> {
   executeActiveActionOnState(state, 'action_training_basic', { random: () => 0.5, includeDisturbance: false });
   const report = buildP71ClosureReport(state);
   assert(report.disturbanceVisibility !== undefined, 'P7.1 closure includes visibility');
-  assert(report.residualRisks.some(r => r.includes('API')), 'API boundary documented in risks');
 }
 
 export async function runP71SummaryBuilderTests(): Promise<void> {

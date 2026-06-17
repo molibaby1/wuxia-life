@@ -105,6 +105,10 @@ export async function resolveSessionAfterAutoProgress(session: HeadlessEngineSes
   if (phase === 'active_planning') {
     return { nextEvent: null, phase };
   }
+  const pending = session.describePendingEvent();
+  if (pending) {
+    return { nextEvent: pending, phase };
+  }
   const next = await session.getNextEvent();
   return { nextEvent: next, phase: session.getSessionPhase() };
 }

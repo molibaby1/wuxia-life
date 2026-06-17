@@ -233,8 +233,37 @@ const availableChoices = computed(() => {
   return gameEngineComposable.engineState.availableChoices;
 });
 
+const apiStoryEventAutomatic = computed(
+  () =>
+    apiEngineState.sessionPhase === 'story_event' &&
+    apiEngineState.currentEvent?.isAutomatic === true &&
+    apiEngineState.availableChoices.length === 0,
+);
+
+const apiPlayer = computed(() => activeSession.value?.player ?? null);
+const apiLifeMemory = computed(() => activeSession.value?.lifeMemory ?? null);
+
 const endingPlayer = computed(() => {
-  if (apiMode) return null;
+  if (apiMode) {
+    const terminal = activeSession.value?.terminal;
+    const player = activeSession.value?.player;
+    if (terminal) {
+      return {
+        name: player?.name ?? (apiPlayerName.value || '侠客'),
+        age: terminal.age,
+        alive: terminal.isAlive,
+        deathReason: terminal.deathReason ?? '人生落幕',
+        title: terminal.endingId ?? '江湖过客',
+        martialPower: player?.martialPower ?? 0,
+        externalSkill: player?.externalSkill ?? 0,
+        internalSkill: player?.internalSkill ?? 0,
+        qinggong: player?.qinggong ?? 0,
+        chivalry: player?.chivalry ?? 0,
+        money: player?.money ?? 0,
+      };
+    }
+    return null;
+  }
   return gameEngine.getGameState().player ?? null;
 });
 
@@ -305,6 +334,9 @@ const onApiManualSave = async () => {
       :api-active-action-summary="apiMode ? apiEngineState.activeActionSummary : null"
       :api-disturbance-narrative="apiMode ? apiEngineState.disturbanceNarrative : null"
       :api-session-phase="apiMode ? apiEngineState.sessionPhase : null"
+      :api-story-event-automatic="apiMode ? apiStoryEventAutomatic : false"
+      :api-player="apiMode ? apiPlayer : null"
+      :api-life-memory="apiMode ? apiLifeMemory : null"
       @choice="onChoice"
       @manual-save="onApiManualSave"
       @api-progression-ack="onApiProgressionAck"

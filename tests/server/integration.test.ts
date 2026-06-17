@@ -219,6 +219,27 @@ export async function runP6bIntegrationTests(databaseUrl: string): Promise<void>
       );
     }
 
+    if (
+      latest.sessionPhase === 'story_event' &&
+      latest.nextEvent?.isAutomatic &&
+      (!latest.nextEvent.choices || latest.nextEvent.choices.length === 0)
+    ) {
+      latest = await gameService.acknowledgeProgression(db, env, {
+        deviceToken: boot1.deviceToken,
+        sessionId: planning.sessionId,
+        sessionToken: planning.sessionToken,
+        expectedSlotVersion: latest.slotVersion,
+        expectedSnapshotId: latest.snapshotId,
+        ackKind: 'story_automatic',
+      });
+      assert(
+        latest.sessionPhase === 'active_planning' ||
+          latest.sessionPhase === 'story_event' ||
+          latest.sessionPhase === 'terminal',
+        'story_automatic ack advances past automatic narrative',
+      );
+    }
+
     try {
       await gameService.executeActiveAction(db, env, {
         deviceToken: boot1.deviceToken,

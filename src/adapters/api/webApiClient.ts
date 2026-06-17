@@ -210,7 +210,7 @@ export class WebApiClient {
     sessionToken: string;
     expectedSlotVersion: number;
     expectedSnapshotId: string;
-    ackKind: 'action_summary' | 'disturbance';
+    ackKind: 'action_summary' | 'disturbance' | 'story_automatic';
   }): Promise<SessionProgressionPayload> {
     return this.request<SessionProgressionPayload>(
       '/v1/sessions/' + params.sessionId + '/progression-ack',

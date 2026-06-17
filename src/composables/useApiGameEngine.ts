@@ -230,10 +230,16 @@ export function useApiGameEngine() {
   async function handleProgressionAck(): Promise<void> {
     if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
     const ackKind =
-      engineState.sessionPhase === 'disturbance_narrative' ? 'disturbance' : 'action_summary';
-    if (engineState.sessionPhase !== 'action_summary' && engineState.sessionPhase !== 'disturbance_narrative') {
-      return;
-    }
+      engineState.sessionPhase === 'disturbance_narrative'
+        ? 'disturbance'
+        : engineState.sessionPhase === 'action_summary'
+          ? 'action_summary'
+          : engineState.sessionPhase === 'story_event' &&
+              engineState.currentEvent?.isAutomatic === true &&
+              engineState.availableChoices.length === 0
+            ? 'story_automatic'
+            : null;
+    if (!ackKind) return;
     isProcessing.value = true;
     try {
       const sessionId = webPlatformStorage.getSessionId();

@@ -23,6 +23,7 @@ import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCatalogAdapter';
 import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './HeadlessEngineSession';
 import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
+import { progressUntilChoiceOrTerminal } from '../progressionLoop';
 import type { PlanningOptionDto } from '../../contracts/sessionProgression';
 import type { SessionPhase } from '../../contracts/sessionProgression';
 import { getActionById } from '../../data/activeActionCatalog';
@@ -183,6 +184,21 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   getCurrentEvent(): EventDefinition | null {
     return this.volatile.currentEvent;
+  }
+
+  describePendingEvent(): NextEventResult | null {
+    const event = this.volatile.currentEvent;
+    if (!event) return null;
+    const available = this.getAvailableChoices(event);
+    const availableIds = new Set(available.map(c => c.id));
+    const requiresChoice = Boolean(event.choices?.length) && available.length > 0;
+    return {
+      eventId: event.id,
+      event: toPlayerSafeEvent(event, availableIds),
+      requiresChoice,
+      isAutomatic: !requiresChoice,
+      raw: event,
+    };
   }
 
   async hydrate(snapshot: GameStateSnapshot): Promise<void> {
@@ -443,16 +459,32 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     return 'terminal';
   }
 
-  getProgressionVolatileState() {
+  getProgressionVolatileState(): HeadlessProgressionVolatileState {
+    const current = this.volatile.currentEvent;
+    const pendingStoryEventId =
+      current && !nextRequiresChoice(current) ? current.id : null;
     return {
       pendingActionSummary: this.volatile.pendingActionSummary,
       pendingDisturbanceNarrative: this.volatile.pendingDisturbanceNarrative,
+      pendingStoryEventId,
     };
   }
 
   applyProgressionVolatileState(state: HeadlessProgressionVolatileState): void {
     this.volatile.pendingActionSummary = state.pendingActionSummary;
     this.volatile.pendingDisturbanceNarrative = state.pendingDisturbanceNarrative;
+    if (state.pendingStoryEventId) {
+      this.attachStoryEventById(state.pendingStoryEventId);
+    }
+  }
+
+  private attachStoryEventById(eventId: string): void {
+    try {
+      const event = this.dependencies.catalog.getEventById(eventId, this.catalogVersion);
+      this.volatile.currentEvent = event;
+    } catch {
+      this.volatile.currentEvent = null;
+    }
   }
 
   getPlanningOptions(): PlanningOptionDto[] {
@@ -510,6 +542,25 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       this.volatile.pendingDisturbanceNarrative = null;
       await this.resolveAfterPlanningAck();
+      return;
+    }
+    if (ackKind === 'story_automatic') {
+      if (phase !== 'story_event') {
+        throw new ProgressionError('INVALID_SESSION_PHASE', 'story_automatic ack requires story_event phase');
+      }
+      const current = this.volatile.currentEvent;
+      if (!current || nextRequiresChoice(current)) {
+        throw new ProgressionError(
+          'INVALID_SESSION_PHASE',
+          'story_automatic ack requires automatic story event',
+        );
+      }
+      const progress = await this.progressAutomatic({ maxSteps: 8 });
+      if (progress.error) {
+        this.lastError = progress.error;
+        throw new ProgressionError('INVALID_SESSION_PHASE', progress.error.message);
+      }
+      await progressUntilChoiceOrTerminal(this);
       return;
     }
     throw new ProgressionError('INVALID_ACK_KIND', `Unknown ackKind: ${ackKind}`);

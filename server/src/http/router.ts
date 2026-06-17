@@ -265,7 +265,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
         const body = await readJsonBody<{
           expectedSlotVersion: number;
           expectedSnapshotId: string;
-          ackKind: 'action_summary' | 'disturbance';
+          ackKind: 'action_summary' | 'disturbance' | 'story_automatic';
         }>(req);
         const db = getPool(env.databaseUrl);
         const result = await gameService.acknowledgeProgression(db, ctx.env, {

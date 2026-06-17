@@ -117,6 +117,18 @@ export async function runP72SessionPhaseTests(): Promise<void> {
   await terminalSession.hydrate(deadSnap);
   assert(terminalSession.getSessionPhase() === 'terminal', 'terminal phase');
   assert(terminalSession.getPlanningOptions().length === 0, 'terminal has no planning options');
+
+  const autoAckSession = await hydrateAtAge(1, 77);
+  const pending = await autoAckSession.getNextEvent();
+  if (pending?.isAutomatic) {
+    assert(autoAckSession.getSessionPhase() === 'story_event', 'automatic event → story_event');
+    await autoAckSession.acknowledgeProgression('story_automatic');
+    const afterPhase = autoAckSession.getSessionPhase();
+    assert(
+      afterPhase === 'active_planning' || afterPhase === 'story_event' || afterPhase === 'terminal',
+      'story_automatic ack advances session',
+    );
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

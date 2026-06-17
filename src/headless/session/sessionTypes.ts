@@ -71,12 +71,16 @@ export interface HeadlessTerminalState {
 export interface HeadlessProgressionVolatileState {
   pendingActionSummary: ActiveActionSummaryDisplay | null;
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
+  /** Automatic story event awaiting player continue (not in snapshot). */
+  pendingStoryEventId: string | null;
 }
 
-export interface HeadlessSessionVolatileState extends HeadlessProgressionVolatileState {
+export interface HeadlessSessionVolatileState {
   currentEvent: EventDefinition | null;
   lastFeedback: ChoiceFeedbackModel | null;
   lastOutcomeText: string | null;
+  pendingActionSummary: ActiveActionSummaryDisplay | null;
+  pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
 }
 
 export class HeadlessProgressionError extends Error {
@@ -95,6 +99,6 @@ export class HeadlessProgressionError extends Error {
   }
 }
 
-export type ProgressionAckKind = 'action_summary' | 'disturbance';
+export type ProgressionAckKind = 'action_summary' | 'disturbance' | 'story_automatic';
 
 export type { SessionPhase };

@@ -57,6 +57,9 @@ export interface HeadlessEngineSession {
   /** Current event id if one is pending player action. */
   getCurrentEvent(): EventDefinition | null;
 
+  /** Map attached current event to API next-event shape without selecting a new event. */
+  describePendingEvent(): NextEventResult | null;
+
   /** Last structured error for observability (cleared on success). */
   getLastError(): HeadlessSessionError | null;
 

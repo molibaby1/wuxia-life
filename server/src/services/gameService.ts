@@ -68,6 +68,34 @@ function buildProgressionResponse(
   );
 }
 
+function shouldPersistProgressionVolatile(
+  headless: Awaited<ReturnType<typeof createHeadlessSessionFromNewGame>>,
+  resolved?: Awaited<ReturnType<typeof resolveSessionAfterAutoProgress>>,
+): boolean {
+  const phase = headless.getSessionPhase();
+  if (phase === 'action_summary' || phase === 'disturbance_narrative') {
+    return true;
+  }
+  return phase === 'story_event' && resolved?.nextEvent?.isAutomatic === true;
+}
+
+function syncProgressionVolatileCache(
+  sessionId: string,
+  snapshotId: string,
+  headless: Awaited<ReturnType<typeof createHeadlessSessionFromNewGame>>,
+  resolved: Awaited<ReturnType<typeof resolveSessionAfterAutoProgress>>,
+): void {
+  if (headless.getTerminalState()) {
+    clearSessionVolatileState(sessionId, snapshotId);
+    return;
+  }
+  if (shouldPersistProgressionVolatile(headless, resolved)) {
+    setSessionVolatileState(sessionId, snapshotId, headless.getProgressionVolatileState());
+    return;
+  }
+  clearSessionVolatileState(sessionId, snapshotId);
+}
+
 export async function listSaves(
   db: Queryable,
   env: BackendEnv,
@@ -253,10 +281,14 @@ export async function restoreSession(
     });
 
     const volatile = headless.getProgressionVolatileState();
-    if (volatile.pendingActionSummary || volatile.pendingDisturbanceNarrative) {
-      setSessionVolatileState(session.id, snap.id, volatile);
-    }
     const resolved = await resolveSessionAfterAutoProgress(headless);
+    if (
+      volatile.pendingActionSummary ||
+      volatile.pendingDisturbanceNarrative ||
+      shouldPersistProgressionVolatile(headless, resolved)
+    ) {
+      setSessionVolatileState(session.id, snap.id, headless.getProgressionVolatileState());
+    }
     return {
       sessionId: session.id,
       sessionToken,
@@ -545,19 +577,13 @@ export async function acknowledgeProgression(
     const terminal = headless.getTerminalState();
     if (terminal) {
       await sessionRepo.updateSessionStatus(client, session.id, 'terminal');
-      clearSessionVolatileState(session.id, snapRow.id);
-    } else {
-      const volatile = headless.getProgressionVolatileState();
-      if (
-        headless.getSessionPhase() === 'action_summary' ||
-        headless.getSessionPhase() === 'disturbance_narrative'
-      ) {
-        setSessionVolatileState(session.id, snapRow.id, volatile);
-      } else {
-        clearSessionVolatileState(session.id, snapRow.id);
-      }
     }
     const resolved = await resolveSessionAfterAutoProgress(headless);
+    if (terminal) {
+      clearSessionVolatileState(session.id, snapRow.id);
+    } else {
+      syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
+    }
     return buildProgressionResponse(headless, updatedSlot.version, snapRow.id, resolved);
   });
 }

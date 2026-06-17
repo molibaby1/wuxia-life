@@ -15,7 +15,7 @@
     <!-- 属性面板 -->
     <div class="attribute-section">
       <AttributePanel 
-        :player="player" 
+        :player="attributePanelPlayer" 
         :talents="talentDefinitions"
       />
     </div>
@@ -134,7 +134,7 @@
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
         </div>
-        <div v-else-if="!isAutoPlaying && !availableChoices.length" class="continue-area">
+        <div v-else-if="!isAutoPlaying && !availableChoices.length && !isApiPlanningPhase" class="continue-area">
           <button class="continue-btn btn" @click="continueToNext">
             继续
           </button>
@@ -173,7 +173,9 @@ import {
 } from '../utils/playerFacingLabels';
 
 import type { ActiveActionSummaryDisplay, DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
-import type { SessionPhase } from '../contracts/sessionProgression';
+import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
+import type { LifeMemorySummary } from '../types/lifeMemory';
+import type { PlayerState } from '../types/eventTypes';
 
 const props = defineProps<{
   currentNode: any;
@@ -183,6 +185,9 @@ const props = defineProps<{
   apiActiveActionSummary?: ActiveActionSummaryDisplay | null;
   apiDisturbanceNarrative?: DisturbanceNarrativeDisplay | null;
   apiSessionPhase?: SessionPhase | null;
+  apiStoryEventAutomatic?: boolean;
+  apiPlayer?: PlayerSummaryDto | null;
+  apiLifeMemory?: LifeMemorySummary | null;
 }>();
 
 const emit = defineEmits<{
@@ -293,11 +298,14 @@ const showNarrativeFallbackHint = computed(() => {
 });
 
 const continueToNext = () => {
-  if (
-    props.apiMode &&
-    (props.apiSessionPhase === 'action_summary' || props.apiSessionPhase === 'disturbance_narrative')
-  ) {
-    emit('api-progression-ack');
+  if (props.apiMode) {
+    if (
+      props.apiSessionPhase === 'action_summary' ||
+      props.apiSessionPhase === 'disturbance_narrative' ||
+      (props.apiSessionPhase === 'story_event' && props.apiStoryEventAutomatic)
+    ) {
+      emit('api-progression-ack');
+    }
     return;
   }
   continueProgressionFlow();
@@ -308,19 +316,69 @@ const talentDefinitions = ref<TalentDefinition[]>([]);
 talentSystem.loadTalents();
 talentDefinitions.value = talentSystem.getAllTalents();
 
+const isApiPlanningPhase = computed(
+  () => props.apiMode && props.apiSessionPhase === 'active_planning',
+);
+
 // 使用 computed 直接获取最新的游戏状态，确保响应式更新
 const player = computed(() => {
+  if (props.apiMode && props.apiPlayer) {
+    return props.apiPlayer;
+  }
   const state = gameEngine.getGameState();
   return state.player;
 });
 
+const attributePanelPlayer = computed((): PlayerState => {
+  if (props.apiMode && props.apiPlayer) {
+    const p = props.apiPlayer;
+    return {
+      name: p.name,
+      age: p.age,
+      gender: 'male',
+      martialPower: p.martialPower,
+      externalSkill: p.externalSkill,
+      internalSkill: p.internalSkill,
+      qinggong: p.qinggong,
+      chivalry: p.chivalry,
+      constitution: p.constitution,
+      comprehension: p.comprehension,
+      sect: p.sect ?? null,
+      title: null,
+      reputation: 0,
+      money: p.money,
+      knowledge: 0,
+      charisma: 0,
+      businessAcumen: 0,
+      influence: 0,
+      connections: 0,
+      martialHeritage: 0,
+      scholarlyHeritage: 0,
+      merchantNetwork: 0,
+      flags: {},
+      children: 0,
+      spouse: null,
+      alive: p.alive,
+      talents: [],
+    };
+  }
+  return gameEngine.getGameState().player;
+});
+
 const lifeMemorySummary = computed(() => {
+  if (props.apiMode && props.apiLifeMemory) {
+    return props.apiLifeMemory;
+  }
   void engineState.lastChoiceFeedback;
   void engineState.currentEvent;
   return deriveLifeMemorySummary(gameEngine.getGameState());
 });
 
 const getCurrentDate = () => {
+  if (props.apiMode && props.apiPlayer) {
+    const p = props.apiPlayer;
+    return `${p.currentYear}年${p.currentMonth}月${p.currentDay}日`;
+  }
   const state = gameEngine.getGameState();
   const time = state.currentTime || { year: 1, month: 1, day: 1 };
   return `${time.year}年${time.month}月${time.day}日`;

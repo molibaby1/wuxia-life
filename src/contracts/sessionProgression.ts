@@ -49,7 +49,7 @@ export interface ActiveActionRequest {
   actionId: string;
 }
 
-export type ProgressionAckKind = 'action_summary' | 'disturbance';
+export type ProgressionAckKind = 'action_summary' | 'disturbance' | 'story_automatic';
 
 export interface ProgressionAckRequest {
   expectedSlotVersion: number;
@@ -63,6 +63,25 @@ export interface HeadlessTerminalDto {
   deathReason?: string;
   endingId?: string;
   age: number;
+}
+
+/** Authoritative player-facing stats for API clients (subset of runtime state). */
+export interface PlayerSummaryDto {
+  name: string;
+  age: number;
+  martialPower: number;
+  externalSkill: number;
+  internalSkill: number;
+  qinggong: number;
+  chivalry: number;
+  constitution: number;
+  comprehension: number;
+  money: number;
+  sect?: string;
+  alive: boolean;
+  currentYear: number;
+  currentMonth: number;
+  currentDay: number;
 }
 
 /**
@@ -80,4 +99,5 @@ export interface SessionProgressionPayload {
   snapshotId: string;
   terminal: HeadlessTerminalDto | null;
   lifeMemory: LifeMemorySummary;
+  player: PlayerSummaryDto;
 }

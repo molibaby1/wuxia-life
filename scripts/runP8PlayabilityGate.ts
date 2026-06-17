@@ -13,8 +13,6 @@ import { adaptHeadlessRunToGameProcessReport } from '../src/headless/playability
 import type { P8PlayabilityRuntimePath } from '../src/p8/types';
 
 const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
-const JSON_NAME = 'p8-playability-gate-latest.json';
-const MD_NAME = 'p8-playability-gate-latest.md';
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 const ENGINE_VERSION = 'p8-headless-gate';
 
@@ -22,6 +20,19 @@ type CliArgs = {
   quiet: boolean;
   mode: P8PlayabilityRuntimePath;
 };
+
+function reportOutputNames(mode: P8PlayabilityRuntimePath): { json: string; md: string } {
+  if (mode === 'headless_server') {
+    return {
+      json: 'p8-playability-gate-latest.json',
+      md: 'p8-playability-gate-latest.md',
+    };
+  }
+  return {
+    json: 'p8-playability-gate-local-latest.json',
+    md: 'p8-playability-gate-local-latest.md',
+  };
+}
 
 function parseArgs(argv: string[]): CliArgs {
   let mode: P8PlayabilityRuntimePath = 'headless_server';
@@ -118,8 +129,9 @@ async function main(): Promise<void> {
   });
 
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
-  const jsonPath = path.join(REPORTS_DIR, JSON_NAME);
-  const mdPath = path.join(REPORTS_DIR, MD_NAME);
+  const { json: jsonName, md: mdName } = reportOutputNames(args.mode);
+  const jsonPath = path.join(REPORTS_DIR, jsonName);
+  const mdPath = path.join(REPORTS_DIR, mdName);
   fs.writeFileSync(jsonPath, JSON.stringify(p8Report, null, 2), 'utf8');
   const relJson = path.relative(process.cwd(), jsonPath);
   fs.writeFileSync(mdPath, renderP8MarkdownReport(p8Report, relJson), 'utf8');

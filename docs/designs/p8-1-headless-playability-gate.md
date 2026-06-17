@@ -36,7 +36,16 @@ Persona 策略：`selectPersonaActiveAction`, `applyPersonaChoiceBias`, `resolve
 
 失败须在测试中打印双端摘要，不 silent pass。
 
-## 4. P8 报告 JSON 元数据
+## 4. 报告输出路径
+
+| mode | JSON | Markdown |
+| --- | --- | --- |
+| `headless_server`（默认） | `p8-playability-gate-latest.json` | `p8-playability-gate-latest.md` |
+| `local_direct` | `p8-playability-gate-local-latest.json` | `p8-playability-gate-local-latest.md` |
+
+P9 baseline 只读取 `p8-playability-gate-latest.json`；`local_direct` 不得覆盖 canonical latest。
+
+## 5. P8 报告 JSON 元数据
 
 ```typescript
 interface P8PlayabilityReportMeta {
@@ -49,11 +58,6 @@ interface P8PlayabilityReportMeta {
 ```
 
 `assemblePlayabilityReport(..., { runtimePath, catalogVersion, engineVersion })` 写入 report 根级字段；`renderP8MarkdownReport` 在 header 展示 `runtimePath`。
-
-## 5. 输出路径（不变）
-
-- `docs/test-reports/p8-playability-gate-latest.json`
-- `docs/test-reports/p8-playability-gate-latest.md`
 
 ## 6. 开放问题收口
 

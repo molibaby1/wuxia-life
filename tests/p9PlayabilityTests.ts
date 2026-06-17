@@ -39,6 +39,10 @@ function assertBaselineReportShape(report: P8PlayabilityReport): void {
   assert(Array.isArray(report.replay.nearDuplicateWarnings), 'baseline nearDuplicateWarnings');
   assert(Array.isArray(report.warnings), 'baseline warnings array');
   assert(Array.isArray(report.verdicts), 'baseline verdicts array');
+  assert(
+    report.runtimePath === 'headless_server',
+    'baseline runtimePath must be headless_server; re-run npm run gate:playability (not --mode local_direct)',
+  );
 }
 
 function assertTriageReportShape(triage: P9WarningTriageReport, baseline: P8PlayabilityReport): void {

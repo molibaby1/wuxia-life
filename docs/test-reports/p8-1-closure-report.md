@@ -47,11 +47,11 @@
 
 ## 5. 真人切片 Go/No-Go
 
-**建议：Fix blockers → 再邀外部试玩**
+**可邀外部试玩**
 
 - 自动化 gate：**通过**
-- 浏览器 checklist：**待实机**（`p8-1-api-browser-acceptance-notes.md`）
-- 外部 5–8 人试玩：在 checklist 无 blocker 后执行 `p8-1-api-human-test-script.md`
+- 浏览器 checklist：**通过**（2026-06-12 实机，见 `p8-1-api-browser-acceptance-notes.md`，无 blocker）
+- 外部 5–8 人试玩：可执行 `p8-1-api-human-test-script.md`（建议 QA 备 note：陈旧 device token 时 `localStorage.clear()`）
 
 ## 6. 残余风险
 

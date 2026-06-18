@@ -18,6 +18,7 @@ const suites: Suite[] = [
   { name: 'p11SchedulingTests', entry: 'tests/p11SchedulingTests.ts' },
   { name: 'p12ProfileTests', entry: 'tests/p12ProfileTests.ts' },
   { name: 'p16OriginDestinyTests', entry: 'tests/p16OriginDestinyTests.ts' },
+  { name: 'infantPassiveChainVerificationTests', entry: 'tests/infantPassiveChainVerificationTests.ts' },
   { name: 'p17ConsequenceTests', entry: 'tests/p17ConsequenceTests.ts' },
   { name: 'p18LegacyTests', entry: 'tests/p18LegacyTests.ts' },
   { name: 'p19EndgameTests', entry: 'tests/p19EndgameTests.ts' },

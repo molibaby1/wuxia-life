@@ -56,6 +56,7 @@
     "report:p12-closure": "tsx scripts/runP12ClosureReport.ts",
     "gate:p16": "tsx scripts/runP16Gate.ts",
     "report:p16-closure": "tsx scripts/runP16ClosureReport.ts",
+    "report:infant-passive-verification": "tsx scripts/runInfantPassiveChainVerification.ts",
     "gate:p17": "tsx scripts/runP17Gate.ts",
     "report:p17-closure": "tsx scripts/runP17ClosureReport.ts",
     "gate:p18": "tsx scripts/runP18Gate.ts",

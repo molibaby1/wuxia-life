@@ -5,6 +5,7 @@ import SaveSlotStartScreen from './components/SaveSlotStartScreen.vue';
 import { useNewGameEngine } from './composables/useNewGameEngine';
 import { isApiModeEnabled, useApiGameEngine } from './composables/useApiGameEngine';
 import { gameEngine } from './core/GameEngineIntegration';
+import { resolvePlanningPlaceholderText } from './data/infantPassiveNarratives';
 import { isPlayerDebugEnabled } from './utils/debugAccess';
 import { webPlatformStorage } from './adapters/platform/webPlatformStorage';
 
@@ -128,11 +129,31 @@ const toggleDebug = () => {
 
 const currentNode = computed(() => {
   if (apiMode) {
+    if (apiEngineState.sessionPhase === 'period_summary' && apiEngineState.periodSummary) {
+      const summary = apiEngineState.periodSummary;
+      return {
+        id: 'period_summary',
+        text: summary.narrativeText,
+        title: summary.headline,
+        choices: [],
+      };
+    }
+    if (apiEngineState.sessionPhase === 'passive_progression' && apiEngineState.passiveNarrative) {
+      const passive = apiEngineState.passiveNarrative;
+      return {
+        id: 'passive_progression',
+        text: passive.text,
+        title: passive.title,
+        choices: [],
+      };
+    }
     if (apiEngineState.sessionPhase === 'active_planning') {
+      const age = activeSession.value?.player?.age ?? 0;
+      const placeholder = resolvePlanningPlaceholderText(age);
       return {
         id: 'active_planning',
-        text: '本期暂无强求的江湖变故，你可安排日常行动。',
-        title: '规划本期人生',
+        text: placeholder.text,
+        title: placeholder.title,
         choices: [],
       };
     }
@@ -147,9 +168,12 @@ const currentNode = computed(() => {
     }
     if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
       const summary = apiEngineState.activeActionSummary;
+      const deltaLine = summary.appliedDeltaSummary
+        ? `本期变化：${summary.appliedDeltaSummary}。`
+        : '';
       return {
         id: 'action_or_choice_result',
-        text: `${summary.actionName}已结束（${summary.durationLabel}）。`,
+        text: `${summary.actionName}已结束（${summary.durationLabel}）。${deltaLine}`,
         title: '本期小结',
         choices: [],
       };
@@ -165,11 +189,31 @@ const currentNode = computed(() => {
   }
   const event = gameEngineComposable.engineState.currentEvent;
   if (!event) {
+    if (gameEngineComposable.engineState.pendingPeriodSummary) {
+      const summary = gameEngineComposable.engineState.pendingPeriodSummary;
+      return {
+        id: 'period_summary',
+        text: summary.narrativeText,
+        title: summary.headline,
+        choices: [],
+      };
+    }
+    if (gameEngineComposable.engineState.isPassiveProgressionMode && gameEngineComposable.engineState.passiveNarrative) {
+      const passive = gameEngineComposable.engineState.passiveNarrative;
+      return {
+        id: 'passive_progression',
+        text: passive.text,
+        title: passive.title,
+        choices: [],
+      };
+    }
     if (gameEngineComposable.engineState.isActiveActionMode) {
+      const age = gameEngine.getGameState().player?.age ?? 0;
+      const placeholder = resolvePlanningPlaceholderText(age);
       return {
         id: 'active_planning',
-        text: '本期暂无强求的江湖变故，你可安排日常行动。',
-        title: '规划本期人生',
+        text: placeholder.text,
+        title: placeholder.title,
         choices: [],
       };
     }
@@ -184,9 +228,12 @@ const currentNode = computed(() => {
     }
     if (gameEngineComposable.engineState.lastActiveActionSummary) {
       const summary = gameEngineComposable.engineState.lastActiveActionSummary;
+      const deltaLine = summary.appliedDeltaSummary
+        ? `本期变化：${summary.appliedDeltaSummary}。`
+        : '';
       return {
         id: 'action_or_choice_result',
-        text: `${summary.actionName}已结束（${summary.durationLabel}）。`,
+        text: `${summary.actionName}已结束（${summary.durationLabel}）。${deltaLine}`,
         title: '本期小结',
         choices: [],
       };
@@ -238,6 +285,15 @@ const apiStoryEventAutomatic = computed(
     apiEngineState.sessionPhase === 'story_event' &&
     apiEngineState.currentEvent?.isAutomatic === true &&
     apiEngineState.availableChoices.length === 0,
+);
+
+const apiNeedsProgressionAck = computed(
+  () =>
+    apiEngineState.sessionPhase === 'action_summary' ||
+    apiEngineState.sessionPhase === 'disturbance_narrative' ||
+    apiEngineState.sessionPhase === 'period_summary' ||
+    apiEngineState.sessionPhase === 'passive_progression' ||
+    apiStoryEventAutomatic.value,
 );
 
 const apiPlayer = computed(() => activeSession.value?.player ?? null);
@@ -335,6 +391,8 @@ const onApiManualSave = async () => {
       :api-disturbance-narrative="apiMode ? apiEngineState.disturbanceNarrative : null"
       :api-session-phase="apiMode ? apiEngineState.sessionPhase : null"
       :api-story-event-automatic="apiMode ? apiStoryEventAutomatic : false"
+      :api-needs-progression-ack="apiMode ? apiNeedsProgressionAck : false"
+      :api-period-summary="apiMode ? apiEngineState.periodSummary : null"
       :api-player="apiMode ? apiPlayer : null"
       :api-life-memory="apiMode ? apiLifeMemory : null"
       @choice="onChoice"

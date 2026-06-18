@@ -1,6 +1,6 @@
 # P16 Experience Gate Report
 
-Generated: 2026-06-08T08:58:44.622Z
+Generated: 2026-06-17T21:55:45.995Z
 Decision: **pass**
 
 ## Origin variance
@@ -12,7 +12,7 @@ Decision: **pass**
 ## Childhood agency
 - Suppressed at age 5: action_business_basic, action_travel_basic, action_socializing_basic, action_study_basic, action_training_basic
 - Merchant/business palette at age 10: action_household_apprentice, action_socializing_lite, action_study_lite, action_childhood_training
-- Scholar palette at age 6: action_study_lite, action_childhood_training, action_socializing_lite
+- Scholar palette at age 6: action_study_lite, action_childhood_training
 - Childhood max age: 12
 
 ## Composite destiny

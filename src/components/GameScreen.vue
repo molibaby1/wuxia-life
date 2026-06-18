@@ -60,11 +60,19 @@
     <div class="content-area">
       <div v-if="currentNode" class="story-card card">
         <p
-          v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay"
+          v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay && !periodSummaryDisplay"
           class="story-text"
         >
           {{ currentNode.text }}
         </p>
+
+        <div v-if="periodSummaryDisplay" class="progression-card period-summary-card">
+          <span class="progression-source-label">{{ periodSummaryDisplay.sourceLabel }}</span>
+          <h3 class="progression-card-title">{{ periodSummaryDisplay.headline }}</h3>
+          <p class="disturbance-body">{{ periodSummaryDisplay.body }}</p>
+          <p class="progression-meta">{{ periodSummaryDisplay.statDeltaSummary }}</p>
+          <p class="progression-hint">本期已落幕，点击继续见证下一季成长。</p>
+        </div>
 
         <div v-if="activeActionSummaryDisplay" class="progression-card active-action-summary-card">
           <span class="progression-source-label">{{ activeActionSummaryDisplay.sourceLabel }}</span>
@@ -134,7 +142,7 @@
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
         </div>
-        <div v-else-if="!isAutoPlaying && !availableChoices.length && !isApiPlanningPhase" class="continue-area">
+        <div v-else-if="showContinueButton" class="continue-area">
           <button class="continue-btn btn" @click="continueToNext">
             继续
           </button>
@@ -172,7 +180,11 @@ import {
   formatRouteLabel,
 } from '../utils/playerFacingLabels';
 
-import type { ActiveActionSummaryDisplay, DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
+import type {
+  ActiveActionSummaryDisplay,
+  DisturbanceNarrativeDisplay,
+  PeriodSummaryDisplay,
+} from '../types/activeActionTypes';
 import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { PlayerState } from '../types/eventTypes';
@@ -186,6 +198,8 @@ const props = defineProps<{
   apiDisturbanceNarrative?: DisturbanceNarrativeDisplay | null;
   apiSessionPhase?: SessionPhase | null;
   apiStoryEventAutomatic?: boolean;
+  apiNeedsProgressionAck?: boolean;
+  apiPeriodSummary?: PeriodSummaryDisplay | null;
   apiPlayer?: PlayerSummaryDto | null;
   apiLifeMemory?: LifeMemorySummary | null;
 }>();
@@ -246,7 +260,16 @@ const hasStructuredFeedback = computed(() => {
   );
 });
 
+const periodSummaryDisplay = computed(() => {
+  if (props.apiMode) {
+    if (props.apiSessionPhase !== 'period_summary') return null;
+    return props.apiPeriodSummary ?? null;
+  }
+  return engineState.pendingPeriodSummary;
+});
+
 const activeActionSummaryDisplay = computed(() => {
+  if (periodSummaryDisplay.value) return null;
   if (props.apiMode) {
     if (props.apiSessionPhase === 'disturbance_narrative') return null;
     return props.apiActiveActionSummary ?? null;
@@ -299,17 +322,30 @@ const showNarrativeFallbackHint = computed(() => {
 
 const continueToNext = () => {
   if (props.apiMode) {
-    if (
-      props.apiSessionPhase === 'action_summary' ||
-      props.apiSessionPhase === 'disturbance_narrative' ||
-      (props.apiSessionPhase === 'story_event' && props.apiStoryEventAutomatic)
-    ) {
+    if (props.apiNeedsProgressionAck) {
       emit('api-progression-ack');
     }
     return;
   }
   continueProgressionFlow();
 };
+
+const showContinueButton = computed(() => {
+  if (props.isAutoPlaying) return false;
+  if (props.availableChoices.length > 0) return false;
+  if (props.apiMode) {
+    return props.apiNeedsProgressionAck === true;
+  }
+  if (engineState.isActiveActionMode) return false;
+  return (
+    engineState.isPassiveProgressionMode ||
+    !!engineState.pendingPeriodSummary ||
+    !!engineState.lastActiveActionSummary ||
+    engineState.showingDisturbanceNarrative ||
+    !!engineState.lastOutcomeText ||
+    !!props.currentNode
+  );
+});
 
 // 加载天赋定义
 const talentDefinitions = ref<TalentDefinition[]>([]);

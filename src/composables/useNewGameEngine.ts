@@ -19,7 +19,15 @@ import type { ChoiceFeedbackModel } from '../types';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
+  PassiveNarrativeDisplay,
+  PeriodSummaryDisplay,
 } from '../types/activeActionTypes';
+import { applyStatDeltas } from '../core/activePlanning/ActivePlanningService';
+import { clampPassiveStatDeltasForAge } from '../core/activePlanning/ageActionStatCaps';
+import { buildPeriodSummary } from '../core/activePlanning/periodSummaryBuilder';
+import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../data/infantPassiveNarratives';
+import { applyPassiveNarrativeFlags } from '../data/originInfantPassiveChain';
+import { shouldOfferDailyPlanning } from '../p16/childhoodAgency';
 import { markDisturbanceNarrativeShown } from '../core/activePlanning/disturbanceNarrativeBuilder';
 
 interface EventState {
@@ -42,6 +50,9 @@ interface EventState {
   lastActiveActionSummary: ActiveActionSummaryDisplay | null;
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   showingDisturbanceNarrative: boolean;
+  isPassiveProgressionMode: boolean;
+  passiveNarrative: PassiveNarrativeDisplay | null;
+  pendingPeriodSummary: PeriodSummaryDisplay | null;
 }
 
 // 单例状态
@@ -65,6 +76,9 @@ function getEngineStateInstance() {
         lastActiveActionSummary: null,
         pendingDisturbanceNarrative: null,
         showingDisturbanceNarrative: false,
+        isPassiveProgressionMode: false,
+        passiveNarrative: null,
+        pendingPeriodSummary: null,
       }),
       isProcessing: false,
     };
@@ -146,7 +160,20 @@ export function useNewGameEngine() {
         engineState.availableChoices = [];
         engineState.availableActiveActions = actions;
         engineState.isActiveActionMode = true;
+        engineState.isPassiveProgressionMode = false;
+        engineState.passiveNarrative = null;
       } else {
+        const age = gameEngine.getGameState().player?.age ?? 0;
+        if (!shouldOfferDailyPlanning(age)) {
+          engineState.currentEvent = null;
+          engineState.availableChoices = [];
+          engineState.availableActiveActions = [];
+          engineState.isActiveActionMode = false;
+          engineState.isPassiveProgressionMode = true;
+          const entry = selectPassiveNarrative(gameEngine.getGameState());
+          engineState.passiveNarrative = { title: entry.title, text: entry.text };
+          return;
+        }
         gameEngine.advanceTime(3, 'month');
         getNextEvent();
       }
@@ -469,10 +496,48 @@ export function useNewGameEngine() {
     engineState.lastActiveActionSummary = null;
     engineState.pendingDisturbanceNarrative = null;
     engineState.showingDisturbanceNarrative = false;
+    engineState.pendingPeriodSummary = null;
+  };
+
+  const executePassiveChildhoodTick = () => {
+    const state = gameEngine.getGameState();
+    const age = state.player?.age ?? 0;
+    const selected = selectPassiveNarrative(state);
+    const deltas = clampPassiveStatDeltasForAge(age, selected.statDeltas);
+    applyStatDeltas(state.player, deltas);
+    applyPassiveNarrativeFlags(state, selected.flags);
+    gameEngine.advanceTime(3, 'month');
+    if (!state.eventHistory) {
+      state.eventHistory = [];
+    }
+    if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
+      state.eventHistory.push({
+        eventId: selected.id,
+        age: state.player.age,
+        timestamp: state.currentTime ? { ...state.currentTime } : undefined,
+      });
+    }
+    engineState.pendingPeriodSummary = buildPeriodSummary({
+      sourceLabel: '童年岁月',
+      headline: selected.title,
+      body: selected.text,
+      deltas,
+    });
+    engineState.isPassiveProgressionMode = false;
+    engineState.passiveNarrative = null;
   };
 
   /** P7.1: two-step continue — action summary, then optional disturbance, then next event */
   const continueProgressionFlow = () => {
+    if (engineState.pendingPeriodSummary) {
+      engineState.pendingPeriodSummary = null;
+      getNextEvent();
+      return;
+    }
+    if (engineState.isPassiveProgressionMode && engineState.passiveNarrative) {
+      executePassiveChildhoodTick();
+      return;
+    }
     if (engineState.pendingDisturbanceNarrative && !engineState.showingDisturbanceNarrative) {
       engineState.showingDisturbanceNarrative = true;
       engineState.lastActiveActionSummary = null;

@@ -1,9 +1,6 @@
 import { getActionById } from '../../data/activeActionCatalog';
-import type {
-  ActionDuration,
-  ActionResult,
-  ActiveActionSummaryDisplay,
-} from '../../types/activeActionTypes';
+import type { ActionDuration, ActionResult, ActiveActionSummaryDisplay } from '../../types/activeActionTypes';
+import { formatStatDeltaSummary } from './periodSummaryBuilder';
 
 export function formatActionDurationLabel(duration: ActionDuration): string {
   switch (duration.unit) {
@@ -39,6 +36,7 @@ export function buildActiveActionSummaryDisplay(
     rewardSummary: actionResult.metadata.rewardSummary,
     costSummary: actionResult.metadata.costSummary,
     riskSummary: actionResult.metadata.riskSummary,
+    appliedDeltaSummary: formatStatDeltaSummary(actionResult.deltas),
     nextStepHint,
   };
 }

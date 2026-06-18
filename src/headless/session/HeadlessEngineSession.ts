@@ -81,6 +81,9 @@ export interface HeadlessEngineSession {
   /** P7.2: ack summary or disturbance; may re-resolve story/planning without snapshot write. */
   acknowledgeProgression(ackKind: ProgressionAckKind): Promise<void>;
 
+  /** Ensure passive childhood narrative is ready when phase is passive_progression. */
+  ensurePassivePresentation(): void;
+
   /** P8.1: advance in-game calendar when phase loop does not advance age. */
   advanceCalendar(amount: number, unit: 'year' | 'month'): Promise<void>;
 

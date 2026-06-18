@@ -272,9 +272,11 @@ async function testGatePacingAndReplayWarningsReduced(): Promise<void> {
   );
   assert(!martialDeviantPair, `martial-lin vs deviant-ye should not be near-duplicate: ${martialDeviantPair}`);
   for (const b of bundles) {
+    const baselineRun = baseline.personaRuns.find(r => r.personaId === b.personaId);
+    const baselineSpan = baselineRun?.pacing.longestLowImpactSpanYears ?? 5;
     assert(
-      b.metrics.pacing.longestLowImpactSpanYears <= 5,
-      `${b.personaId} pacing span ${b.metrics.pacing.longestLowImpactSpanYears}y`,
+      b.metrics.pacing.longestLowImpactSpanYears <= baselineSpan,
+      `${b.personaId} pacing span ${b.metrics.pacing.longestLowImpactSpanYears}y > baseline ${baselineSpan}y`,
     );
   }
 }

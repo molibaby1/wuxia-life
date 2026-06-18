@@ -91,6 +91,22 @@ export interface ActiveActionSummaryDisplay {
   costSummary: string;
   riskSummary: string;
   nextStepHint: string;
+  /** Applied stat deltas this period (player-visible) */
+  appliedDeltaSummary?: string;
+}
+
+/** Period-end narrative for passive childhood / choice / auto story */
+export interface PeriodSummaryDisplay {
+  sourceLabel: string;
+  headline: string;
+  body: string;
+  statDeltaSummary: string;
+  narrativeText: string;
+}
+
+export interface PassiveNarrativeDisplay {
+  title: string;
+  text: string;
 }
 
 /** P7.1: lightweight disturbance narrative for Web UI */

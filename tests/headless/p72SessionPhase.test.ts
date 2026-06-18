@@ -118,6 +118,13 @@ export async function runP72SessionPhaseTests(): Promise<void> {
   assert(terminalSession.getSessionPhase() === 'terminal', 'terminal phase');
   assert(terminalSession.getPlanningOptions().length === 0, 'terminal has no planning options');
 
+  const infantSession = await hydrateAtAge(1, 42);
+  assert(infantSession.getSessionPhase() === 'passive_progression', 'age 1 → passive_progression');
+  assert(infantSession.getPlanningOptions().length === 0, 'no planning options at age 1');
+  infantSession.ensurePassivePresentation();
+  const volatile = infantSession.getProgressionVolatileState();
+  assert(volatile.passiveNarrative !== null, 'passive narrative prepared');
+
   const autoAckSession = await hydrateAtAge(1, 77);
   const pending = await autoAckSession.getNextEvent();
   if (pending?.isAutomatic) {
@@ -125,7 +132,11 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     await autoAckSession.acknowledgeProgression('story_automatic');
     const afterPhase = autoAckSession.getSessionPhase();
     assert(
-      afterPhase === 'active_planning' || afterPhase === 'story_event' || afterPhase === 'terminal',
+      afterPhase === 'active_planning' ||
+        afterPhase === 'story_event' ||
+        afterPhase === 'terminal' ||
+        afterPhase === 'passive_progression' ||
+        afterPhase === 'period_summary',
       'story_automatic ack advances session',
     );
   }

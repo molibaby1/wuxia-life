@@ -6,6 +6,8 @@ import type { ChoiceFeedbackModel } from '../../types/choiceFeedback';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
+  PassiveNarrativeDisplay,
+  PeriodSummaryDisplay,
 } from '../../types/activeActionTypes';
 import type { SessionPhase } from '../../contracts/sessionProgression';
 import type { EventDefinition } from '../../types/eventTypes';
@@ -71,6 +73,8 @@ export interface HeadlessTerminalState {
 export interface HeadlessProgressionVolatileState {
   pendingActionSummary: ActiveActionSummaryDisplay | null;
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
+  pendingPeriodSummary: PeriodSummaryDisplay | null;
+  passiveNarrative: PassiveNarrativeDisplay | null;
   /** Automatic story event awaiting player continue (not in snapshot). */
   pendingStoryEventId: string | null;
 }
@@ -81,6 +85,8 @@ export interface HeadlessSessionVolatileState {
   lastOutcomeText: string | null;
   pendingActionSummary: ActiveActionSummaryDisplay | null;
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
+  pendingPeriodSummary: PeriodSummaryDisplay | null;
+  passiveNarrative: PassiveNarrativeDisplay | null;
 }
 
 export class HeadlessProgressionError extends Error {
@@ -99,6 +105,11 @@ export class HeadlessProgressionError extends Error {
   }
 }
 
-export type ProgressionAckKind = 'action_summary' | 'disturbance' | 'story_automatic';
+export type ProgressionAckKind =
+  | 'action_summary'
+  | 'disturbance'
+  | 'story_automatic'
+  | 'passive_continue'
+  | 'period_summary';
 
 export type { SessionPhase };

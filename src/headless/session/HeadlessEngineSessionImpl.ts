@@ -23,6 +23,12 @@ import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCatalogAdapter';
 import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './HeadlessEngineSession';
 import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
+import { applyStatDeltas } from '../../core/activePlanning/ActivePlanningService';
+import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
+import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
+import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
+import { applyPassiveNarrativeFlags } from '../../data/originInfantPassiveChain';
+import { shouldOfferDailyPlanning } from '../../p16/childhoodAgency';
 import { progressUntilChoiceOrTerminal } from '../progressionLoop';
 import type { PlanningOptionDto } from '../../contracts/sessionProgression';
 import type { SessionPhase } from '../../contracts/sessionProgression';
@@ -79,6 +85,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     lastOutcomeText: null,
     pendingActionSummary: null,
     pendingDisturbanceNarrative: null,
+    pendingPeriodSummary: null,
+    passiveNarrative: null,
   };
   private lastError: HeadlessSessionError | null = null;
   private randomSeed?: number;
@@ -176,6 +184,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.lastOutcomeText = null;
     this.volatile.pendingActionSummary = null;
     this.volatile.pendingDisturbanceNarrative = null;
+    this.volatile.pendingPeriodSummary = null;
+    this.volatile.passiveNarrative = null;
   }
 
   getLastError(): HeadlessSessionError | null {
@@ -376,6 +386,17 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.lastFeedback = feedback;
     this.volatile.lastOutcomeText = resolved?.outcomeText ?? null;
     this.volatile.currentEvent = null;
+    const choiceBody =
+      resolved?.outcomeText ??
+      choice.description ??
+      choice.text ??
+      event.content?.text ??
+      '';
+    this.volatile.pendingPeriodSummary = buildPeriodSummary({
+      sourceLabel: '剧情抉择',
+      headline: event.content?.title ?? '这一回',
+      body: choiceBody,
+    });
 
     const nextSnapshot = this.serialize();
     const response: ChoiceExecutionResponse = {
@@ -414,6 +435,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       lastOutcomeText: null,
       pendingActionSummary: null,
       pendingDisturbanceNarrative: null,
+      pendingPeriodSummary: null,
+      passiveNarrative: null,
     };
     this.lastError = null;
     this.engine = new GameEngineIntegration();
@@ -449,14 +472,59 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     return deriveLifeMemorySummary(this.engine.getGameState());
   }
 
+  ensurePassivePresentation(): void {
+    const age = this.engine.getGameState().player?.age ?? 0;
+    if (shouldOfferDailyPlanning(age)) {
+      return;
+    }
+    if (!this.volatile.passiveNarrative) {
+      const entry = selectPassiveNarrative(this.engine.getGameState());
+      this.volatile.passiveNarrative = { title: entry.title, text: entry.text };
+    }
+  }
+
+  private async executePassiveChildhoodTick(): Promise<void> {
+    const state = this.engine.getGameState();
+    const age = state.player?.age ?? 0;
+    const selected = selectPassiveNarrative(state);
+    const deltas = clampPassiveStatDeltasForAge(age, selected.statDeltas);
+    await this.runWithRandomAsync(async () => {
+      applyStatDeltas(state.player, deltas);
+      applyPassiveNarrativeFlags(state, selected.flags);
+      this.engine.advanceTime(3, 'month');
+      if (!state.eventHistory) {
+        state.eventHistory = [];
+      }
+      if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
+        state.eventHistory.push({
+          eventId: selected.id,
+          age: state.player.age,
+          timestamp: state.currentTime ? { ...state.currentTime } : undefined,
+        });
+      }
+    });
+    this.volatile.pendingPeriodSummary = buildPeriodSummary({
+      sourceLabel: '童年岁月',
+      headline: selected.title,
+      body: selected.text,
+      deltas,
+    });
+    this.volatile.passiveNarrative = null;
+  }
+
   getSessionPhase(): SessionPhase {
     if (this.getTerminalState()) return 'terminal';
+    if (this.volatile.pendingPeriodSummary) return 'period_summary';
     if (this.volatile.pendingActionSummary) return 'action_summary';
     if (this.volatile.pendingDisturbanceNarrative) return 'disturbance_narrative';
     if (this.volatile.currentEvent) return 'story_event';
     const player = this.engine.getGameState().player;
-    if (player?.alive !== false) return 'active_planning';
-    return 'terminal';
+    if (player?.alive === false) return 'terminal';
+    const age = player?.age ?? 0;
+    if (!shouldOfferDailyPlanning(age)) {
+      return 'passive_progression';
+    }
+    return 'active_planning';
   }
 
   getProgressionVolatileState(): HeadlessProgressionVolatileState {
@@ -466,6 +534,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     return {
       pendingActionSummary: this.volatile.pendingActionSummary,
       pendingDisturbanceNarrative: this.volatile.pendingDisturbanceNarrative,
+      pendingPeriodSummary: this.volatile.pendingPeriodSummary,
+      passiveNarrative: this.volatile.passiveNarrative,
       pendingStoryEventId,
     };
   }
@@ -473,6 +543,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   applyProgressionVolatileState(state: HeadlessProgressionVolatileState): void {
     this.volatile.pendingActionSummary = state.pendingActionSummary;
     this.volatile.pendingDisturbanceNarrative = state.pendingDisturbanceNarrative;
+    this.volatile.pendingPeriodSummary = state.pendingPeriodSummary;
+    this.volatile.passiveNarrative = state.passiveNarrative;
     if (state.pendingStoryEventId) {
       this.attachStoryEventById(state.pendingStoryEventId);
     }
@@ -555,12 +627,41 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           'story_automatic ack requires automatic story event',
         );
       }
+      const narrativeBody = current.content?.text ?? '';
+      const narrativeTitle = current.content?.title ?? '往事一局';
       const progress = await this.progressAutomatic({ maxSteps: 8 });
       if (progress.error) {
         this.lastError = progress.error;
         throw new ProgressionError('INVALID_SESSION_PHASE', progress.error.message);
       }
       await progressUntilChoiceOrTerminal(this);
+      if (narrativeBody) {
+        this.volatile.pendingPeriodSummary = buildPeriodSummary({
+          sourceLabel: '剧情事件',
+          headline: narrativeTitle,
+          body: narrativeBody,
+        });
+      }
+      this.ensurePassivePresentation();
+      return;
+    }
+    if (ackKind === 'passive_continue') {
+      if (phase !== 'passive_progression') {
+        throw new ProgressionError(
+          'INVALID_SESSION_PHASE',
+          'passive_continue ack requires passive_progression phase',
+        );
+      }
+      await this.executePassiveChildhoodTick();
+      return;
+    }
+    if (ackKind === 'period_summary') {
+      if (phase !== 'period_summary') {
+        throw new ProgressionError('INVALID_SESSION_PHASE', 'period_summary ack requires period_summary phase');
+      }
+      this.volatile.pendingPeriodSummary = null;
+      await this.resolveAfterPlanningAck();
+      this.ensurePassivePresentation();
       return;
     }
     throw new ProgressionError('INVALID_ACK_KIND', `Unknown ackKind: ${ackKind}`);
@@ -575,6 +676,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       if (next) return;
       const actions = this.engine.getAvailableActiveActions();
       if (actions.length > 0) return;
+      const age = this.engine.getGameState().player?.age ?? 0;
+      if (!shouldOfferDailyPlanning(age)) {
+        this.ensurePassivePresentation();
+        return;
+      }
       await this.runWithRandomAsync(async () => {
         this.engine.advanceTime(3, 'month');
       });

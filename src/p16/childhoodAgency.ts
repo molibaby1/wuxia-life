@@ -10,9 +10,24 @@ import type { PersonaActionStrategy } from '../p8/types';
 import type { GameState, PlayerState } from '../types/eventTypes';
 import { getOriginSurfaceForPlayer } from './originSurfaces';
 
+export const INFANT_MAX_AGE = 2;
+export const DAILY_PLANNING_MIN_AGE = 5;
 export const EARLY_CHILDHOOD_MAX_AGE = 7;
 export const CHILDHOOD_MAX_AGE = 12;
 export const YOUTH_MIN_AGE = 13;
+
+export function shouldOfferDailyPlanning(age: number): boolean {
+  if (age > CHILDHOOD_MAX_AGE) return true;
+  return age >= DAILY_PLANNING_MIN_AGE;
+}
+
+export function isPassiveChildhoodBand(age: number): boolean {
+  return age <= EARLY_CHILDHOOD_MAX_AGE && !shouldOfferDailyPlanning(age);
+}
+
+export function isInfantBand(age: number): boolean {
+  return age <= INFANT_MAX_AGE;
+}
 
 /** Full P7 minimum actions — adult framing, blocked during childhood. */
 export const ADULT_CHILDHOOD_BLOCKED_ACTIONS = new Set([
@@ -116,8 +131,11 @@ export function resolveChildhoodActionPalette(
   if (age > CHILDHOOD_MAX_AGE) {
     return getMinimumActions();
   }
+  if (!shouldOfferDailyPlanning(age)) {
+    return [];
+  }
 
-  const maxCategories = age <= EARLY_CHILDHOOD_MAX_AGE ? 3 : 4;
+  const maxCategories = age <= EARLY_CHILDHOOD_MAX_AGE ? 2 : 4;
   const ranked = [...scoreChildhoodCategories(player, flags).entries()].sort(
     (a, b) => b[1] - a[1],
   );

@@ -29,6 +29,8 @@ function applyProgressionToEngine(
     planningOptions: SessionProgressionPayload['planningOptions'];
     activeActionSummary: SessionProgressionPayload['activeActionSummary'];
     disturbanceNarrative: SessionProgressionPayload['disturbanceNarrative'];
+    periodSummary: SessionProgressionPayload['periodSummary'];
+    passiveNarrative: SessionProgressionPayload['passiveNarrative'];
     currentEvent: SessionStartResponse['nextEvent'];
     availableChoices: Array<{ id: string; text: string }>;
     showingDisturbanceNarrative: boolean;
@@ -39,6 +41,8 @@ function applyProgressionToEngine(
   engineState.planningOptions = payload.planningOptions ?? [];
   engineState.activeActionSummary = payload.activeActionSummary;
   engineState.disturbanceNarrative = payload.disturbanceNarrative;
+  engineState.periodSummary = payload.periodSummary ?? null;
+  engineState.passiveNarrative = payload.passiveNarrative ?? null;
   engineState.currentEvent = payload.nextEvent;
   engineState.availableChoices =
     payload.nextEvent?.choices?.filter(choice => choice.available) ?? [];
@@ -59,6 +63,8 @@ export function useApiGameEngine() {
     planningOptions: [] as SessionProgressionPayload['planningOptions'],
     activeActionSummary: null as SessionProgressionPayload['activeActionSummary'],
     disturbanceNarrative: null as SessionProgressionPayload['disturbanceNarrative'],
+    periodSummary: null as SessionProgressionPayload['periodSummary'],
+    passiveNarrative: null as SessionProgressionPayload['passiveNarrative'],
     showingDisturbanceNarrative: false,
     currentEvent: null as SessionStartResponse['nextEvent'],
     availableChoices: [] as Array<{ id: string; text: string }>,
@@ -234,11 +240,15 @@ export function useApiGameEngine() {
         ? 'disturbance'
         : engineState.sessionPhase === 'action_summary'
           ? 'action_summary'
-          : engineState.sessionPhase === 'story_event' &&
-              engineState.currentEvent?.isAutomatic === true &&
-              engineState.availableChoices.length === 0
-            ? 'story_automatic'
-            : null;
+          : engineState.sessionPhase === 'period_summary'
+            ? 'period_summary'
+            : engineState.sessionPhase === 'passive_progression'
+              ? 'passive_continue'
+              : engineState.sessionPhase === 'story_event' &&
+                  engineState.currentEvent?.isAutomatic === true &&
+                  engineState.availableChoices.length === 0
+                ? 'story_automatic'
+                : null;
     if (!ackKind) return;
     isProcessing.value = true;
     try {

@@ -32,6 +32,11 @@ import {
   ACTIVE_ACTION_REPLAY_RANDOM,
   toActiveActionReplayEventId,
 } from '../src/core/activePlanning/activeActionReplay';
+import { applyStatDeltas } from '../src/core/activePlanning/ActivePlanningService';
+import { clampPassiveStatDeltasForAge } from '../src/core/activePlanning/ageActionStatCaps';
+import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../src/data/infantPassiveNarratives';
+import { applyPassiveNarrativeFlags } from '../src/data/originInfantPassiveChain';
+import { shouldOfferDailyPlanning } from '../src/p16/childhoodAgency';
 import { getActionById } from '../src/data/activeActionCatalog';
 import { getP8PersonaById } from '../src/p8/personas';
 import type { P8Persona } from '../src/p8/types';
@@ -284,12 +289,23 @@ export class GameProcessSimulator {
     const event = gameEngine.selectEvent();  // 不传参数，使用引擎内部年龄
     
     if (!event) {
+      if (!shouldOfferDailyPlanning(ageBeforeEvent)) {
+        this.simulatePassiveChildhoodTick(ageBeforeEvent);
+        this.ensureProgressionCatchUp(ageBeforeEvent);
+        return;
+      }
+
       const persona = this.resolveP8Persona();
       let actionId: string;
       let selectionReason: string | undefined;
 
       if (persona) {
         const available = gameEngine.getAvailableActiveActions();
+        if (available.length === 0) {
+          gameEngine.advanceTime(3, 'month');
+          this.ensureProgressionCatchUp(ageBeforeEvent);
+          return;
+        }
         const stateNow = gameEngine.getGameState();
         const selection = selectPersonaActiveAction({
           persona,
@@ -521,6 +537,29 @@ export class GameProcessSimulator {
     }
   }
 
+  /** Align P9 simulator with passive_progression when daily planning is disabled (0–4). */
+  private simulatePassiveChildhoodTick(ageBeforeEvent: number): void {
+    const state = gameEngine.getGameState();
+    const selected = selectPassiveNarrative(state);
+    const deltas = clampPassiveStatDeltasForAge(ageBeforeEvent, selected.statDeltas);
+    applyStatDeltas(state.player!, deltas);
+    applyPassiveNarrativeFlags(state, selected.flags);
+    gameEngine.advanceTime(3, 'month');
+    if (!state.eventHistory) {
+      state.eventHistory = [];
+    }
+    if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
+      state.eventHistory.push({
+        eventId: selected.id,
+        age: state.player?.age ?? ageBeforeEvent,
+        timestamp: state.currentTime ? { ...state.currentTime } : undefined,
+      });
+    }
+
+    this.log(`   童年被动推进：${selected.title}`);
+    this.gameState = gameEngine.getGameState();
+  }
+
   /**
    * Simulator loop pacing: ensure at least one calendar year per iteration when age unchanged.
    * Active actions may advance months first; this catch-up preserves gate rhythm expectations.
@@ -559,11 +598,18 @@ export class GameProcessSimulator {
   /** P16: persona simulations seed youth route intent without infant commerce/travel actions. */
   private applyP16PersonaYouthRouteSeeds(age: number): void {
     const persona = this.resolveP8Persona();
-    if (!persona || age !== 13) {
+    if (!persona || age < 13) {
       return;
     }
     const state = gameEngine.getGameState();
+    if (!state.flags) {
+      state.flags = {};
+    }
+    if (state.flags.p8_youth_route_seeds_applied) {
+      return;
+    }
     Object.assign(state.flags, resolvePersonaYouthRouteSeeds(persona));
+    state.flags.p8_youth_route_seeds_applied = true;
   }
 
   private collectChoiceEffects(choice: EventChoice): any[] {

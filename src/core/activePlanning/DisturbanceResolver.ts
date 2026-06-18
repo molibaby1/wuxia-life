@@ -21,6 +21,11 @@ export interface DisturbanceResolverInput {
 }
 
 export function resolveDisturbanceAfterAction(input: DisturbanceResolverInput): DisturbanceResolution {
+  const age = input.state.player?.age ?? 0;
+  if (age <= 12) {
+    return { disturbance: null };
+  }
+
   const random = input.random ?? Math.random;
   const triggerChance = input.triggerChance ?? 0.25;
   if (random() > triggerChance) {

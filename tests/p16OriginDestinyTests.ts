@@ -8,9 +8,12 @@ import {
   applyYouthTransitionSeeds,
   childhoodPalettesDifferByArchetype,
   isActionSuppressedForAge,
+  isInfantBand,
   promoteYouthRouteEntryFromUpbringing,
   resolveChildhoodActionPalette,
+  shouldOfferDailyPlanning,
 } from '../src/p16/childhoodAgency';
+import { resolveActiveAction } from '../src/core/activePlanning/ActionResultResolver';
 import type { EventDefinition, GameState, PlayerState } from '../src/types/eventTypes';
 import {
   evaluateAllCompositeDestinies,
@@ -34,7 +37,7 @@ import {
   buildTendencySurfaceSummary,
   createEmptyTendencyAccumulator,
 } from '../src/p16/tendencyShaping';
-import { traitSystem } from '../src/core/TraitSystem';
+import { selectPassiveNarrative } from '../src/data/infantPassiveNarratives';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -80,11 +83,65 @@ function testOriginEventWeighting(): void {
   assert(contrast.materiallyDifferent, 'material contrast');
 }
 
+function testOriginPassiveNarratives(): void {
+  const scholarState = {
+    player: { age: 0, traitProfile: { origin: 'scholar_house' } } as PlayerState,
+    flags: { origin_scholar_family: true },
+    eventHistory: [],
+  } as GameState;
+  const frontierState = {
+    player: { age: 0, traitProfile: { origin: 'frontier_military' } } as PlayerState,
+    flags: { origin_frontier: true },
+    eventHistory: [],
+  } as GameState;
+  const scholarPick = selectPassiveNarrative(scholarState, () => 0);
+  const frontierPick = selectPassiveNarrative(frontierState, () => 0);
+  assert(scholarPick.id === 'scholar_infant_01_hall_birth', 'scholar chain starts at N1');
+  assert(frontierPick.id === 'frontier_infant_01_camp_birth', 'frontier chain starts at N1');
+  assert(scholarPick.id !== frontierPick.id, 'origin picks differ at age 0');
+
+  const scholarAfterN1 = {
+    ...scholarState,
+    eventHistory: [{ eventId: 'scholar_infant_01_hall_birth', age: 0 }],
+    flags: { ...scholarState.flags, scholar_infant_hall_birth: true },
+  } as GameState;
+  const scholarN2 = selectPassiveNarrative(scholarAfterN1, () => 0);
+  assert(scholarN2.id === 'scholar_infant_02_swaddle_ink', 'scholar chain advances to N2 in order');
+}
+
 function testChildhoodAgency(): void {
   for (const adultId of ADULT_CHILDHOOD_BLOCKED_ACTIONS) {
     assert(isActionSuppressedForAge(adultId, 5), `adult action blocked at age 5: ${adultId}`);
     assert(isActionSuppressedForAge(adultId, 10), `adult action blocked at age 10: ${adultId}`);
   }
+
+  for (const infantAge of [0, 1, 2]) {
+    const infantPalette = resolveChildhoodActionPalette({ age: infantAge, player: {} as PlayerState });
+    assert(infantPalette.length === 0, `infant palette empty at age ${infantAge}`);
+    assert(!shouldOfferDailyPlanning(infantAge), `no daily planning at age ${infantAge}`);
+  }
+
+  const preschoolPalette = resolveChildhoodActionPalette({ age: 4, player: {} as PlayerState });
+  assert(preschoolPalette.length === 0, 'preschool palette empty at age 4');
+
+  const age5Palette = resolveChildhoodActionPalette({
+    age: 5,
+    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
+  });
+  assert(age5Palette.length >= 1 && age5Palette.length <= 2, 'age 5 offers light planning');
+
+  const infantAction = resolveActiveAction({
+    state: {
+      player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10 } as PlayerState,
+      flags: {},
+    } as GameState,
+    actionId: 'action_childhood_training',
+    random: () => 0.99,
+  });
+  assert(infantAction !== null, 'infant action resolves');
+  assert((infantAction!.deltas.chivalry ?? 0) === 0, 'infant no chivalry from training');
+  assert((infantAction!.deltas.internalSkill ?? 0) === 0, 'infant no internal skill from training');
+  assert(isInfantBand(0), 'age 0 is infant band');
 
   const scholarPalette = resolveChildhoodActionPalette({
     age: 6,
@@ -269,6 +326,7 @@ function testYouthRouteEntryPromotion(): void {
 function run(): void {
   testOriginSurfaceSchema();
   testOriginEventWeighting();
+  testOriginPassiveNarratives();
   testChildhoodAgency();
   testYouthRouteEntryPromotion();
   testTendencyShaping();

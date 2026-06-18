@@ -65,6 +65,8 @@ export function mapSessionProgression(
     planningOptions,
     activeActionSummary: volatile.pendingActionSummary,
     disturbanceNarrative: volatile.pendingDisturbanceNarrative,
+    periodSummary: volatile.pendingPeriodSummary,
+    passiveNarrative: volatile.passiveNarrative,
     slotVersion,
     snapshotId,
     terminal,

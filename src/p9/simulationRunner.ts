@@ -1,4 +1,5 @@
-import { GameProcessSimulator } from '../../tests/GameProcessSimulator';
+import { runHeadlessPersona } from '../headless/playability/headlessPersonaRunner';
+import { adaptHeadlessRunToGameProcessReport } from '../headless/playability/adaptToGameProcessReport';
 import { P8_GATE_END_AGE } from '../p8/metricDefinitions';
 import { getP8GatePersonas, getP8PersonaById } from '../p8/personas';
 import { buildPersonaRunMetrics } from '../p8/collectPersonaMetrics';
@@ -9,23 +10,15 @@ export async function runPersonaSimulation(personaId: string) {
   if (!persona) {
     throw new Error(`Unknown persona: ${personaId}`);
   }
-  const simulator = new GameProcessSimulator({
-    playerName: persona.name,
-    gender: persona.gender,
-    seed: persona.seed,
-    choiceTendency: persona.choiceTendency,
-    p8PersonaId: persona.id,
-    simulateYears: P8_GATE_END_AGE,
-    runUntilDeath: false,
-    ageRange: { startAge: 0, endAge: P8_GATE_END_AGE },
-    maxEvents: 200,
-    enableAutoSave: false,
-    enableManualSave: false,
-    enableSaveRestore: false,
-    verbose: false,
-    sampleId: persona.id,
+  const headlessResult = await runHeadlessPersona({
+    persona,
+    endAge: P8_GATE_END_AGE,
+    catalogVersion: '1.0.0',
   });
-  const report = await simulator.simulate();
+  const report = adaptHeadlessRunToGameProcessReport(
+    { persona, endAge: P8_GATE_END_AGE, catalogVersion: '1.0.0' },
+    headlessResult,
+  );
   const metrics = buildPersonaRunMetrics(
     persona,
     report,

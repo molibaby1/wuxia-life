@@ -1,6 +1,6 @@
 {
   "gate": {
-    "generatedAt": "2026-06-08T08:58:44.622Z",
+    "generatedAt": "2026-06-17T21:55:45.995Z",
     "decision": "pass",
     "originVariance": {
       "contrasts": [
@@ -44,8 +44,7 @@
       ],
       "scholarPaletteAtAge6": [
         "action_study_lite",
-        "action_childhood_training",
-        "action_socializing_lite"
+        "action_childhood_training"
       ]
     },
     "compositeDestiny": {

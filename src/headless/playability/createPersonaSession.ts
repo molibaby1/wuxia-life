@@ -33,10 +33,15 @@ export function createPersonaHeadlessSession(
   );
 }
 
-/** Apply P16/P8 youth route seeds at age 13 — same lifecycle point as GameProcessSimulator. */
+/** Apply P16/P8 youth route seeds once youth band is reached (age may skip 13 in phase loop). */
 export function applyPersonaYouthRouteSeedsAtAge(session: HeadlessEngineSession, persona: P8Persona): void {
   const state = session.getRuntimeState();
   const age = state.player?.age ?? 0;
-  if (age !== 13) return;
+  if (age < 13) return;
+  if (!state.flags) {
+    state.flags = {};
+  }
+  if (state.flags.p8_youth_route_seeds_applied) return;
   Object.assign(state.flags, resolvePersonaYouthRouteSeeds(persona));
+  state.flags.p8_youth_route_seeds_applied = true;
 }

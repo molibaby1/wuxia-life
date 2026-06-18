@@ -101,14 +101,14 @@ export const birthWithPhenomenon: EventDefinition = {
       value: 1,
     },
     {
-      type: EffectType.STAT_MODIFY,
-      target: 'internalSkill',
-      value: 5,
-      operator: 'add',
-    },
-    {
       type: EffectType.FLAG_SET,
       target: 'bornWithBlessing',
+    },
+    {
+      type: EffectType.STAT_MODIFY,
+      target: 'comprehension',
+      value: 1,
+      operator: 'add',
     },
     {
       type: EffectType.EVENT_RECORD,

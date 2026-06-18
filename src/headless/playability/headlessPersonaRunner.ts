@@ -60,6 +60,13 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
       case 'disturbance_narrative':
         await runDisturbanceAckStep(ctx);
         break;
+      case 'passive_progression':
+        await session.acknowledgeProgression('passive_continue');
+        break;
+      case 'period_summary':
+        await session.acknowledgeProgression('period_summary');
+        await progressUntilChoiceOrTerminal(session);
+        break;
       default:
         await progressUntilChoiceOrTerminal(session);
     }

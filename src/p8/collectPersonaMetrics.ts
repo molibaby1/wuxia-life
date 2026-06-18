@@ -238,8 +238,15 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
 
   const directEchoCount = echoes.filter(e => e.kind === 'direct').length;
   const genericEchoCount = echoes.filter(e => e.kind === 'generic_stat').length;
+  const echoRank = (echo: CausalityEcho): number => {
+    if (echo.kind === 'generic_stat') return 0;
+    if (echo.reference?.startsWith('p9_summary_echo_')) return 4;
+    if (echo.reference?.startsWith('p9_explicit_')) return 3;
+    if (echo.reference?.startsWith('p9_echo_')) return 2;
+    return 1;
+  };
   const strongestExamples = [...echoes]
-    .sort((a, b) => (a.kind === 'direct' ? 1 : 0) - (b.kind === 'direct' ? 1 : 0))
+    .sort((a, b) => echoRank(b) - echoRank(a) || a.age - b.age)
     .slice(0, 5);
 
   return {

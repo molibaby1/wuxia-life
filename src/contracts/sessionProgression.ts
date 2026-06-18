@@ -8,6 +8,8 @@
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
+  PassiveNarrativeDisplay,
+  PeriodSummaryDisplay,
 } from '../types/activeActionTypes';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 
@@ -20,6 +22,8 @@ import type { LifeMemorySummary } from '../types/lifeMemory';
 export type SessionPhase =
   | 'story_event'
   | 'active_planning'
+  | 'passive_progression'
+  | 'period_summary'
   | 'action_summary'
   | 'disturbance_narrative'
   | 'terminal';
@@ -49,7 +53,12 @@ export interface ActiveActionRequest {
   actionId: string;
 }
 
-export type ProgressionAckKind = 'action_summary' | 'disturbance' | 'story_automatic';
+export type ProgressionAckKind =
+  | 'action_summary'
+  | 'disturbance'
+  | 'story_automatic'
+  | 'passive_continue'
+  | 'period_summary';
 
 export interface ProgressionAckRequest {
   expectedSlotVersion: number;
@@ -95,6 +104,8 @@ export interface SessionProgressionPayload {
   planningOptions: PlanningOptionDto[];
   activeActionSummary: ActiveActionSummaryDisplay | null;
   disturbanceNarrative: DisturbanceNarrativeDisplay | null;
+  periodSummary: PeriodSummaryDisplay | null;
+  passiveNarrative: PassiveNarrativeDisplay | null;
   slotVersion: number;
   snapshotId: string;
   terminal: HeadlessTerminalDto | null;

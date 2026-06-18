@@ -1,0 +1,286 @@
+{
+  "version": "1.0.0",
+  "description": "四出身 0～2 岁被动事件链；有序 dequeue 真源。infant_swaddle_* 已并入各链 N2。",
+  "sharedFillers": [
+    {
+      "id": "infant_crawl_home",
+      "title": "咿呀学语",
+      "text": "你在榻上翻身、爬行，把能抓的东西都塞进嘴里，娘亲笑着一件件夺走，嘴里念叨着「慢些长」。",
+      "ageMin": 1,
+      "ageMax": 2,
+      "statDeltas": {
+        "constitution": 1
+      }
+    }
+  ],
+  "chains": [
+    {
+      "questId": "quest_scholar_infant_passive_0_2",
+      "originFlag": "origin_scholar_family",
+      "completeFlag": "scholar_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "scholar_infant_01_hall_birth",
+          "order": 1,
+          "title": "书斋初啼",
+          "text": "府邸深处有藏书阁，檐下挂「耕读传家」旧匾；你初啼时，父亲正捧线装书卷，母亲以帕拭泪。族老低语：「此子生在书卷气里。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["scholar_infant_hall_birth"],
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "scholar_infant_02_swaddle_ink",
+          "order": 2,
+          "title": "墨香襁褓",
+          "text": "你被裹在软绸襁褓里，搁在书案旁竹榻。父亲低声诵《千家诗》，母亲临帖描红，墨香与奶香混在一起；你有时被墨渍染指，被娘笑着拭去。",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["scholar_infant_swaddle_ink"],
+          "legacyCatalogId": "infant_swaddle_scholar",
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "scholar_infant_03_grasp_brush",
+          "order": 3,
+          "title": "抓周拈毫",
+          "text": "抓周案上摆着铜钱、小木剑、算盘与毛笔。你爬过去，小手攥住毛笔不放——父亲目中一亮，母亲却笑说「先养身子，莫急」。族中有人悄议科举，有人只道「孩子闹着玩」。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["scholar_infant_grasp_brush", "p9_early_scholar_seed"],
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "scholar_infant_04_trace_red",
+          "order": 4,
+          "title": "榻前描红",
+          "text": "你在榻上翻身、学爬，常把案角镇纸推落。母亲不责，只握你小手在描红纸上划圈；父亲笑言「字未识得，先识墨气」。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["scholar_infant_trace_red"],
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "scholar_infant_05_corridor_steps",
+          "order": 5,
+          "title": "书廊学步",
+          "text": "你扶着书廊栏杆蹒跚学步，两侧书架高过头顶。你咿呀指着插图册，父亲蹲身念旁白；有一回险些磕到角，被乳母及时抱住——「书要读，骨头也要长结实。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["scholar_infant_corridor_steps", "scholar_infant_chain_complete"],
+          "statDeltas": {
+            "constitution": 1,
+            "health": 1
+          }
+        }
+      ]
+    },
+    {
+      "questId": "quest_martial_infant_passive_0_2",
+      "originFlag": "origin_wuxia_family",
+      "completeFlag": "martial_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "martial_infant_01_hall_birth",
+          "order": 1,
+          "title": "武堂初啼",
+          "text": "府中设小练武场，檐下悬「克己」木匾。你初啼洪亮，院中正练木人桩的叔伯收势回头，祖母笑说：「哭声有劲，像咱家的人。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["martial_infant_hall_birth"],
+          "statDeltas": {}
+        },
+        {
+          "id": "martial_infant_02_swaddle_dummy",
+          "order": 2,
+          "title": "桩影襁褓",
+          "text": "你躺在院中竹榻襁褓里，午后日光把木人桩的影子拉得很长。父亲抱你比划出拳，拳风掠过额发，你只觉呼呼作响；母亲在一旁叮嘱「轻些，别吓着孩儿」。",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["martial_infant_swaddle_dummy"],
+          "legacyCatalogId": "infant_swaddle_martial",
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "martial_infant_03_grasp_wood",
+          "order": 3,
+          "title": "抓周握木",
+          "text": "抓周案上摆着毛笔、算盘、小木剑与布偶。你爬过去，小手攥住木剑鞘不放——叔公抚掌，父亲却按剑说「先养筋骨，兵器不急」。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["martial_infant_grasp_wood", "p9_early_martial_seed"],
+          "statDeltas": {}
+        },
+        {
+          "id": "martial_infant_04_corridor_watch",
+          "order": 4,
+          "title": "廊下观摩",
+          "text": "你在榻上翻身学爬，常爬到廊下看兄长练桩。你有样学样挥小拳头，被长辈笑着扶住腰：「架势像，力气还不够。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["martial_infant_corridor_watch"],
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "martial_infant_05_yard_steps",
+          "order": 5,
+          "title": "院栏学步",
+          "text": "你扶着练武场边木栏蹒跚学步，木人桩被撞得轻轻晃动。有一回脚下一软，被师兄一把捞起——「练武先练稳，莫急。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["martial_infant_yard_steps", "martial_infant_chain_complete"],
+          "statDeltas": {
+            "constitution": 1,
+            "health": 1
+          }
+        }
+      ]
+    },
+    {
+      "questId": "quest_merchant_infant_passive_0_2",
+      "originFlag": "origin_merchant_family",
+      "completeFlag": "merchant_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "merchant_infant_01_shop_birth",
+          "order": 1,
+          "title": "商号初啼",
+          "text": "你生在商号后宅，前堂正谈一笔绸缎买卖。初啼时伙计报喜「添了小东家」，掌柜父亲收住算盘匆匆赶来，母亲笑着说「别惊着孩子，生意晚一刻不打紧。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["merchant_infant_shop_birth"],
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "merchant_infant_02_swaddle_abacus",
+          "order": 2,
+          "title": "算盘襁褓",
+          "text": "你被放在账房旁软榻，算盘声此起彼伏。管家逗你抓铜钱玩，叮当作响；母亲抱你时叮嘱账房先生「声小些，别吵醒小少爷/小姐。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["merchant_infant_swaddle_abacus"],
+          "legacyCatalogId": "infant_swaddle_merchant",
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "merchant_infant_03_grasp_scale",
+          "order": 3,
+          "title": "抓周拈秤",
+          "text": "抓周案上摆着毛笔、木剑、小秤砣与布老虎。你爬过去，小手抓住秤砣不放——祖父大笑「将来是掌秤的人」，母亲却道「先学会走路说话要紧。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["merchant_infant_grasp_scale", "p9_early_merchant_seed"],
+          "statDeltas": {
+            "comprehension": 1
+          }
+        },
+        {
+          "id": "merchant_infant_04_counter_crawl",
+          "order": 4,
+          "title": "柜后学爬",
+          "text": "你在后铺软毯上学爬，把一小摞样布推落满地。伙计要捡，母亲拦道「孩子淘气罢了」；你抓着布角咿呀笑，像模像样地递还给来人。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["merchant_infant_counter_crawl"],
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "merchant_infant_05_alley_steps",
+          "order": 5,
+          "title": "巷口学步",
+          "text": "母亲抱你到巷口看市集，人声鼎沸。下来学步时你扶着货摊边沿挪了两步，险些被路人撞到，被父亲一把揽进怀里：「闹市眼杂，先在家中长大些。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["merchant_infant_alley_steps", "merchant_infant_chain_complete"],
+          "statDeltas": {
+            "constitution": 1,
+            "health": 1
+          }
+        }
+      ]
+    },
+    {
+      "questId": "quest_frontier_infant_passive_0_2",
+      "originFlag": "origin_frontier",
+      "completeFlag": "frontier_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "frontier_infant_01_camp_birth",
+          "order": 1,
+          "title": "营寨初啼",
+          "text": "你生在边关营寨，毡帐外号声时远时近。初啼时父亲刚从巡哨回来，铠甲未卸，母亲用毡毯把你裹紧，低声说「风声大，别怕。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["frontier_infant_camp_birth"],
+          "statDeltas": {}
+        },
+        {
+          "id": "frontier_infant_02_swaddle_wind",
+          "order": 2,
+          "title": "风沙襁褓",
+          "text": "你躺在毡帐内襁褓中，父亲抱你时铠甲的寒意透过衣物传来。门帘缝隙钻进细沙，母亲用湿帕替你掩口，帐外风声呜呜如诉。",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["frontier_infant_swaddle_wind"],
+          "legacyCatalogId": "infant_swaddle_frontier",
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "frontier_infant_03_grasp_bow",
+          "order": 3,
+          "title": "抓周扣弦",
+          "text": "抓周案上摆着毡靴、小弓弦、奶酥与骨饰。你爬过去，小手扣住弓弦不放——父亲眼中一闪，母亲却笑道「弓弦割手，下回换布偶。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["frontier_infant_grasp_bow", "p9_early_frontier_seed"],
+          "statDeltas": {}
+        },
+        {
+          "id": "frontier_infant_04_tent_crawl",
+          "order": 4,
+          "title": "毡帐学爬",
+          "text": "你在毡毯上学爬，把父亲的皮靴拽得歪倒。父亲单手拎起你，佯怒道「小捣蛋」；你抓着靴筒咯咯笑，母亲忙着重摆案几。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["frontier_infant_tent_crawl"],
+          "statDeltas": {
+            "constitution": 1
+          }
+        },
+        {
+          "id": "frontier_infant_05_rampart_steps",
+          "order": 5,
+          "title": "哨边学步",
+          "text": "父亲换防前抱你看了眼城外黄沙，风很大，吹得披风猎猎。你下来扶着栅栏挪步，险些被风带倒，被母亲一把搂住：「边风急，在家中学走。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["frontier_infant_rampart_steps", "frontier_infant_chain_complete"],
+          "statDeltas": {
+            "constitution": 1,
+            "health": 1
+          }
+        }
+      ]
+    }
+  ]
+}

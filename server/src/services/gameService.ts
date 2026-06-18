@@ -73,7 +73,12 @@ function shouldPersistProgressionVolatile(
   resolved?: Awaited<ReturnType<typeof resolveSessionAfterAutoProgress>>,
 ): boolean {
   const phase = headless.getSessionPhase();
-  if (phase === 'action_summary' || phase === 'disturbance_narrative') {
+  if (
+    phase === 'action_summary' ||
+    phase === 'disturbance_narrative' ||
+    phase === 'period_summary' ||
+    phase === 'passive_progression'
+  ) {
     return true;
   }
   return phase === 'story_event' && resolved?.nextEvent?.isAutomatic === true;
@@ -257,7 +262,12 @@ export async function restoreSession(
       headless.applyProgressionVolatileState(restoredVolatile);
     }
     const restoredPhase = headless.getSessionPhase();
-    if (restoredPhase !== 'action_summary' && restoredPhase !== 'disturbance_narrative') {
+    if (
+      restoredPhase !== 'action_summary' &&
+      restoredPhase !== 'disturbance_narrative' &&
+      restoredPhase !== 'period_summary' &&
+      restoredPhase !== 'passive_progression'
+    ) {
       await progressUntilChoiceOrTerminal(headless);
     }
 
@@ -362,7 +372,9 @@ export async function executeChoice(
         code: response.error.code,
       });
     }
-    await progressUntilChoiceOrTerminal(headless);
+    if (headless.getSessionPhase() !== 'period_summary') {
+      await progressUntilChoiceOrTerminal(headless);
+    }
     const newSnapshot = headless.serialize();
     newSnapshot.metadata.engineVersion = env.engineVersion;
     newSnapshot.metadata.eventCatalogVersion = env.eventCatalogVersion;

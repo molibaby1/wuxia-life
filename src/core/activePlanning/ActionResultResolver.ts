@@ -6,6 +6,8 @@ import type {
   RiskLevel,
 } from '../../types/activeActionTypes';
 import type { GameState } from '../../types/eventTypes';
+import { clampActionDeltasForAge } from './ageActionStatCaps';
+import { formatStatDeltaSummary } from './periodSummaryBuilder';
 
 export interface ActionResolverInput {
   state: GameState;
@@ -58,7 +60,15 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
     deltas[key] = (deltas[key] ?? 0) - cost.amount;
   }
 
+  const age = input.state.player?.age ?? 0;
+  const clamped = clampActionDeltasForAge(age, deltas);
+  for (const key of Object.keys(deltas)) {
+    if (!(key in clamped)) delete deltas[key];
+    else deltas[key] = clamped[key];
+  }
+
   const summaries = buildSummaries(action);
+  const appliedDeltaSummary = formatStatDeltaSummary(deltas);
   return {
     actionId: action.id,
     deltas,
@@ -70,6 +80,10 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
       risk: effectiveRisk,
       sourceKind: 'active_action',
       ...summaries,
+      rewardSummary:
+        appliedDeltaSummary !== '本期未见明显数值变化'
+          ? appliedDeltaSummary
+          : summaries.rewardSummary,
       riskSummary:
         sameCategoryRepeat >= 3
           ? `${summaries.riskSummary}（重复投入，收益递减）`

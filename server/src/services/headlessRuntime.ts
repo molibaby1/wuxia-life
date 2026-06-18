@@ -102,7 +102,10 @@ export async function resolveSessionAfterAutoProgress(session: HeadlessEngineSes
   if (phase === 'terminal' || phase === 'action_summary' || phase === 'disturbance_narrative') {
     return { nextEvent: null, phase };
   }
-  if (phase === 'active_planning') {
+  if (phase === 'active_planning' || phase === 'passive_progression' || phase === 'period_summary') {
+    if (phase === 'passive_progression') {
+      session.ensurePassivePresentation();
+    }
     return { nextEvent: null, phase };
   }
   const pending = session.describePendingEvent();

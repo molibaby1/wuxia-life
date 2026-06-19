@@ -1,5 +1,9 @@
 ## Codebase Patterns
-## [2026-06-12] - P8.1 US-001..US-035 (api-mode-playability-acceptance)
+- Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
+## [2026-06-20] - US-001 (early-childhood-agency-mechanics)
+- Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
+- Validation: typecheck ✅
+---
 - Headless persona gate: `src/headless/playability/` + `runHeadlessPersona()`; default `npm run gate:playability` → `runtimePath=headless_server`; comparison `npm run gate:playability -- --mode local_direct`.
 - API human acceptance: `p6b:serve` + `VITE_P6B_API_URL` + `npm run dev`; docs in `docs/test-reports/p8-1-api-*`, `docs/designs/p8-1-api-human-slice.md`.
 - `public/reports/manifest.json` gitignored; gate writes `docs/test-reports/p8-playability-gate-latest.{json,md}` only.

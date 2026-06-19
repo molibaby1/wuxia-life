@@ -1,0 +1,184 @@
+{
+  "project": "Wuxia Life Early Childhood Agency Mechanics (Stage-1)",
+  "branchName": "ralph/early-childhood-agency-mechanics",
+  "description": "Stage-1 runtime/API agency mechanics: ages 0–4 use passive progression (no daily planning), infant stat clamps, period summaries with narrative + stat deltas, and local/API parity via HeadlessEngineSessionImpl. PRD status is implemented—stories serve as baseline verification or gap closure. See docs/PRD/early-childhood-agency-mechanics.md for product truth.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Extend session contracts for passive phases",
+      "description": "As a developer, I need SessionPhase and ProgressionAckKind to include passive progression vocabulary so server and client share one phase model.",
+      "acceptanceCriteria": [
+        "SessionPhase union includes passive_progression and period_summary (in addition to existing phases)",
+        "ProgressionAckKind includes passive_continue and period_summary",
+        "Types exported from src/contracts/sessionProgression.ts (or equivalent shared contracts path)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD US-001; frozen decisions §3; FR-2 passive ack authoritative on server"
+    },
+    {
+      "id": "US-002",
+      "title": "Lock childhood agency age-band constants",
+      "description": "As a player, I want ages 0–4 to never be offered daily planning so that infant play matches age-appropriate agency.",
+      "acceptanceCriteria": [
+        "childhoodAgency.ts defines INFANT_MAX_AGE=2 and DAILY_PLANNING_MIN_AGE=5",
+        "shouldOfferDailyPlanning returns false for ages 0–4",
+        "shouldOfferDailyPlanning returns true from age 5 per lite planning rules in childhoodAgency.ts",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD Goals §2; frozen decisions §3; FR-1 ages 0–4 must not expose active_planning with non-empty options"
+    },
+    {
+      "id": "US-003",
+      "title": "Implement passive session phase resolution",
+      "description": "As a player, I want ages 0–4 to advance via passive continuation when no story event or summary is pending.",
+      "acceptanceCriteria": [
+        "getSessionPhase returns passive_progression when age < 5 and no pending story_event or period_summary",
+        "resolveChildhoodActionPalette returns [] for ages 0–4",
+        "p72SessionPhase.test.ts covers age 1 passive_progression case",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD US-001; touchpoints childhoodAgency.ts, HeadlessEngineSessionImpl.ts"
+    },
+    {
+      "id": "US-004",
+      "title": "Implement passive childhood tick and period summary payload",
+      "description": "As a player, I want each passive season to advance time and produce a summary of what happened before I continue.",
+      "acceptanceCriteria": [
+        "executePassiveChildhoodTick advances exactly 1 quarter and writes eventHistory entry",
+        "periodSummaryBuilder builds periodSummary with narrative and actual stat deltas",
+        "SessionProgressionPayload includes periodSummary and passiveNarrative fields",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD US-002; Goals §2 period_summary with narrative + stat delta; touchpoints periodSummaryBuilder.ts, sessionProgression.ts"
+    },
+    {
+      "id": "US-005",
+      "title": "Wire headless session passive ack flow",
+      "description": "As a maintainer, I want HeadlessEngineSessionImpl to authoritatively drive passive progression and period_summary acks for API mode.",
+      "acceptanceCriteria": [
+        "HeadlessEngineSessionImpl branches on shouldOfferDailyPlanning like local engine",
+        "Passive ack kinds passive_continue and period_summary are handled server-side (not UI-only)",
+        "sessionProgressionMapper maps passive phases and periodSummary to API response DTOs",
+        "Ages 0–4 API responses never return active_planning with non-empty planningOptions",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD US-002, US-005; FR-1, FR-2; touchpoints HeadlessEngineSessionImpl.ts, server sessionProgressionMapper.ts"
+    },
+    {
+      "id": "US-006",
+      "title": "Apply infant age-band stat clamps at resolve time",
+      "description": "As a player, I want infant stat changes limited to believable stats and magnitudes so early life does not jump chivalry or internal skill.",
+      "acceptanceCriteria": [
+        "ageActionStatCaps.ts clamps infant band (age ≤ INFANT_MAX_AGE) to constitution, health, comprehension only",
+        "Infant stat delta magnitude capped at Δ≤1 per application",
+        "ActionResultResolver applies ageActionStatCaps clamps after roll (not display-only)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "PRD US-003; Goals §2; frozen decisions §3 infant allowed stats; FR-3 stat clamps at resolve time"
+    },
+    {
+      "id": "US-007",
+      "title": "Guard infant origin and training stat grants",
+      "description": "As a player, I want birth phenomena and infant training to respect stat clamps so age 0 does not grant impossible martial stats.",
+      "acceptanceCriteria": [
+        "birth_with_phenomenon at age 0 does not grant internalSkill+5 (flags/comprehension only)",
+        "p16OriginDestinyTests assert infant training yields chivalry=0 and internalSkill=0",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "PRD US-003; Goals §2 ages 0–2 forbid chivalry/internalSkill/power jumps from actions or passive settlement"
+    },
+    {
+      "id": "US-008",
+      "title": "Add infant passive narrative catalog V0",
+      "description": "As a player, I want origin-flavored passive text during ages 0–7 filler gaps instead of generic placeholders.",
+      "acceptanceCriteria": [
+        "infantPassiveNarratives.ts catalog entries include origin tags and age bands",
+        "selectPassiveNarrative weights selection by origin flags on player state",
+        "Passive tick uses catalog narrative when no story event is selected",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "PRD US-004; touchpoints infantPassiveNarratives.ts; non-goals §6 exclude Stage-3/4 quest chains and spine density"
+    },
+    {
+      "id": "US-009",
+      "title": "Make planning placeholder copy age-aware",
+      "description": "As a player, I want placeholder text appropriate to my age so infants never see江湖变故-style planning copy.",
+      "acceptanceCriteria": [
+        "resolvePlanningPlaceholderText never returns江湖变故 placeholder for age ≤2",
+        "Placeholder selection respects age band per PRD FR-4",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "PRD US-004; FR-4 placeholder copy must be age-aware"
+    },
+    {
+      "id": "US-010",
+      "title": "Align local and API game engines on passive flow",
+      "description": "As a maintainer, I want useNewGameEngine and useApiGameEngine to mirror headless passive flow so local dev matches API behavior.",
+      "acceptanceCriteria": [
+        "useNewGameEngine branches on shouldOfferDailyPlanning the same way as headless session",
+        "useApiGameEngine handles passive_continue and period_summary ack kinds",
+        "No UI-only hiding of planning while server still returns active_planning for ages 0–4",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "PRD US-005; Goals §2 API and headless single source of truth"
+    },
+    {
+      "id": "US-011",
+      "title": "Render period summary and passive phase in UI",
+      "description": "As a player, I want to see the period summary card and passive continuation UI before acknowledging to continue.",
+      "acceptanceCriteria": [
+        "GameScreen renders period summary card (narrative + stat deltas) before progression ack",
+        "App.vue maps API passive_progression and period_summary phases to non-empty currentNode",
+        "Passive continuation affordance visible for ages 0–4 (no planning three-choice UI)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "PRD US-002; touchpoints GameScreen.vue, App.vue; non-goals §6 exclude Stage-4 lite 2-choice UI redesign for ages 5–7"
+    },
+    {
+      "id": "US-012",
+      "title": "Validate infant passive success metrics and gate",
+      "description": "As a maintainer, I want automated gates to confirm infant runs have zero planning options and high period-summary coverage.",
+      "acceptanceCriteria": [
+        "Infant 10-period headless or playability run produces planningOptions.length === 0 throughout ages 0–4",
+        "Period summary non-empty rate ≥95% across infant passive run sample",
+        "npm run gate:p16 passes after Stage-1 changes",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "PRD Success Metrics §8; suite index early-childhood-opening-experience-index.md; non-goals §6 (Stage-3 quest chains, Stage-4 spine/UI, adult line)"
+    }
+  ]
+}

@@ -162,7 +162,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-002; touchpoints GameScreen.vue, App.vue; non-goals §6 exclude Stage-4 lite 2-choice UI redesign for ages 5–7"
     },
     {

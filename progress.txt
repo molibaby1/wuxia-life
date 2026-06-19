@@ -1,5 +1,9 @@
 ## Codebase Patterns
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
+## [2026-06-20] - US-011 (early-childhood-agency-mechanics)
+- Verified `GameScreen.vue` period-summary card + passive continuation; `App.vue` maps `passive_progression`/`period_summary` to non-empty `currentNode`; local-mode browser (:5174) shows age 1 with no planning three-choice UI.
+- Validation: typecheck ✅ test:headless ✅ browser local-mode spot-check ✅
+---
 ## [2026-06-20] - US-001 (early-childhood-agency-mechanics)
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅

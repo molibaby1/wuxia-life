@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-010 (early-childhood-agency-mechanics)
+- Verified `useNewGameEngine` branches on `shouldOfferDailyPlanning`; `useApiGameEngine` handles `passive_continue`/`period_summary` ack kinds; no UI-only planning hide for ages 0–4.
+- Validation: typecheck ✅ test:headless ✅
+---
 ## [2026-06-20] - US-009 (early-childhood-agency-mechanics)
 - Verified `resolvePlanningPlaceholderText` returns infant-appropriate copy for age ≤2 (never江湖变故 placeholder); age-band selection per FR-4.
 - Validation: typecheck ✅ infantPassiveChainVerificationTests ✅

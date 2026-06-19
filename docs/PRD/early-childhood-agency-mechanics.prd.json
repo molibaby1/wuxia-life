@@ -147,7 +147,7 @@
         "Tests pass"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-005; Goals §2 API and headless single source of truth"
     },
     {

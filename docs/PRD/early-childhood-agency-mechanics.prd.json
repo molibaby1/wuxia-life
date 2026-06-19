@@ -28,7 +28,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD Goals §2; frozen decisions §3; FR-1 ages 0–4 must not expose active_planning with non-empty options"
     },
     {

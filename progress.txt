@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-002 (early-childhood-agency-mechanics)
+- Verified `INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`, `shouldOfferDailyPlanning` false for ages 0–4 and true from age 5 in `src/p16/childhoodAgency.ts`.
+- Validation: typecheck ✅
+---
 - Headless persona gate: `src/headless/playability/` + `runHeadlessPersona()`; default `npm run gate:playability` → `runtimePath=headless_server`; comparison `npm run gate:playability -- --mode local_direct`.
 - API human acceptance: `p6b:serve` + `VITE_P6B_API_URL` + `npm run dev`; docs in `docs/test-reports/p8-1-api-*`, `docs/designs/p8-1-api-human-slice.md`.
 - `public/reports/manifest.json` gitignored; gate writes `docs/test-reports/p8-playability-gate-latest.{json,md}` only.

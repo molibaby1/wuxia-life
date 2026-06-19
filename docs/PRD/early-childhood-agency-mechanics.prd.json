@@ -177,7 +177,7 @@
         "Tests pass"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "PRD Success Metrics §8; suite index early-childhood-opening-experience-index.md; non-goals §6 (Stage-3 quest chains, Stage-4 spine/UI, adult line)"
     }
   ]

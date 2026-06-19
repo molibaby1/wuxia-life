@@ -1,10 +1,12 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-17T21:49:17.687Z
+Generated: 2026-06-19T22:59:58.146Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40
 Machine-readable: docs/test-reports/p8-playability-gate-latest.json
+
+> **Stage-2 (US-002):** Early narrative samples below reflect ages 0–4 passive progression (no 0-year daily planning three-choice). Lite childhood planning begins at age 5 per `DAILY_PLANNING_MIN_AGE`.
 
 ## Summary
 

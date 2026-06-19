@@ -103,7 +103,7 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-003; Goals §2 ages 0–2 forbid chivalry/internalSkill/power jumps from actions or passive settlement"
     },
     {

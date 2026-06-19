@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-006 (early-childhood-agency-mechanics)
+- Verified `ageActionStatCaps.ts` clamps infant band to constitution/health/comprehension with Δ≤1; `ActionResultResolver` applies clamps after roll.
+- Validation: typecheck ✅ p16OriginDestinyTests ✅
+---
 ## [2026-06-20] - US-005 (early-childhood-agency-mechanics)
 - Verified `HeadlessEngineSessionImpl` branches on `shouldOfferDailyPlanning`, handles `passive_continue`/`period_summary` acks; `sessionProgressionMapper` maps passive phases with empty planningOptions for ages 0–4.
 - Validation: typecheck ✅ test:headless ✅

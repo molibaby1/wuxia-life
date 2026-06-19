@@ -89,7 +89,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-003; Goals §2; frozen decisions §3 infant allowed stats; FR-3 stat clamps at resolve time"
     },
     {

@@ -422,6 +422,7 @@ export async function executeChoice(
     }
 
     const resolved = await resolveSessionAfterAutoProgress(headless);
+    syncProgressionVolatileCache(session.id, snapRow.id, headless, resolved);
     return {
       slot: updatedSlot,
       snapshot: snapRow,

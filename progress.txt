@@ -9,6 +9,25 @@
   - `npm run test -- p16OriginDestiny` runs entire `runRealTestGate.ts` suite, not filtered; use direct `npm exec tsx tests/p16OriginDestinyTests.ts`.
   - P9 tests take ~7 min (full persona simulations).
 ---
+## [2026-06-20] - US-004 (early-childhood-opening-experience-governance)
+- Headless four-origin audit to age 7: 5/6 pairwise pairs <50% overlap; 书香×边疆 70.6% flagged for Stage-3/4; infant 0–2 zero planning violations.
+- Files: `scripts/runEarlyChildhoodOriginDivergenceStage2.ts`, `docs/test-reports/early-childhood-origin-divergence-stage2.md`
+- **Learnings for future iterations:**
+  - Shared spine events (birth, clever_speech, toddler_*) inflate overlap — Stage-3 origin chains expected to improve 书香×边疆 pair.
+  - Audit script picks first choice on non-origin events; sufficient for divergence metric, not playtest fidelity.
+---
+## [2026-06-20] - US-003 (early-childhood-opening-experience-governance)
+- API+browser playtest 书香门第 → age 7: 0–4 planningOptions=0, 童年偏好完成, placeholder 0, narrative 100% non-empty; ★★★ vs ★★ baseline.
+- Fixed API router missing player/periodSummary/passiveNarrative + choice volatile cache; progression-ack accepts passive_continue/period_summary.
+- Files: `server/src/http/router.ts`, `server/src/services/gameService.ts`, `scripts/runApiBrowserPlaytestStage2.ts`, `docs/test-reports/api-browser-playtest-stage2.md`
+- **Learnings for future iterations:**
+  - Browser UI stuck when API omits passive/period fields — always use `progressionPayloadBody()` helper for session endpoints.
+  - `executeChoice` must call `syncProgressionVolatileCache` like `executeActiveAction`.
+---
+## [2026-06-20] - US-005 (early-childhood-opening-experience-governance)
+- Stage-2 closure report tying US-002–US-004 evidence; recommends Stage-3/4 parallel with 书香×边疆 overlap follow-up.
+- Files: `docs/test-reports/early-childhood-opening-experience-stage2-closure.md`
+---
 ## [2026-06-20] - US-001 (early-childhood-opening-experience-governance)
 - Read-only Stage-1 baseline audit: confirmed `shouldOfferDailyPlanning` false 0–4 / true ≥5; `SessionPhase` + `ProgressionAckKind` passive phases; infant stat clamps drop chivalry/internalSkill/martialPower.
 - Files: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md`

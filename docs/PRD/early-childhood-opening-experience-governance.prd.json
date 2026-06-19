@@ -53,7 +53,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003; §3 frozen 3–4 passive + age-4 spine; FR-1, FR-2, FR-5, FR-6; success metrics §9 (0 planning at 0–2, 0 placeholder before age 4, ≤3 placeholders in 35 steps, ≥95% non-empty narrative); §8 API browser authoritative over headless; non-goals §6 (no P20 pacing rewrite, no bulk 0–7 conflict events); depends on US-002 gates green"
     },
     {
@@ -71,7 +71,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004; §9 success metric pairwise overlap <50%; open Q3 (Stage-3 origin chains + Stage-4 density own fixes); FR-7 origin-tagged passive selection; non-goals §6 (Stage-3/4 not implemented here); Q1 Stage-2 failure does not block Stage-3/4 parallel PRDs; depends on US-002 gates green; can run parallel with US-003"
     },
     {
@@ -87,7 +87,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-005; §2 goals (handoff report for Stage-3 approval); §10 rollback by story reverse order; non-goals §6; suite index early-childhood-opening-experience-index.md; depends on US-003 and US-004"
     }
   ]

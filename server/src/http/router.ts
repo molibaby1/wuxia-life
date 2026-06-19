@@ -10,6 +10,7 @@ import * as gameService from '../services/gameService.js';
 import * as catalogRepo from '../repositories/catalogRepository.js';
 import { createDefaultInMemoryCatalogAdapter } from '../../../src/headless/catalog/InMemoryEventCatalogAdapter.js';
 import { computeContentHash } from '../crypto/tokens.js';
+import type { SessionProgressionPayload } from '../../../src/contracts/sessionProgression.js';
 
 export interface RouteContext {
   env: BackendEnv;
@@ -44,6 +45,26 @@ function sendError(
   details?: Record<string, unknown>,
 ): void {
   sendJson(res, status, { error: { code, message, requestId, details } });
+}
+
+/** Full P7.2 progression fields for API clients (incl. passive childhood). */
+function progressionPayloadBody(
+  progression: SessionProgressionPayload,
+): Record<string, unknown> {
+  return {
+    sessionPhase: progression.sessionPhase,
+    nextEvent: progression.nextEvent,
+    planningOptions: progression.planningOptions,
+    activeActionSummary: progression.activeActionSummary,
+    disturbanceNarrative: progression.disturbanceNarrative,
+    periodSummary: progression.periodSummary ?? null,
+    passiveNarrative: progression.passiveNarrative ?? null,
+    terminal: progression.terminal,
+    lifeMemory: progression.lifeMemory,
+    player: progression.player,
+    slotVersion: progression.slotVersion,
+    snapshotId: progression.snapshotId,
+  };
 }
 
 export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerRequestHandler {
@@ -146,15 +167,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
             id: result.snapshot.id,
             contentHash: result.snapshot.content_hash,
           },
-          slotVersion: result.slotVersion,
-          snapshotId: result.snapshotId,
-          sessionPhase: result.sessionPhase,
-          nextEvent: result.nextEvent,
-          planningOptions: result.planningOptions,
-          activeActionSummary: result.activeActionSummary,
-          disturbanceNarrative: result.disturbanceNarrative,
-          terminal: result.terminal,
-          lifeMemory: result.lifeMemory,
+          ...progressionPayloadBody(result),
         });
       },
     },
@@ -182,15 +195,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
             id: result.snapshot.id,
             contentHash: result.snapshot.content_hash,
           },
-          slotVersion: result.slotVersion,
-          snapshotId: result.snapshotId,
-          sessionPhase: result.sessionPhase,
-          nextEvent: result.nextEvent,
-          planningOptions: result.planningOptions,
-          activeActionSummary: result.activeActionSummary,
-          disturbanceNarrative: result.disturbanceNarrative,
-          terminal: result.terminal,
-          lifeMemory: result.lifeMemory,
+          ...progressionPayloadBody(result),
         });
       },
     },
@@ -223,13 +228,7 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
           feedback: result.response.status === 'success' ? result.response.feedback : undefined,
           diagnostics:
             result.response.status === 'success' ? result.response.diagnostics : result.response.diagnostics,
-          sessionPhase: result.sessionPhase,
-          nextEvent: result.nextEvent,
-          planningOptions: result.planningOptions,
-          activeActionSummary: result.activeActionSummary,
-          disturbanceNarrative: result.disturbanceNarrative,
-          terminal: result.terminal,
-          lifeMemory: result.lifeMemory,
+          ...progressionPayloadBody(result),
         });
       },
     },
@@ -265,7 +264,12 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
         const body = await readJsonBody<{
           expectedSlotVersion: number;
           expectedSnapshotId: string;
-          ackKind: 'action_summary' | 'disturbance' | 'story_automatic';
+          ackKind:
+            | 'action_summary'
+            | 'disturbance'
+            | 'story_automatic'
+            | 'passive_continue'
+            | 'period_summary';
         }>(req);
         const db = getPool(env.databaseUrl);
         const result = await gameService.acknowledgeProgression(db, ctx.env, {

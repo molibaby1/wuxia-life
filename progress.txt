@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-004 (early-childhood-agency-mechanics)
+- Verified `executePassiveChildhoodTick` advances 1 quarter, writes eventHistory, builds `periodSummary`; `SessionProgressionPayload` includes `periodSummary`/`passiveNarrative`.
+- Validation: typecheck ✅ test:headless ✅
+---
 ## [2026-06-20] - US-003 (early-childhood-agency-mechanics)
 - Verified `getSessionPhase` returns `passive_progression` at age 1, `resolveChildhoodActionPalette` returns `[]` for ages 0–4; `tests/headless/p72SessionPhase.test.ts` covers infant passive case.
 - Validation: typecheck ✅ test:headless ✅

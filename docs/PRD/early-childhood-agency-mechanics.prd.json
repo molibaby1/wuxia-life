@@ -118,7 +118,7 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-004; touchpoints infantPassiveNarratives.ts; non-goals §6 exclude Stage-3/4 quest chains and spine density"
     },
     {

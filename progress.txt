@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-008 (early-childhood-agency-mechanics)
+- Verified `infantPassiveNarratives.ts` catalog with origin tags/age bands; `selectPassiveNarrative` weights by origin flags; passive tick uses catalog when no story event.
+- Validation: typecheck ✅ p16OriginDestinyTests ✅ infantPassiveChainVerificationTests ✅
+---
 ## [2026-06-20] - US-007 (early-childhood-agency-mechanics)
 - Verified `birth_with_phenomenon` grants flag+comprehension only (no internalSkill+5); `p16OriginDestinyTests` asserts infant training yields chivalry=0/internalSkill=0.
 - Validation: typecheck ✅ p16OriginDestinyTests ✅

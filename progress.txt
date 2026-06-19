@@ -1,6 +1,14 @@
 ## Codebase Patterns
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
+- Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+## [2026-06-20] - US-002 (early-childhood-opening-experience-governance)
+- Gate regression: gate:p16 pass, p72SessionPhase ok, p16OriginDestinyTests + p9PlayabilityTests pass, gate:playability 0 blockers; p8 Early samples show 0–4 passive.
+- Files: `docs/test-reports/early-childhood-stage2-gate-regression.md`, `docs/test-reports/p8-playability-gate-latest.md`
+- **Learnings for future iterations:**
+  - `npm run test -- p16OriginDestiny` runs entire `runRealTestGate.ts` suite, not filtered; use direct `npm exec tsx tests/p16OriginDestinyTests.ts`.
+  - P9 tests take ~7 min (full persona simulations).
+---
 ## [2026-06-20] - US-001 (early-childhood-opening-experience-governance)
 - Read-only Stage-1 baseline audit: confirmed `shouldOfferDailyPlanning` false 0–4 / true ≥5; `SessionPhase` + `ProgressionAckKind` passive phases; infant stat clamps drop chivalry/internalSkill/martialPower.
 - Files: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md`

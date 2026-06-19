@@ -34,7 +34,7 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002; §8 test commands; FR-1–FR-8 validation artifacts under docs/test-reports/; success metrics §9 gate:p16 + gate:playability; risks §10 (do not blindly raise P9 baseline); depends on US-001 baseline confirmation"
     },
     {

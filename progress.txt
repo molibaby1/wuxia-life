@@ -4,6 +4,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-009 (early-childhood-agency-mechanics)
+- Verified `resolvePlanningPlaceholderText` returns infant-appropriate copy for age ≤2 (never江湖变故 placeholder); age-band selection per FR-4.
+- Validation: typecheck ✅ infantPassiveChainVerificationTests ✅
+---
 ## [2026-06-20] - US-008 (early-childhood-agency-mechanics)
 - Verified `infantPassiveNarratives.ts` catalog with origin tags/age bands; `selectPassiveNarrative` weights by origin flags; passive tick uses catalog when no story event.
 - Validation: typecheck ✅ p16OriginDestinyTests ✅ infantPassiveChainVerificationTests ✅

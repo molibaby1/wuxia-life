@@ -132,7 +132,7 @@
         "Tests pass"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "PRD US-004; FR-4 placeholder copy must be age-aware"
     },
     {

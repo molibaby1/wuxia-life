@@ -12,6 +12,10 @@
 - Verified `SessionPhase` includes `passive_progression`/`period_summary` and `ProgressionAckKind` includes `passive_continue`/`period_summary` in `src/contracts/sessionProgression.ts`.
 - Validation: typecheck ✅
 ---
+## [2026-06-20] - US-011 (early-childhood-agency-mechanics)
+- Verified `GameScreen.vue` period-summary-card + continue affordance; `App.vue` maps `passive_progression`/`period_summary` to non-empty `currentNode`. Browser (local mode :5176): ages 0–4 show continue button, zero planning choices, no江湖变故 placeholder.
+- Validation: typecheck ✅ browser verify ✅
+---
 ## [2026-06-20] - US-010 (early-childhood-agency-mechanics)
 - Verified `useNewGameEngine` branches on `shouldOfferDailyPlanning`; `useApiGameEngine` handles `passive_continue`/`period_summary` ack kinds; no UI-only planning hide for ages 0–4.
 - Validation: typecheck ✅ test:headless ✅

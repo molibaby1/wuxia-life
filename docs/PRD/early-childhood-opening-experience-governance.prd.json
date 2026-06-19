@@ -1,0 +1,94 @@
+{
+  "project": "Wuxia Life Early Childhood Opening Experience Governance (Stage-2)",
+  "branchName": "ralph/early-childhood-opening-experience-governance",
+  "description": "Stage-2 governance and live acceptance for infant/preschool opening: confirm Stage-1 agency baseline, close regression gates, run 3–4 year API browser playtest, audit four-origin 0–7 divergence, and produce closure report. Validation-only PRD—no Stage-3/4 content implementation. Product truth: docs/PRD/early-childhood-opening-experience-governance.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Stage-1 Baseline Confirmation Audit",
+      "description": "As a maintainer, I want a read-only confirmation that Stage-1 agency mechanisms are wired as designed so that Stage-2 validation targets the right surfaces.",
+      "acceptanceCriteria": [
+        "Confirm shouldOfferDailyPlanning(age) returns false for ages 0–4 and true from age 5 (within childhood band rules in src/p16/childhoodAgency.ts)",
+        "Confirm SessionPhase includes passive_progression and period_summary with passive_continue and period_summary ProgressionAckKind values",
+        "Confirm ageActionStatCaps clamps chivalry, internalSkill, and martialPower at infant band (age ≤ INFANT_MAX_AGE)",
+        "Record findings with reproducible commands in docs/test-reports/early-childhood-stage1-baseline-confirmation.md (create if missing)",
+        "Do not modify gameplay behavior in this story",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §4 US-001; §12 dependency root; frozen agency table §3; touchpoints childhoodAgency.ts, sessionProgression contracts, ageActionStatCaps.ts; non-goals §6 (no adult line, no Stage-3/4 implementation)"
+    },
+    {
+      "id": "US-002",
+      "title": "Regression Gate Closure After Passive Childhood",
+      "description": "As a maintainer, I want all childhood-agency regression gates green after Stage-1 so that passive opening does not break CI or playability baselines.",
+      "acceptanceCriteria": [
+        "npm run gate:p16 exits with decision pass",
+        "npm exec tsx tests/headless/p72SessionPhase.test.ts prints ok (infant passive_progression case included)",
+        "npm run test -- p16OriginDestiny completes without failure (including chained p9PlayabilityTests)",
+        "npm run gate:playability reports 0 blockers",
+        "If P9 near-duplicate warnings exceed baseline: root cause documented; fix behavior first; baseline update only with written justification in test report",
+        "Update docs/test-reports/p8-playability-gate-latest.md so Early narrative samples reflect 0–4 passive (not 0-year three-action planning)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD §4 US-002; §8 test commands; FR-1–FR-8 validation artifacts under docs/test-reports/; success metrics §9 gate:p16 + gate:playability; risks §10 (do not blindly raise P9 baseline); depends on US-001 baseline confirmation"
+    },
+    {
+      "id": "US-003",
+      "title": "Preschool Agency API Browser Playtest",
+      "description": "As a player experience reviewer, I want 3–4 year old play to feel passive with only spine choices so that early life matches age expectations.",
+      "acceptanceCriteria": [
+        "API mode + browser: 书香门第 origin, advance to ≥4 years and complete 童年偏好 choice",
+        "Ages 3–4: planningOptions.length === 0 for all observed periods (no 听先生讲课/玩耍练功/与玩伴 three-action planning)",
+        "Age 4: at least one formal story_event choice (童年偏好) with 2–3 options",
+        "Before every 继续 click: main narrative or periodSummary card is non-empty",
+        "Within 35 steps: placeholder 本期暂无强求的江湖变故… appears ≤3 times total; ages 0–4 show 0 occurrences",
+        "No chivalry/internalSkill absurd jumps after first passive segment at age 0",
+        "Save report under docs/test-reports/api-browser-playtest-stage2.md with reproducible setup (p6b:serve + dev)",
+        "Verify in browser using dev-browser skill or documented manual script equivalent",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD §4 US-003; §3 frozen 3–4 passive + age-4 spine; FR-1, FR-2, FR-5, FR-6; success metrics §9 (0 planning at 0–2, 0 placeholder before age 4, ≤3 placeholders in 35 steps, ≥95% non-empty narrative); §8 API browser authoritative over headless; non-goals §6 (no P20 pacing rewrite, no bulk 0–7 conflict events); depends on US-002 gates green"
+    },
+    {
+      "id": "US-004",
+      "title": "Four-Origin Early Childhood Divergence Audit",
+      "description": "As a designer, I want measurable origin divergence in ages 0–7 so that replay value is observable before investing in full quest chains.",
+      "acceptanceCriteria": [
+        "Run four origins (书香门第 / 武林世家 / 商贾之家 / 边疆异族) each to age 7 in API or headless mode",
+        "Record narrative and passive event id lists per origin",
+        "Pairwise compare all C(4,2)=6 origin pairs: narrative id overlap <50% for each pair",
+        "Ages 0–2: 10 periods each origin — 0 planning three-choices; no chivalry/internalSkill absurd jumps",
+        "Save audit under docs/test-reports/early-childhood-origin-divergence-stage2.md with reproducible commands",
+        "If any pair overlap ≥50%: report notes expected improvement from Stage-3/4 PRDs; this story does not implement content fixes",
+        "Do not modify gameplay behavior in this story",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD §4 US-004; §9 success metric pairwise overlap <50%; open Q3 (Stage-3 origin chains + Stage-4 density own fixes); FR-7 origin-tagged passive selection; non-goals §6 (Stage-3/4 not implemented here); Q1 Stage-2 failure does not block Stage-3/4 parallel PRDs; depends on US-002 gates green; can run parallel with US-003"
+    },
+    {
+      "id": "US-005",
+      "title": "Stage-2 Experience Governance Closure",
+      "description": "As a product owner, I want a single closure summary tying gates and playtests together so that the team can decide whether to open Stage-3.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-opening-experience-stage2-closure.md",
+        "Closure doc references US-002 through US-004 evidence paths (gate reports, api-browser-playtest-stage2.md, origin-divergence-stage2.md)",
+        "Notes baseline metrics for Stage-3/4 sub-agents (overlap %, placeholder counts, playtest rating vs 2026-06-17 ★★☆ baseline)",
+        "Lists residual risks (e.g. passive repetition, spine density, 5–7 lite planning monotony)",
+        "No code changes in this story",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD §4 US-005; §2 goals (handoff report for Stage-3 approval); §10 rollback by story reverse order; non-goals §6; suite index early-childhood-opening-experience-index.md; depends on US-003 and US-004"
+    }
+  ]
+}

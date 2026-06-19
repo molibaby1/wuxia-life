@@ -1,5 +1,13 @@
 ## Codebase Patterns
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
+- Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
+## [2026-06-20] - US-001 (early-childhood-opening-experience-governance)
+- Read-only Stage-1 baseline audit: confirmed `shouldOfferDailyPlanning` false 0–4 / true ≥5; `SessionPhase` + `ProgressionAckKind` passive phases; infant stat clamps drop chivalry/internalSkill/martialPower.
+- Files: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md`
+- **Learnings for future iterations:**
+  - Use `npm exec -- tsx -e` (not bare `npx tsx`) for one-liner repro scripts in this repo.
+  - Stage-1 wiring unchanged since agency-mechanics branch; US-002 can run gates immediately.
+---
 ## [2026-06-20] - US-012 (early-childhood-agency-mechanics)
 - Verified infant 10+ passive periods with `planningOptions.length === 0` (ages 0–4) via `infantPassiveChainVerificationTests`; period narrative non-empty (`emptyNarrativeBeforeContinue === 0`); `npm run gate:p16` pass.
 - Validation: typecheck ✅ test:headless ✅ infantPassiveChainVerificationTests ✅ gate:p16 ✅

@@ -17,7 +17,10 @@
 - Wired martial_infant_03_grasp_wood + martial_infant_04_corridor_watch @ age 1.
 ---## [2026-06-20 00:11] - US-009 (early-childhood-origin-infant-quest-chains)
 - Wired merchant_infant_01_shop_birth + merchant_infant_02_swaddle_abacus; legacyCatalogId infant_swaddle_merchant.
+---## [2026-06-20 00:11] - US-011 (early-childhood-origin-infant-quest-chains)
+- Wired merchant_infant_05_alley_steps; sets merchant_infant_chain_complete.
 ---
+
 ## [2026-06-20 00:11] - US-010 (early-childhood-origin-infant-quest-chains)
 - Wired merchant_infant_03_grasp_scale + merchant_infant_04_counter_crawl @ age 1.
 ---

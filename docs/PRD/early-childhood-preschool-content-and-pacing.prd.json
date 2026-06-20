@@ -16,7 +16,7 @@
         "Tests pass"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004 (split 1/2); §5 FR-4; §8 success metrics (0–4 placeholder 0); §3 frozen (3–4 no active_planning); touchpoints infantPassiveNarratives.ts, App.vue"
     },
     {

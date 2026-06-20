@@ -1,3 +1,8 @@
+/**
+ * Schema: origin-infant-passives.json → chains[] (questId, originFlag, completeFlag, nodes[])
+ * with nodes (id, order, ageMin, ageMax, title, text, flags?, statDeltas?, legacyCatalogId?)
+ * plus sharedFillers[] for neutral post-chain filler. See childhood-origin-infant-passive-index.md §1.
+ */
 import type { GameState } from '../types/eventTypes';
 import originInfantPassivesJson from './lines/origin-infant-passives.json';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';

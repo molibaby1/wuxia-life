@@ -1,0 +1,194 @@
+{
+  "project": "Wuxia Life Early Childhood Preschool Content And Pacing (Stage-4)",
+  "branchName": "ralph/early-childhood-preschool-content-and-pacing",
+  "description": "Stage-4: thicken 3–7 year preschool content density, age-graduated lite planning for 5–7, narrative pacing (≥8 plot beats in 35 steps, placeholder ≤3), stat-delta narrative binding, and disturbance age guard. Product truth: docs/PRD/early-childhood-preschool-content-and-pacing.md; suite index docs/PRD/early-childhood-opening-experience-index.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Age-gated planning placeholder copy for ages 0–7",
+      "description": "As a player, I should never see adult jianghu filler placeholder during infancy and preschool so that early life stays immersive.",
+      "acceptanceCriteria": [
+        "resolvePlanningPlaceholderText(age) for age ≤7 never returns text containing「本期暂无强求的江湖变故，你可安排日常行动」",
+        "Ages 0–4 resolve to passive/home-season copy (e.g. 岁月静流 / 家中一季); ages 5–7 resolve to childhood framing (e.g. 童年时光)",
+        "App.vue planning-gap paths use resolvePlanningPlaceholderText(age) — no hardcoded adult placeholder for age ≤7",
+        "Unit or headless test asserts ages 0, 3, 5, 7 placeholder output excludes adult jianghu snippet",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "PRD §4 US-004 (split 1/2); §5 FR-4; §8 success metrics (0–4 placeholder 0); §3 frozen (3–4 no active_planning); touchpoints infantPassiveNarratives.ts, App.vue"
+    },
+    {
+      "id": "US-002",
+      "title": "Childhood planning intro framing in App.vue",
+      "description": "As a player ages 5–7, I want planning intros to read as childhood seasons, not jianghu career optimization.",
+      "acceptanceCriteria": [
+        "Ages 5–7 active_planning intro/title copy mentions childhood/home framing — not adult career or jianghu optimization language",
+        "Ages 0–4: zero occurrences of「本期暂无强求的江湖变故」in a sample 0→4 browser or scripted playthrough",
+        "Ages 5–7: placeholder frequency target ≤3 per 35 steps documented in test notes (full closure in US-012)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD §4 US-004 (split 2/2); §5 FR-4; §8 (5–7 placeholder ≤3/35 steps); depends on US-001 resolver; non-goals §6 (no disturbance UI redesign)"
+    },
+    {
+      "id": "US-003",
+      "title": "Story-gap scheduling prefers passive or spine over planning",
+      "description": "As a player, I want story gaps in ages 0–7 to prefer spine or passive filler over empty planning placeholders.",
+      "acceptanceCriteria": [
+        "When selectEvent() returns null and age ≤7, session scheduler prefers passive narrative or queued spine before active_planning (age≥5 only)",
+        "Age 3 story gap does not enter active_planning — headless or unit test proves planningOptions.length === 0",
+        "Age 5–7 may enter lite active_planning only after passive/spine paths exhausted per scheduler",
+        "Document behavior and test commands in docs/test-reports/early-childhood-story-gap-stage4.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD §4 US-001; §5 FR-1 (age 3–4 never planningOptions except bug); §9 priority after US-004; touchpoints GameEngineIntegration.selectEvent, HeadlessEngineSessionImpl.getSessionPhase, childhoodAgency.ts"
+    },
+    {
+      "id": "US-004",
+      "title": "Preschool spine and passive config schema for ages 3–7",
+      "description": "As a developer, I want typed config for ages 3–7 spine/passive entries so content density can be tuned without hardcoding.",
+      "acceptanceCriteria": [
+        "Extend or add config under src/data/ for ages 3–7 passive/spine entries with origin tags, ageMin/ageMax, id, title, text, optional statDeltas",
+        "Export typed loader (e.g. preschoolPassiveSpine.ts or extend infantPassiveNarratives.ts) with getPreschoolPassiveEntries(age, originFlags)",
+        "Schema one-liner documented in loader file or design note",
+        "Origin hooks read through getOriginChildhoodEventMultiplier / existing origin surfaces where spine already hooks (PRD §7)",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD §4 US-002 (split 1/4); §7 design considerations; non-goals §6 (no 8–12 P16 palette refactor, no bulk adult combat events)"
+    },
+    {
+      "id": "US-005",
+      "title": "Scholar and martial origin 3–7 spine variants",
+      "description": "As a player born 书香门第 or 武林世家, I want memorable preschool beats between ages 3 and 7 distinct from other origins.",
+      "acceptanceCriteria": [
+        "Add or extend ≥2 origin-variant passive/spine entries per origin for scholar and martial (ages 3–7, config-driven)",
+        "clever_speech (age 3) or equivalent has ≥1 scholar origin text variant OR separate weighted passive entry",
+        "Entries wired into passive/spine selection for ages 3–7 without breaking age-4 childhood_preference story_event (FR-2)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD §4 US-002 (split 2/4); §5 FR-2; §3 frozen (4y childhood_preference remains story_event with choices); depends on US-004 schema"
+    },
+    {
+      "id": "US-006",
+      "title": "Merchant and frontier origin 3–7 spine variants",
+      "description": "As a player born 商贾之家 or 边疆异族, I want preschool narrative beats that diverge from scholar/martial copy.",
+      "acceptanceCriteria": [
+        "Add or extend ≥2 origin-variant passive/spine entries per origin for merchant and frontier (ages 3–7, config-driven)",
+        "Narrative ids must not reuse scholar/martial ids for the same age band",
+        "Entries participate in ages 3–7 passive/spine dequeue alongside US-005 content",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "PRD §4 US-002 (split 3/4); §7 origin variant hooks; depends on US-004 schema and US-005 pattern"
+    },
+    {
+      "id": "US-007",
+      "title": "35-step narrative density verification to age 7",
+      "description": "As a maintainer, I want automated proof that preschool pacing delivers ≥8 plot beats in 35 steps.",
+      "acceptanceCriteria": [
+        "Headless or scripted simulation from age 0 (书香门第 or four-origin sample): ≥8 non-placeholder narrative beats by age 7 within 35 steps",
+        "Non-placeholder excludes adult jianghu placeholder snippet and empty period summaries",
+        "Narrative beat counter exported in test report or debug output (FR-5)",
+        "Save sample metrics under docs/test-reports/early-childhood-preschool-density-stage4.md with reproducible commands",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "PRD §4 US-002 (split 4/4); §8 success metric ≥8 non-placeholder narrative / 35 steps; §5 FR-5; depends on US-005 and US-006 content"
+    },
+    {
+      "id": "US-008",
+      "title": "Age band lite action pool definitions for 5–6 vs 7",
+      "description": "As a developer, I want distinct lite action bands so 5-year-olds and 7-year-olds do not share an identical palette.",
+      "acceptanceCriteria": [
+        "Define bands in childhoodAgency.ts or config: ages 5–6 vs age 7 with different lite action id sets or labels (e.g. 5岁「院中玩耍」→7岁「帮家里打杂」)",
+        "resolveChildhoodActionPalette respects band by player age; still max 2 options per planning period (FR-3, DAILY_PLANNING_MIN_AGE=5)",
+        "No adult P7 five-action minimum set surfaced in 5–7 band",
+        "Unit test: age 5 and age 7 palettes differ in id or label for at least one origin",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "PRD §4 US-003 (split 1/2); §3 frozen (lite palette max 2 categories); §5 FR-3; §7 (prefer copy/pool over new phase if PlanningOptionDto compatible); touchpoints childhoodAgency.ts, childhood action catalog"
+    },
+    {
+      "id": "US-009",
+      "title": "Origin-aware graduated lite palettes with browser verify",
+      "description": "As a player, I want my available childhood actions to change as I grow from 5 to 7 with origin flavor.",
+      "acceptanceCriteria": [
+        "Same origin save at age 5 vs age 7: palette ids are not identical for ≥2 origins (书香门第 + one other minimum)",
+        "Palette remains ≤2 options per planning period at ages 5–7",
+        "Browser or API playtest: age 5 and age 7 show different lite action labels or ids for sampled origin",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "PRD §4 US-003 (split 2/2); §8 success metric (5 vs 7 action pool not identical); §2 goals; depends on US-008 band definitions"
+    },
+    {
+      "id": "US-010",
+      "title": "Stat delta narrative binding in summaries",
+      "description": "As a player, I want to understand why stats changed after childhood actions or passive seasons.",
+      "acceptanceCriteria": [
+        "activeActionSummary includes human-readable cause when stat deltas are non-zero",
+        "periodSummary includes human-readable cause when stat deltas are non-zero",
+        "Sample audit: 5 random childhood deltas in playtest log — 100% mappable to a narrative sentence",
+        "Document audit and examples in docs/test-reports/early-childhood-stat-narrative-stage4.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "PRD §4 US-005; §2 goals (attribute changes narratively explainable); touchpoints periodSummaryBuilder, active action summary DTOs"
+    },
+    {
+      "id": "US-011",
+      "title": "Disturbance age guard for ages 0–7",
+      "description": "As a player, I should not see jianghu disturbance cards during infancy and preschool.",
+      "acceptanceCriteria": [
+        "DisturbanceResolver (or equivalent) does not return adult disturbances for age ≤7",
+        "When disturbance is impossible in 0–7 band, pipeline skips disturbance phase without empty UI shell",
+        "Unit test: resolveDisturbanceAfterAction at age 5 returns null or childhood-safe skip — no adult disturbance card",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "PRD §4 US-006; §3 frozen (no bulk adult jianghu combat events); §6 non-goals (no disturbance UI visual redesign); touchpoints DisturbanceResolver.ts, HeadlessEngineSessionImpl disturbance branch"
+    },
+    {
+      "id": "US-012",
+      "title": "Stage-4 playtest closure report",
+      "description": "As an experience reviewer, I want a single report proving 3–7 pacing improved versus the 2026-06-17 baseline.",
+      "acceptanceCriteria": [
+        "API browser playtest 书香门第 0→7 years, 35+ steps with reproducible setup (p6b:serve + dev or documented script)",
+        "Report documents: ≥8 non-placeholder narrative beats, ages 0–4 zero adult placeholder, ages 5–7 placeholder ≤3/35 steps, age 5 vs 7 palette divergence",
+        "Subjective rating vs 2026-06-17 baseline documented (target ≥★★★)",
+        "Save docs/test-reports/api-browser-playtest-stage4.md",
+        "npm run gate:playability pass",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "PRD §4 US-007; §8 success metrics table; §9 final closure story; baseline docs/test-reports/api-browser-playtest-experience-2026-06-17.md §3–§7; depends on US-001 through US-011"
+    }
+  ]
+}

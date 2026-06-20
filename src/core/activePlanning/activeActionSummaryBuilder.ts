@@ -36,7 +36,10 @@ export function buildActiveActionSummaryDisplay(
     rewardSummary: actionResult.metadata.rewardSummary,
     costSummary: actionResult.metadata.costSummary,
     riskSummary: actionResult.metadata.riskSummary,
-    appliedDeltaSummary: formatStatDeltaSummary(actionResult.deltas),
+    appliedDeltaSummary:
+      formatStatDeltaSummary(actionResult.deltas) === '本期未见明显数值变化'
+        ? formatStatDeltaSummary(actionResult.deltas)
+        : `因「${actionName}」：${formatStatDeltaSummary(actionResult.deltas)}`,
     nextStepHint,
   };
 }

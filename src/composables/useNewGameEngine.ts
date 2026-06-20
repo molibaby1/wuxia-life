@@ -539,6 +539,7 @@ export function useNewGameEngine() {
       headline: selected.title,
       body: selected.text,
       deltas,
+      deltaCause: selected.title,
     });
     engineState.isPassiveProgressionMode = false;
     engineState.passiveNarrative = null;

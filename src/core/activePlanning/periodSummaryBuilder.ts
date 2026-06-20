@@ -34,16 +34,20 @@ export function buildPeriodSummary(params: {
   headline: string;
   body: string;
   deltas?: Record<string, number>;
+  deltaCause?: string;
 }): PeriodSummaryDisplay {
   const deltas = params.deltas ?? {};
   const statDeltaSummary = formatStatDeltaSummary(deltas);
+  const hasDelta = statDeltaSummary !== '本期未见明显数值变化';
+  const cause = params.deltaCause ?? params.headline;
+  const narrativeText = hasDelta
+    ? `${params.body}（因「${cause}」，${statDeltaSummary}）`
+    : params.body;
   return {
     sourceLabel: params.sourceLabel,
     headline: params.headline,
     body: params.body,
-    statDeltaSummary,
-    narrativeText: statDeltaSummary === '本期未见明显数值变化'
-      ? params.body
-      : `${params.body}（${statDeltaSummary}）`,
+    statDeltaSummary: hasDelta ? `因「${cause}」：${statDeltaSummary}` : statDeltaSummary,
+    narrativeText,
   };
 }

@@ -514,6 +514,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       headline: selected.title,
       body: selected.text,
       deltas,
+      deltaCause: selected.title,
     });
     this.volatile.passiveNarrative = null;
     this.volatile.storyGapPassiveServed = true;

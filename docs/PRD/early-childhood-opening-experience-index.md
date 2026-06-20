@@ -25,10 +25,11 @@
 
 | Stage | PRD 文件 | 焦点 | 依赖建议 | 状态 |
 | --- | --- | --- | --- | --- |
-| **1** | [`early-childhood-agency-mechanics.md`](./early-childhood-agency-mechanics.md) | Runtime/API：被动 phase、数值 clamp、小结 | 无 | 已实施（可作基线参考） |
-| **2** | [`early-childhood-opening-experience-governance.md`](./early-childhood-opening-experience-governance.md) | 门禁 + 实机验收 + 四出身基线审计 | 建议 Stage-1 已合入 | 待实施 |
-| **3** | [`early-childhood-origin-infant-quest-chains.md`](./early-childhood-origin-infant-quest-chains.md) | 四出身 0～2 岁顺序被动链 | 建议 Stage-1；可与 Stage-2 并行 | 待实施 |
-| **4** | [`early-childhood-preschool-content-and-pacing.md`](./early-childhood-preschool-content-and-pacing.md) | 3～7 岁 spine 密度、占位、5～7 轻量选项 | 建议 Stage-1；可与 Stage-3 并行 | 待实施 |
+| **1** | [`early-childhood-agency-mechanics.md`](./early-childhood-agency-mechanics.md) | Runtime/API：被动 phase、数值 clamp、小结 | 无 | **已实施** |
+| **2** | [`early-childhood-opening-experience-governance.md`](./early-childhood-opening-experience-governance.md) | 门禁 + 实机验收 + 四出身基线审计 | 建议 Stage-1 已合入 | **已实施** |
+| **3** | [`early-childhood-origin-infant-quest-chains.md`](./early-childhood-origin-infant-quest-chains.md) | 四出身 0～2 岁顺序被动链 | 建议 Stage-1；可与 Stage-2 并行 | **已实施** |
+| **4** | [`early-childhood-preschool-content-and-pacing.md`](./early-childhood-preschool-content-and-pacing.md) | 3～7 岁 spine 密度、占位、5～7 轻量选项 | 建议 Stage-1；可与 Stage-3 并行 | **已实施** |
+| **5** | [`early-childhood-preschool-origin-isolation.md`](./early-childhood-preschool-origin-isolation.md) | **3～7 岁 passive 出身硬隔离**（修复 filler 串味） | Stage-3/4 已合入 | **待实施** |
 
 ```mermaid
 flowchart TB
@@ -37,15 +38,19 @@ flowchart TB
   S2[Stage-2 验收]
   S3[Stage-3 0～2 出身链]
   S4[Stage-4 3～7 内容与节奏]
+  S5[Stage-5 3～7 出身隔离]
 
   IDX --> S1
   S1 --> S2
   S1 --> S3
   S1 --> S4
-  S3 -.->|内容加厚| S4
+  S3 -.->|0～2 已隔离| S5
+  S4 -.->|暴露串味| S5
 ```
 
-**并行建议：** Stage-2 / 3 / 4 可由不同子代理同时进行；合并前各自跑门禁，冲突集中在 `infantPassiveNarratives`、调度与 UI 文案。
+**并行建议：** Stage-5 可在 Stage-4 合入后立即开工；仅改 `preschoolPassiveSpine.ts` 与测试，冲突面小。
+
+**已知问题（Stage-5 目标）：** 3～7 岁 passive 仍用软加权，外国出身条目可被抽中（例：书香 age 4 · `child_frontier_drill`「营中操练」）。0～2 岁四链已隔离，问题仅在幼童 filler 层。
 
 ---
 

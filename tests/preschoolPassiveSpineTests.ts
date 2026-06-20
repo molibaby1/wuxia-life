@@ -1,6 +1,7 @@
 import {
   getPreschoolPassiveEntries,
   selectPreschoolPassiveEntry,
+  validatePreschoolPassiveOriginTags,
 } from '../src/data/preschoolPassiveSpine';
 import type { GameState } from '../src/types/eventTypes';
 
@@ -23,6 +24,8 @@ export function runPreschoolPassiveSpineTests(): void {
     assert(Boolean(entry.id && entry.title && entry.text), `entry ${entry.id} has id/title/text`);
     assert(entry.ageMin >= 3 && entry.ageMax <= 7, `entry ${entry.id} in 3–7 band`);
     assert(entry.originTags.length >= 1, `entry ${entry.id} has originTags`);
+    const originError = validatePreschoolPassiveOriginTags(entry);
+    assert(originError === undefined, originError ?? `entry ${entry.id} originTags invalid`);
   }
 
   const scholarAge3 = getPreschoolPassiveEntries(3, { origin_scholar_family: true }).filter(e =>
@@ -70,6 +73,18 @@ export function runPreschoolPassiveSpineTests(): void {
   for (const id of frontierIds) {
     assert(!scholarIds.has(id) && !martialIds.has(id), `frontier id ${id} must not reuse scholar/martial`);
   }
+
+  assert(
+    validatePreschoolPassiveOriginTags({
+      id: 'bad_multi_exclusive',
+      title: 'x',
+      text: 'x',
+      originTags: ['scholar', 'martial'],
+      ageMin: 3,
+      ageMax: 7,
+    }) !== undefined,
+    'multi-exclusive originTags must fail validation',
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

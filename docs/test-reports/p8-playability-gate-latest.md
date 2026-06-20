@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-20T01:26:09.060Z
+Generated: 2026-06-20T04:42:01.156Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40
@@ -61,7 +61,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 **Achievement**
 - [achieved] 积累学识 (0-20): knowledge=29 >= 20
 - [achieved] 坚持读书规划 (0-20): study actions=8
-- [achieved] 悟性提升 (20-30): comprehension=35 >= 30
+- [achieved] 悟性提升 (20-30): comprehension=34 >= 30
 - [missed] 文路身份显现 (30-40): flag scholar_path_started=undefined
 
 **Frustration**

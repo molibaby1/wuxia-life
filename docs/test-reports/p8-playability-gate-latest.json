@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-06-20T01:00:47.820Z",
+  "generatedAt": "2026-06-20T01:26:09.060Z",
   "runtimePath": "headless_server",
   "catalogVersion": "1.0.0",
   "engineVersion": "p8-headless-gate",
@@ -11,14 +11,14 @@
       "personaId": "p8-martial-lin",
       "personaName": "林破竹",
       "agency": {
-        "activeActionCount": 15,
-        "storyEventCount": 27,
-        "choiceEventCount": 27,
+        "activeActionCount": 14,
+        "storyEventCount": 28,
+        "choiceEventCount": 28,
         "forcedEventCount": 0,
         "activeActionByCategory": {
-          "training": 15
+          "training": 14
         },
-        "repeatedSameActionStreakMax": 3,
+        "repeatedSameActionStreakMax": 2,
         "repeatedStreakExamples": []
       },
       "causality": {
@@ -57,7 +57,7 @@
             "ageBand": "0-20",
             "status": "achieved",
             "evidence": [
-              "training actions=15"
+              "training actions=14"
             ]
           },
           {
@@ -107,7 +107,7 @@
           {
             "age": 21,
             "kind": "story_event",
-            "text": "耕耘收获"
+            "text": "辞别师门"
           },
           {
             "age": 39,
@@ -242,6 +242,14 @@
           "personaId": "p8-martial-lin"
         },
         {
+          "eventId": "love_misunderstanding",
+          "selectedChoiceId": "love_clarify",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "love_silent",
+          "runnerUpScore": 0,
+          "personaId": "p8-martial-lin"
+        },
+        {
           "eventId": "love_rival_appears",
           "selectedChoiceId": "love_duel",
           "selectedScore": 67.6,
@@ -255,14 +263,6 @@
           "selectedScore": 10,
           "runnerUpChoiceId": "neighbor_observe",
           "runnerUpScore": 7,
-          "personaId": "p8-martial-lin"
-        },
-        {
-          "eventId": "love_misunderstanding",
-          "selectedChoiceId": "love_clarify",
-          "selectedScore": 0,
-          "runnerUpChoiceId": "love_silent",
-          "runnerUpScore": 0,
           "personaId": "p8-martial-lin"
         },
         {
@@ -314,9 +314,9 @@
           "personaId": "p8-martial-lin"
         },
         {
-          "eventId": "sect_midlife_stewardship",
-          "selectedChoiceId": "stewardship_force_path",
-          "selectedScore": 3,
+          "eventId": "grudge_and_affection",
+          "selectedChoiceId": "avoid_conflict",
+          "selectedScore": 24,
           "runnerUpChoiceId": null,
           "runnerUpScore": null,
           "personaId": "p8-martial-lin"
@@ -327,6 +327,14 @@
           "selectedScore": 55,
           "runnerUpChoiceId": "decline_challenge",
           "runnerUpScore": 15,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "sect_midlife_stewardship",
+          "selectedChoiceId": "stewardship_force_path",
+          "selectedScore": 3,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
           "personaId": "p8-martial-lin"
         },
         {
@@ -368,11 +376,6 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 23,
-          "actionId": "action_training_basic",
-          "reason": "persona_strategy:training prefers training"
-        },
-        {
           "age": 28,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
@@ -388,7 +391,7 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 32,
+          "age": 31,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
         },
@@ -408,7 +411,7 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 37,
+          "age": 36,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
         },
@@ -3272,37 +3275,37 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-scholar-su",
-        "score": -0.28577365447107284
+        "score": -0.2985877634270918
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-social-gu",
-        "score": 0.5697538172418518
+        "score": 0.5833391503036826
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-wealth-shen",
-        "score": -0.3030031457958413
+        "score": -0.31526051617782064
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-cautious-han",
-        "score": 0.8472092186218814
+        "score": 0.8402728258726484
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-deviant-ye",
-        "score": 0.07581410632490895
+        "score": 0.059481131319262054
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-explorer-lu",
-        "score": 0.3513561030615805
+        "score": 0.36565277560610504
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-balanced-wei",
-        "score": 0.4833546876523456
+        "score": 0.49224641723092327
       },
       {
         "personaA": "p8-scholar-su",
@@ -3425,7 +3428,7 @@
       ]
     ],
     "nearDuplicateWarnings": [
-      "p8-martial-lin ~ p8-cautious-han (0.85)",
+      "p8-martial-lin ~ p8-cautious-han (0.84)",
       "p8-scholar-su ~ p8-wealth-shen (0.96)",
       "p8-scholar-su ~ p8-deviant-ye (0.85)"
     ]
@@ -3435,9 +3438,9 @@
       "key": "agency",
       "status": "pass",
       "severity": "blocker",
-      "detail": "p8-martial-lin: max streak 3",
+      "detail": "p8-martial-lin: max streak 2",
       "evidence": [],
-      "actualValue": 3
+      "actualValue": 2
     },
     {
       "key": "causality",
@@ -3747,7 +3750,7 @@
       "severity": "warning",
       "detail": "3 near-duplicate pairs",
       "evidence": [
-        "p8-martial-lin ~ p8-cautious-han (0.85)",
+        "p8-martial-lin ~ p8-cautious-han (0.84)",
         "p8-scholar-su ~ p8-wealth-shen (0.96)",
         "p8-scholar-su ~ p8-deviant-ye (0.85)"
       ]
@@ -3839,7 +3842,7 @@
       "severity": "warning",
       "detail": "3 near-duplicate pairs",
       "evidence": [
-        "p8-martial-lin ~ p8-cautious-han (0.85)",
+        "p8-martial-lin ~ p8-cautious-han (0.84)",
         "p8-scholar-su ~ p8-wealth-shen (0.96)",
         "p8-scholar-su ~ p8-deviant-ye (0.85)"
       ]

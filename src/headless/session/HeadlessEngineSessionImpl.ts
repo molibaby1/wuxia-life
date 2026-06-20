@@ -439,6 +439,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       pendingDisturbanceNarrative: null,
       pendingPeriodSummary: null,
       passiveNarrative: null,
+      storyGapPassiveServed: false,
     };
     this.lastError = null;
     this.engine = new GameEngineIntegration();

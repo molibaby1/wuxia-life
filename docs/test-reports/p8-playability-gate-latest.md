@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-20T01:00:47.820Z
+Generated: 2026-06-20T01:26:09.060Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40
@@ -25,7 +25,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 林破竹 (p8-martial-lin)
 
 **Planning / Agency**
-- Active actions: 15; categories: {"training":15}
+- Active actions: 14; categories: {"training":14}
 - Sample selection: age 5 → action_childhood_yard_play (persona_strategy:training prefers training)
 
 **Causality**
@@ -35,7 +35,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 
 **Achievement**
 - [missed] 打下武功根基 (0-20): martialPower=4 < 25
-- [achieved] 坚持练功规划 (0-20): training actions=15
+- [achieved] 坚持练功规划 (0-20): training actions=14
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
 - [missed] 三十岁前功力达标 (30-40): martialPower=4 < 45
 
@@ -220,6 +220,6 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 - Age-40 identity: 出身：，路线：江湖游侠（wanderer_map_legend），幼年练功 → 中段功底显现，幼年游历的习惯延续至今，，昔年苦读今见效，幼年交游的习惯延续至今
 
 ## Replay Similarity
-- p8-martial-lin ~ p8-cautious-han (0.85)
+- p8-martial-lin ~ p8-cautious-han (0.84)
 - p8-scholar-su ~ p8-wealth-shen (0.96)
 - p8-scholar-su ~ p8-deviant-ye (0.85)

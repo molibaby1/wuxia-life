@@ -201,7 +201,7 @@
         "Tests pass"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-006 (split 2/3)"
     },
     {

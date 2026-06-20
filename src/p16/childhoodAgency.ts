@@ -38,7 +38,18 @@ export const ADULT_CHILDHOOD_BLOCKED_ACTIONS = new Set([
   'action_training_basic',
 ]);
 
-const LITE_ACTION_BY_CATEGORY: Record<ActionCategory, string> = {
+const LITE_ACTION_BY_CATEGORY_AGE_5_6: Record<ActionCategory, string> = {
+  training: 'action_childhood_yard_play',
+  study: 'action_study_lite',
+  socializing: 'action_socializing_lite',
+  business: 'action_errand_nearby',
+  travel: 'action_errand_nearby',
+  health: 'action_childhood_yard_play',
+  romance: 'action_socializing_lite',
+  jianghu: 'action_childhood_yard_play',
+};
+
+const LITE_ACTION_BY_CATEGORY_AGE_7: Record<ActionCategory, string> = {
   training: 'action_childhood_training',
   study: 'action_study_lite',
   socializing: 'action_socializing_lite',
@@ -48,6 +59,13 @@ const LITE_ACTION_BY_CATEGORY: Record<ActionCategory, string> = {
   romance: 'action_socializing_lite',
   jianghu: 'action_childhood_training',
 };
+
+/** @deprecated use resolveLiteActionMapForAge */
+const LITE_ACTION_BY_CATEGORY: Record<ActionCategory, string> = LITE_ACTION_BY_CATEGORY_AGE_7;
+
+function resolveLiteActionMapForAge(age: number): Record<ActionCategory, string> {
+  return age >= 7 ? LITE_ACTION_BY_CATEGORY_AGE_7 : LITE_ACTION_BY_CATEGORY_AGE_5_6;
+}
 
 export function shouldPreferStoryGapPassiveBeforePlanning(
   age: number,
@@ -128,8 +146,8 @@ function scoreChildhoodCategories(
   return scores;
 }
 
-function childhoodLiteForCategory(category: ActionCategory): ActiveActionDefinition | undefined {
-  const actionId = LITE_ACTION_BY_CATEGORY[category];
+function childhoodLiteForCategory(category: ActionCategory, age: number): ActiveActionDefinition | undefined {
+  const actionId = resolveLiteActionMapForAge(age)[category];
   return getChildhoodActionById(actionId);
 }
 
@@ -157,7 +175,7 @@ export function resolveChildhoodActionPalette(
   const seen = new Set<string>();
   for (const [category] of ranked) {
     if (palette.length >= maxCategories) break;
-    const action = childhoodLiteForCategory(category);
+    const action = childhoodLiteForCategory(category, age);
     if (!action || seen.has(action.id)) continue;
     seen.add(action.id);
     palette.push(action);
@@ -169,7 +187,7 @@ export function resolveChildhoodActionPalette(
   }
 
   if (flags?.p8_route_demonic === true && age >= 5 && age <= 9) {
-    const travelAction = childhoodLiteForCategory('travel');
+    const travelAction = childhoodLiteForCategory('travel', age);
     if (travelAction && !seen.has(travelAction.id)) {
       palette.push(travelAction);
     }

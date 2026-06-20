@@ -130,6 +130,20 @@ function testChildhoodAgency(): void {
   });
   assert(age5Palette.length >= 1 && age5Palette.length <= 2, 'age 5 offers light planning');
 
+  const age7Palette = resolveChildhoodActionPalette({
+    age: 7,
+    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
+  });
+  assert(age7Palette.length >= 1 && age7Palette.length <= 2, 'age 7 offers light planning');
+  assert(
+    age5Palette.map(a => a.id).join(',') !== age7Palette.map(a => a.id).join(','),
+    'age 5 vs 7 scholar palettes differ in action ids',
+  );
+  assert(
+    age5Palette.some(a => a.id === 'action_childhood_yard_play' || a.id === 'action_errand_nearby'),
+    'age 5 band includes 5–6 lite action id',
+  );
+
   const infantAction = resolveActiveAction({
     state: {
       player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10 } as PlayerState,
@@ -163,8 +177,17 @@ function testChildhoodAgency(): void {
     flags: { p8_persona_id: 'p8-wealth-shen' },
   });
   assert(
-    businessPalette.some(a => a.id === 'action_household_apprentice'),
-    'business persona gets household apprentice at age 6',
+    businessPalette.some(a => a.id === 'action_errand_nearby'),
+    'business persona gets 5–6 band errand action at age 6',
+  );
+  const businessAge7 = resolveChildhoodActionPalette({
+    age: 7,
+    player: { traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    flags: { p8_persona_id: 'p8-wealth-shen' },
+  });
+  assert(
+    businessAge7.some(a => a.id === 'action_household_apprentice'),
+    'business persona gets household apprentice at age 7',
   );
   assert(!businessPalette.some(a => a.id === 'action_business_basic'), 'no adult business');
 

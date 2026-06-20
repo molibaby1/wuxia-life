@@ -1,10 +1,12 @@
 import type { GameState } from '../types/eventTypes';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
+import { createRequire } from 'node:module';
 import {
   ORIGIN_FLAG_TO_PASSIVE_TAG,
   selectOrderedOriginInfantPassive,
 } from './originInfantPassiveChain';
-import { selectPreschoolPassiveEntry } from './preschoolPassiveSpine';
+
+const require = createRequire(import.meta.url);
 
 export type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
 
@@ -178,6 +180,7 @@ export function selectPassiveNarrative(
     return buildInfantPassiveGapEntry(age);
   }
   if (age <= 7) {
+    const { selectPreschoolPassiveEntry } = require('./preschoolPassiveSpine') as typeof import('./preschoolPassiveSpine');
     return selectPreschoolPassiveEntry(state, random);
   }
   return selectLegacyPassiveNarrative(state, random);

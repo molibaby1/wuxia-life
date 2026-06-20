@@ -1,6 +1,5 @@
 import {
   getPreschoolPassiveEntries,
-  preschoolPassiveSpineCatalog,
   selectPreschoolPassiveEntry,
 } from '../src/data/preschoolPassiveSpine';
 import type { GameState } from '../src/types/eventTypes';
@@ -10,9 +9,17 @@ function assert(condition: boolean, message: string): void {
 }
 
 export function runPreschoolPassiveSpineTests(): void {
-  assert(preschoolPassiveSpineCatalog.length >= 8, 'merged preschool catalog has density');
+  const preschoolPassiveSpineCatalog = getPreschoolPassiveEntries(3).concat(
+    getPreschoolPassiveEntries(4),
+    getPreschoolPassiveEntries(5),
+    getPreschoolPassiveEntries(6),
+    getPreschoolPassiveEntries(7),
+  );
+  const uniqueIds = new Set(preschoolPassiveSpineCatalog.map(e => e.id));
+  assert(uniqueIds.size >= 8, 'merged preschool catalog has density');
 
-  for (const entry of preschoolPassiveSpineCatalog) {
+  for (const id of uniqueIds) {
+    const entry = preschoolPassiveSpineCatalog.find(e => e.id === id)!;
     assert(Boolean(entry.id && entry.title && entry.text), `entry ${entry.id} has id/title/text`);
     assert(entry.ageMin >= 3 && entry.ageMax <= 7, `entry ${entry.id} in 3–7 band`);
     assert(entry.originTags.length >= 1, `entry ${entry.id} has originTags`);
@@ -23,7 +30,7 @@ export function runPreschoolPassiveSpineTests(): void {
   );
   assert(scholarAge3.length >= 1, 'scholar age 3 has spine entry');
 
-  const clever = preschoolPassiveSpineCatalog.find(e => e.id === 'preschool_scholar_clever_speech');
+  const clever = getPreschoolPassiveEntries(3).find(e => e.id === 'preschool_scholar_clever_speech');
   assert(clever !== undefined, 'clever_speech equivalent in config');
 
   const picked = selectPreschoolPassiveEntry({
@@ -38,16 +45,24 @@ export function runPreschoolPassiveSpineTests(): void {
   }
 
   const scholarIds = new Set(
-    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('scholar')).map(e => e.id),
+    [...getPreschoolPassiveEntries(3), ...getPreschoolPassiveEntries(5), ...getPreschoolPassiveEntries(7)]
+      .filter(e => e.originTags.includes('scholar'))
+      .map(e => e.id),
   );
   const martialIds = new Set(
-    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('martial')).map(e => e.id),
+    [...getPreschoolPassiveEntries(3), ...getPreschoolPassiveEntries(5), ...getPreschoolPassiveEntries(7)]
+      .filter(e => e.originTags.includes('martial'))
+      .map(e => e.id),
   );
   const merchantIds = new Set(
-    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('merchant')).map(e => e.id),
+    [...getPreschoolPassiveEntries(3), ...getPreschoolPassiveEntries(5), ...getPreschoolPassiveEntries(7)]
+      .filter(e => e.originTags.includes('merchant'))
+      .map(e => e.id),
   );
   const frontierIds = new Set(
-    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('frontier')).map(e => e.id),
+    [...getPreschoolPassiveEntries(3), ...getPreschoolPassiveEntries(5), ...getPreschoolPassiveEntries(7)]
+      .filter(e => e.originTags.includes('frontier'))
+      .map(e => e.id),
   );
   for (const id of merchantIds) {
     assert(!scholarIds.has(id) && !martialIds.has(id), `merchant id ${id} must not reuse scholar/martial`);

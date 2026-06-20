@@ -6,6 +6,21 @@ import type { ActiveActionDefinition } from '../types/activeActionTypes';
  */
 export const childhoodActionCatalog: ActiveActionDefinition[] = [
   {
+    id: 'action_childhood_yard_play',
+    category: 'training',
+    name: '院中玩耍',
+    playerIntent: '在庭院里与玩伴追逐嬉闹，模仿大人招式，活动筋骨',
+    duration: { value: 1, unit: 'quarter' },
+    rewards: [
+      { stat: 'constitution', min: 0, max: 2 },
+      { stat: 'externalSkill', min: 0, max: 1 },
+    ],
+    costs: [{ stat: 'energy', amount: 2 }],
+    risk: 'low',
+    metadata: { focusTag: 'martial', childhoodTier: 'lite', ageBand: '5-6' },
+    onCompleteFlags: ['p9_echo_training_hook'],
+  },
+  {
     id: 'action_childhood_training',
     category: 'training',
     name: '玩耍练功',

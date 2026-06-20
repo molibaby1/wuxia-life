@@ -124,7 +124,7 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003 (split 1/2); §3 frozen (lite palette max 2 categories); §5 FR-3; §7 (prefer copy/pool over new phase if PlanningOptionDto compatible); touchpoints childhoodAgency.ts, childhood action catalog"
     },
     {

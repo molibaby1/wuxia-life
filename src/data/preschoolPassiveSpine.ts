@@ -2,24 +2,28 @@
  * Preschool passive/spine loader (ages 3–7).
  * Schema: { id, title, text, originTags[], ageMin, ageMax, statDeltas?, flags? }
  */
+import { createRequire } from 'node:module';
 import preschoolPassiveSpineJson from './lines/preschool-passive-spine.json';
-import {
-  infantPassiveNarrativeCatalog,
-  type PassiveNarrativeEntry,
-} from './infantPassiveNarratives';
+import type { PassiveNarrativeEntry } from './infantPassiveNarratives';
 import type { GameState } from '../types/eventTypes';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { ORIGIN_FLAG_TO_PASSIVE_TAG } from './originInfantPassiveChain';
+
+const require = createRequire(import.meta.url);
 
 export type PreschoolPassiveEntry = PassiveNarrativeEntry;
 
 const preschoolConfigEntries = (preschoolPassiveSpineJson as { entries: PreschoolPassiveEntry[] }).entries;
 
-/** Merged catalog: legacy infantPassiveNarrativeCatalog (3–7) + preschool-passive-spine.json */
-export const preschoolPassiveSpineCatalog: PreschoolPassiveEntry[] = [
-  ...infantPassiveNarrativeCatalog.filter(e => e.ageMin >= 3 && e.ageMax <= 7),
-  ...preschoolConfigEntries,
-];
+function mergedPreschoolCatalog(): PreschoolPassiveEntry[] {
+  const { infantPassiveNarrativeCatalog } = require('./infantPassiveNarratives') as {
+    infantPassiveNarrativeCatalog: PreschoolPassiveEntry[];
+  };
+  return [
+    ...infantPassiveNarrativeCatalog.filter(e => e.ageMin >= 3 && e.ageMax <= 7),
+    ...preschoolConfigEntries,
+  ];
+}
 
 function resolveOriginTags(state: GameState): Set<string> {
   const tags = new Set<string>(['neutral']);
@@ -56,7 +60,7 @@ export function getPreschoolPassiveEntries(
   originFlags?: Record<string, unknown>,
 ): PreschoolPassiveEntry[] {
   void originFlags;
-  return preschoolPassiveSpineCatalog.filter(
+  return mergedPreschoolCatalog().filter(
     entry => age >= entry.ageMin && age <= entry.ageMax,
   );
 }

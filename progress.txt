@@ -22,6 +22,9 @@
 ---## [2026-06-20 00:11] - US-013 (early-childhood-origin-infant-quest-chains)
 - Wired frontier_infant_03_grasp_bow + frontier_infant_04_tent_crawl @ age 1.
 ---
+## [2026-06-20 00:11] - US-014 (early-childhood-origin-infant-quest-chains)
+- Wired frontier_infant_05_rampart_steps; sets frontier_infant_chain_complete.
+---
 
 ## [2026-06-20 00:11] - US-012 (early-childhood-origin-infant-quest-chains)
 - Wired frontier_infant_01_camp_birth + frontier_infant_02_swaddle_wind; distinct from scholar IDs (Stage-2 书香×边疆 target).

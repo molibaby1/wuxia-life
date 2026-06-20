@@ -95,7 +95,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004 (split 1/3); origin_wuxia_family; design index §4 constitution +3 suggested cap"
     },
     {

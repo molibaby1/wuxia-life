@@ -108,7 +108,7 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002 (split 4/4); §8 success metric ≥8 non-placeholder narrative / 35 steps; §5 FR-5; depends on US-005 and US-006 content"
     },
     {

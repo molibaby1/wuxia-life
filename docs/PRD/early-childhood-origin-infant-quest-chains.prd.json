@@ -35,7 +35,7 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002; §3 frozen decisions (no planning, Δ≤1); touchpoints infantPassiveNarratives.ts, originInfantPassiveChain.ts, HeadlessEngineSessionImpl.executePassiveChildhoodTick; design index §5 swaddle merge map"
     },
     {

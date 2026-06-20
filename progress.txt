@@ -8,6 +8,12 @@
 - **Learnings for future iterations:**
   - Schema one-liner lives in originInfantPassiveChain.ts header; design index §1 lists quest IDs.
 ---
+## [2026-06-20 00:11] - US-002 (early-childhood-origin-infant-quest-chains)
+- `selectPassiveNarrative` age ≤2 uses ordered chain dequeue; headless/UI share path; legacy swaddle gated via legacyCatalogId.
+- Files: infantPassiveNarratives.ts, HeadlessEngineSessionImpl.ts, useNewGameEngine.ts
+- **Learnings for future iterations:**
+  - `findNextOriginInfantNode` respects ageMin; shared filler when waiting for next age band.
+---
 
 ## [2026-06-20] - US-002 (early-childhood-opening-experience-governance)
 - Gate regression: gate:p16 pass, p72SessionPhase ok, p16OriginDestinyTests + p9PlayabilityTests pass, gate:playability 0 blockers; p8 Early samples show 0–4 passive.

@@ -59,6 +59,12 @@
 
     <div class="content-area">
       <div v-if="currentNode" class="story-card card">
+        <h3
+          v-if="showPlanningIntroTitle"
+          class="progression-card-title planning-intro-title"
+        >
+          {{ currentNode.title }}
+        </h3>
         <p
           v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay && !periodSummaryDisplay"
           class="story-text"
@@ -355,6 +361,12 @@ talentDefinitions.value = talentSystem.getAllTalents();
 const isApiPlanningPhase = computed(
   () => props.apiMode && props.apiSessionPhase === 'active_planning',
 );
+
+const showPlanningIntroTitle = computed(() => {
+  if (!props.currentNode?.title?.trim()) return false;
+  if (props.currentNode.id !== 'active_planning') return false;
+  return isApiPlanningPhase.value || engineState.isActiveActionMode;
+});
 
 // 使用 computed 直接获取最新的游戏状态，确保响应式更新
 const player = computed(() => {

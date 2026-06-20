@@ -191,7 +191,10 @@ export function resolvePlanningPlaceholderText(age: number): { title: string; te
     return { title: '家中一季', text: '这一季你在庭院与亲人身边度过，听故事、学走路，日子平淡而安稳。' };
   }
   if (age <= 7) {
-    return { title: '童年时光', text: '家中又过了一季，你可稍作安排，或静待家中变故。' };
+    return {
+      title: '童年时光',
+      text: '这一季在家中庭院与亲人、玩伴身边度过；若想略作安排，可从下方择一。',
+    };
   }
   return {
     title: '规划本期人生',

@@ -31,7 +31,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004 (split 2/2); §5 FR-4; §8 (5–7 placeholder ≤3/35 steps); depends on US-001 resolver; non-goals §6 (no disturbance UI redesign)"
     },
     {

@@ -1,73 +1,55 @@
 <template>
   <div class="game-screen">
-    <div class="header">
-      <div class="player-info">
-        <span class="name">{{ player?.name }}</span>
-        <span class="age">{{ player?.age }}岁 (时间：{{ getCurrentDate() }})</span>
-        <span v-if="player?.sect" class="sect">{{ player.sect }}</span>
+    <header class="top-status card">
+      <div class="status-row status-row-top">
+        <div class="player-block">
+          <span class="name">{{ player?.name }}</span>
+        </div>
+        <div class="save-controls">
+          <button class="save-btn" @click="saveGame">保存</button>
+          <button v-if="!apiMode" class="save-btn" @click="loadLatestSave">读档</button>
+        </div>
       </div>
-      <div class="save-controls">
-        <button class="save-btn" @click="saveGame">保存</button>
-        <button v-if="!apiMode" class="save-btn" @click="loadLatestSave">读档</button>
-      </div>
-    </div>
-    
-    <!-- 属性面板 -->
-    <div class="attribute-section">
-      <AttributePanel 
-        :player="attributePanelPlayer" 
-        :talents="talentDefinitions"
-      />
-    </div>
-    
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-label">功力</span>
-        <span class="stat-value">{{ player?.martialPower }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">外功</span>
-        <span class="stat-value">{{ player?.externalSkill }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">内功</span>
-        <span class="stat-value">{{ player?.internalSkill }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">轻功</span>
-        <span class="stat-value">{{ player?.qinggong }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">侠义</span>
-        <span class="stat-value">{{ player?.chivalry }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">体魄</span>
-        <span class="stat-value">{{ player?.constitution }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">悟性</span>
-        <span class="stat-value">{{ player?.comprehension }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">银两</span>
-        <span class="stat-value">{{ player?.money }}</span>
-      </div>
-    </div>
 
-    <LifeMemoryPanel :summary="lifeMemorySummary" />
+      <div class="status-row">
+        <span class="age-line">{{ player?.age }}岁 · {{ getCurrentDate() }}</span>
+      </div>
+
+      <div v-if="mainScreenModel.stageTags.length > 0" class="status-row status-tags">
+        <span
+          v-for="tag in mainScreenModel.stageTags"
+          :key="tag"
+          class="status-tag"
+        >
+          {{ tag }}
+        </span>
+      </div>
+
+      <div class="status-row status-resources">
+        <div
+          v-for="item in mainScreenModel.topResources"
+          :key="item.key"
+          class="resource-item"
+        >
+          <span class="resource-label">{{ item.label }}</span>
+          <span class="resource-value">{{ item.value }}</span>
+        </div>
+      </div>
+    </header>
 
     <div class="content-area">
-      <div v-if="currentNode" class="story-card card">
-        <h3
-          v-if="showPlanningIntroTitle"
-          class="progression-card-title planning-intro-title"
-        >
-          {{ currentNode.title }}
-        </h3>
+      <section v-if="currentNode" class="story-card card">
+        <div class="event-header">
+          <div>
+            <p class="event-kicker">当前经历</p>
+            <h3 class="event-title">
+              {{ showPlanningIntroTitle ? currentNode.title : currentNode.title || '江湖当前进展' }}
+            </h3>
+          </div>
+        </div>
         <p
           v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay && !periodSummaryDisplay"
-          class="story-text"
+          class="story-text story-text-clamped"
         >
           {{ currentNode.text }}
         </p>
@@ -148,12 +130,34 @@
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
         </div>
-        <div v-else-if="showContinueButton" class="continue-area">
-          <button class="continue-btn btn" @click="continueToNext">
+        <div v-else class="event-actions">
+          <button v-if="showContinueButton" class="continue-btn btn" @click="continueToNext">
             继续
           </button>
+          <div class="secondary-action-row">
+            <button class="secondary-btn" type="button" @click="scrollToSummary">
+              人生摘要
+            </button>
+            <button class="secondary-btn" type="button" @click="openFullStats">
+              全部属性
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <MainScreenLifeSummary
+        ref="summarySectionRef"
+        class="summary-section"
+        :route-summary="mainScreenModel.routeSummary"
+        :risk-summary="mainScreenModel.riskSummary"
+        :tendency-summary="mainScreenModel.tendencySummary"
+      />
+
+      <MainScreenStatsPanel
+        ref="statsPanelRef"
+        :core-stats="mainScreenModel.coreStats"
+        :groups="mainScreenModel.fullStatGroups"
+      />
 
       <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
         <button
@@ -173,14 +177,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
-import { talentSystem } from '../core/TalentSystem';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
-import AttributePanel from './AttributePanel.vue';
-import LifeMemoryPanel from './LifeMemoryPanel.vue';
+import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
+import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
+import { buildMainScreenModel } from './mainScreenModel';
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
-import type { StoryChoice, TalentDefinition } from '../types';
+import type { StoryChoice } from '../types';
 import {
   formatLongTermFlag,
   formatRouteLabel,
@@ -353,11 +357,6 @@ const showContinueButton = computed(() => {
   );
 });
 
-// 加载天赋定义
-const talentDefinitions = ref<TalentDefinition[]>([]);
-talentSystem.loadTalents();
-talentDefinitions.value = talentSystem.getAllTalents();
-
 const isApiPlanningPhase = computed(
   () => props.apiMode && props.apiSessionPhase === 'active_planning',
 );
@@ -421,6 +420,27 @@ const lifeMemorySummary = computed(() => {
   void engineState.currentEvent;
   return deriveLifeMemorySummary(gameEngine.getGameState());
 });
+
+const mainScreenModel = computed(() =>
+  buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value),
+);
+
+const summarySectionRef = ref<InstanceType<typeof MainScreenLifeSummary> | HTMLElement | null>(null);
+const statsPanelRef = ref<InstanceType<typeof MainScreenStatsPanel> | null>(null);
+
+const scrollToSummary = async () => {
+  await nextTick();
+  const element = summarySectionRef.value as unknown as { $el?: HTMLElement } | HTMLElement | null;
+  const target = element instanceof HTMLElement ? element : element?.$el;
+  target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+const openFullStats = async () => {
+  statsPanelRef.value?.openDetails();
+  await nextTick();
+  const element = statsPanelRef.value?.$el as HTMLElement | undefined;
+  element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 const getCurrentDate = () => {
   if (props.apiMode && props.apiPlayer) {
@@ -511,37 +531,51 @@ const loadLatestSave = () => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #f6f0e3 0%, #efe4d2 100%);
 }
 
-.header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  padding: 16px 20px;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+.top-status {
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #6f4b1f 0%, #8c6330 100%);
+  color: #fffaf1;
 }
 
-.player-info {
+.status-row {
   display: flex;
   align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-row + .status-row {
+  margin-top: 5px;
+}
+
+.status-row-top {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.player-block {
+  min-width: 0;
 }
 
 .save-controls {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .save-btn {
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
+  min-height: 32px;
+  border: 1px solid rgba(255, 245, 230, 0.4);
+  background: rgba(255, 250, 241, 0.12);
+  color: #fffaf1;
+  border-radius: 10px;
+  padding: 0 10px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -550,67 +584,109 @@ const loadLatestSave = () => {
 }
 
 .name {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
 }
 
-.age, .sect {
-  font-size: 14px;
-  opacity: 0.9;
-  background: rgba(255,255,255,0.2);
-  padding: 4px 10px;
-  border-radius: 12px;
+.age-line {
+  font-size: 13px;
+  line-height: 1.25;
+  color: rgba(255, 250, 241, 0.88);
 }
 
-.attribute-section {
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+.status-tags {
+  gap: 6px;
 }
 
-.stats-bar {
+.status-tag {
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: rgba(255, 250, 241, 0.88);
+  background: rgba(255, 250, 241, 0.1);
+  border: 1px solid rgba(255, 245, 230, 0.16);
+}
+
+.status-resources {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.resource-item {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 12px;
-  background: white;
-  border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.08);
+  border: 1px solid rgba(255, 245, 230, 0.12);
 }
 
-.stat-item {
-  text-align: center;
-  padding: 8px;
+.resource-label {
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(255, 250, 241, 0.68);
 }
 
-.stat-label {
-  display: block;
-  font-size: 12px;
-  color: #8b6914;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  display: block;
-  font-size: 18px;
+.resource-value {
+  font-size: 14px;
+  line-height: 1;
   font-weight: 700;
-  color: var(--primary-color);
+  color: #fffaf1;
 }
 
 .content-area {
   flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+  display: grid;
+  gap: 12px;
 }
 
 .story-card {
-  margin-bottom: 24px;
   position: relative;
+  padding: 16px;
+  border-radius: 20px;
+  background: #fffdf7;
+  border: 1px solid rgba(139, 105, 20, 0.12);
+}
+
+.event-header {
+  margin-bottom: 10px;
+}
+
+.event-kicker {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #8b6914;
+}
+
+.event-title {
+  margin: 0;
+  font-size: 20px;
+  color: var(--primary-color);
 }
 
 .story-text {
   font-size: 16px;
-  line-height: 1.8;
+  line-height: 1.7;
   color: var(--text-color);
+  margin: 0;
+}
+
+.story-text-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .auto-play-indicator {
@@ -803,18 +879,22 @@ const loadLatestSave = () => {
   line-height: 1.5;
 }
 
-.continue-area {
-  margin-top: 1.5rem;
-  text-align: center;
+.event-actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
 }
 
 .continue-btn {
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
+  min-height: 50px;
+  width: 100%;
+  padding: 0 18px;
+  font-size: 16px;
+  font-weight: 700;
   background: linear-gradient(135deg, var(--primary-color), #8b5a2b);
   color: white !important;
   border: none;
-  border-radius: 4px;
+  border-radius: 14px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -822,6 +902,23 @@ const loadLatestSave = () => {
 .continue-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+}
+
+.secondary-action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.secondary-btn {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 105, 20, 0.22);
+  background: #fff;
+  color: #8b6914;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 @keyframes fadeIn {
@@ -836,18 +933,8 @@ const loadLatestSave = () => {
 }
 
 @media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .save-controls {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .stats-bar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-left: auto;
   }
 
   .story-text,
@@ -855,28 +942,20 @@ const loadLatestSave = () => {
     font-size: 15px;
   }
 
-  .content-area {
-    padding: 16px 12px;
+  .status-resources,
+  .secondary-action-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 768px) {
   .game-screen {
-    max-width: 960px;
+    max-width: 720px;
     margin: 0 auto;
-  }
-
-  .stats-bar {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .content-area {
-    padding: 24px 32px;
   }
 
   .choices-area {
-    max-width: 720px;
-    margin: 0 auto;
+    max-width: 100%;
   }
 }
 

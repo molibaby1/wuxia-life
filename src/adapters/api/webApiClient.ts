@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import type { SessionProgressionPayload } from '../../contracts/sessionProgression';
+import type { ProgressionAckKind, SessionProgressionPayload } from '../../contracts/sessionProgression';
 import { webPlatformStorage } from '../platform/webPlatformStorage';
 
 export type ApiClientErrorCategory =
@@ -210,7 +210,7 @@ export class WebApiClient {
     sessionToken: string;
     expectedSlotVersion: number;
     expectedSnapshotId: string;
-    ackKind: 'action_summary' | 'disturbance' | 'story_automatic';
+    ackKind: ProgressionAckKind;
   }): Promise<SessionProgressionPayload> {
     return this.request<SessionProgressionPayload>(
       '/v1/sessions/' + params.sessionId + '/progression-ack',

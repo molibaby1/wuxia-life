@@ -4,6 +4,7 @@ import {
   ORIGIN_FLAG_TO_PASSIVE_TAG,
   selectOrderedOriginInfantPassive,
 } from './originInfantPassiveChain';
+import { selectPreschoolPassiveEntry } from './preschoolPassiveSpine';
 
 export type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
 
@@ -175,6 +176,9 @@ export function selectPassiveNarrative(
       return ordered;
     }
     return buildInfantPassiveGapEntry(age);
+  }
+  if (age <= 7) {
+    return selectPreschoolPassiveEntry(state, random);
   }
   return selectLegacyPassiveNarrative(state, random);
 }

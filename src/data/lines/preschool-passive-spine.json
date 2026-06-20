@@ -1,0 +1,106 @@
+{
+  "entries": [
+    {
+      "id": "preschool_scholar_clever_speech",
+      "title": "伶牙俐齿",
+      "text": "你在长辈面前背出半阙蒙学诗，虽吐字不清，却把「天地玄黄」说得有板有眼，满座皆笑。",
+      "originTags": ["scholar"],
+      "ageMin": 3,
+      "ageMax": 3,
+      "statDeltas": { "comprehension": 1 }
+    },
+    {
+      "id": "preschool_scholar_library_dust",
+      "title": "书斋尘香",
+      "text": "你踮脚够不到书架，便坐在梯下翻画谱，墨香与旧纸味混在一起，成了这一季最深的记忆。",
+      "originTags": ["scholar"],
+      "ageMin": 5,
+      "ageMax": 7,
+      "statDeltas": { "comprehension": 1 }
+    },
+    {
+      "id": "preschool_scholar_gate_visitor",
+      "title": "门庭来客",
+      "text": "有远客来谈诗论道，你在帘后偷听半晌，记住了几个陌生的地名与典故。",
+      "originTags": ["scholar"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_martial_first_stance",
+      "title": "初识马步",
+      "text": "父亲教你扎马步，你坚持不到半盏茶便腿软，却被夸「肯下苦功」。",
+      "originTags": ["martial"],
+      "ageMin": 3,
+      "ageMax": 4,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_martial_weapon_rack",
+      "title": "兵器架下",
+      "text": "你趁练武场无人，摸过几柄未开刃的短刀，被师兄发现后笑骂一句，却也没真罚。",
+      "originTags": ["martial"],
+      "ageMin": 5,
+      "ageMax": 7,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_martial_evening_drill",
+      "title": "暮鼓操练",
+      "text": "暮色里传来整齐号子，你学着举棍刺向木桩，虽力道不足，气势倒像模像样。",
+      "originTags": ["martial"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_merchant_first_coin",
+      "title": "第一枚铜钱",
+      "text": "长辈让你把一枚铜钱从左手交到右手，再交给伙计，你认真数了三遍才肯松手。",
+      "originTags": ["merchant"],
+      "ageMin": 3,
+      "ageMax": 4
+    },
+    {
+      "id": "preschool_merchant_ledger_peek",
+      "title": "偷看账本",
+      "text": "你趴在柜后看父亲拨算盘，虽看不懂进销，却记住了「利薄」「赊欠」几个词。",
+      "originTags": ["merchant"],
+      "ageMin": 5,
+      "ageMax": 7,
+      "statDeltas": { "businessAcumen": 1 }
+    },
+    {
+      "id": "preschool_merchant_caravan_news",
+      "title": "商队见闻",
+      "text": "过路商队歇脚，你听人讲外地物价与路况，回来竟能学舌给邻居听。",
+      "originTags": ["merchant"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_frontier_bonfire_tale",
+      "title": "营火夜话",
+      "text": "夜里营火边有人讲边关旧事，你裹紧小袄听得入神，风沙声里夹着远处马嘶。",
+      "originTags": ["frontier"],
+      "ageMin": 3,
+      "ageMax": 4
+    },
+    {
+      "id": "preschool_frontier_sentry_watch",
+      "title": "望哨初体验",
+      "text": "你跟着亲兵登上短墙，看烽火台在夕照里变暗，第一次觉得「家」也有边界。",
+      "originTags": ["frontier"],
+      "ageMin": 5,
+      "ageMax": 7,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_frontier_horse_whinny",
+      "title": "战马嘶鸣",
+      "text": "马厩里战马齐嘶，你既怕又兴奋，父亲说你若再长高些，便教你识蹄印。",
+      "originTags": ["frontier"],
+      "ageMin": 6,
+      "ageMax": 7
+    }
+  ]
+}

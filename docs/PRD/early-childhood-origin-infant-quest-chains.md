@@ -127,4 +127,4 @@ Stage-1 用 `infantPassiveNarratives.ts` **加权随机**填充 0～7 岁空窗�
 
 ---
 
-**状态：** 待实施
+**状态：** 已实施（Stage-3 · `ralph/early-childhood-origin-infant-quest-chains`）

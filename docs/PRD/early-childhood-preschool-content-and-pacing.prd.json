@@ -92,7 +92,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002 (split 3/4); §7 origin variant hooks; depends on US-004 schema and US-005 pattern"
     },
     {

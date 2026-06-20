@@ -27,7 +27,7 @@ import { clampPassiveStatDeltasForAge } from '../core/activePlanning/ageActionSt
 import { buildPeriodSummary } from '../core/activePlanning/periodSummaryBuilder';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../data/infantPassiveNarratives';
 import { applyPassiveNarrativeFlags } from '../data/originInfantPassiveChain';
-import { shouldOfferDailyPlanning } from '../p16/childhoodAgency';
+import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning } from '../p16/childhoodAgency';
 import { markDisturbanceNarrativeShown } from '../core/activePlanning/disturbanceNarrativeBuilder';
 
 interface EventState {
@@ -53,6 +53,7 @@ interface EventState {
   isPassiveProgressionMode: boolean;
   passiveNarrative: PassiveNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
+  storyGapPassiveServed: boolean;
 }
 
 // 单例状态
@@ -79,6 +80,7 @@ function getEngineStateInstance() {
         isPassiveProgressionMode: false,
         passiveNarrative: null,
         pendingPeriodSummary: null,
+        storyGapPassiveServed: false,
       }),
       isProcessing: false,
     };
@@ -105,6 +107,7 @@ export function useNewGameEngine() {
     const selectedEvent = gameEngine.selectEvent(age);
 
     if (selectedEvent) {
+      engineState.storyGapPassiveServed = false;
       engineState.isActiveActionMode = false;
       engineState.availableActiveActions = [];
       engineState.currentEvent = selectedEvent;
@@ -155,6 +158,20 @@ export function useNewGameEngine() {
       }
     } else {
       const actions = gameEngine.getAvailableActiveActions();
+      const preferPassive = shouldPreferStoryGapPassiveBeforePlanning(
+        age,
+        engineState.storyGapPassiveServed,
+      );
+      if (preferPassive) {
+        engineState.currentEvent = null;
+        engineState.availableChoices = [];
+        engineState.availableActiveActions = [];
+        engineState.isActiveActionMode = false;
+        engineState.isPassiveProgressionMode = true;
+        const entry = selectPassiveNarrative(gameEngine.getGameState());
+        engineState.passiveNarrative = { title: entry.title, text: entry.text };
+        return;
+      }
       if (actions.length > 0) {
         engineState.currentEvent = null;
         engineState.availableChoices = [];
@@ -163,8 +180,8 @@ export function useNewGameEngine() {
         engineState.isPassiveProgressionMode = false;
         engineState.passiveNarrative = null;
       } else {
-        const age = gameEngine.getGameState().player?.age ?? 0;
-        if (!shouldOfferDailyPlanning(age)) {
+        const fallbackAge = gameEngine.getGameState().player?.age ?? 0;
+        if (!shouldOfferDailyPlanning(fallbackAge)) {
           engineState.currentEvent = null;
           engineState.availableChoices = [];
           engineState.availableActiveActions = [];
@@ -525,6 +542,7 @@ export function useNewGameEngine() {
     });
     engineState.isPassiveProgressionMode = false;
     engineState.passiveNarrative = null;
+    engineState.storyGapPassiveServed = true;
   };
 
   /** P7.1: two-step continue — action summary, then optional disturbance, then next event */
@@ -549,6 +567,7 @@ export function useNewGameEngine() {
       return;
     }
     clearProgressionPresentation();
+    engineState.storyGapPassiveServed = false;
     getNextEvent();
   };
 

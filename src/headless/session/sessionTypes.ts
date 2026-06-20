@@ -87,6 +87,8 @@ export interface HeadlessSessionVolatileState {
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  /** True after story-gap passive served for ages 5–7; allows lite planning on same gap. */
+  storyGapPassiveServed: boolean;
 }
 
 export class HeadlessProgressionError extends Error {

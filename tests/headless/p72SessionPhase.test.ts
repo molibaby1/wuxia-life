@@ -2,6 +2,7 @@ import { HeadlessEngineSessionImpl } from '../../src/headless/session/HeadlessEn
 import { HeadlessProgressionError } from '../../src/headless/session/sessionTypes';
 import { GameEngineIntegration } from '../../src/core/GameEngineIntegration';
 import { executeActiveActionOnState } from '../../src/core/activePlanning/ActivePlanningService';
+import { shouldPreferStoryGapPassiveBeforePlanning } from '../../src/p16/childhoodAgency';
 import type { GameStateSnapshot } from '../../src/contracts/gameStateSnapshot';
 
 function assert(condition: boolean, message: string): void {
@@ -124,6 +125,21 @@ export async function runP72SessionPhaseTests(): Promise<void> {
   infantSession.ensurePassivePresentation();
   const volatile = infantSession.getProgressionVolatileState();
   assert(volatile.passiveNarrative !== null, 'passive narrative prepared');
+
+  const age3Session = await hydrateAtAge(3, 42);
+  assert(age3Session.getSessionPhase() === 'passive_progression', 'age 3 story gap → passive_progression');
+  assert(age3Session.getSessionPhase() !== 'active_planning', 'age 3 never enters active_planning on gap');
+
+  const age5Session = await hydrateAtAge(5, 42);
+  assert(
+    age5Session.getSessionPhase() === 'passive_progression',
+    'age 5 story gap prefers passive before lite planning',
+  );
+  assert(age5Session.getSessionPhase() !== 'active_planning', 'age 5 first gap pass is not active_planning yet');
+  assert(shouldPreferStoryGapPassiveBeforePlanning(3, false), 'age 3 always prefers passive on gap');
+  assert(shouldPreferStoryGapPassiveBeforePlanning(5, false), 'age 5 prefers passive before planning on gap');
+  assert(!shouldPreferStoryGapPassiveBeforePlanning(5, true), 'age 5 allows lite planning after passive served');
+  assert(!shouldPreferStoryGapPassiveBeforePlanning(8, false), 'age 8+ skips preschool gap preference');
 
   const autoAckSession = await hydrateAtAge(1, 77);
   const pending = await autoAckSession.getNextEvent();

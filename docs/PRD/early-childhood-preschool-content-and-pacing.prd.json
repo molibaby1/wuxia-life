@@ -47,7 +47,7 @@
         "Tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-001; §5 FR-1 (age 3–4 never planningOptions except bug); §9 priority after US-004; touchpoints GameEngineIntegration.selectEvent, HeadlessEngineSessionImpl.getSessionPhase, childhoodAgency.ts"
     },
     {

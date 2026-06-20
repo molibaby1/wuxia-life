@@ -28,7 +28,7 @@ import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActio
 import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
 import { applyPassiveNarrativeFlags } from '../../data/originInfantPassiveChain';
-import { shouldOfferDailyPlanning } from '../../p16/childhoodAgency';
+import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning, EARLY_CHILDHOOD_MAX_AGE } from '../../p16/childhoodAgency';
 import { progressUntilChoiceOrTerminal } from '../progressionLoop';
 import type { PlanningOptionDto } from '../../contracts/sessionProgression';
 import type { SessionPhase } from '../../contracts/sessionProgression';
@@ -87,6 +87,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     pendingDisturbanceNarrative: null,
     pendingPeriodSummary: null,
     passiveNarrative: null,
+    storyGapPassiveServed: false,
   };
   private lastError: HeadlessSessionError | null = null;
   private randomSeed?: number;
@@ -232,6 +233,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         this.volatile.currentEvent = null;
         return null;
       }
+      this.volatile.storyGapPassiveServed = false;
       this.volatile.currentEvent = event;
       const available = this.getAvailableChoices(event);
       const availableIds = new Set(available.map(c => c.id));
@@ -474,7 +476,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   ensurePassivePresentation(): void {
     const age = this.engine.getGameState().player?.age ?? 0;
-    if (shouldOfferDailyPlanning(age)) {
+    const allowLiteBand =
+      age <= EARLY_CHILDHOOD_MAX_AGE &&
+      shouldOfferDailyPlanning(age) &&
+      shouldPreferStoryGapPassiveBeforePlanning(age, this.volatile.storyGapPassiveServed);
+    if (shouldOfferDailyPlanning(age) && !allowLiteBand) {
       return;
     }
     if (!this.volatile.passiveNarrative) {
@@ -510,6 +516,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       deltas,
     });
     this.volatile.passiveNarrative = null;
+    this.volatile.storyGapPassiveServed = true;
   }
 
   getSessionPhase(): SessionPhase {
@@ -521,6 +528,12 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     const player = this.engine.getGameState().player;
     if (player?.alive === false) return 'terminal';
     const age = player?.age ?? 0;
+    if (
+      shouldPreferStoryGapPassiveBeforePlanning(age, this.volatile.storyGapPassiveServed)
+    ) {
+      this.ensurePassivePresentation();
+      return 'passive_progression';
+    }
     if (!shouldOfferDailyPlanning(age)) {
       return 'passive_progression';
     }
@@ -601,6 +614,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       if (this.volatile.pendingDisturbanceNarrative) {
         return;
       }
+      this.volatile.storyGapPassiveServed = false;
       await this.resolveAfterPlanningAck();
       return;
     }
@@ -613,6 +627,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         markDisturbanceNarrativeShown(this.engine.getGameState(), disturbanceId);
       }
       this.volatile.pendingDisturbanceNarrative = null;
+      this.volatile.storyGapPassiveServed = false;
       await this.resolveAfterPlanningAck();
       return;
     }

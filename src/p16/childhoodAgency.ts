@@ -49,6 +49,19 @@ const LITE_ACTION_BY_CATEGORY: Record<ActionCategory, string> = {
   jianghu: 'action_childhood_training',
 };
 
+export function shouldPreferStoryGapPassiveBeforePlanning(
+  age: number,
+  passiveAlreadyServedThisGap: boolean,
+): boolean {
+  if (age > EARLY_CHILDHOOD_MAX_AGE) return false;
+  if (!shouldOfferDailyPlanning(age)) return true;
+  return !passiveAlreadyServedThisGap;
+}
+
+export function isEarlyChildhoodStoryGap(age: number): boolean {
+  return age <= EARLY_CHILDHOOD_MAX_AGE;
+}
+
 const BIAS_TAG_TO_CATEGORY: Record<string, ActionCategory> = {
   training: 'training',
   comprehension: 'study',

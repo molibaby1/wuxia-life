@@ -7,7 +7,11 @@
 - Files: src/data/originInfantPassiveChain.ts, src/data/lines/origin-infant-passives.json
 - **Learnings for future iterations:**
   - Schema one-liner lives in originInfantPassiveChain.ts header; design index §1 lists quest IDs.
+---## [2026-06-20 00:11] - US-003 (early-childhood-origin-infant-quest-chains)
+- Wired scholar_infant_01_hall_birth + scholar_infant_02_swaddle_ink; legacyCatalogId infant_swaddle_scholar.
+- Files: src/data/lines/origin-infant-passives.json (scholar chain N1–N2)
 ---
+
 ## [2026-06-20 00:11] - US-002 (early-childhood-origin-infant-quest-chains)
 - `selectPassiveNarrative` age ≤2 uses ordered chain dequeue; headless/UI share path; legacy swaddle gated via legacyCatalogId.
 - Files: infantPassiveNarratives.ts, HeadlessEngineSessionImpl.ts, useNewGameEngine.ts

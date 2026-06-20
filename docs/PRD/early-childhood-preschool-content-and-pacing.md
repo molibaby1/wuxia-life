@@ -124,4 +124,4 @@ Stage-1 解决 **agency 形态**（0～4 被动、5+ 规划），Stage-3 加厚 
 
 ---
 
-**状态：** 待实施
+**状态：** 已实施（Stage-4 · `ralph/early-childhood-preschool-content-and-pacing`）

@@ -80,7 +80,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003 (split 3/3); Goals §2 chain complete flag; success metric ≥80% chain completion to age 2"
     },
     {

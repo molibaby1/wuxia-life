@@ -10,7 +10,11 @@
 ---## [2026-06-20 00:11] - US-003 (early-childhood-origin-infant-quest-chains)
 - Wired scholar_infant_01_hall_birth + scholar_infant_02_swaddle_ink; legacyCatalogId infant_swaddle_scholar.
 - Files: src/data/lines/origin-infant-passives.json (scholar chain N1–N2)
+---## [2026-06-20 00:11] - US-005 (early-childhood-origin-infant-quest-chains)
+- Wired scholar_infant_05_corridor_steps; sets scholar_infant_chain_complete.
+- Files: origin-infant-passives.json scholar N5
 ---
+
 ## [2026-06-20 00:11] - US-004 (early-childhood-origin-infant-quest-chains)
 - Wired scholar_infant_03_grasp_brush + scholar_infant_04_trace_red @ age 1.
 - Files: origin-infant-passives.json scholar N3–N4

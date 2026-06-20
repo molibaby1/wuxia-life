@@ -13,7 +13,10 @@
 ---## [2026-06-20 00:11] - US-005 (early-childhood-origin-infant-quest-chains)
 - Wired scholar_infant_05_corridor_steps; sets scholar_infant_chain_complete.
 - Files: origin-infant-passives.json scholar N5
+---## [2026-06-20 00:11] - US-007 (early-childhood-origin-infant-quest-chains)
+- Wired martial_infant_03_grasp_wood + martial_infant_04_corridor_watch @ age 1.
 ---
+
 ## [2026-06-20 00:11] - US-006 (early-childhood-origin-infant-quest-chains)
 - Wired martial_infant_01_hall_birth + martial_infant_02_swaddle_dummy; legacyCatalogId infant_swaddle_martial.
 ---

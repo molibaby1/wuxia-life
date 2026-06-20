@@ -144,6 +144,22 @@ function testChildhoodAgency(): void {
     'age 5 band includes 5–6 lite action id',
   );
 
+  const martialAge5 = resolveChildhoodActionPalette({
+    age: 5,
+    player: { traitProfile: { origin: 'martial_house' } } as PlayerState,
+    flags: { origin_wuxia_family: true },
+  });
+  const martialAge7 = resolveChildhoodActionPalette({
+    age: 7,
+    player: { traitProfile: { origin: 'martial_house' } } as PlayerState,
+    flags: { origin_wuxia_family: true },
+  });
+  assert(
+    martialAge5.map(a => a.id).join(',') !== martialAge7.map(a => a.id).join(','),
+    'martial origin age 5 vs 7 palettes differ',
+  );
+  assert(martialAge5.length <= 2 && martialAge7.length <= 2, 'lite palette max 2 at 5–7');
+
   const infantAction = resolveActiveAction({
     state: {
       player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10 } as PlayerState,

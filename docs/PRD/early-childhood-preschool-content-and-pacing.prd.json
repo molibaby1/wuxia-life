@@ -139,7 +139,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003 (split 2/2); §8 success metric (5 vs 7 action pool not identical); §2 goals; depends on US-008 band definitions"
     },
     {

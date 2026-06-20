@@ -77,7 +77,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002 (split 2/4); §5 FR-2; §3 frozen (4y childhood_preference remains story_event with choices); depends on US-004 schema"
     },
     {

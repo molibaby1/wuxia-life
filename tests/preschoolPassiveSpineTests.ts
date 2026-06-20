@@ -9,17 +9,6 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function scholarState(age: number): GameState {
-  return {
-    player: {
-      age,
-      flags: { origin_scholar_family: true },
-    },
-    flags: { origin_scholar_family: true },
-    eventHistory: [],
-  } as GameState;
-}
-
 export function runPreschoolPassiveSpineTests(): void {
   assert(preschoolPassiveSpineCatalog.length >= 8, 'merged preschool catalog has density');
 
@@ -37,12 +26,34 @@ export function runPreschoolPassiveSpineTests(): void {
   const clever = preschoolPassiveSpineCatalog.find(e => e.id === 'preschool_scholar_clever_speech');
   assert(clever !== undefined, 'clever_speech equivalent in config');
 
-  const picked = selectPreschoolPassiveEntry(scholarState(5));
+  const picked = selectPreschoolPassiveEntry({
+    player: { age: 5 },
+    eventHistory: [],
+  } as GameState);
   assert(picked.title.length > 0, 'selectPreschoolPassiveEntry returns narrative');
 
   for (const origin of ['scholar', 'martial', 'merchant', 'frontier'] as const) {
     const band = getPreschoolPassiveEntries(5).filter(e => e.originTags.includes(origin));
     assert(band.length >= 2, `origin ${origin} has ≥2 entries in 3–7 config`);
+  }
+
+  const scholarIds = new Set(
+    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('scholar')).map(e => e.id),
+  );
+  const martialIds = new Set(
+    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('martial')).map(e => e.id),
+  );
+  const merchantIds = new Set(
+    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('merchant')).map(e => e.id),
+  );
+  const frontierIds = new Set(
+    preschoolPassiveSpineCatalog.filter(e => e.originTags.includes('frontier')).map(e => e.id),
+  );
+  for (const id of merchantIds) {
+    assert(!scholarIds.has(id) && !martialIds.has(id), `merchant id ${id} must not reuse scholar/martial`);
+  }
+  for (const id of frontierIds) {
+    assert(!scholarIds.has(id) && !martialIds.has(id), `frontier id ${id} must not reuse scholar/martial`);
   }
 }
 

@@ -1,6 +1,6 @@
 # 四出身 0～2 岁被动链验收报告
 
-生成时间：2026-06-17T21:57:56.336Z  
+生成时间：2026-06-20T00:10:55.216Z  
 决策：**PASS**  
 真源：`origin-infant-passives.json` + `selectPassiveNarrative` / `HeadlessEngineSessionImpl.passive_continue`  
 对照：`childhood-origin-infant-passive-index.md` AC-X-1～AC-X-4

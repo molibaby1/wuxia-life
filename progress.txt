@@ -21,7 +21,13 @@
 - Wired merchant_infant_05_alley_steps; sets merchant_infant_chain_complete.
 ---## [2026-06-20 00:11] - US-013 (early-childhood-origin-infant-quest-chains)
 - Wired frontier_infant_03_grasp_bow + frontier_infant_04_tent_crawl @ age 1.
+---## [2026-06-20 00:11] - US-015 (early-childhood-origin-infant-quest-chains)
+- AC-X verification: all C(4,2) pairs 0% chain-node overlap; 书香×边疆 0% vs Stage-2 70.6%; gate:p16 pass.
+- Files: scripts/runInfantPassiveChainVerification.ts, docs/test-reports/early-childhood-origin-chains-stage3.md
+- **Learnings for future iterations:**
+  - Stage-3 metric uses chain node IDs only; full-spine overlap may still differ until Stage-4.
 ---
+
 ## [2026-06-20 00:11] - US-014 (early-childhood-origin-infant-quest-chains)
 - Wired frontier_infant_05_rampart_steps; sets frontier_infant_chain_complete.
 ---

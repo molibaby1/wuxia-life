@@ -1,6 +1,6 @@
 # 幼童期被动叙事 · 出身隔离设计规则（Stage-5）
 
-**状态：** 待审批  
+**状态：** 已实施（见 `docs/test-reports/early-childhood-preschool-origin-isolation-stage5-closure.md`）  
 **问题：** 3～7 岁 passive filler **跨出身串味**（如书香门第出现「营中操练」）  
 **关联 PRD：** `docs/PRD/early-childhood-preschool-origin-isolation.md`  
 **对比真源：** Stage-3 的 0～2 岁有序链（`originInfantPassiveChain.ts`）已严格按 `origin_*` flag 隔离

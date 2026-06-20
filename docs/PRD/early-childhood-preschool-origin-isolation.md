@@ -178,5 +178,4 @@ US-005 可与 US-006 并行（tests vs script）。
 
 ---
 
-**状态：** 待审批  
-**前置：** Stage-1～4 已实施
+**状态：** 已实施 · 收口见 `docs/test-reports/early-childhood-preschool-origin-isolation-stage5-closure.md`

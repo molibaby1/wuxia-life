@@ -22,7 +22,7 @@ export interface DisturbanceResolverInput {
 
 export function resolveDisturbanceAfterAction(input: DisturbanceResolverInput): DisturbanceResolution {
   const age = input.state.player?.age ?? 0;
-  if (age <= 12) {
+  if (age <= 7) {
     return { disturbance: null };
   }
 

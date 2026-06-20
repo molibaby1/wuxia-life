@@ -65,7 +65,7 @@
         "Tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003 (split 2/3); may overlap toddler_exploration spine year — use scholar variant copy only"
     },
     {

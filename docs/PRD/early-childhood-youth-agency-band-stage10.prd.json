@@ -1,0 +1,161 @@
+{
+  "project": "Wuxia Life Early Childhood Youth Agency Band (Stage-10)",
+  "branchName": "ralph/early-childhood-youth-agency-band-stage10",
+  "description": "Stage-10 youth band (ages 13–20) closure: audit 13–20 agency and route-entry baselines, land Youth (13–20) design rules, implement moderate youth palette resolver (not unfiltered getMinimumActions at age 13), youth agency matrix tests + CI gate, align routeDefinitions entry ageBand to 13–20, route-entry timing unit tests, optional Stage-9 US-003 8–12 spine carryover (P1 deferrable), extend final playtest 13–20 columns, and Stage-10 closure. Must not regress Stage-5/6/7/8/9 isolation, gap ≤2, 8–12 agency bleed=0, or passive/spine/trait contracts. Product truth: docs/PRD/early-childhood-youth-agency-band-stage10.md; agency rules: docs/designs/p16-stage-agency-rules.md § Youth (13–20); suite index: docs/PRD/early-childhood-opening-experience-index.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Stage-10 Baseline Audit (Read-Only)",
+      "description": "As a maintainer, I want an inventory of 13–20 agency paths, youth transition flags, and route-entry timing before changes.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-stage10-baseline-audit.md",
+        "Add repro script scripts/runStage10BaselineAudit.ts (read-only inventory; no gameplay behavior change)",
+        "Document palette at ages {13,14,16,18,20}: resolveChildhoodActionPalette age>12 branch, getMinimumActions() ids, HeadlessEngineSessionImpl.getPlanningOptions call chain",
+        "Sample 35-step headless runs (four origins, seeds 70001–70004): ages 13–20 step share, planning tick action id histogram",
+        "Inventory routeDefinitions.ts rows with ageBand 0-10 (p9_early_business_focus, p9_early_travel_focus, p9_early_social_focus, p9_echo_training_hook, p9_echo_study_hook) vs applyYouthTransitionSeeds / promoteYouthRouteEntryFromUpbringing",
+        "Record applyYouthTransitionSeeds(12→13) flag outputs for four origin surfaces (scholar, martial, merchant, frontier trait origins)",
+        "Flag daily_take_odd_job and similar age 12+ config events if they violate youth-boundary intent (PRD §11 Q5)",
+        "No gameplay code changes outside the audit script",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §4 US-001; §3 frozen (YOUTH_MIN_AGE=13, YOUTH_MAX_AGE=20 target, 8–12 Stage-9 unchanged); §7 touchpoints childhoodAgency.ts, routeDefinitions.ts, GameEngineIntegration.ts; §10 priority root; pattern: runStage9BaselineAudit.ts"
+    },
+    {
+      "id": "US-002",
+      "title": "Youth (13–20) Design Rules Appendix",
+      "description": "As a designer, I want executable Youth agency rules so implementation and tests share one spec.",
+      "acceptanceCriteria": [
+        "Extend docs/designs/p16-stage-agency-rules.md with § Youth (13–20): moderate agency definition, palette cap ≤5 categories, lite-before-basic gradient, allowed categories (training/study/socializing/business/travel)",
+        "Document boundary: age ≤12 → Stage-9 late childhood rules; age 13–20 → youth rules; age >20 → adult getMinimumActions()",
+        "Document demonic travel exception carryover (no new youth wanderer shortcuts)",
+        "Cross-reference US-001 baseline findings (current age-13 five-basic dump problem)",
+        "Save decision log appendix in docs/test-reports/early-childhood-stage10-baseline-audit.md § youth rules",
+        "No runtime gameplay changes in this story",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD §3 frozen moderate defaults; §11 Q1/Q4 defaults; depends on US-001 audit; blocks US-003 implementation spec"
+    },
+    {
+      "id": "US-003",
+      "title": "Youth Palette Resolver & Engine Wiring",
+      "description": "As a developer, I want a youth-tier action palette wired into the planning path for ages 13–20.",
+      "acceptanceCriteria": [
+        "Export YOUTH_MAX_AGE = 20 from src/p16/childhoodAgency.ts (YOUTH_MIN_AGE = 13 already exists)",
+        "Add resolveYouthActionPalette(context) per US-002 rules: max ≤5 categories, lite preferred, no same-tick all-five action_*_basic dump",
+        "Update resolveChildhoodActionPalette: age 13–20 → resolveYouthActionPalette; age >20 → getMinimumActions(); age ≤12 unchanged (LATE_CHILDHOOD_SUPPRESSED_CATEGORIES retained)",
+        "Wire src/core/GameEngineIntegration.ts getAvailableActiveActions (or equivalent palette entry) to use youth resolver for ages 13–20",
+        "Regression: npm exec tsx tests/lateChildhoodAgencyStage9Tests.ts pass (8–12 zero suppressed-category bleed)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD §5 FR-1, FR-2; §7 childhoodAgency.ts, GameEngineIntegration.ts, activeActionCatalog.ts, childhoodActionCatalog.ts; §9 risk empty pool; depends on US-002; blocks US-004 matrix"
+    },
+    {
+      "id": "US-004",
+      "title": "Youth Agency Matrix Tests & CI Gate",
+      "description": "As a maintainer, I want automated proof that youth planning meets P16 moderate agency bar.",
+      "acceptanceCriteria": [
+        "Create tests/youthAgencyStage10Tests.ts mirroring lateChildhoodAgencyStage9Tests.ts structure",
+        "Matrix: four origins × ages {13,14,15,16,17,18,19,20} × 20 ticks → 0 cells where all five action_*_basic appear in same palette",
+        "Each matrix cell: assert ≥1 training or study action when planning palette non-empty",
+        "Each origin: assert ≥1 cell at some age 13–20 exposes business, travel, or socializing (lite or youth-tier id) — contrast with 8–12 suppression",
+        "Add youthAgencyStage10Tests to tests/runRealTestGate.ts",
+        "Save docs/test-reports/youth-agency-stage10.md with matrix table and commands (npm exec tsx tests/youthAgencyStage10Tests.ts, npm run gate:p16)",
+        "npm run gate:p16 pass",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD §5 FR-1; §8 metric 13–20 full-adult-basic dump 0%; §9 risk palette too narrow; depends on US-003; optional sub-band 13–15 vs 16–20 documented in report only (PRD §11 Q1)"
+    },
+    {
+      "id": "US-005",
+      "title": "Route Definitions ageBand Alignment (13–20)",
+      "description": "As a maintainer, I want P9 route entry signals to declare youth window 13–20, not childhood 0–10.",
+      "acceptanceCriteria": [
+        "Update src/narrative/config/routeDefinitions.ts: change entry signal ageBand from 0-10 to 13-20 for p9_early_business_focus, p9_early_travel_focus, p9_early_social_focus, p9_echo_training_hook, p9_echo_study_hook rows (six entry rows per US-001 inventory)",
+        "Update description strings from 幼年* to 少年* where entry kind is youth route signal",
+        "npm run gate:p11-scheduling exits with decision !== fail",
+        "Document changed rows in docs/test-reports/youth-route-entry-timing-stage10.md § config diff",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD §5 FR-3 partial; §9 risk P11 gate; depends on US-001 inventory; may parallel US-003/US-004; blocks US-006 timing tests for config-aligned assertions"
+    },
+    {
+      "id": "US-006",
+      "title": "Route-Entry Timing Unit Tests",
+      "description": "As a maintainer, I want proof that p9_early_* flags cannot be set by childhood gameplay before age 13.",
+      "acceptanceCriteria": [
+        "Extend tests/p16OriginDestinyTests.ts or add tests/youthRouteEntryTimingStage10Tests.ts",
+        "Test: resolveChildhoodActionPalette / headless planning at ages {8,10,12} for four origins → flags must not gain new p9_early_business_focus, p9_early_travel_focus, p9_early_social_focus from palette path alone",
+        "Test: applyYouthTransitionSeeds(state, 12, 13) per origin surface — merchant seeds p16_deferred_business_upbringing + p9_early_business_focus; demonic travel echo cases from testYouthRouteEntryPromotion still pass",
+        "Regression: existing testYouthRouteEntryPromotion cases pass unchanged",
+        "Complete docs/test-reports/youth-route-entry-timing-stage10.md with test matrix and npm exec tsx command",
+        "Add suite to tests/runRealTestGate.ts if new file created",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "PRD §5 FR-3, FR-4; §8 p9_early before 13 = 0; §7 applyYouthTransitionSeeds, promoteYouthRouteEntryFromUpbringing, personaYouthRouteSeeds.ts; depends on US-005 for config truth; may start after US-003"
+    },
+    {
+      "id": "US-007",
+      "title": "8–12 Origin Spine Minimum Pack (Stage-9 US-003 Carryover, P1 Deferrable)",
+      "description": "As a player, I want late childhood formal beats that reflect my origin, not only neutral childhood_summary echoes.",
+      "acceptanceCriteria": [
+        "Add ≥1 origin-exclusive or origin-weighted spine/story_event per four-main origin (scholar, martial, merchant, frontier) for age band 8–12 in approved catalog path (childhoodEvents.ts / p22-content-expansions.json per Stage-6/7 conventions)",
+        "Each event passes isSpineOriginEligible + validateSpineOriginConfig",
+        "Extend tests/spineOriginIsolationTests.ts 8–12 matrix: 0 foreign exclusive ids",
+        "Save content manifest in docs/test-reports/late-childhood-spine-content-stage10.md listing id, ageRange, origin condition per event",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "P1 DEFERRABLE — Stage-9 US-003 deferred; skip if US-004+US-006 meet product bar; may parallel US-005/US-006 after US-004; PRD §11 Q2 default defer"
+    },
+    {
+      "id": "US-008",
+      "title": "Final Playtest 13–20 Columns",
+      "description": "As a maintainer, I want the opening playtest harness to observe youth-band ticks without changing the 35-step gate.",
+      "acceptanceCriteria": [
+        "Extend scripts/runEarlyChildhoodFinalPlaytest.ts: per-origin columns for ages 13–20 step count, 13–20 planning tick count, youth action id samples",
+        "Re-run npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts",
+        "Update docs/test-reports/early-childhood-opening-experience-final-playtest.md with Stage-10 youth observation row",
+        "Confirm existing gates unchanged: gap ≤2, 8–12 bleed=0, passive/spine/trait bleed=0, maxConsecutivePassiveTitle ≤2",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "PRD §3 frozen (35-step main gate unchanged); §11 Q3; §5 FR-5; depends on US-003 and US-004; precedes US-009 closure"
+    },
+    {
+      "id": "US-009",
+      "title": "Extended Playtest & Stage-10 Closure",
+      "description": "As a product owner, I want closure tying youth agency, route timing, and opening run metrics.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-stage10-closure.md referencing US-001–US-008 artifacts (note US-007 defer/waive if applicable)",
+        "Include command snippets: spineOriginIsolationTests, preschoolOriginIsolationTests, lateChildhoodAgencyStage9Tests, youthAgencyStage10Tests, gate:p16, gate:p11-scheduling",
+        "Confirm Stage-5/6/7/8/9 non-regression table (gap ≤2, bleed=0, 8–12 agency PASS)",
+        "List Stage-11 candidates: trait-line content volume, browser 实机 ★ scoring, 21+ adult agency tuning",
+        "No gameplay code in this story",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "PRD §4 closure story; depends on US-004, US-006, US-008 minimum; US-007 optional waive documented here"
+    }
+  ]
+}

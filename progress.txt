@@ -1,5 +1,6 @@
 ## Codebase Patterns
 
+- Stage-10 youth band baseline: `docs/test-reports/early-childhood-stage10-baseline-audit.md`; repro `npm exec tsx -- scripts/runStage10BaselineAudit.ts` (--sample for 35-step youth metrics). Age>12 today → `getMinimumActions()` five basic; US-003 adds `resolveYouthActionPalette`.
 - Stage-9 late childhood: `LATE_CHILDHOOD_SUPPRESSED_CATEGORIES` in `childhoodAgency.ts` (8–12 training/study only); matrix `tests/lateChildhoodAgencyStage9Tests.ts`; infant filler dedup in `originInfantPassiveChain.ts` for single shared filler repeat; passive path ages ≤12 via `selectPreschoolPassiveEntry`.
 - Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics).
 - Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
@@ -13,6 +14,15 @@
 - Stage-6 spine origin isolation: `resolvePrimaryOriginFamilyFlag` in `src/p16/primaryOriginFlag.ts`; hard gate `isSpineOriginEligible` in `getAvailableEvents` for age ≤7 via `src/p16/spineOriginIsolation.ts`; config validation `src/p16/spineOriginConfigValidation.ts`; tests `tests/spineOriginIsolationTests.ts`, `tests/spineOriginConfigValidationTests.ts`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
 
+---
+
+## [2026-06-22] - US-001 (early-childhood-youth-agency-band-stage10)
+- Read-only Stage-10 baseline: ages 13–20 palette → five adult basic; route entry ageBand 0-10 inventory; applyYouthTransitionSeeds four origins; 35-step youth share ~9–11%.
+- Files: scripts/runStage10BaselineAudit.ts, docs/test-reports/early-childhood-stage10-baseline-audit.md
+- **Learnings for future iterations:**
+  - Age>12 branch is unfiltered getMinimumActions — origin-invariant five-basic dump.
+  - 35-step samples rarely hit youth planning ticks; matrix tests required (US-004).
+  - daily_take_odd_job [12–70] in dailyEvents.ts — acceptable livelihood, not route entry.
 ---
 
 ## [2026-06-21] - US-006 (early-childhood-late-childhood-agency-spine-stage9)

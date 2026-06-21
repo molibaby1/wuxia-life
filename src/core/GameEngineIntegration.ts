@@ -51,6 +51,8 @@ import { getWholeLifePacingMultiplier } from '../p20/wholeLifePacing';
 import { applyLiveOpsActivationToState } from '../p22/liveOpsActivation';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
+import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
+import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import {
   applyRareLineFlags,
   rollRareEventLines,
@@ -425,6 +427,11 @@ export class GameEngineIntegration {
 
       // 1. 统一运行时门禁：conditions + thresholds + legacy triggerConditions
       if (!this.passesRuntimeEventGuards(event, this.gameState)) {
+        return false;
+      }
+
+      const primaryOrigin = resolvePrimaryOriginFamilyFlag(this.gameState);
+      if (!isSpineOriginEligible(event, primaryOrigin, age)) {
         return false;
       }
       

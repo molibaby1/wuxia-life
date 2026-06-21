@@ -16,6 +16,9 @@ export type PreschoolPassiveEntry = PassiveNarrativeEntry;
 export const PRESCHOOL_EXCLUSIVE_ORIGIN_TAGS = ['scholar', 'martial', 'merchant', 'frontier'] as const;
 export type PreschoolExclusiveOriginTag = (typeof PRESCHOOL_EXCLUSIVE_ORIGIN_TAGS)[number];
 
+/** Recent passive title suppression window (PRD Q3, Stage-7 US-007). */
+export const NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW = 5;
+
 const preschoolConfigEntries = (preschoolPassiveSpineJson as { entries: PreschoolPassiveEntry[] }).entries;
 
 function mergedPreschoolCatalog(): PreschoolPassiveEntry[] {
@@ -87,11 +90,23 @@ export function isForeignExclusivePreschoolEntry(
   return false;
 }
 
-function buildPreschoolPassiveGapEntry(age: number): PreschoolPassiveEntry {
+function buildPreschoolPassiveGapEntry(age: number, recentTitles: string[] = []): PreschoolPassiveEntry {
   const placeholder = resolvePlanningPlaceholderText(age);
+  const rotatedTitles =
+    age <= 4
+      ? [placeholder.title, '檐下晚晴', '童稚年月', '静听风言', '庭院时光']
+      : [placeholder.title, '邻里童谣', '季节更迭', '庭院嬉戏', '童年印象'];
+  const lastTitle = recentTitles[0];
+  const title =
+    rotatedTitles.find(candidate => !recentTitles.includes(candidate) && candidate !== lastTitle) ??
+    rotatedTitles.find(candidate => candidate !== lastTitle) ??
+    placeholder.title;
   return {
-    id: 'preschool_passive_gap',
-    title: placeholder.title,
+    id:
+      title === placeholder.title
+        ? 'preschool_passive_gap'
+        : `preschool_passive_gap::${encodeURIComponent(title)}`,
+    title,
     text: placeholder.text,
     originTags: ['neutral'],
     ageMin: 3,
@@ -136,6 +151,48 @@ export function findPreschoolPassiveEntryById(id: string): PreschoolPassiveEntry
   return undefined;
 }
 
+export function getRecentPassiveNarrativeTitles(
+  state: GameState,
+  window: number = NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW,
+): string[] {
+  const history = state.eventHistory ?? [];
+  const titles: string[] = [];
+  for (let i = history.length - 1; i >= 0 && titles.length < window; i -= 1) {
+    const record = history[i]!;
+    const entry = findPreschoolPassiveEntryById(record.eventId);
+    if (entry) {
+      titles.push(entry.title);
+      continue;
+    }
+    if (record.eventId === 'preschool_passive_gap' || record.eventId.startsWith('preschool_passive_gap::')) {
+      const encodedTitle = record.eventId.includes('::')
+        ? decodeURIComponent(record.eventId.split('::')[1] ?? '')
+        : resolvePlanningPlaceholderText(record.age ?? state.player?.age ?? 0).title;
+      titles.push(encodedTitle);
+    }
+  }
+  return titles;
+}
+
+function suppressRecentTitleRepeats(
+  pool: PreschoolPassiveEntry[],
+  recentTitles: string[],
+): PreschoolPassiveEntry[] {
+  if (recentTitles.length === 0) {
+    return pool;
+  }
+  const blocked = new Set(recentTitles);
+  let filtered = pool.filter(entry => !blocked.has(entry.title));
+  const lastTitle = recentTitles[0];
+  if (lastTitle && filtered.length > 1) {
+    const withoutImmediateRepeat = filtered.filter(entry => entry.title !== lastTitle);
+    if (withoutImmediateRepeat.length > 0) {
+      filtered = withoutImmediateRepeat;
+    }
+  }
+  return filtered;
+}
+
 export function selectPreschoolPassiveEntry(
   state: GameState,
   random: () => number = Math.random,
@@ -143,6 +200,7 @@ export function selectPreschoolPassiveEntry(
   const age = state.player?.age ?? 0;
   const originTags = resolveOriginTags(state);
   const history = new Set((state.eventHistory ?? []).map(record => record.eventId));
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
   const ageEntries = getPreschoolPassiveEntries(age);
 
   let pool = ageEntries.filter(
@@ -151,13 +209,17 @@ export function selectPreschoolPassiveEntry(
       !isNeutralOnlyPreschoolEntry(entry) &&
       !history.has(entry.id),
   );
+  pool = suppressRecentTitleRepeats(pool, recentTitles);
   if (pool.length === 0) {
-    pool = ageEntries.filter(
-      entry => isNeutralOnlyPreschoolEntry(entry) && !history.has(entry.id),
+    pool = suppressRecentTitleRepeats(
+      ageEntries.filter(
+        entry => isNeutralOnlyPreschoolEntry(entry) && !history.has(entry.id),
+      ),
+      recentTitles,
     );
   }
   if (pool.length === 0) {
-    return buildPreschoolPassiveGapEntry(age);
+    return buildPreschoolPassiveGapEntry(age, recentTitles);
   }
 
   const weighted = pool.map(entry => ({
@@ -166,7 +228,7 @@ export function selectPreschoolPassiveEntry(
   }));
   const total = weighted.reduce((sum, item) => sum + item.weight, 0);
   if (total <= 0) {
-    return buildPreschoolPassiveGapEntry(age);
+    return buildPreschoolPassiveGapEntry(age, recentTitles);
   }
   let roll = random() * total;
   for (const item of weighted) {

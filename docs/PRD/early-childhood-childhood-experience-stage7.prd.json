@@ -117,7 +117,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-005; §3 frozen (dedup legal pool only, no eligibility change); §5 FR-4; §7 touchpoints preschoolPassiveSpine.ts; §9 neutral passive same-title consecutive ≤2; §10 risk gap increase → fallback order unchanged; §12 Q3 NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW=5; §6 non-goals (no Stage-5 eligibility rule changes beyond dedup weighting); independent per §11"
     },
     {

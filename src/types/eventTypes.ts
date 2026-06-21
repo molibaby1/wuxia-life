@@ -343,6 +343,8 @@ export interface DailyEventConfig {
       repeatThreshold: number;
     }>;
   };
+  /** Optional origin gate probe metadata for daily pool entries (Stage-7). */
+  spineOriginStageFit?: string[];
 }
 
 // ========== 身份系统类型 ==========

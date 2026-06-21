@@ -1,4 +1,6 @@
 import { dailyEvents } from '../data/life/dailyEvents';
+import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
+import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { EffectType, EventCategory, EventPriority, type DailyEventConfig, type DailyEventVariantConfig, type EventDefinition, type EventTrigger, type GameState } from '../types/eventTypes';
 
 function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVariantConfig {
@@ -14,12 +16,16 @@ function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVar
 }
 
 export class DailyEventSystem {
-  selectEvent(state: GameState): EventDefinition | null {
+  selectEvent(state: GameState, configs: DailyEventConfig[] = dailyEvents): EventDefinition | null {
     const age = state.player?.age || 0;
-    const candidates = dailyEvents
+    const primaryOrigin = resolvePrimaryOriginFamilyFlag(state);
+    const candidates = configs
       .filter(event => age >= event.ageRange.min && age <= event.ageRange.max)
       .map(event => ({ event, weight: this.getWeight(event, state) }))
-      .filter(item => item.weight > 0);
+      .filter(item => item.weight > 0)
+      .filter(item =>
+        isSpineOriginEligible(this.buildProbeEvent(item.event, state), primaryOrigin, age),
+      );
 
     if (candidates.length === 0) {
       return null;
@@ -111,6 +117,37 @@ export class DailyEventSystem {
     return this.clampMultiplier(Math.max(0.18, exactPenalty * titlePenalty));
   }
 
+  private buildProbeEvent(config: DailyEventConfig, state: GameState): EventDefinition {
+    const variant =
+      config.variants.neutral[0] ??
+      config.variants.positive[0] ??
+      config.variants.negative[0];
+    const age = state.player?.age || 0;
+    return {
+      id: variant?.id ?? config.id,
+      version: '1.0.0',
+      category: EventCategory.DAILY_EVENT,
+      priority: EventPriority.LOW,
+      weight: config.baseWeight,
+      ageRange: { min: age, max: age },
+      triggers: [{ type: 'age_reach', value: age }],
+      content: {
+        title: config.title,
+        text: variant?.text ?? config.title,
+      },
+      eventType: 'auto',
+      metadata: {
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        tags: ['daily', config.group, 'daily_pool'],
+        enabled: true,
+        authoringSemantics: config.spineOriginStageFit?.length
+          ? { stageFit: config.spineOriginStageFit }
+          : undefined,
+      },
+    };
+  }
+
   private buildEvent(config: DailyEventConfig, state: GameState): EventDefinition {
     const outcomeType = this.chooseOutcomeType(config, state);
     const variant = pickWeightedVariant(config.variants[outcomeType]);
@@ -162,6 +199,9 @@ export class DailyEventSystem {
         updatedAt: Date.now(),
         tags: ['daily', config.group, 'daily_pool'],
         enabled: true,
+        authoringSemantics: config.spineOriginStageFit?.length
+          ? { stageFit: config.spineOriginStageFit }
+          : undefined,
       },
     };
   }

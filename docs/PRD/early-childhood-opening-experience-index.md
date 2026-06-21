@@ -17,7 +17,7 @@
 | 0～2 纯被动 | Stage-1 机制 · Stage-3 出身内容 |
 | 3～4 被动 + spine 抉择 | Stage-1 机制 · Stage-4 密度与文案 · **Stage-6 spine 隔离** |
 | 5～7 有限主动（≤2 lite） | Stage-1 机制 · Stage-4 选项与节奏 · **Stage-6 spine 隔离** |
-| 8～12 受限主动 | Stage-7 spine 隔离（gate band）；完整 agency 内容仍属 P16 范围外 |
+| 8～12 受限主动 | Stage-7 spine 隔离（gate band）；**Stage-9** agency 形态 + spine 密度 |
 
 ---
 
@@ -32,7 +32,8 @@
 | **5** | [`early-childhood-preschool-origin-isolation.md`](./early-childhood-preschool-origin-isolation.md) | **3～7 岁 passive 出身硬隔离** | Stage-3/4 已合入 | **已实施** |
 | **6** | [`early-childhood-spine-origin-isolation.md`](./early-childhood-spine-origin-isolation.md) | **0～7 岁 spine / story_event 出身硬隔离** | Stage-5 已合入；暴露 spine 串味 | **已实施** |
 | **7** | [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) | **Spine 扩 band 8～12 · daily gate · trait 线 · neutral 去重** | Stage-6 已合入 | **已实施** |
-| **8** | [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) | **Passive 池加厚 · poor trait spine · gap 收口** | 总验收 PASS | **待实施** |
+| **8** | [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) | **Passive 池加厚 · poor trait spine · gap 收口** | Stage-7 已合入 | **已实施** |
+| **9** | [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) | **8～12 agency · spine 密度 · neutral spine dedup P2** | Stage-8 已合入 | **待实施** |
 
 ```mermaid
 flowchart TB
@@ -55,6 +56,7 @@ flowchart TB
   S5 -.->|passive 已收口| S6
   S6 -.->|8～12 / daily / trait| S7
   S7 -.->|gap / poor content| S8[Stage-8 密度与 trait]
+  S8 -.->|8～12 / dedup| S9[Stage-9 童年晚期]
 ```
 
 **并行建议：** Stage-6 可在 Stage-5 合入后立即开工；主要 touch `GameEngineIntegration.ts`、P22 配置与测试。
@@ -94,23 +96,34 @@ flowchart TB
 **Stage-7 设计真源：** `docs/designs/childhood-experience-stage7-rules.md`  
 **Closure：** `docs/test-reports/early-childhood-stage7-closure.md`
 
-## 6. 总验收（Stage-1～7）
+## 6. 总验收（Stage-1～8）
 
 | 项 | 结果 |
 | --- | --- |
 | 报告 | [`early-childhood-opening-experience-final-playtest.md`](../test-reports/early-childhood-opening-experience-final-playtest.md) |
-| 决策 | **PASS**（2026-06-21 复验） |
+| 决策 | **PASS**（2026-06-21 Stage-8 复验） |
 | 驱动 | `npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts` |
-| Primary flag 补丁 | `EventExecutor` 四主 flag_set 清除冲突项 + `tests/primaryOriginFlagTests.ts` |
+| Stage-8 gap | **2 / 2 / 2 / 0**（≤2 门禁 PASS） |
+| Primary flag 补丁 | `EventExecutor` 四主 flag_set 清除冲突项 + `tests/primaryOriginFlagTests.ts`（CI） |
+| RNG 确定性 | `HeadlessEngineSessionImpl` passive 选择纳入 seeded RNG（FIX-001） |
 
-## 7. Stage-8（当前）
+## 7. Stage-8 交付记录
 
 | Stage | 焦点 | 状态 |
 | --- | --- | --- |
-| **8** | Passive 池加厚 + poor trait spine + gap ≤2 | **待实施** → [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) |
+| **8** | Passive 池加厚 + poor trait spine + gap ≤2 + RNG 确定性 | **已实施** → [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) |
 
-**Stage-8 设计真源：** `docs/designs/childhood-experience-stage8-content-rules.md`
+**Stage-8 设计真源：** `docs/designs/childhood-experience-stage8-content-rules.md`  
+**Closure：** `docs/test-reports/early-childhood-stage8-closure.md`
+
+## 8. Stage-9（当前）
+
+| Stage | 焦点 | 状态 |
+| --- | --- | --- |
+| **9** | 8～12 P16 agency + spine 密度；neutral spine dedup P2；被动同标题连出收口 | **待实施** → [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) |
+
+**前置：** Stage-8 closure §5 候选项；Stage-7 US-006（P2）延后项
 
 ---
 
-**索引版本：** 0.6 · 2026-06-21
+**索引版本：** 0.7 · 2026-06-21

@@ -1,6 +1,6 @@
 # 幼年体验 Stage-8 设计规则（Passive 池加厚 · Poor trait 线 · Gap 收口）
 
-**状态：** 规划（待实施）  
+**状态：** 已实施（2026-06-21）  
 **前置：** Stage-1～7 机制验收 PASS（`early-childhood-opening-experience-final-playtest.md`）  
 **关联 PRD：** `docs/PRD/early-childhood-passive-density-and-trait-line-stage8.md`  
 **总验收证据：** 四出身 bleed 0；primary flag 冲突已在 `EventExecutor` flag_set 层修复

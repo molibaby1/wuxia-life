@@ -165,6 +165,95 @@
     }
   },
   {
+    "id": "p22_childhood_poor_shaping",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": {
+      "min": 4,
+      "max": 7
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 4
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"origin_poor_family\")"
+      }
+    ],
+    "content": {
+      "title": "苦寒塑形",
+      "text": "家境窘迫，你用坏了的竹简边角练字，墨色淡得几乎看不见。母亲把唯一的热粥让给你，自己却只说「不饿」——你从那时起便学会把苦咽下去。",
+      "description": "P22 童年塑形池扩展：贫寒成长轨迹"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "save_for_rainy_day",
+        "text": "把省下的碎钱藏起来",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "caution",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_poor_shaping_frugal",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "share_with_neighbor",
+        "text": "分给更苦的邻居半块饼",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "chivalry",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_poor_shaping_kind",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "childhood",
+        "formative",
+        "p22",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "stage_sensitive",
+        "stageFit": [
+          "childhood_formative"
+        ],
+        "toneMarkers": [
+          "贫寒",
+          "节用",
+          "童年"
+        ],
+        "duplicateRiskClass": "formative_milestone",
+        "authoringNotes": "Poor trait-line formative beat; condition origin_poor_family only (no four-main OR)."
+      }
+    }
+  },
+  {
     "id": "p22_early_wealth_route_fork",
     "version": "1.0.0",
     "category": "main_story",

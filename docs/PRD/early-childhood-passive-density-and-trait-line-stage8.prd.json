@@ -65,7 +65,7 @@
         "Tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004; §3 frozen (poor condition only origin_poor_family or poor successor flag, no four-main OR); §5 FR-2; §7 poor trait spine ≥1; design §2.2 G2 (reference p22_childhood_street_shaping tone); may parallel US-003 after US-001–US-002; US-005 requires US-004 complete"
     },
     {

@@ -85,6 +85,42 @@ function testCrossTraitBlocked(): void {
   assert(!isTraitLineSpineEligible(mockPoorEvent, state), 'street trait must not unlock poor-line');
 }
 
+function testPoorShapingClassifier(): void {
+  const event = eventLoader.getEventById('p22_childhood_poor_shaping');
+  assert(event !== undefined, 'poor shaping event must exist');
+  assert(
+    inferTraitLineExclusiveFlag(event!) === 'origin_poor_family',
+    'poor shaping must classify as poor-line',
+  );
+}
+
+function testScholarPoorAllowsPoorShaping(): void {
+  const state = buildState('origin_scholar_family', 5, {
+    origin_poor_family: true,
+    p22_live_ops_active: true,
+  });
+  const event = eventLoader.getEventById('p22_childhood_poor_shaping')!;
+  assert(isTraitLineSpineEligible(event, state), 'scholar+origin_poor_family must pass poor-line gate');
+  gameEngine.loadGameState(state);
+  assert(
+    gameEngine.getAvailableEvents(5).some(e => e.id === 'p22_childhood_poor_shaping'),
+    'poor shaping must appear for scholar+origin_poor_family',
+  );
+}
+
+function testScholarWithoutPoorBlocksPoorShaping(): void {
+  const state = buildState('origin_scholar_family', 5, {
+    p22_live_ops_active: true,
+  });
+  const event = eventLoader.getEventById('p22_childhood_poor_shaping')!;
+  assert(!isTraitLineSpineEligible(event, state), 'scholar without poor must not pass poor-line gate');
+  gameEngine.loadGameState(state);
+  assert(
+    !gameEngine.getAvailableEvents(5).some(e => e.id === 'p22_childhood_poor_shaping'),
+    'poor shaping must not appear for scholar without origin_poor_family',
+  );
+}
+
 function testScholarPoorOrphanBlockRegression(): void {
   const state = buildState('origin_scholar_family', 2, {
     origin_poor_family: true,
@@ -179,6 +215,9 @@ function main(): void {
   testStreetbornAllowsStreetShaping();
   testFrontierOrphanShapingSuccessor();
   testCrossTraitBlocked();
+  testPoorShapingClassifier();
+  testScholarPoorAllowsPoorShaping();
+  testScholarWithoutPoorBlocksPoorShaping();
   testScholarPoorOrphanBlockRegression();
   const matrix = testFourMainCrossTraitMatrix();
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });

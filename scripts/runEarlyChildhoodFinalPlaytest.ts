@@ -361,18 +361,19 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
 }
 
 function formatReport(results: OriginRunResult[]): string {
-  const allPass =
-    results.every(
-      r =>
-        r.spineBleeds.length === 0 &&
-        r.passiveBleeds.length === 0 &&
-        r.traitLineBleeds.length === 0 &&
-        r.planningViolations34 === 0 &&
-        r.placeholder04 === 0,
-    );
+  const bleedPass = results.every(
+    r =>
+      r.spineBleeds.length === 0 &&
+      r.passiveBleeds.length === 0 &&
+      r.traitLineBleeds.length === 0 &&
+      r.planningViolations34 === 0 &&
+      r.placeholder04 === 0,
+  );
+  const gapPass = results.every(r => r.gapPassiveSteps <= 2);
+  const allPass = bleedPass && gapPass;
   const avgRating = results.map(r => r.rating).join(' / ');
 
-  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～7 总验收)
+  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～8)
 
 **Date:** ${new Date().toISOString()}  
 **Driver:** \`HeadlessEngineSessionImpl\`（与 P6B API 同引擎）  
@@ -389,9 +390,11 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 
 | 项 | 结果 |
 | --- | --- |
-| 套件门禁（bleed / 3～4 规划 / 0～4 占位） | ${allPass ? '**PASS**' : '**FAIL**'} |
+| 套件门禁（bleed / 3～4 规划 / 0～4 占位） | ${bleedPass ? '**PASS**' : '**FAIL**'} |
+| Stage-8 gap 步 ≤2 / 出身 | ${gapPass ? '**PASS**' : '**FAIL**'} |
 | 四出身主观评分（启发式） | ${avgRating} |
-| vs 2026-06-17 基线 | 机制层 P0 已收口；重复感因出身/seed 而异 |
+| vs Stage-7 终验 gap baseline | 4～5 → ${results.map(r => r.gapPassiveSteps).join(' / ')} |
+| vs 2026-06-17 基线 | 机制层 P0 已收口；内容密度 Stage-8 加厚 |
 
 ## Per-origin matrix
 
@@ -415,6 +418,7 @@ ${results
 | Placeholder ages 0–4 | 0 | ${results.every(r => r.placeholder04 === 0) ? '**PASS**' : '**FAIL**'} |
 | Narrative non-empty | ≥95% steps | ${results.every(r => r.emptyNarrativeSteps / r.logs.length <= 0.05) ? '**PASS**' : '**PARTIAL**'} |
 | Passive title consecutive | ≤2 (Stage-7) | ${results.every(r => r.maxConsecutivePassiveTitle <= 2) ? '**PASS**' : '**PARTIAL**'} |
+| Gap 步 / 35 步 / 出身 (Stage-8) | ≤2 | ${gapPass ? '**PASS**' : '**FAIL**'} |
 
 ## Bleed details (if any)
 
@@ -456,7 +460,7 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** ${allPass ? '**Stage-1～7 机制验收 PASS** — 可进入 Stage-8 内容 PRD' : '**FAIL** — 见 bleed details，修复后再验收'}
+**Decision:** ${allPass ? '**Stage-1～8 验收 PASS** — 机制 + Stage-8 gap 目标达成' : '**FAIL** — 见 bleed / gap details，修复后再验收'}
 `;
 }
 
@@ -485,7 +489,8 @@ async function main(): Promise<void> {
       r.passiveBleeds.length > 0 ||
       r.traitLineBleeds.length > 0 ||
       r.planningViolations34 > 0 ||
-      r.placeholder04 > 0,
+      r.placeholder04 > 0 ||
+      r.gapPassiveSteps > 2,
   );
   if (failed) process.exit(1);
 }

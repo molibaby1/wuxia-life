@@ -81,7 +81,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-005; §3 frozen (gap metric isGapPassiveTitle in runEarlyChildhoodFinalPlaytest.ts, bleed contracts unchanged); §5 FR-4; §7 success metrics table; §2 goals; depends on US-003 and US-004 completion; design §3 acceptance table"
     },
     {

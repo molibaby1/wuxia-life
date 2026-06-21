@@ -8,12 +8,12 @@
 
 ## Summary
 
-| Origin tag | New entries | Prior exclusive count | After |
-| --- | --- | --- | --- |
-| scholar | 2 | 3 | **5** |
-| martial | 2 | 3 | **5** |
-| merchant | 2 | 3 | **5** |
-| frontier | 2 | 3 | **5** |
+| Origin tag | New entries (US-003) | Additional (gap fix) | Prior exclusive | After |
+| --- | --- | --- | --- | --- |
+| scholar | 2 | 2 | 3 | **7** |
+| martial | 2 | 2 | 3 | **7** |
+| merchant | 2 | 2 | 3 | **7** |
+| frontier | 2 | 2 | 3 | **7** |
 
 All entries: unique `id`, single exclusive `originTags`, age band 3–7, non-empty `text`.
 
@@ -49,9 +49,31 @@ All entries: unique `id`, single exclusive `originTags`, age band 3–7, non-emp
 | `preschool_frontier_sand_veil` | 风沙掩目 | 5 | 6 |
 | `preschool_frontier_tent_smoke` | 毡帐炊烟 | 4 | 5 |
 
+### Additional wide-band entries (gap regression)
+
+| id | title | ageMin | ageMax | origin |
+| --- | --- | --- | --- | --- |
+| `preschool_scholar_ink_stone` | 砚边习字 | 3 | 7 | scholar |
+| `preschool_scholar_seal_imprint` | 朱印初识 | 6 | 7 | scholar |
+| `preschool_martial_yard_dust` | 练武场尘 | 3 | 7 | martial |
+| `preschool_martial_blade_kata` | 学棍比试 | 3 | 4 | martial |
+| `preschool_merchant_abacus_rhythm` | 算盘节律 | 3 | 7 | merchant |
+| `preschool_merchant_stall_voice` | 叫卖跟学 | 3 | 4 | merchant |
+| `preschool_frontier_wind_listen` | 听风辨向 | 3 | 7 | frontier |
+| `preschool_frontier_night_patrol` | 夜哨火光 | 6 | 7 | frontier |
+
 ---
 
-## Validation
+## Final playtest gap (US-005)
+
+| 出身 | Gap 步 / 35 |
+| --- | --- |
+| 书香门第 | **2** |
+| 武林世家 | **2** |
+| 商贾之家 | **2** |
+| 边疆异族 | **1** |
+
+Target ≤2: **PASS**
 
 ```bash
 npm exec tsx tests/preschoolPassiveSpineTests.ts

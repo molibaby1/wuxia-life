@@ -1,6 +1,6 @@
-# Early Childhood Opening Experience — Final Playtest (Stage-1～7 总验收)
+# Early Childhood Opening Experience — Final Playtest (Stage-1～8)
 
-**Date:** 2026-06-21T07:56:37.486Z  
+**Date:** 2026-06-21T08:07:21.385Z  
 **Driver:** `HeadlessEngineSessionImpl`（与 P6B API 同引擎）  
 **Scope:** 四出身 × 35 步 · ages 0～7+ 观测  
 **Baseline:** `api-browser-playtest-experience-2026-06-17.md`（★★☆☆☆）
@@ -16,17 +16,19 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 | 项 | 结果 |
 | --- | --- |
 | 套件门禁（bleed / 3～4 规划 / 0～4 占位） | **PASS** |
-| 四出身主观评分（启发式） | ★★★☆☆ / ★★★☆☆ / ★★★☆☆ / ★★★☆☆ |
-| vs 2026-06-17 基线 | 机制层 P0 已收口；重复感因出身/seed 而异 |
+| Stage-8 gap 步 ≤2 / 出身 | **PASS** |
+| 四出身主观评分（启发式） | ★★★★☆ / ★★★★☆ / ★★★☆☆ / ★★★☆☆ |
+| vs Stage-7 终验 gap baseline | 4～5 → 2 / 2 / 2 / 1 |
+| vs 2026-06-17 基线 | 机制层 P0 已收口；内容密度 Stage-8 加厚 |
 
 ## Per-origin matrix
 
 | 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 占位(0～4) | 3～4 规划违规 | 被动同标题连出 | 评分 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 书香门第 | 16 | yes | 0 | 0 | 0 | 5 | 0 | 0 | 1 | ★★★☆☆ |
-| 武林世家 | 15 | yes | 0 | 0 | 0 | 4 | 0 | 0 | 2 | ★★★☆☆ |
-| 商贾之家 | 15 | yes | 0 | 0 | 0 | 4 | 0 | 0 | 2 | ★★★☆☆ |
-| 边疆异族 | 17 | yes | 0 | 0 | 0 | 4 | 0 | 0 | 3 | ★★★☆☆ |
+| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 2 | ★★★★☆ |
+| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 2 | ★★★★☆ |
+| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 3 | ★★★☆☆ |
+| 边疆异族 | 17 | yes | 0 | 0 | 0 | 1 | 0 | 0 | 3 | ★★★☆☆ |
 
 ## Acceptance checklist (套件级)
 
@@ -39,6 +41,7 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 | Placeholder ages 0–4 | 0 | **PASS** |
 | Narrative non-empty | ≥95% steps | **PASS** |
 | Passive title consecutive | ≤2 (Stage-7) | **PARTIAL** |
+| Gap 步 / 35 步 / 出身 (Stage-8) | ≤2 | **PASS** |
 
 ## Bleed details (if any)
 
@@ -49,10 +52,12 @@ _None._
 ### 书香门第
 - `origin_background`
 - `childhood_preference`
+- `p22_childhood_poor_shaping`
 - `martial_arts_enlightenment`
 
 ### 武林世家
 - `origin_background`
+- `p22_childhood_poor_shaping`
 - `childhood_preference`
 - `martial_arts_enlightenment`
 
@@ -67,15 +72,14 @@ _None._
 - `childhood_preference`
 - `martial_arts_enlightenment`
 
-## Residual observations → Stage-8
+## Residual observations → Stage-8 候选
 
 | 观察 | 说明 |
 | --- | --- |
-| Gap / neutral 被动 | 四出身各 **4～5** gap 步/35 步 → Stage-8 加厚本出身池（目标 ≤2） |
-| Poor trait spine | 仅 street 有 P22；poor 无 formative 事件 → Stage-8 US-004 |
-| Passive 同标题连出 | 边疆 seed **3** 连（目标 ≤2）→ 随池加厚可能自然缓解 |
-| 8～12 推进 | 35 步终龄 >7 → **Stage-9**（agency + 密度） |
-| Primary flag | `EventExecutor` 清除冲突四主 flag（2026-06-21 补丁） |
+| Gap / neutral 被动 | gap 或轮换标题步数因 seed 不同；若 ≥4 步可考虑加厚本出身池（Stage-8C） |
+| Trait 线 spine | 无 trait flag 时不应出现 street/poor 线（本验收已测 0 bleed） |
+| 8～12 推进 | 35 步后终龄常 >7；8+ spine 仅 gate 防御，内容密度未在本套件 |
+| 主观武侠感 | 本报告为机制验收；完整 ★ 分需 browser 实机 + 人工判读 |
 
 ## Reproduce
 
@@ -87,4 +91,4 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** **Stage-1～7 机制验收 PASS** — 可进入 Stage-8 内容 PRD
+**Decision:** **Stage-1～8 验收 PASS** — 机制 + Stage-8 gap 目标达成

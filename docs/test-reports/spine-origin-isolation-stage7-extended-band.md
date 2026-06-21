@@ -1,7 +1,7 @@
 # Spine Origin Isolation — Stage-7 Extended Band (US-002)
 
 **PRD:** `docs/PRD/early-childhood-childhood-experience-stage7.md`  
-**Date:** 2026-06-21T08:02:16.040Z  
+**Date:** 2026-06-21T08:07:26.307Z  
 **Decision:** **PASS**  
 **Age band:** 8–12 new (matrix ages 8, 9, 10, 11, 12)  
 **Gate constant:** `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = 12`  

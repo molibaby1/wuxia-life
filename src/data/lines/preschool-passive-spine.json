@@ -168,6 +168,73 @@
       "originTags": ["frontier"],
       "ageMin": 4,
       "ageMax": 5
+    },
+    {
+      "id": "preschool_scholar_ink_stone",
+      "title": "砚边习字",
+      "text": "你在砚边描红，墨痕歪扭，却被夸「笔画有劲」，心里第一次觉得写字有趣。",
+      "originTags": ["scholar"],
+      "ageMin": 3,
+      "ageMax": 7,
+      "statDeltas": { "comprehension": 1 }
+    },
+    {
+      "id": "preschool_scholar_seal_imprint",
+      "title": "朱印初识",
+      "text": "父亲让你按朱印在信笺角上，印泥凉润，你记住了「名姓」二字的写法。",
+      "originTags": ["scholar"],
+      "ageMin": 6,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_martial_yard_dust",
+      "title": "练武场尘",
+      "text": "练武场尘土飞扬，你追着师兄脚步跑圈，摔了也不哭，爬起来继续。",
+      "originTags": ["martial"],
+      "ageMin": 3,
+      "ageMax": 7,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_martial_blade_kata",
+      "title": "学棍比试",
+      "text": "你和堂弟用木棍比划，虽被一招扫倒，却记住了「护头」的要诀。",
+      "originTags": ["martial"],
+      "ageMin": 3,
+      "ageMax": 4
+    },
+    {
+      "id": "preschool_merchant_abacus_rhythm",
+      "title": "算盘节律",
+      "text": "算盘声噼啪作响，你跟着节奏默念数字，虽常错行，却觉得像唱歌。",
+      "originTags": ["merchant"],
+      "ageMin": 3,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_merchant_stall_voice",
+      "title": "叫卖跟学",
+      "text": "你学伙计吆喝「新鲜瓜果」，嗓子稚嫩，却引来路人驻足一笑。",
+      "originTags": ["merchant"],
+      "ageMin": 3,
+      "ageMax": 4
+    },
+    {
+      "id": "preschool_frontier_wind_listen",
+      "title": "听风辨向",
+      "text": "亲兵教你侧耳听风，说北风紧时要关紧帐门，你把这话记了一整天。",
+      "originTags": ["frontier"],
+      "ageMin": 3,
+      "ageMax": 7,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_frontier_night_patrol",
+      "title": "夜哨火光",
+      "text": "夜里远处火光一闪，父亲说是巡哨举火，你第一次觉得黑夜并不空荡。",
+      "originTags": ["frontier"],
+      "ageMin": 6,
+      "ageMax": 7
     }
   ]
 }

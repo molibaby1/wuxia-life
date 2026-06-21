@@ -135,3 +135,15 @@ npm exec tsx -- scripts/runStage10BaselineAudit.ts
 npm exec tsx -- scripts/runStage10BaselineAudit.ts --sample
 npx tsc --noEmit
 ```
+
+---
+
+## Appendix B — Youth rules decision log (US-002)
+
+| Decision | Choice | Rationale |
+| --- | --- | --- |
+| Single youth band 13–20 | Yes (no 13–15 / 16–20 split in code) | PRD §11 Q1 default; matrix validates one band first |
+| Lite ids | Reuse childhood lite catalog (age-7 map) | PRD §11 Q4 — no new youth-only ids in Stage-10 |
+| Basic exposure cap | Max 3 basics/palette; never 5 | Fixes US-001 five-basic dump |
+| Category floor scores | 0.1 base on all five allowed categories | Ensures martial etc. still expose business/travel/socializing vs 8–12 |
+| `daily_take_odd_job` | No change | US-001 Q5 — livelihood daily, not route entry |

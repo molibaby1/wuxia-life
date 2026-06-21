@@ -1,6 +1,6 @@
 ## Codebase Patterns
 
-- Stage-10 youth band baseline: `docs/test-reports/early-childhood-stage10-baseline-audit.md`; repro `npm exec tsx -- scripts/runStage10BaselineAudit.ts` (--sample for 35-step youth metrics). Age>12 today → `getMinimumActions()` five basic; US-003 adds `resolveYouthActionPalette`.
+- Stage-10 youth band: `resolveYouthActionPalette` ages 13–20 (`YOUTH_MAX_AGE=20`); age>20 → `getMinimumActions()`; matrix `tests/youthAgencyStage10Tests.ts`; route timing `tests/youthRouteEntryTimingStage10Tests.ts`; closure `docs/test-reports/early-childhood-stage10-closure.md`.
 - Stage-9 late childhood: `LATE_CHILDHOOD_SUPPRESSED_CATEGORIES` in `childhoodAgency.ts` (8–12 training/study only); matrix `tests/lateChildhoodAgencyStage9Tests.ts`; infant filler dedup in `originInfantPassiveChain.ts` for single shared filler repeat; passive path ages ≤12 via `selectPreschoolPassiveEntry`.
 - Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics).
 - Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.

@@ -36,7 +36,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §3 frozen moderate defaults; §11 Q1/Q4 defaults; depends on US-001 audit; blocks US-003 implementation spec"
     },
     {
@@ -53,7 +53,7 @@
         "Tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §5 FR-1, FR-2; §7 childhoodAgency.ts, GameEngineIntegration.ts, activeActionCatalog.ts, childhoodActionCatalog.ts; §9 risk empty pool; depends on US-002; blocks US-004 matrix"
     },
     {
@@ -72,7 +72,7 @@
         "Tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §5 FR-1; §8 metric 13–20 full-adult-basic dump 0%; §9 risk palette too narrow; depends on US-003; optional sub-band 13–15 vs 16–20 documented in report only (PRD §11 Q1)"
     },
     {
@@ -88,7 +88,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §5 FR-3 partial; §9 risk P11 gate; depends on US-001 inventory; may parallel US-003/US-004; blocks US-006 timing tests for config-aligned assertions"
     },
     {
@@ -106,7 +106,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §5 FR-3, FR-4; §8 p9_early before 13 = 0; §7 applyYouthTransitionSeeds, promoteYouthRouteEntryFromUpbringing, personaYouthRouteSeeds.ts; depends on US-005 for config truth; may start after US-003"
     },
     {
@@ -122,8 +122,8 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "P1 DEFERRABLE — Stage-9 US-003 deferred; skip if US-004+US-006 meet product bar; may parallel US-005/US-006 after US-004; PRD §11 Q2 default defer"
+      "passes": true,
+      "notes": "WAIVED — US-004+US-006 meet product bar; Stage-9 US-003 carryover deferred to Stage-11"
     },
     {
       "id": "US-008",
@@ -138,7 +138,7 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §3 frozen (35-step main gate unchanged); §11 Q3; §5 FR-5; depends on US-003 and US-004; precedes US-009 closure"
     },
     {
@@ -154,7 +154,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 closure story; depends on US-004, US-006, US-008 minimum; US-007 optional waive documented here"
     }
   ]

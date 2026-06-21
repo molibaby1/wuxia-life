@@ -6,6 +6,8 @@
 import type { GameState } from '../types/eventTypes';
 import originInfantPassivesJson from './lines/origin-infant-passives.json';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
+import { getRecentPassiveNarrativeTitles } from './preschoolPassiveSpine';
+import { resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
 
 export interface OriginInfantPassiveNode {
   id: string;
@@ -138,10 +140,11 @@ export function selectOriginInfantSharedFiller(
 ): PassiveNarrativeEntry | null {
   const age = state.player?.age ?? 0;
   const history = eventHistoryIds(state);
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
   const candidates = ORIGIN_INFANT_PASSIVES.sharedFillers.filter(
     filler => age >= filler.ageMin && age <= filler.ageMax && !history.has(filler.id),
   );
-  const pool =
+  let pool =
     candidates.length > 0
       ? candidates
       : ORIGIN_INFANT_PASSIVES.sharedFillers.filter(
@@ -149,6 +152,41 @@ export function selectOriginInfantSharedFiller(
         );
   if (pool.length === 0) {
     return null;
+  }
+  const lastTitle = recentTitles[0];
+  const withoutRecent = pool.filter(filler => !recentTitles.includes(filler.title));
+  if (withoutRecent.length > 0) {
+    pool = withoutRecent;
+  }
+  if (lastTitle && pool.length > 1) {
+    const withoutImmediate = pool.filter(filler => filler.title !== lastTitle);
+    if (withoutImmediate.length > 0) {
+      pool = withoutImmediate;
+    }
+  }
+  if (
+    pool.length === 1 &&
+    lastTitle &&
+    pool[0]!.title === lastTitle &&
+    recentTitles.filter(title => title === lastTitle).length >= 1
+  ) {
+    const placeholder = resolvePlanningPlaceholderText(age);
+    const rotated =
+      age <= 1
+        ? ['褓中微光', '榻上咿声', '童声初闻', placeholder.title]
+        : ['学步跬步', '童声呀呀', '庭院咿呀', placeholder.title];
+    const title =
+      rotated.find(candidate => candidate !== lastTitle && !recentTitles.includes(candidate)) ??
+      rotated.find(candidate => candidate !== lastTitle) ??
+      placeholder.title;
+    return {
+      id: `infant_passive_gap::${encodeURIComponent(title)}`,
+      title,
+      text: placeholder.text,
+      originTags: ['neutral'],
+      ageMin: age,
+      ageMax: age,
+    };
   }
   const index = Math.floor(random() * pool.length);
   return toPassiveEntry(pool[index] ?? pool[0]);

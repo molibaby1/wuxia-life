@@ -27,6 +27,11 @@ import { applyStatDeltas } from '../../core/activePlanning/ActivePlanningService
 import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
 import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
+import type { PassiveNarrativeEntry } from '../../data/passiveNarrativeTypes';
+import {
+  resolvePreschoolPassiveEntryByTitle,
+  appendPassiveTitleToHistory,
+} from '../../data/preschoolPassiveSpine';
 import { applyPassiveNarrativeFlags } from '../../data/originInfantPassiveChain';
 import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning, EARLY_CHILDHOOD_MAX_AGE } from '../../p16/childhoodAgency';
 import { progressUntilChoiceOrTerminal } from '../progressionLoop';
@@ -495,23 +500,29 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   private async executePassiveChildhoodTick(): Promise<void> {
     const state = this.engine.getGameState();
     const age = state.player?.age ?? 0;
+    const displayedTitle = this.volatile.passiveNarrative?.title;
     const { selected, deltas } = await this.runWithRandomAsync(async () => {
       const entry = selectPassiveNarrative(state);
-      const appliedDeltas = clampPassiveStatDeltasForAge(age, entry.statDeltas);
+      const historyEntry =
+        displayedTitle && displayedTitle !== entry.title
+          ? (resolvePreschoolPassiveEntryByTitle(displayedTitle, age) ?? entry)
+          : entry;
+      const appliedDeltas = clampPassiveStatDeltasForAge(age, historyEntry.statDeltas);
       applyStatDeltas(state.player, appliedDeltas);
-      applyPassiveNarrativeFlags(state, entry.flags);
+      applyPassiveNarrativeFlags(state, historyEntry.flags);
       this.engine.advanceTime(3, 'month');
       if (!state.eventHistory) {
         state.eventHistory = [];
       }
-      if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
+      if (shouldRecordPassiveNarrativeInHistory(historyEntry.id)) {
         state.eventHistory.push({
-          eventId: entry.id,
+          eventId: historyEntry.id,
           age: state.player.age,
           timestamp: state.currentTime ? { ...state.currentTime } : undefined,
         });
       }
-      return { selected: entry, deltas: appliedDeltas };
+      appendPassiveTitleToHistory(state, displayedTitle ?? historyEntry.title);
+      return { selected: historyEntry, deltas: appliedDeltas };
     });
     this.volatile.pendingPeriodSummary = buildPeriodSummary({
       sourceLabel: '童年岁月',

@@ -17,7 +17,7 @@ export const PRESCHOOL_EXCLUSIVE_ORIGIN_TAGS = ['scholar', 'martial', 'merchant'
 export type PreschoolExclusiveOriginTag = (typeof PRESCHOOL_EXCLUSIVE_ORIGIN_TAGS)[number];
 
 /** Recent passive title suppression window (PRD Q3, Stage-7 US-007). */
-export const NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW = 5;
+export const NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW = 7;
 
 const preschoolConfigEntries = (preschoolPassiveSpineJson as { entries: PreschoolPassiveEntry[] }).entries;
 
@@ -95,11 +95,21 @@ function buildPreschoolPassiveGapEntry(age: number, recentTitles: string[] = [])
   const rotatedTitles =
     age <= 4
       ? [placeholder.title, '檐下晚晴', '童稚年月', '静听风言', '庭院时光']
-      : [placeholder.title, '邻里童谣', '季节更迭', '庭院嬉戏', '童年印象'];
+      : age <= 7
+        ? [placeholder.title, '邻里童谣', '季节更迭', '庭院嬉戏', '童年印象']
+        : [placeholder.title, '少年初长', '书剑两忘', '寒暑往来', '窗下光阴'];
   const lastTitle = recentTitles[0];
+  const consecutiveBlocked =
+    recentTitles.length >= 2 && recentTitles[0] === recentTitles[1] ? recentTitles[0] : undefined;
   const title =
-    rotatedTitles.find(candidate => !recentTitles.includes(candidate) && candidate !== lastTitle) ??
-    rotatedTitles.find(candidate => candidate !== lastTitle) ??
+    rotatedTitles.find(
+      candidate =>
+        candidate !== consecutiveBlocked &&
+        !recentTitles.includes(candidate) &&
+        candidate !== lastTitle,
+    ) ??
+    rotatedTitles.find(candidate => candidate !== consecutiveBlocked && candidate !== lastTitle) ??
+    rotatedTitles.find(candidate => candidate !== consecutiveBlocked) ??
     placeholder.title;
   return {
     id:
@@ -110,7 +120,7 @@ function buildPreschoolPassiveGapEntry(age: number, recentTitles: string[] = [])
     text: placeholder.text,
     originTags: ['neutral'],
     ageMin: 3,
-    ageMax: 7,
+    ageMax: 12,
   };
 }
 
@@ -144,34 +154,57 @@ export function resolvePreschoolPassiveEntryByTitle(
 }
 
 export function findPreschoolPassiveEntryById(id: string): PreschoolPassiveEntry | undefined {
-  for (const age of [3, 4, 5, 6, 7]) {
-    const entry = getPreschoolPassiveEntries(age).find(item => item.id === id);
-    if (entry) return entry;
+  const fromMerged = mergedPreschoolCatalog().find(item => item.id === id);
+  if (fromMerged) return fromMerged;
+  return infantPassiveNarrativeCatalog.find(item => item.id === id);
+}
+
+/** Append displayed passive title for dedup (covers ensurePassivePresentation before tick). */
+export function appendPassiveTitleToHistory(state: GameState, title: string): void {
+  if (!title.trim()) return;
+  if (!state.flags) {
+    state.flags = {};
   }
-  return undefined;
+  const key = 'p16_passive_title_history';
+  const prev = Array.isArray(state.flags[key]) ? (state.flags[key] as string[]) : [];
+  state.flags[key] = [title, ...prev.filter(t => t !== title)].slice(0, NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW);
 }
 
 export function getRecentPassiveNarrativeTitles(
   state: GameState,
   window: number = NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW,
 ): string[] {
+  const fromFlags = Array.isArray(state.flags?.p16_passive_title_history)
+    ? (state.flags.p16_passive_title_history as string[])
+    : [];
+  const titles: string[] = [...fromFlags];
   const history = state.eventHistory ?? [];
-  const titles: string[] = [];
   for (let i = history.length - 1; i >= 0 && titles.length < window; i -= 1) {
     const record = history[i]!;
     const entry = findPreschoolPassiveEntryById(record.eventId);
     if (entry) {
-      titles.push(entry.title);
+      if (!titles.includes(entry.title)) {
+        titles.push(entry.title);
+      }
       continue;
     }
     if (record.eventId === 'preschool_passive_gap' || record.eventId.startsWith('preschool_passive_gap::')) {
       const encodedTitle = record.eventId.includes('::')
         ? decodeURIComponent(record.eventId.split('::')[1] ?? '')
         : resolvePlanningPlaceholderText(record.age ?? state.player?.age ?? 0).title;
-      titles.push(encodedTitle);
+      if (!titles.includes(encodedTitle)) {
+        titles.push(encodedTitle);
+      }
+      continue;
+    }
+    if (record.eventId.startsWith('infant_passive_gap::')) {
+      const encodedTitle = decodeURIComponent(record.eventId.split('::')[1] ?? '');
+      if (encodedTitle && !titles.includes(encodedTitle)) {
+        titles.push(encodedTitle);
+      }
     }
   }
-  return titles;
+  return titles.slice(0, window);
 }
 
 function suppressRecentTitleRepeats(
@@ -193,6 +226,30 @@ function suppressRecentTitleRepeats(
   return filtered;
 }
 
+function enforceMaxConsecutiveTitleCap(
+  pool: PreschoolPassiveEntry[],
+  recentTitles: string[],
+  maxConsecutive = 2,
+): PreschoolPassiveEntry[] {
+  if (recentTitles.length === 0 || pool.length === 0) {
+    return pool;
+  }
+  let consecutiveSame = 1;
+  for (let i = 1; i < recentTitles.length; i += 1) {
+    if (recentTitles[i] === recentTitles[0]) {
+      consecutiveSame += 1;
+    } else {
+      break;
+    }
+  }
+  if (consecutiveSame < maxConsecutive) {
+    return pool;
+  }
+  const blockedTitle = recentTitles[0];
+  const filtered = pool.filter(entry => entry.title !== blockedTitle);
+  return filtered.length > 0 ? filtered : pool;
+}
+
 export function selectPreschoolPassiveEntry(
   state: GameState,
   random: () => number = Math.random,
@@ -210,6 +267,14 @@ export function selectPreschoolPassiveEntry(
       !history.has(entry.id),
   );
   pool = suppressRecentTitleRepeats(pool, recentTitles);
+  pool = enforceMaxConsecutiveTitleCap(pool, recentTitles, 2);
+  if (recentTitles.length >= 2 && recentTitles[0] === recentTitles[1]) {
+    const blocked = recentTitles[0];
+    const withoutPair = pool.filter(entry => entry.title !== blocked);
+    if (withoutPair.length > 0) {
+      pool = withoutPair;
+    }
+  }
   if (pool.length === 0) {
     pool = suppressRecentTitleRepeats(
       ageEntries.filter(
@@ -217,6 +282,7 @@ export function selectPreschoolPassiveEntry(
       ),
       recentTitles,
     );
+    pool = enforceMaxConsecutiveTitleCap(pool, recentTitles);
   }
   if (pool.length === 0) {
     return buildPreschoolPassiveGapEntry(age, recentTitles);

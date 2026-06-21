@@ -177,10 +177,31 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 `;
 }
 
+function testLateChildhoodGapDedup(): void {
+  const state = buildScholarState(9);
+  const random = seededRandom(202);
+  let lastTitle: string | null = null;
+  let streak = 0;
+  let maxConsecutive = 0;
+  for (let i = 0; i < 40; i += 1) {
+    state.player!.age = 8 + (i % 5);
+    const entry = pickWithHistory(state, random);
+    if (entry.title === lastTitle) {
+      streak += 1;
+      maxConsecutive = Math.max(maxConsecutive, streak + 1);
+    } else {
+      streak = 0;
+    }
+    lastTitle = entry.title;
+  }
+  assert(maxConsecutive <= 2, `age 8–12 gap dedup expected ≤2 consecutive, got ${maxConsecutive}`);
+}
+
 function main(): void {
   const before = runWithoutDedupSimulation(42, 80);
   testConsecutiveCap();
   testFiftyRollDiversity();
+  testLateChildhoodGapDedup();
   const after = measureConsecutiveAndTopTitle(50, seededRandom(99));
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
   fs.writeFileSync(REPORT_PATH, formatReport(before, after), 'utf8');

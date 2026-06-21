@@ -100,7 +100,7 @@ export function selectPassiveNarrative(
     }
     return buildInfantPassiveGapEntry(age);
   }
-  if (age <= 7) {
+  if (age <= 12) {
     return selectPreschoolPassiveEntry(state, random);
   }
   return selectLegacyPassiveNarrative(state, random);

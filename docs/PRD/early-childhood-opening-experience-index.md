@@ -18,6 +18,7 @@
 | 3～4 被动 + spine 抉择 | Stage-1 机制 · Stage-4 密度与文案 · **Stage-6 spine 隔离** |
 | 5～7 有限主动（≤2 lite） | Stage-1 机制 · Stage-4 选项与节奏 · **Stage-6 spine 隔离** |
 | 8～12 受限主动 | Stage-7 spine 隔离（gate band）；**Stage-9** agency 形态 + spine 密度 |
+| 13～20 中等主动 | **Stage-10** youth agency + route-entry 时序 |
 
 ---
 
@@ -34,6 +35,7 @@
 | **7** | [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) | **Spine 扩 band 8～12 · daily gate · trait 线 · neutral 去重** | Stage-6 已合入 | **已实施** |
 | **8** | [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) | **Passive 池加厚 · poor trait spine · gap 收口** | Stage-7 已合入 | **已实施** |
 | **9** | [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) | **8～12 agency · spine 密度 · neutral spine dedup P2** | Stage-8 已合入 | **已实施** |
+| **10** | [`early-childhood-youth-agency-band-stage10.md`](./early-childhood-youth-agency-band-stage10.md) | **13～20 youth agency · route-entry 时序 · Stage-9 US-003 carryover P1** | Stage-9 已合入 | **已实施** |
 
 ```mermaid
 flowchart TB
@@ -57,6 +59,7 @@ flowchart TB
   S6 -.->|8～12 / daily / trait| S7
   S7 -.->|gap / poor content| S8[Stage-8 密度与 trait]
   S8 -.->|8～12 / dedup| S9[Stage-9 童年晚期]
+  S9 -.->|13+ youth| S10[Stage-10 少年期]
 ```
 
 **并行建议：** Stage-6 可在 Stage-5 合入后立即开工；主要 touch `GameEngineIntegration.ts`、P22 配置与测试。
@@ -125,6 +128,18 @@ flowchart TB
 **Stage-9 设计真源：** `docs/designs/p16-stage-agency-rules.md` § Late Childhood (8–12)  
 **Closure：** `docs/test-reports/early-childhood-stage9-closure.md`
 
+## 9. Stage-10（已实施）
+
+| Stage | 焦点 | 状态 |
+| --- | --- | --- |
+| **10** | 13～20 P16 moderate agency + route entry 13–20 对齐；Stage-9 US-003 spine carryover（**US-007 waived**） | **已实施** → [`early-childhood-youth-agency-band-stage10.md`](./early-childhood-youth-agency-band-stage10.md) |
+
+**Stage-10 设计真源：** `docs/designs/p16-stage-agency-rules.md` § Youth (13–20)  
+**Ralph 索引：** [`early-childhood-youth-agency-band-stage10.prd.json`](./early-childhood-youth-agency-band-stage10.prd.json)  
+**Closure：** `docs/test-reports/early-childhood-stage10-closure.md`
+
+**Stage-11 候选：** trait-line 内容量 · browser 实机 ★ 分 · 21+ adult agency 微调 · 8–12 origin spine pack (US-007)
+
 ---
 
-**索引版本：** 0.8 · 2026-06-21
+**索引版本：** 0.9 · 2026-06-22

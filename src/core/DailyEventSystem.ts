@@ -24,10 +24,13 @@ export class DailyEventSystem {
       .filter(event => age >= event.ageRange.min && age <= event.ageRange.max)
       .map(event => ({ event, weight: this.getWeight(event, state) }))
       .filter(item => item.weight > 0)
-      .filter(item =>
-        isSpineOriginEligible(this.buildProbeEvent(item.event, state), primaryOrigin, age) &&
-        isTraitLineSpineEligible(this.buildProbeEvent(item.event, state), state),
-      );
+      .filter(item => {
+        const probe = this.buildProbeEvent(item.event, state);
+        return (
+          isSpineOriginEligible(probe, primaryOrigin, age) &&
+          isTraitLineSpineEligible(probe, state)
+        );
+      });
 
     if (candidates.length === 0) {
       return null;

@@ -66,15 +66,17 @@ None in 8–12 overlap (whitelist ids such as `clever_speech`, `toddler_explorat
 
 ```
 GameEngineIntegration.selectEvent(age?)
-  ├─ getAvailableEvents(currentAge)          ← isSpineOriginEligible applied (age ≤ 7)
+  ├─ getAvailableEvents(currentAge)          ← isSpineOriginEligible + isTraitLineSpineEligible (age ≤ 12)
   ├─ filter untriggered / route / reputation
   ├─ splitEventLayers → pickWeightedFormalEvent (critical / storyline / regular)
   └─ daily fallback (6 exit points):
-       dailyEventSystem.selectEvent(gameState)   ← NO origin gate today
+       dailyEventSystem.selectEvent(gameState)   ← same gates via buildProbeEvent (US-003)
          ├─ dailyEvents.filter(ageRange)
          ├─ getWeight(trait / state / repeat penalty)
          └─ buildEvent(config, state) → EventDefinition
 ```
+
+> **Post-US-003 (2026-06-21):** `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = 12`; daily fallback filters candidates with `isSpineOriginEligible` and `isTraitLineSpineEligible` before weighted pick (`DailyEventSystem.selectEvent`). Appendix A pool semantics unchanged (origin-neutral today).
 
 **File references:**
 

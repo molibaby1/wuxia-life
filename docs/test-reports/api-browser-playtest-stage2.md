@@ -1,7 +1,7 @@
 # API Browser Playtest — Stage-2 Preschool Agency (US-003)
 
 **PRD:** `docs/PRD/early-childhood-opening-experience-governance.md`  
-**Date:** 2026-06-19T23:47:07.319Z  
+**Date:** 2026-06-21T00:59:26.550Z  
 **Environment:** P6B API `http://localhost:8787` + Vite `http://localhost:5200` (API mode)  
 **Origin:** 书香门第 (`origin_scholar_family`)  
 **Steps:** 35 (max 35)
@@ -18,8 +18,8 @@ npm exec tsx scripts/runApiBrowserPlaytestStage2.ts    # API driver (same contra
 
 | Criterion | Result | Evidence |
 | --- | --- | --- |
-| Advance to ≥4y + 童年偏好 | **PASS** | finalAge=7; childhood_preference=yes (2 options) |
-| Ages 3–4 planningOptions.length === 0 | **PASS** | 8 observations at ages 3–4 |
+| Advance to ≥4y + 童年偏好 | **PASS** | finalAge=18; childhood_preference=yes (2 options) |
+| Ages 3–4 planningOptions.length === 0 | **PASS** | 7 observations at ages 3–4 |
 | Age 4 story_event 童年偏好 2–3 options | **PASS** | 2 options |
 | Narrative non-empty before continue | **PASS** | empty=0/35 (100%) |
 | Placeholder ≤3 in 35 steps; 0 at 0–4 | **PASS** | total=0; ages0–4=0 |
@@ -42,20 +42,20 @@ npm exec tsx scripts/runApiBrowserPlaytestStage2.ts    # API driver (same contra
 | 4 | 1 | passive_progression | 0 | yes | no | 墨香襁褓 |
 | 5 | 1 | passive_progression | 0 | yes | no | 抓周拈毫 |
 | 6 | 1 | passive_progression | 0 | yes | no | 榻前描红 |
-| 7 | 2 | story_event | 0 | yes | no | p22_origin_frontier_orphan |
-| 8 | 2 | period_summary | 0 | yes | no | 书廊学步 |
-| 9 | 2 | passive_progression | 0 | yes | no | 书廊学步 |
+| 7 | 2 | passive_progression | 0 | yes | no | 书廊学步 |
+| 8 | 2 | passive_progression | 0 | yes | no | 咿呀学语 |
+| 9 | 2 | passive_progression | 0 | yes | no | 咿呀学语 |
 | 10 | 2 | passive_progression | 0 | yes | no | 咿呀学语 |
-| 11 | 2 | passive_progression | 0 | yes | no | 咿呀学语 |
-| 12 | 2 | passive_progression | 0 | yes | no | 咿呀学语 |
-| 13 | 3 | story_event | 0 | yes | no | clever_speech |
-| 14 | 4 | period_summary | 0 | yes | no | 耳濡目染 |
-| 15 | 4 | story_event | 0 | yes | no | childhood_preference |
-| 16 | 4 | period_summary | 0 | yes | no | — |
-| 17 | 4 | passive_progression | 0 | yes | no | 耳濡目染 |
-| 18 | 4 | passive_progression | 0 | yes | no | 营中操练 |
-| 19 | 4 | passive_progression | 0 | yes | no | 识文断字 |
-| 20 | 4 | passive_progression | 0 | yes | no | 描红练字 |
+| 11 | 3 | story_event | 0 | yes | no | clever_speech |
+| 12 | 4 | story_event | 0 | yes | no | childhood_preference |
+| 13 | 4 | period_summary | 0 | yes | no | — |
+| 14 | 4 | passive_progression | 0 | yes | no | 识文断字 |
+| 15 | 4 | passive_progression | 0 | yes | no | 描红练字 |
+| 16 | 4 | passive_progression | 0 | yes | no | 家中一季 |
+| 17 | 4 | passive_progression | 0 | yes | no | 家中一季 |
+| 18 | 5 | passive_progression | 0 | yes | no | 书斋尘香 |
+| 19 | 5 | passive_progression | 0 | yes | no | 童年时光 |
+| 20 | 5 | passive_progression | 0 | yes | no | 童年时光 |
 
 | … | … | … | … | … | … | 15 more steps |
 

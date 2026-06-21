@@ -15,7 +15,7 @@
 | US-003 | `src/p16/spineOriginIsolation.ts`, `GameEngineIntegration.getAvailableEvents` | ✅ Runtime hard gate age ≤ 7 |
 | US-004 | `p22-content-expansions.json` orphan condition fix | ✅ `origin_frontier`; audit appendix A |
 | US-005 | `docs/test-reports/spine-origin-isolation-stage6.md` | ✅ Four-origin × ages 1–7 matrix, 0 foreign ids |
-| US-006 | `scripts/runApiBrowserPlaytestStage2.ts` spine bleed detector | ✅ Headless contract + report path |
+| US-006 | `docs/test-reports/api-browser-playtest-stage6-spine-isolation.md` | ✅ API 35-step PASS (bleed flags=0, no orphan) |
 | US-007 | `src/p16/spineOriginConfigValidation.ts`, `tests/spineOriginConfigValidationTests.ts` | ✅ CI validation wired in `runRealTestGate` |
 
 ---
@@ -32,7 +32,7 @@
 | `p22ContentLibraryTests` live-ops gate | pass | **pass** |
 | Typecheck | pass | **pass** |
 
-**US-006 API 35-step:** Spine bleed detector added to `runApiBrowserPlaytestStage2.ts`; report at `docs/test-reports/api-browser-playtest-stage6-spine-isolation.md`. Requires `p6b:serve` for live run; logic validated via `spineOriginIsolationTests` (same `isForeignExclusiveSpineEvent` helper).
+**US-006 API 35-step:** Live run via `npm exec tsx scripts/runApiBrowserPlaytestStage2.ts` with `p6b:serve` — **PASS** (35 steps, spine bleed flags=0, no `p22_origin_frontier_orphan`). Report: `docs/test-reports/api-browser-playtest-stage6-spine-isolation.md`.
 
 ---
 

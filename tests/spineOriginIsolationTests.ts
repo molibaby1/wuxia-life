@@ -52,6 +52,20 @@ function testPrimaryResolverScholarOverPoor(): void {
   );
 }
 
+function testPrimaryResolverNullBeforeOriginBackground(): void {
+  const age0 = { player: { age: 0, flags: {} }, flags: {} } as GameState;
+  assert(resolvePrimaryOriginFamilyFlag(age0) === null, 'age 0 without primary flags must return null');
+
+  const poorOnly = {
+    player: { age: 1, flags: { origin_poor_family: true } },
+    flags: { origin_poor_family: true },
+  } as GameState;
+  assert(
+    resolvePrimaryOriginFamilyFlag(poorOnly) === null,
+    'age 1 with only origin_poor_family must return null (not a four-main primary)',
+  );
+}
+
 function testScholarBlocksFrontierOrphan(): void {
   const state = buildState('origin_scholar_family', 2, {
     origin_poor_family: true,
@@ -171,6 +185,7 @@ ${matrix
 
 function main(): void {
   testPrimaryResolverScholarOverPoor();
+  testPrimaryResolverNullBeforeOriginBackground();
   testScholarBlocksFrontierOrphan();
   testFrontierOrphanSelectableAfterConfigFix();
   const matrix = runFourOriginMatrix();

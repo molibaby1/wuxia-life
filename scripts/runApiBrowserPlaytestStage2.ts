@@ -21,7 +21,13 @@ const PLANNING_PLACEHOLDER = '本期暂无强求的江湖变故';
 type ProgressionPayload = {
   sessionPhase: string;
   planningOptions: Array<{ actionId: string; text: string }>;
-  nextEvent: { eventId: string; title: string; text: string; choices?: Array<{ id: string; text: string; available: boolean }> } | null;
+  nextEvent: {
+    eventId: string;
+    title: string;
+    text: string;
+    isAutomatic?: boolean;
+    choices?: Array<{ id: string; text: string; available: boolean }>;
+  } | null;
   passiveNarrative: { title: string; text: string } | null;
   periodSummary: { headline: string; body: string; narrativeText: string } | null;
   slotVersion: number;
@@ -131,6 +137,55 @@ async function ack(
   });
 }
 
+function isAutomaticStoryEvent(payload: ProgressionPayload): boolean {
+  const event = payload.nextEvent;
+  if (!event || payload.sessionPhase !== 'story_event') return false;
+  if (event.isAutomatic === true) return true;
+  return !event.choices?.length;
+}
+
+async function drainPeriodSummaryIfPresent(
+  deviceToken: string,
+  sessionId: string,
+  sessionToken: string,
+  payload: ProgressionPayload,
+): Promise<ProgressionPayload> {
+  if (payload.sessionPhase === 'period_summary') {
+    return await ack(deviceToken, sessionId, sessionToken, payload, 'period_summary');
+  }
+  return payload;
+}
+
+async function drainAfterPeriodSummary(
+  deviceToken: string,
+  sessionId: string,
+  sessionToken: string,
+  payload: ProgressionPayload,
+): Promise<ProgressionPayload> {
+  let current = payload;
+  if (isAutomaticStoryEvent(current)) {
+    current = await ack(deviceToken, sessionId, sessionToken, current, 'story_automatic');
+    current = await drainPeriodSummaryIfPresent(deviceToken, sessionId, sessionToken, current);
+  }
+  return current;
+}
+
+async function drainAfterActiveAction(
+  deviceToken: string,
+  sessionId: string,
+  sessionToken: string,
+  payload: ProgressionPayload,
+): Promise<ProgressionPayload> {
+  let current = payload;
+  if (current.sessionPhase === 'action_summary') {
+    current = await ack(deviceToken, sessionId, sessionToken, current, 'action_summary');
+  }
+  if (current.sessionPhase === 'disturbance_narrative') {
+    current = await ack(deviceToken, sessionId, sessionToken, current, 'disturbance');
+  }
+  return current;
+}
+
 async function runPlaytest(): Promise<{
   logs: StepLog[];
   childhoodPreferenceDone: boolean;
@@ -212,14 +267,13 @@ async function runPlaytest(): Promise<{
         firstPassiveInternal = playerInternal(payload);
       }
       payload = await ack(deviceToken, sessionId, sessionToken, payload, 'passive_continue');
-      if (payload.sessionPhase === 'period_summary') {
-        payload = await ack(deviceToken, sessionId, sessionToken, payload, 'period_summary');
-      }
+      payload = await drainPeriodSummaryIfPresent(deviceToken, sessionId, sessionToken, payload);
       continue;
     }
 
     if (payload.sessionPhase === 'period_summary') {
       payload = await ack(deviceToken, sessionId, sessionToken, payload, 'period_summary');
+      payload = await drainAfterPeriodSummary(deviceToken, sessionId, sessionToken, payload);
       continue;
     }
 
@@ -234,17 +288,13 @@ async function runPlaytest(): Promise<{
           actionId: payload.planningOptions[0]!.actionId,
         }),
       });
-      if (payload.sessionPhase === 'action_summary') {
-        payload = await ack(deviceToken, sessionId, sessionToken, payload, 'action_summary');
-      }
-      if (payload.sessionPhase === 'disturbance_narrative') {
-        payload = await ack(deviceToken, sessionId, sessionToken, payload, 'disturbance');
-      }
+      payload = await drainAfterActiveAction(deviceToken, sessionId, sessionToken, payload);
       continue;
     }
 
-    if (payload.sessionPhase === 'story_event' && payload.nextEvent && !payload.nextEvent.choices?.length) {
+    if (isAutomaticStoryEvent(payload)) {
       payload = await ack(deviceToken, sessionId, sessionToken, payload, 'story_automatic');
+      payload = await drainPeriodSummaryIfPresent(deviceToken, sessionId, sessionToken, payload);
       continue;
     }
 

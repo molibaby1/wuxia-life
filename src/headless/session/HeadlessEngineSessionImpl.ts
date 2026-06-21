@@ -544,14 +544,24 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   getProgressionVolatileState(): HeadlessProgressionVolatileState {
     const current = this.volatile.currentEvent;
-    const pendingStoryEventId =
-      current && !nextRequiresChoice(current) ? current.id : null;
+    const pending = current ? this.describePendingEvent() : null;
+    let pendingStoryEventId: string | null = null;
+    let pendingEphemeralStoryEvent: EventDefinition | null = null;
+    if (pending?.isAutomatic && current) {
+      try {
+        this.dependencies.catalog.getEventById(current.id, this.catalogVersion);
+        pendingStoryEventId = current.id;
+      } catch {
+        pendingEphemeralStoryEvent = current;
+      }
+    }
     return {
       pendingActionSummary: this.volatile.pendingActionSummary,
       pendingDisturbanceNarrative: this.volatile.pendingDisturbanceNarrative,
       pendingPeriodSummary: this.volatile.pendingPeriodSummary,
       passiveNarrative: this.volatile.passiveNarrative,
       pendingStoryEventId,
+      pendingEphemeralStoryEvent,
     };
   }
 
@@ -560,7 +570,9 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.pendingDisturbanceNarrative = state.pendingDisturbanceNarrative;
     this.volatile.pendingPeriodSummary = state.pendingPeriodSummary;
     this.volatile.passiveNarrative = state.passiveNarrative;
-    if (state.pendingStoryEventId) {
+    if (state.pendingEphemeralStoryEvent) {
+      this.volatile.currentEvent = state.pendingEphemeralStoryEvent;
+    } else if (state.pendingStoryEventId) {
       this.attachStoryEventById(state.pendingStoryEventId);
     }
   }
@@ -646,11 +658,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       const narrativeBody = current.content?.text ?? '';
       const narrativeTitle = current.content?.title ?? '往事一局';
-      const progress = await this.progressAutomatic({ maxSteps: 8 });
-      if (progress.error) {
-        this.lastError = progress.error;
-        throw new ProgressionError('INVALID_SESSION_PHASE', progress.error.message);
-      }
+      await this.progressAutomatic({ maxSteps: 8 });
       await progressUntilChoiceOrTerminal(this);
       if (narrativeBody) {
         this.volatile.pendingPeriodSummary = buildPeriodSummary({

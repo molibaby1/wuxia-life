@@ -1,7 +1,7 @@
 # Spine Origin Isolation — Stage-6 (US-005)
 
 **PRD:** `docs/PRD/early-childhood-spine-origin-isolation.md`  
-**Date:** 2026-06-21T00:52:03.126Z  
+**Date:** 2026-06-21T01:00:34.522Z  
 **Decision:** **PASS**  
 **Age band:** 0–7 (matrix ages 1, 2, 3, 4, 5, 6, 7)  
 **Rolls per cell:** 30 `getAvailableEvents` scans

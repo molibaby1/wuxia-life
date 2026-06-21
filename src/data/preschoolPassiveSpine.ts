@@ -8,7 +8,8 @@ import { infantPassiveNarrativeCatalog } from './infantPassiveNarrativeCatalog';
 import { resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
 import type { GameState } from '../types/eventTypes';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
-import { getOriginInfantPassiveChains, ORIGIN_FLAG_TO_PASSIVE_TAG } from './originInfantPassiveChain';
+import { ORIGIN_FLAG_TO_PASSIVE_TAG } from './originInfantPassiveChain';
+import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 
 export type PreschoolPassiveEntry = PassiveNarrativeEntry;
 
@@ -24,19 +25,14 @@ function mergedPreschoolCatalog(): PreschoolPassiveEntry[] {
   ];
 }
 
-function hasOriginFlag(state: GameState, flag: string): boolean {
-  return !!(state.flags?.[flag] || state.player?.flags?.[flag]);
-}
-
-/** Single primary origin tag — same flag priority as 0–2 ordered infant chain. */
+/** Single primary origin tag — reuses resolvePrimaryOriginFamilyFlag (Stage-5 / Stage-6 FR-4). */
 function resolveOriginTags(state: GameState): Set<string> {
   const tags = new Set<string>(['neutral']);
-  for (const chain of getOriginInfantPassiveChains()) {
-    if (hasOriginFlag(state, chain.originFlag)) {
-      const tag = ORIGIN_FLAG_TO_PASSIVE_TAG[chain.originFlag];
-      if (tag) tags.add(tag);
-      return tags;
-    }
+  const primary = resolvePrimaryOriginFamilyFlag(state);
+  if (primary) {
+    const tag = ORIGIN_FLAG_TO_PASSIVE_TAG[primary];
+    if (tag) tags.add(tag);
+    return tags;
   }
   const traitOrigin = state.player?.traitProfile?.origin;
   if (traitOrigin === 'scholar_house') tags.add('scholar');

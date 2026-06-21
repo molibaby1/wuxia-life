@@ -77,6 +77,8 @@ export interface HeadlessProgressionVolatileState {
   passiveNarrative: PassiveNarrativeDisplay | null;
   /** Automatic story event awaiting player continue (not in snapshot). */
   pendingStoryEventId: string | null;
+  /** Daily / runtime-built events not resolvable via catalog id alone. */
+  pendingEphemeralStoryEvent?: EventDefinition | null;
 }
 
 export interface HeadlessSessionVolatileState {

@@ -87,6 +87,9 @@ export interface HeadlessEngineSession {
   /** P8.1: advance in-game calendar when phase loop does not advance age. */
   advanceCalendar(amount: number, unit: 'year' | 'month'): Promise<void>;
 
+  /** P11: whether a critical/mandatory event is pending at current age. */
+  hasPendingForcedEvent(): boolean;
+
   /** Read mutable engine state (playability runner / tests). */
   getRuntimeState(): import('../../types/eventTypes').GameState;
 }

@@ -41,6 +41,22 @@ function resolveCatalogEvent(session: HeadlessEngineSession, event: EventDefinit
   }
 }
 
+async function continueDeferredAutoStoryEvent(ctx: RunnerStepContext): Promise<void> {
+  if (ctx.session.getTerminalState()) return;
+  if (ctx.session.getSessionPhase() !== 'story_event') return;
+  const event = ctx.session.getCurrentEvent();
+  if (!event) return;
+  const catalogEvent = resolveCatalogEvent(ctx.session, event);
+  if (!eventRequiresChoice(catalogEvent)) {
+    await runStoryEventStep(ctx);
+  }
+}
+
+async function afterStoryProgression(ctx: RunnerStepContext): Promise<void> {
+  await progressUntilChoiceOrTerminal(ctx.session);
+  await continueDeferredAutoStoryEvent(ctx);
+}
+
 export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   if (ctx.session.getTerminalState()) return;
 
@@ -66,7 +82,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         currentTime: after.currentTime,
         timestamp: new Date().toISOString(),
       });
-      await progressUntilChoiceOrTerminal(session);
+      await afterStoryProgression(ctx);
       return;
     }
   }
@@ -88,7 +104,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       currentTime: after.currentTime,
       timestamp: new Date().toISOString(),
     });
-    await progressUntilChoiceOrTerminal(session);
+    await afterStoryProgression(ctx);
     return;
   }
 
@@ -96,13 +112,13 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   const stateBefore = snapshotStateForRecord(session);
   const selection = selectPersonaChoice(session, catalogEvent, persona);
   if (!selection?.choice?.id) {
-    await progressUntilChoiceOrTerminal(session);
+    await afterStoryProgression(ctx);
     return;
   }
 
   const choiceId = selection.choice.id;
   if (!catalogEvent.choices?.some(c => c.id === choiceId)) {
-    await progressUntilChoiceOrTerminal(session);
+    await afterStoryProgression(ctx);
     return;
   }
 
@@ -136,7 +152,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     currentTime: session.getRuntimeState().currentTime,
     timestamp: new Date().toISOString(),
   });
-  await progressUntilChoiceOrTerminal(session);
+  await afterStoryProgression(ctx);
 }
 
 export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<void> {
@@ -196,11 +212,11 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
 export async function runActionSummaryAckStep(ctx: RunnerStepContext): Promise<void> {
   if (ctx.session.getTerminalState()) return;
   await ctx.session.acknowledgeProgression('action_summary');
-  await progressUntilChoiceOrTerminal(ctx.session);
+  await afterStoryProgression(ctx);
 }
 
 export async function runDisturbanceAckStep(ctx: RunnerStepContext): Promise<void> {
   if (ctx.session.getTerminalState()) return;
   await ctx.session.acknowledgeProgression('disturbance');
-  await progressUntilChoiceOrTerminal(ctx.session);
+  await afterStoryProgression(ctx);
 }

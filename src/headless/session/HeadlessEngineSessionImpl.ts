@@ -23,7 +23,7 @@ import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCatalogAdapter';
 import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './HeadlessEngineSession';
 import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
-import { applyStatDeltas } from '../../core/activePlanning/ActivePlanningService';
+import { applyStatDeltas, hasPendingForcedEvent as checkPendingForcedEventAtAge } from '../../core/activePlanning/ActivePlanningService';
 import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
 import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
@@ -712,6 +712,9 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       guard += 1;
       const next = await this.getNextEvent();
       if (next) return;
+      if (this.hasPendingForcedEvent() || this.hasUpcomingMandatoryEvent()) {
+        return;
+      }
       const actions = this.engine.getAvailableActiveActions();
       if (actions.length > 0) return;
       const age = this.engine.getGameState().player?.age ?? 0;
@@ -727,6 +730,18 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   getRuntimeState(): GameState {
     return this.engine.getGameState();
+  }
+
+  hasPendingForcedEvent(): boolean {
+    return this.engine.hasPendingForcedEvent();
+  }
+
+  private hasUpcomingMandatoryEvent(): boolean {
+    const age = this.engine.getGameState().player?.age ?? 0;
+    return checkPendingForcedEventAtAge(
+      nextAge => this.engine.getAvailableEvents(nextAge),
+      age + 1,
+    );
   }
 
   async advanceCalendar(amount: number, unit: 'year' | 'month'): Promise<void> {

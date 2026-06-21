@@ -209,7 +209,7 @@
     "id": "p11_wanderer_reinforcement_connections",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 0,
+    "priority": 100,
     "weight": 85,
     "ageRange": { "min": 22, "max": 22 },
     "triggers": [{ "type": "age_reach", "value": 22 }],

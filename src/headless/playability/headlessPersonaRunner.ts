@@ -2,6 +2,10 @@
  * P8.1 headless persona main loop — runs persona to endAge via P7.2 phase machine.
  */
 
+import type { GameProcessRecord } from '../../types/simulationRecordTypes';
+import type { GameState } from '../../types/eventTypes';
+import { EventPriority } from '../../types/eventTypes';
+import { eventLoader } from '../../core/EventLoader';
 import type { HeadlessPersonaRunConfig, HeadlessPersonaRunResult } from './types';
 import { createPersonaHeadlessSession, applyPersonaYouthRouteSeedsAtAge } from './createPersonaSession';
 import {
@@ -15,6 +19,68 @@ import { ensureProgressionCatchUp, progressUntilChoiceOrTerminal } from '../prog
 const DEFAULT_MAX_STEPS = 2400;
 /** Phase micro-steps without calendar advance before forcing +1 year (unstick stall). */
 const STALL_STEPS_BEFORE_YEAR_NUDGE = 16;
+
+function isMandatoryHistoryEvent(eventId: string): boolean {
+  try {
+    const event = eventLoader.getEventById(eventId);
+    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
+    return (
+      event.priority === EventPriority.CRITICAL ||
+      tags.includes('critical') ||
+      tags.includes('mandatory') ||
+      tags.includes('mainline')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function snapshotForHistoryRecord(historyRecord: GameState['eventHistory'][number], finalState: GameState): GameState {
+  const snapshot = historyRecord.stateSnapshot as GameState | undefined;
+  if (snapshot) {
+    return JSON.parse(JSON.stringify(snapshot));
+  }
+  return JSON.parse(JSON.stringify(finalState));
+}
+
+function backfillMandatoryStoryRecords(
+  records: GameProcessRecord[],
+  finalState: GameState,
+): void {
+  const recordedIds = new Set(records.map(record => record.eventId));
+  for (const historyRecord of finalState.eventHistory ?? []) {
+    if (recordedIds.has(historyRecord.eventId)) {
+      continue;
+    }
+    if (!isMandatoryHistoryEvent(historyRecord.eventId)) {
+      continue;
+    }
+    let catalogEvent;
+    try {
+      catalogEvent = eventLoader.getEventById(historyRecord.eventId);
+    } catch {
+      continue;
+    }
+    records.push({
+      age: historyRecord.age ?? finalState.player?.age ?? 0,
+      eventId: historyRecord.eventId,
+      eventTitle: catalogEvent.content?.title ?? historyRecord.eventId,
+      eventText: catalogEvent.content?.text ?? '',
+      eventType: 'auto',
+      progressionKind: 'story_event',
+      gameState: snapshotForHistoryRecord(historyRecord, finalState),
+      currentTime: finalState.currentTime,
+      timestamp: new Date().toISOString(),
+    });
+    recordedIds.add(historyRecord.eventId);
+  }
+  records.sort((a, b) => {
+    if (a.age !== b.age) {
+      return a.age - b.age;
+    }
+    return a.timestamp.localeCompare(b.timestamp);
+  });
+}
 
 export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Promise<HeadlessPersonaRunResult> {
   const { persona, endAge, catalogVersion, maxSteps = DEFAULT_MAX_STEPS } = config;
@@ -43,7 +109,16 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
 
     applyPersonaYouthRouteSeedsAtAge(session, persona);
 
-    const phase = session.getSessionPhase();
+    let phase = session.getSessionPhase();
+    if (
+      phase !== 'story_event' &&
+      phase !== 'terminal' &&
+      session.hasPendingForcedEvent()
+    ) {
+      await session.getNextEvent();
+      phase = session.getSessionPhase();
+    }
+
     switch (phase) {
       case 'terminal':
         stoppedReason = 'terminal';
@@ -78,6 +153,9 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
       stepsWithoutAgeChange += 1;
       if (stepsWithoutAgeChange >= STALL_STEPS_BEFORE_YEAR_NUDGE) {
         await ensureProgressionCatchUp(session, ageAnchor);
+        if (session.getSessionPhase() === 'story_event') {
+          await runStoryEventStep(ctx);
+        }
         stepsWithoutAgeChange = 0;
         ageAnchor = session.getRuntimeState().player?.age ?? ageAnchor;
       }
@@ -97,6 +175,7 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
   }
 
   const finalState = session.getRuntimeState();
+  backfillMandatoryStoryRecords(records, finalState);
   const choiceCount = records.filter(r => r.eventType === 'choice').length;
   const activeCount = records.filter(r => r.progressionKind === 'active_action').length;
 

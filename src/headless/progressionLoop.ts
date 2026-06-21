@@ -2,7 +2,21 @@
  * Shared headless auto-progression loop (server gameService + P8 playability runner).
  */
 
+import type { EventDefinition } from '../types/eventTypes';
 import type { HeadlessEngineSession } from './session/HeadlessEngineSession';
+
+function shouldDeferFormalAutoStoryEvent(event: EventDefinition): boolean {
+  if (event.category === 'daily_event' || event.metadata?.tags?.includes('daily_pool')) {
+    return false;
+  }
+  if (event.eventType === 'auto') {
+    return true;
+  }
+  if (event.autoEffects && event.autoEffects.length > 0 && !event.choices?.length) {
+    return true;
+  }
+  return false;
+}
 
 /** Mirror GameProcessSimulator.ensureProgressionCatchUp — one year when age unchanged. */
 export async function ensureProgressionCatchUp(
@@ -10,9 +24,13 @@ export async function ensureProgressionCatchUp(
   ageBefore: number,
 ): Promise<void> {
   if (session.getTerminalState()) return;
+  if (session.hasPendingForcedEvent()) return;
   const ageAfter = session.getRuntimeState().player?.age ?? 0;
   if (ageAfter <= ageBefore) {
     await session.advanceCalendar(1, 'year');
+    if (session.hasPendingForcedEvent()) {
+      await session.getNextEvent();
+    }
   }
 }
 
@@ -32,6 +50,7 @@ export async function progressUntilChoiceOrTerminal(session: HeadlessEngineSessi
       break;
     }
     if (!next.isAutomatic) break;
+    if (shouldDeferFormalAutoStoryEvent(next.raw)) break;
     const progress = await session.progressAutomatic({ maxSteps: 8 });
     if (progress.stoppedReason === 'terminal') break;
     if (progress.stepsExecuted === 0) break;

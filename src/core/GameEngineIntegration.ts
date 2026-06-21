@@ -485,6 +485,7 @@ export class GameEngineIntegration {
     
     let limitedEvents = availableEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP);
     limitedEvents = this.injectActiveRouteCandidates(availableEvents, limitedEvents);
+    limitedEvents = this.injectMandatoryCandidates(availableEvents, limitedEvents);
 
     return limitedEvents;
   }
@@ -888,6 +889,47 @@ export class GameEngineIntegration {
     }
 
     return result;
+  }
+
+  /** Ensure exact-age mandatory events are not dropped by FORMAL_CANDIDATE_POOL_CAP. */
+  private injectMandatoryCandidates(
+    availableEvents: EventDefinition[],
+    limitedEvents: EventDefinition[],
+  ): EventDefinition[] {
+    const result = [...limitedEvents];
+    const selectedIds = new Set(result.map(event => event.id));
+    const currentAge = this.gameState.player?.age ?? 0;
+
+    for (const event of availableEvents) {
+      if (selectedIds.has(event.id) || !this.isMandatoryEvent(event)) {
+        continue;
+      }
+      const min = event.ageRange?.min;
+      const max = event.ageRange?.max;
+      if (min !== currentAge || max !== currentAge) {
+        continue;
+      }
+      result.push(event);
+      selectedIds.add(event.id);
+    }
+
+    return result;
+  }
+
+  private getExactAgeMandatoryEvents(
+    events: EventDefinition[],
+    currentAge: number,
+  ): EventDefinition[] {
+    return events
+      .filter(event => {
+        if (!this.isMandatoryEvent(event)) {
+          return false;
+        }
+        const min = event.ageRange?.min;
+        const max = event.ageRange?.max;
+        return min === currentAge && max === currentAge;
+      })
+      .sort((a, b) => (b.priority ?? EventPriority.NORMAL) - (a.priority ?? EventPriority.NORMAL));
   }
 
   private getRouteSchedulingMultiplier(
@@ -1505,6 +1547,10 @@ export class GameEngineIntegration {
   }
 
   private getAdjacentClassSuppressionMultiplier(event: EventDefinition): number {
+    if (this.isDailyEvent(event) || this.isMandatoryEvent(event)) {
+      return 1;
+    }
+
     const suppressionClass = this.detectSuppressionClass(event);
     if (!suppressionClass) {
       return 1;
@@ -1802,6 +1848,11 @@ export class GameEngineIntegration {
     }
 
     const { criticalEvents, storylineEvents, regularFormalEvents } = this.splitEventLayers(eventsToSelect);
+
+    const exactAgeMandatory = this.getExactAgeMandatoryEvents(criticalEvents, currentAge);
+    if (exactAgeMandatory.length > 0) {
+      return exactAgeMandatory[0];
+    }
 
     // Layer 1: critical lane, never paused by rhythm pressure.
     const criticalSelection = this.pickWeightedFormalEvent(criticalEvents, currentAge, dominantPaths);

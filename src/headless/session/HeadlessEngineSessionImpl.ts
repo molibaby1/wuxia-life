@@ -27,7 +27,6 @@ import { applyStatDeltas } from '../../core/activePlanning/ActivePlanningService
 import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
 import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
-import type { PassiveNarrativeEntry } from '../../data/passiveNarrativeTypes';
 import {
   resolvePreschoolPassiveEntryByTitle,
   appendPassiveTitleToHistory,

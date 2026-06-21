@@ -1,16 +1,42 @@
 ## Codebase Patterns
 
-- Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics). 8–12 palette still admits lite business/travel/socializing categories → US-002 must category-filter ages 8–12.
+- Stage-9 late childhood: `LATE_CHILDHOOD_SUPPRESSED_CATEGORIES` in `childhoodAgency.ts` (8–12 training/study only); matrix `tests/lateChildhoodAgencyStage9Tests.ts`; infant filler dedup in `originInfantPassiveChain.ts` for single shared filler repeat; passive path ages ≤12 via `selectPreschoolPassiveEntry`.
+- Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics).
 - Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
 - Stage-8 poor trait spine: `p22_childhood_poor_shaping` in `p22-content-expansions.json`; condition `origin_poor_family` only; report `docs/test-reports/trait-poor-spine-stage8.md`.
 - Stage-8 CI: `primaryOriginFlagTests` in `runRealTestGate.ts` after `spineOriginConfigValidationTests`.
 - Stage-7 baseline audit: `docs/test-reports/early-childhood-stage7-baseline-audit.md`; repro `npm exec tsx scripts/runStage7BaselineAudit.ts`. 8–12 band has 0 four-main exclusive spine ids; daily pool origin-neutral; trait-line only `p22_childhood_street_shaping`; passive title max consecutive baseline 5–9 (seed=42).
-- Stage-7 spine/trait/dedup: `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX=12`; `traitLineSpineEligibility.ts`; daily gate via `DailyEventSystem.buildProbeEvent` + optional `spineOriginStageFit`; passive dedup `NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW=5` with gap title encoding `preschool_passive_gap::${title}` for history resolution.
+- Stage-7 spine/trait/dedup: `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX=12`; passive dedup `NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW=7` (Stage-9).
 - Stage-3 infant origin chains: config in `src/data/lines/origin-infant-passives.json`; loader/selector in `src/data/originInfantPassiveChain.ts`; age ≤2 ordered dequeue via `selectOrderedOriginInfantPassive` called from `selectPassiveNarrative`.
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-6 spine origin isolation: `resolvePrimaryOriginFamilyFlag` in `src/p16/primaryOriginFlag.ts`; hard gate `isSpineOriginEligible` in `getAvailableEvents` for age ≤7 via `src/p16/spineOriginIsolation.ts`; config validation `src/p16/spineOriginConfigValidation.ts`; tests `tests/spineOriginIsolationTests.ts`, `tests/spineOriginConfigValidationTests.ts`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+---
+
+## [2026-06-21] - US-006 (early-childhood-late-childhood-agency-spine-stage9)
+- Stage-9 closure + final playtest 8–12 columns; all stories complete.
+- Files: docs/test-reports/early-childhood-stage9-closure.md, scripts/runEarlyChildhoodFinalPlaytest.ts
+---
+
+## [2026-06-21] - US-005 (early-childhood-late-childhood-agency-spine-stage9)
+- Infant shared filler title dedup; 8–12 passive via preschool path; consecutive PASS.
+- Files: originInfantPassiveChain.ts, preschoolPassiveSpine.ts, infantPassiveNarratives.ts, HeadlessEngineSessionImpl.ts
+---
+
+## [2026-06-21] - US-004 (early-childhood-late-childhood-agency-spine-stage9)
+- Waived P2 neutral spine repetition tuning — within baseline.
+---
+
+## [2026-06-21] - US-003 (early-childhood-late-childhood-agency-spine-stage9)
+- Deferred P1 8–12 origin spine pack — documented in manifest.
+---
+
+## [2026-06-21] - US-002 (early-childhood-late-childhood-agency-spine-stage9)
+- Category-filter business/travel/socializing for ages 8–12; matrix 400×2 checks PASS.
+- Files: src/p16/childhoodAgency.ts, tests/lateChildhoodAgencyStage9Tests.ts
+---
 
 ## [2026-06-21] - US-001 (early-childhood-late-childhood-agency-spine-stage9)
 - Read-only Stage-9 baseline: 8–12 palette matrix, spine inventory reconcile, 35-step 8–12 samples, neutral spine + passive consecutive baselines.

@@ -17,7 +17,7 @@
 | 0～2 纯被动 | Stage-1 机制 · Stage-3 出身内容 |
 | 3～4 被动 + spine 抉择 | Stage-1 机制 · Stage-4 密度与文案 · **Stage-6 spine 隔离** |
 | 5～7 有限主动（≤2 lite） | Stage-1 机制 · Stage-4 选项与节奏 · **Stage-6 spine 隔离** |
-| 8～12 受限主动 | P16 范围外（本套件不覆盖） |
+| 8～12 受限主动 | Stage-7 spine 隔离（gate band）；完整 agency 内容仍属 P16 范围外 |
 
 ---
 
@@ -31,7 +31,7 @@
 | **4** | [`early-childhood-preschool-content-and-pacing.md`](./early-childhood-preschool-content-and-pacing.md) | 3～7 岁 spine 密度、占位、5～7 轻量选项 | 建议 Stage-1；可与 Stage-3 并行 | **已实施** |
 | **5** | [`early-childhood-preschool-origin-isolation.md`](./early-childhood-preschool-origin-isolation.md) | **3～7 岁 passive 出身硬隔离** | Stage-3/4 已合入 | **已实施** |
 | **6** | [`early-childhood-spine-origin-isolation.md`](./early-childhood-spine-origin-isolation.md) | **0～7 岁 spine / story_event 出身硬隔离** | Stage-5 已合入；暴露 spine 串味 | **已实施** |
-| **7** | [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) | **Spine 扩 band 8～12 · daily gate · trait 线 · neutral 去重** | Stage-6 已合入 | **规划完成** |
+| **7** | [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) | **Spine 扩 band 8～12 · daily gate · trait 线 · neutral 去重** | Stage-6 已合入 | **已实施** |
 
 ```mermaid
 flowchart TB
@@ -83,15 +83,15 @@ flowchart TB
 
 ---
 
-## 5. 后续 Stage（规划）
+## 5. Stage-7 交付记录
 
 | Stage | 焦点 | 状态 |
 | --- | --- | --- |
-| **7** | Spine gate 扩至 age 12 + daily 回退 gate；trait 线（poor/street）治理；neutral passive 标题去重 | **PRD 已开** → [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) |
+| **7** | Spine gate 扩至 age 12 + daily 回退 gate；trait 线（poor/street）治理；neutral passive 标题去重 | **已实施** → [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) |
 
 **Stage-7 设计真源：** `docs/designs/childhood-experience-stage7-rules.md`  
-**规划基线：** `docs/test-reports/early-childhood-stage7-planning-baseline.md`
+**Closure：** `docs/test-reports/early-childhood-stage7-closure.md`
 
 ---
 
-**索引版本：** 0.3 · 2026-06-21
+**索引版本：** 0.4 · 2026-06-21

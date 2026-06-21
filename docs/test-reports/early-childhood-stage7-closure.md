@@ -38,6 +38,10 @@ npm exec tsx tests/spineOriginConfigValidationTests.ts
 
 npm run gate:p16
 # P16 gate decision: pass
+
+npm test
+# runRealTestGate includes traitLineSpineEligibilityTests,
+# dailyFallbackOriginGateTests, neutralPassiveDedupTests (FR-5)
 ```
 
 **Stage-6 invariants preserved:**
@@ -102,4 +106,4 @@ Neutral **spine** id repetition tuning (clever_speech / toddler families) deferr
 - `docs/test-reports/neutral-passive-dedup-stage7.md`
 - `scripts/runStage7BaselineAudit.ts`
 
-**Status:** Stage-7 **complete** — ready for A1-verify.
+**Status:** Stage-7 **complete** — FR-5 CI suites wired in `tests/runRealTestGate.ts`.

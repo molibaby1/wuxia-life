@@ -1,8 +1,8 @@
-# Early Childhood Opening Experience — Final Playtest (Stage-1～9)
+# Early Childhood Opening Experience — Final Playtest (Stage-1～10)
 
-**Date:** 2026-06-21T12:56:58.321Z  
+**Date:** 2026-06-21T16:50:36.943Z  
 **Driver:** `HeadlessEngineSessionImpl`（与 P6B API 同引擎）  
-**Scope:** 四出身 × 35 步 · ages 0～12 观测（Stage-9 8～12 列）  
+**Scope:** 四出身 × 35 步 · ages 0～12 观测（Stage-9 8～12 列）+ **Stage-10 13～20 观测列**  
 **Baseline:** `api-browser-playtest-experience-2026-06-17.md`（★★☆☆☆）
 
 ## Setup
@@ -23,12 +23,21 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 
 ## Per-origin matrix
 
-| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | 被动同标题连出 | 评分 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
-| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
-| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
-| 边疆异族 | 17 | yes | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | ★★★★☆ |
+| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | **13～20 步** | **13～20 planning** | 被动同标题连出 | 评分 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 书香门第 | 14 | yes | 0 | 0 | 0 | 2 | 1 | 1 | 0 | 4 | 0 | 1 | ★★★★☆ |
+| 武林世家 | 14 | yes | 0 | 0 | 0 | 2 | 1 | 1 | 0 | 4 | 0 | 1 | ★★★★☆ |
+| 商贾之家 | 13 | yes | 0 | 0 | 0 | 2 | 1 | 1 | 0 | 4 | 0 | 1 | ★★★★☆ |
+| 边疆异族 | 14 | yes | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 3 | 0 | 1 | ★★★★☆ |
+
+## Stage-10 youth planning samples (ages 13–20, observation only)
+
+| 出身 | Unique youth planning action ids |
+| --- | --- |
+| 书香门第 | _none in 35 steps_ |
+| 武林世家 | _none in 35 steps_ |
+| 商贾之家 | _none in 35 steps_ |
+| 边疆异族 | _none in 35 steps_ |
 
 ## Acceptance checklist (套件级)
 
@@ -50,25 +59,37 @@ _None._
 ## Story events (age ≤7) by origin
 
 ### 书香门第
+- `birth_wuxia_family`
 - `origin_background`
+- `toddler_exploration`
+- `clever_speech`
 - `childhood_preference`
 - `p22_childhood_poor_shaping`
 - `martial_arts_enlightenment`
 
 ### 武林世家
+- `birth_wuxia_family`
 - `origin_background`
+- `toddler_exploration`
+- `clever_speech`
 - `p22_childhood_poor_shaping`
 - `childhood_preference`
 - `martial_arts_enlightenment`
 
 ### 商贾之家
+- `birth_wuxia_family`
 - `origin_background`
+- `toddler_exploration`
+- `clever_speech`
 - `childhood_preference`
 - `p22_childhood_street_shaping`
 - `martial_arts_enlightenment`
 
 ### 边疆异族
+- `birth_wuxia_family`
 - `origin_background`
+- `p22_origin_frontier_orphan`
+- `clever_speech`
 - `childhood_preference`
 - `martial_arts_enlightenment`
 
@@ -91,4 +112,4 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** **Stage-1～9 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive 目标达成
+**Decision:** **Stage-1～10 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive + Stage-10 youth 观测列

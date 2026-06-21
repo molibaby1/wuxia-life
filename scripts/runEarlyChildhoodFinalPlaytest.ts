@@ -75,6 +75,9 @@ interface OriginRunResult {
   steps812: number;
   formal812: number;
   planning812: number;
+  steps1320: number;
+  planning1320: number;
+  youthPlanningActionIds: string[];
   rating: string;
 }
 
@@ -236,6 +239,7 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
   let placeholder04 = 0;
   let planningViolations34 = 0;
   let emptyNarrativeSteps = 0;
+  const youthPlanningActionIds: string[] = [];
 
   for (let step = 1; step <= MAX_STEPS; step += 1) {
     const state = session.getRuntimeState();
@@ -255,6 +259,12 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
     }
     if (!nonEmpty) emptyNarrativeSteps += 1;
     if (age >= 3 && age <= 4 && planningCount > 0) planningViolations34 += 1;
+
+    if (age >= 13 && age <= 20 && phase === 'active_planning') {
+      for (const opt of session.getPlanningOptions()) {
+        youthPlanningActionIds.push(opt.actionId);
+      }
+    }
 
     if (phase === 'story_event' && eventId) {
       const event = eventLoader.getEventById(eventId);
@@ -348,6 +358,10 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
   const formal812 = logs812.filter(l => l.phase === 'story_event').length;
   const planning812 = logs812.filter(l => l.phase === 'active_planning').length;
 
+  const logs1320 = logs.filter(l => l.age >= 13 && l.age <= 20);
+  const steps1320 = logs1320.length;
+  const planning1320 = logs1320.filter(l => l.phase === 'active_planning').length;
+
   const base: Omit<OriginRunResult, 'rating'> = {
     origin,
     logs,
@@ -366,6 +380,9 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
     steps812,
     formal812,
     planning812,
+    steps1320,
+    planning1320,
+    youthPlanningActionIds: [...new Set(youthPlanningActionIds)],
   };
 
   return { ...base, rating: computeRating(base) };
@@ -384,11 +401,11 @@ function formatReport(results: OriginRunResult[]): string {
   const allPass = bleedPass && gapPass;
   const avgRating = results.map(r => r.rating).join(' / ');
 
-  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～9)
+  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～10)
 
 **Date:** ${new Date().toISOString()}  
 **Driver:** \`HeadlessEngineSessionImpl\`（与 P6B API 同引擎）  
-**Scope:** 四出身 × ${MAX_STEPS} 步 · ages 0～12 观测（Stage-9 8～12 列）  
+**Scope:** 四出身 × ${MAX_STEPS} 步 · ages 0～12 观测（Stage-9 8～12 列）+ **Stage-10 13～20 观测列**  
 **Baseline:** \`api-browser-playtest-experience-2026-06-17.md\`（★★☆☆☆）
 
 ## Setup
@@ -409,12 +426,23 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 
 ## Per-origin matrix
 
-| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | 被动同标题连出 | 评分 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | **13～20 步** | **13～20 planning** | 被动同标题连出 | 评分 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${results
   .map(
     r =>
-      `| ${r.origin.label} | ${r.finalAge} | ${r.childhoodPreferenceDone ? 'yes' : 'no'} | ${r.spineBleeds.length} | ${r.passiveBleeds.length} | ${r.traitLineBleeds.length} | ${r.gapPassiveSteps} | ${r.steps812} | ${r.formal812} | ${r.planning812} | ${r.maxConsecutivePassiveTitle} | ${r.rating} |`,
+      `| ${r.origin.label} | ${r.finalAge} | ${r.childhoodPreferenceDone ? 'yes' : 'no'} | ${r.spineBleeds.length} | ${r.passiveBleeds.length} | ${r.traitLineBleeds.length} | ${r.gapPassiveSteps} | ${r.steps812} | ${r.formal812} | ${r.planning812} | ${r.steps1320} | ${r.planning1320} | ${r.maxConsecutivePassiveTitle} | ${r.rating} |`,
+  )
+  .join('\n')}
+
+## Stage-10 youth planning samples (ages 13–20, observation only)
+
+| 出身 | Unique youth planning action ids |
+| --- | --- |
+${results
+  .map(
+    r =>
+      `| ${r.origin.label} | ${r.youthPlanningActionIds.length ? r.youthPlanningActionIds.map(id => `\`${id}\``).join(', ') : '_none in 35 steps_'} |`,
   )
   .join('\n')}
 
@@ -471,7 +499,7 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** ${allPass ? '**Stage-1～9 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive 目标达成' : '**FAIL** — 见 bleed / gap details，修复后再验收'}
+**Decision:** ${allPass ? '**Stage-1～10 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive + Stage-10 youth 观测列' : '**FAIL** — 见 bleed / gap details，修复后再验收'}
 `;
 }
 

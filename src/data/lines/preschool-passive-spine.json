@@ -101,6 +101,73 @@
       "originTags": ["frontier"],
       "ageMin": 6,
       "ageMax": 7
+    },
+    {
+      "id": "preschool_scholar_mengxue_echo",
+      "title": "蒙学跟读",
+      "text": "你跟着兄长念千字文，错字被温言纠正，虽不懂涵义，却记住了朗朗节奏。",
+      "originTags": ["scholar"],
+      "ageMin": 4,
+      "ageMax": 5,
+      "statDeltas": { "comprehension": 1 }
+    },
+    {
+      "id": "preschool_scholar_rain_eaves",
+      "title": "雨巷听书",
+      "text": "雨天廊下，先生讲半段史记，你记住了「背水」二字，却不知背后战事。",
+      "originTags": ["scholar"],
+      "ageMin": 5,
+      "ageMax": 6
+    },
+    {
+      "id": "preschool_martial_wood_dummy",
+      "title": "木人试拳",
+      "text": "你对练功木人乱拳，拳风虽弱却有架势，师兄笑你「花拳绣腿」，你却练得更起劲。",
+      "originTags": ["martial"],
+      "ageMin": 5,
+      "ageMax": 6,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_martial_mist_run",
+      "title": "晨雾跑桩",
+      "text": "晨雾里跟师兄绕桩，喘得厉害却不肯停，雾散时衣襟已湿透。",
+      "originTags": ["martial"],
+      "ageMin": 4,
+      "ageMax": 5
+    },
+    {
+      "id": "preschool_merchant_counter_count",
+      "title": "柜台数货",
+      "text": "你帮伙计数布匹，数到十便得意地大声念出，客人夸你「伶俐」，父亲却让你再数一遍。",
+      "originTags": ["merchant"],
+      "ageMin": 5,
+      "ageMax": 6
+    },
+    {
+      "id": "preschool_merchant_haggle_listen",
+      "title": "议价旁听",
+      "text": "帘后听父亲与客人还价，你学舌「再添一文」，被轻拍脑袋，却记住了语气里的分寸。",
+      "originTags": ["merchant"],
+      "ageMin": 4,
+      "ageMax": 5
+    },
+    {
+      "id": "preschool_frontier_sand_veil",
+      "title": "风沙掩目",
+      "text": "风起沙扬，你第一次被教用袖遮面，沙粒打在颊上刺痛，却觉得边关风也有味道。",
+      "originTags": ["frontier"],
+      "ageMin": 5,
+      "ageMax": 6,
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_frontier_tent_smoke",
+      "title": "毡帐炊烟",
+      "text": "跟母亲看帐外炊烟辨风向，她说烟往东南，今日不会有大军过境。",
+      "originTags": ["frontier"],
+      "ageMin": 4,
+      "ageMax": 5
     }
   ]
 }

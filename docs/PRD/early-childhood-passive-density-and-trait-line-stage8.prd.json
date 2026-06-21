@@ -49,7 +49,7 @@
         "Tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-003; §3 frozen (only own-origin + neutral entries, no foreign tags, no isolation rollback); §5 FR-1; §7 success metrics gap ≤2/35 per origin; §6 non-goals (no eligibility rule change); design §2.1; may parallel US-004 after US-001–US-002; US-005 requires US-003 complete"
     },
     {

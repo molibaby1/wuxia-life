@@ -33,7 +33,7 @@
 | **6** | [`early-childhood-spine-origin-isolation.md`](./early-childhood-spine-origin-isolation.md) | **0～7 岁 spine / story_event 出身硬隔离** | Stage-5 已合入；暴露 spine 串味 | **已实施** |
 | **7** | [`early-childhood-childhood-experience-stage7.md`](./early-childhood-childhood-experience-stage7.md) | **Spine 扩 band 8～12 · daily gate · trait 线 · neutral 去重** | Stage-6 已合入 | **已实施** |
 | **8** | [`early-childhood-passive-density-and-trait-line-stage8.md`](./early-childhood-passive-density-and-trait-line-stage8.md) | **Passive 池加厚 · poor trait spine · gap 收口** | Stage-7 已合入 | **已实施** |
-| **9** | [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) | **8～12 agency · spine 密度 · neutral spine dedup P2** | Stage-8 已合入 | **待实施** |
+| **9** | [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) | **8～12 agency · spine 密度 · neutral spine dedup P2** | Stage-8 已合入 | **已实施** |
 
 ```mermaid
 flowchart TB
@@ -116,14 +116,15 @@ flowchart TB
 **Stage-8 设计真源：** `docs/designs/childhood-experience-stage8-content-rules.md`  
 **Closure：** `docs/test-reports/early-childhood-stage8-closure.md`
 
-## 8. Stage-9（当前）
+## 8. Stage-9 交付记录
 
 | Stage | 焦点 | 状态 |
 | --- | --- | --- |
-| **9** | 8～12 P16 agency + spine 密度；neutral spine dedup P2；被动同标题连出收口 | **待实施** → [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) |
+| **9** | 8～12 P16 agency + spine 密度；neutral spine dedup P2；被动同标题连出收口 | **已实施** → [`early-childhood-late-childhood-agency-and-spine-stage9.md`](./early-childhood-late-childhood-agency-and-spine-stage9.md) |
 
-**前置：** Stage-8 closure §5 候选项；Stage-7 US-006（P2）延后项
+**Stage-9 设计真源：** `docs/designs/p16-stage-agency-rules.md` § Late Childhood (8–12)  
+**Closure：** `docs/test-reports/early-childhood-stage9-closure.md`
 
 ---
 
-**索引版本：** 0.7 · 2026-06-21
+**索引版本：** 0.8 · 2026-06-21

@@ -1,6 +1,6 @@
 {
   "gate": {
-    "generatedAt": "2026-06-21T04:32:47.467Z",
+    "generatedAt": "2026-06-21T13:01:18.107Z",
     "decision": "pass",
     "originVariance": {
       "contrasts": [
@@ -37,8 +37,6 @@
         "action_training_basic"
       ],
       "allowlistAtAge10": [
-        "action_household_apprentice",
-        "action_socializing_lite",
         "action_study_lite",
         "action_childhood_training"
       ],

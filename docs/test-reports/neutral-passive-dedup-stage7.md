@@ -1,14 +1,14 @@
 # Neutral Passive Title Deduplication — Stage-7 (US-007)
 
 **PRD:** `docs/PRD/early-childhood-childhood-experience-stage7.md`  
-**Date:** 2026-06-21T08:23:32.731Z  
+**Date:** 2026-06-21T13:01:19.605Z  
 **Decision:** **PASS**
 
 ## Implementation
 
 | Constant | Value |
 | --- | --- |
-| `NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW` | 5 |
+| `NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW` | 7 |
 
 Applied in `selectPreschoolPassiveEntry` after `isPreschoolPassiveEligible`; falls through neutral-only → gap when all titles suppressed.
 
@@ -33,17 +33,17 @@ Top titles:
 | Metric | Value |
 | --- | --- |
 | Max consecutive same title | 0 (target ≤2) |
-| Top title share (50 rolls @ age 5) | 14.0% (童年时光) (target ≤25%) |
+| Top title share (50 rolls @ age 5) | 18.0% (童年时光) (target ≤25%) |
 
 Top titles (50 rolls, seed=99):
 
 | Title | Count |
 | --- | --- |
-| 童年时光 | 7 |
-| 家中一季 | 6 |
-| 邻里童谣 | 6 |
-| 季节更迭 | 6 |
-| 庭院嬉戏 | 6 |
+| 童年时光 | 9 |
+| 家中一季 | 4 |
+| 檐下晚晴 | 4 |
+| 邻里童谣 | 4 |
+| 季节更迭 | 4 |
 
 ## Reproduce
 

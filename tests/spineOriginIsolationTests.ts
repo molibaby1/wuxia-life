@@ -66,6 +66,22 @@ function testPrimaryResolverNullBeforeOriginBackground(): void {
   );
 }
 
+function testDeprecatedFrontierFamilyNotInferredAsFrontier(): void {
+  const mockEvent = {
+    id: 'test_deprecated_frontier_family',
+    conditions: [
+      {
+        type: 'expression' as const,
+        expression: 'flags.has("origin_frontier_family")',
+      },
+    ],
+  };
+  assert(
+    inferEventExclusivePrimaryFlag(mockEvent as EventDefinition) === null,
+    'origin_frontier_family must not substring-match origin_frontier',
+  );
+}
+
 function testScholarBlocksFrontierOrphan(): void {
   const state = buildState('origin_scholar_family', 2, {
     origin_poor_family: true,
@@ -186,6 +202,7 @@ ${matrix
 function main(): void {
   testPrimaryResolverScholarOverPoor();
   testPrimaryResolverNullBeforeOriginBackground();
+  testDeprecatedFrontierFamilyNotInferredAsFrontier();
   testScholarBlocksFrontierOrphan();
   testFrontierOrphanSelectableAfterConfigFix();
   const matrix = runFourOriginMatrix();

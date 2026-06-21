@@ -54,9 +54,20 @@ function collectConditionExpressions(event: EventDefinition): string {
   return parts.join(' ');
 }
 
+function extractCanonicalPrimaryFlags(text: string): PrimaryOriginFamilyFlag[] {
+  const tokens = text.match(/origin_[a-z_]+/g) ?? [];
+  const matched = new Set<PrimaryOriginFamilyFlag>();
+  for (const token of tokens) {
+    if ((PRIMARY_ORIGIN_FAMILY_FLAGS as readonly string[]).includes(token)) {
+      matched.add(token as PrimaryOriginFamilyFlag);
+    }
+  }
+  return [...matched];
+}
+
 function primaryFromConditions(event: EventDefinition): PrimaryOriginFamilyFlag | null {
   const text = collectConditionExpressions(event);
-  const matched = PRIMARY_ORIGIN_FAMILY_FLAGS.filter(flag => text.includes(flag));
+  const matched = extractCanonicalPrimaryFlags(text);
   if (matched.length === 1) {
     return matched[0];
   }

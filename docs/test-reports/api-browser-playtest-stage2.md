@@ -1,7 +1,7 @@
 # API Browser Playtest — Stage-2 Preschool Agency (US-003)
 
 **PRD:** `docs/PRD/early-childhood-opening-experience-governance.md`  
-**Date:** 2026-06-21T00:59:26.550Z  
+**Date:** 2026-06-21T01:17:24.819Z  
 **Environment:** P6B API `http://localhost:8787` + Vite `http://localhost:5200` (API mode)  
 **Origin:** 书香门第 (`origin_scholar_family`)  
 **Steps:** 35 (max 35)
@@ -18,9 +18,9 @@ npm exec tsx scripts/runApiBrowserPlaytestStage2.ts    # API driver (same contra
 
 | Criterion | Result | Evidence |
 | --- | --- | --- |
-| Advance to ≥4y + 童年偏好 | **PASS** | finalAge=18; childhood_preference=yes (2 options) |
+| Advance to ≥4y + 童年偏好 | **PASS** | finalAge=19; childhood_preference=yes (3 options) |
 | Ages 3–4 planningOptions.length === 0 | **PASS** | 7 observations at ages 3–4 |
-| Age 4 story_event 童年偏好 2–3 options | **PASS** | 2 options |
+| Age 4 story_event 童年偏好 2–3 options | **PASS** | 3 options |
 | Narrative non-empty before continue | **PASS** | empty=0/35 (100%) |
 | Placeholder ≤3 in 35 steps; 0 at 0–4 | **PASS** | total=0; ages0–4=0 |
 | No chivalry/internalSkill absurd jumps | **PASS** | see step log (passive band clamps hold) |
@@ -49,7 +49,7 @@ npm exec tsx scripts/runApiBrowserPlaytestStage2.ts    # API driver (same contra
 | 11 | 3 | story_event | 0 | yes | no | clever_speech |
 | 12 | 4 | story_event | 0 | yes | no | childhood_preference |
 | 13 | 4 | period_summary | 0 | yes | no | — |
-| 14 | 4 | passive_progression | 0 | yes | no | 识文断字 |
+| 14 | 4 | passive_progression | 0 | yes | no | 描红练字 |
 | 15 | 4 | passive_progression | 0 | yes | no | 描红练字 |
 | 16 | 4 | passive_progression | 0 | yes | no | 家中一季 |
 | 17 | 4 | passive_progression | 0 | yes | no | 家中一季 |

@@ -1,7 +1,7 @@
 # API Playtest — Stage-6 Spine Origin Isolation (US-006)
 
 **PRD:** `docs/PRD/early-childhood-spine-origin-isolation.md`  
-**Date:** 2026-06-21T00:59:26.551Z  
+**Date:** 2026-06-21T01:17:24.819Z  
 **Environment:** P6B API `http://localhost:8787` (headless driver; browser contract equivalent)  
 **Origin:** 书香门第 (`origin_scholar_family`)  
 **Steps:** 35
@@ -30,11 +30,11 @@ None.
 - step 11 age 3: `clever_speech`
 - step 12 age 4: `childhood_preference`
 - step 22 age 6: `martial_arts_enlightenment`
-- step 24 age 7: `p22_childhood_street_shaping`
-- step 30 age 8: `martial_focus_payoff`
-- step 31 age 14: `sect_choice`
-- step 33 age 15: `love_first_meet`
-- step 35 age 18: `martial_arts_invitation`
+- step 28 age 8: `martial_focus_payoff`
+- step 29 age 14: `sect_choice`
+- step 31 age 15: `love_first_meet`
+- step 33 age 18: `martial_arts_invitation`
+- step 35 age 19: `love_family_obstacle`
 
 ---
 

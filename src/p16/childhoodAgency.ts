@@ -4,7 +4,7 @@ import {
 } from '../data/childhoodActionCatalog';
 import type { ActiveActionDefinition } from '../types/activeActionTypes';
 import type { ActionCategory } from '../types/activeActionTypes';
-import { getMinimumActions } from '../data/activeActionCatalog';
+import { getActionById, getMinimumActions } from '../data/activeActionCatalog';
 import { getP8PersonaById } from '../p8/personas';
 import type { PersonaActionStrategy } from '../p8/types';
 import type { GameState, PlayerState } from '../types/eventTypes';
@@ -15,6 +15,31 @@ export const DAILY_PLANNING_MIN_AGE = 5;
 export const EARLY_CHILDHOOD_MAX_AGE = 7;
 export const CHILDHOOD_MAX_AGE = 12;
 export const YOUTH_MIN_AGE = 13;
+export const YOUTH_MAX_AGE = 20;
+
+const YOUTH_ALLOWED_CATEGORIES = new Set<ActionCategory>([
+  'training',
+  'study',
+  'socializing',
+  'business',
+  'travel',
+]);
+
+const YOUTH_CATEGORY_FLOOR_SCORE = 0.1;
+const YOUTH_PALETTE_MAX_CATEGORIES = 5;
+const YOUTH_MAX_BASIC_PER_PALETTE = 3;
+
+const YOUTH_BASIC_BY_CATEGORY: Partial<Record<ActionCategory, string>> = {
+  training: 'action_training_basic',
+  study: 'action_study_basic',
+  socializing: 'action_socializing_basic',
+  business: 'action_business_basic',
+  travel: 'action_travel_basic',
+};
+
+export function isYouthBand(age: number): boolean {
+  return age >= YOUTH_MIN_AGE && age <= YOUTH_MAX_AGE;
+}
 
 export function shouldOfferDailyPlanning(age: number): boolean {
   if (age > CHILDHOOD_MAX_AGE) return true;
@@ -171,6 +196,80 @@ function childhoodLiteForCategory(category: ActionCategory, age: number): Active
   return getChildhoodActionById(actionId);
 }
 
+function scoreYouthCategories(
+  player: PlayerState | undefined,
+  flags: Record<string, unknown> | undefined,
+): Map<ActionCategory, number> {
+  const scores = scoreChildhoodCategories(player, flags);
+  for (const category of YOUTH_ALLOWED_CATEGORIES) {
+    scores.set(category, (scores.get(category) ?? 0) + YOUTH_CATEGORY_FLOOR_SCORE);
+  }
+  return scores;
+}
+
+function youthPrefersLiteForCategory(category: ActionCategory, age: number): boolean {
+  if (age <= 15) return true;
+  if (age <= 17) {
+    return category === 'business' || category === 'travel' || category === 'socializing';
+  }
+  return false;
+}
+
+function youthActionForCategory(
+  category: ActionCategory,
+  age: number,
+): ActiveActionDefinition | undefined {
+  if (!YOUTH_ALLOWED_CATEGORIES.has(category)) return undefined;
+
+  if (youthPrefersLiteForCategory(category, age)) {
+    const lite = childhoodLiteForCategory(category, age);
+    if (lite) return lite;
+  }
+
+  const basicId = YOUTH_BASIC_BY_CATEGORY[category];
+  return basicId ? getActionById(basicId) : undefined;
+}
+
+/**
+ * Build a moderate youth palette (13–20): ≤5 categories, lite-first gradient, never all five basics.
+ */
+export function resolveYouthActionPalette(context: ChildhoodPaletteContext): ActiveActionDefinition[] {
+  const { age, player, flags } = context;
+  const ranked = [...scoreYouthCategories(player, flags).entries()]
+    .filter(([category]) => YOUTH_ALLOWED_CATEGORIES.has(category))
+    .sort((a, b) => b[1] - a[1]);
+
+  const palette: ActiveActionDefinition[] = [];
+  const seen = new Set<string>();
+  let basicCount = 0;
+
+  for (const [category] of ranked) {
+    if (palette.length >= YOUTH_PALETTE_MAX_CATEGORIES) break;
+    let action = youthActionForCategory(category, age);
+    if (!action || seen.has(action.id)) continue;
+    const isBasic = ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(action.id);
+    if (isBasic && basicCount >= YOUTH_MAX_BASIC_PER_PALETTE) {
+      action = childhoodLiteForCategory(category, age);
+      if (!action || seen.has(action.id)) continue;
+    }
+    if (ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(action.id)) {
+      if (basicCount >= YOUTH_MAX_BASIC_PER_PALETTE) continue;
+      basicCount += 1;
+    }
+    seen.add(action.id);
+    palette.push(action);
+  }
+
+  if (palette.length === 0) {
+    const fallback =
+      youthActionForCategory('training', age) ??
+      getChildhoodActionById('action_childhood_training');
+    return fallback ? [fallback] : childhoodActionCatalog.slice(0, 1);
+  }
+
+  return palette;
+}
+
 /**
  * Build a limited childhood palette from origin + persona/upbringing signals.
  * Never includes adult-framed minimum actions.
@@ -179,8 +278,11 @@ export function resolveChildhoodActionPalette(
   context: ChildhoodPaletteContext,
 ): ActiveActionDefinition[] {
   const { age, player, flags } = context;
-  if (age > CHILDHOOD_MAX_AGE) {
+  if (age > YOUTH_MAX_AGE) {
     return getMinimumActions();
+  }
+  if (isYouthBand(age)) {
+    return resolveYouthActionPalette(context);
   }
   if (!shouldOfferDailyPlanning(age)) {
     return [];
@@ -224,14 +326,17 @@ export function filterActionsForChildhoodAgency(
   player?: PlayerState,
   flags?: Record<string, unknown>,
 ): ActiveActionDefinition[] {
-  if (age > CHILDHOOD_MAX_AGE) {
+  if (age > YOUTH_MAX_AGE) {
     return actions;
+  }
+  if (isYouthBand(age)) {
+    return resolveYouthActionPalette({ age, player, flags });
   }
   return resolveChildhoodActionPalette({ age, player, flags });
 }
 
 export function isActionSuppressedForAge(actionId: string, age: number): boolean {
-  if (age > CHILDHOOD_MAX_AGE) return false;
+  if (isYouthBand(age) || age > YOUTH_MAX_AGE) return false;
   return ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(actionId);
 }
 

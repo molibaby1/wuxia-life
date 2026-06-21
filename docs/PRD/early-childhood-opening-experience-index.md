@@ -15,8 +15,8 @@
 | 横切（全 0～7 岁适用） | 各 Stage 分工 |
 | --- | --- |
 | 0～2 纯被动 | Stage-1 机制 · Stage-3 出身内容 |
-| 3～4 被动 + spine 抉择 | Stage-1 机制 · Stage-4 密度与文案 |
-| 5～7 有限主动（≤2 lite） | Stage-1 机制 · Stage-4 选项与节奏 |
+| 3～4 被动 + spine 抉择 | Stage-1 机制 · Stage-4 密度与文案 · **Stage-6 spine 隔离** |
+| 5～7 有限主动（≤2 lite） | Stage-1 机制 · Stage-4 选项与节奏 · **Stage-6 spine 隔离** |
 | 8～12 受限主动 | P16 范围外（本套件不覆盖） |
 
 ---
@@ -29,7 +29,8 @@
 | **2** | [`early-childhood-opening-experience-governance.md`](./early-childhood-opening-experience-governance.md) | 门禁 + 实机验收 + 四出身基线审计 | 建议 Stage-1 已合入 | **已实施** |
 | **3** | [`early-childhood-origin-infant-quest-chains.md`](./early-childhood-origin-infant-quest-chains.md) | 四出身 0～2 岁顺序被动链 | 建议 Stage-1；可与 Stage-2 并行 | **已实施** |
 | **4** | [`early-childhood-preschool-content-and-pacing.md`](./early-childhood-preschool-content-and-pacing.md) | 3～7 岁 spine 密度、占位、5～7 轻量选项 | 建议 Stage-1；可与 Stage-3 并行 | **已实施** |
-| **5** | [`early-childhood-preschool-origin-isolation.md`](./early-childhood-preschool-origin-isolation.md) | **3～7 岁 passive 出身硬隔离**（修复 filler 串味） | Stage-3/4 已合入 | **已实施** |
+| **5** | [`early-childhood-preschool-origin-isolation.md`](./early-childhood-preschool-origin-isolation.md) | **3～7 岁 passive 出身硬隔离** | Stage-3/4 已合入 | **已实施** |
+| **6** | [`early-childhood-spine-origin-isolation.md`](./early-childhood-spine-origin-isolation.md) | **0～7 岁 spine / story_event 出身硬隔离** | Stage-5 已合入；暴露 spine 串味 | **待实施** |
 
 ```mermaid
 flowchart TB
@@ -38,19 +39,24 @@ flowchart TB
   S2[Stage-2 验收]
   S3[Stage-3 0～2 出身链]
   S4[Stage-4 3～7 内容与节奏]
-  S5[Stage-5 3～7 出身隔离]
+  S5[Stage-5 3～7 passive 隔离]
+  S6[Stage-6 0～7 spine 隔离]
 
   IDX --> S1
   S1 --> S2
   S1 --> S3
   S1 --> S4
   S3 -.->|0～2 已隔离| S5
-  S4 -.->|暴露串味| S5
+  S4 -.->|passive 串味| S5
+  S4 -.->|spine 串味| S6
+  S5 -.->|passive 已收口| S6
 ```
 
-**并行建议：** Stage-5 可在 Stage-4 合入后立即开工；仅改 `preschoolPassiveSpine.ts` 与测试，冲突面小。
+**并行建议：** Stage-6 可在 Stage-5 合入后立即开工；主要 touch `GameEngineIntegration.ts`、P22 配置与测试。
 
-**已知问题（Stage-5 目标）：** 3～7 岁 passive 仍用软加权，外国出身条目可被抽中（例：书香 age 4 · `child_frontier_drill`「营中操练」）。0～2 岁四链已隔离，问题仅在幼童 filler 层。
+**已知问题（Stage-6 目标）：** spine / story_event 跨出身（例：书香 age 2 · `p22_origin_frontier_orphan`）。Stage-5 已消除 passive filler 串味（如 `child_frontier_drill`）。
+
+**设计真源（Stage-6）：** `docs/designs/spine-origin-isolation-rules.md`
 
 ---
 
@@ -74,4 +80,12 @@ flowchart TB
 
 ---
 
-**索引版本：** 0.1 · 2026-06-18
+## 5. 后续 Stage（规划）
+
+| Stage | 焦点 | 状态 |
+| --- | --- | --- |
+| **7**（规划） | neutral passive 去重 / micro-chain；daily 回退池治理 | 未开 PRD |
+
+---
+
+**索引版本：** 0.2 · 2026-06-19

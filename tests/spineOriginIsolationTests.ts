@@ -18,6 +18,10 @@ const REPORT_PATH = path.join(
   process.cwd(),
   'docs/test-reports/spine-origin-isolation-stage6.md',
 );
+const EXTENDED_BAND_REPORT_PATH = path.join(
+  process.cwd(),
+  'docs/test-reports/spine-origin-isolation-stage7-extended-band.md',
+);
 
 const ORIGIN_CASES: Array<{ label: string; flag: PrimaryOriginFamilyFlag }> = [
   { label: '书香门第', flag: 'origin_scholar_family' },
@@ -26,7 +30,8 @@ const ORIGIN_CASES: Array<{ label: string; flag: PrimaryOriginFamilyFlag }> = [
   { label: '边疆异族', flag: 'origin_frontier' },
 ];
 
-const AGES = [1, 2, 3, 4, 5, 6, 7] as const;
+const AGES_P0 = [1, 2, 3, 4, 5, 6, 7] as const;
+const AGES_P1 = [8, 9, 10, 11, 12] as const;
 const ROLLS_PER_CELL = 30;
 
 function assert(condition: boolean, message: string): void {
@@ -125,7 +130,7 @@ function collectForeignIds(
   return foreign;
 }
 
-function runFourOriginMatrix(): Array<{
+function runFourOriginMatrix(ages: readonly number[]): Array<{
   label: string;
   flag: PrimaryOriginFamilyFlag;
   age: number;
@@ -141,7 +146,7 @@ function runFourOriginMatrix(): Array<{
   }> = [];
 
   for (const origin of ORIGIN_CASES) {
-    for (const age of AGES) {
+    for (const age of ages) {
       const seenForeign = new Set<string>();
       for (let i = 0; i < ROLLS_PER_CELL; i += 1) {
         for (const id of collectForeignIds(origin.flag, age, { p22_live_ops_active: true })) {
@@ -165,16 +170,20 @@ function runFourOriginMatrix(): Array<{
   return rows;
 }
 
-function formatReport(matrix: Awaited<ReturnType<typeof runFourOriginMatrix>>): string {
+function formatReport(
+  matrix: Awaited<ReturnType<typeof runFourOriginMatrix>>,
+  options: { title: string; ages: readonly number[]; reportLabel: string },
+): string {
   const totalForeign = matrix.reduce((sum, row) => sum + row.foreignIds.length, 0);
   const pass = totalForeign === 0;
 
-  return `# Spine Origin Isolation — Stage-6 (US-005)
+  return `# ${options.title}
 
-**PRD:** \`docs/PRD/early-childhood-spine-origin-isolation.md\`  
+**PRD:** \`docs/PRD/early-childhood-childhood-experience-stage7.md\`  
 **Date:** ${new Date().toISOString()}  
 **Decision:** ${pass ? '**PASS**' : '**FAIL**'}  
-**Age band:** 0–${SPINE_ORIGIN_EXCLUSIVE_AGE_MAX} (matrix ages ${AGES.join(', ')})  
+**Age band:** ${options.reportLabel} (matrix ages ${options.ages.join(', ')})  
+**Gate constant:** \`SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = ${SPINE_ORIGIN_EXCLUSIVE_AGE_MAX}\`  
 **Rolls per cell:** ${ROLLS_PER_CELL} \`getAvailableEvents\` scans
 
 ## Reproduce
@@ -205,11 +214,23 @@ function main(): void {
   testDeprecatedFrontierFamilyNotInferredAsFrontier();
   testScholarBlocksFrontierOrphan();
   testFrontierOrphanSelectableAfterConfigFix();
-  const matrix = runFourOriginMatrix();
-  const report = formatReport(matrix);
+  const matrixP0 = runFourOriginMatrix(AGES_P0);
+  const matrixP1 = runFourOriginMatrix(AGES_P1);
+  const reportP0 = formatReport(matrixP0, {
+    title: 'Spine Origin Isolation — Stage-6 (US-005)',
+    ages: AGES_P0,
+    reportLabel: '0–7 regression',
+  });
+  const reportP1 = formatReport(matrixP1, {
+    title: 'Spine Origin Isolation — Stage-7 Extended Band (US-002)',
+    ages: AGES_P1,
+    reportLabel: '8–12 new',
+  });
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
-  fs.writeFileSync(REPORT_PATH, report, 'utf8');
+  fs.writeFileSync(REPORT_PATH, reportP0, 'utf8');
+  fs.writeFileSync(EXTENDED_BAND_REPORT_PATH, reportP1, 'utf8');
   console.log(`Wrote ${path.relative(process.cwd(), REPORT_PATH)}`);
+  console.log(`Wrote ${path.relative(process.cwd(), EXTENDED_BAND_REPORT_PATH)}`);
   console.log('✔ spineOriginIsolationTests passed');
 }
 

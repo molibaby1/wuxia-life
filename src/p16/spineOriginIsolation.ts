@@ -4,8 +4,8 @@ import {
   type PrimaryOriginFamilyFlag,
 } from './primaryOriginFlag';
 
-/** P0 audit band; gate applies through this age (PRD Q1). */
-export const SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = 7;
+/** P0 audit band; gate applies through this age (PRD Q1, Stage-7). */
+export const SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = 12;
 
 const STAGEFIT_TO_PRIMARY: Record<string, PrimaryOriginFamilyFlag> = {
   origin_scholar: 'origin_scholar_family',

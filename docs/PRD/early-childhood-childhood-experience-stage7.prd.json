@@ -34,7 +34,7 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002; §3 frozen (spine band P0=0–7 regression, P1=8–12 new); §5 FR-1; §9 success metrics foreign exclusive 8–12 0%; §10 rollback revert constant to 7; §11 may parallel US-003; depends on US-001 audit for 8–12 pool inventory; §12 Q1 age 12 inclusive"
     },
     {

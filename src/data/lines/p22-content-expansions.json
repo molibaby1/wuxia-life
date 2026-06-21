@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"origin_frontier_family\") || flags.has(\"origin_poor_family\")"
+        "expression": "flags.has(\"origin_frontier\")"
       }
     ],
     "content": {

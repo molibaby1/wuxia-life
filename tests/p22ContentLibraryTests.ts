@@ -149,16 +149,16 @@ function testLiveOpsSelectionGate(): void {
   const base = gameEngine.getGameState();
   gameEngine.loadGameState({
     ...base,
-    flags: { p22_live_ops_active: true, origin_poor_family: true },
+    flags: { p22_live_ops_active: true, origin_frontier: true },
     player: {
       ...base.player,
       age: 1,
-      flags: { p22_live_ops_active: true, origin_poor_family: true },
+      flags: { p22_live_ops_active: true, origin_frontier: true },
     },
   });
   assert(
     gameEngine.getAvailableEvents(1).some(event => event.id === 'p22_origin_frontier_orphan'),
-    'p22 origin sample selectable when activated with matching origin flags',
+    'p22 frontier orphan selectable when activated with origin_frontier primary',
   );
 }
 

@@ -68,7 +68,7 @@
         "Tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004 (implementation half); §3 frozen (trait-line only matches corresponding trait flag; resolvePrimaryOriginFamilyFlag authority for four-main foreign exclusive); §5 FR-2, FR-3; §7 touchpoints spineOriginIsolation.ts or new module; §12 Q2 scholar+poor allows poor-line, blocks street/frontier/scholar foreign exclusive; depends on US-001 trait inventory"
     },
     {

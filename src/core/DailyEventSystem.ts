@@ -1,6 +1,7 @@
 import { dailyEvents } from '../data/life/dailyEvents';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
+import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import { EffectType, EventCategory, EventPriority, type DailyEventConfig, type DailyEventVariantConfig, type EventDefinition, type EventTrigger, type GameState } from '../types/eventTypes';
 
 function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVariantConfig {
@@ -24,7 +25,8 @@ export class DailyEventSystem {
       .map(event => ({ event, weight: this.getWeight(event, state) }))
       .filter(item => item.weight > 0)
       .filter(item =>
-        isSpineOriginEligible(this.buildProbeEvent(item.event, state), primaryOrigin, age),
+        isSpineOriginEligible(this.buildProbeEvent(item.event, state), primaryOrigin, age) &&
+        isTraitLineSpineEligible(this.buildProbeEvent(item.event, state), state),
       );
 
     if (candidates.length === 0) {

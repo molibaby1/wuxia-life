@@ -53,6 +53,7 @@ import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
+import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import {
   applyRareLineFlags,
   rollRareEventLines,
@@ -432,6 +433,9 @@ export class GameEngineIntegration {
 
       const primaryOrigin = resolvePrimaryOriginFamilyFlag(this.gameState);
       if (!isSpineOriginEligible(event, primaryOrigin, age)) {
+        return false;
+      }
+      if (!isTraitLineSpineEligible(event, this.gameState)) {
         return false;
       }
       

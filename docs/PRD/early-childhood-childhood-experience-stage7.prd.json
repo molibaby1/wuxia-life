@@ -1,0 +1,140 @@
+{
+  "project": "Wuxia Life Early Childhood Childhood Experience (Stage-7)",
+  "branchName": "ralph/early-childhood-childhood-experience-stage7",
+  "description": "Stage-7 childhood experience closure: extend spine origin hard gate to age ≤12, wire daily fallback through isSpineOriginEligible, govern trait-line (poor/street) spine eligibility, deduplicate neutral passive titles ages 3–7, optional neutral spine repetition tuning (P2). Must not regress Stage-5/6 gates. Product truth: docs/PRD/early-childhood-childhood-experience-stage7.md; design rules: docs/designs/childhood-experience-stage7-rules.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Stage-7 Baseline Audit (Read-Only)",
+      "description": "As a maintainer, I want an inventory of 8–12 spine, daily fallback, trait-line, and neutral repetition paths before code changes.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-stage7-baseline-audit.md",
+        "List story_event ids with ageRange overlapping 8–12, grouped by origin exclusivity (scholar/martial/merchant/frontier/trait-poor/trait-street/neutral)",
+        "Document daily fallback call chain: selectEvent → dailyEventSystem.selectEvent with file references",
+        "Inventory trait-line spine ids referencing origin_poor_family or origin_streetborn (incl. p22-content-expansions.json)",
+        "Measure neutral passive title repetition: sample 4 origins × age 3–7 × 30 picks; report top duplicated titles",
+        "No gameplay code changes in this story",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §4 US-001; §3 frozen (hard filter, primary origin authority, spine band 12, daily path gate, trait-line rules); §6 non-goals (no infant chain rewrite, no Stage-5 eligibility change, no full 8–12 content authoring, no global selectEvent rewrite); §8 risk 8–12 thin pools; design docs/designs/childhood-experience-stage7-rules.md"
+    },
+    {
+      "id": "US-002",
+      "title": "Extend Spine Origin Gate To Age 12",
+      "description": "As the engine, I need origin-exclusive spine filtering through age 12 so that late childhood story events match primary origin.",
+      "acceptanceCriteria": [
+        "Raise SPINE_ORIGIN_EXCLUSIVE_AGE_MAX to 12 in src/p16/spineOriginIsolation.ts (or named constant used by gate)",
+        "Confirm GameEngineIntegration.getAvailableEvents uses updated constant (no duplicate magic number)",
+        "Extend tests/spineOriginIsolationTests.ts: four origins × ages {8,9,10,11,12} × 30 rolls → 0 foreign exclusive ids",
+        "Regression: existing 0–7 matrix tests unchanged pass criteria (0 foreign ids)",
+        "Save matrix to docs/test-reports/spine-origin-isolation-stage7-extended-band.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD §4 US-002; §3 frozen (spine band P0=0–7 regression, P1=8–12 new); §5 FR-1; §9 success metrics foreign exclusive 8–12 0%; §10 rollback revert constant to 7; §11 may parallel US-003; depends on US-001 audit for 8–12 pool inventory; §12 Q1 age 12 inclusive"
+    },
+    {
+      "id": "US-003",
+      "title": "Daily Fallback Origin Gate",
+      "description": "As a maintainer, I want daily event fallback to respect the same spine origin rules so that selectEvent bypass cannot reintroduce bleed.",
+      "acceptanceCriteria": [
+        "Wire isSpineOriginEligible into daily selection path (DailyEventSystem.selectEvent and/or GameEngineIntegration.selectEvent daily branch)",
+        "For age ≤ 12: candidates whose built EventDefinition fails origin gate are excluded before weighted pick",
+        "Headless test: mock or fixture daily config with origin-exclusive semantics → wrong primary never selected",
+        "Document daily pool origin semantics in baseline audit appendix (confirm current pool neutral-only or list exceptions)",
+        "Save docs/test-reports/daily-fallback-origin-gate-stage7.md",
+        "Regression: spineOriginIsolationTests + preschoolOriginIsolationTests pass",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD §4 US-003; §3 frozen (daily path must wire gate, defensive not assume neutral-only forever); §5 FR-1; §7 touchpoints DailyEventSystem.ts, GameEngineIntegration.ts; §8 tests/dailyFallbackOriginGateTests.ts; §10 risk daily gate false positive → mock validation; §11 may parallel US-002 after US-001; §12 Q1 age 12 daily included"
+    },
+    {
+      "id": "US-004",
+      "title": "Trait-Line Spine Eligibility Core Gate",
+      "description": "As the engine, I need a trait-line classifier and runtime gate integrated into spine selection so poor/street events match trait flags without four-main foreign bleed.",
+      "acceptanceCriteria": [
+        "Add trait-line classifier (inferTraitLineExclusiveFlag or equivalent) for events keyed on origin_poor_family / origin_streetborn",
+        "Add isTraitLineSpineEligible(event, state) integrated into spine selection path after primary-origin gate",
+        "Rules: four-main foreign exclusive remains blocked; poor-line only when origin_poor_family present; street-line only when origin_streetborn present; cross-trait blocked",
+        "Unit tests in tests/traitLineSpineEligibilityTests.ts (or extend spineOriginIsolationTests.ts) covering four-main × trait combinations",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD §4 US-004 (implementation half); §3 frozen (trait-line only matches corresponding trait flag; resolvePrimaryOriginFamilyFlag authority for four-main foreign exclusive); §5 FR-2, FR-3; §7 touchpoints spineOriginIsolation.ts or new module; §12 Q2 scholar+poor allows poor-line, blocks street/frontier/scholar foreign exclusive; depends on US-001 trait inventory"
+    },
+    {
+      "id": "US-005",
+      "title": "Trait-Line P22 Audit Fixes and Eligibility Matrix",
+      "description": "As a maintainer, I want P22 config fixes and a documented trait-line matrix proving zero cross-trait and foreign-main bleed.",
+      "acceptanceCriteria": [
+        "Audit fix: split or guard P22 entries where street/poor OR branches overlap four-main flags (document in audit appendix)",
+        "Extend spineOriginConfigValidation for trait-line OR-branch rules where applicable (FR-6)",
+        "Save matrix docs/test-reports/trait-line-spine-eligibility-stage7.md",
+        "Regression: Stage-6 scholar+poor orphan block test still passes",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD §4 US-004 (config/validation half); §5 FR-6; §7 touchpoints p22-content-expansions.json, traits/origins.ts, spineOriginConfigValidation.ts; §9 trait-line cross-trait bleed 0%; §6 non-goals (no merging poor/street into four-main origin_background); depends on US-004 core gate"
+    },
+    {
+      "id": "US-006",
+      "title": "Neutral Spine Repetition Tuning (Optional P2)",
+      "description": "As a maintainer, I want reduced repetition among neutral spine ids (e.g. clever_speech, toddler variants) during ages 0–12.",
+      "acceptanceCriteria": [
+        "Extend formal repetition / profile pressure for neutral spine id families listed in audit",
+        "35-step API or headless sample: neutral spine id repetition rate ≤ Stage-6 baseline (document baseline in US-001)",
+        "Save docs/test-reports/neutral-spine-repetition-stage7.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "PRD §4 US-006; priority P2 — may defer if US-007 meets product bar; §11 parallel after US-007; §12 Q4 not P0; §6 non-goals (no infant chain rewrite); depends on US-001 audit baseline"
+    },
+    {
+      "id": "US-007",
+      "title": "Neutral Passive Title Deduplication",
+      "description": "As a player, I want less repeated neutral passive titles during ages 3–7 so that filler feels varied.",
+      "acceptanceCriteria": [
+        "In selectPreschoolPassiveEntry, suppress candidates whose title matches any of the last N passive narrative titles in history (N=5 default, constant configurable)",
+        "Suppression applies within legal pool only (after isPreschoolPassiveEligible); does not bypass origin isolation",
+        "When all candidates suppressed, fall through to existing neutral-only → gap order (Stage-5)",
+        "Unit test: force repeated neutral picks → same title ≤2 consecutive; 50-roll sample meets title diversity threshold",
+        "Save docs/test-reports/neutral-passive-dedup-stage7.md with before/after title frequency tables",
+        "Regression: preschoolOriginIsolationTests pass (0 foreign passive ids)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "PRD §4 US-005; §3 frozen (dedup legal pool only, no eligibility change); §5 FR-4; §7 touchpoints preschoolPassiveSpine.ts; §9 neutral passive same-title consecutive ≤2; §10 risk gap increase → fallback order unchanged; §12 Q3 NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW=5; §6 non-goals (no Stage-5 eligibility rule changes beyond dedup weighting); independent per §11"
+    },
+    {
+      "id": "US-008",
+      "title": "Stage-7 Closure Report",
+      "description": "As a product owner, I want closure tying audit, extended band, daily gate, trait-line, and dedup together.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-stage7-closure.md",
+        "References US-001 through US-007 artifacts (incl. optional US-006 if completed)",
+        "Confirms Stage-5/6 non-regression with command output snippets (gate:p16, preschoolOriginIsolationTests, spineOriginIsolationTests 0–7 section)",
+        "Lists residual risks (8–12 content gaps, trait content volume, daily catalog evolution)",
+        "No code in this story",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "PRD §4 US-007; §2 goals (Stage-5/6 no regression); §9 success metrics table; §10 rollback summary; suite index docs/PRD/early-childhood-opening-experience-index.md; depends on US-001–US-005 and US-007; US-006 optional"
+    }
+  ]
+}

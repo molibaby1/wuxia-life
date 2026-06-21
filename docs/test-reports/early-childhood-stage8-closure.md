@@ -22,7 +22,7 @@
 
 | 指标 | Stage-7 baseline | Stage-8 结果 |
 | --- | --- | --- |
-| Gap 步 / 35 / 出身 | 4～5 | **2 / 2 / 2 / 1** |
+| Gap 步 / 35 / 出身 | 4～5 | **2 / 2 / 2 / 0** |
 | Passive bleed | 0 | **0** |
 | Spine bleed | 0 | **0** |
 | Trait-line bleed | 0 | **0** |

@@ -1,7 +1,7 @@
 # Neutral Passive Title Deduplication — Stage-7 (US-007)
 
 **PRD:** `docs/PRD/early-childhood-childhood-experience-stage7.md`  
-**Date:** 2026-06-21T04:32:51.793Z  
+**Date:** 2026-06-21T08:11:20.629Z  
 **Decision:** **PASS**
 
 ## Implementation
@@ -16,15 +16,17 @@ Applied in `selectPreschoolPassiveEntry` after `isPreschoolPassiveEligible`; fal
 
 | Metric | Value |
 | --- | --- |
-| Max consecutive same title | 7 |
-| Top title share | 52.5% (描红练字) |
+| Max consecutive same title | 4 |
+| Top title share | 27.5% (砚边习字) |
 
 Top titles:
 
 | Title | Count |
 | --- | --- |
-| 描红练字 | 42 |
-| 识文断字 | 38 |
+| 砚边习字 | 22 |
+| 识文断字 | 21 |
+| 蒙学跟读 | 20 |
+| 描红练字 | 17 |
 
 ## Scholar age 4/5 — after (history + title dedup)
 
@@ -38,10 +40,10 @@ Top titles (50 rolls, seed=99):
 | Title | Count |
 | --- | --- |
 | 童年时光 | 7 |
-| 邻里童谣 | 7 |
-| 季节更迭 | 7 |
 | 家中一季 | 6 |
-| 檐下晚晴 | 6 |
+| 邻里童谣 | 6 |
+| 季节更迭 | 6 |
+| 庭院嬉戏 | 6 |
 
 ## Reproduce
 

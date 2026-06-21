@@ -71,9 +71,9 @@ All entries: unique `id`, single exclusive `originTags`, age band 3–7, non-emp
 | 书香门第 | **2** |
 | 武林世家 | **2** |
 | 商贾之家 | **2** |
-| 边疆异族 | **1** |
+| 边疆异族 | **0** |
 
-Target ≤2: **PASS**
+Target ≤2: **PASS**（finalize 复跑 2026-06-21；seed 方差下 martial/frontier 可在 1～2 / 0～1 间波动，均 ≤2）
 
 ```bash
 npm exec tsx tests/preschoolPassiveSpineTests.ts
@@ -86,4 +86,4 @@ npm exec tsx tests/spineOriginConfigValidationTests.ts
 
 ---
 
-**Decision:** US-003 content manifest complete — await US-005 final playtest gap regression
+**Decision:** US-003 + US-005 complete — gap regression **PASS**（2 / 2 / 2 / 0 per finalize 复跑；bleed 0）；见 `early-childhood-opening-experience-final-playtest.md` Stage-8 行

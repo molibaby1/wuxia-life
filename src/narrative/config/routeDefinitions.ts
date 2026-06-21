@@ -38,7 +38,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_wealth',
     label: '营商致富',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_business_focus', description: '幼年营商行动' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_early_business_focus', description: '少年营商行动' },
     ],
     reinforcementPoints: [
       {
@@ -65,7 +65,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_wanderer',
     label: '游历江湖',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_travel_focus', description: '幼年游历行动' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_early_travel_focus', description: '少年游历行动' },
     ],
     reinforcementPoints: [
       {
@@ -92,7 +92,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_martial',
     label: '习武成名',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_echo_training_hook', description: '幼年练功' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_echo_training_hook', description: '少年练功' },
     ],
     reinforcementPoints: [
       { kind: 'reinforcement', ageBand: '10-20', eventId: 'p9_childhood_sword_trial', flagKey: 'p9_childhood_sword_trial', description: '童子试剑' },
@@ -114,7 +114,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_deviant',
     label: '邪路偏锋',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_echo_training_hook', description: '幼年练功' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_echo_training_hook', description: '少年练功' },
     ],
     reinforcementPoints: [
       { kind: 'reinforcement', ageBand: '10-20', eventId: 'p9_childhood_dark_spark', description: '暗劲初萌' },
@@ -135,7 +135,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_scholar',
     label: '治学成名',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_echo_study_hook', description: '幼年读书行动' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_echo_study_hook', description: '少年读书行动' },
     ],
     reinforcementPoints: [],
     divergencePoints: [
@@ -154,7 +154,7 @@ export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
     id: 'route_social',
     label: '交游成名',
     entrySignals: [
-      { kind: 'entry', ageBand: '0-10', flagKey: 'p9_early_social_focus', description: '幼年交游行动' },
+      { kind: 'entry', ageBand: '13-20', flagKey: 'p9_early_social_focus', description: '少年交游行动' },
     ],
     reinforcementPoints: [
       {

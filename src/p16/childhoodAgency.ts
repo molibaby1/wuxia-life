@@ -60,6 +60,15 @@ const LITE_ACTION_BY_CATEGORY_AGE_7: Record<ActionCategory, string> = {
   jianghu: 'action_childhood_training',
 };
 
+/** P16 Late Childhood (8–12): suppress adult-framed category exposure (lite ids included). */
+export const LATE_CHILDHOOD_SUPPRESSED_CATEGORIES = new Set<ActionCategory>([
+  'business',
+  'travel',
+  'socializing',
+]);
+
+const LATE_CHILDHOOD_ALLOWLIST_CATEGORIES = new Set<ActionCategory>(['training', 'study']);
+
 /** @deprecated use resolveLiteActionMapForAge */
 const LITE_ACTION_BY_CATEGORY: Record<ActionCategory, string> = LITE_ACTION_BY_CATEGORY_AGE_7;
 
@@ -146,7 +155,18 @@ function scoreChildhoodCategories(
   return scores;
 }
 
+function isLateChildhoodBand(age: number): boolean {
+  return age > EARLY_CHILDHOOD_MAX_AGE && age <= CHILDHOOD_MAX_AGE;
+}
+
+function isCategoryAllowedForChildhoodAge(category: ActionCategory, age: number): boolean {
+  if (!isLateChildhoodBand(age)) return true;
+  if (LATE_CHILDHOOD_SUPPRESSED_CATEGORIES.has(category)) return false;
+  return LATE_CHILDHOOD_ALLOWLIST_CATEGORIES.has(category);
+}
+
 function childhoodLiteForCategory(category: ActionCategory, age: number): ActiveActionDefinition | undefined {
+  if (!isCategoryAllowedForChildhoodAge(category, age)) return undefined;
   const actionId = resolveLiteActionMapForAge(age)[category];
   return getChildhoodActionById(actionId);
 }
@@ -175,6 +195,7 @@ export function resolveChildhoodActionPalette(
   const seen = new Set<string>();
   for (const [category] of ranked) {
     if (palette.length >= maxCategories) break;
+    if (!isCategoryAllowedForChildhoodAge(category, age)) continue;
     const action = childhoodLiteForCategory(category, age);
     if (!action || seen.has(action.id)) continue;
     seen.add(action.id);

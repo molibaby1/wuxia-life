@@ -213,8 +213,12 @@ function testChildhoodAgency(): void {
     flags: { p8_persona_id: 'p8-social-gu' },
   });
   assert(
-    socialPalette.some(a => a.id === 'action_socializing_lite'),
-    'social persona gets socializing-lite',
+    !socialPalette.some(a => a.category === 'socializing' || a.category === 'business'),
+    'late childhood suppresses socializing/business categories at age 8',
+  );
+  assert(
+    socialPalette.some(a => a.id === 'action_study_lite' || a.id === 'action_childhood_training'),
+    'late childhood still offers training or study at age 8',
   );
 
   const travelPalette = resolveChildhoodActionPalette({
@@ -222,7 +226,8 @@ function testChildhoodAgency(): void {
     player: { traitProfile: { origin: 'frontier_military' } } as PlayerState,
     flags: { p8_persona_id: 'p8-explorer-lu' },
   });
-  assert(travelPalette.some(a => a.id === 'action_errand_nearby'), 'travel persona gets errand-lite');
+  assert(!travelPalette.some(a => a.category === 'travel'), 'late childhood suppresses travel at age 8');
+  assert(travelPalette.some(a => a.id === 'action_childhood_training'), 'frontier late childhood keeps training');
 
   assert(childhoodPalettesDifferByArchetype(), 'archetype palettes do not all collapse to training');
 

@@ -2,15 +2,6 @@
 
 - Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics). 8–12 palette still admits lite business/travel/socializing categories → US-002 must category-filter ages 8–12.
 - Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
-- Pool audit, primaryOriginFlagTests CI, 16 new passive/origin + poor trait spine, gap regression ≤2, closure.
-- Files: preschool-passive-spine.json, p22-content-expansions.json, runStage8PoolAudit.ts, runEarlyChildhoodFinalPlaytest.ts, runRealTestGate.ts, traitLineSpineEligibilityTests.ts
-- **Learnings for future iterations:**
-  - Gap reduction needs wide ageMin–ageMax exclusive rows (3–7), not only narrow bands.
-  - First +2 passive/origin left scholar gap=4; second batch brought 2/2/2/1.
-  - `p22_childhood_poor_shaping` uses comprehension not caution (unknown stat).
----
-
-- Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
 - Stage-8 poor trait spine: `p22_childhood_poor_shaping` in `p22-content-expansions.json`; condition `origin_poor_family` only; report `docs/test-reports/trait-poor-spine-stage8.md`.
 - Stage-8 CI: `primaryOriginFlagTests` in `runRealTestGate.ts` after `spineOriginConfigValidationTests`.
 - Stage-7 baseline audit: `docs/test-reports/early-childhood-stage7-baseline-audit.md`; repro `npm exec tsx scripts/runStage7BaselineAudit.ts`. 8–12 band has 0 four-main exclusive spine ids; daily pool origin-neutral; trait-line only `p22_childhood_street_shaping`; passive title max consecutive baseline 5–9 (seed=42).
@@ -20,6 +11,14 @@
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-6 spine origin isolation: `resolvePrimaryOriginFamilyFlag` in `src/p16/primaryOriginFlag.ts`; hard gate `isSpineOriginEligible` in `getAvailableEvents` for age ≤7 via `src/p16/spineOriginIsolation.ts`; config validation `src/p16/spineOriginConfigValidation.ts`; tests `tests/spineOriginIsolationTests.ts`, `tests/spineOriginConfigValidationTests.ts`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-21] - US-001 (early-childhood-late-childhood-agency-spine-stage9)
+- Read-only Stage-9 baseline: 8–12 palette matrix, spine inventory reconcile, 35-step 8–12 samples, neutral spine + passive consecutive baselines.
+- Files: scripts/runStage9BaselineAudit.ts, docs/test-reports/early-childhood-stage9-baseline-audit.md
+- **Learnings for future iterations:**
+  - Lite actions bypass adult id block but violate P16 category suppression at 8–12.
+  - 35-step harness samples ~0–1 ticks at ages 8–12; agency matrix tests needed for US-002.
+---
 
 ## [2026-06-21] - US-001 through US-008 (early-childhood-spine-origin-isolation)
 - Audit, primary origin resolver, spine hard gate age ≤7, P22 orphan condition fix, four-origin matrix, API bleed detector, CI config validation, closure report.

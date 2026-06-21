@@ -1,0 +1,107 @@
+{
+  "project": "Wuxia Life Early Childhood Late Childhood Agency & Spine (Stage-9)",
+  "branchName": "ralph/early-childhood-late-childhood-agency-spine-stage9",
+  "description": "Stage-9 late childhood (ages 8–12) closure: audit 8–12 agency/spine/repetition baselines, harden P16 agency guardrails (training/study allowlist; suppress business/travel/socializing), optional origin-flavored 8–12 spine minimum pack (P1 deferrable), neutral spine id repetition tuning (P2 conditional), passive title consecutive hardening if still PARTIAL, and Stage-9 closure playtest. Must not regress Stage-5/6/7/8 isolation, gap ≤2, or bleed=0 contracts. Product truth: docs/PRD/early-childhood-late-childhood-agency-and-spine-stage9.md; agency rules: docs/designs/p16-stage-agency-rules.md § Late Childhood (8–12); suite index: docs/PRD/early-childhood-opening-experience-index.md.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Stage-9 Baseline Audit (Read-Only)",
+      "description": "As a maintainer, I want an inventory of 8–12 agency paths, spine pools, and repetition metrics before changes.",
+      "acceptanceCriteria": [
+        "Create docs/test-reports/early-childhood-stage9-baseline-audit.md",
+        "Document 8–12 action palette resolution: resolveChildhoodActionPalette, headless planning branch (HeadlessEngineSessionImpl), suppressed category set (business, travel, socializing per p16-stage-agency-rules.md § Late Childhood)",
+        "Reconcile Stage-7 §2 8–12 spine inventory; note new catalog entries since Stage-7 (childhoodEvents.ts, p22-content-expansions.json, story catalogs)",
+        "Sample 35-step headless runs (four origins): ages 8–12 step share, formal vs daily vs planning ratio",
+        "Record neutral spine id repetition baseline for US-004 (e.g. childhood_summary, p9 childhood echo ids)",
+        "Record passive title consecutive failures from latest final playtest (e.g. frontier max=3)",
+        "No gameplay code changes in this story",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §4 US-001; §3 frozen (hard filter, agency source p16-stage-agency-rules.md, palette max 4 for 8–12 / max 2 for 5–7, no new p9_early_* childhood triggers); §6 non-goals (13+ youth agency, 0–7 rewrite, trait UI merge, selectEvent rewrite, browser ★ scoring, no prd.json in PRD deliverables); §7 touchpoints childhoodAgency.ts, HeadlessEngineSessionImpl.ts; §10 priority root; design baseline pending US-001 per PRD §1"
+    },
+    {
+      "id": "US-002",
+      "title": "8–12 P16 Agency Guardrails",
+      "description": "As a player aged 8–12, I want age-appropriate actions only—training and study, not adult commerce or travel—unless an explicit narrative exception applies.",
+      "acceptanceCriteria": [
+        "Verify resolveChildhoodActionPalette and headless planning path suppress business, travel, socializing for ages 8–12 per docs/designs/p16-stage-agency-rules.md (demonic travel age 5–9 exception retained; no new 8–12 exceptions)",
+        "Add or extend headless matrix test: four origins × ages {8,9,10,11,12} × 20 planning ticks → 0 suppressed action ids (business, travel, socializing adult catalog) in action records",
+        "Assert ≥1 allowlisted action (training or study lite) offered when planning is active for each matrix cell",
+        "Optional: if 8–9 vs 10–12 palette sub-bands implemented, document palette id differences in report (PRD §11 Q1 default: verify existing 4-category first)",
+        "Save docs/test-reports/late-childhood-agency-stage9.md with matrix results and command snippets",
+        "npm run gate:p16 pass (if gate covers childhood agency)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "PRD §4 US-002; §3 frozen (palette max 4 categories age 8–12, agency source p16-stage-agency-rules.md, no 13+ route flags); §5 FR-1; §8 success metrics suppressed action bleed 0%; §9 risks palette too wide → matrix + allowlist tests; §10 US-006 depends on US-002 complete before final playtest; §11 Q4 demonic travel exception retained; §7 touchpoints childhoodAgency.ts, HeadlessEngineSessionImpl.ts; depends on US-001 audit"
+    },
+    {
+      "id": "US-003",
+      "title": "8–12 Origin-Flavored Spine Minimum Pack (Optional P1)",
+      "description": "As a player, I want late childhood formal beats that reflect my origin, not only neutral childhood_summary echoes.",
+      "acceptanceCriteria": [
+        "Add ≥1 origin-exclusive or origin-weighted spine/story_event per four-main origin (scholar, martial, merchant, frontier) for age band 8–12 (config path per Stage-6/7 conventions)",
+        "Each new event passes isSpineOriginEligible + validateSpineOriginConfig (no foreign OR fill pool)",
+        "Extend spineOriginIsolationTests 8–12 matrix: 0 foreign exclusive ids after content add",
+        "Save content manifest in docs/test-reports/late-childhood-spine-content-stage9.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "PRD §4 US-003; P1 deferrable — may defer if US-002 + US-004 meet product bar with neutral-only pool + agency fix (PRD §3 US-003 scope, §9 risk scope inflation); §3 frozen (correct origin/trait conditions, no foreign OR); §5 FR-3; §6 non-goals (no global selectEvent rewrite); §10 may parallel US-004 after US-001–US-002; §11 Q2 P1 deferrable; §7 touchpoints childhoodEvents.ts, p22-content-expansions.json, spineOriginIsolation.ts"
+    },
+    {
+      "id": "US-004",
+      "title": "Neutral Spine Repetition Tuning (Stage-7 US-006 Carryover)",
+      "description": "As a maintainer, I want reduced repetition among neutral spine ids during ages 0–12.",
+      "acceptanceCriteria": [
+        "Extend formal repetition / profile pressure for neutral spine id families listed in US-001 audit (legal pool only; no eligibility or daily gate order change)",
+        "35-step headless sample: neutral spine id repetition rate ≤ US-001 baseline",
+        "Save docs/test-reports/neutral-spine-repetition-stage9.md with before/after metrics",
+        "Regression: spineOriginIsolationTests + daily gate tests pass (Stage-7 gate behavior retained for age ≤12)",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "PRD §4 US-004; P2 conditional — ship if US-001 shows repetition above bar; else document waive in Stage-9 closure (PRD §10, §8 neutral spine id repetition ≤ baseline); §3 frozen (weight/dedup only in legal pool, no foreign bleed, gap fallback order unchanged); §5 FR-4; §9 risk dedup causes gap rise → gap priority over repetition; §10 may parallel US-003; §7 touchpoints GameEngineIntegration.ts, DailyEventSystem.ts; depends on US-001 baseline"
+    },
+    {
+      "id": "US-005",
+      "title": "Passive Title Consecutive Hardening (If Still PARTIAL)",
+      "description": "As a player, I want passive narrative titles not to repeat more than twice in a row across the opening run.",
+      "acceptanceCriteria": [
+        "Re-run npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts; if all four origins maxConsecutivePassiveTitle ≤2, mark story waived in closure (no code change required)",
+        "If PARTIAL: extend dedup (e.g. raise NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW or 8+ passive title history) without breaking Stage-5 origin isolation",
+        "Unit test: forced repeat scenario → consecutive passive title count ≤2",
+        "Update docs/test-reports/neutral-passive-dedup-stage7.md appendix or create docs/test-reports/neutral-passive-dedup-stage9.md",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "PRD §4 US-005; P2 conditional — implement only if final playtest still PARTIAL after prior stories (Stage-8 left frontier max=3); §3 frozen (prefer dedup window / 8+ passive catalog; do not bypass origin isolation); §5 FR-5; §8 success metrics passive title consecutive ≤2 all origins; §10 runs after US-003/US-004; §7 touchpoints preschoolPassiveSpine.ts, runEarlyChildhoodFinalPlaytest.ts"
+    },
+    {
+      "id": "US-006",
+      "title": "Extended Playtest & Stage-9 Closure",
+      "description": "As a product owner, I want closure tying agency, spine, dedup, and opening run metrics.",
+      "acceptanceCriteria": [
+        "Re-run npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts; update docs/test-reports/early-childhood-opening-experience-final-playtest.md with Stage-9 row (8–12 observation columns, consecutive passive titles, gap regression)",
+        "Create docs/test-reports/early-childhood-stage9-closure.md referencing US-001–US-005 artifacts (note US-003/US-004/US-005 defer/waive decisions)",
+        "Confirm Stage-5/6/7/8 non-regression with command snippets (spineOriginIsolationTests, preschoolOriginIsolationTests, gate:p16, gap ≤2 per origin, bleed=0)",
+        "List Stage-10 candidates (13+ youth band, trait content volume, browser 实机 ★ scoring per PRD §6 non-goals)",
+        "No code in this story",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "PRD §4 US-006; §2 goals closure; §3 frozen (extend final playtest report columns, do not lower Stage-8 gap ≤2 gate); §5 FR-2, FR-5; §8 success metrics table; §9 rollback summary; §10 must run after US-002; §11 Q3 extend 8–12 step observation without changing 35-step main gate; suite index docs/PRD/early-childhood-opening-experience-index.md; depends on US-001–US-005"
+    }
+  ]
+}

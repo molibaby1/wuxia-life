@@ -1,4 +1,7 @@
-## [2026-06-21] - US-001 through US-006 (early-childhood-passive-density-trait-line-stage8)
+## Codebase Patterns
+
+- Stage-9 baseline audit: `docs/test-reports/early-childhood-stage9-baseline-audit.md`; repro `npm exec tsx scripts/runStage9BaselineAudit.ts` (--sample for 35-step metrics). 8–12 palette still admits lite business/travel/socializing categories → US-002 must category-filter ages 8–12.
+- Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
 - Pool audit, primaryOriginFlagTests CI, 16 new passive/origin + poor trait spine, gap regression ≤2, closure.
 - Files: preschool-passive-spine.json, p22-content-expansions.json, runStage8PoolAudit.ts, runEarlyChildhoodFinalPlaytest.ts, runRealTestGate.ts, traitLineSpineEligibilityTests.ts
 - **Learnings for future iterations:**

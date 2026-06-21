@@ -1,8 +1,8 @@
-# Early Childhood Opening Experience — Final Playtest (Stage-1～8)
+# Early Childhood Opening Experience — Final Playtest (Stage-1～9)
 
-**Date:** 2026-06-21T08:31:07.821Z  
+**Date:** 2026-06-21T12:56:58.321Z  
 **Driver:** `HeadlessEngineSessionImpl`（与 P6B API 同引擎）  
-**Scope:** 四出身 × 35 步 · ages 0～7+ 观测  
+**Scope:** 四出身 × 35 步 · ages 0～12 观测（Stage-9 8～12 列）  
 **Baseline:** `api-browser-playtest-experience-2026-06-17.md`（★★☆☆☆）
 
 ## Setup
@@ -17,18 +17,18 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 | --- | --- |
 | 套件门禁（bleed / 3～4 规划 / 0～4 占位） | **PASS** |
 | Stage-8 gap 步 ≤2 / 出身 | **PASS** |
-| 四出身主观评分（启发式） | ★★★★☆ / ★★★★☆ / ★★★★☆ / ★★★☆☆ |
+| 四出身主观评分（启发式） | ★★★★☆ / ★★★★☆ / ★★★★☆ / ★★★★☆ |
 | vs Stage-7 终验 gap baseline | 4～5 → 2 / 2 / 2 / 0 |
 | vs 2026-06-17 基线 | 机制层 P0 已收口；内容密度 Stage-8 加厚 |
 
 ## Per-origin matrix
 
-| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 占位(0～4) | 3～4 规划违规 | 被动同标题连出 | 评分 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
-| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
-| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
-| 边疆异族 | 17 | yes | 0 | 0 | 0 | 0 | 0 | 0 | 3 | ★★★☆☆ |
+| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | 被动同标题连出 | 评分 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
+| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
+| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | ★★★★☆ |
+| 边疆异族 | 17 | yes | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | ★★★★☆ |
 
 ## Acceptance checklist (套件级)
 
@@ -40,7 +40,7 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 | Ages 3–4 daily planning | 0 violations | **PASS** |
 | Placeholder ages 0–4 | 0 | **PASS** |
 | Narrative non-empty | ≥95% steps | **PASS** |
-| Passive title consecutive | ≤2 (Stage-7) | **PARTIAL** |
+| Passive title consecutive | ≤2 (Stage-7) | **PASS** |
 | Gap 步 / 35 步 / 出身 (Stage-8) | ≤2 | **PASS** |
 
 ## Bleed details (if any)
@@ -91,4 +91,4 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** **Stage-1～8 验收 PASS** — 机制 + Stage-8 gap 目标达成
+**Decision:** **Stage-1～9 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive 目标达成

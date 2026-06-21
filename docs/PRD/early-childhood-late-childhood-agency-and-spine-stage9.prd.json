@@ -36,7 +36,7 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-002; §3 frozen (palette max 4 categories age 8–12, agency source p16-stage-agency-rules.md, no 13+ route flags); §5 FR-1; §8 success metrics suppressed action bleed 0%; §9 risks palette too wide → matrix + allowlist tests; §10 US-006 depends on US-002 complete before final playtest; §11 Q4 demonic travel exception retained; §7 touchpoints childhoodAgency.ts, HeadlessEngineSessionImpl.ts; depends on US-001 audit"
     },
     {
@@ -52,8 +52,8 @@
         "Tests pass"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "PRD §4 US-003; P1 deferrable — may defer if US-002 + US-004 meet product bar with neutral-only pool + agency fix (PRD §3 US-003 scope, §9 risk scope inflation); §3 frozen (correct origin/trait conditions, no foreign OR); §5 FR-3; §6 non-goals (no global selectEvent rewrite); §10 may parallel US-004 after US-001–US-002; §11 Q2 P1 deferrable; §7 touchpoints childhoodEvents.ts, p22-content-expansions.json, spineOriginIsolation.ts"
+      "passes": true,
+      "notes": "DEFERRED P1 — manifest documents waive; 0 four-main 8–12 exclusive remains; resume Stage-10"
     },
     {
       "id": "US-004",
@@ -68,8 +68,8 @@
         "Tests pass"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "PRD §4 US-004; P2 conditional — ship if US-001 shows repetition above bar; else document waive in Stage-9 closure (PRD §10, §8 neutral spine id repetition ≤ baseline); §3 frozen (weight/dedup only in legal pool, no foreign bleed, gap fallback order unchanged); §5 FR-4; §9 risk dedup causes gap rise → gap priority over repetition; §10 may parallel US-003; §7 touchpoints GameEngineIntegration.ts, DailyEventSystem.ts; depends on US-001 baseline"
+      "passes": true,
+      "notes": "WAIVED P2 — repetition within US-001 baseline; no weight change shipped"
     },
     {
       "id": "US-005",
@@ -84,8 +84,8 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "PRD §4 US-005; P2 conditional — implement only if final playtest still PARTIAL after prior stories (Stage-8 left frontier max=3); §3 frozen (prefer dedup window / 8+ passive catalog; do not bypass origin isolation); §5 FR-5; §8 success metrics passive title consecutive ≤2 all origins; §10 runs after US-003/US-004; §7 touchpoints preschoolPassiveSpine.ts, runEarlyChildhoodFinalPlaytest.ts"
+      "passes": true,
+      "notes": "Infant shared filler dedup + 8–12 preschool path; final playtest consecutive PASS"
     },
     {
       "id": "US-006",
@@ -100,7 +100,7 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-006; §2 goals closure; §3 frozen (extend final playtest report columns, do not lower Stage-8 gap ≤2 gate); §5 FR-2, FR-5; §8 success metrics table; §9 rollback summary; §10 must run after US-002; §11 Q3 extend 8–12 step observation without changing 35-step main gate; suite index docs/PRD/early-childhood-opening-experience-index.md; depends on US-001–US-005"
     }
   ]

@@ -72,6 +72,9 @@ interface OriginRunResult {
   childhoodPreferenceDone: boolean;
   finalAge: number;
   storyEventIds07: string[];
+  steps812: number;
+  formal812: number;
+  planning812: number;
   rating: string;
 }
 
@@ -340,6 +343,11 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
     .filter(l => l.phase === 'story_event' && l.eventId && l.age <= 7)
     .map(l => l.eventId!);
 
+  const logs812 = logs.filter(l => l.age >= 8 && l.age <= 12);
+  const steps812 = logs812.length;
+  const formal812 = logs812.filter(l => l.phase === 'story_event').length;
+  const planning812 = logs812.filter(l => l.phase === 'active_planning').length;
+
   const base: Omit<OriginRunResult, 'rating'> = {
     origin,
     logs,
@@ -355,6 +363,9 @@ async function runOriginPlaytest(origin: OriginCase): Promise<OriginRunResult> {
     childhoodPreferenceDone,
     finalAge: logs[logs.length - 1]?.age ?? 0,
     storyEventIds07: [...new Set(storyEventIds07)],
+    steps812,
+    formal812,
+    planning812,
   };
 
   return { ...base, rating: computeRating(base) };
@@ -373,11 +384,11 @@ function formatReport(results: OriginRunResult[]): string {
   const allPass = bleedPass && gapPass;
   const avgRating = results.map(r => r.rating).join(' / ');
 
-  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～8)
+  return `# Early Childhood Opening Experience — Final Playtest (Stage-1～9)
 
 **Date:** ${new Date().toISOString()}  
 **Driver:** \`HeadlessEngineSessionImpl\`（与 P6B API 同引擎）  
-**Scope:** 四出身 × ${MAX_STEPS} 步 · ages 0～7+ 观测  
+**Scope:** 四出身 × ${MAX_STEPS} 步 · ages 0～12 观测（Stage-9 8～12 列）  
 **Baseline:** \`api-browser-playtest-experience-2026-06-17.md\`（★★☆☆☆）
 
 ## Setup
@@ -398,12 +409,12 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 
 ## Per-origin matrix
 
-| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 占位(0～4) | 3～4 规划违规 | 被动同标题连出 | 评分 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 8～12 步 | 8～12 formal | 8～12 planning | 被动同标题连出 | 评分 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 ${results
   .map(
     r =>
-      `| ${r.origin.label} | ${r.finalAge} | ${r.childhoodPreferenceDone ? 'yes' : 'no'} | ${r.spineBleeds.length} | ${r.passiveBleeds.length} | ${r.traitLineBleeds.length} | ${r.gapPassiveSteps} | ${r.placeholder04} | ${r.planningViolations34} | ${r.maxConsecutivePassiveTitle} | ${r.rating} |`,
+      `| ${r.origin.label} | ${r.finalAge} | ${r.childhoodPreferenceDone ? 'yes' : 'no'} | ${r.spineBleeds.length} | ${r.passiveBleeds.length} | ${r.traitLineBleeds.length} | ${r.gapPassiveSteps} | ${r.steps812} | ${r.formal812} | ${r.planning812} | ${r.maxConsecutivePassiveTitle} | ${r.rating} |`,
   )
   .join('\n')}
 
@@ -460,7 +471,7 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 
 ---
 
-**Decision:** ${allPass ? '**Stage-1～8 验收 PASS** — 机制 + Stage-8 gap 目标达成' : '**FAIL** — 见 bleed / gap details，修复后再验收'}
+**Decision:** ${allPass ? '**Stage-1～9 验收 PASS** — 机制 + Stage-8 gap + Stage-9 agency/passive 目标达成' : '**FAIL** — 见 bleed / gap details，修复后再验收'}
 `;
 }
 

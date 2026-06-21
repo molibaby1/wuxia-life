@@ -120,9 +120,17 @@ Street 线已有 P22；poor 线 gate（`isTraitLineSpineEligible`）已就绪，
 
 ---
 
-## Appendix A — CI wiring（US-002 占位）
+## Appendix A — CI wiring（US-002）
 
-_待 US-002 完成后在此记录 `primaryOriginFlagTests` 接入 `runRealTestGate.ts` 的证据。_
+`tests/primaryOriginFlagTests.ts` 已接入 `tests/runRealTestGate.ts`，位于 `spineOriginConfigValidationTests` 之后：
+
+```bash
+npm exec tsx tests/primaryOriginFlagTests.ts
+# 或完整 gate：
+npm test
+```
+
+覆盖：`EventExecutor` 四主 `flag_set` 互斥清除、`resolvePrimaryOriginFamilyFlag` 在冲突 flag 下以 `origin_background` 事件记录为准、边疆 primary 后 passive 无 foreign bleed。
 
 ---
 

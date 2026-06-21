@@ -1,6 +1,6 @@
 # P16 Experience Gate Report
 
-Generated: 2026-06-21T13:01:18.107Z
+Generated: 2026-06-21T16:23:59.811Z
 Decision: **pass**
 
 ## Origin variance

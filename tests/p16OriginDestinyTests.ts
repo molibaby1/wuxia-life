@@ -232,7 +232,15 @@ function testChildhoodAgency(): void {
   assert(childhoodPalettesDifferByArchetype(), 'archetype palettes do not all collapse to training');
 
   const age20 = resolveChildhoodActionPalette({ age: 20, player: {} as PlayerState });
-  assert(age20.some(a => a.id === 'action_business_basic'), 'adult palette restores full actions');
+  assert(
+    !age20.every(a =>
+      ['action_training_basic', 'action_study_basic', 'action_socializing_basic', 'action_business_basic', 'action_travel_basic'].includes(a.id),
+    ) || age20.length < 5,
+    'youth palette at age 20 must not dump all five adult basics',
+  );
+
+  const age21 = resolveChildhoodActionPalette({ age: 21, player: {} as PlayerState });
+  assert(age21.some(a => a.id === 'action_business_basic'), 'adult palette restores full actions at age 21+');
 }
 
 function testTendencyShaping(): void {

@@ -5,9 +5,16 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { eventLoader } from '../src/core/EventLoader';
+import { isForeignExclusiveSpineEvent } from '../src/p16/spineOriginIsolation';
 
 const API_BASE = process.env.P6B_API_URL ?? 'http://localhost:8787';
 const REPORT_PATH = path.join(process.cwd(), 'docs/test-reports/api-browser-playtest-stage2.md');
+const SPINE_ISOLATION_REPORT_PATH = path.join(
+  process.cwd(),
+  'docs/test-reports/api-browser-playtest-stage6-spine-isolation.md',
+);
+const SCHOLAR_PRIMARY = 'origin_scholar_family' as const;
 const MAX_STEPS = 35;
 const PLANNING_PLACEHOLDER = '本期暂无强求的江湖变故';
 
@@ -53,6 +60,7 @@ interface StepLog {
   passiveTitle?: string;
   chivalry: number;
   internalSkill: number;
+  spineBleed?: boolean;
 }
 
 async function api<T>(path: string, init: RequestInit & { deviceToken?: string; sessionToken?: string } = {}): Promise<T> {
@@ -84,6 +92,13 @@ function narrativeNonEmpty(payload: ProgressionPayload): boolean {
   }
   if (payload.nextEvent?.text?.trim()) return true;
   return false;
+}
+
+function detectSpineBleed(eventId: string | undefined): boolean {
+  if (!eventId) return false;
+  const event = eventLoader.getEventById(eventId);
+  if (!event) return false;
+  return isForeignExclusiveSpineEvent(event, SCHOLAR_PRIMARY);
 }
 
 function placeholderInPayload(payload: ProgressionPayload): boolean {
@@ -162,6 +177,8 @@ async function runPlaytest(): Promise<{
       passiveTitle: payload.passiveNarrative?.title,
       chivalry: playerChivalry(payload),
       internalSkill: playerInternal(payload),
+      spineBleed:
+        payload.sessionPhase === 'story_event' && detectSpineBleed(payload.nextEvent?.eventId),
     });
 
     if (payload.sessionPhase === 'story_event' && payload.nextEvent?.choices?.length) {
@@ -311,13 +328,65 @@ ${logs.length > 20 ? `\n| … | … | … | … | … | … | ${logs.length - 20
 `;
 }
 
+function formatSpineIsolationReport(result: Awaited<ReturnType<typeof runPlaytest>>): string {
+  const { logs } = result;
+  const bleedSteps = logs.filter(l => l.spineBleed);
+  const bleedCount = bleedSteps.length;
+  const pass = bleedCount === 0;
+
+  return `# API Playtest — Stage-6 Spine Origin Isolation (US-006)
+
+**PRD:** \`docs/PRD/early-childhood-spine-origin-isolation.md\`  
+**Date:** ${new Date().toISOString()}  
+**Environment:** P6B API \`${API_BASE}\` (headless driver; browser contract equivalent)  
+**Origin:** 书香门第 (\`origin_scholar_family\`)  
+**Steps:** ${logs.length}
+
+## Setup
+
+\`\`\`bash
+npm run p6b:serve   # terminal A
+npm exec tsx scripts/runApiBrowserPlaytestStage2.ts
+\`\`\`
+
+## Spine bleed acceptance
+
+| Criterion | Result | Evidence |
+| --- | --- | --- |
+| 35-step 书香 run spine bleed flags | ${pass ? '**PASS**' : '**FAIL**'} | bleed flags=${bleedCount} (target 0) |
+| No \`p22_origin_frontier_orphan\` | ${logs.some(l => l.eventId === 'p22_origin_frontier_orphan') ? '**FAIL**' : '**PASS**'} | step ids in log below |
+
+## Bleed events (if any)
+
+${bleedSteps.length === 0 ? 'None.' : bleedSteps.map(l => `- step ${l.step} age ${l.age}: \`${l.eventId}\``).join('\n')}
+
+## Story_event ids (ages 0–7)
+
+${logs
+  .filter(l => l.phase === 'story_event' && l.eventId)
+  .map(l => `- step ${l.step} age ${l.age}: \`${l.eventId}\`${l.spineBleed ? ' ⚠️ BLEED' : ''}`)
+  .join('\n') || 'None'}
+
+---
+
+**Contract:** \`isForeignExclusiveSpineEvent(event, origin_scholar_family)\` on each story_event step.
+`;
+}
+
 async function main(): Promise<void> {
   const result = await runPlaytest();
   const md = formatReport(result);
+  const spineMd = formatSpineIsolationReport(result);
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
   fs.writeFileSync(REPORT_PATH, md, 'utf8');
+  fs.writeFileSync(SPINE_ISOLATION_REPORT_PATH, spineMd, 'utf8');
   console.log(`Wrote ${path.relative(process.cwd(), REPORT_PATH)}`);
-  console.log(`Steps: ${result.logs.length}, childhood_preference: ${result.childhoodPreferenceDone}`);
+  console.log(`Wrote ${path.relative(process.cwd(), SPINE_ISOLATION_REPORT_PATH)}`);
+  const bleedCount = result.logs.filter(l => l.spineBleed).length;
+  console.log(`Steps: ${result.logs.length}, spine_bleed_flags: ${bleedCount}`);
+  if (bleedCount > 0) {
+    process.exit(1);
+  }
 }
 
 main().catch(err => {

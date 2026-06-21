@@ -23,6 +23,10 @@ import type {
   FactionType,
   FocusType,
 } from '../types/eventTypes';
+import {
+  applyPrimaryOriginFamilyExclusivity,
+  isPrimaryOriginFamilyFlag,
+} from '../p16/primaryOriginFlag';
 import { IdentitySystem } from './IdentitySystem';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
@@ -438,6 +442,11 @@ export class FlagSetHandler implements EffectHandler {
       ...(state.player?.flags || {}),
       [flagName]: flagValue,
     };
+
+    // origin_background 四选一：设置主出身 flag 时清除其他四主 flag（trait startingFlags 可能已写入冲突项）
+    if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
+      newFlags = applyPrimaryOriginFamilyExclusivity(newFlags, flagName);
+    }
     
     // 如果设置 sect_faction，需要清除旧阵营的标记
     if (flagName === 'sect_faction' && flagValue) {

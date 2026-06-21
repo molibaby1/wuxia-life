@@ -1,6 +1,6 @@
 # Early Childhood Opening Experience — Final Playtest (Stage-1～8)
 
-**Date:** 2026-06-21T08:11:22.981Z  
+**Date:** 2026-06-21T08:31:07.821Z  
 **Driver:** `HeadlessEngineSessionImpl`（与 P6B API 同引擎）  
 **Scope:** 四出身 × 35 步 · ages 0～7+ 观测  
 **Baseline:** `api-browser-playtest-experience-2026-06-17.md`（★★☆☆☆）
@@ -17,7 +17,7 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 | --- | --- |
 | 套件门禁（bleed / 3～4 规划 / 0～4 占位） | **PASS** |
 | Stage-8 gap 步 ≤2 / 出身 | **PASS** |
-| 四出身主观评分（启发式） | ★★★★☆ / ★★★★☆ / ★★★☆☆ / ★★★☆☆ |
+| 四出身主观评分（启发式） | ★★★★☆ / ★★★★☆ / ★★★★☆ / ★★★☆☆ |
 | vs Stage-7 终验 gap baseline | 4～5 → 2 / 2 / 2 / 0 |
 | vs 2026-06-17 基线 | 机制层 P0 已收口；内容密度 Stage-8 加厚 |
 
@@ -25,10 +25,10 @@ npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
 
 | 出身 | 终龄 | 童年偏好 | Spine bleed | Passive bleed | Trait bleed | Gap 步 | 占位(0～4) | 3～4 规划违规 | 被动同标题连出 | 评分 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 2 | ★★★★☆ |
-| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 2 | ★★★★☆ |
-| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 3 | ★★★☆☆ |
-| 边疆异族 | 17 | yes | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ★★★☆☆ |
+| 书香门第 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
+| 武林世家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
+| 商贾之家 | 15 | yes | 0 | 0 | 0 | 2 | 0 | 0 | 1 | ★★★★☆ |
+| 边疆异族 | 17 | yes | 0 | 0 | 0 | 0 | 0 | 0 | 3 | ★★★☆☆ |
 
 ## Acceptance checklist (套件级)
 

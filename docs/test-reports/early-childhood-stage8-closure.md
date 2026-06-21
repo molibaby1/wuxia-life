@@ -20,15 +20,21 @@
 
 ## 2. Success metrics
 
+来源：`docs/test-reports/early-childhood-opening-experience-final-playtest.md`（2026-06-21，US-005 RNG 补修后复跑）
+
 | 指标 | Stage-7 baseline | Stage-8 结果 |
 | --- | --- | --- |
-| Gap 步 / 35 / 出身 | 4～5 | **2 / 2 / 2 / 0** |
+| Gap 步 / 35 / 出身（书香 / 武林 / 商贾 / 边疆） | 4～5 | **2 / 2 / 2 / 0** |
+| Stage-8 gap 门禁 (≤2) | — | **PASS** |
 | Passive bleed | 0 | **0** |
 | Spine bleed | 0 | **0** |
 | Trait-line bleed | 0 | **0** |
 | Poor trait spine (3～7) | 0 | **1** (`p22_childhood_poor_shaping`) |
 | `primaryOriginFlagTests` CI | 未接线 | **pass** |
-| 启发式评分 | ★★★☆☆ | ★★★★☆ / ★★★★☆ / ★★★☆☆ / ★★★☆☆（无回归） |
+| 启发式评分 | ★★★☆☆ | ★★★★☆ / ★★★★☆ / ★★★★☆ / ★★★☆☆ |
+| 被动同标题连出 (max) | — | 1 / 1 / 1 / 3（套件 PARTIAL，Stage-7 指标） |
+
+固定 seed 下连续 3 次 `runEarlyChildhoodFinalPlaytest.ts` gap 均为 **2/2/2/0**（与上表一致）。
 
 ---
 
@@ -56,8 +62,27 @@ $ npm exec tsx tests/traitLineSpineEligibilityTests.ts
 - ✅ 新 passive 带正确 `originTags`；`preschoolOriginIsolationTests` 0 foreign  
 - ✅ Poor spine 条件仅 `origin_poor_family`（无四主 OR）  
 - ✅ Gap 指标沿用 `isGapPassiveTitle`；终验脚本新增 Stage-8 ≤2 门禁  
+- ✅ **US-005 补修：** `selectPassiveNarrative` / `executeActiveAction` 随机调用纳入 `runWithRandomSync/Async`；固定 seed 下连续 3 次终验 gap **2/2/2/0** 完全一致  
 
 ---
+
+## 4b. US-005 RNG determinism fix (post-closure)
+
+**根因：** `HeadlessEngineSessionImpl.ensurePassivePresentation` 与 `executePassiveChildhoodTick` 在 seeded RNG 作用域外调用 `selectPassiveNarrative`，导致固定 `randomSeed` 下 gap 步仍波动（martial 曾出现 gap=3）。
+
+**修复：** `src/headless/session/HeadlessEngineSessionImpl.ts`
+
+- `ensurePassivePresentation` → `runWithRandomSync` 内选 passive
+- `executePassiveChildhoodTick` → `runWithRandomAsync` 内选 passive
+- `executeActiveAction` → 移除显式 `Math.random`，依赖 patched `Math.random`
+
+**复验（2026-06-21）：**
+
+```bash
+# 连续 3 次，四出身 gap 均为 2/2/2/0
+npm exec tsx scripts/runEarlyChildhoodFinalPlaytest.ts
+```
+
 
 ## 5. Stage-9 candidates（PRD §6 非目标）
 

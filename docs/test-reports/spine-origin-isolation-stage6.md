@@ -1,7 +1,7 @@
 # Spine Origin Isolation — Stage-6 (US-005)
 
 **PRD:** `docs/PRD/early-childhood-childhood-experience-stage7.md`  
-**Date:** 2026-06-21T08:11:21.888Z  
+**Date:** 2026-06-21T08:31:14.762Z  
 **Decision:** **PASS**  
 **Age band:** 0–7 regression (matrix ages 1, 2, 3, 4, 5, 6, 7)  
 **Gate constant:** `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX = 12`  

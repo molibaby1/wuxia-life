@@ -73,7 +73,7 @@ All entries: unique `id`, single exclusive `originTags`, age band 3–7, non-emp
 | 商贾之家 | **2** |
 | 边疆异族 | **0** |
 
-Target ≤2: **PASS**（finalize 复跑 2026-06-21；seed 方差下 martial/frontier 可在 1～2 / 0～1 间波动，均 ≤2）
+Target ≤2: **PASS**（`runEarlyChildhoodFinalPlaytest.ts`，2026-06-21；固定 seed 连续 3 次复跑 gap 均为上表，与 `early-childhood-opening-experience-final-playtest.md` Per-origin matrix 一致）
 
 ```bash
 npm exec tsx tests/preschoolPassiveSpineTests.ts
@@ -86,4 +86,4 @@ npm exec tsx tests/spineOriginConfigValidationTests.ts
 
 ---
 
-**Decision:** US-003 + US-005 complete — gap regression **PASS**（2 / 2 / 2 / 0 per finalize 复跑；bleed 0）；见 `early-childhood-opening-experience-final-playtest.md` Stage-8 行
+**Decision:** US-003 + US-005 **PASS** — gap **2 / 2 / 2 / 0**（书香 / 武林 / 商贾 / 边疆），passive/spine/trait bleed **0**；终验见 `early-childhood-opening-experience-final-playtest.md` Stage-8 行

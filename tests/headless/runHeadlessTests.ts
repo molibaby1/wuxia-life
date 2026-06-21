@@ -16,7 +16,7 @@ import { runP81HeadlessPersonaToAge20Test, runP81HeadlessGatePersonasSmokeTest }
 import { runP81HeadlessLocalParityTest } from './p81HeadlessLocalParity.test';
 
 async function main(): Promise<void> {
-  runRandomSourceTests();
+  await runRandomSourceTests();
   runTimeSourceTests();
   runCatalogAdapterTests();
   runSnapshotAdapterTests();

@@ -485,30 +485,33 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       return;
     }
     if (!this.volatile.passiveNarrative) {
-      const entry = selectPassiveNarrative(this.engine.getGameState());
-      this.volatile.passiveNarrative = { title: entry.title, text: entry.text };
+      this.runWithRandomSync(() => {
+        const entry = selectPassiveNarrative(this.engine.getGameState());
+        this.volatile.passiveNarrative = { title: entry.title, text: entry.text };
+      });
     }
   }
 
   private async executePassiveChildhoodTick(): Promise<void> {
     const state = this.engine.getGameState();
     const age = state.player?.age ?? 0;
-    const selected = selectPassiveNarrative(state);
-    const deltas = clampPassiveStatDeltasForAge(age, selected.statDeltas);
-    await this.runWithRandomAsync(async () => {
-      applyStatDeltas(state.player, deltas);
-      applyPassiveNarrativeFlags(state, selected.flags);
+    const { selected, deltas } = await this.runWithRandomAsync(async () => {
+      const entry = selectPassiveNarrative(state);
+      const appliedDeltas = clampPassiveStatDeltasForAge(age, entry.statDeltas);
+      applyStatDeltas(state.player, appliedDeltas);
+      applyPassiveNarrativeFlags(state, entry.flags);
       this.engine.advanceTime(3, 'month');
       if (!state.eventHistory) {
         state.eventHistory = [];
       }
-      if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
+      if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
         state.eventHistory.push({
-          eventId: selected.id,
+          eventId: entry.id,
           age: state.player.age,
           timestamp: state.currentTime ? { ...state.currentTime } : undefined,
         });
       }
+      return { selected: entry, deltas: appliedDeltas };
     });
     this.volatile.pendingPeriodSummary = buildPeriodSummary({
       sourceLabel: '童年岁月',
@@ -606,7 +609,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       throw new ProgressionError('INVALID_SESSION_PHASE', 'Active action requires active_planning phase');
     }
     const result = await this.runWithRandomAsync(async () =>
-      this.engine.executeActiveAction(actionId, { random: Math.random }),
+      this.engine.executeActiveAction(actionId),
     );
     if (!result) {
       throw new ProgressionError('INVALID_ACTION', `Unknown or unavailable action: ${actionId}`);

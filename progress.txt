@@ -16,6 +16,11 @@
 
 ---
 
+## [2026-06-22] - US-002 through US-009 (early-childhood-youth-agency-band-stage10)
+- Youth design rules, resolveYouthActionPalette, matrix tests, route ageBand 13-20, timing tests, final playtest 13-20 columns, closure. US-007 waived.
+- Files: childhoodAgency.ts, routeDefinitions.ts, youthAgencyStage10Tests.ts, youthRouteEntryTimingStage10Tests.ts, runEarlyChildhoodFinalPlaytest.ts, early-childhood-stage10-closure.md
+---
+
 ## [2026-06-22] - US-001 (early-childhood-youth-agency-band-stage10)
 - Read-only Stage-10 baseline: ages 13–20 palette → five adult basic; route entry ageBand 0-10 inventory; applyYouthTransitionSeeds four origins; 35-step youth share ~9–11%.
 - Files: scripts/runStage10BaselineAudit.ts, docs/test-reports/early-childhood-stage10-baseline-audit.md

@@ -17,7 +17,7 @@
 
 **Choices:**
 
-- 把省下的碎钱藏起来 → `p22_poor_shaping_frugal`, caution +3  
+- 把省下的碎钱藏起来 → `p22_poor_shaping_frugal`, comprehension +3  
 - 分给更苦的邻居半块饼 → `p22_poor_shaping_kind`, chivalry +3
 
 ---

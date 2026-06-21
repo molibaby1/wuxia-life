@@ -1,4 +1,15 @@
-## Codebase Patterns
+## [2026-06-21] - US-001 through US-006 (early-childhood-passive-density-trait-line-stage8)
+- Pool audit, primaryOriginFlagTests CI, 16 new passive/origin + poor trait spine, gap regression ≤2, closure.
+- Files: preschool-passive-spine.json, p22-content-expansions.json, runStage8PoolAudit.ts, runEarlyChildhoodFinalPlaytest.ts, runRealTestGate.ts, traitLineSpineEligibilityTests.ts
+- **Learnings for future iterations:**
+  - Gap reduction needs wide ageMin–ageMax exclusive rows (3–7), not only narrow bands.
+  - First +2 passive/origin left scholar gap=4; second batch brought 2/2/2/1.
+  - `p22_childhood_poor_shaping` uses comprehension not caution (unknown stat).
+---
+
+- Stage-8 passive density: audit `docs/test-reports/early-childhood-stage8-pool-audit.md`; repro `npm exec tsx scripts/runStage8PoolAudit.ts`. Per-origin preschool exclusive entries in `preschool-passive-spine.json` (7/origin after US-003+gap fix); gap target ≤2/35 via `runEarlyChildhoodFinalPlaytest.ts` `isGapPassiveTitle`.
+- Stage-8 poor trait spine: `p22_childhood_poor_shaping` in `p22-content-expansions.json`; condition `origin_poor_family` only; report `docs/test-reports/trait-poor-spine-stage8.md`.
+- Stage-8 CI: `primaryOriginFlagTests` in `runRealTestGate.ts` after `spineOriginConfigValidationTests`.
 - Stage-7 baseline audit: `docs/test-reports/early-childhood-stage7-baseline-audit.md`; repro `npm exec tsx scripts/runStage7BaselineAudit.ts`. 8–12 band has 0 four-main exclusive spine ids; daily pool origin-neutral; trait-line only `p22_childhood_street_shaping`; passive title max consecutive baseline 5–9 (seed=42).
 - Stage-7 spine/trait/dedup: `SPINE_ORIGIN_EXCLUSIVE_AGE_MAX=12`; `traitLineSpineEligibility.ts`; daily gate via `DailyEventSystem.buildProbeEvent` + optional `spineOriginStageFit`; passive dedup `NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW=5` with gap title encoding `preschool_passive_gap::${title}` for history resolution.
 - Stage-3 infant origin chains: config in `src/data/lines/origin-infant-passives.json`; loader/selector in `src/data/originInfantPassiveChain.ts`; age ≤2 ordered dequeue via `selectOrderedOriginInfantPassive` called from `selectPassiveNarrative`.

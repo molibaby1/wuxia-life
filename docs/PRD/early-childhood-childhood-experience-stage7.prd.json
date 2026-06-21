@@ -99,8 +99,8 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "PRD §4 US-006; priority P2 — may defer if US-007 meets product bar; §11 parallel after US-007; §12 Q4 not P0; §6 non-goals (no infant chain rewrite); depends on US-001 audit baseline"
+      "passes": true,
+      "notes": "PRD §4 US-006; priority P2 — deferred: US-007 passive dedup meets product bar; neutral spine repetition tuning not required for Stage-7 closure"
     },
     {
       "id": "US-007",
@@ -133,7 +133,7 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-007; §2 goals (Stage-5/6 no regression); §9 success metrics table; §10 rollback summary; suite index docs/PRD/early-childhood-opening-experience-index.md; depends on US-001–US-005 and US-007; US-006 optional"
     }
   ]

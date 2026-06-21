@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
 import { gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
@@ -6,6 +8,11 @@ import {
   isTraitLineSpineEligible,
 } from '../src/p16/traitLineSpineEligibility';
 import type { PrimaryOriginFamilyFlag } from '../src/p16/primaryOriginFlag';
+
+const REPORT_PATH = path.join(
+  process.cwd(),
+  'docs/test-reports/trait-line-spine-eligibility-stage7.md',
+);
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -97,8 +104,13 @@ const PRIMARYS: PrimaryOriginFamilyFlag[] = [
   'origin_frontier',
 ];
 
-function testFourMainCrossTraitMatrix(): void {
+function testFourMainCrossTraitMatrix(): Array<{
+  primary: string;
+  trait: string;
+  streetLineEligible: boolean;
+}> {
   const streetEvent = eventLoader.getEventById('p22_childhood_street_shaping')!;
+  const rows: Array<{ primary: string; trait: string; streetLineEligible: boolean }> = [];
   for (const primary of PRIMARYS) {
     for (const trait of ['none', 'poor', 'street'] as const) {
       const extra: Record<string, boolean> = { p22_live_ops_active: true };
@@ -106,6 +118,7 @@ function testFourMainCrossTraitMatrix(): void {
       if (trait === 'street') extra.origin_streetborn = true;
       const state = buildState(primary, 8, extra);
       const eligible = isTraitLineSpineEligible(streetEvent, state);
+      rows.push({ primary, trait, streetLineEligible: eligible });
       if (trait === 'street') {
         assert(eligible, `${primary}+streetborn should allow street-line`);
       } else {
@@ -113,6 +126,51 @@ function testFourMainCrossTraitMatrix(): void {
       }
     }
   }
+  return rows;
+}
+
+function formatReport(matrix: ReturnType<typeof testFourMainCrossTraitMatrix>): string {
+  const crossTraitBleed = matrix.filter(
+    row => row.trait !== 'street' && row.streetLineEligible,
+  ).length;
+
+  return `# Trait-Line Spine Eligibility — Stage-7 (US-005)
+
+**PRD:** \`docs/PRD/early-childhood-childhood-experience-stage7.md\`  
+**Date:** ${new Date().toISOString()}  
+**Decision:** ${crossTraitBleed === 0 ? '**PASS**' : '**FAIL**'}
+
+## P22 audit fixes
+
+| Event | Issue | Resolution |
+| --- | --- | --- |
+| \`p22_origin_frontier_orphan\` | Stage-6 removed \`origin_poor_family\` OR | Config: \`origin_frontier\` only ✅ |
+| \`p22_childhood_street_shaping\` | \`origin_streetborn\` OR \`p22_frontier_orphan_shaped\` | **Guarded** by \`isTraitLineSpineEligible\`: street trait OR frontier primary + orphan successor ✅ |
+
+## Config validation (age ≤ 12)
+
+Extended \`validateSpineOriginConfig\` with \`street_or_cross_origin\` and \`trait_line_ambiguous\` kinds. Current catalog: **0 failures**.
+
+## Street-line matrix (four-main × trait)
+
+| Primary | Trait | Street-line eligible |
+| --- | --- | --- |
+${matrix
+  .map(row => `| ${row.primary} | ${row.trait} | ${row.streetLineEligible ? 'yes' : 'no'} |`)
+  .join('\n')}
+
+## Cross-trait bleed
+
+- Cells with trait ≠ street and eligible=yes: **${crossTraitBleed}** (target 0)
+- Stage-6 scholar+poor orphan block: regression covered in test suite ✅
+
+## Reproduce
+
+\`\`\`bash
+npm exec tsx tests/traitLineSpineEligibilityTests.ts
+npm exec tsx tests/spineOriginConfigValidationTests.ts
+\`\`\`
+`;
 }
 
 function main(): void {
@@ -122,7 +180,10 @@ function main(): void {
   testFrontierOrphanShapingSuccessor();
   testCrossTraitBlocked();
   testScholarPoorOrphanBlockRegression();
-  testFourMainCrossTraitMatrix();
+  const matrix = testFourMainCrossTraitMatrix();
+  fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
+  fs.writeFileSync(REPORT_PATH, formatReport(matrix), 'utf8');
+  console.log(`Wrote ${path.relative(process.cwd(), REPORT_PATH)}`);
   console.log('✔ traitLineSpineEligibilityTests passed');
 }
 

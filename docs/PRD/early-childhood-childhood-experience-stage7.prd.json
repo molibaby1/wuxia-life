@@ -84,7 +84,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "PRD §4 US-004 (config/validation half); §5 FR-6; §7 touchpoints p22-content-expansions.json, traits/origins.ts, spineOriginConfigValidation.ts; §9 trait-line cross-trait bleed 0%; §6 non-goals (no merging poor/street into four-main origin_background); depends on US-004 core gate"
     },
     {

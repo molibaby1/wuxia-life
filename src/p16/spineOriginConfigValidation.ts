@@ -22,7 +22,13 @@ const FOUR_MAIN_EXCLUSIVE = new Set([
 
 export interface SpineOriginConfigFinding {
   eventId: string;
-  kind: 'deprecated_flag' | 'unknown_flag' | 'stagefit_mismatch' | 'poor_or_cross_origin';
+  kind:
+    | 'deprecated_flag'
+    | 'unknown_flag'
+    | 'stagefit_mismatch'
+    | 'poor_or_cross_origin'
+    | 'street_or_cross_origin'
+    | 'trait_line_ambiguous';
   detail: string;
 }
 
@@ -70,6 +76,27 @@ function scanEventConditions(event: EventDefinition): SpineOriginConfigFinding[]
     }
   }
 
+  if (combined.includes('origin_streetborn') && /origin_(scholar|wuxia|merchant|frontier)/.test(combined)) {
+    const hasMainExclusive = [...FOUR_MAIN_EXCLUSIVE].some(
+      flag => combined.includes(flag) || combined.includes(flag.replace('_family', '')),
+    );
+    if (hasMainExclusive || combined.includes('origin_frontier_family')) {
+      findings.push({
+        eventId: event.id,
+        kind: 'street_or_cross_origin',
+        detail: 'origin_streetborn OR branch with four-main origin flags',
+      });
+    }
+  }
+
+  if (combined.includes('origin_poor_family') && combined.includes('origin_streetborn')) {
+    findings.push({
+      eventId: event.id,
+      kind: 'trait_line_ambiguous',
+      detail: 'origin_poor_family and origin_streetborn in same condition branch',
+    });
+  }
+
   return findings;
 }
 
@@ -104,7 +131,7 @@ export function validateSpineOriginConfig(): SpineOriginConfigFinding[] {
   const findings: SpineOriginConfigFinding[] = [];
   for (const event of eventLoader.getAllEvents()) {
     const maxAge = event.ageRange?.max ?? 99;
-    if (maxAge > 7) continue;
+    if (maxAge > 12) continue;
     findings.push(...scanEventConditions(event));
     findings.push(...scanStageFit(event));
   }

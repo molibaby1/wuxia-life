@@ -117,9 +117,11 @@ Weighting uses `preferredTraits` / `suppressedTraits` / life-state multipliers o
 
 **No spine event** currently keys solely on `origin_poor_family` in loaded catalog. Poor-line bleed risk is **config + future content**, not present runtime ids.
 
-### Config validation findings (age ≤ 7 scan)
+### Config validation findings (age ≤ 12 scan)
 
-`validateSpineOriginConfig()` — **0 findings** at audit time (Stage-6 orphan OR fix held).
+`validateSpineOriginConfig()` — **0 failures** at audit time (Stage-6 orphan OR fix held).
+
+**US-005 appendix:** `p22_childhood_street_shaping` retains `origin_streetborn || p22_frontier_orphan_shaped`; runtime guarded by `isTraitLineSpineEligible` (frontier orphan successor path). No four-main OR overlap in config.
 
 ---
 

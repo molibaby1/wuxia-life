@@ -3,6 +3,7 @@
  */
 
 import { getWorldProfile, WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
+import { P7_MINIMUM_ACTION_IDS } from '../src/data/activeActionCatalog';
 import {
   ADULT_CHILDHOOD_BLOCKED_ACTIONS,
   applyYouthTransitionSeeds,
@@ -232,10 +233,9 @@ function testChildhoodAgency(): void {
   assert(childhoodPalettesDifferByArchetype(), 'archetype palettes do not all collapse to training');
 
   const age20 = resolveChildhoodActionPalette({ age: 20, player: {} as PlayerState });
+  const age20Ids = age20.map(a => a.id);
   assert(
-    !age20.every(a =>
-      ['action_training_basic', 'action_study_basic', 'action_socializing_basic', 'action_business_basic', 'action_travel_basic'].includes(a.id),
-    ) || age20.length < 5,
+    !P7_MINIMUM_ACTION_IDS.every(id => age20Ids.includes(id)),
     'youth palette at age 20 must not dump all five adult basics',
   );
 

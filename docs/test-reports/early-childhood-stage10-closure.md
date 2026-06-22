@@ -29,9 +29,19 @@ Stage-10 delivers **13～20 youth band moderate agency**, **route entry ageBand 
 | US-004 | `tests/youthAgencyStage10Tests.ts`, `docs/test-reports/youth-agency-stage10.md` | **PASS** |
 | US-005 | `routeDefinitions.ts` ageBand, `youth-route-entry-timing-stage10.md` § config | **PASS** |
 | US-006 | `tests/youthRouteEntryTimingStage10Tests.ts`, timing report § tests | **PASS** |
-| US-007 | 8–12 origin spine minimum pack | **WAIVED** — US-004 + US-006 meet product bar; Stage-9 US-003 carryover deferred |
+| US-007 | 8–12 origin spine minimum pack | **WAIVED** — see [§ US-007](#us-007-waived-p1) below |
 | US-008 | `runEarlyChildhoodFinalPlaytest.ts` 13–20 columns, final playtest report | **PASS** |
 | US-009 | This closure | **PASS** |
+
+---
+
+## US-007 (waived P1)
+
+**Decision:** WAIVED P1 — US-004 + US-006 meet product bar; Stage-9 US-003 carryover deferred to Stage-11 (PRD §11 Q2 default defer).
+
+**Manifest:** This section (`early-childhood-stage10-closure.md § US-007`). No separate content manifest shipped.
+
+**Not created:** `docs/test-reports/late-childhood-spine-content-stage10.md` — waived story did not add 8–12 origin-exclusive spine events or catalog listing.
 
 ---
 

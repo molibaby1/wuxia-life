@@ -1,8 +1,7 @@
 /**
  * Stage-10 US-004: 13–20 P16 youth agency matrix.
  */
-import { P7_MINIMUM_ACTION_IDS } from '../src/data/activeActionCatalog';
-import { getActionById } from '../src/data/activeActionCatalog';
+import { getActionById, P7_MINIMUM_ACTION_IDS } from '../src/data/activeActionCatalog';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameStateSnapshot } from '../src/contracts/gameStateSnapshot';
 import {

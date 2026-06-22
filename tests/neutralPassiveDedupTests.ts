@@ -2,10 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { GameState } from '../src/types/eventTypes';
 import {
+  appendPassiveTitleToHistory,
   NEUTRAL_PASSIVE_TITLE_DEDUP_WINDOW,
   selectPreschoolPassiveEntry,
 } from '../src/data/preschoolPassiveSpine';
 import { shouldRecordPassiveNarrativeInHistory } from '../src/data/infantPassiveNarratives';
+import { selectOrderedOriginInfantPassive } from '../src/data/originInfantPassiveChain';
 
 const REPORT_PATH = path.join(
   process.cwd(),
@@ -177,6 +179,61 @@ npm exec tsx tests/preschoolOriginIsolationTests.ts
 `;
 }
 
+function buildFrontierInfantSharedFillerOnlyState(age: number): GameState {
+  return {
+    player: { age, flags: { origin_frontier: true } },
+    flags: { origin_frontier: true },
+    eventHistory: [
+      { eventId: 'frontier_infant_01_camp_birth', age: 0 },
+      { eventId: 'frontier_infant_02_swaddle_wind', age: 0 },
+      { eventId: 'frontier_infant_03_grasp_bow', age: 1 },
+      { eventId: 'frontier_infant_04_tent_crawl', age: 1 },
+    ],
+  } as GameState;
+}
+
+function pickFrontierInfantPassive(state: GameState, random: () => number) {
+  const entry = selectOrderedOriginInfantPassive(state, random);
+  assert(entry !== null, 'FIX-002: expected sharedFiller path entry');
+  if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
+    state.eventHistory = [
+      ...(state.eventHistory ?? []),
+      { eventId: entry.id, age: state.player?.age ?? 0 },
+    ];
+  }
+  appendPassiveTitleToHistory(state, entry.title);
+  return entry;
+}
+
+/** FIX-002: frontier infant 候链阶段仅 sharedFiller（seed 70004）连续 title ≤2 */
+function testFix002FrontierInfantSharedFillerDedup(): void {
+  const state = buildFrontierInfantSharedFillerOnlyState(1);
+  const random = seededRandom(70004);
+  let lastTitle: string | null = null;
+  let streak = 0;
+  let maxConsecutive = 0;
+
+  for (let i = 0; i < 40; i += 1) {
+    const entry = pickFrontierInfantPassive(state, random);
+    assert(
+      entry.id === 'infant_crawl_home' || entry.id.startsWith('infant_passive_gap::'),
+      `FIX-002: expected sharedFiller or gap rotation, got ${entry.id}`,
+    );
+    if (entry.title === lastTitle) {
+      streak += 1;
+      maxConsecutive = Math.max(maxConsecutive, streak + 1);
+    } else {
+      streak = 0;
+    }
+    lastTitle = entry.title;
+  }
+
+  assert(
+    maxConsecutive <= 2,
+    `FIX-002: frontier infant sharedFiller-only expected max consecutive ≤2, got ${maxConsecutive}`,
+  );
+}
+
 function testLateChildhoodGapDedup(): void {
   const state = buildScholarState(9);
   const random = seededRandom(202);
@@ -201,6 +258,7 @@ function main(): void {
   const before = runWithoutDedupSimulation(42, 80);
   testConsecutiveCap();
   testFiftyRollDiversity();
+  testFix002FrontierInfantSharedFillerDedup();
   testLateChildhoodGapDedup();
   const after = measureConsecutiveAndTopTitle(50, seededRandom(99));
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });

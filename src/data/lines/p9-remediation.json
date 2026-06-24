@@ -749,5 +749,145 @@
       "enabled": true,
       "tags": ["p9", "causality_echo", "mandatory", "once"]
     }
+  },
+  {
+    "id": "p9_deviant_youth_route_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 130,
+    "ageRange": { "min": 12, "max": 13 },
+    "triggers": [{ "type": "age_reach", "value": 12 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_demonic\") && !flags.has(\"p9_deviant_youth_route_milestone_done\")"
+      }
+    ],
+    "content": {
+      "title": "邪路少年里程碑",
+      "text": "十二岁这年，族中长辈终于不再把你当普通孩童看待。你暗中练成的偏门劲路已被察觉——这是走邪一途在少年阶段第一次被正式点名的路线分叉。",
+      "description": "邪路少年 pacing payoff"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "deviant_youth_embrace_shadow",
+        "text": "承认偏门劲路",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "flag_set", "target": "p9_deviant_youth_route_milestone_done", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_youth_acknowledged" },
+          { "type": "flag_set", "target": "demonic_path_touched", "value": true }
+        ]
+      },
+      {
+        "id": "deviant_youth_hide_shadow",
+        "text": "暂避锋芒",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "p9_deviant_youth_route_milestone_done", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_youth_concealed" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "pacing_milestone", "demonic", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_scholar_academy_gate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 105,
+    "ageRange": { "min": 22, "max": 24 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_scholar\") && flags.has(\"p9_echo_study_hook\") && !flags.has(\"p9_scholar_academy_gate_done\")"
+      }
+    ],
+    "content": {
+      "title": "书院辩学",
+      "text": "地方书院开坛辩学，你以典籍章句力压群雄——文路身份在此刻第一次被当众确认为学识之路，而非营商或练功的杂糅。",
+      "description": "文路 replay differentiation"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "scholar_academy_lecture",
+        "text": "登台讲学",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "comprehension", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "p9_scholar_academy_gate_done", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_academy_debater" },
+          { "type": "flag_set", "target": "scholar_path_started", "value": true }
+        ]
+      },
+      {
+        "id": "scholar_academy_observe",
+        "text": "旁听记录",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p9_scholar_academy_gate_done", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_academy_scribe" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "scholarly", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "p9_wealth_caravan_gate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 105,
+    "ageRange": { "min": 22, "max": 24 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_wealth_caravan_gate_done\")"
+      }
+    ],
+    "content": {
+      "title": "商路押镖",
+      "text": "你亲自押送一票贵重货物穿越州界，途中设局反杀劫匪并反手赚下翻倍利润——营商路线在此刻与文路彻底分化，银两与商路身份同时立住。",
+      "description": "财富 replay differentiation"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "wealth_caravan_expand",
+        "text": "扩张商路",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 280, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p9_wealth_caravan_gate_done", "value": true },
+          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_wealth", "value": "wealth_caravan_magnate" }
+        ]
+      },
+      {
+        "id": "wealth_caravan_conservative",
+        "text": "稳守本业",
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
+          { "type": "flag_set", "target": "p9_wealth_caravan_gate_done", "value": true },
+          { "type": "flag_set", "target": "p9_route_identity_wealth", "value": "wealth_steady_trader" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p9", "route_divergence", "wealth", "mandatory", "once"]
+    }
   }
 ]

@@ -35,15 +35,32 @@ const STRATEGY_YOUTH_SEEDS: Record<P8Persona['strategy'], Record<string, boolean
  * Age-13 route intent flags for P8 persona simulations.
  * Demonic personas diverge from pure-martial training seeds to unlock deviant route content.
  */
+const ROUTE_PREFERENCE_FLAG: Partial<Record<P8Persona['routePreference'], string>> = {
+  martial: 'p8_route_martial',
+  scholarly: 'p8_route_scholar',
+  social: 'p8_route_social',
+  wealth: 'p8_route_wealth',
+  conservative: 'p8_route_conservative',
+  demonic: 'p8_route_demonic',
+  wanderer: 'p8_route_wanderer',
+  balanced: 'p8_route_balanced',
+};
+
 export function resolvePersonaYouthRouteSeeds(persona: P8Persona): Record<string, boolean> {
+  const routeFlag = ROUTE_PREFERENCE_FLAG[persona.routePreference];
+  const base: Record<string, boolean> = { ...STRATEGY_YOUTH_SEEDS[persona.strategy] };
+  if (routeFlag) {
+    base[routeFlag] = true;
+  }
   if (persona.routePreference === 'demonic') {
-    return {
-      p8_route_demonic: true,
+    const demonic: Record<string, boolean> = {
+      ...base,
       p9_echo_training_hook: true,
       p9_echo_study_hook: true,
       p16_deferred_study_upbringing: true,
-      p9_childhood_dark_spark: true,
     };
+    delete demonic.p9_early_training_focus;
+    return demonic;
   }
-  return { ...STRATEGY_YOUTH_SEEDS[persona.strategy] };
+  return base;
 }

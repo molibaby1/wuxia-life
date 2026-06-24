@@ -3,7 +3,32 @@
 - Stage-3 infant origin chains: config in `src/data/lines/origin-infant-passives.json`; loader/selector in `src/data/originInfantPassiveChain.ts`; age ≤2 ordered dequeue via `selectOrderedOriginInfantPassive` called from `selectPassiveNarrative`.
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
-- Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).## [2026-06-20 00:11] - US-001 (early-childhood-origin-infant-quest-chains)
+- Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-24] - P40-005 (p40-wuxia-p8-replay-pacing-polish)
+- Closure: GAP-P8-WARNINGS closed for deviant-ye pacing; M1–M5 Met; defer queue documented.
+- Files: `docs/test-reports/p40-closure-report.md`
+---
+## [2026-06-24] - P40-004 (p40-wuxia-p8-replay-pacing-polish)
+- Gate refresh PASS; `tests/p40ReplayPacingPolishTests.ts`; post-polish delta doc.
+- Validation: typecheck ✅ p40ReplayPacingPolishTests ✅ p8PlayabilityTests ✅ gate:playability PASS
+---
+## [2026-06-24] - P40-003 (p40-wuxia-p8-replay-pacing-polish)
+- Replay differentiation: `p9_scholar_academy_gate`, `p9_wealth_caravan_gate`, `p9_deviant_youth_route_milestone`.
+- Files: `src/data/lines/p9-remediation.json`
+- Validation: near-duplicate pairs ≤3 on gate run
+---
+## [2026-06-24] - P40-002 (p40-wuxia-p8-replay-pacing-polish)
+- Deviant-ye pacing 7y→5y via headless bootstrap flags + youth route seeds.
+- Files: `createPersonaSession.ts`, `personaYouthRouteSeeds.ts`, `p40-deviant-ye-pacing-before-after.md`
+- Validation: deviant-ye span 5y on gate run
+---
+## [2026-06-24] - P40-001 (p40-wuxia-p8-replay-pacing-polish)
+- Root-cause audit: pacing gap ages 7–14, replay cluster levers.
+- Files: `docs/test-reports/p40-pacing-replay-audit.md`
+- **PRD vs JSON:** PRD cited 7 near-dup pairs and missing childhood-payoff contract doc; tree baseline had 3 pairs; used golden-line-spine as contract proxy.
+---
+## [2026-06-20 00:11] - US-001 (early-childhood-origin-infant-quest-chains)
 - Typed loader `originInfantPassiveChain.ts` + `origin-infant-passives.json` with four 5-node chains and sharedFillers.
 - Files: src/data/originInfantPassiveChain.ts, src/data/lines/origin-infant-passives.json
 - **Learnings for future iterations:**

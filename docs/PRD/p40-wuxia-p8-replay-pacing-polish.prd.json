@@ -1,0 +1,85 @@
+{
+  "project": "Wuxia Life P40 P8 Replay And Pacing Polish",
+  "branchName": "codex/p40-wuxia-p8-replay-pacing-polish",
+  "description": "Optional P8 warning polish: clear p8-deviant-ye 6y low-impact pacing span and reduce 7 near-duplicate replay pairs via content differentiation; maintain gate:playability PASS and P38 frustration gains.",
+  "userStories": [
+    {
+      "id": "P40-001",
+      "title": "P40 pacing and replay root-cause audit",
+      "description": "As a maintainer, I want an audit of deviant-ye pacing gap and near-duplicate replay pairs so remediation targets minimal high-leverage content surfaces.",
+      "acceptanceCriteria": [
+        "Extract p8-deviant-ye low-impact span ages from latest gate JSON; list non-impact records in span",
+        "Map span gap to childhood payoff spine contract and demonic route content gaps",
+        "For each of 7 near-duplicate pairs document signatureVector divergence gaps",
+        "Rank persona clusters by similarity; identify at least 2 differentiation levers per cluster",
+        "Save audit under docs/test-reports/p40-pacing-replay-audit.md",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation; GAP-P8-WARNINGS."
+    },
+    {
+      "id": "P40-002",
+      "title": "P40 deviant-ye pacing remediation",
+      "description": "As a maintainer, I want demonic-route childhood/youth payoff content so p8-deviant-ye clears the 5y low-impact pacing warning.",
+      "acceptanceCriteria": [
+        "Implement audit-identified fixes on allowed surfaces (general.json, golden-line-spine, personaYouthRouteSeeds — not scheduler core)",
+        "p8-deviant-ye low-impact span must be at most 5y on gate or isolated headless run",
+        "No new pacing blockers (no persona span greater than 8y)",
+        "Document before/after pacing samples under docs/test-reports",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Depends on P40-001. Reference childhood-payoff-spine-7-13-content-contract."
+    },
+    {
+      "id": "P40-003",
+      "title": "P40 persona replay differentiation",
+      "description": "As a maintainer, I want persona-differentiating content so P8 replay signature vectors diverge and near-duplicate pairs drop.",
+      "acceptanceCriteria": [
+        "Address at least 2 high-similarity clusters from audit (scholar/wealth/deviant/balanced + martial/cautious)",
+        "Each fix traces to audit lever with documented expected signature delta",
+        "Near-duplicate pair count at most 3 on post-fix gate run (baseline 7)",
+        "No P38 frustration regression (all personas opaque ratio at most 0.35)",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Content-first; no metric threshold changes by default."
+    },
+    {
+      "id": "P40-004",
+      "title": "P40 gate refresh and isolated regression",
+      "description": "As a maintainer, I want post-polish gate refresh and isolated regression asserting pacing/replay improvements without blocker regression.",
+      "acceptanceCriteria": [
+        "Run npm run gate:playability; save or reference latest reports under docs/test-reports",
+        "Document delta vs P38/P39 baseline",
+        "Gate decision remains PASS; frustration blockers unchanged",
+        "Add tests/p40ReplayPacingPolishTests.ts asserting deviant-ye span at most 5y and near-duplicate count at most 3",
+        "Carry-forward P38, P39, P36, P37 tests pass",
+        "Test file runs independently and exits cleanly",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P40-002 and P40-003."
+    },
+    {
+      "id": "P40-005",
+      "title": "P40 closure and defer queue update",
+      "description": "As a maintainer, I want a closure note documenting P40 polish outcomes and updated defer queue.",
+      "acceptanceCriteria": [
+        "Summarize audit, fixes, gate delta, verification commands",
+        "State GAP-P8-WARNINGS status (closed vs residual)",
+        "Confirm section 8 item 5 gate-no-regression status unchanged",
+        "List remaining defer queue",
+        "Save under docs/test-reports/p40-closure-report.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

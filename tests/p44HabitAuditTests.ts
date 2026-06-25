@@ -97,7 +97,7 @@ function testP42ChildhoodReaderPresent(coverage: HabitCoverageAuditResult): void
   assert(childhoodStudy.bands.includes('childhood'), 'childhood copybook should map to childhood band');
 }
 
-async function main(): Promise<void> {
+function main(): void {
   testCoverageAuditShape();
   testLegacyDriftAuditShape();
   testArchetypeDifferentiationAudit();

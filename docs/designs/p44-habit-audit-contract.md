@@ -173,11 +173,13 @@ npm run audit:p44-habit
 npm exec tsx tests/p44HabitAuditTests.ts
 ```
 
-Artifacts (optional `--write`):
+Artifacts (with `--write`, default via `npm run audit:p44-habit`):
 
-- `docs/test-reports/p44-habit-coverage-audit.json`
+- `docs/test-reports/p44-habit-operator-audit.json`
 - `docs/test-reports/p44-habit-coverage-audit.md`
+- `docs/test-reports/p44-legacy-flag-drift-audit.md`
 - `docs/test-reports/p44-archetype-differentiation-audit.md`
+- `docs/test-reports/p44-habit-operator-audit-summary.md`
 
 ---
 

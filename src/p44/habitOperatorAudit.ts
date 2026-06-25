@@ -212,7 +212,7 @@ function hasLifeStatesCoGate(line: string): boolean {
   return /lifeStates\.(trainingHabit|studyHabit|businessHabit)/.test(line);
 }
 
-function classifyLegacyHit(relativePath: string, lineText: string, flag: LegacyFlag): LegacyFlagHit['classification'] {
+function classifyLegacyHit(relativePath: string, lineText: string): LegacyFlagHit['classification'] {
   for (const rule of LEGACY_ALLOWLIST) {
     if (rule.pattern.test(relativePath)) return rule.classification;
   }
@@ -248,7 +248,7 @@ function scanLegacyFlagHits(rootDir = process.cwd()): LegacyFlagHit[] {
             file: relative,
             flag,
             line: index + 1,
-            classification: classifyLegacyHit(relative, line, flag),
+            classification: classifyLegacyHit(relative, line),
             excerpt: line.trim().slice(0, 120),
           });
         }
@@ -340,7 +340,7 @@ export function runArchetypeDifferentiationAudit(
 }
 
 const RECAP_SURFACE_EXPECTATIONS: Array<Omit<RecapSurfaceReport, 'wired'>> = [
-  { surface: 'Main-screen shaping row', file: 'src/utils/habitShapingSummary.ts', helper: 'buildCurrentShapingSummary' },
+  { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helper: 'buildCurrentShapingSummary' },
   { surface: 'Life-memory 长期塑形', file: 'src/core/deriveLifeMemorySummary.ts', helper: 'deriveDominantShapingLines' },
   { surface: 'P19 final summary', file: 'src/p19/finalSummaryComposition.ts', helper: 'buildLateLifeShapingRecapLine' },
   { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helper: 'buildLateLifeShapingRecapLine' },

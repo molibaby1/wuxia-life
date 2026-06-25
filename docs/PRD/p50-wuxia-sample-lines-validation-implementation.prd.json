@@ -84,7 +84,7 @@
         "Cross-line retell section shows lines distinguishable within 30 seconds"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "P49 HR-3 execution; requires runnable build."
     },
     {
@@ -98,7 +98,7 @@
         "P46 section 11.3 overall closure status stated with residual warnings if applicable"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "P49 HR-4; final P46 sample-line closure gate."
     }
   ]

@@ -1,6 +1,29 @@
 ## Codebase Patterns
+- P51 sample lines tuning: merchant `merchant_first_shop` accepts childhood-seed capital readiness + `mandatory` tag; age-40 spine events fire at age 38 with `mandatory` + line-specific childhood gates; `deriveSampleLineCostLabel` / `deriveSampleLineAge40Identity` (done-flag-first) in `src/p50/sampleLineExpression.ts`; benchmark route-track bootstrap sets `p8_route_*` at age 7 in `src/headless/parity/routeTrackFixtures.ts`; closure `docs/test-reports/p51-sample-lines-tuning-closure-report.md`.
 - P50 sample lines validation: config spine `src/data/lines/sample-lines-spine.json` (EventLoader + events.json import); expression `src/p50/sampleLineExpression.ts` (`deriveSampleLineCurrentGoal`, `deriveSampleLineAge40Identity` → `deriveLifeMemorySummary.routeStatus.currentGoalLabel` + main-screen route row); replay `src/p49/sampleLineReplay.ts` (`P49_SAMPLE_LINE_MATRIX` seeds 301/303/804, checkpoints 13/18/25/32/40); CLI `npm run p49:replay` → `scripts/runP49SampleLineReplay.ts`; tests `tests/p50SampleLineSpineTests.ts`, `tests/p50SampleLineExpressionTests.ts`, `tests/p49SampleLineReplayTests.ts`; closure `docs/test-reports/p49-sample-lines-closure-report.md`.
 - P44 habit operator audit tooling: contract `docs/designs/p44-habit-audit-contract.md`; module `src/p44/habitOperatorAudit.ts` (`runP44HabitOperatorAudit`, coverage/legacy/archetype/recap audits); CLI `npm run audit:p44-habit`; regression `tests/p44HabitAuditTests.ts`; closure `docs/test-reports/p44-habit-audit-tooling-closure.md`.
+
+## [2026-06-26] - P51-005 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- P51 closure report; typecheck + spine/expression/replay tests + gate:playability PASS.
+- Files: `docs/test-reports/p51-sample-lines-tuning-closure-report.md`, `docs/PRD/p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring.prd.json`
+- Validation: typecheck ✅ p50SampleLineSpineTests ✅ p50SampleLineExpressionTests ✅ p49SampleLineReplayTests ✅ gate:playability PASS
+---
+## [2026-06-26] - P51-004 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Regenerated P49 replay latest + cross-line comparison; P49/P46 closure upgraded to Pass.
+- Files: `docs/test-reports/p49-sample-lines-replay-latest.*`, `p49-sample-lines-cross-line-comparison-latest.md`, `p49-sample-lines-closure-report.md`, `docs/PRD/p46-wuxia-minimum-playable-life-samples-roadmap.md`
+---
+## [2026-06-26] - P51-003 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- `deriveSampleLineCostLabel` + replay cost dimension; age-13 cost distinct across lines.
+- Files: `src/p50/sampleLineExpression.ts`, `src/p49/sampleLineReplay.ts`, `tests/p50SampleLineExpressionTests.ts`
+---
+## [2026-06-26] - P51-002 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Mandatory age-38 identity spine + route-track bootstrap + done-flag-first age-40 expression.
+- Files: `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/headless/parity/routeTrackFixtures.ts`, `tests/p50SampleLineSpineTests.ts`
+---
+## [2026-06-26] - P51-001 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Merchant first shop gate relaxed for benchmark seed 804; root cause documented.
+- Files: `src/data/lines/merchant.json`, `docs/test-reports/p51-merchant-trigger-root-cause.md`, `tests/p50SampleLineSpineTests.ts`
+---
 
 ## [2026-06-26] - P50-007 (p50-wuxia-sample-lines-validation-implementation)
 - Closure report Warning baseline-ready; P46 §11.3 three-phase status documented.

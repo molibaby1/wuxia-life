@@ -105,6 +105,9 @@ function collectPlayerFacingStrings(summary: LifeMemorySummary): string {
   for (const entry of summary.achievements ?? []) {
     parts.push(entry.label);
   }
+  for (const entry of summary.habitTrajectory ?? []) {
+    parts.push(entry.label, entry.tierLabel);
+  }
   return parts.join('\n');
 }
 
@@ -336,6 +339,35 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     'achievements should map generic achievement ids',
   );
   console.log('✓ achievements derivation');
+}
+
+// P41 habit trajectory recap
+{
+  const state = createBaseState({
+    player: {
+      ...createBaseState().player,
+      lifeStates: {
+        fatigue: 0,
+        discipline: 0,
+        indulgence: 0,
+        anxiety: 0,
+        trainingHabit: 4,
+        studyHabit: 2,
+        businessHabit: 0,
+        socialMomentum: 3,
+        familyBond: 0,
+      },
+    },
+  });
+  const summary = deriveLifeMemorySummary(state);
+  const visible = filterPlayerVisible(summary.habitTrajectory);
+  assert(visible.length === 3, 'habit trajectory should include all dominant axes at threshold >= 2 up to cap of 3');
+  assert(visible[0]?.label === '习武塑形', 'dominant martial shaping should rank first');
+  assert(visible.some((entry) => entry.label === '人情往来'), 'social momentum shaping should surface');
+  assertNoRawEventIds(summary);
+  const playerFacing = collectPlayerFacingStrings(summary);
+  assert(!playerFacing.includes('trainingHabit'), 'habit trajectory must not expose raw state keys');
+  console.log('✓ habit trajectory recap');
 }
 
 // Serializability

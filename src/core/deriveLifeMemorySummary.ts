@@ -20,6 +20,7 @@ import {
   LIFE_MEMORY_SCHEMA_VERSION,
   type LifeMemoryAchievementEntry,
   type LifeMemoryDebtEntry,
+  type LifeMemoryHabitTrajectoryEntry,
   type LifeMemoryKeyChoiceEntry,
   type LifeMemoryRelationshipEntry,
   type LifeMemoryRiskEntry,
@@ -32,6 +33,7 @@ import {
   getPlayerRouteSummary,
   lifecyclePhaseLabel,
 } from '../utils/playerFacingLabels';
+import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -815,6 +817,16 @@ function omitEmpty<T>(array: T[] | undefined): T[] | undefined {
   return array;
 }
 
+function buildHabitTrajectory(state: GameState): LifeMemoryHabitTrajectoryEntry[] {
+  return deriveDominantShapingLines(state.player.lifeStates, 3).map((line, index) => ({
+    id: `habit-trajectory-${index}`,
+    label: line.label,
+    tierLabel: line.tierLabel,
+    visibility: 'player' as const,
+    sortKey: line.sortKey,
+  }));
+}
+
 /**
  * Derive a serializable life memory summary from current game state.
  * Does not mutate state or persist redundant memory fields.
@@ -829,6 +841,7 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
     unresolvedDebts ?? [],
     buildAchievements(state),
   );
+  const habitTrajectory = buildHabitTrajectory(state);
 
   const summary: LifeMemorySummary = {
     schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
@@ -841,12 +854,14 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   const optionalDebts = omitEmpty(unresolvedDebts);
   const optionalRisks = omitEmpty(risks);
   const optionalAchievements = omitEmpty(achievements);
+  const optionalHabitTrajectory = omitEmpty(habitTrajectory);
 
   if (optionalKeyChoices) summary.keyChoices = optionalKeyChoices;
   if (optionalRelationships) summary.relationships = optionalRelationships;
   if (optionalDebts) summary.unresolvedDebts = optionalDebts;
   if (optionalRisks) summary.risks = optionalRisks;
   if (optionalAchievements) summary.achievements = optionalAchievements;
+  if (optionalHabitTrajectory) summary.habitTrajectory = optionalHabitTrajectory;
 
   return summary;
 }

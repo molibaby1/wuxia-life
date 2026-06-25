@@ -77,10 +77,16 @@ export interface LifeMemoryAchievementEntry extends LifeMemoryEntryBase {
   diagnostic: { achievementId?: string; sourceFlags: string[] };
 }
 
+export interface LifeMemoryHabitTrajectoryEntry extends LifeMemoryEntryBase {
+  label: string;
+  tierLabel: string;
+}
+
 export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
   routeStatus?: LifeMemoryRouteStatus;
+  habitTrajectory?: LifeMemoryHabitTrajectoryEntry[];
   keyChoices?: LifeMemoryKeyChoiceEntry[];
   relationships?: LifeMemoryRelationshipEntry[];
   unresolvedDebts?: LifeMemoryDebtEntry[];

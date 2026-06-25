@@ -409,5 +409,94 @@
         "authoringNotes": "Study habit consequence distinct from medical-specific path."
       }
     }
+  },
+  {
+    "id": "p42_training_habit_later_guardian",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 52, "max": 62 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 3"
+      }
+    ],
+    "content": {
+      "title": "晚岁守场",
+      "text": "数十年练功塑形的筋骨虽不如少年时凌厉，却仍能镇住场面。乡里练武场请你坐镇指点后辈，这份晚岁回响不靠一时名头，而靠长年不辍的底气。",
+      "description": "P42 晚年塑形：练功习惯的传承回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_guardian_role",
+        "text": "坐镇练场，为后辈定规矩",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "martialHeritage", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "p42_training_later_guardian", "value": true }
+        ]
+      },
+      {
+        "id": "decline_guardian_role",
+        "text": "只偶作指点，不再常驻",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "p42_training_later_guardian_declined", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "training", "later_life"]
+    }
+  },
+  {
+    "id": "p42_study_habit_later_chronicle",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 68,
+    "ageRange": { "min": 48, "max": 58 },
+    "triggers": [{ "type": "age_reach", "value": 48 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 3"
+      }
+    ],
+    "content": {
+      "title": "旧案新编",
+      "text": "多年读书养成的整理与辨义习惯，让你在暮年前仍能把半生见闻汇成一部可传世的编年。是亲自执笔，还是托门生代劳，都将决定后世如何记住你。",
+      "description": "P42 晚年塑形：读书习惯的编年回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "write_chronicle_self",
+        "text": "亲自动笔，汇辑半生见闻",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "scholarlyHeritage", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p42_study_later_chronicle_written", "value": true }
+        ]
+      },
+      {
+        "id": "delegate_chronicle",
+        "text": "托门生代笔，自己口述审定",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "scholarlyHeritage", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p42_study_later_chronicle_delegated", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "study", "later_life"]
+    }
   }
 ]

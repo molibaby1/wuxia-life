@@ -30,7 +30,7 @@
         "Add or update targeted regression coverage for new sample eligibility"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Keep scope to one axis pair only."
     },
     {

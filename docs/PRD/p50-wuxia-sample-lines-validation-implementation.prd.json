@@ -70,7 +70,7 @@
         "scripts/runP49SampleLineReplay.ts and npm run p49:replay regenerate reports"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "P49 RH-3/RH-4 and HR-1/HR-2."
     },
     {

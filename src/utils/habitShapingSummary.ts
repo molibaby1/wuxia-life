@@ -81,7 +81,7 @@ export function deriveDominantShapingLines(
 const SHAPING_IDENTITY_CONSEQUENCE: Record<ShapingAxisKey, string> = {
   trainingHabit: '名望与战意多由此立，旁人记得的是你的刀锋与担当',
   studyHabit: '文字与思辨成为你识世立身的主轴',
-  businessHabit: '门路與买卖织成了你行走江湖的底气',
+  businessHabit: '门路与买卖织成了你行走江湖的底气',
   socialMomentum: '人情往来替你铺开了许多单靠武力打不开的门',
   familyBond: '亲族牵绊锚定了你许多重大抉择与归宿',
 };

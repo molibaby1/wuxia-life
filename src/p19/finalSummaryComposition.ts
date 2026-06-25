@@ -5,6 +5,7 @@ import {
   buildLateLifeShapingRecapLine,
   buildShapingPatternEndingTone,
 } from '../utils/habitShapingSummary';
+import { readMergedFlags } from '../p17/stateAccess';
 import { buildLaterLifeLegacyReport } from '../p18/laterLifeLegacySelection';
 import { buildEndgameCategoryReport } from './endgameCategories';
 import { buildHistoricalMemoryReport } from './historicalMemory';
@@ -52,7 +53,7 @@ export function composeP19FinalSummary(
   const shapingRecapLine = buildLateLifeShapingRecapLine(state.player?.lifeStates);
   const shapingPatternToneLine = buildShapingPatternEndingTone(
     state.player?.lifeStates,
-    state.flags,
+    readMergedFlags(state),
   );
   const historicalMemoryLines = [
     memoryReport.posthumousReputation,

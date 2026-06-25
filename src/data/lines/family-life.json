@@ -1144,5 +1144,138 @@
         ]
       }
     ]
+  },
+  {
+    "id": "p42_family_bond_festival_reunion",
+    "name": "节庆团圆",
+    "description": "久别亲族在节庆重聚，家庭牵绊化为温暖回响。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 70,
+    "weight": 54,
+    "ageRange": {
+      "min": 44,
+      "max": 54
+    },
+    "type": "family",
+    "eventType": "auto",
+    "tags": [
+      "family",
+      "restorative",
+      "p42"
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.familyBond >= 2"
+      }
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 44
+      }
+    ],
+    "content": {
+      "title": "节庆团圆",
+      "text": "多年维系亲族牵绊的习惯，在节庆时化为真正的团圆——不必谁求谁，亲族自会聚拢到你身边。这份温暖不是义务，而是长期塑形攒下的归属感。"
+    },
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "life_state_change",
+        "target": "familyBond",
+        "value": 1,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "flag": "p42_family_reunion_warmth",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "p42_family_bond_estate_trust",
+    "name": "家资信托",
+    "description": "亲族请你主持分产或信托，家庭牵绊转化为银两与身份抉择。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 68,
+    "weight": 52,
+    "ageRange": {
+      "min": 50,
+      "max": 60
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "identity",
+      "p42"
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.familyBond >= 3"
+      }
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 50
+      }
+    ],
+    "content": {
+      "title": "家资信托",
+      "text": "亲族多年默认由你维系门户，如今分产在即，请你主持信托。接下便要在银两、情面与家声之间定规矩；推辞则少一层身份，也避开了是非。"
+    },
+    "choices": [
+      {
+        "id": "accept_estate_trust",
+        "text": "主持信托，定分产规矩",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 100,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_family_estate_trustee",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "decline_estate_trust",
+        "text": "推辞主持，只作旁证",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_family_estate_trust_declined",
+            "value": true
+          }
+        ]
+      }
+    ]
   }
 ]

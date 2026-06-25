@@ -60,7 +60,7 @@
         "Add or update targeted regression coverage"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Keep family consequences as a separate execution story."
     },
     {

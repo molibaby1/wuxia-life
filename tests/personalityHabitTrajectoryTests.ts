@@ -253,6 +253,11 @@ function testP28SemiPersonalityRegression(): void {
   assertSemiPersonalityGatedEvent('p28_family_bond_caretaker_obligation', 'familyBond', 3, 42);
 }
 
+function testP42FamilyBondDensification(): void {
+  assertSemiPersonalityGatedEvent('p42_family_bond_festival_reunion', 'familyBond', 2, 48);
+  assertSemiPersonalityGatedEvent('p42_family_bond_estate_trust', 'familyBond', 3, 52);
+}
+
 function testP42BusinessSocialDensification(): void {
   assertHabitGatedEvent('p42_business_habit_youth_stall', 'businessHabit', 2, 18);
   assertHabitGatedEvent('p42_business_habit_midlife_syndicate', 'businessHabit', 3, 40);
@@ -291,6 +296,7 @@ async function main(): Promise<void> {
   testP29MedicalAndSocialRegression();
   testP42TrainingStudyDensification();
   testP42BusinessSocialDensification();
+  testP42FamilyBondDensification();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();
   testP25HabitTrajectorySlice();

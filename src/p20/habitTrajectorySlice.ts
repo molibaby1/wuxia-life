@@ -22,6 +22,20 @@ const HABIT_TRAJECTORY_EVENT_IDS = [
   'p29_study_habit_case_record_duty',
   'p29_social_momentum_healer_network',
   'p29_social_momentum_patron_obligation',
+  'p42_training_habit_youth_sparring',
+  'p42_training_habit_later_guardian',
+  'p42_study_habit_childhood_copybook',
+  'p42_study_habit_later_chronicle',
+  'p42_business_habit_youth_stall',
+  'p42_business_habit_midlife_syndicate',
+  'p42_social_momentum_youth_introduction',
+  'p42_social_momentum_later_testimonial',
+  'p42_family_bond_festival_reunion',
+  'p42_family_bond_estate_trust',
+  'p42_training_habit_martial_clan_echo',
+  'p42_training_habit_scholar_body_echo',
+  'p42_study_habit_scholar_academy_echo',
+  'p42_study_habit_merchant_ledger_echo',
 ] as const;
 
 function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {

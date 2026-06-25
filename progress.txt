@@ -1,5 +1,36 @@
 ## Codebase Patterns
+- P50 sample lines validation: config spine `src/data/lines/sample-lines-spine.json` (EventLoader + events.json import); expression `src/p50/sampleLineExpression.ts` (`deriveSampleLineCurrentGoal`, `deriveSampleLineAge40Identity` → `deriveLifeMemorySummary.routeStatus.currentGoalLabel` + main-screen route row); replay `src/p49/sampleLineReplay.ts` (`P49_SAMPLE_LINE_MATRIX` seeds 301/303/804, checkpoints 13/18/25/32/40); CLI `npm run p49:replay` → `scripts/runP49SampleLineReplay.ts`; tests `tests/p50SampleLineSpineTests.ts`, `tests/p50SampleLineExpressionTests.ts`, `tests/p49SampleLineReplayTests.ts`; closure `docs/test-reports/p49-sample-lines-closure-report.md`.
 - P44 habit operator audit tooling: contract `docs/designs/p44-habit-audit-contract.md`; module `src/p44/habitOperatorAudit.ts` (`runP44HabitOperatorAudit`, coverage/legacy/archetype/recap audits); CLI `npm run audit:p44-habit`; regression `tests/p44HabitAuditTests.ts`; closure `docs/test-reports/p44-habit-audit-tooling-closure.md`.
+
+## [2026-06-26] - P50-007 (p50-wuxia-sample-lines-validation-implementation)
+- Closure report Warning baseline-ready; P46 §11.3 three-phase status documented.
+- Files: `docs/test-reports/p49-sample-lines-closure-report.md`
+- Validation: typecheck ✅ p49SampleLineReplayTests ✅
+---
+## [2026-06-26] - P50-006 (p50-wuxia-sample-lines-validation-implementation)
+- Playtest round 1 archived with P46 §10.2 five-item matrix + cross-line retell.
+- Files: `docs/test-reports/p49-sample-lines-playtest-round-1.md`
+---
+## [2026-06-26] - P50-005 (p50-wuxia-sample-lines-validation-implementation)
+- Replay latest JSON/MD + cross-line comparison generated via `npm run p49:replay`.
+- Files: `docs/test-reports/p49-sample-lines-replay-latest.*`, `p49-sample-lines-cross-line-comparison-latest.md`
+---
+## [2026-06-26] - P50-004 (p50-wuxia-sample-lines-validation-implementation)
+- P49_SAMPLE_LINE_MATRIX + deterministic checkpoint export + `p49SampleLineReplayTests`.
+- Files: `src/p49/sampleLineReplay.ts`, `scripts/runP49SampleLineReplay.ts`, `package.json` (`p49:replay`)
+---
+## [2026-06-26] - P50-003 (p50-wuxia-sample-lines-validation-implementation)
+- Merchant M-E1/M-E2/M-E3: key choices, debts, route_merchant long-term label, merchant_midlife_debt milestone.
+- Files: `src/core/deriveLifeMemorySummary.ts`, `src/data/lifeMemoryLabels.ts`, `tests/p50SampleLineExpressionTests.ts`
+---
+## [2026-06-26] - P50-002 (p50-wuxia-sample-lines-validation-implementation)
+- O/D currentGoal + age-40 identity on life-memory + main-screen; consequence/risk labels.
+- Files: `src/p50/sampleLineExpression.ts`, `src/types/lifeMemory.ts`, `src/components/mainScreenModel.ts`
+---
+## [2026-06-26] - P50-001 (p50-wuxia-sample-lines-validation-implementation)
+- P47 O/D/M minimum spine JSON; seeds 301/303/804 reach age 40 in `p50SampleLineSpineTests`.
+- Files: `src/data/lines/sample-lines-spine.json`, patches to sect-wudang/merchant/orthodox/identity-demon
+---
 - P43 archetype recap/ending differentiation: gap audit `docs/test-reports/p43-ending-differentiation-gap-audit.md`; late-life shaping recap + pattern tones in `src/utils/habitShapingSummary.ts` (`buildLateLifeShapingRecapLine`, `buildShapingPatternEndingTone`); wired via `composeP19FinalSummary` in `src/p19/finalSummaryComposition.ts`; delta matrix `docs/test-reports/p43-archetype-ending-delta-matrix.md`; regression `tests/p43ArchetypeRecapEndingTests.ts`; closure `docs/test-reports/p43-archetype-recap-ending-closure.md`.
 - P42 habit content densification: gap map `docs/test-reports/p42-habit-coverage-gap-map.md`; new samples prefixed `p42_` in p21/p22/merchant/relationship/family-life pools; regression `tests/p42ContentDensityTests.ts`; closure `docs/test-reports/p42-habit-content-densification-closure.md`.
 - P41 habit player-facing feedback: shared labels/derivation in `src/utils/habitShapingSummary.ts` (`buildCurrentShapingSummary`, `deriveDominantShapingLines`, `shapingFeedbackFlagKey`); main-screen `shapingSummary` row in `MainScreenLifeSummary.vue`; choice feedback diffs `lifeStates` in `ChoiceFeedbackGenerator.appendShapingFeedbackHints`; life-memory field `habitTrajectory` in `deriveLifeMemorySummary.ts` + `LifeMemoryPanel.vue`; regression `tests/p41HabitFeedbackTests.ts`; closure `docs/test-reports/p41-habit-feedback-closure.md`.

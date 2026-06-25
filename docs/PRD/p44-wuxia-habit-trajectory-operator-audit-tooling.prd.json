@@ -1,0 +1,78 @@
+{
+  "project": "Wuxia Life P44 Habit Trajectory Operator Audit Tooling",
+  "branchName": "codex/p44-wuxia-habit-trajectory-operator-audit-tooling",
+  "description": "Create lightweight operator-facing audit tooling so future content waves can detect shaping coverage gaps, legacy-flag drift, and archetype differentiation regressions without large manual audits.",
+  "userStories": [
+    {
+      "id": "P44-001",
+      "title": "Define operator audit questions and outputs",
+      "description": "As a maintainer, I want an explicit audit contract for the habit trajectory system so tooling output is stable and actionable.",
+      "acceptanceCriteria": [
+        "Define the core audit questions for coverage gaps, legacy-flag drift, archetype imbalance, and recap absorption",
+        "Define expected output shape for operator consumption",
+        "Save contract under docs/designs/p44-habit-audit-contract.md",
+        "Do not change gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P44-002",
+      "title": "Add habit coverage audit script or test surface",
+      "description": "As a maintainer, I want a repeatable way to inspect habit content coverage so future waves can be checked before merge.",
+      "acceptanceCriteria": [
+        "Add a script or test that inventories content by axis and age band",
+        "Output highlights missing or low-density zones",
+        "Output is readable in terminal and or markdown artifact form",
+        "Add regression coverage for the audit output shape"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Single tooling story."
+    },
+    {
+      "id": "P44-003",
+      "title": "Add legacy flag drift detection",
+      "description": "As a maintainer, I want tooling that detects when new content accidentally depends on legacy habit flags without documented reason.",
+      "acceptanceCriteria": [
+        "Detect references to training_habit, study_habit, and business_habit in content and logic surfaces",
+        "Distinguish allowed compatibility use from suspicious primary dependency where possible",
+        "Output suspicious readers clearly",
+        "Add targeted regression coverage"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Focused compatibility-health story."
+    },
+    {
+      "id": "P44-004",
+      "title": "Add archetype differentiation audit",
+      "description": "As a maintainer, I want an audit view of shaping coverage across archetypes so replay differentiation regressions are easier to catch.",
+      "acceptanceCriteria": [
+        "Define at least one operator-facing report comparing shaping echoes across archetype families",
+        "Surface obvious convergence or thin differentiation areas",
+        "Output references concrete event or summary surfaces",
+        "Save sample report under docs/test-reports/"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Replay-differentiation audit story."
+    },
+    {
+      "id": "P44-005",
+      "title": "P44 regression and closure",
+      "description": "As a maintainer, I want closure evidence that the operator audit tooling is usable and can catch real shaping-system regressions.",
+      "acceptanceCriteria": [
+        "Run typecheck",
+        "Run new audit tooling or tests",
+        "Demonstrate at least one real example per audit class",
+        "Save closure under docs/test-reports/p44-habit-audit-tooling-closure.md",
+        "Closure defines what still remains manual"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Final validation and handoff story."
+    }
+  ]
+}

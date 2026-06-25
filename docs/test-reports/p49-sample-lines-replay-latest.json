@@ -1,0 +1,430 @@
+{
+  "generatedAt": "2026-06-25T17:24:45.540Z",
+  "checkpointAges": [
+    13,
+    18,
+    25,
+    32,
+    40
+  ],
+  "lines": [
+    {
+      "lineId": "orthodox",
+      "label": "正派武道",
+      "seed": 301,
+      "checkpoints": [
+        {
+          "age": 13,
+          "eventIds": [
+            "merchant_talent_discovery",
+            "orthodox_childhood_seed_milestone",
+            "daily_copybook_practice_neu_1",
+            "setback_injury",
+            "medical_talent_discovery"
+          ],
+          "routeFlags": [
+            "route_merchant",
+            "route_orthodox"
+          ],
+          "currentGoal": "门派倾向已显，尚未立誓入门",
+          "lifeMemoryEntry": "goal=门派倾向已显，尚未立誓入门"
+        },
+        {
+          "age": 18,
+          "eventIds": [
+            "orthodox_initiation",
+            "love_first_meet",
+            "orthodox_trial_service",
+            "martial_improvement",
+            "orthodox_trial_completion"
+          ],
+          "routeFlags": [
+            "route_merchant",
+            "route_orthodox"
+          ],
+          "currentGoal": "门派倾向已显，尚未立誓入门",
+          "lifeMemoryEntry": "goal=门派倾向已显，尚未立誓入门"
+        },
+        {
+          "age": 25,
+          "eventIds": [
+            "daily_home_letter_neu_1",
+            "p11_social_reinforcement_gathering",
+            "setback_injury",
+            "relationship_blood_brotherhood",
+            "family_child_born"
+          ],
+          "routeFlags": [
+            "route_merchant",
+            "route_orthodox"
+          ],
+          "currentGoal": "行侠守义，承担门派义务",
+          "lifeMemoryEntry": "goal=行侠守义，承担门派义务 | achievement=喜结良缘"
+        },
+        {
+          "age": 32,
+          "eventIds": [
+            "daily_night_reflection_pos_1",
+            "love_after_greet",
+            "jianghu_challenge",
+            "career_foundation_sect",
+            "p11_wealth_wanderer_divergence_fork"
+          ],
+          "routeFlags": [
+            "route_merchant",
+            "route_orthodox"
+          ],
+          "currentGoal": "行侠守义，承担门派义务",
+          "lifeMemoryEntry": "goal=行侠守义，承担门派义务 | achievement=喜结良缘"
+        },
+        {
+          "age": 40,
+          "eventIds": [
+            "family_crisis",
+            "career_martial_arts_conference",
+            "jianghu_hero_meeting",
+            "jianghu_grudge",
+            "family_child_education"
+          ],
+          "routeFlags": [
+            "route_merchant",
+            "route_orthodox"
+          ],
+          "currentGoal": "行侠守义，承担门派义务",
+          "lifeMemoryEntry": "goal=行侠守义，承担门派义务 | achievement=喜结良缘"
+        }
+      ],
+      "finalAge": 40,
+      "deterministicHash": "h1780653248"
+    },
+    {
+      "lineId": "demonic",
+      "label": "邪路偏锋",
+      "seed": 303,
+      "checkpoints": [
+        {
+          "age": 13,
+          "eventIds": [
+            "merchant_childhood_seed_milestone",
+            "daily_morning_training_pos_1",
+            "merchant_talent_discovery",
+            "childhood_summary",
+            "youth_begins"
+          ],
+          "routeFlags": [
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张"
+        },
+        {
+          "age": 18,
+          "eventIds": [
+            "setback_injury",
+            "love_first_meet",
+            "love_shared_mission",
+            "martial_improvement",
+            "daily_take_odd_job_neu_1"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_merchant"
+          ],
+          "currentGoal": "暗中试探，尚未公开入魔",
+          "lifeMemoryEntry": "goal=暗中试探，尚未公开入魔"
+        },
+        {
+          "age": 25,
+          "eventIds": [
+            "relationship_blood_brotherhood",
+            "daily_second_guess_neg_1",
+            "commoner_year_farming",
+            "commoner_year_neighbor",
+            "family_child_born"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_merchant"
+          ],
+          "currentGoal": "力量与地盘在涨，诱惑未止",
+          "lifeMemoryEntry": "goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘"
+        },
+        {
+          "age": 32,
+          "eventIds": [
+            "daily_take_odd_job_pos_1",
+            "family_child_education",
+            "demonic_aftermath",
+            "demonic_midlife_expansion",
+            "spouse_mingyue_daily"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_demonic_completed",
+            "route_merchant"
+          ],
+          "currentGoal": "力量与地盘在涨，诱惑未止",
+          "lifeMemoryEntry": "goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘"
+        },
+        {
+          "age": 40,
+          "eventIds": [
+            "family_crisis",
+            "jianghu_rescue",
+            "jianghu_hero_meeting",
+            "relationship_enemy_create",
+            "setback_illness"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_demonic_completed",
+            "route_merchant"
+          ],
+          "currentGoal": "力量与地盘在涨，诱惑未止",
+          "lifeMemoryEntry": "goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘"
+        }
+      ],
+      "finalAge": 40,
+      "deterministicHash": "h1646542821"
+    },
+    {
+      "lineId": "merchant",
+      "label": "商路崛起",
+      "seed": 804,
+      "checkpoints": [
+        {
+          "age": 13,
+          "eventIds": [
+            "merchant_talent_discovery",
+            "daily_morning_training_neg_1",
+            "childhood_summary",
+            "late_childhood_prep",
+            "youth_begins"
+          ],
+          "routeFlags": [
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张"
+        },
+        {
+          "age": 18,
+          "eventIds": [
+            "sect_choice",
+            "love_first_meet",
+            "love_after_greet",
+            "love_shared_mission",
+            "daily_second_guess_neu_1"
+          ],
+          "routeFlags": [
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张"
+        },
+        {
+          "age": 25,
+          "eventIds": [
+            "setback_illness",
+            "p11_wealth_reinforcement_first_deal",
+            "relationship_blood_brotherhood",
+            "p9_wealth_caravan_gate",
+            "family_child_born"
+          ],
+          "routeFlags": [
+            "route_beggars",
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+        },
+        {
+          "age": 32,
+          "eventIds": [
+            "p9_merchant_midlife_caravan",
+            "relationship_sworn_help",
+            "commoner_year_neighbor",
+            "commoner_year_farming",
+            "relationship_enemy_create"
+          ],
+          "routeFlags": [
+            "route_beggars",
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+        },
+        {
+          "age": 40,
+          "eventIds": [
+            "family_crisis",
+            "setback_illness",
+            "jianghu_grudge",
+            "setback_injury",
+            "daily_take_odd_job_pos_1"
+          ],
+          "routeFlags": [
+            "route_beggars",
+            "route_merchant"
+          ],
+          "currentGoal": "营商天赋已显，尚未开张",
+          "lifeMemoryEntry": "goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+        }
+      ],
+      "finalAge": 40,
+      "deterministicHash": "h588790740"
+    }
+  ],
+  "crossLineComparison": [
+    {
+      "checkpointAge": 13,
+      "dimension": "goal",
+      "verdict": "partial",
+      "detail": "门派倾向已显，尚未立誓入门 || 营商天赋已显，尚未开张 || 营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 13,
+      "dimension": "cost",
+      "verdict": "collapsed",
+      "detail": "商路债务 || 商路债务 || 商路债务"
+    },
+    {
+      "checkpointAge": 13,
+      "dimension": "identity",
+      "verdict": "partial",
+      "detail": "goal=门派倾向已显，尚未立誓入门 || goal=营商天赋已显，尚未开张 || goal=营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 13,
+      "dimension": "continue",
+      "verdict": "partial",
+      "detail": "route_merchant,route_orthodox || route_merchant || route_merchant"
+    },
+    {
+      "checkpointAge": 13,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:setback_injury+medical_talent_discovery || demonic:childhood_summary+youth_begins || merchant:late_childhood_prep+youth_begins"
+    },
+    {
+      "checkpointAge": 18,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "门派倾向已显，尚未立誓入门 || 暗中试探，尚未公开入魔 || 营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 18,
+      "dimension": "cost",
+      "verdict": "partial",
+      "detail": "商路债务 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 18,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "goal=门派倾向已显，尚未立誓入门 || goal=暗中试探，尚未公开入魔 || goal=营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 18,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_merchant,route_orthodox || route_demonic,route_merchant || route_merchant"
+    },
+    {
+      "checkpointAge": 18,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:martial_improvement+orthodox_trial_completion || demonic:martial_improvement+daily_take_odd_job_neu_1 || merchant:love_shared_mission+daily_second_guess_neu_1"
+    },
+    {
+      "checkpointAge": 25,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 25,
+      "dimension": "cost",
+      "verdict": "partial",
+      "detail": "商路债务 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 25,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+    },
+    {
+      "checkpointAge": 25,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_merchant,route_orthodox || route_demonic,route_merchant || route_beggars,route_merchant"
+    },
+    {
+      "checkpointAge": 25,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:relationship_blood_brotherhood+family_child_born || demonic:commoner_year_neighbor+family_child_born || merchant:p9_wealth_caravan_gate+family_child_born"
+    },
+    {
+      "checkpointAge": 32,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 32,
+      "dimension": "cost",
+      "verdict": "partial",
+      "detail": "商路债务 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 32,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+    },
+    {
+      "checkpointAge": 32,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_merchant,route_orthodox || route_demonic,route_demonic_completed,route_merchant || route_beggars,route_merchant"
+    },
+    {
+      "checkpointAge": 32,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:career_foundation_sect+p11_wealth_wanderer_divergence_fork || demonic:demonic_midlife_expansion+spouse_mingyue_daily || merchant:commoner_year_farming+relationship_enemy_create"
+    },
+    {
+      "checkpointAge": 40,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 营商天赋已显，尚未开张"
+    },
+    {
+      "checkpointAge": 40,
+      "dimension": "cost",
+      "verdict": "partial",
+      "detail": "商路债务 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 40,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=营商天赋已显，尚未开张 | achievement=喜结良缘"
+    },
+    {
+      "checkpointAge": 40,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_merchant,route_orthodox || route_demonic,route_demonic_completed,route_merchant || route_beggars,route_merchant"
+    },
+    {
+      "checkpointAge": 40,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:jianghu_grudge+family_child_education || demonic:relationship_enemy_create+setback_illness || merchant:setback_injury+daily_take_odd_job_pos_1"
+    }
+  ]
+}

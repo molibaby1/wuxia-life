@@ -56,7 +56,7 @@
         "Unit test asserts matrix length equals 3 and seed values match P49 PRD"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "P49 RH-1/RH-2."
     },
     {

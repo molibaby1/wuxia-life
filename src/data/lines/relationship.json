@@ -477,5 +477,83 @@
         ]
       }
     ]
+  },
+  {
+    "id": "p42_social_momentum_youth_introduction",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 72,
+    "weight": 52,
+    "ageRange": {"min": 17, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+    ],
+    "content": {
+      "title": "初识引见",
+      "text": "你平日待人接物积下的好感，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。",
+      "description": "P42 青年塑形：社交势能驱动的初次引见"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_introduction",
+        "text": "接下引见，试着进入更高圈层",
+        "effects": [
+          {"type": "stat_modify", "target": "connections", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "charisma", "value": 3, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_youth_intro_accepted", "value": true}
+        ]
+      },
+      {
+        "id": "defer_introduction",
+        "text": "谢过好意，先把眼前关系稳住",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 2, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_youth_intro_deferred", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p42_social_momentum_later_testimonial",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 70,
+    "weight": 50,
+    "ageRange": {"min": 50, "max": 58},
+    "triggers": [
+      {"type": "age_reach", "value": 50}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 3"}
+    ],
+    "content": {
+      "title": "晚岁证名",
+      "text": "数十年人情往来塑成的信用，让你在暮年仍被请出来为后辈作保、为旧友作证。这份晚岁回响不是一时名头，而是长期社交势能的兑现。",
+      "description": "P42 晚年塑形：社交势能驱动的证名回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "give_testimonial",
+        "text": "出面证名，为旧友后辈作保",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 4, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_later_testimonial_given", "value": true}
+        ]
+      },
+      {
+        "id": "stay_quiet",
+        "text": "少涉外事，把情面留给至亲",
+        "effects": [
+          {"type": "stat_modify", "target": "charisma", "value": 2, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_later_testimonial_declined", "value": true}
+        ]
+      }
+    ]
   }
 ]

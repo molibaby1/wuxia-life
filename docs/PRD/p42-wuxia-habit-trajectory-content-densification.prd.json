@@ -45,7 +45,7 @@
         "Add or update targeted regression coverage"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Parallel axis pair to P42-002."
     },
     {

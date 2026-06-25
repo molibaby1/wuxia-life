@@ -253,6 +253,13 @@ function testP28SemiPersonalityRegression(): void {
   assertSemiPersonalityGatedEvent('p28_family_bond_caretaker_obligation', 'familyBond', 3, 42);
 }
 
+function testP42BusinessSocialDensification(): void {
+  assertHabitGatedEvent('p42_business_habit_youth_stall', 'businessHabit', 2, 18);
+  assertHabitGatedEvent('p42_business_habit_midlife_syndicate', 'businessHabit', 3, 40);
+  assertSemiPersonalityGatedEvent('p42_social_momentum_youth_introduction', 'socialMomentum', 2, 19);
+  assertSemiPersonalityGatedEvent('p42_social_momentum_later_testimonial', 'socialMomentum', 3, 52);
+}
+
 function testP42TrainingStudyDensification(): void {
   assertHabitGatedEvent('p42_training_habit_youth_sparring', 'trainingHabit', 2, 16);
   assertHabitGatedEvent('p42_training_habit_later_guardian', 'trainingHabit', 3, 54);
@@ -283,6 +290,7 @@ async function main(): Promise<void> {
   testP28SemiPersonalityRegression();
   testP29MedicalAndSocialRegression();
   testP42TrainingStudyDensification();
+  testP42BusinessSocialDensification();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();
   testP25HabitTrajectorySlice();

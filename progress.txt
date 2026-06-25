@@ -7,7 +7,11 @@
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
 
-## [2026-06-25] - P42-002 (p42-wuxia-habit-trajectory-content-densification)
+## [2026-06-25] - P42-003 (p42-wuxia-habit-trajectory-content-densification)
+- Added 4 business/social densification samples spanning youth through later life.
+- Files: `merchant.json`, `relationship.json`, `tests/personalityHabitTrajectoryTests.ts`
+- Validation: personalityHabitTrajectoryTests ✅
+---
 - Added 4 training/study densification samples: youth sparring, childhood copybook, later guardian/chronicle.
 - Files: `p22-content-expansions.json`, `p21-content-samples.json`, `tests/personalityHabitTrajectoryTests.ts`
 - Validation: personalityHabitTrajectoryTests ✅

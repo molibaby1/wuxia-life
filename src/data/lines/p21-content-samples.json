@@ -10,7 +10,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"scholar_path_started\") || flags.has(\"study_habit\")"
+        "expression": "flags.has(\"scholar_path_started\") || lifeStates.studyHabit >= 2 || flags.has(\"study_habit\")"
       }
     ],
     "content": {
@@ -78,7 +78,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_study_hook\")"
+        "expression": "lifeStates.studyHabit >= 2 || flags.has(\"p9_echo_study_hook\")"
       }
     ],
     "content": {
@@ -110,6 +110,61 @@
         "duplicateRiskClass": "echo_callback",
         "authoringNotes": "Callback-sensitive sample; triggered by p9_echo_study_hook flag.",
         "llmEditableFields": ["content.text", "content.title"]
+      }
+    }
+  },
+  {
+    "id": "p21_martial_route_reinforcement",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 86,
+    "ageRange": { "min": 20, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 2 || flags.has(\"training_habit\") || flags.has(\"martial_path_started\")"
+      }
+    ],
+    "content": {
+      "title": "拳路渐明",
+      "text": "你这些年反复打磨出来的筋骨和招路，终于让前辈看出门道。一次公开切磋之后，旁人对你已不再只当后生晚辈。",
+      "description": "P21 路线敏感内容样板：武道路线强化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_martial_challenge",
+        "text": "借切磋正名，继续向上走",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p21_martial_route_reinforced", "value": true }
+        ]
+      },
+      {
+        "id": "keep_training_low_profile",
+        "text": "仍以苦练为主，不急着出头",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p21_martial_route_reinforced", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780900000000,
+      "updatedAt": 1780900000000,
+      "enabled": true,
+      "tags": ["p21", "route_sensitive", "martial", "habit_trajectory"],
+      "pathAffinity": { "martial": 1.0 },
+      "authoringSemantics": {
+        "contentRole": "route_sensitive",
+        "routeFit": ["martial"],
+        "stageFit": ["martial_identity"],
+        "toneMarkers": ["练功", "江湖"],
+        "duplicateRiskClass": "route_reinforcement",
+        "authoringNotes": "Training habit can directly reinforce martial route without route-only flags."
       }
     }
   },
@@ -164,6 +219,194 @@
         "duplicateRiskClass": "endgame_identity",
         "authoringNotes": "Late-life archetype/legacy sample via config-only workflow.",
         "llmEditableFields": ["content.text", "content.title"]
+      }
+    }
+  },
+  {
+    "id": "p26_study_habit_midlife_callback",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 78,
+    "ageRange": { "min": 24, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 3"
+      }
+    ],
+    "content": {
+      "title": "旧卷回声",
+      "text": "多年读书塑形的梳理与辨析，终于在江湖纷争中显出回响。你一句话点破症结，旁人这才发现你这些年并非只是在案头空耗。",
+      "description": "P26 中年回响：读书习惯直接塑造后续化局能力"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "flag_set", "target": "p26_study_habit_midlife_seen", "value": true }
+    ],
+    "metadata": {
+      "createdAt": 1782100000000,
+      "updatedAt": 1782100000000,
+      "enabled": true,
+      "tags": ["p26", "habit_trajectory", "callback_sensitive", "study"],
+      "authoringSemantics": {
+        "contentRole": "callback_sensitive",
+        "routeFit": ["scholarly", "academic"],
+        "stageFit": ["midlife_echo"],
+        "toneMarkers": ["书卷", "江湖"],
+        "duplicateRiskClass": "echo_callback",
+        "authoringNotes": "Directly gated by lifeStates.studyHabit without requiring legacy hook flag."
+      }
+    }
+  },
+  {
+    "id": "p26_training_habit_midlife_callback",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": { "min": 26, "max": 34 },
+    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 3"
+      }
+    ],
+    "content": {
+      "title": "苦练成势",
+      "text": "经年习武塑形的积累，在真正动手时几乎不用思索——筋骨与呼吸自然就把那份习惯接了出来。",
+      "description": "P26 中年回响：练功习惯让武道表现从偶然变成稳定"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "flag_set", "target": "p26_training_habit_midlife_seen", "value": true }
+    ],
+    "metadata": {
+      "createdAt": 1782100000000,
+      "updatedAt": 1782100000000,
+      "enabled": true,
+      "tags": ["p26", "habit_trajectory", "callback_sensitive", "training"],
+      "authoringSemantics": {
+        "contentRole": "callback_sensitive",
+        "routeFit": ["martial"],
+        "stageFit": ["midlife_echo"],
+        "toneMarkers": ["练功", "江湖"],
+        "duplicateRiskClass": "echo_callback",
+        "authoringNotes": "Directly gated by lifeStates.trainingHabit."
+      }
+    }
+  },
+  {
+    "id": "p27_mentor_obligation_consequence",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 74,
+    "ageRange": { "min": 30, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 3 || flags.has(\"origin_martial_family\")"
+      }
+    ],
+    "content": {
+      "title": "授徒之责",
+      "text": "你多年苦练的名声传开后，晚辈纷纷求你指点。答应下来，往后便要分心授徒；拒绝，则难免失几分门墙情面。",
+      "description": "P27 中后期后果：练功习惯塑造出的门墙义务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_disciples",
+        "text": "收下门徒，担起传承之责",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": -20, "operator": "add" },
+          { "type": "flag_set", "target": "p27_mentor_obligation_taken", "value": true }
+        ]
+      },
+      {
+        "id": "decline_disciples",
+        "text": "谢绝求教，专注自身修行",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "p27_mentor_obligation_declined", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1782200000000,
+      "updatedAt": 1782200000000,
+      "enabled": true,
+      "tags": ["p27", "habit_trajectory", "consequence", "training"],
+      "authoringSemantics": {
+        "contentRole": "consequence_sensitive",
+        "routeFit": ["martial"],
+        "stageFit": ["midlate_obligation"],
+        "toneMarkers": ["门墙", "传承"],
+        "duplicateRiskClass": "later_consequence",
+        "authoringNotes": "Training habit consequence distinct from route-only martial logic."
+      }
+    }
+  },
+  {
+    "id": "p27_renown_upkeep_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 72,
+    "ageRange": { "min": 32, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 3"
+      }
+    ],
+    "content": {
+      "title": "清名难养",
+      "text": "你这些年靠学识与判断积累出的清名，终于引来更多求助与公议。名望能带来门路，也会把你推到不得不回应的位置。",
+      "description": "P27 中后期后果：读书习惯带来的清名维持压力"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "maintain_public_reputation",
+        "text": "继续出面评议，维持清名",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": -15, "operator": "add" },
+          { "type": "flag_set", "target": "p27_renown_upkeep_accepted", "value": true }
+        ]
+      },
+      {
+        "id": "withdraw_from_public",
+        "text": "逐渐淡出公议，保留心力",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "p27_renown_upkeep_declined", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1782200000000,
+      "updatedAt": 1782200000000,
+      "enabled": true,
+      "tags": ["p27", "habit_trajectory", "consequence", "study"],
+      "authoringSemantics": {
+        "contentRole": "consequence_sensitive",
+        "routeFit": ["scholarly", "academic"],
+        "stageFit": ["midlate_obligation"],
+        "toneMarkers": ["清名", "江湖"],
+        "duplicateRiskClass": "later_consequence",
+        "authoringNotes": "Study habit consequence distinct from medical-specific path."
       }
     }
   }

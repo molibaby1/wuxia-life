@@ -874,5 +874,275 @@
         }
       ]
     }
+  },
+  {
+    "id": "p28_family_bond_elder_care",
+    "name": "长辈照料",
+    "description": "家中长辈需要照料，家庭牵绊深的你面临义务抉择。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 72,
+    "weight": 58,
+    "ageRange": {
+      "min": 35,
+      "max": 50
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "obligation",
+      "p28"
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.familyBond >= 2"
+      }
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 35
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 35,
+        "max": 50
+      }
+    },
+    "content": {
+      "title": "长辈照料",
+      "text": "家中长辈年迈体衰，需人近身照料。你这些年在亲族牵绊上的长期塑形，此刻化为不得不面对的义务：是放下外务归家侍疾，还是出资请人、自己仍奔走江湖？"
+    },
+    "choices": [
+      {
+        "id": "care_in_person",
+        "text": "归家侍疾，暂离江湖 (财富 -40, 家庭牵绊 +1, 声望 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -40,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_elder_care_in_person",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "hire_caretaker",
+        "text": "出资请人照料，自己仍奔走外务 (财富 -60)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -60,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_elder_care_hired",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p28_family_bond_sibling_support",
+    "name": "手足相援",
+    "description": "兄弟姐妹遇困，家庭牵绊让你面临支援抉择。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 68,
+    "weight": 55,
+    "ageRange": {
+      "min": 28,
+      "max": 42
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "support",
+      "p28"
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.familyBond >= 2"
+      }
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 28,
+        "max": 42
+      }
+    },
+    "content": {
+      "title": "手足相援",
+      "text": "兄弟姐妹来信求助——或生意亏折，或仕途受阻。你与家族羁绊已深，此刻是倾囊相助，还是量力而行、留些余地？"
+    },
+    "choices": [
+      {
+        "id": "full_sibling_support",
+        "text": "倾囊相助，共渡难关 (财富 -80, 家庭牵绊 +1, 人脉 +5)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -80,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_sibling_support_full",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "partial_sibling_support",
+        "text": "量力而行，留些余地 (财富 -30)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -30,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_sibling_support_partial",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p28_family_bond_caretaker_obligation",
+    "name": "家门看护",
+    "description": "家中事务与老幼都开始默认由你兜底，深家庭牵绊转化为持续义务。",
+    "version": "1.0.0",
+    "category": "family",
+    "priority": 66,
+    "weight": 52,
+    "ageRange": {
+      "min": 42,
+      "max": 52
+    },
+    "type": "family",
+    "eventType": "choice",
+    "tags": [
+      "family",
+      "obligation",
+      "p28"
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.familyBond >= 3"
+      }
+    ],
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 42
+      }
+    ],
+    "triggerConditions": {
+      "age": {
+        "min": 42,
+        "max": 52
+      }
+    },
+    "content": {
+      "title": "家门看护",
+      "text": "这些年你事事顾着家里，亲族也渐渐把大小难题默认托到你身上。如今一桩家产与照料纠纷一起压来，你要么亲自接下，要么让家里学着各自承担。"
+    },
+    "choices": [
+      {
+        "id": "take_family_burden",
+        "text": "亲自兜底，把家门重新拢住 (财富 -60, 家庭牵绊 +1, 声望 +4)",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "money",
+            "value": -60,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "familyBond",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_caretaker_obligation_taken",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "delegate_family_burden",
+        "text": "分派亲族自理，自己退后一步",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": -2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_caretaker_obligation_delegated",
+            "value": true
+          }
+        ]
+      }
+    ]
   }
 ]

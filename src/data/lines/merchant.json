@@ -565,5 +565,44 @@
     "autoEffects": [
       {"type": "flag_set", "flag": "ending_merchant_hidden", "value": true}
     ]
+  },
+  {
+    "id": "p26_business_habit_obligation",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 82,
+    "weight": 62,
+    "ageRange": {"min": 34, "max": 44},
+    "triggers": [
+      {"type": "age_reach", "value": 34}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.businessHabit >= 3"}
+    ],
+    "content": {
+      "title": "账面之外",
+      "text": "长期营生塑形攒下的门道与信誉，终于把你推到更大摊子前。有人请你长期代管账路与货脉，接下便是稳定收益与持续牵扯，不接则少一层可做大的机会。",
+      "description": "P26 中后期后果：营生习惯积累转化为长期商路义务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "take_long_term_ledger",
+        "text": "接下账路，换取更稳更深的商脉",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 120},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "p26_business_obligation_taken", "value": true}
+        ]
+      },
+      {
+        "id": "stay_small_scale",
+        "text": "维持小盘周转，不再扩张",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 30},
+          {"type": "flag_set", "flag": "p26_business_obligation_declined", "value": true}
+        ]
+      }
+    ]
   }
 ]

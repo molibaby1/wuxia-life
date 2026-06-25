@@ -58,7 +58,7 @@ function testP42MultiBandCoverage(): void {
   assert(bandHits.get('studyHabit')!.size >= 2, 'studyHabit P42 samples should span 2+ bands');
   assert(bandHits.get('businessHabit')!.size >= 2, 'businessHabit P42 samples should span 2+ bands');
   assert(bandHits.get('socialMomentum')!.size >= 2, 'socialMomentum P42 samples should span 2+ bands');
-  assert(bandHits.get('familyBond')!.size >= 1, 'familyBond P42 samples should cover at least 1 band');
+  assert(bandHits.get('familyBond')!.size >= 2, 'familyBond P42 samples should span 2+ bands');
   assert(P42_EVENT_IDS.length >= 14, 'expected 14 P42 densification events');
 }
 

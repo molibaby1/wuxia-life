@@ -162,7 +162,7 @@ export function runP20HabitTrajectorySlice(): P20HabitTrajectorySliceResult {
 
 export function formatP20HabitTrajectorySliceMarkdown(result: P20HabitTrajectorySliceResult): string {
   return [
-    '# P20 Habit Trajectory Divergence Slice (P26/P27/P28/P29)',
+    '# P20 Habit Trajectory Divergence Slice (P26/P27/P28/P29/P42)',
     '',
     `Decision: **${result.passed ? 'PASS' : 'FAIL'}**`,
     '',

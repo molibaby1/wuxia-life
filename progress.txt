@@ -3,6 +3,11 @@
 - P50 sample lines validation: config spine `src/data/lines/sample-lines-spine.json` (EventLoader + events.json import); expression `src/p50/sampleLineExpression.ts` (`deriveSampleLineCurrentGoal`, `deriveSampleLineAge40Identity` → `deriveLifeMemorySummary.routeStatus.currentGoalLabel` + main-screen route row); replay `src/p49/sampleLineReplay.ts` (`P49_SAMPLE_LINE_MATRIX` seeds 301/303/804, checkpoints 13/18/25/32/40); CLI `npm run p49:replay` → `scripts/runP49SampleLineReplay.ts`; tests `tests/p50SampleLineSpineTests.ts`, `tests/p50SampleLineExpressionTests.ts`, `tests/p49SampleLineReplayTests.ts`; closure `docs/test-reports/p49-sample-lines-closure-report.md`.
 - P44 habit operator audit tooling: contract `docs/designs/p44-habit-audit-contract.md`; module `src/p44/habitOperatorAudit.ts` (`runP44HabitOperatorAudit`, coverage/legacy/archetype/recap audits); CLI `npm run audit:p44-habit`; regression `tests/p44HabitAuditTests.ts`; closure `docs/test-reports/p44-habit-audit-tooling-closure.md`.
 
+## [2026-06-26] - P51 pipeline finalize (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Code review sign-off; verify/discovery/gaps artifacts; North Star §8 CLEAR; P46 queue COMPLETED.
+- Files: `agent_docs/p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring-{verify-result,discovery-result,gaps}.md`
+- Validation: verify PASS ✅ discovery CLEAR ✅ end_state_status CLEAR ✅
+---
 ## [2026-06-26] - P51-005 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
 - P51 closure report; typecheck + spine/expression/replay tests + gate:playability PASS.
 - Files: `docs/test-reports/p51-sample-lines-tuning-closure-report.md`, `docs/PRD/p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring.prd.json`

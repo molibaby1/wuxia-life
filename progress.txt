@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- P43 archetype recap/ending differentiation: gap audit `docs/test-reports/p43-ending-differentiation-gap-audit.md`; late-life shaping recap + pattern tones in `src/utils/habitShapingSummary.ts` (`buildLateLifeShapingRecapLine`, `buildShapingPatternEndingTone`); wired via `composeP19FinalSummary` in `src/p19/finalSummaryComposition.ts`; delta matrix `docs/test-reports/p43-archetype-ending-delta-matrix.md`; regression `tests/p43ArchetypeRecapEndingTests.ts`; closure `docs/test-reports/p43-archetype-recap-ending-closure.md`.
 - P42 habit content densification: gap map `docs/test-reports/p42-habit-coverage-gap-map.md`; new samples prefixed `p42_` in p21/p22/merchant/relationship/family-life pools; regression `tests/p42ContentDensityTests.ts`; closure `docs/test-reports/p42-habit-content-densification-closure.md`.
 - P41 habit player-facing feedback: shared labels/derivation in `src/utils/habitShapingSummary.ts` (`buildCurrentShapingSummary`, `deriveDominantShapingLines`, `shapingFeedbackFlagKey`); main-screen `shapingSummary` row in `MainScreenLifeSummary.vue`; choice feedback diffs `lifeStates` in `ChoiceFeedbackGenerator.appendShapingFeedbackHints`; life-memory field `habitTrajectory` in `deriveLifeMemorySummary.ts` + `LifeMemoryPanel.vue`; regression `tests/p41HabitFeedbackTests.ts`; closure `docs/test-reports/p41-habit-feedback-closure.md`.
 - P40 P8 replay/pacing polish: headless persona bootstrap in `createPersonaSession.applyPersonaBootstrapFlags` sets `p8_route_*` + `p8_persona_id` at session start (mirror `GameProcessSimulator`); `resolvePersonaYouthRouteSeeds` maps `routePreference` → `p8_route_*`; demonic omits `p9_early_training_focus` and premature `p9_childhood_dark_spark` seed; regression `tests/p40ReplayPacingPolishTests.ts`; closure `docs/test-reports/p40-closure-report.md`.
@@ -6,6 +7,28 @@
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-25] - P43-005 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Closure M1–M4 Met; EndingScreen UI wiring deferred.
+- Files: `docs/test-reports/p43-archetype-recap-ending-closure.md`, `tests/p43ArchetypeRecapEndingTests.ts`
+- Validation: typecheck ✅ p43ArchetypeRecapEndingTests ✅ testLifeMemorySummary ✅ p41HabitFeedbackTests ✅ p19EndgameTests ✅
+---
+## [2026-06-25] - P43-004 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- `inferLivedSelfUnderstanding` prefers dominant shaping axis; label alignment regression in p43 tests.
+- Files: `src/p19/stateAccess.ts`
+---
+## [2026-06-25] - P43-003 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Same-route martial + livelihood shaping pattern ending tones; delta matrix doc.
+- Files: `docs/test-reports/p43-archetype-ending-delta-matrix.md`, `tests/p43ArchetypeRecapEndingTests.ts`
+---
+## [2026-06-25] - P43-002 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Dominant shaping recap in P19 final summary + EndingSystem fallback path.
+- Files: `src/utils/habitShapingSummary.ts`, `src/p19/finalSummaryComposition.ts`, `src/core/EndingSystem.ts`
+---
+## [2026-06-25] - P43-001 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Read-only endgame recap gap audit; ranked G1–G5 patch surfaces.
+- Files: `docs/test-reports/p43-ending-differentiation-gap-audit.md`
+---
 
 ## [2026-06-25] - P42-006 (p42-wuxia-habit-trajectory-content-densification)
 - Closure: M1–M4 Met; 14 new events; remaining thin areas documented.

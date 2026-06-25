@@ -339,12 +339,16 @@ export function runArchetypeDifferentiationAudit(
   return { axes, convergenceWarnings };
 }
 
-const RECAP_SURFACE_EXPECTATIONS: Array<Omit<RecapSurfaceReport, 'wired'>> = [
-  { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helper: 'buildCurrentShapingSummary' },
-  { surface: 'Life-memory 长期塑形', file: 'src/core/deriveLifeMemorySummary.ts', helper: 'deriveDominantShapingLines' },
-  { surface: 'P19 final summary', file: 'src/p19/finalSummaryComposition.ts', helper: 'buildLateLifeShapingRecapLine' },
-  { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helper: 'buildLateLifeShapingRecapLine' },
-  { surface: 'Self-understanding', file: 'src/p19/stateAccess.ts', helper: 'deriveDominantShapingLines' },
+const RECAP_SURFACE_EXPECTATIONS: Array<{ surface: string; file: string; helpers: string[] }> = [
+  { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helpers: ['buildCurrentShapingSummary'] },
+  { surface: 'Life-memory 长期塑形', file: 'src/core/deriveLifeMemorySummary.ts', helpers: ['deriveDominantShapingLines'] },
+  {
+    surface: 'P19 final summary',
+    file: 'src/p19/finalSummaryComposition.ts',
+    helpers: ['buildLateLifeShapingRecapLine', 'buildShapingPatternEndingTone'],
+  },
+  { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helpers: ['buildLateLifeShapingRecapLine'] },
+  { surface: 'Self-understanding', file: 'src/p19/stateAccess.ts', helpers: ['deriveDominantShapingLines'] },
 ];
 
 const DEFERRED_SURFACES: RecapSurfaceReport[] = [
@@ -364,10 +368,18 @@ export function runRecapAbsorptionAudit(rootDir = process.cwd()): RecapAbsorptio
   for (const expected of RECAP_SURFACE_EXPECTATIONS) {
     const abs = path.join(rootDir, expected.file);
     const content = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : '';
-    const wired = content.includes(expected.helper);
-    const report: RecapSurfaceReport = { ...expected, wired };
+    const wired = expected.helpers.every((helper) => content.includes(helper));
+    const report: RecapSurfaceReport = {
+      surface: expected.surface,
+      file: expected.file,
+      helper: expected.helpers.join(', '),
+      wired,
+    };
     if (wired) wiredSurfaces.push(report);
-    else unwiredSurfaces.push({ ...report, reason: `missing ${expected.helper} import/use` });
+    else {
+      const missing = expected.helpers.filter((helper) => !content.includes(helper));
+      unwiredSurfaces.push({ ...report, reason: `missing ${missing.join(', ')}` });
+    }
   }
 
   return {

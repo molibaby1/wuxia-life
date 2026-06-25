@@ -191,6 +191,8 @@ P49（`docs/PRD/p49-wuxia-sample-lines-validation-and-playtest.md`）必须同�
 
 仅当上述两类证据齐备，方可对整个 P46 路线（三条最小可玩人生样本线）做最终 closure。
 
+**Closure status (2026-06-26, P51):** P49 验证收口 **Pass**（RW-04 第二名 playtest 为 documented defer）。详见 `docs/test-reports/p49-sample-lines-closure-report.md`。
+
 ### 11.4 阶段依赖顺序
 
 | 顺序 | 阶段 | PRD 文件 | 前置条件 |

@@ -498,5 +498,168 @@
       "enabled": true,
       "tags": ["p42", "habit_trajectory", "study", "later_life"]
     }
+  },
+  {
+    "id": "p42_training_habit_martial_clan_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 72,
+    "ageRange": { "min": 32, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 3 && (flags.has(\"martial_path_started\") || flags.has(\"origin_martial_family\"))"
+      }
+    ],
+    "content": {
+      "title": "门墙试锋",
+      "text": "在同门眼中，你这些年练功塑形的积累早已不是「勤练」二字能概括——招路、劲力、临场反应都透着武家子弟的底子。门中长老邀你代表门墙出战，胜则名望直上，败则累及师门。",
+      "description": "P42 武者型分化：trainingHabit 在门派语境下的回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "represent_clan",
+        "text": "代表门墙出战",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "p42_martial_clan_echo_taken", "value": true }
+        ]
+      },
+      {
+        "id": "yield_to_senior",
+        "text": "让给师兄，自己从旁观摩",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p42_martial_clan_echo_deferred", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "training", "archetype_martial"]
+    }
+  },
+  {
+    "id": "p42_training_habit_scholar_body_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 30, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 3 && (flags.has(\"scholar_path_started\") || player.knowledge >= 40)"
+      }
+    ],
+    "content": {
+      "title": "养生拳意",
+      "text": "你的练功塑形并非为了争胜，而是多年伏案后自守体魄的节律。同僚见你气色稳、步履轻，反而来请教「读书人如何不伤身」——这份回响是文士语境里的强身，不是武者语境里的试锋。",
+      "description": "P42 文士型分化：trainingHabit 在养生/体魄语境下的回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "constitution", "value": 6, "operator": "add" },
+      { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" },
+      { "type": "flag_set", "target": "p42_scholar_body_echo_seen", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "training", "archetype_scholar"]
+    }
+  },
+  {
+    "id": "p42_study_habit_scholar_academy_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 71,
+    "ageRange": { "min": 28, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 3 && flags.has(\"scholar_path_started\")"
+      }
+    ],
+    "content": {
+      "title": "书院问难",
+      "text": "多年读书塑形的辨析力，让你在书院问难中从容应对。这不是医理或账簿之路，而是仕林语境里——以文义服人、以判断立身的回响。",
+      "description": "P42 文士型分化：studyHabit 在书院语境下的回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "debate_publicly",
+        "text": "公开问难，以文义立名",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 6, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "p42_scholar_academy_echo_taken", "value": true }
+        ]
+      },
+      {
+        "id": "debate_privately",
+        "text": "私下切磋，不抢风头",
+        "effects": [
+          { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p42_scholar_academy_echo_private", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "study", "archetype_scholar"]
+    }
+  },
+  {
+    "id": "p42_study_habit_merchant_ledger_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 69,
+    "ageRange": { "min": 26, "max": 34 },
+    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 3 && (lifeStates.businessHabit >= 2 || player.businessAcumen >= 30)"
+      }
+    ],
+    "content": {
+      "title": "账理精通",
+      "text": "你读书养成的记诵与辨数习惯，在账房与货单上化为真正的营生优势。商号管事请你梳理旧账、定新规——这是商路语境里的读书回响，不是书院问难，也不是医案汇辑。",
+      "description": "P42 商贾型分化：studyHabit 在账簿/营生语境下的回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "reform_ledgers",
+        "text": "梳理旧账，定新规矩",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 90, "operator": "add" },
+          { "type": "flag_set", "target": "p42_merchant_ledger_echo_taken", "value": true }
+        ]
+      },
+      {
+        "id": "consult_only",
+        "text": "只做顾问，不常驻账房",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 40, "operator": "add" },
+          { "type": "flag_set", "target": "p42_merchant_ledger_echo_consult", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "study", "archetype_merchant"]
+    }
   }
 ]

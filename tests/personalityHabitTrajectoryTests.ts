@@ -253,6 +253,59 @@ function testP28SemiPersonalityRegression(): void {
   assertSemiPersonalityGatedEvent('p28_family_bond_caretaker_obligation', 'familyBond', 3, 42);
 }
 
+function testP42ArchetypeDifferentiation(): void {
+  const loader = EventLoader.getInstance();
+  const evaluator = new ConditionEvaluator();
+
+  const martialState = makeState();
+  martialState.player.age = 34;
+  martialState.flags = { martial_path_started: true };
+  martialState.player.lifeStates = {
+    ...martialState.player.lifeStates,
+    trainingHabit: 3,
+  };
+  const martialEvent = loader.getEventById('p42_training_habit_martial_clan_echo');
+  const martialExpr = martialEvent?.conditions?.[0]?.type === 'expression' ? martialEvent.conditions[0].expression : '';
+  assert(martialExpr.includes('martial_path_started'), 'martial echo should gate on martial cluster');
+  assert(evaluator.evaluate({ type: 'expression', expression: martialExpr }, martialState) === true, 'martial cluster triggers martial echo');
+
+  const scholarTrainState = makeState();
+  scholarTrainState.player.age = 32;
+  scholarTrainState.flags = { scholar_path_started: true };
+  scholarTrainState.player.knowledge = 45;
+  scholarTrainState.player.lifeStates = {
+    ...scholarTrainState.player.lifeStates,
+    trainingHabit: 3,
+  };
+  const scholarTrainEvent = loader.getEventById('p42_training_habit_scholar_body_echo');
+  const scholarTrainExpr = scholarTrainEvent?.conditions?.[0]?.type === 'expression' ? scholarTrainEvent.conditions[0].expression : '';
+  assert(evaluator.evaluate({ type: 'expression', expression: scholarTrainExpr }, scholarTrainState) === true, 'scholar cluster triggers body echo');
+
+  const scholarStudyState = makeState();
+  scholarStudyState.player.age = 30;
+  scholarStudyState.flags = { scholar_path_started: true };
+  scholarStudyState.player.lifeStates = {
+    ...scholarStudyState.player.lifeStates,
+    studyHabit: 3,
+  };
+  const scholarStudyEvent = loader.getEventById('p42_study_habit_scholar_academy_echo');
+  const scholarStudyExpr = scholarStudyEvent?.conditions?.[0]?.type === 'expression' ? scholarStudyEvent.conditions[0].expression : '';
+  assert(evaluator.evaluate({ type: 'expression', expression: scholarStudyExpr }, scholarStudyState) === true, 'scholar cluster triggers academy echo');
+
+  const merchantStudyState = makeState();
+  merchantStudyState.player.age = 28;
+  merchantStudyState.player.businessAcumen = 35;
+  merchantStudyState.player.lifeStates = {
+    ...merchantStudyState.player.lifeStates,
+    studyHabit: 3,
+    businessHabit: 2,
+  };
+  const merchantStudyEvent = loader.getEventById('p42_study_habit_merchant_ledger_echo');
+  const merchantStudyExpr = merchantStudyEvent?.conditions?.[0]?.type === 'expression' ? merchantStudyEvent.conditions[0].expression : '';
+  assert(merchantStudyExpr.includes('businessHabit'), 'merchant echo should dual-read business context');
+  assert(evaluator.evaluate({ type: 'expression', expression: merchantStudyExpr }, merchantStudyState) === true, 'merchant cluster triggers ledger echo');
+}
+
 function testP42FamilyBondDensification(): void {
   assertSemiPersonalityGatedEvent('p42_family_bond_festival_reunion', 'familyBond', 2, 48);
   assertSemiPersonalityGatedEvent('p42_family_bond_estate_trust', 'familyBond', 3, 52);
@@ -297,6 +350,7 @@ async function main(): Promise<void> {
   testP42TrainingStudyDensification();
   testP42BusinessSocialDensification();
   testP42FamilyBondDensification();
+  testP42ArchetypeDifferentiation();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();
   testP25HabitTrajectorySlice();

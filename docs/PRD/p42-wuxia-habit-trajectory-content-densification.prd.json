@@ -74,7 +74,7 @@
         "Document before and after examples under docs/test-reports/p42-archetype-differentiation-matrix.md"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on prior densification stories."
     },
     {

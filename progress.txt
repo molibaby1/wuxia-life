@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- P44 habit operator audit tooling: contract `docs/designs/p44-habit-audit-contract.md`; module `src/p44/habitOperatorAudit.ts` (`runP44HabitOperatorAudit`, coverage/legacy/archetype/recap audits); CLI `npm run audit:p44-habit`; regression `tests/p44HabitAuditTests.ts`; closure `docs/test-reports/p44-habit-audit-tooling-closure.md`.
 - P43 archetype recap/ending differentiation: gap audit `docs/test-reports/p43-ending-differentiation-gap-audit.md`; late-life shaping recap + pattern tones in `src/utils/habitShapingSummary.ts` (`buildLateLifeShapingRecapLine`, `buildShapingPatternEndingTone`); wired via `composeP19FinalSummary` in `src/p19/finalSummaryComposition.ts`; delta matrix `docs/test-reports/p43-archetype-ending-delta-matrix.md`; regression `tests/p43ArchetypeRecapEndingTests.ts`; closure `docs/test-reports/p43-archetype-recap-ending-closure.md`.
 - P42 habit content densification: gap map `docs/test-reports/p42-habit-coverage-gap-map.md`; new samples prefixed `p42_` in p21/p22/merchant/relationship/family-life pools; regression `tests/p42ContentDensityTests.ts`; closure `docs/test-reports/p42-habit-content-densification-closure.md`.
 - P41 habit player-facing feedback: shared labels/derivation in `src/utils/habitShapingSummary.ts` (`buildCurrentShapingSummary`, `deriveDominantShapingLines`, `shapingFeedbackFlagKey`); main-screen `shapingSummary` row in `MainScreenLifeSummary.vue`; choice feedback diffs `lifeStates` in `ChoiceFeedbackGenerator.appendShapingFeedbackHints`; life-memory field `habitTrajectory` in `deriveLifeMemorySummary.ts` + `LifeMemoryPanel.vue`; regression `tests/p41HabitFeedbackTests.ts`; closure `docs/test-reports/p41-habit-feedback-closure.md`.
@@ -7,6 +8,28 @@
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-25] - P44-005 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Closure M1–M4 Met; manual follow-ups documented (Ending UI, copy review, lifetime sim gates).
+- Files: `docs/test-reports/p44-habit-audit-tooling-closure.md`, `tests/p44HabitAuditTests.ts`
+- Validation: typecheck ✅ p44HabitAuditTests ✅ audit:p44-habit ✅
+---
+## [2026-06-25] - P44-004 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Archetype differentiation report + sample artifacts under docs/test-reports/p44-*.
+- Files: `src/p44/habitOperatorAudit.ts`, `docs/test-reports/p44-archetype-differentiation-audit.md`
+---
+## [2026-06-25] - P44-003 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Legacy flag drift scan with allowlist + co-gate classification; suspicious reader output.
+- Files: `src/p44/habitOperatorAudit.ts`, `tests/p44HabitAuditTests.ts`
+---
+## [2026-06-25] - P44-002 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Coverage audit inventories axis-gated readers by age band; CLI + regression shape tests.
+- Files: `src/p44/habitOperatorAudit.ts`, `scripts/runP44HabitOperatorAudit.ts`, `tests/p44HabitAuditTests.ts`
+---
+## [2026-06-25] - P44-001 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Operator audit contract (questions, output shapes, vocabulary).
+- Files: `docs/designs/p44-habit-audit-contract.md`
+---
 
 ## [2026-06-25] - P43-005 (p43-wuxia-archetype-recap-and-ending-differentiation)
 - Closure M1–M4 Met; EndingScreen UI wiring deferred.

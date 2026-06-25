@@ -56,7 +56,7 @@
         "Save sample report under docs/test-reports/"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Replay-differentiation audit story."
     },
     {
@@ -71,7 +71,7 @@
         "Closure defines what still remains manual"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Final validation and handoff story."
     }
   ]

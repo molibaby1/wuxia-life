@@ -56,7 +56,7 @@
       {"type": "age_reach", "value": 16}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_talent == true && money >= 50"}
+      {"type": "expression", "expression": "flags.merchant_talent == true && (money >= 50 || flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true)"}
     ],
     "content": {
       "title": "开设店铺",
@@ -92,7 +92,7 @@
       }
     ],
     "metadata": {
-      "tags": ["商业", "开店", "主线", "mainline", "once"]
+      "tags": ["商业", "开店", "主线", "mainline", "mandatory", "once"]
     }
   },
   {

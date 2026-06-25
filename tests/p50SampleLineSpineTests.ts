@@ -1,4 +1,5 @@
 import { EventLoader } from '../src/core/EventLoader';
+import { deriveSampleLineCurrentGoal } from '../src/p50/sampleLineExpression';
 import { GameProcessSimulator } from './GameProcessSimulator';
 
 const SPINE_EVENT_IDS = [
@@ -39,7 +40,7 @@ function testSpineEventsLoaded(): void {
 async function testBenchmarkSeedReachesAge40(
   label: string,
   config: ConstructorParameters<typeof GameProcessSimulator>[0],
-): Promise<void> {
+): Promise<import('../src/types/simulationRecordTypes').GameProcessReport> {
   const simulator = new GameProcessSimulator({
     ...config,
     simulateYears: 40,
@@ -53,6 +54,34 @@ async function testBenchmarkSeedReachesAge40(
   });
   const report = await simulator.simulate();
   assert(report.finalAge >= 38, `${label}: finalAge ${report.finalAge} < 38`);
+  return report;
+}
+
+async function testMerchant804ShopChain(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge40('merchant-804-shop', {
+    playerName: '沈聚财',
+    gender: 'male',
+    seed: 804,
+    choiceTendency: 'wealth',
+    p8PersonaId: 'p8-wealth-shen',
+    sampleId: 'p8-wealth-shen',
+  });
+
+  const shopEvent = report.records.find((record) => record.eventId === 'merchant_first_shop');
+  assert(Boolean(shopEvent), 'seed 804: merchant_first_shop never fired');
+  assert(
+    (shopEvent?.age ?? 99) >= 16 && (shopEvent?.age ?? 0) <= 22,
+    `seed 804: merchant_first_shop at age ${shopEvent?.age}, expected 16-22`,
+  );
+
+  const rec25 = [...report.records].reverse().find((record) => record.age <= 25);
+  const flags = rec25?.gameState.flags ?? {};
+  const hasShop =
+    flags.merchant_shop_grocery || flags.merchant_shop_weapon || flags.merchant_shop_herb;
+  assert(Boolean(hasShop), 'seed 804: no merchant_shop_* flag by age 25');
+
+  const goal25 = deriveSampleLineCurrentGoal(rec25!.gameState) ?? '';
+  assert(!goal25.includes('尚未开张'), `seed 804 age 25 goal still pre-shop: ${goal25}`);
 }
 
 async function main(): Promise<void> {
@@ -76,14 +105,7 @@ async function main(): Promise<void> {
     sampleId: 'golden-demonic',
   });
 
-  await testBenchmarkSeedReachesAge40('merchant-804', {
-    playerName: '沈聚财',
-    gender: 'male',
-    seed: 804,
-    choiceTendency: 'wealth',
-    p8PersonaId: 'p8-wealth-shen',
-    sampleId: 'p8-wealth-shen',
-  });
+  await testMerchant804ShopChain();
 
   assert(SPINE_FLAGS.length >= 9, 'spine flag inventory incomplete');
   console.log('p50SampleLineSpineTests: all passed');

@@ -61,6 +61,11 @@ export const KEY_CHOICE_OUTCOME_CONSEQUENCES: Record<string, string> = {
   diligentStudent: '你以勤学为志',
   freeSpirit: '你以自在为志',
   balancedApproach: '你文武兼修',
+  sect_midlife_gray_executed: '你接了灰色任务，师门记功，心下难安',
+  sect_midlife_gray_refused: '你守住了底线，师门关系承压',
+  sect_midlife_gray_leaked: '你把内幕捅出，江湖侧目',
+  demonic_midlife_isolation_done: '扩张之后，旧友渐远',
+  demonic_midlife_betrayal_done: '门内清洗，信任碎裂',
 };
 
 export const RELATIONSHIP_ROLE_LABELS: Record<string, string> = {
@@ -103,6 +108,8 @@ export const DEBT_FLAG_LABELS: Record<string, string> = {
   has_life_debt: '尚欠救命之恩',
   hero_gray_debtor: '灰色案中的庇护之债',
   demonic_usurp_failed: '夺位失败后清算阴影',
+  merchant_shop_failed: '初次经营失利，本钱受损',
+  merchant_midlife_debt: '人情债未清，周转吃紧',
 };
 
 export const RISK_SIGNAL_LABELS = {
@@ -113,6 +120,8 @@ export const RISK_SIGNAL_LABELS = {
   sectJudgmentPending: '师门公审将至',
   badReputation: '声名狼藉，行事多阻',
   demonicChivalry: '魔念渐深，正道难容',
+  demonicIsolation: '扩张之后，旧友渐远',
+  merchantCrisis: '财富与义气难以两全',
   highAnxiety: '心事重重',
   highFatigue: '身心俱疲',
 } as const;

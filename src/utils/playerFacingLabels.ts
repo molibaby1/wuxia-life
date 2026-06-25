@@ -49,6 +49,7 @@ const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   route_demonic: '堕入魔道',
   route_wanderer: '选择游侠',
   route_border: '边城立名',
+  route_merchant: '踏上商路',
   sect_faction: '门派倾向确立',
   origin_scholar_family: '书香门第出身',
   origin_merchant_family: '商贾之家出身',

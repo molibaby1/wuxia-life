@@ -94,7 +94,9 @@ function buildRouteSummary(summary: LifeMemorySummary): string {
   if (!primary) {
     return '未定 · 未入门';
   }
-  return `${primary.name} · ${primary.phase}`;
+  const goal = summary.routeStatus?.currentGoalLabel;
+  const base = `${primary.name} · ${primary.phase}`;
+  return goal ? `${base} · ${goal}` : base;
 }
 
 function buildRiskSummary(summary: LifeMemorySummary): string {

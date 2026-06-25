@@ -34,6 +34,10 @@ import {
   lifecyclePhaseLabel,
 } from '../utils/playerFacingLabels';
 import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
+import {
+  deriveSampleLineAge40Identity,
+  deriveSampleLineCurrentGoal,
+} from '../p50/sampleLineExpression';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -248,6 +252,11 @@ function buildRouteStatus(state: GameState): LifeMemoryRouteStatus {
     routeStatus.factionLabel = SECT_FACTION_LABELS[faction];
   }
 
+  const currentGoalLabel = deriveSampleLineCurrentGoal(state);
+  if (currentGoalLabel) {
+    routeStatus.currentGoalLabel = currentGoalLabel;
+  }
+
   const history = state.routeHistory || [];
   const lastTransition = [...history].reverse().find((entry) => entry.to !== 'inactive');
   if (lastTransition) {
@@ -311,6 +320,7 @@ function resolvePayoffStatus(
 function resolveKeyChoiceConsequence(
   state: GameState,
   mapEntry?: (typeof goldenLinePayoffMap.entries)[number],
+  eventId?: string,
 ): string | undefined {
   const flags = state.flags || {};
   for (const write of mapEntry?.durableWrites ?? []) {
@@ -318,8 +328,18 @@ function resolveKeyChoiceConsequence(
       return KEY_CHOICE_OUTCOME_CONSEQUENCES[write];
     }
   }
+  if (eventId === 'sect_midlife_gray_mission') {
+    if (flags.sect_midlife_gray_executed) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_executed;
+    if (flags.sect_midlife_gray_refused) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_refused;
+    if (flags.sect_midlife_gray_leaked) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_leaked;
+  }
   if (flags.hero_old_case_truth) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_truth;
   if (flags.hero_old_case_silence) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_silence;
+  if (flags.sect_midlife_gray_executed) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_executed;
+  if (flags.sect_midlife_gray_refused) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_refused;
+  if (flags.sect_midlife_gray_leaked) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_leaked;
+  if (flags.demonic_midlife_isolation_done) return KEY_CHOICE_OUTCOME_CONSEQUENCES.demonic_midlife_isolation_done;
+  if (flags.demonic_midlife_betrayal_done) return KEY_CHOICE_OUTCOME_CONSEQUENCES.demonic_midlife_betrayal_done;
   return undefined;
 }
 
@@ -352,7 +372,7 @@ function buildKeyChoices(state: GameState): LifeMemoryKeyChoiceEntry[] {
       occurredAtAge: age,
       sortKey: -(age * 1000 + (isMidlifeKey ? 1 : 0)),
       label: formatKeyChoiceLabel(eventId, record.selectedChoice),
-      consequence: resolveKeyChoiceConsequence(state, mapEntry),
+      consequence: resolveKeyChoiceConsequence(state, mapEntry, eventId),
       payoffStatus: resolvePayoffStatus(state, eventId, mapEntry),
       diagnostic: {
         eventId,
@@ -633,6 +653,17 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
     );
   }
 
+  if (flags.demonic_midlife_isolation_done === true) {
+    pushRisk(
+      'risk-demonic-isolation',
+      RISK_SIGNAL_LABELS.demonicIsolation,
+      'medium',
+      'L1',
+      ['demonic_midlife_isolation_done'],
+      [],
+    );
+  }
+
   if (flags.demonic_midlife_purge === true || flags.demonic_ending_purge === true) {
     pushRisk(
       'risk-demonic-purge',
@@ -792,6 +823,11 @@ function buildAchievements(state: GameState): LifeMemoryAchievementEntry[] {
         [pattern.flag],
       );
     }
+  }
+
+  const age40Identity = deriveSampleLineAge40Identity(state);
+  if (age40Identity) {
+    pushAchievement('achievement-age40-identity', age40Identity, 'route', 'age40_identity');
   }
 
   if ((state.player.children ?? 0) > 0) {

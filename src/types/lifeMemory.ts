@@ -35,6 +35,7 @@ export interface LifeMemoryRouteStatus {
   primary: { routeId: string; name: string; phase: string };
   secondary?: { routeId: string; name: string; phase: string };
   factionLabel?: string;
+  currentGoalLabel?: string;
   lastTransition?: { label: string; age?: number };
   diagnostic: {
     routeStates: Record<string, { lifecycle: string; lockedIn: boolean }>;

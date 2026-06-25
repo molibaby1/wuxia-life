@@ -165,6 +165,9 @@ export function applyRouteTrackFixtureBootstrap(
   }
 
   if (routeTrack === 'demonic') {
+    if (age >= 7 && !flags.p8_route_demonic) {
+      flags.p8_route_demonic = true;
+    }
     if (age === 14 && !flags.route_demonic) {
       syncFlag('route_demonic', 'route-track-fixture-demonic-entry');
     }
@@ -183,6 +186,9 @@ export function applyRouteTrackFixtureBootstrap(
   }
 
   if (routeTrack === 'sect') {
+    if (age >= 7 && !flags.p8_route_martial) {
+      flags.p8_route_martial = true;
+    }
     if (age === 13 && !flags.route_orthodox) {
       syncFlag('route_orthodox', 'route-track-fixture-sect-entry');
       flags.orthodox_trial_active = true;

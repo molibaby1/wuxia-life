@@ -10,7 +10,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has('orthodox_childhood_seed_done') && (flags.has('p8_route_martial') || flags.has('origin_wuxia_family') || flags.has('p9_echo_training_hook'))"
+        "expression": "!flags.has('orthodox_childhood_seed_done') && !flags.has('p8_route_demonic') && !flags.has('p8_route_wealth') && (flags.has('p8_route_martial') || flags.has('origin_wuxia_family') || flags.has('p9_echo_training_hook'))"
       }
     ],
     "content": {
@@ -34,12 +34,12 @@
     "category": "main_story",
     "priority": 0,
     "weight": 100,
-    "ageRange": { "min": 40, "max": 42 },
-    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('route_orthodox') && !flags.has('orthodox_age40_identity_done')"
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox') || flags.has('orthodox_formal_disciple') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_age40_identity_done') && !flags.has('route_demonic')"
       }
     ],
     "content": {
@@ -54,7 +54,7 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "orthodox", "age40", "mainline", "once"],
+      "tags": ["p47", "orthodox", "age40", "mainline", "mandatory", "once"],
       "narrativeScheduling": {
         "stageSignals": ["age40_identity"]
       }
@@ -130,7 +130,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('route_demonic') && !flags.has('demonic_age40_identity_done')"
+        "expression": "flags.has('route_demonic') && !flags.has('demonic_age40_identity_done') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic') || flags.has('demonic_youth_first_transgression') || flags.has('route_demonic_completed'))"
       }
     ],
     "content": {
@@ -145,7 +145,7 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "demonic", "age40", "mainline", "once"],
+      "tags": ["p47", "demonic", "age40", "mainline", "mandatory", "once"],
       "narrativeScheduling": {
         "stageSignals": ["age40_identity"]
       }
@@ -162,7 +162,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('origin_merchant_family') || flags.has('p9_echo_business_hook'))"
+        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('p9_echo_business_hook'))"
       }
     ],
     "content": {
@@ -187,12 +187,12 @@
     "category": "main_story",
     "priority": 0,
     "weight": 100,
-    "ageRange": { "min": 40, "max": 42 },
-    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "(flags.has('route_merchant') || flags.has('merchant_talent') || flags.has('p8_route_wealth')) && !flags.has('merchant_age40_identity_done')"
+        "expression": "!flags.has('merchant_age40_identity_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('orthodox_childhood_seed_done') && (flags.has('merchant_talent') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth'))"
       }
     ],
     "content": {
@@ -207,7 +207,7 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "merchant", "age40", "mainline", "once"],
+      "tags": ["p47", "merchant", "age40", "mainline", "mandatory", "once"],
       "narrativeScheduling": {
         "stageSignals": ["age40_identity"]
       }

@@ -1,5 +1,9 @@
 import { EventLoader } from '../src/core/EventLoader';
-import { deriveSampleLineCurrentGoal } from '../src/p50/sampleLineExpression';
+import {
+  deriveSampleLineAge40Identity,
+  deriveSampleLineCurrentGoal,
+  isPlayerVisibleSampleLineText,
+} from '../src/p50/sampleLineExpression';
 import { GameProcessSimulator } from './GameProcessSimulator';
 
 const SPINE_EVENT_IDS = [
@@ -84,6 +88,21 @@ async function testMerchant804ShopChain(): Promise<void> {
   assert(!goal25.includes('尚未开张'), `seed 804 age 25 goal still pre-shop: ${goal25}`);
 }
 
+async function testBenchmarkAge40Identity(
+  label: string,
+  config: ConstructorParameters<typeof GameProcessSimulator>[0],
+  expectedFlag: keyof typeof SPINE_FLAGS extends string ? string : never,
+): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge40(label, config);
+  const rec40 = [...report.records].reverse().find((record) => record.age <= 40);
+  assert(Boolean(rec40), `${label}: missing age 40 checkpoint record`);
+  const flags = rec40!.gameState.flags ?? {};
+  assert(Boolean(flags[expectedFlag]), `${label}: expected ${expectedFlag} at age 40`);
+  const identity = deriveSampleLineAge40Identity(rec40!.gameState);
+  assert(Boolean(identity), `${label}: missing dedicated age-40 identity text`);
+  assert(isPlayerVisibleSampleLineText(identity!), `${label}: raw key in age-40 identity`);
+}
+
 async function main(): Promise<void> {
   testSpineEventsLoaded();
 
@@ -106,6 +125,33 @@ async function main(): Promise<void> {
   });
 
   await testMerchant804ShopChain();
+
+  await testBenchmarkAge40Identity('orthodox-301-age40', {
+    playerName: '顾清和',
+    gender: 'male',
+    seed: 301,
+    choiceTendency: 'martial',
+    routeTrack: 'sect',
+    sampleId: 'golden-sect',
+  }, 'orthodox_age40_identity_done');
+
+  await testBenchmarkAge40Identity('demonic-303-age40', {
+    playerName: '沈夜',
+    gender: 'male',
+    seed: 303,
+    choiceTendency: 'risk_averse',
+    routeTrack: 'demonic',
+    sampleId: 'golden-demonic',
+  }, 'demonic_age40_identity_done');
+
+  await testBenchmarkAge40Identity('merchant-804-age40', {
+    playerName: '沈聚财',
+    gender: 'male',
+    seed: 804,
+    choiceTendency: 'wealth',
+    p8PersonaId: 'p8-wealth-shen',
+    sampleId: 'p8-wealth-shen',
+  }, 'merchant_age40_identity_done');
 
   assert(SPINE_FLAGS.length >= 9, 'spine flag inventory incomplete');
   console.log('p50SampleLineSpineTests: all passed');

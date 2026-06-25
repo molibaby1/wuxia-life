@@ -81,6 +81,20 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   return age >= 16 ? '以小本经营积累财富与人脉' : '观察买卖，等待开张时机';
 }
 
+export function deriveSampleLineCostLabel(state: GameState): string {
+  const line = detectSampleLine(state.flags ?? {});
+  if (line === 'orthodox') {
+    return '守正代价';
+  }
+  if (line === 'demonic') {
+    return '邪路代价';
+  }
+  if (line === 'merchant') {
+    return '商路债务';
+  }
+  return '守正代价';
+}
+
 export function deriveSampleLineCurrentGoal(state: GameState): string | undefined {
   const flags = state.flags ?? {};
   const age = state.player?.age ?? 0;
@@ -144,6 +158,15 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   const age = state.player?.age ?? 0;
   if (age < 38) {
     return undefined;
+  }
+  if (flags.merchant_age40_identity_done) {
+    return merchantAge40Identity(flags);
+  }
+  if (flags.orthodox_age40_identity_done) {
+    return orthodoxAge40Identity(flags);
+  }
+  if (flags.demonic_age40_identity_done) {
+    return demonicAge40Identity(flags);
   }
   const line = detectSampleLine(flags);
   if (line === 'orthodox') {

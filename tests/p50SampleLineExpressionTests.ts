@@ -127,9 +127,39 @@ function testDemonicExpression(): void {
   assert(Boolean(identity?.includes('魔道')), `demonic age40 identity missing: ${identity}`);
 }
 
+function testMerchantExpression(): void {
+  const youth = makeState(20, {
+    route_merchant: true,
+    merchant_talent: true,
+    merchant_shop_grocery: true,
+  });
+  const goal = deriveSampleLineCurrentGoal(youth);
+  assert(Boolean(goal?.includes('店铺') || goal?.includes('经营')), `merchant goal missing: ${goal}`);
+
+  const orthodox = makeState(28, { route_orthodox: true, orthodox_formal_disciple: true });
+  const merchant = makeState(28, {
+    route_merchant: true,
+    merchant_caravan_success: true,
+  });
+  const orthodoxGoal = deriveSampleLineCurrentGoal(orthodox) ?? '';
+  const merchantGoal = deriveSampleLineCurrentGoal(merchant) ?? '';
+  assert(orthodoxGoal !== merchantGoal, 'merchant should differ from orthodox at age 25+');
+  assert(!merchantGoal.includes('行侠'), 'merchant goal should not read orthodox');
+
+  const crisis = makeState(35, {
+    route_merchant: true,
+    merchant_shop_failed: true,
+    merchant_midlife_debt: true,
+  });
+  const summary = deriveLifeMemorySummary(crisis);
+  assert(summary.unresolvedDebts?.some((debt) => debt.label.includes('失利')), 'merchant shop debt missing');
+  assert(summary.unresolvedDebts?.some((debt) => debt.label.includes('人情债')), 'merchant midlife debt missing');
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
+  testMerchantExpression();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

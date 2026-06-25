@@ -212,5 +212,34 @@
         "stageSignals": ["age40_identity"]
       }
     }
+  },
+  {
+    "id": "merchant_midlife_debt_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": { "min": 32, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_merchant') && (flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success')) && !flags.has('merchant_midlife_debt')"
+      }
+    ],
+    "content": {
+      "title": "人情周转",
+      "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全。",
+      "description": "P47 商路中年代价"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_midlife_debt" },
+      { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "midlife", "mainline", "once"]
+    }
   }
 ]

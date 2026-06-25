@@ -22,6 +22,9 @@ export const KEY_CHOICE_EVENT_LABELS: Record<string, string> = {
   demonic_midlife_betrayal: '魔道背叛之局',
   demonic_midlife_fork: '魔道岔路',
   demonic_midlife_consequence: '魔道中年收束',
+  merchant_first_shop: '开设店铺',
+  merchant_shop_failure: '经营失利',
+  merchant_crisis: '财富危机',
 };
 
 export const KEY_CHOICE_LABELS: Record<string, Record<string, string>> = {
@@ -110,6 +113,7 @@ export const DEBT_FLAG_LABELS: Record<string, string> = {
   demonic_usurp_failed: '夺位失败后清算阴影',
   merchant_shop_failed: '初次经营失利，本钱受损',
   merchant_midlife_debt: '人情债未清，周转吃紧',
+  merchant_crisis_loyalty: '财富与义气难以两全',
 };
 
 export const RISK_SIGNAL_LABELS = {

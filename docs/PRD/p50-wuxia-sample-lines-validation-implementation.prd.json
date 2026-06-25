@@ -28,7 +28,7 @@
         "Surface changes covered by at least one focused test or gate slice"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "P48 O/D expression tasks."
     },
     {

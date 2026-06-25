@@ -52,6 +52,9 @@ const MIDLIFE_KEY_CHOICE_EVENT_IDS = [
   'demonic_midlife_betrayal',
   'demonic_midlife_fork',
   'demonic_midlife_consequence',
+  'merchant_first_shop',
+  'merchant_shop_failure',
+  'merchant_crisis',
 ] as const;
 
 const SECT_FACTION_LABELS: Record<string, string> = {
@@ -333,6 +336,12 @@ function resolveKeyChoiceConsequence(
     if (flags.sect_midlife_gray_refused) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_refused;
     if (flags.sect_midlife_gray_leaked) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_leaked;
   }
+  if (eventId === 'merchant_shop_failure' && flags.merchant_shop_failed) {
+    return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_shop_failed;
+  }
+  if (eventId === 'merchant_crisis' && flags.merchant_crisis_loyalty) {
+    return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_crisis_loyalty;
+  }
   if (flags.hero_old_case_truth) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_truth;
   if (flags.hero_old_case_silence) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_silence;
   if (flags.sect_midlife_gray_executed) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_executed;
@@ -518,6 +527,26 @@ function buildUnresolvedDebts(state: GameState): LifeMemoryDebtEntry[] {
     );
   }
 
+  if (flags.merchant_shop_failed === true) {
+    pushDebt(
+      'debt-merchant-shop',
+      DEBT_FLAG_LABELS.merchant_shop_failed,
+      'medium',
+      ['merchant_shop_failed'],
+      ['flags.merchant_shop_failed'],
+    );
+  }
+
+  if (flags.merchant_midlife_debt === true) {
+    pushDebt(
+      'debt-merchant-midlife',
+      DEBT_FLAG_LABELS.merchant_midlife_debt,
+      'high',
+      ['merchant_midlife_debt'],
+      ['flags.merchant_midlife_debt'],
+    );
+  }
+
   const commitments = state.lifePath?.commitments;
   for (const name of commitments?.mustProtect ?? []) {
     pushDebt(
@@ -660,6 +689,17 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
       'medium',
       'L1',
       ['demonic_midlife_isolation_done'],
+      [],
+    );
+  }
+
+  if (flags.merchant_crisis_pending === true || flags.merchant_crisis_loyalty === true) {
+    pushRisk(
+      'risk-merchant-crisis',
+      RISK_SIGNAL_LABELS.merchantCrisis,
+      'medium',
+      'L1',
+      ['merchant_crisis_pending', 'merchant_crisis_loyalty'],
       [],
     );
   }

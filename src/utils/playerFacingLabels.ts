@@ -1,5 +1,9 @@
 import type { GameState } from '../types/eventTypes';
 import type { RouteLifecycleState } from '../core/RouteStateManager';
+import {
+  SHAPING_AXES,
+  shapingAxisKeyFromFeedbackFlag,
+} from './habitShapingSummary';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -30,6 +34,13 @@ const SECT_FACTION_LABELS: Record<string, string> = {
   unconventional: '非传统门派',
   neutral: '中立门派',
 };
+
+const SHAPING_FEEDBACK_LABELS = Object.fromEntries(
+  SHAPING_AXES.map((axis) => [
+    `shaping_${axis.key}_up`,
+    `${axis.shortLabel}加深`,
+  ]),
+) as Record<string, string>;
 
 const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   route_orthodox: '踏上正道',
@@ -80,7 +91,7 @@ export function lifecyclePhaseLabel(
 }
 
 export function formatLongTermFlag(flag: string, value: boolean): string {
-  const label = LONG_TERM_FLAG_LABELS[flag];
+  const label = LONG_TERM_FLAG_LABELS[flag] || SHAPING_FEEDBACK_LABELS[flag];
   if (label) {
     return value ? label : `失去：${label}`;
   }
@@ -88,7 +99,13 @@ export function formatLongTermFlag(flag: string, value: boolean): string {
 }
 
 export function isPlayerVisibleFlag(flag: string): boolean {
-  return Boolean(LONG_TERM_FLAG_LABELS[flag] || ROUTE_FLAG_LABELS[flag] || flag === 'sect_faction');
+  return Boolean(
+    LONG_TERM_FLAG_LABELS[flag]
+    || ROUTE_FLAG_LABELS[flag]
+    || SHAPING_FEEDBACK_LABELS[flag]
+    || flag === 'sect_faction'
+    || shapingAxisKeyFromFeedbackFlag(flag),
+  );
 }
 
 export function getPlayerRouteSummary(state: GameState): { name: string; phase: string } {

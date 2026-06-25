@@ -1,4 +1,5 @@
 import type { PlayerState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 
 /** P31: resolve achievement key_choice flags from habit-led bridge flags (mirrors P27–P29 event wiring). */
 export function resolveP31HabitLedKeyChoiceBridges(
@@ -6,7 +7,7 @@ export function resolveP31HabitLedKeyChoiceBridges(
   flags: Record<string, unknown>,
 ): Record<string, unknown> {
   const resolved = { ...flags };
-  const lifeStates = player?.lifeStates ?? {};
+  const lifeStates = player?.lifeStates ?? createDefaultPlayerLifeStates();
   const socialMomentum = lifeStates.socialMomentum ?? 0;
   const studyHabit = lifeStates.studyHabit ?? 0;
 

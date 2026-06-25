@@ -871,7 +871,7 @@ async function runSaveRegressionCoverageCase() {
   }
 }
 
-function createSimulationReportStub(overrides: Partial<import('./GameProcessSimulator').GameProcessReport> = {}): import('./GameProcessSimulator').GameProcessReport {
+function createSimulationReportStub(overrides: Partial<import('../src/types/simulationRecordTypes').GameProcessReport> = {}): import('../src/types/simulationRecordTypes').GameProcessReport {
   const state = framework.createTestState();
   return {
     id: 'stub-report',
@@ -2945,7 +2945,7 @@ const coreFunctionSuite: TestSuite = {
         const completed = createSimulationReportStub({
           finalAge: 50,
           isAlive: true,
-          statistics: { spouse: '明月', children: 1 } as import('./GameProcessSimulator').GameProcessReport['statistics'],
+          statistics: { spouse: '明月', children: 1 } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'],
           records: [
             {
               age: 18,
@@ -3023,7 +3023,7 @@ const coreFunctionSuite: TestSuite = {
           statistics: {
             spouse: '明月',
             children: 1,
-          } as import('./GameProcessSimulator').GameProcessReport['statistics'],
+          } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'],
           records: [
             {
               age: 22,
@@ -3089,7 +3089,7 @@ const coreFunctionSuite: TestSuite = {
             totalChoices: 8,
             totalEvents: 20,
             records: [],
-          } as import('./GameProcessSimulator').GameProcessReport,
+          } as import('../src/types/simulationRecordTypes').GameProcessReport,
           replay,
         };
         const evaluation = evaluatePayoffGate([run]);
@@ -3154,7 +3154,7 @@ const coreFunctionSuite: TestSuite = {
             totalChoices: 8,
             totalEvents: 20,
             records: [],
-          } as import('./GameProcessSimulator').GameProcessReport,
+          } as import('../src/types/simulationRecordTypes').GameProcessReport,
           replay,
         };
         const evaluation = evaluatePayoffGate([run]);
@@ -3176,8 +3176,8 @@ const coreFunctionSuite: TestSuite = {
             finalAge: 50,
             isAlive: true,
             statistics: achieved
-              ? ({ spouse: 'x', children: 0 } as import('./GameProcessSimulator').GameProcessReport['statistics'])
-              : ({} as import('./GameProcessSimulator').GameProcessReport['statistics']),
+              ? ({ spouse: 'x', children: 0 } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'])
+              : ({} as import('../src/types/simulationRecordTypes').GameProcessReport['statistics']),
           });
         const lowRateEntries = Array.from({ length: 5 }, (_, index) => ({
           sampleId: `sample-${index}`,
@@ -3240,7 +3240,7 @@ const coreFunctionSuite: TestSuite = {
             totalChoices: 8,
             totalEvents: 20,
             records: [],
-          } as import('./GameProcessSimulator').GameProcessReport,
+          } as import('../src/types/simulationRecordTypes').GameProcessReport,
           replay,
         };
         const gate = evaluateGoldenLineGates([run]);

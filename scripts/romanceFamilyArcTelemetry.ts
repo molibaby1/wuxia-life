@@ -2,7 +2,7 @@
  * P3 US-010: Romance/family arc regression telemetry for deterministic samples.
  * Aligns with docs/test-reports/p3-midlife-romance-family-sample-arc.md (arc_rf_mingyue).
  */
-import type { GameProcessReport, GameProcessRecord } from '../tests/GameProcessSimulator';
+import type { GameProcessReport, GameProcessRecord } from '../src/types/simulationRecordTypes';
 
 export const ARC_RF_MINGYUE_ID = 'arc_rf_mingyue';
 

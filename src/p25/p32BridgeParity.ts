@@ -1,6 +1,6 @@
-import type { EventDefinition } from '../types/eventTypes';
-import type { PlayerState } from '../types/eventTypes';
+import type { EventDefinition, PlayerState } from '../types/eventTypes';
 import { EventLoader } from '../core/EventLoader';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { resolveP31HabitLedKeyChoiceBridges } from './p31HabitLedKeyChoiceBridges';
 
 /** P31 bridge flag targets compared in JSON↔resolver parity tests. */
@@ -117,14 +117,9 @@ export function playerAtHabitThreshold(
   value: number,
 ): Partial<PlayerState> {
   return {
-    lifeStates: {
-      trainingHabit: 0,
-      studyHabit: 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
+    lifeStates: createDefaultPlayerLifeStates({
       [spec.habitAxis]: value,
-    },
+    }),
   };
 }
 

@@ -2458,7 +2458,7 @@ export class GameEngineIntegration {
       this.pendingEventOutcomeNote = null;
     }
 
-    if ((tags.has('training') || tags.has('risk')) && martialGain >= 6) {
+    if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
       lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
       if (martialGain >= 12) {
@@ -2466,12 +2466,12 @@ export class GameEngineIntegration {
       }
     }
 
-    if (tags.has('comprehension') && academicGain >= 4) {
+    if (tags.has('comprehension') && academicGain >= 3) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
       lifeStates.studyHabit = traitSystem.clampLifeState('studyHabit', (lifeStates.studyHabit || 0) + 1);
     }
 
-    if (tags.has('business') && (moneyGain >= 100 || businessGain >= 2)) {
+    if (tags.has('business') && (moneyGain >= 25 || businessGain >= 1)) {
       lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       lifeStates.businessHabit = traitSystem.clampLifeState('businessHabit', (lifeStates.businessHabit || 0) + 1);
       if (moneyGain >= 150 && lifeStates.familyBond > 0) {

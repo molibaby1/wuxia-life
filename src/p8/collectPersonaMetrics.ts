@@ -1,5 +1,4 @@
-import type { GameProcessRecord } from '../types/simulationRecordTypes';
-import type { GameProcessReport } from '../../tests/GameProcessSimulator';
+import type { GameProcessRecord, GameProcessReport } from '../types/simulationRecordTypes';
 import type { P8Persona } from './types';
 import type {
   AgencyMetricPayload,

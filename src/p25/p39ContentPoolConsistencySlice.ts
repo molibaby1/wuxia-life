@@ -10,6 +10,7 @@ import {
   runP37MixedMerchantPatronLifetimeSlice,
   runP37PinnacleFoundingPatriarchLifetimeSlice,
 } from './p37AdditionalMixedPinnacleLifetimeSlices';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import {
   findLifePathContradictions,
   type ContradictionFinding,
@@ -55,13 +56,9 @@ export const P39_CONTENT_POOL_SAMPLE_PATHS: LifePathFixture[] = [
       reputation: 55,
       connections: 20,
       money: 35,
-      lifeStates: {
-        trainingHabit: 0,
+      lifeStates: createDefaultPlayerLifeStates({
         studyHabit: 3,
-        businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
-      },
+      }),
     },
     flags: {
       medical_talent: true,
@@ -102,13 +99,11 @@ export function buildP37LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: merchantTerminal.reputation,
         connections: 28,
         money: 65,
-        lifeStates: {
+        lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: merchantTerminal.trainingHabit,
           studyHabit: merchantTerminal.studyHabit ?? 0,
           businessHabit: 3,
-          socialMomentum: 0,
-          familyBond: 0,
-        },
+        }),
       },
       flags: merchantFlags,
       summarySignals: ['商武双修', '侠义投资'],
@@ -123,13 +118,10 @@ export function buildP37LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: patriarchTerminal.reputation,
         connections: 72,
         money: 56,
-        lifeStates: {
+        lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: patriarchTerminal.trainingHabit,
-          studyHabit: 0,
-          businessHabit: 0,
           socialMomentum: 2,
-          familyBond: 0,
-        },
+        }),
       },
       flags: patriarchFlags,
       summarySignals: ['开派祖师', '盟会'],

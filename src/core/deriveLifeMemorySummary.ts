@@ -133,6 +133,18 @@ function readActiveRoutes(state: GameState): ActiveRoute[] {
     active.push({ routeId: 'demonic', lifecycle: 'active', lockedIn: false });
   } else if (flags.route_wanderer || flags.route_border) {
     active.push({ routeId: 'wanderer', lifecycle: 'active', lockedIn: false });
+  } else if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    active.push({ routeId: 'merchant', lifecycle: 'active', lockedIn: false });
   }
 
   return active;

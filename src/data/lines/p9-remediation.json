@@ -254,6 +254,7 @@
     "autoEffects": [
       { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
       { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
+      { "type": "life_state_change", "target": "studyHabit", "value": 1, "operator": "add" },
       { "type": "flag_set", "target": "p9_childhood_balanced_posture", "value": true },
       { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "balanced_martial_base" }
     ],
@@ -347,6 +348,7 @@
     "autoEffects": [
       { "type": "stat_modify", "target": "money", "value": 40, "operator": "add" },
       { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "life_state_change", "target": "businessHabit", "value": 1, "operator": "add" },
       { "type": "flag_set", "target": "p9_childhood_first_trade", "value": true },
       { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "merchant_childhood_first_trade" }
     ],

@@ -6,11 +6,11 @@ import type {
 
 const STRATEGY_CATEGORY_PRIORITY: Record<PersonaActionStrategy, string[]> = {
   training: ['training', 'study', 'socializing', 'business', 'travel'],
-  study: ['study', 'training', 'socializing', 'business', 'travel'],
+  study: ['study', 'socializing', 'training', 'business', 'travel'],
   socializing: ['socializing', 'study', 'training', 'business', 'travel'],
-  business: ['business', 'training', 'study', 'socializing', 'travel'],
+  business: ['business', 'socializing', 'study', 'training', 'travel'],
   travel: ['travel', 'socializing', 'study', 'training', 'business'],
-  balanced: ['training', 'study', 'socializing', 'business', 'travel'],
+  balanced: ['study', 'socializing', 'business', 'training', 'travel'],
 };
 
 const CATEGORY_TO_DEFAULT_ACTION: Record<string, string> = {
@@ -99,8 +99,7 @@ export function selectPersonaActiveAction(
     const picked = pickByCategory(input, category);
     if (picked) {
       if (input.focusStreakCategory === category && input.focusStreakCount >= 4) {
-        const altCategory = priorities.find(c => c !== category);
-        if (altCategory) {
+        for (const altCategory of priorities.filter(c => c !== category)) {
           const alt = pickByCategory(input, altCategory);
           if (alt) {
             return {

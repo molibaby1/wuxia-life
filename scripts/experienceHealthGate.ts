@@ -24,7 +24,7 @@ import {
   type SimulationMetricEvaluation,
   type SimulationWaiver,
 } from './gameplaySimulationGate';
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 export type ExperienceHealthGateStatus = 'pass' | 'warning' | 'fail';
 

@@ -1,6 +1,7 @@
 import { eventLoader } from '../core/EventLoader';
 import { WUXIA_COMPOSITE_DESTINY_OUTCOMES } from '../narrative/profile/wuxiaOriginSurfaces';
 import { evaluateAllCompositeDestinies, evaluateCompositeDestinyOutcome } from '../p16/compositeDestiny';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import type { PlayerState } from '../types/eventTypes';
 import { P25_MAINSTREAM_ACHIEVEMENT_TRACEABILITY } from './achievementTraceability';
 import { resolveP31HabitLedKeyChoiceBridges } from './p31HabitLedKeyChoiceBridges';
@@ -88,13 +89,13 @@ export const P30_HABIT_LED_LIFE_PATHS: LifePathFixture[] = [
       reputation: 70,
       connections: 60,
       money: 35,
-      lifeStates: {
+      lifeStates: createDefaultPlayerLifeStates({
         trainingHabit: 0,
         studyHabit: 0,
         businessHabit: 0,
         socialMomentum: 3,
         familyBond: 0,
-      },
+      }),
     },
     flags: {
       p28_social_network_renown: true,
@@ -113,13 +114,13 @@ export const P30_HABIT_LED_LIFE_PATHS: LifePathFixture[] = [
       reputation: 60,
       connections: 25,
       money: 45,
-      lifeStates: {
+      lifeStates: createDefaultPlayerLifeStates({
         trainingHabit: 0,
         studyHabit: 3,
         businessHabit: 0,
         socialMomentum: 0,
         familyBond: 0,
-      },
+      }),
     },
     flags: {
       p27_study_healer_path: true,

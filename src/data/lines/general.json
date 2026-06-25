@@ -344,8 +344,18 @@
             "operator": "add"
           },
           {
+            "type": "life_state_change",
+            "target": "studyHabit",
+            "value": 1,
+            "operator": "add"
+          },
+          {
             "type": "flag_set",
             "target": "balancedApproach"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_echo_study_hook"
           }
         ]
       }

@@ -2,6 +2,7 @@
  * P36 extended consequence consistency audit — P25 representative paths + P34/P35 lifetime trace flag sequences.
  */
 import { runP34MedicalLifetimeBirthToDeathSlice } from './p34LifetimeBirthToDeathSlice';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import {
   runP35MixedHealerSwordsmanLifetimeSlice,
   runP35PinnacleMythLegendLifetimeSlice,
@@ -48,13 +49,9 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: p34Terminal.reputation,
         connections: 25,
         money: p34Terminal.money,
-        lifeStates: {
-          trainingHabit: 0,
+        lifeStates: createDefaultPlayerLifeStates({
           studyHabit: p34Terminal.studyHabit,
-          businessHabit: 0,
-          socialMomentum: 0,
-          familyBond: 0,
-        },
+        }),
       },
       flags: p34Flags,
       summarySignals: ['医德', '医术'],
@@ -69,13 +66,10 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: mixedTerminal.reputation,
         connections: 30,
         money: 42,
-        lifeStates: {
+        lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: mixedTerminal.trainingHabit,
           studyHabit: mixedTerminal.studyHabit,
-          businessHabit: 0,
-          socialMomentum: 0,
-          familyBond: 0,
-        },
+        }),
       },
       flags: mixedFlags,
       summarySignals: ['医武双修'],
@@ -90,13 +84,10 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: pinTerminal.reputation,
         connections: 28,
         money: 35,
-        lifeStates: {
+        lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: pinTerminal.trainingHabit,
           studyHabit: pinTerminal.studyHabit,
-          businessHabit: 0,
-          socialMomentum: 0,
-          familyBond: 0,
-        },
+        }),
       },
       flags: pinFlags,
       summarySignals: ['护道', '稀有机缘'],

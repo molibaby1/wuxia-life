@@ -27,6 +27,8 @@ const ROUTE_FLAG_LABELS: Record<string, string> = {
   route_border: '边城侠踪',
   route_beggars: '丐帮',
   route_official: '仕途',
+  route_merchant: '商路',
+  route_wealth_committed: '商路',
 };
 
 const SECT_FACTION_LABELS: Record<string, string> = {
@@ -131,6 +133,19 @@ export function getPlayerRouteSummary(state: GameState): { name: string; phase: 
   if (flags.route_wanderer || flags.route_border) {
     return { name: '流浪侠客', phase: '路线进行中' };
   }
+  if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    return { name: '商路', phase: '路线进行中' };
+  }
 
   const faction = flags.sect_faction;
   if (typeof faction === 'string' && SECT_FACTION_LABELS[faction]) {
@@ -173,6 +188,19 @@ export function readRawRouteKeyFromFlags(flags: Record<string, unknown> | undefi
   }
   if (flags.route_official) {
     return 'official';
+  }
+  if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    return 'merchant';
   }
 
   return null;

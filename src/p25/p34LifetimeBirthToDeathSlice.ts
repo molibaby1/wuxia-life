@@ -6,9 +6,9 @@
 import { evaluateCompositeDestinyOutcome } from '../p16/compositeDestiny';
 import { EventLoader } from '../core/EventLoader';
 import { getWorldProfile } from '../narrative/worldProfile';
-import type { PlayerState } from '../types/eventTypes';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
 import { incrementStudyHabitFromComprehension } from './p33HabitZeroOnRampSlice';
+import { createSimulationPlayerState } from './simulationPlayerState';
 
 export interface P34LifetimeAgeStep {
   age: number;
@@ -54,24 +54,20 @@ function buildPlayer(
   age: number,
   lifeStates: Record<string, number>,
   stats: { reputation: number; money: number; martialPower: number; connections: number },
-): PlayerState {
-  return {
+) {
+  return createSimulationPlayerState({
     name: 'p34-lifetime',
     age,
-    traitProfile: { origin: 'poor_family' },
+    origin: 'poor_family',
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
     money: stats.money,
     alive: age < TERMINAL_AGE,
     lifeStates: {
-      trainingHabit: 0,
       studyHabit: lifeStates.studyHabit ?? 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
     },
-  } as PlayerState;
+  });
 }
 
 /** Birth→terminal lifetime: studyHabit 0 → on-ramp → p27/p29 bridges → composite eval. */

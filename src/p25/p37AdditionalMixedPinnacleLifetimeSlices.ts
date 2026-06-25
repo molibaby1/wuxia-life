@@ -9,7 +9,6 @@ import {
 } from '../p16/rareEventLines';
 import { EventLoader } from '../core/EventLoader';
 import { getWorldProfile } from '../narrative/worldProfile';
-import type { PlayerState } from '../types/eventTypes';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
 import {
   incrementTrainingHabitFromMartialGain,
@@ -17,6 +16,7 @@ import {
   type P35LifetimeEventStep,
   type P35PinnacleFailureAttribution,
 } from './p35MixedPinnacleLifetimeSlices';
+import { createSimulationPlayerState } from './simulationPlayerState';
 
 export interface P37MixedMerchantPatronLifetimeResult {
   slice: 'p37_mixed_merchant_patron_lifetime';
@@ -105,11 +105,11 @@ function buildMixedMerchantPlayer(
   age: number,
   lifeStates: Record<string, number>,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
-): PlayerState {
-  return {
+) {
+  return createSimulationPlayerState({
     name: 'p37-mixed-merchant-patron',
     age,
-    traitProfile: { origin: 'merchant_house' },
+    origin: 'merchant_house',
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
@@ -117,23 +117,21 @@ function buildMixedMerchantPlayer(
     alive: age < MIXED_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
-      studyHabit: 0,
       businessHabit: lifeStates.businessHabit ?? 0,
       socialMomentum: lifeStates.socialMomentum ?? 0,
-      familyBond: 0,
     },
-  } as PlayerState;
+  });
 }
 
 function buildPinnaclePatriarchPlayer(
   age: number,
   lifeStates: Record<string, number>,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
-): PlayerState {
-  return {
+) {
+  return createSimulationPlayerState({
     name: 'p37-pinnacle-founding-patriarch',
     age,
-    traitProfile: { origin: 'scholar_house' },
+    origin: 'scholar_house',
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
@@ -141,12 +139,9 @@ function buildPinnaclePatriarchPlayer(
     alive: age < PINNACLE_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
-      studyHabit: 0,
-      businessHabit: 0,
       socialMomentum: lifeStates.socialMomentum ?? 0,
-      familyBond: 0,
     },
-  } as PlayerState;
+  });
 }
 
 /** Dual-track lifetime: business + martial habit on-ramp → wealth + sect investment bridges → mixed eval. */

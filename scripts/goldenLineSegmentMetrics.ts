@@ -1,4 +1,4 @@
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import {
   evaluatePayoffGate,
   PAYOFF_RATE_THRESHOLD,

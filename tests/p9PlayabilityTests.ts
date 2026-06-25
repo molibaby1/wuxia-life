@@ -19,7 +19,7 @@ import {
 import { collectCausalityMetrics, collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
-import type { GameProcessRecord } from './GameProcessSimulator';
+import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 import { runAllPersonaSimulations, runPersonaSimulations } from '../src/p9/simulationRunner';
 
 function assert(condition: boolean, message: string): void {

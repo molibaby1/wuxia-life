@@ -9,9 +9,10 @@ import {
 } from '../p16/rareEventLines';
 import { EventLoader } from '../core/EventLoader';
 import { getWorldProfile } from '../narrative/worldProfile';
-import type { EventDefinition, PlayerState } from '../types/eventTypes';
+import type { EventDefinition } from '../types/eventTypes';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
 import { incrementStudyHabitFromComprehension } from './p33HabitZeroOnRampSlice';
+import { createSimulationPlayerState } from './simulationPlayerState';
 
 type FlagEffect = { type?: string; flag?: string; target?: string; value?: unknown };
 
@@ -155,11 +156,11 @@ function buildMixedPlayer(
   age: number,
   lifeStates: Record<string, number>,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
-): PlayerState {
-  return {
+) {
+  return createSimulationPlayerState({
     name: 'p35-mixed-lifetime',
     age,
-    traitProfile: { origin: 'martial_family' },
+    origin: 'martial_family',
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
@@ -168,22 +169,19 @@ function buildMixedPlayer(
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: lifeStates.studyHabit ?? 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
     },
-  } as PlayerState;
+  });
 }
 
 function buildPinnaclePlayer(
   age: number,
   lifeStates: Record<string, number>,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
-): PlayerState {
-  return {
+) {
+  return createSimulationPlayerState({
     name: 'p35-pinnacle-lifetime',
     age,
-    traitProfile: { origin: 'martial_family' },
+    origin: 'martial_family',
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
@@ -192,11 +190,8 @@ function buildPinnaclePlayer(
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: lifeStates.studyHabit ?? 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
     },
-  } as PlayerState;
+  });
 }
 
 function activeFlags(flags: Record<string, unknown>): string[] {

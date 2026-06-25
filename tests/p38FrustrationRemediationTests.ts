@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EventLoader } from '../src/core/EventLoader';
 import { collectFrustrationMetrics } from '../src/p8/collectPersonaMetrics';
-import type { GameProcessRecord } from './GameProcessSimulator';
+import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 
 const BLOCKER_PERSONAS = [
   'p8-martial-lin',

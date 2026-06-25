@@ -1,4 +1,5 @@
 import { getMinimumActions, getActionById } from '../../data/activeActionCatalog';
+import { createDefaultPlayerLifeStates } from '../../data/life/lifeStates';
 import type {
   ActionDuration,
   ActionFocusStreak,
@@ -21,6 +22,23 @@ import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
 } from '../../types/activeActionTypes';
+
+function mapEchoFlagToLifeState(
+  flag: string,
+): 'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum' | null {
+  switch (flag) {
+    case 'p9_echo_training_hook':
+      return 'trainingHabit';
+    case 'p9_echo_study_hook':
+      return 'studyHabit';
+    case 'p9_echo_business_hook':
+      return 'businessHabit';
+    case 'p9_echo_social_hook':
+      return 'socialMomentum';
+    default:
+      return null;
+  }
+}
 
 export interface ActiveActionExecutionResult {
   actionResult: ActionResult;
@@ -126,7 +144,11 @@ export function executeActiveActionOnState(
   if (actionDef?.onCompleteFlags?.length) {
     if (!state.flags) state.flags = {};
     if (!state.player.flags) state.player.flags = {};
+    if (!state.player.lifeStates) {
+      state.player.lifeStates = createDefaultPlayerLifeStates();
+    }
     const demonicRoute = state.flags?.p8_route_demonic === true;
+    const touchedLifeStates = new Set<'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum'>();
     for (const flag of actionDef.onCompleteFlags) {
       if (demonicRoute && flag === 'p9_early_travel_focus') {
         state.flags.p9_demonic_restless_journey = true;
@@ -135,6 +157,26 @@ export function executeActiveActionOnState(
       }
       state.flags[flag] = true;
       state.player.flags[flag] = true;
+      const lifeStateKey = mapEchoFlagToLifeState(flag);
+      if (lifeStateKey) {
+        touchedLifeStates.add(lifeStateKey);
+      }
+    }
+    for (const lifeStateKey of touchedLifeStates) {
+      state.player.lifeStates[lifeStateKey] = Math.min(
+        5,
+        (state.player.lifeStates[lifeStateKey] ?? 0) + 1,
+      );
+      if (lifeStateKey === 'trainingHabit') {
+        state.flags.training_habit = true;
+        state.player.flags.training_habit = true;
+      } else if (lifeStateKey === 'studyHabit') {
+        state.flags.study_habit = true;
+        state.player.flags.study_habit = true;
+      } else if (lifeStateKey === 'businessHabit') {
+        state.flags.business_habit = true;
+        state.player.flags.business_habit = true;
+      }
     }
   }
 

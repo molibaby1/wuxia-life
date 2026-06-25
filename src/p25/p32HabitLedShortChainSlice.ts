@@ -8,7 +8,8 @@
  */
 import { evaluateCompositeDestinyOutcome } from '../p16/compositeDestiny';
 import { getWorldProfile } from '../narrative/worldProfile';
-import type { PlayerState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
+import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';
 import { EventLoader } from '../core/EventLoader';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
 
@@ -25,7 +26,7 @@ export interface P32ShortChainSliceResult {
   outcomeId: 'jianghu_renown_sage' | 'medical_sage_healer';
   seed: {
     originId: string;
-    lifeStates: Record<string, number>;
+    lifeStates: PlayerLifeStates;
     statSnapshot: { martialPower: number; reputation: number; connections: number; money: number };
   };
   eventSequence: P32ShortChainStep[];
@@ -41,13 +42,9 @@ const RENOWN_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
   reputation: 70,
   connections: 60,
   money: 35,
-  lifeStates: {
-    trainingHabit: 0,
-    studyHabit: 0,
-    businessHabit: 0,
+  lifeStates: createDefaultPlayerLifeStates({
     socialMomentum: 2,
-    familyBond: 0,
-  },
+  }),
 };
 
 const MEDICAL_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
@@ -56,13 +53,9 @@ const MEDICAL_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
   reputation: 60,
   connections: 25,
   money: 45,
-  lifeStates: {
-    trainingHabit: 0,
+  lifeStates: createDefaultPlayerLifeStates({
     studyHabit: 3,
-    businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
-  },
+  }),
 };
 
 /** Habit on-ramp → bridge event → composite eval for jianghu_renown_sage (no resolver). */
@@ -91,7 +84,7 @@ export function runP32RenownShortChainSlice(): P32ShortChainSliceResult {
     outcomeId: 'jianghu_renown_sage',
     seed: {
       originId: 'scholar_house',
-      lifeStates: RENOWN_SHORT_CHAIN_PLAYER.lifeStates as Record<string, number>,
+      lifeStates: RENOWN_SHORT_CHAIN_PLAYER.lifeStates!,
       statSnapshot: {
         martialPower: RENOWN_SHORT_CHAIN_PLAYER.martialPower!,
         reputation: RENOWN_SHORT_CHAIN_PLAYER.reputation!,
@@ -145,7 +138,7 @@ export function runP33MedicalShortChainSlice(): P32ShortChainSliceResult {
     outcomeId: 'medical_sage_healer',
     seed: {
       originId: 'poor_family',
-      lifeStates: MEDICAL_SHORT_CHAIN_PLAYER.lifeStates as Record<string, number>,
+      lifeStates: MEDICAL_SHORT_CHAIN_PLAYER.lifeStates!,
       statSnapshot: {
         martialPower: MEDICAL_SHORT_CHAIN_PLAYER.martialPower!,
         reputation: MEDICAL_SHORT_CHAIN_PLAYER.reputation!,

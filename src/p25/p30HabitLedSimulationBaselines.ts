@@ -69,7 +69,7 @@ function evaluatePathForOutcome(
     pathId: path.id,
     outcomeId,
     unlocked: report.unlocked,
-    keyChoicesMet: keyDim?.status === 'met',
+    keyChoicesMet: keyDim?.status === 'satisfied',
     statDimensionsMet: statDims.every(d => d.status !== 'missing' && d.status !== 'blocked'),
     bridgeFlagsPresent: bridgeFlags,
     habitAxisValue,

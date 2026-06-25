@@ -1,4 +1,14 @@
-import type { LifeStateConfig } from '../../types/eventTypes';
+import type { LifeStateConfig, PlayerLifeStates } from '../../types/eventTypes';
+
+export function createDefaultPlayerLifeStates(
+  overrides: Partial<PlayerLifeStates> = {},
+): PlayerLifeStates {
+  const base = lifeStates.reduce((acc, state) => {
+    acc[state.key] = state.defaultValue;
+    return acc;
+  }, {} as PlayerLifeStates);
+  return { ...base, ...overrides };
+}
 
 export const lifeStates: LifeStateConfig[] = [
   {

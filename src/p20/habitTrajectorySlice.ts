@@ -1,6 +1,7 @@
 import { EventLoader } from '../core/EventLoader';
 import { ConditionEvaluator } from '../core/ConditionEvaluator';
-import type { GameState, PlayerState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
+import type { GameState, PlayerLifeStates, PlayerState } from '../types/eventTypes';
 
 const HABIT_TRAJECTORY_EVENT_IDS = [
   'p21_scholar_route_reinforcement',
@@ -38,7 +39,10 @@ const HABIT_TRAJECTORY_EVENT_IDS = [
   'p42_study_habit_merchant_ledger_echo',
 ] as const;
 
-function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
+function basePlayer(
+  overrides: Omit<Partial<PlayerState>, 'lifeStates'> & { lifeStates?: Partial<PlayerLifeStates> } = {},
+): PlayerState {
+  const { lifeStates: lifeStatesOverride, ...rest } = overrides;
   return {
     age: 24,
     name: 'habit-slice',
@@ -65,15 +69,9 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     children: 0,
     spouse: null,
     alive: true,
-    lifeStates: {
-      trainingHabit: 0,
-      studyHabit: 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
-    },
+    lifeStates: createDefaultPlayerLifeStates(lifeStatesOverride),
     flags: {},
-    ...overrides,
+    ...rest,
   } as PlayerState;
 }
 

@@ -1,6 +1,6 @@
 {
   "auditVersion": "p44-v1",
-  "generatedAt": "2026-06-25T05:16:12.212Z",
+  "generatedAt": "2026-06-25T10:10:28.429Z",
   "coverage": {
     "matrix": {
       "trainingHabit": {
@@ -638,10 +638,1326 @@
         "line": 130,
         "classification": "allowed_documentation",
         "excerpt": "\"hits\": [{ \"file\": \"...\", \"flag\": \"training_habit\", \"line\": 42, \"classification\": \"allowed_compatibility\" }],"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-audit-tooling-closure.md",
+        "flag": "study_habit",
+        "line": 44,
+        "classification": "allowed_documentation",
+        "excerpt": "**Finding:** Content pools retain compatibility co-gates (`lifeStates.*` + `flags.has(\"study_habit\")`) — classified **al"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-audit-tooling-closure.md",
+        "flag": "study_habit",
+        "line": 46,
+        "classification": "allowed_documentation",
+        "excerpt": "**Evidence:** `docs/test-reports/p44-legacy-flag-drift-audit.md` — sample co-gate in `p21-content-samples.json` line wit"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 483,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 486,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"case 'training_habit':\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 490,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 493,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"case 'study_habit':\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 497,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 500,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"case 'business_habit':\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 504,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 507,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 507,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 507,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 511,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 514,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 514,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 514,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 518,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 521,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 521,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 521,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 525,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 528,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"['training_habit', lifeStates?.trainingHabit || 0],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 532,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 535,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"['study_habit', lifeStates?.studyHabit || 0],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 539,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 542,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"['business_habit', lifeStates?.businessHabit || 0],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 546,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 549,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"addTendency: ['training_habit'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 553,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 556,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"expression\\\": \\\"flags.has(\\\\\\\"scholar_path_started\\\\\\\") || lifeStates.studyHabit >= 2 || flags.has(\\\\\\\"stu"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 560,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 563,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"expression\\\": \\\"lifeStates.trainingHabit >= 2 || flags.has(\\\\\\\"training_habit\\\\\\\") || flags.has(\\\\\\\"martia"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 567,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 570,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"expression\\\": \\\"lifeStates.businessHabit >= 2 || flags.has(\\\\\\\"business_habit\\\\\\\") || flags.has(\\\\\\\"origin"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 574,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 577,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"growthPatternFlags: ['training_habit', 'martial_talent_acknowledged', 'joined_sect'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 581,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 584,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"growthPatternFlags: ['scholar_path_started', 'study_habit', 'mentor_bond'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 588,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 591,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"growthPatternFlags: ['business_habit', 'merchant_network_growing', 'wealth_milestone'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 595,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 598,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"seedFlags: ['training_habit', 'martial_talent_acknowledged'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 602,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 605,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"seedFlags: ['business_habit', 'merchant_network_growing'],\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 609,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 612,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"sliceId === 'p20_slice_wealth_pacing' || slice?.seedFlags.includes('business_habit')\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 616,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 619,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 619,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 619,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 623,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 626,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 626,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 626,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 630,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 633,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 633,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 633,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 637,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 644,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 647,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"**Finding:** Content pools retain compatibility co-gates (`lifeStates.*` + `flags.has(\\\"study_habit\\\")`) — c"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 651,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 658,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 665,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 668,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"case 'training_habit':\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 672,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 679,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 682,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"case 'study_habit':\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 686,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 693,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 696,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"case 'business_habit':\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 700,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 707,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 710,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 710,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 710,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 714,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 717,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 717,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 717,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 721,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 724,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 724,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 724,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 728,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 735,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 738,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 738,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 738,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 742,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 745,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 745,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 745,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 749,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 752,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 752,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 752,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 756,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 763,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 766,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 766,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 766,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 770,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 773,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 773,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 773,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 777,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 780,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 780,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 780,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [\\\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 784,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 791,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 794,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"['training_habit', lifeStates?.trainingHabit || 0],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 798,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 805,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 808,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"['study_habit', lifeStates?.studyHabit || 0],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 812,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 819,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 822,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"['business_habit', lifeStates?.businessHabit || 0],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 826,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 833,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 836,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"addTendency: ['training_habit'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 840,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 847,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 854,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 861,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 864,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"\\\\\\\"expression\\\\\\\": \\\\\\\"lifeStates.trainingHabit >= 2 || flags.has(\\\\\\\\\\\\\\\"training_habit\\\\\\\\"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 868,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 875,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 878,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"\\\\\\\"expression\\\\\\\": \\\\\\\"lifeStates.businessHabit >= 2 || flags.has(\\\\\\\\\\\\\\\"business_habit\\\\\\\\"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 882,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 889,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 892,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"growthPatternFlags: ['training_habit', 'martial_talent_acknowledged', 'joined_sect'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 896,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 903,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 906,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"growthPatternFlags: ['scholar_path_started', 'study_habit', 'mentor_bond'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 910,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 917,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 920,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"growthPatternFlags: ['business_habit', 'merchant_network_growing', 'wealth_milestone'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 924,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 931,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 934,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"seedFlags: ['training_habit', 'martial_talent_acknowledged'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 938,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 945,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 948,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"seedFlags: ['business_habit', 'merchant_network_growing'],\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 952,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 959,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 962,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"sliceId === 'p20_slice_wealth_pacing' || slice?.seedFlags.includes('business_habit')\\\"\""
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 966,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 973,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 976,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 976,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 976,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 980,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 983,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 983,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 983,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 987,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 990,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 990,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 990,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 994,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1001,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1004,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1004,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1004,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1008,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1011,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1011,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1011,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1015,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1018,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1018,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1018,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1022,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1029,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1032,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1032,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1032,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1036,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"study_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1039,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1039,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1039,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1043,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"business_habit\","
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1046,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "study_habit",
+        "line": 1046,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "business_habit",
+        "line": 1046,
+        "classification": "allowed_documentation",
+        "excerpt": "\"excerpt\": \"\\\"excerpt\\\": \\\"export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as cons"
+      },
+      {
+        "file": "docs/test-reports/p44-habit-operator-audit.json",
+        "flag": "training_habit",
+        "line": 1050,
+        "classification": "allowed_documentation",
+        "excerpt": "\"flag\": \"training_habit\","
       }
     ],
     "suspiciousReaders": [],
-    "allowedCount": 23,
+    "allowedCount": 211,
     "suspiciousCount": 0
   },
   "archetypeDifferentiation": {
@@ -745,7 +2061,7 @@
     "wiredSurfaces": [
       {
         "surface": "Main-screen shaping row",
-        "file": "src/utils/habitShapingSummary.ts",
+        "file": "src/components/mainScreenModel.ts",
         "helper": "buildCurrentShapingSummary",
         "wired": true
       },
@@ -758,7 +2074,7 @@
       {
         "surface": "P19 final summary",
         "file": "src/p19/finalSummaryComposition.ts",
-        "helper": "buildLateLifeShapingRecapLine",
+        "helper": "buildLateLifeShapingRecapLine, buildShapingPatternEndingTone",
         "wired": true
       },
       {

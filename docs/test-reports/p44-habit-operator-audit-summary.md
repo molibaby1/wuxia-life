@@ -1,6 +1,6 @@
 # P44 Habit Operator Audit Summary
 
-Generated: 2026-06-25T05:16:12.212Z
+Generated: 2026-06-25T10:10:28.429Z
 
 # P44 Habit Coverage Audit
 
@@ -36,7 +36,7 @@ Total gated readers inventoried: **33**
 
 # P44 Legacy Flag Drift Audit
 
-- Allowed hits: 23
+- Allowed hits: 211
 - Suspicious hits: 0
 
 ## Suspicious readers

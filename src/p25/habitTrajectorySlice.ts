@@ -1,6 +1,7 @@
 import { EventLoader } from '../core/EventLoader';
 import { ConditionEvaluator } from '../core/ConditionEvaluator';
-import type { GameState, PlayerState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
+import type { GameState, PlayerLifeStates, PlayerState } from '../types/eventTypes';
 
 export type HabitTrajectoryAxis =
   | 'trainingHabit'
@@ -27,7 +28,10 @@ export interface P25HabitTrajectorySliceResult {
   passed: boolean;
 }
 
-function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
+function basePlayer(
+  overrides: Omit<Partial<PlayerState>, 'lifeStates'> & { lifeStates?: Partial<PlayerLifeStates> } = {},
+): PlayerState {
+  const { lifeStates: lifeStatesOverride, ...rest } = overrides;
   return {
     age: 18,
     name: 'p25-habit',
@@ -37,15 +41,9 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     money: 200,
     knowledge: 25,
     alive: true,
-    lifeStates: {
-      trainingHabit: 0,
-      studyHabit: 0,
-      businessHabit: 0,
-      socialMomentum: 0,
-      familyBond: 0,
-    },
+    lifeStates: createDefaultPlayerLifeStates(lifeStatesOverride),
     flags: {},
-    ...overrides,
+    ...rest,
   } as PlayerState;
 }
 

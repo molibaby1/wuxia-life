@@ -1,7 +1,7 @@
 import goldenLineSpine from '../data/golden-line-spine.json';
 import goldenLinePayoffMap from '../data/golden-line-payoff-map.json';
 import { eventLoader } from '../core/EventLoader';
-import type { EventChoice } from '../types/eventTypes';
+import { EffectType, type EventChoice } from '../types/eventTypes';
 import { isBannedVagueFeedback } from '../data/golden-line-feedback-patterns';
 
 export interface KeyChoiceFeedbackIssue {
@@ -19,16 +19,17 @@ function choiceHasPlayerFacingNarrative(choice: EventChoice): boolean {
   return false;
 }
 
-function choiceWritesVisibleState(choice: EventChoice): boolean {
+export function isChoicePlayerFacingVisibleState(choice: EventChoice): boolean {
   const topEffects = choice.effects ?? [];
   const outcomeEffects = (choice.outcomes ?? []).flatMap(o => o.effects ?? []);
   const effects = [...topEffects, ...outcomeEffects];
   return effects.some(
     e =>
-      e.type === 'stat_modify' ||
-      e.type === 'flag_set' ||
-      e.type === 'relation_change' ||
-      e.type === 'route_change',
+      e.type === EffectType.STAT_MODIFY ||
+      e.type === EffectType.FLAG_SET ||
+      e.type === EffectType.RELATION_CHANGE ||
+      e.type === EffectType.SET_FACTION ||
+      e.type === EffectType.LIFE_STATE_CHANGE,
   );
 }
 
@@ -48,7 +49,7 @@ export function validateKeyChoiceFeedbackCoverage(): KeyChoiceFeedbackIssue[] {
       if (!choiceHasPlayerFacingNarrative(choice)) {
         issues.push({ eventId, choiceId, reason: 'missing_player_facing_narrative' });
       }
-      if (!choiceWritesVisibleState(choice)) {
+      if (!isChoicePlayerFacingVisibleState(choice)) {
         issues.push({ eventId, choiceId, reason: 'hidden_only_no_visible_state' });
       }
     }

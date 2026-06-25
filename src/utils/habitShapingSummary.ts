@@ -55,6 +55,7 @@ export interface DominantShapingLine {
   label: string;
   tierLabel: string;
   sortKey: number;
+  axisKey: ShapingAxisKey;
 }
 
 /** Life-memory recap: up to `limit` dominant shaping directions. */
@@ -73,7 +74,75 @@ export function deriveDominantShapingLines(
       label: entry.axis.shortLabel,
       tierLabel: shapingTierLabel(entry.value),
       sortKey: entry.value,
+      axisKey: entry.axis.key,
     }));
+}
+
+const SHAPING_IDENTITY_CONSEQUENCE: Record<ShapingAxisKey, string> = {
+  trainingHabit: '名望与战意多由此立，旁人记得的是你的刀锋与担当',
+  studyHabit: '文字与思辨成为你识世立身的主轴',
+  businessHabit: '门路與买卖织成了你行走江湖的底气',
+  socialMomentum: '人情往来替你铺开了许多单靠武力打不开的门',
+  familyBond: '亲族牵绊锚定了你许多重大抉择与归宿',
+};
+
+/** Late-life / ending recap: dominant shaping in player-facing narrative. */
+export function buildLateLifeShapingRecapLine(
+  lifeStates: Partial<PlayerLifeStates> | undefined,
+): string {
+  const dominant = deriveDominantShapingLines(lifeStates, 2);
+  if (dominant.length === 0) {
+    return '长期塑形尚未凝成清晰主轴，这一生更多被际遇推着走。';
+  }
+
+  const axisSummary = dominant
+    .map((line) => `${line.label} · ${line.tierLabel}`)
+    .join('、');
+  const consequence = SHAPING_IDENTITY_CONSEQUENCE[dominant[0].axisKey];
+  return `回首这一生，${axisSummary}最为醒目；${consequence}。`;
+}
+
+export type ShapingRouteFamily = 'martial_route' | 'livelihood_route';
+
+const SHAPING_PATTERN_TONE: Record<
+  ShapingRouteFamily,
+  Partial<Record<ShapingAxisKey, string>>
+> = {
+  martial_route: {
+    trainingHabit: '与同路侠客相比，你是苦修成锋、以武立名之人。',
+    studyHabit: '与同路侠客相比，你以文佐武、守礼而不蛮干。',
+  },
+  livelihood_route: {
+    businessHabit: '在同一条营生路上，你把算账与门路练成了绝活。',
+    socialMomentum: '在同一条营生路上，你的人脉比货单更值钱。',
+  },
+};
+
+export function detectShapingRouteFamily(
+  flags: Record<string, unknown> | undefined,
+): ShapingRouteFamily | null {
+  const f = flags ?? {};
+  if (f.route_orthodox || f.route_wanderer || f.route_demonic || f.sectMember) {
+    return 'martial_route';
+  }
+  if (f.route_merchant || f.merchant_path || f.wealth_caravan_gate) {
+    return 'livelihood_route';
+  }
+  return null;
+}
+
+/** Same-route-family ending tone keyed by dominant shaping axis. */
+export function buildShapingPatternEndingTone(
+  lifeStates: Partial<PlayerLifeStates> | undefined,
+  flags: Record<string, unknown> | undefined,
+): string {
+  const family = detectShapingRouteFamily(flags);
+  if (!family) return '';
+
+  const dominant = deriveDominantShapingLines(lifeStates, 1)[0];
+  if (!dominant) return '';
+
+  return SHAPING_PATTERN_TONE[family][dominant.axisKey] ?? '';
 }
 
 /** Post-choice hints when an axis materially increases (delta ≥ 1). */

@@ -4,6 +4,7 @@ import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { GameProcessRecord, GameProcessReport } from '../types/simulationRecordTypes';
 import {
   deriveSampleLineAge40Identity,
+  deriveSampleLineCostLabel,
   deriveSampleLineCurrentGoal,
   type SampleLineId,
 } from '../p50/sampleLineExpression';
@@ -27,6 +28,7 @@ export interface P49CheckpointExport {
   eventIds: string[];
   routeFlags: string[];
   currentGoal?: string;
+  costLabel?: string;
   lifeMemoryEntry: string;
   age40Identity?: string;
 }
@@ -141,6 +143,7 @@ export function summarizeSampleLineRun(input: {
       eventIds: collectRecentEventIds(input.report.records, age),
       routeFlags: collectRouteFlags(record.gameState),
       currentGoal: deriveSampleLineCurrentGoal(record.gameState),
+      costLabel: deriveSampleLineCostLabel(record.gameState),
       lifeMemoryEntry: buildLifeMemoryEntry(lifeMemory),
       age40Identity: age >= 38 ? deriveSampleLineAge40Identity(record.gameState) : undefined,
     };
@@ -195,13 +198,7 @@ export function buildCrossLineComparison(report: P49SampleLineReplayReport): P49
   for (const age of report.checkpointAges) {
     const snapshots = report.lines.map((line) => line.checkpoints.find((cp) => cp.age === age)!);
     const goals = snapshots.map((cp) => cp.currentGoal ?? cp.lifeMemoryEntry);
-    const costs = snapshots.map((cp) => (
-      cp.routeFlags.includes('route_demonic')
-        ? '邪路代价'
-        : cp.routeFlags.includes('route_merchant')
-          ? '商路债务'
-          : '守正代价'
-    ));
+    const costs = snapshots.map((cp) => cp.costLabel ?? '守正代价');
     const identities = snapshots.map((cp) => cp.age40Identity ?? cp.lifeMemoryEntry);
     const continues = snapshots.map((cp) => cp.routeFlags.join(',') || 'none');
     const replays = report.lines.map((line) => {

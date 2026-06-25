@@ -3,6 +3,7 @@ import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import {
   deriveSampleLineAge40Identity,
+  deriveSampleLineCostLabel,
   deriveSampleLineCurrentGoal,
   isPlayerVisibleSampleLineText,
 } from '../src/p50/sampleLineExpression';
@@ -156,10 +157,40 @@ function testMerchantExpression(): void {
   assert(summary.unresolvedDebts?.some((debt) => debt.label.includes('人情债')), 'merchant midlife debt missing');
 }
 
+function testCrossLineAge13CostLabels(): void {
+  const orthodox = makeState(13, {
+    route_orthodox: true,
+    route_merchant: true,
+    orthodox_childhood_seed_done: true,
+  });
+  const demonic = makeState(13, {
+    route_demonic: true,
+    route_merchant: true,
+    demonic_childhood_seed_done: true,
+  });
+  const merchant = makeState(13, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+  });
+
+  const orthodoxCost = deriveSampleLineCostLabel(orthodox);
+  const demonicCost = deriveSampleLineCostLabel(demonic);
+  const merchantCost = deriveSampleLineCostLabel(merchant);
+
+  assert(orthodoxCost.includes('守正'), `orthodox age-13 cost unexpected: ${orthodoxCost}`);
+  assert(demonicCost.includes('邪路'), `demonic age-13 cost unexpected: ${demonicCost}`);
+  assert(merchantCost.includes('商路'), `merchant age-13 cost unexpected: ${merchantCost}`);
+  assert(
+    new Set([orthodoxCost, demonicCost, merchantCost]).size === 3,
+    'age-13 cost labels collapsed across sample lines',
+  );
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
   testMerchantExpression();
+  testCrossLineAge13CostLabels();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

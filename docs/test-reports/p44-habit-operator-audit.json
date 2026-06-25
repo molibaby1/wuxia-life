@@ -1,0 +1,788 @@
+{
+  "auditVersion": "p44-v1",
+  "generatedAt": "2026-06-25T05:16:12.212Z",
+  "coverage": {
+    "matrix": {
+      "trainingHabit": {
+        "childhood": 0,
+        "youth": 2,
+        "early_adult": 6,
+        "midlife": 3,
+        "later_life": 1,
+        "total": 8
+      },
+      "studyHabit": {
+        "childhood": 1,
+        "youth": 2,
+        "early_adult": 8,
+        "midlife": 3,
+        "later_life": 1,
+        "total": 10
+      },
+      "businessHabit": {
+        "childhood": 0,
+        "youth": 2,
+        "early_adult": 3,
+        "midlife": 2,
+        "later_life": 0,
+        "total": 4
+      },
+      "socialMomentum": {
+        "childhood": 0,
+        "youth": 1,
+        "early_adult": 4,
+        "midlife": 1,
+        "later_life": 1,
+        "total": 6
+      },
+      "familyBond": {
+        "childhood": 0,
+        "youth": 0,
+        "early_adult": 1,
+        "midlife": 4,
+        "later_life": 4,
+        "total": 5
+      }
+    },
+    "gaps": [
+      {
+        "axis": "trainingHabit",
+        "band": "childhood",
+        "readerCount": 0,
+        "severity": "gap"
+      },
+      {
+        "axis": "businessHabit",
+        "band": "childhood",
+        "readerCount": 0,
+        "severity": "gap"
+      },
+      {
+        "axis": "businessHabit",
+        "band": "later_life",
+        "readerCount": 0,
+        "severity": "gap"
+      },
+      {
+        "axis": "socialMomentum",
+        "band": "childhood",
+        "readerCount": 0,
+        "severity": "gap"
+      },
+      {
+        "axis": "familyBond",
+        "band": "childhood",
+        "readerCount": 0,
+        "severity": "gap"
+      },
+      {
+        "axis": "familyBond",
+        "band": "youth",
+        "readerCount": 0,
+        "severity": "gap"
+      }
+    ],
+    "lowDensity": [
+      {
+        "axis": "trainingHabit",
+        "band": "later_life",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "studyHabit",
+        "band": "childhood",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "studyHabit",
+        "band": "later_life",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "socialMomentum",
+        "band": "youth",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "socialMomentum",
+        "band": "midlife",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "socialMomentum",
+        "band": "later_life",
+        "readerCount": 1,
+        "severity": "low_density"
+      },
+      {
+        "axis": "familyBond",
+        "band": "early_adult",
+        "readerCount": 1,
+        "severity": "low_density"
+      }
+    ],
+    "readers": [
+      {
+        "eventId": "p28_family_bond_elder_care",
+        "axis": "familyBond",
+        "bands": [
+          "midlife",
+          "later_life"
+        ],
+        "poolHint": "family-life",
+        "minAge": 35,
+        "maxAge": 50
+      },
+      {
+        "eventId": "p28_family_bond_sibling_support",
+        "axis": "familyBond",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "family-life",
+        "minAge": 28,
+        "maxAge": 42
+      },
+      {
+        "eventId": "p28_family_bond_caretaker_obligation",
+        "axis": "familyBond",
+        "bands": [
+          "midlife",
+          "later_life"
+        ],
+        "poolHint": "family-life",
+        "minAge": 42,
+        "maxAge": 52
+      },
+      {
+        "eventId": "p42_family_bond_festival_reunion",
+        "axis": "familyBond",
+        "bands": [
+          "midlife",
+          "later_life"
+        ],
+        "poolHint": "family-life",
+        "minAge": 44,
+        "maxAge": 54
+      },
+      {
+        "eventId": "p42_family_bond_estate_trust",
+        "axis": "familyBond",
+        "bands": [
+          "later_life"
+        ],
+        "poolHint": "family-life",
+        "minAge": 50,
+        "maxAge": 60
+      },
+      {
+        "eventId": "p21_scholar_route_reinforcement",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "p21",
+        "minAge": 22,
+        "maxAge": 28
+      },
+      {
+        "eventId": "p21_study_echo_callback",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "p21",
+        "minAge": 25,
+        "maxAge": 30
+      },
+      {
+        "eventId": "p21_martial_route_reinforcement",
+        "axis": "trainingHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "p21",
+        "minAge": 20,
+        "maxAge": 26
+      },
+      {
+        "eventId": "p26_study_habit_midlife_callback",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "p21",
+        "minAge": 24,
+        "maxAge": 32
+      },
+      {
+        "eventId": "p26_training_habit_midlife_callback",
+        "axis": "trainingHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "p21",
+        "minAge": 26,
+        "maxAge": 34
+      },
+      {
+        "eventId": "p27_mentor_obligation_consequence",
+        "axis": "trainingHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "p21",
+        "minAge": 30,
+        "maxAge": 38
+      },
+      {
+        "eventId": "p27_renown_upkeep_pressure",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "p21",
+        "minAge": 32,
+        "maxAge": 40
+      },
+      {
+        "eventId": "p42_training_habit_later_guardian",
+        "axis": "trainingHabit",
+        "bands": [
+          "later_life"
+        ],
+        "poolHint": "p42",
+        "minAge": 52,
+        "maxAge": 62
+      },
+      {
+        "eventId": "p42_study_habit_later_chronicle",
+        "axis": "studyHabit",
+        "bands": [
+          "midlife",
+          "later_life"
+        ],
+        "poolHint": "p42",
+        "minAge": 48,
+        "maxAge": 58
+      },
+      {
+        "eventId": "p42_training_habit_martial_clan_echo",
+        "axis": "trainingHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "p42",
+        "minAge": 32,
+        "maxAge": 40
+      },
+      {
+        "eventId": "p42_training_habit_scholar_body_echo",
+        "axis": "trainingHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "p42",
+        "minAge": 30,
+        "maxAge": 38
+      },
+      {
+        "eventId": "p42_study_habit_scholar_academy_echo",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "p42",
+        "minAge": 28,
+        "maxAge": 36
+      },
+      {
+        "eventId": "p42_study_habit_merchant_ledger_echo",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "merchant",
+        "minAge": 26,
+        "maxAge": 34
+      },
+      {
+        "eventId": "p22_early_wealth_route_fork",
+        "axis": "businessHabit",
+        "bands": [
+          "youth",
+          "early_adult"
+        ],
+        "poolHint": "p22",
+        "minAge": 18,
+        "maxAge": 24
+      },
+      {
+        "eventId": "p22_early_martial_route_fork",
+        "axis": "trainingHabit",
+        "bands": [
+          "youth",
+          "early_adult"
+        ],
+        "poolHint": "p22",
+        "minAge": 16,
+        "maxAge": 22
+      },
+      {
+        "eventId": "p42_training_habit_youth_sparring",
+        "axis": "trainingHabit",
+        "bands": [
+          "youth"
+        ],
+        "poolHint": "p42",
+        "minAge": 14,
+        "maxAge": 18
+      },
+      {
+        "eventId": "p42_study_habit_childhood_copybook",
+        "axis": "studyHabit",
+        "bands": [
+          "childhood",
+          "youth"
+        ],
+        "poolHint": "p42",
+        "minAge": 10,
+        "maxAge": 14
+      },
+      {
+        "eventId": "p27_study_habit_healer_reinforcement",
+        "axis": "studyHabit",
+        "bands": [
+          "youth",
+          "early_adult"
+        ],
+        "poolHint": "medical",
+        "minAge": 18,
+        "maxAge": 28
+      },
+      {
+        "eventId": "p29_study_habit_case_record_duty",
+        "axis": "studyHabit",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "other",
+        "minAge": 26,
+        "maxAge": 34
+      },
+      {
+        "eventId": "p29_social_momentum_healer_network",
+        "axis": "socialMomentum",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "medical",
+        "minAge": 24,
+        "maxAge": 32
+      },
+      {
+        "eventId": "p28_social_momentum_network_fork",
+        "axis": "socialMomentum",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "relationship",
+        "minAge": 24,
+        "maxAge": 30
+      },
+      {
+        "eventId": "p28_social_reputation_reinforcement",
+        "axis": "socialMomentum",
+        "bands": [
+          "early_adult"
+        ],
+        "poolHint": "relationship",
+        "minAge": 26,
+        "maxAge": 34
+      },
+      {
+        "eventId": "p29_social_momentum_patron_obligation",
+        "axis": "socialMomentum",
+        "bands": [
+          "midlife"
+        ],
+        "poolHint": "relationship",
+        "minAge": 36,
+        "maxAge": 46
+      },
+      {
+        "eventId": "p42_social_momentum_youth_introduction",
+        "axis": "socialMomentum",
+        "bands": [
+          "youth",
+          "early_adult"
+        ],
+        "poolHint": "relationship",
+        "minAge": 17,
+        "maxAge": 22
+      },
+      {
+        "eventId": "p42_social_momentum_later_testimonial",
+        "axis": "socialMomentum",
+        "bands": [
+          "later_life"
+        ],
+        "poolHint": "relationship",
+        "minAge": 50,
+        "maxAge": 58
+      },
+      {
+        "eventId": "p26_business_habit_obligation",
+        "axis": "businessHabit",
+        "bands": [
+          "early_adult",
+          "midlife"
+        ],
+        "poolHint": "merchant",
+        "minAge": 34,
+        "maxAge": 44
+      },
+      {
+        "eventId": "p42_business_habit_youth_stall",
+        "axis": "businessHabit",
+        "bands": [
+          "youth",
+          "early_adult"
+        ],
+        "poolHint": "merchant",
+        "minAge": 16,
+        "maxAge": 21
+      },
+      {
+        "eventId": "p42_business_habit_midlife_syndicate",
+        "axis": "businessHabit",
+        "bands": [
+          "midlife"
+        ],
+        "poolHint": "merchant",
+        "minAge": 38,
+        "maxAge": 46
+      }
+    ]
+  },
+  "legacyDrift": {
+    "hits": [
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "training_habit",
+        "line": 2578,
+        "classification": "allowed_compatibility",
+        "excerpt": "case 'training_habit':"
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "study_habit",
+        "line": 2580,
+        "classification": "allowed_compatibility",
+        "excerpt": "case 'study_habit':"
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "business_habit",
+        "line": 2582,
+        "classification": "allowed_compatibility",
+        "excerpt": "case 'business_habit':"
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "training_habit",
+        "line": 2600,
+        "classification": "allowed_compatibility",
+        "excerpt": "const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = ["
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "study_habit",
+        "line": 2600,
+        "classification": "allowed_compatibility",
+        "excerpt": "const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = ["
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "business_habit",
+        "line": 2600,
+        "classification": "allowed_compatibility",
+        "excerpt": "const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = ["
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "training_habit",
+        "line": 2601,
+        "classification": "allowed_compatibility",
+        "excerpt": "['training_habit', lifeStates?.trainingHabit || 0],"
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "study_habit",
+        "line": 2602,
+        "classification": "allowed_compatibility",
+        "excerpt": "['study_habit', lifeStates?.studyHabit || 0],"
+      },
+      {
+        "file": "src/core/GameEngineIntegration.ts",
+        "flag": "business_habit",
+        "line": 2603,
+        "classification": "allowed_compatibility",
+        "excerpt": "['business_habit', lifeStates?.businessHabit || 0],"
+      },
+      {
+        "file": "src/data/life/dailyEvents.ts",
+        "flag": "training_habit",
+        "line": 51,
+        "classification": "allowed_compatibility",
+        "excerpt": "addTendency: ['training_habit'],"
+      },
+      {
+        "file": "src/data/lines/p21-content-samples.json",
+        "flag": "study_habit",
+        "line": 13,
+        "classification": "allowed_compatibility",
+        "excerpt": "\"expression\": \"flags.has(\\\"scholar_path_started\\\") || lifeStates.studyHabit >= 2 || flags.has(\\\"study_habit\\\")\""
+      },
+      {
+        "file": "src/data/lines/p21-content-samples.json",
+        "flag": "training_habit",
+        "line": 127,
+        "classification": "allowed_compatibility",
+        "excerpt": "\"expression\": \"lifeStates.trainingHabit >= 2 || flags.has(\\\"training_habit\\\") || flags.has(\\\"martial_path_started\\\")\""
+      },
+      {
+        "file": "src/data/lines/p22-content-expansions.json",
+        "flag": "business_habit",
+        "line": 186,
+        "classification": "allowed_compatibility",
+        "excerpt": "\"expression\": \"lifeStates.businessHabit >= 2 || flags.has(\\\"business_habit\\\") || flags.has(\\\"origin_merchant_family\\\")\""
+      },
+      {
+        "file": "src/narrative/profile/wuxiaReplayabilitySurfaces.ts",
+        "flag": "training_habit",
+        "line": 16,
+        "classification": "allowed_replayability",
+        "excerpt": "growthPatternFlags: ['training_habit', 'martial_talent_acknowledged', 'joined_sect'],"
+      },
+      {
+        "file": "src/narrative/profile/wuxiaReplayabilitySurfaces.ts",
+        "flag": "study_habit",
+        "line": 40,
+        "classification": "allowed_replayability",
+        "excerpt": "growthPatternFlags: ['scholar_path_started', 'study_habit', 'mentor_bond'],"
+      },
+      {
+        "file": "src/narrative/profile/wuxiaReplayabilitySurfaces.ts",
+        "flag": "business_habit",
+        "line": 63,
+        "classification": "allowed_replayability",
+        "excerpt": "growthPatternFlags: ['business_habit', 'merchant_network_growing', 'wealth_milestone'],"
+      },
+      {
+        "file": "src/narrative/profile/wuxiaReplayabilitySurfaces.ts",
+        "flag": "training_habit",
+        "line": 231,
+        "classification": "allowed_replayability",
+        "excerpt": "seedFlags: ['training_habit', 'martial_talent_acknowledged'],"
+      },
+      {
+        "file": "src/narrative/profile/wuxiaReplayabilitySurfaces.ts",
+        "flag": "business_habit",
+        "line": 258,
+        "classification": "allowed_replayability",
+        "excerpt": "seedFlags: ['business_habit', 'merchant_network_growing'],"
+      },
+      {
+        "file": "src/p24/sliceFixtures.ts",
+        "flag": "business_habit",
+        "line": 22,
+        "classification": "allowed_fixture",
+        "excerpt": "sliceId === 'p20_slice_wealth_pacing' || slice?.seedFlags.includes('business_habit')"
+      },
+      {
+        "file": "src/p44/habitOperatorAudit.ts",
+        "flag": "training_habit",
+        "line": 19,
+        "classification": "allowed_documentation",
+        "excerpt": "export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;"
+      },
+      {
+        "file": "src/p44/habitOperatorAudit.ts",
+        "flag": "study_habit",
+        "line": 19,
+        "classification": "allowed_documentation",
+        "excerpt": "export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;"
+      },
+      {
+        "file": "src/p44/habitOperatorAudit.ts",
+        "flag": "business_habit",
+        "line": 19,
+        "classification": "allowed_documentation",
+        "excerpt": "export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;"
+      },
+      {
+        "file": "docs/designs/p44-habit-audit-contract.md",
+        "flag": "training_habit",
+        "line": 130,
+        "classification": "allowed_documentation",
+        "excerpt": "\"hits\": [{ \"file\": \"...\", \"flag\": \"training_habit\", \"line\": 42, \"classification\": \"allowed_compatibility\" }],"
+      }
+    ],
+    "suspiciousReaders": [],
+    "allowedCount": 23,
+    "suspiciousCount": 0
+  },
+  "archetypeDifferentiation": {
+    "axes": [
+      {
+        "axis": "trainingHabit",
+        "readerCount": 8,
+        "clusterVariants": [
+          "martial",
+          "scholar"
+        ],
+        "differentiation": "strong",
+        "sampleEvents": [
+          "p21_martial_route_reinforcement",
+          "p26_training_habit_midlife_callback",
+          "p27_mentor_obligation_consequence",
+          "p42_training_habit_later_guardian"
+        ],
+        "thinAreas": []
+      },
+      {
+        "axis": "studyHabit",
+        "readerCount": 10,
+        "clusterVariants": [
+          "healer",
+          "merchant",
+          "scholar"
+        ],
+        "differentiation": "strong",
+        "sampleEvents": [
+          "p21_scholar_route_reinforcement",
+          "p21_study_echo_callback",
+          "p26_study_habit_midlife_callback",
+          "p27_renown_upkeep_pressure"
+        ],
+        "thinAreas": []
+      },
+      {
+        "axis": "businessHabit",
+        "readerCount": 4,
+        "clusterVariants": [
+          "merchant"
+        ],
+        "differentiation": "partial",
+        "sampleEvents": [
+          "p22_early_wealth_route_fork",
+          "p26_business_habit_obligation",
+          "p42_business_habit_youth_stall",
+          "p42_business_habit_midlife_syndicate"
+        ],
+        "thinAreas": [
+          "single cluster dominates; add contrasting archetype echo"
+        ]
+      },
+      {
+        "axis": "socialMomentum",
+        "readerCount": 6,
+        "clusterVariants": [
+          "healer",
+          "social"
+        ],
+        "differentiation": "strong",
+        "sampleEvents": [
+          "p29_social_momentum_healer_network",
+          "p28_social_momentum_network_fork",
+          "p28_social_reputation_reinforcement",
+          "p29_social_momentum_patron_obligation"
+        ],
+        "thinAreas": []
+      },
+      {
+        "axis": "familyBond",
+        "readerCount": 5,
+        "clusterVariants": [
+          "family"
+        ],
+        "differentiation": "partial",
+        "sampleEvents": [
+          "p28_family_bond_elder_care",
+          "p28_family_bond_sibling_support",
+          "p28_family_bond_caretaker_obligation",
+          "p42_family_bond_festival_reunion"
+        ],
+        "thinAreas": [
+          "single cluster dominates; add contrasting archetype echo"
+        ]
+      }
+    ],
+    "convergenceWarnings": [
+      {
+        "axis": "businessHabit",
+        "reason": "single cluster dominates; add contrasting archetype echo"
+      },
+      {
+        "axis": "familyBond",
+        "reason": "single cluster dominates; add contrasting archetype echo"
+      }
+    ]
+  },
+  "recapAbsorption": {
+    "wiredSurfaces": [
+      {
+        "surface": "Main-screen shaping row",
+        "file": "src/utils/habitShapingSummary.ts",
+        "helper": "buildCurrentShapingSummary",
+        "wired": true
+      },
+      {
+        "surface": "Life-memory 长期塑形",
+        "file": "src/core/deriveLifeMemorySummary.ts",
+        "helper": "deriveDominantShapingLines",
+        "wired": true
+      },
+      {
+        "surface": "P19 final summary",
+        "file": "src/p19/finalSummaryComposition.ts",
+        "helper": "buildLateLifeShapingRecapLine",
+        "wired": true
+      },
+      {
+        "surface": "Ending fallback summary",
+        "file": "src/core/EndingSystem.ts",
+        "helper": "buildLateLifeShapingRecapLine",
+        "wired": true
+      },
+      {
+        "surface": "Self-understanding",
+        "file": "src/p19/stateAccess.ts",
+        "helper": "deriveDominantShapingLines",
+        "wired": true
+      }
+    ],
+    "unwiredSurfaces": [
+      {
+        "surface": "Ending UI",
+        "file": "src/components/EndingScreen.vue",
+        "helper": "buildLateLifeShapingRecapLine",
+        "wired": false,
+        "reason": "deferred UI wiring"
+      }
+    ],
+    "allRequiredEngineSurfacesWired": true
+  }
+}

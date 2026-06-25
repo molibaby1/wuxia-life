@@ -76,6 +76,7 @@
     "report:p24-closure": "tsx scripts/runP24ClosureReport.ts",
     "gate:v1-0": "tsx scripts/runV10Gate.ts",
     "report:v1-0-closure": "tsx scripts/runV10ClosureReport.ts",
+    "p49:replay": "tsx scripts/runP49SampleLineReplay.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
     "build": "vue-tsc -b && vite build",

@@ -33,6 +33,7 @@
     "gate:midlife": "tsx scripts/runMidlifeGate.ts --quiet",
     "verify:route-track-samples": "tsx scripts/verifyRouteTrackSamples.ts",
     "gate:experience": "tsx scripts/runExperienceHealthGate.ts --quiet",
+    "audit:p44-habit": "tsx scripts/runP44HabitOperatorAudit.ts --write",
     "p6b:db:up": "docker compose -f docker-compose.p6b.yml up -d",
     "p6b:db:down": "docker compose -f docker-compose.p6b.yml down",
     "p6b:db:reset": "docker compose -f docker-compose.p6b.yml down -v && docker compose -f docker-compose.p6b.yml up -d",

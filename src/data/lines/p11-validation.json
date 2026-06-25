@@ -125,8 +125,8 @@
     "id": "p11_social_reinforcement_gathering",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 1,
-    "weight": 80,
+    "priority": 100,
+    "weight": 90,
     "ageRange": { "min": 22, "max": 26 },
     "triggers": [{ "type": "age_reach", "value": 22 }],
     "conditions": [
@@ -147,7 +147,7 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "route_reinforcement", "social"],
+      "tags": ["p11", "route_reinforcement", "social", "mandatory", "mainline", "once"],
       "narrativeScheduling": {
         "stageSignals": ["route_reinforcement"],
         "routePoints": [
@@ -209,9 +209,9 @@
     "id": "p11_wanderer_reinforcement_connections",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 0,
-    "weight": 85,
-    "ageRange": { "min": 22, "max": 22 },
+    "priority": 100,
+    "weight": 95,
+    "ageRange": { "min": 22, "max": 26 },
     "triggers": [{ "type": "age_reach", "value": 22 }],
     "conditions": [
       {

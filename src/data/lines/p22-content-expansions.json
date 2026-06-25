@@ -183,7 +183,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
+        "expression": "lifeStates.businessHabit >= 2 || flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
       }
     ],
     "content": {
@@ -207,6 +207,11 @@
             "type": "flag_set",
             "target": "p22_wealth_route_forked",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "route_wealth_committed",
+            "value": true
           }
         ]
       },
@@ -223,6 +228,11 @@
           {
             "type": "flag_set",
             "target": "p22_wealth_route_forked",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "route_wealth_committed",
             "value": true
           }
         ]
@@ -399,6 +409,11 @@
           {
             "type": "flag_set",
             "target": "p22_faction_continuation_active",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p16_alliance_brokered",
             "value": true
           },
           {
@@ -799,6 +814,50 @@
         "duplicateRiskClass": "wave_sample",
         "authoringNotes": "Late-life content wave sample for closure pool expansion."
       }
+    }
+  },
+  {
+    "id": "p22_early_martial_route_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 46,
+    "ageRange": { "min": 16, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 2 || flags.has(\"origin_martial_family\")"
+      }
+    ],
+    "content": {
+      "title": "武途初分",
+      "text": "十六岁后你常于清晨练功、日暮复盘。一位游方武者路过，见你招式虽稚嫩却日日不辍，邀你择一路：是拜入正经门派，还是继续独行磨砺？",
+      "description": "P22 早期路线分歧：武道路线强化（习惯驱动）"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "seek_sect_entry",
+        "text": "求引荐，入正经门派",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p22_martial_route_forked", "value": true },
+          { "type": "flag_set", "target": "martial_path_started", "value": true }
+        ]
+      },
+      {
+        "id": "continue_solo_training",
+        "text": "谢绝引荐，继续独行苦练",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "flag_set", "target": "p22_martial_route_forked", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["route", "p22", "martial", "live_ops_expansion"]
     }
   }
 ]

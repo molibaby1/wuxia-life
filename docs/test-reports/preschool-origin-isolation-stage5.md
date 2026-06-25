@@ -1,7 +1,7 @@
 # Preschool Origin Isolation — Stage-5 (US-005)
 
 **PRD:** `docs/PRD/early-childhood-preschool-origin-isolation.md`  
-**Date:** 2026-06-20T09:32:42.204Z  
+**Date:** 2026-06-24T23:01:05.934Z  
 **Decision:** **PASS**
 
 ## Summary

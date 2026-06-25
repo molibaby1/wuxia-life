@@ -45,6 +45,9 @@ import p9RemediationEventsJson from '../data/lines/p9-remediation.json';
 import p11ValidationEventsJson from '../data/lines/p11-validation.json';
 import p21ContentSamplesJson from '../data/lines/p21-content-samples.json';
 import p22ContentExpansionsJson from '../data/lines/p22-content-expansions.json';
+import medicalEventsJson from '../data/lines/medical.json';
+import relationshipEventsJson from '../data/lines/relationship.json';
+import merchantLineEventsJson from '../data/lines/merchant.json';
 
 // 路线事件（已合并到 identity-outlaw.json）
 // import pathExamplesJson from '../data/lines/path-examples.json';
@@ -81,6 +84,9 @@ const p9RemediationEvents = p9RemediationEventsJson as EventDefinition[];
 const p11ValidationEvents = p11ValidationEventsJson as EventDefinition[];
 const p21ContentSamples = p21ContentSamplesJson as EventDefinition[];
 const p22ContentExpansions = p22ContentExpansionsJson as EventDefinition[];
+const medicalEvents = medicalEventsJson as EventDefinition[];
+const relationshipEvents = relationshipEventsJson as EventDefinition[];
+const merchantLineEvents = merchantLineEventsJson as EventDefinition[];
 
 const eventsIndex = eventsIndexJson as {
   version: string;
@@ -145,6 +151,9 @@ export class EventLoader {
       './lines/p11-validation.json': p11ValidationEvents,
       './lines/p21-content-samples.json': p21ContentSamples,
       './lines/p22-content-expansions.json': p22ContentExpansions,
+      './lines/medical.json': medicalEvents,
+      './lines/relationship.json': relationshipEvents,
+      './lines/merchant.json': merchantLineEvents,
     };
     
     const orderedLines = (eventsIndex.imports || [])

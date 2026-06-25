@@ -25,7 +25,13 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
-async function runPersonaBundle(personaId: string) {
+type PersonaBundle = {
+  persona: NonNullable<ReturnType<typeof getP8PersonaById>>;
+  report: ReturnType<typeof adaptHeadlessRunToGameProcessReport>;
+  metrics: ReturnType<typeof buildPersonaRunMetrics>;
+};
+
+async function runPersonaBundle(personaId: string): Promise<PersonaBundle> {
   const persona = getP8PersonaById(personaId);
   assert(Boolean(persona), `missing persona ${personaId}`);
   const result: HeadlessPersonaRunResult = await runHeadlessPersona({
@@ -46,21 +52,25 @@ async function runPersonaBundle(personaId: string) {
   return { persona: persona!, report, metrics };
 }
 
-async function testDeviantYePacingSpan(): Promise<void> {
-  const { metrics } = await runPersonaBundle('p8-deviant-ye');
+// ponytail: one headless pass per persona; all assertions share this bundle (was 25 runs).
+async function runAllPersonaBundles(): Promise<Map<string, PersonaBundle>> {
+  const bundles = new Map<string, PersonaBundle>();
+  for (const persona of getP8GatePersonas()) {
+    bundles.set(persona.id, await runPersonaBundle(persona.id));
+  }
+  return bundles;
+}
+
+function assertDeviantYePacingSpan(bundles: Map<string, PersonaBundle>): void {
+  const deviant = bundles.get('p8-deviant-ye');
+  assert(Boolean(deviant), 'missing p8-deviant-ye bundle');
   assert(
-    metrics.pacing.longestLowImpactSpanYears <= MAX_DEVIANT_LOW_IMPACT_SPAN,
-    `p8-deviant-ye low-impact span ${metrics.pacing.longestLowImpactSpanYears}y exceeds ${MAX_DEVIANT_LOW_IMPACT_SPAN}y`,
+    deviant!.metrics.pacing.longestLowImpactSpanYears <= MAX_DEVIANT_LOW_IMPACT_SPAN,
+    `p8-deviant-ye low-impact span ${deviant!.metrics.pacing.longestLowImpactSpanYears}y exceeds ${MAX_DEVIANT_LOW_IMPACT_SPAN}y`,
   );
 }
 
-async function testNearDuplicatePairCount(): Promise<void> {
-  const runs = [];
-  for (const persona of getP8GatePersonas()) {
-    const { report } = await runPersonaBundle(persona.id);
-    runs.push({ personaId: persona.id, report });
-  }
-  const replay = collectReplayMetrics(runs);
+function assertNearDuplicatePairCount(replay: ReturnType<typeof collectReplayMetrics>): void {
   const highPairs = replay.pairwiseSimilarities.filter(p => p.score >= NEAR_DUPLICATE_THRESHOLD);
   assert(
     highPairs.length <= MAX_NEAR_DUPLICATE_PAIRS,
@@ -68,34 +78,36 @@ async function testNearDuplicatePairCount(): Promise<void> {
   );
 }
 
-async function testFrustrationNoRegression(): Promise<void> {
-  for (const persona of getP8GatePersonas()) {
-    const { metrics } = await runPersonaBundle(persona.id);
+function assertFrustrationNoRegression(bundles: Map<string, PersonaBundle>): void {
+  for (const [personaId, bundle] of bundles) {
     assert(
-      metrics.frustration.opaqueRatio <= MAX_FRUSTRATION_OPAQUE_RATIO,
-      `${persona.id} opaque ratio ${metrics.frustration.opaqueRatio} exceeds ${MAX_FRUSTRATION_OPAQUE_RATIO}`,
+      bundle.metrics.frustration.opaqueRatio <= MAX_FRUSTRATION_OPAQUE_RATIO,
+      `${personaId} opaque ratio ${bundle.metrics.frustration.opaqueRatio} exceeds ${MAX_FRUSTRATION_OPAQUE_RATIO}`,
     );
   }
 }
 
-async function testGateDecisionPass(): Promise<void> {
-  const metricsList = [];
-  const runs = [];
-  for (const persona of getP8GatePersonas()) {
-    const { report, metrics } = await runPersonaBundle(persona.id);
-    metricsList.push(metrics);
-    runs.push({ personaId: persona.id, report });
-  }
-  const replay = collectReplayMetrics(runs);
+function assertGateDecisionPass(
+  metricsList: ReturnType<typeof buildPersonaRunMetrics>[],
+  replay: ReturnType<typeof collectReplayMetrics>,
+): void {
   const evaluation = evaluateP8Gate(metricsList, replay);
   assert(evaluation.decision === 'pass', `gate decision ${evaluation.decision} expected pass`);
 }
 
 async function main(): Promise<void> {
-  await testDeviantYePacingSpan();
-  await testNearDuplicatePairCount();
-  await testFrustrationNoRegression();
-  await testGateDecisionPass();
+  const bundles = await runAllPersonaBundles();
+  const runs = [...bundles.entries()].map(([personaId, bundle]) => ({
+    personaId,
+    report: bundle.report,
+  }));
+  const replay = collectReplayMetrics(runs);
+  const metricsList = [...bundles.values()].map(bundle => bundle.metrics);
+
+  assertDeviantYePacingSpan(bundles);
+  assertNearDuplicatePairCount(replay);
+  assertFrustrationNoRegression(bundles);
+  assertGateDecisionPass(metricsList, replay);
   console.log('p40ReplayPacingPolishTests: all passed');
 }
 

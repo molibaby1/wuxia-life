@@ -10,7 +10,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\")"
+        "expression": "flags.has(\"p8_route_wealth\") && (flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\"))"
       }
     ],
     "content": {
@@ -73,7 +73,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_travel_hook\") && !flags.has(\"p9_early_business_focus\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_echo_travel_hook\") && flags.has(\"p8_route_wanderer\") && !flags.has(\"p9_early_business_focus\") && !flags.has(\"p8_route_demonic\")"
       }
     ],
     "content": {
@@ -242,7 +242,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_training_hook\") && flags.has(\"p8_route_balanced\")"
+        "expression": "flags.has(\"p8_route_balanced\") && (flags.has(\"p9_echo_study_hook\") || flags.has(\"p9_echo_social_hook\"))"
       }
     ],
     "content": {
@@ -273,7 +273,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\") && flags.has(\"p8_route_scholar\")"
       }
     ],
     "content": {
@@ -304,7 +304,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_social_hook\")"
+        "expression": "flags.has(\"p8_route_social\") && flags.has(\"p9_echo_social_hook\")"
       }
     ],
     "content": {
@@ -335,7 +335,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_business_focus\")"
+        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_early_business_focus\")"
       }
     ],
     "content": {
@@ -366,7 +366,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_early_travel_focus\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_early_travel_focus\") && flags.has(\"p8_route_wanderer\") && !flags.has(\"p8_route_demonic\")"
       }
     ],
     "content": {
@@ -529,7 +529,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_training_hook\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_echo_training_hook\") && !flags.has(\"p8_route_demonic\") && flags.has(\"p8_route_martial\")"
       }
     ],
     "content": {
@@ -589,7 +589,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_merchant_midlife_path\")"
+        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_merchant_midlife_path\")"
       }
     ],
     "content": {
@@ -619,7 +619,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_echo_study_hook\") && !flags.has(\"p8_route_demonic\") && flags.has(\"p8_route_scholar\")"
       }
     ],
     "content": {
@@ -724,12 +724,12 @@
     "category": "main_story",
     "priority": 0,
     "weight": 88,
-    "ageRange": { "min": 27, "max": 27 },
+    "ageRange": { "min": 27, "max": 30 },
     "triggers": [{ "type": "age_reach", "value": 27 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_social_hook\") || flags.has(\"p9_early_social_focus\") || flags.has(\"p16_deferred_social_upbringing\")"
+        "expression": "flags.has(\"p8_route_social\") && (flags.has(\"p9_echo_social_hook\") || flags.has(\"p9_early_social_focus\"))"
       }
     ],
     "content": {
@@ -849,8 +849,8 @@
     "category": "main_story",
     "priority": 0,
     "weight": 105,
-    "ageRange": { "min": 22, "max": 24 },
-    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "ageRange": { "min": 23, "max": 24 },
+    "triggers": [{ "type": "age_reach", "value": 23 }],
     "conditions": [
       {
         "type": "expression",

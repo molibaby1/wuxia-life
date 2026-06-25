@@ -21,7 +21,7 @@
       }
     },
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !flags.has('current_sect') && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox')"}
+      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !flags.has('current_sect') && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox') && !flags.has('p8_route_wanderer') && !flags.has('p9_early_travel_focus') && !flags.has('p16_deferred_travel_upbringing')"}
     ],
     "content": {
       "title": "幽影门之路",

@@ -118,8 +118,11 @@ export class ConditionEvaluator implements IConditionEvaluator {
     }
     return JSON.stringify({
       player: playerSlice,
+      lifeStates: state.player?.lifeStates || {},
       flags: state.flags,
+      playerFlags: state.player?.flags || {},
       triggeredEvents: state.triggeredEvents,
+      eventHistory: (state.eventHistory || []).map(entry => entry.eventId),
     });
   }
   
@@ -414,8 +417,13 @@ class ConditionExpressionParser {
 
     if (identifier.startsWith('player.')) {
       const property = identifier.slice('player.'.length);
+      return this.resolvePlayerProperty(property, token.position);
+    }
+
+    if (identifier.startsWith('lifeStates.')) {
+      const property = identifier.slice('lifeStates.'.length);
       this.assertSafeProperty(property, token.position);
-      return (this.state.player as any)?.[property];
+      return this.state.player?.lifeStates?.[property as keyof typeof this.state.player.lifeStates] ?? 0;
     }
 
     if (identifier.startsWith('flags.')) {
@@ -474,6 +482,17 @@ class ConditionExpressionParser {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(property)) {
       throw this.error(`Unsupported property access "${property}"`, position);
     }
+  }
+
+  private resolvePlayerProperty(property: string, position: number): unknown {
+    if (property.startsWith('lifeStates.')) {
+      const lifeStateKey = property.slice('lifeStates.'.length);
+      this.assertSafeProperty(lifeStateKey, position);
+      return this.state.player?.lifeStates?.[lifeStateKey as keyof typeof this.state.player.lifeStates] ?? 0;
+    }
+
+    this.assertSafeProperty(property, position);
+    return (this.state.player as any)?.[property];
   }
 
   private toBoolean(value: unknown): boolean {

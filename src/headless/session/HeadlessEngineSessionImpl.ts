@@ -530,6 +530,9 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     const player = this.engine.getGameState().player;
     if (player?.alive === false) return 'terminal';
     const age = player?.age ?? 0;
+    if (this.engine.hasPendingForcedEvent()) {
+      return 'story_event';
+    }
     if (
       shouldPreferStoryGapPassiveBeforePlanning(age, this.volatile.storyGapPassiveServed)
     ) {

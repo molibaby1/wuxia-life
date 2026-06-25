@@ -49,9 +49,13 @@ All personas opaque ratio **0.00** — no P38 regression.
 ## Isolated regression (M5)
 
 ```bash
-npm exec tsx tests/p40ReplayPacingPolishTests.ts   # PASS
-npm exec tsx tests/p8PlayabilityTests.ts           # PASS
-npx tsc --noEmit                                   # PASS
+npm exec tsx tests/p40ReplayPacingPolishTests.ts   # PASS (8 headless runs, single bundle)
+npm exec tsx tests/p38FrustrationRemediationTests.ts # PASS
+npm exec tsx tests/p36ConsistencyTests.ts            # PASS
+npm exec tsx tests/p37AdditionalMixedPinnacleParityTests.ts # PASS
+npm exec tsx tests/p39ContentPoolConsistencyTests.ts  # PASS
+npm exec tsx tests/p8PlayabilityTests.ts             # PASS
+npx tsc --noEmit                                     # PASS
 ```
 
-Carry-forward P36–P39 test files are **not present** on `main` branch baseline; verified via P8 playability + P40 isolated suite per branch reality.
+P40-004 carry-forward: P36–P39 isolated regression suites restored on p40 branch (selective p39 lineage import; P40 replay metrics unchanged). P36–P39 wired into `tests/runRealTestGate.ts`; P40 remains isolated (~100s headless bundle).

@@ -1,10 +1,17 @@
 ## Codebase Patterns
+- P42 habit content densification: gap map `docs/test-reports/p42-habit-coverage-gap-map.md`; new samples prefixed `p42_` in p21/p22/merchant/relationship/family-life pools; regression `tests/p42ContentDensityTests.ts`; closure `docs/test-reports/p42-habit-content-densification-closure.md`.
 - P41 habit player-facing feedback: shared labels/derivation in `src/utils/habitShapingSummary.ts` (`buildCurrentShapingSummary`, `deriveDominantShapingLines`, `shapingFeedbackFlagKey`); main-screen `shapingSummary` row in `MainScreenLifeSummary.vue`; choice feedback diffs `lifeStates` in `ChoiceFeedbackGenerator.appendShapingFeedbackHints`; life-memory field `habitTrajectory` in `deriveLifeMemorySummary.ts` + `LifeMemoryPanel.vue`; regression `tests/p41HabitFeedbackTests.ts`; closure `docs/test-reports/p41-habit-feedback-closure.md`.
 - P40 P8 replay/pacing polish: headless persona bootstrap in `createPersonaSession.applyPersonaBootstrapFlags` sets `p8_route_*` + `p8_persona_id` at session start (mirror `GameProcessSimulator`); `resolvePersonaYouthRouteSeeds` maps `routePreference` → `p8_route_*`; demonic omits `p9_early_training_focus` and premature `p9_childhood_dark_spark` seed; regression `tests/p40ReplayPacingPolishTests.ts`; closure `docs/test-reports/p40-closure-report.md`.
 - Stage-3 infant origin chains: config in `src/data/lines/origin-infant-passives.json`; loader/selector in `src/data/originInfantPassiveChain.ts`; age ≤2 ordered dequeue via `selectOrderedOriginInfantPassive` called from `selectPassiveNarrative`.
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
 - Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-25] - P42-001 (p42-wuxia-habit-trajectory-content-densification)
+- Read-only coverage gap map for five habit/semi-personality axes by age band.
+- Files: `docs/test-reports/p42-habit-coverage-gap-map.md`
+- **Learnings:** childhood + later-life are zero-reader for 4/5 axes; businessHabit thinnest (2 total).
+---
 
 ## [2026-06-25] - P41-006 (p41-wuxia-habit-trajectory-player-facing-feedback)
 - Closure: M1–M5 Met; defer queue (P42–P44, API lifeStates DTO) documented.

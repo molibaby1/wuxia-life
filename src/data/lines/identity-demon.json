@@ -362,7 +362,7 @@
     "ageRange": {"min": 31, "max": 38},
     "type": "identity",
     "eventType": "choice",
-    "tags": ["outlaw", "identity", "midlife", "demonic", "route"],
+    "tags": ["outlaw", "identity", "midlife", "demonic", "route", "mainline", "once", "mandatory"],
     "triggers": [{"type": "age_reach", "value": 31}],
     "conditions": [
       {

@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 8}
     ],
     "conditions": [
-      {"type": "expression", "expression": "charisma >= 12 || money >= 50"}
+      {"type": "expression", "expression": "(charisma >= 12 || money >= 50) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
     ],
     "content": {
       "title": "经商天赋",
@@ -24,7 +24,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "stat_modify", "stat": "money", "value": 20},
-          {"type": "flag_set", "flag": "merchant_talent", "value": true}
+          {"type": "flag_set", "flag": "merchant_talent", "value": true},
+          {"type": "flag_set", "flag": "route_merchant", "value": true}
         ]
       },
       {
@@ -41,7 +42,7 @@
         "wuxia": 0.2,
         "frontier": 0.4
       },
-      "tags": ["商业", "天赋", "主线"]
+      "tags": ["商业", "天赋", "主线", "mainline", "once"]
     }
   },
   {
@@ -69,7 +70,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
-          {"type": "stat_modify", "stat": "reputation", "value": 5}
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "event_record", "target": "merchant_first_shop_grocery"}
         ]
       },
       {
@@ -88,7 +90,10 @@
           {"type": "stat_modify", "stat": "chivalry", "value": 5}
         ]
       }
-    ]
+    ],
+    "metadata": {
+      "tags": ["商业", "开店", "主线", "mainline", "once"]
+    }
   },
   {
     "id": "merchant_shop_failure",

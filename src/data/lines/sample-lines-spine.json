@@ -1,0 +1,216 @@
+[
+  {
+    "id": "orthodox_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('orthodox_childhood_seed_done') && (flags.has('p8_route_martial') || flags.has('origin_wuxia_family') || flags.has('p9_echo_training_hook'))"
+      }
+    ],
+    "content": {
+      "title": "正道种子",
+      "text": "幼年习武的点滴汇聚成念：你隐约感到自己适合走守正之路，日后或入名门、或行侠仗义。",
+      "description": "P47 O-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_childhood_seed_done" },
+      { "type": "event_record", "target": "orthodox_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "orthodox_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 40, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_orthodox') && !flags.has('orthodox_age40_identity_done')"
+      }
+    ],
+    "content": {
+      "title": "四十回望·正道",
+      "text": "四十岁这年，你回望来路：入门试炼、承担门派义务、守正时的取舍，都已刻进身份。你是被江湖认可的正派武者。",
+      "description": "P47 正派 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age40_identity_done" },
+      { "type": "event_record", "target": "orthodox_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "age40", "mainline", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "demonic_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_childhood_seed_done') && (flags.has('p8_route_demonic') || flags.has('demonic_path_touched') || flags.has('p9_childhood_dark_spark'))"
+      }
+    ],
+    "content": {
+      "title": "邪念初萌",
+      "text": "少年时几次越界的念头并未散去，反而像暗火一样埋在心底——力量与捷径的诱惑，已开始牵引你。",
+      "description": "P47 D-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_childhood_seed_done" },
+      { "type": "event_record", "target": "demonic_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_youth_first_transgression",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 13, "max": 14 },
+    "triggers": [{ "type": "age_reach", "value": 13 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_youth_first_transgression') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic')) && !flags.has('route_orthodox')"
+      }
+    ],
+    "content": {
+      "title": "第一次越界",
+      "text": "为求一时之利，你做了件不该做的事。旁人未必知晓，你却清楚：底线已经松动了一寸。",
+      "description": "P47 D-2 少年越界"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_youth_first_transgression" },
+      { "type": "stat_modify", "target": "chivalry", "value": -3, "operator": "add" },
+      { "type": "event_record", "target": "demonic_youth_first_transgression" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "youth", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('demonic_age40_identity_done')"
+      }
+    ],
+    "content": {
+      "title": "四十回望·邪路",
+      "text": "诱惑让你得到力量与地位，也让你失去信任与安稳。四十岁这年，你已无法否认：是选择与后果，把你推向了邪路。",
+      "description": "P47 邪路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age40_identity_done" },
+      { "type": "event_record", "target": "demonic_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "age40", "mainline", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "merchant_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('origin_merchant_family') || flags.has('p9_echo_business_hook'))"
+      }
+    ],
+    "content": {
+      "title": "营商天赋",
+      "text": "你从小对买卖、账本、货价格外敏感。长辈说你有营商之才，日后或可走商路立业。",
+      "description": "P47 M-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_seed_done" },
+      { "type": "flag_set", "target": "route_merchant" },
+      { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "merchant_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 40, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_talent') || flags.has('p8_route_wealth')) && !flags.has('merchant_age40_identity_done')"
+      }
+    ],
+    "content": {
+      "title": "四十回望·商路",
+      "text": "财富带来了选择权，也带来了人情债与周转压力。四十岁这年，你是靠经营立足的商路中人——成败与义气，都已写进账本之外的人生。",
+      "description": "P47 商路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age40_identity_done" },
+      { "type": "event_record", "target": "merchant_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "age40", "mainline", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  }
+]

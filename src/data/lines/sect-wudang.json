@@ -492,6 +492,7 @@
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
       { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
       { "type": "flag_set", "target": "orthodox_trial_completed" },
+      { "type": "flag_set", "target": "orthodox_youth_recognized" },
       { "type": "flag_set", "target": "p16_guardian_oath", "value": true },
       { "type": "flag_unset", "target": "orthodox_trial_active" },
       { "type": "event_record", "target": "orthodox_trial_completion" }

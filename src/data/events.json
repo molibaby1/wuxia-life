@@ -28,7 +28,8 @@
     "./lines/p22-content-expansions.json",
     "./lines/medical.json",
     "./lines/relationship.json",
-    "./lines/merchant.json"
+    "./lines/merchant.json",
+    "./lines/sample-lines-spine.json"
   ],
   "notes": "Imports must match EventLoader lineMap. Deferred (not yet wired): prologue, identity-scholar/hermit/sect_leader/assassin/doctor/beggar/official, martial-arts-meeting."
 }

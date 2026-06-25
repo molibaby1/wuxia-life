@@ -195,8 +195,12 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 8},
       {"type": "stat_modify", "stat": "reputation", "value": 12},
-      {"type": "flag_set", "flag": "orthodox_formal_disciple", "value": true}
-    ]
+      {"type": "flag_set", "flag": "orthodox_formal_disciple", "value": true},
+      {"type": "flag_set", "flag": "route_orthodox", "value": true}
+    ],
+    "metadata": {
+      "tags": ["orthodox", "mainline", "once", "mandatory"]
+    }
   },
   {
     "id": "orthodox_daily_training",

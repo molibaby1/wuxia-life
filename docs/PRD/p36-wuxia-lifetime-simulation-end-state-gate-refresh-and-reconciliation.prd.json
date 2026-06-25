@@ -1,0 +1,81 @@
+{
+  "project": "Wuxia Life P36 Lifetime Simulation End-State Gate Refresh And Reconciliation",
+  "branchName": "codex/p36-wuxia-lifetime-simulation-end-state-gate-refresh-and-reconciliation",
+  "description": "Post-P35 gate refresh, P34/P35 consistency audit, North Star section 8 reconciliation, optional additional mixed/pinnacle trace, and closure toward end-state CLEAR.",
+  "userStories": [
+    {
+      "id": "P36-001",
+      "title": "Post-P35 playability and p20 gate refresh",
+      "description": "As a maintainer, I want post-P35 gate:playability and gate:p20 runs documented with delta vs latest baseline.",
+      "acceptanceCriteria": [
+        "Run npm run gate:playability and npm run gate:p20 after P35 finalize",
+        "Save or reference latest gate reports under docs/test-reports",
+        "Document pass or fail and delta vs pre-P35 baseline in a gate refresh note",
+        "No gameplay behavior changes beyond fixes if gate finds regressions",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Addresses GAP-END-08-05; P35 baseline skipped gate execution."
+    },
+    {
+      "id": "P36-002",
+      "title": "Extend P34/P35 consequence consistency audit",
+      "description": "As a maintainer, I want a consistency audit covering P34 medical and P35 mixed/pinnacle lifetime traces for North Star section 8 item 3.",
+      "acceptanceCriteria": [
+        "Extend existing P25 consistency slice harness or sibling audit to include P34/P35 lifetime trace flag sequences",
+        "Report highSeverityContradictionCount and per-trace findings",
+        "Document audit command and results under docs/test-reports",
+        "Align with P25 zero-contradiction acceptance semantics where applicable",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Addresses GAP-END-08-03 partial; extends P25 consistency slice to P34/P35 traces."
+    },
+    {
+      "id": "P36-003",
+      "title": "North Star section 8 end-state reconciliation report",
+      "description": "As a maintainer, I want a reconciliation report mapping each North Star section 8 checklist item to evidence and status.",
+      "acceptanceCriteria": [
+        "Map all 5 section 8 checklist items to evidence files",
+        "State explicit Met, Partial, Open, or Defer per item with rationale",
+        "Recommend whether Discovery may output end_state_status CLEAR after P36 or needs P37 plus",
+        "Save under docs/test-reports",
+        "Typecheck passes if code touched"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Addresses GAP-END-08-01 reconcile; primary end-state assessment artifact."
+    },
+    {
+      "id": "P36-004",
+      "title": "Optional additional mixed or pinnacle habit-led lifetime trace",
+      "description": "As a maintainer, I want an optional second mixed or pinnacle habit-led lifetime trace to strengthen section 8 item 1.",
+      "acceptanceCriteria": [
+        "Add one of founding_patriarch pinnacle lifetime or merchant_martial_patron mixed lifetime under P25 test harness",
+        "Document seed, age steps, unlock, and terminal outcome under docs/test-reports",
+        "Unlock without static resolveP31HabitLedKeyChoiceBridges on fixtures where applicable",
+        "Skip acceptable if US-003 reconciliation proves section 8 item 1 category Met with P34/P35 evidence only",
+        "Typecheck passes if implemented"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Skipped optional trace — US-003 proves §8 item 1 category Met with P34/P35; see p36-004-optional-trace-skip.md"
+    },
+    {
+      "id": "P36-005",
+      "title": "Write P36 closure and remaining queue",
+      "description": "As a maintainer, I want a closure note listing what P36 proved and what remains for North Star section 8.",
+      "acceptanceCriteria": [
+        "Summarize gate refresh, consistency audit, reconciliation, and optional trace",
+        "List remaining Wave 3/4 deferrals, renown optional lifetime, medical pool, poison mutex Monitor",
+        "Cross-reference North Star section 8 items still OPEN after P36",
+        "Save under docs/test-reports"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

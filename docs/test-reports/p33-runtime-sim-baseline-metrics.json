@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-06-24T04:35:55.554Z",
+  "command": "npm exec tsx scripts/runP33HabitLedSimulationBaseline.ts",
+  "p31StaticBaseline": {
+    "jianghu_renown_sage_unlockRate": 1,
+    "medical_sage_healer_unlockRate": 1
+  },
+  "p32RenownRuntimeBaseline": {
+    "unlockRate": 1
+  },
+  "p33MedicalRuntimeShortChain": {
+    "medical": {
+      "slice": "p32_habit_led_short_chain",
+      "pathId": "p33_medical_event_driven_short_chain",
+      "outcomeId": "medical_sage_healer",
+      "seed": {
+        "originId": "poor_family",
+        "lifeStates": {
+          "trainingHabit": 0,
+          "studyHabit": 3,
+          "businessHabit": 0,
+          "socialMomentum": 0,
+          "familyBond": 0
+        },
+        "statSnapshot": {
+          "martialPower": 30,
+          "reputation": 60,
+          "connections": 25,
+          "money": 45
+        }
+      },
+      "eventSequence": [
+        {
+          "eventId": "p27_study_habit_healer_reinforcement",
+          "choiceIndex": 0,
+          "choiceLabel": "顺势钻研医理",
+          "flagsAfter": [
+            "p27_study_healer_path",
+            "medical_pure",
+            "medical_talent"
+          ]
+        },
+        {
+          "eventId": "p29_study_habit_case_record_duty",
+          "choiceIndex": 0,
+          "choiceLabel": "接下汇辑之责",
+          "flagsAfter": [
+            "p27_study_healer_path",
+            "medical_pure",
+            "medical_talent",
+            "p29_study_healer_case_duty",
+            "medical_divine_doctor_fame"
+          ]
+        }
+      ],
+      "unlocked": true,
+      "keyChoicesMet": true,
+      "resolvedBridgeFlags": [
+        "medical_pure",
+        "medical_divine_doctor_fame"
+      ],
+      "usedStaticResolver": false
+    },
+    "medicalUnlockRate": 1
+  },
+  "deltaSummary": "P33 medical runtime short-chain unlock (100%) aligns with P31 static baseline. P32 renown runtime remains 100%.",
+  "parityNotes": [
+    "P33 medical runtime short-chain uses JSON flag_set from p27→p29 events; P31 static uses resolveP31HabitLedKeyChoiceBridges.",
+    "P32 renown runtime baseline retained for cross-path comparison.",
+    "Poison mutex aligned in P33-002 via applyEventChoiceFlagSets."
+  ]
+}

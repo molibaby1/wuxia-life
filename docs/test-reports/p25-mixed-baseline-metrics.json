@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-06-23T06:37:24.150Z",
+  "config": {
+    "sampleCount": 32,
+    "seedStart": 3001,
+    "seedEnd": 3032,
+    "command": "npm exec tsx scripts/runP25MixedBaseline.ts"
+  },
+  "mixedUnlockRates": {
+    "merchant_magnate": 0.15625,
+    "healer_swordsman": 0.1875,
+    "merchant_martial_patron": 0.1875
+  },
+  "crossTrackCoverage": {
+    "merchant_route": {
+      "satisfied": 5,
+      "total": 32,
+      "rate": 0.15625
+    },
+    "wealth_capital": {
+      "satisfied": 10,
+      "total": 32,
+      "rate": 0.3125
+    },
+    "martial_track": {
+      "satisfied": 33,
+      "total": 64,
+      "rate": 0.515625
+    },
+    "medical_track": {
+      "satisfied": 6,
+      "total": 32,
+      "rate": 0.1875
+    },
+    "merchant_track": {
+      "satisfied": 6,
+      "total": 32,
+      "rate": 0.1875
+    }
+  },
+  "mainstreamRegression": {},
+  "pinnacleRegression": {},
+  "gatePlayability": "PASS",
+  "gateP20": "PASS"
+}

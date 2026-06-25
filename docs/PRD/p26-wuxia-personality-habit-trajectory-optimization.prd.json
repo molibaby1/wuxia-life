@@ -1,0 +1,199 @@
+{
+  "project": "Wuxia Life P26 Personality Habit Trajectory Optimization",
+  "branchName": "codex/p26-wuxia-personality-habit-trajectory-optimization",
+  "description": "Connect long-term habit state to high-value content, midlife consequence, and replayability validation through execution-sized migrations.",
+  "userStories": [
+    {
+      "id": "P26-001",
+      "title": "Write P26 scope and migration rules",
+      "description": "As a maintainer, I want explicit migration rules for P26 so that later stories stay focused on habit trajectory work.",
+      "acceptanceCriteria": [
+        "Define allowed P26 habit axes: trainingHabit, studyHabit, businessHabit",
+        "Define in-scope layers: P21, P22, P17, P20/P25 validation",
+        "Define that legacy habit flags remain as compatibility projection in P26",
+        "Save the rules in the PRD or a linked design note"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P26-002",
+      "title": "Audit current habit-gated content hits",
+      "description": "As a maintainer, I want an inventory of habit-sensitive content so that migration order is based on impact.",
+      "acceptanceCriteria": [
+        "Inventory current training_habit, study_habit, and business_habit readers",
+        "Classify each hit as content trigger, validation fixture, replayability surface, or compatibility-only",
+        "Record 3-6 highest-value direct migration targets",
+        "Save the audit under docs/test-reports or docs/designs"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Read-only audit before broader migration."
+    },
+    {
+      "id": "P26-003",
+      "title": "Add isolated habit regression test file",
+      "description": "As a maintainer, I want an isolated habit regression test file so that P26 can be verified without relying on the noisy full suite.",
+      "acceptanceCriteria": [
+        "Add a standalone test file for habit trajectory runtime checks",
+        "Cover ConditionEvaluator access to player.lifeStates and lifeStates shorthand",
+        "Cover daily long-term habit accumulation and compatibility flag projection",
+        "Test file runs independently and exits cleanly"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Single verification artifact only."
+    },
+    {
+      "id": "P26-004",
+      "title": "Register isolated habit test in runRealTestGate",
+      "description": "As a maintainer, I want the new habit regression test registered in the standard gate list so future gates include it automatically.",
+      "acceptanceCriteria": [
+        "Add the new habit regression test entry to tests/runRealTestGate.ts",
+        "Use a clear test name identifying habit trajectory coverage",
+        "Do not modify unrelated gate entries"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P26-003."
+    },
+    {
+      "id": "P26-005",
+      "title": "Migrate one P21 scholar reinforcement sample to studyHabit",
+      "description": "As a player, I want one scholar reinforcement sample to read long-term study habit directly so scholarly identity can emerge from behavior.",
+      "acceptanceCriteria": [
+        "Update one P21 scholar reinforcement sample to read lifeStates.studyHabit >= threshold",
+        "Preserve any intended route or stage guard that still defines audience",
+        "Independent regression test proves trigger works without legacy study_habit flag"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Single content sample only."
+    },
+    {
+      "id": "P26-006",
+      "title": "Migrate one P22 business fork sample to businessHabit",
+      "description": "As a player, I want one merchant divergence sample to read long-term business habit directly so wealth-route identity can emerge from repeated livelihood behavior.",
+      "acceptanceCriteria": [
+        "Update one P22 business fork sample to read lifeStates.businessHabit >= threshold",
+        "Preserve any intentional origin fallback for merchant-house access",
+        "Independent regression test proves trigger works without legacy business_habit flag"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Single content sample only."
+    },
+    {
+      "id": "P26-007",
+      "title": "Add one P21 training reinforcement sample driven by trainingHabit",
+      "description": "As a player, I want one training reinforcement sample to read long-term training habit so martial identity is reinforced by repeated behavior.",
+      "acceptanceCriteria": [
+        "Add or migrate one P21 training-oriented sample to read lifeStates.trainingHabit >= threshold",
+        "Sample remains age-appropriate and route-consistent",
+        "Targeted test or fixture proves the new habit-sensitive access path"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Do not batch multiple P21 samples."
+    },
+    {
+      "id": "P26-008",
+      "title": "Add one P22 non-business fork sample driven by habit",
+      "description": "As a player, I want one additional early fork outside the merchant path to prove habit-driven routing is reusable.",
+      "acceptanceCriteria": [
+        "Add or migrate one non-business P22 early fork sample",
+        "Sample reads either lifeStates.studyHabit or lifeStates.trainingHabit",
+        "Chosen identity direction differs from the merchant sample",
+        "Targeted test or fixture proves the habit-sensitive path"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Single fork sample only."
+    },
+    {
+      "id": "P26-009",
+      "title": "Add one adult callback sample for studyHabit",
+      "description": "As a player, I want one age 20-35 callback event that acknowledges long-term study habit so early behavior has medium-term narrative echo.",
+      "acceptanceCriteria": [
+        "Add one age 20-35 callback sample keyed by lifeStates.studyHabit",
+        "Text makes the long-term shaping legible to the player",
+        "Callback does not rely solely on legacy study_habit flag",
+        "Relevant tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Single callback sample."
+    },
+    {
+      "id": "P26-010",
+      "title": "Add one adult callback sample for a second habit axis",
+      "description": "As a player, I want one more adult callback sample from a different habit axis so P26 proves multi-axis echo.",
+      "acceptanceCriteria": [
+        "Add one age 20-35 callback sample keyed by trainingHabit or businessHabit",
+        "Chosen axis differs from P26-009",
+        "Callback introduces a believable opportunity, burden, or reinforcement outcome",
+        "Relevant tests pass"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Depends on one prior callback pattern."
+    },
+    {
+      "id": "P26-011",
+      "title": "Add one P17 habit-borne consequence sample",
+      "description": "As a player, I want at least one mid/late-life consequence event to acknowledge what kind of person I became so habits affect later responsibilities.",
+      "acceptanceCriteria": [
+        "Add one P17 consequence sample keyed by a long-term habit axis",
+        "The consequence changes obligation, opportunity, pressure, or burden rather than only flavor text",
+        "Sample is distinct from route-only consequence logic",
+        "Relevant tests pass"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": "Single consequence sample only."
+    },
+    {
+      "id": "P26-012",
+      "title": "Add one P20 habit trajectory replayability slice",
+      "description": "As a maintainer, I want a replayability slice comparing high-vs-low habit runs so divergence can be measured.",
+      "acceptanceCriteria": [
+        "Add at least one P20 slice comparing representative runs with different habit accumulation",
+        "Slice reports whether event trajectory materially differs across habit profiles",
+        "Output is machine-readable and included in P20 reporting flow",
+        "Relevant tests pass"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "Validation-only story."
+    },
+    {
+      "id": "P26-013",
+      "title": "Add one P25 habit trajectory acceptance slice",
+      "description": "As a maintainer, I want a lifetime-acceptance slice proving early habit formation survives into later callback or consequence echo.",
+      "acceptanceCriteria": [
+        "Add at least one P25 slice covering early habit formation and later echo",
+        "Slice records pass or fail with concrete event or flag pointers",
+        "Results surface inside existing P25 validation output",
+        "Relevant tests pass"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Validation-only story."
+    },
+    {
+      "id": "P26-014",
+      "title": "Write P26 closure note and next migration queue",
+      "description": "As a maintainer, I want a closure note for P26 so future sessions know what was proven and what should migrate next.",
+      "acceptanceCriteria": [
+        "Summarize migrated samples, new validation slices, and verification commands",
+        "List remaining high-value habit-flag content still not migrated to direct lifeStates reads",
+        "Record recommended next pools in dependency order",
+        "Save under docs/test-reports or docs/designs"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

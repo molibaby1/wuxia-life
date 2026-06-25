@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-06-23T03:41:59.571Z",
+  "slice": "childhood-payoff-spine-slice-c",
+  "phase": "after",
+  "personaCount": 8,
+  "personasWithSpanOver5": 0,
+  "maxPersonaSpanYears": 4,
+  "cohortMaxLowImpactSpanYears": 5,
+  "cohortAvgLowImpactSpanYears": 3.44,
+  "personas": [
+    { "personaId": "p8-martial-lin", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-scholar-su", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-social-gu", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-wealth-shen", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-cautious-han", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-deviant-ye", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-explorer-lu", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 },
+    { "personaId": "p8-balanced-wei", "longestLowImpactSpanYears": 4, "lowImpactSpanStartAge": 7, "lowImpactSpanEndAge": 11 }
+  ]
+}

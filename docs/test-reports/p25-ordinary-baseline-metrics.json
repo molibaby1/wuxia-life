@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-06-23T07:28:17.701Z",
+  "config": {
+    "sampleCount": 32,
+    "seedStart": 4001,
+    "seedEnd": 4032,
+    "command": "npm exec tsx scripts/runP25OrdinaryBaseline.ts"
+  },
+  "ordinaryOriginUnlockRates": {
+    "farm_peasant": 0.3333333333333333,
+    "town_apprentice": 0.5,
+    "tavern_hand": 0.5
+  },
+  "midTierUnlockRate": 0.34375,
+  "midTierUnlockRateAboveZero": true,
+  "pinnacleUnlockRates": {},
+  "mainstreamMedianUnlockRate": 0.1875,
+  "pinnacleMaxUnlockRate": 0,
+  "pinnacleBelowMainstreamMedian": true,
+  "pinnacleNotForcedZero": true,
+  "pairwiseTrajectoryDivergence": {
+    "tavern_hand_vs_merchant_house": 0.34375,
+    "farm_peasant_vs_poor_family": 0.34375,
+    "town_apprentice_vs_streetborn": 0.3125
+  },
+  "averagePairwiseDivergence": 0.3333333333333333,
+  "gatePlayability": "PASS",
+  "gateP20": "PASS"
+}

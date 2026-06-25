@@ -15,7 +15,7 @@
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Docs-first foundation story."
+      "notes": "Gap audit: docs/test-reports/p47-sample-lines-content-anchor-gap-audit.md"
     },
     {
       "id": "P47-002",
@@ -30,7 +30,7 @@
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Single-line spine story."
+      "notes": "PRD §10 Orthodox Martial 0-40 Chapter Spine"
     },
     {
       "id": "P47-003",
@@ -45,7 +45,7 @@
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Single-line spine story."
+      "notes": "PRD §11 Demonic Edge 0-40 Chapter Spine"
     },
     {
       "id": "P47-004",
@@ -60,7 +60,7 @@
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Single-line spine story."
+      "notes": "PRD §12 Merchant Rise 0-40 Chapter Spine"
     },
     {
       "id": "P47-005",
@@ -74,7 +74,7 @@
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Task-sizing story."
+      "notes": "PRD §13 Orthodox Early-Life Configuration Tasks (O-1/O-2/O-3)"
     },
     {
       "id": "P47-006",
@@ -88,7 +88,7 @@
       ],
       "priority": 6,
       "passes": true,
-      "notes": "Task-sizing story."
+      "notes": "PRD §14 Demonic Early-Life Configuration Tasks (D-1/D-2/D-3)"
     },
     {
       "id": "P47-007",
@@ -102,7 +102,7 @@
       ],
       "priority": 7,
       "passes": true,
-      "notes": "Task-sizing story."
+      "notes": "PRD §15 Merchant Early-Life Configuration Tasks (M-1/M-2/M-3)"
     },
     {
       "id": "P47-008",
@@ -116,7 +116,7 @@
       ],
       "priority": 8,
       "passes": true,
-      "notes": "Cross-line consequence story."
+      "notes": "PRD §16 Midlife Cost And Age-40 Identity Hooks"
     },
     {
       "id": "P47-009",
@@ -130,7 +130,7 @@
       ],
       "priority": 9,
       "passes": true,
-      "notes": "Runtime-compatibility story."
+      "notes": "PRD §17 RoutePoint And Flag Wiring Requirements"
     },
     {
       "id": "P47-010",
@@ -144,8 +144,7 @@
       ],
       "priority": 10,
       "passes": true,
-      "notes": "Stage-close story."
+      "notes": "PRD §18 P47 Closure Evidence; aligns with P46 §11.1"
     }
   ]
 }
-

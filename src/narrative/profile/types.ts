@@ -68,6 +68,8 @@ export interface OriginWorldviewShaping {
 export interface WorldProfileOriginSurface {
   originId: string;
   label: string;
+  /** P25 Wave 4: vivid =鲜明出身; ordinary =平凡出身 (distinct opportunity structure). */
+  originTier?: 'vivid' | 'ordinary';
   resources: OriginResourceExposure;
   /** Snapshot applied when resolving childhood material/guidance weighting. */
   immediateConditions: OriginResourceExposure;
@@ -86,8 +88,20 @@ export type DestinyDimension =
 export interface CompositeDestinyRequirement {
   dimension: DestinyDimension;
   minValue?: number;
+  maxValue?: number;
   requiredFlags?: string[];
+  anyOfFlags?: string[];
   blockedByFlags?: string[];
+  /** P25 pinnacle: classify flag gates for choice vs luck attribution. */
+  gateKind?: 'choice' | 'luck';
+}
+
+/** P25 mixed: cross-track requirement group for partial-progress reporting. */
+export interface MixedCrossTrackGroup {
+  trackId: string;
+  trackLabel: string;
+  /** Indices into `requirements`; group satisfied when all listed requirements are met. */
+  requirementIndices: number[];
 }
 
 export interface CompositeDestinyOutcome {
@@ -95,6 +109,15 @@ export interface CompositeDestinyOutcome {
   label: string;
   requirements: CompositeDestinyRequirement[];
   requireAll?: boolean;
+  tier?: 'mainstream' | 'pinnacle' | 'mixed';
+  /** P25 pinnacle: stat grind cannot substitute a missed rare-line window. */
+  grindCannotSubstituteLuck?: boolean;
+  /** P25 mixed: cross-track groups (≥2) per North Star §3.3. */
+  crossTrackGroups?: MixedCrossTrackGroup[];
+  /** P25 mixed: may unlock alongside these outcome ids in the same life. */
+  coexistWith?: string[];
+  /** P25 mixed: cannot unlock if any listed outcome id is also unlocked. */
+  mutexWith?: string[];
 }
 
 export interface CompositeDestinyDimensionProgress {
@@ -110,6 +133,10 @@ export interface CompositeDestinyProgressReport {
   outcomeLabel: string;
   unlocked: boolean;
   dimensions: CompositeDestinyDimensionProgress[];
+  /** P25 pinnacle: which dual gate (choice / luck) blocks unlock. */
+  unmetGates?: { choice?: string; luck?: string };
+  /** P25 mixed: per-track unmet dimension detail for sim output. */
+  unmetCrossTracks?: Record<string, string>;
 }
 
 export interface ChildhoodShapingRule {
@@ -156,6 +183,10 @@ export interface WorldProfile {
   originSurfaces?: WorldProfileOriginSurface[];
   /** P16: multi-factor high-level outcome requirements. */
   compositeDestinyOutcomes?: CompositeDestinyOutcome[];
+  /** P25: pinnacle-tier outcomes (choice + luck dual gate), separate from mainstream. */
+  pinnacleDestinyOutcomes?: CompositeDestinyOutcome[];
+  /** P25 Wave 3: mixed-tier cross-track outcomes, separate from mainstream/pinnacle. */
+  mixedDestinyOutcomes?: CompositeDestinyOutcome[];
   /** P16: childhood experience → tendency mapping. */
   childhoodShapingRules?: ChildhoodShapingRule[];
   /** P16: luck-weighted opportunity lines. */

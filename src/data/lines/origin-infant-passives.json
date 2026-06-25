@@ -281,6 +281,177 @@
           }
         }
       ]
+    },
+    {
+      "questId": "quest_peasant_infant_passive_0_2",
+      "originFlag": "origin_farm_peasant",
+      "completeFlag": "peasant_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "peasant_infant_01_cottage_birth",
+          "order": 1,
+          "title": "茅屋初啼",
+          "text": "你生在村头茅屋，窗外是刚翻过的田垄。初啼时父亲正担水归来，母亲用粗布把你裹紧，灶上稀粥咕嘟作响。",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["peasant_infant_cottage_birth"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "peasant_infant_02_swaddle_straw",
+          "order": 2,
+          "title": "稻草襁褓",
+          "text": "你被放在铺了干稻草的竹篮里，鸡在院中刨食。母亲一边择菜一边哼小调，你抓着她指节不肯放。",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["peasant_infant_swaddle_straw"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "peasant_infant_03_grasp_hoe",
+          "order": 3,
+          "title": "抓周握锄",
+          "text": "抓周案上摆着木勺、布偶、小锄柄与草绳。你爬过去攥住锄柄不放——邻居笑说「将来是干农活的好手」，母亲却道「先学会走路。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["peasant_infant_grasp_hoe", "p9_early_peasant_seed"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "peasant_infant_04_yard_crawl",
+          "order": 4,
+          "title": "院中学爬",
+          "text": "你在晒谷场边学爬，把一把谷穗抓得满手。父亲不恼，只教你「别糟蹋粮食」；你似懂非懂地点头。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["peasant_infant_yard_crawl"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "peasant_infant_05_path_steps",
+          "order": 5,
+          "title": "田埂学步",
+          "text": "你扶着田埂边木桩蹒跚学步，一脚踩进泥里，被母亲拎起来——「路要一步步走，急不得。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["peasant_infant_path_steps", "peasant_infant_chain_complete"],
+          "statDeltas": { "constitution": 1, "health": 1 }
+        }
+      ]
+    },
+    {
+      "questId": "quest_apprentice_infant_passive_0_2",
+      "originFlag": "origin_town_apprentice",
+      "completeFlag": "apprentice_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "apprentice_infant_01_shop_birth",
+          "order": 1,
+          "title": "铺后初啼",
+          "text": "你生在镇上的小铺后间，前堂传来刨木声。初啼时师傅正给木柜上漆，掌柜父亲放下刷子赶来，母亲笑说「别沾了漆。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["apprentice_infant_shop_birth"],
+          "statDeltas": { "comprehension": 1 }
+        },
+        {
+          "id": "apprentice_infant_02_swaddle_shavings",
+          "order": 2,
+          "title": "刨花襁褓",
+          "text": "你躺在铺着干净刨花的摇篮里，木屑清香混着浆糊味。师傅偶尔探头逗你，说「将来也得认得出纹理。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["apprentice_infant_swaddle_shavings"],
+          "statDeltas": { "comprehension": 1 }
+        },
+        {
+          "id": "apprentice_infant_03_grasp_chisel",
+          "order": 3,
+          "title": "抓周握凿",
+          "text": "抓周案上摆着木凿、算盘、布偶与小锤。你抓住木凿不放——师傅点头，母亲却道「凿子锋利，先学会规矩。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["apprentice_infant_grasp_chisel", "p9_early_apprentice_seed"],
+          "statDeltas": { "comprehension": 1 }
+        },
+        {
+          "id": "apprentice_infant_04_workbench_crawl",
+          "order": 4,
+          "title": "案下学爬",
+          "text": "你在案桌下学爬，把刨花推得满地。师兄要扫，师傅拦道「孩子淘气罢了」——你记住了「案上要净」。",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["apprentice_infant_workbench_crawl"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "apprentice_infant_05_alley_steps",
+          "order": 5,
+          "title": "巷中学步",
+          "text": "你扶着铺前木柱学步，镇上来往行人多。母亲紧跟着护你，师傅说「眼要活，手要稳——先从走路练起。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["apprentice_infant_alley_steps", "apprentice_infant_chain_complete"],
+          "statDeltas": { "constitution": 1, "health": 1 }
+        }
+      ]
+    },
+    {
+      "questId": "quest_tavern_infant_passive_0_2",
+      "originFlag": "origin_tavern_hand",
+      "completeFlag": "tavern_infant_chain_complete",
+      "nodes": [
+        {
+          "id": "tavern_infant_01_inn_birth",
+          "order": 1,
+          "title": "酒肆初啼",
+          "text": "你生在镇口酒肆后厢，前堂划拳声隐约可闻。初啼时母亲正烫壶酒，掌柜父亲赶来，把客人劝出后厢：「别吓着娃。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["tavern_infant_inn_birth"],
+          "statDeltas": {}
+        },
+        {
+          "id": "tavern_infant_02_swaddle_steam",
+          "order": 2,
+          "title": "蒸汽襁褓",
+          "text": "你被放在后厨旁软榻，蒸汽与酒香交织。伙计逗你抓酒筹玩，母亲叮嘱「别近灶台。」",
+          "ageMin": 0,
+          "ageMax": 0,
+          "flags": ["tavern_infant_swaddle_steam"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "tavern_infant_03_grasp_bowl",
+          "order": 3,
+          "title": "抓周握碗",
+          "text": "抓周案上摆着木碗、酒筹、布偶与小勺。你抓住木碗不放——伙计笑说「将来是跑堂的好料」，母亲却道「先学会叫人。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["tavern_infant_grasp_bowl", "p9_early_tavern_seed"],
+          "statDeltas": {}
+        },
+        {
+          "id": "tavern_infant_04_kitchen_crawl",
+          "order": 4,
+          "title": "灶边学爬",
+          "text": "你在后巷学爬，把一摞空碗推得叮当响。母亲要骂，父亲却笑：「手稳才能端碗——现在先别摔。」",
+          "ageMin": 1,
+          "ageMax": 1,
+          "flags": ["tavern_infant_kitchen_crawl"],
+          "statDeltas": { "constitution": 1 }
+        },
+        {
+          "id": "tavern_infant_05_stair_steps",
+          "order": 5,
+          "title": "梯间学步",
+          "text": "你扶着酒肆木梯蹒跚学步，有一回险些踩空，被伙计一把捞起——「跑堂先看路，再看人。」",
+          "ageMin": 2,
+          "ageMax": 2,
+          "flags": ["tavern_infant_stair_steps", "tavern_infant_chain_complete"],
+          "statDeltas": { "constitution": 1, "health": 1 }
+        }
+      ]
     }
   ]
 }

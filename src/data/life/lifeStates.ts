@@ -17,4 +17,7 @@ export const lifeStates: LifeStateConfig[] = [
   { key: 'familyBond', name: '家庭牵绊', min: 0, max: 5, defaultValue: 0 },
   { key: 'socialMomentum', name: '社交势能', min: 0, max: 5, defaultValue: 0 },
   { key: 'anxiety', name: '焦虑', min: 0, max: 5, defaultValue: 0 },
+  { key: 'trainingHabit', name: '练功习惯', min: 0, max: 5, defaultValue: 0 },
+  { key: 'studyHabit', name: '读书习惯', min: 0, max: 5, defaultValue: 0 },
+  { key: 'businessHabit', name: '营生习惯', min: 0, max: 5, defaultValue: 0 },
 ];

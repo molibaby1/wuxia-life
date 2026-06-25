@@ -42,6 +42,11 @@
             "target": "orthodox_trial_active"
           },
           {
+            "type": "flag_set",
+            "target": "mentor_bond",
+            "value": true
+          },
+          {
             "type": "stat_modify",
             "target": "chivalry",
             "value": 10,
@@ -487,6 +492,7 @@
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
       { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
       { "type": "flag_set", "target": "orthodox_trial_completed" },
+      { "type": "flag_set", "target": "p16_guardian_oath", "value": true },
       { "type": "flag_unset", "target": "orthodox_trial_active" },
       { "type": "event_record", "target": "orthodox_trial_completion" }
     ],
@@ -945,6 +951,7 @@
         "effects": [
           { "type": "flag_set", "target": "sect_midlife_ledger_done" },
           { "type": "flag_set", "target": "sect_midlife_outcome", "value": "upright_guardian" },
+          { "type": "flag_set", "target": "p16_guardian_oath", "value": true },
           { "type": "stat_modify", "target": "reputation", "value": 10, "operator": "add" },
           { "type": "stat_modify", "target": "chivalry", "value": 6, "operator": "add" },
           { "type": "event_record", "target": "sect_midlife_ledger_upright" }

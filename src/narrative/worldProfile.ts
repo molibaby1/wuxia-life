@@ -65,7 +65,9 @@ import {
 import {
   WUXIA_CHILDHOOD_SHAPING_RULES,
   WUXIA_COMPOSITE_DESTINY_OUTCOMES,
+  WUXIA_MIXED_DESTINY_OUTCOMES,
   WUXIA_ORIGIN_SURFACES,
+  WUXIA_PINNACLE_DESTINY_OUTCOMES,
   WUXIA_RARE_EVENT_LINES,
 } from './profile/wuxiaOriginSurfaces';
 import type { WorldProfile } from './profile/types';
@@ -99,6 +101,8 @@ export const WUXIA_WORLD_PROFILE: WorldProfile = {
   summaryTemplates: WUXIA_SUMMARY_TEMPLATES,
   originSurfaces: WUXIA_ORIGIN_SURFACES,
   compositeDestinyOutcomes: WUXIA_COMPOSITE_DESTINY_OUTCOMES,
+  pinnacleDestinyOutcomes: WUXIA_PINNACLE_DESTINY_OUTCOMES,
+  mixedDestinyOutcomes: WUXIA_MIXED_DESTINY_OUTCOMES,
   childhoodShapingRules: WUXIA_CHILDHOOD_SHAPING_RULES,
   rareEventLines: WUXIA_RARE_EVENT_LINES,
   relationshipConsequencePatterns: WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS,

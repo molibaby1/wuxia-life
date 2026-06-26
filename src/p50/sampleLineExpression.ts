@@ -62,6 +62,12 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
 }
 
 function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.orthodox_age45_legacy_steward_done) {
+    return '传承守门，门派遗命在肩';
+  }
+  if (flags.orthodox_age40_identity_done && age >= 44) {
+    return '四十回望之后，守山之责待承';
+  }
   if (flags.orthodox_age40_identity_done) {
     return '回望正道身份，守正之路已刻进一生';
   }
@@ -78,6 +84,12 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.demonic_age45_territory_consolidated) {
+    return '地盘既固，反噬与孤立加深';
+  }
+  if (flags.demonic_age40_identity_done && age >= 44) {
+    return '邪路已定，扩张与反噬待至';
+  }
   if (flags.demonic_age40_identity_done) {
     return '邪路身份已定，收益与孤立并存';
   }
@@ -97,6 +109,12 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 }
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.merchant_age45_expansion_fork_done) {
+    return '扩张分岔已至，债与人情并重';
+  }
+  if (flags.merchant_age40_identity_done && age >= 44) {
+    return '商路身份已定，扩张分岔在前';
+  }
   if (flags.merchant_age40_identity_done) {
     return '财富带来选择，也带来债';
   }

@@ -84,7 +84,7 @@
         "Do not introduce a new test framework"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Configuration implementation story."
     },
     {

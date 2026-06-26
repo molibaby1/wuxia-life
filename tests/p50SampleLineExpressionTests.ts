@@ -200,12 +200,45 @@ function testMerchantLineWinsOverParallelDemonicRoute(): void {
   assert(goal.includes('店铺') || goal.includes('经营') || goal.includes('周转'), `unexpected merchant goal: ${goal}`);
 }
 
+function testPost40PayoffExpression(): void {
+  const orthodox45 = makeState(45, {
+    orthodox_age40_identity_done: true,
+    orthodox_age45_payoff_done: true,
+    orthodox_age45_legacy_steward_done: true,
+  });
+  const orthodoxGoal = deriveSampleLineCurrentGoal(orthodox45) ?? '';
+  assert(orthodoxGoal.includes('传承'), `orthodox 45 payoff goal: ${orthodoxGoal}`);
+
+  const demonic45 = makeState(45, {
+    demonic_age40_identity_done: true,
+    demonic_age45_payoff_done: true,
+    demonic_age45_territory_consolidated: true,
+    route_demonic: true,
+  });
+  const demonicGoal = deriveSampleLineCurrentGoal(demonic45) ?? '';
+  assert(demonicGoal.includes('地盘'), `demonic 45 payoff goal: ${demonicGoal}`);
+
+  const merchant45 = makeState(45, {
+    merchant_age40_identity_done: true,
+    merchant_age45_payoff_done: true,
+    merchant_age45_expansion_fork_done: true,
+    merchant_childhood_seed_done: true,
+  });
+  const merchantGoal = deriveSampleLineCurrentGoal(merchant45) ?? '';
+  assert(merchantGoal.includes('扩张'), `merchant 45 payoff goal: ${merchantGoal}`);
+
+  for (const goal of [orthodoxGoal, demonicGoal, merchantGoal]) {
+    assert(isPlayerVisibleSampleLineText(goal), `raw key in 40+ goal: ${goal}`);
+  }
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
   testMerchantExpression();
   testCrossLineAge13CostLabels();
   testMerchantLineWinsOverParallelDemonicRoute();
+  testPost40PayoffExpression();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T22:53:42.206Z",
+  "generatedAt": "2026-06-26T04:54:48.137Z",
   "checkpointAges": [
     13,
     18,
@@ -238,9 +238,9 @@
             "route_demonic",
             "route_merchant"
           ],
-          "currentGoal": "试探底线，换取力量",
-          "costLabel": "邪路代价",
-          "lifeMemoryEntry": "goal=试探底线，换取力量 | achievement=喜结良缘"
+          "currentGoal": "第一桶金已得，店铺经营中",
+          "costLabel": "商路债务",
+          "lifeMemoryEntry": "goal=第一桶金已得，店铺经营中 | achievement=喜结良缘"
         },
         {
           "age": 32,
@@ -255,9 +255,9 @@
             "route_demonic",
             "route_merchant"
           ],
-          "currentGoal": "试探底线，换取力量",
-          "costLabel": "邪路代价",
-          "lifeMemoryEntry": "goal=试探底线，换取力量 | achievement=喜结良缘"
+          "currentGoal": "第一桶金已得，店铺经营中",
+          "costLabel": "商路债务",
+          "lifeMemoryEntry": "goal=第一桶金已得，店铺经营中 | achievement=喜结良缘"
         },
         {
           "age": 40,
@@ -272,14 +272,14 @@
             "route_demonic",
             "route_merchant"
           ],
-          "currentGoal": "试探底线，换取力量",
-          "costLabel": "邪路代价",
-          "lifeMemoryEntry": "goal=试探底线，换取力量 | achievement=喜结良缘",
+          "currentGoal": "财富带来选择，也带来债",
+          "costLabel": "商路债务",
+          "lifeMemoryEntry": "goal=财富带来选择，也带来债 | achievement=喜结良缘",
           "age40Identity": "你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力"
         }
       ],
       "finalAge": 40,
-      "deterministicHash": "h394378646"
+      "deterministicHash": "h199304213"
     }
   ],
   "crossLineComparison": [
@@ -347,19 +347,19 @@
       "checkpointAge": 25,
       "dimension": "goal",
       "verdict": "distinct",
-      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 试探底线，换取力量"
+      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 第一桶金已得，店铺经营中"
     },
     {
       "checkpointAge": 25,
       "dimension": "cost",
-      "verdict": "partial",
-      "detail": "守正代价 || 邪路代价 || 邪路代价"
+      "verdict": "distinct",
+      "detail": "守正代价 || 邪路代价 || 商路债务"
     },
     {
       "checkpointAge": 25,
       "dimension": "identity",
       "verdict": "distinct",
-      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=试探底线，换取力量 | achievement=喜结良缘"
+      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=第一桶金已得，店铺经营中 | achievement=喜结良缘"
     },
     {
       "checkpointAge": 25,
@@ -377,19 +377,19 @@
       "checkpointAge": 32,
       "dimension": "goal",
       "verdict": "distinct",
-      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 试探底线，换取力量"
+      "detail": "行侠守义，承担门派义务 || 力量与地盘在涨，诱惑未止 || 第一桶金已得，店铺经营中"
     },
     {
       "checkpointAge": 32,
       "dimension": "cost",
-      "verdict": "partial",
-      "detail": "守正代价 || 邪路代价 || 邪路代价"
+      "verdict": "distinct",
+      "detail": "守正代价 || 邪路代价 || 商路债务"
     },
     {
       "checkpointAge": 32,
       "dimension": "identity",
       "verdict": "distinct",
-      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=试探底线，换取力量 | achievement=喜结良缘"
+      "detail": "goal=行侠守义，承担门派义务 | achievement=喜结良缘 || goal=力量与地盘在涨，诱惑未止 | achievement=喜结良缘 || goal=第一桶金已得，店铺经营中 | achievement=喜结良缘"
     },
     {
       "checkpointAge": 32,
@@ -407,13 +407,13 @@
       "checkpointAge": 40,
       "dimension": "goal",
       "verdict": "distinct",
-      "detail": "回望正道身份，守正之路已刻进一生 || 邪路身份已定，收益与孤立并存 || 试探底线，换取力量"
+      "detail": "回望正道身份，守正之路已刻进一生 || 邪路身份已定，收益与孤立并存 || 财富带来选择，也带来债"
     },
     {
       "checkpointAge": 40,
       "dimension": "cost",
-      "verdict": "partial",
-      "detail": "守正代价 || 邪路代价 || 邪路代价"
+      "verdict": "distinct",
+      "detail": "守正代价 || 邪路代价 || 商路债务"
     },
     {
       "checkpointAge": 40,

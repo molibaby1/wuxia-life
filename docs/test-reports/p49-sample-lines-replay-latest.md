@@ -1,6 +1,6 @@
 # P49 Sample Lines Replay Latest
 
-Generated: 2026-06-25T22:53:42.206Z
+Generated: 2026-06-26T04:54:48.137Z
 Checkpoint ages: 13, 18, 25, 32, 40
 
 ## 正派武道 (seed 301)
@@ -36,14 +36,14 @@ Checkpoint ages: 13, 18, 25, 32, 40
 ## 商路崛起 (seed 804)
 
 - Final age: 40
-- Deterministic hash: h394378646
+- Deterministic hash: h199304213
 
 | Age | Current goal | Route flags | Recent events | Life-memory entry |
 | --- | --- | --- | --- | --- |
 | 13 | 营商天赋已显，尚未开张 | route_merchant | merchant_talent_discovery, daily_morning_training_neg_1, childhood_summary, late_childhood_prep, youth_begins | goal=营商天赋已显，尚未开张 |
 | 18 | 第一桶金已得，店铺经营中 | route_merchant | sect_choice, love_first_meet, love_after_greet, merchant_first_shop, daily_training_bottleneck_pos_1 | goal=第一桶金已得，店铺经营中 |
-| 25 | 试探底线，换取力量 | route_demonic, route_merchant | outlaw_path_beginning, p11_wealth_reinforcement_first_deal, commoner_year_apprentice, p9_wealth_caravan_gate, family_child_born | goal=试探底线，换取力量 | achievement=喜结良缘 |
-| 32 | 试探底线，换取力量 | route_demonic, route_merchant | family_child_education, spouse_mingyue_daily, relationship_enemy_create, setback_illness, relationship_blood_brotherhood | goal=试探底线，换取力量 | achievement=喜结良缘 |
-| 40 | 试探底线，换取力量 | route_demonic, route_merchant | family_crisis, commoner_year_farming, relationship_sworn_help, merchant_age40_identity_summary, daily_morning_training_pos_1 | goal=试探底线，换取力量 | achievement=喜结良缘 |
+| 25 | 第一桶金已得，店铺经营中 | route_demonic, route_merchant | outlaw_path_beginning, p11_wealth_reinforcement_first_deal, commoner_year_apprentice, p9_wealth_caravan_gate, family_child_born | goal=第一桶金已得，店铺经营中 | achievement=喜结良缘 |
+| 32 | 第一桶金已得，店铺经营中 | route_demonic, route_merchant | family_child_education, spouse_mingyue_daily, relationship_enemy_create, setback_illness, relationship_blood_brotherhood | goal=第一桶金已得，店铺经营中 | achievement=喜结良缘 |
+| 40 | 财富带来选择，也带来债 | route_demonic, route_merchant | family_crisis, commoner_year_farming, relationship_sworn_help, merchant_age40_identity_summary, daily_morning_training_pos_1 | goal=财富带来选择，也带来债 | achievement=喜结良缘 |
 
 **Age-40 identity:** 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力

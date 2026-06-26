@@ -42,7 +42,7 @@
         "Limit to small configuration-layer changes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Orthodox spine design story."
     },
     {
@@ -56,7 +56,7 @@
         "Limit to small configuration-layer changes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Demonic spine design story."
     },
     {

@@ -63,3 +63,13 @@
 **Post flags:** `demonic_age45_payoff_done`, `demonic_age45_territory_consolidated`  
 **Bridge:** 语义对齐 `demonic_midlife_consequence` / expansion 主题，spine 保证 benchmark 触发  
 **Expression hook:** currentGoal →「地盘既固，反噬与孤立加深」（payoff done）
+
+## Appendix C — Merchant 40+ payoff spine (P53-005)
+
+**Event ID:** `merchant_age45_expansion_fork`  
+**Age:** 44–48 trigger @ 44  
+**Theme:** 扩张分岔 — 债务/人情/忠诚冲突，可选加强 M-merchant-debt 信号  
+**Pre:** `merchant_age40_identity_done`, 排除 O/D childhood seed  
+**Post flags:** `merchant_age45_payoff_done`, `merchant_age45_expansion_fork_done`  
+**Bridge:** 承接 `merchant_midlife_debt` 语义，40+ 给出「下一阶段经营方向」  
+**Expression hook:** currentGoal →「扩张分岔已至，债与人情并重」（payoff done）

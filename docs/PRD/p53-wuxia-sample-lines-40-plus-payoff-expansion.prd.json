@@ -70,7 +70,7 @@
         "Limit to small configuration-layer changes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Merchant spine design story."
     },
     {

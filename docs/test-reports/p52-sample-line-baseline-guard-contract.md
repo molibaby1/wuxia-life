@@ -53,10 +53,22 @@ Runs in sequence:
 
 - Full checkpoint snapshot for ages 13/18/32
 - Fourth sample line
-- 40+ content expansion
+- Full birth→death lifetime sim
 - Human playtest automation
 
-## 6. Related artifacts
+## 6. P53 addendum — G-40+ checkpoints (2026-06-26)
+
+| ID | Invariant | Guard location | Checkpoint / trigger |
+| --- | --- | --- | --- |
+| G-11 | Orthodox 301 age-45 `orthodox_age45_payoff_done` + payoff event in 44–48 | `p50SampleLineSpineTests` → `testBenchmarkAge45Payoff` | Live sim seed 301 age ≤50 |
+| G-12 | Demonic 303 age-45 `demonic_age45_payoff_done` + payoff event in 44–48 | `testBenchmarkAge45Payoff` | Live sim seed 303 |
+| G-13 | Merchant 804 age-45 `merchant_age45_payoff_done` + payoff event in 44–48 | `testBenchmarkAge45Payoff` | Live sim seed 804 |
+| G-14 | Replay matrix age-45 post40PayoffDone + line-consistent currentGoal | `p49SampleLineReplayTests` → `testLiveAge45PayoffAlignment` | Live sim checkpoint 45 |
+| G-15 | P49 checkpoint ages include 45/50; replay latest reflects 40+ slice | `p49:replay` → `p49-sample-lines-replay-latest.*` | On demand |
+
+P52 G-01–G-10 **unchanged**. P53 extends guard surface only for 40+ slice.
+
+## 7. Related artifacts
 
 - Gap audit: `p52-baseline-hardening-gap-audit.md`
 - Cross-tester comparison: `p52-cross-tester-playtest-comparison.md`

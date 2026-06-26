@@ -112,7 +112,7 @@
         "Update cross-line comparison with 40+ readable difference dimension if applicable"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Replay extension story."
     },
     {
@@ -126,7 +126,7 @@
         "Do not replace gate:playability"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Guard extension story."
     },
     {
@@ -140,7 +140,7 @@
         "Do not reopen P46-P52 blockers"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Closure story."
     }
   ]

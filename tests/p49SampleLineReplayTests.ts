@@ -73,7 +73,7 @@ function testMatrixSpec(): void {
   assert(P49_SAMPLE_LINE_MATRIX[0]?.seed === 301, 'orthodox seed mismatch');
   assert(P49_SAMPLE_LINE_MATRIX[1]?.seed === 303, 'demonic seed mismatch');
   assert(P49_SAMPLE_LINE_MATRIX[2]?.seed === 804, 'merchant seed mismatch');
-  assert(P49_CHECKPOINT_AGES.join(',') === '13,18,25,32,40', 'checkpoint ages mismatch');
+  assert(P49_CHECKPOINT_AGES.join(',') === '13,18,25,32,40,45,50', 'checkpoint ages mismatch');
 }
 
 function testDeterministicExport(): void {
@@ -131,7 +131,7 @@ function testDeterministicExport(): void {
   const first = summarizeSampleLineRun({ entry: orthodox, report: buildReport() });
   const second = summarizeSampleLineRun({ entry: orthodox, report: buildReport() });
   assert(first.deterministicHash === second.deterministicHash, 'checkpoint export not deterministic');
-  assert(first.checkpoints.length === 5, 'expected 5 checkpoint exports');
+  assert(first.checkpoints.length === 7, 'expected 7 checkpoint exports');
   assert(Boolean(first.checkpoints[0]?.lifeMemoryEntry), 'life-memory entry missing');
 }
 
@@ -214,11 +214,52 @@ async function testLiveAge25GoalAlignment(): Promise<void> {
   }
 }
 
+async function testLiveAge45PayoffAlignment(): Promise<void> {
+  const expectations: Array<{ seed: number; payoffFlag: string; goalFragment: string }> = [
+    { seed: 301, payoffFlag: 'orthodox_age45_payoff_done', goalFragment: '传承' },
+    { seed: 303, payoffFlag: 'demonic_age45_payoff_done', goalFragment: '地盘' },
+    { seed: 804, payoffFlag: 'merchant_age45_payoff_done', goalFragment: '扩张' },
+  ];
+  for (const entry of P49_SAMPLE_LINE_MATRIX) {
+    const expected = expectations.find((item) => item.seed === entry.seed)!;
+    const simulator = new GameProcessSimulator({
+      playerName: entry.personaName,
+      gender: entry.gender,
+      seed: entry.seed,
+      choiceTendency: entry.choiceTendency,
+      routeTrack: entry.routeTrack,
+      p8PersonaId: entry.p8PersonaId,
+      simulateYears: 50,
+      runUntilDeath: false,
+      ageRange: { startAge: 0, endAge: 50 },
+      maxEvents: 280,
+      enableAutoSave: false,
+      enableManualSave: false,
+      enableSaveRestore: false,
+      verbose: false,
+      sampleId: entry.sampleId,
+    });
+    const report = await simulator.simulate();
+    const summary = summarizeSampleLineRun({ entry, report });
+    const cp45 = summary.checkpoints.find((cp) => cp.age === 45);
+    assert(Boolean(cp45), `seed ${entry.seed}: missing age-45 checkpoint export`);
+    assert(cp45!.post40PayoffDone === true, `seed ${entry.seed}: post40PayoffDone false at age 45`);
+    const goal = cp45!.currentGoal ?? '';
+    assert(
+      goal.includes(expected.goalFragment),
+      `seed ${entry.seed}: age-45 goal missing "${expected.goalFragment}": ${goal}`,
+    );
+    const rec45 = [...report.records].reverse().find((record) => record.age <= 45);
+    assert(Boolean(rec45?.gameState.flags?.[expected.payoffFlag]), `seed ${entry.seed}: missing ${expected.payoffFlag}`);
+  }
+}
+
 async function main(): Promise<void> {
   testMatrixSpec();
   testDeterministicExport();
   await testLiveDeterminism();
   await testLiveAge25GoalAlignment();
+  await testLiveAge45PayoffAlignment();
   console.log('p49SampleLineReplayTests: all passed');
 }
 

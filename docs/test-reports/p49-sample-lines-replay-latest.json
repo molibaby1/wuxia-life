@@ -1,11 +1,13 @@
 {
-  "generatedAt": "2026-06-26T04:54:48.137Z",
+  "generatedAt": "2026-06-26T05:07:22.851Z",
   "checkpointAges": [
     13,
     18,
     25,
     32,
-    40
+    40,
+    45,
+    50
   ],
   "lines": [
     {
@@ -80,11 +82,11 @@
         {
           "age": 40,
           "eventIds": [
-            "family_crisis",
             "daily_take_odd_job_neu_1",
             "commoner_year_neighbor",
             "orthodox_age40_identity_summary",
-            "relationship_blood_brotherhood"
+            "relationship_blood_brotherhood",
+            "daily_small_trade_neg_1"
           ],
           "routeFlags": [
             "route_orthodox"
@@ -93,10 +95,46 @@
           "costLabel": "守正代价",
           "lifeMemoryEntry": "goal=回望正道身份，守正之路已刻进一生 | achievement=喜结良缘",
           "age40Identity": "你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径"
+        },
+        {
+          "age": 45,
+          "eventIds": [
+            "jianghu_public_enemy",
+            "family_child_education",
+            "jianghu_demon_sect",
+            "orthodox_age45_legacy_stewardship",
+            "relationship_sworn_help"
+          ],
+          "routeFlags": [
+            "route_orthodox"
+          ],
+          "currentGoal": "传承守门，门派遗命在肩",
+          "costLabel": "守正代价",
+          "lifeMemoryEntry": "goal=传承守门，门派遗命在肩 | achievement=喜结良缘",
+          "age40Identity": "你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径",
+          "post40PayoffDone": true
+        },
+        {
+          "age": 50,
+          "eventIds": [
+            "relationship_sworn_help",
+            "daily_morning_training_neu_1",
+            "jianghu_hermit_master",
+            "family_family_honor",
+            "career_mediate_conflict"
+          ],
+          "routeFlags": [
+            "route_orthodox"
+          ],
+          "currentGoal": "传承守门，门派遗命在肩",
+          "costLabel": "守正代价",
+          "lifeMemoryEntry": "goal=传承守门，门派遗命在肩 | achievement=喜结良缘",
+          "age40Identity": "你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径",
+          "post40PayoffDone": true
         }
       ],
-      "finalAge": 40,
-      "deterministicHash": "h584082903"
+      "finalAge": 50,
+      "deterministicHash": "h1601969020"
     },
     {
       "lineId": "demonic",
@@ -169,11 +207,11 @@
         {
           "age": 40,
           "eventIds": [
-            "family_crisis",
             "demonic_midlife_betrayal",
             "commoner_year_neighbor",
             "demonic_age40_identity_summary",
-            "demonic_midlife_fork"
+            "demonic_midlife_fork",
+            "daily_night_reflection_neu_1"
           ],
           "routeFlags": [
             "route_demonic",
@@ -183,10 +221,48 @@
           "costLabel": "邪路代价",
           "lifeMemoryEntry": "goal=邪路身份已定，收益与孤立并存 | achievement=喜结良缘",
           "age40Identity": "你成了被选择与后果推向邪路的魔道中人，诱惑让你得到力量，也让你失去安稳"
+        },
+        {
+          "age": 45,
+          "eventIds": [
+            "jianghu_grudge",
+            "jianghu_public_enemy",
+            "jianghu_hermit_master",
+            "demonic_age45_territory_consolidation",
+            "demonic_midlife_consequence"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_demonic_completed"
+          ],
+          "currentGoal": "地盘既固，反噬与孤立加深",
+          "costLabel": "邪路代价",
+          "lifeMemoryEntry": "goal=地盘既固，反噬与孤立加深 | achievement=魔道立规",
+          "age40Identity": "你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路",
+          "post40PayoffDone": true
+        },
+        {
+          "age": 50,
+          "eventIds": [
+            "demonic_midlife_consequence",
+            "daily_get_back_spirit_pos_1",
+            "family_child_marriage",
+            "setback_illness",
+            "jianghu_hero_meeting"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_demonic_completed"
+          ],
+          "currentGoal": "地盘既固，反噬与孤立加深",
+          "costLabel": "邪路代价",
+          "lifeMemoryEntry": "goal=地盘既固，反噬与孤立加深 | achievement=魔道立规",
+          "age40Identity": "你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路",
+          "post40PayoffDone": true
         }
       ],
-      "finalAge": 40,
-      "deterministicHash": "h2110389778"
+      "finalAge": 50,
+      "deterministicHash": "h1889627738"
     },
     {
       "lineId": "merchant",
@@ -262,11 +338,11 @@
         {
           "age": 40,
           "eventIds": [
-            "family_crisis",
             "commoner_year_farming",
             "relationship_sworn_help",
             "merchant_age40_identity_summary",
-            "daily_morning_training_pos_1"
+            "daily_morning_training_pos_1",
+            "jianghu_rescue"
           ],
           "routeFlags": [
             "route_demonic",
@@ -276,10 +352,48 @@
           "costLabel": "商路债务",
           "lifeMemoryEntry": "goal=财富带来选择，也带来债 | achievement=喜结良缘",
           "age40Identity": "你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力"
+        },
+        {
+          "age": 45,
+          "eventIds": [
+            "jianghu_demon_sect",
+            "jianghu_grudge",
+            "career_mediate_conflict",
+            "merchant_age45_expansion_fork",
+            "daily_morning_training_neu_1"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_merchant"
+          ],
+          "currentGoal": "扩张分岔已至，债与人情并重",
+          "costLabel": "商路债务",
+          "lifeMemoryEntry": "goal=扩张分岔已至，债与人情并重 | achievement=喜结良缘",
+          "age40Identity": "你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力",
+          "post40PayoffDone": true
+        },
+        {
+          "age": 50,
+          "eventIds": [
+            "daily_morning_training_neu_1",
+            "family_reunion",
+            "career_write_book",
+            "family_child_marriage",
+            "setback_injury"
+          ],
+          "routeFlags": [
+            "route_demonic",
+            "route_merchant"
+          ],
+          "currentGoal": "扩张分岔已至，债与人情并重",
+          "costLabel": "商路债务",
+          "lifeMemoryEntry": "goal=扩张分岔已至，债与人情并重 | achievement=喜结良缘",
+          "age40Identity": "你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力",
+          "post40PayoffDone": true
         }
       ],
-      "finalAge": 40,
-      "deterministicHash": "h199304213"
+      "finalAge": 50,
+      "deterministicHash": "h1383510263"
     }
   ],
   "crossLineComparison": [
@@ -431,7 +545,67 @@
       "checkpointAge": 40,
       "dimension": "replay",
       "verdict": "distinct",
-      "detail": "orthodox:orthodox_age40_identity_summary+relationship_blood_brotherhood || demonic:demonic_age40_identity_summary+demonic_midlife_fork || merchant:merchant_age40_identity_summary+daily_morning_training_pos_1"
+      "detail": "orthodox:relationship_blood_brotherhood+daily_small_trade_neg_1 || demonic:demonic_midlife_fork+daily_night_reflection_neu_1 || merchant:daily_morning_training_pos_1+jianghu_rescue"
+    },
+    {
+      "checkpointAge": 45,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "传承守门，门派遗命在肩 || 地盘既固，反噬与孤立加深 || 扩张分岔已至，债与人情并重"
+    },
+    {
+      "checkpointAge": 45,
+      "dimension": "cost",
+      "verdict": "distinct",
+      "detail": "守正代价 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 45,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径 || 你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路 || 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力"
+    },
+    {
+      "checkpointAge": 45,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_orthodox || route_demonic,route_demonic_completed || route_demonic,route_merchant"
+    },
+    {
+      "checkpointAge": 45,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:orthodox_age45_legacy_stewardship+relationship_sworn_help || demonic:demonic_age45_territory_consolidation+demonic_midlife_consequence || merchant:merchant_age45_expansion_fork+daily_morning_training_neu_1"
+    },
+    {
+      "checkpointAge": 50,
+      "dimension": "goal",
+      "verdict": "distinct",
+      "detail": "传承守门，门派遗命在肩 || 地盘既固，反噬与孤立加深 || 扩张分岔已至，债与人情并重"
+    },
+    {
+      "checkpointAge": 50,
+      "dimension": "cost",
+      "verdict": "distinct",
+      "detail": "守正代价 || 邪路代价 || 商路债务"
+    },
+    {
+      "checkpointAge": 50,
+      "dimension": "identity",
+      "verdict": "distinct",
+      "detail": "你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径 || 你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路 || 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力"
+    },
+    {
+      "checkpointAge": 50,
+      "dimension": "continue",
+      "verdict": "distinct",
+      "detail": "route_orthodox || route_demonic,route_demonic_completed || route_demonic,route_merchant"
+    },
+    {
+      "checkpointAge": 50,
+      "dimension": "replay",
+      "verdict": "distinct",
+      "detail": "orthodox:family_family_honor+career_mediate_conflict || demonic:setback_illness+jianghu_hero_meeting || merchant:family_child_marriage+setback_injury"
     }
   ]
 }

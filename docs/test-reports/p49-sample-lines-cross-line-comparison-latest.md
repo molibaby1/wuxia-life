@@ -1,6 +1,6 @@
 # P49 Sample Lines Cross-Line Comparison Latest
 
-Generated: 2026-06-26T04:54:48.137Z
+Generated: 2026-06-26T05:07:22.851Z
 
 | Checkpoint | Dimension | Verdict | Detail |
 | --- | --- | --- | --- |
@@ -28,6 +28,16 @@ Generated: 2026-06-26T04:54:48.137Z
 | 40 | 代价感知 | distinct | 守正代价 || 邪路代价 || 商路债务 |
 | 40 | 身份总结 | distinct | 你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径 || 你成了被选择与后果推向邪路的魔道中人，诱惑让你得到力量，也让你失去安稳 || 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力 |
 | 40 | 继续意愿代理 | distinct | route_orthodox || route_demonic,route_demonic_completed || route_demonic,route_merchant |
-| 40 | 重开差异代理 | distinct | orthodox:orthodox_age40_identity_summary+relationship_blood_brotherhood || demonic:demonic_age40_identity_summary+demonic_midlife_fork || merchant:merchant_age40_identity_summary+daily_morning_training_pos_1 |
+| 40 | 重开差异代理 | distinct | orthodox:relationship_blood_brotherhood+daily_small_trade_neg_1 || demonic:demonic_midlife_fork+daily_night_reflection_neu_1 || merchant:daily_morning_training_pos_1+jianghu_rescue |
+| 45 | 当前目标 | distinct | 传承守门，门派遗命在肩 || 地盘既固，反噬与孤立加深 || 扩张分岔已至，债与人情并重 |
+| 45 | 代价感知 | distinct | 守正代价 || 邪路代价 || 商路债务 |
+| 45 | 身份总结 | distinct | 你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径 || 你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路 || 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力 |
+| 45 | 继续意愿代理 | distinct | route_orthodox || route_demonic,route_demonic_completed || route_demonic,route_merchant |
+| 45 | 重开差异代理 | distinct | orthodox:orthodox_age45_legacy_stewardship+relationship_sworn_help || demonic:demonic_age45_territory_consolidation+demonic_midlife_consequence || merchant:merchant_age45_expansion_fork+daily_morning_training_neu_1 |
+| 50 | 当前目标 | distinct | 传承守门，门派遗命在肩 || 地盘既固，反噬与孤立加深 || 扩张分岔已至，债与人情并重 |
+| 50 | 代价感知 | distinct | 守正代价 || 邪路代价 || 商路债务 |
+| 50 | 身份总结 | distinct | 你是被门派与江湖认可的正派武者，为守正放弃了安逸与捷径 || 你成了立规掌权的魔道中人，诱惑让你得到地位，也让你失去退路 || 你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力 |
+| 50 | 继续意愿代理 | distinct | route_orthodox || route_demonic,route_demonic_completed || route_demonic,route_merchant |
+| 50 | 重开差异代理 | distinct | orthodox:family_family_honor+career_mediate_conflict || demonic:setback_illness+jianghu_hero_meeting || merchant:family_child_marriage+setback_injury |
 
-Summary: distinct=25, partial=0, collapsed=0
+Summary: distinct=35, partial=0, collapsed=0

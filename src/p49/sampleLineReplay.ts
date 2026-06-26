@@ -31,6 +31,7 @@ export interface P49CheckpointExport {
   costLabel?: string;
   lifeMemoryEntry: string;
   age40Identity?: string;
+  post40PayoffDone?: boolean;
 }
 
 export interface P49LineReplaySummary {
@@ -48,7 +49,7 @@ export interface P49SampleLineReplayReport {
   lines: P49LineReplaySummary[];
 }
 
-export const P49_CHECKPOINT_AGES = [13, 18, 25, 32, 40] as const;
+export const P49_CHECKPOINT_AGES = [13, 18, 25, 32, 40, 45, 50] as const;
 
 export const P49_SAMPLE_LINE_MATRIX: P49SampleLineMatrixEntry[] = [
   {
@@ -138,6 +139,7 @@ export function summarizeSampleLineRun(input: {
       return { age, eventIds: [], routeFlags: [], lifeMemoryEntry: 'none' };
     }
     const lifeMemory = deriveLifeMemorySummary(record.gameState);
+    const flags = record.gameState.flags ?? {};
     return {
       age,
       eventIds: collectRecentEventIds(input.report.records, age),
@@ -146,6 +148,11 @@ export function summarizeSampleLineRun(input: {
       costLabel: deriveSampleLineCostLabel(record.gameState),
       lifeMemoryEntry: buildLifeMemoryEntry(lifeMemory),
       age40Identity: age >= 38 ? deriveSampleLineAge40Identity(record.gameState) : undefined,
+      post40PayoffDone: age >= 45 ? Boolean(
+        flags.orthodox_age45_payoff_done
+        || flags.demonic_age45_payoff_done
+        || flags.merchant_age45_payoff_done,
+      ) : undefined,
     };
   });
 
@@ -253,6 +260,11 @@ export function formatP49ReplayMarkdown(report: P49SampleLineReplayReport): stri
     if (age40?.age40Identity) {
       lines.push('');
       lines.push(`**Age-40 identity:** ${age40.age40Identity}`);
+    }
+    const age45 = line.checkpoints.find((cp) => cp.age === 45);
+    if (age45?.post40PayoffDone) {
+      lines.push('');
+      lines.push(`**Age-45 40+ payoff:** done — ${age45.currentGoal ?? '—'}`);
     }
   }
 

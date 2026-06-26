@@ -98,7 +98,7 @@
         "Add focused expression test coverage for 40+ assertions"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Expression wiring story."
     },
     {

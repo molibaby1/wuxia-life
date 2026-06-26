@@ -28,7 +28,7 @@
         "Record the contract in the PRD or docs/test-reports/"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Scope contract story."
     },
     {

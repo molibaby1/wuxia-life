@@ -41,3 +41,25 @@
 - 不重开 P46–P52 blocker
 - 不替代 `gate:playability`
 - 每线 payoff 节点 **≤ 2**（本 contract 取 1）
+
+---
+
+## Appendix A — Orthodox 40+ payoff spine (P53-003)
+
+**Event ID:** `orthodox_age45_legacy_stewardship`  
+**Age:** 44–48 trigger @ 44  
+**Theme:** 传承守门 — 承接 age-40 正派身份，延续门派 stewardship/legacy  
+**Pre:** `orthodox_age40_identity_done`, not `route_demonic`  
+**Post flags:** `orthodox_age45_payoff_done`, `orthodox_age45_legacy_steward_done`  
+**Bridge:** 语义对齐 `sect_midlife_stewardship` / `sect_midlife_ledger`，但不依赖其完整 midlife 链  
+**Expression hook:** currentGoal →「传承守门，门派遗命在肩」（payoff done）或「四十回望之后，守山之责待承」（age≥44 pre-payoff）
+
+## Appendix B — Demonic 40+ payoff spine (P53-004)
+
+**Event ID:** `demonic_age45_territory_consolidation`  
+**Age:** 44–48 trigger @ 44  
+**Theme:** 地盘巩固与反噬 — 诱惑/收益/孤立延续，不复述 age-40 邪路总结  
+**Pre:** `demonic_age40_identity_done`, `route_demonic`  
+**Post flags:** `demonic_age45_payoff_done`, `demonic_age45_territory_consolidated`  
+**Bridge:** 语义对齐 `demonic_midlife_consequence` / expansion 主题，spine 保证 benchmark 触发  
+**Expression hook:** currentGoal →「地盘既固，反噬与孤立加深」（payoff done）

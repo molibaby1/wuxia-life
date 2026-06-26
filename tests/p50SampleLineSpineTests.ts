@@ -10,22 +10,28 @@ import { GameProcessSimulator } from './GameProcessSimulator';
 const SPINE_EVENT_IDS = [
   'orthodox_childhood_seed_milestone',
   'orthodox_age40_identity_summary',
+  'orthodox_age45_legacy_stewardship',
   'demonic_childhood_seed_milestone',
   'demonic_youth_first_transgression',
   'demonic_age40_identity_summary',
+  'demonic_age45_territory_consolidation',
   'merchant_childhood_seed_milestone',
   'merchant_age40_identity_summary',
+  'merchant_age45_expansion_fork',
 ] as const;
 
 const SPINE_FLAGS = [
   'orthodox_childhood_seed_done',
   'orthodox_youth_recognized',
   'orthodox_age40_identity_done',
+  'orthodox_age45_payoff_done',
   'demonic_childhood_seed_done',
   'demonic_youth_first_transgression',
   'demonic_age40_identity_done',
+  'demonic_age45_payoff_done',
   'merchant_childhood_seed_done',
   'merchant_age40_identity_done',
+  'merchant_age45_payoff_done',
   'route_merchant',
 ] as const;
 
@@ -42,24 +48,32 @@ function testSpineEventsLoaded(): void {
   }
 }
 
-async function testBenchmarkSeedReachesAge40(
+async function testBenchmarkSeedReachesAge(
   label: string,
   config: ConstructorParameters<typeof GameProcessSimulator>[0],
+  endAge: number,
 ): Promise<GameProcessReport> {
   const simulator = new GameProcessSimulator({
     ...config,
-    simulateYears: 40,
+    simulateYears: endAge,
     runUntilDeath: false,
-    ageRange: { startAge: 0, endAge: 40 },
-    maxEvents: 220,
+    ageRange: { startAge: 0, endAge },
+    maxEvents: endAge <= 40 ? 220 : 280,
     enableAutoSave: false,
     enableManualSave: false,
     enableSaveRestore: false,
     verbose: false,
   });
   const report = await simulator.simulate();
-  assert(report.finalAge >= 38, `${label}: finalAge ${report.finalAge} < 38`);
+  assert(report.finalAge >= Math.min(endAge - 2, endAge), `${label}: finalAge ${report.finalAge} < ${endAge - 2}`);
   return report;
+}
+
+async function testBenchmarkSeedReachesAge40(
+  label: string,
+  config: ConstructorParameters<typeof GameProcessSimulator>[0],
+): Promise<GameProcessReport> {
+  return testBenchmarkSeedReachesAge(label, config, 40);
 }
 
 async function testMerchant804ShopChain(): Promise<void> {
@@ -158,6 +172,24 @@ async function testBenchmarkAge40Identity(
   assert(isPlayerVisibleSampleLineText(identity!), `${label}: raw key in age-40 identity`);
 }
 
+async function testBenchmarkAge45Payoff(
+  label: string,
+  config: ConstructorParameters<typeof GameProcessSimulator>[0],
+  expectedEventId: string,
+  expectedFlag: string,
+): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge(label, config, 50);
+  const payoffEvent = report.records.find((record) => record.eventId === expectedEventId);
+  assert(Boolean(payoffEvent), `${label}: expected 40+ payoff event ${expectedEventId}`);
+  assert(
+    (payoffEvent?.age ?? 0) >= 44 && (payoffEvent?.age ?? 99) <= 48,
+    `${label}: ${expectedEventId} at age ${payoffEvent?.age}, expected 44-48`,
+  );
+  const rec45 = [...report.records].reverse().find((record) => record.age <= 45);
+  assert(Boolean(rec45), `${label}: missing age 45 checkpoint record`);
+  assert(Boolean(rec45!.gameState.flags?.[expectedFlag]), `${label}: expected ${expectedFlag} by age 45`);
+}
+
 async function main(): Promise<void> {
   testSpineEventsLoaded();
 
@@ -211,7 +243,34 @@ async function main(): Promise<void> {
     sampleId: 'p8-wealth-shen',
   }, 'merchant_age40_identity_done');
 
-  assert(SPINE_FLAGS.length >= 9, 'spine flag inventory incomplete');
+  await testBenchmarkAge45Payoff('orthodox-301-age45', {
+    playerName: '顾清和',
+    gender: 'male',
+    seed: 301,
+    choiceTendency: 'martial',
+    routeTrack: 'sect',
+    sampleId: 'golden-sect',
+  }, 'orthodox_age45_legacy_stewardship', 'orthodox_age45_payoff_done');
+
+  await testBenchmarkAge45Payoff('demonic-303-age45', {
+    playerName: '沈夜',
+    gender: 'male',
+    seed: 303,
+    choiceTendency: 'risk_averse',
+    routeTrack: 'demonic',
+    sampleId: 'golden-demonic',
+  }, 'demonic_age45_territory_consolidation', 'demonic_age45_payoff_done');
+
+  await testBenchmarkAge45Payoff('merchant-804-age45', {
+    playerName: '沈聚财',
+    gender: 'male',
+    seed: 804,
+    choiceTendency: 'wealth',
+    p8PersonaId: 'p8-wealth-shen',
+    sampleId: 'p8-wealth-shen',
+  }, 'merchant_age45_expansion_fork', 'merchant_age45_payoff_done');
+
+  assert(SPINE_FLAGS.length >= 12, 'spine flag inventory incomplete');
   console.log('p50SampleLineSpineTests: all passed');
 }
 

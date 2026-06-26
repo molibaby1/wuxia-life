@@ -241,5 +241,104 @@
       "enabled": true,
       "tags": ["p47", "merchant", "midlife", "mainline", "once"]
     }
+  },
+  {
+    "id": "orthodox_age45_legacy_stewardship",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('orthodox_age40_identity_done') && !flags.has('orthodox_age45_payoff_done') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "传承守门",
+      "text": "四十岁回望之后，师门将藏经阁钥匙与巡山令一并交到你手中。守正一生，终要有人为下一代护住山门。",
+      "description": "P53 正派 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age45_payoff_done" },
+      { "type": "flag_set", "target": "orthodox_age45_legacy_steward_done" },
+      { "type": "event_record", "target": "orthodox_age45_legacy_stewardship" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "orthodox", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "demonic_age45_territory_consolidation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('demonic_age40_identity_done') && flags.has('route_demonic') && !flags.has('demonic_age45_payoff_done')"
+      }
+    ],
+    "content": {
+      "title": "地盘既固",
+      "text": "邪路身份既成，幽影门内外再无人敢轻慢。可扩张带来的孤立与反噬，也在暗处积聚——力量未止，代价亦未止。",
+      "description": "P53 邪路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age45_payoff_done" },
+      { "type": "flag_set", "target": "demonic_age45_territory_consolidated" },
+      { "type": "event_record", "target": "demonic_age45_territory_consolidation" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "demonic", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "merchant_age45_expansion_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_age40_identity_done') && !flags.has('merchant_age45_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "扩张分岔",
+      "text": "四十岁后的第一笔大买卖摆在眼前：联号共担，还是独守铺面。财富带来选择，人情债与周转压力也一并涌来。",
+      "description": "P53 商路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+      { "type": "flag_set", "target": "merchant_age45_expansion_fork_done" },
+      { "type": "event_record", "target": "merchant_age45_expansion_fork" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "merchant", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
   }
 ]

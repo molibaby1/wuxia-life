@@ -1,6 +1,8 @@
-## [2026-06-26] - P54 Finalize (A2)
+## [2026-06-27] - P54 Finalize (A2)
+- A2 five-axis code review PASS: archive verify artifact; align residual replay guards with `isPlayerVisibleSampleLineText` (parity with age-25/45).
 - Closed P54 residual polish: M-orthodox-gray + M-merchant-debt → guarded baseline; spine bridge events, expression, G-16/G-17, closure report.
-- Validation: guard:sample-lines-baseline ✅ p49:replay ✅ typecheck ✅
+- Files: `agent_docs/p54-wuxia-sample-lines-residual-polish-verify-result.md`, `tests/p49SampleLineReplayTests.ts`, `progress.txt`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅ (no `lint` script in repo)
 ---
 ## [2026-06-26] - P54-011 (p54-wuxia-sample-lines-residual-polish)
 - Closure report; both residuals closed on benchmark seeds.

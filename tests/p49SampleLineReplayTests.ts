@@ -236,12 +236,15 @@ async function testLiveResidualSignalAlignment(): Promise<void> {
     ?? orthodoxSummary.checkpoints.find((cp) => cp.age === 32);
   const rec28 = [...orthodoxReport.records].reverse().find((record) => record.age <= 28);
   const goal28 = rec28 ? (deriveSampleLineCurrentGoal(rec28.gameState) ?? '') : (cp28?.currentGoal ?? '');
+  assert(isPlayerVisibleSampleLineText(goal28), `seed 301 residual cost goal has raw key: ${goal28}`);
   assert(
     goal28.includes('代价') || goal28.includes('义务'),
     `seed 301 residual cost goal missing at age 28: ${goal28}`,
   );
   const rec35 = [...orthodoxReport.records].reverse().find((record) => record.age <= 35);
+  assert(Boolean(rec35), 'seed 301: missing age-35 checkpoint record for residual gray signal');
   const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
+  assert(isPlayerVisibleSampleLineText(goal35), `seed 301 residual gray goal has raw key: ${goal35}`);
   assert(
     goal35.includes('灰度') || goal35.includes('代价'),
     `seed 301 residual gray goal missing by age 35: ${goal35}`,
@@ -252,12 +255,14 @@ async function testLiveResidualSignalAlignment(): Promise<void> {
   const rec35m = [...merchantReport.records].reverse().find((record) => record.age <= 35);
   assert(Boolean(rec35m?.gameState.flags?.merchant_midlife_debt), 'seed 804: merchant_midlife_debt missing by age 35');
   const goal35m = deriveSampleLineCurrentGoal(rec35m!.gameState) ?? '';
+  assert(isPlayerVisibleSampleLineText(goal35m), `seed 804 residual debt goal has raw key: ${goal35m}`);
   assert(
     goal35m.includes('人情') || goal35m.includes('周转') || goal35m.includes('债'),
     `seed 804 residual debt goal missing by age 35: ${goal35m}`,
   );
   const cp40 = summarizeSampleLineRun({ entry: merchant, report: merchantReport }).checkpoints.find((cp) => cp.age === 40);
   const identity40 = cp40?.age40Identity ?? '';
+  assert(isPlayerVisibleSampleLineText(identity40), `seed 804 age-40 identity has raw key: ${identity40}`);
   assert(
     identity40.includes('债') || identity40.includes('人情'),
     `seed 804 age-40 identity missing debt/favor: ${identity40}`,

@@ -93,6 +93,56 @@ async function testMerchant804ShopChain(): Promise<void> {
   );
 }
 
+function assertAge25Goal(
+  label: string,
+  report: GameProcessReport,
+  predicate: (goal: string) => boolean,
+  forbidden: string[],
+): void {
+  const rec25 = [...report.records].reverse().find((record) => record.age <= 25);
+  assert(Boolean(rec25), `${label}: missing age 25 checkpoint record`);
+  const goal25 = deriveSampleLineCurrentGoal(rec25!.gameState) ?? '';
+  assert(isPlayerVisibleSampleLineText(goal25), `${label}: raw key in age-25 goal: ${goal25}`);
+  assert(predicate(goal25), `${label}: age-25 goal off-line: ${goal25}`);
+  for (const fragment of forbidden) {
+    assert(!goal25.includes(fragment), `${label}: forbidden fragment "${fragment}" in goal: ${goal25}`);
+  }
+}
+
+async function testOrthodox301Age25Goal(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge40('orthodox-301-age25', {
+    playerName: '顾清和',
+    gender: 'male',
+    seed: 301,
+    choiceTendency: 'martial',
+    routeTrack: 'sect',
+    sampleId: 'golden-sect',
+  });
+  assertAge25Goal(
+    'seed 301',
+    report,
+    (goal) => goal.includes('行侠') || goal.includes('门派'),
+    ['店铺', '经营', '试探底线', '力量与地盘'],
+  );
+}
+
+async function testDemonic303Age25Goal(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge40('demonic-303-age25', {
+    playerName: '沈夜',
+    gender: 'male',
+    seed: 303,
+    choiceTendency: 'risk_averse',
+    routeTrack: 'demonic',
+    sampleId: 'golden-demonic',
+  });
+  assertAge25Goal(
+    'seed 303',
+    report,
+    (goal) => goal.includes('力量') || goal.includes('地盘') || goal.includes('邪') || goal.includes('诱惑'),
+    ['店铺', '经营', '行侠守义'],
+  );
+}
+
 async function testBenchmarkAge40Identity(
   label: string,
   config: ConstructorParameters<typeof GameProcessSimulator>[0],
@@ -130,6 +180,9 @@ async function main(): Promise<void> {
   });
 
   await testMerchant804ShopChain();
+
+  await testOrthodox301Age25Goal();
+  await testDemonic303Age25Goal();
 
   await testBenchmarkAge40Identity('orthodox-301-age40', {
     playerName: '顾清和',

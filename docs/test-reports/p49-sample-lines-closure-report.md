@@ -40,7 +40,7 @@ None.
 | RW-02 | 三线 `*_age40_identity_done` 未全触发 | warning | **Resolved (P51-002)** |
 | RW-03 | age 13 cross-line 代价维 collapsed | warning | **Resolved (P51-003)** |
 | RW-04 | 第二名 playtest 交叉验证缺失 | warning | **Deferred (optional)** |
-| RW-05 | 商路 804 age 25+ 并行 `route_demonic` 导致 interim goal 偏邪路 | info | 非阻塞；age-40 merchant identity 已专用收束 |
+| RW-05 | 商路 804 age 25+ 并行 `route_demonic` 导致 interim goal 偏邪路 | info | **Resolved in current checkout**；merchant spine seed / shop flags 优先，midlife goal 保持商路表达 |
 
 ## 5. P46 §11.3 overall closure status
 
@@ -55,5 +55,4 @@ None.
 ## 6. Recommended follow-ups
 
 1. Optional second playtest round (RW-04) for cross-tester validation.
-2. Monitor merchant 804 parallel `route_demonic` goal bleed at midlife checkpoints (RW-05).
-3. Monitor `gate:playability` on sample-line tuning merges.
+2. Monitor `gate:playability` on sample-line tuning merges.

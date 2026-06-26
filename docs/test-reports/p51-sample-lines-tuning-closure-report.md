@@ -20,7 +20,7 @@
 | --- | --- | --- | --- | --- |
 | 301 | 正派 | 40 | 行侠守义，承担门派义务 | `orthodox_age40_identity_done` |
 | 303 | 邪路 | 40 | 力量与地盘在涨，诱惑未止 | `demonic_age40_identity_done` |
-| 804 | 商路 | 40 | 试探底线，换取力量 *(parallel route_demonic bleed — RW-05)* | `merchant_age40_identity_done` |
+| 804 | 商路 | 40 | 第一桶金已得，店铺经营中 | `merchant_age40_identity_done` |
 
 Cross-line comparison: **distinct=22, partial=3, collapsed=0** (`p49-sample-lines-cross-line-comparison-latest.md`).
 
@@ -39,15 +39,15 @@ Cross-line comparison: **distinct=22, partial=3, collapsed=0** (`p49-sample-line
 
 - `merchant.json` — relaxed `merchant_first_shop` capital gate + `mandatory` tag
 - `sample-lines-spine.json` — mandatory age-38 identity events; childhood seed gating; line-specific age-40 conditions
-- `src/p50/sampleLineExpression.ts` — `deriveSampleLineCostLabel`; age-40 identity prefers `*_done` flags
+- `src/p50/sampleLineExpression.ts` — `detectSampleLine` prefers sample-line seeds / merchant shop flags over parallel `route_*`; `deriveSampleLineCostLabel`; age-40 identity prefers `*_done` flags
 - `src/p49/sampleLineReplay.ts` — cost dimension uses expression layer
 - `src/headless/parity/routeTrackFixtures.ts` — benchmark route-track bootstrap flags at age 7
 
 ## 5. Documented defer / follow-up
 
 - **RW-04:** Second human playtest round (optional).
-- **RW-05:** Merchant seed 804 midlife `currentGoal` may read demonic when parallel `route_demonic` flag appears; age-40 merchant identity and shop chain remain correct.
+- **RW-05:** **Resolved in current checkout** — merchant seed 804 midlife `currentGoal` now stays on merchant expression when parallel `route_demonic` appears; covered by `p50SampleLineExpressionTests` and `p50SampleLineSpineTests`.
 
 ## 6. Overall verdict
 
-**P51 stage: Complete.** P49 overall verdict upgraded **Warning → Pass** (RW-04 defer only). P46 §11.3 **Pass with documented defer**.
+**P51 stage: Complete.** RW-01–05 are closed or explicitly deferred, with **RW-04** the only remaining defer. P49 overall verdict stays **Pass**. P46 §11.3 remains **Pass with documented defer**.

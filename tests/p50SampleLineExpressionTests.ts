@@ -5,6 +5,7 @@ import {
   deriveSampleLineAge40Identity,
   deriveSampleLineCostLabel,
   deriveSampleLineCurrentGoal,
+  detectSampleLine,
   isPlayerVisibleSampleLineText,
 } from '../src/p50/sampleLineExpression';
 import type { GameState } from '../src/types/eventTypes';
@@ -186,11 +187,25 @@ function testCrossLineAge13CostLabels(): void {
   );
 }
 
+function testMerchantLineWinsOverParallelDemonicRoute(): void {
+  const merchant804Midlife = makeState(28, {
+    merchant_childhood_seed_done: true,
+    route_merchant: true,
+    route_demonic: true,
+    merchant_shop_grocery: true,
+  });
+  assert(detectSampleLine(merchant804Midlife.flags ?? {}) === 'merchant', 'parallel route_demonic stole merchant line');
+  const goal = deriveSampleLineCurrentGoal(merchant804Midlife) ?? '';
+  assert(!goal.includes('试探底线'), `merchant line goal bleeds demonic: ${goal}`);
+  assert(goal.includes('店铺') || goal.includes('经营') || goal.includes('周转'), `unexpected merchant goal: ${goal}`);
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
   testMerchantExpression();
   testCrossLineAge13CostLabels();
+  testMerchantLineWinsOverParallelDemonicRoute();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

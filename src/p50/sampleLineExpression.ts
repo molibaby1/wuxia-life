@@ -3,6 +3,40 @@ import type { GameState } from '../types/eventTypes';
 export type SampleLineId = 'orthodox' | 'demonic' | 'merchant';
 
 export function detectSampleLine(flags: Record<string, unknown>): SampleLineId | null {
+  const hasOrthodoxSeed = Boolean(
+    flags.orthodox_childhood_seed_done || flags.orthodox_age40_identity_done,
+  );
+  const hasDemonicSeed = Boolean(
+    flags.demonic_childhood_seed_done || flags.demonic_age40_identity_done,
+  );
+  const hasMerchantSeed = Boolean(
+    flags.merchant_childhood_seed_done
+    || flags.merchant_age40_identity_done
+    || flags.merchant_shop_grocery
+    || flags.merchant_shop_weapon
+    || flags.merchant_shop_herb,
+  );
+
+  // ponytail: spine childhood seeds beat parallel route_* from other pools (P51 RW-05)
+  if (hasMerchantSeed && !hasOrthodoxSeed && !hasDemonicSeed) {
+    return 'merchant';
+  }
+  if (hasOrthodoxSeed && !hasDemonicSeed && !hasMerchantSeed) {
+    return 'orthodox';
+  }
+  if (hasDemonicSeed && !hasOrthodoxSeed && !hasMerchantSeed) {
+    return 'demonic';
+  }
+  if (hasMerchantSeed && (flags.merchant_shop_grocery || flags.merchant_shop_weapon || flags.merchant_shop_herb || flags.merchant_age40_identity_done)) {
+    return 'merchant';
+  }
+  if (hasOrthodoxSeed) {
+    return 'orthodox';
+  }
+  if (hasDemonicSeed) {
+    return 'demonic';
+  }
+
   if (flags.route_orthodox || flags.orthodox_trial_completed || flags.orthodox_formal_disciple) {
     return 'orthodox';
   }
@@ -159,24 +193,15 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   if (age < 38) {
     return undefined;
   }
-  if (flags.merchant_age40_identity_done) {
+  const line = detectSampleLine(flags);
+  if (line === 'merchant') {
     return merchantAge40Identity(flags);
   }
-  if (flags.orthodox_age40_identity_done) {
-    return orthodoxAge40Identity(flags);
-  }
-  if (flags.demonic_age40_identity_done) {
-    return demonicAge40Identity(flags);
-  }
-  const line = detectSampleLine(flags);
   if (line === 'orthodox') {
     return orthodoxAge40Identity(flags);
   }
   if (line === 'demonic') {
     return demonicAge40Identity(flags);
-  }
-  if (line === 'merchant') {
-    return merchantAge40Identity(flags);
   }
   return undefined;
 }

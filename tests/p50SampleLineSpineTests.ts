@@ -1,4 +1,5 @@
 import { EventLoader } from '../src/core/EventLoader';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import {
   deriveSampleLineAge40Identity,
   deriveSampleLineCurrentGoal,
@@ -44,7 +45,7 @@ function testSpineEventsLoaded(): void {
 async function testBenchmarkSeedReachesAge40(
   label: string,
   config: ConstructorParameters<typeof GameProcessSimulator>[0],
-): Promise<import('../src/types/simulationRecordTypes').GameProcessReport> {
+): Promise<GameProcessReport> {
   const simulator = new GameProcessSimulator({
     ...config,
     simulateYears: 40,
@@ -86,12 +87,16 @@ async function testMerchant804ShopChain(): Promise<void> {
 
   const goal25 = deriveSampleLineCurrentGoal(rec25!.gameState) ?? '';
   assert(!goal25.includes('尚未开张'), `seed 804 age 25 goal still pre-shop: ${goal25}`);
+  assert(
+    goal25.includes('店铺') || goal25.includes('经营') || goal25.includes('周转'),
+    `seed 804 age 25 goal not merchant-operating: ${goal25}`,
+  );
 }
 
 async function testBenchmarkAge40Identity(
   label: string,
   config: ConstructorParameters<typeof GameProcessSimulator>[0],
-  expectedFlag: keyof typeof SPINE_FLAGS extends string ? string : never,
+  expectedFlag: string,
 ): Promise<void> {
   const report = await testBenchmarkSeedReachesAge40(label, config);
   const rec40 = [...report.records].reverse().find((record) => record.age <= 40);

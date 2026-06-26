@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-06-25T23:00:25.197Z
+Generated: 2026-06-26T02:32:15.605Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40

@@ -1686,3 +1686,16 @@
   - For simulation blockers that are expected in constrained single-run samples, waiver usage must include a concrete reason string and be logged in closure artifacts.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅, `npm run simulate:gameplay -- --gate --quiet --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --waive=ending_distribution:single-run-ending-concentration-baseline` ✅
 ---
+## [2026-06-26] - P52 Finalize (A2)
+- Closed P52 sample-line baseline hardening: round-2 playtest + cross-tester comparison archived; guard contract G-01–G-10 and `guard:sample-lines-baseline` cheap runner in place.
+- A2 five-axis code review: no blocking issues; aligned replay age-25 guard with `isPlayerVisibleSampleLineText` (parity with spine tests).
+- Files changed:
+  - `tests/p49SampleLineReplayTests.ts`
+  - `docs/PRD/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation.prd.json`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-discovery-result.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-gaps.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-verify-result.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-review-fix-prompts.md`
+  - `progress.txt`
+- Validation evidence: `npm run guard:sample-lines-baseline` ✅, `npm run typecheck` ✅ (no `lint` script in repo)
+---

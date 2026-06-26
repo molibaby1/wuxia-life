@@ -4,7 +4,10 @@ import {
   P49_SAMPLE_LINE_MATRIX,
   summarizeSampleLineRun,
 } from '../src/p49/sampleLineReplay';
-import { deriveSampleLineCurrentGoal } from '../src/p50/sampleLineExpression';
+import {
+  deriveSampleLineCurrentGoal,
+  isPlayerVisibleSampleLineText,
+} from '../src/p50/sampleLineExpression';
 import type { GameProcessReport, GameProcessRecord } from '../src/types/simulationRecordTypes';
 import type { GameState } from '../src/types/eventTypes';
 import { GameProcessSimulator } from './GameProcessSimulator';
@@ -161,7 +164,7 @@ async function testLiveDeterminism(): Promise<void> {
 }
 
 function assertAge25GoalForLine(seed: number, goal: string): void {
-  assert(!goal.includes('route_'), `seed ${seed} age-25 goal has raw key: ${goal}`);
+  assert(isPlayerVisibleSampleLineText(goal), `seed ${seed} age-25 goal has raw key: ${goal}`);
   assert(!goal.includes('试探底线'), `seed ${seed} age-25 goal bleeds demonic: ${goal}`);
   if (seed === 301) {
     assert(

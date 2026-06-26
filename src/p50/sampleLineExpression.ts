@@ -71,6 +71,12 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
   if (flags.orthodox_age40_identity_done) {
     return '回望正道身份，守正之路已刻进一生';
   }
+  if (flags.orthodox_gray_pressure_visible) {
+    return '灰度压力在肩，守正须付代价';
+  }
+  if (flags.orthodox_righteousness_cost_visible && age >= 25) {
+    return '守正有代价，义务先于私利';
+  }
   if (flags.sect_midlife_gray_executed || flags.sect_midlife_gray_leaked || flags.sect_midlife_gray_refused) {
     return '守正有代价，仍在承担门派义务';
   }
@@ -119,7 +125,7 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     return '财富带来选择，也带来债';
   }
   if (flags.merchant_midlife_debt || flags.merchant_shop_failed) {
-    return '周转吃紧，人情债未清';
+    return age >= 32 ? '周转吃紧，人情债未清' : '扩张初尝，债务阴影已现';
   }
   if (flags.merchant_caravan_success || flags.merchant_sect_investment_done) {
     return '商队或投资分岔，扩张与风险并行';
@@ -200,7 +206,7 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     return undefined;
   }
   if (flags.merchant_shop_failed || flags.merchant_midlife_debt) {
-    return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债与风险';
+    return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险';
   }
   return '你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力';
 }

@@ -68,7 +68,18 @@ Runs in sequence:
 
 P52 G-01–G-10 **unchanged**. P53 extends guard surface only for 40+ slice.
 
-## 7. Related artifacts
+## 8. P54 addendum — G-16/G-17 residual invariants (2026-06-26)
+
+| ID | Invariant | Guard location | Checkpoint / trigger |
+| --- | --- | --- | --- |
+| G-16 | Orthodox 301 age-25/32 residual cost + gray spine events fire; goal readable by age 28/35 | `p50SampleLineSpineTests` → `testOrthodox301ResidualSpineSignals` | Live sim seed 301 |
+| G-17 | Merchant 804 midlife debt milestone fires; debt goal + age-40 identity by age 35/40 | `p50SampleLineSpineTests` → `testMerchant804ResidualDebtSpine` | Live sim seed 804 |
+
+**Expression + replay narrow asserts:** `p50SampleLineExpressionTests` → `testOrthodox301ResidualExpression`, `testMerchant804ResidualExpression`; `p49SampleLineReplayTests` → `testLiveResidualSignalAlignment`.
+
+P52 G-01–G-15 **unchanged** except merchant midlife debt gate broadened for benchmark shop path (P54-005).
+
+## 9. Related artifacts
 
 - Gap audit: `p52-baseline-hardening-gap-audit.md`
 - Cross-tester comparison: `p52-cross-tester-playtest-comparison.md`

@@ -232,12 +232,71 @@ function testPost40PayoffExpression(): void {
   }
 }
 
+function testOrthodox301ResidualExpression(): void {
+  const age25Cost = makeState(26, {
+    route_orthodox: true,
+    orthodox_righteousness_cost_visible: true,
+    orthodox_trial_completed: true,
+  });
+  const costGoal = deriveSampleLineCurrentGoal(age25Cost) ?? '';
+  assert(costGoal.includes('代价') || costGoal.includes('义务'), `orthodox age-25 cost goal: ${costGoal}`);
+
+  const age32Gray = makeState(33, {
+    route_orthodox: true,
+    orthodox_righteousness_cost_visible: true,
+    orthodox_gray_pressure_visible: true,
+    orthodox_trial_completed: true,
+  });
+  const grayGoal = deriveSampleLineCurrentGoal(age32Gray) ?? '';
+  assert(grayGoal.includes('灰度') || grayGoal.includes('代价'), `orthodox age-32 gray goal: ${grayGoal}`);
+
+  const graySummary = deriveLifeMemorySummary(age32Gray);
+  assert(
+    graySummary.routeStatus?.currentGoalLabel?.includes('灰度')
+    || graySummary.routeStatus?.currentGoalLabel?.includes('代价'),
+    'orthodox gray pressure missing from life-memory goal',
+  );
+}
+
+function testMerchant804ResidualExpression(): void {
+  const age32Debt = makeState(33, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    merchant_shop_grocery: true,
+    merchant_midlife_debt: true,
+  });
+  const debtGoal = deriveSampleLineCurrentGoal(age32Debt) ?? '';
+  assert(
+    debtGoal.includes('人情') || debtGoal.includes('周转') || debtGoal.includes('债'),
+    `merchant age-32 debt goal: ${debtGoal}`,
+  );
+
+  const age40Debt = makeState(40, {
+    route_merchant: true,
+    merchant_age40_identity_done: true,
+    merchant_midlife_debt: true,
+    merchant_childhood_seed_done: true,
+  });
+  const identity = deriveSampleLineAge40Identity(age40Debt) ?? '';
+  assert(
+    identity.includes('债') && identity.includes('人情'),
+    `merchant age-40 debt identity: ${identity}`,
+  );
+  const summary = deriveLifeMemorySummary(age40Debt);
+  assert(
+    summary.unresolvedDebts?.some((debt) => debt.label.includes('人情债')),
+    'merchant age-40 life-memory missing favor debt',
+  );
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
   testMerchantExpression();
   testCrossLineAge13CostLabels();
   testMerchantLineWinsOverParallelDemonicRoute();
+  testOrthodox301ResidualExpression();
+  testMerchant804ResidualExpression();
   testPost40PayoffExpression();
   console.log('p50SampleLineExpressionTests: all passed');
 }

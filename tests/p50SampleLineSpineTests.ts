@@ -9,6 +9,8 @@ import { GameProcessSimulator } from './GameProcessSimulator';
 
 const SPINE_EVENT_IDS = [
   'orthodox_childhood_seed_milestone',
+  'orthodox_age25_righteousness_cost_milestone',
+  'orthodox_age32_gray_pressure_milestone',
   'orthodox_age40_identity_summary',
   'orthodox_age45_legacy_stewardship',
   'demonic_childhood_seed_milestone',
@@ -17,6 +19,7 @@ const SPINE_EVENT_IDS = [
   'demonic_age45_territory_consolidation',
   'merchant_childhood_seed_milestone',
   'merchant_age40_identity_summary',
+  'merchant_midlife_debt_milestone',
   'merchant_age45_expansion_fork',
 ] as const;
 
@@ -190,6 +193,74 @@ async function testBenchmarkAge45Payoff(
   assert(Boolean(rec45!.gameState.flags?.[expectedFlag]), `${label}: expected ${expectedFlag} by age 45`);
 }
 
+async function testOrthodox301ResidualSpineSignals(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge('orthodox-301-residual', {
+    playerName: '顾清和',
+    gender: 'male',
+    seed: 301,
+    choiceTendency: 'martial',
+    routeTrack: 'sect',
+    sampleId: 'golden-sect',
+  }, 50);
+
+  const costEvent = report.records.find((record) => record.eventId === 'orthodox_age25_righteousness_cost_milestone');
+  assert(Boolean(costEvent), 'seed 301: orthodox_age25_righteousness_cost_milestone never fired');
+  assert(
+    (costEvent?.age ?? 99) >= 25 && (costEvent?.age ?? 0) <= 28,
+    `seed 301: righteousness cost event at age ${costEvent?.age}, expected 25-28`,
+  );
+
+  const grayEvent = report.records.find((record) => record.eventId === 'orthodox_age32_gray_pressure_milestone');
+  assert(Boolean(grayEvent), 'seed 301: orthodox_age32_gray_pressure_milestone never fired');
+  assert(
+    (grayEvent?.age ?? 99) >= 32 && (grayEvent?.age ?? 0) <= 36,
+    `seed 301: gray pressure event at age ${grayEvent?.age}, expected 32-36`,
+  );
+
+  const rec28 = [...report.records].reverse().find((record) => record.age <= 28);
+  assert(Boolean(rec28?.gameState.flags?.orthodox_righteousness_cost_visible), 'seed 301: missing orthodox_righteousness_cost_visible by age 28');
+  const goal28 = deriveSampleLineCurrentGoal(rec28!.gameState) ?? '';
+  assert(goal28.includes('代价') || goal28.includes('义务'), `seed 301 age-28 goal missing cost signal: ${goal28}`);
+
+  const rec35 = [...report.records].reverse().find((record) => record.age <= 35);
+  assert(Boolean(rec35?.gameState.flags?.orthodox_gray_pressure_visible), 'seed 301: missing orthodox_gray_pressure_visible by age 35');
+  const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
+  assert(goal35.includes('灰度') || goal35.includes('代价'), `seed 301 age-35 goal missing gray signal: ${goal35}`);
+}
+
+async function testMerchant804ResidualDebtSpine(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge('merchant-804-residual', {
+    playerName: '沈聚财',
+    gender: 'male',
+    seed: 804,
+    choiceTendency: 'wealth',
+    p8PersonaId: 'p8-wealth-shen',
+    sampleId: 'p8-wealth-shen',
+  }, 50);
+
+  const debtEvent = report.records.find((record) => record.eventId === 'merchant_midlife_debt_milestone');
+  assert(Boolean(debtEvent), 'seed 804: merchant_midlife_debt_milestone never fired');
+  assert(
+    (debtEvent?.age ?? 99) >= 32 && (debtEvent?.age ?? 0) <= 38,
+    `seed 804: midlife debt event at age ${debtEvent?.age}, expected 32-38`,
+  );
+
+  const rec35 = [...report.records].reverse().find((record) => record.age <= 35);
+  assert(Boolean(rec35?.gameState.flags?.merchant_midlife_debt), 'seed 804: missing merchant_midlife_debt by age 35');
+  const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
+  assert(
+    goal35.includes('人情') || goal35.includes('周转') || goal35.includes('债'),
+    `seed 804 age-35 goal missing debt signal: ${goal35}`,
+  );
+
+  const rec40 = [...report.records].reverse().find((record) => record.age <= 40);
+  const identity40 = deriveSampleLineAge40Identity(rec40!.gameState) ?? '';
+  assert(
+    identity40.includes('债') || identity40.includes('人情'),
+    `seed 804 age-40 identity missing debt/favor signal: ${identity40}`,
+  );
+}
+
 async function main(): Promise<void> {
   testSpineEventsLoaded();
 
@@ -269,6 +340,9 @@ async function main(): Promise<void> {
     p8PersonaId: 'p8-wealth-shen',
     sampleId: 'p8-wealth-shen',
   }, 'merchant_age45_expansion_fork', 'merchant_age45_payoff_done');
+
+  await testOrthodox301ResidualSpineSignals();
+  await testMerchant804ResidualDebtSpine();
 
   assert(SPINE_FLAGS.length >= 12, 'spine flag inventory incomplete');
   console.log('p50SampleLineSpineTests: all passed');

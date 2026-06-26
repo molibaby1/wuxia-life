@@ -68,6 +68,29 @@ function makeRecord(age: number, eventId: string, state: GameState): GameProcess
   };
 }
 
+function createSampleLineSimulator(
+  entry: (typeof P49_SAMPLE_LINE_MATRIX)[number],
+  endAge: number,
+): GameProcessSimulator {
+  return new GameProcessSimulator({
+    playerName: entry.personaName,
+    gender: entry.gender,
+    seed: entry.seed,
+    choiceTendency: entry.choiceTendency,
+    routeTrack: entry.routeTrack,
+    p8PersonaId: entry.p8PersonaId,
+    simulateYears: endAge,
+    runUntilDeath: false,
+    ageRange: { startAge: 0, endAge },
+    maxEvents: endAge <= 40 ? 220 : 280,
+    enableAutoSave: false,
+    enableManualSave: false,
+    enableSaveRestore: false,
+    verbose: false,
+    sampleId: entry.sampleId,
+  });
+}
+
 function testMatrixSpec(): void {
   assert(P49_SAMPLE_LINE_MATRIX.length === 3, `matrix length ${P49_SAMPLE_LINE_MATRIX.length}`);
   assert(P49_SAMPLE_LINE_MATRIX[0]?.seed === 301, 'orthodox seed mismatch');
@@ -84,9 +107,9 @@ function testDeterministicExport(): void {
     config: {
       playerName: orthodox.personaName,
       gender: orthodox.gender,
-      simulateYears: 40,
+      simulateYears: 50,
       runUntilDeath: false,
-      maxEvents: 200,
+      maxEvents: 280,
       enableAutoSave: false,
       enableManualSave: false,
       autoSaveMode: 'age',
@@ -99,9 +122,9 @@ function testDeterministicExport(): void {
     },
     randomSeed: orthodox.seed,
     runMode: 'age_range',
-    ageRange: { startAge: 0, endAge: 40 },
-    totalYears: 40,
-    finalAge: 40,
+    ageRange: { startAge: 0, endAge: 50 },
+    totalYears: 50,
+    finalAge: 50,
     isAlive: true,
     deathReason: null,
     totalEvents: 5,
@@ -138,23 +161,7 @@ function testDeterministicExport(): void {
 async function testLiveDeterminism(): Promise<void> {
   const entry = P49_SAMPLE_LINE_MATRIX[0]!;
   const runOnce = async () => {
-    const simulator = new GameProcessSimulator({
-      playerName: entry.personaName,
-      gender: entry.gender,
-      seed: entry.seed,
-      choiceTendency: entry.choiceTendency,
-      routeTrack: entry.routeTrack,
-      simulateYears: 40,
-      runUntilDeath: false,
-      ageRange: { startAge: 0, endAge: 40 },
-      maxEvents: 220,
-      enableAutoSave: false,
-      enableManualSave: false,
-      enableSaveRestore: false,
-      verbose: false,
-      sampleId: entry.sampleId,
-    });
-    const report = await simulator.simulate();
+    const report = await createSampleLineSimulator(entry, 50).simulate();
     return summarizeSampleLineRun({ entry, report }).deterministicHash;
   };
 
@@ -186,24 +193,7 @@ function assertAge25GoalForLine(seed: number, goal: string): void {
 
 async function testLiveAge25GoalAlignment(): Promise<void> {
   for (const entry of P49_SAMPLE_LINE_MATRIX) {
-    const simulator = new GameProcessSimulator({
-      playerName: entry.personaName,
-      gender: entry.gender,
-      seed: entry.seed,
-      choiceTendency: entry.choiceTendency,
-      routeTrack: entry.routeTrack,
-      p8PersonaId: entry.p8PersonaId,
-      simulateYears: 40,
-      runUntilDeath: false,
-      ageRange: { startAge: 0, endAge: 40 },
-      maxEvents: 220,
-      enableAutoSave: false,
-      enableManualSave: false,
-      enableSaveRestore: false,
-      verbose: false,
-      sampleId: entry.sampleId,
-    });
-    const report = await simulator.simulate();
+    const report = await createSampleLineSimulator(entry, 40).simulate();
     const summary = summarizeSampleLineRun({ entry, report });
     const cp25 = summary.checkpoints.find((cp) => cp.age === 25);
     assert(Boolean(cp25), `seed ${entry.seed}: missing age-25 checkpoint export`);
@@ -222,24 +212,7 @@ async function testLiveAge45PayoffAlignment(): Promise<void> {
   ];
   for (const entry of P49_SAMPLE_LINE_MATRIX) {
     const expected = expectations.find((item) => item.seed === entry.seed)!;
-    const simulator = new GameProcessSimulator({
-      playerName: entry.personaName,
-      gender: entry.gender,
-      seed: entry.seed,
-      choiceTendency: entry.choiceTendency,
-      routeTrack: entry.routeTrack,
-      p8PersonaId: entry.p8PersonaId,
-      simulateYears: 50,
-      runUntilDeath: false,
-      ageRange: { startAge: 0, endAge: 50 },
-      maxEvents: 280,
-      enableAutoSave: false,
-      enableManualSave: false,
-      enableSaveRestore: false,
-      verbose: false,
-      sampleId: entry.sampleId,
-    });
-    const report = await simulator.simulate();
+    const report = await createSampleLineSimulator(entry, 50).simulate();
     const summary = summarizeSampleLineRun({ entry, report });
     const cp45 = summary.checkpoints.find((cp) => cp.age === 45);
     assert(Boolean(cp45), `seed ${entry.seed}: missing age-45 checkpoint export`);
@@ -255,12 +228,49 @@ async function testLiveAge45PayoffAlignment(): Promise<void> {
   }
 }
 
+async function testLiveResidualSignalAlignment(): Promise<void> {
+  const orthodox = P49_SAMPLE_LINE_MATRIX[0]!;
+  const orthodoxReport = await createSampleLineSimulator(orthodox, 50).simulate();
+  const orthodoxSummary = summarizeSampleLineRun({ entry: orthodox, report: orthodoxReport });
+  const cp28 = orthodoxSummary.checkpoints.find((cp) => cp.age === 25)
+    ?? orthodoxSummary.checkpoints.find((cp) => cp.age === 32);
+  const rec28 = [...orthodoxReport.records].reverse().find((record) => record.age <= 28);
+  const goal28 = rec28 ? (deriveSampleLineCurrentGoal(rec28.gameState) ?? '') : (cp28?.currentGoal ?? '');
+  assert(
+    goal28.includes('代价') || goal28.includes('义务'),
+    `seed 301 residual cost goal missing at age 28: ${goal28}`,
+  );
+  const rec35 = [...orthodoxReport.records].reverse().find((record) => record.age <= 35);
+  const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
+  assert(
+    goal35.includes('灰度') || goal35.includes('代价'),
+    `seed 301 residual gray goal missing by age 35: ${goal35}`,
+  );
+
+  const merchant = P49_SAMPLE_LINE_MATRIX[2]!;
+  const merchantReport = await createSampleLineSimulator(merchant, 50).simulate();
+  const rec35m = [...merchantReport.records].reverse().find((record) => record.age <= 35);
+  assert(Boolean(rec35m?.gameState.flags?.merchant_midlife_debt), 'seed 804: merchant_midlife_debt missing by age 35');
+  const goal35m = deriveSampleLineCurrentGoal(rec35m!.gameState) ?? '';
+  assert(
+    goal35m.includes('人情') || goal35m.includes('周转') || goal35m.includes('债'),
+    `seed 804 residual debt goal missing by age 35: ${goal35m}`,
+  );
+  const cp40 = summarizeSampleLineRun({ entry: merchant, report: merchantReport }).checkpoints.find((cp) => cp.age === 40);
+  const identity40 = cp40?.age40Identity ?? '';
+  assert(
+    identity40.includes('债') || identity40.includes('人情'),
+    `seed 804 age-40 identity missing debt/favor: ${identity40}`,
+  );
+}
+
 async function main(): Promise<void> {
   testMatrixSpec();
   testDeterministicExport();
   await testLiveDeterminism();
   await testLiveAge25GoalAlignment();
   await testLiveAge45PayoffAlignment();
+  await testLiveResidualSignalAlignment();
   console.log('p49SampleLineReplayTests: all passed');
 }
 

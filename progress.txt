@@ -1,3 +1,19 @@
+## [2026-06-26] - P54 Finalize (A2)
+- Closed P54 residual polish: M-orthodox-gray + M-merchant-debt → guarded baseline; spine bridge events, expression, G-16/G-17, closure report.
+- Validation: guard:sample-lines-baseline ✅ p49:replay ✅ typecheck ✅
+---
+## [2026-06-26] - P54-011 (p54-wuxia-sample-lines-residual-polish)
+- Closure report; both residuals closed on benchmark seeds.
+- Files: `docs/test-reports/p54-sample-lines-residual-polish-closure-report.md`
+---
+## [2026-06-26] - P54-005/006 (p54-wuxia-sample-lines-residual-polish)
+- Spine: orthodox age25/32 residual milestones; merchant midlife debt gate broadened + mandatory.
+- Files: `src/data/lines/sample-lines-spine.json`, `tests/p50SampleLineSpineTests.ts`
+---
+## [2026-06-26] - P54-001/002 (p54-wuxia-sample-lines-residual-polish)
+- Gap audit + scope contract (+ signal appendices); no gameplay until P54-005.
+- Files: `docs/test-reports/p54-sample-lines-residual-polish-gap-audit.md`, `p54-sample-lines-residual-polish-scope-contract.md`
+---
 ## [2026-06-26] - P53 Finalize (A2)
 - Closed P53 bounded 40+ payoff slice: age-45 spine events ×3, expression/replay/guard G-11–G-15; A1 verify PASS.
 - A2 five-axis code review: no blocking issues; aligned replay age-45 guard with `isPlayerVisibleSampleLineText` (parity with age-25/spine tests).
@@ -9,6 +25,7 @@
 - Validation evidence: `npm run guard:sample-lines-baseline` ✅, `npm run typecheck` ✅ (no `lint` script in repo)
 ---
 ## Codebase Patterns
+- P54 sample lines residual polish: spine `orthodox_age25_righteousness_cost_milestone`, `orthodox_age32_gray_pressure_milestone`, relaxed `merchant_midlife_debt_milestone` in `sample-lines-spine.json`; expression P54 flags in `src/p50/sampleLineExpression.ts`; guard G-16/G-17 in `p52-sample-line-baseline-guard-contract.md` §8; closure `docs/test-reports/p54-sample-lines-residual-polish-closure-report.md`.
 - P53 sample lines 40+ payoff: spine events `orthodox_age45_legacy_stewardship`, `demonic_age45_territory_consolidation`, `merchant_age45_expansion_fork` in `sample-lines-spine.json` (gate on `*_age40_identity_done`, age 44–48); expression post-40 goals in `src/p50/sampleLineExpression.ts`; replay checkpoints `[13,18,25,32,40,45,50]` + `post40PayoffDone` in `src/p49/sampleLineReplay.ts`; guard G-11–G-15 in `p52-sample-line-baseline-guard-contract.md` §6; closure `docs/test-reports/p53-sample-lines-40-plus-closure-report.md`.
 
 ## [2026-06-26] - P53-010 (p53-wuxia-sample-lines-40-plus-payoff-expansion)

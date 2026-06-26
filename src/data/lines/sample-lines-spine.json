@@ -61,6 +61,70 @@
     }
   },
   {
+    "id": "orthodox_age25_righteousness_cost_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 25, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_trial_completed') || flags.has('orthodox_formal_disciple')) && !flags.has('orthodox_righteousness_cost_visible') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "守正之价",
+      "text": "入门之后，你渐渐明白：行侠守义不是口号——每一次替门派出头，都要放弃私情与安逸。守正，从来有代价。",
+      "description": "P54 正派 25 岁守正代价桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_righteousness_cost_visible" },
+      { "type": "event_record", "target": "orthodox_age25_righteousness_cost_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age25", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_righteousness_cost"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age32_gray_pressure_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_righteousness_cost_visible') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_gray_pressure_visible') && !flags.has('sect_midlife_gray_executed') && !flags.has('sect_midlife_gray_leaked') && !flags.has('sect_midlife_gray_refused') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "灰度压肩",
+      "text": "师门交下来一件不便见光的差事——办，则沾灰；不办，则得罪派系。守正之路，此刻逼你在义与权之间取舍。",
+      "description": "P54 正派 32 岁灰度压力桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_gray_pressure_visible" },
+      { "type": "event_record", "target": "orthodox_age32_gray_pressure_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age32", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_gray_pressure"]
+      }
+    }
+  },
+  {
     "id": "demonic_childhood_seed_milestone",
     "version": "1.0.0",
     "category": "main_story",
@@ -217,19 +281,19 @@
     "id": "merchant_midlife_debt_milestone",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 1,
-    "weight": 80,
+    "priority": 0,
+    "weight": 95,
     "ageRange": { "min": 32, "max": 38 },
     "triggers": [{ "type": "age_reach", "value": 32 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('route_merchant') && (flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success')) && !flags.has('merchant_midlife_debt')"
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('merchant_talent') || flags.has('p8_route_wealth')) && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success')) && !flags.has('merchant_midlife_debt') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
       }
     ],
     "content": {
       "title": "人情周转",
-      "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全。",
+      "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全——每一笔赊账都在记你的人情账。",
       "description": "P47 商路中年代价"
     },
     "eventType": "auto",
@@ -239,7 +303,10 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "merchant", "midlife", "mainline", "once"]
+      "tags": ["p47", "p54", "merchant", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_merchant_debt"]
+      }
     }
   },
   {

@@ -1,3 +1,13 @@
+## [2026-06-26] - P53 Finalize (A2)
+- Closed P53 bounded 40+ payoff slice: age-45 spine events ×3, expression/replay/guard G-11–G-15; A1 verify PASS.
+- A2 five-axis code review: no blocking issues; aligned replay age-45 guard with `isPlayerVisibleSampleLineText` (parity with age-25/spine tests).
+- Files changed:
+  - `tests/p49SampleLineReplayTests.ts`
+  - `tests/p50SampleLineSpineTests.ts`
+  - `agent_docs/p53-wuxia-sample-lines-40-plus-payoff-expansion-verify-result.md`
+  - `progress.txt`
+- Validation evidence: `npm run guard:sample-lines-baseline` ✅, `npm run typecheck` ✅ (no `lint` script in repo)
+---
 ## Codebase Patterns
 - P53 sample lines 40+ payoff: spine events `orthodox_age45_legacy_stewardship`, `demonic_age45_territory_consolidation`, `merchant_age45_expansion_fork` in `sample-lines-spine.json` (gate on `*_age40_identity_done`, age 44–48); expression post-40 goals in `src/p50/sampleLineExpression.ts`; replay checkpoints `[13,18,25,32,40,45,50]` + `post40PayoffDone` in `src/p49/sampleLineReplay.ts`; guard G-11–G-15 in `p52-sample-line-baseline-guard-contract.md` §6; closure `docs/test-reports/p53-sample-lines-40-plus-closure-report.md`.
 

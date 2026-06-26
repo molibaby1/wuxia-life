@@ -245,6 +245,7 @@ async function testLiveAge45PayoffAlignment(): Promise<void> {
     assert(Boolean(cp45), `seed ${entry.seed}: missing age-45 checkpoint export`);
     assert(cp45!.post40PayoffDone === true, `seed ${entry.seed}: post40PayoffDone false at age 45`);
     const goal = cp45!.currentGoal ?? '';
+    assert(isPlayerVisibleSampleLineText(goal), `seed ${entry.seed}: age-45 goal has raw key: ${goal}`);
     assert(
       goal.includes(expected.goalFragment),
       `seed ${entry.seed}: age-45 goal missing "${expected.goalFragment}": ${goal}`,

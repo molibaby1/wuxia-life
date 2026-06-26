@@ -65,7 +65,7 @@ async function testBenchmarkSeedReachesAge(
     verbose: false,
   });
   const report = await simulator.simulate();
-  assert(report.finalAge >= Math.min(endAge - 2, endAge), `${label}: finalAge ${report.finalAge} < ${endAge - 2}`);
+  assert(report.finalAge >= endAge - 2, `${label}: finalAge ${report.finalAge} < ${endAge - 2}`);
   return report;
 }
 

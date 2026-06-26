@@ -4,6 +4,7 @@ import {
   P49_SAMPLE_LINE_MATRIX,
   summarizeSampleLineRun,
 } from '../src/p49/sampleLineReplay';
+import { deriveSampleLineCurrentGoal } from '../src/p50/sampleLineExpression';
 import type { GameProcessReport, GameProcessRecord } from '../src/types/simulationRecordTypes';
 import type { GameState } from '../src/types/eventTypes';
 import { GameProcessSimulator } from './GameProcessSimulator';
@@ -159,10 +160,62 @@ async function testLiveDeterminism(): Promise<void> {
   assert(hashA === hashB, `live replay not deterministic: ${hashA} vs ${hashB}`);
 }
 
+function assertAge25GoalForLine(seed: number, goal: string): void {
+  assert(!goal.includes('route_'), `seed ${seed} age-25 goal has raw key: ${goal}`);
+  assert(!goal.includes('试探底线'), `seed ${seed} age-25 goal bleeds demonic: ${goal}`);
+  if (seed === 301) {
+    assert(
+      goal.includes('行侠') || goal.includes('门派'),
+      `seed 301 age-25 goal not orthodox: ${goal}`,
+    );
+  } else if (seed === 303) {
+    assert(
+      goal.includes('力量') || goal.includes('地盘') || goal.includes('邪') || goal.includes('诱惑'),
+      `seed 303 age-25 goal not demonic: ${goal}`,
+    );
+  } else if (seed === 804) {
+    assert(
+      goal.includes('店铺') || goal.includes('经营') || goal.includes('周转'),
+      `seed 804 age-25 goal not merchant: ${goal}`,
+    );
+  }
+}
+
+async function testLiveAge25GoalAlignment(): Promise<void> {
+  for (const entry of P49_SAMPLE_LINE_MATRIX) {
+    const simulator = new GameProcessSimulator({
+      playerName: entry.personaName,
+      gender: entry.gender,
+      seed: entry.seed,
+      choiceTendency: entry.choiceTendency,
+      routeTrack: entry.routeTrack,
+      p8PersonaId: entry.p8PersonaId,
+      simulateYears: 40,
+      runUntilDeath: false,
+      ageRange: { startAge: 0, endAge: 40 },
+      maxEvents: 220,
+      enableAutoSave: false,
+      enableManualSave: false,
+      enableSaveRestore: false,
+      verbose: false,
+      sampleId: entry.sampleId,
+    });
+    const report = await simulator.simulate();
+    const summary = summarizeSampleLineRun({ entry, report });
+    const cp25 = summary.checkpoints.find((cp) => cp.age === 25);
+    assert(Boolean(cp25), `seed ${entry.seed}: missing age-25 checkpoint export`);
+    const goal = cp25!.currentGoal ?? deriveSampleLineCurrentGoal(
+      report.records.find((r) => r.age <= 25)?.gameState ?? report.records.at(-1)!.gameState,
+    ) ?? '';
+    assertAge25GoalForLine(entry.seed, goal);
+  }
+}
+
 async function main(): Promise<void> {
   testMatrixSpec();
   testDeterministicExport();
   await testLiveDeterminism();
+  await testLiveAge25GoalAlignment();
   console.log('p49SampleLineReplayTests: all passed');
 }
 

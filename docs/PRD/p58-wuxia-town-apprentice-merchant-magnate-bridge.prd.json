@@ -14,8 +14,8 @@
         "Do not change runtime behavior in this story"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "Read-only audit."
+      "passes": true,
+      "notes": "Read-only audit. Created gap audit doc mapping apprentice signals vs merchant gate requirements."
     },
     {
       "id": "P58-002",

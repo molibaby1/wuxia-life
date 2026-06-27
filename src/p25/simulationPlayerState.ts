@@ -1,10 +1,20 @@
 import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
-import type { OriginId, PlayerLifeStates, PlayerState } from '../types/eventTypes';
+import type {
+  CoreTalentId,
+  OriginId,
+  PlayerLifeStates,
+  PlayerState,
+  TemperamentId,
+  WeaknessId,
+} from '../types/eventTypes';
 
 interface SimulationPlayerStateOptions {
   name: string;
   age: number;
   origin: OriginId;
+  coreTalent?: CoreTalentId;
+  weakness?: WeaknessId;
+  temperament?: TemperamentId;
   martialPower: number;
   reputation: number;
   connections: number;
@@ -17,6 +27,9 @@ export function createSimulationPlayerState({
   name,
   age,
   origin,
+  coreTalent = 'keen_mind',
+  weakness = 'lazy',
+  temperament = 'competitive',
   martialPower,
   reputation,
   connections,
@@ -53,7 +66,7 @@ export function createSimulationPlayerState({
     spouse: null,
     alive,
     talents: [],
-    traitProfile: { origin },
+    traitProfile: { origin, coreTalent, weakness, temperament },
     lifeStates: createDefaultPlayerLifeStates(lifeStates),
   };
 }

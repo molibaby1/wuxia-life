@@ -161,7 +161,7 @@ export function summarizeTrajectoryRun(input: {
     };
   });
 
-  const finalState = input.report.records.at(-1)?.gameState;
+  const finalState = input.report.records[input.report.records.length - 1]?.gameState;
   const finalLifeMemory = finalState ? deriveLifeMemorySummary(finalState) : undefined;
 
   return {

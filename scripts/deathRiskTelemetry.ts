@@ -18,7 +18,16 @@ export type {
   DeathRiskTelemetry,
   DeathCauseCount,
 } from '../src/types/deathRiskTelemetryTypes';
-import type { DeathCauseCount, SimulationCohort } from '../src/types/deathRiskTelemetryTypes';
+import type {
+  DeathCauseCategory,
+  DeathCauseCount,
+  DeathLifePhase,
+  DeathRiskTelemetry,
+  RecentKeyChoice,
+  RouteStateSnapshot,
+  SimulationCohort,
+  WarningLevel,
+} from '../src/types/deathRiskTelemetryTypes';
 
 export type DeathCauseSummary = {
   totalDeaths: number;

@@ -142,7 +142,7 @@ export const dailyEvents: DailyEventConfig[] = [
   },
   {
     id: 'daily_copybook_practice',
-    group: 'study',
+    group: 'training',
     title: '临帖抄书',
     ageRange: { min: 8, max: 60 },
     baseWeight: 32,
@@ -193,7 +193,7 @@ export const dailyEvents: DailyEventConfig[] = [
   },
   {
     id: 'daily_reading_notes',
-    group: 'study',
+    group: 'training',
     title: '读书摘记',
     ageRange: { min: 12, max: 70 },
     baseWeight: 28,

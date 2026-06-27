@@ -1,3 +1,13 @@
+## [2026-06-28] - P59 Tavern Hand Merchant-Adjacent Bridge (A2)
+- P59 tavern-hand merchant-adjacent bridge: all 9 stories implemented and verified.
+- Configuration: `ordinary-origin-midlife.json` — `tavern_take_referral` sets `route_wealth_committed` + `tavern_merchant_bridge_crossed`.
+- Gate wiring: `sample-lines-spine.json` — `magnate_on_ramp` + `merchant_midlife_debt_milestone` gates accept `tavern_merchant_bridge_crossed` in both route + milestone conditions.
+- Expression: `ordinaryOriginExpression.ts` — currentGoal/lifeMemory/summary bridge branches for tavern_hand.
+- Tests: `tests/p59TavernHandBridgeTests.ts` with 16 assertions (all pass).
+- Proof: `docs/test-reports/p59-tavern-hand-magnate-targeted-proof.md`.
+- Files: `ordinary-origin-midlife.json`, `sample-lines-spine.json`, `ordinaryOriginExpression.ts`, `p59TavernHandBridgeTests.ts`, `docs/test-reports/p59-tavern-hand-*.md`, `docs/PRD/p59-tavern-hand-*.md`
+- Validation: p59TavernHandBridgeTests ✅ p56OrdinaryOriginGrowthTests ✅ p58ApprenticeBridgeTests ✅ typecheck ✅
+---
 ## [2026-06-27] - P57 Verify Round 2 (A1 Phase C1)
 - P57 verify round 2: PASS — Round 1 issues (prd.json duplicate notes, gap audit Appendix C title) both fixed.
 - All 10 user stories verified; FR-1–FR-5 satisfied; guard + typecheck pass; no code changes.

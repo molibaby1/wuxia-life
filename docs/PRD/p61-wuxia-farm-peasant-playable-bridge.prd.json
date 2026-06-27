@@ -70,8 +70,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added peasant-merchant bridge expression branches to all 3 existing surfaces in ordinaryOriginExpression.ts: peasantCurrentGoal (\"跟着粮商走南闯北，粮路渐宽\"), peasantLifeMemory (\"你从田间走到粮路上...\"), deriveOrdinaryOriginSummary (\"农家出身的粮货商人...\")."
     },
     {
       "id": "P61-006",

@@ -16,6 +16,9 @@ export function detectOrdinaryOrigin(flags: Record<string, unknown>): OrdinaryOr
 }
 
 function peasantCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.peasant_merchant_bridge_crossed) {
+    return '跟着粮商走南闯北，粮路渐宽';
+  }
   if (flags.peasant_midlife_steadfast_accrual) {
     return '田地已稳，日子虽苦却有了根基';
   }
@@ -89,6 +92,9 @@ export function deriveOrdinaryOriginCurrentGoal(state: GameState): string | unde
 }
 
 function peasantLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.peasant_merchant_bridge_crossed) {
+    return '你从田间走到粮路上，从帮工做起，渐渐摸通了粮货买卖。';
+  }
   if (flags.peasant_midlife_steadfast_accrual) {
     return '你靠年复一年的耕种攒下几亩薄田，日子虽苦却有了根基。';
   }
@@ -195,6 +201,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return undefined;
   }
   if (origin === 'farm_peasant') {
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '农家出身的粮货商人：从田埂到粮路，靠体力和勤恳踏出生意路。';
+    }
     if (flags.peasant_midlife_steadfast_accrual || flags.peasant_midlife_outside_offer) {
       return '平凡农人的中年：在田地与机会之间，守住或换路。';
     }

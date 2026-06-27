@@ -1,7 +1,9 @@
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
-- P61-004: Downstream gate wiring completed in sample-lines-spine.json.
-- Changes: Added `peasant_merchant_bridge_crossed` to both route + milestone conditions of `magnate_on_ramp` and `merchant_midlife_debt_milestone` gates.
-- Files: `src/data/lines/sample-lines-spine.json`
+- P61-005: Peasant bridge expression added to ordinaryOriginExpression.ts (3 surfaces).
+- Changes: Added `peasant_merchant_bridge_crossed` branches to peasantCurrentGoal, peasantLifeMemory, and deriveOrdinaryOriginSummary.
+- Files: `src/p56/ordinaryOriginExpression.ts`
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-004
 ---
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-003
 ---

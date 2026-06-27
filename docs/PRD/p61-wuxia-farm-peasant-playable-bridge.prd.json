@@ -28,8 +28,8 @@
         "Save docs/test-reports/p61-farm-peasant-bridge-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract created at docs/test-reports/p61-farm-peasant-bridge-scope-contract.md; 0 runtime changes."
     },
     {
       "id": "P61-003",

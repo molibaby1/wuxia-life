@@ -1,4 +1,8 @@
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
+- P61-002: Scope contract document created; 0 runtime changes.
+- Files: `docs/test-reports/p61-farm-peasant-bridge-scope-contract.md`
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-001
 - P61-001: P60 contract intake document created; 0 runtime changes.
 - Files: `docs/test-reports/p61-farm-peasant-bridge-intake.md`
 ---

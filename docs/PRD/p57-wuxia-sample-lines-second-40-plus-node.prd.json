@@ -98,7 +98,8 @@
         "Relevant targeted simulations can trigger the approved nodes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
+      "notes": "All lines no-go; no configuration changes needed. N/A."
       "notes": "Configuration story."
     },
     {
@@ -112,7 +113,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
+      "notes": "All lines no-go; no expression changes needed. N/A."
       "notes": "Expression story."
     },
     {
@@ -126,7 +128,8 @@
         "Relevant commands pass"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
+      "notes": "All lines no-go; no replay/guard changes needed. N/A."
       "notes": "Verification story."
     },
     {
@@ -140,7 +143,7 @@
         "Do not frame P57 as a mandatory sample-line stage"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Closure story."
     }
   ]

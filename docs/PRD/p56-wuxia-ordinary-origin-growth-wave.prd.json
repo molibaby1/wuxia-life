@@ -1,0 +1,147 @@
+{
+  "project": "Wuxia Life P56 Ordinary Origin Growth Wave",
+  "branchName": "codex/p56-wuxia-ordinary-origin-growth-wave",
+  "description": "Grow the three already-proven ordinary origins beyond P25 minimum acceptance by adding bounded midlife depth, clearer player-facing differentiation, and narrow verification assets, without reopening sample lines, adding a fourth origin, or expanding into a full ordinary-life content system.",
+  "userStories": [
+    {
+      "id": "P56-001",
+      "title": "Audit ordinary-origin growth gaps",
+      "description": "As a maintainer, I want an audit of what the three ordinary origins already prove and what still feels thin so P56 grows depth rather than replaying P25 acceptance work.",
+      "acceptanceCriteria": [
+        "Summarize the proven surfaces and thin spots for the three ordinary origins",
+        "Separate already-met minimum criteria from growth opportunities",
+        "Save docs/test-reports/p56-ordinary-origin-growth-gap-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only audit."
+    },
+    {
+      "id": "P56-002",
+      "title": "Lock ordinary growth scope contract",
+      "description": "As a planner, I want a scope contract for ordinary-origin growth so P56 stays focused on depth and differentiation instead of broad world expansion.",
+      "acceptanceCriteria": [
+        "Limit the stage to farm_peasant, town_apprentice, and tavern_hand",
+        "Define allowed layers: story configuration, light presentation, validation scripts",
+        "List forbidden expansions: fourth origin, sample-line work, full ordinary system, bulk deferred wiring",
+        "Save docs/test-reports/p56-ordinary-origin-growth-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract story."
+    },
+    {
+      "id": "P56-003",
+      "title": "Define peasant growth contract",
+      "description": "As a designer, I want a bounded growth contract for farm_peasant so the path has a clearer midlife identity beyond early hardship tags.",
+      "acceptanceCriteria": [
+        "Define at least two peasant-specific midlife signals or forks",
+        "Include at least one signal around staying, switching, or accumulating through hardship",
+        "Do not rewrite peasant into a vivid origin",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P56-004",
+      "title": "Define apprentice growth contract",
+      "description": "As a designer, I want a bounded growth contract for town_apprentice so the path leads more clearly toward craft or merchant opportunity instead of only serving as a starter tag.",
+      "acceptanceCriteria": [
+        "Define at least two apprentice-specific midlife signals or forks",
+        "Include at least one signal around trade, craft, or merchant opportunity",
+        "Keep the path ordinary instead of recreating merchant_house",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P56-005",
+      "title": "Define tavern growth contract",
+      "description": "As a designer, I want a bounded growth contract for tavern_hand so the path shows clearer network-driven opportunity rather than only serving as a generic social start.",
+      "acceptanceCriteria": [
+        "Define at least two tavern-specific midlife signals or forks",
+        "Include at least one signal around ally networks, guests, or chance meetings",
+        "Keep the path ordinary instead of turning it into a vivid elite social route",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P56-006",
+      "title": "Wire ordinary growth story configuration",
+      "description": "As a developer, I want the three ordinary origins wired with bounded midlife depth so their opportunity structures stay distinct beyond the childhood slice.",
+      "acceptanceCriteria": [
+        "Each of the three ordinary paths gets at least one new midlife configuration touchpoint",
+        "Do not introduce a new origin framework",
+        "Existing early-life wiring and P25 regression evidence do not regress",
+        "Relevant targeted tests can verify the additions"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Configuration story."
+    },
+    {
+      "id": "P56-007",
+      "title": "Add ordinary player-facing expression",
+      "description": "As a player, I want the three ordinary origins to read differently in summaries, goals, or life-memory so the growth wave feels visible instead of hidden in flags.",
+      "acceptanceCriteria": [
+        "Each origin gets at least one new readable signal on existing surfaces",
+        "The wording explains the different opportunity structure of each origin",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Expression story."
+    },
+    {
+      "id": "P56-008",
+      "title": "Add ordinary mid-tier verification slice",
+      "description": "As a maintainer, I want a bounded verification slice proving that the added ordinary-origin growth changes are runtime-visible and not just documented intentions.",
+      "acceptanceCriteria": [
+        "Produce at least one mid-tier or midlife ordinary verification artifact",
+        "Cover all three ordinary origins in the artifact",
+        "Show key flags, events, or summaries in a readable way",
+        "Do not require full lifetime exhaust"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Verification artifact story."
+    },
+    {
+      "id": "P56-009",
+      "title": "Add ordinary regression tests",
+      "description": "As a maintainer, I want narrow tests for the ordinary growth additions so later edits do not flatten the three paths back into generic low-tier starts.",
+      "acceptanceCriteria": [
+        "Add at least one narrow assert for each of the three ordinary origins",
+        "Reuse existing P25, origin, or simulation harnesses",
+        "Do not rewrite all P25 tests",
+        "Relevant commands pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Regression story."
+    },
+    {
+      "id": "P56-010",
+      "title": "Produce P56 closure report",
+      "description": "As a maintainer, I want a P56 closure report showing what ordinary-origin depth increased and what still remains out of scope for a larger ordinary-content wave.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p56-ordinary-origin-growth-closure-report.md",
+        "Summarize configuration, expression, verification, and test evidence",
+        "Confirm that the P25 Wave 4 minimum remains valid and unchanged",
+        "List deferred ordinary-content expansion items"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Closure story."
+    }
+  ]
+}

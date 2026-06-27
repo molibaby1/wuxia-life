@@ -3,7 +3,7 @@
 **Date:** 2026-06-26  
 **Mode:** post-run (`--pipeline-auto`, queue terminus)  
 **Branch:** `codex/p50-wuxia-sample-lines-validation-implementation`  
-**Finalize commit:** _(pending finalize)_  
+**Finalize commit:** `e52f214`  
 **Parent PRD:** `docs/PRD/p50-wuxia-sample-lines-validation-implementation.md`  
 **Product End-State:** `docs/designs/p25-lifetime-simulation-north-star.md`
 

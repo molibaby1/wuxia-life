@@ -51,6 +51,9 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.tavern_merchant_bridge_crossed) {
+    return '城里铺子已上手，酒肆人脉铺出了商路';
+  }
   if (flags.tavern_midlife_guest_regulars) {
     return '常客认得你了，镇上有了些人脉';
   }
@@ -139,6 +142,9 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.tavern_merchant_bridge_crossed) {
+    return '你靠着酒肆积累的人脉进了城里的铺子，从跑堂伙计踏上了商路。';
+  }
   if (flags.tavern_midlife_guest_regulars) {
     if (flags.tavern_embrace_network) {
       return '你经营人脉，常客成了朋友，镇上有了些门路。';
@@ -202,6 +208,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
       return '平凡学徒的中年：手艺与买卖之间，自立或合伙。';
     }
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
+  }
+  if (flags.tavern_merchant_bridge_crossed) {
+    return '酒肆出身的商人：从跑堂伙计到城里铺子，靠人脉铺出了商路。';
   }
   if (flags.tavern_midlife_guest_regulars || flags.tavern_midlife_ally_referral) {
     return '平凡酒肆帮工的中年：人脉与引荐之间，经营或留守。';

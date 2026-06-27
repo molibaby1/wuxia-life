@@ -192,7 +192,7 @@
         {
           "id": "take_referral",
           "label": "接受引荐",
-          "flags": ["tavern_midlife_ally_referral", "tavern_take_referral", "ordinary_tavern_midlife_done"],
+          "flags": ["tavern_midlife_ally_referral", "tavern_take_referral", "route_wealth_committed", "tavern_merchant_bridge_crossed", "ordinary_tavern_midlife_done"],
           "effects": [
             { "type": "stat_modify", "target": "externalSkill", "value": 2, "operator": "add" },
             { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" }

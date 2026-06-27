@@ -240,6 +240,7 @@ function testOrthodox301ResidualExpression(): void {
   });
   const costGoal = deriveSampleLineCurrentGoal(age25Cost) ?? '';
   assert(costGoal.includes('代价') || costGoal.includes('义务'), `orthodox age-25 cost goal: ${costGoal}`);
+  assert(isPlayerVisibleSampleLineText(costGoal), `orthodox age-25 cost goal has raw key: ${costGoal}`);
 
   const age32Gray = makeState(33, {
     route_orthodox: true,
@@ -249,6 +250,7 @@ function testOrthodox301ResidualExpression(): void {
   });
   const grayGoal = deriveSampleLineCurrentGoal(age32Gray) ?? '';
   assert(grayGoal.includes('灰度') || grayGoal.includes('代价'), `orthodox age-32 gray goal: ${grayGoal}`);
+  assert(isPlayerVisibleSampleLineText(grayGoal), `orthodox age-32 gray goal has raw key: ${grayGoal}`);
 
   const graySummary = deriveLifeMemorySummary(age32Gray);
   assert(
@@ -270,6 +272,7 @@ function testMerchant804ResidualExpression(): void {
     debtGoal.includes('人情') || debtGoal.includes('周转') || debtGoal.includes('债'),
     `merchant age-32 debt goal: ${debtGoal}`,
   );
+  assert(isPlayerVisibleSampleLineText(debtGoal), `merchant age-32 debt goal has raw key: ${debtGoal}`);
 
   const age40Debt = makeState(40, {
     route_merchant: true,
@@ -282,11 +285,62 @@ function testMerchant804ResidualExpression(): void {
     identity.includes('债') && identity.includes('人情'),
     `merchant age-40 debt identity: ${identity}`,
   );
+  assert(isPlayerVisibleSampleLineText(identity), `merchant age-40 debt identity has raw key: ${identity}`);
   const summary = deriveLifeMemorySummary(age40Debt);
   assert(
     summary.unresolvedDebts?.some((debt) => debt.label.includes('人情债')),
     'merchant age-40 life-memory missing favor debt',
   );
+}
+
+function testMagnateExpression(): void {
+  const onRamp = makeState(30, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    magnate_on_ramp_done: true,
+  });
+  const onRampGoal = deriveSampleLineCurrentGoal(onRamp) ?? '';
+  assert(onRampGoal.includes('巨贾') || onRampGoal.includes('产业'), `magnate on-ramp goal: ${onRampGoal}`);
+  assert(isPlayerVisibleSampleLineText(onRampGoal), `magnate on-ramp goal has raw key: ${onRampGoal}`);
+
+  const pressure = makeState(38, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const pressureGoal = deriveSampleLineCurrentGoal(pressure) ?? '';
+  assert(pressureGoal.includes('人情') || pressureGoal.includes('巨贾'), `magnate pressure goal: ${pressureGoal}`);
+  assert(isPlayerVisibleSampleLineText(pressureGoal), `magnate pressure goal has raw key: ${pressureGoal}`);
+
+  const payoff = makeState(44, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const payoffGoal = deriveSampleLineCurrentGoal(payoff) ?? '';
+  assert(payoffGoal.includes('巨贾') || payoffGoal.includes('守住'), `magnate payoff goal: ${payoffGoal}`);
+  assert(isPlayerVisibleSampleLineText(payoffGoal), `magnate payoff goal has raw key: ${payoffGoal}`);
+
+  const age40 = makeState(40, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    merchant_age40_identity_done: true,
+    magnate_on_ramp_done: true,
+  });
+  const identity = deriveSampleLineAge40Identity(age40) ?? '';
+  assert(identity.includes('巨贾'), `magnate age-40 identity: ${identity}`);
+  assert(isPlayerVisibleSampleLineText(identity), `magnate age-40 identity has raw key: ${identity}`);
+
+  const costState = makeState(35, {
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    magnate_on_ramp_done: true,
+  });
+  const costLabel = deriveSampleLineCostLabel(costState);
+  assert(costLabel === '巨贾负担', `magnate cost label: ${costLabel}`);
 }
 
 function main(): void {
@@ -298,6 +352,7 @@ function main(): void {
   testOrthodox301ResidualExpression();
   testMerchant804ResidualExpression();
   testPost40PayoffExpression();
+  testMagnateExpression();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

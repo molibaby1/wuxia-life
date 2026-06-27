@@ -231,11 +231,9 @@ async function testLiveAge45PayoffAlignment(): Promise<void> {
 async function testLiveResidualSignalAlignment(): Promise<void> {
   const orthodox = P49_SAMPLE_LINE_MATRIX[0]!;
   const orthodoxReport = await createSampleLineSimulator(orthodox, 50).simulate();
-  const orthodoxSummary = summarizeSampleLineRun({ entry: orthodox, report: orthodoxReport });
-  const cp28 = orthodoxSummary.checkpoints.find((cp) => cp.age === 25)
-    ?? orthodoxSummary.checkpoints.find((cp) => cp.age === 32);
   const rec28 = [...orthodoxReport.records].reverse().find((record) => record.age <= 28);
-  const goal28 = rec28 ? (deriveSampleLineCurrentGoal(rec28.gameState) ?? '') : (cp28?.currentGoal ?? '');
+  assert(Boolean(rec28), 'seed 301: missing age-28 checkpoint record for residual cost signal');
+  const goal28 = deriveSampleLineCurrentGoal(rec28!.gameState) ?? '';
   assert(isPlayerVisibleSampleLineText(goal28), `seed 301 residual cost goal has raw key: ${goal28}`);
   assert(
     goal28.includes('代价') || goal28.includes('义务'),
@@ -252,20 +250,21 @@ async function testLiveResidualSignalAlignment(): Promise<void> {
 
   const merchant = P49_SAMPLE_LINE_MATRIX[2]!;
   const merchantReport = await createSampleLineSimulator(merchant, 50).simulate();
+  const merchantSummary = summarizeSampleLineRun({ entry: merchant, report: merchantReport });
   const rec35m = [...merchantReport.records].reverse().find((record) => record.age <= 35);
   assert(Boolean(rec35m?.gameState.flags?.merchant_midlife_debt), 'seed 804: merchant_midlife_debt missing by age 35');
   const goal35m = deriveSampleLineCurrentGoal(rec35m!.gameState) ?? '';
   assert(isPlayerVisibleSampleLineText(goal35m), `seed 804 residual debt goal has raw key: ${goal35m}`);
   assert(
-    goal35m.includes('人情') || goal35m.includes('周转') || goal35m.includes('债'),
-    `seed 804 residual debt goal missing by age 35: ${goal35m}`,
+    goal35m.includes('人情') || goal35m.includes('周转') || goal35m.includes('债') || goal35m.includes('巨贾') || goal35m.includes('产业'),
+    `seed 804 residual debt/magnate goal missing by age 35: ${goal35m}`,
   );
-  const cp40 = summarizeSampleLineRun({ entry: merchant, report: merchantReport }).checkpoints.find((cp) => cp.age === 40);
+  const cp40 = merchantSummary.checkpoints.find((cp) => cp.age === 40);
   const identity40 = cp40?.age40Identity ?? '';
   assert(isPlayerVisibleSampleLineText(identity40), `seed 804 age-40 identity has raw key: ${identity40}`);
   assert(
-    identity40.includes('债') || identity40.includes('人情'),
-    `seed 804 age-40 identity missing debt/favor: ${identity40}`,
+    identity40.includes('债') || identity40.includes('人情') || identity40.includes('巨贾'),
+    `seed 804 age-40 identity missing debt/favor/magnate: ${identity40}`,
   );
 }
 

@@ -21,11 +21,16 @@ const SPINE_EVENT_IDS = [
   'merchant_age40_identity_summary',
   'merchant_midlife_debt_milestone',
   'merchant_age45_expansion_fork',
+  'magnate_on_ramp',
+  'magnate_midlife_pressure',
+  'magnate_payoff',
 ] as const;
 
 const SPINE_FLAGS = [
   'orthodox_childhood_seed_done',
   'orthodox_youth_recognized',
+  'orthodox_righteousness_cost_visible',
+  'orthodox_gray_pressure_visible',
   'orthodox_age40_identity_done',
   'orthodox_age45_payoff_done',
   'demonic_childhood_seed_done',
@@ -33,9 +38,13 @@ const SPINE_FLAGS = [
   'demonic_age40_identity_done',
   'demonic_age45_payoff_done',
   'merchant_childhood_seed_done',
+  'merchant_midlife_debt',
   'merchant_age40_identity_done',
   'merchant_age45_payoff_done',
   'route_merchant',
+  'magnate_on_ramp_done',
+  'magnate_midlife_pressure_done',
+  'magnate_payoff_done',
 ] as const;
 
 function assert(condition: boolean, message: string): void {
@@ -249,15 +258,78 @@ async function testMerchant804ResidualDebtSpine(): Promise<void> {
   assert(Boolean(rec35?.gameState.flags?.merchant_midlife_debt), 'seed 804: missing merchant_midlife_debt by age 35');
   const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
   assert(
-    goal35.includes('人情') || goal35.includes('周转') || goal35.includes('债'),
-    `seed 804 age-35 goal missing debt signal: ${goal35}`,
+    goal35.includes('人情') || goal35.includes('周转') || goal35.includes('债') || goal35.includes('巨贾') || goal35.includes('产业'),
+    `seed 804 age-35 goal missing debt/magnate signal: ${goal35}`,
   );
 
   const rec40 = [...report.records].reverse().find((record) => record.age <= 40);
   const identity40 = deriveSampleLineAge40Identity(rec40!.gameState) ?? '';
   assert(
-    identity40.includes('债') || identity40.includes('人情'),
-    `seed 804 age-40 identity missing debt/favor signal: ${identity40}`,
+    identity40.includes('债') || identity40.includes('人情') || identity40.includes('巨贾'),
+    `seed 804 age-40 identity missing debt/favor/magnate signal: ${identity40}`,
+  );
+}
+
+async function testMagnateChainSim(): Promise<void> {
+  const report = await testBenchmarkSeedReachesAge('magnate-804-chain', {
+    playerName: '沈聚财',
+    gender: 'male',
+    seed: 804,
+    choiceTendency: 'wealth',
+    p8PersonaId: 'p8-wealth-shen',
+    sampleId: 'p8-wealth-shen',
+  }, 50);
+
+  const onRamp = report.records.find((record) => record.eventId === 'magnate_on_ramp');
+  assert(Boolean(onRamp), 'seed 804: magnate_on_ramp never fired');
+  assert(
+    (onRamp?.age ?? 99) >= 28 && (onRamp?.age ?? 0) <= 32,
+    `seed 804: magnate_on_ramp at age ${onRamp?.age}, expected 28-32`,
+  );
+
+  const pressure = report.records.find((record) => record.eventId === 'magnate_midlife_pressure');
+  assert(Boolean(pressure), 'seed 804: magnate_midlife_pressure never fired');
+  assert(
+    (pressure?.age ?? 99) >= 36 && (pressure?.age ?? 0) <= 40,
+    `seed 804: magnate_midlife_pressure at age ${pressure?.age}, expected 36-40`,
+  );
+
+  const payoff = report.records.find((record) => record.eventId === 'magnate_payoff');
+  assert(Boolean(payoff), 'seed 804: magnate_payoff never fired');
+  assert(
+    (payoff?.age ?? 99) >= 42 && (payoff?.age ?? 0) <= 46,
+    `seed 804: magnate_payoff at age ${payoff?.age}, expected 42-46`,
+  );
+
+  const rec30 = [...report.records].reverse().find((record) => record.age <= 30);
+  assert(Boolean(rec30?.gameState.flags?.magnate_on_ramp_done), 'seed 804: missing magnate_on_ramp_done by age 30');
+  const goal30 = deriveSampleLineCurrentGoal(rec30!.gameState) ?? '';
+  assert(
+    goal30.includes('巨贾') || goal30.includes('产业'),
+    `seed 804 age-30 goal missing magnate signal: ${goal30}`,
+  );
+
+  const rec38 = [...report.records].reverse().find((record) => record.age <= 38);
+  assert(Boolean(rec38?.gameState.flags?.magnate_midlife_pressure_done), 'seed 804: missing magnate_midlife_pressure_done by age 38');
+  const goal38 = deriveSampleLineCurrentGoal(rec38!.gameState) ?? '';
+  assert(
+    goal38.includes('人情') || goal38.includes('巨贾'),
+    `seed 804 age-38 goal missing magnate pressure signal: ${goal38}`,
+  );
+
+  const rec44 = [...report.records].reverse().find((record) => record.age <= 44);
+  assert(Boolean(rec44?.gameState.flags?.magnate_payoff_done), 'seed 804: missing magnate_payoff_done by age 44');
+  const goal44 = deriveSampleLineCurrentGoal(rec44!.gameState) ?? '';
+  assert(
+    goal44.includes('巨贾') || goal44.includes('守住'),
+    `seed 804 age-44 goal missing magnate payoff signal: ${goal44}`,
+  );
+
+  const rec40 = [...report.records].reverse().find((record) => record.age <= 40);
+  const identity40 = deriveSampleLineAge40Identity(rec40!.gameState) ?? '';
+  assert(
+    identity40.includes('巨贾'),
+    `seed 804 age-40 identity missing magnate signal: ${identity40}`,
   );
 }
 
@@ -332,17 +404,28 @@ async function main(): Promise<void> {
     sampleId: 'golden-demonic',
   }, 'demonic_age45_territory_consolidation', 'demonic_age45_payoff_done');
 
-  await testBenchmarkAge45Payoff('merchant-804-age45', {
-    playerName: '沈聚财',
-    gender: 'male',
-    seed: 804,
-    choiceTendency: 'wealth',
-    p8PersonaId: 'p8-wealth-shen',
-    sampleId: 'p8-wealth-shen',
-  }, 'merchant_age45_expansion_fork', 'merchant_age45_payoff_done');
+  {
+    const report = await testBenchmarkSeedReachesAge('merchant-804-age45', {
+      playerName: '沈聚财',
+      gender: 'male',
+      seed: 804,
+      choiceTendency: 'wealth',
+      p8PersonaId: 'p8-wealth-shen',
+      sampleId: 'p8-wealth-shen',
+    }, 50);
+    const payoff = report.records.find((record) => record.eventId === 'magnate_payoff');
+    assert(Boolean(payoff), 'seed 804: magnate_payoff never fired at 42-46');
+    assert(
+      (payoff?.age ?? 99) >= 42 && (payoff?.age ?? 0) <= 46,
+      `seed 804: magnate_payoff at age ${payoff?.age}, expected 42-46`,
+    );
+    const rec45 = [...report.records].reverse().find((record) => record.age <= 45);
+    assert(Boolean(rec45!.gameState.flags?.merchant_age45_payoff_done), 'seed 804: missing merchant_age45_payoff_done by age 45');
+  }
 
   await testOrthodox301ResidualSpineSignals();
   await testMerchant804ResidualDebtSpine();
+  await testMagnateChainSim();
 
   assert(SPINE_FLAGS.length >= 12, 'spine flag inventory incomplete');
   console.log('p50SampleLineSpineTests: all passed');

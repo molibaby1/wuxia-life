@@ -478,8 +478,8 @@
     "category": "main_story",
     "priority": 0,
     "weight": 100,
-    "ageRange": { "min": 44, "max": 48 },
-    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "ageRange": { "min": 42, "max": 46 },
+    "triggers": [{ "type": "age_reach", "value": 42 }],
     "conditions": [
       {
         "type": "expression",
@@ -495,6 +495,7 @@
     "autoEffects": [
       { "type": "flag_set", "target": "magnate_payoff_done" },
       { "type": "flag_set", "target": "magnate_payoff_resolved" },
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
       { "type": "event_record", "target": "magnate_payoff" }
     ],
     "metadata": {

@@ -32,6 +32,9 @@ function peasantCurrentGoal(flags: Record<string, unknown>, age: number): string
 }
 
 function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.apprentice_merchant_bridge_crossed) {
+    return '合伙经商已有起色，商路渐通';
+  }
   if (flags.apprentice_midlife_craft_mastery) {
     return '手艺出师，可以自立门户了';
   }
@@ -105,6 +108,9 @@ function peasantLifeMemory(flags: Record<string, unknown>): string | undefined {
 }
 
 function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.apprentice_merchant_bridge_crossed) {
+    return '你与买卖人合伙经商，从学徒踏上了商路。';
+  }
   if (flags.apprentice_midlife_craft_mastery) {
     if (flags.apprentice_open_shop) {
       return '你自立门户开了自己的铺子，镇上人都知道你的手艺。';
@@ -189,6 +195,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡农人：在村里长大，日子平淡但安稳。';
   }
   if (origin === 'town_apprentice') {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '学徒出身的商人：从铺子学徒到商路合伙，跨越了手艺与买卖的界限。';
+    }
     if (flags.apprentice_midlife_craft_mastery || flags.apprentice_midlife_trade_network) {
       return '平凡学徒的中年：手艺与买卖之间，自立或合伙。';
     }

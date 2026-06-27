@@ -70,8 +70,8 @@
         "Existing P25, P55, and P56 evidence does not regress"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "Configuration story."
+      "passes": true,
+      "notes": "Configuration story. Added route_wealth_committed and apprentice_merchant_bridge_crossed to join_partnership flags in midlife JSON."
     },
     {
       "id": "P58-006",

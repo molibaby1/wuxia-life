@@ -56,8 +56,8 @@
         "Existing P25, P56, and P58 evidence does not regress"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added peasant_merchant_bridge_crossed to both route and milestone conditions of magnate_on_ramp and merchant_midlife_debt_milestone gates in sample-lines-spine.json. Follows P58/P59 proven pattern."
     },
     {
       "id": "P61-005",

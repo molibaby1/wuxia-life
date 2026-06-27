@@ -1,0 +1,119 @@
+{
+  "project": "Wuxia Life P61 Farm Peasant Playable Bridge",
+  "branchName": "codex/p61-wuxia-farm-peasant-playable-bridge",
+  "description": "Implement the bounded farm_peasant bridge defined by P60 by adding only the approved minimum content, wiring, expression, proof, and narrow regression coverage needed to make the path runtime-reachable, without reopening direction decisions or expanding into broader peasant, economy, or migration systems.",
+  "userStories": [
+    {
+      "id": "P61-001",
+      "title": "Confirm P60 contract intake",
+      "description": "As a maintainer, I want a formal intake of the approved P60 bridge contract so P61 only implements what was already decided.",
+      "acceptanceCriteria": [
+        "Reference the P60-approved bridge direction, checkpoint, downstream target, and minimum-addition scope",
+        "State which items belong to P61 and which remain deferred",
+        "Save docs/test-reports/p61-farm-peasant-bridge-intake.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Intake document created at docs/test-reports/p61-farm-peasant-bridge-intake.md; 0 runtime changes."
+    },
+    {
+      "id": "P61-002",
+      "title": "Lock P61 scope contract",
+      "description": "As a planner, I want a scope contract so P61 remains a strict implementation stage.",
+      "acceptanceCriteria": [
+        "State that P61 only implements the approved P60 contract",
+        "Define allowed layers: minimum event, choice, flag, and config wiring, plus light expression, proof, and narrow tests",
+        "List forbidden expansions: direction redesign, new systems, and broader long-chain content growth",
+        "Save docs/test-reports/p61-farm-peasant-bridge-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-003",
+      "title": "Implement minimum bridge content",
+      "description": "As a developer, I want the minimum new content required by P60 so farm_peasant can actually cross the bridge at runtime.",
+      "acceptanceCriteria": [
+        "Add or adjust only the minimum event, choice, and flag content specified by the approved P60 contract",
+        "Do not create a second competing bridge path",
+        "Keep the before-bridge and after-bridge states clearly separated",
+        "Land the content through existing configuration carriers"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-004",
+      "title": "Wire the chosen downstream gate",
+      "description": "As a developer, I want the peasant bridge wired into the chosen downstream gate so the path becomes reachable without new framework work.",
+      "acceptanceCriteria": [
+        "Connect only to the single downstream target chosen in P60",
+        "Do not introduce a new destiny framework",
+        "The bridged path can enter the chosen gate or produce an equivalent bounded proof path",
+        "Existing P25, P56, and P58 evidence does not regress"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-005",
+      "title": "Add peasant bridge expression",
+      "description": "As a player, I want the peasant bridge to be legible through existing narrative surfaces.",
+      "acceptanceCriteria": [
+        "Add at least two readable bridge signals on existing expression surfaces",
+        "Keep the wording distinct from ordinary farm_peasant growth text",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-006",
+      "title": "Add targeted playable bridge proof",
+      "description": "As a maintainer, I want a bounded artifact proving the peasant bridge is runtime-reachable under the P60 contract.",
+      "acceptanceCriteria": [
+        "Produce one targeted simulation, replay, or verification artifact",
+        "Show peasant seed, bridge checkpoint, and downstream gate evidence in order",
+        "Do not rely on direct terminal destiny-flag seeding as the only proof path",
+        "Do not require combinatorial exhaust"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-007",
+      "title": "Add narrow peasant-bridge regression coverage",
+      "description": "As a maintainer, I want narrow tests protecting the new peasant bridge from future regressions.",
+      "acceptanceCriteria": [
+        "Cover bridge gating, player-facing expression, and proof key assertions with narrow checks",
+        "Reuse existing harnesses instead of rewriting the full test suite",
+        "Do not introduce unrelated test refactors",
+        "Relevant commands pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P61-008",
+      "title": "Produce P61 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what playable bridge now exists for farm_peasant.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p61-farm-peasant-playable-bridge-closure-report.md",
+        "Summarize intake, configuration, expression, proof, and test evidence",
+        "State the boundary versus P60 design-first output and the separate P59 tavern bridge stage",
+        "List larger system items that remain deferred"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
+- P61-001: P60 contract intake document created; 0 runtime changes.
+- Files: `docs/test-reports/p61-farm-peasant-bridge-intake.md`
+---
 ## [2026-06-28] - P60 Farm-Peasant Bridge Design-First Wave (A2)
 - P60 farm-peasant bridge design-first wave: all 7 stories completed.
 - **Design-only stage:** 0 runtime code changes; 5 design/audit/contract documents produced.

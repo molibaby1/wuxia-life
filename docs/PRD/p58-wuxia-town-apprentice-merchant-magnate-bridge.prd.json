@@ -112,8 +112,8 @@
         "Relevant commands pass"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "Regression story."
+      "passes": true,
+      "notes": "Regression story. Created p58ApprenticeBridgeTests.ts with 8 tests covering bridge gate, expression, and proof."
     },
     {
       "id": "P58-009",

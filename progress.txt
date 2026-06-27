@@ -1,3 +1,11 @@
+## [2026-06-27] - P55 Finalize (A2)
+- P55 merchant magnate bounded expansion: all 10 stories implemented and verified.
+- Spine events: magnate_on_ramp (28-32), magnate_midlife_pressure (36-40), magnate_payoff (42-46).
+- Expression: 3 currentGoal branches, age40Identity, costLabel ("巨贾负担").
+- Sim: seed 804 full chain verified; regression tests updated.
+- Files: `sample-lines-spine.json`, `sampleLineExpression.ts`, `p50SampleLineSpineTests.ts`, `p50SampleLineExpressionTests.ts`, `p49SampleLineReplayTests.ts`, `docs/test-reports/p55-merchant-magnate-*.md`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅
+---
 ## [2026-06-27] - P54 Finalize (A2)
 - A2 five-axis code review PASS: archive verify artifact; align residual replay guards with `isPlayerVisibleSampleLineText` (parity with age-25/45).
 - Closed P54 residual polish: M-orthodox-gray + M-merchant-debt → guarded baseline; spine bridge events, expression, G-16/G-17, closure report.

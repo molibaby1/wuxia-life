@@ -14,7 +14,7 @@
         "Do not change runtime behavior in this story"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Read-only audit."
     },
     {
@@ -28,7 +28,7 @@
         "Save docs/test-reports/p55-merchant-magnate-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Scope contract story."
     },
     {
@@ -42,7 +42,7 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Design story."
     },
     {
@@ -56,7 +56,7 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Design story."
     },
     {
@@ -70,7 +70,7 @@
         "Existing sample-line and P25 regression evidence does not regress"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Configuration story."
     },
     {
@@ -84,7 +84,7 @@
         "Add or update focused expression tests"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Expression story."
     },
     {
@@ -98,7 +98,7 @@
         "Do not require combinatorial exhaust"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Simulation proof story."
     },
     {
@@ -112,7 +112,7 @@
         "Relevant commands pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Regression story."
     },
     {
@@ -126,7 +126,7 @@
         "Link the artifact from closure documentation"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Artifact story."
     },
     {
@@ -140,7 +140,7 @@
         "List merchant-growth items that remain deferred"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Closure story."
     }
   ]

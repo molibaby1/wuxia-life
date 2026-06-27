@@ -14,7 +14,7 @@
         "Do not change runtime behavior in this story"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Read-only audit."
     },
     {
@@ -28,7 +28,7 @@
         "Save docs/test-reports/p57-sample-lines-second-40-plus-scope-contract.md"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "Scope contract story."
     },
     {
@@ -42,7 +42,7 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "Design story."
     },
     {
@@ -56,7 +56,7 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "Design story."
     },
     {
@@ -70,7 +70,7 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "Design story."
     },
     {
@@ -84,7 +84,7 @@
         "Record the decision in the scope contract or gap audit"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": "Decision story."
     },
     {
@@ -98,7 +98,7 @@
         "Relevant targeted simulations can trigger the approved nodes"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": "Configuration story."
     },
     {
@@ -112,7 +112,7 @@
         "Add or update focused expression tests"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": "Expression story."
     },
     {
@@ -126,7 +126,7 @@
         "Relevant commands pass"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": "Verification story."
     },
     {
@@ -140,7 +140,7 @@
         "Do not frame P57 as a mandatory sample-line stage"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": "Closure story."
     }
   ]

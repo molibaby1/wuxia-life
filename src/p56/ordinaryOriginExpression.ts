@@ -197,7 +197,7 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
   if (flags.tavern_midlife_guest_regulars || flags.tavern_midlife_ally_referral) {
     return '平凡酒肆帮工的中年：人脉与引荐之间，经营或留守。';
   }
-  return '平凡酒肆帮工：在酒肆帮忙，日子忙碌但热闹';
+  return '平凡酒肆帮工：在酒肆帮忙，日子忙碌但热闹';;
 }
 
 export function isPlayerVisibleOrdinaryOriginText(text: string): boolean {

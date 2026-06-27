@@ -1,3 +1,18 @@
+## [2026-06-28] - P60 Farm-Peasant Bridge Design-First Wave (A2)
+- P60 farm-peasant bridge design-first wave: all 7 stories completed.
+- **Design-only stage:** 0 runtime code changes; 5 design/audit/contract documents produced.
+- **Chosen direction:** Grain-merchant adjacent — `farm_peasant` → swap-crew curiosity → grain-trade outside offer → `peasant_merchant_bridge_crossed` → P55 magnate chain → `merchant_magnate`.
+- **Rejected direction:** Escort-jianghu-renown — narratively appealing but `jianghu_renown_sage` has no sample-line event chain; scope would explode.
+- **Bridge contract:** `docs/PRD/p60-farm-peasant-bridge-contract.md` — prerequisite chain, checkpoint, minimal additions, downstream gates, expression changes, edge cases, P61 validation shape.
+- **Gap audit:** `docs/test-reports/p60-farm-peasant-bridge-gap-audit.md` — existing assets, missing seeds, why apprentice pattern can't be reused.
+- **Scope contract:** `docs/test-reports/p60-farm-peasant-bridge-scope-contract.md` — allowed layers + forbidden expansions.
+- **Candidate seeds:** `docs/test-reports/p60-farm-peasant-candidate-bridge-seeds.md` — 2 candidates + comparison matrix + recommendation.
+- **Closure report:** `docs/test-reports/p60-farm-peasant-bridge-design-closure-report.md` — summary + P61 handoff.
+- **Why design-only:** `farm_peasant` bridge feasibility was Low (per P58 discovery) because direction was ambiguous — needed design before implementation to avoid identity collapse and scope creep.
+- **P61 handoff:** Implementation stage can pick up the contract directly — reframe outside-offer text + add bridge flags + expand gates + add expression + tests/proof/closure.
+- Files: `docs/test-reports/p60-farm-peasant-bridge-gap-audit.md`, `p60-farm-peasant-bridge-scope-contract.md`, `p60-farm-peasant-candidate-bridge-seeds.md`, `p60-farm-peasant-bridge-design-closure-report.md`, `docs/PRD/p60-farm-peasant-bridge-contract.md`, `docs/PRD/p60-wuxia-farm-peasant-bridge-design-first-wave.prd.json`
+- Validation: prd.json valid JSON ✅ (no runtime changes — no tests/typecheck needed)
+---
 ## [2026-06-28] - P59 Tavern Hand Merchant-Adjacent Bridge (A2)
 - P59 tavern-hand merchant-adjacent bridge: all 9 stories implemented and verified.
 - Configuration: `ordinary-origin-midlife.json` — `tavern_take_referral` sets `route_wealth_committed` + `tavern_merchant_bridge_crossed`.

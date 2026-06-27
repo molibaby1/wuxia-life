@@ -28,8 +28,8 @@
         "Save docs/test-reports/p58-town-apprentice-merchant-bridge-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "Scope contract story."
+      "passes": true,
+      "notes": "Scope contract story. Created scope contract doc with allowed/forbidden boundaries."
     },
     {
       "id": "P58-003",

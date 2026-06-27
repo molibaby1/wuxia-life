@@ -38,6 +38,11 @@ import {
   deriveSampleLineAge40Identity,
   deriveSampleLineCurrentGoal,
 } from '../p50/sampleLineExpression';
+import {
+  deriveOrdinaryOriginCurrentGoal,
+  deriveOrdinaryOriginLifeMemory,
+  deriveOrdinaryOriginSummary,
+} from '../p56/ordinaryOriginExpression';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -255,7 +260,8 @@ function buildRouteStatus(state: GameState): LifeMemoryRouteStatus {
     routeStatus.factionLabel = SECT_FACTION_LABELS[faction];
   }
 
-  const currentGoalLabel = deriveSampleLineCurrentGoal(state);
+  const currentGoalLabel = deriveSampleLineCurrentGoal(state)
+    ?? deriveOrdinaryOriginCurrentGoal(state);
   if (currentGoalLabel) {
     routeStatus.currentGoalLabel = currentGoalLabel;
   }
@@ -950,6 +956,12 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   if (optionalRisks) summary.risks = optionalRisks;
   if (optionalAchievements) summary.achievements = optionalAchievements;
   if (optionalHabitTrajectory) summary.habitTrajectory = optionalHabitTrajectory;
+
+  const flags = state.flags ?? {};
+  const ordinaryLifeMemory = deriveOrdinaryOriginLifeMemory(flags);
+  const ordinarySummary = deriveOrdinaryOriginSummary(flags);
+  if (ordinaryLifeMemory) summary.ordinaryOriginLifeMemory = ordinaryLifeMemory;
+  if (ordinarySummary) summary.ordinaryOriginSummary = ordinarySummary;
 
   return summary;
 }

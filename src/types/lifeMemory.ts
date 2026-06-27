@@ -93,4 +93,6 @@ export interface LifeMemorySummary {
   unresolvedDebts?: LifeMemoryDebtEntry[];
   risks?: LifeMemoryRiskEntry[];
   achievements?: LifeMemoryAchievementEntry[];
+  ordinaryOriginLifeMemory?: string;
+  ordinaryOriginSummary?: string;
 }

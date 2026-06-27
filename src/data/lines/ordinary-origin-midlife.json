@@ -124,7 +124,7 @@
         {
           "id": "join_partnership",
           "label": "合伙经商",
-          "flags": ["apprentice_midlife_trade_network", "apprentice_join_partnership", "ordinary_apprentice_midlife_done"],
+          "flags": ["apprentice_midlife_trade_network", "apprentice_join_partnership", "route_wealth_committed", "apprentice_merchant_bridge_crossed", "ordinary_apprentice_midlife_done"],
           "effects": [
             { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
             { "type": "stat_modify", "target": "externalSkill", "value": 2, "operator": "add" }

@@ -56,8 +56,8 @@
         "Record the contract in the PRD or audit appendix"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "Design story."
+      "passes": true,
+      "notes": "Design story. Created magnate-entry contract doc with conditions, distinction, and reuse boundary."
     },
     {
       "id": "P58-005",

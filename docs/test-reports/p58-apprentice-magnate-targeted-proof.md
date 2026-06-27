@@ -81,19 +81,21 @@ apprentice_merchant_bridge_crossed: true (set by bridge checkpoint)
 }
 ```
 
-### 3.3 merchant_magnate Gate Requirements
-| Requirement | Value | Threshold | Status |
-|-------------|-------|-----------|--------|
-| resources | ~182 (money) | >= 55 | ✅ Satisfied |
-| social_capital | ~58 (connections) | >= 55 | ✅ Satisfied |
-| route_wealth_committed | true | anyOf required | ✅ Satisfied |
-| business_empire/merchant_empire/merchant_wealthy | not yet set | anyOf required | ⏳ Downstream |
+### 3.3 magnate_on_ramp Gate Requirements
+The `magnate_on_ramp` gate requires two conditions ANDed:
 
-**Note:** The 4th requirement (`business_empire` or equivalent) is provided by the P55 magnate chain downstream. The bridge provides the first 3 requirements, enabling the magnate chain to fire.
+| Condition | Required | Bridge Provides | Status |
+|-----------|----------|-----------------|--------|
+| Route flag | `route_merchant \|\| merchant_childhood_seed_done \|\| p8_route_wealth \|\| apprentice_merchant_bridge_crossed` | `apprentice_merchant_bridge_crossed` | ✅ Satisfied |
+| Merchant milestone | `merchant_caravan_success \|\| merchant_shop_grocery \|\| ... \|\| apprentice_merchant_bridge_crossed` | `apprentice_merchant_bridge_crossed` | ✅ Satisfied |
+| Not already done | `!magnate_on_ramp_done` | — | ✅ Satisfied |
+| Not orthodox/demonic | `!orthodox_childhood_seed_done && !demonic_childhood_seed_done` | — | ✅ Satisfied |
+
+**Note:** Before P58, `route_wealth_committed` did NOT satisfy either condition. P58 added `apprentice_merchant_bridge_crossed` to both conditions in `sample-lines-spine.json`.
 
 ### 3.4 Magnate Chain Entry
-After bridge crossing, the P55 magnate chain provides:
-- `magnate_on_ramp` (age 28–32) → sets wealth milestone flags
+After bridge crossing, `apprentice_merchant_bridge_crossed` satisfies both conditions of `magnate_on_ramp`:
+- `magnate_on_ramp` (age 28–32) → sets `magnate_on_ramp_done`
 - `magnate_midlife_pressure` (age 36–40) → magnate pressure
 - `magnate_payoff` (age 42–46) → magnate payoff + `merchant_age45_payoff_done`
 
@@ -130,7 +132,8 @@ merchant_magnate mixed gate: ✅ FULLY SATISFIED
 |---------------|--------|--------|
 | Configuration | ✅ | Bridge flags in midlife JSON |
 | Expression | ✅ | 3 surfaces with bridge-specific text |
-| Gate evaluation | ✅ | 3/4 requirements met by bridge; 4th from P55 chain |
+| Gate evaluation | ✅ | `apprentice_merchant_bridge_crossed` satisfies both magnate_on_ramp conditions |
+| Gate fix | ✅ | `sample-lines-spine.json` gates expanded to accept bridge flag |
 | Flag chain | ✅ | Seed → bridge → magnate checkpoint ordered |
 | No static fixture shortcut | ✅ | Proof uses runtime flag flow, not direct mixed-flag seeding |
 

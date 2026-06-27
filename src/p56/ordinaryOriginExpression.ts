@@ -209,13 +209,15 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     }
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
-  if (flags.tavern_merchant_bridge_crossed) {
-    return '酒肆出身的商人：从跑堂伙计到城里铺子，靠人脉铺出了商路。';
+  if (origin === 'tavern_hand') {
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '酒肆出身的商人：从跑堂伙计到城里铺子，靠人脉铺出了商路。';
+    }
+    if (flags.tavern_midlife_guest_regulars || flags.tavern_midlife_ally_referral) {
+      return '平凡酒肆帮工的中年：人脉与引荐之间，经营或留守。';
+    }
+    return '平凡酒肆帮工：在酒肆帮忙，日子忙碌但热闹';
   }
-  if (flags.tavern_midlife_guest_regulars || flags.tavern_midlife_ally_referral) {
-    return '平凡酒肆帮工的中年：人脉与引荐之间，经营或留守。';
-  }
-  return '平凡酒肆帮工：在酒肆帮忙，日子忙碌但热闹';;
 }
 
 export function isPlayerVisibleOrdinaryOriginText(text: string): boolean {

@@ -19,16 +19,19 @@ After the bridge checkpoint (`apprentice_merchant_bridge_crossed`) fires, the ap
 
 ### 1.2 Magnate On-Ramp Conditions
 - Player age reaches 28–32 (P55 `magnate_on_ramp` spine event window)
-- `route_wealth_committed === true` (already set by bridge)
-- Resources sufficient for wealth milestone (partnership `+120 money` contributes)
+- Route flag satisfied: `apprentice_merchant_bridge_crossed` (added to gate as alternative to `route_merchant`)
+- Merchant milestone satisfied: `apprentice_merchant_bridge_crossed` (added to gate as alternative to shop/caravan milestones)
+- Not already completed (`!magnate_on_ramp_done`)
+- Not orthodox/demonic childhood
 
 ### 1.3 What Triggers Magnate Chain Entry
 The P55 `magnate_on_ramp` spine event fires when:
-1. Player is on merchant route (`route_wealth_committed`)
-2. Age window 28–32
-3. Resource/wealth milestone met
+1. Route flag: `route_merchant || merchant_childhood_seed_done || p8_route_wealth || apprentice_merchant_bridge_crossed`
+2. Merchant milestone: `merchant_caravan_success || merchant_shop_grocery || ... || apprentice_merchant_bridge_crossed`
+3. Age window 28–32
+4. Not already done, not orthodox/demonic
 
-The bridge ensures condition 1 is met. The midlife event timing and stat effects ensure condition 3 is feasible.
+The bridge ensures conditions 1 and 2 are met via `apprentice_merchant_bridge_crossed`. The midlife event timing ensures condition 3 is feasible.
 
 ## 2. Distinction vs. Generic Merchant Start
 
@@ -50,7 +53,7 @@ The generic merchant start has merchant-route access from childhood. The apprent
 ### 3.1 What P58 Reuses from P55
 | Component | Reuse | Modification |
 |-----------|-------|--------------|
-| `magnate_on_ramp` spine event | ✅ Exact reuse | None |
+| `magnate_on_ramp` spine event | ✅ Reused with gate expansion | `apprentice_merchant_bridge_crossed` added as alternative in both route + milestone conditions |
 | `magnate_midlife_pressure` spine event | ✅ Exact reuse | None |
 | `magnice_payoff` spine event | ✅ Exact reuse | None |
 | `merchant_magnate` mixed gate | ✅ Exact reuse | None |
@@ -58,13 +61,14 @@ The generic merchant start has merchant-route access from childhood. The apprent
 | Magnate flag chain | ✅ Exact reuse | None |
 
 ### 3.2 What P58 Does NOT Modify
-- P55 spine event definitions or timing
+- P55 spine event timing or age windows
 - P55 magnate expression text
-- P55 magnate gate requirements
 - P55 mixed baseline fixtures
 - Any existing merchant route configuration
+- Generic merchant path behavior (childhood seed, talent discovery, shop/caravan milestones)
 
 ### 3.3 What P58 Adds (Minimal)
+- `apprentice_merchant_bridge_crossed` as alternative in `magnate_on_ramp` and `merchant_midlife_debt_milestone` gate expressions (`sample-lines-spine.json`)
 - Bridge checkpoint flags in midlife config (P58-005)
 - Bridge expression signals (P58-006)
 - Bridge tracking flag `apprentice_merchant_bridge_crossed`

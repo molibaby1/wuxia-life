@@ -29,8 +29,10 @@ P58 将 `town_apprentice` 到 `merchant_magnate` 的路径从"文档与 fixture 
 | Change | File |
 |--------|------|
 | Added `route_wealth_committed` + `apprentice_merchant_bridge_crossed` to `join_partnership` flags | `src/data/lines/ordinary-origin-midlife.json` |
+| Added `apprentice_merchant_bridge_crossed` to `magnate_on_ramp` gate (route + milestone conditions) | `src/data/lines/sample-lines-spine.json` |
+| Added `apprentice_merchant_bridge_crossed` to `merchant_midlife_debt_milestone` gate (route + milestone conditions) | `src/data/lines/sample-lines-spine.json` |
 
-**Bridge checkpoint:** When apprentice chooses partnership, bridge flags are set. No new framework, no new config carrier.
+**Bridge checkpoint:** When apprentice chooses partnership, bridge flags are set. Gate expressions expanded to accept bridge flag as alternative to generic merchant route/milestone flags.
 
 ### 2.4 Expression (P58-006)
 
@@ -45,14 +47,15 @@ P58 将 `town_apprentice` 到 `merchant_magnate` 的路径从"文档与 fixture 
 | Artifact | Evidence |
 |----------|----------|
 | Targeted proof | `docs/test-reports/p58-apprentice-magnate-targeted-proof.md` |
-| Flag chain | `apprentice_trade_curiosity` → `apprentice_midlife_trade_network` → `apprentice_join_partnership` → `route_wealth_committed` → P55 magnate chain |
-| Gate evaluation | 3/4 `merchant_magnate` requirements met by bridge; 4th from P55 downstream |
+| Gate fix | `sample-lines-spine.json` — `magnate_on_ramp` and `merchant_midlife_debt_milestone` gates accept `apprentice_merchant_bridge_crossed` in both route + milestone conditions |
+| Flag chain | `apprentice_trade_curiosity` → `apprentice_midlife_trade_network` → `apprentice_join_partnership` → `apprentice_merchant_bridge_crossed` → P55 magnate chain |
+| Gate evaluation | `apprentice_merchant_bridge_crossed` satisfies both `magnate_on_ramp` conditions (route flag + merchant milestone) |
 
 ### 2.6 Tests (P58-008)
 
 | Test File | Assertions |
 |-----------|------------|
-| `tests/p58ApprenticeBridgeTests.ts` | 8 tests: bridge gate flags, prerequisite enforcement, currentGoal, lifeMemory, summary, ordinary origin preservation, lifeMemory summary integration, non-apprentice isolation |
+| `tests/p58ApprenticeBridgeTests.ts` | 14 tests: bridge gate flags, prerequisite enforcement, currentGoal, lifeMemory, summary, ordinary origin preservation, lifeMemory summary integration, non-apprentice isolation, **magnate_on_ramp gate acceptance**, **magnate_on_ramp rejection without bridge**, **merchant_midlife_debt gate acceptance**, **magnate_on_ramp rejection when already done**, **magnate_on_ramp rejection for orthodox**, **generic merchant path still works** |
 
 ## 3. Validation Results
 
@@ -60,12 +63,12 @@ P58 将 `town_apprentice` 到 `merchant_magnate` 的路径从"文档与 fixture 
 |---------|--------|
 | `npx tsc --noEmit` | **Pass** |
 | `npm exec tsx tests/p56OrdinaryOriginGrowthTests.ts` | **Pass** (no regression) |
-| `npm exec tsx tests/p58ApprenticeBridgeTests.ts` | **Pass** |
+| `npm exec tsx tests/p58ApprenticeBridgeTests.ts` | **Pass** (14 tests including gate-level assertions) |
 
 ## 4. What Now Exists
 
 ### 4.1 Runtime Bridge
-`town_apprentice` → `apprentice_trade_curiosity` → `apprentice_midlife_trade_network` → `apprentice_join_partnership` → `route_wealth_committed` + `apprentice_merchant_bridge_crossed` → P55 magnate chain → `merchant_magnate` gate
+`town_apprentice` → `apprentice_trade_curiosity` → `apprentice_midlife_trade_network` → `apprentice_join_partnership` → `apprentice_merchant_bridge_crossed` → `magnate_on_ramp` gate (bridge flag satisfies both conditions) → P55 magnate chain → `merchant_magnate` gate
 
 ### 4.2 Player-Visible Expression
 - Bridge crossing reads as "从学徒踏上了商路" (crossed from apprentice into merchant route)
@@ -73,10 +76,10 @@ P58 将 `town_apprentice` 到 `merchant_magnate` 的路径从"文档与 fixture 
 - Distinct from magnate stage ("产业初成，巨贾之路刚起步")
 
 ### 4.3 Evidence Chain
-- Configuration: JSON carrier within existing midlife event structure
+- Configuration: bridge flags in midlife JSON + gate expression expansion in sample-lines-spine.json
 - Expression: 3 surfaces with bridge-specific text
-- Proof: 1 targeted artifact showing seed → bridge → magnate checkpoint
-- Tests: 8 assertions covering gate, expression, and proof
+- Proof: 1 targeted artifact showing seed → bridge → magnate checkpoint, with gate-level evaluation
+- Tests: 14 assertions covering gate acceptance, expression, rejection cases, and generic merchant regression
 
 ## 5. Boundaries
 

@@ -44,14 +44,19 @@ This ensures the bridge is gated by ordinary-origin identity, early trade intere
 
 ## 3. Connection to Existing Wealth-Route Gate
 
-The `merchant_magnate` mixed destiny requires:
-1. `resources >= 55` — apprentice gets `+120 money` from partnership, contributing to resources
-2. `social_capital >= 55` — trade network provides social capital base
-3. `route_wealth_committed` or `p22_wealth_route_forked` — **bridge sets `route_wealth_committed`**
-4. `business_empire` or `merchant_empire` or `merchant_wealthy` — downstream magnate chain provides this
+The P55 `magnate_on_ramp` spine event requires two conditions ANDed together:
+
+1. **Route flag:** `route_merchant || merchant_childhood_seed_done || p8_route_wealth || apprentice_merchant_bridge_crossed`
+2. **Merchant milestone:** `merchant_caravan_success || merchant_shop_grocery || ... || apprentice_merchant_bridge_crossed`
+
+Before P58, `route_wealth_committed` alone did NOT satisfy either condition. P58 fixes this by adding `apprentice_merchant_bridge_crossed` as an acceptable alternative in BOTH conditions of the `magnate_on_ramp` gate (and the `merchant_midlife_debt_milestone` gate).
+
+**What the bridge provides:**
+- `route_wealth_committed` — semantic commitment to wealth route (used by `merchant_magnate` mixed destiny gate)
+- `apprentice_merchant_bridge_crossed` — satisfies both `magnate_on_ramp` conditions for the bridged apprentice path
 
 After bridge crossing, the path connects to:
-- P55 `magnate_on_ramp` spine event (merchant route + wealth milestone)
+- P55 `magnate_on_ramp` spine event (bridge flag satisfies both route + milestone conditions)
 - P55 `magnate_midlife_pressure` → `magnate_payoff` chain
 - Existing `merchant_magnate` mixed gate via `route_wealth_committed`
 
@@ -66,7 +71,8 @@ Before bridge checkpoint fires:
 After bridge checkpoint fires:
 - Player still has `origin_town_apprentice` flag
 - Expression surfaces can now show bridge/merchant-ascent flavor
-- `route_wealth_committed` enables merchant gate evaluation
+- `apprentice_merchant_bridge_crossed` satisfies both conditions of `magnate_on_ramp` gate
+- `route_wealth_committed` satisfies `merchant_magnate` mixed destiny gate
 - Magnate chain events become reachable
 
 The bridge does NOT:

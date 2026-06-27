@@ -86,7 +86,7 @@ The current age-45 payoffs are **substantially complete** for all three lines. T
 | Constraint | Do not rewrite demonic core route; maintain existing flag semantics |
 | Go/No-Go | **Marginal No-Go.** The backlash theme is already in the age-45 expression. A second node risks being "more of the same." P46 endgame recovery patterns already handle late-life demonic closure. If go, theme must be sharply distinct from consolidation. |
 
-## Appendix C — Demonic Second-Node Contract (US-005)
+## Appendix C — Merchant Second-Node Contract (US-005)
 
 | Item | Detail |
 |------|--------|

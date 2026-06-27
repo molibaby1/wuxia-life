@@ -100,7 +100,6 @@
       "priority": 7,
       "passes": true,
       "notes": "All lines no-go; no configuration changes needed. N/A."
-      "notes": "Configuration story."
     },
     {
       "id": "P57-008",
@@ -115,7 +114,6 @@
       "priority": 8,
       "passes": true,
       "notes": "All lines no-go; no expression changes needed. N/A."
-      "notes": "Expression story."
     },
     {
       "id": "P57-009",
@@ -130,7 +128,6 @@
       "priority": 9,
       "passes": true,
       "notes": "All lines no-go; no replay/guard changes needed. N/A."
-      "notes": "Verification story."
     },
     {
       "id": "P57-010",

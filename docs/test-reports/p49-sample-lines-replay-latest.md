@@ -1,6 +1,6 @@
 # P49 Sample Lines Replay Latest
 
-Generated: 2026-06-26T16:11:56.956Z
+Generated: 2026-06-27T04:59:06.718Z
 Checkpoint ages: 13, 18, 25, 32, 40, 45, 50
 
 ## 正派武道 (seed 301)
@@ -44,18 +44,18 @@ Checkpoint ages: 13, 18, 25, 32, 40, 45, 50
 ## 商路崛起 (seed 804)
 
 - Final age: 50
-- Deterministic hash: h967301057
+- Deterministic hash: h669388045
 
 | Age | Current goal | Route flags | Recent events | Life-memory entry |
 | --- | --- | --- | --- | --- |
 | 13 | 营商天赋已显，尚未开张 | route_merchant | merchant_talent_discovery, daily_morning_training_neg_1, childhood_summary, late_childhood_prep, youth_begins | goal=营商天赋已显，尚未开张 |
 | 18 | 第一桶金已得，店铺经营中 | route_merchant | sect_choice, love_first_meet, love_after_greet, merchant_first_shop, daily_training_bottleneck_pos_1 | goal=第一桶金已得，店铺经营中 |
 | 25 | 第一桶金已得，店铺经营中 | route_demonic, route_merchant | outlaw_path_beginning, p11_wealth_reinforcement_first_deal, commoner_year_apprentice, p9_wealth_caravan_gate, family_child_born | goal=第一桶金已得，店铺经营中 | achievement=喜结良缘 |
-| 32 | 第一桶金已得，店铺经营中 | route_demonic, route_merchant | family_child_education, spouse_mingyue_daily, relationship_enemy_create, setback_illness, merchant_midlife_debt_milestone | goal=第一桶金已得，店铺经营中 | achievement=喜结良缘 |
-| 40 | 财富带来选择，也带来债 | route_demonic, route_merchant | relationship_blood_brotherhood, jianghu_hero_meeting, merchant_age40_identity_summary, daily_take_odd_job_pos_1, career_martial_arts_conference | goal=财富带来选择，也带来债 | achievement=喜结良缘 |
-| 45 | 扩张分岔已至，债与人情并重 | route_demonic, route_merchant | relationship_sworn_help, jianghu_public_enemy, career_mediate_conflict, merchant_age45_expansion_fork, daily_copybook_practice_neu_1 | goal=扩张分岔已至，债与人情并重 | achievement=喜结良缘 |
-| 50 | 扩张分岔已至，债与人情并重 | route_demonic, route_merchant | daily_copybook_practice_neu_1, jianghu_grudge, jianghu_hermit_master, family_child_marriage, setback_injury | goal=扩张分岔已至，债与人情并重 | achievement=喜结良缘 |
+| 32 | 产业初成，巨贾之路刚起步 | route_demonic, route_merchant | magnate_on_ramp, commoner_year_farming, jianghu_challenge, relationship_enemy_create, merchant_midlife_debt_milestone | goal=产业初成，巨贾之路刚起步 | achievement=喜结良缘 |
+| 40 | 商号遍九州，人情债也遍九州 | route_demonic, route_merchant | magnate_midlife_pressure, relationship_blood_brotherhood, merchant_age40_identity_summary, daily_take_odd_job_pos_1, career_martial_arts_conference | goal=商号遍九州，人情债也遍九州 | achievement=喜结良缘 |
+| 45 | 巨贾之位已成，守住比扩张更难 | route_demonic, route_merchant | relationship_sworn_help, magnate_payoff, jianghu_secret_manual, daily_second_guess_pos_1, career_mediate_conflict | goal=巨贾之位已成，守住比扩张更难 | achievement=喜结良缘 |
+| 50 | 巨贾之位已成，守住比扩张更难 | route_demonic, route_merchant | career_mediate_conflict, relationship_master_betrayal, jianghu_hermit_master, jianghu_rescue, family_child_marriage | goal=巨贾之位已成，守住比扩张更难 | achievement=喜结良缘 |
 
-**Age-40 identity:** 你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险
+**Age-40 identity:** 你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任
 
-**Age-45 40+ payoff:** done — 扩张分岔已至，债与人情并重
+**Age-45 40+ payoff:** done — 巨贾之位已成，守住比扩张更难

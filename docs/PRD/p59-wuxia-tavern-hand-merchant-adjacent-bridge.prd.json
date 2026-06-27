@@ -28,8 +28,8 @@
         "Save docs/test-reports/p59-tavern-hand-bridge-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract complete. Single-origin (tavern_hand only), target: merchant_magnate via P55 magnate chain. Forbidden: sample-line reopen, full social sim, farm_peasant bridge, merchant deepening."
     },
     {
       "id": "P59-003",

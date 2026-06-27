@@ -42,8 +42,8 @@
         "Land the content through existing configuration carriers"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Reframed ordinary_peasant_midlife_outside_offer to grain-trade context; added route_wealth_committed + peasant_merchant_bridge_crossed to accept_offer flags in ordinary-origin-midlife.json."
     },
     {
       "id": "P61-004",

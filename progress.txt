@@ -1,6 +1,9 @@
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
-- P61-002: Scope contract document created; 0 runtime changes.
-- Files: `docs/test-reports/p61-farm-peasant-bridge-scope-contract.md`
+- P61-003: Minimum bridge content implemented in ordinary-origin-midlife.json.
+- Changes: Reframed `ordinary_peasant_midlife_outside_offer` to grain-trade context; added `route_wealth_committed` + `peasant_merchant_bridge_crossed` to `accept_offer` flags.
+- Files: `src/data/lines/ordinary-origin-midlife.json`
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-002
 ---
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-001
 - P61-001: P60 contract intake document created; 0 runtime changes.

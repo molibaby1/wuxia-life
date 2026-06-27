@@ -43,8 +43,8 @@
       "originFlag": "origin_farm_peasant",
       "ageMin": 30,
       "ageMax": 30,
-      "title": "外出机会",
-      "prompt": "走南闯北的商人路过村子，说镇上缺人手——你第一次认真想过离开。",
+      "title": "粮商找帮工",
+      "prompt": "走南闯北的粮商路过村子，说粮队缺个能扛能走的帮工——你跟过换工队，知道外面的路不只是田埂。",
       "conditions": [
         {
           "type": "expression",
@@ -62,8 +62,8 @@
         },
         {
           "id": "accept_offer",
-          "label": "去镇上试试",
-          "flags": ["peasant_midlife_outside_offer", "peasant_accept_outside", "ordinary_peasant_midlife_done"],
+          "label": "跟粮商走",
+          "flags": ["peasant_midlife_outside_offer", "peasant_accept_outside", "route_wealth_committed", "peasant_merchant_bridge_crossed", "ordinary_peasant_midlife_done"],
           "effects": [
             { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
             { "type": "stat_modify", "target": "externalSkill", "value": 1, "operator": "add" }

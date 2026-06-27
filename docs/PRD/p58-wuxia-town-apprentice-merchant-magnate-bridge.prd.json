@@ -42,8 +42,8 @@
         "Keep ordinary identity intact before the bridge checkpoint fires"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "Design story."
+      "passes": true,
+      "notes": "Design story. Created bridge contract doc with prerequisite group, checkpoint, and downstream flow."
     },
     {
       "id": "P58-004",

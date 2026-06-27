@@ -14,7 +14,7 @@
         "Do not change runtime behavior in this story"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Read-only audit."
     },
     {
@@ -28,7 +28,7 @@
         "Save docs/test-reports/p56-ordinary-origin-growth-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Scope contract story."
     },
     {

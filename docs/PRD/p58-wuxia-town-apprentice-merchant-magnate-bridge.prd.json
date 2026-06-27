@@ -84,8 +84,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Expression story."
+      "passes": true,
+      "notes": "Expression story. Added bridge expression in currentGoal, lifeMemory, and summary surfaces."
     },
     {
       "id": "P58-007",

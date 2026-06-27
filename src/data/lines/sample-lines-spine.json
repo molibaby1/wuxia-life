@@ -407,5 +407,102 @@
         "stageSignals": ["age45_payoff"]
       }
     }
+  },
+  {
+    "id": "magnate_on_ramp",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 28, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth')) && (flags.has('merchant_caravan_success') || flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_wealthy') || flags.has('merchant_chamber_head')) && !flags.has('magnate_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾门槛",
+      "text": "产业初成，商路已铺开半壁江山。你不再是小本经营的掌柜——财富与人脉把你推到了'巨贾'的门槛。可这门槛一旦跨过，便再无退路。",
+      "description": "P55 巨贾 on-ramp"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_on_ramp_done" },
+      { "type": "event_record", "target": "magnate_on_ramp" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "on-ramp", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "magnate_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 36, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && !flags.has('magnate_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情如网",
+      "text": "商号遍九州，人情债也遍九州。每笔赊账、每位合作伙伴、每桩江湖义气，都是一根牵着你的线——巨贾的担子，比掌柜的重得多。",
+      "description": "P55 巨贾 midlife pressure"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_midlife_pressure_done" },
+      { "type": "event_record", "target": "magnate_midlife_pressure" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "magnate_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && flags.has('magnate_midlife_pressure_done') && !flags.has('magnate_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾之位",
+      "text": "半生经营，你的商号已成江湖不可或缺的血脉。可每一笔利润都沾着人情，每一桩合作都系着风险——巨贾之位，坐上去容易，守住难。",
+      "description": "P55 巨贾 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_payoff_done" },
+      { "type": "flag_set", "target": "magnate_payoff_resolved" },
+      { "type": "event_record", "target": "magnate_payoff" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_payoff"]
+      }
+    }
   }
 ]

@@ -115,6 +115,15 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 }
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.magnate_payoff_done) {
+    return '巨贾之位已成，守住比扩张更难';
+  }
+  if (flags.magnate_midlife_pressure_done) {
+    return '商号遍九州，人情债也遍九州';
+  }
+  if (flags.magnate_on_ramp_done) {
+    return '产业初成，巨贾之路刚起步';
+  }
   if (flags.merchant_age45_expansion_fork_done) {
     return '扩张分岔已至，债与人情并重';
   }
@@ -140,7 +149,8 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 export function deriveSampleLineCostLabel(state: GameState): string {
-  const line = detectSampleLine(state.flags ?? {});
+  const flags = state.flags ?? {};
+  const line = detectSampleLine(flags);
   if (line === 'orthodox') {
     return '守正代价';
   }
@@ -148,6 +158,9 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '邪路代价';
   }
   if (line === 'merchant') {
+    if (flags.magnate_on_ramp_done) {
+      return '巨贾负担';
+    }
     return '商路债务';
   }
   return '守正代价';
@@ -204,6 +217,9 @@ function demonicAge40Identity(flags: Record<string, unknown>): string | undefine
 function merchantAge40Identity(flags: Record<string, unknown>): string | undefined {
   if (!flags.merchant_age40_identity_done) {
     return undefined;
+  }
+  if (flags.magnate_on_ramp_done) {
+    return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
   if (flags.merchant_shop_failed || flags.merchant_midlife_debt) {
     return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险';

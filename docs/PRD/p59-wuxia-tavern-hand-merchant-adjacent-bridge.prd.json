@@ -42,8 +42,8 @@
         "Keep tavern_hand ordinary identity intact before the bridge checkpoint fires"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Bridge contract saved at docs/PRD/p59-tavern-hand-bridge-contract.md. Prereq chain: tavern_guest_network → tavern_embrace_network → tavern_take_referral. Checkpoint flag: tavern_merchant_bridge_crossed. Ordinary identity preserved via detectOrdinaryOrigin."
     },
     {
       "id": "P59-004",
@@ -56,8 +56,8 @@
         "If the target is not merchant-adjacent, document the fit versus P25 ordinary wiring"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Downstream gate locked: merchant_magnate via P55 magnate chain. Entry contract saved at docs/PRD/p59-tavern-hand-magnate-entry-contract.md. Reuses P58 bridge pattern (single flag satisfies both route + milestone conditions). P55 chain itself is not modified."
     },
     {
       "id": "P59-005",

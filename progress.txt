@@ -1,3 +1,10 @@
+## [2026-06-27] - P57 Finalize (A2)
+- P57 optional second 40+ node stage: all lines no-go — no second nodes implemented.
+- Go-lines: none — all three lines (orthodox/demonic/merchant) assessed as no-go.
+- Gap audit found age-45 payoffs are substantially complete; P46 endgame covers late-life closure.
+- Files: `docs/test-reports/p57-sample-lines-second-40-plus-gap-audit.md`, `p57-sample-lines-second-40-plus-scope-contract.md`, `p57-sample-lines-second-40-plus-closure-report.md`, `docs/PRD/p57-wuxia-sample-lines-second-40-plus-node.prd.json`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅ (no code changes)
+---
 ## [2026-06-27] - P56 Ordinary Origin Growth Wave (A2)
 - P56 ordinary origin growth wave: all 10 stories implemented and verified.
 - Configuration: `ordinary-origin-midlife.json` with 6 midlife events (2 per origin).

@@ -93,11 +93,11 @@ By the end of P60, these artifacts will exist:
 |----------|--------|-------|
 | Gap audit document | ✅ Done | P60-001 |
 | Scope contract document | 📌 This doc | P60-002 |
-| Candidate bridge seeds comparison | ⏳ Pending | P60-003 |
-| Downstream target selection + justification | ⏳ Pending | P60-004 |
-| Bridge contract document | ⏳ Pending | P60-005 |
-| P61 validation shape definition | ⏳ Pending | P60-006 |
-| P60 closure report | ⏳ Pending | P60-007 |
+| Candidate bridge seeds comparison | ✅ Done | P60-003 |
+| Downstream target selection + justification | ✅ Done | P60-004 |
+| Bridge contract document | ✅ Done | P60-005 |
+| P61 validation shape definition | ✅ Done | P60-006 |
+| P60 closure report | ✅ Done | P60-007 |
 
 **No runtime code changes.** No config changes. No test changes. All deliverables are documents under `docs/test-reports/` and `docs/PRD/`.
 

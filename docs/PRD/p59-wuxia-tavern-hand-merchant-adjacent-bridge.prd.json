@@ -1,0 +1,133 @@
+{
+  "project": "Wuxia Life P59 Tavern Hand Merchant-Adjacent Bridge",
+  "branchName": "codex/p59-wuxia-tavern-hand-merchant-adjacent-bridge",
+  "description": "Close a bounded single-origin bridge for tavern_hand by turning the existing guest-network and ally-referral growth signals into a runtime-reachable merchant-adjacent or mixed-adjacent path, without reopening sample lines, deepening merchant_magnate, or expanding into a full tavern or social simulation system.",
+  "userStories": [
+    {
+      "id": "P59-001",
+      "title": "Audit tavern-hand bridge opportunity",
+      "description": "As a maintainer, I want an audit of the current tavern_hand bridge opportunity so P59 closes a real repo gap instead of inventing a disconnected route.",
+      "acceptanceCriteria": [
+        "Summarize existing tavern_hand growth signals, choice forks, expression surfaces, and mixed or downstream wiring evidence",
+        "State that P59 is a merchant-adjacent or mixed-adjacent bridge stage rather than a merchant deepening stage",
+        "Identify whether the current missing layer is gate wiring, a bridge checkpoint, or downstream-target definition",
+        "Save docs/test-reports/p59-tavern-hand-bridge-gap-audit.md"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Gap audit complete. Missing layer: bridge checkpoint flag + gate wiring + downstream target. Recommended target: merchant_magnate via P55 magnate chain (mirrors P58 apprentice pattern)."
+    },
+    {
+      "id": "P59-002",
+      "title": "Lock P59 scope contract",
+      "description": "As a planner, I want a scope contract for P59 so the stage stays single-origin and bounded.",
+      "acceptanceCriteria": [
+        "Limit the stage to tavern_hand only",
+        "Define allowed layers: configuration wiring, light bridge expression, targeted proof, narrow tests",
+        "List forbidden expansions: sample-line work, merchant magnate deepening, full social system, second ordinary origin in the same stage",
+        "Save docs/test-reports/p59-tavern-hand-bridge-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-003",
+      "title": "Define tavern-hand bridge contract",
+      "description": "As a designer, I want a bounded contract for how tavern_hand guest-network and ally-referral signals graduate into a higher-value route.",
+      "acceptanceCriteria": [
+        "Define a minimal prerequisite group using the existing regular-customer and ally-referral signals",
+        "Define at least one explicit bridge checkpoint",
+        "State whether the bridge targets a merchant-adjacent route or another existing mixed destiny and justify that choice with repo evidence",
+        "Keep tavern_hand ordinary identity intact before the bridge checkpoint fires"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-004",
+      "title": "Choose and lock the downstream gate",
+      "description": "As a maintainer, I want P59 to lock one downstream gate so implementation does not sprawl across multiple half-connected routes.",
+      "acceptanceCriteria": [
+        "Choose one primary downstream target from existing destiny or route assets",
+        "Explain why this target is preferable to inventing a new destiny",
+        "If the target is merchant-adjacent, document the reuse boundary versus the P55 magnate chain",
+        "If the target is not merchant-adjacent, document the fit versus P25 ordinary wiring"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-005",
+      "title": "Wire tavern-hand bridge configuration",
+      "description": "As a developer, I want the tavern-hand bridge wired through existing config carriers so it becomes runtime-reachable without a new framework.",
+      "acceptanceCriteria": [
+        "Implement the bridge only through existing origin, route, or destiny configuration carriers",
+        "Do not introduce a new origin framework or large new system",
+        "The bridged path can enter the chosen downstream gate or produce an equivalent bounded proof path",
+        "Existing P56, P58, and P25 ordinary-origin evidence does not regress"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-006",
+      "title": "Add tavern-hand bridge expression",
+      "description": "As a player, I want the tavern_hand route to visibly read as crossing from local service work into a broader opportunity network.",
+      "acceptanceCriteria": [
+        "Add at least two readable bridge signals on existing expression surfaces",
+        "Keep the wording distinct from ordinary tavern_hand growth text",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-007",
+      "title": "Add targeted tavern-hand bridge proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing tavern_hand can reach the chosen downstream gate through the new bridge.",
+      "acceptanceCriteria": [
+        "Produce one targeted simulation, replay, or verification artifact",
+        "Show tavern seed, bridge checkpoint, and downstream gate evidence in order",
+        "Do not rely on direct terminal mixed-flag seeding as the only proof path",
+        "Do not require combinatorial exhaust or a full lifetime wave"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-008",
+      "title": "Add narrow tavern-hand regression coverage",
+      "description": "As a maintainer, I want narrow tests for the tavern-hand bridge so future edits do not silently collapse it.",
+      "acceptanceCriteria": [
+        "Cover bridge gating, player-facing expression, and proof key assertions with narrow checks",
+        "Reuse existing ordinary-origin or mixed harnesses",
+        "Do not rewrite the full merchant or ordinary test suites",
+        "Relevant commands pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P59-009",
+      "title": "Produce P59 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what bridge now exists for tavern_hand and what remains deferred.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p59-tavern-hand-bridge-closure-report.md",
+        "Summarize configuration, expression, proof, and test evidence",
+        "State the boundary versus the P58 apprentice bridge and the P60 peasant design-first stage",
+        "List larger social, merchant, or ordinary follow-up items that remain deferred"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

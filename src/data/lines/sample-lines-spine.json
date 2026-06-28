@@ -541,5 +541,41 @@
         "stageSignals": ["renown_on_ramp"]
       }
     }
+  },
+  {
+    "id": "renown_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 37, "max": 41 },
+    "triggers": [{ "type": "age_reach", "value": 37 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_on_ramp_done') && !flags.has('renown_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情债重",
+      "text": "这些年，你在江湖上的名声越来越响。酒肆里常有人来，有受过你恩惠专程来道谢的，有你欠了人情找上门来的，还有人借着你的名头在外行事。你站在柜台后，看着一拨又一拨的人，忽然想起小时候在这儿见惯的人情往来——那时候你只觉得热闹，如今才知道，这人情债，是真的能压得人喘不过气。",
+      "description": "P75 江湖名宿 pressure — 人情债渐重"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_renown_pressure" },
+      { "type": "event_record", "target": "renown_midlife_pressure" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p75", "renown", "pressure", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_midlife_pressure"]
+      }
+    }
   }
 ]

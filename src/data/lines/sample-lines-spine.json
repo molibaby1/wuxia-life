@@ -756,5 +756,107 @@
         "stageSignals": ["renown_late_life"]
       }
     }
+  },
+  {
+    "id": "renown_endgame_echo_sigh",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_burnout') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·叹",
+      "text": "六十岁这年，你偶然走进一家酒肆，听见角落里有年轻人问起：「那个老掌柜，后来怎么样了？」\n\n老客人叹口气，说：「那人啊，是个好人……一辈子帮了不知多少人，最后身子垮了。可江湖上，谁不念他一句好呢。」\n\n你坐在角落里，听着自己成了传说。\n\n名声比人长久。\n\n你守了一辈子的名声，最后真的传下去了。只是代价，也真的没人记得了。",
+      "description": "P81 江湖名宿 endgame — Variant A 身后名之声·叹"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_sigh" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "sigh", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
+  },
+  {
+    "id": "renown_endgame_echo_distant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_lone_wolf') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·遥",
+      "text": "六十岁这年，你在一家酒肆里喝酒，听见邻桌讲起「那个逍遥翁」的故事。\n\n说他当年怎么怎么样，一人独闯多少地方，认识多少三教九流的人。说得有鼻子有眼，真假难辨。\n\n你坐在角落里，没人认出你。\n\n你笑了笑——自己都快忘了自己当年的样子了。\n\n江湖上的你，和真实的你，早就两回事了。\n\n传说真假谁真谁假，自己知道就好。",
+      "description": "P81 江湖名宿 endgame — Variant B 身后名之声·遥"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_distant" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "distant", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
+  },
+  {
+    "id": "renown_endgame_echo_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_mentor') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·传",
+      "text": "六十岁这年，你在酒肆里坐着，看见几个年轻人在聊天。\n\n他们说起「老掌柜的规矩」——该帮的帮，该推的推，有来有往才长久。\n\n你的话，还在被人提起。\n\n你看着他们从青涩到练达，想起当年老掌柜教你的样子。\n\n传承不是名字传下去，是智慧传下去了。\n\n看着后辈们传下去，这就够了。",
+      "description": "P81 江湖名宿 endgame — Variant C 身后名之声·传"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_legacy" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
   }
 ]

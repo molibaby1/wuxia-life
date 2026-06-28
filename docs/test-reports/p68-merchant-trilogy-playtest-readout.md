@@ -161,15 +161,15 @@ Prompt: 30秒内，用一句话分别复述三条路线的区别。
 
 ### 5.2 Can You Tell Them Apart?
 
-**Answer: **Yes, clearly.**
+**Answer:** Yes, clearly.
 
 The three routes feel like three different lives:
 
-1. **Apprentice** — "The Calculator** — success through quality and judgment; cost is losing craft freedom
+1. **Apprentice** — "The Calculator" — success through quality and judgment; cost is losing craft freedom
 2. **Tavern** — "The Weaver" — success through connections and favors; cost is social debt
 3. **Peasant** — "The Stepper" — success through labor and endurance; cost is leaving the land
 
-The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different kinds of action, three different kinds of success.
+The distinctive verbs help a lot: **算出 / 织出 / 踩出** — three different kinds of action, three different kinds of success.
 
 ### 5.3 Which Feels Most Different?
 
@@ -191,7 +191,7 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
 | Tavern | **Pass** | "欠的人情比银子多" + "人人都有求于你" — 独特的社交负债概念 |
 | Peasant | **Pass** | "回不到田里" + "脚下的路比田埂长" — 最有身体感的代价 |
 
-**Overall success-cost verdict: **Pass** — 三条路线代价都不一样，都是具体的、有画面感的、和出身呼应的。不是泛泛的"经商不易"。
+**Overall success-cost verdict: Pass** — 三条路线代价都不一样，都是具体的、有画面感的、和出身呼应的。不是泛泛的"经商不易"。
 
 ### 6.2 Success-Shape Differentiation
 
@@ -201,7 +201,7 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
 | Tavern | **Pass** | "织出来的成功" — 靠人情网络，老主顾串门路 |
 | Peasant | **Pass** | "踩出来的成功" — 靠脚力血汗，车马仓储踩根基 |
 
-**Overall success-shape verdict: **Pass** — 三种成功形状完全不同：算 / 织 / 踩。三个不同动词，三种不同的成功方式。不只是"不同的装饰"，是"不同的形状"。
+**Overall success-shape verdict: Pass** — 三种成功形状完全不同：算 / 织 / 踩。三个不同动词，三种不同的成功方式。不只是"不同的装饰"，是"不同的形状"。
 
 ### 6.3 Destiny-Sentence Recall
 
@@ -211,7 +211,7 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
 | Tavern | **Pass** | "从酒肆到商号，靠人情网络织出了八方商路" — 好记，有画面 |
 | Peasant | **Pass** | "从田埂到车马，靠脚力血汗踩出了一条粮路" — 好记，有画面 |
 
-**Overall destiny-sentence verdict: **Pass** — 三句命运句都符合"从X到Y，靠Z..."的结构，都是16个字，都有具体意象。放在一起很好区分。
+**Overall destiny-sentence verdict: Pass** — 三句命运句都符合"从X到Y，靠Z..."的结构，都是16个字，都有具体意象。放在一起很好区分。
 
 ---
 
@@ -223,7 +223,7 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
 | **Success-shape** | Pass | Pass | **Pass** |
 | **Destiny sentence** | Pass | Pass | **Pass** |
 
-**Overall trilogy verdict: **Pass** — 所有三个维度都通过。三条路线感觉像是三种不同的人生，而不是一条商路的三个皮肤。
+**Overall trilogy verdict: Pass** — 所有三个维度都通过。三条路线感觉像是三种不同的人生，而不是一条商路的三个皮肤。
 
 ---
 
@@ -240,18 +240,18 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
    - 人情比银子多（酒肆）
    - 回不到田里（农家）
 
-3. **玩家能记住差异。** 不是"三条商路的三个变体，是三种不同的成功人生。
+3. **玩家能记住差异。** 不是"三条商路的三个变体"，是三种不同的成功人生。
 
 ---
 
 ## 9. Caveats and Warnings
 
-1. **纯文字层面的区别 — 没有机制层面的区别。** 所有区别都在文字表达里，不在玩法机制上三条路线还是一样的骨架。
-2. **命运句没有接入UI — 函数存在但玩家不一定能看到。如果不在结局或总结页面展示。
-3. **只有一个评审者 — 样本量小，是内部评审，不是外部用户测试。
-4. **基于表达审查，不是全程游玩 — 是看表达文本，不是实际玩游戏。
+1. **纯文字层面的区别 — 没有机制层面的区别。** 所有区别都在文字表达里，不在玩法机制上。三条路线还是一样的骨架。
+2. **命运句没有接入UI —** 函数存在但玩家不一定能看到。如果不在结局或总结页面展示。
+3. **只有一个评审者 —** 样本量小，是内部评审，不是外部用户测试。
+4. **基于表达审查，不是全程游玩 —** 是看表达文本，不是实际玩游戏。
 
-这些是已知限制，不是失败。**
+这些是已知限制，不是失败。
 
 ---
 
@@ -259,12 +259,12 @@ The distinctive verbs help a lot: **算出 / 织出 / 踩出 — three different
 
 三条 merchant 路线现在**感觉像是三种不同的人生**：
 
-- ✅ **学徒商人：手艺人靠品质眼光算出来的成功，代价是失去手艺自由
-- ✅ **酒肆商人：开酒馆的靠人情网络织出来的成功，代价是欠人人情
-- ✅ **农家商人：庄稼人靠脚力血汗踩出来的成功，代价是回不到田里
+- ✅ **学徒商人：**手艺人靠品质眼光算出来的成功，代价是失去手艺自由
+- ✅ **酒肆商人：**开酒馆的靠人情网络织出来的成功，代价是欠人人情
+- ✅ **农家商人：**庄稼人靠脚力血汗踩出来的成功，代价是回不到田里
 
 玩家能清楚区分三条路线，能复述差异，能记住三个命运句。
 
-三条路线不只是"商路的三个版本"，是"三种不同的成功人生。
+三条路线不只是"商路的三个版本"，是"三种不同的成功人生"。
 
 **Playtest readout complete. Overall verdict: Pass (3/3 dimensions pass).**

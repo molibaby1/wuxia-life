@@ -65,8 +65,8 @@
         "Document conclusion in design document"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Complete: 3 branches designed — 叹 (bittersweet legend) / 遥 (distant legend) / 传 (living legend). Single auto echo event with 3 variants. All meaningfully different. All tavern-born flavored. Lightweight compliant. 0 runtime changes."
     },
     {
       "id": "P80-005",

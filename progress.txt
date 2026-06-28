@@ -1,8 +1,9 @@
-## [2026-06-29] - P80 Renown Endgame Design-First - P80-001~003
+## [2026-06-29] - P80 Renown Endgame Design-First - P80-001~004
 - P80-001: Renown endgame prerequisite audit complete — 6-stage foundation (bridge + entry + on-ramp + pressure + payoff + late-life) verified; 16 flags/markers inventoried; 7 events cataloged; 7 expression surfaces mapped; 3 late-life branch state differences documented; reusable assets and gaps identified; P19 endgame echo reuse assessed.
 - P80-002: Scope contract locked — 7 allowed layers (audit/scope/direction/design/contract/shape/closure); 13 forbidden expansions; lightweight constraint (1 echo event + expression only); 4 scope guardrails (boundedness/flavor/differentiation/GO-NO-GO); GO/NO-GO criteria; rollback strategy; P80/P81 boundary; quality priority order.
 - P80-003: Endgame direction assessment complete — **CONDITIONAL_GO**; core positioning: Legacy Echo (身后名之声) — 江湖如何记住你; 3 distinct variants (one per late-life branch); perspective shift (first-person life → third-person memory); clear distinction from late-life and P19; tavern-born flavor anchors defined; risks & mitigations documented.
-- Files: `docs/test-reports/p80-renown-endgame-prerequisite-audit.md`, `docs/test-reports/p80-renown-endgame-scope-contract.md`, `docs/test-reports/p80-renown-endgame-direction-assessment.md`
+- P80-004: Three endgame branches designed — 叹 (bittersweet legend) / 遥 (distant legend) / 传 (living legend); single auto echo event with 3 variants; all meaningfully different; all tavern-born flavored; lightweight compliant (7/7 constraints); 0 runtime changes.
+- Files: `docs/test-reports/p80-renown-endgame-prerequisite-audit.md`, `docs/test-reports/p80-renown-endgame-scope-contract.md`, `docs/test-reports/p80-renown-endgame-direction-assessment.md`, `docs/test-reports/p80-renown-endgame-branch-design.md`
 - Validation: prd.json valid JSON ✅ (zero runtime changes — design-only stage)
 ---
 ## [2026-06-29] - P79 Renown Late-Life Playable Implementation - P79-001~007 ✅ COMPLETE

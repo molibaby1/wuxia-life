@@ -1,0 +1,105 @@
+{
+  "project": "Wuxia Life P71 Selected Next Route Playable Bridge",
+  "branchName": "codex/p71-wuxia-selected-next-route-playable-bridge",
+  "description": "Implement only the minimum runtime bridge for the route selected by P69 and contracted by P70, closing gate acceptance, player-facing bridge expression, targeted proof, and narrow regression without expanding into later differentiation stages.",
+  "userStories": [
+    {
+      "id": "P71-001",
+      "title": "Audit implementation delta against the bridge contract",
+      "description": "As a maintainer, I want an implementation delta audit so P71 only changes what the approved bridge contract actually requires.",
+      "acceptanceCriteria": [
+        "List the minimum implementation points needed by comparing the current repo state against the approved bridge contract",
+        "State which existing wiring can be reused directly",
+        "Save docs/test-reports/p71-selected-route-bridge-implementation-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Implementation delta audit saved; zero runtime changes in this story"
+    },
+    {
+      "id": "P71-002",
+      "title": "Lock P71 runtime scope contract",
+      "description": "As a planner, I want a runtime scope contract so P71 stays a playable-bridge stage and does not sprawl into later differentiation work.",
+      "acceptanceCriteria": [
+        "Limit P71 to bridge wiring, bridge expression, targeted proof, and narrow tests",
+        "List forbidden expansions: entry densification, pressure or payoff work, and new systems",
+        "Save docs/test-reports/p71-selected-route-bridge-scope-contract.md",
+        "State the boundary between P71 and P72"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P71-003",
+      "title": "Implement bridge wiring",
+      "description": "As a developer, I want the selected route's bridge checkpoint wired through existing carriers so the target gate can be reached at runtime.",
+      "acceptanceCriteria": [
+        "Implement the minimum flag, gate, and configuration wiring defined by the approved bridge contract",
+        "Do not introduce a new route framework",
+        "Ensure the target gate passes when the bridge conditions are satisfied",
+        "Existing related evidence does not regress"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P71-004",
+      "title": "Add bridge player-facing expression",
+      "description": "As a player, I want the bridge crossing to feel visible and route-specific so the new path does not read like a silent flag change.",
+      "acceptanceCriteria": [
+        "Add at least two bridge-specific readable signals across existing expression surfaces",
+        "Make the bridge crossing distinguishable from the generic path",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P71-005",
+      "title": "Add targeted bridge proof",
+      "description": "As a maintainer, I want one targeted proof showing seed to bridge to gate acceptance so the bridge is repo-proven without relying on static fixtures alone.",
+      "acceptanceCriteria": [
+        "Produce one targeted proof artifact",
+        "Show the ordered chain from seed to bridge checkpoint to gate acceptance",
+        "Do not require full lifetime comparative exhaust",
+        "Do not rely on a static shortcut as the only bridge evidence"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P71-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow regression coverage so the new bridge cannot silently break later.",
+      "acceptanceCriteria": [
+        "Cover gate acceptance, player-facing expression, and non-target isolation with narrow checks",
+        "Reuse existing harnesses",
+        "Do not rewrite the full route test suite",
+        "Relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P71-007",
+      "title": "Produce P71 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly how the selected route bridge now works and what remains for later differentiation stages.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p71-selected-next-route-bridge-closure-report.md",
+        "Summarize wiring, expression, proof, and tests",
+        "State the boundary between P71 and P72",
+        "List larger densification or new-route items that remain deferred"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

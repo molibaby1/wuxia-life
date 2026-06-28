@@ -54,6 +54,17 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_endgame_done) {
+    if (flags.tavern_renown_endgame_sigh) {
+      return '听着自己成了传说，也算值了';
+    }
+    if (flags.tavern_renown_endgame_distant) {
+      return '传说真假谁真谁假，自己知道就好';
+    }
+    if (flags.tavern_renown_endgame_legacy) {
+      return '看着后辈们传下去，这就够了';
+    }
+  }
   if (flags.renown_late_life_done) {
     if (flags.tavern_renown_late_burnout) {
       return '守住这一辈子的名声，撑到最后';
@@ -179,6 +190,17 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.renown_endgame_done) {
+    if (flags.tavern_renown_endgame_sigh) {
+      return '你坐在酒肆角落里，听着年轻人讲「那个老掌柜」的故事。老客人叹口气说：「那人啊，是个好人……」名声比人长久——你守了一辈子的名声，最后真的传下去了，只是代价，也真的没人记得了。';
+    }
+    if (flags.tavern_renown_endgame_distant) {
+      return '你在酒肆里喝酒，听邻桌讲「逍遥翁」的传说。说得有鼻子有眼，真假难辨。在座没人认出你。你笑了笑——自己都快忘了当年的样子了。江湖上的你，和真实的你，早就两回事了。';
+    }
+    if (flags.tavern_renown_endgame_legacy) {
+      return '你看着酒肆里的年轻人聊「老掌柜的规矩」。该帮的帮，该推的推，有来有往才长久。你的话还在被人提起。传承不是名字传下去，是智慧传下去了。看着后辈们传下去，这就够了。';
+    }
+  }
   if (flags.renown_late_life_done) {
     if (flags.tavern_renown_late_burnout) {
       return '身体越来越差了。可只要还有人找上门，你还是硬撑着答应。老客人们见了你，都叹口气——"这老好人，还是改不了。"夜深人静时，你摸着酸疼的骨头，想起小时候在酒肆跑堂的日子——那时候累是累，可身子骨硬朗啊。算盘珠子拨了一辈子人情账，最后算到了自己头上。';
@@ -281,6 +303,17 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
   if (origin === 'tavern_hand') {
+    if (flags.renown_endgame_done) {
+      if (flags.tavern_renown_endgame_sigh) {
+        return '酒肆出身的江湖名宿：硬扛了一辈子人情债，名声比人长久。最后坐在酒肆角落里，听着自己成了传说——身后名·叹，名声比人长久。';
+      }
+      if (flags.tavern_renown_endgame_distant) {
+        return '酒肆出身的江湖独行：撕破了假人情，换来了逍遥自在。江湖上的传说真假参半，没人认出角落里的你——身后名·遥，传说比人逍遥。';
+      }
+      if (flags.tavern_renown_endgame_legacy) {
+        return '酒肆出身的江湖名宿：人情练达了一辈子，也传了一辈子。老掌柜的规矩还在被人提起，后辈们照着你的路走下去——身后名·传，智慧比人长久。';
+      }
+    }
     if (flags.renown_late_life_done) {
       if (flags.tavern_renown_late_burnout) {
         return '酒肆出身的江湖名宿：硬扛了一辈子人情债，名声响遍江湖，最后油尽灯枯。有人念你的好，有人叹你的傻。';

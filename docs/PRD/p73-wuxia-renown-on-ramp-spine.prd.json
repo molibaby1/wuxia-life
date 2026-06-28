@@ -72,8 +72,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "On-ramp player-facing expression added — 4 updates: 1) renownCurrentGoal (sampleLineExpression.ts), 2) tavernCurrentGoal (ordinaryOriginExpression.ts), 3) tavernLifeMemory (ordinaryOriginExpression.ts), 4) deriveOrdinaryOriginSummary (ordinaryOriginExpression.ts). All have tavern-born renown flavor. No new UI components. P71/P72 tests pass, typecheck pass."
     },
     {
       "id": "P73-006",

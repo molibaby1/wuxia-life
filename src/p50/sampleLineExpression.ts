@@ -191,6 +191,9 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_on_ramp_done) {
+    return '在江湖上有了名号，常有人来请你主持公道、引荐高人';
+  }
   if (flags.tavern_renown_bridge_crossed) {
     return '凭人脉声名在江湖立足，常有人来寻你引荐主事';
   }

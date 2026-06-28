@@ -54,6 +54,9 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_on_ramp_done) {
+    return '在江湖上有了名号，常有人来请你主持公道';
+  }
   if (flags.tavern_renown_bridge_crossed) {
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
@@ -151,6 +154,9 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.renown_on_ramp_done) {
+    return '你第一次以江湖人的身份主持了公道，两拨人都服你的气。从那天起，你的名字在江湖上有了分量——不是因为武功，是因为人脉和面子。';
+  }
   if (flags.tavern_renown_bridge_crossed) {
     return '你凭着酒肆里攒下的人脉和名声，渐渐在江湖上有了名号。人们不是来找你喝酒，是来寻你引荐、求你主事。';
   }
@@ -225,6 +231,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
   if (origin === 'tavern_hand') {
+    if (flags.renown_on_ramp_done) {
+      return '酒肆出身的江湖名宿：凭人脉与面子在江湖上有了名号，主持公道、引荐高人。';
+    }
     if (flags.tavern_renown_bridge_crossed) {
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }

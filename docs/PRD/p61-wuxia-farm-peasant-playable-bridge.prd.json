@@ -98,8 +98,8 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created tests/p61FarmPeasantBridgeTests.ts with 18 assertions covering bridge gate flags, prerequisite enforcement, expression (currentGoal/lifeMemory/summary), origin preservation, life-memory summary integration, non-peasant isolation, magnate_on_ramp gate acceptance/rejection, merchant_midlife_debt gate acceptance, generic merchant path, P58/P59 regression, and decline-offer no-bridge. All tests pass; P56/P58/P59 regression tests pass; typecheck passes."
     },
     {
       "id": "P61-008",

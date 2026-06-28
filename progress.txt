@@ -1,6 +1,10 @@
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
-- P61-006: Targeted playable proof document created.
-- Files: `docs/test-reports/p61-farm-peasant-magnate-targeted-proof.md`
+- P61-007: Narrow regression tests added and passing.
+- Tests: 18 assertions in `tests/p61FarmPeasantBridgeTests.ts` — all pass.
+- Regression: p56OrdinaryOriginGrowthTests ✅ p58ApprenticeBridgeTests ✅ p59TavernHandBridgeTests ✅ typecheck ✅
+- Files: `tests/p61FarmPeasantBridgeTests.ts`
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-006
 ---
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-005
 ---

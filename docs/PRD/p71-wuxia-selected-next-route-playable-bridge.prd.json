@@ -56,8 +56,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 expression branches added: tavernCurrentGoal, tavernLifeMemory, deriveOrdinaryOriginSummary; all existing tests pass; no new UI components"
     },
     {
       "id": "P71-005",

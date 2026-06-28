@@ -1,3 +1,14 @@
+## [2026-06-29] - P71 Selected Next Route Playable Bridge - COMPLETE
+- P71 selected next route playable bridge: all 7 stories completed and verified.
+- **Bridge:** Ally-Network Midlife Bridge — tavern_hand + ally_network (childhood seed) → midlife renown bridge event (age 29) → tavern_renown_bridge_crossed → jianghu_renown_sage.
+- **Wiring:** `ordinary_tavern_midlife_renown_bridge` event in ordinary-origin-midlife.json; `embrace_renown` sets `tavern_renown_bridge_crossed` + `route_renown_committed`.
+- **Expression:** 3 branches in ordinaryOriginExpression.ts (currentGoal, lifeMemory, summary); tavern_hand identity preserved.
+- **Proof:** Targeted proof with all 11 chain nodes verified via runtime code paths.
+- **Tests:** `p71TavernHandRenownBridgeTests.ts` with 15 assertions; all pass + no regressions in P56/P58/P59/P61/lifeMemorySummary.
+- **Closure:** 10/10 closure criteria met; P72 (entry differentiation) can proceed.
+- Files: `docs/test-reports/p71-*.md`, `src/data/lines/ordinary-origin-midlife.json`, `src/p56/ordinaryOriginExpression.ts`, `tests/p71TavernHandRenownBridgeTests.ts`, `docs/PRD/p71-*.md`, `docs/PRD/p71-*.prd.json`
+- Validation: typecheck ✅ P56 ✅ P58 ✅ P59 ✅ P61 ✅ lifeMemorySummary ✅ p71 ✅
+---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001~006
 - P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta.
 - P71-002: Runtime scope contract locked — 4 allowed layers, 5 forbidden expansions.

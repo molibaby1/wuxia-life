@@ -28,8 +28,8 @@
         "Save docs/test-reports/p73-renown-on-ramp-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract locked: 4 allowed layers (event config, expression, proof, narrow tests), 6 forbidden expansions (pressure, payoff, new systems, full expansion, second route, other origins)."
     },
     {
       "id": "P73-003",

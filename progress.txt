@@ -1,3 +1,9 @@
+## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001/002
+- P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps (on-ramp event, checkpoint flag, expression updates) documented.
+- P73-002: Scope contract locked — 4 allowed layers, 6 forbidden expansion categories, boundary guards defined.
+- Files: `docs/test-reports/p73-renown-on-ramp-gap-audit.md`, `docs/test-reports/p73-renown-on-ramp-scope-contract.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in these stories)
+---
 ## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001
 - P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps (on-ramp event, checkpoint flag, expression updates) documented.
 - Files: `docs/test-reports/p73-renown-on-ramp-gap-audit.md`

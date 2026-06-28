@@ -147,8 +147,10 @@ export class KarmaManager {
    * 清除因果（用于转世等特殊事件）
    */
   static clearKarma(state: GameState): GameState {
-    state.karma = this.create();
-    return state;
+    return {
+      ...state,
+      karma: this.create(),
+    };
   }
 
   /**

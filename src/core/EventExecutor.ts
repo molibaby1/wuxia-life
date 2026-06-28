@@ -194,8 +194,6 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.LIFEPATH_ADD_COMMITMENT, new LifepathAddCommitmentHandler());
     this.handlers.set(EffectType.LIFEPATH_ADD_RELATIONSHIP, new LifepathAddRelationshipHandler());
     
-    // 新增：触发事件处理器
-    this.handlers.set(EffectType.TRIGGER_EVENT, new TriggerEventHandler());
     this.handlers.set(EffectType.LIFE_STATE_CHANGE, new LifeStateChangeHandler());
   }
   
@@ -668,9 +666,8 @@ export class RandomEffectHandler implements EffectHandler {
  */
 export class KarmaChangeHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const effectDef = effect as any;
-    const good = effectDef.good || 0;
-    const evil = effectDef.evil || 0;
+    const good = effect.good || 0;
+    const evil = effect.evil || 0;
     const description = effect.description || '因果变化';
     
     if (good === 0 && evil === 0) {
@@ -917,54 +914,4 @@ export class LifepathAddRelationshipHandler implements EffectHandler {
   }
 }
 
-/**
- * 触发事件处理器
- * 用于在事件效果中直接触发另一个事件
- */
-export class TriggerEventHandler implements EffectHandler {
-  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target } = effect;
-    const eventId = target as string;
-    
-    
-    // 从 eventLoader 获取事件定义
-    const eventLoader = (this as any).eventLoader;
-    if (!eventLoader) {
-      console.error(`[TriggerEvent] eventLoader 不存在，无法触发 ${eventId}`);
-      return state;
-    }
-    
-    const event = eventLoader.getEventById(eventId);
-    if (!event) {
-      console.error(`[TriggerEvent] 事件 ${eventId} 不存在`);
-      return state;
-    }
-    
-    
-    // 如果是自动事件，直接执行效果
-    if (event.eventType === 'auto' && event.autoEffects) {
-      const updatedState = await this.execute(event.autoEffects, state);
-      return updatedState;
-    }
-    
-    // 否则只记录事件
-    if (state.player) {
-      state.player.events.push({
-        eventId: eventId,
-        timestamp: state.currentTime
-          ? {
-              year: state.currentTime.year,
-              month: state.currentTime.month,
-              day: state.currentTime.day,
-            }
-          : {
-              year: state.player.age,
-              month: 1,
-              day: 1,
-            },
-      });
-    }
-    
-    return state;
-  }
-}
+

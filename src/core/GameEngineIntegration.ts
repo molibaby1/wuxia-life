@@ -18,7 +18,6 @@ import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
 import { talentSystem } from './TalentSystem';
-import { statGrowthSystem } from './StatGrowthSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { LifePathManager } from './LifePathSystem';
 import { difficultyManager } from './DifficultyManager';
@@ -453,15 +452,7 @@ export class GameEngineIntegration {
         return false;
       }
       
-      // 6. 检查剧情线密度（新增）
-      if (!this.checkStoryLineDensity(event)) {
-        return false;
-      }
-      
-      // 7. 检查故事线保底触发（新增）
-      if (!this.checkStoryLineGuarantee(event)) {
-        return false;
-      }
+
       
       return true;
     });
@@ -724,54 +715,6 @@ export class GameEngineIntegration {
     
     if (yearsPassed < cooldown) {
       return false;
-    }
-    
-    return true;
-  }
-  
-  /**
-   * 检查剧情线密度
-   * 防止同一条剧情线的事件过于密集
-   * 
-   * 注意：已移除密度限制，允许剧情线事件连续触发
-   */
-  private checkStoryLineDensity(_event: EventDefinition): boolean {
-    return true;
-  }
-  
-  /**
-   * 检查故事线保底触发
-   * 如果一条故事线中断太久，强制触发下一个事件
-   */
-  private checkStoryLineGuarantee(event: EventDefinition): boolean {
-    const storyLine = event.storyLine;
-    if (!storyLine) {
-      return true; // 没有剧情线标签，不检查
-    }
-    
-    const currentAge = this.gameState.player?.age || 0;
-    const eventHistory = this.gameState.eventHistory || [];
-    
-    // 获取这条故事线的所有事件
-    const storyLineEvents = eventHistory
-      .filter(e => {
-        const eventDef = eventLoader.getEventById(e.eventId);
-        return eventDef?.storyLine === storyLine;
-      })
-      .sort((a, b) => a.age - b.age);
-    
-    if (storyLineEvents.length === 0) {
-      return true; // 这条线还没开始
-    }
-    
-    const lastEventAge = storyLineEvents[storyLineEvents.length - 1].age;
-    const yearsPassed = currentAge - lastEventAge;
-    
-    // 如果距离上个事件已经 3 年以上，强制触发这条线的下一个事件
-    const guaranteeThreshold = 3;
-    
-    if (yearsPassed >= guaranteeThreshold) {
-      return true; // 允许触发
     }
     
     return true;

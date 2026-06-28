@@ -114,8 +114,8 @@
         "List larger renown-expansion items that remain deferred"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report complete — 8/8 stories passed. Summary: 1 auto spine event (声名初显), 1 checkpoint flag (renown_on_ramp_done), 4 expression updates, 19 tests, zero regressions. Scope compliance: 100%. Pressure stage recommendation: GO (design-first, bounded). Document: docs/test-reports/p73-renown-on-ramp-closure-report.md"
     }
   ]
 }

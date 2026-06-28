@@ -54,6 +54,17 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_late_life_done) {
+    if (flags.tavern_renown_late_burnout) {
+      return '守住这一辈子的名声，撑到最后';
+    }
+    if (flags.tavern_renown_late_lone_wolf) {
+      return '无牵无挂，过好剩下的日子';
+    }
+    if (flags.tavern_renown_late_mentor) {
+      return '指点后辈，把这一辈子的人情世故传下去';
+    }
+  }
   if (flags.renown_midlife_payoff_done) {
     if (flags.tavern_renown_payoff_hard_holder) {
       return '硬扛所有人情债，保住江湖名声';
@@ -168,6 +179,17 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.renown_late_life_done) {
+    if (flags.tavern_renown_late_burnout) {
+      return '身体越来越差了。可只要还有人找上门，你还是硬撑着答应。老客人们见了你，都叹口气——"这老好人，还是改不了。"夜深人静时，你摸着酸疼的骨头，想起小时候在酒肆跑堂的日子——那时候累是累，可身子骨硬朗啊。算盘珠子拨了一辈子人情账，最后算到了自己头上。';
+    }
+    if (flags.tavern_renown_late_lone_wolf) {
+      return '你常常一个人去酒肆，点一壶酒，坐一下午。老客人们有的还打招呼，有的绕着走。你不在乎——这辈子撕破了那么多假人情，剩下的才是真的。一个人喝酒怎么了？自在。算盘珠子不算人情账了，算自己的逍遥账——赚了。';
+    }
+    if (flags.tavern_renown_late_mentor) {
+      return '酒肆里常来年轻人，向你请教江湖上的人情世故。你像当年老掌柜教你一样，慢慢点拨他们——该帮的帮，该推的推，有来有往才长久。看着他们从青涩到练达，你觉得这辈子没白活。算盘珠子算的不是人情债，是传承账——赚大了。';
+    }
+  }
   if (flags.renown_midlife_payoff_done) {
     if (flags.tavern_renown_payoff_hard_holder) {
       return '你把所有人情债都扛了下来。受过你恩惠的人念你的好，你自己却常在夜深人静时叹气——名声是撑住了，人也累垮了。酒肆的老掌柜若还在，大概会说你傻吧。';
@@ -259,6 +281,17 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
   if (origin === 'tavern_hand') {
+    if (flags.renown_late_life_done) {
+      if (flags.tavern_renown_late_burnout) {
+        return '酒肆出身的江湖名宿：硬扛了一辈子人情债，名声响遍江湖，最后油尽灯枯。有人念你的好，有人叹你的傻。';
+      }
+      if (flags.tavern_renown_late_lone_wolf) {
+        return '酒肆出身的江湖独行：撕破了假人情，断了所有牵绊，换来一身自由。有人说你绝情，你只觉得可笑——真真假假，你早就分得清。';
+      }
+      if (flags.tavern_renown_late_mentor) {
+        return '酒肆出身的江湖名宿：人情练达了一辈子，拿捏得住分寸，分得清真假。晚年成了人人敬重的老前辈，把这一辈子的智慧都传了下去。酒肆掌柜的智慧，后继有人。';
+      }
+    }
     if (flags.renown_midlife_payoff_done) {
       if (flags.tavern_renown_payoff_hard_holder) {
         return '酒肆出身的江湖名宿：靠人脉与面子闯出了名号，人情债全自己扛，名声越响，担子越重。';

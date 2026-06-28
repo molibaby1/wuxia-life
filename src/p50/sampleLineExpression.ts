@@ -191,6 +191,17 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_late_life_done) {
+    if (flags.tavern_renown_late_burnout) {
+      return '守住这一辈子的名声，撑到最后';
+    }
+    if (flags.tavern_renown_late_lone_wolf) {
+      return '无牵无挂，过好剩下的日子';
+    }
+    if (flags.tavern_renown_late_mentor) {
+      return '指点后辈，把这一辈子的人情世故传下去';
+    }
+  }
   if (flags.renown_midlife_payoff_done) {
     if (flags.tavern_renown_payoff_hard_holder) {
       return '硬扛所有人情债，保住江湖名声';
@@ -268,6 +279,17 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '商路债务';
   }
   if (line === 'renown') {
+    if (flags.renown_late_life_done) {
+      if (flags.tavern_renown_late_burnout) {
+        return '油尽灯枯';
+      }
+      if (flags.tavern_renown_late_lone_wolf) {
+        return '逍遥自在';
+      }
+      if (flags.tavern_renown_late_mentor) {
+        return '传承授业';
+      }
+    }
     if (flags.renown_midlife_payoff_done) {
       if (flags.tavern_renown_payoff_hard_holder) {
         return '声名之累';
@@ -365,6 +387,17 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
 function renownAge40Identity(flags: Record<string, unknown>): string | undefined {
   if (!flags.tavern_renown_bridge_crossed) {
     return undefined;
+  }
+  if (flags.renown_late_life_identity_done) {
+    if (flags.tavern_renown_late_burnout) {
+      return '你是油尽灯枯的老好人：从酒肆跑堂到江湖名宿，硬扛了一辈子人情债，名声响了一辈子，身体也垮了。酒肆的老掌柜若还在，大概会说你傻吧。可你知道——有些人，就是为了名声活着的。';
+    }
+    if (flags.tavern_renown_late_lone_wolf) {
+      return '你是逍遥自在的孤翁：从酒肆跑堂到江湖独行，撕破了一辈子假人情，断了所有不该有的牵绊。身边的人少了，心却宽了。有人说你可怜，你只笑笑——酒肆里三教九流见多了，真真假假，你分得清。孤独？不，这叫自由。';
+    }
+    if (flags.tavern_renown_late_mentor) {
+      return '你是德高望重的老前辈：从酒肆跑堂到江湖名宿，人情练达了一辈子，拿捏得准分寸，分得清真假。到了晚年，成了人人敬重的老前辈——年轻人来请教，你倾囊相授。酒肆掌柜的智慧，全被你用在了江湖上，也传给了后来人。';
+    }
   }
   if (flags.renown_age40_identity_done) {
     if (flags.tavern_renown_payoff_hard_holder) {

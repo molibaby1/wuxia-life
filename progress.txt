@@ -1,3 +1,15 @@
+## [2026-06-29] - P79 Renown Late-Life Playable Implementation - P79-001~007 ✅ COMPLETE
+- P79-001: Renown late-life spine event wired — 3 auto events in sample-lines-spine.json (burnout/lone_wolf/mentor, age 52-56, post-payoff, payoff marker branching, exclusivity guard, stats per branch).
+- P79-002: Late-life core P0 expression (sample line) complete — sample line cost label (油尽灯枯/逍遥自在/传承授业) + current goal (撑到最后/过好剩下的日子/指点后辈) updated for all 3 branches.
+- P79-003: Late-life identity P0 expression complete — renownAge40Identity() checks late-life identity first; 3 distinct identities: 油尽灯枯的老好人/逍遥自在的孤翁/德高望重的老前辈.
+- P79-004: Late-life bonus P1 expression (ordinary origin) complete — ordinary origin current goal + life memory + summary updated for all 3 branches; tavern-born flavor preserved.
+- P79-005: Targeted late-life proof complete — 8 core + 5 bonus chain nodes verified; tavern-born flavor consistent; endgame stage conditional GO recommendation.
+- P79-006: Narrow regression coverage complete — 9 test groups in tests/p79TavernHandRenownLateLifeSpineTests.ts; all pass.
+- P79-007: Closure report complete — 7/7 stories passed; 9/9 closure criteria satisfied; conditional GO for endgame (lightweight only) or skip.
+- Files: `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/p56/ordinaryOriginExpression.ts`, `tests/p79TavernHandRenownLateLifeSpineTests.ts`, `docs/test-reports/p79-renown-late-life-*.md`, `docs/PRD/p79-*.md`, `docs/PRD/p79-*.prd.json`
+- Validation: JSON valid ✅ typecheck ✅ P71 ✅ P72 ✅ P73 ✅ P75 ✅ P77 ✅ P79 ✅
+- Status: 7/7 stories complete; ready for A1-verify
+---
 ## [2026-06-29] - P78 Renown Late-Life Design-First - P78-001~006 ✅ COMPLETE
 - P78-001: Renown late-life prerequisite audit complete — 5-stage foundation (bridge + entry + on-ramp + pressure + payoff) verified; 10+ flags/markers inventoried; 4 events cataloged; 6 expression surfaces mapped; 3 payoff choice state differences documented; reusable assets and gaps identified; tavern-born flavor consistency confirmed.
 - P78-002: Scope contract locked — 6 allowed layers (audit/scope/design/contract/shape/closure); 13 forbidden expansions; 4 scope guardrails (boundedness/flavor/differentiation/GO-NO-GO); GO/NO-GO criteria; rollback strategy; P78/P79 boundary; quality priority order.

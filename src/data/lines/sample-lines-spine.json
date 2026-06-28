@@ -645,5 +645,116 @@
         "stageSignals": ["renown_midlife_payoff"]
       }
     }
+  },
+  {
+    "id": "renown_late_life_burnout",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_hard_holder') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n身体越来越差了。可只要还有人找上门，你还是硬撑着答应。\n\n老客人们见了你，都叹口气——\"这老好人，还是改不了。\"\n\n夜深人静时，你摸着酸疼的骨头，想起小时候在酒肆跑堂的日子——那时候累是累，可身子骨硬朗啊。\n\n算盘珠子拨了一辈子人情账，最后算到了自己头上。",
+      "description": "P79 江湖名宿 late-life — Branch A 油尽灯枯"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_burnout" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "burnout", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
+  },
+  {
+    "id": "renown_late_life_lone_wolf",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_breaker') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n你常常一个人去酒肆，点一壶酒，坐一下午。\n\n老客人们有的还打招呼，有的绕着走。你不在乎——这辈子撕破了那么多假人情，剩下的才是真的。\n\n一个人喝酒怎么了？自在。\n\n算盘珠子不算人情账了，算自己的逍遥账——赚了。",
+      "description": "P79 江湖名宿 late-life — Branch B 逍遥自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_lone_wolf" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "lone-wolf", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
+  },
+  {
+    "id": "renown_late_life_mentor",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_balancer') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n酒肆里常来年轻人，向你请教江湖上的人情世故。\n\n你像当年老掌柜教你一样，慢慢点拨他们——该帮的帮，该推的推，有来有往才长久。\n\n看着他们从青涩到练达，你觉得这辈子没白活。\n\n算盘珠子算的不是人情债，是传承账——赚大了。",
+      "description": "P79 江湖名宿 late-life — Branch C 传承授业"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_mentor" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "mentor", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
   }
 ]

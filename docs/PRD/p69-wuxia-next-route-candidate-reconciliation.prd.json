@@ -84,8 +84,8 @@
         "If jianghu_renown_sage is not selected, state why"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Selected: jianghu_renown_sage. Deferred: merchant_martial_patron. Rationale based on quality-first priority order: evidence strength (renown wins decisively) → implementation risk (renown wins decisively) → methodology fit (mixed, edge to renown for low drift) → value density (patron wins but lowest priority). Written to p69-next-route-candidate-comparison.md Part 4."
     },
     {
       "id": "P69-007",
@@ -98,8 +98,8 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Evidence is sufficient — no additional validation needed. Selection is clear: jianghu_renown_sage wins on 3/4 quality-first priority dimensions (evidence strength, implementation risk, methodology fit on net). Typecheck passes. Assessment saved to p69-narrow-reinforcement-assessment.md."
     },
     {
       "id": "P69-008",

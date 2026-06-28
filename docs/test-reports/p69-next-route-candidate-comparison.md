@@ -264,4 +264,78 @@ Implementation risk edge: **jianghu_renown_sage** by a clear margin.
 
 ---
 
-**P69-003/004/005 comparison artifact saved.** Selection (P69-006) will synthesize this into a final recommendation.
+## Part 4: Final Route Selection (P69-006)
+
+### 4.1 Recommendation
+
+**Selected route: `jianghu_renown_sage` (江湖名宿)**
+
+**Verdict: GO with jianghu_renown_sage as the next replication target.**
+
+### 4.2 Selection Rationale (Repo-Grounded)
+
+The selection is based on the quality-first priority order defined in the scope contract: evidence strength → implementation risk → methodology fit → value density.
+
+#### 1. Evidence strength: jianghu_renown_sage wins decisively
+
+- **Wiring evidence:** `jianghu_renown_sage` has P25-verified ordinary-origin wiring (tavern_hand → ally_network). `merchant_martial_patron` has zero ordinary-origin bridge evidence — only a vivid-origin (merchant_house) lifetime trace.
+- **Short-chain proof:** `jianghu_renown_sage` has P32 event-driven short-chain proof. `merchant_martial_patron` has no equivalent.
+- **Playable-bridge distance:** `jianghu_renown_sage` is one bridge-crossing event away from playable. `merchant_martial_patron` needs at least a martial seed plus a bridge, possibly more.
+
+#### 2. Implementation risk: jianghu_renown_sage wins decisively
+
+- **Bridge cost:** Single-seed bridge with existing foundation vs dual-seed bridge needing new martial content.
+- **Expression cost:** Single-track differentiation (fewer dimensions, less text) vs dual-track differentiation (more dimensions, more combinations).
+- **Validation cost:** Fewer test cases, lower regression risk vs more edge cases, higher regression risk.
+- **Small-step iterability:** 2–3 stages to playable vs 3–4 stages.
+- **No-go likelihood:** Very low (seed exists, pattern proven) vs moderate-high (no ordinary dual seed, more scope).
+
+#### 3. Methodology fit: Mixed, but quality-first gives edge to jianghu_renown_sage
+
+- `merchant_martial_patron` has better pure type match (mixed tier, same category as merchant_magnate).
+- But `jianghu_renown_sage` has lower scope drift risk — simpler = less likely to expand beyond bounds.
+- Quality-first prioritizes bounded scope and low risk → slight edge to `jianghu_renown_sage`.
+
+#### 4. Value density: merchant_martial_patron wins, but it comes last
+
+- `merchant_martial_patron` has higher differentiation potential and long-term value (dual-track = more surface area).
+- But value density is the lowest priority in the quality-first framework. A higher-value route with weaker evidence and higher risk is worse than a medium-value route with strong evidence and low risk.
+
+### 4.3 Why Not merchant_martial_patron?
+
+`merchant_martial_patron` is **deferred**, not rejected. It remains a strong candidate for a later replication cycle. Here's why it's not selected now:
+
+1. **No ordinary-origin bridge seed exists** — The only trace is from merchant_house (vivid tier). Building an ordinary→patron bridge would first require building a martial-content seed for ordinary origins, which is scope expansion beyond a single bridge.
+
+2. **Dual-seed bridge = higher complexity** — Merchant track + martial track means two growth systems to balance, more flag combinations, more edge cases. This increases the risk of scope drift and implementation bugs.
+
+3. **Higher no-go risk** — If we start down the patron path and discover that ordinary-origin martial content is too thin to support a credible bridge, we'd have to backtrack. Starting with the safer option (renown) de-risks the overall program.
+
+4. **Learn from the first replication first** — The merchant trilogy methodology was proven on merchant_magnate (mixed tier, single primary track). Replicating it on a mainstream-tier route tests the methodology's generality. If it works for renown, we'll have more confidence applying it to patron later.
+
+### 4.4 Why Not No-Go?
+
+No-go is not warranted because:
+
+1. **At least one candidate has strong evidence** — `jianghu_renown_sage` has P25 wiring + P32 short-chain proof + tavern_hand seed. This is a solid foundation.
+
+2. **The methodology is transfer-ready** — P68 confirmed the five-stage sequence is proven and stable. We're not guessing about the methodology; we're choosing where to apply it next.
+
+3. **The risk is bounded** — `jianghu_renown_sage` is low-risk enough that failure would be a minor setback, not a major waste. The upside (testing methodology generality + adding a mainstream-tier route) justifies the investment.
+
+### 4.5 What This Means for P70
+
+P70 will be the **design-first stage** for the `jianghu_renown_sage` route, following the same pattern as P60 (farm-peasant design-first):
+
+- P70-001: Gap audit of existing renown assets
+- P70-002: Scope contract for the renown bridge design
+- P70-003: Candidate bridge seeds comparison
+- P70-004: Bridge contract definition
+- P70-005: Implementation plan for P71 (playable bridge)
+- P70-006: Closure report
+
+P70 will be documentation-only, like P60. Implementation begins in P71.
+
+---
+
+**P69-006 complete.** Route selection: `jianghu_renown_sage`. Deferred: `merchant_martial_patron`.

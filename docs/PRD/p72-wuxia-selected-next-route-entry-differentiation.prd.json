@@ -98,8 +98,8 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Narrow regression coverage complete — 15 tests in p72TavernHandRenownEntryDifferentiationTests.ts covering: sample line detection (7 tests), expression surfaces (6 tests), differentiation comparisons (2 tests); all pass + no regressions in P71/P56/lifeMemorySummary"
     },
     {
       "id": "P72-008",

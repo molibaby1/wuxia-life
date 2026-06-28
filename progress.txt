@@ -1,12 +1,13 @@
-## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~006
+## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~007
 - P72-001: Post-bridge entry sharedness audit — 6 flattening points identified, 4 addressable in P72 bounded scope.
 - P72-002: Scope contract locked — 4 allowed layers, 4 forbidden expansion categories, boundary guards defined.
 - P72-003: Entry differentiation contract defined — 4 core identity signals, 3 expression surfaces + light markers, tavern-born flavor preserved, shared skeleton intact.
 - P72-004: Entry-level wiring complete — `detectSampleLine()` recognizes renown; renownCurrentGoal + deriveSampleLineCostLabel + renownAge40Identity added via existing carriers; no new framework.
 - P72-005: Player-facing entry expression complete — 4+ readable signals: currentGoal, costLabel, age40Identity, route summary name; tavern-born renown flavor distinct from merchant/orthodox/demonic.
 - P72-006: Targeted entry proof complete — comparison-style proof with 4 cases, 6 expression surfaces, all distinct; supports go decision for deeper differentiation.
-- Files: `docs/test-reports/p72-*.md`, `docs/PRD/p72-*.md`, `src/p50/sampleLineExpression.ts`, `src/utils/playerFacingLabels.ts`
-- Validation: typecheck ✅ P71 ✅ P56 ✅ p50SampleLineExpression ✅ lifeMemorySummary ✅
+- P72-007: Narrow regression coverage complete — 15 tests in p72TavernHandRenownEntryDifferentiationTests.ts covering sample line detection + expression surfaces + differentiation comparisons.
+- Files: `docs/test-reports/p72-*.md`, `docs/PRD/p72-*.md`, `src/p50/sampleLineExpression.ts`, `src/utils/playerFacingLabels.ts`, `tests/p72TavernHandRenownEntryDifferentiationTests.ts`
+- Validation: typecheck ✅ P71 ✅ P56 ✅ p50SampleLineExpression ✅ lifeMemorySummary ✅ P72 ✅
 ---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - COMPLETE
 - P71 selected next route playable bridge: all 7 stories completed and verified.

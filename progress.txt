@@ -1,3 +1,13 @@
+## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001~006
+- P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps documented.
+- P73-002: Scope contract locked — 4 allowed layers, 6 forbidden expansion categories.
+- P73-003: On-ramp contract defined — '声名初显' event at age 32-35, renown_on_ramp_done checkpoint, pressure/payoff flag interfaces reserved.
+- P73-004: On-ramp event wiring complete — `renown_on_ramp` auto event in sample-lines-spine.json.
+- P73-005: On-ramp player-facing expression complete — 4 updates: currentGoal (2x), lifeMemory, summary; all tavern-born renown flavor.
+- P73-006: Targeted on-ramp proof complete — 8 chain nodes verified; tavern-born flavor consistent; pressure stage recommendation: GO (with conditions).
+- Files: `docs/test-reports/p73-renown-on-ramp-*.md`, `docs/PRD/p73-renown-on-ramp-contract.md`, `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/p56/ordinaryOriginExpression.ts`
+- Validation: JSON valid ✅ typecheck ✅ P71 ✅ P72 ✅
+---
 ## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001~005
 - P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps documented.
 - P73-002: Scope contract locked — 4 allowed layers, 6 forbidden expansion categories.

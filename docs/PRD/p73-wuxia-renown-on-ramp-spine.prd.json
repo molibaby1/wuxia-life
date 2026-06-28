@@ -113,9 +113,9 @@
         "State whether the subsequent pressure stage is worth opening",
         "List larger renown-expansion items that remain deferred"
       ],
-      "priority": 8,
-      "passes": false,
-      "notes": ""
+      "priority": 4,
+      "passes": true,
+      "notes": "Targeted on-ramp proof complete — 8 chain nodes verified: pre-on-ramp baseline, event trigger, checkpoint, 4 expression updates (sampleLine currentGoal, ordinary origin currentGoal, lifeMemory, summary), and no-regression check. Tavern-born flavor verified across all surfaces. Pressure stage readiness recommendation: GO (with conditions). Document: docs/test-reports/p73-renown-on-ramp-targeted-proof.md"
     }
   ]
 }

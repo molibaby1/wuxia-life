@@ -28,7 +28,7 @@
         "Save docs/test-reports/p63-merchant-entry-differentiation-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

@@ -184,7 +184,10 @@ export type LifeStateKey =
   | 'indulgence'
   | 'familyBond'
   | 'socialMomentum'
-  | 'anxiety';
+  | 'anxiety'
+  | 'trainingHabit'
+  | 'studyHabit'
+  | 'businessHabit';
 
 export interface TraitStatModifier {
   stat: TraitStatKey;
@@ -285,6 +288,9 @@ export interface PlayerLifeStates {
   familyBond: number;
   socialMomentum: number;
   anxiety: number;
+  trainingHabit: number;
+  studyHabit: number;
+  businessHabit: number;
 }
 
 export interface LifeStateConfig {

@@ -141,11 +141,111 @@ export const dailyEvents: DailyEventConfig[] = [
     },
   },
   {
+    id: 'daily_copybook_practice',
+    group: 'training',
+    title: '临帖抄书',
+    ageRange: { min: 8, max: 60 },
+    baseWeight: 32,
+    preferredTraits: ['keen_mind', 'disciplined', 'scholar_house'],
+    suppressedTraits: ['lazy', 'unstable_mood'],
+    preferredStates: [
+      { state: 'discipline', min: 1, weightMultiplier: 1.12 },
+      { state: 'fatigue', min: 2, weightMultiplier: 0.82 },
+      { state: 'anxiety', min: 2, weightMultiplier: 0.88 },
+    ],
+    variants: {
+      positive: [
+        {
+          id: 'daily_copybook_practice_pos_1',
+          weight: 3,
+          text: '你伏案抄书，起初只是照着字形描摹，渐渐也读出了其中意味。',
+          statEffects: [
+            { stat: 'comprehension', value: 1 },
+            { stat: 'knowledge', value: 1 },
+          ],
+          stateEffects: [{ state: 'discipline', value: 1 }],
+        },
+      ],
+      neutral: [
+        {
+          id: 'daily_copybook_practice_neu_1',
+          weight: 2,
+          text: '你照例临了几页字帖，虽然说不上大进境，却也不算白费工夫。',
+        },
+      ],
+      negative: [
+        {
+          id: 'daily_copybook_practice_neg_1',
+          weight: 1,
+          text: '你抄到后面已觉眼花，字迹渐乱，只得先搁下笔。',
+          stateEffects: [{ state: 'fatigue', value: 1 }],
+        },
+      ],
+    },
+    outcomeBias: {
+      positiveByTraits: ['keen_mind', 'disciplined'],
+      negativeByTraits: ['unstable_mood'],
+    },
+    longTermHooks: {
+      addTendency: ['study_habit'],
+      addStateOnRepeat: [{ state: 'discipline', increment: 1, repeatThreshold: 3 }],
+    },
+  },
+  {
+    id: 'daily_reading_notes',
+    group: 'training',
+    title: '读书摘记',
+    ageRange: { min: 12, max: 70 },
+    baseWeight: 28,
+    preferredTraits: ['keen_mind', 'scholar_house', 'grand_dreams_poor_followthrough'],
+    suppressedTraits: ['indulgent'],
+    preferredStates: [
+      { state: 'discipline', min: 1, weightMultiplier: 1.08 },
+      { state: 'anxiety', min: 2, weightMultiplier: 0.9 },
+    ],
+    variants: {
+      positive: [
+        {
+          id: 'daily_reading_notes_pos_1',
+          weight: 2,
+          text: '你把书里的关键处都记了下来，忽然觉得许多道理在心里连成了一线。',
+          statEffects: [
+            { stat: 'knowledge', value: 1 },
+            { stat: 'comprehension', value: 1 },
+            { stat: 'charisma', value: 1 },
+          ],
+        },
+      ],
+      neutral: [
+        {
+          id: 'daily_reading_notes_neu_1',
+          weight: 2,
+          text: '你边读边记，虽说还未豁然开朗，却也把杂乱思绪整理出了些眉目。',
+        },
+      ],
+      negative: [
+        {
+          id: 'daily_reading_notes_neg_1',
+          weight: 1,
+          text: '你记了半天，越看越觉得前后矛盾，心里反倒添了几分烦躁。',
+          stateEffects: [{ state: 'anxiety', value: 1 }],
+        },
+      ],
+    },
+    outcomeBias: {
+      positiveByTraits: ['keen_mind'],
+      negativeByTraits: ['soft_eared'],
+    },
+    longTermHooks: {
+      addTendency: ['study_habit'],
+    },
+  },
+  {
     id: 'daily_take_odd_job',
     group: 'livelihood',
     title: '接点零活',
     ageRange: { min: 12, max: 70 },
-    baseWeight: 34,
+    baseWeight: 38,
     preferredTraits: ['poor_family', 'streetborn', 'unyielding', 'iron_abacus'],
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
@@ -184,13 +284,17 @@ export const dailyEvents: DailyEventConfig[] = [
       positiveByTraits: ['iron_abacus', 'profit_driven'],
       negativeByTraits: ['grand_dreams_poor_followthrough'],
     },
+    longTermHooks: {
+      addTendency: ['business_habit'],
+      addStateOnRepeat: [{ state: 'businessHabit', increment: 1, repeatThreshold: 2 }],
+    },
   },
   {
     id: 'daily_small_trade',
     group: 'livelihood',
     title: '小本生意',
     ageRange: { min: 15, max: 70 },
-    baseWeight: 26,
+    baseWeight: 34,
     preferredTraits: ['merchant_house', 'iron_abacus', 'profit_driven', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
@@ -226,6 +330,10 @@ export const dailyEvents: DailyEventConfig[] = [
     outcomeBias: {
       positiveByTraits: ['iron_abacus', 'profit_driven'],
       negativeByTraits: ['soft_eared'],
+    },
+    longTermHooks: {
+      addTendency: ['business_habit'],
+      addStateOnRepeat: [{ state: 'businessHabit', increment: 1, repeatThreshold: 2 }],
     },
   },
   {
@@ -268,6 +376,9 @@ export const dailyEvents: DailyEventConfig[] = [
     outcomeBias: {
       positiveByTraits: ['unyielding'],
       negativeByTraits: ['indulgent'],
+    },
+    longTermHooks: {
+      addTendency: ['business_habit'],
     },
   },
   {

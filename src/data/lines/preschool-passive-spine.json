@@ -101,6 +101,62 @@
       "originTags": ["frontier"],
       "ageMin": 6,
       "ageMax": 7
+    },
+    {
+      "id": "preschool_peasant_harvest_help",
+      "title": "帮收谷穗",
+      "text": "你踮脚把散落的谷穗拢进篮里，手指被芒刺扎红，却听母亲夸「肯帮忙。」",
+      "originTags": ["peasant"],
+      "ageMin": 4,
+      "ageMax": 5,
+      "flags": ["preschool_peasant_harvest_help"],
+      "statDeltas": { "constitution": 1 }
+    },
+    {
+      "id": "preschool_peasant_well_watch",
+      "title": "井台看天",
+      "text": "你在村井边看大人打水，听他们聊年景与税赋，记住了「旱」和「歉收」两个词。",
+      "originTags": ["peasant"],
+      "ageMin": 6,
+      "ageMax": 7,
+      "flags": ["preschool_peasant_well_watch"]
+    },
+    {
+      "id": "preschool_apprentice_plane_shavings",
+      "title": "刨花满袖",
+      "text": "师傅让你递刨子，你递错了面，被轻敲手背——「认工具，先认规矩。」",
+      "originTags": ["apprentice"],
+      "ageMin": 4,
+      "ageMax": 5,
+      "flags": ["preschool_apprentice_plane_shavings"],
+      "statDeltas": { "comprehension": 1 }
+    },
+    {
+      "id": "preschool_apprentice_market_errand",
+      "title": "赶集差事",
+      "text": "父亲让你去集市买漆，你记错色号被说了一通，却也因此记住了「样品要对。」",
+      "originTags": ["apprentice"],
+      "ageMin": 6,
+      "ageMax": 7,
+      "flags": ["preschool_apprentice_market_errand"]
+    },
+    {
+      "id": "preschool_tavern_tray_balance",
+      "title": "端盘练稳",
+      "text": "母亲让你端空盘练手，走三步停一步，洒了便重来——「跑堂第一功是稳。」",
+      "originTags": ["tavern"],
+      "ageMin": 4,
+      "ageMax": 5,
+      "flags": ["preschool_tavern_tray_balance"]
+    },
+    {
+      "id": "preschool_tavern_rumor_listen",
+      "title": "帘后听风",
+      "text": "你在后堂帘后听客人聊江湖轶事，记住了几个门派名字，却不敢插嘴。",
+      "originTags": ["tavern"],
+      "ageMin": 6,
+      "ageMax": 7,
+      "flags": ["preschool_tavern_rumor_listen"]
     }
   ]
 }

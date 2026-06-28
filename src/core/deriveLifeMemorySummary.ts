@@ -20,6 +20,7 @@ import {
   LIFE_MEMORY_SCHEMA_VERSION,
   type LifeMemoryAchievementEntry,
   type LifeMemoryDebtEntry,
+  type LifeMemoryHabitTrajectoryEntry,
   type LifeMemoryKeyChoiceEntry,
   type LifeMemoryRelationshipEntry,
   type LifeMemoryRiskEntry,
@@ -32,6 +33,16 @@ import {
   getPlayerRouteSummary,
   lifecyclePhaseLabel,
 } from '../utils/playerFacingLabels';
+import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
+import {
+  deriveSampleLineAge40Identity,
+  deriveSampleLineCurrentGoal,
+} from '../p50/sampleLineExpression';
+import {
+  deriveOrdinaryOriginCurrentGoal,
+  deriveOrdinaryOriginLifeMemory,
+  deriveOrdinaryOriginSummary,
+} from '../p56/ordinaryOriginExpression';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -46,6 +57,9 @@ const MIDLIFE_KEY_CHOICE_EVENT_IDS = [
   'demonic_midlife_betrayal',
   'demonic_midlife_fork',
   'demonic_midlife_consequence',
+  'merchant_first_shop',
+  'merchant_shop_failure',
+  'merchant_crisis',
 ] as const;
 
 const SECT_FACTION_LABELS: Record<string, string> = {
@@ -131,6 +145,18 @@ function readActiveRoutes(state: GameState): ActiveRoute[] {
     active.push({ routeId: 'demonic', lifecycle: 'active', lockedIn: false });
   } else if (flags.route_wanderer || flags.route_border) {
     active.push({ routeId: 'wanderer', lifecycle: 'active', lockedIn: false });
+  } else if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    active.push({ routeId: 'merchant', lifecycle: 'active', lockedIn: false });
   }
 
   return active;
@@ -234,6 +260,12 @@ function buildRouteStatus(state: GameState): LifeMemoryRouteStatus {
     routeStatus.factionLabel = SECT_FACTION_LABELS[faction];
   }
 
+  const currentGoalLabel = deriveSampleLineCurrentGoal(state)
+    ?? deriveOrdinaryOriginCurrentGoal(state);
+  if (currentGoalLabel) {
+    routeStatus.currentGoalLabel = currentGoalLabel;
+  }
+
   const history = state.routeHistory || [];
   const lastTransition = [...history].reverse().find((entry) => entry.to !== 'inactive');
   if (lastTransition) {
@@ -297,6 +329,7 @@ function resolvePayoffStatus(
 function resolveKeyChoiceConsequence(
   state: GameState,
   mapEntry?: (typeof goldenLinePayoffMap.entries)[number],
+  eventId?: string,
 ): string | undefined {
   const flags = state.flags || {};
   for (const write of mapEntry?.durableWrites ?? []) {
@@ -304,8 +337,24 @@ function resolveKeyChoiceConsequence(
       return KEY_CHOICE_OUTCOME_CONSEQUENCES[write];
     }
   }
+  if (eventId === 'sect_midlife_gray_mission') {
+    if (flags.sect_midlife_gray_executed) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_executed;
+    if (flags.sect_midlife_gray_refused) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_refused;
+    if (flags.sect_midlife_gray_leaked) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_leaked;
+  }
+  if (eventId === 'merchant_shop_failure' && flags.merchant_shop_failed) {
+    return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_shop_failed;
+  }
+  if (eventId === 'merchant_crisis' && flags.merchant_crisis_loyalty) {
+    return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_crisis_loyalty;
+  }
   if (flags.hero_old_case_truth) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_truth;
   if (flags.hero_old_case_silence) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_silence;
+  if (flags.sect_midlife_gray_executed) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_executed;
+  if (flags.sect_midlife_gray_refused) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_refused;
+  if (flags.sect_midlife_gray_leaked) return KEY_CHOICE_OUTCOME_CONSEQUENCES.sect_midlife_gray_leaked;
+  if (flags.demonic_midlife_isolation_done) return KEY_CHOICE_OUTCOME_CONSEQUENCES.demonic_midlife_isolation_done;
+  if (flags.demonic_midlife_betrayal_done) return KEY_CHOICE_OUTCOME_CONSEQUENCES.demonic_midlife_betrayal_done;
   return undefined;
 }
 
@@ -338,7 +387,7 @@ function buildKeyChoices(state: GameState): LifeMemoryKeyChoiceEntry[] {
       occurredAtAge: age,
       sortKey: -(age * 1000 + (isMidlifeKey ? 1 : 0)),
       label: formatKeyChoiceLabel(eventId, record.selectedChoice),
-      consequence: resolveKeyChoiceConsequence(state, mapEntry),
+      consequence: resolveKeyChoiceConsequence(state, mapEntry, eventId),
       payoffStatus: resolvePayoffStatus(state, eventId, mapEntry),
       diagnostic: {
         eventId,
@@ -484,6 +533,26 @@ function buildUnresolvedDebts(state: GameState): LifeMemoryDebtEntry[] {
     );
   }
 
+  if (flags.merchant_shop_failed === true) {
+    pushDebt(
+      'debt-merchant-shop',
+      DEBT_FLAG_LABELS.merchant_shop_failed,
+      'medium',
+      ['merchant_shop_failed'],
+      ['flags.merchant_shop_failed'],
+    );
+  }
+
+  if (flags.merchant_midlife_debt === true) {
+    pushDebt(
+      'debt-merchant-midlife',
+      DEBT_FLAG_LABELS.merchant_midlife_debt,
+      'high',
+      ['merchant_midlife_debt'],
+      ['flags.merchant_midlife_debt'],
+    );
+  }
+
   const commitments = state.lifePath?.commitments;
   for (const name of commitments?.mustProtect ?? []) {
     pushDebt(
@@ -615,6 +684,28 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
       'high',
       'L1',
       ['demonic_usurp_failed'],
+      [],
+    );
+  }
+
+  if (flags.demonic_midlife_isolation_done === true) {
+    pushRisk(
+      'risk-demonic-isolation',
+      RISK_SIGNAL_LABELS.demonicIsolation,
+      'medium',
+      'L1',
+      ['demonic_midlife_isolation_done'],
+      [],
+    );
+  }
+
+  if (flags.merchant_crisis_pending === true || flags.merchant_crisis_loyalty === true) {
+    pushRisk(
+      'risk-merchant-crisis',
+      RISK_SIGNAL_LABELS.merchantCrisis,
+      'medium',
+      'L1',
+      ['merchant_crisis_pending', 'merchant_crisis_loyalty'],
       [],
     );
   }
@@ -780,6 +871,11 @@ function buildAchievements(state: GameState): LifeMemoryAchievementEntry[] {
     }
   }
 
+  const age40Identity = deriveSampleLineAge40Identity(state);
+  if (age40Identity) {
+    pushAchievement('achievement-age40-identity', age40Identity, 'route', 'age40_identity');
+  }
+
   if ((state.player.children ?? 0) > 0) {
     pushAchievement('achievement-children', '膝下有子', 'family', 'children');
   }
@@ -815,6 +911,16 @@ function omitEmpty<T>(array: T[] | undefined): T[] | undefined {
   return array;
 }
 
+function buildHabitTrajectory(state: GameState): LifeMemoryHabitTrajectoryEntry[] {
+  return deriveDominantShapingLines(state.player.lifeStates, 3).map((line, index) => ({
+    id: `habit-trajectory-${index}`,
+    label: line.label,
+    tierLabel: line.tierLabel,
+    visibility: 'player' as const,
+    sortKey: line.sortKey,
+  }));
+}
+
 /**
  * Derive a serializable life memory summary from current game state.
  * Does not mutate state or persist redundant memory fields.
@@ -829,6 +935,7 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
     unresolvedDebts ?? [],
     buildAchievements(state),
   );
+  const habitTrajectory = buildHabitTrajectory(state);
 
   const summary: LifeMemorySummary = {
     schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
@@ -841,12 +948,20 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   const optionalDebts = omitEmpty(unresolvedDebts);
   const optionalRisks = omitEmpty(risks);
   const optionalAchievements = omitEmpty(achievements);
+  const optionalHabitTrajectory = omitEmpty(habitTrajectory);
 
   if (optionalKeyChoices) summary.keyChoices = optionalKeyChoices;
   if (optionalRelationships) summary.relationships = optionalRelationships;
   if (optionalDebts) summary.unresolvedDebts = optionalDebts;
   if (optionalRisks) summary.risks = optionalRisks;
   if (optionalAchievements) summary.achievements = optionalAchievements;
+  if (optionalHabitTrajectory) summary.habitTrajectory = optionalHabitTrajectory;
+
+  const flags = state.flags ?? {};
+  const ordinaryLifeMemory = deriveOrdinaryOriginLifeMemory(flags);
+  const ordinarySummary = deriveOrdinaryOriginSummary(flags);
+  if (ordinaryLifeMemory) summary.ordinaryOriginLifeMemory = ordinaryLifeMemory;
+  if (ordinarySummary) summary.ordinaryOriginSummary = ordinarySummary;
 
   return summary;
 }

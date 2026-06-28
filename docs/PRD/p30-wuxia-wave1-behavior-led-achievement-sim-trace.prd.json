@@ -1,0 +1,103 @@
+{
+  "project": "Wuxia Life P30 Wave 1 Behavior-Led Achievement Sim Trace",
+  "branchName": "codex/p30-wuxia-wave1-behavior-led-achievement-sim-trace",
+  "description": "Close Wave 1 habit-led to composite destiny sim trace: audit, traceability extension, validation fixtures, sim baseline delta, and regression.",
+  "userStories": [
+    {
+      "id": "P30-001",
+      "title": "P30 habit-to-achievement traceability audit delta",
+      "description": "As a maintainer, I want an audit of P27-P29 habit events vs Wave 1 achievement flag requirements so P30 sim wiring targets the highest-value gaps.",
+      "acceptanceCriteria": [
+        "Inventory P27-P29 habit and semi-personality events and their output flags",
+        "Map each to jianghu_renown_sage and medical_sage_healer composite requirements; classify bridge gaps",
+        "Save the audit under docs/test-reports or docs/designs",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P30-002",
+      "title": "Extend achievement traceability for P27-P29 events",
+      "description": "As a maintainer, I want achievementTraceability to link Wave 1 new achievements to habit-led on-ramp events.",
+      "acceptanceCriteria": [
+        "Extend src/p25/achievementTraceability.ts with P27-P29 event IDs for jianghu_renown_sage and medical_sage_healer",
+        "Each achievement links at least 1 habit or semi-personality on-ramp event plus existing choice flags",
+        "Typecheck passes",
+        "Relevant P25 tests pass"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Core traceability wiring."
+    },
+    {
+      "id": "P30-003",
+      "title": "Add habit-led life path validation fixtures",
+      "description": "As a maintainer, I want P25 validation slice fixtures that enter through habit-led events rather than direct flag seeding.",
+      "acceptanceCriteria": [
+        "Add at least 2 habit-led life path fixtures in src/p25/validationSlices.ts (1 renown or social, 1 medical or study)",
+        "Fixtures seed lifeStates thresholds and P27-P29 bridge flags, not direct achievement flags",
+        "Composite destiny evaluation remains inspectable in test or sim output",
+        "Relevant P25 tests pass"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Depends on P30-001 audit."
+    },
+    {
+      "id": "P30-004",
+      "title": "Run sim baseline delta for habit-led paths",
+      "description": "As a maintainer, I want before/after sim metrics proving habit-led paths improve Wave 1 achievement observability.",
+      "acceptanceCriteria": [
+        "Run sim baseline with habit-led fixture inputs; save JSON under docs/test-reports",
+        "Document delta vs P29 closure baseline for jianghu_renown_sage and medical_sage_healer unlock observability",
+        "Do not modify gameplay behavior beyond reporting if needed"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P30-003."
+    },
+    {
+      "id": "P30-005",
+      "title": "Extend P30 sim trace regression tests",
+      "description": "As a maintainer, I want isolated regression coverage for P30 traceability and habit-led fixtures.",
+      "acceptanceCriteria": [
+        "Extend tests/p25LifetimeSimulationTests.ts or sibling isolated file for P30 trace links and fixtures",
+        "Assert traceability entries reference P27-P29 event IDs",
+        "Test file runs independently and exits cleanly"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Depends on P30-002 through P30-003."
+    },
+    {
+      "id": "P30-006",
+      "title": "Optional minimal flag bridge wiring",
+      "description": "As a player, I want habit-led choices to optionally advance toward achievement prerequisites when sim trace reveals a dead-end.",
+      "acceptanceCriteria": [
+        "If audit identifies a dead-end bridge, add minimal flag bridge on existing P27-P29 events (max 2 bridges)",
+        "Bridges must not bypass composite multi-factor requirements",
+        "Targeted test proves bridge fires only at habit threshold",
+        "Skip if audit shows sim trace closable without content changes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Skipped per audit §5 — sim trace closable via traceability + fixtures without flag bridges."
+    },
+    {
+      "id": "P30-007",
+      "title": "Write P30 closure and remaining queue",
+      "description": "As a maintainer, I want a closure note listing what P30 proved and what remains for full Wave 1 and North Star section 8.",
+      "acceptanceCriteria": [
+        "Summarize traceability extensions, fixtures, sim delta, and verification commands",
+        "List remaining Wave 1 sim trace gaps and deferred medical pool and Wave 2-4 items",
+        "Cross-reference North Star section 8 items still OPEN after P30",
+        "Save under docs/test-reports"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

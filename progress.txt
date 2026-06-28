@@ -1,8 +1,320 @@
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor) - COMPLETE
+- P61 farm-peasant playable bridge: all 8 stories completed and verified.
+- Configuration: `ordinary-origin-midlife.json` — `ordinary_peasant_midlife_outside_offer` reframed to grain-trade context; `accept_offer` sets `route_wealth_committed` + `peasant_merchant_bridge_crossed`.
+- Gate wiring: `sample-lines-spine.json` — `magnate_on_ramp` + `merchant_midlife_debt_milestone` gates accept `peasant_merchant_bridge_crossed` in both route + milestone conditions.
+- Expression: `ordinaryOriginExpression.ts` — currentGoal/lifeMemory/summary bridge branches for farm_peasant.
+- Tests: `tests/p61FarmPeasantBridgeTests.ts` with 18 assertions (all pass).
+- Proof: `docs/test-reports/p61-farm-peasant-magnate-targeted-proof.md`.
+- Files: `ordinary-origin-midlife.json`, `sample-lines-spine.json`, `ordinaryOriginExpression.ts`, `p61FarmPeasantBridgeTests.ts`, `docs/test-reports/p61-farm-peasant-*.md`, `docs/PRD/p61-*.md`, `docs/PRD/p61-*.prd.json`
+- Validation: p61FarmPeasantBridgeTests ✅ p56OrdinaryOriginGrowthTests ✅ p58ApprenticeBridgeTests ✅ p59TavernHandBridgeTests ✅ typecheck ✅
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-007
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-006
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-005
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-004
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-003
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-002
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-001
+- P61-001: P60 contract intake document created; 0 runtime changes.
+- Files: `docs/test-reports/p61-farm-peasant-bridge-intake.md`
+---
+## [2026-06-28] - P60 Farm-Peasant Bridge Design-First Wave (A2)
+- P60 farm-peasant bridge design-first wave: all 7 stories completed.
+- **Design-only stage:** 0 runtime code changes; 5 design/audit/contract documents produced.
+- **Chosen direction:** Grain-merchant adjacent — `farm_peasant` → swap-crew curiosity → grain-trade outside offer → `peasant_merchant_bridge_crossed` → P55 magnate chain → `merchant_magnate`.
+- **Rejected direction:** Escort-jianghu-renown — narratively appealing but `jianghu_renown_sage` has no sample-line event chain; scope would explode.
+- **Bridge contract:** `docs/PRD/p60-farm-peasant-bridge-contract.md` — prerequisite chain, checkpoint, minimal additions, downstream gates, expression changes, edge cases, P61 validation shape.
+- **Gap audit:** `docs/test-reports/p60-farm-peasant-bridge-gap-audit.md` — existing assets, missing seeds, why apprentice pattern can't be reused.
+- **Scope contract:** `docs/test-reports/p60-farm-peasant-bridge-scope-contract.md` — allowed layers + forbidden expansions.
+- **Candidate seeds:** `docs/test-reports/p60-farm-peasant-candidate-bridge-seeds.md` — 2 candidates + comparison matrix + recommendation.
+- **Closure report:** `docs/test-reports/p60-farm-peasant-bridge-design-closure-report.md` — summary + P61 handoff.
+- **Why design-only:** `farm_peasant` bridge feasibility was Low (per P58 discovery) because direction was ambiguous — needed design before implementation to avoid identity collapse and scope creep.
+- **P61 handoff:** Implementation stage can pick up the contract directly — reframe outside-offer text + add bridge flags + expand gates + add expression + tests/proof/closure.
+- Files: `docs/test-reports/p60-farm-peasant-bridge-gap-audit.md`, `p60-farm-peasant-bridge-scope-contract.md`, `p60-farm-peasant-candidate-bridge-seeds.md`, `p60-farm-peasant-bridge-design-closure-report.md`, `docs/PRD/p60-farm-peasant-bridge-contract.md`, `docs/PRD/p60-wuxia-farm-peasant-bridge-design-first-wave.prd.json`
+- Validation: prd.json valid JSON ✅ (no runtime changes — no tests/typecheck needed)
+---
+## [2026-06-28] - P59 Tavern Hand Merchant-Adjacent Bridge (A2)
+- P59 tavern-hand merchant-adjacent bridge: all 9 stories implemented and verified.
+- Configuration: `ordinary-origin-midlife.json` — `tavern_take_referral` sets `route_wealth_committed` + `tavern_merchant_bridge_crossed`.
+- Gate wiring: `sample-lines-spine.json` — `magnate_on_ramp` + `merchant_midlife_debt_milestone` gates accept `tavern_merchant_bridge_crossed` in both route + milestone conditions.
+- Expression: `ordinaryOriginExpression.ts` — currentGoal/lifeMemory/summary bridge branches for tavern_hand.
+- Tests: `tests/p59TavernHandBridgeTests.ts` with 16 assertions (all pass).
+- Proof: `docs/test-reports/p59-tavern-hand-magnate-targeted-proof.md`.
+- Files: `ordinary-origin-midlife.json`, `sample-lines-spine.json`, `ordinaryOriginExpression.ts`, `p59TavernHandBridgeTests.ts`, `docs/test-reports/p59-tavern-hand-*.md`, `docs/PRD/p59-tavern-hand-*.md`
+- Validation: p59TavernHandBridgeTests ✅ p56OrdinaryOriginGrowthTests ✅ p58ApprenticeBridgeTests ✅ typecheck ✅
+---
+## [2026-06-27] - P57 Verify Round 2 (A1 Phase C1)
+- P57 verify round 2: PASS — Round 1 issues (prd.json duplicate notes, gap audit Appendix C title) both fixed.
+- All 10 user stories verified; FR-1–FR-5 satisfied; guard + typecheck pass; no code changes.
+- Files: `agent_docs/p57-wuxia-sample-lines-second-40-plus-node-verify-result.md`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅ prd.json valid JSON ✅
+---
+## [2026-06-27] - P57 Finalize (A2)
+- P57 optional second 40+ node stage: all lines no-go — no second nodes implemented.
+- Go-lines: none — all three lines (orthodox/demonic/merchant) assessed as no-go.
+- Gap audit found age-45 payoffs are substantially complete; P46 endgame covers late-life closure.
+- Files: `docs/test-reports/p57-sample-lines-second-40-plus-gap-audit.md`, `p57-sample-lines-second-40-plus-scope-contract.md`, `p57-sample-lines-second-40-plus-closure-report.md`, `docs/PRD/p57-wuxia-sample-lines-second-40-plus-node.prd.json`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅ (no code changes)
+---
+## [2026-06-27] - P56 Ordinary Origin Growth Wave (A2)
+- P56 ordinary origin growth wave: all 10 stories implemented and verified.
+- Configuration: `ordinary-origin-midlife.json` with 6 midlife events (2 per origin).
+- Expression: `src/p56/ordinaryOriginExpression.ts` with currentGoal/life-memory/summary.
+- Integration: wired into `deriveLifeMemorySummary.ts` and `lifeMemory.ts`.
+- Tests: `tests/p56OrdinaryOriginGrowthTests.ts` with 11 assertions (all pass).
+- Verification: `docs/test-reports/p56-ordinary-origin-midlife-verification-slice.md`.
+- Files: `ordinary-origin-midlife.json`, `ordinaryOriginExpression.ts`, `deriveLifeMemorySummary.ts`, `lifeMemory.ts`, `p56OrdinaryOriginGrowthTests.ts`, `docs/test-reports/p56-ordinary-origin-*.md`
+- Validation: p56OrdinaryOriginGrowthTests ✅ typecheck ✅ guard:sample-lines-baseline ✅
+---
+## [2026-06-27] - P55 Finalize (A2)
+- P55 merchant magnate bounded expansion: all 10 stories implemented and verified.
+- Spine events: magnate_on_ramp (28-32), magnate_midlife_pressure (36-40), magnate_payoff (42-46).
+- Expression: 3 currentGoal branches, age40Identity, costLabel ("巨贾负担").
+- Sim: seed 804 full chain verified; regression tests updated.
+- Files: `sample-lines-spine.json`, `sampleLineExpression.ts`, `p50SampleLineSpineTests.ts`, `p50SampleLineExpressionTests.ts`, `p49SampleLineReplayTests.ts`, `docs/test-reports/p55-merchant-magnate-*.md`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅
+---
+## [2026-06-27] - P54 Finalize (A2)
+- A2 five-axis code review PASS: archive verify artifact; align residual replay guards with `isPlayerVisibleSampleLineText` (parity with age-25/45).
+- Closed P54 residual polish: M-orthodox-gray + M-merchant-debt → guarded baseline; spine bridge events, expression, G-16/G-17, closure report.
+- Files: `agent_docs/p54-wuxia-sample-lines-residual-polish-verify-result.md`, `tests/p49SampleLineReplayTests.ts`, `progress.txt`
+- Validation: guard:sample-lines-baseline ✅ typecheck ✅ (no `lint` script in repo)
+---
+## [2026-06-26] - P54-011 (p54-wuxia-sample-lines-residual-polish)
+- Closure report; both residuals closed on benchmark seeds.
+- Files: `docs/test-reports/p54-sample-lines-residual-polish-closure-report.md`
+---
+## [2026-06-26] - P54-005/006 (p54-wuxia-sample-lines-residual-polish)
+- Spine: orthodox age25/32 residual milestones; merchant midlife debt gate broadened + mandatory.
+- Files: `src/data/lines/sample-lines-spine.json`, `tests/p50SampleLineSpineTests.ts`
+---
+## [2026-06-26] - P54-001/002 (p54-wuxia-sample-lines-residual-polish)
+- Gap audit + scope contract (+ signal appendices); no gameplay until P54-005.
+- Files: `docs/test-reports/p54-sample-lines-residual-polish-gap-audit.md`, `p54-sample-lines-residual-polish-scope-contract.md`
+---
+## [2026-06-26] - P53 Finalize (A2)
+- Closed P53 bounded 40+ payoff slice: age-45 spine events ×3, expression/replay/guard G-11–G-15; A1 verify PASS.
+- A2 five-axis code review: no blocking issues; aligned replay age-45 guard with `isPlayerVisibleSampleLineText` (parity with age-25/spine tests).
+- Files changed:
+  - `tests/p49SampleLineReplayTests.ts`
+  - `tests/p50SampleLineSpineTests.ts`
+  - `agent_docs/p53-wuxia-sample-lines-40-plus-payoff-expansion-verify-result.md`
+  - `progress.txt`
+- Validation evidence: `npm run guard:sample-lines-baseline` ✅, `npm run typecheck` ✅ (no `lint` script in repo)
+---
 ## Codebase Patterns
+- P54 sample lines residual polish: spine `orthodox_age25_righteousness_cost_milestone`, `orthodox_age32_gray_pressure_milestone`, relaxed `merchant_midlife_debt_milestone` in `sample-lines-spine.json`; expression P54 flags in `src/p50/sampleLineExpression.ts`; guard G-16/G-17 in `p52-sample-line-baseline-guard-contract.md` §8; closure `docs/test-reports/p54-sample-lines-residual-polish-closure-report.md`.
+- P53 sample lines 40+ payoff: spine events `orthodox_age45_legacy_stewardship`, `demonic_age45_territory_consolidation`, `merchant_age45_expansion_fork` in `sample-lines-spine.json` (gate on `*_age40_identity_done`, age 44–48); expression post-40 goals in `src/p50/sampleLineExpression.ts`; replay checkpoints `[13,18,25,32,40,45,50]` + `post40PayoffDone` in `src/p49/sampleLineReplay.ts`; guard G-11–G-15 in `p52-sample-line-baseline-guard-contract.md` §6; closure `docs/test-reports/p53-sample-lines-40-plus-closure-report.md`.
+
+## [2026-06-26] - P53-010 (p53-wuxia-sample-lines-40-plus-payoff-expansion)
+- P53 closure report; all stories passes:true; guard:sample-lines-baseline Pass.
+- Files: `docs/test-reports/p53-sample-lines-40-plus-closure-report.md`, `docs/PRD/p53-wuxia-sample-lines-40-plus-payoff-expansion.prd.json`
+- Validation: guard:sample-lines-baseline ✅ p49:replay ✅
+---
+## [2026-06-26] - P53-006 (p53-wuxia-sample-lines-40-plus-payoff-expansion)
+- Three-line age-45 payoff spine events + `testBenchmarkAge45Payoff`.
+- Files: `src/data/lines/sample-lines-spine.json`, `tests/p50SampleLineSpineTests.ts`
+- Validation: p50SampleLineSpineTests ✅
+---
+## [2026-06-26] - P53-001 (p53-wuxia-sample-lines-40-plus-payoff-expansion)
+- Gap audit from P52 baseline; no gameplay changes.
+- Files: `docs/test-reports/p53-sample-lines-40-plus-gap-audit.md`
+---
+- P51 sample lines tuning: merchant `merchant_first_shop` accepts childhood-seed capital readiness + `mandatory` tag; age-40 spine events fire at age 38 with `mandatory` + line-specific childhood gates; `deriveSampleLineCostLabel` / `deriveSampleLineAge40Identity` (done-flag-first) in `src/p50/sampleLineExpression.ts`; benchmark route-track bootstrap sets `p8_route_*` at age 7 in `src/headless/parity/routeTrackFixtures.ts`; closure `docs/test-reports/p51-sample-lines-tuning-closure-report.md`.
+- P50 sample lines validation: config spine `src/data/lines/sample-lines-spine.json` (EventLoader + events.json import); expression `src/p50/sampleLineExpression.ts` (`deriveSampleLineCurrentGoal`, `deriveSampleLineAge40Identity` → `deriveLifeMemorySummary.routeStatus.currentGoalLabel` + main-screen route row); replay `src/p49/sampleLineReplay.ts` (`P49_SAMPLE_LINE_MATRIX` seeds 301/303/804, checkpoints 13/18/25/32/40); CLI `npm run p49:replay` → `scripts/runP49SampleLineReplay.ts`; tests `tests/p50SampleLineSpineTests.ts`, `tests/p50SampleLineExpressionTests.ts`, `tests/p49SampleLineReplayTests.ts`; closure `docs/test-reports/p49-sample-lines-closure-report.md`.
+- P44 habit operator audit tooling: contract `docs/designs/p44-habit-audit-contract.md`; module `src/p44/habitOperatorAudit.ts` (`runP44HabitOperatorAudit`, coverage/legacy/archetype/recap audits); CLI `npm run audit:p44-habit`; regression `tests/p44HabitAuditTests.ts`; closure `docs/test-reports/p44-habit-audit-tooling-closure.md`.
+
+## [2026-06-26] - P51 pipeline finalize (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Code review sign-off; verify/discovery/gaps artifacts; North Star §8 CLEAR; P46 queue COMPLETED.
+- Files: `agent_docs/p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring-{verify-result,discovery-result,gaps}.md`
+- Validation: verify PASS ✅ discovery CLEAR ✅ end_state_status CLEAR ✅
+---
+## [2026-06-26] - P51-005 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- P51 closure report; typecheck + spine/expression/replay tests + gate:playability PASS.
+- Files: `docs/test-reports/p51-sample-lines-tuning-closure-report.md`, `docs/PRD/p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring.prd.json`
+- Validation: typecheck ✅ p50SampleLineSpineTests ✅ p50SampleLineExpressionTests ✅ p49SampleLineReplayTests ✅ gate:playability PASS
+---
+## [2026-06-26] - P51-004 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Regenerated P49 replay latest + cross-line comparison; P49/P46 closure upgraded to Pass.
+- Files: `docs/test-reports/p49-sample-lines-replay-latest.*`, `p49-sample-lines-cross-line-comparison-latest.md`, `p49-sample-lines-closure-report.md`, `docs/PRD/p46-wuxia-minimum-playable-life-samples-roadmap.md`
+---
+## [2026-06-26] - P51-003 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- `deriveSampleLineCostLabel` + replay cost dimension; age-13 cost distinct across lines.
+- Files: `src/p50/sampleLineExpression.ts`, `src/p49/sampleLineReplay.ts`, `tests/p50SampleLineExpressionTests.ts`
+---
+## [2026-06-26] - P51-002 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Mandatory age-38 identity spine + route-track bootstrap + done-flag-first age-40 expression.
+- Files: `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/headless/parity/routeTrackFixtures.ts`, `tests/p50SampleLineSpineTests.ts`
+---
+## [2026-06-26] - P51-001 (p51-wuxia-sample-lines-merchant-trigger-and-gate-wiring)
+- Merchant first shop gate relaxed for benchmark seed 804; root cause documented.
+- Files: `src/data/lines/merchant.json`, `docs/test-reports/p51-merchant-trigger-root-cause.md`, `tests/p50SampleLineSpineTests.ts`
+---
+
+## [2026-06-26] - P50-007 (p50-wuxia-sample-lines-validation-implementation)
+- Closure report Warning baseline-ready; P46 §11.3 three-phase status documented.
+- Files: `docs/test-reports/p49-sample-lines-closure-report.md`
+- Validation: typecheck ✅ p49SampleLineReplayTests ✅
+---
+## [2026-06-26] - P50-006 (p50-wuxia-sample-lines-validation-implementation)
+- Playtest round 1 archived with P46 §10.2 five-item matrix + cross-line retell.
+- Files: `docs/test-reports/p49-sample-lines-playtest-round-1.md`
+---
+## [2026-06-26] - P50-005 (p50-wuxia-sample-lines-validation-implementation)
+- Replay latest JSON/MD + cross-line comparison generated via `npm run p49:replay`.
+- Files: `docs/test-reports/p49-sample-lines-replay-latest.*`, `p49-sample-lines-cross-line-comparison-latest.md`
+---
+## [2026-06-26] - P50-004 (p50-wuxia-sample-lines-validation-implementation)
+- P49_SAMPLE_LINE_MATRIX + deterministic checkpoint export + `p49SampleLineReplayTests`.
+- Files: `src/p49/sampleLineReplay.ts`, `scripts/runP49SampleLineReplay.ts`, `package.json` (`p49:replay`)
+---
+## [2026-06-26] - P50-003 (p50-wuxia-sample-lines-validation-implementation)
+- Merchant M-E1/M-E2/M-E3: key choices, debts, route_merchant long-term label, merchant_midlife_debt milestone.
+- Files: `src/core/deriveLifeMemorySummary.ts`, `src/data/lifeMemoryLabels.ts`, `tests/p50SampleLineExpressionTests.ts`
+---
+## [2026-06-26] - P50-002 (p50-wuxia-sample-lines-validation-implementation)
+- O/D currentGoal + age-40 identity on life-memory + main-screen; consequence/risk labels.
+- Files: `src/p50/sampleLineExpression.ts`, `src/types/lifeMemory.ts`, `src/components/mainScreenModel.ts`
+---
+## [2026-06-26] - P50-001 (p50-wuxia-sample-lines-validation-implementation)
+- P47 O/D/M minimum spine JSON; seeds 301/303/804 reach age 40 in `p50SampleLineSpineTests`.
+- Files: `src/data/lines/sample-lines-spine.json`, patches to sect-wudang/merchant/orthodox/identity-demon
+---
+- P43 archetype recap/ending differentiation: gap audit `docs/test-reports/p43-ending-differentiation-gap-audit.md`; late-life shaping recap + pattern tones in `src/utils/habitShapingSummary.ts` (`buildLateLifeShapingRecapLine`, `buildShapingPatternEndingTone`); wired via `composeP19FinalSummary` in `src/p19/finalSummaryComposition.ts`; delta matrix `docs/test-reports/p43-archetype-ending-delta-matrix.md`; regression `tests/p43ArchetypeRecapEndingTests.ts`; closure `docs/test-reports/p43-archetype-recap-ending-closure.md`.
+- P42 habit content densification: gap map `docs/test-reports/p42-habit-coverage-gap-map.md`; new samples prefixed `p42_` in p21/p22/merchant/relationship/family-life pools; regression `tests/p42ContentDensityTests.ts`; closure `docs/test-reports/p42-habit-content-densification-closure.md`.
+- P41 habit player-facing feedback: shared labels/derivation in `src/utils/habitShapingSummary.ts` (`buildCurrentShapingSummary`, `deriveDominantShapingLines`, `shapingFeedbackFlagKey`); main-screen `shapingSummary` row in `MainScreenLifeSummary.vue`; choice feedback diffs `lifeStates` in `ChoiceFeedbackGenerator.appendShapingFeedbackHints`; life-memory field `habitTrajectory` in `deriveLifeMemorySummary.ts` + `LifeMemoryPanel.vue`; regression `tests/p41HabitFeedbackTests.ts`; closure `docs/test-reports/p41-habit-feedback-closure.md`.
+- P40 P8 replay/pacing polish: headless persona bootstrap in `createPersonaSession.applyPersonaBootstrapFlags` sets `p8_route_*` + `p8_persona_id` at session start (mirror `GameProcessSimulator`); `resolvePersonaYouthRouteSeeds` maps `routePreference` → `p8_route_*`; demonic omits `p9_early_training_focus` and premature `p9_childhood_dark_spark` seed; regression `tests/p40ReplayPacingPolishTests.ts`; closure `docs/test-reports/p40-closure-report.md`.
 - Stage-3 infant origin chains: config in `src/data/lines/origin-infant-passives.json`; loader/selector in `src/data/originInfantPassiveChain.ts`; age ≤2 ordered dequeue via `selectOrderedOriginInfantPassive` called from `selectPassiveNarrative`.
 - Early childhood agency Stage-1: passive phases in `src/contracts/sessionProgression.ts`; age bands in `src/p16/childhoodAgency.ts` (`INFANT_MAX_AGE=2`, `DAILY_PLANNING_MIN_AGE=5`); headless passive tick in `HeadlessEngineSessionImpl.executePassiveChildhoodTick`; infant stat clamps in `src/core/activePlanning/ageActionStatCaps.ts`; narrative catalog `src/data/infantPassiveNarratives.ts`.
 - Stage-2 governance baseline audit: `docs/test-reports/early-childhood-stage1-baseline-confirmation.md` — read-only repro via `npm exec -- tsx -e` on `shouldOfferDailyPlanning` / `clampActionDeltasForAge`.
-- Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).## [2026-06-20 00:11] - US-001 (early-childhood-origin-infant-quest-chains)
+- Stage-2 gate regression: `docs/test-reports/early-childhood-stage2-gate-regression.md`; run P16/P9 suites via `npm exec tsx tests/<suite>.ts` (full `npm run test` also runs unrelated p11 suite).
+
+## [2026-06-25] - P44-005 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Closure M1–M4 Met; manual follow-ups documented (Ending UI, copy review, lifetime sim gates).
+- Files: `docs/test-reports/p44-habit-audit-tooling-closure.md`, `tests/p44HabitAuditTests.ts`
+- Validation: typecheck ✅ p44HabitAuditTests ✅ audit:p44-habit ✅
+---
+## [2026-06-25] - P44-004 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Archetype differentiation report + sample artifacts under docs/test-reports/p44-*.
+- Files: `src/p44/habitOperatorAudit.ts`, `docs/test-reports/p44-archetype-differentiation-audit.md`
+---
+## [2026-06-25] - P44-003 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Legacy flag drift scan with allowlist + co-gate classification; suspicious reader output.
+- Files: `src/p44/habitOperatorAudit.ts`, `tests/p44HabitAuditTests.ts`
+---
+## [2026-06-25] - P44-002 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Coverage audit inventories axis-gated readers by age band; CLI + regression shape tests.
+- Files: `src/p44/habitOperatorAudit.ts`, `scripts/runP44HabitOperatorAudit.ts`, `tests/p44HabitAuditTests.ts`
+---
+## [2026-06-25] - P44-001 (p44-wuxia-habit-trajectory-operator-audit-tooling)
+- Operator audit contract (questions, output shapes, vocabulary).
+- Files: `docs/designs/p44-habit-audit-contract.md`
+---
+
+## [2026-06-25] - P43-005 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Closure M1–M4 Met; EndingScreen UI wiring deferred.
+- Files: `docs/test-reports/p43-archetype-recap-ending-closure.md`, `tests/p43ArchetypeRecapEndingTests.ts`
+- Validation: typecheck ✅ p43ArchetypeRecapEndingTests ✅ testLifeMemorySummary ✅ p41HabitFeedbackTests ✅ p19EndgameTests ✅
+---
+## [2026-06-25] - P43-004 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- `inferLivedSelfUnderstanding` prefers dominant shaping axis; label alignment regression in p43 tests.
+- Files: `src/p19/stateAccess.ts`
+---
+## [2026-06-25] - P43-003 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Same-route martial + livelihood shaping pattern ending tones; delta matrix doc.
+- Files: `docs/test-reports/p43-archetype-ending-delta-matrix.md`, `tests/p43ArchetypeRecapEndingTests.ts`
+---
+## [2026-06-25] - P43-002 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Dominant shaping recap in P19 final summary + EndingSystem fallback path.
+- Files: `src/utils/habitShapingSummary.ts`, `src/p19/finalSummaryComposition.ts`, `src/core/EndingSystem.ts`
+---
+## [2026-06-25] - P43-001 (p43-wuxia-archetype-recap-and-ending-differentiation)
+- Read-only endgame recap gap audit; ranked G1–G5 patch surfaces.
+- Files: `docs/test-reports/p43-ending-differentiation-gap-audit.md`
+---
+
+## [2026-06-25] - P42-006 (p42-wuxia-habit-trajectory-content-densification)
+- Closure: M1–M4 Met; 14 new events; remaining thin areas documented.
+- Files: `tests/p42ContentDensityTests.ts`, `docs/test-reports/p42-habit-content-densification-closure.md`, `src/p20/habitTrajectorySlice.ts`
+- Validation: typecheck ✅ personalityHabitTrajectoryTests ✅ p42ContentDensityTests ✅
+---
+- Archetype-differentiated training/study echoes + matrix doc.
+- Files: `p21-content-samples.json`, `docs/test-reports/p42-archetype-differentiation-matrix.md`, `tests/personalityHabitTrajectoryTests.ts`
+- Validation: personalityHabitTrajectoryTests ✅
+---
+- Added restorative reunion + estate-trust familyBond samples.
+- Files: `family-life.json`, `tests/personalityHabitTrajectoryTests.ts`
+- Validation: personalityHabitTrajectoryTests ✅
+---
+- Added 4 business/social densification samples spanning youth through later life.
+- Files: `merchant.json`, `relationship.json`, `tests/personalityHabitTrajectoryTests.ts`
+- Validation: personalityHabitTrajectoryTests ✅
+---
+- Added 4 training/study densification samples: youth sparring, childhood copybook, later guardian/chronicle.
+- Files: `p22-content-expansions.json`, `p21-content-samples.json`, `tests/personalityHabitTrajectoryTests.ts`
+- Validation: personalityHabitTrajectoryTests ✅
+---
+- Read-only coverage gap map for five habit/semi-personality axes by age band.
+- Files: `docs/test-reports/p42-habit-coverage-gap-map.md`
+- **Learnings:** childhood + later-life are zero-reader for 4/5 axes; businessHabit thinnest (2 total).
+---
+
+## [2026-06-25] - P41-006 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Closure: M1–M5 Met; defer queue (P42–P44, API lifeStates DTO) documented.
+- Files: `docs/test-reports/p41-habit-feedback-closure.md`, `tests/p41HabitFeedbackTests.ts`
+- Validation: typecheck ✅ mainScreenModel ✅ p41ChoiceFeedbackShaping ✅ p41HabitFeedback ✅ testLifeMemorySummary ✅ personalityHabitTrajectoryTests ✅
+---
+## [2026-06-25] - P41-005 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Life-memory `habitTrajectory` (1–3 dominant lines) + LifeMemoryPanel 长期塑形 section.
+- Files: `deriveLifeMemorySummary.ts`, `types/lifeMemory.ts`, `LifeMemoryPanel.vue`, `tests/testLifeMemorySummary.ts`
+---
+## [2026-06-25] - P41-004 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Echo copy legibility pass on P26/P28 samples; matrix `docs/test-reports/p41-habit-echo-legibility-matrix.md`.
+- Files: `p21-content-samples.json`, `merchant.json`, `relationship.json`, `family-life.json`
+---
+## [2026-06-25] - P41-003 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Choice feedback emits shaping hints via lifeStates before/after diff into 长期影响.
+- Files: `ChoiceFeedbackGenerator.ts`, `playerFacingLabels.ts`, `tests/p41ChoiceFeedbackShapingTests.ts`
+---
+## [2026-06-25] - P41-002 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Main-screen 塑形 row from `habitShapingSummary.ts`; tests in `mainScreenModel.test.ts`.
+- Files: `mainScreenModel.ts`, `MainScreenLifeSummary.vue`, `GameScreen.vue`, `src/utils/habitShapingSummary.ts`
+---
+## [2026-06-25] - P41-001 (p41-wuxia-habit-trajectory-player-facing-feedback)
+- Read-only audit: habit axes hidden on main-screen/feedback/memory; primary patch surfaces identified.
+- Files: `docs/test-reports/p41-habit-feedback-audit.md`
+---
+
+## [2026-06-24] - P40-005 (p40-wuxia-p8-replay-pacing-polish)
+- Closure: GAP-P8-WARNINGS closed for deviant-ye pacing; M1–M5 Met; defer queue documented.
+- Files: `docs/test-reports/p40-closure-report.md`
+---
+## [2026-06-24] - P40-004 (p40-wuxia-p8-replay-pacing-polish)
+- Gate refresh PASS; `tests/p40ReplayPacingPolishTests.ts`; post-polish delta doc.
+- Validation: typecheck ✅ p40ReplayPacingPolishTests ✅ p8PlayabilityTests ✅ gate:playability PASS
+---
+## [2026-06-24] - P40-003 (p40-wuxia-p8-replay-pacing-polish)
+- Replay differentiation: `p9_scholar_academy_gate`, `p9_wealth_caravan_gate`, `p9_deviant_youth_route_milestone`.
+- Files: `src/data/lines/p9-remediation.json`
+- Validation: near-duplicate pairs ≤3 on gate run
+---
+## [2026-06-24] - P40-002 (p40-wuxia-p8-replay-pacing-polish)
+- Deviant-ye pacing 7y→5y via headless bootstrap flags + youth route seeds.
+- Files: `createPersonaSession.ts`, `personaYouthRouteSeeds.ts`, `p40-deviant-ye-pacing-before-after.md`
+- Validation: deviant-ye span 5y on gate run
+---
+## [2026-06-24] - P40-001 (p40-wuxia-p8-replay-pacing-polish)
+- Root-cause audit: pacing gap ages 7–14, replay cluster levers.
+- Files: `docs/test-reports/p40-pacing-replay-audit.md`
+- **PRD vs JSON:** PRD cited 7 near-dup pairs and missing childhood-payoff contract doc; tree baseline had 3 pairs; used golden-line-spine as contract proxy.
+---
+## [2026-06-20 00:11] - US-001 (early-childhood-origin-infant-quest-chains)
 - Typed loader `originInfantPassiveChain.ts` + `origin-infant-passives.json` with four 5-node chains and sharedFillers.
 - Files: src/data/originInfantPassiveChain.ts, src/data/lines/origin-infant-passives.json
 - **Learnings for future iterations:**
@@ -1500,4 +1812,17 @@
   - Milestone closure should pair fresh gate reruns with an explicit evidence-coverage audit so cross-session continuation remains mechanically verifiable.
   - For simulation blockers that are expected in constrained single-run samples, waiver usage must include a concrete reason string and be logged in closure artifacts.
 - Validation evidence: `npm run typecheck` ✅, `npm run build` ✅, `npm test` ✅, `npm run simulate:gameplay -- --gate --quiet --seed=42 --start-age=10 --end-age=25 --auto-save-mode=event --save-event-interval=3 --waive=ending_distribution:single-run-ending-concentration-baseline` ✅
+---
+## [2026-06-26] - P52 Finalize (A2)
+- Closed P52 sample-line baseline hardening: round-2 playtest + cross-tester comparison archived; guard contract G-01–G-10 and `guard:sample-lines-baseline` cheap runner in place.
+- A2 five-axis code review: no blocking issues; aligned replay age-25 guard with `isPlayerVisibleSampleLineText` (parity with spine tests).
+- Files changed:
+  - `tests/p49SampleLineReplayTests.ts`
+  - `docs/PRD/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation.prd.json`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-discovery-result.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-gaps.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-verify-result.md`
+  - `agent_docs/p52-wuxia-sample-lines-baseline-hardening-and-cross-tester-validation-review-fix-prompts.md`
+  - `progress.txt`
+- Validation evidence: `npm run guard:sample-lines-baseline` ✅, `npm run typecheck` ✅ (no `lint` script in repo)
 ---

@@ -84,6 +84,22 @@ export async function runP71ReportChecks(): Promise<void> {
   assert(report.disturbanceVisibility !== undefined, 'P7.1 closure includes visibility');
 }
 
+export async function runP71LongTermShapingTests(): Promise<void> {
+  const trainingState = createState();
+  executeActiveActionOnState(trainingState, 'action_training_basic', { random: () => 0.5, includeDisturbance: false });
+  assert(trainingState.player.lifeStates.trainingHabit >= 1, 'training action should deepen trainingHabit');
+  assert(trainingState.flags.training_habit === true, 'training action should project training_habit flag');
+
+  const businessState = createState();
+  executeActiveActionOnState(businessState, 'action_household_apprentice', { random: () => 0.5, includeDisturbance: false });
+  assert(businessState.player.lifeStates.businessHabit >= 1, 'childhood business action should deepen businessHabit');
+  assert(businessState.flags.business_habit === true, 'childhood business action should project business_habit flag');
+
+  const studyState = createState();
+  executeActiveActionOnState(studyState, 'action_study_basic', { random: () => 0.5, includeDisturbance: false });
+  assert(studyState.player.lifeStates.studyHabit >= 1, 'study action should deepen studyHabit');
+}
+
 export async function runP71SummaryBuilderTests(): Promise<void> {
   const state = createState();
   const resolved = resolveActiveAction({ state, actionId: 'action_study_basic', random: () => 0.5 });
@@ -97,4 +113,5 @@ export async function runAllP71Tests(): Promise<void> {
   await runP71ActiveActionSummaryTests();
   await runP71DisturbanceNarrativeTests();
   await runP71ReportChecks();
+  await runP71LongTermShapingTests();
 }

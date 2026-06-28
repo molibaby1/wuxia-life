@@ -357,7 +357,203 @@
       {"type": "stat_modify", "stat": "martialPower", "value": 15},
       {"type": "stat_modify", "stat": "chivalry", "value": 10},
       {"type": "stat_modify", "stat": "charisma", "value": 10},
-      {"type": "flag_set", "flag": "has_mentor", "value": true}
+      {"type": "flag_set", "flag": "has_mentor", "value": true},
+      {"type": "flag_set", "flag": "mentor_bond", "value": true}
+    ]
+  },
+  {
+    "id": "p28_social_momentum_network_fork",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 76,
+    "weight": 58,
+    "ageRange": {"min": 24, "max": 30},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+    ],
+    "content": {
+      "title": "人脉成线",
+      "text": "长期人情往来塑成的名声与门路，已把熟识之人连成一张能互相引介的网。眼下有人邀你参加一场只认门路不认名帖的私宴。",
+      "description": "P28 半性格轴：socialMomentum 驱动的人脉分岔"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "enter_private_circle",
+        "text": "接下邀约，试着进入更深的人脉圈层",
+        "effects": [
+          {"type": "stat_modify", "target": "connections", "value": 6, "operator": "add"},
+          {"type": "flag_set", "flag": "p28_social_network_opened", "value": true}
+        ]
+      },
+      {
+        "id": "stay_local_contacts",
+        "text": "维持眼下往来，不急着再往上走",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 3, "operator": "add"},
+          {"type": "flag_set", "flag": "p28_social_network_deferred", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p28_social_reputation_reinforcement",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {"min": 26, "max": 34},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+    ],
+    "content": {
+      "title": "席间扬名",
+      "text": "你在人情往来间积攒的信用终于有了回响。一次席间议事中，你被推到台前，若应对得当，不仅能得名，还能把零散关系拧成真正可用的同盟。",
+      "description": "P28 半性格轴：socialMomentum 驱动的声望强化与桥接"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "attend_banquet",
+        "text": "出面赴宴，借机整合同道",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 6, "operator": "add"},
+          {"type": "flag_set", "flag": "p28_social_reputation_reinforced", "value": true},
+          {"type": "flag_set", "flag": "ally_network", "value": true}
+        ]
+      },
+      {
+        "id": "send_representative",
+        "text": "遣人代赴，留三分余地",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
+          {"type": "flag_set", "flag": "p28_social_reputation_partial", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p29_social_momentum_patron_obligation",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 74,
+    "weight": 54,
+    "ageRange": {"min": 36, "max": 46},
+    "triggers": [
+      {"type": "age_reach", "value": 36}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 3"}
+    ],
+    "content": {
+      "title": "人情担保",
+      "text": "你这些年结下的人望终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。",
+      "description": "P29 半性格轴：deep socialMomentum 带来的人情担保义务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "back_the_petition",
+        "text": "出面担保，把人情兑现到底",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 7, "operator": "add"},
+          {"type": "stat_modify", "target": "money", "value": -25, "operator": "add"},
+          {"type": "flag_set", "flag": "p29_social_patron_obligation_taken", "value": true}
+        ]
+      },
+      {
+        "id": "decline_the_petition",
+        "text": "婉拒担保，保留后手",
+        "effects": [
+          {"type": "stat_modify", "target": "connections", "value": -2, "operator": "add"},
+          {"type": "flag_set", "flag": "p29_social_patron_obligation_declined", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p42_social_momentum_youth_introduction",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 72,
+    "weight": 52,
+    "ageRange": {"min": 17, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 17}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+    ],
+    "content": {
+      "title": "初识引见",
+      "text": "你平日待人接物积下的好感，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。",
+      "description": "P42 青年塑形：社交势能驱动的初次引见"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "accept_introduction",
+        "text": "接下引见，试着进入更高圈层",
+        "effects": [
+          {"type": "stat_modify", "target": "connections", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "charisma", "value": 3, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_youth_intro_accepted", "value": true}
+        ]
+      },
+      {
+        "id": "defer_introduction",
+        "text": "谢过好意，先把眼前关系稳住",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 2, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_youth_intro_deferred", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p42_social_momentum_later_testimonial",
+    "version": "1.0.0",
+    "category": "relationship",
+    "priority": 70,
+    "weight": 50,
+    "ageRange": {"min": 50, "max": 58},
+    "triggers": [
+      {"type": "age_reach", "value": 50}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 3"}
+    ],
+    "content": {
+      "title": "晚岁证名",
+      "text": "数十年人情往来塑成的信用，让你在暮年仍被请出来为后辈作保、为旧友作证。这份晚岁回响不是一时名头，而是长期社交势能的兑现。",
+      "description": "P42 晚年塑形：社交势能驱动的证名回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "give_testimonial",
+        "text": "出面证名，为旧友后辈作保",
+        "effects": [
+          {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "target": "connections", "value": 4, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_later_testimonial_given", "value": true}
+        ]
+      },
+      {
+        "id": "stay_quiet",
+        "text": "少涉外事，把情面留给至亲",
+        "effects": [
+          {"type": "stat_modify", "target": "charisma", "value": 2, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_social_later_testimonial_declined", "value": true}
+        ]
+      }
     ]
   }
 ]

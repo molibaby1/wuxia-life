@@ -1,7 +1,7 @@
 /**
  * P2 收尾：从模拟报告中抽取可定位的体验诊断（复读、路线、婚恋/家庭），供报告与 CLI 复用。
  */
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 export type EventFrequencyRow = { eventId: string; count: number };
 

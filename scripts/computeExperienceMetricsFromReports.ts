@@ -1,5 +1,5 @@
 import { eventLoader } from '../src/core/EventLoader';
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import { detectEventClasses, type EventClass } from './eventRepetitionClassDetection';
 
 export interface TimelineEvent {

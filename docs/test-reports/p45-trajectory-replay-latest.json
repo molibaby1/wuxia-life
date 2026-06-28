@@ -1,0 +1,293 @@
+{
+  "generatedAt": "2026-06-25T15:44:59.878Z",
+  "ageWindow": {
+    "startAge": 0,
+    "endAge": 40
+  },
+  "checkpointAges": [
+    10,
+    20,
+    30,
+    40
+  ],
+  "summaries": [
+    {
+      "personaLabel": "Martial / training-leaning",
+      "personaId": "p8-martial-lin",
+      "seed": 801,
+      "checkpoints": [
+        {
+          "age": 10,
+          "dominantAxes": [
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-martial-lin"
+          ],
+          "consequenceSignals": []
+        },
+        {
+          "age": 20,
+          "dominantAxes": [
+            "习武塑形 · 成形"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-martial-lin",
+            "route_orthodox"
+          ],
+          "consequenceSignals": [
+            "childhood_summary: 童年总结"
+          ]
+        },
+        {
+          "age": 30,
+          "dominantAxes": [
+            "习武塑形 · 定势"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-martial-lin",
+            "route_orthodox"
+          ],
+          "consequenceSignals": []
+        },
+        {
+          "age": 40,
+          "dominantAxes": [
+            "习武塑形 · 定势",
+            "饱学塑形 · 渐成"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-martial-lin",
+            "route_orthodox"
+          ],
+          "consequenceSignals": [
+            "p26_training_habit_midlife_callback: 苦练成势"
+          ]
+        }
+      ],
+      "finalSummary": {
+        "routeSignal": "route: 正道门派(路线进行中)",
+        "lifeMemoryEntryPoints": [
+          "习武塑形 · 定势",
+          "饱学塑形 · 渐成",
+          "achievement=喜结良缘"
+        ],
+        "summaryEntry": "growth=强项：更擅长观察与规避风险，但关系升温较慢。 / dominant=习武塑形 / 优先练功，追求武力成长与江湖身份"
+      }
+    },
+    {
+      "personaLabel": "Scholarly / study-leaning",
+      "personaId": "p8-scholar-su",
+      "seed": 802,
+      "checkpoints": [
+        {
+          "age": 10,
+          "dominantAxes": [
+            "饱学塑形 · 成形"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-scholar-su"
+          ],
+          "consequenceSignals": [
+            "childhood_summary: 童年总结"
+          ]
+        },
+        {
+          "age": 20,
+          "dominantAxes": [
+            "饱学塑形 · 成形",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-scholar-su"
+          ],
+          "consequenceSignals": [
+            "childhood_summary: 童年总结",
+            "p42_study_habit_childhood_copybook: 字帖成习"
+          ]
+        },
+        {
+          "age": 30,
+          "dominantAxes": [
+            "饱学塑形 · 成形",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-scholar-su",
+            "scholar_path_started"
+          ],
+          "consequenceSignals": [
+            "p27_study_habit_healer_reinforcement: 医理相通"
+          ]
+        },
+        {
+          "age": 40,
+          "dominantAxes": [
+            "饱学塑形 · 成形",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-scholar-su",
+            "scholar_path_started"
+          ],
+          "consequenceSignals": []
+        }
+      ],
+      "finalSummary": {
+        "routeSignal": "route: 中立门派(未入门)",
+        "lifeMemoryEntryPoints": [
+          "饱学塑形 · 成形",
+          "习武塑形 · 渐成",
+          "achievement=喜结良缘"
+        ],
+        "summaryEntry": "growth=强项：更会算账与经营，但更少被纯理想驱动。 / dominant=饱学塑形 / 优先读书，提升学识与悟性"
+      }
+    },
+    {
+      "personaLabel": "Business / livelihood-leaning",
+      "personaId": "p8-wealth-shen",
+      "seed": 804,
+      "checkpoints": [
+        {
+          "age": 10,
+          "dominantAxes": [
+            "营生塑形 · 渐成"
+          ],
+          "routeSignal": "route: 商路(路线进行中)",
+          "identitySignals": [
+            "persona=p8-wealth-shen"
+          ],
+          "consequenceSignals": []
+        },
+        {
+          "age": 20,
+          "dominantAxes": [
+            "营生塑形 · 成形",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 商路(路线进行中)",
+          "identitySignals": [
+            "persona=p8-wealth-shen"
+          ],
+          "consequenceSignals": [
+            "childhood_summary: 童年总结"
+          ]
+        },
+        {
+          "age": 30,
+          "dominantAxes": [
+            "营生塑形 · 入骨",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 商路(路线进行中)",
+          "identitySignals": [
+            "persona=p8-wealth-shen"
+          ],
+          "consequenceSignals": []
+        },
+        {
+          "age": 40,
+          "dominantAxes": [
+            "营生塑形 · 入骨",
+            "习武塑形 · 渐成"
+          ],
+          "routeSignal": "route: 商路(路线进行中)",
+          "identitySignals": [
+            "persona=p8-wealth-shen"
+          ],
+          "consequenceSignals": []
+        }
+      ],
+      "finalSummary": {
+        "routeSignal": "route: 商路(路线进行中)",
+        "lifeMemoryEntryPoints": [
+          "营生塑形 · 入骨",
+          "习武塑形 · 渐成",
+          "achievement=喜结良缘"
+        ],
+        "summaryEntry": "growth=强项：恢复能力和逆境表现更稳，但爆发不算突出。 / dominant=营生塑形 / 优先营商敛财，财富与声望并重"
+      }
+    },
+    {
+      "personaLabel": "Mixed / balanced tendency",
+      "personaId": "p8-balanced-wei",
+      "seed": 808,
+      "checkpoints": [
+        {
+          "age": 10,
+          "dominantAxes": [
+            "习武塑形 · 成形",
+            "饱学塑形 · 渐成"
+          ],
+          "routeSignal": "route: 中立门派(未入门)",
+          "identitySignals": [
+            "persona=p8-balanced-wei"
+          ],
+          "consequenceSignals": []
+        },
+        {
+          "age": 20,
+          "dominantAxes": [
+            "习武塑形 · 定势",
+            "饱学塑形 · 定势"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-balanced-wei",
+            "route_orthodox"
+          ],
+          "consequenceSignals": [
+            "childhood_summary: 童年总结"
+          ]
+        },
+        {
+          "age": 30,
+          "dominantAxes": [
+            "习武塑形 · 定势",
+            "饱学塑形 · 定势"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-balanced-wei",
+            "route_orthodox"
+          ],
+          "consequenceSignals": [
+            "p21_study_echo_callback: 旧学新用"
+          ]
+        },
+        {
+          "age": 40,
+          "dominantAxes": [
+            "饱学塑形 · 入骨",
+            "习武塑形 · 定势"
+          ],
+          "routeSignal": "route: 正道门派(路线进行中)",
+          "identitySignals": [
+            "persona=p8-balanced-wei",
+            "route_orthodox"
+          ],
+          "consequenceSignals": [
+            "p27_mentor_obligation_consequence: 授徒之责"
+          ]
+        }
+      ],
+      "finalSummary": {
+        "routeSignal": "route: 正道门派(路线进行中)",
+        "lifeMemoryEntryPoints": [
+          "饱学塑形 · 入骨",
+          "习武塑形 · 定势",
+          "achievement=喜结良缘"
+        ],
+        "summaryEntry": "growth=强项：记忆和学习更快，但也更容易想得太多。 / dominant=饱学塑形 / 均衡成长，不偏极端"
+      }
+    }
+  ]
+}

@@ -67,7 +67,13 @@ export function applyPersonaChoiceBias(ctx: PersonaChoiceBiasContext): number {
   }
 
   if (persona.routePreference === 'balanced') {
-    if (choiceLower.includes('study') || choiceLower.includes('mediate') || choiceLower.includes('peace')) {
+    if (choiceLower.includes('balance') || choiceLower.includes('balanced')) {
+      bonus += 45;
+    } else if (
+      choiceLower.includes('study')
+      || choiceLower.includes('mediate')
+      || choiceLower.includes('peace')
+    ) {
       bonus += 30;
     }
   }

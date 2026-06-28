@@ -1,0 +1,38 @@
+{
+  "slice": "p25_rare_window_waste",
+  "pathCount": 2,
+  "findings": [
+    {
+      "pathId": "pinnacle_myth_grind_no_luck",
+      "pinnacleOutcomeId": "jianghu_myth_legend",
+      "windowAvailable": true,
+      "windowTaken": false,
+      "grindAfterMiss": {
+        "statsMaxed": true,
+        "choicePresent": true,
+        "luckPresent": false,
+        "pinnacleUnlocked": false
+      },
+      "passed": true,
+      "pointer": "path:pinnacle_myth_grind_no_luck → outcome:jianghu_myth_legend flag:p16_rare_master_encounter",
+      "detail": "Rare window missed; post-grind stats + choice cannot substitute luck gate"
+    },
+    {
+      "pathId": "pinnacle_patriarch_grind_no_luck",
+      "pinnacleOutcomeId": "founding_patriarch",
+      "windowAvailable": true,
+      "windowTaken": false,
+      "grindAfterMiss": {
+        "statsMaxed": true,
+        "choicePresent": true,
+        "luckPresent": false,
+        "pinnacleUnlocked": false
+      },
+      "passed": true,
+      "pointer": "path:pinnacle_patriarch_grind_no_luck → outcome:founding_patriarch flag:p16_scholar_mentor",
+      "detail": "Rare window missed; post-grind stats + choice cannot substitute luck gate"
+    }
+  ],
+  "wasteCasesDetected": 2,
+  "passed": true
+}

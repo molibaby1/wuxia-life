@@ -13,7 +13,7 @@
 
 import { reactive, isReactive } from 'vue';
 import { EventPriority } from '../types/eventTypes';
-import type { EventDefinition, GameState, Effect, PlayerIdentity } from '../types/eventTypes';
+import type { EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStates } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
@@ -474,8 +474,36 @@ export class GameEngineIntegration {
     
     let limitedEvents = availableEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP);
     limitedEvents = this.injectActiveRouteCandidates(availableEvents, limitedEvents);
+    limitedEvents = this.injectMandatoryCandidates(availableEvents, limitedEvents);
 
     return limitedEvents;
+  }
+
+  /** ponytail: mandatory/mainline events must survive FORMAL_CANDIDATE_POOL_CAP trimming. */
+  private isSchedulingValidationEvent(event: EventDefinition): boolean {
+    const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
+    return (
+      tags.includes('p9') ||
+      tags.includes('p11') ||
+      tags.includes('causality_echo') ||
+      (tags.includes('mandatory') && tags.includes('mainline'))
+    );
+  }
+
+  private injectMandatoryCandidates(
+    availableEvents: EventDefinition[],
+    limitedEvents: EventDefinition[],
+  ): EventDefinition[] {
+    const result = [...limitedEvents];
+    const selectedIds = new Set(result.map(event => event.id));
+    for (const event of availableEvents) {
+      if (selectedIds.has(event.id) || !this.isSchedulingValidationEvent(event)) {
+        continue;
+      }
+      result.push(event);
+      selectedIds.add(event.id);
+    }
+    return result;
   }
 
   /**
@@ -1891,7 +1919,8 @@ export class GameEngineIntegration {
       event.autoEffects,
       this.gameState
     );
-    const adjustedState = this.applyFormalEventConsequences(previousState, updatedState, event);
+    let adjustedState = this.applyFormalEventConsequences(previousState, updatedState, event);
+    adjustedState = this.applyDailyEventLongTermHooks(previousState, adjustedState, event);
     this.applyGameState(adjustedState);
     
     // 记录事件触发（用于年度事件限制）
@@ -2429,19 +2458,22 @@ export class GameEngineIntegration {
       this.pendingEventOutcomeNote = null;
     }
 
-    if ((tags.has('training') || tags.has('risk')) && martialGain >= 6) {
+    if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
+      lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
       if (martialGain >= 12) {
         lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       }
     }
 
-    if (tags.has('comprehension') && academicGain >= 4) {
+    if (tags.has('comprehension') && academicGain >= 3) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
+      lifeStates.studyHabit = traitSystem.clampLifeState('studyHabit', (lifeStates.studyHabit || 0) + 1);
     }
 
-    if (tags.has('business') && (moneyGain >= 100 || businessGain >= 2)) {
+    if (tags.has('business') && (moneyGain >= 25 || businessGain >= 1)) {
       lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
+      lifeStates.businessHabit = traitSystem.clampLifeState('businessHabit', (lifeStates.businessHabit || 0) + 1);
       if (moneyGain >= 150 && lifeStates.familyBond > 0) {
         lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond - 1);
       }
@@ -2468,12 +2500,120 @@ export class GameEngineIntegration {
       }
     }
 
+    const projected = this.projectHabitCompatibilityFlags(
+      lifeStates,
+      adjustedPlayer.flags || {},
+      nextState.flags || {},
+    );
+
     return {
       ...nextState,
       player: {
         ...adjustedPlayer,
-        lifeStates,
+        lifeStates: projected.lifeStates,
+        flags: projected.playerFlags,
       },
+      flags: projected.gameFlags,
+    };
+  }
+
+  private applyDailyEventLongTermHooks(
+    previousState: GameState,
+    nextState: GameState,
+    event: EventDefinition,
+  ): GameState {
+    if (event.category !== 'daily_event' || !nextState.player) {
+      return nextState;
+    }
+
+    const config = dailyEventSystem.getConfigByVariantId(event.id);
+    if (!config?.longTermHooks) {
+      return nextState;
+    }
+
+    const lifeStates = {
+      ...(nextState.player.lifeStates || traitSystem.createInitialLifeStates()),
+    };
+
+    for (const tendency of config.longTermHooks.addTendency || []) {
+      const habitState = this.mapLegacyHabitFlagToLifeState(tendency);
+      if (!habitState) {
+        continue;
+      }
+      lifeStates[habitState] = traitSystem.clampLifeState(habitState, (lifeStates[habitState] || 0) + 1);
+    }
+
+    for (const repeatRule of config.longTermHooks.addStateOnRepeat || []) {
+      const previousValue = previousState.player?.lifeStates?.[repeatRule.state] || 0;
+      const currentValue = nextState.player.lifeStates?.[repeatRule.state] || 0;
+      const alreadyReached = previousValue >= repeatRule.repeatThreshold;
+      const reachedNow = currentValue >= repeatRule.repeatThreshold;
+      if (!alreadyReached && reachedNow) {
+        lifeStates[repeatRule.state] = traitSystem.clampLifeState(
+          repeatRule.state,
+          (lifeStates[repeatRule.state] || 0) + repeatRule.increment,
+        );
+      }
+    }
+
+    const projected = this.projectHabitCompatibilityFlags(
+      lifeStates,
+      nextState.player.flags || {},
+      nextState.flags || {},
+    );
+
+    return {
+      ...nextState,
+      player: {
+        ...nextState.player,
+        lifeStates: projected.lifeStates,
+        flags: projected.playerFlags,
+      },
+      flags: projected.gameFlags,
+    };
+  }
+
+  private mapLegacyHabitFlagToLifeState(flag: string): 'trainingHabit' | 'studyHabit' | 'businessHabit' | null {
+    switch (flag) {
+      case 'training_habit':
+        return 'trainingHabit';
+      case 'study_habit':
+        return 'studyHabit';
+      case 'business_habit':
+        return 'businessHabit';
+      default:
+        return null;
+    }
+  }
+
+  private projectHabitCompatibilityFlags(
+    lifeStates: PlayerLifeStates,
+    playerFlags: Record<string, unknown>,
+    gameFlags: Record<string, unknown>,
+  ): {
+    lifeStates: PlayerLifeStates;
+    playerFlags: Record<string, unknown>;
+    gameFlags: Record<string, unknown>;
+  } {
+    const nextPlayerFlags = { ...playerFlags };
+    const nextGameFlags = { ...gameFlags };
+    const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [
+      ['training_habit', lifeStates?.trainingHabit || 0],
+      ['study_habit', lifeStates?.studyHabit || 0],
+      ['business_habit', lifeStates?.businessHabit || 0],
+    ];
+
+    for (const [flagKey, value] of projections) {
+      if (value >= 1) {
+        nextPlayerFlags[flagKey] = true;
+        nextGameFlags[flagKey] = true;
+      }
+    }
+
+    return {
+      lifeStates,
+      playerFlags: nextPlayerFlags,
+      gameFlags: nextGameFlags,
     };
   }
 

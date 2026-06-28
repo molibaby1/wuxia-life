@@ -1,0 +1,82 @@
+{
+  "slice": "p25_ordinary_origin_trajectory",
+  "pathCount": 3,
+  "findings": [
+    {
+      "pathId": "ordinary_peasant_renown_path",
+      "ordinaryOriginId": "farm_peasant",
+      "vividControlOriginId": "poor_family",
+      "ordinaryEarlyMidFlags": [
+        "origin:farm_peasant",
+        "infant:peasant_infant_chain_complete",
+        "preschool:preschool_peasant_harvest_help",
+        "bias:labor+seasonal+family",
+        "flag:peasant_steadfast_field",
+        "flag:ordinary_peasant_midlife_seed"
+      ],
+      "vividEarlyMidFlags": [
+        "origin:poor_family",
+        "infant:shared_infant_filler",
+        "preschool:preschool_passive_gap",
+        "bias:survival+business",
+        "flag:survival_upbringing"
+      ],
+      "overlapRatio": 0,
+      "materiallyDistinguishable": true,
+      "passed": true,
+      "pointer": "path:ordinary_peasant_renown_path origin:farm_peasant vs poor_family overlap=0.00",
+      "detail": "Early/mid trajectory flags differ from vivid control"
+    },
+    {
+      "pathId": "ordinary_apprentice_merchant_path",
+      "ordinaryOriginId": "town_apprentice",
+      "vividControlOriginId": "streetborn",
+      "ordinaryEarlyMidFlags": [
+        "origin:town_apprentice",
+        "infant:apprentice_infant_chain_complete",
+        "preschool:preschool_apprentice_plane_shavings",
+        "bias:craft+apprenticeship+discipline",
+        "flag:apprentice_craft_committed",
+        "flag:ordinary_apprentice_midlife_seed"
+      ],
+      "vividEarlyMidFlags": [
+        "origin:streetborn",
+        "infant:shared_infant_filler",
+        "preschool:preschool_passive_gap",
+        "bias:social+family",
+        "flag:street_network_seed"
+      ],
+      "overlapRatio": 0,
+      "materiallyDistinguishable": true,
+      "passed": true,
+      "pointer": "path:ordinary_apprentice_merchant_path origin:town_apprentice vs streetborn overlap=0.00",
+      "detail": "Early/mid trajectory flags differ from vivid control"
+    },
+    {
+      "pathId": "ordinary_tavern_renown_path",
+      "ordinaryOriginId": "tavern_hand",
+      "vividControlOriginId": "merchant_house",
+      "ordinaryEarlyMidFlags": [
+        "origin:tavern_hand",
+        "infant:tavern_infant_chain_complete",
+        "preschool:preschool_tavern_tray_balance",
+        "bias:service+rumor+social",
+        "flag:tavern_service_committed",
+        "flag:ordinary_tavern_midlife_seed"
+      ],
+      "vividEarlyMidFlags": [
+        "origin:merchant_house",
+        "infant:merchant_infant_chain_complete",
+        "preschool:preschool_merchant_first_coin",
+        "bias:business+social",
+        "flag:p9_early_merchant_seed"
+      ],
+      "overlapRatio": 0,
+      "materiallyDistinguishable": true,
+      "passed": true,
+      "pointer": "path:ordinary_tavern_renown_path origin:tavern_hand vs merchant_house overlap=0.00",
+      "detail": "Early/mid trajectory flags differ from vivid control"
+    }
+  ],
+  "passed": true
+}

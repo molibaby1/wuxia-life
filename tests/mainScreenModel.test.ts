@@ -1,6 +1,7 @@
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
+import type { PlayerLifeStates } from '../src/types/eventTypes';
 import type { LifeMemorySummary } from '../src/types/lifeMemory';
-import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { buildMainScreenModel, type MainScreenPlayer } from '../src/components/mainScreenModel';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -25,6 +26,28 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     currentYear: 19,
     currentMonth: 6,
     currentDay: 1,
+    ...overrides,
+  };
+}
+
+function createLifeStates(overrides: Partial<PlayerLifeStates> = {}): PlayerLifeStates {
+  return {
+    fatigue: 0,
+    discipline: 0,
+    indulgence: 0,
+    anxiety: 0,
+    trainingHabit: 0,
+    studyHabit: 0,
+    businessHabit: 0,
+    socialMomentum: 0,
+    familyBond: 0,
+    ...overrides,
+  };
+}
+
+function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): MainScreenPlayer {
+  return {
+    ...createPlayer(),
     ...overrides,
   };
 }
@@ -66,6 +89,7 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.stageTags[1] === '未入门', 'stage tags second item should be route phase');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '悟性 24 / 体魄 18', 'tendency should prefer representative stats');
+  assert(model.shapingSummary === '塑形未成', 'shaping should degrade when no habit axis is strong');
   assert(model.topResources.length === 3, 'top resources should stay capped at three');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,外功,内功,轻功,体魄,银两',
@@ -110,6 +134,18 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(model.tendencySummary === '功力 35', 'near-duplicate martial stats should collapse to one route-explaining stat');
   console.log('✓ avoids noisy duplicate tendency entries');
+}
+
+{
+  const model = buildMainScreenModel(
+    createMainScreenPlayer({
+      lifeStates: createLifeStates({ trainingHabit: 3, studyHabit: 2 }),
+    }),
+    createLifeMemory(),
+  );
+
+  assert(model.shapingSummary === '习武 · 成形 / 饱学 · 渐成', 'shaping should rank habit axes with readable labels');
+  console.log('✓ surfaces dominant habit shaping on main screen');
 }
 
 console.log('\n=== Main Screen Model Tests Passed ===');

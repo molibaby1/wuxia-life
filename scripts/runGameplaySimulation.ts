@@ -2,7 +2,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
+import { GameProcessSimulator } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import { evaluateSimulationGate, parseWaiverArg, type SimulationWaiver } from './gameplaySimulationGate';
 import { printDiagnosticsToConsole } from './gameplaySimulationDiagnostics';
 import {

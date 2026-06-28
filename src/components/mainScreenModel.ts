@@ -1,6 +1,7 @@
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
-import type { PlayerState } from '../types/eventTypes';
+import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
+import { buildCurrentShapingSummary } from '../utils/habitShapingSummary';
 
 export interface MainScreenStatItem {
   key: string;
@@ -21,6 +22,7 @@ export interface MainScreenModel {
   routeSummary: string;
   riskSummary: string;
   tendencySummary: string;
+  shapingSummary: string;
   coreStats: MainScreenStatItem[];
   fullStatGroups: MainScreenStatGroup[];
 }
@@ -42,7 +44,12 @@ export type MainScreenPlayer = Pick<
   | 'influence'
   | 'sect'
 > &
-  Partial<Pick<PlayerState, 'businessAcumen'>>;
+  Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>>;
+
+export type MainScreenLifeStates = Pick<
+  PlayerLifeStates,
+  'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum' | 'familyBond'
+>;
 
 const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
   low: '低',
@@ -87,7 +94,9 @@ function buildRouteSummary(summary: LifeMemorySummary): string {
   if (!primary) {
     return '未定 · 未入门';
   }
-  return `${primary.name} · ${primary.phase}`;
+  const goal = summary.routeStatus?.currentGoalLabel;
+  const base = `${primary.name} · ${primary.phase}`;
+  return goal ? `${base} · ${goal}` : base;
 }
 
 function buildRiskSummary(summary: LifeMemorySummary): string {
@@ -200,6 +209,10 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
   ];
 }
 
+function buildShapingSummary(player: MainScreenPlayer): string {
+  return buildCurrentShapingSummary(player.lifeStates);
+}
+
 export function buildMainScreenModel(
   playerLike: MainScreenPlayer | PlayerSummaryDto,
   lifeMemory: LifeMemorySummary,
@@ -221,6 +234,7 @@ export function buildMainScreenModel(
     routeSummary,
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player, lifeMemory),
+    shapingSummary: buildShapingSummary(player),
     coreStats: CORE_STATS.map((item) =>
       createStat(String(item.key), item.label, valueOf(player, item.key)),
     ),

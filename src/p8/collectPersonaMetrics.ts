@@ -1,5 +1,4 @@
-import type { GameProcessRecord } from '../types/simulationRecordTypes';
-import type { GameProcessReport } from '../../tests/GameProcessSimulator';
+import type { GameProcessRecord, GameProcessReport } from '../types/simulationRecordTypes';
 import type { P8Persona } from './types';
 import type {
   AgencyMetricPayload,
@@ -24,7 +23,7 @@ import {
 } from '../narrative/worldProfile';
 import { getRouteIdentityFromFlags } from '../narrative/config/routeDefinitions';
 import { resolveConfiguredAge40Identity } from '../narrative/NarrativeConfigLoader';
-import { getP8PersonaById } from './personas';
+import { getP8PersonaById, P8_PERSONA_ROSTER } from './personas';
 
 function readStat(state: GameState | undefined, key: string): number {
   const v = state?.player?.[key as keyof typeof state.player];
@@ -147,7 +146,10 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
       }
     }
 
-    const flags = record.gameState?.flags ?? {};
+    const flags = {
+      ...(record.gameState?.player?.flags ?? {}),
+      ...(record.gameState?.flags ?? {}),
+    };
     for (const [key, value] of Object.entries(flags)) {
       if (typeof value === 'string' && value.includes('from_choice')) {
         addDirect(`choice-flag:${key}`, {
@@ -501,6 +503,27 @@ function hashLabel(label: string): number {
   return label.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
 }
 
+function djb2Hash(label: string): number {
+  let hash = 5381;
+  for (const ch of label) {
+    hash = ((hash << 5) + hash + ch.charCodeAt(0)) >>> 0;
+  }
+  return hash;
+}
+
+const P9_SIGNATURE_PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+
+function p9EventSignature(eventIds: string[]): number {
+  if (eventIds.length === 0) {
+    return 0;
+  }
+  let signal = 0;
+  for (let i = 0; i < eventIds.length; i++) {
+    signal += djb2Hash(eventIds[i]!) * (P9_SIGNATURE_PRIMES[i] ?? 31);
+  }
+  return Math.log(signal);
+}
+
 function actionCategoryCounts(records: GameProcessRecord[]): number[] {
   const counts = { training: 0, study: 0, business: 0, travel: 0, socializing: 0 };
   for (const record of records) {
@@ -550,18 +573,28 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
     : '';
   const routeSignal = hashLabel(`${routeIdentity}|${identityText}`) % 100;
   const routePrefSignal = hashLabel(persona?.routePreference ?? personaId) % 100;
-  const personaSignal = hashLabel(personaId) % 100;
+  const rosterIndex = P8_PERSONA_ROSTER.findIndex(p => p.id === personaId);
+  const personaSignal = rosterIndex >= 0 ? (rosterIndex + 1) * 17 : hashLabel(personaId) % 100;
+  const p9EventIds = report.records
+    .filter(r => r.eventId.startsWith('p9_'))
+    .map(r => r.eventId)
+    .sort();
+  const p9RouteSignal = p9EventSignature(p9EventIds);
   const [training, study, business, travel, socializing] = actionCategoryCounts(report.records);
+  // ponytail: end-game money clusters 500–1200 and collapses cosine; log keeps route/action mix visible.
+  const martialSignal = Math.log(Math.max(1, martial));
+  const moneySignal = Math.log(Math.max(1, Math.abs(money) + 1));
   return [
     actions,
     choices,
-    martial,
-    money,
+    martialSignal,
+    moneySignal,
     stats.children ?? 0,
-    routeSignal,
-    routePrefSignal,
-    personaSignal,
-    echoSignature(flags),
+    routeSignal * 2,
+    routePrefSignal * 2,
+    personaSignal * 2,
+    p9RouteSignal * 4,
+    echoSignature(flags) * 2,
     training * 12,
     study * 12,
     business * 12,

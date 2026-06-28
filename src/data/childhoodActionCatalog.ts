@@ -67,6 +67,22 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     onCompleteFlags: ['p9_echo_social_hook', 'p9_early_social_focus'],
   },
   {
+    id: 'action_household_errand',
+    category: 'business',
+    name: '帮家里跑腿',
+    playerIntent: '替家里记小账、送小件、认摊认货，先学最基础的营生分寸',
+    duration: { value: 1, unit: 'month' },
+    rewards: [
+      { stat: 'money', min: 1, max: 6 },
+      { stat: 'businessAcumen', min: 1, max: 1 },
+      { stat: 'knowledge', min: 0, max: 1 },
+    ],
+    costs: [{ stat: 'energy', amount: 2 }],
+    risk: 'low',
+    metadata: { focusTag: 'business', childhoodTier: 'lite', ageBand: '5-6' },
+    onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
+  },
+  {
     id: 'action_household_apprentice',
     category: 'business',
     name: '帮家里打杂',
@@ -74,11 +90,11 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     duration: { value: 1, unit: 'quarter' },
     rewards: [
       { stat: 'money', min: 3, max: 10 },
-      { stat: 'businessAcumen', min: 0, max: 2 },
+      { stat: 'businessAcumen', min: 1, max: 2 },
     ],
     costs: [{ stat: 'energy', amount: 3 }],
     risk: 'low',
-    metadata: { focusTag: 'wealth', childhoodTier: 'lite' },
+    metadata: { focusTag: 'business', childhoodTier: 'lite' },
     onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
   },
   {

@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "description": "P25 Wave 4: ordinary-origin childhood choices (ages 8–15) with durable flags.",
+  "choices": [
+    {
+      "id": "ordinary_peasant_plow_fork",
+      "originId": "farm_peasant",
+      "originFlag": "origin_farm_peasant",
+      "ageMin": 10,
+      "ageMax": 14,
+      "title": "农忙分岔",
+      "prompt": "开春农忙，父亲让你选：守在家田，还是跟邻村换工队出远门？",
+      "options": [
+        {
+          "id": "stay_home_field",
+          "label": "守家田",
+          "flags": ["peasant_steadfast_field", "ordinary_peasant_midlife_seed"]
+        },
+        {
+          "id": "join_swap_crew",
+          "label": "跟换工队",
+          "flags": ["peasant_swap_crew_curiosity", "ordinary_peasant_midlife_seed"]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_apprentice_craft_fork",
+      "originId": "town_apprentice",
+      "originFlag": "origin_town_apprentice",
+      "ageMin": 11,
+      "ageMax": 15,
+      "title": "手艺分岔",
+      "prompt": "师傅说你可以专精木工，也可以学些跑外市的买卖门道。",
+      "options": [
+        {
+          "id": "focus_craft",
+          "label": "专精木工",
+          "flags": ["apprentice_craft_committed", "ordinary_apprentice_midlife_seed"]
+        },
+        {
+          "id": "learn_trade_routes",
+          "label": "学跑外市",
+          "flags": ["apprentice_trade_curiosity", "ordinary_apprentice_midlife_seed"]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_tavern_network_fork",
+      "originId": "tavern_hand",
+      "originFlag": "origin_tavern_hand",
+      "ageMin": 9,
+      "ageMax": 13,
+      "title": "酒肆分岔",
+      "prompt": "掌柜让你选：专心学跑堂规矩，还是帮账房记流水、认江湖客人？",
+      "options": [
+        {
+          "id": "master_service",
+          "label": "学跑堂",
+          "flags": ["tavern_service_committed", "ordinary_tavern_midlife_seed"]
+        },
+        {
+          "id": "track_guests",
+          "label": "记客人",
+          "flags": ["tavern_guest_network", "ally_network"]
+        }
+      ]
+    }
+  ]
+}

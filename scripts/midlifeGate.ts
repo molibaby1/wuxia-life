@@ -9,7 +9,7 @@ import {
   type GoldenLineSimulationRun,
   runAllGoldenLineSimulations,
 } from './goldenLineSimulation';
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 /** US-002 §5.2 — minimum midlife route content per priority route. */
 export const MIN_MIDLIFE_ROUTE_EVENTS = 3;

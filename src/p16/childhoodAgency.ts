@@ -42,7 +42,7 @@ const LITE_ACTION_BY_CATEGORY_AGE_5_6: Record<ActionCategory, string> = {
   training: 'action_childhood_yard_play',
   study: 'action_study_lite',
   socializing: 'action_socializing_lite',
-  business: 'action_errand_nearby',
+  business: 'action_household_errand',
   travel: 'action_errand_nearby',
   health: 'action_childhood_yard_play',
   romance: 'action_socializing_lite',

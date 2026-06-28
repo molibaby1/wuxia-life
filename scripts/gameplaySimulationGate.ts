@@ -2,7 +2,7 @@ import {
   P2_SIMULATION_METRIC_DEFINITIONS,
   type SimulationMetricDefinition,
 } from './gameplaySimulationMetricDefinitions';
-import type { GameProcessReport } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 export type SimulationGateStatus = 'pass' | 'warning' | 'fail';
 

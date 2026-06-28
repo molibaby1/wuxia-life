@@ -1,0 +1,78 @@
+{
+  "project": "Wuxia Life P35 Wave 2 Mixed/Pinnacle Habit-Led Lifetime Traces",
+  "branchName": "codex/p35-wuxia-wave2-mixed-pinnacle-habit-led-lifetime-traces",
+  "description": "Close mixed and pinnacle habit-led lifetime sim traces, baseline delta, regression, and closure toward North Star section 8 mixed/pinnacle samples.",
+  "userStories": [
+    {
+      "id": "P35-001",
+      "title": "P35 mixed habit-led lifetime sim trace",
+      "description": "As a maintainer, I want a mixed-achievement habit-led lifetime sim trace proving cross-track unlock from on-ramp through terminal eval.",
+      "acceptanceCriteria": [
+        "Add mixed lifetime trace under P25 test harness with habit on-ramp observability, cross-track bridge flags, and terminal composite eval",
+        "Target a P25 mixed outcome such as healer_swordsman or documented equivalent cross-track outcome",
+        "Document seed, age steps, event sequence, unlock, and terminal outcome under docs/test-reports",
+        "Unlock without static resolveP31HabitLedKeyChoiceBridges on fixtures",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Addresses GAP-END-MIXED-PIN mixed leg; extends P34 lifetime pattern to cross-track outcomes."
+    },
+    {
+      "id": "P35-002",
+      "title": "P35 pinnacle habit-led lifetime trace or dual-gate slice",
+      "description": "As a maintainer, I want a pinnacle-achievement habit-led lifetime trace or dual-gate slice proving luck plus choice gating on a habit-led path.",
+      "acceptanceCriteria": [
+        "Add pinnacle lifetime trace or dual-gate slice under P25 test harness with success path and or documented failure attribution",
+        "Target a P25 pinnacle outcome such as jianghu_myth_legend or founding_patriarch or documented equivalent",
+        "Document luck window, key choices, and unlock or failure outcome under docs/test-reports",
+        "Align with P25 rare-window waste slice semantics where applicable",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Addresses GAP-END-MIXED-PIN pinnacle leg; GAP-END-08-01 partial."
+    },
+    {
+      "id": "P35-003",
+      "title": "Run mixed/pinnacle sim baseline delta",
+      "description": "As a maintainer, I want sim metrics comparing P35 trace inputs vs P25 static mixed/pinnacle baselines.",
+      "acceptanceCriteria": [
+        "Run sim baseline with P35 trace inputs; save JSON under docs/test-reports",
+        "Document delta vs P25 mixed identity slice and pinnacle baseline metrics",
+        "Do not modify gameplay behavior beyond parity fixes if audit finds drift"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Baseline vs P25 static mixed/pinnacle slices."
+    },
+    {
+      "id": "P35-004",
+      "title": "Extend P35 regression tests",
+      "description": "As a maintainer, I want isolated regression coverage for P35 mixed/pinnacle habit-led traces.",
+      "acceptanceCriteria": [
+        "Extend tests/p34LifetimeParityTests.ts or sibling isolated file for P35 mixed/pinnacle asserts",
+        "Assert unlock outcomes and no static resolver on path where applicable",
+        "Test file runs independently and exits cleanly",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P35-001 and P35-002; sibling tests/p35MixedPinnacleParityTests.ts acceptable."
+    },
+    {
+      "id": "P35-005",
+      "title": "Write P35 closure and remaining queue",
+      "description": "As a maintainer, I want a closure note listing what P35 proved and what remains for North Star section 8.",
+      "acceptanceCriteria": [
+        "Summarize mixed/pinnacle traces, baseline delta, and verification commands",
+        "List remaining Wave 2-4 deferrals, renown optional lifetime, medical pool, poison mutex Monitor",
+        "Cross-reference North Star section 8 items still OPEN after P35",
+        "Save under docs/test-reports"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

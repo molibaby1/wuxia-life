@@ -1,0 +1,135 @@
+{
+  "project": "Wuxia Life P49 Sample Lines Validation And Playtest",
+  "branchName": "codex/p49-wuxia-sample-lines-validation-and-playtest",
+  "description": "Plan the validation, replay, and human playtest work that determines whether the three 0-40 minimum playable life samples are stable, readable, distinct, and worth continuing or replaying.",
+  "userStories": [
+    {
+      "id": "P49-001",
+      "title": "Define the validation contract for the three sample lines",
+      "description": "As a maintainer, I want an explicit validation contract for the three sample lines so closure is judged against a stable bar instead of taste alone.",
+      "acceptanceCriteria": [
+        "Define pass, warning, and fail interpretations for the three sample lines",
+        "Define the minimum simulation and human-evidence bundle",
+        "State that gate pass is not the only closure signal",
+        "Save the contract under docs/test-reports/"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Validation-foundation story."
+    },
+    {
+      "id": "P49-002",
+      "title": "Define fixed-seed replay coverage for orthodox martial",
+      "description": "As a tester, I want a fixed-seed replay plan for the orthodox line so its 0-40 sample can be rechecked consistently after later changes.",
+      "acceptanceCriteria": [
+        "Define the orthodox fixed seed and key checkpoint ages",
+        "Define the required key nodes and identity signals",
+        "Define the required cost or fallback signals",
+        "Record the replay specification in the PRD"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Line-specific replay story."
+    },
+    {
+      "id": "P49-003",
+      "title": "Define fixed-seed replay coverage for demonic edge",
+      "description": "As a tester, I want a fixed-seed replay plan for the demonic line so temptation, gain, and backlash can be rechecked consistently after later changes.",
+      "acceptanceCriteria": [
+        "Define the demonic fixed seed and key checkpoint ages",
+        "Define the required key nodes and identity signals",
+        "Define the required cost or fallback signals",
+        "Record the replay specification in the PRD"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Line-specific replay story."
+    },
+    {
+      "id": "P49-004",
+      "title": "Define fixed-seed replay coverage for merchant rise",
+      "description": "As a tester, I want a fixed-seed replay plan for the merchant line so its business-growth and obligation arc can be rechecked consistently after later changes.",
+      "acceptanceCriteria": [
+        "Define the merchant fixed seed and key checkpoint ages",
+        "Define the required key nodes and identity signals",
+        "Define the required cost or fallback signals",
+        "Record the replay specification in the PRD"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Line-specific replay story."
+    },
+    {
+      "id": "P49-005",
+      "title": "Define cross-line comparison dimensions",
+      "description": "As a maintainer, I want explicit comparison dimensions across the three lines so validation focuses on readable life differences rather than hidden implementation differences.",
+      "acceptanceCriteria": [
+        "Define comparison dimensions for goal, cost, identity summary, continue intent, and replay intent",
+        "Give each dimension a clear judgment method",
+        "Record the comparison dimensions in the PRD",
+        "Do not add implementation in this story"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Comparison-framework story."
+    },
+    {
+      "id": "P49-006",
+      "title": "Define the human playtest checklist",
+      "description": "As a maintainer, I want a bounded human playtest checklist so fun and readability have minimum human evidence instead of relying only on automation.",
+      "acceptanceCriteria": [
+        "Define post-run retell questions",
+        "Define continue-intent checks",
+        "Define key-turning-point memory checks",
+        "Define replay-another-line intent checks",
+        "Save the checklist under docs/test-reports/ or record it in the PRD"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Human-evidence story."
+    },
+    {
+      "id": "P49-007",
+      "title": "Split replay harness work into small tasks",
+      "description": "As an implementer, I want replay-harness work split into small tasks so validation tooling can be added incrementally and rechecked often.",
+      "acceptanceCriteria": [
+        "Split fixed-seed matrix definition into a standalone task",
+        "Split checkpoint-output work into a standalone task",
+        "Split delta-report output into a standalone task",
+        "Ensure each task fits in one implementation iteration"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Tooling task-sizing story."
+    },
+    {
+      "id": "P49-008",
+      "title": "Split human-facing report work into small tasks",
+      "description": "As an implementer, I want report and checklist work split into small tasks so human-verification artifacts can be produced without bundling too many concerns together.",
+      "acceptanceCriteria": [
+        "Split replay-latest report work into a standalone task",
+        "Split cross-line comparison report work into a standalone task",
+        "Split human checklist report work into a standalone task",
+        "Ensure each task fits in one implementation iteration"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Report task-sizing story."
+    },
+    {
+      "id": "P49-009",
+      "title": "Define final closure evidence",
+      "description": "As a maintainer, I want explicit final closure evidence so the project can say whether the three minimum playable life samples are actually ready to serve as the next experience baseline.",
+      "acceptanceCriteria": [
+        "Define the required script outputs for final closure",
+        "Define the required human evidence for final closure",
+        "Define which residual warnings remain acceptable",
+        "Define which failure types must block closure",
+        "Record the closure rules in the PRD"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Stage-close story."
+    }
+  ]
+}

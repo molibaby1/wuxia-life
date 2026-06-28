@@ -38,8 +38,8 @@ async function main(): Promise<void> {
 
   let bundles = p8Report.personaRuns.map(run => ({
     personaId: run.personaId,
-    report: { records: [] } as import('../tests/GameProcessSimulator').GameProcessReport,
-    records: [] as import('../tests/GameProcessSimulator').GameProcessRecord[],
+    report: { records: [] } as import('../src/types/simulationRecordTypes').GameProcessReport,
+    records: [] as import('../src/types/simulationRecordTypes').GameProcessRecord[],
     metrics: run,
   }));
 

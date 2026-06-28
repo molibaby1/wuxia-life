@@ -9,6 +9,7 @@
 
 import { LIFE_MEMORY_SCHEMA_VERSION } from '../../types/lifeMemory';
 import { EffectType } from '../../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../../data/life/lifeStates';
 import {
   GAME_STATE_SNAPSHOT_SCHEMA_VERSION,
   type GameStateSnapshot,
@@ -71,14 +72,14 @@ export const gameStateSnapshotAge50 = {
         weakness: 'grand_dreams_poor_followthrough',
         temperament: 'disciplined',
       },
-      lifeStates: {
+      lifeStates: createDefaultPlayerLifeStates({
         fatigue: 35,
         discipline: 78,
         indulgence: 12,
         familyBond: 82,
         socialMomentum: 55,
         anxiety: 28,
-      },
+      }),
       talents: ['iron_body', 'swift_strike'],
       relationships: [
         {

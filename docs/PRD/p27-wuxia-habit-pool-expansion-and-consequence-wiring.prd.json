@@ -1,0 +1,140 @@
+{
+  "project": "Wuxia Life P27 Habit Pool Expansion And Consequence Wiring",
+  "branchName": "codex/p27-wuxia-habit-pool-expansion-and-consequence-wiring",
+  "description": "Second-round habit pool migration: P20 replay mirrors, P21 echo wiring, P17 mentor/renown consequences, and one medical habit sample.",
+  "userStories": [
+    {
+      "id": "P27-001",
+      "title": "P27 pool expansion scope and audit delta",
+      "description": "As a maintainer, I want an updated audit delta from P26 closure so P27 migrations target the highest-value remaining pools.",
+      "acceptanceCriteria": [
+        "Re-inventory legacy *_habit readers in replay surfaces, echo hooks, and validation fixtures",
+        "Classify each hit and map to P27 story execution order",
+        "Save the audit under docs/test-reports or docs/designs",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P27-002",
+      "title": "Mirror martial and scholar archetype habit seeds to lifeStates",
+      "description": "As a maintainer, I want P20 martial and scholar archetype surfaces to recognize lifeStates habit thresholds.",
+      "acceptanceCriteria": [
+        "Update wuxiaReplayabilitySurfaces.ts martial and scholar habit-related seeds for trainingHabit and studyHabit",
+        "Preserve backward compatibility for existing P20 gate fixtures where required",
+        "Targeted test or fixture proves archetype resolution with lifeStates-led profile"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Replay surface mirror — martial and scholar only."
+    },
+    {
+      "id": "P27-003",
+      "title": "Mirror wealth archetype and P20 validation habit fixtures",
+      "description": "As a maintainer, I want wealth archetype and P20 validation slice habit seeds updated to match content semantics.",
+      "acceptanceCriteria": [
+        "Update wealth merchant archetype habit seeds in wuxiaReplayabilitySurfaces.ts",
+        "Update p20/validationSlices.ts habit seed fixtures to use lifeStates or documented projection",
+        "Relevant P20 replayability tests pass"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Depends on P27-002 pattern."
+    },
+    {
+      "id": "P27-004",
+      "title": "Wire P21 study echo callback to studyHabit",
+      "description": "As a player, I want the P21 scholarly echo callback to fire from long-term study habit without requiring the P9 hook flag alone.",
+      "acceptanceCriteria": [
+        "Update p21_study_echo_callback conditions to include lifeStates.studyHabit >= threshold",
+        "Preserve access via p9_echo_study_hook where appropriate",
+        "Regression test proves callback triggers from studyHabit without legacy study_habit flag"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Single echo callback wiring."
+    },
+    {
+      "id": "P27-005",
+      "title": "Add P17 mentor obligation consequence sample",
+      "description": "As a player, I want a mid/late-life consequence acknowledging training or study habit through mentor obligations.",
+      "acceptanceCriteria": [
+        "Add one P17-style consequence keyed by trainingHabit or studyHabit",
+        "Outcome changes obligation, burden, or opportunity—not flavor only",
+        "Distinct from p26_business_habit_obligation",
+        "Targeted test proves habit-sensitive trigger"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Single consequence sample."
+    },
+    {
+      "id": "P27-006",
+      "title": "Add P17 renown maintenance consequence sample",
+      "description": "As a player, I want a consequence where long-term scholarly shaping creates renown upkeep pressure.",
+      "acceptanceCriteria": [
+        "Add one P17-style consequence keyed by studyHabit",
+        "Changes pressure, opportunity, or social obligation materially",
+        "Targeted test proves trigger path"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Single consequence sample; differs from P27-005 axis emphasis."
+    },
+    {
+      "id": "P27-007",
+      "title": "Add one medical pool habit-driven sample",
+      "description": "As a player, I want at least one medical content node to recognize study habit for healer path emergence.",
+      "acceptanceCriteria": [
+        "Add or migrate one medical pool sample to read lifeStates.studyHabit or appropriate habit axis",
+        "Sample does not require high martial stats",
+        "Targeted test proves habit-led access"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Single medical sample only."
+    },
+    {
+      "id": "P27-008",
+      "title": "Extend habit regression tests for P27 samples",
+      "description": "As a maintainer, I want isolated regression coverage for P27 echo, consequence, and medical wiring.",
+      "acceptanceCriteria": [
+        "Extend tests/personalityHabitTrajectoryTests.ts or sibling isolated file for P27 paths",
+        "Cover echo callback and new P17 and medical sample triggers",
+        "Test file runs independently and exits cleanly"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Depends on P27-004 through P27-007."
+    },
+    {
+      "id": "P27-009",
+      "title": "Update P20 habit trajectory slice for pool expansion",
+      "description": "As a maintainer, I want P20 habit trajectory reporting to reflect P27 replay mirror changes.",
+      "acceptanceCriteria": [
+        "Update src/p20/habitTrajectorySlice.ts or related reporting for new mirror semantics",
+        "Output remains machine-readable in existing P20 reporting flow",
+        "Relevant P20 tests pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Validation-only story."
+    },
+    {
+      "id": "P27-010",
+      "title": "Write P27 closure and remaining queue",
+      "description": "As a maintainer, I want a closure note listing what P27 proved and what remains for P25 and P28.",
+      "acceptanceCriteria": [
+        "Summarize migrated surfaces, new samples, and verification commands",
+        "List remaining legacy-only surfaces and deferred semi-personality axes",
+        "Cross-reference P25 Wave 1 achievement gaps outside P27 scope",
+        "Save under docs/test-reports"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

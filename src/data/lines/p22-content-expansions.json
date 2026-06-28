@@ -183,7 +183,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
+        "expression": "lifeStates.businessHabit >= 2 || flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
       }
     ],
     "content": {
@@ -207,6 +207,11 @@
             "type": "flag_set",
             "target": "p22_wealth_route_forked",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "route_wealth_committed",
+            "value": true
           }
         ]
       },
@@ -223,6 +228,11 @@
           {
             "type": "flag_set",
             "target": "p22_wealth_route_forked",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "route_wealth_committed",
             "value": true
           }
         ]
@@ -399,6 +409,11 @@
           {
             "type": "flag_set",
             "target": "p22_faction_continuation_active",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p16_alliance_brokered",
             "value": true
           },
           {
@@ -799,6 +814,124 @@
         "duplicateRiskClass": "wave_sample",
         "authoringNotes": "Late-life content wave sample for closure pool expansion."
       }
+    }
+  },
+  {
+    "id": "p22_early_martial_route_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 46,
+    "ageRange": { "min": 16, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 2 || flags.has(\"origin_martial_family\")"
+      }
+    ],
+    "content": {
+      "title": "武途初分",
+      "text": "十六岁后你常于清晨练功、日暮复盘。一位游方武者路过，见你招式虽稚嫩却日日不辍，邀你择一路：是拜入正经门派，还是继续独行磨砺？",
+      "description": "P22 早期路线分歧：武道路线强化（习惯驱动）"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "seek_sect_entry",
+        "text": "求引荐，入正经门派",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p22_martial_route_forked", "value": true },
+          { "type": "flag_set", "target": "martial_path_started", "value": true }
+        ]
+      },
+      {
+        "id": "continue_solo_training",
+        "text": "谢绝引荐，继续独行苦练",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
+          { "type": "flag_set", "target": "p22_martial_route_forked", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["route", "p22", "martial", "live_ops_expansion"]
+    }
+  },
+  {
+    "id": "p42_training_habit_youth_sparring",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 44,
+    "ageRange": { "min": 14, "max": 18 },
+    "triggers": [{ "type": "age_reach", "value": 14 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 2"
+      }
+    ],
+    "content": {
+      "title": "同窗过招",
+      "text": "你这些年养成的练武节律，已让同窗看出差别——不必等门派试炼，日常对练里你的起手、收势都比别人更稳。有人邀你牵头组织晨课，也有人想借你的节奏压一压自己的懒散。",
+      "description": "P42 青年塑形：练功习惯的非路线回响"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "lead_morning_drill",
+        "text": "牵头晨课，帮众人定规矩",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "flag_set", "target": "p42_training_youth_drill_led", "value": true }
+        ]
+      },
+      {
+        "id": "spar_solo",
+        "text": "谢绝牵头，继续独自打磨",
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "p42_training_youth_solo", "value": true }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "training", "youth"]
+    }
+  },
+  {
+    "id": "p42_study_habit_childhood_copybook",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 43,
+    "ageRange": { "min": 10, "max": 14 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 2"
+      }
+    ],
+    "content": {
+      "title": "字帖成习",
+      "text": "别的孩童还在逃学嬉戏，你已把每日临帖当成理所当然。先生不必催，你自己会补完昨日欠下的功课——这份静气，比一时聪明更叫长辈放心。",
+      "description": "P42 童年/少年塑形：读书习惯的非路线回响"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+      { "type": "flag_set", "target": "p42_study_childhood_copybook_seen", "value": true }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p42", "habit_trajectory", "study", "childhood"]
     }
   }
 ]

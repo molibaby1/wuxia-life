@@ -1,0 +1,329 @@
+{
+  "generatedAt": "2026-06-24T08:48:20.188Z",
+  "command": "npm exec tsx scripts/runP37HabitLedSimulationBaseline.ts",
+  "p25StaticMixed": {
+    "merchant_martial_patron_unlockRate": 0.1875,
+    "healer_swordsman_unlockRate": 0.1875,
+    "mixedIdentitySlicePassed": true
+  },
+  "p25StaticPinnacle": {
+    "founding_patriarch_unlockRate": 0.15625,
+    "jianghu_myth_legend_unlockRate": 0.1875,
+    "pinnacleMaxUnlockRate": 0.1875
+  },
+  "p35HabitLedLifetime": {
+    "healerSwordsmanUnlockRate": 1,
+    "jianghuMythLegendUnlockRate": 1
+  },
+  "p37MixedLifetime": {
+    "lifetime": {
+      "slice": "p37_mixed_merchant_patron_lifetime",
+      "pathId": "p37_mixed_merchant_patron_habit_zero_lifetime",
+      "outcomeId": "merchant_martial_patron",
+      "seed": {
+        "originId": "merchant_house",
+        "birthAge": 0,
+        "businessHabitStart": 0,
+        "trainingHabitStart": 0
+      },
+      "ageProgression": [
+        {
+          "age": 0,
+          "phase": "birth",
+          "action": "born merchant_house; businessHabit/trainingHabit at 0",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 24,
+          "reputation": 12
+        },
+        {
+          "age": 10,
+          "phase": "childhood",
+          "action": "family_ledger (+3 business) → businessHabit 1",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 24,
+          "reputation": 15
+        },
+        {
+          "age": 14,
+          "phase": "childhood",
+          "action": "trade_apprentice (+2 business) → businessHabit 2",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 24,
+          "reputation": 18
+        },
+        {
+          "age": 16,
+          "phase": "childhood",
+          "action": "route_scouting (+3 business) → businessHabit 3",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 24,
+          "reputation": 21
+        },
+        {
+          "age": 12,
+          "phase": "youth",
+          "action": "guard_training (+7 martial) → trainingHabit 1",
+          "trainingHabit": 1,
+          "studyHabit": 0,
+          "martialPower": 31,
+          "reputation": 23
+        },
+        {
+          "age": 15,
+          "phase": "youth",
+          "action": "caravan_escort (+6 martial) → trainingHabit 2",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 37,
+          "reputation": 25
+        },
+        {
+          "age": 18,
+          "phase": "bridge",
+          "action": "p22_early_wealth_route_fork → route_wealth_committed",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 40,
+          "reputation": 29
+        },
+        {
+          "age": 32,
+          "phase": "bridge",
+          "action": "merchant_sect_investment → merchant_invest_good",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 62,
+          "reputation": 63
+        },
+        {
+          "age": 68,
+          "phase": "terminal",
+          "action": "mixed composite eval → unlocked=true tracks=merchant_track+martial_track",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 62,
+          "reputation": 63
+        }
+      ],
+      "eventSequence": [
+        {
+          "age": 18,
+          "eventId": "p22_early_wealth_route_fork",
+          "choiceIndex": 0,
+          "choiceLabel": "expand_trade_route",
+          "flagsAfter": [
+            "origin_merchant_family",
+            "p22_wealth_route_forked",
+            "route_wealth_committed"
+          ]
+        },
+        {
+          "age": 32,
+          "eventId": "merchant_sect_investment",
+          "choiceIndex": 1,
+          "choiceLabel": "投资正道门派（侠义 +10）",
+          "flagsAfter": [
+            "origin_merchant_family",
+            "p22_wealth_route_forked",
+            "route_wealth_committed",
+            "merchant_invest_good"
+          ]
+        }
+      ],
+      "terminalCheckpoint": {
+        "age": 68,
+        "endState": "mixed_composite_eval_terminal",
+        "unlocked": true,
+        "crossTrackGroupsSatisfied": 2
+      },
+      "resolvedBridgeFlags": [
+        "route_wealth_committed",
+        "merchant_invest_good"
+      ],
+      "crossTrackSignals": [
+        "merchant_track:ok",
+        "martial_track:ok"
+      ],
+      "usedStaticResolver": false
+    },
+    "merchantMartialPatronUnlockRate": 1
+  },
+  "p37PinnacleLifetime": {
+    "lifetime": {
+      "slice": "p37_pinnacle_founding_patriarch_lifetime",
+      "pathId": "p37_pinnacle_founding_patriarch_habit_zero_lifetime",
+      "outcomeId": "founding_patriarch",
+      "seed": {
+        "originId": "scholar_house",
+        "birthAge": 0,
+        "trainingHabitStart": 0,
+        "socialMomentumStart": 0
+      },
+      "ageProgression": [
+        {
+          "age": 0,
+          "phase": "birth",
+          "action": "born scholar_house; trainingHabit/socialMomentum at 0",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 26,
+          "reputation": 14
+        },
+        {
+          "age": 4,
+          "phase": "childhood",
+          "action": "childhood_preference focus_on_study",
+          "trainingHabit": 0,
+          "studyHabit": 0,
+          "martialPower": 26,
+          "reputation": 14
+        },
+        {
+          "age": 10,
+          "phase": "childhood",
+          "action": "academy_drill (+7 martial) → trainingHabit 1",
+          "trainingHabit": 1,
+          "studyHabit": 0,
+          "martialPower": 33,
+          "reputation": 14
+        },
+        {
+          "age": 12,
+          "phase": "childhood",
+          "action": "sect_prep (+6 martial) → trainingHabit 2",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 39,
+          "reputation": 14
+        },
+        {
+          "age": 11,
+          "phase": "childhood",
+          "action": "salon_introduction → socialMomentum 1",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 39,
+          "reputation": 18
+        },
+        {
+          "age": 14,
+          "phase": "youth",
+          "action": "alliance_dinner → socialMomentum 2",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 39,
+          "reputation": 22
+        },
+        {
+          "age": 13,
+          "phase": "bridge",
+          "action": "sect exposure modeled for faction continuation precondition",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 43,
+          "reputation": 25
+        },
+        {
+          "age": 15,
+          "phase": "luck",
+          "action": "scholar_mentor_line roll (p=0.09) → triggered=true",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 48,
+          "reputation": 34
+        },
+        {
+          "age": 30,
+          "phase": "bridge",
+          "action": "p22_faction_sect_continuation → p16_alliance_brokered",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 74,
+          "reputation": 38
+        },
+        {
+          "age": 45,
+          "phase": "midlife",
+          "action": "social/resource grind toward pinnacle stat gates",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 78,
+          "reputation": 62
+        },
+        {
+          "age": 60,
+          "phase": "midlife",
+          "action": "social/resource grind toward pinnacle stat gates",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 80,
+          "reputation": 65
+        },
+        {
+          "age": 72,
+          "phase": "terminal",
+          "action": "pinnacle eval → unlocked=true",
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "martialPower": 74,
+          "reputation": 58
+        }
+      ],
+      "eventSequence": [
+        {
+          "age": 30,
+          "eventId": "p22_faction_sect_continuation",
+          "choiceIndex": 0,
+          "choiceLabel": "accept_sect_duty",
+          "flagsAfter": [
+            "focus_on_study",
+            "sect_exposure",
+            "joined_sect",
+            "p16_scholar_mentor",
+            "p22_faction_continuation_active",
+            "p16_alliance_brokered"
+          ]
+        }
+      ],
+      "luckWindow": {
+        "lineId": "scholar_mentor_line",
+        "age": 15,
+        "triggered": true,
+        "unlocksFlags": [
+          "p16_scholar_mentor"
+        ],
+        "effectiveProbability": 0.09
+      },
+      "failureAttribution": {
+        "grindOnlyLocked": true,
+        "luckGateUnmet": true,
+        "choiceGateMet": true,
+        "detail": "grind + choice without scholar_mentor luck stays locked (aligns with p25 rare-window-waste slice)"
+      },
+      "terminalCheckpoint": {
+        "age": 72,
+        "endState": "pinnacle_composite_eval_terminal",
+        "unlocked": true,
+        "choiceGateMet": true,
+        "luckGateMet": true
+      },
+      "resolvedBridgeFlags": [
+        "p16_alliance_brokered",
+        "p16_scholar_mentor"
+      ],
+      "usedStaticResolver": false
+    },
+    "foundingPatriarchUnlockRate": 1
+  },
+  "deltaSummary": "P37 additional lifetime traces unlock (100% mixed patron, 100% founding patriarch) — consistent with P25 static paths that achieve unlock.",
+  "parityNotes": [
+    "P37 mixed lifetime uses dual business+training on-ramp + wealth/sect JSON bridges; P25 static seeds flags directly.",
+    "P37 pinnacle lifetime chains faction continuation + scholar_mentor_line; P25 static pinnacle fixtures seed luck/choice flags.",
+    "Lifetime unlock rates are single-path traces (100% or 0%); P25 baselines are multi-fixture seed distributions.",
+    "P35 category traces (healer_swordsman, jianghu_myth_legend) unchanged; P37 closes additional outcomes only."
+  ]
+}

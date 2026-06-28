@@ -921,7 +921,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "NOT flags.has(\"route_orthodox\") AND (player.chivalry <= 30 OR flags.has(\"route_wanderer\"))"
+        "expression": "NOT flags.has(\"route_orthodox\") AND !flags.has(\"p8_route_martial\") AND !flags.has(\"p8_route_conservative\") AND (player.chivalry <= 30 OR flags.has(\"route_wanderer\"))"
       }
     ],
     "content": {

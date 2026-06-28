@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-06-24T03:38:41.066Z",
+  "command": "npm exec tsx scripts/runP30HabitLedSimulationBaseline.ts",
+  "p29DirectFlagBaseline": {
+    "jianghu_renown_path_unlockRate": 1,
+    "medical_sage_path_unlockRate": 1
+  },
+  "habitLedObservability": {
+    "jianghu_renown_sage": {
+      "paths": [
+        {
+          "pathId": "habit_led_renown_social_path",
+          "outcomeId": "jianghu_renown_sage",
+          "unlocked": false,
+          "keyChoicesMet": false,
+          "statDimensionsMet": true,
+          "bridgeFlagsPresent": [
+            "p28_social_network_renown",
+            "p28_social_reputation_reinforced",
+            "p29_social_patron_obligation_assumed"
+          ],
+          "habitAxisValue": 3
+        }
+      ],
+      "unlockRate": 0,
+      "partialProgressRate": 1,
+      "traceLinkedEventCount": 3
+    },
+    "medical_sage_healer": {
+      "paths": [
+        {
+          "pathId": "habit_led_medical_study_path",
+          "outcomeId": "medical_sage_healer",
+          "unlocked": false,
+          "keyChoicesMet": false,
+          "statDimensionsMet": true,
+          "bridgeFlagsPresent": [
+            "p27_study_healer_path",
+            "p29_study_healer_case_duty",
+            "p29_social_healer_network"
+          ],
+          "habitAxisValue": 3
+        }
+      ],
+      "unlockRate": 0,
+      "partialProgressRate": 1,
+      "traceLinkedEventCount": 3
+    }
+  },
+  "deltaSummary": "P29 direct-flag paths unlock Wave 1 achievements (100% on representative fixtures); P30 habit-led paths show partial progress (stats met, key_choices unmet) with trace-linked P27-P29 on-ramps — sim observability improved without bypassing composite gates."
+}

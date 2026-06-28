@@ -1,0 +1,212 @@
+{
+  "version": "1.0.0",
+  "description": "P56: ordinary-origin midlife growth events (ages 25–30) with bounded depth.",
+  "choices": [
+    {
+      "id": "ordinary_peasant_midlife_steadfast",
+      "originId": "farm_peasant",
+      "originFlag": "origin_farm_peasant",
+      "ageMin": 28,
+      "ageMax": 28,
+      "title": "坚守积累",
+      "prompt": "你守着田地熬了十几年，攒下几亩薄田和一套农具。有人说你傻，不肯出去闯；也有人羡慕你稳当。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('peasant_steadfast_field') && !flags.has('ordinary_peasant_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "continue_farming",
+          "label": "继续耕种",
+          "flags": ["peasant_midlife_steadfast_accrual", "ordinary_peasant_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+            { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" }
+          ]
+        },
+        {
+          "id": "rent_out_fields",
+          "label": "租田收租",
+          "flags": ["peasant_midlife_steadfast_accrual", "peasant_rent_out_fields", "ordinary_peasant_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
+            { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_peasant_midlife_outside_offer",
+      "originId": "farm_peasant",
+      "originFlag": "origin_farm_peasant",
+      "ageMin": 30,
+      "ageMax": 30,
+      "title": "粮商找帮工",
+      "prompt": "走南闯北的粮商路过村子，说粮队缺个能扛能走的帮工——你跟过换工队，知道外面的路不只是田埂。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('peasant_swap_crew_curiosity') && !flags.has('ordinary_peasant_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "refuse_offer",
+          "label": "留在村里",
+          "flags": ["peasant_midlife_outside_offer", "peasant_refuse_outside", "ordinary_peasant_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+          ]
+        },
+        {
+          "id": "accept_offer",
+          "label": "跟粮商走",
+          "flags": ["peasant_midlife_outside_offer", "peasant_accept_outside", "route_wealth_committed", "peasant_merchant_bridge_crossed", "ordinary_peasant_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+            { "type": "stat_modify", "target": "externalSkill", "value": 1, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_apprentice_midlife_craft_mastery",
+      "originId": "town_apprentice",
+      "originFlag": "origin_town_apprentice",
+      "ageMin": 26,
+      "ageMax": 26,
+      "title": "手艺出师",
+      "prompt": "你专精的手艺终于得到认可，师傅说你可以出师了——镇上人都知道你的名字。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('apprentice_craft_committed') && !flags.has('ordinary_apprentice_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "open_own_shop",
+          "label": "自立门户",
+          "flags": ["apprentice_midlife_craft_mastery", "apprentice_open_shop", "ordinary_apprentice_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
+            { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" }
+          ]
+        },
+        {
+          "id": "stay_with_master",
+          "label": "留在师傅身边",
+          "flags": ["apprentice_midlife_craft_mastery", "apprentice_stay_master", "ordinary_apprentice_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+            { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_apprentice_midlife_trade_network",
+      "originId": "town_apprentice",
+      "originFlag": "origin_town_apprentice",
+      "ageMin": 28,
+      "ageMax": 28,
+      "title": "贸易人脉",
+      "prompt": "跑外市让你认识了不少买卖人，有人提议合伙做小本生意。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('apprentice_trade_curiosity') && !flags.has('ordinary_apprentice_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "join_partnership",
+          "label": "合伙经商",
+          "flags": ["apprentice_midlife_trade_network", "apprentice_join_partnership", "route_wealth_committed", "apprentice_merchant_bridge_crossed", "ordinary_apprentice_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
+            { "type": "stat_modify", "target": "externalSkill", "value": 2, "operator": "add" }
+          ]
+        },
+        {
+          "id": "decline_partnership",
+          "label": "婉拒合伙",
+          "flags": ["apprentice_midlife_trade_network", "apprentice_decline_partnership", "ordinary_apprentice_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_tavern_midlife_guest_regulars",
+      "originId": "tavern_hand",
+      "originFlag": "origin_tavern_hand",
+      "ageMin": 25,
+      "ageMax": 25,
+      "title": "常客认脸",
+      "prompt": "常来的客人认得你了，有人请你帮忙传话、带信——你在镇上有了些人脉。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('tavern_guest_network') && !flags.has('ordinary_tavern_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "embrace_network",
+          "label": "经营人脉",
+          "flags": ["tavern_midlife_guest_regulars", "tavern_embrace_network", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+            { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" }
+          ]
+        },
+        {
+          "id": "keep_distance",
+          "label": "保持距离",
+          "flags": ["tavern_midlife_guest_regulars", "tavern_keep_distance", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ordinary_tavern_midlife_ally_referral",
+      "originId": "tavern_hand",
+      "originFlag": "origin_tavern_hand",
+      "ageMin": 27,
+      "ageMax": 27,
+      "title": "盟友引荐",
+      "prompt": "你帮忙照顾过的客人说城里的铺子缺人——问你愿不愿意去试试。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('ally_network') && !flags.has('ordinary_tavern_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "take_referral",
+          "label": "接受引荐",
+          "flags": ["tavern_midlife_ally_referral", "tavern_take_referral", "route_wealth_committed", "tavern_merchant_bridge_crossed", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "externalSkill", "value": 2, "operator": "add" },
+            { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" }
+          ]
+        },
+        {
+          "id": "decline_referral",
+          "label": "留在酒肆",
+          "flags": ["tavern_midlife_ally_referral", "tavern_decline_referral", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+          ]
+        }
+      ]
+    }
+  ]
+}

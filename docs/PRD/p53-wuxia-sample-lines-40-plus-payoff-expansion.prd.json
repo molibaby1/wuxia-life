@@ -1,0 +1,147 @@
+{
+  "project": "Wuxia Life P53 Sample Lines 40+ Payoff Expansion",
+  "branchName": "codex/p53-wuxia-sample-lines-40-plus-payoff-expansion",
+  "description": "Extend the P52-hardened three-line 0-40 sample baseline with bounded 40+ payoff nodes, player-facing expression, replay/guard extension, and closure evidence without breaking existing baseline guards or expanding into full lifetime sim.",
+  "userStories": [
+    {
+      "id": "P53-001",
+      "title": "Audit 40+ payoff gaps from P52 baseline",
+      "description": "As a maintainer, I want a concise audit of what exists after age 40 for each sample line so P53 extends real spine gaps instead of inventing disconnected arcs.",
+      "acceptanceCriteria": [
+        "Inventory post-age-40 content and missing payoff nodes for all three lines",
+        "Reference P52 monitor-only residuals and mark out-of-scope items",
+        "Save docs/test-reports/p53-sample-lines-40-plus-gap-audit.md",
+        "Do not change gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Gap audit story."
+    },
+    {
+      "id": "P53-002",
+      "title": "Define bounded 40+ payoff scope contract",
+      "description": "As a planner, I want an explicit scope contract for 40+ payoff so implementation stays bounded and guard-compatible.",
+      "acceptanceCriteria": [
+        "Define per-line 40+ age slice (target 45-55) and at most 2 payoff nodes",
+        "Define continuation conditions from P52 age-40 identity flags",
+        "Define pass, warning, and fail bar for sim and optional spot-check",
+        "Record the contract in the PRD or docs/test-reports/"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract story."
+    },
+    {
+      "id": "P53-003",
+      "title": "Specify orthodox 40+ payoff spine",
+      "description": "As a designer, I want an orthodox 40+ payoff spine so the martial line continues after age-40 identity.",
+      "acceptanceCriteria": [
+        "Define at least one 40+ payoff node with flag continuation and narrative hook",
+        "Reuse or bridge existing route_orthodox or sect midlife content",
+        "Record spine spec in PRD or gap audit appendix",
+        "Limit to small configuration-layer changes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Orthodox spine design story."
+    },
+    {
+      "id": "P53-004",
+      "title": "Specify demonic 40+ payoff spine",
+      "description": "As a designer, I want a demonic 40+ payoff spine so the edge line continues after age-40 identity.",
+      "acceptanceCriteria": [
+        "Define at least one 40+ payoff node with flag continuation and narrative hook",
+        "Continue temptation, gain, and backlash themes without repeating age-40 summary",
+        "Record spine spec in PRD or gap audit appendix",
+        "Limit to small configuration-layer changes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Demonic spine design story."
+    },
+    {
+      "id": "P53-005",
+      "title": "Specify merchant 40+ payoff spine",
+      "description": "As a designer, I want a merchant 40+ payoff spine so the business line continues after age-40 identity.",
+      "acceptanceCriteria": [
+        "Define at least one 40+ payoff node with flag continuation and narrative hook",
+        "Optionally strengthen midlife debt or loyalty signals (M-merchant-debt monitor)",
+        "Record spine spec in PRD or gap audit appendix",
+        "Limit to small configuration-layer changes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Merchant spine design story."
+    },
+    {
+      "id": "P53-006",
+      "title": "Implement 40+ spine configuration",
+      "description": "As a developer, I want 40+ payoff nodes wired into existing content carriers on benchmark seeds without breaking P52 guards.",
+      "acceptanceCriteria": [
+        "Write three-line 40+ nodes into sample-lines-spine.json or existing line JSON",
+        "Benchmark seeds 301, 303, and 804 each trigger at least one 40+ payoff event or flag in target age slice",
+        "npm run guard:sample-lines-baseline still passes for 0-40 baseline",
+        "Do not introduce a new test framework"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Configuration implementation story."
+    },
+    {
+      "id": "P53-007",
+      "title": "Wire player-facing expression for 40+ checkpoints",
+      "description": "As a player, I want 40+ payoff visible in summary or route signal after the age-40 identity beat.",
+      "acceptanceCriteria": [
+        "Define deriveSampleLineCurrentGoal or equivalent rules for 40+ checkpoints",
+        "Cover benchmark seeds 301, 303, and 804 at target ages",
+        "Reuse P48/P50 expression surfaces without new UI components",
+        "Add focused expression test coverage for 40+ assertions"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Expression wiring story."
+    },
+    {
+      "id": "P53-008",
+      "title": "Extend fixed-seed replay to 40+ age slice",
+      "description": "As a maintainer, I want replay extended beyond age 40 so 40+ payoff is regression-checked.",
+      "acceptanceCriteria": [
+        "Extend p49:replay or companion script to age 45-55 or contract upper bound",
+        "Refresh p49-sample-lines-replay-latest.* with 40+ checkpoint fields",
+        "Same-seed double-run deterministic hash remains stable",
+        "Update cross-line comparison with 40+ readable difference dimension if applicable"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Replay extension story."
+    },
+    {
+      "id": "P53-009",
+      "title": "Extend baseline guard for 40+ checkpoints",
+      "description": "As a maintainer, I want cheap guard extended to 40+ invariants so post-40 payoff does not silently regress.",
+      "acceptanceCriteria": [
+        "Update guard contract or P53 addendum with G-40+ items",
+        "Add narrow 40+ assertions in spine or replay tests (at least one per line)",
+        "npm run guard:sample-lines-baseline includes new assertions and passes",
+        "Do not replace gate:playability"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Guard extension story."
+    },
+    {
+      "id": "P53-010",
+      "title": "Produce P53 closure report",
+      "description": "As a maintainer, I want a P53 closure report distinguishing 0-40 baseline from 40+ payoff slice completion.",
+      "acceptanceCriteria": [
+        "Produce docs/test-reports/p53-sample-lines-40-plus-closure-report.md",
+        "Summarize gap audit, spine, expression, replay, and guard evidence",
+        "Confirm P52 baseline remains valid; list remaining monitor-only residuals",
+        "Do not reopen P46-P52 blockers"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Closure story."
+    }
+  ]
+}

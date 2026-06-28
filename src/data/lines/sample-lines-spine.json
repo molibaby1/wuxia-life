@@ -1,0 +1,509 @@
+[
+  {
+    "id": "orthodox_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('orthodox_childhood_seed_done') && !flags.has('p8_route_demonic') && !flags.has('p8_route_wealth') && (flags.has('p8_route_martial') || flags.has('origin_wuxia_family') || flags.has('p9_echo_training_hook'))"
+      }
+    ],
+    "content": {
+      "title": "正道种子",
+      "text": "幼年习武的点滴汇聚成念：你隐约感到自己适合走守正之路，日后或入名门、或行侠仗义。",
+      "description": "P47 O-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_childhood_seed_done" },
+      { "type": "event_record", "target": "orthodox_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "orthodox_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox') || flags.has('orthodox_formal_disciple') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_age40_identity_done') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "四十回望·正道",
+      "text": "四十岁这年，你回望来路：入门试炼、承担门派义务、守正时的取舍，都已刻进身份。你是被江湖认可的正派武者。",
+      "description": "P47 正派 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age40_identity_done" },
+      { "type": "event_record", "target": "orthodox_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age25_righteousness_cost_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 25, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_trial_completed') || flags.has('orthodox_formal_disciple')) && !flags.has('orthodox_righteousness_cost_visible') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "守正之价",
+      "text": "入门之后，你渐渐明白：行侠守义不是口号——每一次替门派出头，都要放弃私情与安逸。守正，从来有代价。",
+      "description": "P54 正派 25 岁守正代价桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_righteousness_cost_visible" },
+      { "type": "event_record", "target": "orthodox_age25_righteousness_cost_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age25", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_righteousness_cost"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age32_gray_pressure_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_righteousness_cost_visible') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_gray_pressure_visible') && !flags.has('sect_midlife_gray_executed') && !flags.has('sect_midlife_gray_leaked') && !flags.has('sect_midlife_gray_refused') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "灰度压肩",
+      "text": "师门交下来一件不便见光的差事——办，则沾灰；不办，则得罪派系。守正之路，此刻逼你在义与权之间取舍。",
+      "description": "P54 正派 32 岁灰度压力桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_gray_pressure_visible" },
+      { "type": "event_record", "target": "orthodox_age32_gray_pressure_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age32", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_gray_pressure"]
+      }
+    }
+  },
+  {
+    "id": "demonic_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_childhood_seed_done') && (flags.has('p8_route_demonic') || flags.has('demonic_path_touched') || flags.has('p9_childhood_dark_spark'))"
+      }
+    ],
+    "content": {
+      "title": "邪念初萌",
+      "text": "少年时几次越界的念头并未散去，反而像暗火一样埋在心底——力量与捷径的诱惑，已开始牵引你。",
+      "description": "P47 D-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_childhood_seed_done" },
+      { "type": "event_record", "target": "demonic_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_youth_first_transgression",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 13, "max": 14 },
+    "triggers": [{ "type": "age_reach", "value": 13 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_youth_first_transgression') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic')) && !flags.has('route_orthodox')"
+      }
+    ],
+    "content": {
+      "title": "第一次越界",
+      "text": "为求一时之利，你做了件不该做的事。旁人未必知晓，你却清楚：底线已经松动了一寸。",
+      "description": "P47 D-2 少年越界"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_youth_first_transgression" },
+      { "type": "stat_modify", "target": "chivalry", "value": -3, "operator": "add" },
+      { "type": "event_record", "target": "demonic_youth_first_transgression" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "youth", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('demonic_age40_identity_done') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic') || flags.has('demonic_youth_first_transgression') || flags.has('route_demonic_completed'))"
+      }
+    ],
+    "content": {
+      "title": "四十回望·邪路",
+      "text": "诱惑让你得到力量与地位，也让你失去信任与安稳。四十岁这年，你已无法否认：是选择与后果，把你推向了邪路。",
+      "description": "P47 邪路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age40_identity_done" },
+      { "type": "event_record", "target": "demonic_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "merchant_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('p9_echo_business_hook'))"
+      }
+    ],
+    "content": {
+      "title": "营商天赋",
+      "text": "你从小对买卖、账本、货价格外敏感。长辈说你有营商之才，日后或可走商路立业。",
+      "description": "P47 M-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_seed_done" },
+      { "type": "flag_set", "target": "route_merchant" },
+      { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "merchant_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('merchant_age40_identity_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('orthodox_childhood_seed_done') && (flags.has('merchant_talent') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth'))"
+      }
+    ],
+    "content": {
+      "title": "四十回望·商路",
+      "text": "财富带来了选择权，也带来了人情债与周转压力。四十岁这年，你是靠经营立足的商路中人——成败与义气，都已写进账本之外的人生。",
+      "description": "P47 商路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age40_identity_done" },
+      { "type": "event_record", "target": "merchant_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "merchant_midlife_debt_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 32, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('merchant_talent') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('merchant_midlife_debt') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情周转",
+      "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全——每一笔赊账都在记你的人情账。",
+      "description": "P47 商路中年代价"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_midlife_debt" },
+      { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "p54", "merchant", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_merchant_debt"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age45_legacy_stewardship",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('orthodox_age40_identity_done') && !flags.has('orthodox_age45_payoff_done') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "传承守门",
+      "text": "四十岁回望之后，师门将藏经阁钥匙与巡山令一并交到你手中。守正一生，终要有人为下一代护住山门。",
+      "description": "P53 正派 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age45_payoff_done" },
+      { "type": "flag_set", "target": "orthodox_age45_legacy_steward_done" },
+      { "type": "event_record", "target": "orthodox_age45_legacy_stewardship" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "orthodox", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "demonic_age45_territory_consolidation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('demonic_age40_identity_done') && flags.has('route_demonic') && !flags.has('demonic_age45_payoff_done')"
+      }
+    ],
+    "content": {
+      "title": "地盘既固",
+      "text": "邪路身份既成，幽影门内外再无人敢轻慢。可扩张带来的孤立与反噬，也在暗处积聚——力量未止，代价亦未止。",
+      "description": "P53 邪路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age45_payoff_done" },
+      { "type": "flag_set", "target": "demonic_age45_territory_consolidated" },
+      { "type": "event_record", "target": "demonic_age45_territory_consolidation" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "demonic", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "merchant_age45_expansion_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_age40_identity_done') && !flags.has('merchant_age45_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "扩张分岔",
+      "text": "四十岁后的第一笔大买卖摆在眼前：联号共担，还是独守铺面。财富带来选择，人情债与周转压力也一并涌来。",
+      "description": "P53 商路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+      { "type": "flag_set", "target": "merchant_age45_expansion_fork_done" },
+      { "type": "event_record", "target": "merchant_age45_expansion_fork" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "merchant", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "magnate_on_ramp",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 28, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_caravan_success') || flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_wealthy') || flags.has('merchant_chamber_head') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('magnate_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾门槛",
+      "text": "产业初成，商路已铺开半壁江山。你不再是小本经营的掌柜——财富与人脉把你推到了'巨贾'的门槛。可这门槛一旦跨过，便再无退路。",
+      "description": "P55 巨贾 on-ramp"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_on_ramp_done" },
+      { "type": "event_record", "target": "magnate_on_ramp" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "on-ramp", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "magnate_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 36, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && !flags.has('magnate_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情如网",
+      "text": "商号遍九州，人情债也遍九州。每笔赊账、每位合作伙伴、每桩江湖义气，都是一根牵着你的线——巨贾的担子，比掌柜的重得多。",
+      "description": "P55 巨贾 midlife pressure"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_midlife_pressure_done" },
+      { "type": "event_record", "target": "magnate_midlife_pressure" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "magnate_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 42, "max": 46 },
+    "triggers": [{ "type": "age_reach", "value": 42 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && flags.has('magnate_midlife_pressure_done') && !flags.has('magnate_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾之位",
+      "text": "半生经营，你的商号已成江湖不可或缺的血脉。可每一笔利润都沾着人情，每一桩合作都系着风险——巨贾之位，坐上去容易，守住难。",
+      "description": "P55 巨贾 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_payoff_done" },
+      { "type": "flag_set", "target": "magnate_payoff_resolved" },
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+      { "type": "event_record", "target": "magnate_payoff" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_payoff"]
+      }
+    }
+  }
+]

@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 8}
     ],
     "conditions": [
-      {"type": "expression", "expression": "charisma >= 12 || money >= 50"}
+      {"type": "expression", "expression": "(charisma >= 12 || money >= 50) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
     ],
     "content": {
       "title": "经商天赋",
@@ -24,7 +24,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "stat_modify", "stat": "money", "value": 20},
-          {"type": "flag_set", "flag": "merchant_talent", "value": true}
+          {"type": "flag_set", "flag": "merchant_talent", "value": true},
+          {"type": "flag_set", "flag": "route_merchant", "value": true}
         ]
       },
       {
@@ -41,7 +42,7 @@
         "wuxia": 0.2,
         "frontier": 0.4
       },
-      "tags": ["商业", "天赋", "主线"]
+      "tags": ["商业", "天赋", "主线", "mainline", "once"]
     }
   },
   {
@@ -55,7 +56,7 @@
       {"type": "age_reach", "value": 16}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_talent == true && money >= 50"}
+      {"type": "expression", "expression": "flags.merchant_talent == true && (money >= 50 || flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true)"}
     ],
     "content": {
       "title": "开设店铺",
@@ -69,7 +70,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
-          {"type": "stat_modify", "stat": "reputation", "value": 5}
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "event_record", "target": "merchant_first_shop_grocery"}
         ]
       },
       {
@@ -88,7 +90,10 @@
           {"type": "stat_modify", "stat": "chivalry", "value": 5}
         ]
       }
-    ]
+    ],
+    "metadata": {
+      "tags": ["商业", "开店", "主线", "mainline", "mandatory", "once"]
+    }
   },
   {
     "id": "merchant_shop_failure",
@@ -564,6 +569,124 @@
     "endingType": "merchant_hidden",
     "autoEffects": [
       {"type": "flag_set", "flag": "ending_merchant_hidden", "value": true}
+    ]
+  },
+  {
+    "id": "p26_business_habit_obligation",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 82,
+    "weight": 62,
+    "ageRange": {"min": 34, "max": 44},
+    "triggers": [
+      {"type": "age_reach", "value": 34}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.businessHabit >= 3"}
+    ],
+    "content": {
+      "title": "账面之外",
+      "text": "长期营生塑形攒下的门道与信誉，终于把你推到更大摊子前。有人请你长期代管账路与货脉，接下便是稳定收益与持续牵扯，不接则少一层可做大的机会。",
+      "description": "P26 中后期后果：营生习惯积累转化为长期商路义务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "take_long_term_ledger",
+        "text": "接下账路，换取更稳更深的商脉",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 120},
+          {"type": "stat_modify", "stat": "reputation", "value": 5},
+          {"type": "flag_set", "flag": "p26_business_obligation_taken", "value": true}
+        ]
+      },
+      {
+        "id": "stay_small_scale",
+        "text": "维持小盘周转，不再扩张",
+        "effects": [
+          {"type": "stat_modify", "stat": "money", "value": 30},
+          {"type": "flag_set", "flag": "p26_business_obligation_declined", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p42_business_habit_youth_stall",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 80,
+    "weight": 58,
+    "ageRange": {"min": 16, "max": 21},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.businessHabit >= 2"}
+    ],
+    "content": {
+      "title": "小摊初立",
+      "text": "你从小帮衬家里算账、记货的习惯，终于让你有底气在集市立起自己的小摊。是借亲族名义扩张，还是凭自己积攒的信誉单打独斗？",
+      "description": "P42 青年塑形：营生习惯驱动的初次营盘"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "expand_with_kin",
+        "text": "借亲族名义，快速铺开货路",
+        "effects": [
+          {"type": "stat_modify", "target": "money", "value": 80, "operator": "add"},
+          {"type": "stat_modify", "target": "merchantNetwork", "value": 5, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_business_youth_kin_stall", "value": true}
+        ]
+      },
+      {
+        "id": "solo_stall",
+        "text": "单打独斗，把信誉攒在自己名下",
+        "effects": [
+          {"type": "stat_modify", "target": "money", "value": 50, "operator": "add"},
+          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_business_youth_solo_stall", "value": true}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "p42_business_habit_midlife_syndicate",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 78,
+    "weight": 56,
+    "ageRange": {"min": 38, "max": 46},
+    "triggers": [
+      {"type": "age_reach", "value": 38}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.businessHabit >= 3"}
+    ],
+    "content": {
+      "title": "联号之议",
+      "text": "多年营生塑形攒下的货路与账规，已让几家商号想拉你入联号共担风险。这与代管账路不同——入联便要在盈亏与共间分神，不入则少一层跨州调配的机缘。",
+      "description": "P42 中年塑形：营生习惯驱动的联号机会（区别于 p26 代管义务）"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "join_syndicate",
+        "text": "入联号，共担盈亏换更大货路",
+        "effects": [
+          {"type": "stat_modify", "target": "money", "value": 200, "operator": "add"},
+          {"type": "stat_modify", "target": "merchantNetwork", "value": 10, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_business_syndicate_joined", "value": true}
+        ]
+      },
+      {
+        "id": "decline_syndicate",
+        "text": "拒入联号，维持独立周转",
+        "effects": [
+          {"type": "stat_modify", "target": "money", "value": 60, "operator": "add"},
+          {"type": "flag_set", "flag": "p42_business_syndicate_declined", "value": true}
+        ]
+      }
     ]
   }
 ]

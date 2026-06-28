@@ -1,3 +1,8 @@
+## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001
+- P72-001: Post-bridge entry sharedness audit — 6 flattening points identified, 4 addressable in P72 bounded scope.
+- Files: `docs/test-reports/p72-selected-route-entry-sharedness-audit.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in this story)
+---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - COMPLETE
 - P71 selected next route playable bridge: all 7 stories completed and verified.
 - **Bridge:** Ally-Network Midlife Bridge — tavern_hand + ally_network (childhood seed) → midlife renown bridge event (age 29) → tavern_renown_bridge_crossed → jianghu_renown_sage.

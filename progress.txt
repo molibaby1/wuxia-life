@@ -1,3 +1,8 @@
+## [2026-06-29] - P74 Renown Pressure Design-First - P74-001
+- P74-001: Renown pressure prerequisite audit complete — 3-stage foundation (bridge + entry + on-ramp) verified; 6+ expression surfaces identified; merchant pressure precedent documented; tavern-born flavor consistent.
+- Files: `docs/test-reports/p74-renown-pressure-prerequisite-audit.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in this story)
+---
 ## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001~008 ✅ COMPLETE
 - P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps documented.
 - P73-002: Scope contract locked — 4 allowed layers, 6 forbidden expansion categories.

@@ -43,8 +43,8 @@
         "Record the contract in the PRD or an appendix"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "On-ramp contract defined: '江湖调解' event at age 32-35, post-bridge trigger, tavern-born flavor preserved, 2 choices (accept/decline), renown_on_ramp_done checkpoint, flag interfaces for pressure/payoff stages reserved. Saved to docs/PRD/p73-renown-on-ramp-contract.md."
     },
     {
       "id": "P73-004",

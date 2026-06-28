@@ -70,8 +70,8 @@
         "Do not require full lifetime exhaust"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P71 validation shape defined — 11 targeted proof chain nodes, ~12-16 regression assertions, 10 success criteria for bridge closure. No full lifetime exhaust required. 6 required regression suites (P56/P58/P59/P61/lifeMemorySummary/typecheck)."
     },
     {
       "id": "P70-006",

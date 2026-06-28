@@ -42,8 +42,8 @@
         "Record the contract in the PRD or an appendix artifact"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Entry differentiation contract defined — 4 core identity signals, 3 expression surfaces + light markers, tavern-born flavor preserved, shared skeleton intact"
     },
     {
       "id": "P72-004",

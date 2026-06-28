@@ -1,7 +1,8 @@
-## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~002
+## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~003
 - P72-001: Post-bridge entry sharedness audit — 6 flattening points identified, 4 addressable in P72 bounded scope.
 - P72-002: Scope contract locked — 4 allowed layers, 4 forbidden expansion categories, boundary guards defined.
-- Files: `docs/test-reports/p72-selected-route-entry-sharedness-audit.md`, `docs/test-reports/p72-selected-route-entry-scope-contract.md`
+- P72-003: Entry differentiation contract defined — 4 core identity signals, 3 expression surfaces + light markers, tavern-born flavor preserved, shared skeleton intact.
+- Files: `docs/test-reports/p72-selected-route-entry-sharedness-audit.md`, `docs/test-reports/p72-selected-route-entry-scope-contract.md`, `docs/PRD/p72-wuxia-renown-entry-differentiation-contract.md`
 - Validation: prd.json valid JSON ✅ (zero runtime changes in these stories)
 ---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - COMPLETE

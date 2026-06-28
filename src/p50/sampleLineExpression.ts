@@ -120,15 +120,16 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
   if (flags.magnate_payoff_done) {
-    // P66: payoff with cost reflection — success that came at a price
+    // P67: success-shape differentiation — each route succeeds in a different shape
+    // P66 cost reflection is preserved and woven into the success shape
     if (flags.apprentice_merchant_bridge_crossed) {
-      return '巨贾之位到手，供货销路尽在掌握，只是当年的手艺人如今要看合伙人的脸色，账目上的分成比刨子上的木纹更难拿捏';
+      return '从刨子到账本，靠手艺的眼光算出了一片商路，品质立住了招牌，合伙铺出了版图，只是如今要看着合伙人的脸色，账目上的分成比木纹更难拿捏';
     }
     if (flags.tavern_merchant_bridge_crossed) {
-      return '商号凭人脉通八方，老主顾遍布各行，只是欠的人情比挣的银子还多，每一笔生意都要掂量谁的面子、还谁的情';
+      return '从酒肆到商号，靠人情的网络织出了八方商路，老主顾串起了门路，引荐打通了关节，只是欠的人情比挣的银子还多，每一笔都要掂量谁的面子、还谁的情';
     }
     if (flags.peasant_merchant_bridge_crossed) {
-      return '车马仓储物流根基已成，泥腿子熬出了头，只是脚下的路比田埂还长，每一步都赌过收成、押过季节，赢了但也再回不到田里了';
+      return '从田埂到车马，靠脚力和血汗踩出了一条粮路，车马仓储踩出了根基，收成赌出了规模，只是脚下的路比田埂还长，赢了但也再回不到田里了';
     }
     return '巨贾之位已成，守住比扩张更难';
   }
@@ -290,16 +291,17 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   if (!flags.merchant_age40_identity_done) {
     return undefined;
   }
-  // P63 + P66: Entry differentiation with cost weight at magnate_on_ramp+
+  // P67: success-shape differentiation + P66 cost weight
+  // Identity now emphasizes what KIND of success, not just where you came from
   if (flags.magnate_on_ramp_done) {
     if (flags.apprentice_merchant_bridge_crossed) {
-      return '你是从学徒走来的巨贾：手艺为基，合伙为径，商路是技能延伸的版图，代价是再也回不到只管刨花的日子';
+      return '你是靠手艺眼光做起来的巨贾：从刨子到账本，品质立住了招牌，合伙铺出了版图，代价是再也回不到只管刨花的日子';
     }
     if (flags.tavern_merchant_bridge_crossed) {
-      return '你是从酒肆走来的巨贾：人脉为基，引荐为径，商路是人情往来的延伸，代价是人人都认得你、人人都有求于你';
+      return '你是靠人情网络做起来的巨贾：从酒肆到商号，人脉织出了商路，引荐打通了关节，代价是人人都认得你、人人都有求于你';
     }
     if (flags.peasant_merchant_bridge_crossed) {
-      return '你是从农家走来的巨贾：力气为基，跑商为径，商路是勤劳致富的通道，代价是脚下的路比田埂还长，再也回不到守着一亩三分地的安稳';
+      return '你是靠脚力血汗做起来的巨贾：从田埂到车马，粮路踩出了根基，奔波换来了规模，代价是脚下的路比田埂还长，再也回不到守着一亩三分地的安稳';
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
@@ -324,6 +326,31 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   }
   if (line === 'demonic') {
     return demonicAge40Identity(flags);
+  }
+  return undefined;
+}
+
+function merchantDestinySentence(flags: Record<string, unknown>): string | undefined {
+  if (!flags.magnate_payoff_done) {
+    return undefined;
+  }
+  if (flags.apprentice_merchant_bridge_crossed) {
+    return '从刨子到账本，靠手艺眼光算出了一片商路';
+  }
+  if (flags.tavern_merchant_bridge_crossed) {
+    return '从酒肆到商号，靠人情网络织出了八方商路';
+  }
+  if (flags.peasant_merchant_bridge_crossed) {
+    return '从田埂到车马，靠脚力血汗踩出了一条粮路';
+  }
+  return undefined;
+}
+
+export function deriveSampleLineDestinySentence(state: GameState): string | undefined {
+  const flags = state.flags ?? {};
+  const line = detectSampleLine(flags);
+  if (line === 'merchant') {
+    return merchantDestinySentence(flags);
   }
   return undefined;
 }

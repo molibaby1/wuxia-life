@@ -5,6 +5,7 @@ import {
   deriveSampleLineAge40Identity,
   deriveSampleLineCostLabel,
   deriveSampleLineCurrentGoal,
+  deriveSampleLineDestinySentence,
   detectSampleLine,
   isPlayerVisibleSampleLineText,
 } from '../src/p50/sampleLineExpression';
@@ -759,6 +760,192 @@ function testP66CostDistinctionComparison(): void {
   assert(peasantGoal.includes('赌') || peasantGoal.includes('田') || peasantGoal.includes('路'), 'peasant cost should be about bet/road');
 }
 
+// P67: Success-shape and recap differentiation tests
+function testP67PayoffSuccessShapeDifferentiation(): void {
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprenticePayoff) ?? '';
+  assert(
+    apprenticeGoal.includes('从刨子到账本') || apprenticeGoal.includes('手艺的眼光') || apprenticeGoal.includes('品质立住'),
+    `apprentice payoff should have craft-judgment success shape: ${apprenticeGoal}`,
+  );
+
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernGoal = deriveSampleLineCurrentGoal(tavernPayoff) ?? '';
+  assert(
+    tavernGoal.includes('从酒肆到商号') || tavernGoal.includes('人情的网络') || tavernGoal.includes('老主顾串起'),
+    `tavern payoff should have network-information success shape: ${tavernGoal}`,
+  );
+
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantGoal = deriveSampleLineCurrentGoal(peasantPayoff) ?? '';
+  assert(
+    peasantGoal.includes('从田埂到车马') || peasantGoal.includes('脚力和血汗') || peasantGoal.includes('车马仓储踩出'),
+    `peasant payoff should have endurance-logistics success shape: ${peasantGoal}`,
+  );
+
+  for (const goal of [apprenticeGoal, tavernGoal, peasantGoal]) {
+    assert(isPlayerVisibleSampleLineText(goal), `raw key in P67 payoff goal: ${goal}`);
+  }
+}
+
+function testP67DestinySentenceExistsAndDistinct(): void {
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const apprenticeDestiny = deriveSampleLineDestinySentence(apprenticePayoff);
+  assert(Boolean(apprenticeDestiny), 'apprentice should have a destiny sentence at payoff');
+  assert(apprenticeDestiny!.includes('刨子') || apprenticeDestiny!.includes('手艺'), `apprentice destiny should reference craft origin: ${apprenticeDestiny}`);
+
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernDestiny = deriveSampleLineDestinySentence(tavernPayoff);
+  assert(Boolean(tavernDestiny), 'tavern should have a destiny sentence at payoff');
+  assert(tavernDestiny!.includes('酒肆') || tavernDestiny!.includes('人情'), `tavern destiny should reference network origin: ${tavernDestiny}`);
+
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantDestiny = deriveSampleLineDestinySentence(peasantPayoff);
+  assert(Boolean(peasantDestiny), 'peasant should have a destiny sentence at payoff');
+  assert(peasantDestiny!.includes('田埂') || peasantDestiny!.includes('脚力'), `peasant destiny should reference labor origin: ${peasantDestiny}`);
+
+  assert(
+    apprenticeDestiny !== tavernDestiny && apprenticeDestiny !== peasantDestiny,
+    'destiny sentences should differ across routes',
+  );
+  assert(tavernDestiny !== peasantDestiny, 'tavern and peasant destiny sentences should differ');
+
+  for (const sentence of [apprenticeDestiny!, tavernDestiny!, peasantDestiny!]) {
+    assert(isPlayerVisibleSampleLineText(sentence), `raw key in destiny sentence: ${sentence}`);
+  }
+}
+
+function testP67Age40IdentityHasSuccessShape(): void {
+  const apprenticeAge40 = makeState(40, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const apprenticeIdentity = deriveSampleLineAge40Identity(apprenticeAge40) ?? '';
+  assert(
+    apprenticeIdentity.includes('靠手艺眼光') || apprenticeIdentity.includes('品质立住') || apprenticeIdentity.includes('从刨子到账本'),
+    `apprentice age40 identity should emphasize success shape: ${apprenticeIdentity}`,
+  );
+
+  const tavernAge40 = makeState(40, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const tavernIdentity = deriveSampleLineAge40Identity(tavernAge40) ?? '';
+  assert(
+    tavernIdentity.includes('靠人情网络') || tavernIdentity.includes('人脉织出') || tavernIdentity.includes('从酒肆到商号'),
+    `tavern age40 identity should emphasize success shape: ${tavernIdentity}`,
+  );
+
+  const peasantAge40 = makeState(40, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const peasantIdentity = deriveSampleLineAge40Identity(peasantAge40) ?? '';
+  assert(
+    peasantIdentity.includes('靠脚力血汗') || peasantIdentity.includes('粮路踩出') || peasantIdentity.includes('从田埂到车马'),
+    `peasant age40 identity should emphasize success shape: ${peasantIdentity}`,
+  );
+
+  for (const identity of [apprenticeIdentity, tavernIdentity, peasantIdentity]) {
+    assert(isPlayerVisibleSampleLineText(identity), `raw key in P67 age40 identity: ${identity}`);
+  }
+}
+
+function testP67SuccessShapeComparisonDistinction(): void {
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprenticePayoff) ?? '';
+  const tavernGoal = deriveSampleLineCurrentGoal(tavernPayoff) ?? '';
+  const peasantGoal = deriveSampleLineCurrentGoal(peasantPayoff) ?? '';
+
+  const apprenticeDestiny = deriveSampleLineDestinySentence(apprenticePayoff) ?? '';
+  const tavernDestiny = deriveSampleLineDestinySentence(tavernPayoff) ?? '';
+  const peasantDestiny = deriveSampleLineDestinySentence(peasantPayoff) ?? '';
+
+  const apprenticeIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+  const tavernIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+  const peasantIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+
+  assert(new Set([apprenticeGoal, tavernGoal, peasantGoal]).size === 3, 'P67 payoff goals should be 3 distinct values');
+  assert(new Set([apprenticeDestiny, tavernDestiny, peasantDestiny]).size === 3, 'P67 destiny sentences should be 3 distinct values');
+  assert(new Set([apprenticeIdentity, tavernIdentity, peasantIdentity]).size === 3, 'P67 age40 identities should be 3 distinct values');
+
+  assert(apprenticeGoal.includes('刨子') || apprenticeGoal.includes('手艺'), 'apprentice success should reference craft shape');
+  assert(tavernGoal.includes('酒肆') || tavernGoal.includes('人情'), 'tavern success should reference network shape');
+  assert(peasantGoal.includes('田埂') || peasantGoal.includes('脚力'), 'peasant success should reference labor shape');
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
@@ -781,6 +968,11 @@ function main(): void {
   testP66PayoffHasCostReflection();
   testP66Age40IdentityHasCostWeight();
   testP66CostDistinctionComparison();
+  // P67: Success-shape and recap differentiation tests
+  testP67PayoffSuccessShapeDifferentiation();
+  testP67DestinySentenceExistsAndDistinct();
+  testP67Age40IdentityHasSuccessShape();
+  testP67SuccessShapeComparisonDistinction();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

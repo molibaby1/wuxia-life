@@ -1,0 +1,133 @@
+{
+  "project": "Wuxia Life P64 Merchant Magnate Differentiated Pressure And Payoff",
+  "branchName": "codex/p64-wuxia-merchant-magnate-differentiated-pressure-payoff",
+  "description": "Add the smallest bounded differentiation inside magnate_midlife_pressure and magnate_payoff so the three ordinary-origin merchant ascents remain distinct beyond entry, while preserving the shared P55 magnate chain and avoiding a full merchant second-wave buildout.",
+  "userStories": [
+    {
+      "id": "P64-001",
+      "title": "Audit pressure and payoff flattening",
+      "description": "As a maintainer, I want an audit of where the three merchant entries still flatten back into one shared magnate experience so P64 solves the real mid/late-stage gap.",
+      "acceptanceCriteria": [
+        "Summarize the currently shared parts of magnate_midlife_pressure and magnate_payoff",
+        "Separate shared unified magnate identity from flattening that weakens route differentiation",
+        "Save docs/test-reports/p64-merchant-pressure-payoff-flattening-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-002",
+      "title": "Lock P64 scope contract",
+      "description": "As a planner, I want a scope contract so P64 stays a bounded densification stage rather than growing into a new merchant content wave.",
+      "acceptanceCriteria": [
+        "Limit P64 to pressure and payoff differentiation only",
+        "Define allowed layers: light configuration, expression, proof, and narrow tests",
+        "List forbidden expansions: large new chains, new systems, and a full merchant universe buildout",
+        "Save docs/test-reports/p64-merchant-pressure-payoff-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-003",
+      "title": "Define differentiated pressure contracts",
+      "description": "As a designer, I want bounded pressure contracts for apprentice, tavern, and peasant merchant ascents so their burdens do not read identically.",
+      "acceptanceCriteria": [
+        "Define at least three pressure-emphasis contracts, one per bridge path",
+        "Tie each pressure contract to its origin-to-merchant path instead of generic merchant stress",
+        "Keep the shared merchant_magnate mixed identity intact",
+        "Record the contracts in the PRD or appendix"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-004",
+      "title": "Define differentiated payoff contracts",
+      "description": "As a designer, I want bounded payoff contracts so the three merchant entries land with different emphases rather than one undifferentiated merchant success line.",
+      "acceptanceCriteria": [
+        "Define at least three payoff-emphasis contracts, one per bridge path",
+        "Make each payoff reflect a different source-of-gain emphasis from the earlier path",
+        "Keep the payoff distinct from merchant_martial_patron, generic merchant success, and the P55 baseline payoff",
+        "Record the contracts in the PRD or appendix"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-005",
+      "title": "Wire pressure and payoff differentiation",
+      "description": "As a developer, I want the differentiated pressure/payoff implemented through bounded configuration or marker changes so the main magnate chain remains intact.",
+      "acceptanceCriteria": [
+        "Implement differentiation only through existing magnate carriers or light markers",
+        "Do not introduce a new merchant framework",
+        "Keep the existing P55 magnate chain stably triggerable",
+        "Existing P55, P58, P59, P61, and P63 evidence does not regress"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-006",
+      "title": "Add differentiated merchant expression",
+      "description": "As a player, I want the three magnate ascents to read differently once they reach pressure and payoff phases.",
+      "acceptanceCriteria": [
+        "Add at least three readable pressure/payoff-specific signals across existing expression surfaces",
+        "Make apprentice, tavern, and peasant mid/late-stage merchant burdens or payoffs distinguishable",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-007",
+      "title": "Add targeted differentiated proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the three merchant ascents now diverge meaningfully in mid/late-stage emphasis.",
+      "acceptanceCriteria": [
+        "Produce one comparison-style targeted proof artifact",
+        "Show pressure or payoff differentiation contrasts across the three bridge paths",
+        "Do not require full merchant combinatorial exhaust",
+        "Ensure the proof can be compared against the P55 baseline magnate chain"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-008",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the differentiated pressure/payoff so future edits do not collapse the merchant trilogy back into one path.",
+      "acceptanceCriteria": [
+        "Cover markers, player-facing expression, and comparison-level assertions with narrow checks",
+        "Reuse existing merchant and bridge harnesses",
+        "Do not rewrite the full merchant test suite",
+        "Relevant commands pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "P64-009",
+      "title": "Produce P64 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what post-entry merchant differentiation now exists and what remains deferred.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p64-merchant-pressure-payoff-differentiation-closure-report.md",
+        "Summarize the flattening audit, contracts, configuration, expression, proof, and tests",
+        "State the boundary versus any future full merchant wave",
+        "List larger economy, map, or new-destiny items that remain deferred"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

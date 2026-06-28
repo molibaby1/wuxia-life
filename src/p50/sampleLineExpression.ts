@@ -191,6 +191,17 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_endgame_done) {
+    if (flags.tavern_renown_endgame_sigh) {
+      return '听着自己成了传说，也算值了';
+    }
+    if (flags.tavern_renown_endgame_distant) {
+      return '传说真假谁真谁假，自己知道就好';
+    }
+    if (flags.tavern_renown_endgame_legacy) {
+      return '看着后辈们传下去，这就够了';
+    }
+  }
   if (flags.renown_late_life_done) {
     if (flags.tavern_renown_late_burnout) {
       return '守住这一辈子的名声，撑到最后';
@@ -279,6 +290,17 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '商路债务';
   }
   if (line === 'renown') {
+    if (flags.renown_endgame_done) {
+      if (flags.tavern_renown_endgame_sigh) {
+        return '身后名·叹';
+      }
+      if (flags.tavern_renown_endgame_distant) {
+        return '身后名·遥';
+      }
+      if (flags.tavern_renown_endgame_legacy) {
+        return '身后名·传';
+      }
+    }
     if (flags.renown_late_life_done) {
       if (flags.tavern_renown_late_burnout) {
         return '油尽灯枯';
@@ -387,6 +409,17 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
 function renownAge40Identity(flags: Record<string, unknown>): string | undefined {
   if (!flags.tavern_renown_bridge_crossed) {
     return undefined;
+  }
+  if (flags.renown_endgame_identity_done) {
+    if (flags.tavern_renown_endgame_sigh) {
+      return '你是熬干了的老传说：从酒肆跑堂到江湖名宿，硬扛了一辈子人情债，名声传了一辈子，人也熬干了。最后坐在酒肆角落里，听着年轻人讲自己的传说——名声比人长久，代价也没人记得了。可你知道，有些人，就是为了名声活着的。';
+    }
+    if (flags.tavern_renown_endgame_distant) {
+      return '你是传说里的神秘人：从酒肆跑堂到江湖独行，撕破了一辈子假人情，换来了逍遥自在。江湖上你的传说真假参半，在座没人认出你。你笑了笑——自己都快忘了当年的样子了。传说比人逍遥，真假谁在乎呢。';
+    }
+    if (flags.tavern_renown_endgame_legacy) {
+      return '你是活在传说里的老掌柜：从酒肆跑堂到江湖名宿，人情练达了一辈子，也传了一辈子。老掌柜的规矩还在被人提起，后辈们照着你的路走下去。传承不是名字传下去，是智慧传下去了——你这辈子，没白活。';
+    }
   }
   if (flags.renown_late_life_identity_done) {
     if (flags.tavern_renown_late_burnout) {

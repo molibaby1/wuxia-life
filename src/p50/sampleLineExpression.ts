@@ -120,28 +120,28 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
   if (flags.magnate_payoff_done) {
-    // P64: differentiated payoff based on bridge origin
+    // P66: payoff with cost reflection — success that came at a price
     if (flags.apprentice_merchant_bridge_crossed) {
-      return '商路已掌控，供货销路尽在掌握，手艺人的巨贾之位靠的是一身本事和合伙人的信任';
+      return '巨贾之位到手，供货销路尽在掌握，只是当年的手艺人如今要看合伙人的脸色，账目上的分成比刨子上的木纹更难拿捏';
     }
     if (flags.tavern_merchant_bridge_crossed) {
-      return '商号凭人脉通八方，老主顾遍布各行，酒肆出身的巨贾人脉就是商路';
+      return '商号凭人脉通八方，老主顾遍布各行，只是欠的人情比挣的银子还多，每一笔生意都要掂量谁的面子、还谁的情';
     }
     if (flags.peasant_merchant_bridge_crossed) {
-      return '车马仓储物流根基已成，泥腿子熬出来的商路靠的是一步一步走出来的根基';
+      return '车马仓储物流根基已成，泥腿子熬出了头，只是脚下的路比田埂还长，每一步都赌过收成、押过季节，赢了但也再回不到田里了';
     }
     return '巨贾之位已成，守住比扩张更难';
   }
   if (flags.magnate_midlife_pressure_done) {
-    // P64: differentiated pressure based on bridge origin
+    // P64 + P66: differentiated pressure with stronger cost flavor
     if (flags.apprentice_merchant_bridge_crossed) {
-      return '商号遍九州，合伙人与人情债也遍九州，供货的账期、销路的分成拴住每一条线';
+      return '商号遍九州，合伙人与账目债也遍九州，供货的账期、销路的分成拴住了手艺人的手脚';
     }
     if (flags.tavern_merchant_bridge_crossed) {
-      return '商号遍九州，人情面子债也遍九州，老主顾的期待、介绍的欠情让巨贾负重前行';
+      return '商号遍九州，人情面子债也遍九州，老主顾的期待、介绍的欠情让巨贾被人脉捆住了手脚';
     }
     if (flags.peasant_merchant_bridge_crossed) {
-      return '商号遍九州，车马仓储债也遍九州，运力、仓库、下属工钱让泥腿子巨贾不敢停歇';
+      return '商号遍九州，车马仓储债也遍九州，运力、仓库、下属工钱让泥腿子巨贾用身体在扛';
     }
     return '商号遍九州，人情债也遍九州';
   }
@@ -195,6 +195,31 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '邪路代价';
   }
   if (line === 'merchant') {
+    // P66: cost label differentiation persists through pressure and payoff
+    if (flags.magnate_payoff_done) {
+      if (flags.apprentice_merchant_bridge_crossed) {
+        return '合伙与账目的担子';
+      }
+      if (flags.tavern_merchant_bridge_crossed) {
+        return '人情与面子的担子';
+      }
+      if (flags.peasant_merchant_bridge_crossed) {
+        return '粮路与奔波的担子';
+      }
+      return '巨贾负担';
+    }
+    if (flags.magnate_midlife_pressure_done) {
+      if (flags.apprentice_merchant_bridge_crossed) {
+        return '合伙与账目的担子';
+      }
+      if (flags.tavern_merchant_bridge_crossed) {
+        return '人情与面子的担子';
+      }
+      if (flags.peasant_merchant_bridge_crossed) {
+        return '粮路与奔波的担子';
+      }
+      return '巨贾负担';
+    }
     // P63: Entry differentiation via bridge-origin markers at magnate_on_ramp
     if (flags.magnate_on_ramp_done) {
       if (flags.apprentice_merchant_bridge_crossed) {
@@ -265,16 +290,16 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   if (!flags.merchant_age40_identity_done) {
     return undefined;
   }
-  // P63: Entry differentiation via bridge-origin markers at magnate_on_ramp
+  // P63 + P66: Entry differentiation with cost weight at magnate_on_ramp+
   if (flags.magnate_on_ramp_done) {
     if (flags.apprentice_merchant_bridge_crossed) {
-      return '你是从学徒走来的巨贾：手艺为基，合伙为径，商路是技能延伸的版图';
+      return '你是从学徒走来的巨贾：手艺为基，合伙为径，商路是技能延伸的版图，代价是再也回不到只管刨花的日子';
     }
     if (flags.tavern_merchant_bridge_crossed) {
-      return '你是从酒肆走来的巨贾：人脉为基，引荐为径，商路是人情往来的延伸';
+      return '你是从酒肆走来的巨贾：人脉为基，引荐为径，商路是人情往来的延伸，代价是人人都认得你、人人都有求于你';
     }
     if (flags.peasant_merchant_bridge_crossed) {
-      return '你是从农家走来的巨贾：力气为基，跑商为径，商路是勤劳致富的通道';
+      return '你是从农家走来的巨贾：力气为基，跑商为径，商路是勤劳致富的通道，代价是脚下的路比田埂还长，再也回不到守着一亩三分地的安稳';
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }

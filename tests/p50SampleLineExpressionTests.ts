@@ -534,6 +534,231 @@ function testMagnatePressurePayoffDifferentiation(): void {
   }
 }
 
+// P66: Success-cost differentiation tests
+function testP66CostLabelPersistsThroughJourney(): void {
+  const apprenticeOnRamp = makeState(30, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const apprenticePressure = makeState(38, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+
+  const onRampCost = deriveSampleLineCostLabel(apprenticeOnRamp);
+  const pressureCost = deriveSampleLineCostLabel(apprenticePressure);
+  const payoffCost = deriveSampleLineCostLabel(apprenticePayoff);
+
+  assert(onRampCost.includes('手艺') || onRampCost.includes('合伙'), `apprentice on-ramp cost: ${onRampCost}`);
+  assert(pressureCost.includes('合伙') || pressureCost.includes('账目'), `apprentice pressure cost: ${pressureCost}`);
+  assert(payoffCost.includes('合伙') || payoffCost.includes('账目'), `apprentice payoff cost: ${payoffCost}`);
+
+  const tavernOnRamp = makeState(30, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const tavernPressure = makeState(38, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+
+  const tavernOnRampCost = deriveSampleLineCostLabel(tavernOnRamp);
+  const tavernPressureCost = deriveSampleLineCostLabel(tavernPressure);
+  const tavernPayoffCost = deriveSampleLineCostLabel(tavernPayoff);
+
+  assert(tavernOnRampCost.includes('人脉') || tavernOnRampCost.includes('铺子'), `tavern on-ramp cost: ${tavernOnRampCost}`);
+  assert(tavernPressureCost.includes('人情') || tavernPressureCost.includes('面子'), `tavern pressure cost: ${tavernPressureCost}`);
+  assert(tavernPayoffCost.includes('人情') || tavernPayoffCost.includes('面子'), `tavern payoff cost: ${tavernPayoffCost}`);
+
+  const peasantOnRamp = makeState(30, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const peasantPressure = makeState(38, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+
+  const peasantOnRampCost = deriveSampleLineCostLabel(peasantOnRamp);
+  const peasantPressureCost = deriveSampleLineCostLabel(peasantPressure);
+  const peasantPayoffCost = deriveSampleLineCostLabel(peasantPayoff);
+
+  assert(peasantOnRampCost.includes('粮路') || peasantOnRampCost.includes('买卖'), `peasant on-ramp cost: ${peasantOnRampCost}`);
+  assert(peasantPressureCost.includes('粮路') || peasantPressureCost.includes('奔波'), `peasant pressure cost: ${peasantPressureCost}`);
+  assert(peasantPayoffCost.includes('粮路') || peasantPayoffCost.includes('奔波'), `peasant payoff cost: ${peasantPayoffCost}`);
+
+  const pressureSet = new Set([pressureCost, tavernPressureCost, peasantPressureCost]);
+  assert(pressureSet.size === 3, 'pressure cost labels should be distinct across routes');
+
+  const payoffSet = new Set([payoffCost, tavernPayoffCost, peasantPayoffCost]);
+  assert(payoffSet.size === 3, 'payoff cost labels should be distinct across routes');
+}
+
+function testP66PayoffHasCostReflection(): void {
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprenticePayoff) ?? '';
+  assert(
+    apprenticeGoal.includes('合伙人的脸色') || apprenticeGoal.includes('账目') || apprenticeGoal.includes('分成'),
+    `apprentice payoff should have cost reflection: ${apprenticeGoal}`,
+  );
+
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernGoal = deriveSampleLineCurrentGoal(tavernPayoff) ?? '';
+  assert(
+    tavernGoal.includes('欠的人情') || tavernGoal.includes('掂量') || tavernGoal.includes('面子'),
+    `tavern payoff should have cost reflection: ${tavernGoal}`,
+  );
+
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantGoal = deriveSampleLineCurrentGoal(peasantPayoff) ?? '';
+  assert(
+    peasantGoal.includes('赌过') || peasantGoal.includes('回不到田里') || peasantGoal.includes('田埂'),
+    `peasant payoff should have cost reflection: ${peasantGoal}`,
+  );
+
+  for (const goal of [apprenticeGoal, tavernGoal, peasantGoal]) {
+    assert(isPlayerVisibleSampleLineText(goal), `raw key in P66 payoff goal: ${goal}`);
+  }
+}
+
+function testP66Age40IdentityHasCostWeight(): void {
+  const apprenticeAge40 = makeState(40, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const apprenticeIdentity = deriveSampleLineAge40Identity(apprenticeAge40) ?? '';
+  assert(
+    apprenticeIdentity.includes('代价') || apprenticeIdentity.includes('再也回不到') || apprenticeIdentity.includes('刨花'),
+    `apprentice age40 identity should have cost weight: ${apprenticeIdentity}`,
+  );
+
+  const tavernAge40 = makeState(40, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const tavernIdentity = deriveSampleLineAge40Identity(tavernAge40) ?? '';
+  assert(
+    tavernIdentity.includes('代价') || tavernIdentity.includes('人人都有求于你') || tavernIdentity.includes('认得你'),
+    `tavern age40 identity should have cost weight: ${tavernIdentity}`,
+  );
+
+  const peasantAge40 = makeState(40, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const peasantIdentity = deriveSampleLineAge40Identity(peasantAge40) ?? '';
+  assert(
+    peasantIdentity.includes('代价') || peasantIdentity.includes('回不到') || peasantIdentity.includes('田埂'),
+    `peasant age40 identity should have cost weight: ${peasantIdentity}`,
+  );
+
+  for (const identity of [apprenticeIdentity, tavernIdentity, peasantIdentity]) {
+    assert(isPlayerVisibleSampleLineText(identity), `raw key in P66 age40 identity: ${identity}`);
+  }
+}
+
+function testP66CostDistinctionComparison(): void {
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprenticePayoff) ?? '';
+  const tavernGoal = deriveSampleLineCurrentGoal(tavernPayoff) ?? '';
+  const peasantGoal = deriveSampleLineCurrentGoal(peasantPayoff) ?? '';
+
+  const apprenticeCost = deriveSampleLineCostLabel(apprenticePayoff);
+  const tavernCost = deriveSampleLineCostLabel(tavernPayoff);
+  const peasantCost = deriveSampleLineCostLabel(peasantPayoff);
+
+  const apprenticeIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+  const tavernIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+  const peasantIdentity = deriveSampleLineAge40Identity(makeState(40, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  })) ?? '';
+
+  assert(apprenticeGoal !== tavernGoal && apprenticeGoal !== peasantGoal, 'P66 payoff goals should differ across routes');
+  assert(tavernGoal !== peasantGoal, 'P66 tavern vs peasant payoff goals should differ');
+
+  assert(new Set([apprenticeCost, tavernCost, peasantCost]).size === 3, 'P66 payoff cost labels should be 3 distinct values');
+
+  assert(apprenticeIdentity !== tavernIdentity && apprenticeIdentity !== peasantIdentity, 'P66 age40 identities should differ across routes');
+  assert(tavernIdentity !== peasantIdentity, 'P66 tavern vs peasant age40 identities should differ');
+
+  assert(apprenticeGoal.includes('合伙') || apprenticeGoal.includes('账目'), 'apprentice cost should be about partnership/books');
+  assert(tavernGoal.includes('人情') || tavernGoal.includes('面子'), 'tavern cost should be about favors/face');
+  assert(peasantGoal.includes('赌') || peasantGoal.includes('田') || peasantGoal.includes('路'), 'peasant cost should be about bet/road');
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
@@ -551,6 +776,11 @@ function main(): void {
   testP63BridgeEntryDistinction();
   // P64: Pressure/payoff differentiation tests
   testMagnatePressurePayoffDifferentiation();
+  // P66: Success-cost differentiation tests
+  testP66CostLabelPersistsThroughJourney();
+  testP66PayoffHasCostReflection();
+  testP66Age40IdentityHasCostWeight();
+  testP66CostDistinctionComparison();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

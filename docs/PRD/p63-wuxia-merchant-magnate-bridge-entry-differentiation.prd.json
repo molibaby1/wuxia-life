@@ -57,7 +57,7 @@
       ],
       "priority": 4,
       "passes": false,
-      "notes": ""
+      "notes": "BLOCKED: P58/P59/P61 merchant bridge implementations (town_apprentice, tavern_hand, farm_peasant origins and their magnate_on_ramp wiring) do not exist in the codebase. The prerequisite implementations were never merged to main."
     },
     {
       "id": "P63-005",

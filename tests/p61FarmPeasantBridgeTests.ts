@@ -16,47 +16,8 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
-function makeState(age: number, flags: Record<string, unknown>): GameState {
-  return {
-    player: {
-      age,
-      name: 'fixture',
-      gender: 'male',
-      martialPower: 30,
-      externalSkill: 10,
-      internalSkill: 10,
-      qinggong: 10,
-      chivalry: 10,
-      constitution: 50,
-      comprehension: 30,
-      sect: null,
-      title: null,
-      reputation: 10,
-      money: 100,
-      knowledge: 15,
-      charisma: 10,
-      businessAcumen: 10,
-      influence: 8,
-      connections: 5,
-      martialHeritage: 0,
-      scholarlyHeritage: 0,
-      merchantNetwork: 0,
-      children: 0,
-      spouse: null,
-      alive: true,
-      flags: {},
-      lifeStates: createDefaultPlayerLifeStates(),
-    },
-    flags,
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-    routeStates: {},
-  } as GameState;
-}
-
 function testBridgeGateFlags(): void {
-  const state = makeState(30, {
+  const state = makeGameState({
     origin_farm_peasant: true,
     peasant_swap_crew_curiosity: true,
     peasant_midlife_outside_offer: true,
@@ -74,7 +35,7 @@ function testBridgeGateFlags(): void {
 }
 
 function testBridgeGateRequiresAcceptOutside(): void {
-  const noAccept = makeState(30, {
+  const noAccept = makeGameState({
     origin_farm_peasant: true,
     peasant_swap_crew_curiosity: true,
     peasant_midlife_outside_offer: true,
@@ -87,7 +48,7 @@ function testBridgeGateRequiresAcceptOutside(): void {
 }
 
 function testBridgeRequiresSwapCrewCuriosity(): void {
-  const noCuriosity = makeState(30, {
+  const noCuriosity = makeGameState({
     origin_farm_peasant: true,
     peasant_steadfast_field: true,
     route_wealth_committed: true,
@@ -98,7 +59,7 @@ function testBridgeRequiresSwapCrewCuriosity(): void {
 }
 
 function testBridgeCurrentGoalExpression(): void {
-  const bridge = makeState(30, {
+  const bridge = makeGameState({
     origin_farm_peasant: true,
     peasant_merchant_bridge_crossed: true,
   });
@@ -106,18 +67,18 @@ function testBridgeCurrentGoalExpression(): void {
   assert(goal.includes('粮商') || goal.includes('粮路'), `bridge currentGoal: ${goal}`);
   assert(isPlayerVisibleOrdinaryOriginText(goal), `raw key in bridge goal: ${goal}`);
 
-  const midlife = makeState(28, {
+  const midlife = makeGameState({
     origin_farm_peasant: true,
     peasant_swap_crew_curiosity: true,
     peasant_midlife_outside_offer: true,
-  });
+  }, 28);
   const midlifeGoal = deriveOrdinaryOriginCurrentGoal(midlife) ?? '';
   assert(midlifeGoal.includes('机会') || midlifeGoal.includes('招手'), `midlife currentGoal: ${midlifeGoal}`);
   assert(!midlifeGoal.includes('粮商'), `midlife goal should not mention grain merchant: ${midlifeGoal}`);
 }
 
 function testBridgeLifeMemoryExpression(): void {
-  const bridge = makeState(30, {
+  const bridge = makeGameState({
     origin_farm_peasant: true,
     peasant_merchant_bridge_crossed: true,
   });
@@ -125,34 +86,34 @@ function testBridgeLifeMemoryExpression(): void {
   assert(Boolean(memory?.includes('粮路') || memory?.includes('粮货')), `bridge lifeMemory: ${memory}`);
   assert(isPlayerVisibleOrdinaryOriginText(memory ?? ''), `raw key in bridge lifeMemory: ${memory}`);
 
-  const accept = makeState(27, {
+  const accept = makeGameState({
     origin_farm_peasant: true,
     peasant_midlife_outside_offer: true,
     peasant_accept_outside: true,
-  });
+  }, 27);
   const acceptMemory = deriveOrdinaryOriginLifeMemory(accept.flags ?? {});
   assert(Boolean(acceptMemory?.includes('镇上') || acceptMemory?.includes('村子')), `accept lifeMemory: ${acceptMemory}`);
 }
 
 function testBridgeSummaryExpression(): void {
-  const bridge = makeState(30, {
+  const bridge = makeGameState({
     origin_farm_peasant: true,
     peasant_merchant_bridge_crossed: true,
   });
   const summary = deriveOrdinaryOriginSummary(bridge.flags ?? {});
   assert(Boolean(summary?.includes('农家') || summary?.includes('粮货')), `bridge summary: ${summary}`);
 
-  const midlife = makeState(28, {
+  const midlife = makeGameState({
     origin_farm_peasant: true,
     peasant_midlife_outside_offer: true,
-  });
+  }, 28);
   const midlifeSummary = deriveOrdinaryOriginSummary(midlife.flags ?? {});
   assert(Boolean(midlifeSummary?.includes('平凡农人')), `midlife summary: ${midlifeSummary}`);
   assert(!midlifeSummary?.includes('粮货'), `midlife summary should not say 粮货: ${midlifeSummary}`);
 }
 
 function testBridgeDoesNotBreakOrdinaryOrigin(): void {
-  const bridge = makeState(30, {
+  const bridge = makeGameState({
     origin_farm_peasant: true,
     peasant_swap_crew_curiosity: true,
     peasant_midlife_outside_offer: true,
@@ -165,7 +126,7 @@ function testBridgeDoesNotBreakOrdinaryOrigin(): void {
 }
 
 function testBridgeSummaryInLifeMemorySummary(): void {
-  const bridge = makeState(30, {
+  const bridge = makeGameState({
     origin_farm_peasant: true,
     peasant_merchant_bridge_crossed: true,
   });
@@ -175,7 +136,7 @@ function testBridgeSummaryInLifeMemorySummary(): void {
 }
 
 function testNonPeasantNoBridge(): void {
-  const apprentice = makeState(30, {
+  const apprentice = makeGameState({
     origin_town_apprentice: true,
     route_wealth_committed: true,
     peasant_merchant_bridge_crossed: true,
@@ -183,7 +144,7 @@ function testNonPeasantNoBridge(): void {
   const goal = deriveOrdinaryOriginCurrentGoal(apprentice);
   assert(!goal?.includes('粮商'), `apprentice should not have peasant bridge goal: ${goal}`);
 
-  const tavern = makeState(30, {
+  const tavern = makeGameState({
     origin_tavern_hand: true,
     route_wealth_committed: true,
     peasant_merchant_bridge_crossed: true,
@@ -356,7 +317,7 @@ function testTavernBridgeStillWorks(): void {
 }
 
 function testDeclineOfferNoBridge(): void {
-  const state = makeState(30, {
+  const state = makeGameState({
     origin_farm_peasant: true,
     peasant_swap_crew_curiosity: true,
     peasant_midlife_outside_offer: true,

@@ -191,8 +191,17 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
-  // TODO: renown_payoff_done — for P76+ payoff stage
-  // TODO: renown_age40_identity_done — for P76+ payoff stage
+  if (flags.renown_midlife_payoff_done) {
+    if (flags.tavern_renown_payoff_hard_holder) {
+      return '硬扛所有人情债，保住江湖名声';
+    }
+    if (flags.tavern_renown_payoff_breaker) {
+      return '撕破脸皮，断了不该还的债';
+    }
+    if (flags.tavern_renown_payoff_balancer) {
+      return '拿捏人情往来的分寸，找到平衡';
+    }
+  }
   if (flags.renown_midlife_pressure_done) {
     return '一面维持声名，一面应付越来越重的人情债';
   }
@@ -259,6 +268,17 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '商路债务';
   }
   if (line === 'renown') {
+    if (flags.renown_midlife_payoff_done) {
+      if (flags.tavern_renown_payoff_hard_holder) {
+        return '声名之累';
+      }
+      if (flags.tavern_renown_payoff_breaker) {
+        return '快意恩仇';
+      }
+      if (flags.tavern_renown_payoff_balancer) {
+        return '人情练达';
+      }
+    }
     if (flags.renown_midlife_pressure_done) {
       return '人情债渐重';
     }

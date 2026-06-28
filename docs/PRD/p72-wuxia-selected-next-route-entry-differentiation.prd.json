@@ -28,8 +28,8 @@
         "Save docs/test-reports/p72-selected-route-entry-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract locked — 4 allowed layers, 4 forbidden expansion categories, boundary guards defined"
     },
     {
       "id": "P72-003",

@@ -505,5 +505,41 @@
         "stageSignals": ["magnate_payoff"]
       }
     }
+  },
+  {
+    "id": "renown_on_ramp",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('tavern_renown_bridge_crossed') && !flags.has('renown_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "声名初显",
+      "text": "你在江湖上的名声渐渐传开——不是因为武功多高，而是因为你认识的人多、能说上话、肯给面子。这日，两拨江湖人因为一点纠纷闹到酒肆，都指名要你主持公道。你接过这事，凭着积攒的人脉和面子，竟真把事情摆平了。两拨人临走时都抱拳称一句「兄台高义」。你知道，从今天起，你的名字在江湖上有了分量。",
+      "description": "P73 江湖名宿 on-ramp — 第一个标志性叙事节点"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_on_ramp_done" },
+      { "type": "flag_set", "target": "tavern_renown_on_ramp" },
+      { "type": "event_record", "target": "renown_on_ramp" },
+      { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p73", "renown", "on-ramp", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_on_ramp"]
+      }
+    }
   }
 ]

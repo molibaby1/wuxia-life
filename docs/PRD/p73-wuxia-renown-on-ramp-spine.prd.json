@@ -58,8 +58,8 @@
         "Shared destination chain remains stably triggerable"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Renown on-ramp event wired in sample-lines-spine.json — auto event 'renown_on_ramp' at age 32-35, triggers on tavern_renown_bridge_crossed, sets renown_on_ramp_done + tavern_renown_on_ramp, stat boosts (reputation +5, connections +4, charisma +2). No new framework. P71/P72 tests pass, sample-lines guard pass."
     },
     {
       "id": "P73-005",

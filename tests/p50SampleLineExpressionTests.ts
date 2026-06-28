@@ -343,6 +343,106 @@ function testMagnateExpression(): void {
   assert(costLabel === '巨贾负担', `magnate cost label: ${costLabel}`);
 }
 
+// P64: Test differentiated magnate pressure/payoff expression per bridge origin
+function testMagnatePressurePayoffDifferentiation(): void {
+  // Apprentice bridge - pressure stage
+  const apprenticePressure = makeState(38, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const apprenticePressureGoal = deriveSampleLineCurrentGoal(apprenticePressure) ?? '';
+  assert(
+    apprenticePressureGoal.includes('合伙') || apprenticePressureGoal.includes('供货') || apprenticePressureGoal.includes('销路'),
+    `apprentice pressure goal: ${apprenticePressureGoal}`,
+  );
+
+  // Tavern bridge - pressure stage
+  const tavernPressure = makeState(38, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const tavernPressureGoal = deriveSampleLineCurrentGoal(tavernPressure) ?? '';
+  assert(
+    tavernPressureGoal.includes('人情') || tavernPressureGoal.includes('老主顾') || tavernPressureGoal.includes('面'),
+    `tavern pressure goal: ${tavernPressureGoal}`,
+  );
+
+  // Peasant bridge - pressure stage
+  const peasantPressure = makeState(38, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+  });
+  const peasantPressureGoal = deriveSampleLineCurrentGoal(peasantPressure) ?? '';
+  assert(
+    peasantPressureGoal.includes('车马') || peasantPressureGoal.includes('仓库') || peasantPressureGoal.includes('运力'),
+    `peasant pressure goal: ${peasantPressureGoal}`,
+  );
+
+  // Apprentice bridge - payoff stage
+  const apprenticePayoff = makeState(44, {
+    apprentice_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const apprenticePayoffGoal = deriveSampleLineCurrentGoal(apprenticePayoff) ?? '';
+  assert(
+    apprenticePayoffGoal.includes('商路') || apprenticePayoffGoal.includes('供货') || apprenticePayoffGoal.includes('销路'),
+    `apprentice payoff goal: ${apprenticePayoffGoal}`,
+  );
+
+  // Tavern bridge - payoff stage
+  const tavernPayoff = makeState(44, {
+    tavern_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const tavernPayoffGoal = deriveSampleLineCurrentGoal(tavernPayoff) ?? '';
+  assert(
+    tavernPayoffGoal.includes('人脉') || tavernPayoffGoal.includes('老主顾') || tavernPayoffGoal.includes('八方'),
+    `tavern payoff goal: ${tavernPayoffGoal}`,
+  );
+
+  // Peasant bridge - payoff stage
+  const peasantPayoff = makeState(44, {
+    peasant_merchant_bridge_crossed: true,
+    route_merchant: true,
+    magnate_on_ramp_done: true,
+    magnate_midlife_pressure_done: true,
+    magnate_payoff_done: true,
+  });
+  const peasantPayoffGoal = deriveSampleLineCurrentGoal(peasantPayoff) ?? '';
+  assert(
+    peasantPayoffGoal.includes('车马') || peasantPayoffGoal.includes('仓储') || peasantPayoffGoal.includes('根基'),
+    `peasant payoff goal: ${peasantPayoffGoal}`,
+  );
+
+  // Verify three bridges produce different text at pressure stage
+  assert(apprenticePressureGoal !== tavernPressureGoal, 'apprentice and tavern pressure goals should differ');
+  assert(tavernPressureGoal !== peasantPressureGoal, 'tavern and peasant pressure goals should differ');
+  assert(apprenticePressureGoal !== peasantPressureGoal, 'apprentice and peasant pressure goals should differ');
+
+  // Verify three bridges produce different text at payoff stage
+  assert(apprenticePayoffGoal !== tavernPayoffGoal, 'apprentice and tavern payoff goals should differ');
+  assert(tavernPayoffGoal !== peasantPayoffGoal, 'tavern and peasant payoff goals should differ');
+  assert(apprenticePayoffGoal !== peasantPayoffGoal, 'apprentice and peasant payoff goals should differ');
+
+  // Verify all goals are player-visible (no raw keys)
+  for (const goal of [apprenticePressureGoal, tavernPressureGoal, peasantPressureGoal,
+                       apprenticePayoffGoal, tavernPayoffGoal, peasantPayoffGoal]) {
+    assert(isPlayerVisibleSampleLineText(goal), `raw key in differentiated goal: ${goal}`);
+  }
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
@@ -353,6 +453,7 @@ function main(): void {
   testMerchant804ResidualExpression();
   testPost40PayoffExpression();
   testMagnateExpression();
+  testMagnatePressurePayoffDifferentiation();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

@@ -16,7 +16,9 @@
 
 ---
 
-## 2. Targeted Proof Chain (Targeted proof 是 P75 的核心验证——证明 pressure 链路是通的。
+## 2. Targeted Proof Chain
+
+Targeted proof 是 P75 的核心验证——证明 pressure 链路是通的。
 
 ### 2.1 Chain Nodes Overview
 
@@ -24,11 +26,11 @@ Targeted proof 需展示以下链路节点：
 
 | # | Node | Type | Verification Point |
 |---|------|------|-----------------|
-| 1 | **Pre-bridge state | baseline | tavern_hand + ally_network, no renown flags |
+| 1 | **Pre-bridge state** | baseline | tavern_hand + ally_network, no renown flags |
 | 2 | **Bridge crossed** | P71 | `tavern_renown_bridge_crossed` + `route_renown_committed` set |
 | 3 | **Entry expression** | P72 | `detectSampleLine()` returns `jianghu_renown_sage` |
 | 4 | **On-ramp reached** | P73 | `renown_on_ramp` fires at age 32-35, `renown_on_ramp_done` set |
-| 5 | **Pre-pressure state** | baseline (P73 后，P75 前 | `renown_on_ramp_done` = true, `renown_midlife_pressure_done` = false |
+| 5 | **Pre-pressure state** | baseline (P73 后，P75 前) | `renown_on_ramp_done` = true, `renown_midlife_pressure_done` = false |
 | 6 | **Pressure event fires** | **P75 core** | `renown_midlife_pressure` fires at age 37-41 |
 | 7 | **Pressure checkpoint set** | **P75 core** | `renown_midlife_pressure_done` = true |
 | 8 | **Pressure expression — cost label** | **P75 core** | cost label changes from "江湖声名之累" to "人情债渐重" |
@@ -39,15 +41,15 @@ Targeted proof 需展示以下链路节点：
 
 ### 2.2 Core Nodes (Must Show)
 
-**必须展示的核心节点（P0）：
+必须展示的核心节点（P0）：
 
-1. **节点 5: Pre-pressure state — on-ramp done, pressure not done
-2. **节点 6: Pressure event fires — 在正确年龄范围触发
-3. **节点 7: Pressure checkpoint set — `renown_midlife_pressure_done` 被正确设置
-4. **节点 8: Cost label 更新 — "人情债渐重"
-5. **节点 9: Current goal 更新 — pressure 状态
+1. **节点 5:** Pre-pressure state — on-ramp done, pressure not done
+2. **节点 6:** Pressure event fires — 在正确年龄范围触发
+3. **节点 7:** Pressure checkpoint set — `renown_midlife_pressure_done` 被正确设置
+4. **节点 8:** Cost label 更新 — "人情债渐重"
+5. **节点 9:** Current goal 更新 — pressure 状态
 
-**共 5 个核心节点**
+共 5 个核心节点
 
 ### 2.3 Bonus Nodes (Nice to Show)
 
@@ -151,7 +153,7 @@ P75 pressure 阶段算 closed 的标准：
 ### 4.2 Must-Have vs Nice-to-Have
 
 **Must-have (P0):**
-- C1-C4: 核心功能完整（事件 + flag + 2 个核心表达更新
+- C1-C4: 核心功能完整（事件 + flag + 2 个核心表达更新）
 - C5: 风味一致性
 - C6-C8: 质量闸门
 
@@ -165,7 +167,7 @@ P75 pressure 阶段算 closed 的标准：
 
 ### 5.1 What Must Not Regress
 
-P75 实施后，以下既有证据**必须保持通过：
+P75 实施后，以下既有证据必须保持通过：
 
 | Stage | Evidence | Verification |
 |-------|----------|--------------|
@@ -177,7 +179,7 @@ P75 实施后，以下既有证据**必须保持通过：
 
 ### 5.2 What Is Allowed to Change
 
-以下内容**允许**变化（因为是 pressure 阶段的正常更新：
+以下内容允许变化（因为是 pressure 阶段的正常更新）：
 
 - Sample line current goal（on-ramp → pressure）
 - Sample line cost label（江湖声名之累 → 人情债渐重）

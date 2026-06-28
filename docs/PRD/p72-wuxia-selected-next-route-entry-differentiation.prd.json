@@ -84,8 +84,8 @@
         "Ensure the proof directly supports whether deeper differentiation is worth opening"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Targeted entry proof complete — comparison-style proof with 4 cases (plain tavern / merchant bridge / renown bridge / generic ally), 6 expression surfaces, all distinct; supports go decision for deeper differentiation"
     },
     {
       "id": "P72-007",

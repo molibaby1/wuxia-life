@@ -28,7 +28,7 @@
         "Save docs/test-reports/p63-merchant-entry-differentiation-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -42,7 +42,7 @@
         "Keep merchant_magnate intact as the shared mixed outcome"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -56,7 +56,7 @@
         "Existing P55, P58, P59, and P61 evidence does not regress"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -70,7 +70,7 @@
         "Add or update focused expression tests"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -84,7 +84,7 @@
         "Ensure the proof can directly support whether P64 is worth doing"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -98,7 +98,7 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -112,7 +112,7 @@
         "List deeper merchant densification items that remain deferred"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]

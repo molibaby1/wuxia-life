@@ -48,6 +48,10 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
     || flags.merchant_talent
     || flags.merchant_childhood_seed_done
     || flags.p8_route_wealth
+    // P63: Bridge-origin merchant entry flags
+    || flags.apprentice_merchant_bridge_crossed
+    || flags.tavern_merchant_bridge_crossed
+    || flags.peasant_merchant_bridge_crossed
   ) {
     return 'merchant';
   }
@@ -122,6 +126,19 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     return '商号遍九州，人情债也遍九州';
   }
   if (flags.magnate_on_ramp_done) {
+    // P63: Entry differentiation via bridge-origin markers
+    // Apprentice path: craft mastery + partnership → business as skill extension
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '手艺学透、合伙商路已通，正谋划更大的局面';
+    }
+    // Tavern path: network + referral → business as relationship extension
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '人脉已通、铺子已上手，正借助这些关系扩张';
+    }
+    // Peasant path: labor + trade → business as labor elevation
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '粮路跑通、买卖上手，正学着像商人一样思考';
+    }
     return '产业初成，巨贾之路刚起步';
   }
   if (flags.merchant_age45_expansion_fork_done) {
@@ -158,7 +175,17 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '邪路代价';
   }
   if (line === 'merchant') {
+    // P63: Entry differentiation via bridge-origin markers at magnate_on_ramp
     if (flags.magnate_on_ramp_done) {
+      if (flags.apprentice_merchant_bridge_crossed) {
+        return '手艺与合伙的担子';
+      }
+      if (flags.tavern_merchant_bridge_crossed) {
+        return '人脉与铺子的担子';
+      }
+      if (flags.peasant_merchant_bridge_crossed) {
+        return '粮路与买卖的担子';
+      }
       return '巨贾负担';
     }
     return '商路债务';
@@ -218,7 +245,17 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   if (!flags.merchant_age40_identity_done) {
     return undefined;
   }
+  // P63: Entry differentiation via bridge-origin markers at magnate_on_ramp
   if (flags.magnate_on_ramp_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '你是从学徒走来的巨贾：手艺为基，合伙为径，商路是技能延伸的版图';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '你是从酒肆走来的巨贾：人脉为基，引荐为径，商路是人情往来的延伸';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '你是从农家走来的巨贾：力气为基，跑商为径，商路是勤劳致富的通道';
+    }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
   if (flags.merchant_shop_failed || flags.merchant_midlife_debt) {

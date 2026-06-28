@@ -341,7 +341,7 @@ export class SaveManager {
    * 生成存档 ID
    */
   private generateSaveId(): string {
-    return `save_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `save_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
   
   /**

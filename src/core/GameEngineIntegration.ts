@@ -41,7 +41,6 @@ import {
 } from './activePlanning/ActivePlanningService';
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
-import { getMinimumActions } from '../data/activeActionCatalog';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
 import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSelection';
@@ -610,7 +609,6 @@ export class GameEngineIntegration {
       }
       
       // 也检查 gameState.player 中的背景字段
-      const player = gameState.player;
       if (player) {
         if ((player as any).bornInWuxiaFamily === true) playerBackgrounds.push('bornInWuxiaFamily');
         if ((player as any).bornInScholarFamily === true) playerBackgrounds.push('bornInScholarFamily');
@@ -709,11 +707,6 @@ export class GameEngineIntegration {
     const maxTriggers = event.maxTriggers ?? 1;
     const triggerCount = triggerHistory.length;
     
-    // 调试日志
-    if (event.id === 'merchant_empire' || event.id === 'hero_become_legend') {
-      const eventHistory = this.gameState.eventHistory || [];
-    }
-    
     // 检查最大触发次数 - 如果已达到上限，直接返回false
     if (triggerCount >= maxTriggers) {
       return false;
@@ -742,35 +735,8 @@ export class GameEngineIntegration {
    * 
    * 注意：已移除密度限制，允许剧情线事件连续触发
    */
-  private checkStoryLineDensity(event: EventDefinition): boolean {
-    // 移除密度限制 - 允许剧情线事件连续触发
-    // const storyLine = event.storyLine;
-    // if (!storyLine) {
-    //   return true;
-    // }
-    // 
-    // const currentAge = this.gameState.player?.age || 0;
-    // const recentEvents = this.gameState.player?.events
-    //   .filter(e => {
-    //     const eventDef = eventLoader.getEventById(e.eventId);
-    //     return eventDef?.storyLine === storyLine;
-    //   })
-    //   .sort((a, b) => b.age - a.age);
-    // 
-    // if (recentEvents.length === 0) {
-    //   return true;
-    // }
-    // 
-    // const lastEventAge = recentEvents[0].age;
-    // const yearsPassed = currentAge - lastEventAge;
-    // const minInterval = 1;
-    // 
-    // if (yearsPassed < minInterval) {
-    //   console.log(`[StoryLine] ${storyLine} 密度过高：距离上次事件 ${yearsPassed} 年，需要间隔 ${minInterval} 年`);
-    //   return false;
-    // }
-    
-    return true;  // 始终返回 true，不限制密度
+  private checkStoryLineDensity(_event: EventDefinition): boolean {
+    return true;
   }
   
   /**

@@ -191,6 +191,9 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_midlife_pressure_done) {
+    return '一面维持声名，一面应付越来越重的人情债';
+  }
   if (flags.renown_on_ramp_done) {
     return '在江湖上有了名号，常有人来请你主持公道、引荐高人';
   }
@@ -254,6 +257,9 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '商路债务';
   }
   if (line === 'renown') {
+    if (flags.renown_midlife_pressure_done) {
+      return '人情债渐重';
+    }
     return '江湖声名之累';
   }
   return '守正代价';

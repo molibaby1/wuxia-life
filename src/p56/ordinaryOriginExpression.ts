@@ -54,6 +54,9 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_midlife_pressure_done) {
+    return '一面维持声名，一面应付越来越重的人情债';
+  }
   if (flags.renown_on_ramp_done) {
     return '在江湖上有了名号，常有人来请你主持公道';
   }

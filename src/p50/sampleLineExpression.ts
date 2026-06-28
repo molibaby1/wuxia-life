@@ -120,9 +120,29 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
   if (flags.magnate_payoff_done) {
+    // P64: differentiated payoff based on bridge origin
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '商路已掌控，供货销路尽在掌握，手艺人的巨贾之位靠的是一身本事和合伙人的信任';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '商号凭人脉通八方，老主顾遍布各行，酒肆出身的巨贾人脉就是商路';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '车马仓储物流根基已成，泥腿子熬出来的商路靠的是一步一步走出来的根基';
+    }
     return '巨贾之位已成，守住比扩张更难';
   }
   if (flags.magnate_midlife_pressure_done) {
+    // P64: differentiated pressure based on bridge origin
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '商号遍九州，合伙人与人情债也遍九州，供货的账期、销路的分成拴住每一条线';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '商号遍九州，人情面子债也遍九州，老主顾的期待、介绍的欠情让巨贾负重前行';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '商号遍九州，车马仓储债也遍九州，运力、仓库、下属工钱让泥腿子巨贾不敢停歇';
+    }
     return '商号遍九州，人情债也遍九州';
   }
   if (flags.magnate_on_ramp_done) {

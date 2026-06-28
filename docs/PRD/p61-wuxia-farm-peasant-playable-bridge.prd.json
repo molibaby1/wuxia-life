@@ -84,8 +84,8 @@
         "Do not require combinatorial exhaust"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Targeted proof document created at docs/test-reports/p61-farm-peasant-magnate-targeted-proof.md; covers config evidence, expression evidence, gate evaluation simulation, and ordered flag chain trace."
     },
     {
       "id": "P61-007",

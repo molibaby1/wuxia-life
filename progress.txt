@@ -1,7 +1,8 @@
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor)
-- P61-005: Peasant bridge expression added to ordinaryOriginExpression.ts (3 surfaces).
-- Changes: Added `peasant_merchant_bridge_crossed` branches to peasantCurrentGoal, peasantLifeMemory, and deriveOrdinaryOriginSummary.
-- Files: `src/p56/ordinaryOriginExpression.ts`
+- P61-006: Targeted playable proof document created.
+- Files: `docs/test-reports/p61-farm-peasant-magnate-targeted-proof.md`
+---
+## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-005
 ---
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge - P61-004
 ---

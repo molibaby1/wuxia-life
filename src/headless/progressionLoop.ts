@@ -3,19 +3,6 @@
  */
 
 import type { HeadlessEngineSession } from './session/HeadlessEngineSession';
-import type { EventDefinition } from '../types/eventTypes';
-
-/** ponytail: mandatory auto events must go through story_event step so sim records capture them. */
-function shouldDeferAutomaticStoryEvent(event: EventDefinition): boolean {
-  const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
-  return (
-    tags.includes('mandatory') ||
-    tags.includes('mainline') ||
-    tags.includes('p9') ||
-    tags.includes('p11') ||
-    tags.includes('causality_echo')
-  );
-}
 
 /** Mirror GameProcessSimulator.ensureProgressionCatchUp — one year when age unchanged. */
 export async function ensureProgressionCatchUp(
@@ -45,7 +32,6 @@ export async function progressUntilChoiceOrTerminal(session: HeadlessEngineSessi
       break;
     }
     if (!next.isAutomatic) break;
-    if (shouldDeferAutomaticStoryEvent(next.raw)) break;
     const progress = await session.progressAutomatic({ maxSteps: 8 });
     if (progress.stoppedReason === 'terminal') break;
     if (progress.stepsExecuted === 0) break;

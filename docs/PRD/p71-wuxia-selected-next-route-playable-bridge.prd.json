@@ -70,8 +70,8 @@
         "Do not rely on a static shortcut as the only bridge evidence"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Targeted proof document covers all 11 chain nodes; verified via ConditionEvaluator + ordinaryOriginExpression runtime code paths; not static fixture-only"
     },
     {
       "id": "P71-006",

@@ -207,6 +207,41 @@
           ]
         }
       ]
+    },
+    {
+      "id": "ordinary_tavern_midlife_renown_bridge",
+      "originId": "tavern_hand",
+      "originFlag": "origin_tavern_hand",
+      "ageMin": 29,
+      "ageMax": 29,
+      "title": "江湖名号",
+      "prompt": "这些年你在酒肆见多了江湖人物，也帮过不少人穿针引线。渐渐有人慕名而来，或求引荐，或请你主事——你在江湖上竟有了些名号。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "flags.has('ally_network') && !flags.has('ordinary_tavern_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "embrace_renown",
+          "label": "踏入江湖",
+          "flags": ["tavern_midlife_renown_bridge", "tavern_embrace_renown", "route_renown_committed", "tavern_renown_bridge_crossed", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+            { "type": "stat_modify", "target": "connections", "value": 4, "operator": "add" },
+            { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
+          ]
+        },
+        {
+          "id": "stay_in_tavern",
+          "label": "留在酒肆",
+          "flags": ["tavern_midlife_renown_bridge", "tavern_stay_in_tavern", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+          ]
+        }
+      ]
     }
   ]
 }

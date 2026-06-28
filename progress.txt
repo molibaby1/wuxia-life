@@ -1,3 +1,10 @@
+## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001/002/003
+- P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta (1 new event + 3 expression branches + tests).
+- P71-002: Runtime scope contract locked — 4 allowed layers, 5 forbidden expansions, clear P71/P72 boundary.
+- P71-003: Bridge wiring complete — `ordinary_tavern_midlife_renown_bridge` event added to ordinary-origin-midlife.json (age 29, ally_network + !ordinary_tavern_midlife_done); `embrace_renown` sets `tavern_renown_bridge_crossed` + `route_renown_committed`.
+- Files: `docs/test-reports/p71-selected-route-bridge-implementation-audit.md`, `docs/test-reports/p71-selected-route-bridge-scope-contract.md`, `src/data/lines/ordinary-origin-midlife.json`
+- Validation: JSON valid ✅ typecheck ✅ P56 ✅ P59 ✅ P61 ✅
+---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001
 - P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta (1 new event + 3 expression branches + tests).
 - Files: `docs/test-reports/p71-selected-route-bridge-implementation-audit.md`

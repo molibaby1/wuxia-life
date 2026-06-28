@@ -42,8 +42,8 @@
         "Existing related evidence does not regress"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Bridge event added to ordinary-origin-midlife.json; tavern_renown_bridge_crossed + route_renown_committed flags set on embrace_renown; existing P56/P59/P61 tests pass"
     },
     {
       "id": "P71-004",

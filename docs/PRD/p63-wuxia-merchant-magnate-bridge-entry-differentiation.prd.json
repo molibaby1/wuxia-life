@@ -56,8 +56,8 @@
         "Existing P55, P58, P59, and P61 evidence does not regress"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "BLOCKED: P58/P59/P61 merchant bridge implementations (town_apprentice, tavern_hand, farm_peasant origins and their magnate_on_ramp wiring) do not exist in the codebase. The prerequisite implementations were never merged to main."
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "P63-005",
@@ -70,7 +70,7 @@
         "Add or update focused expression tests"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -84,7 +84,7 @@
         "Ensure the proof can directly support whether P64 is worth doing"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -98,7 +98,7 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

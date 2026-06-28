@@ -132,7 +132,7 @@ Rationale:
 **Expression updates:**
 - Cost label: `身后名·遥`
 - Current goal: `传说真假谁真谁假，自己知道就好`
-- Identity: `逍遥传说里的神秘人`
+- Identity: `传说里的神秘人`
 - Life memory: `故事还在流传 + 没人知道你在哪 + 真假参半的传说`
 - Summary: `江湖独行 + 身后名·遥 + 传说比人逍遥`
 
@@ -230,7 +230,7 @@ P81 implementation MUST adhere to these lightweight constraints:
 
 | Constraint | Requirement |
 |------------|-------------|
-| 1 echo event maximum | 1 event with 3 variants, not 3 separate events |
+| 1 echo event maximum | Conceptually 1 echo event; implemented as 3 variant-specific auto events (sigh/distant/legacy) with unified event_record `renown_endgame_echo`, consistent with P79 late-life pattern |
 | Expression updates only | No new systems, no new framework |
 | Auto event | Not a choice event |
 | 3 variants max | One per late-life branch |

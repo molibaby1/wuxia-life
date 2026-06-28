@@ -84,8 +84,8 @@
         "Write contract to docs/PRD/p80-renown-endgame-contract.md"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Complete: Contract LOCKED — renown_endgame_echo auto event (age 60-65, 3 variants based on late-life branch, no stat changes, 6 expression surfaces, 3+ endgame signals, clear distinction from late-life and P19, tavern-born flavor, 5 reserved flags). 0 runtime changes."
     },
     {
       "id": "P80-006",

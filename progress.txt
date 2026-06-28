@@ -1,3 +1,13 @@
+## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001~006
+- P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta.
+- P71-002: Runtime scope contract locked — 4 allowed layers, 5 forbidden expansions.
+- P71-003: Bridge wiring complete — `ordinary_tavern_midlife_renown_bridge` event (age 29); `embrace_renown` sets `tavern_renown_bridge_crossed` + `route_renown_committed`.
+- P71-004: Bridge expression complete — 3 branches in `ordinaryOriginExpression.ts` (currentGoal, lifeMemory, summary).
+- P71-005: Targeted proof complete — all 11 chain nodes verified via runtime code paths.
+- P71-006: Narrow regression tests complete — `p71TavernHandRenownBridgeTests.ts` with 15 assertions; all pass + no regressions.
+- Files: `docs/test-reports/p71-*.md`, `src/data/lines/ordinary-origin-midlife.json`, `src/p56/ordinaryOriginExpression.ts`, `tests/p71TavernHandRenownBridgeTests.ts`
+- Validation: typecheck ✅ P56 ✅ P58 ✅ P59 ✅ P61 ✅ lifeMemorySummary ✅ p71 ✅
+---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001~004
 - P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta.
 - P71-002: Runtime scope contract locked — 4 allowed layers, 5 forbidden expansions.

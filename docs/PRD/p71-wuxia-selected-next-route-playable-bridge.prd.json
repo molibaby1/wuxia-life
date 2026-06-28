@@ -84,8 +84,8 @@
         "Relevant commands pass"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "p71TavernHandRenownBridgeTests with 15 assertions (bridge flag chain, prerequisite enforcement, 3 expressions, origin preservation, mutual exclusivity, decline path, non-target isolation, gate key_choices, merchant regression); all pass + P56/P58/P59/P61/lifeMemorySummary all pass"
     },
     {
       "id": "P71-007",

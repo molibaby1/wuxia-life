@@ -1,3 +1,14 @@
+## [2026-06-29] - P78 Renown Late-Life Design-First - P78-001~006 ✅ COMPLETE
+- P78-001: Renown late-life prerequisite audit complete — 5-stage foundation (bridge + entry + on-ramp + pressure + payoff) verified; 10+ flags/markers inventoried; 4 events cataloged; 6 expression surfaces mapped; 3 payoff choice state differences documented; reusable assets and gaps identified; tavern-born flavor consistency confirmed.
+- P78-002: Scope contract locked — 6 allowed layers (audit/scope/design/contract/shape/closure); 13 forbidden expansions; 4 scope guardrails (boundedness/flavor/differentiation/GO-NO-GO); GO/NO-GO criteria; rollback strategy; P78/P79 boundary; quality priority order.
+- P78-003: Three late-life branches designed — Single auto event with 3 branches selected (bounded, age 52-56); Branch A: 硬扛 → 油尽灯枯 (tragic burnout, 老掌柜的叹息); Branch B: 撕破脸 → 逍遥自在 (bittersweet freedom, 三教九流见多了); Branch C: 平衡 → 传承授业 (warm mentorship, 老掌柜的传承); All 3 meaningfully differentiated; distinct from merchant late-life; late-life adds value verdict.
+- P78-004: Late-life contract LOCKED — renown_late_life auto event (age 52-56, branching on payoff choice markers); 3 branches (burnout/lone_wolf/mentor) with distinct stats/identity/expression/narrative; 5 core late-life signals; clear distinction from payoff and generic endgame; tavern-born flavor in all branches; renown_endgame_echo_done reserved; gate acceptance criteria; P78/P79 boundary.
+- P78-005: P79 validation shape defined — 8 core proof nodes + 6 bonus nodes; ~20-25 regression tests across 7 groups; 9 closure criteria; P71/P72/P73/P75/P77 regression boundaries; no full lifetime exhaust required; implementation→validation mapping.
+- P78-006: Closure report complete — 6/6 stories passed; CONDITIONAL GO for P79 late-life implementation; all 6 GO criteria satisfied; no NO-GO criteria triggered; 4 risks with mitigations; clear P78/P79 boundary; 9 deferred items.
+- Files: `docs/test-reports/p78-renown-late-life-prerequisite-audit.md`, `docs/test-reports/p78-renown-late-life-scope-contract.md`, `docs/test-reports/p78-renown-late-life-branch-design.md`, `docs/PRD/p78-renown-late-life-contract.md`, `docs/test-reports/p78-p79-validation-shape.md`, `docs/test-reports/p78-renown-late-life-closure-report.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes — design-only stage)
+- Status: 6/6 stories complete; CONDITIONAL GO for P79; ready for A1-verify
+---
 ## [2026-06-29] - P76 Renown Payoff Design-First - P76-001~006 ✅ COMPLETE
 - P76-001: Renown payoff prerequisite audit complete — 4-stage foundation (bridge + entry + on-ramp + pressure) verified; 5 checkpoint flags, 4 stage markers, 3 spine events, 7 expression surfaces inventoried; upstream gate renown_midlife_pressure_done ready; payoff gaps documented.
 - P76-002: Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 5 forbidden expansion categories, 4 scope guardrails, NO-GO conditions, rollback strategy.

@@ -1,0 +1,103 @@
+{
+  "project": "Wuxia Life P78 Renown Late-Life Design-First",
+  "branchName": "codex/p78-wuxia-renown-late-life-design-first",
+  "description": "Design-first contract stage for jianghu_renown_sage late-life phase — define 3 late-life branches (one per payoff choice), contract, and validation shape before implementation, preserving tavern-born flavor. Assess GO/NO-GO for late-life.",
+  "userStories": [
+    {
+      "id": "P78-001",
+      "title": "Audit renown late-life prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the renown late-life stage so P78 starts from the real gating surfaces.",
+      "acceptanceCriteria": [
+        "Summarize existing renown route flags, markers, events, and expressions (bridge + entry + on-ramp + pressure + payoff)",
+        "Document state differences across 3 payoff choices (stats + flags + identity)",
+        "Identify what exists before late-life vs what can be reused",
+        "Save docs/test-reports/p78-renown-late-life-prerequisite-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Completed: 5-stage foundation verified; 10+ flags/markers inventoried; 4 events cataloged; 6 expression surfaces mapped; 3 payoff choice state differences documented; reusable assets and gaps identified; tavern-born flavor consistency confirmed."
+    },
+    {
+      "id": "P78-002",
+      "title": "Lock P78 scope contract",
+      "description": "As a planner, I want a scope contract so P78 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P78 to gap audit, branch design, late-life contract, and proof shape only",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, new framework, bulk content wave, endgame design, second route",
+        "Save docs/test-reports/p78-renown-late-life-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Completed: 6 allowed layers defined (audit/scope/design/contract/shape/closure); 13 forbidden expansions listed; 4 scope guardrails (boundedness/flavor/differentiation/GO-NO-GO); GO/NO-GO criteria defined; rollback strategy; P78/P79 boundary; quality priority order; verification method."
+    },
+    {
+      "id": "P78-003",
+      "title": "Design three late-life branches (per payoff choice)",
+      "description": "As a designer, I want three distinct late-life branches (one per payoff choice) so renown late-life leverages the 3-choice structure for meaningful differentiation.",
+      "acceptanceCriteria": [
+        "Design Option A (hard_holder) late-life branch: core narrative + trigger + player experience",
+        "Design Option B (breaker) late-life branch: core narrative + trigger + player experience",
+        "Design Option C (balancer) late-life branch: core narrative + trigger + player experience",
+        "Three branches have meaningfully different identities (not reskinned)",
+        "Each branch has tavern-born flavor adaptation",
+        "Decide: single event with 3 branches vs multi-event (recommend single for boundedness)",
+        "Save design document"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Completed: Single auto event with 3 branches selected (bounded, leverages 3-choice structure); Branch A: 硬扛 → 油尽灯枯 (tragic burnout, tavern anchor: 老掌柜的叹息); Branch B: 撕破脸 → 逍遥自在 (bittersweet freedom, tavern anchor: 三教九流见多了); Branch C: 平衡 → 传承授业 (warm mentorship, tavern anchor: 老掌柜的传承); All 3 branches meaningfully differentiated (narrative/tone/stats/identity/tavern anchor); Clearly differentiated from merchant late-life; Late-life adds meaningful value verdict."
+    },
+    {
+      "id": "P78-004",
+      "title": "Define renown late-life contract",
+      "description": "As a designer, I want an explicit late-life contract so P79 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define late-life checkpoint, required flags, and corresponding gate acceptance",
+        "Define late-life event structure (choice or auto; recommend auto with 3 branches)",
+        "Define stat changes, identity markers, and expression differences per branch",
+        "Define at least 3 late-life-specific player-facing signals",
+        "Clarify difference between late-life vs payoff and vs generic endgame",
+        "Preserve tavern-born flavor throughout",
+        "Reserve flag interfaces for subsequent endgame / final legacy stages",
+        "Save contract to docs/PRD/p78-renown-late-life-contract.md"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Completed: Full late-life contract LOCKED — renown_late_life auto event (age 52-56, branching on payoff choice markers); 3 branches (burnout/lone_wolf/mentor) with distinct stats/identity/expression/narrative; 5 core late-life signals (cost label, current goal, late-life identity, life memory, origin summary); clear distinction from payoff (choice vs consequence) and from generic endgame (active stage vs final review); tavern-born flavor in all branches; renown_endgame_echo_done reserved for future; gate acceptance criteria defined; P78/P79 boundary clear."
+    },
+    {
+      "id": "P78-005",
+      "title": "Define P79 validation shape",
+      "description": "As a maintainer, I want the P79 validation shape fixed in advance so playable late-life work is judged against explicit expectations.",
+      "acceptanceCriteria": [
+        "Define which chain nodes targeted proof must show (payoff → late-life → expression changes)",
+        "Each of 3 branches must have core node verification",
+        "Define which assertions regression tests must cover at minimum",
+        "Define what evidence counts as late-life closed",
+        "No full lifetime exhaust required",
+        "Define regression boundaries for P71/P72/P73/P75/P77 existing evidence"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Completed: P79 validation shape defined — 8 core proof nodes (baseline, event fires, 3 branches flags+stats, cost label, current goal, late-life identity) + 6 bonus nodes (life memory, origin summary, full chain, mutex, branch matching, flavor check); ~20-25 regression tests across 7 groups; 9 closure criteria; P71/P72/P73/P75/P77 regression boundaries; other sample line regression boundaries; no full lifetime exhaust required; implementation→validation mapping."
+    },
+    {
+      "id": "P78-006",
+      "title": "Produce P78 closure report",
+      "description": "As a maintainer, I want a closure report that locks the renown late-life design-first contract and hands off to P79.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p78-renown-late-life-closure-report.md",
+        "Summarize prerequisite audit, scope contract, branch design, late-life contract, validation shape",
+        "Clarify boundary with P79",
+        "List remaining deferred larger renown-expansion items",
+        "State GO / NO-GO for late-life implementation stage (with rationale either way)",
+        "If NO-GO, clearly state stopping point and why"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Completed: Closure report saved — 6/6 stories passed; CONDITIONAL GO for P79 late-life implementation; all 6 GO criteria satisfied, no NO-GO criteria triggered; 4 risks with mitigations; clear P78/P79 boundary; 9 deferred items; 6 created docs + 2 modified; zero runtime changes."
+    }
+  ]
+}

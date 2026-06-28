@@ -56,8 +56,8 @@
         "Record the contract in the PRD or an appendix artifact"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Bridge contract complete — ally-network midlife bridge from tavern_hand to jianghu_renown_sage. Checkpoint: tavern_renown_bridge_crossed + route_renown_committed. 3 player-facing signals (currentGoal, lifeMemory, summary). Tavern_hand identity preserved — renown grows from network/reputation, not martial skill. Mutual exclusivity with merchant bridge via ordinary_tavern_midlife_done."
     },
     {
       "id": "P70-005",

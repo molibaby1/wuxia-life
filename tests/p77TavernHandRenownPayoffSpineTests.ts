@@ -3,7 +3,6 @@ import {
   detectSampleLine,
   deriveSampleLineCurrentGoal,
   deriveSampleLineCostLabel,
-  renownAge40Identity,
   isPlayerVisibleSampleLineText,
 } from '../src/p50/sampleLineExpression';
 import {

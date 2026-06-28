@@ -112,8 +112,8 @@
         "List larger route-expansion items that remain deferred"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P72 closure report complete — 8/8 stories done; entry differentiation solid; go decision for deeper work (P73+ on-ramp spine); zero regressions; rollback plan defined"
     }
   ]
 }

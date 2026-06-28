@@ -112,8 +112,8 @@
         "List defer reasons for the route that was not selected or for a no-go result"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report complete. Summarizes inventory, scope contract, evidence/fit/risk comparison, route selection (jianghu_renown_sage), P69/P70 boundary, and defer reasons for merchant_martial_patron. All 8 stories passes:true."
     }
   ]
 }

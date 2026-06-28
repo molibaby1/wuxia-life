@@ -1,3 +1,11 @@
+## [2026-06-29] - P69 Next Route Candidate Reconciliation - COMPLETE
+- P69 next-route candidate reconciliation: all 8 stories completed.
+- **Selected route:** jianghu_renown_sage (江湖名宿) — quality-first selection based on evidence strength, implementation risk, methodology fit, and value density.
+- **Deferred:** merchant_martial_patron (商武一体) — no ordinary-origin bridge seed, higher complexity, higher no-go risk; better as second replication.
+- **Methodology:** Quality-first priority order: evidence strength → implementation risk → methodology fit → value density. Renown wins on 3/4 dimensions.
+- Files: `docs/test-reports/p69-next-route-candidate-inventory.md`, `p69-next-route-selection-scope-contract.md`, `p69-next-route-candidate-comparison.md`, `p69-narrow-reinforcement-assessment.md`, `p69-next-route-candidate-closure-report.md`, `docs/PRD/p69-*.md`, `docs/PRD/p69-*.prd.json`
+- Validation: typecheck ✅ prd.json valid JSON ✅ (documentation-only stage — zero runtime changes)
+---
 ## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-006/007
 - P69-006: Route selection — jianghu_renown_sage selected; merchant_martial_patron deferred. Quality-first priority order: evidence strength → implementation risk → methodology fit → value density. Renown wins on 3/4 dimensions.
 - P69-007: Narrow reinforcement assessment — evidence sufficient; no additional validation needed. Typecheck passes.

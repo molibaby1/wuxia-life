@@ -343,6 +343,97 @@ function testMagnateExpression(): void {
   assert(costLabel === '巨贾负担', `magnate cost label: ${costLabel}`);
 }
 
+// P63: Bridge-entry differentiation tests
+function testP63ApprenticeBridgeEntryDifferentiation(): void {
+  // Apprentice bridge entry at magnate_on_ramp
+  const apprenticeOnRamp = makeState(30, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprenticeOnRamp) ?? '';
+  assert(apprenticeGoal.includes('手艺') || apprenticeGoal.includes('合伙'), `apprentice on-ramp goal: ${apprenticeGoal}`);
+  assert(isPlayerVisibleSampleLineText(apprenticeGoal), `apprentice on-ramp goal has raw key: ${apprenticeGoal}`);
+
+  const apprenticeCost = deriveSampleLineCostLabel(apprenticeOnRamp);
+  assert(apprenticeCost.includes('手艺') || apprenticeCost.includes('合伙'), `apprentice cost label: ${apprenticeCost}`);
+
+  const apprenticeAge40 = makeState(40, {
+    apprentice_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const apprenticeIdentity = deriveSampleLineAge40Identity(apprenticeAge40) ?? '';
+  assert(apprenticeIdentity.includes('学徒') || apprenticeIdentity.includes('手艺'), `apprentice age40 identity: ${apprenticeIdentity}`);
+  assert(isPlayerVisibleSampleLineText(apprenticeIdentity), `apprentice age40 identity has raw key: ${apprenticeIdentity}`);
+}
+
+function testP63TavernBridgeEntryDifferentiation(): void {
+  // Tavern bridge entry at magnate_on_ramp
+  const tavernOnRamp = makeState(30, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const tavernGoal = deriveSampleLineCurrentGoal(tavernOnRamp) ?? '';
+  assert(tavernGoal.includes('人脉') || tavernGoal.includes('铺子'), `tavern on-ramp goal: ${tavernGoal}`);
+  assert(isPlayerVisibleSampleLineText(tavernGoal), `tavern on-ramp goal has raw key: ${tavernGoal}`);
+
+  const tavernCost = deriveSampleLineCostLabel(tavernOnRamp);
+  assert(tavernCost.includes('人脉') || tavernCost.includes('铺子'), `tavern cost label: ${tavernCost}`);
+
+  const tavernAge40 = makeState(40, {
+    tavern_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const tavernIdentity = deriveSampleLineAge40Identity(tavernAge40) ?? '';
+  assert(tavernIdentity.includes('酒肆') || tavernIdentity.includes('人脉'), `tavern age40 identity: ${tavernIdentity}`);
+  assert(isPlayerVisibleSampleLineText(tavernIdentity), `tavern age40 identity has raw key: ${tavernIdentity}`);
+}
+
+function testP63PeasantBridgeEntryDifferentiation(): void {
+  // Peasant bridge entry at magnate_on_ramp
+  const peasantOnRamp = makeState(30, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+  });
+  const peasantGoal = deriveSampleLineCurrentGoal(peasantOnRamp) ?? '';
+  assert(peasantGoal.includes('粮路') || peasantGoal.includes('买卖'), `peasant on-ramp goal: ${peasantGoal}`);
+  assert(isPlayerVisibleSampleLineText(peasantGoal), `peasant on-ramp goal has raw key: ${peasantGoal}`);
+
+  const peasantCost = deriveSampleLineCostLabel(peasantOnRamp);
+  assert(peasantCost.includes('粮路') || peasantCost.includes('买卖'), `peasant cost label: ${peasantCost}`);
+
+  const peasantAge40 = makeState(40, {
+    peasant_merchant_bridge_crossed: true,
+    magnate_on_ramp_done: true,
+    merchant_age40_identity_done: true,
+  });
+  const peasantIdentity = deriveSampleLineAge40Identity(peasantAge40) ?? '';
+  assert(peasantIdentity.includes('农家') || peasantIdentity.includes('粮路'), `peasant age40 identity: ${peasantIdentity}`);
+  assert(isPlayerVisibleSampleLineText(peasantIdentity), `peasant age40 identity has raw key: ${peasantIdentity}`);
+}
+
+function testP63BridgeEntryDistinction(): void {
+  // Verify the three bridge entries produce distinct signals
+  const apprentice = makeState(30, { apprentice_merchant_bridge_crossed: true, magnate_on_ramp_done: true });
+  const tavern = makeState(30, { tavern_merchant_bridge_crossed: true, magnate_on_ramp_done: true });
+  const peasant = makeState(30, { peasant_merchant_bridge_crossed: true, magnate_on_ramp_done: true });
+
+  const apprenticeGoal = deriveSampleLineCurrentGoal(apprentice) ?? '';
+  const tavernGoal = deriveSampleLineCurrentGoal(tavern) ?? '';
+  const peasantGoal = deriveSampleLineCurrentGoal(peasant) ?? '';
+
+  // Each should have its own distinctive keyword
+  assert(apprenticeGoal !== tavernGoal && apprenticeGoal !== peasantGoal, 'bridge goals should differ');
+  assert(tavernGoal !== peasantGoal, 'tavern vs peasant goals should differ');
+
+  // Cost labels should also differ
+  const apprenticeCost = deriveSampleLineCostLabel(apprentice);
+  const tavernCost = deriveSampleLineCostLabel(tavern);
+  const peasantCost = deriveSampleLineCostLabel(peasant);
+  assert(new Set([apprenticeCost, tavernCost, peasantCost]).size === 3, 'bridge cost labels should be distinct');
+}
+
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
@@ -353,6 +444,11 @@ function main(): void {
   testMerchant804ResidualExpression();
   testPost40PayoffExpression();
   testMagnateExpression();
+  // P63: Bridge-entry differentiation tests
+  testP63ApprenticeBridgeEntryDifferentiation();
+  testP63TavernBridgeEntryDifferentiation();
+  testP63PeasantBridgeEntryDifferentiation();
+  testP63BridgeEntryDistinction();
   console.log('p50SampleLineExpressionTests: all passed');
 }
 

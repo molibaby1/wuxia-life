@@ -48,6 +48,10 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
     || flags.merchant_talent
     || flags.merchant_childhood_seed_done
     || flags.p8_route_wealth
+    // P63: Bridge-origin merchant entry flags
+    || flags.apprentice_merchant_bridge_crossed
+    || flags.tavern_merchant_bridge_crossed
+    || flags.peasant_merchant_bridge_crossed
   ) {
     return 'merchant';
   }

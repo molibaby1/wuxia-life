@@ -86,7 +86,7 @@
 2. `!flags.has('renown_midlife_payoff_done')` — 互斥 guard
 3. `!flags.has('orthodox_childhood_seed_done')` — 排除正道种子
 4. `!flags.has('demonic_childhood_seed_done')` — 排除魔道种子
-5. 仅限 tavern_hand origin + ally_network seed
+5. `flags.has('tavern_renown_bridge_crossed')` — 隐含保证 tavern_hand origin + ally_network seed（bridge 事件仅在此组合下触发）
 
 ### Upstream Gate
 `renown_midlife_pressure_done`
@@ -159,6 +159,82 @@
 - Weight: 100
 - Category: `main_story`
 - narrativeScheduling.stageSignals: `["renown_midlife_payoff"]`
+
+### JSON Structure Reference
+参考 `sample-lines-spine.json` 中 pressure event 的结构，choice 类型的 payoff event 顶层结构如下：
+
+```json
+{
+  "id": "renown_midlife_payoff",
+  "version": "1.0.0",
+  "category": "main_story",
+  "priority": 0,
+  "weight": 100,
+  "ageRange": { "min": 43, "max": 47 },
+  "triggers": [{ "type": "age_reach", "value": 43 }],
+  "conditions": [
+    {
+      "type": "expression",
+      "expression": "flags.has('renown_midlife_pressure_done') && !flags.has('renown_midlife_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+    }
+  ],
+  "content": {
+    "title": "人情之解",
+    "text": "...",
+    "description": "P77 江湖名宿 payoff — 人情债之解"
+  },
+  "eventType": "choice",
+  "autoEffects": [
+    { "type": "flag_set", "target": "renown_midlife_payoff_done" },
+    { "type": "flag_set", "target": "renown_age40_identity_done" },
+    { "type": "event_record", "target": "renown_midlife_payoff" }
+  ],
+  "options": [
+    {
+      "id": "hard_holder",
+      "label": "硬扛到底",
+      "description": "都是受过我恩惠的人，这点忙算什么。债，我一个人扛。",
+      "effects": [
+        { "type": "flag_set", "target": "tavern_renown_payoff_hard_holder" },
+        { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+        { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+        { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+      ]
+    },
+    {
+      "id": "breaker",
+      "label": "索性撕破脸",
+      "description": "有些债，本就不该还。假人情，断了也罢。",
+      "effects": [
+        { "type": "flag_set", "target": "tavern_renown_payoff_breaker" },
+        { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
+        { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
+        { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" }
+      ]
+    },
+    {
+      "id": "balancer",
+      "label": "找到平衡",
+      "description": "人情不是债，是往来。该帮的帮，该推的推，有来有往才长久。",
+      "effects": [
+        { "type": "flag_set", "target": "tavern_renown_payoff_balancer" },
+        { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+        { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+        { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+      ]
+    }
+  ],
+  "metadata": {
+    "enabled": true,
+    "tags": ["p77", "renown", "payoff", "mainline", "choice", "once"],
+    "narrativeScheduling": {
+      "stageSignals": ["renown_midlife_payoff"]
+    }
+  }
+}
+```
+
+> **注意**：以上为参考结构，具体字段名和格式需以 `sample-lines-spine.json` 中实际的 choice event 模式为准。P77 implementation 阶段需根据现有事件系统的 choice 事件规范调整。
 
 ---
 

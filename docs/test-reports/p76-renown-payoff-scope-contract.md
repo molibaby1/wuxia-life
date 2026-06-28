@@ -136,10 +136,10 @@ P76 只允许在以下 4 个层面工作：
 
 P76 完成时应产出：
 - [x] Prerequisite audit 文档（P76-001）
-- [ ] Scope contract 文档（P76-002 — 本文档）
-- [ ] Payoff direction comparison 文档（P76-003）
-- [ ] Payoff contract 文档（P76-004）
-- [ ] P77 validation shape（P76-005）
-- [ ] Closure report（P76-006）
+- [x] Scope contract 文档（P76-002 — 本文档）
+- [x] Payoff direction comparison 文档（P76-003）
+- [x] Payoff contract 文档（P76-004）
+- [x] P77 validation shape（P76-005）
+- [x] Closure report（P76-006）
 
 **所有 deliverables 都是文档，零 runtime 代码改动。**

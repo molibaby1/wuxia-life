@@ -112,8 +112,8 @@
         "List larger system items that remain deferred"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report created at docs/test-reports/p61-farm-peasant-playable-bridge-closure-report.md; summarizes all 8 stories, validation evidence, boundaries vs P60/P59/P55, and deferred items."
     }
   ]
 }

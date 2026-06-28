@@ -112,7 +112,7 @@
         "List deeper merchant densification items that remain deferred"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]

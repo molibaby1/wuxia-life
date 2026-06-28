@@ -1,0 +1,147 @@
+{
+  "project": "Wuxia Life P66 Merchant Trilogy Success-Cost Differentiation",
+  "branchName": "codex/p66-wuxia-merchant-trilogy-success-cost-differentiation",
+  "description": "Add the smallest bounded runtime-visible differentiation that makes apprentice, tavern, and peasant merchant success feel costly in different ways, while preserving the existing merchant trilogy skeleton and avoiding a broader merchant content wave.",
+  "userStories": [
+    {
+      "id": "P66-001",
+      "title": "Audit current success-cost signals",
+      "description": "As a maintainer, I want an audit of the current success-cost signals so P66 targets the real thin spots instead of layering generic hardship on top of the trilogy.",
+      "acceptanceCriteria": [
+        "Summarize the existing cost signals across apprentice, tavern, and peasant merchant routes",
+        "Separate route-specific burdens from generic merchant hardship that still reads shared",
+        "Save docs/test-reports/p66-success-cost-signal-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Audit saved at docs/test-reports/p66-success-cost-signal-audit.md. Identified payoff phase as thinnest spot."
+    },
+    {
+      "id": "P66-002",
+      "title": "Lock P66 success-cost scope contract",
+      "description": "As a planner, I want a scope contract so P66 stays focused on success-cost differentiation instead of growing into a broader merchant expansion stage.",
+      "acceptanceCriteria": [
+        "Limit P66 to success-cost differentiation only",
+        "Define allowed layers: light configuration, expression, proof, and narrow tests",
+        "List forbidden expansions: full merchant wave, success-shape mainline work, and playtest platformization",
+        "Save docs/test-reports/p66-success-cost-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract saved at docs/test-reports/p66-success-cost-scope-contract.md."
+    },
+    {
+      "id": "P66-003",
+      "title": "Define apprentice success-cost contract",
+      "description": "As a designer, I want a bounded cost contract for the apprentice merchant path so its success feels tied to partnership, bookkeeping, and control risks rather than generic merchant debt.",
+      "acceptanceCriteria": [
+        "Define the primary cost sources for the apprentice merchant route",
+        "Tie the cost profile to the existing apprentice-to-partnership-to-merchant path",
+        "Keep the apprentice burden distinct from generic merchant debt or generic hardship",
+        "Record the contract in the PRD or an appendix artifact"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Apprentice cost contract defined in PRD Appendix A.1 — partnership/control/bookkeeping cost profile."
+    },
+    {
+      "id": "P66-004",
+      "title": "Define tavern success-cost contract",
+      "description": "As a designer, I want a bounded cost contract for the tavern merchant path so its success feels tied to favor backlash, relationship debt, and information distortion.",
+      "acceptanceCriteria": [
+        "Define the primary cost sources for the tavern merchant route",
+        "Tie the cost profile to the existing familiar-guest, referral, and social-network path",
+        "Keep the tavern burden distinct from generic merchant debt or generic hardship",
+        "Record the contract in the PRD or an appendix artifact"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Tavern cost contract defined in PRD Appendix A.2 — favor/network/information-distortion cost profile."
+    },
+    {
+      "id": "P66-005",
+      "title": "Define peasant success-cost contract",
+      "description": "As a designer, I want a bounded cost contract for the peasant merchant path so its success feels tied to cargo pressure, travel burden, and timing bets.",
+      "acceptanceCriteria": [
+        "Define the primary cost sources for the peasant merchant route",
+        "Tie the cost profile to the existing grain-route, travel, and heavy-bet path",
+        "Keep the peasant burden distinct from generic merchant debt or generic hardship",
+        "Record the contract in the PRD or an appendix artifact"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Peasant cost contract defined in PRD Appendix A.3 — cargo/travel/timing-bet cost profile."
+    },
+    {
+      "id": "P66-006",
+      "title": "Wire success-cost differentiation",
+      "description": "As a developer, I want the three cost profiles wired through bounded carriers and markers so players can feel different burdens without introducing a new merchant system.",
+      "acceptanceCriteria": [
+        "Implement the differentiation only through existing merchant-trilogy carriers, markers, or expression-adjacent wiring",
+        "Do not introduce a new merchant framework or economy system",
+        "Existing P55, P58, P59, P61, P63, and P64 evidence does not regress",
+        "Keep the differentiated routes stably inside the existing merchant trilogy structure"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Wired through existing expression framework in src/p50/sampleLineExpression.ts. No new systems. All P58/P59/P61/P63/P64 tests pass."
+    },
+    {
+      "id": "P66-007",
+      "title": "Add player-facing cost expression",
+      "description": "As a player, I want each merchant route's burden to read as my own kind of pain rather than as one shared merchant stress line.",
+      "acceptanceCriteria": [
+        "Add at least three cost-specific readable signals across existing expression surfaces",
+        "Make apprentice, tavern, and peasant pain sources distinguishable to the player",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "3+ groups of cost-specific signals: (1) payoff cost reflection, (2) cost label persistence, (3) age-40 cost weight. All player-visible."
+    },
+    {
+      "id": "P66-008",
+      "title": "Add targeted success-cost proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the three merchant routes now pay different prices for success.",
+      "acceptanceCriteria": [
+        "Produce one comparison-style targeted proof artifact",
+        "Show success-cost differentiation evidence for apprentice, tavern, and peasant merchant routes",
+        "Do not require full lifetime comparative exhaust",
+        "Ensure the proof directly supports the next success-shape stage"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Proof saved at docs/test-reports/p66-success-cost-differentiation-proof.md. 3-dimension comparison. Directly supports P67."
+    },
+    {
+      "id": "P66-009",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the cost differentiation so later edits do not flatten the pain back into one merchant line.",
+      "acceptanceCriteria": [
+        "Cover markers, player-facing expression, and comparison-level assertions with narrow checks",
+        "Reuse the existing merchant trilogy harnesses",
+        "Do not rewrite the full merchant test suite",
+        "Relevant commands pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "4 new test functions in tests/p50SampleLineExpressionTests.ts: cost label persistence, payoff cost reflection, age-40 cost weight, comparison distinction. All pass."
+    },
+    {
+      "id": "P66-010",
+      "title": "Produce P66 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly how the three merchant routes now pay different prices for success and what remains for the next stage.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p66-success-cost-differentiation-closure-report.md",
+        "Summarize the audit, contracts, configuration, expression, proof, and tests",
+        "State the boundary between P66 and P67",
+        "List larger merchant or new-route work that remains deferred"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Closure report saved at docs/test-reports/p66-success-cost-differentiation-closure-report.md."
+    }
+  ]
+}

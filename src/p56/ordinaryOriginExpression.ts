@@ -157,6 +157,9 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.renown_midlife_pressure_done) {
+    return '这些年欠的人情、攒的面子，如今都成了要还的债。有人登门道谢，有人上门讨债，酒肆的门槛都快被踩平了。你才明白——江湖名声，从来不是白来的。';
+  }
   if (flags.renown_on_ramp_done) {
     return '你第一次以江湖人的身份主持了公道，两拨人都服你的气。从那天起，你的名字在江湖上有了分量——不是因为武功，是因为人脉和面子。';
   }
@@ -234,6 +237,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
   if (origin === 'tavern_hand') {
+    if (flags.renown_midlife_pressure_done) {
+      return '酒肆出身的江湖名宿：靠人脉与面子闯出了名号，只是名声越大，欠下的人情债也越重。';
+    }
     if (flags.renown_on_ramp_done) {
       return '酒肆出身的江湖名宿：凭人脉与面子在江湖上有了名号，主持公道、引荐高人。';
     }

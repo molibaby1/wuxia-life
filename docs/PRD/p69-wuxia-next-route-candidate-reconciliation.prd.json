@@ -28,8 +28,8 @@
         "Save docs/test-reports/p69-next-route-selection-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract defines 4 allowed layers, 5 forbidden expansion categories, quality-first priority order, no-go conditions, and P69/P70 boundary."
     },
     {
       "id": "P69-003",

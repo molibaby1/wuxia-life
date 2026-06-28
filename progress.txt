@@ -1,3 +1,8 @@
+## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-002
+- P69-002: Scope contract document created; defines allowed layers, forbidden expansions, quality-first priority order, no-go conditions, and P69/P70 boundary.
+- Files: `docs/test-reports/p69-next-route-selection-scope-contract.md`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — no runtime changes)
+---
 ## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-001
 - P69-001: Candidate route inventory document created; covers jianghu_renown_sage and merchant_martial_patron with outcome types, linked origins, and evidence surfaces.
 - Files: `docs/test-reports/p69-next-route-candidate-inventory.md`

@@ -77,7 +77,7 @@
         "Clarify boundary with P33 medical short-chain validation"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Pre-commit validation shape for P83."
     },
     {
@@ -92,7 +92,7 @@
         "Give route planning recommendations after entry differentiation (on-ramp / pressure / payoff etc.)"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Closure and handoff to P83 playable bridge."
     }
   ]

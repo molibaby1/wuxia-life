@@ -1,3 +1,14 @@
+## [2026-06-29] - P82 Medical Sage Bridge Design-First - P82-001~006 ✅ COMPLETE
+- P82-001: Medical sage prerequisite audit complete — strong foundation (composite gate + 21 medical events + P33 short-chain + P34 lifetime proof + 2 habit-led on-ramps); gap is ordinary-origin bridge + spine + expression; bridge distance: Close.
+- P82-002: Scope contract locked — 5 allowed layers (audit/compare/contract/shape/closure); 8 forbidden expansions; 7 boundary guards; quality-first priority order; renown regression clean requirement.
+- P82-003: Candidate bridge-shape comparison complete — **Habit-Led Study-Healer Bridge (RECOMMENDED)** vs Social-Momentum Healer Bridge (DEFERRED); 2 candidates evaluated; study-healer wins on evidence strength, implementation risk, methodology fit, and differentiation from renown.
+- P82-004: Medical sage bridge contract LOCKED — tavern_medical_bridge_crossed + route_medical_committed checkpoint; medical_pure + medical_talent set at bridge; 3 player-facing signals (currentGoal/lifeMemory/summary); 2 entry variants (compassionate / pragmatic); mutual exclusivity with merchant AND renown bridges; tavern_hand identity preserved.
+- P82-005: P83 validation shape defined — 14 targeted proof chain nodes; ~15-20 regression assertions across ~14 categories; 12 closure criteria; 7 required regression suites; no full lifetime exhaust; clear boundary with P33 medical short-chain validation.
+- P82-006: Closure report complete — 6/6 stories passed; GO recommendation for P83 playable bridge; 10 deferred items; 8-stage route planning recommendation (P83-P89); 100% scope compliance; zero runtime changes.
+- Files: `docs/test-reports/p82-medical-sage-prerequisite-audit.md`, `docs/test-reports/p82-medical-sage-scope-contract.md`, `docs/test-reports/p82-candidate-bridge-shapes-comparison.md`, `docs/PRD/p82-medical-sage-bridge-contract.md`, `docs/test-reports/p82-p83-validation-shape.md`, `docs/test-reports/p82-medical-sage-bridge-design-closure-report.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes — design-only stage)
+- Status: 6/6 stories complete; GO for P83; ready for A1-verify
+---
 ## [2026-06-29] - P80 Renown Endgame Design-First - P80-001~007 ✅ COMPLETE
 - P80-001: Renown endgame prerequisite audit complete — 6-stage foundation (bridge + entry + on-ramp + pressure + payoff + late-life) verified; 16 flags/markers inventoried; 7 events cataloged; 7 expression surfaces mapped; 3 late-life branch state differences documented; reusable assets and gaps identified; P19 endgame echo reuse assessed.
 - P80-002: Scope contract locked — 7 allowed layers (audit/scope/direction/design/contract/shape/closure); 13 forbidden expansions; lightweight constraint (1 echo event + expression only); 4 scope guardrails (boundedness/flavor/differentiation/GO-NO-GO); GO/NO-GO criteria; rollback strategy; P80/P81 boundary; quality priority order.

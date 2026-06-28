@@ -122,6 +122,19 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     return '商号遍九州，人情债也遍九州';
   }
   if (flags.magnate_on_ramp_done) {
+    // P63: Entry differentiation via bridge-origin markers
+    // Apprentice path: craft mastery + partnership → business as skill extension
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '手艺学透、合伙商路已通，正谋划更大的局面';
+    }
+    // Tavern path: network + referral → business as relationship extension
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '人脉已通、铺子已上手，正借助这些关系扩张';
+    }
+    // Peasant path: labor + trade → business as labor elevation
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '粮路跑通、买卖上手，正学着像商人一样思考';
+    }
     return '产业初成，巨贾之路刚起步';
   }
   if (flags.merchant_age45_expansion_fork_done) {

@@ -1,0 +1,119 @@
+{
+  "project": "Wuxia Life P68 Merchant Trilogy Live Experience Validation",
+  "branchName": "codex/p68-wuxia-merchant-trilogy-live-experience-validation",
+  "description": "Validate whether the completed merchant trilogy optimization sequence is actually player-perceivable through bounded replay, playtest-style readout, and methodology-transfer judgment, without reopening merchant implementation scope.",
+  "userStories": [
+    {
+      "id": "P68-001",
+      "title": "Audit existing merchant trilogy validation assets",
+      "description": "As a maintainer, I want an audit of existing merchant trilogy proof, test, replay, and playtest-style assets so P68 can reuse real repo evidence instead of inventing a parallel validation workflow.",
+      "acceptanceCriteria": [
+        "Summarize the existing merchant trilogy proof, tests, replay-style assets, and playtest-style documents",
+        "Separate assets that are directly reusable from validation gaps that still need bounded readout support",
+        "Save docs/test-reports/p68-merchant-trilogy-validation-asset-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Asset audit complete: 7 proof docs, 6 test suites, 8 closure reports identified. Gaps: no trilogy-specific comparison readout, no intra-merchant playtest, no fixed verdict contract, no transfer readiness judgment."
+    },
+    {
+      "id": "P68-002",
+      "title": "Lock P68 validation scope contract",
+      "description": "As a planner, I want a scope contract so P68 stays a bounded replay, playtest, and verdict stage rather than slipping into fresh merchant implementation.",
+      "acceptanceCriteria": [
+        "Limit P68 to replay, playtest-style readout, comparison, and verdict work",
+        "Define allowed layers: documentation, minimum validation scripts, and comparison readout",
+        "List forbidden expansions: new merchant content, new systems, new bridges, and new mixed endings",
+        "Save docs/test-reports/p68-merchant-trilogy-validation-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract complete: 4 allowed layers (docs, min scripts, comparison readout, verdict framework), 5 forbidden expansions (new content, new systems, new bridges, new endings, platformization)."
+    },
+    {
+      "id": "P68-003",
+      "title": "Define merchant trilogy experience verdict contract",
+      "description": "As a designer, I want a fixed verdict contract so P68 evaluates the trilogy on consistent player-facing dimensions across apprentice, tavern, and peasant routes.",
+      "acceptanceCriteria": [
+        "Define at least three fixed player-facing dimensions: success cost, success shape, and destiny-sentence recall",
+        "Define pass, warning, and fail judgment rules for those dimensions",
+        "Explain how replay evidence and human-readable playtest evidence combine into one verdict",
+        "Record the verdict contract in the PRD or an appendix artifact"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Verdict contract complete: 3 dimensions (success-cost, success-shape, destiny-sentence recall); pass/warning/fail rules; replay+playtest combination matrix; overall verdict rollup; transfer-readiness threshold. Recorded in PRD Appendix A + standalone doc."
+    },
+    {
+      "id": "P68-004",
+      "title": "Produce a bounded merchant trilogy comparison readout",
+      "description": "As a maintainer, I want one bounded comparison readout that lets the three merchant routes be reviewed side by side without requiring a platformized playtest system.",
+      "acceptanceCriteria": [
+        "Produce one merchant trilogy comparison-style readout",
+        "Cover apprentice, tavern, and peasant routes in the same artifact",
+        "Ground the comparison in success-cost, success-shape, and destiny-sentence evidence",
+        "Do not require a full lifetime exhaustive matrix"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Comparison readout complete: 3 routes × 3 dimensions (success-cost, success-shape, destiny-sentence). All 3 dimensions pass on replay evidence. Bounded scope: payoff-phase focused, not full lifetime exhaust."
+    },
+    {
+      "id": "P68-005",
+      "title": "Run merchant trilogy human-readable playtest readout",
+      "description": "As a reviewer, I want a human-readable playtest-style verdict that answers whether the trilogy now feels like three different lives rather than one merchant path with variations.",
+      "acceptanceCriteria": [
+        "Produce at least one human-readable merchant trilogy playtest readout",
+        "State pass, warning, or fail for each of the three routes",
+        "State whether players can retell the differences among the three routes",
+        "Do not require platformized external-user research"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Playtest readout complete: all 3 routes pass (5/5 each); 30-second retell test pass — all 3 clearly distinguishable. Overall verdict: Pass (3/3 dimensions pass). Trilogy feels like 3 different lives, not 1 path with variations."
+    },
+    {
+      "id": "P68-006",
+      "title": "Judge methodology transfer readiness",
+      "description": "As a planner, I want a formal judgment on whether the merchant trilogy optimization method is stable enough to transfer to another route.",
+      "acceptanceCriteria": [
+        "State whether the method has reached a transfer-ready threshold",
+        "If the method is not transfer-ready, identify whether the blocker is validation weakness or content weakness",
+        "If the method is transfer-ready, state the minimum stage order that must be preserved when transferring it",
+        "Write the conclusion into closure or verdict documentation"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Methodology is TRANSFER-READY. All 3 dimensions pass (replay + playtest). Minimum stage order: bridges → entry → flavor → cost → shape+recap. 5 known caveats documented (expression-only, 3-route bias, ordinary→mixed bias, destiny sentence UI gap, internal review only)."
+    },
+    {
+      "id": "P68-007",
+      "title": "Add narrow validation reinforcement if needed",
+      "description": "As a maintainer, I want only the minimum additional validation support needed if existing merchant trilogy evidence is insufficient for a transfer-readiness judgment.",
+      "acceptanceCriteria": [
+        "If existing validation assets are sufficient, record that no additional validation is needed",
+        "If existing validation is insufficient, add only the smallest readout or comparison-level validation asset needed",
+        "Do not rewrite the main P58 through P67 test systems",
+        "Relevant commands pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "No additional validation needed. Existing assets (P58-P67 proofs + tests + P68-004 comparison + P68-005 playtest) are sufficient. Typecheck + p50SampleLineExpressionTests both pass."
+    },
+    {
+      "id": "P68-008",
+      "title": "Produce P68 closure report",
+      "description": "As a maintainer, I want a closure report stating whether the merchant trilogy method is now player-validated and ready to inform the next route choice.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p68-merchant-trilogy-live-experience-closure-report.md",
+        "Summarize the asset audit, scope contract, verdict contract, comparison readout, playtest readout, and transfer-readiness judgment",
+        "State the boundary between P68 and P69",
+        "List full playtest or platformization items that remain deferred"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Closure report complete. Overall verdict: Pass (3/3 dimensions). Methodology: TRANSFER-READY. Zero runtime changes, all tests pass. P68/P69 boundary defined. 6 deferred items documented."
+    }
+  ]
+}

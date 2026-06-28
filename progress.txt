@@ -1,3 +1,12 @@
+## [2026-06-29] - P70 Selected Next Route Design-First Contract - COMPLETE
+- P70 design-first contract for jianghu_renown_sage: all 6 stories completed.
+- **Selected bridge:** Ally-Network Midlife Bridge — tavern_hand + ally_network (childhood seed) → midlife bridge event → tavern_renown_bridge_crossed → jianghu_renown_sage.
+- **Deferred:** Mentor-Bond Martial Seed Bridge — zero existing infrastructure, large scope; revisit after ally-network bridge is proven.
+- **Bridge contract:** Checkpoint flags tavern_renown_bridge_crossed + route_renown_committed; 3 player-facing signals; mutual exclusivity with merchant bridge; tavern_hand identity preserved.
+- **P71 validation:** 11 targeted proof nodes, ~12-16 regression assertions, 10 closure criteria; no full lifetime exhaust.
+- Files: `docs/test-reports/p70-selected-route-prerequisite-audit.md`, `docs/test-reports/p70-selected-route-scope-contract.md`, `docs/test-reports/p70-candidate-bridge-shapes-comparison.md`, `docs/PRD/p70-jianghu-renown-sage-bridge-contract.md`, `docs/test-reports/p70-p71-validation-shape.md`, `docs/test-reports/p70-selected-next-route-design-closure-report.md`, `docs/PRD/p70-*.md`, `docs/PRD/p70-*.prd.json`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — zero runtime changes)
+---
 ## [2026-06-29] - P70 Selected Next Route Design-First Contract - P70-001~005
 - P70-001: Prerequisite audit for jianghu_renown_sage — strong foundation (composite gate + ally_network flag + P32 short-chain proof + tavern_hand seed); gap is playable bridge + post-bridge spine + expression.
 - P70-002: Scope contract — 5 allowed layers, 7 forbidden expansions, 6 boundary guards; quality-first priority order preserved.

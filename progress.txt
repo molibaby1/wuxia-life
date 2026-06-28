@@ -1,3 +1,11 @@
+## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-003/004/005
+- P69-003/004/005: Candidate comparison document created with evidence strength, methodology fit, and implementation risk sections.
+- Evidence: jianghu_renown_sage has stronger foundation (P25 + P32 + tavern_hand seed); merchant_martial_patron has zero ordinary-origin bridge evidence.
+- Methodology fit: merchant_martial_patron has better pure type match (mixed tier), but jianghu_renown_sage has lower scope drift risk → quality-first gives slight edge to renown.
+- Risk: jianghu_renown_sage is lower risk across bridge/expression/validation costs and better fits small-step iteration.
+- Files: `docs/test-reports/p69-next-route-candidate-comparison.md`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — no runtime changes)
+---
 ## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-002
 - P69-002: Scope contract document created; defines allowed layers, forbidden expansions, quality-first priority order, no-go conditions, and P69/P70 boundary.
 - Files: `docs/test-reports/p69-next-route-selection-scope-contract.md`

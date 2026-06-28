@@ -42,8 +42,8 @@
         "Write the comparison into the P69 evidence artifact"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Evidence comparison in p69-next-route-candidate-comparison.md Part 1. jianghu_renown_sage has stronger foundation (P25 wiring + P32 short-chain + tavern_hand seed). merchant_martial_patron has zero ordinary-origin bridge evidence."
     },
     {
       "id": "P69-004",
@@ -56,8 +56,8 @@
         "Write the conclusion into the P69 comparison artifact"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Methodology fit comparison in p69-next-route-candidate-comparison.md Part 2. merchant_martial_patron has better pure type match (mixed tier), but jianghu_renown_sage has lower scope drift risk. Quality-first prioritizes low drift → slight edge to renown."
     },
     {
       "id": "P69-005",
@@ -70,8 +70,8 @@
         "Write the conclusion into the P69 comparison artifact"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Risk comparison in p69-next-route-candidate-comparison.md Part 3. jianghu_renown_sage is lower risk across all three cost dimensions (bridge/expression/validation) and better fits small-step iteration. merchant_martial_patron has higher no-go likelihood due to missing ordinary-origin dual seed."
     },
     {
       "id": "P69-006",

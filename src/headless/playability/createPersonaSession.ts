@@ -13,11 +13,24 @@ import { resolvePersonaYouthRouteSeeds } from '../../p8/personaYouthRouteSeeds';
 
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 
+export function applyPersonaBootstrapFlags(session: HeadlessEngineSession, persona: P8Persona): void {
+  const state = session.getRuntimeState();
+  if (!state.flags) {
+    state.flags = {};
+  }
+  if (state.flags.p8_youth_route_seeds_applied) {
+    return;
+  }
+  state.flags.p8_persona_id = persona.id;
+  Object.assign(state.flags, resolvePersonaYouthRouteSeeds(persona));
+  state.flags.p8_youth_route_seeds_applied = true;
+}
+
 export function createPersonaHeadlessSession(
   persona: P8Persona,
   catalogVersion = DEFAULT_CATALOG_VERSION,
 ): HeadlessEngineSession {
-  return HeadlessEngineSessionImpl.create(
+  const session = HeadlessEngineSessionImpl.create(
     {
       playerName: persona.name,
       gender: persona.gender,
@@ -31,17 +44,11 @@ export function createPersonaHeadlessSession(
       random: new SeededRandomSource(persona.seed),
     },
   );
+  applyPersonaBootstrapFlags(session, persona);
+  return session;
 }
 
-/** Apply P16/P8 youth route seeds once youth band is reached (age may skip 13 in phase loop). */
+/** Idempotent re-apply at youth boundary for sims that skipped bootstrap. */
 export function applyPersonaYouthRouteSeedsAtAge(session: HeadlessEngineSession, persona: P8Persona): void {
-  const state = session.getRuntimeState();
-  const age = state.player?.age ?? 0;
-  if (age < 13) return;
-  if (!state.flags) {
-    state.flags = {};
-  }
-  if (state.flags.p8_youth_route_seeds_applied) return;
-  Object.assign(state.flags, resolvePersonaYouthRouteSeeds(persona));
-  state.flags.p8_youth_route_seeds_applied = true;
+  applyPersonaBootstrapFlags(session, persona);
 }

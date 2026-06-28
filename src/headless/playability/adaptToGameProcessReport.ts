@@ -2,7 +2,7 @@
  * Adapts headless persona run output to GameProcessReport for buildPersonaRunMetrics.
  */
 
-import type { GameProcessReport } from '../../../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../../types/simulationRecordTypes';
 import type { HeadlessPersonaRunConfig, HeadlessPersonaRunResult } from './types';
 
 export function adaptHeadlessRunToGameProcessReport(

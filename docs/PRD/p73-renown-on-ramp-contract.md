@@ -78,32 +78,26 @@
 | `category` | `main_story` |
 | `priority` | `0` |
 | `weight` | `100` |
-| `eventType` | `choice`（给玩家选择：接/不接） |
+| `eventType` | `auto`（与 merchant on-ramp 模式对齐；强制性里程碑事件） |
 
-### 3.2 Choices
+### 3.2 Auto Effects
 
-**Option A: 主持公道（embrace_renown_on_ramp）**
-- 接受挑战，正式踏入江湖名宿之路
-- 设置 `renown_on_ramp_done`
+**Auto 事件（无选择）：** 与 merchant on-ramp (`magnate_on_ramp`) 一致，on-ramp 是强制性里程碑事件，玩家到达后自动触发。
+
+**效果：**
+- 设置 `renown_on_ramp_done`（on-ramp 检查点）
+- 设置 `tavern_renown_on_ramp`（事件触发标记）
 - 效果：reputation +5, connections +4, charisma +2
-- 叙事：你接过了这场调解，凭着认识的人和积攒的面子，竟真把事情摆平了。两拨人都服你的气，临走时都抱拳称一句"兄台高义"。你知道，从今天起，你的名字在江湖上有了分量。
+- 叙事：你接过了这场调解，凭着认识的人和积攒的面子，竟真把事情摆平了。两拨人都服你的气，临走时都抱拳称一句「兄台高义」。你知道，从今天起，你的名字在江湖上有了分量。
 
-**Option B: 婉拒出面（decline_renown_on_ramp）**
-- 婉拒，继续做酒肆里的伙计
-- 不设置 `renown_on_ramp_done`（或设置 `renown_on_ramp_declined`）
-- 效果：charisma +1
-- 叙事：你笑着打了个圆场，说自己就是个跑堂的，哪能主持什么公道。两拨人有些失望，但也没强求。你看着他们离去的背影，心里不知是松了口气，还是有些遗憾。
-
-**Note:** Option B 是"拒绝 on-ramp"的分支，但根据现有模式（bridge 事件也是选择），应该保留玩家选择权。
+**Note:** 选择 auto 而非 choice 的原因：1) 与 merchant on-ramp 模式对齐（magnate_on_ramp 也是 auto）；2) on-ramp 是路线的标志性节点，玩家既然选择了 renown 路线（在 bridge 阶段选择），on-ramp 就是自然进展；3) 如果需要"拒绝 on-ramp"的分支，可以在后续阶段添加。
 
 ### 3.3 Checkpoint Flags
 
 | Flag | Set By | Purpose |
 |------|--------|---------|
-| `renown_on_ramp_done` | Option A | **On-ramp 检查点** — 后续 pressure/payoff 的前置条件 |
-| `tavern_renown_on_ramp` | Both choices | 事件触发标记 |
-| `renown_on_ramp_accepted` | Option A | 接受标记（表达用） |
-| `renown_on_ramp_declined` | Option B | 拒绝标记（表达用） |
+| `renown_on_ramp_done` | Auto event | **On-ramp 检查点** — 后续 pressure/payoff 的前置条件 |
+| `tavern_renown_on_ramp` | Auto event | 事件触发标记（origin-scoped） |
 
 ## 4. Expression Updates
 

@@ -10,6 +10,11 @@
 - Files: `docs/test-reports/p73-renown-on-ramp-*.md`, `docs/PRD/p73-renown-on-ramp-contract.md`, `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/p56/ordinaryOriginExpression.ts`, `tests/p73TavernHandRenownOnRampSpineTests.ts`
 - Validation: JSON valid ✅ typecheck ✅ P71 ✅ P72 ✅ P73 ✅ baseline guard ✅
 - Status: 8/8 stories complete; ready for A1-verify
+
+### PRD 差异记录
+- Contract 最初设计为 choice 事件（2 个选项：接受/拒绝），实际实现为 auto 事件
+- 原因：与 merchant on-ramp (`magnate_on_ramp`) 模式对齐；on-ramp 是路线内的强制性里程碑
+- 已更新 contract 文档以反映实际实现
 ---
 ## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001~007
 - P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps documented.

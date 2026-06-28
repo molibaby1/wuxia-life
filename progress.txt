@@ -1,3 +1,8 @@
+## [2026-06-29] - P80 Renown Endgame Design-First - P80-001
+- P80-001: Renown endgame prerequisite audit complete — 6-stage foundation (bridge + entry + on-ramp + pressure + payoff + late-life) verified; 16 flags/markers inventoried; 7 events cataloged; 7 expression surfaces mapped; 3 late-life branch state differences documented; reusable assets and gaps identified; P19 endgame echo reuse assessed.
+- Files: `docs/test-reports/p80-renown-endgame-prerequisite-audit.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes — design-only stage)
+---
 ## [2026-06-29] - P79 Renown Late-Life Playable Implementation - P79-001~007 ✅ COMPLETE
 - P79-001: Renown late-life spine event wired — 3 auto events in sample-lines-spine.json (burnout/lone_wolf/mentor, age 52-56, post-payoff, payoff marker branching, exclusivity guard, stats per branch).
 - P79-002: Late-life core P0 expression (sample line) complete — sample line cost label (油尽灯枯/逍遥自在/传承授业) + current goal (撑到最后/过好剩下的日子/指点后辈) updated for all 3 branches.

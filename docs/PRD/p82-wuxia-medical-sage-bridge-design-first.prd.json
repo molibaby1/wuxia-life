@@ -31,7 +31,7 @@
         "Output docs/test-reports/p82-medical-sage-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Scope guardrails for the design-first stage."
     },
     {

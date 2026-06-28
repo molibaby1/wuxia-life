@@ -1,0 +1,122 @@
+{
+  "project": "Wuxia Life P77 Renown Payoff Playable Implementation",
+  "branchName": "codex/p77-wuxia-renown-payoff-playable-implementation",
+  "description": "Implement the renown payoff stage (人情债之解) for jianghu_renown_sage tavern_hand seed — runtime choice event wiring, expression updates for all 3 choices, targeted proof, and regression tests. Strictly follows P76 payoff contract.",
+  "userStories": [
+    {
+      "id": "P77-001",
+      "title": "Wire renown payoff spine event",
+      "description": "As a developer, I want the renown payoff event wired through the existing event system so players on the renown route encounter a real payoff milestone with meaningful choices.",
+      "acceptanceCriteria": [
+        "Configure renown_midlife_payoff choice event in sample-lines-spine.json",
+        "Trigger conditions: renown_midlife_pressure_done + age 43-47 + exclusivity guard + no orthodox/demonic",
+        "Set renown_midlife_payoff_done checkpoint flag + renown_age40_identity_done",
+        "Set choice-specific markers: tavern_renown_payoff_hard_holder / tavern_renown_payoff_breaker / tavern_renown_payoff_balancer",
+        "Correct stat changes per choice: A(rep+5,con+3,cha+2) / B(rep-2,con-4,cha-1) / C(rep+2,con+1,cha+3)",
+        "No new event framework or scheduler",
+        "P71/P72/P73/P75 existing evidence does not regress"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-002",
+      "title": "Add payoff player-facing expression — sample line (core P0)",
+      "description": "As a player, I want the renown payoff choice reflected in my sample line status so the route feels like it has a meaningful identity turning point.",
+      "acceptanceCriteria": [
+        "Sample line cost label: pressure state → payoff state (声名之累 / 快意恩仇 / 人情练达)",
+        "Sample line current goal: pressure state → payoff state (硬扛 / 撕破脸 / 找平衡)",
+        "At least 2 payoff-specific readable signals (cost label + current goal)",
+        "Three choices have meaningfully different expressions, not reskinned",
+        "Preserve tavern-born renown flavor",
+        "No new UI components"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-003",
+      "title": "Add payoff player-facing expression — age-40 identity (core P0)",
+      "description": "As a player, I want an age-40 identity summary that reflects my payoff choice so the midlife turning point feels like it defines who I am.",
+      "acceptanceCriteria": [
+        "renownAge40Identity() returns corresponding identity text after payoff",
+        "Option A: 硬撑面子的江湖好人",
+        "Option B: 快意恩仇的独行侠",
+        "Option C: 人情练达的江湖名宿",
+        "Three choices have meaningfully different identity descriptions",
+        "Preserve tavern-born renown flavor"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-004",
+      "title": "Add payoff player-facing expression — ordinary origin (bonus P1)",
+      "description": "As a player, I want additional payoff-specific expressions in the ordinary origin view so the payoff stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin current goal: payoff state update (consistent with sample line)",
+        "Ordinary origin life memory: payoff-specific text (different per choice)",
+        "Ordinary origin summary: payoff state update (different per choice)",
+        "Preserve tavern-born renown flavor",
+        "No new UI components"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-005",
+      "title": "Add targeted payoff proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the renown payoff event fires correctly, all three choices work, and tavern-born renown flavor is preserved.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof (pressure → payoff → expression changes path verification)",
+        "Show 11 core nodes: pre-payoff baseline → event fires → 3 choices visible → Option A flags → Option A stats → Option B flags → Option B stats → Option C flags → Option C stats → cost label per choice → current goal per choice",
+        "Optional bonus nodes: age-40 identity, life memory, origin summary, full chain traceback, mutex with other lines",
+        "No full lifetime exhaust required",
+        "Proof supports whether to continue late-life stage decision",
+        "Save as docs/test-reports/p77-renown-payoff-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the renown payoff stage so future edits do not break the first renown payoff milestone.",
+      "acceptanceCriteria": [
+        "New test file covering payoff stage",
+        "Group 1: Event wiring (4 tests) — existence, choice type, 3 options, conditions, age range",
+        "Group 2: Pre-payoff state (2 tests) — state verification after pressure before payoff",
+        "Group 3: Option A post-payoff (4 tests) — flags + stats + cost label + current goal",
+        "Group 4: Option B post-payoff (4 tests) — flags + stats + cost label + current goal",
+        "Group 5: Option C post-payoff (4 tests) — flags + stats + cost label + current goal",
+        "Group 6: Distinct from merchant payoff (2 tests)",
+        "Group 7: No regression of P71/P72/P73/P75 (5 tests)",
+        "Reuse existing test harness",
+        "All relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P77-007",
+      "title": "Produce P77 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the renown payoff stage now provides and whether late-life stage is justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p77-renown-payoff-closure-report.md",
+        "Summarize event wiring, expressions, proof, tests",
+        "State whether subsequent late-life stage is worth opening",
+        "List larger renown-expansion items that remain deferred",
+        "All 9 closure criteria satisfied (from P76 validation shape)"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

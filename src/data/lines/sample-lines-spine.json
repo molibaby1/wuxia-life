@@ -577,5 +577,73 @@
         "stageSignals": ["renown_midlife_pressure"]
       }
     }
+  },
+  {
+    "id": "renown_midlife_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 43, "max": 47 },
+    "triggers": [{ "type": "age_reach", "value": 43 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_pressure_done') && !flags.has('renown_midlife_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "人情之解",
+      "text": "这些年，人情债像酒肆门口的石狮子，越压越重。有人登门道谢，有人上门讨债，有人借着你的名头在外行事。你站在柜台后，拨着算盘——这人情的账，该清一清了。\n\n窗外的柳树绿了又黄，你想起小时候帮账房先生拨算盘的日子。那时候你只觉得数字有趣，如今才知道——人情这盘账，最难算。",
+      "description": "P77 江湖名宿 payoff — 人情债之解"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_midlife_payoff_done" },
+      { "type": "flag_set", "target": "renown_age40_identity_done" },
+      { "type": "event_record", "target": "renown_midlife_payoff" }
+    ],
+    "choices": [
+      {
+        "id": "hard_holder",
+        "text": "硬扛到底",
+        "description": "都是受过我恩惠的人，这点忙算什么。债，我一个人扛。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_hard_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "breaker",
+        "text": "索性撕破脸",
+        "description": "有些债，本就不该还。假人情，断了也罢。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_breaker" },
+          { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "balancer",
+        "text": "找到平衡",
+        "description": "人情不是债，是往来。该帮的帮，该推的推，有来有往才长久。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_balancer" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p77", "renown", "payoff", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_midlife_payoff"]
+      }
+    }
   }
 ]

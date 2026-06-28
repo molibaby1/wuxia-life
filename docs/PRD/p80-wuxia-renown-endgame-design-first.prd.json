@@ -47,8 +47,8 @@
         "Document conclusion in design document"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CONDITIONAL_GO: Legacy Echo (身后名之声) — 江湖如何记住你. 3 distinct variants (one per late-life branch). Perspective shift: first-person life → third-person memory. Clear distinction from late-life and P19. 0 runtime changes."
     },
     {
       "id": "P80-004",

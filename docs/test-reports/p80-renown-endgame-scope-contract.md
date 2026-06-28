@@ -64,10 +64,10 @@ Endgame (if GO) must be **LIGHTWEIGHT**:
 
 1. **1 echo event maximum** — not a multi-event arc
 2. **Expression updates only** — no new systems, no new framework
-3. **Auto event (recommended) — not another choice point
+3. **Auto event (recommended)** — not another choice point
 4. **3 variants** — one per late-life branch, but all under 1 event
 5. **Age 60-65** — one age window, not multiple stages
-6. **2+ endgame-specific signals — not just "more late-life"
+6. **2+ endgame-specific signals** — not just "more late-life"
 
 **If endgame needs more than this, it's NO-GO by definition.**
 
@@ -121,7 +121,7 @@ Endgame (if GO) must be **LIGHTWEIGHT**:
 
 ## 7. Rollback Strategy
 
-- **If GO but P81 exceeds scope → rollback to P79 late-life-only state
+- **If GO but P81 exceeds scope** → rollback to P79 late-life-only state
 - P79 late-life is complete and stable; endgame is optional enhancement
 - No runtime changes in P80; rollback is trivial (just don't do P81)
 

@@ -155,15 +155,15 @@ Three endgame branches designed, each a distinct variant of the Legacy Echo (身
 
 | Dimension | Branch A: 叹 | Branch B: 遥 | Branch C: 传 |
 |-----------|--------------|-------------|-------------|
-| **Late-life root | 油尽灯枯 | 逍遥自在 | 传承授业 |
-| **Core theme | 名声比人长久 | 传说比人逍遥 | 智慧比人长久 |
-| **Tone | Bittersweet | Playful-mysterious | Warm-satisfied |
-| **Jianghu memory | 只记得你的好，忘了你的代价 | 真假参半的传说，人在哪没人知道 | 智慧通过后辈传下去 |
-| **Player feeling | 苦涩中有释然 | 好笑中有虚无 | 温暖中有满足 |
-| **Cost label | 身后名·叹 | 身后名·遥 | 身后名·传 |
-| **Identity | 熬干了的老传说 | 传说里的神秘人 | 活在传说里的老掌柜 |
-| **Tavern anchor | 老客人叹息 | 酒肆谈资 | 后辈传规矩 |
-| **Stat changes | None | None | None |
+| **Late-life root** | 油尽灯枯 | 逍遥自在 | 传承授业 |
+| **Core theme** | 名声比人长久 | 传说比人逍遥 | 智慧比人长久 |
+| **Tone** | Bittersweet | Playful-mysterious | Warm-satisfied |
+| **Jianghu memory** | 只记得你的好，忘了你的代价 | 真假参半的传说，人在哪没人知道 | 智慧通过后辈传下去 |
+| **Player feeling** | 苦涩中有释然 | 好笑中有虚无 | 温暖中有满足 |
+| **Cost label** | 身后名·叹 | 身后名·遥 | 身后名·传 |
+| **Identity** | 熬干了的老传说 | 传说里的神秘人 | 活在传说里的老掌柜 |
+| **Tavern anchor** | 老客人叹息 | 酒肆谈资 | 后辈传规矩 |
+| **Stat changes** | None | None | None |
 
 ---
 

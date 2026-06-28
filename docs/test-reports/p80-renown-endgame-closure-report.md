@@ -213,12 +213,15 @@ The following remain deferred after P80:
 | Endgame / final legacy implementation | Design-only stage; implementation is P81 (if GO) | P81 (conditional) |
 | Stat threshold gate implementation | Optional enhancement, not required | Future stage |
 | Mentor-bond renown seed | Second seed route, high scope | Future cycle |
+| Second renown achievement line (medical_sage_healer) | Single achievement line for now; second line is separate route | Future cycle |
+| Peak / hybrid renown achievements (Wave 2/3) | Wave 1 only for now; peak/hybrid are later expansion | Future waves |
 | Farm_peasant / town_apprentice renown bridges | Other origins out of scope | Future cycles |
 | Full renown route expansion | Way beyond endgame scope | Far future |
 | Cross-route interaction (renown × merchant) | No route interaction systems | Far future |
 | Multiple endgame events per branch | 1 event per branch per contract | Future expansion |
 | Endgame stat tradeoffs | Endgame is memory, not power | If player feedback demands |
 | Additional expression surfaces | 6 surfaces already cover core UX | If player feedback demands |
+| New UI components | Reuse existing expression surfaces | If player feedback demands |
 | P19 generic endgame integration | Renown endgame is separate, route-specific | After P19 is proven |
 
 ---

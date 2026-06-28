@@ -174,7 +174,7 @@ P19 endgame is **generic, final end of life** (death/epilogue). Renown endgame s
 - Expression infrastructure mature & pattern clear
 
 ### 8.2 Risks/Open Questions
-1. **Redundancy risk:** Late-life already provides strong closure — does endgame add enough value?**
+1. **Redundancy risk:** Late-life already provides strong closure — does endgame add enough value?
 2. **Single origin:** Only tavern_hand — lower replication value
 3. **Scope creep risk:** Endgame could easily expand
 4. **P19 overlap:** Need clear distinction from generic endgame
@@ -195,7 +195,7 @@ P19 endgame is **generic, final end of life** (death/epilogue). Renown endgame s
 
 The renown route has a strong 6-stage foundation with 3 late-life branches. The infrastructure (flags, events, expressions) is mature and the 3-branch structure creates natural endgame branching points.
 
-**The open question is not "can we build endgame?" but "should we build endgame?" — late-life already provides strong closure, and endgame must prove it adds meaningful value (not just "more content") to justify the route.
+**The open question is not "can we build endgame?" but "should we build endgame?"** — late-life already provides strong closure, and endgame must prove it adds meaningful value (not just "more content") to justify the route.
 
 This audit provides the baseline for US-003 direction assessment (GO/NO-GO).
 

@@ -92,7 +92,7 @@ This is the natural culmination of the renown theme:
 
 | Dimension | Late-Life (52-56) | Endgame (60-65) |
 |-----------|-------------------|-----------------|
-| **Perspective | First-person (your life) | Third-person (jianghu's memory) |
+| **Perspective** | First-person (your life) | Third-person (jianghu's memory) |
 | **Core theme** | 你晚年怎么过 | 江湖怎么记住你 |
 | **Agency** | You're still living it | It's happening around you / to your legacy |
 | **Tone** | Earned rest / consequence | Echo / memory / legend |

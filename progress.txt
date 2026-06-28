@@ -1,7 +1,11 @@
-## [2026-06-29] - P74 Renown Pressure Design-First - P74-001
+## [2026-06-29] - P74 Renown Pressure Design-First - P74-001~005
 - P74-001: Renown pressure prerequisite audit complete — 3-stage foundation (bridge + entry + on-ramp) verified; 6+ expression surfaces identified; merchant pressure precedent documented; tavern-born flavor consistent.
-- Files: `docs/test-reports/p74-renown-pressure-prerequisite-audit.md`
-- Validation: prd.json valid JSON ✅ (zero runtime changes in this story)
+- P74-002: Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 12 forbidden expansions, 4 scope guardrails, NO-GO conditions defined.
+- P74-003: Pressure direction comparison complete — 3 candidates evaluated; selected: 人情债渐重 (Favor Debt Burden); rejected: 声名之累, 江湖恩怨站队; 5/5 flavor fit, 5/5 boundedness.
+- P74-004: Pressure contract defined — renown_midlife_pressure auto event (age 37-41); renown_midlife_pressure_done checkpoint; 2+ core signals (cost label + current goal); 5 expression surfaces; payoff flag interfaces reserved.
+- P74-005: P75 validation shape defined — ~12 targeted proof chain nodes (5 core), ~14-17 regression assertions across 5 groups, 9 closure criteria, P71/P72/P73 regression boundaries.
+- Files: `docs/test-reports/p74-renown-pressure-prerequisite-audit.md`, `docs/test-reports/p74-renown-pressure-scope-contract.md`, `docs/test-reports/p74-renown-pressure-direction-comparison.md`, `docs/PRD/p74-renown-pressure-contract.md`, `docs/test-reports/p74-p75-validation-shape.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in these stories)
 ---
 ## [2026-06-29] - P73 Renown On-Ramp Spine - P73-001~008 ✅ COMPLETE
 - P73-001: Renown on-ramp gap audit complete — existing bridge + 6+ expression surfaces identified; 3 core gaps documented.

@@ -28,8 +28,8 @@
         "Save docs/test-reports/p74-renown-pressure-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 12 forbidden expansions, 4 scope guardrails, NO-GO conditions defined."
     },
     {
       "id": "P74-003",
@@ -43,8 +43,8 @@
         "Save comparison document"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Pressure direction comparison complete — 3 candidates evaluated; selected: 人情债渐重 (Favor Debt Burden); rejected: 声名之累 (less unique), 江湖恩怨站队 (too generic/high scope); 5/5 flavor fit, 5/5 boundedness, low risk."
     },
     {
       "id": "P74-004",
@@ -60,8 +60,8 @@
         "Save contract to docs/PRD/p74-renown-pressure-contract.md"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Pressure contract defined — 人情债渐重 direction; renown_midlife_pressure auto event (age 37-41); renown_midlife_pressure_done checkpoint; 2+ core signals (cost label + current goal); 5 expression surfaces; payoff flag interfaces reserved; tavern-born flavor verified."
     },
     {
       "id": "P74-005",
@@ -75,8 +75,8 @@
         "Define regression boundaries for P71/P72/P73 existing evidence"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P75 validation shape defined — ~12 targeted proof chain nodes (5 core), ~14-17 regression assertions across 5 groups, 9 closure criteria, P71/P72/P73 regression boundaries, no full lifetime exhaust required."
     },
     {
       "id": "P74-006",

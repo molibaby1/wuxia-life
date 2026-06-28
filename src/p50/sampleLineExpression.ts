@@ -191,6 +191,8 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
 }
 
 function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  // TODO: renown_payoff_done — for P76+ payoff stage
+  // TODO: renown_age40_identity_done — for P76+ payoff stage
   if (flags.renown_midlife_pressure_done) {
     return '一面维持声名，一面应付越来越重的人情债';
   }
@@ -341,6 +343,8 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
 }
 
 function renownAge40Identity(flags: Record<string, unknown>): string | undefined {
+  // TODO: renown_payoff_done — for P76+ payoff stage
+  // TODO: renown_age40_identity_done — for P76+ payoff stage
   if (!flags.tavern_renown_bridge_crossed) {
     return undefined;
   }

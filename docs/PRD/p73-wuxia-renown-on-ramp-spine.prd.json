@@ -86,8 +86,8 @@
         "Proof supports whether to continue to pressure stage"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Targeted on-ramp proof complete — 8 chain nodes verified: pre-on-ramp baseline, event trigger, checkpoint, 4 expression updates (sampleLine currentGoal, ordinary origin currentGoal, lifeMemory, summary), and no-regression check. Tavern-born flavor verified across all surfaces. Pressure stage readiness recommendation: GO (with conditions). Document: docs/test-reports/p73-renown-on-ramp-targeted-proof.md"
     },
     {
       "id": "P73-007",
@@ -100,8 +100,8 @@
         "Relevant commands pass"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Narrow regression coverage added — tests/p73TavernHandRenownOnRampSpineTests.ts with 19 tests across 5 groups: 1) on-ramp event wiring (5 tests), 2) pre-on-ramp bridge-only state (4 tests), 3) post-on-ramp expression updates (5 tests), 4) distinct from merchant on-ramp (2 tests), 5) no regression of P71/P72 (3 tests). All pass. typecheck ✅ P71 ✅ P72 ✅ P73 ✅ baseline guard ✅"
     },
     {
       "id": "P73-008",
@@ -113,9 +113,9 @@
         "State whether the subsequent pressure stage is worth opening",
         "List larger renown-expansion items that remain deferred"
       ],
-      "priority": 4,
-      "passes": true,
-      "notes": "Targeted on-ramp proof complete — 8 chain nodes verified: pre-on-ramp baseline, event trigger, checkpoint, 4 expression updates (sampleLine currentGoal, ordinary origin currentGoal, lifeMemory, summary), and no-regression check. Tavern-born flavor verified across all surfaces. Pressure stage readiness recommendation: GO (with conditions). Document: docs/test-reports/p73-renown-on-ramp-targeted-proof.md"
+      "priority": 8,
+      "passes": false,
+      "notes": ""
     }
   ]
 }

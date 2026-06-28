@@ -62,7 +62,7 @@
         "Contract written into PRD or appendix"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Core deliverable: bridge + entry contract for P83 implementation."
     },
     {

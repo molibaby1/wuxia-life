@@ -210,5 +210,9 @@ export function readRawRouteKeyFromFlags(flags: Record<string, unknown> | undefi
     return 'merchant';
   }
 
+  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
+    return 'renown';
+  }
+
   return null;
 }

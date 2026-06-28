@@ -264,7 +264,7 @@ Implementation risk edge: **jianghu_renown_sage** by a clear margin.
 
 ---
 
-## Part 4: Final Route Selection (P69-006)
+## Part 5: Final Route Selection (P69-006)
 
 ### 4.1 Recommendation
 

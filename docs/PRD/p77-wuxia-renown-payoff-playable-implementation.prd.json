@@ -17,7 +17,7 @@
         "P71/P72/P73/P75 existing evidence does not regress"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -33,7 +33,7 @@
         "No new UI components"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -49,7 +49,7 @@
         "Preserve tavern-born renown flavor"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -64,7 +64,7 @@
         "No new UI components"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -80,7 +80,7 @@
         "Save as docs/test-reports/p77-renown-payoff-targeted-proof.md"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -100,7 +100,7 @@
         "All relevant commands pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -115,7 +115,7 @@
         "All 9 closure criteria satisfied (from P76 validation shape)"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]

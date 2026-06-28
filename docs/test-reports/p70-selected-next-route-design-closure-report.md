@@ -5,6 +5,7 @@
 > **Branch:** `codex/p70-wuxia-selected-next-route-design-first-contract`
 > **Type:** Closure — design-only, zero runtime changes
 > **Selected Route:** `jianghu_renown_sage` (江湖名宿)
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 
 ---
 

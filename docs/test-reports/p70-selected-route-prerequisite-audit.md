@@ -4,6 +4,7 @@
 > **Stage:** P70 Wuxia Selected Next Route Design-First Contract
 > **Story:** P70-001 — Audit Selected Route Prerequisites
 > **Selected Route:** `jianghu_renown_sage` (江湖名宿)
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 > **Purpose:** Audit existing jianghu_renown_sage assets — origins, flags, gates, expressions, tests — so P70 starts from real gating surfaces rather than assumptions.
 
 ---

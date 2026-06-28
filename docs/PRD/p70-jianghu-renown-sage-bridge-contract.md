@@ -1,6 +1,7 @@
 # P70 Jianghu Renown Sage Bridge Contract
 
 > **Stage:** P70 selected next route design-first contract
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 > **Origin:** `tavern_hand` (酒肆跑堂, ordinary tier)
 > **Target:** `jianghu_renown_sage` (江湖名宿, mainstream tier)
 > **Bridge type:** Ally-network midlife bridge — childhood network seed → midlife reputation event → renown path

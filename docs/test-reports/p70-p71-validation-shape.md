@@ -3,6 +3,8 @@
 > **Date:** 2026-06-29
 > **Stage:** P70 Wuxia Selected Next Route Design-First Contract
 > **Story:** P70-005 — Define P71 Validation Shape
+> **Selected Route:** `jianghu_renown_sage` (江湖名宿)
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 > **Target Stage:** P71 — Playable Bridge Implementation
 > **Purpose:** Fix the validation shape for P71 in advance so the playable bridge work is judged against explicit proof and regression expectations.
 

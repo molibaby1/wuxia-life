@@ -4,6 +4,7 @@
 > **Stage:** P70 Wuxia Selected Next Route Design-First Contract
 > **Story:** P70-003 — Compare Candidate Bridge Shapes Inside The Selected Route
 > **Selected Route:** `jianghu_renown_sage` (江湖名宿)
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 > **Purpose:** Define at least two candidate bridge-shape directions for `jianghu_renown_sage`, bind each to existing repo assets, compare them across narrative fit / system fit / scope cost / small-step iterability, and recommend one primary direction.
 
 ---

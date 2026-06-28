@@ -4,6 +4,7 @@
 > **Stage:** P70 Wuxia Selected Next Route Design-First Contract
 > **Story:** P70-002 — Lock P70 Scope Contract
 > **Selected Route:** `jianghu_renown_sage` (江湖名宿)
+> **Input from:** `docs/test-reports/p69-next-route-candidate-closure-report.md` (jianghu_renown_sage selected)
 > **Purpose:** Lock the scope boundaries of P70 so it remains a design-first stage and does not silently slide into implementation work.
 
 ---

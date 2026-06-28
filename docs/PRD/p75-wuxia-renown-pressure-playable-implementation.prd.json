@@ -16,8 +16,8 @@
         "P71/P72/P73 existing evidence does not regress"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Event added at sample-lines-spine.json; auto type; tavern-born flavor (人情债 in 酒肆); P73 tests pass"
     },
     {
       "id": "P75-002",
@@ -32,8 +32,8 @@
         "No new UI components"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "3 P0 expression updates: costLabel (sampleLine) + currentGoal (sampleLine + ordinaryOrigin); tavern-born flavor preserved"
     },
     {
       "id": "P75-003",
@@ -46,8 +46,8 @@
         "No new UI components"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "2 P1 expression updates: lifeMemory + summary in ordinaryOriginExpression.ts; tavern-born flavor preserved"
     },
     {
       "id": "P75-004",
@@ -60,8 +60,8 @@
         "Placeholders clearly annotated 'for P76+ payoff stage"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "TODO comments added in renownCurrentGoal + renownAge40Identity; no payoff logic implemented"
     },
     {
       "id": "P75-005",
@@ -76,8 +76,8 @@
         "Save as docs/test-reports/p75-renown-pressure-targeted-proof.md"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "5 core nodes + 2 bonus nodes verified; payoff stage GO recommendation included"
     },
     {
       "id": "P75-006",
@@ -94,8 +94,8 @@
         "All relevant commands pass"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "18 tests across 5 groups in p75TavernHandRenownPressureSpineTests.ts; all pass; P71/P72/P73 no regression"
     },
     {
       "id": "P75-007",
@@ -109,8 +109,8 @@
         "All 9 closure criteria satisfied"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report complete; 9/9 criteria satisfied; GO recommendation for P76 payoff stage"
     }
   ]
 }

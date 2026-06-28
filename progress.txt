@@ -1,3 +1,15 @@
+## [2026-06-29] - P75 Renown Pressure Playable Implementation - P75-001~007 ✅ COMPLETE
+- P75-001: Renown pressure spine event wired — `renown_midlife_pressure` auto event in sample-lines-spine.json (age 37-41, post-on-ramp, renown_on_ramp_done gate, exclusivity guard).
+- P75-002: Pressure core P0 expression complete — 3 updates: sample line cost label (江湖声名之累 → 人情债渐重), sample line currentGoal, ordinary origin currentGoal.
+- P75-003: Pressure bonus P1 expression complete — 2 updates: ordinary origin lifeMemory (酒肆门槛被踩平), ordinary origin summary (名声越大，人情债越重).
+- P75-004: Payoff flag interfaces reserved — `renown_payoff_done` + `renown_age40_identity_done` TODO comments in sampleLineExpression.ts; no payoff logic implemented.
+- P75-005: Targeted pressure proof complete — 5 core nodes + 2 bonus nodes verified; tavern-born flavor consistent; payoff stage GO recommendation.
+- P75-006: Narrow regression coverage complete — 18 tests across 5 groups in tests/p75TavernHandRenownPressureSpineTests.ts; all pass.
+- P75-007: Closure report complete — 7/7 stories passed; 9/9 closure criteria satisfied; GO recommendation for P76 payoff stage.
+- Files: `src/data/lines/sample-lines-spine.json`, `src/p50/sampleLineExpression.ts`, `src/p56/ordinaryOriginExpression.ts`, `tests/p75TavernHandRenownPressureSpineTests.ts`, `docs/test-reports/p75-renown-pressure-*.md`, `docs/PRD/p75-*.md`, `docs/PRD/p75-*.prd.json`
+- Validation: JSON valid ✅ typecheck ✅ P71 ✅ P72 ✅ P73 ✅ P75 ✅
+- Status: 7/7 stories complete; ready for A1-verify
+---
 ## [2026-06-29] - P74 Renown Pressure Design-First - P74-001~006 ✅ COMPLETE
 - P74-001: Renown pressure prerequisite audit complete — 3-stage foundation (bridge + entry + on-ramp) verified; 6+ expression surfaces identified; merchant pressure precedent documented; tavern-born flavor consistent.
 - P74-002: Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 12 forbidden expansions, 4 scope guardrails, NO-GO conditions defined.

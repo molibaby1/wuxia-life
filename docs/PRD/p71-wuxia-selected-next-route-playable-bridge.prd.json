@@ -28,8 +28,8 @@
         "State the boundary between P71 and P72"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract saved — 4 allowed layers, 5 forbidden expansions, clear P71/P72 boundary"
     },
     {
       "id": "P71-003",

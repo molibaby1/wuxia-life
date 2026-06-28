@@ -1,3 +1,8 @@
+## [2026-06-29] - P71 Selected Next Route Playable Bridge - P71-001
+- P71-001: Implementation delta audit against P70 bridge contract — small, well-bounded delta (1 new event + 3 expression branches + tests).
+- Files: `docs/test-reports/p71-selected-route-bridge-implementation-audit.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in this story)
+---
 ## [2026-06-29] - P70 Selected Next Route Design-First Contract - COMPLETE
 - P70 design-first contract for jianghu_renown_sage: all 6 stories completed.
 - **Selected bridge:** Ally-Network Midlife Bridge — tavern_hand + ally_network (childhood seed) → midlife bridge event → tavern_renown_bridge_crossed → jianghu_renown_sage.

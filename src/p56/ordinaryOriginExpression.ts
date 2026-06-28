@@ -54,6 +54,17 @@ function apprenticeCurrentGoal(flags: Record<string, unknown>, age: number): str
 }
 
 function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.renown_midlife_payoff_done) {
+    if (flags.tavern_renown_payoff_hard_holder) {
+      return '硬扛所有人情债，保住江湖名声';
+    }
+    if (flags.tavern_renown_payoff_breaker) {
+      return '撕破脸皮，断了不该还的债';
+    }
+    if (flags.tavern_renown_payoff_balancer) {
+      return '拿捏人情往来的分寸，找到平衡';
+    }
+  }
   if (flags.renown_midlife_pressure_done) {
     return '一面维持声名，一面应付越来越重的人情债';
   }
@@ -157,6 +168,17 @@ function apprenticeLifeMemory(flags: Record<string, unknown>): string | undefine
 }
 
 function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
+  if (flags.renown_midlife_payoff_done) {
+    if (flags.tavern_renown_payoff_hard_holder) {
+      return '你把所有人情债都扛了下来。受过你恩惠的人念你的好，你自己却常在夜深人静时叹气——名声是撑住了，人也累垮了。酒肆的老掌柜若还在，大概会说你傻吧。';
+    }
+    if (flags.tavern_renown_payoff_breaker) {
+      return '你撕破了脸，断了那些不该还的假人情。有人骂你忘恩负义，也有人说你活得通透。你不在乎——酒肆里三教九流见多了，真真假假，你分得清。';
+    }
+    if (flags.tavern_renown_payoff_balancer) {
+      return '你拿捏住了人情往来的分寸。该帮的帮，该推的推，有来有往，不欠人情也不结仇。酒肆掌柜的智慧，全被你用在了江湖上。人们说你人情练达，你只是笑笑。';
+    }
+  }
   if (flags.renown_midlife_pressure_done) {
     return '这些年欠的人情、攒的面子，如今都成了要还的债。有人登门道谢，有人上门讨债，酒肆的门槛都快被踩平了。你才明白——江湖名声，从来不是白来的。';
   }
@@ -237,6 +259,17 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     return '平凡学徒：在铺子里学手艺，日子充实但辛苦。';
   }
   if (origin === 'tavern_hand') {
+    if (flags.renown_midlife_payoff_done) {
+      if (flags.tavern_renown_payoff_hard_holder) {
+        return '酒肆出身的江湖名宿：靠人脉与面子闯出了名号，人情债全自己扛，名声越响，担子越重。';
+      }
+      if (flags.tavern_renown_payoff_breaker) {
+        return '酒肆出身的江湖独行：曾靠人脉与面子闯出名号，后来撕破脸断了假人情，反倒活得通透快意。';
+      }
+      if (flags.tavern_renown_payoff_balancer) {
+        return '酒肆出身的江湖名宿：靠人脉与面子闯出了名号，更懂人情往来的分寸，人情练达，游刃有余。';
+      }
+    }
     if (flags.renown_midlife_pressure_done) {
       return '酒肆出身的江湖名宿：靠人脉与面子闯出了名号，只是名声越大，欠下的人情债也越重。';
     }

@@ -363,10 +363,19 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
 }
 
 function renownAge40Identity(flags: Record<string, unknown>): string | undefined {
-  // TODO: renown_payoff_done — for P76+ payoff stage
-  // TODO: renown_age40_identity_done — for P76+ payoff stage
   if (!flags.tavern_renown_bridge_crossed) {
     return undefined;
+  }
+  if (flags.renown_age40_identity_done) {
+    if (flags.tavern_renown_payoff_hard_holder) {
+      return '你是硬撑面子的江湖好人：从酒肆跑堂到江湖名宿，人情债都自己扛，名声响了，担子也重了。';
+    }
+    if (flags.tavern_renown_payoff_breaker) {
+      return '你是快意恩仇的独行侠：从酒肆跑堂到江湖名宿，撕破了假人情，换来了真自由。';
+    }
+    if (flags.tavern_renown_payoff_balancer) {
+      return '你是人情练达的江湖名宿：从酒肆跑堂到江湖名宿，懂人情往来，拿捏得住分寸，游刃有余。';
+    }
   }
   return '你是从酒肆走来的江湖名宿：人脉为基，引荐为径，声名是人情往来的重量。';
 }

@@ -168,6 +168,20 @@ medical_talent_discovery (age 8-16)
 
 This is the original medical.json event chain but it relies on early talent_discovery which is NOT habit-led and has no ordinary-origin seeding.
 
+### 5.4 Medical Talent Flag Sources Summary
+
+`medical_talent` is a talent-confirmation flag that can be set by multiple paths. The bridge contract also sets it at checkpoint as identity confirmation (idempotent — harmless if already present).
+
+| Source Event | Age | Path Type | Notes |
+|--------------|-----|-----------|-------|
+| `medical_talent_discovery` | 8–16 | Traditional talent path | Early-life talent discovery event in medical.json |
+| `p27_study_habit_healer_reinforcement` | 18–28 | Habit-led (study) | Sets medical_talent when study habit triggers healer reinforcement |
+| `p29_study_habit_case_record_duty` | 26–34 | Habit-led (study) | Sets medical_talent again during case-record-duty stage (idempotent) |
+| `p29_social_momentum_healer_network` | 24–32 | Habit-led (social) | Sets medical_talent via social momentum healer network |
+| **Bridge checkpoint (P83)** | 26–30 | Ordinary-origin bridge | Sets medical_talent at bridge crossing as identity confirmation |
+
+**Key observation:** `medical_talent` can be acquired through 4+ different paths before the bridge even fires. The bridge setting it is idempotent — it confirms the character's healer aptitude rather than being the first time they've shown talent. This is consistent with the bridge being a "formalization of identity" moment, not the "discovery of talent" moment.
+
 ---
 
 ## 6. Ordinary-Origin Inventory

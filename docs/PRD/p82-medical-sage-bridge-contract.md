@@ -265,6 +265,7 @@ This is a preliminary design decision — P83 should validate and refine it duri
 | Player is not `tavern_hand` origin | Bridge flags are never checked; no bridge |
 | Player already has `medical_plague_hero` or `medical_imperial` from other sources | `medical_sage_healer` gate still works via those flags; medical bridge is an additional path, not the only path |
 | Player reaches medical gate stats without bridge event | Gate can still unlock via P33/P34 habit-led pattern; bridge is the *playable* path, not the *only* path |
+| Player already has `medical_pure` from habit-led events (p27_study_habit_healer_reinforcement) | Bridge event still sets `medical_pure` (idempotent — no change if already present); bridge checkpoint still fires normally |
 | Player chose poison path (`medical_poison_path`) | `medical_pure` key_choice is blocked; player would need `medical_plague_hero` for dim 2; this is a legitimate alternative path but not the focus of this bridge |
 
 ---

@@ -286,7 +286,7 @@ Following the same pattern as P71 (renown playable bridge):
 1. Add medical bridge midlife event to `ordinary-origin-midlife.json`
 2. Add bridge flags (`tavern_medical_bridge_crossed` + `route_medical_committed`)
 3. Add medical bridge expression branches (3 surfaces × 2 variants)
-4. Add basic medical on-ramp spine (if in scope for P83)
+4. No spine events in P83 — deferred to later stage
 5. Write targeted proof document
 6. Write regression tests (~15–20 assertions)
 7. Run typecheck + regression suites
@@ -336,13 +336,15 @@ Following the renown route methodology (bridge → entry → on-ramp → pressur
 
 | Stage | Focus | Equivalent Renown Stage | Approximate Scope |
 |-------|-------|-------------------------|-------------------|
-| **P83** | Playable bridge + basic on-ramp | P71 + P73 (partial) | Bridge event + expression + basic on-ramp |
+| **P83** | Playable bridge (bridge-only, no spine) | P71 | Bridge event + expression + 2 entry variants |
 | **P84** | Entry differentiation refinement | P72 | Deepen the 2 variants, add more identity signals |
 | **P85** | Pressure stage design-first | P74 | Define healer's burden / growing reputation pressure |
 | **P86** | Pressure implementation | P75 | Wire pressure event + expression |
 | **P87** | Payoff design-first + implementation | P76 + P77 | Divine doctor fame / medical sage status payoff |
 | **P88** | Late-life design-first + implementation | P78 + P79 | Medical late-life branches (e.g., 医圣 / 游医 / 御医) |
 | **P89** | Endgame design-first + implementation | P80 + P81 | Medical endgame echoes / legacy |
+
+> **Note:** P83 仅实施 bridge + entry variant + expression，不包含 spine events；basic on-ramp 可能在 P84 或单独 stage 中实施，具体以 P83 PRD 为准。
 
 ### 10.2 Key Medical-Specific Considerations
 

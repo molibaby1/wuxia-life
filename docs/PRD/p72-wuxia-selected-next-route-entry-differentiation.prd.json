@@ -56,8 +56,8 @@
         "The shared destination chain remains stably triggerable"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Entry-level wiring complete — detectSampleLine recognizes renown, renownCurrentGoal + deriveSampleLineCostLabel + renownAge40Identity added via existing carriers; no new framework; P71 tests still pass"
     },
     {
       "id": "P72-005",

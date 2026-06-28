@@ -1,8 +1,12 @@
 import type { GameState } from '../types/eventTypes';
 
-export type SampleLineId = 'orthodox' | 'demonic' | 'merchant';
+export type SampleLineId = 'orthodox' | 'demonic' | 'merchant' | 'renown';
 
 export function detectSampleLine(flags: Record<string, unknown>): SampleLineId | null {
+  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
+    return 'renown';
+  }
+
   const hasOrthodoxSeed = Boolean(
     flags.orthodox_childhood_seed_done || flags.orthodox_age40_identity_done,
   );
@@ -186,6 +190,16 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   return age >= 16 ? '以小本经营积累财富与人脉' : '观察买卖，等待开张时机';
 }
 
+function renownCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.tavern_renown_bridge_crossed) {
+    return '凭人脉声名在江湖立足，常有人来寻你引荐主事';
+  }
+  if (flags.ally_network) {
+    return age >= 25 ? '积累声名，拓展人脉' : '认识些江湖朋友，攒下些名头';
+  }
+  return '在江湖上闯出名头';
+}
+
 export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
   const line = detectSampleLine(flags);
@@ -236,6 +250,9 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     }
     return '商路债务';
   }
+  if (line === 'renown') {
+    return '江湖声名之累';
+  }
   return '守正代价';
 }
 
@@ -252,7 +269,10 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
   if (line === 'demonic') {
     return demonicCurrentGoal(flags, age);
   }
-  return merchantCurrentGoal(flags, age);
+  if (line === 'merchant') {
+    return merchantCurrentGoal(flags, age);
+  }
+  return renownCurrentGoal(flags, age);
 }
 
 function orthodoxAge40Identity(flags: Record<string, unknown>): string | undefined {
@@ -311,6 +331,13 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   return '你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力';
 }
 
+function renownAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (!flags.tavern_renown_bridge_crossed) {
+    return undefined;
+  }
+  return '你是从酒肆走来的江湖名宿：人脉为基，引荐为径，声名是人情往来的重量。';
+}
+
 export function deriveSampleLineAge40Identity(state: GameState): string | undefined {
   const flags = state.flags ?? {};
   const age = state.player?.age ?? 0;
@@ -326,6 +353,9 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   }
   if (line === 'demonic') {
     return demonicAge40Identity(flags);
+  }
+  if (line === 'renown') {
+    return renownAge40Identity(flags);
   }
   return undefined;
 }

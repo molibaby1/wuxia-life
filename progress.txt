@@ -1,3 +1,14 @@
+## [2026-06-29] - P76 Renown Payoff Design-First - P76-001~006 ✅ COMPLETE
+- P76-001: Renown payoff prerequisite audit complete — 4-stage foundation (bridge + entry + on-ramp + pressure) verified; 5 checkpoint flags, 4 stage markers, 3 spine events, 7 expression surfaces inventoried; upstream gate renown_midlife_pressure_done ready; payoff gaps documented.
+- P76-002: Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 5 forbidden expansion categories, 4 scope guardrails, NO-GO conditions, rollback strategy.
+- P76-003: Payoff direction comparison complete — selected choice-based '人情债之解'; 3 directions: 硬扛到底(A) / 索性撕破脸(B) / 找到平衡(C); rejected auto payoff; all choices have distinct stats/identity/narrative; tavern-born flavor consistent.
+- P76-004: Payoff contract LOCKED — full event spec (renown_midlife_payoff, choice, age 43-47); 5 expression surfaces (cost label, current goal, age40 identity, life memory, origin summary); 3 choice-specific markers + common checkpoint; gate acceptance criteria; reserved late-life flags.
+- P76-005: P77 validation shape defined — 11 core + 5 bonus targeted proof nodes; ~25 regression tests across 7 groups; 9 closure criteria; P71/P72/P73/P75 regression boundaries; no full lifetime exhaust required.
+- P76-006: Closure report complete — 6/6 stories passed; contract LOCKED; GO recommendation for P77 payoff implementation; deferred items documented; P76/P77 boundary clear.
+- Files: `docs/test-reports/p76-renown-payoff-prerequisite-audit.md`, `docs/test-reports/p76-renown-payoff-scope-contract.md`, `docs/test-reports/p76-renown-payoff-direction-comparison.md`, `docs/PRD/p76-renown-payoff-contract.md`, `docs/test-reports/p76-p77-validation-shape.md`, `docs/test-reports/p76-renown-payoff-closure-report.md`, `docs/PRD/p76-wuxia-renown-payoff-design-first.prd.json`
+- Validation: prd.json valid JSON ✅ (zero runtime changes — design-only stage)
+- Status: 6/6 stories complete; ready for A1-verify
+---
 ## [2026-06-29] - P75 Renown Pressure Playable Implementation - P75-001~007 ✅ COMPLETE
 - P75-001: Renown pressure spine event wired — `renown_midlife_pressure` auto event in sample-lines-spine.json (age 37-41, post-on-ramp, renown_on_ramp_done gate, exclusivity guard).
 - P75-002: Pressure core P0 expression complete — 3 updates: sample line cost label (江湖声名之累 → 人情债渐重), sample line currentGoal, ordinary origin currentGoal.

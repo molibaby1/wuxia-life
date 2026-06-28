@@ -42,7 +42,7 @@
         "Keep merchant_magnate intact as the shared mixed outcome"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

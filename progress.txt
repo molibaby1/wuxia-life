@@ -1,3 +1,8 @@
+## [2026-06-29] - P70 Selected Next Route Design-First Contract - P70-001
+- P70-001: Prerequisite audit for jianghu_renown_sage — strong foundation (composite gate + ally_network flag + P32 short-chain proof + tavern_hand seed); gap is playable bridge + post-bridge spine + expression.
+- Files: `docs/test-reports/p70-selected-route-prerequisite-audit.md`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — zero runtime changes)
+---
 ## [2026-06-29] - P69 Next Route Candidate Reconciliation - COMPLETE
 - P69 next-route candidate reconciliation: all 8 stories completed.
 - **Selected route:** jianghu_renown_sage (江湖名宿) — quality-first selection based on evidence strength, implementation risk, methodology fit, and value density.

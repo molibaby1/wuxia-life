@@ -28,8 +28,8 @@
         "Save docs/test-reports/p70-selected-route-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract complete — 5 allowed layers (audit / comparison / contract / validation-shape / closure), 7 forbidden expansions, 6 boundary guards, quality-first priority order preserved."
     },
     {
       "id": "P70-003",

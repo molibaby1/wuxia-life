@@ -1,3 +1,9 @@
+## [2026-06-29] - P70 Selected Next Route Design-First Contract - P70-001/002
+- P70-001: Prerequisite audit for jianghu_renown_sage — strong foundation (composite gate + ally_network flag + P32 short-chain proof + tavern_hand seed); gap is playable bridge + post-bridge spine + expression.
+- P70-002: Scope contract — 5 allowed layers, 7 forbidden expansions, 6 boundary guards; quality-first priority order preserved.
+- Files: `docs/test-reports/p70-selected-route-prerequisite-audit.md`, `docs/test-reports/p70-selected-route-scope-contract.md`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — zero runtime changes)
+---
 ## [2026-06-29] - P70 Selected Next Route Design-First Contract - P70-001
 - P70-001: Prerequisite audit for jianghu_renown_sage — strong foundation (composite gate + ally_network flag + P32 short-chain proof + tavern_hand seed); gap is playable bridge + post-bridge spine + expression.
 - Files: `docs/test-reports/p70-selected-route-prerequisite-audit.md`

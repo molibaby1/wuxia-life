@@ -118,8 +118,8 @@
         "If NO-GO: explain why renown route culminates at late-life and why that's better"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Complete: Closure report saved. 7/7 stories passed. CONDITIONAL_GO for P81 endgame implementation. Endgame direction: Legacy Echo (身后名之声) — 江湖如何记住你. 3 variants (叹/遥/传). Lightweight: 1 echo event + 6 expression updates, no stat changes. 0 runtime changes."
     }
   ]
 }

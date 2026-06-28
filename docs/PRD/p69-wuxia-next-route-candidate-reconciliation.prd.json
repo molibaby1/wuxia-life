@@ -1,0 +1,119 @@
+{
+  "project": "Wuxia Life P69 Next Route Candidate Reconciliation",
+  "branchName": "codex/p69-wuxia-next-route-candidate-reconciliation",
+  "description": "Compare the next plausible route candidates using current repo evidence, methodology fit, and bounded implementation risk, then select one route or declare no-go before any new bridge design begins.",
+  "userStories": [
+    {
+      "id": "P69-001",
+      "title": "Audit next-route candidate inventory",
+      "description": "As a maintainer, I want an inventory of plausible next-route candidates so P69 compares real repo options instead of imaginary future routes.",
+      "acceptanceCriteria": [
+        "Summarize the plausible next-route candidates currently grounded in the repo",
+        "Cover at least jianghu_renown_sage and merchant_martial_patron",
+        "State each candidate's outcome type, linked origins, and existing evidence surfaces",
+        "Save docs/test-reports/p69-next-route-candidate-inventory.md"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Inventory covers both candidates with outcome types, linked origins, and evidence surfaces. Excluded merchant_magnate (already optimized) and healer_swordsman/demonic/orthodox (insufficient ordinary-origin evidence)."
+    },
+    {
+      "id": "P69-002",
+      "title": "Lock P69 route-selection scope contract",
+      "description": "As a planner, I want a scope contract so P69 stays a route-selection stage and does not turn into pre-implementation design work.",
+      "acceptanceCriteria": [
+        "Limit P69 to comparison, ranking, route selection, or no-go",
+        "Define allowed layers: documentation comparison, evidence synthesis, and risk ranking",
+        "List forbidden expansions: new bridge contracts, new implementation, and new validation platforms",
+        "Save docs/test-reports/p69-next-route-selection-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-003",
+      "title": "Compare repo evidence strength",
+      "description": "As a designer, I want a direct comparison of each candidate's current repo evidence so the next route choice is grounded in what already exists.",
+      "acceptanceCriteria": [
+        "Compare wiring evidence, proof, tests, closure reports, and lifetime-trace strength across the candidates",
+        "State which candidate already has prerequisites closer to a playable bridge and which does not",
+        "Separate implementation foundation from idea-level potential",
+        "Write the comparison into the P69 evidence artifact"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-004",
+      "title": "Compare methodology fit",
+      "description": "As a planner, I want to know which candidate best fits the merchant trilogy optimization sequence without forcing major redesign.",
+      "acceptanceCriteria": [
+        "Compare the candidates against the merchant trilogy stage sequence and transfer rules",
+        "State which candidate better fits bridge to entry to later differentiation ordering",
+        "State which candidate would create clear scope drift if forced into the same pattern too early",
+        "Write the conclusion into the P69 comparison artifact"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-005",
+      "title": "Compare bounded implementation risk",
+      "description": "As a maintainer, I want a bounded implementation-risk comparison so the next route choice reflects quality-first priorities rather than value density alone.",
+      "acceptanceCriteria": [
+        "Compare bridge cost, expression cost, and validation cost across the candidates",
+        "State which candidate better fits small-step single-iteration implementation standards",
+        "State the likely no-go conditions for each candidate",
+        "Write the conclusion into the P69 comparison artifact"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-006",
+      "title": "Select one route or declare no-go",
+      "description": "As a planner, I want P69 to end with one selected route or a clear no-go so the next PRD does not start from ambiguity.",
+      "acceptanceCriteria": [
+        "Output one recommended route or an explicit no-go conclusion",
+        "Bind the selection or no-go rationale to repo-grounded evidence",
+        "If merchant_martial_patron is not selected, state why",
+        "If jianghu_renown_sage is not selected, state why"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-007",
+      "title": "Add narrow reinforcement if evidence is missing",
+      "description": "As a maintainer, I want only the smallest additional evidence work needed if the route comparison cannot be decided from current repo truth.",
+      "acceptanceCriteria": [
+        "If current evidence is sufficient, record that no additional validation is needed",
+        "If current evidence is insufficient, add only the smallest candidate-comparison evidence needed",
+        "Do not enter bridge-contract or runtime implementation work",
+        "Relevant commands pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P69-008",
+      "title": "Produce P69 closure report",
+      "description": "As a maintainer, I want a closure report stating which route is selected next and why it is the most stable quality-first continuation.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p69-next-route-candidate-closure-report.md",
+        "Summarize the inventory, scope contract, evidence comparison, methodology fit, implementation-risk comparison, and final route selection",
+        "State the boundary between P69 and P70",
+        "List defer reasons for the route that was not selected or for a no-go result"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

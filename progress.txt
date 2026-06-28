@@ -1,3 +1,8 @@
+## [2026-06-29] - P69 Next Route Candidate Reconciliation - P69-001
+- P69-001: Candidate route inventory document created; covers jianghu_renown_sage and merchant_martial_patron with outcome types, linked origins, and evidence surfaces.
+- Files: `docs/test-reports/p69-next-route-candidate-inventory.md`
+- Validation: prd.json valid JSON ✅ (documentation-only stage — no runtime changes)
+---
 ## [2026-06-28] - P61 Farm-Peasant Playable Bridge (C2 Executor) - COMPLETE
 - P61 farm-peasant playable bridge: all 8 stories completed and verified.
 - Configuration: `ordinary-origin-midlife.json` — `ordinary_peasant_midlife_outside_offer` reframed to grain-trade context; `accept_offer` sets `route_wealth_committed` + `peasant_merchant_bridge_crossed`.

@@ -65,7 +65,7 @@ Targeted proof 需展示以下链路节点：
 - Full birth-to-death 穷举
 - 多种子组合爆炸
 - 所有 origin × 所有 route 的组合验证
-- Stat 阈值的边界测试（stat threshold 是增强项，非必须
+- Stat 阈值的边界测试（stat threshold 是增强项，非必须）
 
 只需要 targeted 的 targeted proof：1 条基准路径上的 pressure 链路打通
 
@@ -122,8 +122,8 @@ P75 新增的 regression tests 应覆盖以下断言：
 
 ### 3.2 Test Count Estimate
 
-- **P0 断言：约 10-12 个
-- **P1 断言：约 4-5 个
+- **P0 断言：** 约 10-12 个
+- **P1 断言：** 约 4-5 个
 - **总计：约 14-17 个断言**
 
 与 P73 on-ramp 的 19 个 tests 规模相当。
@@ -143,7 +143,7 @@ P75 pressure 阶段算 closed 的标准：
 | C3 | **Cost label updates** | "人情债渐重" 显示正确 |
 | C4 | **Current goal updates** | pressure 状态目标显示正确 |
 | C5 | **Tavern-born flavor consistent** | Manual review of all text |
-| C6 | **No P71/P72/P73 regressions | 所有既有测试通过 |
+| C6 | **No P71/P72/P73 regressions** | 所有既有测试通过 |
 | C7 | **Typecheck passes** | `tsc --noEmit` 通过 |
 | C8 | **Guard: sample-lines-baseline passes** | baseline guard 通过 |
 | C9 | **Payoff flag interfaces reserved** | 代码中可见预留接口 |

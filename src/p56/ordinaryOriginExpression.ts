@@ -226,7 +226,7 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
   }
   if (origin === 'tavern_hand') {
     if (flags.tavern_renown_bridge_crossed) {
-      return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足';
+      return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }
     if (flags.tavern_merchant_bridge_crossed) {
       return '酒肆出身的商人：从跑堂伙计到城里铺子，靠人脉铺出了商路。';

@@ -31,8 +31,8 @@
         "Output docs/test-reports/p80-renown-endgame-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Complete: 7 allowed layers, 13 forbidden items, lightweight constraint (1 echo + expression only), 4 scope guardrails, GO/NO-GO criteria, rollback strategy, P80/P81 boundary"
     },
     {
       "id": "P80-003",

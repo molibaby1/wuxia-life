@@ -18,6 +18,7 @@ export const ROUTE_DISPLAY_NAMES: Record<string, string> = {
   hermit: '隐逸',
   orthodox: '正道门派',
   demonic_path: '魔道',
+  renown: '江湖名宿',
 };
 
 const ROUTE_FLAG_LABELS: Record<string, string> = {
@@ -29,6 +30,7 @@ const ROUTE_FLAG_LABELS: Record<string, string> = {
   route_official: '仕途',
   route_merchant: '商路',
   route_wealth_committed: '商路',
+  route_renown_committed: '江湖名宿之路',
 };
 
 const SECT_FACTION_LABELS: Record<string, string> = {
@@ -54,6 +56,7 @@ const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   origin_scholar_family: '书香门第出身',
   origin_merchant_family: '商贾之家出身',
   origin_wuxia_family: '武林世家出身',
+  tavern_renown_bridge_crossed: '踏上江湖名宿之路',
 };
 
 export function formatRouteLabel(raw: string | null | undefined): string {
@@ -133,6 +136,9 @@ export function getPlayerRouteSummary(state: GameState): { name: string; phase: 
   }
   if (flags.route_wanderer || flags.route_border) {
     return { name: '流浪侠客', phase: '路线进行中' };
+  }
+  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
+    return { name: '江湖名宿', phase: '路线进行中' };
   }
   if (
     flags.route_merchant

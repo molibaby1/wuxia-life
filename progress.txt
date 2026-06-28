@@ -1,10 +1,11 @@
-## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~004
+## [2026-06-29] - P72 Selected Next Route Entry Differentiation - P72-001~005
 - P72-001: Post-bridge entry sharedness audit — 6 flattening points identified, 4 addressable in P72 bounded scope.
 - P72-002: Scope contract locked — 4 allowed layers, 4 forbidden expansion categories, boundary guards defined.
 - P72-003: Entry differentiation contract defined — 4 core identity signals, 3 expression surfaces + light markers, tavern-born flavor preserved, shared skeleton intact.
 - P72-004: Entry-level wiring complete — `detectSampleLine()` recognizes renown; renownCurrentGoal + deriveSampleLineCostLabel + renownAge40Identity added via existing carriers; no new framework.
-- Files: `docs/test-reports/p72-*.md`, `docs/PRD/p72-*.md`, `src/p50/sampleLineExpression.ts`
-- Validation: typecheck ✅ P71 ✅ P56 ✅ p50SampleLineExpression ✅
+- P72-005: Player-facing entry expression complete — 4+ readable signals: currentGoal, costLabel, age40Identity, route summary name; tavern-born renown flavor distinct from merchant/orthodox/demonic.
+- Files: `docs/test-reports/p72-*.md`, `docs/PRD/p72-*.md`, `src/p50/sampleLineExpression.ts`, `src/utils/playerFacingLabels.ts`
+- Validation: typecheck ✅ P71 ✅ P56 ✅ p50SampleLineExpression ✅ lifeMemorySummary ✅
 ---
 ## [2026-06-29] - P71 Selected Next Route Playable Bridge - COMPLETE
 - P71 selected next route playable bridge: all 7 stories completed and verified.

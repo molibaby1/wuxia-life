@@ -70,8 +70,8 @@
         "Add or update focused expression tests"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Player-facing entry expression complete — 4+ readable signals: currentGoal, costLabel, age40Identity, route summary name; tavern-born renown flavor distinct from merchant/orthodox/demonic"
     },
     {
       "id": "P72-006",

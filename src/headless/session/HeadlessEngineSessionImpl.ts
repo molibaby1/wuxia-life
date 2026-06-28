@@ -530,14 +530,17 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     const player = this.engine.getGameState().player;
     if (player?.alive === false) return 'terminal';
     const age = player?.age ?? 0;
-    if (this.engine.hasPendingForcedEvent()) {
-      return 'story_event';
-    }
+    // Check passive preference first - passive events (like origin_background at age 1)
+    // are part of passive progression and shouldn't force story_event phase
     if (
       shouldPreferStoryGapPassiveBeforePlanning(age, this.volatile.storyGapPassiveServed)
     ) {
       this.ensurePassivePresentation();
       return 'passive_progression';
+    }
+    // Only return story_event for forced events if not in passive-preferred age range
+    if (this.engine.hasPendingForcedEvent()) {
+      return 'story_event';
     }
     if (!shouldOfferDailyPlanning(age)) {
       return 'passive_progression';

@@ -104,8 +104,8 @@
         "If NO-GO, mark as skipped with rationale"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Expanded from renown endgame pattern for 6 branches + 2-variant differentiation. ~30-40 regression assertions expected."
+      "passes": true,
+      "notes": "P93 validation shape defined. 10 core + 7 bonus proof nodes. ~30-37 tests across 10 groups. 10 closure criteria. No full lifetime exhaust — targeted proof only. Risk-based testing prioritized."
     },
     {
       "id": "P92-007",
@@ -121,8 +121,8 @@
         "If NO-GO: explain why medical route culminates at late-life and why that's better"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "Closure and GO/NO-GO for P93 medical endgame implementation stage. 7/7 stories = complete."
+      "passes": true,
+      "notes": "Closure report complete. 7/7 stories passed. Verdict: CONDITIONAL_GO for P93. Endgame direction: Medical Legacy Echo (医名身后事). 6 variants (3 compassionate + 3 pragmatic). Lightweight: 1 echo event + expression-only + no stat changes."
     }
   ]
 }

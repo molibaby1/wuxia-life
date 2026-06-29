@@ -1,7 +1,8 @@
-## [2026-06-29] - P83 Medical Sage Bridge Playable - P83-001
+## [2026-06-29] - P83 Medical Sage Bridge Playable - P83-001~002
 - P83-001: Implementation delta audit complete — small, well-bounded delta (1 new event + 3 expression branches + tests); 5 existing wiring systems reusable; comparable to P71 renown bridge but with 2 entry variants + 2 mutual exclusivity pairs.
-- Files: `docs/test-reports/p83-medical-sage-bridge-implementation-audit.md`
-- Validation: prd.json valid JSON ✅ (zero runtime changes in this story)
+- P83-002: Runtime scope contract locked — 5 allowed layers (bridge wiring / 2 entry variants / 3 expression surfaces / targeted proof / narrow tests); 17 forbidden expansions; 7 scope guardrails; P83/P84 boundary defined; quality-first priority order; rollback strategy.
+- Files: `docs/test-reports/p83-medical-sage-bridge-implementation-audit.md`, `docs/test-reports/p83-medical-sage-bridge-scope-contract.md`
+- Validation: prd.json valid JSON ✅ (zero runtime changes in these stories)
 ---
 ## [2026-06-29] - P82 Medical Sage Bridge Design-First - P82-001~006 ✅ COMPLETE
 - P82-001: Medical sage prerequisite audit complete — strong foundation (composite gate + 21 medical events + P33 short-chain + P34 lifetime proof + 2 habit-led on-ramps); gap is ordinary-origin bridge + spine + expression; bridge distance: Close.

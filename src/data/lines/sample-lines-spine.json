@@ -1146,5 +1146,235 @@
         "stageSignals": ["medical_payoff"]
       }
     }
+  },
+  {
+    "id": "medical_late_life_compassionate_final",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_holder') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n手抖得越来越厉害了，有时候连针都抓不住。\n\n可只要门外有病人的声音，你还是撑着要起来。\n\n徒弟们哭着劝你歇着，你只摇摇头——\"能多救一个是一个。\"\n\n夜深人静时，你闻着空气里淡淡的药味，想起小时候在酒肆帮着熬药的日子，也是这样的味道。那时候苦，可现在，你觉得值。",
+      "description": "P91 一代名医 late-life — Comp-A 最后仁心"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_final" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "final", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_compassionate_peaceful",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_let_go') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n你常常搬个小凳子坐在门口晒太阳，像当年在酒肆门口看街景一样。\n\n街坊邻居有个头疼脑热的来找你，你随手就给看了——不收钱，就当聊聊天。\n\n徒弟们都长大了，各自开了药庐，你乐得清闲。\n\n有时候想起年轻时候硬扛的那些日子，你摇摇头——那时候真傻，可也真热血。",
+      "description": "P91 一代名医 late-life — Comp-B 从容自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_peaceful" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "peaceful", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_compassionate_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_legacy') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n逢年过节，徒弟们带着徒孙们来看你，热热闹闹一院子。\n\n你坐在中间，看着这些年轻的面孔，像看着年轻时候的自己——一样的仁心，一样的热血。\n\n老掌柜若还在，大概会笑着说\"这酒肆里熬出来的药香，飘到全天下了。\"\n\n你想想也是——从酒肆里的苦孩子，到满天下的仁医，这辈子，值了。",
+      "description": "P91 一代名医 late-life — Comp-C 仁心传承"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_legacy" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_fallen",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_holder') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n门前冷落鞍马稀。\n\n以前送礼的人能排半条街，现在连个问安的都没有。\n\n你倒是看得开——这辈子什么场面没见过？从酒肆里看人脸色，到太医院里给人脸色，再到现在门可罗雀，起起落落，不就是人生吗。\n\n只是有时候深夜醒来，想起当年在酒肆里端盘子的日子——那时候穷，可睡得踏实。",
+      "description": "P91 一代名医 late-life — Prag-A 人走茶凉"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_fallen" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": -2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "fallen", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_wanderer",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_breaker') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n你还在路上。\n\n背着药箱，拄着拐杖，从一个村子走到另一个镇子。\n\n有人认出你，热情招待；没人认识，就自己找个破庙凑合一晚。\n\n你不在乎——这辈子什么场面没见过？从酒肆里听江湖故事，到自己成了江湖故事，够了。只是偶尔经过某个酒肆，会停下来喝一碗——还是当年的味道吗？",
+      "description": "P91 一代名医 late-life — Prag-B 逍遥自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_wanderer" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -3, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "wanderer", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_master",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_master') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n家里常常高朋满座，有达官贵人，也有江湖豪杰，还有你一手带出来的徒弟们。\n\n你坐在主位，笑眯眯地看着，什么人说什么话，你心里门儿清。\n\n有时候想起当年在酒肆里跟老掌柜学看人学说话的日子，忍不住笑——那时候哪能想到，酒肆里学的那点东西，能用一辈子呢？\n\n老掌柜要是知道你现在这样子，大概会得意得胡子都翘起来吧。",
+      "description": "P91 一代名医 late-life — Prag-C 德高望重"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_master" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "master", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
   }
 ]

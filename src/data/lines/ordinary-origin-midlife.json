@@ -209,6 +209,51 @@
       ]
     },
     {
+      "id": "ordinary_tavern_midlife_medical_bridge",
+      "originId": "tavern_hand",
+      "originFlag": "origin_tavern_hand",
+      "ageMin": 28,
+      "ageMax": 28,
+      "title": "医者之名",
+      "prompt": "这些年你在酒肆耳濡目染，见过的病人、听过的方子、偷偷翻过的医书，竟都攒成了本事。起初只是帮熟客看看小病，后来名声渐渐传开——镇上人都说，酒肆那跑堂的，竟有一手神医的本事。",
+      "conditions": [
+        {
+          "type": "expression",
+          "expression": "!flags.has('ordinary_tavern_midlife_done')"
+        }
+      ],
+      "options": [
+        {
+          "id": "embrace_compassionate_healer",
+          "label": "仁心行医",
+          "flags": ["tavern_midlife_medical_bridge", "tavern_embrace_compassionate_healer", "tavern_medical_bridge_crossed", "route_medical_committed", "medical_pure", "medical_talent", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+            { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+            { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+          ]
+        },
+        {
+          "id": "embrace_pragmatic_healer",
+          "label": "世故行医",
+          "flags": ["tavern_midlife_medical_bridge", "tavern_embrace_pragmatic_healer", "tavern_medical_bridge_crossed", "route_medical_committed", "medical_pure", "medical_talent", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+            { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
+            { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+          ]
+        },
+        {
+          "id": "decline_medical",
+          "label": "留在酒肆",
+          "flags": ["tavern_midlife_medical_bridge", "tavern_decline_medical", "ordinary_tavern_midlife_done"],
+          "effects": [
+            { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" }
+          ]
+        }
+      ]
+    },
+    {
       "id": "ordinary_tavern_midlife_renown_bridge",
       "originId": "tavern_hand",
       "originFlag": "origin_tavern_hand",

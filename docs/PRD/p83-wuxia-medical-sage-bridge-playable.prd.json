@@ -47,7 +47,7 @@
         "Existing related evidence does not regress (P56/P58/P59/P61/P71/P72)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Core implementation: bridge event + 2 variants + flag chain + mutual exclusivity."
     },
     {

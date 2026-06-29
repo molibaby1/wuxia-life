@@ -110,7 +110,7 @@
         "Give route planning recommendations after entry differentiation (on-ramp / pressure / payoff etc.)"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Closure and handoff to P84 entry differentiation refinement."
     }
   ]

@@ -1,0 +1,130 @@
+{
+  "project": "Wuxia Life P89 Medical Payoff Playable Implementation",
+  "branchName": "codex/p89-wuxia-medical-payoff-playable-implementation",
+  "description": "Implement the medical payoff stage for medical_sage_healer tavern_hand seed — 2 choice events (compassionate + pragmatic), 6 total branches with full expression updates (cost label, current goal, age-40 identity, life memory, summary), targeted proof, and regression tests. Strictly follows P88 payoff contract.",
+  "userStories": [
+    {
+      "id": "P89-001",
+      "title": "Wire medical payoff spine events (2 variants)",
+      "description": "As a developer, I want both medical payoff choice events wired through the existing event system so players on the medical route encounter real payoff milestones with meaningful choices.",
+      "acceptanceCriteria": [
+        "Configure medical_payoff_compassionate choice event in sample-lines-spine.json (age 42-46)",
+        "Configure medical_payoff_pragmatic choice event in sample-lines-spine.json (age 43-47)",
+        "Trigger conditions: medical_midlife_pressure_done + variant marker + age range + exclusivity guard + no orthodox/demonic",
+        "Both events set medical_payoff_done checkpoint flag + medical_age40_identity_done",
+        "Compassionate choice markers: tavern_medical_payoff_compassionate_holder / let_go / legacy",
+        "Pragmatic choice markers: tavern_medical_payoff_pragmatic_holder / breaker / master",
+        "Correct stat changes per choice (per P88 contract section 5)",
+        "No new event framework or scheduler",
+        "P83/P84/P85/P87 existing evidence does not regress"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "2 choice events = 6 total branches. Core runtime wiring for medical payoff."
+    },
+    {
+      "id": "P89-002",
+      "title": "Add payoff player-facing expression — sample line (core P0)",
+      "description": "As a player, I want the medical payoff choice reflected in my sample line status so the route feels like it has a meaningful identity turning point.",
+      "acceptanceCriteria": [
+        "Sample line cost label: pressure state → payoff state (6 distinct labels)",
+        "Sample line current goal: pressure state → payoff state (6 distinct goals)",
+        "At least 2 payoff-specific readable signals (cost label + current goal)",
+        "Six choices have meaningfully different expressions, not reskinned",
+        "Two variants have genuinely different expressions (not mirrored)",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Core P0 expression surfaces. 6 branches × 2 signals = 12 expression updates."
+    },
+    {
+      "id": "P89-003",
+      "title": "Add payoff player-facing expression — age-40 identity (core P0)",
+      "description": "As a player, I want an age-40 identity summary that reflects my payoff choice so the midlife turning point feels like it defines who I am.",
+      "acceptanceCriteria": [
+        "medicalAge40Identity() returns corresponding identity text after payoff",
+        "Compassionate A: 油尽灯枯的仁心医者",
+        "Compassionate B: 释然通透的医者",
+        "Compassionate C: 传道授业的仁医之师",
+        "Pragmatic A: 声名赫赫的权贵御医",
+        "Pragmatic B: 快意恩仇的江湖游医",
+        "Pragmatic C: 人情练达的一代名医",
+        "Six choices have meaningfully different identity descriptions",
+        "Preserve tavern-born medical healer flavor"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Core P0 identity surface. 6 unique age-40 identities."
+    },
+    {
+      "id": "P89-004",
+      "title": "Add payoff player-facing expression — ordinary origin (bonus P1)",
+      "description": "As a player, I want additional payoff-specific expressions in the ordinary origin view so the payoff stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin current goal: payoff state update (consistent with sample line or tavern-flavored variant)",
+        "Ordinary origin life memory: payoff-specific text (different per choice, 6 total)",
+        "Ordinary origin summary: payoff state update (different per choice, 6 total)",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Bonus P1 expression surfaces. Life memory and summary depth."
+    },
+    {
+      "id": "P89-005",
+      "title": "Add targeted payoff proof (6 branches)",
+      "description": "As a maintainer, I want a bounded proof artifact showing that both medical payoff events fire correctly, all 6 choices work, and tavern-born healer flavor is preserved.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof (pressure → payoff → expression changes path verification, both variants)",
+        "Show core nodes: pre-payoff baseline → 2 events fire → 3 choices visible per variant → 6 choices flags+stats → cost label per choice → current goal per choice",
+        "Optional bonus nodes: age-40 identity (6 branches), life memory, origin summary, full chain traceback, variant mutex",
+        "No full lifetime exhaust required",
+        "Proof supports whether to continue late-life stage decision",
+        "Save as docs/test-reports/p89-medical-payoff-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Targeted proof covering all 6 payoff branches + 2 variants."
+    },
+    {
+      "id": "P89-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the medical payoff stage so future edits do not break the first medical payoff milestone.",
+      "acceptanceCriteria": [
+        "New test file covering payoff stage (2 variants × 3 choices)",
+        "Group 1: Event wiring — 2 events exist, choice type, 3 options each, conditions, age ranges",
+        "Group 2: Pre-payoff state — state verification after pressure before payoff (both variants)",
+        "Group 3: Compassionate 3 choices post-payoff — flags + stats + cost label + current goal",
+        "Group 4: Pragmatic 3 choices post-payoff — flags + stats + cost label + current goal",
+        "Group 5: Age-40 identity (6 branches, P1)",
+        "Group 6: Two-variant differentiation — compassionate ≠ pragmatic",
+        "Group 7: Six-branch differentiation — all 6 branches different",
+        "Group 8: Distinct from renown/merchant payoff",
+        "Group 9: No regression of P83/P84/P85/P87",
+        "Reuse existing test harness",
+        "All relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "~55-65 regression assertions across 9 groups. Covers both variants + all 6 branches."
+    },
+    {
+      "id": "P89-007",
+      "title": "Produce P89 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the medical payoff stage now provides and whether late-life stage is justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p89-medical-payoff-closure-report.md",
+        "Summarize event wiring, expressions, proof, tests",
+        "State whether subsequent late-life stage is worth opening (GO / NO-GO)",
+        "List larger medical-expansion items that remain deferred",
+        "All 14 closure criteria satisfied (from P88 validation shape)"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P90 medical late-life design-first stage."
+    }
+  ]
+}

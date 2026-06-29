@@ -243,7 +243,26 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
 }
 
 function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
-  // TODO: medical_payoff_done / medical_age40_identity_done — for P88+ payoff stage
+  if (flags.medical_payoff_done) {
+    if (flags.tavern_medical_payoff_compassionate_holder) {
+      return '趁着还能动，能多救一个是一个';
+    }
+    if (flags.tavern_medical_payoff_compassionate_let_go) {
+      return '量力而行，把有限的精力留给真正需要的人';
+    }
+    if (flags.tavern_medical_payoff_compassionate_legacy) {
+      return '把医术和仁心传下去，让更多人能得到救治';
+    }
+    if (flags.tavern_medical_payoff_pragmatic_holder) {
+      return '维持各方人情，在权贵圈里站稳脚跟';
+    }
+    if (flags.tavern_medical_payoff_pragmatic_breaker) {
+      return '断了权贵的人情，只给愿意给的人看病';
+    }
+    if (flags.tavern_medical_payoff_pragmatic_master) {
+      return '拿捏人情往来的分寸，游刃有余地行走在权贵之间';
+    }
+  }
   if (flags.tavern_medical_pressure_compassionate) {
     return '一面撑着身子救人，一面看着自己的仁心一点点耗尽';
   }
@@ -358,7 +377,26 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '江湖声名之累';
   }
   if (line === 'medical') {
-    // TODO: tavern_medical_payoff_compassionate / tavern_medical_payoff_pragmatic — for P88+ payoff stage
+    if (flags.medical_payoff_done) {
+      if (flags.tavern_medical_payoff_compassionate_holder) {
+        return '油尽灯枯';
+      }
+      if (flags.tavern_medical_payoff_compassionate_let_go) {
+        return '释然行医';
+      }
+      if (flags.tavern_medical_payoff_compassionate_legacy) {
+        return '仁心传承';
+      }
+      if (flags.tavern_medical_payoff_pragmatic_holder) {
+        return '声名所累';
+      }
+      if (flags.tavern_medical_payoff_pragmatic_breaker) {
+        return '快意江湖';
+      }
+      if (flags.tavern_medical_payoff_pragmatic_master) {
+        return '人情练达';
+      }
+    }
     if (flags.tavern_medical_pressure_compassionate) {
       return '仁心耗尽';
     }
@@ -494,6 +532,31 @@ function renownAge40Identity(flags: Record<string, unknown>): string | undefined
   return '你是从酒肆走来的江湖名宿：人脉为基，引荐为径，声名是人情往来的重量。';
 }
 
+function medicalAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (!flags.medical_age40_identity_done) {
+    return undefined;
+  }
+  if (flags.tavern_medical_payoff_compassionate_holder) {
+    return '你是油尽灯枯的仁心医者：从酒肆帮工到一代名医，一辈子救了无数人，唯独忘了救自己。';
+  }
+  if (flags.tavern_medical_payoff_compassionate_let_go) {
+    return '你是释然通透的医者：从酒肆帮工到一代名医，曾以为自己能救所有人，直到身体垮了才学会量力而行。';
+  }
+  if (flags.tavern_medical_payoff_compassionate_legacy) {
+    return '你是传道授业的仁医之师：从酒肆帮工到一代名医，身体垮了，但仁心没断，医术和医德一起传了下去。';
+  }
+  if (flags.tavern_medical_payoff_pragmatic_holder) {
+    return '你是声名赫赫的权贵御医：从酒肆帮工到一代名医，靠人情世故闯出了名头，成了权贵座上宾，只是再也脱不开身。';
+  }
+  if (flags.tavern_medical_payoff_pragmatic_breaker) {
+    return '你是快意恩仇的江湖游医：从酒肆帮工到一代名医，曾在权贵圈里风生水起，后来撕破脸断了人情，反倒活得自在。';
+  }
+  if (flags.tavern_medical_payoff_pragmatic_master) {
+    return '你是人情练达的一代名医：从酒肆帮工到一代名医，深谙人情世故，拿捏得恰到好处，谁都给面子，谁也绑不住。';
+  }
+  return undefined;
+}
+
 export function deriveSampleLineAge40Identity(state: GameState): string | undefined {
   const flags = state.flags ?? {};
   const age = state.player?.age ?? 0;
@@ -512,6 +575,9 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   }
   if (line === 'renown') {
     return renownAge40Identity(flags);
+  }
+  if (line === 'medical') {
+    return medicalAge40Identity(flags);
   }
   return undefined;
 }

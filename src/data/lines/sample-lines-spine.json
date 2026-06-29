@@ -1004,5 +1004,147 @@
         "stageSignals": ["medical_midlife_pressure"]
       }
     }
+  },
+  {
+    "id": "medical_payoff_compassionate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 42, "max": 46 },
+    "triggers": [{ "type": "age_reach", "value": 42 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_midlife_pressure_done') && flags.has('tavern_medical_pressure_compassionate') && !flags.has('medical_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "仁心之重",
+      "text": "这些年，药庐的灯夜夜亮着。你的身子一天不如一天，但求医的人越来越多。周边村子的、外乡来的、背着铺盖卷在酒肆门口等天亮的。\n\n老掌柜劝你歇歇，你摆摆手说「救人要紧」。可这日清晨，你刚拿起药方，手就开始发颤——你知道，自己撑不了多久了。\n\n窗外的阳光照进来，你忽然想起小时候在酒肆里看老掌柜给穷苦人免账——那时候你只觉得他心善，如今才知道，仁心这东西，是真的要拿命去填的。\n\n可你，打算怎么填？",
+      "description": "P89 一代名医 payoff — 仁心医者 variant 抉择节点（向内消耗的三种归宿）"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_payoff_done" },
+      { "type": "flag_set", "target": "medical_age40_identity_done" },
+      { "type": "event_record", "target": "medical_payoff_compassionate" }
+    ],
+    "choices": [
+      {
+        "id": "compassionate_holder",
+        "text": "硬扛到底",
+        "description": "能多救一个是一个。趁着还能动，多看几个。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "compassionate_let_go",
+        "text": "学会放手",
+        "description": "我不是神。每日十诊，量力而行。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_let_go" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "compassionate_legacy",
+        "text": "找到传承",
+        "description": "找个徒弟吧。医术要传下去，仁心也是。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_legacy" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p89", "medical", "payoff", "compassionate", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_payoff"]
+      }
+    }
+  },
+  {
+    "id": "medical_payoff_pragmatic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 43, "max": 47 },
+    "triggers": [{ "type": "age_reach", "value": 43 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_midlife_pressure_done') && flags.has('tavern_medical_pressure_pragmatic') && !flags.has('medical_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情之局",
+      "text": "这些年，你在镇上权贵间混得风生水起。张员外的小妾、李知府的幕僚、王捕头的亲戚……认识的人越来越多，欠的人情也越来越重。\n\n这日，酒肆里又来了一拨人——有来道谢的，有来求人的，有带着名帖请你过府的。你站在柜台后，看着一拨又一拨的人，忽然想起小时候在这儿见惯的人情往来——那时候你只觉得热闹，如今才知道，这人情网，是真的能把人缠住的。\n\n有人递来一张请帖——总督府的，请你去给夫人诊脉。你接过来，指尖碰到烫金的帖子，忽然想问自己：这人情的局，你打算怎么了？",
+      "description": "P89 一代名医 payoff — 世故人医 variant 抉择节点（向外束缚的三种归宿）"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_payoff_done" },
+      { "type": "flag_set", "target": "medical_age40_identity_done" },
+      { "type": "event_record", "target": "medical_payoff_pragmatic" }
+    ],
+    "choices": [
+      {
+        "id": "pragmatic_holder",
+        "text": "硬扛人情",
+        "description": "名声就是一切。这局，我撑下去。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 60, "operator": "add" }
+        ]
+      },
+      {
+        "id": "pragmatic_breaker",
+        "text": "撕破脸皮",
+        "description": "有些债，不该还。不伺候了。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_breaker" },
+          { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": -5, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "pragmatic_master",
+        "text": "人情练达",
+        "description": "人情不是债，是往来。有来有往，才长久。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_master" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p89", "medical", "payoff", "pragmatic", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_payoff"]
+      }
+    }
   }
 ]

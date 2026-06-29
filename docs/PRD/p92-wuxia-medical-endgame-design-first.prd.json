@@ -47,8 +47,8 @@
         "Document conclusion in design document"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "Expected direction: Legacy Echo (身后名之声) — 江湖/世人如何记住这位医者. Perspective shift: first-person life → third-person memory."
+      "passes": true,
+      "notes": "Verdict: CONDITIONAL_GO. Core direction: Medical Legacy Echo (医名身后事) — 世人如何记住这位医者. 2 legacy axes: Compassionate = spiritual/healing (薪火相传), Pragmatic = social/medical (医名远播). 6 distinct variants. Perspective shift: first-person life → third-person memory."
     },
     {
       "id": "P92-004",

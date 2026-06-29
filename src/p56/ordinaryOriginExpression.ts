@@ -96,6 +96,9 @@ function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string 
   if (flags.tavern_renown_bridge_crossed) {
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
+  if (flags.tavern_medical_bridge_crossed) {
+    return '渐渐有人寻你看病，酒肆后面辟出了一间小药庐';
+  }
   if (flags.tavern_merchant_bridge_crossed) {
     return '城里铺子已上手，酒肆人脉铺出了商路';
   }
@@ -232,6 +235,15 @@ function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
   if (flags.tavern_renown_bridge_crossed) {
     return '你凭着酒肆里攒下的人脉和名声，渐渐在江湖上有了名号。人们不是来找你喝酒，是来寻你引荐、求你主事。';
   }
+  if (flags.tavern_medical_bridge_crossed) {
+    if (flags.tavern_embrace_compassionate_healer) {
+      return '你在酒肆里耳濡目染，竟自学成了一手医术。起初只是帮熟客看看小病，后来名声渐渐传开，镇上人都称你一声小神医。你见不得人受苦，有钱没钱都给看——酒肆后面的柴房改成了小药庐，看病的人比喝酒的还多。';
+    }
+    if (flags.tavern_embrace_pragmatic_healer) {
+      return '跑堂的出身，没想到竟走上了行医的路。这些年在酒肆里见过的人、听过的方子、偷偷翻过的医书，竟都攒成了本事。你看病收钱，也看人下菜碟——镇上的大户人家都捧你，穷人家也说你公道。名声和日子都渐渐好了起来。';
+    }
+    return '你凭着自学的医术，在镇上有了些神医的名头。酒肆后面辟出了一间小药庐，来找你看病的人络绎不绝。';
+  }
   if (flags.tavern_merchant_bridge_crossed) {
     return '你靠着酒肆积累的人脉进了城里的铺子，从跑堂伙计踏上了商路。';
   }
@@ -344,6 +356,9 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
     }
     if (flags.tavern_renown_bridge_crossed) {
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
+    }
+    if (flags.tavern_medical_bridge_crossed) {
+      return '酒肆出身的医者：靠自学和经验在镇上行医，渐渐有了神医的名头。';
     }
     if (flags.tavern_merchant_bridge_crossed) {
       return '酒肆出身的商人：从跑堂伙计到城里铺子，靠人脉铺出了商路。';

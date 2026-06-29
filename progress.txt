@@ -1,8 +1,9 @@
-## [2026-06-29] - P83 Medical Sage Bridge Playable - P83-001~003
+## [2026-06-29] - P83 Medical Sage Bridge Playable - P83-001~004
 - P83-001: Implementation delta audit complete — small, well-bounded delta (1 new event + 3 expression branches + tests); 5 existing wiring systems reusable; comparable to P71 renown bridge but with 2 entry variants + 2 mutual exclusivity pairs.
 - P83-002: Runtime scope contract locked — 5 allowed layers (bridge wiring / 2 entry variants / 3 expression surfaces / targeted proof / narrow tests); 17 forbidden expansions; 7 scope guardrails; P83/P84 boundary defined; quality-first priority order; rollback strategy.
 - P83-003: Bridge wiring + 2 entry variants complete — `ordinary_tavern_midlife_medical_bridge` event added (age 28, tavern_hand only); 2 embrace choices (仁心医者 compassionate / 世故人医 pragmatic) with distinct stats/flags; decline choice sets ordinary_tavern_midlife_done only; bridge checkpoint flags: tavern_medical_bridge_crossed + route_medical_committed + medical_pure + medical_talent (idempotent); medical_pure verified to satisfy key_choices dim 2 of medical_sage_healer gate; mutual exclusivity via ordinary_tavern_midlife_done.
-- Files: `docs/test-reports/p83-medical-sage-bridge-implementation-audit.md`, `docs/test-reports/p83-medical-sage-bridge-scope-contract.md`, `src/data/lines/ordinary-origin-midlife.json`
+- P83-004: Bridge player-facing expression complete — 3 surfaces updated: tavernCurrentGoal (medical bridge branch), tavernLifeMemory (medical bridge with 2 variant-specific texts: compassionate + pragmatic), deriveOrdinaryOriginSummary (tavern-hand medical branch); tavern_hand identity preserved (detectOrdinaryOrigin still returns 'tavern_hand'); no new UI components; style consistent with existing tavern_hand expressions (colloquial, vivid, tavern-grounded).
+- Files: `docs/test-reports/p83-medical-sage-bridge-implementation-audit.md`, `docs/test-reports/p83-medical-sage-bridge-scope-contract.md`, `src/data/lines/ordinary-origin-midlife.json`, `src/p56/ordinaryOriginExpression.ts`
 - Validation: JSON valid ✅ typecheck ✅ P56 ✅ P59 ✅ P71 ✅
 ---
 ## [2026-06-29] - P82 Medical Sage Bridge Design-First - P82-001~006 ✅ COMPLETE

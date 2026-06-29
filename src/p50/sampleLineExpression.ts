@@ -573,6 +573,27 @@ function renownAge40Identity(flags: Record<string, unknown>): string | undefined
 }
 
 function medicalAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (flags.medical_late_life_identity_done) {
+    if (flags.tavern_medical_late_compassionate_final) {
+      return '你是燃尽自己的最后仁心：从酒肆里的苦孩子到一代名医，你硬扛了一辈子。身体垮了，手抖了，眼看不清了，可只要还有人找上门，你还是撑着坐起来。老掌柜若还在，大概会哭着骂你傻。可你知道——医者仁心，就是燃尽自己，照亮别人。';
+    }
+    if (flags.tavern_medical_late_compassionate_peaceful) {
+      return '你是从容自在的老者：硬扛了半辈子，终于学会了放手。到了晚年，你成了最从容的老者——没事晒晒太阳，给街坊看看小病，徒弟们都独当一面了。酒肆的老掌柜若还在，大概会笑着拍你肩膀——"臭小子，终于想通了？"你也笑——是啊，早该这样了。';
+    }
+    if (flags.tavern_medical_late_compassionate_legacy) {
+      return '你是仁心满天下的老宗师：一辈子行医救人，带出了一群好徒弟。徒弟们散在各地，个个仁心仁术，像你年轻时一样。有人说你是"一代宗师"，你只摆摆手——"什么宗师不宗师的，救人而已。"酒肆的老掌柜若还在，大概会捋着胡子笑——当年酒肆里的苦孩子，现在桃李满天下了。';
+    }
+    if (flags.tavern_medical_late_pragmatic_fallen) {
+      return '你是失势的老御医：从酒肆跑堂爬到太医院院判，你风光了半辈子。可靠山一倒，墙倒众人推，从人人巴结的"李院判"变成了无人问津的"老李头"。有人说你可怜，你只冷笑——可怜？你见过的世面，这些人一辈子都见不到。酒肆老掌柜若还在，大概会叹口气——爬那么高干什么呢？可你知道——不爬，就只能端一辈子盘子。';
+    }
+    if (flags.tavern_medical_late_pragmatic_wanderer) {
+      return '你是逍遥自在的老游医：撕破了所有假人情，断了所有牵绊，一辈子行走江湖。从江南走到塞北，从东海走到西域，什么权贵什么人情，全不放在眼里。酒肆老掌柜若还在，大概会笑着骂你"这匹野马，到死都拴不住"。你也笑——人生在世，不就图个自在吗？';
+    }
+    if (flags.tavern_medical_late_pragmatic_master) {
+      return '你是德高望重的老名医：一辈子人情练达，拿捏得住分寸，分得清真假。到了晚年，人人敬重——权贵给你面子，江湖人卖你情面，徒弟们个个有出息。酒肆老掌柜若还在，大概会捋着胡子得意——"我就说这小子是块料子！"你也笑——这一辈子，全靠当年在酒肆学的那点人情世故。';
+    }
+    return undefined;
+  }
   if (!flags.medical_age40_identity_done) {
     return undefined;
   }

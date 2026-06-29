@@ -88,7 +88,7 @@
         "Save as docs/test-reports/p91-medical-late-life-targeted-proof.md"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Targeted proof covering all 6 late-life branches + 2 variants."
     },
     {

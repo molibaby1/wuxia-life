@@ -68,8 +68,8 @@
         "Document conclusion in design document"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "6 branches = 2× renown endgame complexity. Compassionate = body/spirit axis endgame; Pragmatic = social/position axis endgame. Must maintain variant differentiation."
+      "passes": true,
+      "notes": "6 branches designed. Compassionate (spiritual/healing legacy): 仁心不灭·烬 / 医者从容·淡 / 仁心满天下·传. Pragmatic (social/medical legacy): 医名犹存·寂 / 江湖游医·遥 / 一代宗师·名. 2 fundamentally different axes, not mirrors. All tavern-born flavored. Lightweight compliant."
     },
     {
       "id": "P92-005",

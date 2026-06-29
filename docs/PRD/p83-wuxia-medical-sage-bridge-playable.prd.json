@@ -94,7 +94,7 @@
         "npm run typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Narrow regression + all existing bridge suites must pass. Slightly more assertions than P71 due to 2 entry variants + 2 mutual exclusivity pairs."
     },
     {

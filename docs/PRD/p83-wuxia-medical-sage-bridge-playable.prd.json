@@ -1,0 +1,117 @@
+{
+  "project": "Wuxia Life P83 Medical Sage Bridge Playable Implementation",
+  "branchName": "codex/p83-wuxia-medical-sage-bridge-playable",
+  "description": "Implement the minimum runtime bridge for medical_sage_healer (一代名医) from tavern_hand origin, with 2 entry variants (compassionate / pragmatic healer), 3 expression surfaces, targeted proof, and narrow regression. Strictly follows P82 bridge contract. Bridge-only stage — no spine events.",
+  "userStories": [
+    {
+      "id": "P83-001",
+      "title": "Audit implementation delta against the bridge contract",
+      "description": "As a maintainer, I want an implementation delta audit so P83 only changes what the approved bridge contract actually requires.",
+      "acceptanceCriteria": [
+        "List minimum implementation points by comparing repo state against P82 bridge contract",
+        "State which existing wiring can be reused directly (midlife event system, expression surfaces, mutual exclusivity mechanism)",
+        "State which files/configs/code points need to be added or modified",
+        "Save docs/test-reports/p83-medical-sage-bridge-implementation-audit.md",
+        "No runtime behavior changes in this story"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Foundational audit; must complete before implementation begins."
+    },
+    {
+      "id": "P83-002",
+      "title": "Lock P83 runtime scope contract",
+      "description": "As a planner, I want a runtime scope contract so P83 stays a playable-bridge stage and does not sprawl into later differentiation work.",
+      "acceptanceCriteria": [
+        "Clarify P83 covers only: bridge wiring, 2 entry variants, bridge expression (3 surfaces), targeted proof, narrow tests",
+        "List forbidden expansions: spine events, entry densification beyond 2 variants, pressure/payoff work, new systems, additional origins",
+        "Define boundary with P84 (entry differentiation refinement)",
+        "Save docs/test-reports/p83-medical-sage-bridge-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Scope guardrails for the bridge implementation stage."
+    },
+    {
+      "id": "P83-003",
+      "title": "Implement bridge wiring + 2 entry variants",
+      "description": "As a developer, I want the medical sage bridge checkpoint wired through existing carriers with 2 entry variants so the target gate can be reached at runtime.",
+      "acceptanceCriteria": [
+        "Add medical bridge midlife event to ordinary-origin-midlife.json (age 26-30, tavern_hand only)",
+        "Implement 2 embrace choices: compassionate healer / pragmatic healer, each with distinct stats/flags/flavor",
+        "Implement decline choice: sets ordinary_tavern_midlife_done but NOT bridge flags",
+        "Set bridge checkpoint flags: tavern_medical_bridge_crossed + route_medical_committed",
+        "Set medical_pure + medical_talent at bridge checkpoint (idempotent — no change if already present)",
+        "Verify medical_pure satisfies key_choices dim 2 of medical_sage_healer composite gate",
+        "Ensure mutual exclusivity with merchant bridge (P59) and renown bridge (P71) via ordinary_tavern_midlife_done",
+        "Existing related evidence does not regress (P56/P58/P59/P61/P71/P72)"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Core implementation: bridge event + 2 variants + flag chain + mutual exclusivity."
+    },
+    {
+      "id": "P83-004",
+      "title": "Add bridge player-facing expression (3 surfaces × 2 variants)",
+      "description": "As a player, I want the bridge crossing to feel visible and route-specific so the new path does not read like a silent flag change.",
+      "acceptanceCriteria": [
+        "Add medical bridge branch to tavernCurrentGoal() (bridge-crossed state)",
+        "Add medical bridge branch to tavernLifeMemory() (bridge-crossed state)",
+        "Add tavern-hand medical branch to deriveOrdinaryOriginSummary()",
+        "2 entry variants have perceptible expression differences (at least lifeMemory has variant-specific text)",
+        "tavern_hand identity preserved — detectOrdinaryOrigin() still returns 'tavern_hand'",
+        "Expression style consistent with existing tavern_hand expressions (colloquial, vivid, tavern-grounded)",
+        "No new UI components added",
+        "Add or update focused expression tests"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Player-visible identity: 3 expression surfaces × 2 variants minimum."
+    },
+    {
+      "id": "P83-005",
+      "title": "Add targeted bridge proof",
+      "description": "As a maintainer, I want one targeted proof showing origin → bridge event → checkpoint → gate acceptance so the bridge is repo-proven without relying on static fixtures alone.",
+      "acceptanceCriteria": [
+        "Produce docs/test-reports/p83-tavern-hand-medical-bridge-targeted-proof.md",
+        "Show all 14 chain nodes defined in P82 validation shape: origin identity, bridge event trigger, bridge checkpoint, key-choice flag (medical_pure), entry variant A, entry variant B, decline path, currentGoal signal, lifeMemory signal, summary signal, origin identity preserved, composite gate key_choices dim 2 met, mutual exclusivity with merchant, mutual exclusivity with renown",
+        "Do not require full lifetime comparative exhaust",
+        "Proof does not rely on static shortcut as the only evidence"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Walkthrough of the full bridge chain — 14 nodes per P82 validation shape."
+    },
+    {
+      "id": "P83-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow regression coverage so the new bridge cannot silently break later.",
+      "acceptanceCriteria": [
+        "Add test file tests/p83TavernHandMedicalBridgeTests.ts",
+        "Cover ~15-20 assertions across: bridge flag chain, prerequisite enforcement, 2 entry variants, 3 expression surfaces, origin preservation, life-memory summary integration, non-medical isolation, mutual exclusivity (merchant vs medical both directions), mutual exclusivity (renown vs medical both directions), decline path, composite gate key_choices dim 2, existing merchant bridge still works, existing renown bridge still works",
+        "Reuse existing harnesses (do not rewrite full route test suite)",
+        "All existing regression suites pass: p56OrdinaryOriginGrowthTests, p58ApprenticeBridgeTests, p59TavernHandBridgeTests, p61FarmPeasantBridgeTests, p71TavernHandRenownBridgeTests, p72TavernHandRenownEntryDifferentiationTests, testLifeMemorySummary",
+        "npm run typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Narrow regression + all existing bridge suites must pass. Slightly more assertions than P71 due to 2 entry variants + 2 mutual exclusivity pairs."
+    },
+    {
+      "id": "P83-007",
+      "title": "Produce P83 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly how the medical sage bridge now works and what remains for later differentiation stages.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p83-medical-sage-bridge-playable-closure-report.md",
+        "Summarize wiring, 2 entry variants, expression (3 surfaces), proof, tests",
+        "Confirm all 12 P82 closure criteria are met",
+        "State boundary with P84 (entry differentiation refinement)",
+        "List larger densification or new-route items that remain deferred",
+        "Give route planning recommendations after entry differentiation (on-ramp / pressure / payoff etc.)"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Closure and handoff to P84 entry differentiation refinement."
+    }
+  ]
+}

@@ -79,7 +79,7 @@
         "Proof does not rely on static shortcut as the only evidence"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Walkthrough of the full bridge chain — 14 nodes per P82 validation shape."
     },
     {

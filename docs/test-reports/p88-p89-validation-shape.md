@@ -136,15 +136,15 @@ P89 新增的 regression tests 应覆盖以下断言（2 variants × 3 choices�
 
 | # | Assertion | Priority |
 |---|-----------|----------|
-| R27 | Choice A (硬扛): `tavern_medical_payoff_pragmatic_holder` 设置 + stats 正确 (rep+4, con+3, money+60, chivalry-2) | P0 |
+| R27 | Choice A (硬扛): `tavern_medical_payoff_pragmatic_holder` 设置 + stats 正确 (rep+4, conn+3, money+60, chivalry-2) | P0 |
 | R28 | Choice A: cost label = "声名所累" | P0 |
 | R29 | Choice A: sample line current goal 正确 | P0 |
 | R30 | Choice A: ordinary origin current goal 正确 | P0 |
-| R31 | Choice B (撕破): `tavern_medical_payoff_pragmatic_breaker` 设置 + stats 正确 (rep-3, con-5, charisma-1, con+2, chivalry+1) | P0 |
+| R31 | Choice B (撕破): `tavern_medical_payoff_pragmatic_breaker` 设置 + stats 正确 (rep-3, conn-5, charisma-1, con+2, chivalry+1) | P0 |
 | R32 | Choice B: cost label = "快意江湖" | P0 |
 | R33 | Choice B: sample line current goal 正确 | P0 |
 | R34 | Choice B: ordinary origin current goal 正确 | P0 |
-| R35 | Choice C (练达): `tavern_medical_payoff_pragmatic_master` 设置 + stats 正确 (rep+2, con+1, charisma+4, money+30) | P0 |
+| R35 | Choice C (练达): `tavern_medical_payoff_pragmatic_master` 设置 + stats 正确 (rep+2, conn+1, charisma+4, money+30) | P0 |
 | R36 | Choice C: cost label = "人情练达" | P0 |
 | R37 | Choice C: sample line current goal 正确 | P0 |
 | R38 | Choice C: ordinary origin current goal 正确 | P0 |

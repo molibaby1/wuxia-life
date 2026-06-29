@@ -353,15 +353,32 @@ Payoff 让 medical 路线从"有代价的成长"变成"有选择的人生"，2 v
 
 ## 5. Stat Changes Summary
 
+### 5.0 Stat Abbreviation Reference
+
+| 全称 | 缩写 | 说明 |
+|------|------|------|
+| reputation | rep | 名声/声望 |
+| constitution | con | 体质/身体（既有惯例缩写） |
+| connections | conn | 人脉/人情（注意：不要缩写为 con，避免与 constitution 混淆） |
+| charisma | charisma | 魅力/人缘 |
+| chivalry | chivalry | 侠义/仁心 |
+| money | money | 银两 |
+
+**缩写规则：** constitution 缩写为 `con`（既有惯例），connections 写全称或缩写为 `conn`，绝不用 `con`。
+
+**统一顺序：** rep → con → conn → charisma → chivalry → money
+
 ### 5.1 Compassionate Variant
 
 | Stat | A: 硬扛到底 | B: 学会放手 | C: 找到传承 |
 |------|-----------|-----------|-----------|
-| constitution | -2 | +2 | +1 |
-| chivalry | +3 | -1 | +1 |
-| reputation | +2 | -1 | +1 |
+| reputation (rep) | +2 | -1 | +1 |
+| constitution (con) | -2 | +2 | +1 |
+| connections (conn) | — | — | — |
 | charisma | — | +1 | +2 |
-| **净值** | **+3** | **+1** | **+5** |
+| chivalry | +3 | -1 | +1 |
+| money | — | — | — |
+| **净值（不含 money）** | **+3** | **+1** | **+5** |
 
 **Design note:**
 - A 净值不高但 chivalry 最高——理想主义极致
@@ -372,13 +389,13 @@ Payoff 让 medical 路线从"有代价的成长"变成"有选择的人生"，2 v
 
 | Stat | A: 硬扛人情 | B: 撕破脸皮 | C: 人情练达 |
 |------|-----------|-----------|-----------|
-| reputation | +4 | -3 | +2 |
-| connections | +3 | -5 | +1 |
+| reputation (rep) | +4 | -3 | +2 |
+| constitution (con) | — | +2 | — |
+| connections (conn) | +3 | -5 | +1 |
 | charisma | — | -1 | +4 |
-| money | +60 | — | +30 |
-| constitution | — | +2 | — |
 | chivalry | -2 | +1 | — |
-| **净值（不含钱）** | **+5** | **-6** | **+7** |
+| money | +60 | — | +30 |
+| **净值（不含 money）** | **+5** | **-6** | **+7** |
 
 **Design note:**
 - A 净值高但 chivalry 最低——彻底沦为权贵工具
@@ -531,7 +548,7 @@ Payoff 让 medical 路线从"有代价的成长"变成"有选择的人生"，2 v
 | **Choice markers** | 3 个（holder / let_go / legacy） | 3 个（holder / breaker / master） |
 | **Core signals** | 5 个（cost label, current goal, age40 identity, life memory, summary） | 同左 |
 | **Expression surfaces** | 5 个 surfaces × 3 branches = 15 个新分支 | 5 个 surfaces × 3 branches = 15 个新分支 |
-| **Key stats** | A: con-2, chivalry+3, rep+2; B: con+2, chivalry-1, rep-1, charisma+1; C: con+1, rep+1, chivalry+1, charisma+2 | A: rep+4, con+3, money+60, chivalry-2; B: rep-3, con-5, charisma-1, con+2, chivalry+1; C: rep+2, con+1, charisma+4, money+30 |
+| **Key stats** | A: con-2, chivalry+3, rep+2; B: con+2, chivalry-1, rep-1, charisma+1; C: con+1, rep+1, chivalry+1, charisma+2 | A: rep+4, conn+3, money+60, chivalry-2; B: rep-3, conn-5, charisma-1, con+2, chivalry+1; C: rep+2, conn+1, charisma+4, money+30 |
 | **New systems** | 零 — 全部复用现有架构 | 零 — 全部复用现有架构 |
 | **Late-life interface** | `medical_late_life_done` + `tavern_medical_late_life_*` (reserved) | 同左 |
 | **Flavor** | Tavern-born compassionate healer — 仁心的三种归宿 | Tavern-born pragmatic healer — 世故的三种归宿 |

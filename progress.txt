@@ -1,3 +1,14 @@
+## [2026-06-29] - P93 Medical Endgame Playable Implementation - P93-001~006 🔄 IN PROGRESS
+- P93-001: Medical endgame echo event wired — 6 auto events added to sample-lines-spine.json (compassionate: ember/peace/legacy; pragmatic: fame_remain/wanderer_legend/grand_master; age 60-65); shared checkpoint: medical_endgame_echo_done + medical_endgame_identity_done; 6 branch markers; NO stat changes (lightweight compliant); excludes orthodox/demonic childhood seeds.
+- P93-002: Endgame core P0 sample line expression complete — 2 expression surfaces × 6 branches = 12 updates: sampleLineExpression.ts (medicalCurrentGoal +6, deriveSampleLineCostLabel +6); cost labels: 仁心不灭·烬 / 医者从容·淡 / 仁心满天下·传 / 医名犹存·寂 / 江湖游医·遥 / 一代宗师·名; done-flag-first pattern (endgame > late-life); tavern-born healer flavor preserved.
+- P93-003: Endgame core P0 identity expression complete — medicalAge40Identity() checks medical_endgame_identity_done first; 6 unique endgame identities: 燃尽自己的点灯人 / 从容淡然的老医者 / 桃李满天下的仁医宗师 / 失势但名存的老太医 / 传说里的逍遥游医 / 德高望重的一代宗师; all include tavern-born healer flavor anchors.
+- P93-004: Endgame bonus P1 ordinary origin expression complete — 3 additional expression surfaces × 6 branches = 18 updates: ordinaryOriginExpression.ts (tavernCurrentGoal +6, tavernLifeMemory +6, deriveOrdinaryOriginSummary +6); life memory with full narrative; summary with endgame state; tavern-born healer flavor preserved.
+- P93-005: Targeted endgame proof complete — 3-layer proof: config layer (event existence/conditions/effects/JSON validity), logic layer (10 core nodes × 6 variants + bonus nodes), contract layer (P91 late-life → P93 endgame衔接 + flag naming consistency + full chain trace + variant differentiation + lightweight compliance); GO recommendation for closure.
+- P93-006: Narrow regression coverage complete — tests/p93TavernHandMedicalEndgameSpineTests.ts with 10 test groups (event wiring, pre-endgame baseline, Comp-A, Comp-B, Comp-C, Prag-A, Prag-B, Prag-C, no regression, identity verification); 35/35 tests all passed.
+- Files: src/data/lines/sample-lines-spine.json, src/p50/sampleLineExpression.ts, src/p56/ordinaryOriginExpression.ts, tests/p93TavernHandMedicalEndgameSpineTests.ts, docs/test-reports/p93-medical-endgame-targeted-proof.md
+- Validation: JSON valid ✅ typecheck ✅ P83 ✅ P85 ✅ P87 ✅ P89 ✅ P91 ✅ P93 ✅ (35/35 tests)
+- Status: 6/7 stories complete; US-007 (closure report) pending; ready for self-check + closure
+---
 ## [2026-06-29] - P92 Medical Endgame Design-First - Verify Round 1 Fixes ✅ COMPLETE
 - FIX-001 [required]: Endgame contract moved from docs/test-reports/ to docs/PRD/p92-medical-endgame-contract.md — matches P80/P90 precedent and PRD US-005 acceptance criteria; closure report references updated.
 - FIX-002 [optional]: Validation shape no-regression stages corrected from P85/P86/P88/P90/P91 to P83/P84/P85/P87/P89/P91 — matches PRD US-006 and actual test file naming; closure report reference updated.

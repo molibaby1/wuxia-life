@@ -1,0 +1,138 @@
+{
+  "project": "Wuxia Life P93 Medical Endgame Playable Implementation",
+  "branchName": "codex/p93-wuxia-medical-endgame-playable",
+  "description": "Lightweight implementation of medical_sage_healer endgame / final legacy stage (Medical Legacy Echo / 医名身后事). Strictly follows P92 contract: 1 auto echo event + 6 expression updates, 6 variants (3 compassionate + 3 pragmatic), no stat changes, tavern-born medical healer flavor.",
+  "userStories": [
+    {
+      "id": "P93-001",
+      "title": "Wire medical endgame echo event",
+      "description": "As a developer, I want the medical endgame echo event wired through the existing event system so players on the medical route encounter a final legacy echo with 6 distinct variants.",
+      "acceptanceCriteria": [
+        "Configure 6 medical_endgame_echo auto events in sample-lines-spine.json (2 variants × 3 choices)",
+        "Trigger conditions: medical_late_life_done + age 60-65 + mutex guard + exclude orthodox/demonic",
+        "Set medical_endgame_echo_done checkpoint flag + medical_endgame_identity_done",
+        "Set 6 variant markers: compassionate_ember/peace/legacy + pragmatic_fame_remain/wanderer_legend/grand_master",
+        "Branching based on late-life branch markers (compassionate_final→ember, compassionate_peaceful→peace, compassionate_legacy→legacy, pragmatic_fallen→fame_remain, pragmatic_wanderer→wanderer_legend, pragmatic_master→grand_master)",
+        "No stat changes (endgame is memory, not power)",
+        "No new event framework or scheduler",
+        "No regressions in P83/P85/P87/P89/P91",
+        "event_record target: medical_endgame_echo",
+        "stageSignals: [\"medical_endgame\"]"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "6 endgame echo events (3 compassionate + 3 pragmatic). Follows renown endgame pattern but with 2× variants. No stat changes — lightweight compliant."
+    },
+    {
+      "id": "P93-002",
+      "title": "Add endgame expression — sample line core (P0)",
+      "description": "As a player, I want the medical endgame stage reflected in my sample line status so the route feels like it has a meaningful final legacy identity.",
+      "acceptanceCriteria": [
+        "Sample line cost label: late-life → endgame (仁心不灭·烬 / 医者从容·淡 / 仁心满天下·传 / 医名犹存·寂 / 江湖游医·遥 / 一代宗师·名)",
+        "Sample line current goal: late-life → endgame (6 distinct goals per variant)",
+        "At least 2 endgame-specific readable signals (cost label + current goal)",
+        "Six variants have meaningfully different expressions, not reskinned",
+        "Two variant axes fundamentally different: Compassionate = spiritual/healing legacy, Pragmatic = social/medical reputation",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components",
+        "Done-flag-first pattern: check medical_endgame_echo_done before medical_late_life_done"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Core expression updates for sample line. 6 variants across 2 axes. Done-flag-first gate order."
+    },
+    {
+      "id": "P93-003",
+      "title": "Add endgame expression — endgame identity (P0)",
+      "description": "As a player, I want an endgame identity summary that deepens my age-40 identity so the endgame stage feels like it defines the final legacy.",
+      "acceptanceCriteria": [
+        "medicalAge40Identity() checks medical_endgame_identity_done first",
+        "Comp-A (仁心不灭·烬): 燃尽自己的点灯人",
+        "Comp-B (医者从容·淡): 从容淡然的老医者",
+        "Comp-C (仁心满天下·传): 桃李满天下的仁医宗师",
+        "Prag-A (医名犹存·寂): 失势但名存的老太医",
+        "Prag-B (江湖游医·遥): 传说里的逍遥游医",
+        "Prag-C (一代宗师·名): 德高望重的一代宗师",
+        "Six variants have meaningfully different identity descriptions",
+        "Two variant axes fundamentally different (not mirrors)",
+        "Preserve tavern-born medical healer flavor"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Endgame identity deepening. 6 distinct identities. Compassionate = spiritual/healing, Pragmatic = social/medical reputation."
+    },
+    {
+      "id": "P93-004",
+      "title": "Add endgame expression — ordinary origin (bonus P1)",
+      "description": "As a player, I want additional endgame-specific expressions in the ordinary origin view so the endgame stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin current goal: endgame state update (matches sample line)",
+        "Ordinary origin life memory: endgame-specific text (different per variant)",
+        "Ordinary origin summary: endgame state update (different per variant)",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components",
+        "Done-flag-first pattern"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Bonus expression updates for ordinary origin. 3 surfaces × 6 variants."
+    },
+    {
+      "id": "P93-005",
+      "title": "Add targeted endgame proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the medical endgame event fires correctly, all six variants work, and tavern-born medical healer flavor is preserved.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof (late-life → endgame → expression changes chain)",
+        "Show 10 core nodes: pre-endgame baseline → event fires → Comp-A → Comp-B → Comp-C → Prag-A → Prag-B → Prag-C → cost label → current goal",
+        "Optional bonus nodes: endgame identity depth, ordinary origin expression, full chain traceback, mutex with other lines, branch matching, tavern-born flavor check, lightweight compliance, two-variant axis differentiation",
+        "No full lifetime exhaust required",
+        "Save as docs/test-reports/p93-medical-endgame-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Targeted proof with 10 core + 7 bonus nodes. 6 variants = richer than renown endgame proof."
+    },
+    {
+      "id": "P93-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the medical endgame stage so future edits do not break the first medical endgame milestone.",
+      "acceptanceCriteria": [
+        "New test file tests/p93TavernHandMedicalEndgameSpineTests.ts covering endgame stage",
+        "Group 1: Event wiring (4-5 tests) — 6 events exist, auto type, age range, conditions",
+        "Group 2: Pre-endgame baseline (2 tests) — post-late-life pre-endgame state",
+        "Group 3: Comp-A post-endgame (3-4 tests) — flags + cost label + current goal",
+        "Group 4: Comp-B post-endgame (3-4 tests)",
+        "Group 5: Comp-C post-endgame (3-4 tests)",
+        "Group 6: Prag-A post-endgame (3-4 tests)",
+        "Group 7: Prag-B post-endgame (3-4 tests)",
+        "Group 8: Prag-C post-endgame (3-4 tests)",
+        "Group 9: No regression P83/P85/P87/P89/P91 (5+ tests)",
+        "Group 10: Endgame identity verification (6-7 tests) — 6 variants + all different + two-axis difference",
+        "No stat changes verification",
+        "Typecheck passes",
+        "~30-37 tests total"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "10 test groups (~30-37 assertions). 6 variants = 2× renown's test coverage. No regression on 5 prior stages."
+    },
+    {
+      "id": "P93-007",
+      "title": "Produce P93 closure report",
+      "description": "As a maintainer, I want a closure report that locks the medical endgame implementation and confirms the medical route is fully closed for Wave 1.",
+      "acceptanceCriteria": [
+        "Output docs/test-reports/p93-medical-endgame-closure-report.md",
+        "Summarize event wiring, expression updates, targeted proof, regression test results",
+        "Clarify whether medical route is fully closed (bridge→entry→on-ramp→pressure→payoff→late-life→endgame)",
+        "List deferred larger medical-expansion items",
+        "Confirm lightweight constraint is maintained",
+        "Confirm no regressions in P83/P85/P87/P89/P91",
+        "Summarize Wave 1 medical route completion status",
+        "Verify two variants (compassionate vs pragmatic) remain fundamentally different axes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Closure report with medical route full-closure assessment. Wave 1 medical_sage_healer tavern_hand seed complete after P93."
+    }
+  ]
+}

@@ -87,8 +87,8 @@
         "Write contract to docs/PRD/p92-medical-endgame-contract.md"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "Contract LOCKED at end of this story. P93 implementation strictly follows this contract. 6 branch markers + shared checkpoint + identity flag."
+      "passes": true,
+      "notes": "Contract LOCKED for P93. 6 variants (3 compassionate + 3 pragmatic). 8 reserved flags. 6 expression surfaces. 10 gate acceptance criteria. 7 quality priorities. Lightweight: 1 echo event, expression-only, no stat changes."
     },
     {
       "id": "P92-006",

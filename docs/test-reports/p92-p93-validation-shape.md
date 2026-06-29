@@ -65,7 +65,7 @@ P93 implements the `medical_sage_healer` endgame / final legacy stage, strictly 
 | 6. Prag-A post-endgame (医名犹存·寂) | 3-4 | Flags + cost label + current goal |
 | 7. Prag-B post-endgame (江湖游医·遥) | 3-4 | Flags + cost label + current goal |
 | 8. Prag-C post-endgame (一代宗师·名) | 3-4 | Flags + cost label + current goal |
-| 9. No regression P85/P86/P88/P90/P91 | 5 | Each prior stage still works |
+| 9. No regression P83/P84/P85/P87/P89/P91 | 6 | Each prior stage still works |
 | 10. Endgame identity + variant differentiation | 4-6 | 6 branches all different + 2 variants not mirrors |
 
 **Total: ~30-37 tests**
@@ -73,10 +73,11 @@ P93 implements the `medical_sage_healer` endgame / final legacy stage, strictly 
 ### 3.2 Regression Boundaries
 
 **Must NOT regress:**
-- P85 bridge tests (p85TavernHandMedicalBridgeTests.ts)
-- P86 entry tests (p86TavernHandMedicalEntryTests.ts)
-- P88 on-ramp tests (p88TavernHandMedicalOnRampTests.ts)
-- P90 pressure + payoff tests (p90TavernHandMedicalPressurePayoffTests.ts)
+- P83 bridge tests (p83TavernHandMedicalBridgeTests.ts)
+- P84 entry tests (p84MedicalEntryDifferentiationTests.ts)
+- P85 on-ramp tests (p85TavernHandMedicalOnRampSpineTests.ts)
+- P87 pressure tests (p87TavernHandMedicalPressureSpineTests.ts)
+- P89 payoff tests (p89TavernHandMedicalPayoffSpineTests.ts)
 - P91 late-life tests (p91TavernHandMedicalLateLifeTests.ts)
 - Typecheck passes
 - Sample line baseline guard (if applicable)
@@ -99,7 +100,7 @@ P93 implements the `medical_sage_healer` endgame / final legacy stage, strictly 
 | 6 | Endgame identity deepens per branch | Test Group 10 + proof node 11 |
 | 7 | Two variants remain meaningfully different (not mirrors) | Test Group 10 + proof node 16 |
 | 8 | Tavern-born medical healer flavor consistent | Proof document flavor check |
-| 9 | No P85/P86/P88/P90/P91 regressions | Test Group 9 + all prior suites pass |
+| 9 | No P83/P84/P85/P87/P89/P91 regressions | Test Group 9 + all prior suites pass |
 | 10 | Typecheck passes | `npm run typecheck` exits 0 |
 
 **Closure verdict: 10/10 criteria satisfied = PASS**
@@ -112,10 +113,11 @@ P93 implements the `medical_sage_healer` endgame / final legacy stage, strictly 
 
 | Stage | Test File | Key Assertions |
 |-------|-----------|----------------|
-| P85 Bridge | p85TavernHandMedicalBridgeTests.ts | Bridge event fires, flags set, expression correct |
-| P86 Entry | p86TavernHandMedicalEntryTests.ts | Entry differentiation from other lines |
-| P88 On-ramp | p88TavernHandMedicalOnRampTests.ts | On-ramp event fires, expression updates |
-| P90 Pressure + Payoff | p90TavernHandMedicalPressurePayoffTests.ts | Pressure + payoff events fire, 2×3 choices work |
+| P83 Bridge | p83TavernHandMedicalBridgeTests.ts | Bridge event fires, flags set, expression correct |
+| P84 Entry | p84MedicalEntryDifferentiationTests.ts | Entry differentiation from other lines |
+| P85 On-ramp | p85TavernHandMedicalOnRampSpineTests.ts | On-ramp event fires, expression updates |
+| P87 Pressure | p87TavernHandMedicalPressureSpineTests.ts | Pressure event fires, expression updates |
+| P89 Payoff | p89TavernHandMedicalPayoffSpineTests.ts | Payoff events fire, 2×3 choices work |
 | P91 Late-life | p91TavernHandMedicalLateLifeTests.ts | Late-life fires, 6 branches (2×3) work |
 
 ### 5.2 What We Don't Need to Verify

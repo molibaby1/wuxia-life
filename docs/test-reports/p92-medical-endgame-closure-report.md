@@ -130,7 +130,7 @@ P92 successfully delivered the **design-first contract** for the `medical_sage_h
 
 ### 2.5 Endgame Contract (P92-005)
 
-**File:** `docs/test-reports/p92-medical-endgame-contract.md`
+**File:** `docs/PRD/p92-medical-endgame-contract.md`
 
 **Status: LOCKED**
 
@@ -163,7 +163,7 @@ P92 successfully delivered the **design-first contract** for the `medical_sage_h
 
 **Closure criteria:** 10 criteria
 
-**No-regression boundary:** P85/P86/P88/P90/P91 all must still pass
+**No-regression boundary:** P83/P84/P85/P87/P89/P91 all must still pass
 
 **No full lifetime exhaust required.**
 
@@ -317,7 +317,7 @@ The following remain deferred after P92:
 - `docs/test-reports/p92-medical-endgame-scope-contract.md` — Scope contract
 - `docs/test-reports/p92-medical-endgame-direction-assessment.md` — GO/NO-GO + direction
 - `docs/test-reports/p92-medical-endgame-branch-design.md` — 6 branch designs
-- `docs/test-reports/p92-medical-endgame-contract.md` — Endgame contract (LOCKED)
+- `docs/PRD/p92-medical-endgame-contract.md` — Endgame contract (LOCKED)
 - `docs/test-reports/p92-p93-validation-shape.md` — P93 validation shape
 - `docs/test-reports/p92-medical-endgame-closure-report.md` — This report
 

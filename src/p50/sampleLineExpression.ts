@@ -243,6 +243,26 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
 }
 
 function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.medical_endgame_echo_done) {
+    if (flags.tavern_medical_endgame_compassionate_ember) {
+      return '仁薪尽传，此生无憾';
+    }
+    if (flags.tavern_medical_endgame_compassionate_peace) {
+      return '晒晒太阳看看病，从容了此一生';
+    }
+    if (flags.tavern_medical_endgame_compassionate_legacy) {
+      return '看着仁心一辈辈传下去，这就够了';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_fame_remain) {
+      return '权势如烟云，医名自长久';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+      return '传说真假谁在乎，自在就好';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_grand_master) {
+      return '看着这一世医名，守着这一份圆满';
+    }
+  }
   if (flags.medical_late_life_done) {
     if (flags.tavern_medical_late_compassionate_final) {
       return '多救一个是一个，撑到最后一刻';
@@ -397,6 +417,26 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '江湖声名之累';
   }
   if (line === 'medical') {
+    if (flags.medical_endgame_echo_done) {
+      if (flags.tavern_medical_endgame_compassionate_ember) {
+        return '仁心不灭·烬';
+      }
+      if (flags.tavern_medical_endgame_compassionate_peace) {
+        return '医者从容·淡';
+      }
+      if (flags.tavern_medical_endgame_compassionate_legacy) {
+        return '仁心满天下·传';
+      }
+      if (flags.tavern_medical_endgame_pragmatic_fame_remain) {
+        return '医名犹存·寂';
+      }
+      if (flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+        return '江湖游医·遥';
+      }
+      if (flags.tavern_medical_endgame_pragmatic_grand_master) {
+        return '一代宗师·名';
+      }
+    }
     if (flags.medical_late_life_done) {
       if (flags.tavern_medical_late_compassionate_final) {
         return '最后仁心';

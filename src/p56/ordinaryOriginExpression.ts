@@ -97,6 +97,12 @@ function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string 
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
   if (flags.tavern_medical_bridge_crossed) {
+    if (flags.tavern_medical_on_ramp_compassionate) {
+      return '周边村子的人都慕名而来，小药庐挤不下，大堂都摆上了病床';
+    }
+    if (flags.tavern_medical_on_ramp_pragmatic) {
+      return '镇上大户都来请你，诊金丰厚，还认识了不少有头有脸的人物';
+    }
     if (flags.tavern_embrace_compassionate_healer) {
       return '酒肆后面辟出小药庐，有钱没钱都给看';
     }
@@ -242,6 +248,12 @@ function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
     return '你凭着酒肆里攒下的人脉和名声，渐渐在江湖上有了名号。人们不是来找你喝酒，是来寻你引荐、求你主事。';
   }
   if (flags.tavern_medical_bridge_crossed) {
+    if (flags.tavern_medical_on_ramp_compassionate) {
+      return '你在酒肆后面的小药庐行医，有钱没钱都给看。名声传开了，周边村子的人都慕名而来，小药庐挤不下，连酒肆大堂都摆上了病床。老掌柜叹口气，没说什么——他知道你这脾气。镇上人都说，你是真的仁心。可只有你自己知道，这样下去，身子撑不了多久。';
+    }
+    if (flags.tavern_medical_on_ramp_pragmatic) {
+      return '你在酒肆后面的小药庐行医，看病收钱，也看人下菜碟。镇上大户人家的老爷被你治好后，厚赏了你，还把你引荐给了其他有头有脸的人物。名声传开了，找你看病的人越来越多。你懂分寸、会办事——该收的收，该推的推，这才是长久之道。';
+    }
     if (flags.tavern_embrace_compassionate_healer) {
       return '你在酒肆里耳濡目染，竟自学成了一手医术。起初只是帮熟客看看小病，后来名声渐渐传开，镇上人都称你一声小神医。你见不得人受苦，有钱没钱都给看——酒肆后面的柴房改成了小药庐，看病的人比喝酒的还多。';
     }
@@ -364,6 +376,12 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }
     if (flags.tavern_medical_bridge_crossed) {
+      if (flags.tavern_medical_on_ramp_compassionate) {
+        return '酒肆出身的仁心医者：名声传开，周边村子的人都慕名而来，累是累，但救人要紧。';
+      }
+      if (flags.tavern_medical_on_ramp_pragmatic) {
+        return '酒肆出身的世故人医：镇上大户都来请你看病，名声银子双丰收，该拿捏的得拿捏。';
+      }
       if (flags.tavern_embrace_compassionate_healer) {
         return '酒肆出身的仁心医者：靠自学在镇上行医，有钱没钱都给看，小药庐里挤满了求医的人。';
       }

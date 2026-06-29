@@ -243,6 +243,12 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
 }
 
 function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.tavern_medical_on_ramp_compassionate) {
+    return '名声传开了，周边村子的人都来找你看病，累是累，但救人要紧';
+  }
+  if (flags.tavern_medical_on_ramp_pragmatic) {
+    return '镇上大户都来请你看病，名声银子双丰收，该拿捏的得拿捏';
+  }
   if (flags.tavern_embrace_compassionate_healer) {
     return '多救一个是一个，酒肆的小药庐挤不下了';
   }

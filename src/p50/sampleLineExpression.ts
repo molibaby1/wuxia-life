@@ -243,6 +243,26 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
 }
 
 function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.medical_late_life_done) {
+    if (flags.tavern_medical_late_compassionate_final) {
+      return '多救一个是一个，撑到最后一刻';
+    }
+    if (flags.tavern_medical_late_compassionate_peaceful) {
+      return '晒晒太阳看看病，过好剩下的日子';
+    }
+    if (flags.tavern_medical_late_compassionate_legacy) {
+      return '看着徒弟们成长，仁心传下去就够了';
+    }
+    if (flags.tavern_medical_late_pragmatic_fallen) {
+      return '看淡世态炎凉，过好自己的日子';
+    }
+    if (flags.tavern_medical_late_pragmatic_wanderer) {
+      return '走到哪儿算哪儿，自在就好';
+    }
+    if (flags.tavern_medical_late_pragmatic_master) {
+      return '看着这一世繁华，守着这一份体面';
+    }
+  }
   if (flags.medical_payoff_done) {
     if (flags.tavern_medical_payoff_compassionate_holder) {
       return '趁着还能动，能多救一个是一个';
@@ -377,6 +397,26 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '江湖声名之累';
   }
   if (line === 'medical') {
+    if (flags.medical_late_life_done) {
+      if (flags.tavern_medical_late_compassionate_final) {
+        return '最后仁心';
+      }
+      if (flags.tavern_medical_late_compassionate_peaceful) {
+        return '从容自在';
+      }
+      if (flags.tavern_medical_late_compassionate_legacy) {
+        return '仁心传承';
+      }
+      if (flags.tavern_medical_late_pragmatic_fallen) {
+        return '人走茶凉';
+      }
+      if (flags.tavern_medical_late_pragmatic_wanderer) {
+        return '逍遥自在';
+      }
+      if (flags.tavern_medical_late_pragmatic_master) {
+        return '德高望重';
+      }
+    }
     if (flags.medical_payoff_done) {
       if (flags.tavern_medical_payoff_compassionate_holder) {
         return '油尽灯枯';

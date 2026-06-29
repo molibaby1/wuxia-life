@@ -931,5 +931,78 @@
         "stageSignals": ["medical_on_ramp"]
       }
     }
+  },
+  {
+    "id": "medical_pressure_compassionate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 36, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_on_ramp_done') && flags.has('tavern_medical_on_ramp_compassionate') && !flags.has('medical_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "仁心耗尽",
+      "text": "这些年，你治病救人，从不问贫富。周边村子的人都慕名而来，酒肆大堂摆上了病床，小药庐的药罐从早煎到晚。\n\n老掌柜劝你歇一歇，你总说「救人要紧」。可你自己的身子，你比谁都清楚——夜里常常咳醒，手也开始发颤。\n\n这天，你又熬了一个通宵给人看病。天快亮时，你坐在药庐门口，望着天边的鱼肚白，忽然想起小时候在酒肆里帮老掌柜晒草药的日子。那时候你以为，救人是天底下最体面的事。\n\n如今你才明白——仁心这东西，也是会耗尽的。",
+      "description": "P87 一代名医 pressure — 仁心医者 variant 压力节点（向内消耗）"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_medical_pressure_compassionate" },
+      { "type": "event_record", "target": "medical_pressure" },
+      { "type": "stat_modify", "target": "constitution", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p87", "medical", "pressure", "compassionate", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "medical_pressure_pragmatic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 37, "max": 41 },
+    "triggers": [{ "type": "age_reach", "value": 37 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_on_ramp_done') && flags.has('tavern_medical_on_ramp_pragmatic') && !flags.has('medical_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情债缠身",
+      "text": "这些年，你在镇上的名气越来越响。大户人家请你看病，诊金丰厚；寻常百姓找你问诊，也得看你的脸色。\n\n你懂分寸、会办事——该收的收，该推的推，该欠的人情也欠着。镇上有头有脸的人物，你都认得；酒肆里的老掌柜，也常说你「出息了」。\n\n可这天夜里，你坐在酒肆后院的小药庐里，翻着这些年记下的人情账，忽然觉得累。\n\n张老爷的姨娘是你治好的，欠着一份人情；李掌柜的独子是你救回来的，欠着一份人情；就连县衙的师爷，也受过你的恩惠。\n\n人情这东西，欠的时候容易，还的时候——才知道是一笔还不清的债。你以为自己拿捏得住分寸，到头来，还是被这张人情的网，缠得死死的。",
+      "description": "P87 一代名医 pressure — 世故人医 variant 压力节点（向外束缚）"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_medical_pressure_pragmatic" },
+      { "type": "event_record", "target": "medical_pressure" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p87", "medical", "pressure", "pragmatic", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_midlife_pressure"]
+      }
+    }
   }
 ]

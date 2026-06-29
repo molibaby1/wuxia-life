@@ -1,0 +1,126 @@
+{
+  "project": "Wuxia Life P87 Medical Pressure Playable Implementation",
+  "branchName": "codex/p87-wuxia-medical-pressure-playable-implementation",
+  "description": "Playable implementation of medical_sage_healer pressure stage following P86 design-first contract, covering both compassionate (burnout) and pragmatic (favor debt) variants with tavern-born healer flavor preserved.",
+  "userStories": [
+    {
+      "id": "P87-001",
+      "title": "Wire medical pressure spine events (2 variants)",
+      "description": "As a developer, I want the medical pressure events (2 variants) wired through the existing event system so players on the medical route encounter real pressure milestones.",
+      "acceptanceCriteria": [
+        "Configure medical_pressure_compassionate auto event in sample-lines-spine.json",
+        "Configure medical_pressure_pragmatic auto event in sample-lines-spine.json",
+        "Compassionate triggers: medical_on_ramp_done + tavern_medical_on_ramp_compassionate + age 36-40 + exclusivity guard",
+        "Pragmatic triggers: medical_on_ramp_done + tavern_medical_on_ramp_pragmatic + age 37-41 + exclusivity guard",
+        "Both events set shared medical_midlife_pressure_done checkpoint flag",
+        "Compassionate sets tavern_medical_pressure_compassionate variant marker",
+        "Pragmatic sets tavern_medical_pressure_pragmatic variant marker",
+        "Compassionate stats: constitution -3, reputation +3, chivalry +2",
+        "Pragmatic stats: reputation +4, connections +3, charisma +2, money +50",
+        "No new event framework or scheduler introduced",
+        "No P83/P84/P85 regressions"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Core runtime wiring — 2 auto events following P86 contract. Both variants share checkpoint flag but have distinct markers and effects."
+    },
+    {
+      "id": "P87-002",
+      "title": "Add pressure player-facing expression (core P0)",
+      "description": "As a player, I want the medical pressure to read as a meaningful turning point (with 2 distinct variants) so the route feels like it has a cost, not just benefit.",
+      "acceptanceCriteria": [
+        "Sample line cost label update: Compassionate '仁心之累' → '仁心耗尽'; Pragmatic '世故之秤' → '人情债缠身'",
+        "Sample line current goal update for both variants (on-ramp → pressure)",
+        "Ordinary origin current goal update for both variants (on-ramp → pressure)",
+        "At least 2 pressure-specific readable signals per variant (cost label + current goal)",
+        "Tavern-born medical healer flavor preserved",
+        "Two variants are genuinely different (inward burnout vs outward entanglement)",
+        "No new UI components"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "P0 expression updates — 3 surfaces × 2 variants = 6 total updates. Must maintain variant differentiation and tavern-born flavor."
+    },
+    {
+      "id": "P87-003",
+      "title": "Add pressure player-facing expression (bonus P1)",
+      "description": "As a player, I want additional pressure-specific expressions so the pressure stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin life memory: pressure-specific text for both variants",
+        "Ordinary origin summary: pressure state update for both variants",
+        "Tavern-born medical healer flavor preserved",
+        "Two variants are genuinely different",
+        "No new UI components"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "P1 bonus expressions — life memory + summary for deeper immersion. 2 surfaces × 2 variants = 4 total updates."
+    },
+    {
+      "id": "P87-004",
+      "title": "Reserve payoff flag interfaces",
+      "description": "As a maintainer, I want payoff flag interfaces reserved in code so the next stage can build on them without renaming.",
+      "acceptanceCriteria": [
+        "medical_payoff_done flag reservation visible in code (comment or TODO)",
+        "medical_age40_identity_done flag reservation visible in code",
+        "tavern_medical_payoff_compassionate / tavern_medical_payoff_pragmatic reservations visible",
+        "No payoff logic implemented in this stage",
+        "Reservations have clear comments stating 'for P88+ payoff stage'"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Flag interface reservation for P88+ payoff stage — minimal code change, reduces future rename churn."
+    },
+    {
+      "id": "P87-005",
+      "title": "Add targeted pressure proof (2 variants)",
+      "description": "As a maintainer, I want bounded proof artifacts showing that both medical pressure variants fire correctly and carry the tavern-born healer flavor.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof document covering both variants (on-ramp → pressure path validation)",
+        "Compassionate: show 6 core nodes (pre-pressure state → event fires → checkpoint set → variant marker → cost label → current goal)",
+        "Pragmatic: show 6 core nodes (pre-pressure state → event fires → checkpoint set → variant marker → cost label → current goal)",
+        "Optional bonus nodes: life memory, summary, full chain trace (bridge → entry → on-ramp → pressure)",
+        "No full lifetime exhaust required",
+        "Proof supports judgment on whether to continue to payoff stage",
+        "Save as docs/test-reports/p87-medical-pressure-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "~12 core proof nodes (6 per variant) + optional bonus nodes. Serves as GO/NO-GO evidence for P88 payoff stage."
+    },
+    {
+      "id": "P87-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the medical pressure stage (2 variants) so future edits do not break the first medical pressure milestone.",
+      "acceptanceCriteria": [
+        "New test file covering pressure stage",
+        "Group 1: Event wiring (8-10 tests) — 2 events exist, conditions, age range, auto type, flag setting",
+        "Group 2: Pre-pressure state (4 tests) — on-ramp state before pressure (2 variants)",
+        "Group 3: Post-pressure expression updates (10 tests: 6 P0 + 4 P1)",
+        "Group 4: Variant differentiation (4 tests) — 2 variants are different",
+        "Group 5: Cross-route distinction (3 tests) — different from merchant/renown",
+        "Group 6: No regression of P83/P84/P85 (4+ tests)",
+        "Reuse existing test harness",
+        "All relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "~30-35 total regression assertions across 6 groups. Covers both variants and cross-route distinction."
+    },
+    {
+      "id": "P87-007",
+      "title": "Produce P87 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the medical pressure stage now provides and whether payoff stage is justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p87-medical-pressure-closure-report.md",
+        "Summarize event wiring, expressions (2 variants), proof, tests",
+        "State whether payoff stage is worth pursuing next (GO / NO-GO)",
+        "List larger medical-expansion items that remain deferred",
+        "All 12 closure criteria satisfied"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P88+ medical payoff design-first stage."
+    }
+  ]
+}

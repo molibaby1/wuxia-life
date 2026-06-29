@@ -243,6 +243,13 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
 }
 
 function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  // TODO: medical_payoff_done / medical_age40_identity_done — for P88+ payoff stage
+  if (flags.tavern_medical_pressure_compassionate) {
+    return '一面撑着身子救人，一面看着自己的仁心一点点耗尽';
+  }
+  if (flags.tavern_medical_pressure_pragmatic) {
+    return '一面维持名声，一面应付越来越多的人情债';
+  }
   if (flags.tavern_medical_on_ramp_compassionate) {
     return '名声传开了，周边村子的人都来找你看病，累是累，但救人要紧';
   }
@@ -351,6 +358,13 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     return '江湖声名之累';
   }
   if (line === 'medical') {
+    // TODO: tavern_medical_payoff_compassionate / tavern_medical_payoff_pragmatic — for P88+ payoff stage
+    if (flags.tavern_medical_pressure_compassionate) {
+      return '仁心耗尽';
+    }
+    if (flags.tavern_medical_pressure_pragmatic) {
+      return '人情债缠身';
+    }
     if (flags.tavern_embrace_compassionate_healer) {
       return '仁心之累';
     }

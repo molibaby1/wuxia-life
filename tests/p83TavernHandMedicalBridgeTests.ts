@@ -237,7 +237,7 @@ function testDeclinePathNoBridge(): void {
   assert(flags.ordinary_tavern_midlife_done === true, 'decline should set ordinary_tavern_midlife_done');
 
   const goal = deriveOrdinaryOriginCurrentGoal(decline) ?? '';
-  assert(!goal.includes('看病') || !goal.includes('药庐'), `decline should not have medical goal: ${goal}`);
+  assert(!goal.includes('看病') && !goal.includes('药庐'), `decline should not have medical goal: ${goal}`);
 }
 
 function testMerchantBridgeBlocksMedical(): void {

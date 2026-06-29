@@ -109,6 +109,8 @@ function testPragmaticConditions(): void {
   assert(cond.includes('medical_on_ramp_done'), 'pragmatic needs on-ramp done');
   assert(cond.includes('tavern_medical_on_ramp_pragmatic'), 'pragmatic needs variant marker');
   assert(cond.includes('!flags.has') && cond.includes('medical_midlife_pressure_done'), 'pragmatic has exclusivity guard');
+  assert(cond.includes('!flags.has') && cond.includes('orthodox_childhood_seed_done'), 'pragmatic excludes orthodox');
+  assert(cond.includes('!flags.has') && cond.includes('demonic_childhood_seed_done'), 'pragmatic excludes demonic');
   console.log('  ✓ pragmatic pressure conditions correct');
 }
 

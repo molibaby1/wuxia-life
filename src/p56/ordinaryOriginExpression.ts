@@ -97,10 +97,10 @@ function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string 
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
   if (flags.tavern_medical_bridge_crossed) {
-    if (flags.tavern_medical_pressure_compassionate) {
+    if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_compassionate) {
       return '一面撑着身子给人看病，一面看着自己的仁心一点点耗尽';
     }
-    if (flags.tavern_medical_pressure_pragmatic) {
+    if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_pragmatic) {
       return '一面维持名声场面，一面应付越来越多的人情债';
     }
     if (flags.tavern_medical_on_ramp_compassionate) {
@@ -254,10 +254,10 @@ function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
     return '你凭着酒肆里攒下的人脉和名声，渐渐在江湖上有了名号。人们不是来找你喝酒，是来寻你引荐、求你主事。';
   }
   if (flags.tavern_medical_bridge_crossed) {
-    if (flags.tavern_medical_pressure_compassionate) {
+    if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_compassionate) {
       return '这些年，你治病救人，从不问贫富。周边村子的人都慕名而来，酒肆大堂摆上了病床，小药庐的药罐从早煎到晚。老掌柜劝你歇一歇，你总说「救人要紧」。可你自己的身子，你比谁都清楚——夜里常常咳醒，手也开始发颤。你坐在药庐门口，望着天边的鱼肚白，忽然想起小时候帮老掌柜晒草药的日子。那时候你以为，救人是天底下最体面的事。如今你才明白——仁心这东西，也是会耗尽的。';
     }
-    if (flags.tavern_medical_pressure_pragmatic) {
+    if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_pragmatic) {
       return '这些年，你在镇上的名气越来越响。大户人家请你看病，诊金丰厚；寻常百姓找你问诊，也得看你的脸色。你懂分寸、会办事——该收的收，该推的推，该欠的人情也欠着。可这天夜里，你坐在酒肆后院的小药庐里，翻着这些年记下的人情账，忽然觉得累。张老爷的姨娘、李掌柜的独子、县衙的师爷……人情这东西，欠的时候容易，还的时候才知道是一笔还不清的债。你以为自己拿捏得住分寸，到头来，还是被这张人情的网，缠得死死的。';
     }
     if (flags.tavern_medical_on_ramp_compassionate) {
@@ -388,10 +388,10 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }
     if (flags.tavern_medical_bridge_crossed) {
-      if (flags.tavern_medical_pressure_compassionate) {
+      if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_compassionate) {
         return '酒肆出身的仁心医者：名声传遍周边，只是仁心耗尽、身子渐垮，仍硬撑着救人。';
       }
-      if (flags.tavern_medical_pressure_pragmatic) {
+      if (flags.medical_midlife_pressure_done && flags.tavern_medical_pressure_pragmatic) {
         return '酒肆出身的世故人医：镇上大户都捧着你，只是人情债越积越多，被缠得脱不开身。';
       }
       if (flags.tavern_medical_on_ramp_compassionate) {

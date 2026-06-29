@@ -17,7 +17,7 @@
 | Scope Contract | `docs/test-reports/p85-medical-on-ramp-scope-contract.md` | US-002 |
 | On-Ramp Contract | `docs/PRD/p85-medical-on-ramp-contract.md` | US-003 |
 | Targeted Proof | `docs/test-reports/p85-medical-on-ramp-targeted-proof.md` | US-006 |
-| Closure Report | `docs/test-reports/p85-medical-on-ramp-closure-report.md` | US-008 |
+| Closure Report | `docs/test-reports/p85-medical-sage-on-ramp-closure-report.md` | US-008 |
 
 ### 1.2 代码类
 
@@ -26,7 +26,7 @@
 | `src/data/lines/sample-lines-spine.json` | 新增 2 个 auto event | US-004 |
 | `src/p50/sampleLineExpression.ts` | medicalCurrentGoal 新增 2 个 on-ramp 分支 | US-005 |
 | `src/p56/ordinaryOriginExpression.ts` | tavernCurrentGoal / tavernLifeMemory / deriveOrdinaryOriginSummary 各新增 2 个 on-ramp 分支 | US-005 |
-| `tests/p85MedicalOnRampTests.ts` | 新增窄回归测试（8 项） | US-007 |
+| `tests/p85TavernHandMedicalOnRampSpineTests.ts` | 新增窄回归测试（8 项） | US-007 |
 
 ### 1.3 Commits
 

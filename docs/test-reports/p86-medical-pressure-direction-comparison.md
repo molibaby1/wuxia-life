@@ -126,7 +126,30 @@
 
 **一句话概括：** 病人太多，药材不够用了。你是救人还是留药？救了这个就救不了那个——药材告急的两难。
 
-### 4.2 Tavern-Born Fit Assessment
+### 4.2 Trigger Conditions
+
+| Condition | Value | Rationale |
+|-----------|-------|-----------|
+| Upstream gate | `medical_on_ramp_done` + `tavern_medical_on_ramp_compassionate` | On-ramp 之后病人才多到药材不够用 |
+| Age range | 36–40 | On-ramp (31-34) 后 2-6 年，名声传开后病人激增 |
+| Stat proxy | high reputation + high chivalry + low money | 名声越大、心越善、越没钱买药，越容易缺药材 |
+| Exclusivity | `!medical_midlife_pressure_done` | 只触发一次 |
+
+### 4.3 Player Choice Space
+
+**建议：Choice 事件（玩家决定怎么应对药材短缺）**
+
+理由：
+- 药材告急天然带有选择空间——救谁不救谁、怎么分配有限的药材
+- 与 burnout 的"必然代价"不同，药材短缺的核心是"两难选择"
+- 选择可以体现在：优先救穷人 / 优先救富人赚药钱 / 自己上山采药
+
+**可选的 choice 分支：**
+- 倾囊相救（名声更高，药材更缺，钱更少）
+- 量力而行（维持现状，名声略降）
+- 看人下菜碟（赚钱多了，但侠义之心受损）
+
+### 4.4 Tavern-Born Fit Assessment
 
 | Anchor | Fit? | Notes |
 |--------|------|-------|
@@ -138,7 +161,7 @@
 
 **风味评分：⭐⭐⭐⭐ (4/5) — 还不错，但不如身体垮掉那么"仁心"**
 
-### 4.3 Boundedness Assessment
+### 4.5 Boundedness Assessment
 
 | Dimension | Score | Notes |
 |-----------|-------|-------|
@@ -149,7 +172,7 @@
 
 **Boundedness 评分：⭐⭐⭐⭐ (4/5) — 还可以，但不如 burnout 集中**
 
-### 4.4 Why Not First Choice
+### 4.6 Why Not First Choice
 
 1. **不够聚焦 variant 身份：** "药材告急"是所有医者都可能遇到的问题，不一定是 compassionate 独有。pragmatic variant 也可能遇到药材问题。"身体垮掉"才是 compassionate 独有的——只有太好心、太拼命的人才会把自己累垮。
 2. **与 merchant pressure 有点像：** Merchant pressure 是"钱不够"，药材告急是"药不够"，都是资源短缺压力。虽然主题不同，但结构上有点像换皮。"身体垮掉"是完全不同的压力类型（自我消耗 vs 资源短缺）。
@@ -358,7 +381,30 @@
 
 **一句话概括：** 要名声还是要银子？给穷人看病名声好但赚不到钱，给富人看病赚钱多但名声坏。你在名声与利益之间摇摆，找不到平衡。
 
-### 10.2 Tavern-Born Fit Assessment
+### 10.2 Trigger Conditions
+
+| Condition | Value | Rationale |
+|-----------|-------|-----------|
+| Upstream gate | `medical_on_ramp_done` + `tavern_medical_on_ramp_pragmatic` | On-ramp 之后有名声也有了钱，才会面临名声 vs 利益的选择 |
+| Age range | 37–41 | On-ramp (31-34) 后 3-7 年，积累了一定名声和财富后开始纠结 |
+| Stat proxy | high reputation + high money + medium connections | 名声和钱都有了一定基础后，才会面临二者的权衡 |
+| Exclusivity | `!medical_midlife_pressure_done` | 只触发一次 |
+
+### 10.3 Player Choice Space
+
+**建议：Choice 事件（玩家在名声与利益之间做选择）**
+
+理由：
+- 名声 vs 利益天然就是选择题——核心就是玩家怎么选
+- 与 pragmatic 的"分寸感"人设契合——世故的人会权衡利弊
+- 选择可以体现在：偏向名声 / 偏向利益 / 找平衡
+
+**可选的 choice 分支：**
+- 走名声路线（多给穷人看病，名声更高，钱更少）
+- 走利益路线（专给富人看病，钱更多，名声略降）
+- 找平衡点（维持现状，名声和钱都不多不少）
+
+### 10.4 Tavern-Born Fit Assessment
 
 | Anchor | Fit? | Notes |
 |--------|------|-------|
@@ -369,7 +415,7 @@
 
 **风味评分：⭐⭐⭐⭐ (4/5) — 还不错，但不如人情债那么"世故"**
 
-### 10.3 Why Not First Choice
+### 10.5 Why Not First Choice
 
 1. **不够聚焦 variant 身份：** "名声 vs 利益"是所有医者都可能遇到的选择，不一定是 pragmatic 独有。compassionate 也会遇到（救穷人还是救富人）。"人情债缠身"才是 pragmatic 独有的——只有懂世故、有人脉的人才会陷入人情网。
 2. **与 merchant pressure 有点像：** Merchant pressure 是金钱/债务压力，这个方向也是金钱相关。虽然角度不同，但核心都是"钱"。"人情债"是完全不同的压力类型。

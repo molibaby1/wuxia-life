@@ -1376,5 +1376,209 @@
         "stageSignals": ["medical_late_life"]
       }
     }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_ember",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_final') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·仁心不灭·烬",
+      "text": "六十岁这年的某个冬日，你坐在药庐门口晒太阳，越来越觉得累。\n\n恍惚间，你想起小时候在酒肆帮着熬药的日子，老掌柜摸着你的头说「这孩子心善」。\n\n这些年，你救过多少人？数不清了。有富人，有穷人，有好人，有坏人——你都救了。\n\n你不知道的是，你救过的那些人，有的成了好大夫，有的一辈子记着你的恩情。\n\n仁心像火种——你这盏灯快灭了，但别处的灯，还亮着。\n\n老掌柜若还在，大概会摸着你的头说：「傻孩子，值了。」",
+      "description": "P93 一代名医 endgame — Comp-A 仁心不灭·烬"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_ember" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "ember", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_peace",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_peaceful') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·医者从容·淡",
+      "text": "六十岁这年，你常常搬个小凳子坐在门口晒太阳，像当年在酒肆门口看街景一样。\n\n偶尔还有老病人找上门来，你随手就给看了——不收钱，就当聊聊天。\n\n有人说「李大夫你真好」，你只笑笑——好什么呀，就是顺手的事。\n\n年轻时候总觉得「我不救谁救」，硬扛了半辈子，现在想通了。\n\n老掌柜若还在，大概会拍你肩膀说：「臭小子，终于想通了？」\n\n你也笑——是啊，早该这样了。",
+      "description": "P93 一代名医 endgame — Comp-B 医者从容·淡"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_peace" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "peace", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_legacy') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·仁心满天下·传",
+      "text": "六十岁这年，逢年过节，徒弟们带着徒孙们来看你，热热闹闹一院子。\n\n大徒弟在江南开了药庐，二徒弟在塞外救牧民，三徒弟进宫做了太医……个个都像你。\n\n你坐在中间，看着这些年轻的面孔，像看着年轻时候的自己——一样的仁心，一样的热血。\n\n有人说「老恩师您是一代宗师」，你只摆摆手——「什么宗师不宗师的，救人而已」。\n\n老掌柜若还在，大概会捋着胡子笑——当年酒肆里熬药的苦孩子，现在桃李满天下了。\n\n你想想也是——从酒肆里的苦孩子，到满天下的仁医，这辈子，值了。",
+      "description": "P93 一代名医 endgame — Comp-C 仁心满天下·传"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_legacy" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_fame_remain",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_fallen') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·医名犹存·寂",
+      "text": "六十岁这年，门前冷落鞍马稀。\n\n以前送礼的人能排半条街，现在连个问安的都没有。\n\n你倒是看得开——这辈子什么场面没见过？从酒肆里看人脸色，到太医院里给人脸色，再到现在门可罗雀，起起落落，不就是人生吗。\n\n只是有时候，你会翻翻自己写的医书，勾勾改改——这些东西，传下去就好。\n\n你不知道的是，太医院里的年轻太医还在看你的书，江湖上的游医还在用你的方。\n\n权势如烟云，说散就散了。但医名不一样——它比权势长久。\n\n老掌柜若还在，大概会叹口气——「爬那么高干什么呢？摔下来疼啊。」但转头又会说：「可你写的那些药方，管用！」",
+      "description": "P93 一代名医 endgame — Prag-A 医名犹存·寂"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_fame_remain" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "fame_remain", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_wanderer_legend",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_wanderer') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·江湖游医·遥",
+      "text": "六十岁这年，你还在路上。\n\n背着药箱，拄着拐杖，从一个村子走到另一个镇子。\n\n有人认出你，热情招待；没人认识，就自己找个破庙凑合一晚。\n\n你不在乎——这辈子什么场面没见过？从酒肆里听江湖故事，到自己成了江湖故事，够了。\n\n只是偶尔经过某个酒肆，会停下来喝一碗——听听这些年，江湖上把你传成了什么样。\n\n有人说你能活死人肉白骨，有人说你脾气古怪看人下菜碟，有人说你早就死在塞外了……你听着直乐。\n\n老掌柜若还在，大概会笑着骂你「这匹野马，到死都拴不住」。你也笑——人生在世，不就图个自在吗？",
+      "description": "P93 一代名医 endgame — Prag-B 江湖游医·遥"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_wanderer_legend" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "wanderer_legend", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_grand_master",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_master') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·一代宗师·名",
+      "text": "六十岁这年，家里常常高朋满座。\n\n有达官贵人，也有江湖豪杰，还有你一手带出来的徒弟们。\n\n你坐在主位，笑眯眯地看着，什么人说什么话，你心里门儿清。\n\n太医院请你做院判你不去，江湖门派请你做供奉你也不去——就守着你的药庐，看着后辈们成长。\n\n有人说「李老先生您是一代宗师」，你只摆摆手——「什么宗师，就是个看病的」。\n\n老掌柜若还在，大概会捋着胡子得意——「我就说这小子是块料子！你看你看！」\n\n你也笑——这一辈子，全靠当年在酒肆跟老掌柜学的那点人情世故。从跑堂的到一代名医，这条路，走得稳。",
+      "description": "P93 一代名医 endgame — Prag-C 一代宗师·名"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_grand_master" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "grand_master", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
   }
 ]

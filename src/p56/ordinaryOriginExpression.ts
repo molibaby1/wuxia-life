@@ -97,6 +97,24 @@ function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string 
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
   if (flags.tavern_medical_bridge_crossed) {
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_ember) {
+      return '仁薪尽传，此生无憾';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_peace) {
+      return '晒晒太阳看看病，从容了此一生';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_legacy) {
+      return '看着仁心一辈辈传下去，这就够了';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_fame_remain) {
+      return '权势如烟云，医名自长久';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+      return '传说真假谁在乎，自在就好';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_grand_master) {
+      return '看着这一世医名，守着这一份圆满';
+    }
     if (flags.medical_late_life_done && flags.tavern_medical_late_compassionate_final) {
       return '多救一个是一个，撑到最后一刻';
     }
@@ -290,6 +308,24 @@ function tavernLifeMemory(flags: Record<string, unknown>): string | undefined {
     return '你凭着酒肆里攒下的人脉和名声，渐渐在江湖上有了名号。人们不是来找你喝酒，是来寻你引荐、求你主事。';
   }
   if (flags.tavern_medical_bridge_crossed) {
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_ember) {
+      return '某个冬日，你坐在药庐门口晒太阳，越来越觉得累。恍惚间，你想起小时候在酒肆帮着熬药的日子，老掌柜摸着你的头说「这孩子心善」。这些年，你救过多少人？数不清了。你不知道的是，你救过的那些人，有的成了好大夫，有的一辈子记着你的恩情。仁心像火种——你这盏灯快灭了，但别处的灯，还亮着。老掌柜若还在，大概会摸着你的头说：「傻孩子，值了。」';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_peace) {
+      return '你常常搬个小凳子坐在门口晒太阳，像当年在酒肆门口看街景一样。偶尔还有老病人找上门来，你随手就给看了——不收钱，就当聊聊天。有人说「李大夫你真好」，你只笑笑——好什么呀，就是顺手的事。年轻时候总觉得「我不救谁救」，硬扛了半辈子，现在想通了。老掌柜若还在，大概会拍你肩膀说：「臭小子，终于想通了？」你也笑——是啊，早该这样了。';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_legacy) {
+      return '逢年过节，徒弟们带着徒孙们来看你，热热闹闹一院子。大徒弟在江南开了药庐，二徒弟在塞外救牧民，三徒弟进宫做了太医……个个都像你。你坐在中间，看着这些年轻的面孔，像看着年轻时候的自己——一样的仁心，一样的热血。有人说「老恩师您是一代宗师」，你只摆摆手——「什么宗师不宗师的，救人而已」。老掌柜若还在，大概会捋着胡子笑——当年酒肆里熬药的苦孩子，现在桃李满天下了。';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_fame_remain) {
+      return '门前冷落鞍马稀。以前送礼的人能排半条街，现在连个问安的都没有。你倒是看得开——这辈子什么场面没见过？从酒肆里看人脸色，到太医院里给人脸色，再到现在门可罗雀，起起落落，不就是人生吗。只是有时候，你会翻翻自己写的医书，勾勾改改——这些东西，传下去就好。你不知道的是，太医院里的年轻太医还在看你的书，江湖上的游医还在用你的方。权势如烟云，说散就散了。但医名不一样——它比权势长久。';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+      return '你还在路上。背着药箱，拄着拐杖，从一个村子走到另一个镇子。有人认出你，热情招待；没人认识，就自己找个破庙凑合一晚。你不在乎——这辈子什么场面没见过？从酒肆里听江湖故事，到自己成了江湖故事，够了。只是偶尔经过某个酒肆，会停下来喝一碗——听听这些年，江湖上把你传成了什么样。有人说你能活死人肉白骨，有人说你脾气古怪看人下菜碟，有人说你早就死在塞外了……你听着直乐。';
+    }
+    if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_grand_master) {
+      return '家里常常高朋满座，有达官贵人，也有江湖豪杰，还有你一手带出来的徒弟们。你坐在主位，笑眯眯地看着，什么人说什么话，你心里门儿清。太医院请你做院判你不去，江湖门派请你做供奉你也不去——就守着你的药庐，看着后辈们成长。有人说「李老先生您是一代宗师」，你只摆摆手——「什么宗师，就是个看病的」。老掌柜若还在，大概会捋着胡子得意——「我就说这小子是块料子！」';
+    }
     if (flags.medical_late_life_done && flags.tavern_medical_late_compassionate_final) {
       return '手抖得越来越厉害了，有时候连针都抓不住。可只要门外有病人的声音，你还是撑着要起来。徒弟们哭着劝你歇着，你只摇摇头——"能多救一个是一个。"夜深人静时，你闻着空气里淡淡的药味，想起小时候在酒肆帮着熬药的日子，也是这样的味道。那时候苦，可现在，你觉得值。';
     }
@@ -460,6 +496,24 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }
     if (flags.tavern_medical_bridge_crossed) {
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_ember) {
+        return '酒肆出身的仁心名医：燃尽自己，点亮了无数盏灯。仁心像火种，你这盏灯快灭了，但别处的灯，还亮着。从酒肆里的苦孩子到燃尽自己的点灯人，这辈子，值了。';
+      }
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_peace) {
+        return '酒肆出身的仁心名医：硬扛了半辈子，终于想通了。晚年从容淡然，晒晒太阳看看病，像回到了酒肆的日子。老掌柜若还在，大概会笑着说你终于想通了。';
+      }
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_compassionate_legacy) {
+        return '酒肆出身的仁心名医：一辈子救人，也一辈子教人。徒弟们散在各地，仁心传了一辈又一辈。从酒肆里的苦孩子到桃李满天下的仁医宗师，这辈子，值了。';
+      }
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_fame_remain) {
+        return '酒肆出身的世故名医：从跑堂爬到御医，风光了半辈子，也摔了下来。人走茶凉，世态炎凉，你都见过了。可权势如烟云，医名自长久——你写的药方，还在传着。';
+      }
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+        return '酒肆出身的世故名医：撕破了所有假人情，断了所有牵绊，一辈子行走江湖，逍遥自在。从酒肆里听江湖故事，到自己成了江湖传说。有人说你漂泊可怜，你只笑——可怜？这叫自在。';
+      }
+      if (flags.medical_endgame_echo_done && flags.tavern_medical_endgame_pragmatic_grand_master) {
+        return '酒肆出身的世故名医：一辈子人情练达，拿捏得住分寸，分得清真假。从酒肆里跟老掌柜学说话，到成为人人敬重的一代宗师，这一辈子，走得稳，走得顺。老掌柜若还在，大概会得意得很——我就说这小子是块料子！';
+      }
       if (flags.medical_late_life_done && flags.tavern_medical_late_compassionate_final) {
         return '酒肆出身的仁心名医：硬扛了一辈子，燃尽了自己，照亮了无数人。身体垮了，可仁心还在。老掌柜若还在，大概会哭着说你傻。可你知道——这就是医者的命。';
       }

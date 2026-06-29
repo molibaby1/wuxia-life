@@ -1954,7 +1954,7 @@ export class GameEngineIntegration {
         };
         
         const choiceValue = choiceValueMap[choiceId] || choiceId;
-        CriticalChoiceSystem.recordChoice(this.gameState, eventId, choiceValue, this.gameState);
+        CriticalChoiceSystem.recordChoice(this.gameState, eventId, choiceValue, true);
       }
     }
     

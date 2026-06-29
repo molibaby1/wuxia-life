@@ -91,20 +91,20 @@ export class CriticalChoiceSystem {
    * @param state 游戏状态
    * @param choiceId 选择 ID
    * @param option 选择的选项
-   * @param gameState 当前游戏状态
+   * @param applyConsequences 是否应用选择后果
    */
   static recordChoice(
     state: GameState,
     choiceId: string,
     option: string,
-    gameState?: any
+    applyConsequences = false,
   ): GameState {
     if (!state.criticalChoices) {
       state.criticalChoices = this.create();
     }
 
     const choices = state.criticalChoices;
-    
+
     // 验证选择 ID 是否有效
     if (!this.CHOICE_POINTS[choiceId as keyof typeof this.CHOICE_POINTS]) {
       console.warn(`无效的选择 ID: ${choiceId}`);
@@ -112,11 +112,10 @@ export class CriticalChoiceSystem {
     }
 
     // 记录选择
-    (choices as any)[choiceId] = option;
-
+    (choices as Record<string, string>)[choiceId] = option;
 
     // 触发选择后果（可选）
-    if (gameState) {
+    if (applyConsequences) {
       this.applyChoiceConsequences(state, choiceId, option);
     }
 
@@ -197,7 +196,7 @@ export class CriticalChoiceSystem {
    */
   static hasMadeChoice(state: GameState, choiceId: string): boolean {
     if (!state.criticalChoices) return false;
-    return (state.criticalChoices as any)[choiceId] !== undefined;
+    return (state.criticalChoices as Record<string, string>)[choiceId] !== undefined;
   }
 
   /**
@@ -205,7 +204,7 @@ export class CriticalChoiceSystem {
    */
   static getChoice(state: GameState, choiceId: string): string | undefined {
     if (!state.criticalChoices) return undefined;
-    return (state.criticalChoices as any)[choiceId];
+    return (state.criticalChoices as Record<string, string>)[choiceId];
   }
 
   /**
@@ -260,7 +259,7 @@ export class CriticalChoiceSystem {
   /**
    * 获取选择点的定义
    */
-  static getChoicePoint(choiceId: string): any {
+  static getChoicePoint(choiceId: string): typeof CriticalChoiceSystem.CHOICE_POINTS[keyof typeof CriticalChoiceSystem.CHOICE_POINTS] | undefined {
     return this.CHOICE_POINTS[choiceId as keyof typeof this.CHOICE_POINTS];
   }
 
@@ -297,7 +296,7 @@ export class CriticalChoiceSystem {
   /**
    * 序列化选择数据（用于存档）
    */
-  static serialize(state: GameState): any {
+  static serialize(state: GameState): CriticalChoices | null {
     if (!state.criticalChoices) return null;
     return { ...state.criticalChoices };
   }
@@ -305,8 +304,8 @@ export class CriticalChoiceSystem {
   /**
    * 反序列化选择数据（用于读档）
    */
-  static deserialize(data: any): CriticalChoices {
+  static deserialize(data: Partial<CriticalChoices> | null | undefined): CriticalChoices {
     if (!data) return this.create();
-    return { ...data };
+    return { ...data } as CriticalChoices;
   }
 }

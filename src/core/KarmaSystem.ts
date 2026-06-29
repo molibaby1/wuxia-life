@@ -156,7 +156,7 @@ export class KarmaManager {
   /**
    * 序列化因果数据（用于存档）
    */
-  static serialize(state: GameState): any {
+  static serialize(state: GameState): KarmaSystemType | null {
     if (!state.karma) return null;
     return {
       good_karma: state.karma.good_karma,
@@ -168,7 +168,7 @@ export class KarmaManager {
   /**
    * 反序列化因果数据（用于读档）
    */
-  static deserialize(data: any): KarmaSystemType {
+  static deserialize(data: Partial<KarmaSystemType> | null | undefined): KarmaSystemType {
     if (!data) return this.create();
     return {
       good_karma: data.good_karma || 0,

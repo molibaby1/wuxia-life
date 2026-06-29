@@ -13,7 +13,7 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity } from '../types/eventTypes';
+import type { GameState, PlayerIdentity, PlayerLifeStates, PlayerTraitProfile, CriticalChoices } from '../types/eventTypes';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
@@ -63,6 +63,7 @@ export interface EndingInfo {
     good_karma?: number;
     evil_karma?: number;
     flags?: string[];
+    not_flags?: string[];
     achievements?: string[];
     age?: number;
     externalSkill?: number;
@@ -72,9 +73,33 @@ export interface EndingInfo {
     knowledge?: number;
     businessAcumen?: number;
     influence?: number;
-    not_flags?: string[];
   };
   priority: number;  // 优先级，用于冲突时判定
+}
+
+interface EndingEvaluationData {
+  chivalry: number;
+  money: number;
+  comprehension: number;
+  reputation: number;
+  martialPower: number;
+  externalSkill: number;
+  internalSkill: number;
+  qinggong: number;
+  connections: number;
+  knowledge: number;
+  businessAcumen: number;
+  influence: number;
+  good_karma: number;
+  evil_karma: number;
+  flags: string[];
+  achievements: string[];
+  age: number;
+  spouse: string | null;
+  children: number;
+  lifeStates: PlayerLifeStates;
+  traitProfile?: PlayerTraitProfile;
+  choices?: CriticalChoices;
 }
 
 export class EndingSystem {
@@ -332,7 +357,7 @@ export class EndingSystem {
    * 检查是否满足结局要求
    */
   private static meetsEndingRequirements(
-    data: any,
+    data: EndingEvaluationData,
     requirements: EndingInfo['requirements']
   ): boolean {
     // 检查属性要求
@@ -404,8 +429,8 @@ export class EndingSystem {
     }
 
     // 检查 not_flags 要求
-    if ((requirements as any).not_flags) {
-      for (const flag of (requirements as any).not_flags) {
+    if (requirements.not_flags) {
+      for (const flag of requirements.not_flags) {
         if (data.flags.includes(flag)) {
           return false;
         }
@@ -600,7 +625,7 @@ export class EndingSystem {
     );
   }
 
-  private static qualifiesForPositiveEnding(data: any, endingId: EndingType): boolean {
+  private static qualifiesForPositiveEnding(data: EndingEvaluationData, endingId: EndingType): boolean {
     const { lifeStates } = data;
     const fatigue = lifeStates?.fatigue || 0;
     const anxiety = lifeStates?.anxiety || 0;
@@ -627,7 +652,7 @@ export class EndingSystem {
     }
   }
 
-  private static determineNeutralEnding(data: any): EndingInfo {
+  private static determineNeutralEnding(data: EndingEvaluationData): EndingInfo {
     const { lifeStates } = data;
     const fatigue = lifeStates?.fatigue || 0;
     const anxiety = lifeStates?.anxiety || 0;

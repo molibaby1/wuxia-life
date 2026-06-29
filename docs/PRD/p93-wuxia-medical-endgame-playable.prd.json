@@ -131,7 +131,7 @@
         "Verify two variants (compassionate vs pragmatic) remain fundamentally different axes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Closure report with medical route full-closure assessment. Wave 1 medical_sage_healer tavern_hand seed complete after P93."
     }
   ]

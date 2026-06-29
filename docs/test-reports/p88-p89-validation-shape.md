@@ -119,15 +119,15 @@ P89 新增的 regression tests 应覆盖以下断言（2 variants × 3 choices�
 
 | # | Assertion | Priority |
 |---|-----------|----------|
-| R15 | Choice A (硬扛): `tavern_medical_payoff_compassionate_holder` 设置 + stats 正确 (con-2, chivalry+3, rep+2) | P0 |
+| R15 | Choice A (硬扛): `tavern_medical_payoff_compassionate_holder` 设置 + stats 正确 (rep+2, con-2, chivalry+3) | P0 |
 | R16 | Choice A: cost label = "油尽灯枯" | P0 |
 | R17 | Choice A: sample line current goal 正确 | P0 |
 | R18 | Choice A: ordinary origin current goal 正确 | P0 |
-| R19 | Choice B (放手): `tavern_medical_payoff_compassionate_let_go` 设置 + stats 正确 (con+2, chivalry-1, rep-1, charisma+1) | P0 |
+| R19 | Choice B (放手): `tavern_medical_payoff_compassionate_let_go` 设置 + stats 正确 (rep-1, con+2, charisma+1, chivalry-1) | P0 |
 | R20 | Choice B: cost label = "释然行医" | P0 |
 | R21 | Choice B: sample line current goal 正确 | P0 |
 | R22 | Choice B: ordinary origin current goal 正确 | P0 |
-| R23 | Choice C (传承): `tavern_medical_payoff_compassionate_legacy` 设置 + stats 正确 (con+1, rep+1, chivalry+1, charisma+2) | P0 |
+| R23 | Choice C (传承): `tavern_medical_payoff_compassionate_legacy` 设置 + stats 正确 (rep+1, con+1, charisma+2, chivalry+1) | P0 |
 | R24 | Choice C: cost label = "仁心传承" | P0 |
 | R25 | Choice C: sample line current goal 正确 | P0 |
 | R26 | Choice C: ordinary origin current goal 正确 | P0 |
@@ -140,7 +140,7 @@ P89 新增的 regression tests 应覆盖以下断言（2 variants × 3 choices�
 | R28 | Choice A: cost label = "声名所累" | P0 |
 | R29 | Choice A: sample line current goal 正确 | P0 |
 | R30 | Choice A: ordinary origin current goal 正确 | P0 |
-| R31 | Choice B (撕破): `tavern_medical_payoff_pragmatic_breaker` 设置 + stats 正确 (rep-3, conn-5, charisma-1, con+2, chivalry+1) | P0 |
+| R31 | Choice B (撕破): `tavern_medical_payoff_pragmatic_breaker` 设置 + stats 正确 (rep-3, con+2, conn-5, charisma-1, chivalry+1) | P0 |
 | R32 | Choice B: cost label = "快意江湖" | P0 |
 | R33 | Choice B: sample line current goal 正确 | P0 |
 | R34 | Choice B: ordinary origin current goal 正确 | P0 |

@@ -165,9 +165,9 @@ The foundation is solid:
 
 | Choice | Core Identity | Stats Net（不含 money） | Narrative Tone | Verdict |
 |--------|--------------|----------------------|----------------|---------|
-| **A: 硬扛到底** | 油尽灯枯的仁心医者 | +3 (con-2, chivalry+3, rep+2) | 悲壮、理想主义悲剧 | ✅ Selected |
-| **B: 学会放手** | 释然通透的医者 | +1 (con+2, chivalry-1, rep-1, charisma+1) | 释然、与自己和解 | ✅ Selected |
-| **C: 找到传承** | 传道授业的仁医之师 | +5 (con+1, rep+1, chivalry+1, charisma+2) | 温暖、薪火相传 | ✅ Selected |
+| **A: 硬扛到底** | 油尽灯枯的仁心医者 | +3 (rep+2, con-2, chivalry+3) | 悲壮、理想主义悲剧 | ✅ Selected |
+| **B: 学会放手** | 释然通透的医者 | +1 (rep-1, con+2, charisma+1, chivalry-1) | 释然、与自己和解 | ✅ Selected |
+| **C: 找到传承** | 传道授业的仁医之师 | +5 (rep+1, con+1, charisma+2, chivalry+1) | 温暖、薪火相传 | ✅ Selected |
 
 **三个选择的本质差异：**
 - A = 坚持到底，自我牺牲，理想主义极致
@@ -245,11 +245,11 @@ medical_payoff_done (shared payoff checkpoint)
 
 | # | Variant | Choice | Identity Marker | Cost Label | Key Stats |
 |---|---------|--------|----------------|------------|-----------|
-| 1 | Compassionate | A 硬扛到底 | `tavern_medical_payoff_compassionate_holder` | 油尽灯枯 | con-2, chivalry+3, rep+2 |
-| 2 | Compassionate | B 学会放手 | `tavern_medical_payoff_compassionate_let_go` | 释然行医 | con+2, chivalry-1, rep-1, charisma+1 |
-| 3 | Compassionate | C 找到传承 | `tavern_medical_payoff_compassionate_legacy` | 仁心传承 | con+1, rep+1, chivalry+1, charisma+2 |
-| 4 | Pragmatic | A 硬扛人情 | `tavern_medical_payoff_pragmatic_holder` | 声名所累 | rep+4, conn+3, money+60, chivalry-2 |
-| 5 | Pragmatic | B 撕破脸皮 | `tavern_medical_payoff_pragmatic_breaker` | 快意江湖 | rep-3, conn-5, charisma-1, con+2, chivalry+1 |
+| 1 | Compassionate | A 硬扛到底 | `tavern_medical_payoff_compassionate_holder` | 油尽灯枯 | rep+2, con-2, chivalry+3 |
+| 2 | Compassionate | B 学会放手 | `tavern_medical_payoff_compassionate_let_go` | 释然行医 | rep-1, con+2, charisma+1, chivalry-1 |
+| 3 | Compassionate | C 找到传承 | `tavern_medical_payoff_compassionate_legacy` | 仁心传承 | rep+1, con+1, charisma+2, chivalry+1 |
+| 4 | Pragmatic | A 硬扛人情 | `tavern_medical_payoff_pragmatic_holder` | 声名所累 | rep+4, conn+3, chivalry-2, money+60 |
+| 5 | Pragmatic | B 撕破脸皮 | `tavern_medical_payoff_pragmatic_breaker` | 快意江湖 | rep-3, con+2, conn-5, charisma-1, chivalry+1 |
 | 6 | Pragmatic | C 人情练达 | `tavern_medical_payoff_pragmatic_master` | 人情练达 | rep+2, conn+1, charisma+4, money+30 |
 
 ### 6.3 Expression Surfaces (5 × 6 = 30 branches)

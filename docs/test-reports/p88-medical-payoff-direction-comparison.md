@@ -275,9 +275,9 @@
    - C = 薪火相传，仁心延续
 2. **三个方向各有各的身份走向**：油尽灯枯的医者 / 释然通透的医者 / 传道授业的医师
 3. **Stat 变化有明显区别**：
-   - A: con-2, chivalry+3, rep+2（继续消耗，理想主义极致）
-   - B: con+2, chivalry-1, rep-1, charisma+1（收回精力，找回自我）
-   - C: con+1, rep+1, chivalry+1, charisma+2（均衡发展，传承加分）
+   - A: rep+2, con-2, chivalry+3（继续消耗，理想主义极致）
+   - B: rep-1, con+2, charisma+1, chivalry-1（收回精力，找回自我）
+   - C: rep+1, con+1, charisma+2, chivalry+1（均衡发展，传承加分）
 4. **都符合 tavern-born 风味**：老掌柜、酒肆、药庐，三个方向都有锚点
 5. **都与 pressure 衔接自然**：都是"仁心耗尽"之后的合理应对方式
 6. **都有 distinct identity**：不是简单的数值换皮
@@ -518,7 +518,7 @@
 2. **三个方向各有各的身份走向**：声名赫赫的权贵御医 / 快意恩仇的江湖游医 / 人情练达的一代名医
 3. **Stat 变化有明显区别**：
    - A: rep+4, conn+3, money+60, chivalry-2（全是社交/物质，但侠义下降）
-   - B: rep-3, conn-5, charisma-1, con+2, chivalry+1（社交崩塌，但身体/侠义回升）
+   - B: rep-3, con+2, conn-5, charisma-1, chivalry+1（社交崩塌，但身体/侠义回升）
    - C: rep+2, conn+1, charisma+4, money+30（均衡，charisma 最高）
 4. **都符合 tavern-born 风味**：酒肆、老掌柜、人情世故，三个方向都有锚点
 5. **都与 pressure 衔接自然**：都是"人情债缠身"之后的合理应对方式

@@ -548,7 +548,7 @@ Payoff 让 medical 路线从"有代价的成长"变成"有选择的人生"，2 v
 | **Choice markers** | 3 个（holder / let_go / legacy） | 3 个（holder / breaker / master） |
 | **Core signals** | 5 个（cost label, current goal, age40 identity, life memory, summary） | 同左 |
 | **Expression surfaces** | 5 个 surfaces × 3 branches = 15 个新分支 | 5 个 surfaces × 3 branches = 15 个新分支 |
-| **Key stats** | A: con-2, chivalry+3, rep+2; B: con+2, chivalry-1, rep-1, charisma+1; C: con+1, rep+1, chivalry+1, charisma+2 | A: rep+4, conn+3, money+60, chivalry-2; B: rep-3, conn-5, charisma-1, con+2, chivalry+1; C: rep+2, conn+1, charisma+4, money+30 |
+| **Key stats** | A: rep+2, con-2, chivalry+3; B: rep-1, con+2, charisma+1, chivalry-1; C: rep+1, con+1, charisma+2, chivalry+1 | A: rep+4, conn+3, chivalry-2, money+60; B: rep-3, con+2, conn-5, charisma-1, chivalry+1; C: rep+2, conn+1, charisma+4, money+30 |
 | **New systems** | 零 — 全部复用现有架构 | 零 — 全部复用现有架构 |
 | **Late-life interface** | `medical_late_life_done` + `tavern_medical_late_life_*` (reserved) | 同左 |
 | **Flavor** | Tavern-born compassionate healer — 仁心的三种归宿 | Tavern-born pragmatic healer — 世故的三种归宿 |

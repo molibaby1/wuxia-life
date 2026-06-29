@@ -1,8 +1,11 @@
 import type { GameState } from '../types/eventTypes';
 
-export type SampleLineId = 'orthodox' | 'demonic' | 'merchant' | 'renown';
+export type SampleLineId = 'orthodox' | 'demonic' | 'merchant' | 'renown' | 'medical';
 
 export function detectSampleLine(flags: Record<string, unknown>): SampleLineId | null {
+  if (flags.tavern_medical_bridge_crossed || flags.route_medical_committed) {
+    return 'medical';
+  }
   if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
     return 'renown';
   }
@@ -239,6 +242,19 @@ function renownCurrentGoal(flags: Record<string, unknown>, age: number): string 
   return '在江湖上闯出名头';
 }
 
+function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.tavern_embrace_compassionate_healer) {
+    return '多救一个是一个，酒肆的小药庐挤不下了';
+  }
+  if (flags.tavern_embrace_pragmatic_healer) {
+    return '名声银子都要挣，酒肆出来的大夫懂分寸';
+  }
+  if (flags.tavern_medical_bridge_crossed) {
+    return '靠自学的医术在镇上立足，酒肆后面辟出了小药庐';
+  }
+  return age >= 25 ? '学医救人，攒下些名声' : '翻医书认草药，摸索着学医';
+}
+
 export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
   const line = detectSampleLine(flags);
@@ -328,6 +344,15 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     }
     return '江湖声名之累';
   }
+  if (line === 'medical') {
+    if (flags.tavern_embrace_compassionate_healer) {
+      return '仁心之累';
+    }
+    if (flags.tavern_embrace_pragmatic_healer) {
+      return '世故之秤';
+    }
+    return '行医之重';
+  }
   return '守正代价';
 }
 
@@ -346,6 +371,9 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
   }
   if (line === 'merchant') {
     return merchantCurrentGoal(flags, age);
+  }
+  if (line === 'medical') {
+    return medicalCurrentGoal(flags, age);
   }
   return renownCurrentGoal(flags, age);
 }

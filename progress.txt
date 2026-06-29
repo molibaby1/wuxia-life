@@ -1,3 +1,16 @@
+## [2026-06-29] - P84 Medical Sage Entry Differentiation - P84-001~008 ✅ COMPLETE
+- P84-001: Post-bridge entry sharedness audit complete — identified 6 flattening points, 4 addressable in P84 bounded scope; variant gap analysis shows compassionate/pragmatic have some differentiation but can be deepened at entry layer.
+- P84-002: P84 scope contract locked — 4 allowed layers (audit/scope/contract/wiring/expression/proof/tests/closure), 8 forbidden expansions, 4 scope guardrails, P84/P85 boundary defined, quality-first priority order, rollback strategy.
+- P84-003: Medical entry differentiation contract defined — 4 core identity signals for tavern-born healer, 3 entry expression surfaces + light markers, 2-variant differentiation rules (compassionate vs pragmatic), tavern-born flavor preservation, shared skeleton intact.
+- P84-004: Entry-level wiring complete — medical route added to sample-line system: 'medical' SampleLineId, detectSampleLine with priority over renown, medicalCurrentGoal function, cost labels (仁心之累/世故之秤/行医之重), route summary display names, player-facing labels.
+- P84-005: Player-facing entry expression complete — 7 expression surfaces updated: sample-line detection + cost label + current goal, ordinary origin current goal + life memory + summary, route summary name; 2 variants clearly differentiated; tavern-born healer flavor preserved.
+- P84-006: Targeted entry proof complete — comparison-style proof with 5 cases (plain tavern / merchant / renown / medical compassionate / medical pragmatic) × 7 expression surfaces = 35 data points; all entry differentiation criteria satisfied; conditional GO for P85 on-ramp spine.
+- P84-007: Narrow regression coverage complete — tests/p84MedicalEntryDifferentiationTests.ts with 14 test groups: sample line detection, priority ordering, cost labels, current goals, route summary, tavern-born flavor, variant distinctness, non-medical isolation, existing route regression.
+- P84-008: Closure report complete — 8/8 stories passed; entry differentiation score: 7/7 surfaces vs other routes, 7/8 surfaces between variants; conditional GO for P85 on-ramp spine; 3 known risks documented; P85 recommendations defined.
+- Files: docs/test-reports/p84-medical-entry-sharedness-audit.md, docs/test-reports/p84-medical-entry-scope-contract.md, docs/PRD/p84-medical-entry-differentiation-contract.md, src/p50/sampleLineExpression.ts, src/utils/playerFacingLabels.ts, src/p56/ordinaryOriginExpression.ts, docs/test-reports/p84-medical-entry-targeted-proof.md, tests/p84MedicalEntryDifferentiationTests.ts, docs/test-reports/p84-medical-entry-closure-report.md
+- Validation: typecheck ✅ P83 ✅ P84 ✅
+- Status: 8/8 stories complete; conditional GO for P85 on-ramp spine; ready for A1-verify
+---
 ## [2026-06-29] - P83 Medical Sage Bridge Playable - P83-001~007 ✅ COMPLETE
 - P83-001: Implementation delta audit complete — small, well-bounded delta (1 new event + 3 expression branches + tests); 5 existing wiring systems reusable; comparable to P71 renown bridge but with 2 entry variants + 2 mutual exclusivity pairs.
 - P83-002: Runtime scope contract locked — 5 allowed layers (bridge wiring / 2 entry variants / 3 expression surfaces / targeted proof / narrow tests); 17 forbidden expansions; 7 scope guardrails; P83/P84 boundary defined; quality-first priority order; rollback strategy.

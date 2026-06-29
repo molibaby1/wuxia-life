@@ -97,6 +97,12 @@ function tavernCurrentGoal(flags: Record<string, unknown>, age: number): string 
     return '江湖上渐渐有了名声，常有人来寻你引荐';
   }
   if (flags.tavern_medical_bridge_crossed) {
+    if (flags.tavern_embrace_compassionate_healer) {
+      return '酒肆后面辟出小药庐，有钱没钱都给看';
+    }
+    if (flags.tavern_embrace_pragmatic_healer) {
+      return '酒肆后面辟出小药庐，看病也讲人情世故';
+    }
     return '渐渐有人寻你看病，酒肆后面辟出了一间小药庐';
   }
   if (flags.tavern_merchant_bridge_crossed) {
@@ -358,6 +364,12 @@ export function deriveOrdinaryOriginSummary(flags: Record<string, unknown>): str
       return '酒肆出身的江湖人物：靠人脉和名声在江湖上立足。';
     }
     if (flags.tavern_medical_bridge_crossed) {
+      if (flags.tavern_embrace_compassionate_healer) {
+        return '酒肆出身的仁心医者：靠自学在镇上行医，有钱没钱都给看，小药庐里挤满了求医的人。';
+      }
+      if (flags.tavern_embrace_pragmatic_healer) {
+        return '酒肆出身的世故人医：靠眼力在镇上行医，看病也讲分寸，名声银子都挣到了手。';
+      }
       return '酒肆出身的医者：靠自学和经验在镇上行医，渐渐有了神医的名头。';
     }
     if (flags.tavern_merchant_bridge_crossed) {

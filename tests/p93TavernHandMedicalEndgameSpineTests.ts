@@ -612,10 +612,55 @@ function testDoneFlagFirstPattern(): void {
   console.log('  ✓ done-flag-first pattern: endgame > late-life');
 }
 
+function testAllSixIdentitiesHaveTavernFlavor(): void {
+  const identities = [
+    deriveSampleLineAge40Identity(makeCompassionateEndgameState('tavern_medical_endgame_compassionate_ember')),
+    deriveSampleLineAge40Identity(makeCompassionateEndgameState('tavern_medical_endgame_compassionate_peace')),
+    deriveSampleLineAge40Identity(makeCompassionateEndgameState('tavern_medical_endgame_compassionate_legacy')),
+    deriveSampleLineAge40Identity(makePragmaticEndgameState('tavern_medical_endgame_pragmatic_fame_remain')),
+    deriveSampleLineAge40Identity(makePragmaticEndgameState('tavern_medical_endgame_pragmatic_wanderer_legend')),
+    deriveSampleLineAge40Identity(makePragmaticMasterEndgameState('tavern_medical_endgame_pragmatic_grand_master')),
+  ];
+  for (let i = 0; i < identities.length; i++) {
+    const id = identities[i];
+    const hasTavernAnchor = id?.includes('酒肆') || id?.includes('老掌柜');
+    assert(hasTavernAnchor, `endgame identity ${i + 1} should have tavern flavor anchor (酒肆 or 老掌柜), got: ${id?.slice(0, 30)}`);
+  }
+  console.log('  ✓ all 6 endgame identities have tavern-born flavor anchors');
+}
+
+function testEndgameIdentityDeeperThanLateLife(): void {
+  const endgameIdentity = deriveSampleLineAge40Identity(makeCompassionateEndgameState('tavern_medical_endgame_compassionate_ember'));
+  const lateLifeState = makeState(55, {
+    origin_tavern_hand: true,
+    tavern_medical_bridge_crossed: true,
+    tavern_embrace_compassionate_healer: true,
+    tavern_medical_on_ramp_compassionate: true,
+    medical_on_ramp_done: true,
+    medical_midlife_pressure_done: true,
+    tavern_medical_pressure_compassionate: true,
+    medical_payoff_done: true,
+    medical_age40_identity_done: true,
+    tavern_medical_payoff_compassionate_holder: true,
+    medical_late_life_done: true,
+    medical_late_life_identity_done: true,
+    tavern_medical_late_compassionate_final: true,
+  });
+  const lateLifeIdentity = deriveSampleLineAge40Identity(lateLifeState);
+  assert(endgameIdentity !== undefined, 'endgame identity should exist');
+  assert(lateLifeIdentity !== undefined, 'late-life identity should exist');
+  const endgameLen = (endgameIdentity || '').length;
+  const lateLifeLen = (lateLifeIdentity || '').length;
+  assert(endgameLen > lateLifeLen, `endgame identity should be deeper/longer than late-life identity, endgame=${endgameLen} chars vs late-life=${lateLifeLen} chars`);
+  console.log('  ✓ endgame identity is deeper than late-life identity');
+}
+
 testAllSixBranchesHaveDifferentCostLabels();
 testAllSixBranchesHaveDifferentGoals();
 testAllSixBranchesHaveDifferentIdentities();
 testTwoVariantsHaveDifferentAxes();
 testDoneFlagFirstPattern();
+testAllSixIdentitiesHaveTavernFlavor();
+testEndgameIdentityDeeperThanLateLife();
 
 console.log('\n=== All P93 tests passed ===');

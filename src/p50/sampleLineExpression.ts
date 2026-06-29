@@ -613,6 +613,27 @@ function renownAge40Identity(flags: Record<string, unknown>): string | undefined
 }
 
 function medicalAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (flags.medical_endgame_identity_done) {
+    if (flags.tavern_medical_endgame_compassionate_ember) {
+      return '你是燃尽自己的点灯人：从酒肆里的苦孩子到一代名医，你硬扛了一辈子，燃尽了自己，却点亮了无数盏灯。你救过的人，有的成了好大夫，有的一辈子记着你的恩情。仁心像火种——你这盏灯快灭了，但别处的灯，还亮着。老掌柜若还在，大概会摸着你的头说：「傻孩子，值了。」';
+    }
+    if (flags.tavern_medical_endgame_compassionate_peace) {
+      return '你是从容淡然的老医者：硬扛了半辈子，终于想通了。到了晚年，你成了最从容的老医者——搬个小凳子坐在门口晒太阳，老病人找上门来随手就给看了，不收钱，就当聊聊天。有人说你真好，你只笑笑——好什么呀，就是顺手的事。酒肆的老掌柜若还在，大概会拍你肩膀说：「臭小子，终于想通了？」';
+    }
+    if (flags.tavern_medical_endgame_compassionate_legacy) {
+      return '你是桃李满天下的仁医宗师：一辈子行医救人，带出了一群好徒弟。大徒弟在江南开药庐，二徒弟在塞外救牧民，三徒弟进宫做了太医……个个都像你，一样的仁心，一样的热血。有人说你是「一代宗师」，你只摆摆手——「什么宗师不宗师的，救人而已。」酒肆的老掌柜若还在，大概会捋着胡子笑——当年酒肆里熬药的苦孩子，现在桃李满天下了。';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_fame_remain) {
+      return '你是失势但名存的老太医：从酒肆跑堂爬到太医院院判，你风光了半辈子。可靠山一倒，墙倒众人推，从人人巴结的「李院判」变成了无人问津的「老李头」。你倒是看得开——起起落落，不就是人生吗？只是你写的医书药方，还在太医院里传着，还在江湖上用着。权势如烟云，医名自长久。酒肆老掌柜若还在，大概会叹口气——爬那么高干什么呢？可转头又会说：可你写的那些药方，管用！';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_wanderer_legend) {
+      return '你是传说里的逍遥游医：撕破了所有假人情，断了所有牵绊，一辈子行走江湖。从江南走到塞北，从东海走到西域，什么权贵什么人情，全不放在眼里。江湖上到处是你的传说——有人说你能活死人肉白骨，有人说你脾气古怪，有人说你早就死在塞外了……你听着直乐。酒肆老掌柜若还在，大概会笑着骂你「这匹野马，到死都拴不住」。你也笑——人生在世，不就图个自在吗？';
+    }
+    if (flags.tavern_medical_endgame_pragmatic_grand_master) {
+      return '你是德高望重的一代宗师：一辈子人情练达，拿捏得住分寸，分得清真假。到了晚年，人人敬重——权贵给你面子，江湖人卖你情面，徒弟们个个有出息。太医院请你做院判你不去，江湖门派请你做供奉你也不去——就守着你的药庐，看着后辈们成长。酒肆老掌柜若还在，大概会捋着胡子得意——「我就说这小子是块料子！」你也笑——这一辈子，全靠当年在酒肆学的那点人情世故。';
+    }
+    return undefined;
+  }
   if (flags.medical_late_life_identity_done) {
     if (flags.tavern_medical_late_compassionate_final) {
       return '你是燃尽自己的最后仁心：从酒肆里的苦孩子到一代名医，你硬扛了一辈子。身体垮了，手抖了，眼看不清了，可只要还有人找上门，你还是撑着坐起来。老掌柜若还在，大概会哭着骂你傻。可你知道——医者仁心，就是燃尽自己，照亮别人。';

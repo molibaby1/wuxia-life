@@ -35,6 +35,7 @@ export interface LifeMemoryRouteStatus {
   primary: { routeId: string; name: string; phase: string };
   secondary?: { routeId: string; name: string; phase: string };
   factionLabel?: string;
+  currentGoalLabel?: string;
   lastTransition?: { label: string; age?: number };
   diagnostic: {
     routeStates: Record<string, { lifecycle: string; lockedIn: boolean }>;
@@ -77,13 +78,21 @@ export interface LifeMemoryAchievementEntry extends LifeMemoryEntryBase {
   diagnostic: { achievementId?: string; sourceFlags: string[] };
 }
 
+export interface LifeMemoryHabitTrajectoryEntry extends LifeMemoryEntryBase {
+  label: string;
+  tierLabel: string;
+}
+
 export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
   routeStatus?: LifeMemoryRouteStatus;
+  habitTrajectory?: LifeMemoryHabitTrajectoryEntry[];
   keyChoices?: LifeMemoryKeyChoiceEntry[];
   relationships?: LifeMemoryRelationshipEntry[];
   unresolvedDebts?: LifeMemoryDebtEntry[];
   risks?: LifeMemoryRiskEntry[];
   achievements?: LifeMemoryAchievementEntry[];
+  ordinaryOriginLifeMemory?: string;
+  ordinaryOriginSummary?: string;
 }

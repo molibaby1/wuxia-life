@@ -39,6 +39,7 @@ import {
   createEmptyTendencyAccumulator,
 } from '../src/p16/tendencyShaping';
 import { selectPassiveNarrative } from '../src/data/infantPassiveNarratives';
+import { getChildhoodActionById } from '../src/data/childhoodActionCatalog';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -194,8 +195,12 @@ function testChildhoodAgency(): void {
     flags: { p8_persona_id: 'p8-wealth-shen' },
   });
   assert(
-    businessPalette.some(a => a.id === 'action_errand_nearby'),
-    'business persona gets 5–6 band errand action at age 6',
+    businessPalette.some(a => a.id === 'action_household_errand'),
+    'business persona gets 5–6 band household errand action at age 6',
+  );
+  assert(
+    businessPalette.some(a => a.category === 'business'),
+    'business persona should keep a business-category childhood action at age 6',
   );
   const businessAge7 = resolveChildhoodActionPalette({
     age: 7,
@@ -241,6 +246,13 @@ function testChildhoodAgency(): void {
 
   const age21 = resolveChildhoodActionPalette({ age: 21, player: {} as PlayerState });
   assert(age21.some(a => a.id === 'action_business_basic'), 'adult palette restores full actions at age 21+');
+
+  const householdErrand = getChildhoodActionById('action_household_errand');
+  const householdApprentice = getChildhoodActionById('action_household_apprentice');
+  const errandBusiness = householdErrand?.rewards.find(r => r.stat === 'businessAcumen');
+  const apprenticeBusiness = householdApprentice?.rewards.find(r => r.stat === 'businessAcumen');
+  assert((errandBusiness?.min ?? 0) >= 1, 'household errand should guarantee businessAcumen gain');
+  assert((apprenticeBusiness?.min ?? 0) >= 1, 'household apprentice should guarantee businessAcumen gain');
 }
 
 function testTendencyShaping(): void {

@@ -4,6 +4,15 @@ import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import { EffectType, EventCategory, EventPriority, type DailyEventConfig, type DailyEventVariantConfig, type EventDefinition, type EventTrigger, type GameState } from '../types/eventTypes';
 
+// ponytail: built once at load; getConfigByVariantId was O(configs × variants) per daily event.
+const dailyConfigByVariantId = new Map<string, DailyEventConfig>(
+  dailyEvents.flatMap(config =>
+    Object.values(config.variants)
+      .flat()
+      .map(variant => [variant.id, config] as const),
+  ),
+);
+
 function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVariantConfig {
   const total = variants.reduce((sum, variant) => sum + variant.weight, 0);
   let random = Math.random() * total;
@@ -17,6 +26,10 @@ function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVar
 }
 
 export class DailyEventSystem {
+  getConfigByVariantId(eventId: string): DailyEventConfig | null {
+    return dailyConfigByVariantId.get(eventId) ?? null;
+  }
+
   selectEvent(state: GameState, configs: DailyEventConfig[] = dailyEvents): EventDefinition | null {
     const age = state.player?.age || 0;
     const primaryOrigin = resolvePrimaryOriginFamilyFlag(state);

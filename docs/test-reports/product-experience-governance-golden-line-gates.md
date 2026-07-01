@@ -1,31 +1,31 @@
 # Product Experience Governance — Golden Line Gates (PXG4)
 
-生成时间：2026-06-11T00:56:45.711Z
+生成时间：2026-06-28T13:26:35.713Z
 
-结果：**PASS**
+结果：**FAIL**
 
 ## Active scope summary
 
 - active blockers: **0**
-- total quality issues: 109
-- deferred warnings (major+): 31
+- total quality issues: 182
+- deferred warnings (major+): 75
 - candidate warnings (major+): 6
 
 ## Simulation samples
 
 | Sample | Route track | Final age | Choices |
 | --- | --- | --- | --- |
-| golden-sect | sect | 50 | 25 |
-| golden-wanderer | wanderer | 50 | 29 |
-| golden-demonic | demonic | 50 | 24 |
-| golden-neutral-baseline | neutral | 50 | 26 |
-| golden-romance-family | neutral | 50 | 26 |
+| golden-sect | sect | 50 | 24 |
+| golden-wanderer | wanderer | 50 | 28 |
+| golden-demonic | demonic | 50 | 26 |
+| golden-neutral-baseline | neutral | 50 | 23 |
+| golden-romance-family | neutral | 50 | 27 |
 
 ## Payoff coverage (static vs simulated)
 
 - static map: **100.0%**
 - simulated threshold: **70%**
-- missed opportunities (simulated_gap): **0**
+- missed opportunities (simulated_gap): **1**
 - never-reached key choices: **6**
 
 | Sample | Sim rate | Static | Pass |
@@ -34,7 +34,13 @@
 | golden-wanderer | 100.0% | 100.0% | yes |
 | golden-demonic | 100.0% | 100.0% | yes |
 | golden-neutral-baseline | 100.0% | 100.0% | yes |
-| golden-romance-family | 100.0% | 100.0% | yes |
+| golden-romance-family | 75.0% | 100.0% | yes |
+
+## Missed payoff opportunities
+
+| Sample | Choice | Expected payoff | Block reason |
+| --- | --- | --- | --- |
+| golden-romance-family | faction_support_elder @ sect_midlife_faction_pressure | sect_midlife_gray_mission | timing_exceeded |
 
 ## Gate findings
 
@@ -46,5 +52,7 @@
 | payoff | info | warning | Never-reached key choice (cohort): demonic_power_struggle; expected=demonic_usurpation, demonic_renounce_path; blockReason=condition_unmet (prerequisite chain not completed in deterministic replay) |
 | payoff | info | warning | Never-reached key choice (cohort): sect_trial_final; expected=sect_trial, martial_improvement; blockReason=route_fixture_skip (sect fixture may sync sect_trial_completed without sect_trial_final event) |
 | payoff | info | warning | Never-reached key choice (cohort): hero_first_case; expected=hero_save_village, hero_old_case_returns, continued_journey; blockReason=condition_unmet (hero identity and faction gates not satisfied in P3-EVAL replays) |
+| payoff | blocker | fail | segment_fail 0-30: simulated 66.7% < 70% |
+| payoff | blocker | fail | simulated_gap: choice=faction_support_elder expected=sect_midlife_gray_mission blockReason=timing_exceeded (no payoff event before hard cap age 48) |
 
 Regenerate: `npm run gate:golden-line`

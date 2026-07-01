@@ -5,6 +5,18 @@
 import type { EventDefinition } from '../types/eventTypes';
 import type { HeadlessEngineSession } from './session/HeadlessEngineSession';
 
+/** ponytail: mandatory auto events must go through story_event step so sim records capture them. */
+function shouldDeferAutomaticStoryEvent(event: EventDefinition): boolean {
+  const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
+  return (
+    tags.includes('mandatory') ||
+    tags.includes('mainline') ||
+    tags.includes('p9') ||
+    tags.includes('p11') ||
+    tags.includes('causality_echo')
+  );
+}
+
 function shouldDeferFormalAutoStoryEvent(event: EventDefinition): boolean {
   if (event.category === 'daily_event' || event.metadata?.tags?.includes('daily_pool')) {
     return false;

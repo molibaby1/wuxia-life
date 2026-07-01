@@ -1,0 +1,133 @@
+{
+  "project": "Wuxia Life P58 Town Apprentice Merchant-Magnate Bridge",
+  "branchName": "codex/p58-wuxia-town-apprentice-merchant-magnate-bridge",
+  "description": "Close the bounded runtime bridge from the existing town_apprentice ordinary-growth path into the current merchant_magnate mixed gate and P55 magnate chain, without reopening sample lines, expanding into a full merchant wave, or broadening to other ordinary origins.",
+  "userStories": [
+    {
+      "id": "P58-001",
+      "title": "Audit apprentice-to-magnate bridge gap",
+      "description": "As a maintainer, I want an audit of the current town_apprentice to merchant_magnate evidence chain so P58 closes the real bridge gap instead of rebuilding P55 or P56.",
+      "acceptanceCriteria": [
+        "Summarize current apprentice ordinary-growth signals, mixed-fixture evidence, and magnate gate requirements",
+        "Separate existing merchant_magnate proof from missing apprentice runtime bridge layers",
+        "Save docs/test-reports/p58-town-apprentice-merchant-bridge-gap-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only audit. Created gap audit doc mapping apprentice signals vs merchant gate requirements."
+    },
+    {
+      "id": "P58-002",
+      "title": "Lock P58 scope contract",
+      "description": "As a planner, I want a scope contract for P58 so the stage stays focused on a single high-value bridge instead of sprawling into general merchant or ordinary expansion.",
+      "acceptanceCriteria": [
+        "Limit the stage to town_apprentice to merchant_magnate only",
+        "Define allowed layers: configuration wiring, light presentation, targeted simulation or verification, narrow regression",
+        "List forbidden expansions: sample-line work, peasant or tavern bridge work, full merchant wave, platformization",
+        "Save docs/test-reports/p58-town-apprentice-merchant-bridge-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract story. Created scope contract doc with allowed/forbidden boundaries."
+    },
+    {
+      "id": "P58-003",
+      "title": "Define apprentice bridge contract",
+      "description": "As a designer, I want a bounded contract for how apprentice trade-network signals graduate into the existing wealth-route and magnate chain.",
+      "acceptanceCriteria": [
+        "Define a minimal apprentice prerequisite group using existing trade-curiosity or partnership signals",
+        "Define at least one ordinary-to-merchant bridge checkpoint",
+        "Explain how the bridge connects to route_wealth_committed or an equivalent existing wealth-route gate",
+        "Keep ordinary identity intact before the bridge checkpoint fires"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Design story. Created bridge contract doc with prerequisite group, checkpoint, and downstream flow."
+    },
+    {
+      "id": "P58-004",
+      "title": "Define apprentice magnate-entry contract",
+      "description": "As a designer, I want a clear contract for when the bridged apprentice path should count as entering the current magnate chain instead of remaining generic merchant flavor.",
+      "acceptanceCriteria": [
+        "Define the minimum additional conditions required for the apprentice path to enter the P55 magnate on-ramp",
+        "Document the distinction versus a generic merchant start",
+        "Document the reuse boundary versus existing P55 pressure and payoff nodes",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Design story. Created magnate-entry contract doc with conditions, distinction, and reuse boundary."
+    },
+    {
+      "id": "P58-005",
+      "title": "Wire apprentice-to-merchant configuration",
+      "description": "As a developer, I want the apprentice bridge wired through existing JSON carriers so the path becomes runtime-reachable without a new framework.",
+      "acceptanceCriteria": [
+        "Implement the bridge only through existing ordinary, merchant, or wealth-route configuration carriers",
+        "Do not introduce a new origin or merchant framework",
+        "The bridged path can trigger the existing magnate gate chain or an equivalent bounded proof",
+        "Existing P25, P55, and P56 evidence does not regress"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Configuration story. Added route_wealth_committed and apprentice_merchant_bridge_crossed to join_partnership flags in midlife JSON."
+    },
+    {
+      "id": "P58-006",
+      "title": "Add apprentice bridge player-facing expression",
+      "description": "As a player, I want the apprentice route to visibly read as crossing from skilled town worker into merchant ascent so the bridge is legible.",
+      "acceptanceCriteria": [
+        "Add at least two readable apprentice-to-merchant bridge signals on existing expression surfaces",
+        "Keep the wording distinct from ordinary apprentice midlife text and from the later magnate-stage text",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Expression story. Added bridge expression in currentGoal, lifeMemory, and summary surfaces."
+    },
+    {
+      "id": "P58-007",
+      "title": "Add targeted apprentice-to-magnate proof",
+      "description": "As a maintainer, I want a bounded proof showing that town_apprentice can reach the current magnate chain without relying only on static mixed-fixture shortcuts.",
+      "acceptanceCriteria": [
+        "Produce one targeted simulation, replay, or verification artifact",
+        "Show apprentice seed, bridge flag, and magnate checkpoint evidence in order",
+        "Do not rely on direct terminal mixed-flag seeding as the only proof path",
+        "Do not require combinatorial exhaust or a full lifetime platform wave"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Proof story. Created targeted proof artifact with flag chain trace and gate evaluation."
+    },
+    {
+      "id": "P58-008",
+      "title": "Add narrow apprentice-bridge regression coverage",
+      "description": "As a maintainer, I want narrow tests for the apprentice bridge so future edits do not silently break the path or collapse it back into fixture-only proof.",
+      "acceptanceCriteria": [
+        "Cover bridge gating, player-facing expression, and targeted proof with narrow assertions",
+        "Reuse existing P25, P55, and P56 harnesses",
+        "Do not rewrite the full merchant or ordinary test suites",
+        "Relevant commands pass"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Regression story. Created p58ApprenticeBridgeTests.ts with 8 tests covering bridge gate, expression, and proof."
+    },
+    {
+      "id": "P58-009",
+      "title": "Produce P58 closure report",
+      "description": "As a maintainer, I want a P58 closure report stating exactly what runtime bridge now exists between town_apprentice and merchant_magnate, and what remains deferred for later merchant or ordinary waves.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p58-town-apprentice-merchant-bridge-closure-report.md",
+        "Summarize configuration, expression, simulation or verification, and test evidence",
+        "State the boundary versus P55 merchant deepening, P56 ordinary growth, and the closed sample-line track",
+        "List larger merchant or ordinary follow-up items that remain deferred"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Closure story. Created closure report with delivery evidence, validation results, boundaries, and deferred items."
+    }
+  ]
+}

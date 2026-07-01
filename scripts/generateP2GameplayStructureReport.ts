@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
+import { GameProcessSimulator } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import { evaluateSimulationGate } from './gameplaySimulationGate';
 import { formatDiagnosticsMarkdownSection } from './gameplaySimulationDiagnostics';
 

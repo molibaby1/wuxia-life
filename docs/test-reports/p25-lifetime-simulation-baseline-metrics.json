@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-06-23T05:48:29.199Z",
+  "config": {
+    "sampleCount": 24,
+    "seedStart": 1001,
+    "seedEnd": 1024,
+    "command": "npm exec tsx scripts/runP25SimulationBaseline.ts"
+  },
+  "achievementUnlockRates": {
+    "medical_sage_healer": 0.20833333333333334,
+    "sect_leader_statesman": 0.16666666666666666,
+    "lone_sword_legend": 0.125,
+    "grandmaster_guardian": 0.125,
+    "jianghu_renown_sage": 0.16666666666666666
+  },
+  "pathDivergenceProxy": 0.25,
+  "highSeverityContradictionCount": 0,
+  "wave1AcceptanceDirection": "Wave 1 targets partial reachability on all 5 mainstream outcomes and pathDivergenceProxy >= 0.25; pinnacle/mixed/ordinary-origin thresholds deferred to Wave 2-4."
+}

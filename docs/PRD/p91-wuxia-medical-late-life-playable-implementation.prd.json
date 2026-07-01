@@ -1,0 +1,132 @@
+{
+  "project": "Wuxia Life P91 Medical Late-Life Playable Implementation",
+  "branchName": "codex/p91-wuxia-medical-late-life-playable-implementation",
+  "description": "Implement the medical late-life stage for medical_sage_healer tavern_hand seed — 1 auto event with 6 branches (2 variants × 3 choices), full expression updates (cost label, current goal, late-life identity, life memory, summary), targeted proof, and regression tests. Strictly follows P90 late-life contract.",
+  "userStories": [
+    {
+      "id": "P91-001",
+      "title": "Wire medical late-life spine event (6 branches)",
+      "description": "As a developer, I want the medical late-life auto event wired through the existing event system so players on the medical route encounter a real late-life milestone with 6 distinct branches based on payoff choice.",
+      "acceptanceCriteria": [
+        "Configure medical_late_life auto event in sample-lines-spine.json (age 52-56)",
+        "Trigger conditions: medical_payoff_done + age range + exclusivity guard + no orthodox/demonic",
+        "Event sets medical_late_life_done checkpoint flag + medical_late_life_identity_done",
+        "Branching logic: based on payoff choice marker (6 options: 3 compassionate + 3 pragmatic)",
+        "Compassionate branch markers: tavern_medical_late_compassionate_final / peaceful / legacy",
+        "Pragmatic branch markers: tavern_medical_late_pragmatic_fallen / wanderer / master",
+        "Correct stat changes per branch (per P90 contract section 5): Comp-A +3, Comp-B +7, Comp-C +10, Prag-A -6, Prag-B +3, Prag-C +13",
+        "No new event framework or scheduler",
+        "P83/P84/P85/P87/P89 existing evidence does not regress"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "1 auto event with 6 branches = more complex than renown late-life (3 branches). Core runtime wiring for medical late-life."
+    },
+    {
+      "id": "P91-002",
+      "title": "Add late-life player-facing expression — sample line (core P0)",
+      "description": "As a player, I want the medical late-life stage reflected in my sample line status so the route feels like it has a meaningful late-life identity.",
+      "acceptanceCriteria": [
+        "Sample line cost label: payoff state → late-life state (6 distinct labels: 最后仁心 / 从容自在 / 仁心传承 / 人走茶凉 / 逍遥自在 / 德高望重)",
+        "Sample line current goal: payoff state → late-life state (6 distinct goals)",
+        "Gate order: medical_late_life_done > medical_payoff_done > medical_midlife_pressure_done > medical_on_ramp_done > tavern_medical_bridge_crossed > base",
+        "At least 2 late-life-specific readable signals (cost label + current goal)",
+        "Six branches have meaningfully different expressions, not reskinned",
+        "Two variants have genuinely different expressions (compassionate = body/spirit, pragmatic = social/position)",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Core P0 expression surfaces. 6 branches × 2 signals = 12 expression updates."
+    },
+    {
+      "id": "P91-003",
+      "title": "Add late-life player-facing expression — late-life identity (core P0)",
+      "description": "As a player, I want a late-life identity summary that deepens my age-40 identity so the late-life stage feels like it defines who I become.",
+      "acceptanceCriteria": [
+        "medicalAge40Identity() checks medical_late_life_identity_done first, then falls back to medical_age40_identity_done",
+        "Comp-A: 燃尽自己的最后仁心",
+        "Comp-B: 从容自在的老者",
+        "Comp-C: 仁心满天下的老宗师",
+        "Prag-A: 失势的老御医",
+        "Prag-B: 逍遥自在的老游医",
+        "Prag-C: 德高望重的老名医",
+        "Six branches have meaningfully different identity descriptions",
+        "Preserve tavern-born medical healer flavor (tavern, old shopkeeper, etc.)"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Core P0 identity surface. 6 unique late-life identities — deeper than age-40 identities."
+    },
+    {
+      "id": "P91-004",
+      "title": "Add late-life player-facing expression — ordinary origin (bonus P1)",
+      "description": "As a player, I want additional late-life-specific expressions in the ordinary origin view so the late-life stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin current goal: late-life state update (consistent with sample line)",
+        "Ordinary origin life memory: late-life-specific text (different per branch, 6 total)",
+        "Ordinary origin summary: late-life state update (different per branch, 6 total)",
+        "Gate order matches sample line",
+        "Preserve tavern-born medical healer flavor",
+        "No new UI components"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Bonus P1 expression surfaces. Life memory and summary depth. 3 surfaces × 6 branches = 18 expression updates."
+    },
+    {
+      "id": "P91-005",
+      "title": "Add targeted late-life proof (6 branches)",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the medical late-life event fires correctly, all 6 branches work, and tavern-born healer flavor is preserved.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof (payoff → late-life → expression changes path verification, both variants × 3 choices)",
+        "Show core nodes: pre-late-life baseline → event fires → 6 branches flags+stats → cost label per branch → current goal per branch → late-life identity per branch",
+        "Optional bonus nodes: life memory, origin summary, full chain traceback, variant differentiation (body/spirit vs social/position), 6-branch differentiation, cross-route distinction, tavern-born flavor check",
+        "No full lifetime exhaust required",
+        "Proof supports whether to continue endgame stage decision",
+        "Save as docs/test-reports/p91-medical-late-life-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Targeted proof covering all 6 late-life branches + 2 variants."
+    },
+    {
+      "id": "P91-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the medical late-life stage so future edits do not break the first medical late-life milestone.",
+      "acceptanceCriteria": [
+        "New test file covering late-life stage (1 auto event × 6 branches)",
+        "Group 1: Event wiring — event exists, auto type, age range, conditions, 6 branch markers",
+        "Group 2: Pre-late-life state — state verification after payoff before late-life (both variants)",
+        "Group 3: Compassionate 3 branches post-late-life — flags + stats + cost label + current goal",
+        "Group 4: Pragmatic 3 branches post-late-life — flags + stats + cost label + current goal",
+        "Group 5: Late-life identity (6 branches, P0)",
+        "Group 6: Two-variant differentiation — compassionate ≠ pragmatic (body/spirit vs social/position)",
+        "Group 7: Six-branch differentiation — all 6 branches different",
+        "Group 8: Distinct from renown late-life (healer vs jianghu networker)",
+        "Group 9: No regression of P83/P84/P85/P87/P89",
+        "Reuse existing test harness",
+        "All relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "~60-70 regression assertions across 9 groups. Covers both variants + all 6 branches."
+    },
+    {
+      "id": "P91-007",
+      "title": "Produce P91 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the medical late-life stage now provides and whether endgame stage is justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p91-medical-late-life-closure-report.md",
+        "Summarize event wiring, expressions, proof, tests",
+        "State whether subsequent endgame / final legacy stage is worth opening (GO / NO-GO)",
+        "List larger medical-expansion items that remain deferred",
+        "All 14 closure criteria satisfied (from P90 validation shape)"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P92 medical endgame design-first stage."
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "project": "Wuxia Life P73 Renown On-Ramp Spine",
+  "branchName": "codex/p73-wuxia-renown-on-ramp-spine",
+  "description": "Build the minimum playable on-ramp spine event for the jianghu_renown_sage route so it has real content beyond entry labels, while staying bounded and preserving the tavern-born flavor.",
+  "userStories": [
+    {
+      "id": "P73-001",
+      "title": "Audit renown on-ramp gap",
+      "description": "As a maintainer, I want an audit of what currently exists for jianghu_renown_sage after entry so P73 targets the real on-ramp gap.",
+      "acceptanceCriteria": [
+        "Summarize existing renown route flags, markers, expression, and events",
+        "Identify what exists before on-ramp vs what the minimum spine needs",
+        "Save docs/test-reports/p73-renown-on-ramp-gap-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Gap audit complete: existing bridge + 6+ expression surfaces identified; 3 core gaps (on-ramp event, checkpoint flag, expression updates) documented."
+    },
+    {
+      "id": "P73-002",
+      "title": "Lock P73 scope contract",
+      "description": "As a planner, I want a scope contract so P73 stays an on-ramp spine stage and does not sprawl into full renown content.",
+      "acceptanceCriteria": [
+        "Limit P73 to on-ramp spine event plus corresponding expression only",
+        "Define allowed layers: event configuration, expression, proof, and narrow tests",
+        "List forbidden expansions: pressure wave, payoff wave, new systems, full route expansion, second route",
+        "Save docs/test-reports/p73-renown-on-ramp-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract locked: 4 allowed layers (event config, expression, proof, narrow tests), 6 forbidden expansions (pressure, payoff, new systems, full expansion, second route, other origins)."
+    },
+    {
+      "id": "P73-003",
+      "title": "Define renown on-ramp contract",
+      "description": "As a designer, I want an explicit on-ramp contract for jianghu_renown_sage so the first post-bridge milestone feels like a renown-specific turning point.",
+      "acceptanceCriteria": [
+        "Define on-ramp trigger conditions (post-bridge + age range + minimum renown/network threshold)",
+        "Define the core narrative: what is the first iconic milestone of a jianghu renown sage",
+        "Preserve tavern-born flavor (network path from tavern origins)",
+        "Reserve flag interfaces for subsequent pressure/payoff stages",
+        "Record the contract in the PRD or an appendix"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "On-ramp contract defined: '江湖调解' event at age 32-35, post-bridge trigger, tavern-born flavor preserved, 2 choices (accept/decline), renown_on_ramp_done checkpoint, flag interfaces for pressure/payoff stages reserved. Saved to docs/PRD/p73-renown-on-ramp-contract.md."
+    },
+    {
+      "id": "P73-004",
+      "title": "Wire renown on-ramp spine event",
+      "description": "As a developer, I want the renown on-ramp event wired through the existing event system so players crossing the renown bridge encounter a real milestone.",
+      "acceptanceCriteria": [
+        "Implement on-ramp spine event through existing event system configuration",
+        "Do not introduce a new event framework or scheduler",
+        "Trigger conditions are compatible with P71 bridge and P72 entry",
+        "P71/P72 existing evidence does not regress",
+        "Shared destination chain remains stably triggerable"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Renown on-ramp event wired in sample-lines-spine.json — auto event 'renown_on_ramp' at age 32-35, triggers on tavern_renown_bridge_crossed, sets renown_on_ramp_done + tavern_renown_on_ramp, stat boosts (reputation +5, connections +4, charisma +2). No new framework. P71/P72 tests pass, sample-lines guard pass."
+    },
+    {
+      "id": "P73-005",
+      "title": "Add on-ramp player-facing expression",
+      "description": "As a player, I want the renown on-ramp to read as a meaningful turning point so the route feels like it has content beyond entry labels.",
+      "acceptanceCriteria": [
+        "Add at least two on-ramp-specific readable signals (currentGoal update, identity summary, etc.)",
+        "After on-ramp, players can feel 'I have truly gained fame in the jianghu'",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "On-ramp player-facing expression added — 4 updates: 1) renownCurrentGoal (sampleLineExpression.ts), 2) tavernCurrentGoal (ordinaryOriginExpression.ts), 3) tavernLifeMemory (ordinaryOriginExpression.ts), 4) deriveOrdinaryOriginSummary (ordinaryOriginExpression.ts). All have tavern-born renown flavor. No new UI components. P71/P72 tests pass, typecheck pass."
+    },
+    {
+      "id": "P73-006",
+      "title": "Add targeted on-ramp proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the renown on-ramp event fires correctly and carries tavern-born renown flavor.",
+      "acceptanceCriteria": [
+        "Produce one targeted proof (bridge to on-ramp path verification)",
+        "Show on-ramp event trigger plus expression changes",
+        "Do not require full lifetime exhaust",
+        "Proof supports whether to continue to pressure stage"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Targeted on-ramp proof complete — 8 chain nodes verified: pre-on-ramp baseline, event trigger, checkpoint, 4 expression updates (sampleLine currentGoal, ordinary origin currentGoal, lifeMemory, summary), and no-regression check. Tavern-born flavor verified across all surfaces. Pressure stage readiness recommendation: GO (with conditions). Document: docs/test-reports/p73-renown-on-ramp-targeted-proof.md"
+    },
+    {
+      "id": "P73-007",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the renown on-ramp spine so future edits do not break the first renown content milestone.",
+      "acceptanceCriteria": [
+        "Cover at least on-ramp trigger conditions, event firing, expression updates, and comparison assertions",
+        "Reuse existing test harness",
+        "Do not rewrite the full test suite",
+        "Relevant commands pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Narrow regression coverage added — tests/p73TavernHandRenownOnRampSpineTests.ts with 19 tests across 5 groups: 1) on-ramp event wiring (5 tests), 2) pre-on-ramp bridge-only state (4 tests), 3) post-on-ramp expression updates (5 tests), 4) distinct from merchant on-ramp (2 tests), 5) no regression of P71/P72 (3 tests). All pass. typecheck ✅ P71 ✅ P72 ✅ P73 ✅ baseline guard ✅"
+    },
+    {
+      "id": "P73-008",
+      "title": "Produce P73 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the renown on-ramp provides and whether pressure/payoff stages are justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p73-renown-on-ramp-closure-report.md",
+        "Summarize gap audit, contract, event wiring, expression, proof, and tests",
+        "State whether the subsequent pressure stage is worth opening",
+        "List larger renown-expansion items that remain deferred"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Closure report complete — 8/8 stories passed. Summary: 1 auto spine event (声名初显), 1 checkpoint flag (renown_on_ramp_done), 4 expression updates, 19 tests, zero regressions. Scope compliance: 100%. Pressure stage recommendation: GO (design-first, bounded). Document: docs/test-reports/p73-renown-on-ramp-closure-report.md"
+    }
+  ]
+}

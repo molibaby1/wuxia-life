@@ -1,0 +1,79 @@
+{
+  "project": "Wuxia Life P43 Archetype Recap And Ending Differentiation",
+  "branchName": "codex/p43-wuxia-archetype-recap-and-ending-differentiation",
+  "description": "Strengthen whole-life payoff by making dominant shaping directions and archetype differences more explicit in recap, life memory, and ending-level output.",
+  "userStories": [
+    {
+      "id": "P43-001",
+      "title": "Audit current endgame and recap differentiation gaps",
+      "description": "As a maintainer, I want a gap audit of endgame recap and archetype differentiation so P43 targets the weakest closing surfaces.",
+      "acceptanceCriteria": [
+        "Inventory current recap and ending surfaces that express life trajectory or archetype",
+        "Identify where shaping is lost, flattened, or repeated across archetypes",
+        "Rank the highest-value recap and ending gaps",
+        "Save audit under docs/test-reports/p43-ending-differentiation-gap-audit.md",
+        "Do not change gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P43-002",
+      "title": "Add dominant shaping recap to late-life summary",
+      "description": "As a player, I want late-life recap to explicitly name the dominant long-term forces that shaped my life, so the whole run feels causally legible.",
+      "acceptanceCriteria": [
+        "Add or revise recap output so it names dominant shaping directions in player-facing language",
+        "Recap connects shaping direction to visible life consequences or identity",
+        "Avoid raw internal state output",
+        "Add targeted regression coverage for recap derivation"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Single recap-layer story."
+    },
+    {
+      "id": "P43-003",
+      "title": "Differentiate archetype endings by shaping pattern",
+      "description": "As a player, I want two runs in the same broad route family to still end with different tones or summaries when their long-term shaping patterns differ.",
+      "acceptanceCriteria": [
+        "Select at least 2 archetype families and 2 shaping patterns per family",
+        "Add or revise ending or recap content so these patterns are visibly distinct",
+        "Differentiation is readable in player-facing output, not only hidden diagnostics",
+        "Document sample before and after cases under docs/test-reports/p43-archetype-ending-delta-matrix.md"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Main differentiation story."
+    },
+    {
+      "id": "P43-004",
+      "title": "Bind life memory, recap, and ending language together",
+      "description": "As a player, I want my life-memory summary, late recap, and ending language to feel like one coherent interpretation of the same life rather than three disconnected summaries.",
+      "acceptanceCriteria": [
+        "Review terminology consistency across life memory, recap, and ending surfaces",
+        "Align major labels for martial, scholarly, livelihood, social, and family shaping",
+        "Remove obvious contradictions or duplicate phrasing patterns",
+        "Add targeted regression or snapshot coverage where appropriate"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Consistency cleanup story only."
+    },
+    {
+      "id": "P43-005",
+      "title": "P43 regression and closure",
+      "description": "As a maintainer, I want regression coverage and closure evidence that archetype and ending differentiation improved without breaking prior shaping features.",
+      "acceptanceCriteria": [
+        "Run typecheck",
+        "Run existing habit and recap related tests",
+        "Add at least one isolated P43 regression asserting differentiated recap or ending output",
+        "Save closure under docs/test-reports/p43-archetype-recap-ending-closure.md",
+        "Closure lists remaining flattening areas clearly"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Final validation and handoff story."
+    }
+  ]
+}

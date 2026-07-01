@@ -184,7 +184,10 @@ export type LifeStateKey =
   | 'indulgence'
   | 'familyBond'
   | 'socialMomentum'
-  | 'anxiety';
+  | 'anxiety'
+  | 'trainingHabit'
+  | 'studyHabit'
+  | 'businessHabit';
 
 export interface TraitStatModifier {
   stat: TraitStatKey;
@@ -285,6 +288,9 @@ export interface PlayerLifeStates {
   familyBond: number;
   socialMomentum: number;
   anxiety: number;
+  trainingHabit: number;
+  studyHabit: number;
+  businessHabit: number;
 }
 
 export interface LifeStateConfig {
@@ -575,10 +581,16 @@ export interface EffectDefinition {
     immediate?: boolean;  // 是否立即触发结局
   };
 
-  // 兼容旧字段命名
+  ///** 兼容旧字段命名 */
   stat?: string;
   flag?: string;
   event?: string;
+
+  /** 因果变化 - 善行值（用于 karma_change 效果） */
+  good?: number;
+
+  /** 因果变化 - 恶行值（用于 karma_change 效果） */
+  evil?: number;
 }
 
 // 兼容旧代码中的命名

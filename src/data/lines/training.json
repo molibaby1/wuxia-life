@@ -164,17 +164,19 @@
           },
           {
             "type": "stat_modify",
-            "target": "martialPower",
-            "value": 3,
+            "target": "knowledge",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "life_state_change",
+            "target": "studyHabit",
+            "value": 1,
             "operator": "add"
           },
           {
             "type": "flag_set",
             "target": "balancedStart"
-          },
-          {
-            "type": "flag_set",
-            "target": "martialPathDeclared"
           }
         ]
       },
@@ -239,7 +241,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"martialPathDeclared\") && !flags.has(\"martial_focus_payoff_done\")"
+        "expression": "(flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"agilePath\")) && !flags.has(\"martial_focus_payoff_done\")"
       }
     ],
     "content": {
@@ -301,7 +303,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"balancedStart\") OR flags.has(\"martialPathDeclared\")"
+        "expression": "flags.has(\"shaolinDisciple\") OR flags.has(\"wudangDisciple\") OR flags.has(\"emeiDisciple\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"martialPathDeclared\")"
       }
     ],
     "content": {
@@ -442,7 +444,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"martialPathDeclared\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR flags.has(\"balancedStart\") OR (!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\"))"
+        "expression": "flags.has(\"martialPathDeclared\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR (!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\") && !flags.has(\"p8_route_balanced\"))"
       }
     ],
     "content": {

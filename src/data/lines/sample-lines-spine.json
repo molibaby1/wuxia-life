@@ -1,0 +1,1584 @@
+[
+  {
+    "id": "orthodox_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('orthodox_childhood_seed_done') && !flags.has('p8_route_demonic') && !flags.has('p8_route_wealth') && (flags.has('p8_route_martial') || flags.has('origin_wuxia_family') || flags.has('p9_echo_training_hook'))"
+      }
+    ],
+    "content": {
+      "title": "正道种子",
+      "text": "幼年习武的点滴汇聚成念：你隐约感到自己适合走守正之路，日后或入名门、或行侠仗义。",
+      "description": "P47 O-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_childhood_seed_done" },
+      { "type": "event_record", "target": "orthodox_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "orthodox_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox') || flags.has('orthodox_formal_disciple') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_age40_identity_done') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "四十回望·正道",
+      "text": "四十岁这年，你回望来路：入门试炼、承担门派义务、守正时的取舍，都已刻进身份。你是被江湖认可的正派武者。",
+      "description": "P47 正派 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age40_identity_done" },
+      { "type": "event_record", "target": "orthodox_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "orthodox", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age25_righteousness_cost_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 25, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_trial_completed') || flags.has('orthodox_formal_disciple')) && !flags.has('orthodox_righteousness_cost_visible') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "守正之价",
+      "text": "入门之后，你渐渐明白：行侠守义不是口号——每一次替门派出头，都要放弃私情与安逸。守正，从来有代价。",
+      "description": "P54 正派 25 岁守正代价桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_righteousness_cost_visible" },
+      { "type": "event_record", "target": "orthodox_age25_righteousness_cost_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age25", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_righteousness_cost"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age32_gray_pressure_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 36 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('orthodox_childhood_seed_done') || flags.has('route_orthodox')) && (flags.has('orthodox_righteousness_cost_visible') || flags.has('orthodox_trial_completed')) && !flags.has('orthodox_gray_pressure_visible') && !flags.has('sect_midlife_gray_executed') && !flags.has('sect_midlife_gray_leaked') && !flags.has('sect_midlife_gray_refused') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "灰度压肩",
+      "text": "师门交下来一件不便见光的差事——办，则沾灰；不办，则得罪派系。守正之路，此刻逼你在义与权之间取舍。",
+      "description": "P54 正派 32 岁灰度压力桥接"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_gray_pressure_visible" },
+      { "type": "event_record", "target": "orthodox_age32_gray_pressure_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p54", "orthodox", "age32", "residual", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_gray_pressure"]
+      }
+    }
+  },
+  {
+    "id": "demonic_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_childhood_seed_done') && (flags.has('p8_route_demonic') || flags.has('demonic_path_touched') || flags.has('p9_childhood_dark_spark'))"
+      }
+    ],
+    "content": {
+      "title": "邪念初萌",
+      "text": "少年时几次越界的念头并未散去，反而像暗火一样埋在心底——力量与捷径的诱惑，已开始牵引你。",
+      "description": "P47 D-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_childhood_seed_done" },
+      { "type": "event_record", "target": "demonic_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_youth_first_transgression",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 13, "max": 14 },
+    "triggers": [{ "type": "age_reach", "value": 13 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('demonic_youth_first_transgression') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic')) && !flags.has('route_orthodox')"
+      }
+    ],
+    "content": {
+      "title": "第一次越界",
+      "text": "为求一时之利，你做了件不该做的事。旁人未必知晓，你却清楚：底线已经松动了一寸。",
+      "description": "P47 D-2 少年越界"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_youth_first_transgression" },
+      { "type": "stat_modify", "target": "chivalry", "value": -3, "operator": "add" },
+      { "type": "event_record", "target": "demonic_youth_first_transgression" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "youth", "mainline", "once"]
+    }
+  },
+  {
+    "id": "demonic_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('route_demonic') && !flags.has('demonic_age40_identity_done') && (flags.has('demonic_childhood_seed_done') || flags.has('p8_route_demonic') || flags.has('demonic_youth_first_transgression') || flags.has('route_demonic_completed'))"
+      }
+    ],
+    "content": {
+      "title": "四十回望·邪路",
+      "text": "诱惑让你得到力量与地位，也让你失去信任与安稳。四十岁这年，你已无法否认：是选择与后果，把你推向了邪路。",
+      "description": "P47 邪路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age40_identity_done" },
+      { "type": "event_record", "target": "demonic_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "demonic", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "merchant_childhood_seed_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 7, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 7 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('p9_echo_business_hook'))"
+      }
+    ],
+    "content": {
+      "title": "营商天赋",
+      "text": "你从小对买卖、账本、货价格外敏感。长辈说你有营商之才，日后或可走商路立业。",
+      "description": "P47 M-1 童年种子"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_seed_done" },
+      { "type": "flag_set", "target": "route_merchant" },
+      { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "merchant_age40_identity_summary",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 38, "max": 42 },
+    "triggers": [{ "type": "age_reach", "value": 38 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('merchant_age40_identity_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('orthodox_childhood_seed_done') && (flags.has('merchant_talent') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth'))"
+      }
+    ],
+    "content": {
+      "title": "四十回望·商路",
+      "text": "财富带来了选择权，也带来了人情债与周转压力。四十岁这年，你是靠经营立足的商路中人——成败与义气，都已写进账本之外的人生。",
+      "description": "P47 商路 40 岁身份收束"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age40_identity_done" },
+      { "type": "event_record", "target": "merchant_age40_identity_summary" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "merchant", "age40", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age40_identity"]
+      }
+    }
+  },
+  {
+    "id": "merchant_midlife_debt_milestone",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 95,
+    "ageRange": { "min": 32, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('merchant_talent') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('merchant_midlife_debt') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情周转",
+      "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全——每一笔赊账都在记你的人情账。",
+      "description": "P47 商路中年代价"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_midlife_debt" },
+      { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p47", "p54", "merchant", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["residual_merchant_debt"]
+      }
+    }
+  },
+  {
+    "id": "orthodox_age45_legacy_stewardship",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('orthodox_age40_identity_done') && !flags.has('orthodox_age45_payoff_done') && !flags.has('route_demonic')"
+      }
+    ],
+    "content": {
+      "title": "传承守门",
+      "text": "四十岁回望之后，师门将藏经阁钥匙与巡山令一并交到你手中。守正一生，终要有人为下一代护住山门。",
+      "description": "P53 正派 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "orthodox_age45_payoff_done" },
+      { "type": "flag_set", "target": "orthodox_age45_legacy_steward_done" },
+      { "type": "event_record", "target": "orthodox_age45_legacy_stewardship" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "orthodox", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "demonic_age45_territory_consolidation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('demonic_age40_identity_done') && flags.has('route_demonic') && !flags.has('demonic_age45_payoff_done')"
+      }
+    ],
+    "content": {
+      "title": "地盘既固",
+      "text": "邪路身份既成，幽影门内外再无人敢轻慢。可扩张带来的孤立与反噬，也在暗处积聚——力量未止，代价亦未止。",
+      "description": "P53 邪路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "demonic_age45_payoff_done" },
+      { "type": "flag_set", "target": "demonic_age45_territory_consolidated" },
+      { "type": "event_record", "target": "demonic_age45_territory_consolidation" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "demonic", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "merchant_age45_expansion_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 44, "max": 48 },
+    "triggers": [{ "type": "age_reach", "value": 44 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_age40_identity_done') && !flags.has('merchant_age45_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "扩张分岔",
+      "text": "四十岁后的第一笔大买卖摆在眼前：联号共担，还是独守铺面。财富带来选择，人情债与周转压力也一并涌来。",
+      "description": "P53 商路 45 岁 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+      { "type": "flag_set", "target": "merchant_age45_expansion_fork_done" },
+      { "type": "event_record", "target": "merchant_age45_expansion_fork" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p53", "merchant", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["age45_payoff"]
+      }
+    }
+  },
+  {
+    "id": "magnate_on_ramp",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 28, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_caravan_success') || flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_wealthy') || flags.has('merchant_chamber_head') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('magnate_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾门槛",
+      "text": "产业初成，商路已铺开半壁江山。你不再是小本经营的掌柜——财富与人脉把你推到了'巨贾'的门槛。可这门槛一旦跨过，便再无退路。",
+      "description": "P55 巨贾 on-ramp"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_on_ramp_done" },
+      { "type": "event_record", "target": "magnate_on_ramp" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "on-ramp", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "magnate_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 36, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && !flags.has('magnate_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情如网",
+      "text": "商号遍九州，人情债也遍九州。每笔赊账、每位合作伙伴、每桩江湖义气，都是一根牵着你的线——巨贾的担子，比掌柜的重得多。",
+      "description": "P55 巨贾 midlife pressure"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_midlife_pressure_done" },
+      { "type": "event_record", "target": "magnate_midlife_pressure" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "midlife", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "magnate_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 42, "max": 46 },
+    "triggers": [{ "type": "age_reach", "value": 42 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_on_ramp_done') && flags.has('magnate_midlife_pressure_done') && !flags.has('magnate_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾之位",
+      "text": "半生经营，你的商号已成江湖不可或缺的血脉。可每一笔利润都沾着人情，每一桩合作都系着风险——巨贾之位，坐上去容易，守住难。",
+      "description": "P55 巨贾 payoff"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_payoff_done" },
+      { "type": "flag_set", "target": "magnate_payoff_resolved" },
+      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+      { "type": "event_record", "target": "magnate_payoff" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p55", "merchant", "magnate", "age45", "payoff", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_payoff"]
+      }
+    }
+  },
+  {
+    "id": "renown_on_ramp",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 35 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('tavern_renown_bridge_crossed') && !flags.has('renown_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "声名初显",
+      "text": "你在江湖上的名声渐渐传开——不是因为武功多高，而是因为你认识的人多、能说上话、肯给面子。这日，两拨江湖人因为一点纠纷闹到酒肆，都指名要你主持公道。你接过这事，凭着积攒的人脉和面子，竟真把事情摆平了。两拨人临走时都抱拳称一句「兄台高义」。你知道，从今天起，你的名字在江湖上有了分量。",
+      "description": "P73 江湖名宿 on-ramp — 第一个标志性叙事节点"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_on_ramp_done" },
+      { "type": "flag_set", "target": "tavern_renown_on_ramp" },
+      { "type": "event_record", "target": "renown_on_ramp" },
+      { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p73", "renown", "on-ramp", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "renown_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 37, "max": 41 },
+    "triggers": [{ "type": "age_reach", "value": 37 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_on_ramp_done') && !flags.has('renown_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情债重",
+      "text": "这些年，你在江湖上的名声越来越响。酒肆里常有人来，有受过你恩惠专程来道谢的，有你欠了人情找上门来的，还有人借着你的名头在外行事。你站在柜台后，看着一拨又一拨的人，忽然想起小时候在这儿见惯的人情往来——那时候你只觉得热闹，如今才知道，这人情债，是真的能压得人喘不过气。",
+      "description": "P75 江湖名宿 pressure — 人情债渐重"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_renown_pressure" },
+      { "type": "event_record", "target": "renown_midlife_pressure" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p75", "renown", "pressure", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "renown_midlife_payoff",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 43, "max": 47 },
+    "triggers": [{ "type": "age_reach", "value": 43 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_pressure_done') && !flags.has('renown_midlife_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "人情之解",
+      "text": "这些年，人情债像酒肆门口的石狮子，越压越重。有人登门道谢，有人上门讨债，有人借着你的名头在外行事。你站在柜台后，拨着算盘——这人情的账，该清一清了。\n\n窗外的柳树绿了又黄，你想起小时候帮账房先生拨算盘的日子。那时候你只觉得数字有趣，如今才知道——人情这盘账，最难算。",
+      "description": "P77 江湖名宿 payoff — 人情债之解"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_midlife_payoff_done" },
+      { "type": "flag_set", "target": "renown_age40_identity_done" },
+      { "type": "event_record", "target": "renown_midlife_payoff" }
+    ],
+    "choices": [
+      {
+        "id": "hard_holder",
+        "text": "硬扛到底",
+        "description": "都是受过我恩惠的人，这点忙算什么。债，我一个人扛。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_hard_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "breaker",
+        "text": "索性撕破脸",
+        "description": "有些债，本就不该还。假人情，断了也罢。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_breaker" },
+          { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "balancer",
+        "text": "找到平衡",
+        "description": "人情不是债，是往来。该帮的帮，该推的推，有来有往才长久。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_renown_payoff_balancer" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p77", "renown", "payoff", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_midlife_payoff"]
+      }
+    }
+  },
+  {
+    "id": "renown_late_life_burnout",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_hard_holder') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n身体越来越差了。可只要还有人找上门，你还是硬撑着答应。\n\n老客人们见了你，都叹口气——\"这老好人，还是改不了。\"\n\n夜深人静时，你摸着酸疼的骨头，想起小时候在酒肆跑堂的日子——那时候累是累，可身子骨硬朗啊。\n\n算盘珠子拨了一辈子人情账，最后算到了自己头上。",
+      "description": "P79 江湖名宿 late-life — Branch A 油尽灯枯"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_burnout" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "burnout", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
+  },
+  {
+    "id": "renown_late_life_lone_wolf",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_breaker') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n你常常一个人去酒肆，点一壶酒，坐一下午。\n\n老客人们有的还打招呼，有的绕着走。你不在乎——这辈子撕破了那么多假人情，剩下的才是真的。\n\n一个人喝酒怎么了？自在。\n\n算盘珠子不算人情账了，算自己的逍遥账——赚了。",
+      "description": "P79 江湖名宿 late-life — Branch B 逍遥自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_lone_wolf" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "lone-wolf", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
+  },
+  {
+    "id": "renown_late_life_mentor",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_midlife_payoff_done') && flags.has('tavern_renown_payoff_balancer') && !flags.has('renown_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你站在酒肆门口，看着街上来来往往的人——有的认识，有的不认识。风一吹，你忽然想起年轻时的日子。\n\n这一辈子，人情债的账，算到最后，到底是个什么结果？\n\n酒肆里常来年轻人，向你请教江湖上的人情世故。\n\n你像当年老掌柜教你一样，慢慢点拨他们——该帮的帮，该推的推，有来有往才长久。\n\n看着他们从青涩到练达，你觉得这辈子没白活。\n\n算盘珠子算的不是人情债，是传承账——赚大了。",
+      "description": "P79 江湖名宿 late-life — Branch C 传承授业"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_late_life_done" },
+      { "type": "flag_set", "target": "renown_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_late_mentor" },
+      { "type": "event_record", "target": "renown_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p79", "renown", "late-life", "mentor", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_late_life"]
+      }
+    }
+  },
+  {
+    "id": "renown_endgame_echo_sigh",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_burnout') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·叹",
+      "text": "六十岁这年，你偶然走进一家酒肆，听见角落里有年轻人问起：「那个老掌柜，后来怎么样了？」\n\n老客人叹口气，说：「那人啊，是个好人……一辈子帮了不知多少人，最后身子垮了。可江湖上，谁不念他一句好呢。」\n\n你坐在角落里，听着自己成了传说。\n\n名声比人长久。\n\n你守了一辈子的名声，最后真的传下去了。只是代价，也真的没人记得了。",
+      "description": "P81 江湖名宿 endgame — Variant A 身后名之声·叹"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_sigh" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "sigh", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
+  },
+  {
+    "id": "renown_endgame_echo_distant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_lone_wolf') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·遥",
+      "text": "六十岁这年，你在一家酒肆里喝酒，听见邻桌讲起「那个逍遥翁」的故事。\n\n说他当年怎么怎么样，一人独闯多少地方，认识多少三教九流的人。说得有鼻子有眼，真假难辨。\n\n你坐在角落里，没人认出你。\n\n你笑了笑——自己都快忘了自己当年的样子了。\n\n江湖上的你，和真实的你，早就两回事了。\n\n传说真假谁真谁假，自己知道就好。",
+      "description": "P81 江湖名宿 endgame — Variant B 身后名之声·遥"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_distant" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "distant", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
+  },
+  {
+    "id": "renown_endgame_echo_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('renown_late_life_done') && flags.has('tavern_renown_late_mentor') && !flags.has('renown_endgame_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_renown_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "身后名之声·传",
+      "text": "六十岁这年，你在酒肆里坐着，看见几个年轻人在聊天。\n\n他们说起「老掌柜的规矩」——该帮的帮，该推的推，有来有往才长久。\n\n你的话，还在被人提起。\n\n你看着他们从青涩到练达，想起当年老掌柜教你的样子。\n\n传承不是名字传下去，是智慧传下去了。\n\n看着后辈们传下去，这就够了。",
+      "description": "P81 江湖名宿 endgame — Variant C 身后名之声·传"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "renown_endgame_done" },
+      { "type": "flag_set", "target": "renown_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_renown_endgame_legacy" },
+      { "type": "event_record", "target": "renown_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p81", "renown", "endgame", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["renown_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_on_ramp_compassionate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 31, "max": 34 },
+    "triggers": [{ "type": "age_reach", "value": 31 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('tavern_medical_bridge_crossed') && flags.has('tavern_embrace_compassionate_healer') && !flags.has('medical_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "仁心之名",
+      "text": "这些日子，来找你看病的人越来越多——不光是镇上的熟客，连周边村子的穷人也慕名而来。有人背着铺盖卷在酒肆门口等天亮，有人跪在小药庐前磕头求你救救家里的孩子。你见不得人受苦，有钱没钱都给看。\n\n小药庐挤不下了，酒肆的大堂都摆上了病床。老掌柜叹口气，没说什么——他知道你这脾气。\n\n名声传开了。镇上人都说，酒肆那位小大夫，是真的仁心。可只有你自己知道，这样下去，身子撑不了多久。",
+      "description": "P85 一代名医 on-ramp — 仁心医者 variant 第一个标志性叙事节点"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_on_ramp_done" },
+      { "type": "flag_set", "target": "tavern_medical_on_ramp_compassionate" },
+      { "type": "event_record", "target": "medical_on_ramp" },
+      { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
+      { "type": "stat_modify", "target": "constitution", "value": -2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p85", "medical", "on-ramp", "compassionate", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "medical_on_ramp_pragmatic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 31, "max": 34 },
+    "triggers": [{ "type": "age_reach", "value": 31 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('tavern_medical_bridge_crossed') && flags.has('tavern_embrace_pragmatic_healer') && !flags.has('medical_on_ramp_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "世故之名",
+      "text": "这天，一位镇上大户人家的管家亲自来到酒肆，说他家老爷得了怪病，请了多少大夫都看不好。听闻你医术高明，特来请你过府一瞧——诊金丰厚，另有谢礼。\n\n你去了。望闻问切，拿捏分寸，几副药下去，病情真的见好。老爷大喜，不仅厚赏了你，还在酒席上把你引荐给了镇上其他有头有脸的人物。\n\n名声传开了。镇上人都说，酒肆出来的那位大夫，懂分寸、会办事，不光医术好，人情世故也拎得清。找你看病的人越来越多，但你知道——该收的收，该推的推，这才是长久之道。",
+      "description": "P85 一代名医 on-ramp — 世故人医 variant 第一个标志性叙事节点"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_on_ramp_done" },
+      { "type": "flag_set", "target": "tavern_medical_on_ramp_pragmatic" },
+      { "type": "event_record", "target": "medical_on_ramp" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p85", "medical", "on-ramp", "pragmatic", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_on_ramp"]
+      }
+    }
+  },
+  {
+    "id": "medical_pressure_compassionate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 36, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 36 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_on_ramp_done') && flags.has('tavern_medical_on_ramp_compassionate') && !flags.has('medical_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "仁心耗尽",
+      "text": "这些年，你治病救人，从不问贫富。周边村子的人都慕名而来，酒肆大堂摆上了病床，小药庐的药罐从早煎到晚。\n\n老掌柜劝你歇一歇，你总说「救人要紧」。可你自己的身子，你比谁都清楚——夜里常常咳醒，手也开始发颤。\n\n这天，你又熬了一个通宵给人看病。天快亮时，你坐在药庐门口，望着天边的鱼肚白，忽然想起小时候在酒肆里帮老掌柜晒草药的日子。那时候你以为，救人是天底下最体面的事。\n\n如今你才明白——仁心这东西，也是会耗尽的。",
+      "description": "P87 一代名医 pressure — 仁心医者 variant 压力节点（向内消耗）"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_medical_pressure_compassionate" },
+      { "type": "event_record", "target": "medical_pressure" },
+      { "type": "stat_modify", "target": "constitution", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p87", "medical", "pressure", "compassionate", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "medical_pressure_pragmatic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 37, "max": 41 },
+    "triggers": [{ "type": "age_reach", "value": 37 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_on_ramp_done') && flags.has('tavern_medical_on_ramp_pragmatic') && !flags.has('medical_midlife_pressure_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情债缠身",
+      "text": "这些年，你在镇上的名气越来越响。大户人家请你看病，诊金丰厚；寻常百姓找你问诊，也得看你的脸色。\n\n你懂分寸、会办事——该收的收，该推的推，该欠的人情也欠着。镇上有头有脸的人物，你都认得；酒肆里的老掌柜，也常说你「出息了」。\n\n可这天夜里，你坐在酒肆后院的小药庐里，翻着这些年记下的人情账，忽然觉得累。\n\n张老爷的姨娘是你治好的，欠着一份人情；李掌柜的独子是你救回来的，欠着一份人情；就连县衙的师爷，也受过你的恩惠。\n\n人情这东西，欠的时候容易，还的时候——才知道是一笔还不清的债。你以为自己拿捏得住分寸，到头来，还是被这张人情的网，缠得死死的。",
+      "description": "P87 一代名医 pressure — 世故人医 variant 压力节点（向外束缚）"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_midlife_pressure_done" },
+      { "type": "flag_set", "target": "tavern_medical_pressure_pragmatic" },
+      { "type": "event_record", "target": "medical_pressure" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p87", "medical", "pressure", "pragmatic", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_midlife_pressure"]
+      }
+    }
+  },
+  {
+    "id": "medical_payoff_compassionate",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 42, "max": 46 },
+    "triggers": [{ "type": "age_reach", "value": 42 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_midlife_pressure_done') && flags.has('tavern_medical_pressure_compassionate') && !flags.has('medical_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "仁心之重",
+      "text": "这些年，药庐的灯夜夜亮着。你的身子一天不如一天，但求医的人越来越多。周边村子的、外乡来的、背着铺盖卷在酒肆门口等天亮的。\n\n老掌柜劝你歇歇，你摆摆手说「救人要紧」。可这日清晨，你刚拿起药方，手就开始发颤——你知道，自己撑不了多久了。\n\n窗外的阳光照进来，你忽然想起小时候在酒肆里看老掌柜给穷苦人免账——那时候你只觉得他心善，如今才知道，仁心这东西，是真的要拿命去填的。\n\n可你，打算怎么填？",
+      "description": "P89 一代名医 payoff — 仁心医者 variant 抉择节点（向内消耗的三种归宿）"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_payoff_done" },
+      { "type": "flag_set", "target": "medical_age40_identity_done" },
+      { "type": "event_record", "target": "medical_payoff_compassionate" }
+    ],
+    "choices": [
+      {
+        "id": "compassionate_holder",
+        "text": "硬扛到底",
+        "description": "能多救一个是一个。趁着还能动，多看几个。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" }
+        ]
+      },
+      {
+        "id": "compassionate_let_go",
+        "text": "学会放手",
+        "description": "我不是神。每日十诊，量力而行。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_let_go" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "compassionate_legacy",
+        "text": "找到传承",
+        "description": "找个徒弟吧。医术要传下去，仁心也是。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_compassionate_legacy" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p89", "medical", "payoff", "compassionate", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_payoff"]
+      }
+    }
+  },
+  {
+    "id": "medical_payoff_pragmatic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 43, "max": 47 },
+    "triggers": [{ "type": "age_reach", "value": 43 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_midlife_pressure_done') && flags.has('tavern_medical_pressure_pragmatic') && !flags.has('medical_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "人情之局",
+      "text": "这些年，你在镇上权贵间混得风生水起。张员外的小妾、李知府的幕僚、王捕头的亲戚……认识的人越来越多，欠的人情也越来越重。\n\n这日，酒肆里又来了一拨人——有来道谢的，有来求人的，有带着名帖请你过府的。你站在柜台后，看着一拨又一拨的人，忽然想起小时候在这儿见惯的人情往来——那时候你只觉得热闹，如今才知道，这人情网，是真的能把人缠住的。\n\n有人递来一张请帖——总督府的，请你去给夫人诊脉。你接过来，指尖碰到烫金的帖子，忽然想问自己：这人情的局，你打算怎么了？",
+      "description": "P89 一代名医 payoff — 世故人医 variant 抉择节点（向外束缚的三种归宿）"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_payoff_done" },
+      { "type": "flag_set", "target": "medical_age40_identity_done" },
+      { "type": "event_record", "target": "medical_payoff_pragmatic" }
+    ],
+    "choices": [
+      {
+        "id": "pragmatic_holder",
+        "text": "硬扛人情",
+        "description": "名声就是一切。这局，我撑下去。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 60, "operator": "add" }
+        ]
+      },
+      {
+        "id": "pragmatic_breaker",
+        "text": "撕破脸皮",
+        "description": "有些债，不该还。不伺候了。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_breaker" },
+          { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": -5, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": -1, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "pragmatic_master",
+        "text": "人情练达",
+        "description": "人情不是债，是往来。有来有往，才长久。",
+        "effects": [
+          { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_master" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p89", "medical", "payoff", "pragmatic", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_payoff"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_compassionate_final",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_holder') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n手抖得越来越厉害了，有时候连针都抓不住。\n\n可只要门外有病人的声音，你还是撑着要起来。\n\n徒弟们哭着劝你歇着，你只摇摇头——\"能多救一个是一个。\"\n\n夜深人静时，你闻着空气里淡淡的药味，想起小时候在酒肆帮着熬药的日子，也是这样的味道。那时候苦，可现在，你觉得值。",
+      "description": "P91 一代名医 late-life — Comp-A 最后仁心"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_final" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "final", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_compassionate_peaceful",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_let_go') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n你常常搬个小凳子坐在门口晒太阳，像当年在酒肆门口看街景一样。\n\n街坊邻居有个头疼脑热的来找你，你随手就给看了——不收钱，就当聊聊天。\n\n徒弟们都长大了，各自开了药庐，你乐得清闲。\n\n有时候想起年轻时候硬扛的那些日子，你摇摇头——那时候真傻，可也真热血。",
+      "description": "P91 一代名医 late-life — Comp-B 从容自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_peaceful" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "peaceful", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_compassionate_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_compassionate_legacy') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n逢年过节，徒弟们带着徒孙们来看你，热热闹闹一院子。\n\n你坐在中间，看着这些年轻的面孔，像看着年轻时候的自己——一样的仁心，一样的热血。\n\n老掌柜若还在，大概会笑着说\"这酒肆里熬出来的药香，飘到全天下了。\"\n\n你想想也是——从酒肆里的苦孩子，到满天下的仁医，这辈子，值了。",
+      "description": "P91 一代名医 late-life — Comp-C 仁心传承"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_compassionate_legacy" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "compassionate", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_fallen",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_holder') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n门前冷落鞍马稀。\n\n以前送礼的人能排半条街，现在连个问安的都没有。\n\n你倒是看得开——这辈子什么场面没见过？从酒肆里看人脸色，到太医院里给人脸色，再到现在门可罗雀，起起落落，不就是人生吗。\n\n只是有时候深夜醒来，想起当年在酒肆里端盘子的日子——那时候穷，可睡得踏实。",
+      "description": "P91 一代名医 late-life — Prag-A 人走茶凉"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_fallen" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": -2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "fallen", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_wanderer",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_breaker') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n你还在路上。\n\n背着药箱，拄着拐杖，从一个村子走到另一个镇子。\n\n有人认出你，热情招待；没人认识，就自己找个破庙凑合一晚。\n\n你不在乎——这辈子什么场面没见过？从酒肆里听江湖故事，到自己成了江湖故事，够了。只是偶尔经过某个酒肆，会停下来喝一碗——还是当年的味道吗？",
+      "description": "P91 一代名医 late-life — Prag-B 逍遥自在"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_wanderer" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": -3, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "wanderer", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_late_life_pragmatic_master",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_payoff_done') && flags.has('tavern_medical_payoff_pragmatic_master') && !flags.has('medical_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "晚景几何",
+      "text": "五十岁这年，你坐在药庐门口，晒着太阳，想起了很多事——酒肆的暖炉，老掌柜的笑，还有第一次拿起针的手。\n\n这一辈子，从酒肆帮工到一代名医，走的是仁心路还是世陌路，到了晚年，又是怎样一番光景？\n\n家里常常高朋满座，有达官贵人，也有江湖豪杰，还有你一手带出来的徒弟们。\n\n你坐在主位，笑眯眯地看着，什么人说什么话，你心里门儿清。\n\n有时候想起当年在酒肆里跟老掌柜学看人学说话的日子，忍不住笑——那时候哪能想到，酒肆里学的那点东西，能用一辈子呢？\n\n老掌柜要是知道你现在这样子，大概会得意得胡子都翘起来吧。",
+      "description": "P91 一代名医 late-life — Prag-C 德高望重"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_late_life_done" },
+      { "type": "flag_set", "target": "medical_late_life_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_late_pragmatic_master" },
+      { "type": "event_record", "target": "medical_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "money", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p91", "medical", "late-life", "pragmatic", "master", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_late_life"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_ember",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_final') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·仁心不灭·烬",
+      "text": "六十岁这年的某个冬日，你坐在药庐门口晒太阳，越来越觉得累。\n\n恍惚间，你想起小时候在酒肆帮着熬药的日子，老掌柜摸着你的头说「这孩子心善」。\n\n这些年，你救过多少人？数不清了。有富人，有穷人，有好人，有坏人——你都救了。\n\n你不知道的是，你救过的那些人，有的成了好大夫，有的一辈子记着你的恩情。\n\n仁心像火种——你这盏灯快灭了，但别处的灯，还亮着。\n\n老掌柜若还在，大概会摸着你的头说：「傻孩子，值了。」",
+      "description": "P93 一代名医 endgame — Comp-A 仁心不灭·烬"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_ember" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "ember", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_peace",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_peaceful') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·医者从容·淡",
+      "text": "六十岁这年，你常常搬个小凳子坐在门口晒太阳，像当年在酒肆门口看街景一样。\n\n偶尔还有老病人找上门来，你随手就给看了——不收钱，就当聊聊天。\n\n有人说「李大夫你真好」，你只笑笑——好什么呀，就是顺手的事。\n\n年轻时候总觉得「我不救谁救」，硬扛了半辈子，现在想通了。\n\n老掌柜若还在，大概会拍你肩膀说：「臭小子，终于想通了？」\n\n你也笑——是啊，早该这样了。",
+      "description": "P93 一代名医 endgame — Comp-B 医者从容·淡"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_peace" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "peace", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_compassionate_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_compassionate_legacy') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·仁心满天下·传",
+      "text": "六十岁这年，逢年过节，徒弟们带着徒孙们来看你，热热闹闹一院子。\n\n大徒弟在江南开了药庐，二徒弟在塞外救牧民，三徒弟进宫做了太医……个个都像你。\n\n你坐在中间，看着这些年轻的面孔，像看着年轻时候的自己——一样的仁心，一样的热血。\n\n有人说「老恩师您是一代宗师」，你只摆摆手——「什么宗师不宗师的，救人而已」。\n\n老掌柜若还在，大概会捋着胡子笑——当年酒肆里熬药的苦孩子，现在桃李满天下了。\n\n你想想也是——从酒肆里的苦孩子，到满天下的仁医，这辈子，值了。",
+      "description": "P93 一代名医 endgame — Comp-C 仁心满天下·传"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_compassionate_legacy" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "compassionate", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_fame_remain",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_fallen') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·医名犹存·寂",
+      "text": "六十岁这年，门前冷落鞍马稀。\n\n以前送礼的人能排半条街，现在连个问安的都没有。\n\n你倒是看得开——这辈子什么场面没见过？从酒肆里看人脸色，到太医院里给人脸色，再到现在门可罗雀，起起落落，不就是人生吗。\n\n只是有时候，你会翻翻自己写的医书，勾勾改改——这些东西，传下去就好。\n\n你不知道的是，太医院里的年轻太医还在看你的书，江湖上的游医还在用你的方。\n\n权势如烟云，说散就散了。但医名不一样——它比权势长久。\n\n老掌柜若还在，大概会叹口气——「爬那么高干什么呢？摔下来疼啊。」但转头又会说：「可你写的那些药方，管用！」",
+      "description": "P93 一代名医 endgame — Prag-A 医名犹存·寂"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_fame_remain" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "fame_remain", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_wanderer_legend",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_wanderer') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·江湖游医·遥",
+      "text": "六十岁这年，你还在路上。\n\n背着药箱，拄着拐杖，从一个村子走到另一个镇子。\n\n有人认出你，热情招待；没人认识，就自己找个破庙凑合一晚。\n\n你不在乎——这辈子什么场面没见过？从酒肆里听江湖故事，到自己成了江湖故事，够了。\n\n只是偶尔经过某个酒肆，会停下来喝一碗——听听这些年，江湖上把你传成了什么样。\n\n有人说你能活死人肉白骨，有人说你脾气古怪看人下菜碟，有人说你早就死在塞外了……你听着直乐。\n\n老掌柜若还在，大概会笑着骂你「这匹野马，到死都拴不住」。你也笑——人生在世，不就图个自在吗？",
+      "description": "P93 一代名医 endgame — Prag-B 江湖游医·遥"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_wanderer_legend" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "wanderer_legend", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  },
+  {
+    "id": "medical_endgame_echo_pragmatic_grand_master",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 60 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('medical_late_life_done') && flags.has('tavern_medical_late_pragmatic_master') && !flags.has('medical_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_medical_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "医名身后事·一代宗师·名",
+      "text": "六十岁这年，家里常常高朋满座。\n\n有达官贵人，也有江湖豪杰，还有你一手带出来的徒弟们。\n\n你坐在主位，笑眯眯地看着，什么人说什么话，你心里门儿清。\n\n太医院请你做院判你不去，江湖门派请你做供奉你也不去——就守着你的药庐，看着后辈们成长。\n\n有人说「李老先生您是一代宗师」，你只摆摆手——「什么宗师，就是个看病的」。\n\n老掌柜若还在，大概会捋着胡子得意——「我就说这小子是块料子！你看你看！」\n\n你也笑——这一辈子，全靠当年在酒肆跟老掌柜学的那点人情世故。从跑堂的到一代名医，这条路，走得稳。",
+      "description": "P93 一代名医 endgame — Prag-C 一代宗师·名"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "medical_endgame_echo_done" },
+      { "type": "flag_set", "target": "medical_endgame_identity_done" },
+      { "type": "flag_set", "target": "tavern_medical_endgame_pragmatic_grand_master" },
+      { "type": "event_record", "target": "medical_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p93", "medical", "endgame", "pragmatic", "grand_master", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["medical_endgame"]
+      }
+    }
+  }
+]

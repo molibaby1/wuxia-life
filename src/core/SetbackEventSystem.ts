@@ -185,27 +185,27 @@ export function getActiveSetbacks(state: GameState): string[] {
  */
 export function clearExpiredSetbacks(state: GameState): GameState {
   const currentYear = state.currentTime?.year || 0;
-  let newState = { ...state };
   let hasChanges = false;
+  const newFlags = { ...state.flags };
 
   for (const event of SETBACK_EVENTS) {
     const activeFlag = `setback_${event.id}_active`;
     const endYearFlag = `setback_${event.id}_endYear`;
 
-    const isActive = newState.flags[activeFlag] as boolean | undefined;
+    const isActive = newFlags[activeFlag] as boolean | undefined;
     if (isActive) {
-      const flagsAny = newState.flags as Record<string, number | boolean | undefined>;
+      const flagsAny = newFlags as Record<string, number | boolean | undefined>;
       const endYear = flagsAny[endYearFlag] as number | undefined;
       if (endYear && currentYear >= endYear) {
-        delete newState.flags[activeFlag];
-        delete newState.flags[endYearFlag];
-        delete newState.flags[`setback_${event.id}_endTime`];
+        delete newFlags[activeFlag];
+        delete newFlags[endYearFlag];
+        delete newFlags[`setback_${event.id}_endTime`];
         hasChanges = true;
       }
     }
   }
 
-  return hasChanges ? newState : state;
+  return hasChanges ? { ...state, flags: newFlags } : state;
 }
 
 /**

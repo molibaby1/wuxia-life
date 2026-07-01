@@ -1,0 +1,119 @@
+{
+  "project": "Wuxia Life P72 Selected Next Route Entry Differentiation",
+  "branchName": "codex/p72-wuxia-selected-next-route-entry-differentiation",
+  "description": "Add the smallest bounded post-bridge entry differentiation for the selected next route so its identity survives the first shared destination layer, without expanding into deeper cost, shape, or payoff work.",
+  "userStories": [
+    {
+      "id": "P72-001",
+      "title": "Audit post-bridge entry sharedness",
+      "description": "As a maintainer, I want an audit of what the selected route currently shares at post-bridge entry so P72 targets the real flattening point.",
+      "acceptanceCriteria": [
+        "Summarize the currently shared gates, markers, and expression at the post-bridge entry layer",
+        "Separate healthy reuse from flattening that weakens player-perceived route identity",
+        "Save docs/test-reports/p72-selected-route-entry-sharedness-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Sharedness audit complete — 6 flattening points identified, 4 addressable in P72 bounded scope"
+    },
+    {
+      "id": "P72-002",
+      "title": "Lock P72 scope contract",
+      "description": "As a planner, I want a scope contract so P72 stays an entry-differentiation stage and does not sprawl into deeper route densification.",
+      "acceptanceCriteria": [
+        "Limit P72 to early post-bridge and entry-adjacent differentiation only",
+        "Define allowed layers: light configuration, expression, proof, and narrow tests",
+        "List forbidden expansions: pressure or payoff waves, new systems, and full route expansion",
+        "Save docs/test-reports/p72-selected-route-entry-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract locked — 4 allowed layers, 4 forbidden expansion categories, boundary guards defined"
+    },
+    {
+      "id": "P72-003",
+      "title": "Define entry differentiation contract",
+      "description": "As a designer, I want an explicit entry contract so the selected route's bridge identity survives contact with the shared destination path.",
+      "acceptanceCriteria": [
+        "Define the core identity signals that must be preserved at entry for the selected route",
+        "State which differences belong in expression and which belong in light markers",
+        "Keep the shared destination skeleton intact",
+        "Record the contract in the PRD or an appendix artifact"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Entry differentiation contract defined — 4 core identity signals, 3 expression surfaces + light markers, tavern-born flavor preserved, shared skeleton intact"
+    },
+    {
+      "id": "P72-004",
+      "title": "Wire entry-level differentiation",
+      "description": "As a developer, I want the selected route's post-bridge entry to expose bounded differentiation through existing carriers rather than a new framework.",
+      "acceptanceCriteria": [
+        "Implement the entry differentiation only through existing carriers, markers, or gate-adjacent wiring",
+        "Do not introduce a new route framework",
+        "Existing P71 bridge evidence does not regress",
+        "The shared destination chain remains stably triggerable"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Entry-level wiring complete — detectSampleLine recognizes renown, renownCurrentGoal + deriveSampleLineCostLabel + renownAge40Identity added via existing carriers; no new framework; P71 tests still pass"
+    },
+    {
+      "id": "P72-005",
+      "title": "Add player-facing entry expression",
+      "description": "As a player, I want the selected route to read differently immediately after crossing the bridge so the new path keeps its identity at the first shared layer.",
+      "acceptanceCriteria": [
+        "Add at least three entry-specific readable signals across existing expression surfaces",
+        "Make the post-bridge entry identity distinguishable from the generic path",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Player-facing entry expression complete — 4+ readable signals: currentGoal, costLabel, age40Identity, route summary name; tavern-born renown flavor distinct from merchant/orthodox/demonic"
+    },
+    {
+      "id": "P72-006",
+      "title": "Add targeted entry proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the selected route remains distinguishable at entry after crossing into the shared destination path.",
+      "acceptanceCriteria": [
+        "Produce one comparison-style targeted proof artifact",
+        "Show entry markers or expression differences for the selected route versus the generic path",
+        "Do not require full lifetime exhaust",
+        "Ensure the proof directly supports whether deeper differentiation is worth opening"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Targeted entry proof complete — comparison-style proof with 4 cases (plain tavern / merchant bridge / renown bridge / generic ally), 6 expression surfaces, all distinct; supports go decision for deeper differentiation"
+    },
+    {
+      "id": "P72-007",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the new entry differentiation so later edits do not flatten the route back into a generic shared entry.",
+      "acceptanceCriteria": [
+        "Cover entry markers, player-facing expression, and comparison-level assertions with narrow checks",
+        "Reuse existing harnesses",
+        "Do not rewrite the full test suite",
+        "Relevant commands pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Narrow regression coverage complete — 15 tests in p72TavernHandRenownEntryDifferentiationTests.ts covering: sample line detection (7 tests), expression surfaces (6 tests), differentiation comparisons (2 tests); all pass + no regressions in P71/P56/lifeMemorySummary"
+    },
+    {
+      "id": "P72-008",
+      "title": "Produce P72 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what entry differentiation now exists and whether deeper success-cost or success-shape work is justified later.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p72-selected-next-route-entry-closure-report.md",
+        "Summarize the sharedness audit, contract, wiring, expression, proof, and tests",
+        "State whether deeper differentiation is worth opening later",
+        "List larger route-expansion items that remain deferred"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "P72 closure report complete — 8/8 stories done; entry differentiation solid; go decision for deeper work (P73+ on-ramp spine); zero regressions; rollback plan defined"
+    }
+  ]
+}

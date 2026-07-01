@@ -13,10 +13,11 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity } from '../types/eventTypes';
+import type { GameState, PlayerIdentity, PlayerLifeStates, PlayerTraitProfile, CriticalChoices } from '../types/eventTypes';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
+import { buildLateLifeShapingRecapLine } from '../utils/habitShapingSummary';
 
 /**
  * 结局类型
@@ -62,6 +63,7 @@ export interface EndingInfo {
     good_karma?: number;
     evil_karma?: number;
     flags?: string[];
+    not_flags?: string[];
     achievements?: string[];
     age?: number;
     externalSkill?: number;
@@ -71,9 +73,33 @@ export interface EndingInfo {
     knowledge?: number;
     businessAcumen?: number;
     influence?: number;
-    not_flags?: string[];
   };
   priority: number;  // 优先级，用于冲突时判定
+}
+
+interface EndingEvaluationData {
+  chivalry: number;
+  money: number;
+  comprehension: number;
+  reputation: number;
+  martialPower: number;
+  externalSkill: number;
+  internalSkill: number;
+  qinggong: number;
+  connections: number;
+  knowledge: number;
+  businessAcumen: number;
+  influence: number;
+  good_karma: number;
+  evil_karma: number;
+  flags: string[];
+  achievements: string[];
+  age: number;
+  spouse: string | null;
+  children: number;
+  lifeStates: PlayerLifeStates;
+  traitProfile?: PlayerTraitProfile;
+  choices?: CriticalChoices;
 }
 
 export class EndingSystem {
@@ -331,7 +357,7 @@ export class EndingSystem {
    * 检查是否满足结局要求
    */
   private static meetsEndingRequirements(
-    data: any,
+    data: EndingEvaluationData,
     requirements: EndingInfo['requirements']
   ): boolean {
     // 检查属性要求
@@ -403,8 +429,8 @@ export class EndingSystem {
     }
 
     // 检查 not_flags 要求
-    if ((requirements as any).not_flags) {
-      for (const flag of (requirements as any).not_flags) {
+    if (requirements.not_flags) {
+      for (const flag of requirements.not_flags) {
         if (data.flags.includes(flag)) {
           return false;
         }
@@ -515,6 +541,8 @@ export class EndingSystem {
       return composeP19FinalSummary(state, ending).composedSummary;
     }
 
+    const shapingRecap = buildLateLifeShapingRecapLine(state.player.lifeStates);
+
     const lifeStates = state.player.lifeStates || {
       fatigue: 0,
       discipline: 0,
@@ -524,35 +552,32 @@ export class EndingSystem {
       anxiety: 0,
     };
 
+    let categoryLine: string;
     if (ending.category === 'positive') {
       if (lifeStates.anxiety >= 3 || lifeStates.fatigue >= 3) {
-        return '虽有高成就，但一路代价不小。';
+        categoryLine = '虽有高成就，但一路代价不小。';
+      } else {
+        categoryLine = '高门槛成就成立，人生主轴清晰且完成度高。';
       }
-      return '高门槛成就成立，人生主轴清晰且完成度高。';
+    } else if (ending.id === 'bittersweet_success') {
+      categoryLine = '有明显成就，但状态、关系或代价阻止了它成为完美结局。';
+    } else if (ending.id === 'quiet_family_life') {
+      categoryLine = '最终重心落在身边人和安稳生活，而不是江湖传说。';
+    } else if (ending.id === 'unfulfilled_ambition') {
+      categoryLine = '一生持续向上，但始终差一步，留下了明显遗憾。';
+    } else if (ending.id === 'hermit_life') {
+      categoryLine = '你主动从纷扰中退身，把后半生过成了离江湖更远的样子。';
+    } else if (ending.id === 'wanderer_life') {
+      categoryLine = '没有扎下根，也没有真正停下脚步，人生最后仍带着漂泊感。';
+    } else if (ending.id === 'ordinary_life') {
+      categoryLine = '没有走成传说，也没有跌入深渊，一生的重量更多落在平凡日常里。';
+    } else if (ending.category === 'negative') {
+      categoryLine = '长期的恶果、孤立或失控状态压过了成就。';
+    } else {
+      categoryLine = '没有达到传奇门槛，人生以更普通但也更真实的方式收束。';
     }
 
-    if (ending.id === 'bittersweet_success') {
-      return '有明显成就，但状态、关系或代价阻止了它成为完美结局。';
-    }
-    if (ending.id === 'quiet_family_life') {
-      return '最终重心落在身边人和安稳生活，而不是江湖传说。';
-    }
-    if (ending.id === 'unfulfilled_ambition') {
-      return '一生持续向上，但始终差一步，留下了明显遗憾。';
-    }
-    if (ending.id === 'hermit_life') {
-      return '你主动从纷扰中退身，把后半生过成了离江湖更远的样子。';
-    }
-    if (ending.id === 'wanderer_life') {
-      return '没有扎下根，也没有真正停下脚步，人生最后仍带着漂泊感。';
-    }
-    if (ending.id === 'ordinary_life') {
-      return '没有走成传说，也没有跌入深渊，一生的重量更多落在平凡日常里。';
-    }
-    if (ending.category === 'negative') {
-      return '长期的恶果、孤立或失控状态压过了成就。';
-    }
-    return '没有达到传奇门槛，人生以更普通但也更真实的方式收束。';
+    return `${shapingRecap}\n${categoryLine}`;
   }
 
   static getForcedLateLifeEnding(state: GameState): EndingInfo | null {
@@ -600,7 +625,7 @@ export class EndingSystem {
     );
   }
 
-  private static qualifiesForPositiveEnding(data: any, endingId: EndingType): boolean {
+  private static qualifiesForPositiveEnding(data: EndingEvaluationData, endingId: EndingType): boolean {
     const { lifeStates } = data;
     const fatigue = lifeStates?.fatigue || 0;
     const anxiety = lifeStates?.anxiety || 0;
@@ -627,7 +652,7 @@ export class EndingSystem {
     }
   }
 
-  private static determineNeutralEnding(data: any): EndingInfo {
+  private static determineNeutralEnding(data: EndingEvaluationData): EndingInfo {
     const { lifeStates } = data;
     const fatigue = lifeStates?.fatigue || 0;
     const anxiety = lifeStates?.anxiety || 0;

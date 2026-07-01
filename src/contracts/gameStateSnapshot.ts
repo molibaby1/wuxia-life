@@ -167,6 +167,9 @@ export interface GameStateSnapshotState {
   lastSavedAt?: number;
   gameTimestamp?: number;
 
+  /** Pending automatic story event ID for volatile state restoration across server restarts. */
+  pendingStoryEventId?: string;
+
   /** @deprecated Superseded by `eventHistory` (§9.2). */
   triggeredEvents?: string[];
   /** @deprecated Legacy alias; prefer `eventHistory` (§9.2). */

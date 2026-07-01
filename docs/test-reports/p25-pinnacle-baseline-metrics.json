@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-06-23T06:15:26.483Z",
+  "config": {
+    "sampleCount": 32,
+    "seedStart": 2001,
+    "seedEnd": 2032,
+    "command": "npm exec tsx scripts/runP25PinnacleBaseline.ts"
+  },
+  "pinnacleUnlockRates": {
+    "jianghu_myth_legend": 0.1875,
+    "founding_patriarch": 0.15625
+  },
+  "mainstreamMedianUnlockRate": 0.34375,
+  "pinnacleMaxUnlockRate": 0.1875,
+  "pinnacleRateBelowMainstreamMedian": true,
+  "failureAttribution": {
+    "missing_rare_line": 42,
+    "missing_key_choice": 11,
+    "missed_window": 0,
+    "stat_shortfall": 0,
+    "unlocked": 11
+  },
+  "failureAttributionRate": 1,
+  "failureAttributionMeetsThreshold": true,
+  "gatePlayability": "PASS",
+  "gateP20": "PASS"
+}

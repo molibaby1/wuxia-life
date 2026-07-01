@@ -1,0 +1,81 @@
+{
+  "project": "Wuxia Life P39 Full Content Pool Consequence Audit Reconciliation",
+  "branchName": "codex/p39-wuxia-full-content-pool-consequence-audit-reconciliation",
+  "description": "Extend consequence consistency harness beyond P36 8-path slice to full bounded content pool audit; close North Star section 8 item 3 toward Met.",
+  "userStories": [
+    {
+      "id": "P39-001",
+      "title": "P39 content pool audit scope inventory",
+      "description": "As a maintainer, I want an inventory of content pools and consequence-risk categories so the full audit has explicit acceptance boundaries.",
+      "acceptanceCriteria": [
+        "Inventory src/data/lines pools and setback/love pools with flag-touch surfaces",
+        "Classify risk categories: ghost-flag, mutex, summary contradiction, stale flag reader",
+        "Map each pool to at least one representative audit path candidate",
+        "Document P37 trace flag sequences as harness extension inputs",
+        "Save audit scope under docs/test-reports",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation; GAP-END-08-03, GAP-P37-CONSISTENCY."
+    },
+    {
+      "id": "P39-002",
+      "title": "P39 extended consistency harness",
+      "description": "As a maintainer, I want an extended consequence consistency harness covering P37 traces and representative pool paths.",
+      "acceptanceCriteria": [
+        "Extend harness beyond P36 8-path baseline to include P37 merchant_martial_patron and founding_patriarch traces",
+        "Add at least 2 representative content-pool paths",
+        "Total audited paths at least 12",
+        "Harness exports highSeverityContradictionCount and per-path findings",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Extends src/p25/p36ConsequenceConsistencySlice.ts or sibling module."
+    },
+    {
+      "id": "P39-003",
+      "title": "P39 full pool audit run and remediation",
+      "description": "As a maintainer, I want a full pool audit run with remediation of any high or critical findings.",
+      "acceptanceCriteria": [
+        "Run extended audit via script and save report under docs/test-reports",
+        "highSeverityContradictionCount must be 0; fix root causes if non-zero and re-run",
+        "Document medium or low findings as defer queue",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Depends on P39-002."
+    },
+    {
+      "id": "P39-004",
+      "title": "P39 isolated regression and gate carry-forward",
+      "description": "As a maintainer, I want isolated regression and gate carry-forward proving no regression from P38 playability pass.",
+      "acceptanceCriteria": [
+        "Add or extend tests/p39ContentPoolConsistencyTests.ts asserting extended harness PASS",
+        "Carry-forward P38, P36, P37 tests pass",
+        "Confirm gate:playability latest report remains PASS",
+        "Test file runs independently and exits cleanly",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P39-003."
+    },
+    {
+      "id": "P39-005",
+      "title": "P39 section 8 item 3 reconciliation closure",
+      "description": "As a maintainer, I want a closure note updating section 8 item 3 status after full pool audit.",
+      "acceptanceCriteria": [
+        "Summarize audit scope, harness extension, findings, verification commands",
+        "State section 8 item 3 status after P39",
+        "List remaining defer queue",
+        "Save under docs/test-reports"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "project": "Wuxia Life P57 Sample Lines Second 40+ Node",
+  "branchName": "codex/p57-wuxia-sample-lines-second-40-plus-node",
+  "description": "Optionally extend the closed sample-line track with at most one second 40+ payoff node per line, but only where an evidence-based audit shows real value beyond the existing age-45 payoff, without reopening the sample-line baseline or competing with higher-priority merchant_magnate and ordinary-origin growth work.",
+  "userStories": [
+    {
+      "id": "P57-001",
+      "title": "Audit whether second 40+ nodes are worth doing",
+      "description": "As a maintainer, I want an audit of whether each current sample line actually benefits from a second 40+ node so P57 is optional by evidence rather than habit.",
+      "acceptanceCriteria": [
+        "Assess the completeness of the current age-45 payoff for orthodox, demonic, and merchant lines",
+        "Identify which lines have a real second-node gap and which do not",
+        "Save docs/test-reports/p57-sample-lines-second-40-plus-gap-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only audit."
+    },
+    {
+      "id": "P57-002",
+      "title": "Lock optional scope contract",
+      "description": "As a planner, I want an explicit optional scope contract so P57 stays low-risk and does not quietly reopen the closed sample-line track.",
+      "acceptanceCriteria": [
+        "State that P57 is lower priority than P55 and P56",
+        "Limit the stage to at most one new second node per line",
+        "List forbidden expansions: full lifetime sim, sample-line skeleton rewrite, fourth line, platformization",
+        "Save docs/test-reports/p57-sample-lines-second-40-plus-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract story."
+    },
+    {
+      "id": "P57-003",
+      "title": "Define orthodox second-node contract",
+      "description": "As a designer, I want a bounded second-node contract for the orthodox line so any late-life extension adds a new stewardship payoff instead of repeating age-45.",
+      "acceptanceCriteria": [
+        "Define the orthodox second-node theme and prerequisites",
+        "Document how it differs from age-45 legacy stewardship",
+        "Do not rewrite the orthodox core route",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P57-004",
+      "title": "Define demonic second-node contract",
+      "description": "As a designer, I want a bounded second-node contract for the demonic line so any late-life extension deepens backlash or rule-making instead of repeating age-45 territory consolidation.",
+      "acceptanceCriteria": [
+        "Define the demonic second-node theme and prerequisites",
+        "Document how it differs from age-45 territory consolidation",
+        "Do not rewrite the demonic core route",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P57-005",
+      "title": "Define merchant second-node contract",
+      "description": "As a designer, I want a bounded second-node contract for the merchant line so any late-life extension deepens scale or succession pressure instead of repeating age-45 expansion fork.",
+      "acceptanceCriteria": [
+        "Define the merchant second-node theme and prerequisites",
+        "Document how it differs from age-45 expansion fork",
+        "Keep existing merchant debt, favor, and expansion semantics intact",
+        "Record the contract in the PRD or audit appendix"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Design story."
+    },
+    {
+      "id": "P57-006",
+      "title": "Decide go or no-go per line",
+      "description": "As a maintainer, I want a line-by-line go or no-go decision so P57 can skip weak candidates instead of forcing symmetry across all three lines.",
+      "acceptanceCriteria": [
+        "Produce a go or no-go decision for each of the three lines",
+        "Allow one to three lines rather than forcing all three",
+        "Support each decision with evidence and scope reasoning",
+        "Record the decision in the scope contract or gap audit"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Decision story."
+    },
+    {
+      "id": "P57-007",
+      "title": "Wire approved second-node configuration",
+      "description": "As a developer, I want only the approved second nodes wired through bounded configuration changes so the optional late-life extension remains small and testable.",
+      "acceptanceCriteria": [
+        "Implement configuration only for go-lines",
+        "Do not introduce a new sample-line framework",
+        "Existing age-40 and age-45 conclusions do not regress",
+        "Relevant targeted simulations can trigger the approved nodes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "All lines no-go; no configuration changes needed. N/A."
+    },
+    {
+      "id": "P57-008",
+      "title": "Add second-node player-facing expression",
+      "description": "As a player, I want approved second nodes to appear on existing expression surfaces so the late-life extension is visible and not just hidden in flags.",
+      "acceptanceCriteria": [
+        "Add second-node wording for go-lines only",
+        "Keep the wording distinct from age-45 payoff text",
+        "Do not add new UI components",
+        "Add or update focused expression tests"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "All lines no-go; no expression changes needed. N/A."
+    },
+    {
+      "id": "P57-009",
+      "title": "Extend replay and guard narrowly",
+      "description": "As a maintainer, I want narrow replay and guard coverage for any approved second nodes so optional late-life content cannot silently disappear later.",
+      "acceptanceCriteria": [
+        "Add replay or guard assertions only for go-lines",
+        "Do not turn the cheap guard into a new large gate",
+        "Replay latest or a companion artifact shows the approved second nodes",
+        "Relevant commands pass"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "All lines no-go; no replay/guard changes needed. N/A."
+    },
+    {
+      "id": "P57-010",
+      "title": "Produce P57 closure report",
+      "description": "As a maintainer, I want a P57 closure report stating whether the optional second-node stage was worthwhile and which lines, if any, actually got extended.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p57-sample-lines-second-40-plus-closure-report.md",
+        "Summarize the audit, go-or-no-go decisions, configuration, expression, and verification evidence",
+        "State which lines got a second node and which remained no-go",
+        "Do not frame P57 as a mandatory sample-line stage"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Closure story."
+    }
+  ]
+}

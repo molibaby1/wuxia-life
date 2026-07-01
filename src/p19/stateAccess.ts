@@ -9,6 +9,7 @@ import type { GameState } from '../types/eventTypes';
 import { flagIsActive, lifePathSignalActive, readMergedFlags } from '../p17/stateAccess';
 import { computeSuccessionQualityScore } from '../p18/legacyOutcomes';
 import { collectUnmetMaintenancePressure } from '../p17/achievementMaintenance';
+import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
 
 export function inferRelationshipScore(state: GameState): number {
   const player = state.player;
@@ -88,6 +89,24 @@ export function inferBurdenScore(state: GameState): number {
 export function inferLivedSelfUnderstanding(state: GameState): string {
   const player = state.player;
   if (!player) return '一生经历难以概括。';
+
+  const dominant = deriveDominantShapingLines(player.lifeStates, 1)[0];
+  if (dominant?.axisKey === 'trainingHabit') {
+    return '你自觉一生苦修不辍，以武立身。';
+  }
+  if (dominant?.axisKey === 'studyHabit') {
+    return '你自觉以书卷与思辨识世，文气入骨。';
+  }
+  if (dominant?.axisKey === 'businessHabit') {
+    return '你自觉把营生与门路练成了行走江湖的底气。';
+  }
+  if (dominant?.axisKey === 'socialMomentum') {
+    return '你自觉人情往来织就了你的江湖版图。';
+  }
+  if (dominant?.axisKey === 'familyBond') {
+    return '你自觉亲族牵绊锚定了许多归宿与抉择。';
+  }
+
   const chivalry = player.chivalry ?? 0;
   const reputation = player.reputation ?? 0;
   if (chivalry >= 60 && reputation >= 70) {

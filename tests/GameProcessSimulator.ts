@@ -19,8 +19,16 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
-import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
-export type { GameProcessRecord } from '../src/types/simulationRecordTypes';
+import type {
+  GameProcessConfig,
+  GameProcessRecord,
+  GameProcessReport,
+} from '../src/types/simulationRecordTypes';
+export type {
+  GameProcessConfig,
+  GameProcessRecord,
+  GameProcessReport,
+} from '../src/types/simulationRecordTypes';
 import { buildDeathRiskTelemetry, type DeathRiskTelemetry } from '../scripts/deathRiskTelemetry';
 import {
   applyRouteTrackFixtureBootstrap,
@@ -57,96 +65,6 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 const REPORTS_DIR = path.join(process.cwd(), 'public/reports');
-
-export interface GameProcessConfig {
-  playerName: string;
-  gender: 'male' | 'female';
-  simulateYears: number;  // 模拟多少年
-  runUntilDeath: boolean; // 是否运行到死亡/结局（完整人生）
-  ageRange?: {
-    startAge: number;
-    endAge: number;
-  };
-  seed?: number; // 固定随机种子
-  maxEvents: number; // 最大事件数，避免月/日推进导致无限循环
-  enableAutoSave: boolean;  // 启用自动保存
-  enableManualSave: boolean;  // 启用手动保存
-  autoSaveMode: 'age' | 'event';
-  saveAgeInterval: number;  // 按年龄自动保存间隔（年）
-  saveEventInterval: number;  // 按事件自动保存间隔（事件数）
-  enableSaveRestore: boolean;  // 启用自动读档恢复验证
-  maxRestoreCount: number;  // 最多自动读档恢复次数
-  verbose: boolean;  // 详细日志
-  choiceTendency: 'balanced' | 'martial' | 'wealth' | 'relationship' | 'risk_averse';
-  /** P8: fixed persona id for strategy-driven simulation */
-  p8PersonaId?: string;
-  /** 路线专项样本：偏向入线/完成对应路线 */
-  routeTrack?: 'official' | 'beggars' | 'demonic' | 'sect' | 'wanderer';
-  /** P3-EVAL sample id for death-risk telemetry cohort resolution. */
-  sampleId?: string;
-}
-
-export interface GameProcessReport {
-  id: string;
-  timestamp: string;
-  config: GameProcessConfig;
-  randomSeed: number | null;
-  runMode: 'complete_life' | 'age_range';
-  ageRange: {
-    startAge: number;
-    endAge: number;
-  } | null;
-  totalYears: number;
-  finalAge: number;
-  isAlive: boolean;
-  deathReason: string | null;
-  /** P3 US-005: populated when simulation ends with death or forced ending. */
-  deathRiskTelemetry?: DeathRiskTelemetry | null;
-  /** P3 US-010: romance/family arc regression snapshot when sampleId is set. */
-  romanceFamilyArcReport?: RomanceFamilyArcReport | null;
-  totalEvents: number;
-  totalChoices: number;
-  totalSaves: number;
-  totalLoads: number;
-  persistenceConsistency: {
-    totalChecks: number;
-    passedChecks: number;
-    failedChecks: number;
-    results: {
-      saveId: string;
-      age: number;
-      passed: boolean;
-      mismatchedFields: string[];
-    }[];
-  };
-  records: GameProcessRecord[];
-  statistics: {
-    childhoodEvents: number;
-    youthEvents: number;
-    adultEvents: number;
-    elderlyEvents: number;
-    autoEvents: number;
-    choiceEvents: number;
-    martialPowerGrowth: number;
-    moneyGrowth: number;
-    sectJoined: string | null;
-    sectStatus?: string;  // 门派地位
-    spouse?: string;      // 配偶
-    children?: number;    // 子女数量
-    origin?: string;
-    coreTalent?: string;
-    weakness?: string;
-    temperament?: string;
-    lifeStates?: Record<string, number>;
-    dailyEventCount?: number;
-    growthBiasSummary?: string[];
-    endingSummary?: string;
-    flags?: Record<string, any>;  // 其他重要标志
-  };
-  /** P8: aggregated choice diagnostics for reports */
-  p8ChoiceDiagnostics?: ChoiceScoreDiagnostic[];
-  p8ActiveActionReasons?: Array<{ age: number; actionId: string; reason: string }>;
-}
 
 /**
  * 游戏过程模拟器

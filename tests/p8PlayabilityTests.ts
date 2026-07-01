@@ -10,7 +10,7 @@ import { collectAgencyMetrics } from '../src/p8/collectPersonaMetrics';
 import { evaluateP8Gate, assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { renderP8MarkdownReport } from '../src/p8/reportBuilder';
 import { runHeadlessPersona } from '../src/headless/playability/headlessPersonaRunner';
-import type { GameProcessRecord } from './GameProcessSimulator';
+import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 import { P8_METRIC_DEFINITIONS } from '../src/p8/metricDefinitions';
 
 function assert(condition: boolean, message: string): void {
@@ -153,6 +153,40 @@ function testPersonaChoiceBias(): void {
   assert(biased > 5, 'wealth persona should boost money choices');
 }
 
+function testBalancedChoiceBias(): void {
+  const persona = getP8PersonaById('p8-balanced-wei')!;
+  const childhoodBalanced = applyPersonaChoiceBias({
+    persona,
+    baseScore: 5,
+    choiceId: 'balance_both',
+    eventId: 'childhood_preference',
+  });
+  const childhoodStudy = applyPersonaChoiceBias({
+    persona,
+    baseScore: 5,
+    choiceId: 'focus_on_study',
+    eventId: 'childhood_preference',
+  });
+  assert(
+    childhoodBalanced > childhoodStudy,
+    `balanced persona should prefer balance_both over focus_on_study, got ${childhoodBalanced} <= ${childhoodStudy}`,
+  );
+
+  const balanced = applyPersonaChoiceBias({
+    persona,
+    baseScore: 5,
+    choiceId: 'balanced_start',
+    eventId: 'martial_arts_enlightenment',
+  });
+  const martial = applyPersonaChoiceBias({
+    persona,
+    baseScore: 5,
+    choiceId: 'external_focus',
+    eventId: 'martial_arts_enlightenment',
+  });
+  assert(balanced > martial, `balanced persona should prefer balanced_start over martial fork, got ${balanced} <= ${martial}`);
+}
+
 function testAgencyRepeatedStreak(): void {
   const records: GameProcessRecord[] = Array.from({ length: 5 }, (_, i) => ({
     age: i,
@@ -243,6 +277,7 @@ async function runAll(): Promise<void> {
   testPersonaActionStrategyDegrade();
   testChoiceDiagnosticsRanking();
   testPersonaChoiceBias();
+  testBalancedChoiceBias();
   testAgencyRepeatedStreak();
   testMetricDefinitionsComplete();
   testGateAssemblySmoke();

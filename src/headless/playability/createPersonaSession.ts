@@ -14,11 +14,24 @@ import { PERSONA_ROUTE_MAP } from '../../p11/schedulingContext';
 
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 
+export function applyPersonaBootstrapFlags(session: HeadlessEngineSession, persona: P8Persona): void {
+  const state = session.getRuntimeState();
+  if (!state.flags) {
+    state.flags = {};
+  }
+  if (state.flags.p8_youth_route_seeds_applied) {
+    return;
+  }
+  state.flags.p8_persona_id = persona.id;
+  Object.assign(state.flags, resolvePersonaYouthRouteSeeds(persona));
+  state.flags.p8_youth_route_seeds_applied = true;
+}
+
 export function createPersonaHeadlessSession(
   persona: P8Persona,
   catalogVersion = DEFAULT_CATALOG_VERSION,
 ): HeadlessEngineSession {
-  return HeadlessEngineSessionImpl.create(
+  const session = HeadlessEngineSessionImpl.create(
     {
       playerName: persona.name,
       gender: persona.gender,
@@ -32,6 +45,8 @@ export function createPersonaHeadlessSession(
       random: new SeededRandomSource(persona.seed),
     },
   );
+  applyPersonaBootstrapFlags(session, persona);
+  return session;
 }
 
 /** Apply P8/P16 youth route seeds before age-10 mandatory milestones. */

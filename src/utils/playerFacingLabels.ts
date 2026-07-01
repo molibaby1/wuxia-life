@@ -1,5 +1,9 @@
 import type { GameState } from '../types/eventTypes';
 import type { RouteLifecycleState } from '../core/RouteStateManager';
+import {
+  SHAPING_AXES,
+  shapingAxisKeyFromFeedbackFlag,
+} from './habitShapingSummary';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -14,6 +18,8 @@ export const ROUTE_DISPLAY_NAMES: Record<string, string> = {
   hermit: '隐逸',
   orthodox: '正道门派',
   demonic_path: '魔道',
+  renown: '江湖名宿',
+  medical: '医者之路',
 };
 
 const ROUTE_FLAG_LABELS: Record<string, string> = {
@@ -23,6 +29,10 @@ const ROUTE_FLAG_LABELS: Record<string, string> = {
   route_border: '边城侠踪',
   route_beggars: '丐帮',
   route_official: '仕途',
+  route_merchant: '商路',
+  route_wealth_committed: '商路',
+  route_renown_committed: '江湖名宿之路',
+  route_medical_committed: '医者之路',
 };
 
 const SECT_FACTION_LABELS: Record<string, string> = {
@@ -31,15 +41,25 @@ const SECT_FACTION_LABELS: Record<string, string> = {
   neutral: '中立门派',
 };
 
+const SHAPING_FEEDBACK_LABELS = Object.fromEntries(
+  SHAPING_AXES.map((axis) => [
+    `shaping_${axis.key}_up`,
+    `${axis.shortLabel}加深`,
+  ]),
+) as Record<string, string>;
+
 const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   route_orthodox: '踏上正道',
   route_demonic: '堕入魔道',
   route_wanderer: '选择游侠',
   route_border: '边城立名',
+  route_merchant: '踏上商路',
   sect_faction: '门派倾向确立',
   origin_scholar_family: '书香门第出身',
   origin_merchant_family: '商贾之家出身',
   origin_wuxia_family: '武林世家出身',
+  tavern_renown_bridge_crossed: '踏上江湖名宿之路',
+  tavern_medical_bridge_crossed: '踏上医者之路',
 };
 
 export function formatRouteLabel(raw: string | null | undefined): string {
@@ -80,7 +100,7 @@ export function lifecyclePhaseLabel(
 }
 
 export function formatLongTermFlag(flag: string, value: boolean): string {
-  const label = LONG_TERM_FLAG_LABELS[flag];
+  const label = LONG_TERM_FLAG_LABELS[flag] || SHAPING_FEEDBACK_LABELS[flag];
   if (label) {
     return value ? label : `失去：${label}`;
   }
@@ -88,7 +108,13 @@ export function formatLongTermFlag(flag: string, value: boolean): string {
 }
 
 export function isPlayerVisibleFlag(flag: string): boolean {
-  return Boolean(LONG_TERM_FLAG_LABELS[flag] || ROUTE_FLAG_LABELS[flag] || flag === 'sect_faction');
+  return Boolean(
+    LONG_TERM_FLAG_LABELS[flag]
+    || ROUTE_FLAG_LABELS[flag]
+    || SHAPING_FEEDBACK_LABELS[flag]
+    || flag === 'sect_faction'
+    || shapingAxisKeyFromFeedbackFlag(flag),
+  );
 }
 
 export function getPlayerRouteSummary(state: GameState): { name: string; phase: string } {
@@ -113,6 +139,31 @@ export function getPlayerRouteSummary(state: GameState): { name: string; phase: 
   }
   if (flags.route_wanderer || flags.route_border) {
     return { name: '流浪侠客', phase: '路线进行中' };
+  }
+  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
+    return { name: '江湖名宿', phase: '路线进行中' };
+  }
+  if (flags.tavern_medical_bridge_crossed || flags.route_medical_committed) {
+    if (flags.tavern_embrace_compassionate_healer) {
+      return { name: '仁心医者', phase: '路线进行中' };
+    }
+    if (flags.tavern_embrace_pragmatic_healer) {
+      return { name: '世故人医', phase: '路线进行中' };
+    }
+    return { name: '医者之路', phase: '路线进行中' };
+  }
+  if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    return { name: '商路', phase: '路线进行中' };
   }
 
   const faction = flags.sect_faction;
@@ -156,6 +207,27 @@ export function readRawRouteKeyFromFlags(flags: Record<string, unknown> | undefi
   }
   if (flags.route_official) {
     return 'official';
+  }
+  if (
+    flags.route_merchant
+    || flags.route_wealth_committed
+    || flags.p22_wealth_route_forked
+    || flags.p9_merchant_midlife_path
+    || flags.p9_wealth_caravan_gate_done
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    )
+  ) {
+    return 'merchant';
+  }
+
+  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
+    return 'renown';
+  }
+
+  if (flags.tavern_medical_bridge_crossed || flags.route_medical_committed) {
+    return 'medical';
   }
 
   return null;

@@ -1,0 +1,103 @@
+{
+  "project": "Wuxia Life P88 Medical Payoff Design-First",
+  "branchName": "codex/p88-wuxia-medical-payoff-design-first",
+  "description": "Design-first contract stage for medical_sage_healer payoff phase (2 variants × 3 choices = 6 branches) — define payoff direction, contract, and validation shape before implementation, preserving tavern-born healer flavor and variant differentiation.",
+  "userStories": [
+    {
+      "id": "P88-001",
+      "title": "Audit medical payoff prerequisites (2 variants)",
+      "description": "As a maintainer, I want a prerequisite audit for the medical payoff stage covering both variants so P88 starts from the real gating surfaces.",
+      "acceptanceCriteria": [
+        "Summarize existing medical route flags, markers, events, and expressions (bridge + entry + on-ramp + pressure)",
+        "Identify what exists before payoff vs what can be reused for both compassionate and pragmatic variants",
+        "Document variant-specific differences and commonalities",
+        "Save docs/test-reports/p88-medical-payoff-prerequisite-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Covers both compassionate and pragmatic variants. Inventories all existing surfaces before payoff design begins."
+    },
+    {
+      "id": "P88-002",
+      "title": "Lock P88 scope contract",
+      "description": "As a planner, I want a scope contract so P88 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P88 to gap audit, direction comparison, payoff contract, and proof shape only",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, new framework, bulk content wave, late-life design",
+        "Save docs/test-reports/p88-medical-payoff-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope guardrails to keep P88 design-only. Zero runtime changes allowed."
+    },
+    {
+      "id": "P88-003",
+      "title": "Compare medical payoff directions (2 variants × 3 choices)",
+      "description": "As a designer, I want payoff-direction options for both medical variants so P88 chooses the most differentiated and bounded payoff shape before implementation.",
+      "acceptanceCriteria": [
+        "Confirm choice-based payoff mode (2 variants × 3 choices = 6 branches)",
+        "Compassionate variant: compare at least 3 choice directions (e.g. hold-on / let-go / find-legacy)",
+        "Pragmatic variant: compare at least 3 choice directions (e.g. hold-favors / break-free / master-favors)",
+        "Each candidate includes: core narrative, trigger conditions, player choice space, tavern-born fit, implementation complexity",
+        "Select recommended direction and document rejected alternatives for each variant",
+        "Recommendation follows quality-first and small-step principles",
+        "Ensure 2 variants have genuinely different payoff arcs (not reskinned)",
+        "Save comparison document"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Core design work — 2 variants each with 3 meaningful choices. Must maintain variant differentiation and tavern-born flavor."
+    },
+    {
+      "id": "P88-004",
+      "title": "Define medical payoff contract (2 variants)",
+      "description": "As a designer, I want an explicit payoff contract for both variants so P89 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define payoff checkpoint, required flags, and corresponding gate acceptance",
+        "Define 2 core payoff events (compassionate + pragmatic, both choice-based)",
+        "Define stat changes, identity markers, and expression differences per choice for both variants",
+        "Define at least 5 payoff-specific player-facing signals (cost label, current goal, age40 identity, life memory, summary)",
+        "Clarify difference between payoff vs pressure and vs generic midlife for both variants",
+        "Preserve tavern-born medical healer flavor throughout",
+        "Reserve flag interfaces for subsequent late-life / endgame stages",
+        "Save contract to docs/PRD/p88-medical-payoff-contract.md"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Contract LOCK for P89 implementation. 2 variants × 3 choices = 6 full branches with complete specs."
+    },
+    {
+      "id": "P88-005",
+      "title": "Define P89 validation shape",
+      "description": "As a maintainer, I want the P89 validation shape fixed in advance so playable payoff work is judged against explicit expectations.",
+      "acceptanceCriteria": [
+        "Define which chain nodes targeted proof must show (pressure → payoff → expression changes)",
+        "Both variants × 3 choices: each direction must have core node verification",
+        "Define which assertions regression tests must cover at minimum",
+        "Define what evidence counts as payoff closed",
+        "No full lifetime exhaust required",
+        "Define regression boundaries for P83/P84/P85/P87 existing evidence"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Pre-commit to P89 validation shape. Covers all 6 payoff branches + cross-variant differentiation + regression boundaries."
+    },
+    {
+      "id": "P88-006",
+      "title": "Produce P88 closure report",
+      "description": "As a maintainer, I want a closure report that locks the medical payoff design-first contract and hands off to P89.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p88-medical-payoff-closure-report.md",
+        "Summarize prerequisite audit, scope contract, payoff-direction comparison, payoff contract, validation shape",
+        "Clarify boundary with P89",
+        "List remaining deferred larger medical-expansion items",
+        "State GO / NO-GO for payoff implementation stage"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P89 medical payoff playable implementation stage."
+    }
+  ]
+}

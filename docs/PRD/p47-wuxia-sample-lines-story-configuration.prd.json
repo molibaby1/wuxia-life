@@ -1,0 +1,150 @@
+{
+  "project": "Wuxia Life P47 Sample Lines Story Configuration",
+  "branchName": "codex/p47-wuxia-sample-lines-story-configuration",
+  "description": "Define and decompose the story-configuration work required to build three 0-40 minimum playable life samples for orthodox martial, demonic edge, and merchant rise using existing content carriers instead of runtime platformization.",
+  "userStories": [
+    {
+      "id": "P47-001",
+      "title": "Audit existing content anchors for the three sample lines",
+      "description": "As a content planner, I want a focused gap audit of existing orthodox, demonic, and merchant anchors so P47 extends real repo content instead of inventing disconnected new arcs.",
+      "acceptanceCriteria": [
+        "Inventory current orthodox martial, demonic edge, and merchant rise anchors",
+        "Mark which required nodes already exist and which are missing",
+        "Save the gap audit under docs/test-reports/",
+        "Do not change gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Gap audit: docs/test-reports/p47-sample-lines-content-anchor-gap-audit.md"
+    },
+    {
+      "id": "P47-002",
+      "title": "Define the orthodox martial 0-40 chapter spine",
+      "description": "As a designer, I want an explicit chapter spine for the orthodox martial sample so later event work serves one coherent life arc instead of scattered martial content.",
+      "acceptanceCriteria": [
+        "Define childhood, youth, early adult, and pre-midlife chapter goals for the orthodox line",
+        "List at least 5 key nodes",
+        "List at least 2 key choices",
+        "List at least 1 upright-cost or fallback node",
+        "Record the spine specification in the PRD"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "PRD §10 Orthodox Martial 0-40 Chapter Spine"
+    },
+    {
+      "id": "P47-003",
+      "title": "Define the demonic edge 0-40 chapter spine",
+      "description": "As a designer, I want an explicit chapter spine for the demonic edge sample so the route reads as temptation, gain, and cost rather than flat evil-stat growth.",
+      "acceptanceCriteria": [
+        "Define childhood, youth, early adult, and pre-midlife chapter goals for the demonic line",
+        "List at least 5 key nodes",
+        "List at least 2 key choices",
+        "List at least 1 post-gain cost fallback node",
+        "Record the spine specification in the PRD"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "PRD §11 Demonic Edge 0-40 Chapter Spine"
+    },
+    {
+      "id": "P47-004",
+      "title": "Define the merchant rise 0-40 chapter spine",
+      "description": "As a designer, I want an explicit chapter spine for the merchant rise sample so the route reads as ambition, leverage, and obligation instead of only money gain.",
+      "acceptanceCriteria": [
+        "Define childhood, youth, early adult, and pre-midlife chapter goals for the merchant line",
+        "List at least 5 key nodes",
+        "List at least 2 key choices",
+        "List at least 1 wealth-loyalty or debt-obligation fallback node",
+        "Record the spine specification in the PRD"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "PRD §12 Merchant Rise 0-40 Chapter Spine"
+    },
+    {
+      "id": "P47-005",
+      "title": "Specify orthodox childhood and youth configuration tasks",
+      "description": "As an implementer, I want orthodox early-life work split into small tasks so story configuration can be delivered incrementally instead of as one broad content rewrite.",
+      "acceptanceCriteria": [
+        "Split the orthodox childhood seed into a standalone task",
+        "Split the youth first-recognition node into a standalone task",
+        "Split the young-adult sect commitment node into a standalone task",
+        "Ensure each task can fit in one implementation iteration"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "PRD §13 Orthodox Early-Life Configuration Tasks (O-1/O-2/O-3)"
+    },
+    {
+      "id": "P47-006",
+      "title": "Specify demonic childhood and youth configuration tasks",
+      "description": "As an implementer, I want demonic early-life work split into small tasks so the corruption arc can be built stepwise and validated locally.",
+      "acceptanceCriteria": [
+        "Split the demonic childhood seed into a standalone task",
+        "Split the youth first-transgression node into a standalone task",
+        "Split the young-adult temptation node into a standalone task",
+        "Ensure each task can fit in one implementation iteration"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "PRD §14 Demonic Early-Life Configuration Tasks (D-1/D-2/D-3)"
+    },
+    {
+      "id": "P47-007",
+      "title": "Specify merchant childhood and youth configuration tasks",
+      "description": "As an implementer, I want merchant early-life work split into small tasks so the livelihood arc can be expanded through bounded story slices.",
+      "acceptanceCriteria": [
+        "Split the merchant childhood business seed into a standalone task",
+        "Split the youth first-capital node into a standalone task",
+        "Split the young-adult caravan or investment fork into a standalone task",
+        "Ensure each task can fit in one implementation iteration"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "PRD §15 Merchant Early-Life Configuration Tasks (M-1/M-2/M-3)"
+    },
+    {
+      "id": "P47-008",
+      "title": "Specify midlife cost and identity hooks for all three lines",
+      "description": "As a planner, I want the shared midlife-cost and identity-hook work split clearly so later implementation does not stop at youth growth spikes without lifetime consequence.",
+      "acceptanceCriteria": [
+        "Define the orthodox midlife upright-cost hook",
+        "Define the demonic midlife reputation, relationship, or health cost hook",
+        "Define the merchant midlife wealth-loyalty conflict hook",
+        "Define an age-40 identity summary hook for each line"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "PRD §16 Midlife Cost And Age-40 Identity Hooks"
+    },
+    {
+      "id": "P47-009",
+      "title": "Define routePoint and flag wiring requirements",
+      "description": "As a developer, I want explicit routePoint and flag wiring requirements so content implementation stays compatible with the current runtime instead of drifting into hidden assumptions.",
+      "acceptanceCriteria": [
+        "Define the required key flags for each sample line",
+        "Define the required routePoints or equivalent carriers for each sample line",
+        "Mark which nodes should use mainline, mandatory, or once protection",
+        "Record the wiring requirements in the PRD"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "PRD §17 RoutePoint And Flag Wiring Requirements"
+    },
+    {
+      "id": "P47-010",
+      "title": "Define P47 closure evidence",
+      "description": "As a maintainer, I want explicit closure evidence for the configuration stage so later phases know the story spine is stable enough to build on.",
+      "acceptanceCriteria": [
+        "Define the required closure evidence for the configuration stage",
+        "List the documents or reports that must be produced",
+        "List what remains blocked if the stage is incomplete",
+        "Record the closure rules in the PRD"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "PRD §18 P47 Closure Evidence; aligns with P46 §11.1"
+    }
+  ]
+}

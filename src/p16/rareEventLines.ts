@@ -96,3 +96,23 @@ export function getRareLineOpportunityMultiplier(
   }
   return Math.min(2, multiplier);
 }
+
+/** Reconstruct triggered rare lines from durable flags (post-checkpoint). */
+export function deriveRareLineRollResultsFromFlags(
+  flags: Record<string, unknown>,
+  worldId = 'wuxia',
+): RareLineRollResult[] {
+  const lines = getWorldProfile(worldId).rareEventLines ?? [];
+  return lines.map(line => {
+    const unlockFlags = line.unlocksFlags ?? [];
+    const triggered = unlockFlags.length > 0 && unlockFlags.every(flag => Boolean(flags[flag]));
+    return {
+      lineId: line.id,
+      label: line.label,
+      triggered,
+      effectiveProbability: triggered ? line.baseProbability : 0,
+      unlocksFlags: triggered ? unlockFlags : [],
+      altersOpportunityTags: triggered ? (line.altersOpportunityTags ?? []) : [],
+    };
+  });
+}

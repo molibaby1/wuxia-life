@@ -13,12 +13,11 @@
 
 import { reactive, isReactive } from 'vue';
 import { EventPriority } from '../types/eventTypes';
-import type { EventDefinition, GameState, Effect, PlayerIdentity } from '../types/eventTypes';
+import type { EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStates } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
 import { talentSystem } from './TalentSystem';
-import { statGrowthSystem } from './StatGrowthSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { LifePathManager } from './LifePathSystem';
 import { difficultyManager } from './DifficultyManager';
@@ -41,7 +40,6 @@ import {
 } from './activePlanning/ActivePlanningService';
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
-import { getMinimumActions } from '../data/activeActionCatalog';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
 import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSelection';
@@ -465,15 +463,7 @@ export class GameEngineIntegration {
         return false;
       }
       
-      // 6. 检查剧情线密度（新增）
-      if (!this.checkStoryLineDensity(event)) {
-        return false;
-      }
-      
-      // 7. 检查故事线保底触发（新增）
-      if (!this.checkStoryLineGuarantee(event)) {
-        return false;
-      }
+
       
       return true;
     });
@@ -488,6 +478,33 @@ export class GameEngineIntegration {
     limitedEvents = this.injectMandatoryCandidates(availableEvents, limitedEvents);
 
     return limitedEvents;
+  }
+
+  /** ponytail: mandatory/mainline events must survive FORMAL_CANDIDATE_POOL_CAP trimming. */
+  private isSchedulingValidationEvent(event: EventDefinition): boolean {
+    const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
+    return (
+      tags.includes('p9') ||
+      tags.includes('p11') ||
+      tags.includes('causality_echo') ||
+      (tags.includes('mandatory') && tags.includes('mainline'))
+    );
+  }
+
+  private injectMandatoryCandidates(
+    availableEvents: EventDefinition[],
+    limitedEvents: EventDefinition[],
+  ): EventDefinition[] {
+    const result = [...limitedEvents];
+    const selectedIds = new Set(result.map(event => event.id));
+    for (const event of availableEvents) {
+      if (selectedIds.has(event.id) || !this.isSchedulingValidationEvent(event)) {
+        continue;
+      }
+      result.push(event);
+      selectedIds.add(event.id);
+    }
+    return result;
   }
 
   /**
@@ -594,7 +611,6 @@ export class GameEngineIntegration {
       }
       
       // 也检查 gameState.player 中的背景字段
-      const player = gameState.player;
       if (player) {
         if ((player as any).bornInWuxiaFamily === true) playerBackgrounds.push('bornInWuxiaFamily');
         if ((player as any).bornInScholarFamily === true) playerBackgrounds.push('bornInScholarFamily');
@@ -693,11 +709,6 @@ export class GameEngineIntegration {
     const maxTriggers = event.maxTriggers ?? 1;
     const triggerCount = triggerHistory.length;
     
-    // 调试日志
-    if (event.id === 'merchant_empire' || event.id === 'hero_become_legend') {
-      const eventHistory = this.gameState.eventHistory || [];
-    }
-    
     // 检查最大触发次数 - 如果已达到上限，直接返回false
     if (triggerCount >= maxTriggers) {
       return false;
@@ -715,81 +726,6 @@ export class GameEngineIntegration {
     
     if (yearsPassed < cooldown) {
       return false;
-    }
-    
-    return true;
-  }
-  
-  /**
-   * 检查剧情线密度
-   * 防止同一条剧情线的事件过于密集
-   * 
-   * 注意：已移除密度限制，允许剧情线事件连续触发
-   */
-  private checkStoryLineDensity(event: EventDefinition): boolean {
-    // 移除密度限制 - 允许剧情线事件连续触发
-    // const storyLine = event.storyLine;
-    // if (!storyLine) {
-    //   return true;
-    // }
-    // 
-    // const currentAge = this.gameState.player?.age || 0;
-    // const recentEvents = this.gameState.player?.events
-    //   .filter(e => {
-    //     const eventDef = eventLoader.getEventById(e.eventId);
-    //     return eventDef?.storyLine === storyLine;
-    //   })
-    //   .sort((a, b) => b.age - a.age);
-    // 
-    // if (recentEvents.length === 0) {
-    //   return true;
-    // }
-    // 
-    // const lastEventAge = recentEvents[0].age;
-    // const yearsPassed = currentAge - lastEventAge;
-    // const minInterval = 1;
-    // 
-    // if (yearsPassed < minInterval) {
-    //   console.log(`[StoryLine] ${storyLine} 密度过高：距离上次事件 ${yearsPassed} 年，需要间隔 ${minInterval} 年`);
-    //   return false;
-    // }
-    
-    return true;  // 始终返回 true，不限制密度
-  }
-  
-  /**
-   * 检查故事线保底触发
-   * 如果一条故事线中断太久，强制触发下一个事件
-   */
-  private checkStoryLineGuarantee(event: EventDefinition): boolean {
-    const storyLine = event.storyLine;
-    if (!storyLine) {
-      return true; // 没有剧情线标签，不检查
-    }
-    
-    const currentAge = this.gameState.player?.age || 0;
-    const eventHistory = this.gameState.eventHistory || [];
-    
-    // 获取这条故事线的所有事件
-    const storyLineEvents = eventHistory
-      .filter(e => {
-        const eventDef = eventLoader.getEventById(e.eventId);
-        return eventDef?.storyLine === storyLine;
-      })
-      .sort((a, b) => a.age - b.age);
-    
-    if (storyLineEvents.length === 0) {
-      return true; // 这条线还没开始
-    }
-    
-    const lastEventAge = storyLineEvents[storyLineEvents.length - 1].age;
-    const yearsPassed = currentAge - lastEventAge;
-    
-    // 如果距离上个事件已经 3 年以上，强制触发这条线的下一个事件
-    const guaranteeThreshold = 3;
-    
-    if (yearsPassed >= guaranteeThreshold) {
-      return true; // 允许触发
     }
     
     return true;
@@ -1953,7 +1889,8 @@ export class GameEngineIntegration {
       event.autoEffects,
       this.gameState
     );
-    const adjustedState = this.applyFormalEventConsequences(previousState, updatedState, event);
+    let adjustedState = this.applyFormalEventConsequences(previousState, updatedState, event);
+    adjustedState = this.applyDailyEventLongTermHooks(previousState, adjustedState, event);
     this.applyGameState(adjustedState);
     
     // 记录事件触发（用于年度事件限制）
@@ -2078,7 +2015,7 @@ export class GameEngineIntegration {
         };
         
         const choiceValue = choiceValueMap[choiceId] || choiceId;
-        CriticalChoiceSystem.recordChoice(this.gameState, eventId, choiceValue, this.gameState);
+        CriticalChoiceSystem.recordChoice(this.gameState, eventId, choiceValue, true);
       }
     }
     
@@ -2491,19 +2428,22 @@ export class GameEngineIntegration {
       this.pendingEventOutcomeNote = null;
     }
 
-    if ((tags.has('training') || tags.has('risk')) && martialGain >= 6) {
+    if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
+      lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
       if (martialGain >= 12) {
         lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       }
     }
 
-    if (tags.has('comprehension') && academicGain >= 4) {
+    if (tags.has('comprehension') && academicGain >= 3) {
       lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
+      lifeStates.studyHabit = traitSystem.clampLifeState('studyHabit', (lifeStates.studyHabit || 0) + 1);
     }
 
-    if (tags.has('business') && (moneyGain >= 100 || businessGain >= 2)) {
+    if (tags.has('business') && (moneyGain >= 25 || businessGain >= 1)) {
       lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
+      lifeStates.businessHabit = traitSystem.clampLifeState('businessHabit', (lifeStates.businessHabit || 0) + 1);
       if (moneyGain >= 150 && lifeStates.familyBond > 0) {
         lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond - 1);
       }
@@ -2530,12 +2470,120 @@ export class GameEngineIntegration {
       }
     }
 
+    const projected = this.projectHabitCompatibilityFlags(
+      lifeStates,
+      adjustedPlayer.flags || {},
+      nextState.flags || {},
+    );
+
     return {
       ...nextState,
       player: {
         ...adjustedPlayer,
-        lifeStates,
+        lifeStates: projected.lifeStates,
+        flags: projected.playerFlags,
       },
+      flags: projected.gameFlags,
+    };
+  }
+
+  private applyDailyEventLongTermHooks(
+    previousState: GameState,
+    nextState: GameState,
+    event: EventDefinition,
+  ): GameState {
+    if (event.category !== 'daily_event' || !nextState.player) {
+      return nextState;
+    }
+
+    const config = dailyEventSystem.getConfigByVariantId(event.id);
+    if (!config?.longTermHooks) {
+      return nextState;
+    }
+
+    const lifeStates = {
+      ...(nextState.player.lifeStates || traitSystem.createInitialLifeStates()),
+    };
+
+    for (const tendency of config.longTermHooks.addTendency || []) {
+      const habitState = this.mapLegacyHabitFlagToLifeState(tendency);
+      if (!habitState) {
+        continue;
+      }
+      lifeStates[habitState] = traitSystem.clampLifeState(habitState, (lifeStates[habitState] || 0) + 1);
+    }
+
+    for (const repeatRule of config.longTermHooks.addStateOnRepeat || []) {
+      const previousValue = previousState.player?.lifeStates?.[repeatRule.state] || 0;
+      const currentValue = nextState.player.lifeStates?.[repeatRule.state] || 0;
+      const alreadyReached = previousValue >= repeatRule.repeatThreshold;
+      const reachedNow = currentValue >= repeatRule.repeatThreshold;
+      if (!alreadyReached && reachedNow) {
+        lifeStates[repeatRule.state] = traitSystem.clampLifeState(
+          repeatRule.state,
+          (lifeStates[repeatRule.state] || 0) + repeatRule.increment,
+        );
+      }
+    }
+
+    const projected = this.projectHabitCompatibilityFlags(
+      lifeStates,
+      nextState.player.flags || {},
+      nextState.flags || {},
+    );
+
+    return {
+      ...nextState,
+      player: {
+        ...nextState.player,
+        lifeStates: projected.lifeStates,
+        flags: projected.playerFlags,
+      },
+      flags: projected.gameFlags,
+    };
+  }
+
+  private mapLegacyHabitFlagToLifeState(flag: string): 'trainingHabit' | 'studyHabit' | 'businessHabit' | null {
+    switch (flag) {
+      case 'training_habit':
+        return 'trainingHabit';
+      case 'study_habit':
+        return 'studyHabit';
+      case 'business_habit':
+        return 'businessHabit';
+      default:
+        return null;
+    }
+  }
+
+  private projectHabitCompatibilityFlags(
+    lifeStates: PlayerLifeStates,
+    playerFlags: Record<string, unknown>,
+    gameFlags: Record<string, unknown>,
+  ): {
+    lifeStates: PlayerLifeStates;
+    playerFlags: Record<string, unknown>;
+    gameFlags: Record<string, unknown>;
+  } {
+    const nextPlayerFlags = { ...playerFlags };
+    const nextGameFlags = { ...gameFlags };
+    const projections: Array<['training_habit' | 'study_habit' | 'business_habit', number]> = [
+      ['training_habit', lifeStates?.trainingHabit || 0],
+      ['study_habit', lifeStates?.studyHabit || 0],
+      ['business_habit', lifeStates?.businessHabit || 0],
+    ];
+
+    for (const [flagKey, value] of projections) {
+      if (value >= 1) {
+        nextPlayerFlags[flagKey] = true;
+        nextGameFlags[flagKey] = true;
+      }
+    }
+
+    return {
+      lifeStates,
+      playerFlags: nextPlayerFlags,
+      gameFlags: nextGameFlags,
     };
   }
 

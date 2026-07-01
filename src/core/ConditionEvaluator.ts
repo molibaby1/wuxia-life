@@ -19,6 +19,20 @@ import { readPlayerNumeric } from '../utils/playerStatAccess';
 
 export type Condition = EventCondition;
 
+interface CustomHandlerCondition {
+  type: 'custom';
+  handler: string;
+  params: Record<string, unknown>;
+}
+
+interface CompositeCondition {
+  op: 'and' | 'or' | 'not';
+  conditions?: EventCondition[];
+  condition?: EventCondition;
+}
+
+type EvaluatorCondition = EventCondition | CustomHandlerCondition | CompositeCondition;
+
 /**
  * 条件评估器实现
  */
@@ -58,15 +72,18 @@ export class ConditionEvaluator implements IConditionEvaluator {
   evaluate(condition: EventCondition, state: GameState): boolean {
     if (condition.type === 'expression') {
       return this.evaluateExpression(condition.expression, state);
-    } else {
-      // 调用自定义处理器
-      const handler = this.handlers.get((condition as any).handler);
+    }
+    const customCond = condition as unknown as CustomHandlerCondition;
+    if (customCond.type === 'custom' && customCond.handler) {
+      const handler = this.handlers.get(customCond.handler);
       if (!handler) {
-        console.warn(`Unknown condition handler: ${(condition as any).handler}`);
+        console.warn(`Unknown condition handler: ${customCond.handler}`);
         return false;
       }
-      return handler.evaluate((condition as any).params, state);
+      return handler.evaluate(customCond.params || {}, state);
     }
+    console.warn(`Unknown condition type: ${(condition as { type: string }).type}`);
+    return false;
   }
   
   /**
@@ -118,8 +135,11 @@ export class ConditionEvaluator implements IConditionEvaluator {
     }
     return JSON.stringify({
       player: playerSlice,
+      lifeStates: state.player?.lifeStates || {},
       flags: state.flags,
+      playerFlags: state.player?.flags || {},
       triggeredEvents: state.triggeredEvents,
+      eventHistory: (state.eventHistory || []).map(entry => entry.eventId),
     });
   }
   
@@ -414,8 +434,13 @@ class ConditionExpressionParser {
 
     if (identifier.startsWith('player.')) {
       const property = identifier.slice('player.'.length);
+      return this.resolvePlayerProperty(property, token.position);
+    }
+
+    if (identifier.startsWith('lifeStates.')) {
+      const property = identifier.slice('lifeStates.'.length);
       this.assertSafeProperty(property, token.position);
-      return (this.state.player as any)?.[property];
+      return this.state.player?.lifeStates?.[property as keyof typeof this.state.player.lifeStates] ?? 0;
     }
 
     if (identifier.startsWith('flags.')) {
@@ -476,6 +501,17 @@ class ConditionExpressionParser {
     }
   }
 
+  private resolvePlayerProperty(property: string, position: number): unknown {
+    if (property.startsWith('lifeStates.')) {
+      const lifeStateKey = property.slice('lifeStates.'.length);
+      this.assertSafeProperty(lifeStateKey, position);
+      return this.state.player?.lifeStates?.[lifeStateKey as keyof typeof this.state.player.lifeStates] ?? 0;
+    }
+
+    this.assertSafeProperty(property, position);
+    return (this.state.player as any)?.[property];
+  }
+
   private toBoolean(value: unknown): boolean {
     return Boolean(value);
   }
@@ -527,7 +563,7 @@ class ConditionExpressionParser {
  * 自定义条件处理器接口
  */
 export interface CustomConditionHandler {
-  evaluate(params: any, state: GameState): boolean;
+  evaluate(params: Record<string, unknown>, state: GameState): boolean;
 }
 
 /**
@@ -545,25 +581,20 @@ export class CompositeConditionEvaluator implements IConditionEvaluator {
     if (condition.type === 'expression') {
       return this.baseEvaluator.evaluate(condition, state);
     }
-    
-    // 如果是复合条件，递归评估
-    const compositeCondition = condition as any;
-    if (compositeCondition.op === 'and') {
-      return compositeCondition.conditions.every((c: any) => 
-        this.evaluate(c, state)
-      );
+
+    const compositeCond = condition as unknown as CompositeCondition;
+    if (compositeCond.op === 'and' && compositeCond.conditions) {
+      return compositeCond.conditions.every(c => this.evaluate(c, state));
     }
-    
-    if (compositeCondition.op === 'or') {
-      return compositeCondition.conditions.some((c: any) => 
-        this.evaluate(c, state)
-      );
+
+    if (compositeCond.op === 'or' && compositeCond.conditions) {
+      return compositeCond.conditions.some(c => this.evaluate(c, state));
     }
-    
-    if (compositeCondition.op === 'not') {
-      return !this.evaluate(compositeCondition.condition, state);
+
+    if (compositeCond.op === 'not' && compositeCond.condition) {
+      return !this.evaluate(compositeCond.condition, state);
     }
-    
+
     // 默认调用基础评估器
     return this.baseEvaluator.evaluate(condition, state);
   }

@@ -1,6 +1,5 @@
 import type { P8PlayabilityReport, P8PersonaRunMetrics } from '../p8/types';
-import type { GameProcessRecord } from '../types/simulationRecordTypes';
-import type { GameProcessReport } from '../../tests/GameProcessSimulator';
+import type { GameProcessRecord, GameProcessReport } from '../types/simulationRecordTypes';
 
 export type WarningBucket = 'replayability' | 'pacing' | 'causality' | 'other';
 

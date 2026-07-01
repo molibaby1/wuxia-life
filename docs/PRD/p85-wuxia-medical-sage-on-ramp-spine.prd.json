@@ -1,0 +1,130 @@
+{
+  "project": "Wuxia Life P85 Medical Sage On-Ramp Spine",
+  "branchName": "codex/p85-wuxia-medical-sage-on-ramp-spine",
+  "description": "Build the minimum playable on-ramp spine event for the medical_sage_healer route so it has real content beyond entry labels, with compassionate/pragmatic variant differentiation, while staying bounded and preserving the tavern-born healer flavor.",
+  "userStories": [
+    {
+      "id": "P85-001",
+      "title": "Audit medical on-ramp gap",
+      "description": "As a maintainer, I want an audit of what currently exists for medical_sage_healer after entry so P85 targets the real on-ramp gap.",
+      "acceptanceCriteria": [
+        "Summarize existing medical route flags, markers, expression, and events",
+        "Identify what exists before on-ramp vs what the minimum spine needs",
+        "Analyze on-ramp needs for both compassionate and pragmatic variants",
+        "Save docs/test-reports/p85-medical-on-ramp-gap-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Foundational audit — must complete before implementation begins. Includes variant-specific gap analysis."
+    },
+    {
+      "id": "P85-002",
+      "title": "Lock P85 scope contract",
+      "description": "As a planner, I want a scope contract so P85 stays an on-ramp spine stage and does not sprawl into full medical content.",
+      "acceptanceCriteria": [
+        "Limit P85 to on-ramp spine event plus corresponding expression only",
+        "Define allowed layers: event configuration, expression, proof, and narrow tests",
+        "List forbidden expansions: pressure wave, payoff wave, new systems, full route expansion, second route, other origins",
+        "Define boundary with P86 (pressure stage)",
+        "Save docs/test-reports/p85-medical-on-ramp-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope guardrails for the on-ramp spine stage — follows P73 renown on-ramp pattern with 2-variant focus."
+    },
+    {
+      "id": "P85-003",
+      "title": "Define medical on-ramp contract",
+      "description": "As a designer, I want an explicit on-ramp contract for medical_sage_healer so the first post-bridge milestone feels like a medical-specific turning point.",
+      "acceptanceCriteria": [
+        "Define on-ramp trigger conditions (post-bridge + age range + minimum threshold)",
+        "Define the core narrative: what is the first iconic milestone of a medical sage healer",
+        "Design different on-ramp flavor for compassionate vs pragmatic variants",
+        "Preserve tavern-born healer flavor (path from tavern origins)",
+        "Reserve flag interfaces for subsequent pressure/payoff stages",
+        "Record the contract in the PRD or an appendix"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "On-ramp contract — tavern-born healer identity + 2 variant flavors carried through to first milestone."
+    },
+    {
+      "id": "P85-004",
+      "title": "Wire medical on-ramp spine event",
+      "description": "As a developer, I want the medical on-ramp event wired through the existing event system so players crossing the medical bridge encounter a real milestone.",
+      "acceptanceCriteria": [
+        "Implement on-ramp spine event through existing event system configuration",
+        "Do not introduce a new event framework or scheduler",
+        "Trigger conditions are compatible with P83 bridge and P84 entry",
+        "P83/P84 existing evidence does not regress",
+        "Both variants have distinct on-ramp consequences (stats / flags)",
+        "Shared destination chain remains stably triggerable"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Core wiring — on-ramp event + variant-specific outcomes + checkpoint flag."
+    },
+    {
+      "id": "P85-005",
+      "title": "Add on-ramp player-facing expression",
+      "description": "As a player, I want the medical on-ramp to read as a meaningful turning point so the route feels like it has content beyond entry labels.",
+      "acceptanceCriteria": [
+        "Add at least two on-ramp-specific readable signals (currentGoal update, identity summary, etc.)",
+        "After on-ramp, players can feel 'I have truly established myself in the healing path'",
+        "Compassionate and pragmatic have perceptible expression differences at on-ramp",
+        "No new UI components added",
+        "Add or update focused expression tests"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Player-visible identity — on-ramp turning point expression × 2 variants."
+    },
+    {
+      "id": "P85-006",
+      "title": "Add targeted on-ramp proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the medical on-ramp event fires correctly and carries tavern-born medical flavor with variant differentiation.",
+      "acceptanceCriteria": [
+        "Produce one targeted proof (bridge to on-ramp path verification, covering both variants)",
+        "Show on-ramp event trigger plus expression changes",
+        "Show compassionate vs pragmatic differences at on-ramp layer",
+        "Do not require full lifetime exhaust",
+        "Proof supports whether to continue to pressure stage"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Comparison-style proof — both variants × multiple expression surfaces."
+    },
+    {
+      "id": "P85-007",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the medical on-ramp spine so future edits do not break the first medical content milestone.",
+      "acceptanceCriteria": [
+        "Add test file tests/p85TavernHandMedicalOnRampSpineTests.ts",
+        "Cover on-ramp trigger conditions, event firing, expression updates, and comparison assertions with narrow checks",
+        "Cover 2 variant differentiation assertions at on-ramp level",
+        "Reuse existing test harness",
+        "Do not rewrite the full test suite",
+        "Relevant commands pass: typecheck + related regression suites"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Narrow regression + existing suites must pass. Follows P73 pattern with 2-variant focus."
+    },
+    {
+      "id": "P85-008",
+      "title": "Produce P85 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the medical on-ramp now provides and whether pressure/payoff stages are justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p85-medical-sage-on-ramp-closure-report.md",
+        "Summarize gap audit, contract, event wiring, expression, proof, and tests",
+        "State whether subsequent pressure stage is worth opening",
+        "List larger medical-expansion items that remain deferred",
+        "Give route planning recommendations after pressure (payoff / late-life etc.)"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P86+ pressure stage implementation."
+    }
+  ]
+}

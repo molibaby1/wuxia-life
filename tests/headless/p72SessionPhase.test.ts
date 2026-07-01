@@ -9,7 +9,7 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function snapshotAtAge(age: number): GameStateSnapshot {
+function snapshotAtAge(age: number, overrides?: Partial<{ charisma: number }>): GameStateSnapshot {
   const bootstrap = HeadlessEngineSessionImpl.create({
     playerName: '测试',
     gender: 'male',
@@ -19,23 +19,27 @@ function snapshotAtAge(age: number): GameStateSnapshot {
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
   snap.state.player.alive = true;
+  if (overrides?.charisma !== undefined) {
+    snap.state.player.charisma = overrides.charisma;
+  }
   return snap;
 }
 
-async function hydrateAtAge(age: number, randomSeed = 42) {
+async function hydrateAtAge(age: number, randomSeed = 42, snapshotOverrides?: Partial<{ charisma: number }>) {
   const session = HeadlessEngineSessionImpl.create({
     playerName: '规划侠客',
     gender: 'male',
     randomSeed,
     catalogVersion: '1.0.0',
   });
-  await session.hydrate(snapshotAtAge(age));
+  await session.hydrate(snapshotAtAge(age, snapshotOverrides));
   return session;
 }
 
 export async function runP72SessionPhaseTests(): Promise<void> {
   const planningSession = await hydrateAtAge(16, 77);
-  assert(planningSession.getSessionPhase() === 'active_planning', 'alive with no event → active_planning');
+  // love_first_meet is CRITICAL priority and available at age 16, so session is story_event
+  assert(planningSession.getSessionPhase() === 'story_event', 'forced event available → story_event');
 
   const next = await planningSession.getNextEvent();
   if (next) {
@@ -55,7 +59,8 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     assert(option.riskLevel.length > 0, 'risk populated');
   }
 
-  const actionSession = await hydrateAtAge(16, 12345);
+  // Use charisma = 4 to disable love_first_meet (which requires charisma >= 5)
+  const actionSession = await hydrateAtAge(16, 12345, { charisma: 4 });
   const beforeStats = { ...actionSession.getRuntimeState().player };
   await actionSession.executeActiveAction('action_training_basic');
   assert(actionSession.getSessionPhase() === 'action_summary', 'after action → action_summary');
@@ -72,7 +77,8 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     'stat delta applied',
   );
 
-  const loopSession = await hydrateAtAge(16, 88);
+  // Use charisma = 4 to disable love_first_meet
+  const loopSession = await hydrateAtAge(16, 88, { charisma: 4 });
   await loopSession.executeActiveAction('action_socializing_basic');
   await loopSession.acknowledgeProgression('action_summary');
   if (loopSession.getProgressionVolatileState().pendingDisturbanceNarrative) {
@@ -98,7 +104,7 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     assert(error.code === 'INVALID_SESSION_PHASE', 'phase guard');
   }
 
-  const invalidSession = await hydrateAtAge(16);
+  const invalidSession = await hydrateAtAge(16, 42, { charisma: 4 });
   try {
     await invalidSession.executeActiveAction('not_a_real_action');
     throw new Error('expected INVALID_ACTION');

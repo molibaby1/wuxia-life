@@ -1,0 +1,102 @@
+{
+  "project": "Wuxia Life P29 Medical Habit Pool Expansion And Social Consequence Wiring",
+  "branchName": "codex/p29-wuxia-medical-habit-pool-expansion-and-social-consequence-wiring",
+  "description": "Third-round habit pool migration: medical habit samples, socialMomentum P17 consequence, P25 slice extension, and regression.",
+  "userStories": [
+    {
+      "id": "P29-001",
+      "title": "P29 medical pool expansion audit delta",
+      "description": "As a maintainer, I want an audit of medical pool habit readiness so P29 wiring targets the highest-value nodes.",
+      "acceptanceCriteria": [
+        "Inventory medical pool events: stat/talent gate vs lifeStates readers",
+        "Classify gaps and map to P29 story order with achievement traceability hooks",
+        "Save the audit under docs/test-reports or docs/designs",
+        "Do not modify gameplay behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Docs-only foundation story."
+    },
+    {
+      "id": "P29-002",
+      "title": "Add medical pool habit-driven samples",
+      "description": "As a player, I want medical content to recognize study or social shaping so healer paths emerge from behavior.",
+      "acceptanceCriteria": [
+        "Add at least 2 content samples in medical.json or documented crossover pool reading lifeStates.studyHabit and/or socialMomentum at threshold",
+        "Samples change opportunity, reinforcement, or obligation materially",
+        "Remain age-appropriate with no high martial stat gate on new samples",
+        "Targeted test proves habit-led access for each sample"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Medical pool content only."
+    },
+    {
+      "id": "P29-003",
+      "title": "Add social momentum P17 consequence sample",
+      "description": "As a player, I want a mid or late-life consequence acknowledging long-term social momentum and renown upkeep pressure.",
+      "acceptanceCriteria": [
+        "Add one P17-style consequence keyed by socialMomentum >= threshold",
+        "Outcome changes obligation, burden, or opportunity—not flavor only",
+        "Distinct from P27 renown upkeep, P28 familyBond caretaker, and P26 business consequences",
+        "Targeted test proves axis-sensitive trigger"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Single socialMomentum consequence; addresses P28 deferral."
+    },
+    {
+      "id": "P29-004",
+      "title": "Extend P25 habit trajectory slice for P29",
+      "description": "As a maintainer, I want P25 trajectory reporting to include P29 medical and social consequence events.",
+      "acceptanceCriteria": [
+        "Extend src/p25/habitTrajectorySlice.ts event lists for P29 samples",
+        "Output remains machine-readable in existing P25 reporting flow",
+        "Relevant P25 tests pass"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Depends on P29-002 and P29-003."
+    },
+    {
+      "id": "P29-005",
+      "title": "Extend medical and social regression tests",
+      "description": "As a maintainer, I want isolated regression coverage for P29 medical and social consequence wiring.",
+      "acceptanceCriteria": [
+        "Extend tests/personalityHabitTrajectoryTests.ts or sibling isolated file for P29 paths",
+        "Cover medical samples and socialMomentum P17 consequence",
+        "Test file runs independently and exits cleanly"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Depends on P29-002 through P29-003."
+    },
+    {
+      "id": "P29-006",
+      "title": "Optional P20 slice sync for P29 events",
+      "description": "As a maintainer, I want P20 habit trajectory slice aligned with P29 event IDs where replay reporting references them.",
+      "acceptanceCriteria": [
+        "Update src/p20/habitTrajectorySlice.ts if P29 events appear in replay surfaces",
+        "No regression to P28 semi-personality mirror semantics",
+        "Relevant P20 tests pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Validation-only; skip if no replay surface linkage."
+    },
+    {
+      "id": "P29-007",
+      "title": "Write P29 closure and remaining queue",
+      "description": "As a maintainer, I want a closure note listing what P29 proved and what remains for full medical migration and P25 section 8.",
+      "acceptanceCriteria": [
+        "Summarize new samples, verification commands, and slice extensions",
+        "List remaining medical pool habit gaps and deferred P24 fixtures",
+        "Cross-reference North Star section 8 items still OPEN after P29",
+        "Save under docs/test-reports"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Docs-only closure story."
+    }
+  ]
+}

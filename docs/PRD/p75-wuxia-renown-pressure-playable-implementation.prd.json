@@ -1,0 +1,116 @@
+{
+  "project": "Wuxia Life P75 Renown Pressure Playable Implementation",
+  "branchName": "codex/p75-wuxia-renown-pressure-playable-implementation",
+  "description": "Implement the renown pressure stage (人情债渐重) for jianghu_renown_sage tavern_hand seed — runtime event wiring, expression updates, targeted proof, and regression tests. Strictly follows P74 pressure contract.",
+  "userStories": [
+    {
+      "id": "P75-001",
+      "title": "Wire renown pressure spine event",
+      "description": "As a developer, I want the renown pressure event wired through the existing event system so players on the renown route encounter a real pressure milestone.",
+      "acceptanceCriteria": [
+        "Configure renown_midlife_pressure auto event in sample-lines-spine.json",
+        "Trigger conditions: renown_on_ramp_done + age 37-41 + exclusivity guard",
+        "Set renown_midlife_pressure_done checkpoint flag + tavern_renown_pressure marker",
+        "Stat changes: reputation +3, connections +2, charisma +1",
+        "No new event framework or scheduler",
+        "P71/P72/P73 existing evidence does not regress"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Event added at sample-lines-spine.json; auto type; tavern-born flavor (人情债 in 酒肆); P73 tests pass"
+    },
+    {
+      "id": "P75-002",
+      "title": "Add pressure player-facing expression (core P0)",
+      "description": "As a player, I want the renown pressure to read as a meaningful turning point so the route feels like it has a cost, not just benefit.",
+      "acceptanceCriteria": [
+        "Sample line cost label: 江湖声名之累 → 人情债渐重",
+        "Sample line current goal: on-ramp state → pressure state",
+        "Ordinary origin current goal: on-ramp state → pressure state",
+        "At least 2 pressure-specific readable signals (cost label + current goal)",
+        "Preserve tavern-born renown flavor",
+        "No new UI components"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "3 P0 expression updates: costLabel (sampleLine) + currentGoal (sampleLine + ordinaryOrigin); tavern-born flavor preserved"
+    },
+    {
+      "id": "P75-003",
+      "title": "Add pressure player-facing expression (bonus P1)",
+      "description": "As a player, I want additional pressure-specific expressions so the pressure stage feels richer and more memorable.",
+      "acceptanceCriteria": [
+        "Ordinary origin life memory: pressure-specific text",
+        "Ordinary origin summary: pressure state update",
+        "Preserve tavern-born renown flavor",
+        "No new UI components"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "2 P1 expression updates: lifeMemory + summary in ordinaryOriginExpression.ts; tavern-born flavor preserved"
+    },
+    {
+      "id": "P75-004",
+      "title": "Reserve payoff flag interfaces",
+      "description": "As a maintainer, I want payoff flag interfaces reserved in code so the next stage can build on them without renaming.",
+      "acceptanceCriteria": [
+        "renown_payoff_done flag placeholder visible in code (comment or TODO)",
+        "renown_age40_identity_done flag placeholder visible",
+        "No payoff logic implemented in this stage",
+        "Placeholders clearly annotated 'for P76+ payoff stage"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "TODO comments added in renownCurrentGoal + renownAge40Identity; no payoff logic implemented"
+    },
+    {
+      "id": "P75-005",
+      "title": "Add targeted pressure proof",
+      "description": "As a maintainer, I want a bounded proof artifact showing that the renown pressure event fires correctly and carries tavern-born renown flavor.",
+      "acceptanceCriteria": [
+        "Produce 1 targeted proof (on-ramp → pressure path verification)",
+        "Show 5 core nodes: pre-pressure state → event fires → checkpoint set → cost label update → current goal update",
+        "Optional bonus nodes: life memory, summary, full chain traceback",
+        "No full lifetime exhaust required",
+        "Proof supports whether to continue payoff stage decision",
+        "Save as docs/test-reports/p75-renown-pressure-targeted-proof.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "5 core nodes + 2 bonus nodes verified; payoff stage GO recommendation included"
+    },
+    {
+      "id": "P75-006",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the renown pressure stage so future edits do not break the first renown pressure milestone.",
+      "acceptanceCriteria": [
+        "New test file covering pressure stage",
+        "Group 1: Event wiring (5 tests) — existence, conditions, age range, auto type, flag setting",
+        "Group 2: Pre-pressure state (2 tests) — state verification after on-ramp before pressure",
+        "Group 3: Post-pressure expression updates (5 tests: 3 P0 + 2 P1)",
+        "Group 4: Distinct from merchant pressure (2 tests)",
+        "Group 5: No regression of P71/P72/P73 (4 tests)",
+        "Reuse existing test harness",
+        "All relevant commands pass"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "18 tests across 5 groups in p75TavernHandRenownPressureSpineTests.ts; all pass; P71/P72/P73 no regression"
+    },
+    {
+      "id": "P75-007",
+      "title": "Produce P75 closure report",
+      "description": "As a maintainer, I want a closure report stating exactly what the renown pressure stage now provides and whether payoff stage is justified next.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p75-renown-pressure-closure-report.md",
+        "Summarize event wiring, expression, proof, tests",
+        "State whether subsequent payoff stage is worth opening",
+        "List larger renown-expansion items that remain deferred",
+        "All 9 closure criteria satisfied"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Closure report complete; 9/9 criteria satisfied; GO recommendation for P76 payoff stage"
+    }
+  ]
+}

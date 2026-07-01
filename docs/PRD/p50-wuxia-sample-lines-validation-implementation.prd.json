@@ -1,0 +1,105 @@
+{
+  "project": "Wuxia Life P50 Sample Lines Validation Implementation",
+  "branchName": "codex/p50-wuxia-sample-lines-validation-implementation",
+  "description": "Implement P47 config backbone, P48 player-facing expression, and P49 replay/playtest harness to close the three 0-40 minimum playable life sample lines with simulation and human evidence.",
+  "userStories": [
+    {
+      "id": "P50-001",
+      "title": "Implement minimum P47 config backbone for three sample lines",
+      "description": "As an implementer, I want the minimum P47 spine nodes and flags wired in JSON so benchmark seeds replay without spine breaks.",
+      "acceptanceCriteria": [
+        "Task O/D/M minimum nodes present per P47 PRD sections 13-15",
+        "Benchmark seeds 301/303/804 reach age 40 without critical spine gaps",
+        "route_merchant or documented interim merchant signals for seed 804",
+        "Age-40 summary hooks configured or documented interim fallback per P49 section 18.4"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Upstream config backbone; blocks replay pass."
+    },
+    {
+      "id": "P50-002",
+      "title": "Implement P48 orthodox and demonic player-facing expression",
+      "description": "As a player, I want orthodox and demonic sample lines to show readable current goals, costs, and age-40 identity.",
+      "acceptanceCriteria": [
+        "O-E1/O-E2/O-E3 implemented in existing summary or life-memory surfaces",
+        "D-E1/D-E2/D-E3 implemented in existing surfaces",
+        "No raw eventId or flag keys in player-visible checkpoint output for orthodox/demonic",
+        "Surface changes covered by at least one focused test or gate slice"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "P48 O/D expression tasks."
+    },
+    {
+      "id": "P50-003",
+      "title": "Implement P48 merchant player-facing expression",
+      "description": "As a player, I want the merchant line to show readable business goals, debt costs, and age-40 identity.",
+      "acceptanceCriteria": [
+        "M-E1/M-E2/M-E3 implemented in existing surfaces",
+        "Merchant key choices wired into life-memory key-choice surface",
+        "route_merchant in long-term impact whitelist if flag writes exist",
+        "Merchant checkpoint output distinguishable from orthodox/demonic at age 25+"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "P48 M expression tasks; merchant was weakest in P48 audit."
+    },
+    {
+      "id": "P50-004",
+      "title": "Build P49 fixed-seed replay matrix and checkpoint export",
+      "description": "As a maintainer, I want encoded benchmark parameters and deterministic checkpoint export for repeatable validation.",
+      "acceptanceCriteria": [
+        "P49_SAMPLE_LINE_MATRIX with seeds 301/303/804 and checkpoint ages 13/18/25/32/40",
+        "0-40 simulation export includes eventId summary, route flags, life-memory entry per checkpoint",
+        "Two consecutive runs on same seed produce identical checkpoint JSON",
+        "Unit test asserts matrix length equals 3 and seed values match P49 PRD"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "P49 RH-1/RH-2."
+    },
+    {
+      "id": "P50-005",
+      "title": "Generate cross-line replay latest reports",
+      "description": "As a maintainer, I want cross-line delta reports so five comparison dimensions are judged at checkpoints.",
+      "acceptanceCriteria": [
+        "docs/test-reports/p49-sample-lines-replay-latest.json generated",
+        "docs/test-reports/p49-sample-lines-replay-latest.md human-readable per line and checkpoint",
+        "docs/test-reports/p49-sample-lines-cross-line-comparison-latest.md with distinct/partial/collapsed",
+        "scripts/runP49SampleLineReplay.ts and npm run p49:replay regenerate reports"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "P49 RH-3/RH-4 and HR-1/HR-2."
+    },
+    {
+      "id": "P50-006",
+      "title": "Execute human playtest round and archive results",
+      "description": "As a maintainer, I want at least one completed playtest round archived for human evidence.",
+      "acceptanceCriteria": [
+        "At least one tester completes checklist for all three lines using seeds 301/303/804",
+        "Results saved as docs/test-reports/p49-sample-lines-playtest-round-1.md",
+        "P46 section 10.2 five items recorded with pass/warning/fail per line",
+        "Cross-line retell section shows lines distinguishable within 30 seconds"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "P49 HR-3 execution; requires runnable build."
+    },
+    {
+      "id": "P50-007",
+      "title": "Produce P49 closure report and P46 overall verdict",
+      "description": "As a maintainer, I want a closure page combining simulation and human evidence for baseline readiness.",
+      "acceptanceCriteria": [
+        "docs/test-reports/p49-sample-lines-closure-report.md references replay latest and playtest round",
+        "Verdict Pass/Warning/Fail per P49 validation contract section 3",
+        "Blocking failures explicitly listed if any",
+        "P46 section 11.3 overall closure status stated with residual warnings if applicable"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "P49 HR-4; final P46 sample-line closure gate."
+    }
+  ]
+}

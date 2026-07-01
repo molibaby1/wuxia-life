@@ -7,7 +7,7 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function baseSnapshot(age: number): GameStateSnapshot {
+function baseSnapshot(age: number, charisma?: number): GameStateSnapshot {
   const bootstrap = HeadlessEngineSessionImpl.create({
     playerName: 'parity',
     gender: 'male',
@@ -16,6 +16,9 @@ function baseSnapshot(age: number): GameStateSnapshot {
   });
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
+  if (charisma !== undefined) {
+    snap.state.player.charisma = charisma;
+  }
   return snap;
 }
 
@@ -24,7 +27,8 @@ export async function runP72ActivePlanningParityTests(): Promise<void> {
 
   for (const actionId of actionIds) {
     const seed = 1000 + actionId.length;
-    const snap = baseSnapshot(16);
+    // Use charisma = 4 to disable love_first_meet (requires charisma >= 5)
+    const snap = baseSnapshot(16, 4);
     const rng = new SeededRandomSource(seed);
     const random = () => rng.next();
 

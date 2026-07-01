@@ -5,56 +5,29 @@
 import { EndingSystem } from '../src/core/EndingSystem';
 import { SETBACK_EVENTS } from '../src/data/setbackEvents';
 import goldenLineSpine from '../src/data/golden-line-spine.json';
-import type { GameProcessReport, GameProcessRecord } from '../tests/GameProcessSimulator';
+import type { GameProcessReport, GameProcessRecord } from '../src/types/simulationRecordTypes';
 import type { GameState } from '../src/types/eventTypes';
 
-export type DeathCauseCategory =
-  | 'engine_setback'
-  | 'event_choice'
-  | 'event_auto'
-  | 'forced_ending';
-
-export type DeathLifePhase = 'early' | 'young_adult' | 'midlife' | 'late_life';
-
-export type WarningLevel = 'none' | 'L0' | 'L1' | 'L2' | 'L3';
-
-export type SimulationCohort = 'p3_eval' | 'p2_legacy' | 'other';
-
-export type RecentKeyChoice = {
-  eventId: string;
-  choiceId?: string;
-  age: number;
-};
-
-export type RouteStateSnapshot = Record<
-  string,
-  { lifecycle: string; lockedIn: boolean }
->;
-
-export type DeathRiskTelemetry = {
-  deathCauseId: string;
-  deathCauseCategory: DeathCauseCategory;
-  deathAge: number;
-  deathLifePhase: DeathLifePhase;
-  deathEventId: string;
-  routeStateAtDeath: RouteStateSnapshot;
-  recentKeyChoices: RecentKeyChoice[];
-  warningLevelMax: WarningLevel;
-  warningSatisfied: boolean;
-  mitigationAvailable: boolean;
-  mitigationTaken: boolean;
-  deathWithoutWarning: boolean;
-  healthAtDeath: number | null;
-  constitutionAtDeath: number | null;
-  cohort: SimulationCohort;
-};
-
-export type DeathCauseCount = {
-  deathCauseId: string;
-  deathCauseCategory: DeathCauseCategory;
-  count: number;
-  deathWithoutWarningCount: number;
-};
+export type {
+  DeathCauseCategory,
+  DeathLifePhase,
+  WarningLevel,
+  SimulationCohort,
+  RecentKeyChoice,
+  RouteStateSnapshot,
+  DeathRiskTelemetry,
+  DeathCauseCount,
+} from '../src/types/deathRiskTelemetryTypes';
+import type {
+  DeathCauseCategory,
+  DeathCauseCount,
+  DeathLifePhase,
+  DeathRiskTelemetry,
+  RecentKeyChoice,
+  RouteStateSnapshot,
+  SimulationCohort,
+  WarningLevel,
+} from '../src/types/deathRiskTelemetryTypes';
 
 export type DeathCauseSummary = {
   totalDeaths: number;

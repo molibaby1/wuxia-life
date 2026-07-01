@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 15}
     ],
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown') && (chivalry <= 20 || flags.wandering == true)"}
+      {"type": "expression", "expression": "!flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown') && !flags.has('p8_route_martial') && !flags.has('p8_route_conservative') && (chivalry <= 20 || flags.wandering == true)"}
     ],
     "content": {
       "title": "另一条路",

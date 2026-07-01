@@ -36,6 +36,144 @@
     ]
   },
   {
+    "id": "p27_study_habit_healer_reinforcement",
+    "version": "1.0.0",
+    "category": "medical",
+    "priority": 88,
+    "weight": 75,
+    "ageRange": {"min": 18, "max": 28},
+    "triggers": [
+      {"type": "age_reach", "value": 18}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.studyHabit >= 2"}
+    ],
+    "content": {
+      "title": "医理相通",
+      "text": "多年读书养成的静气与辨识力，让你在翻阅医典时触类旁通。乡邻开始请你辨识草药、记录脉案——并非武勇之路，却是另一条济世之途。",
+      "description": "P27 医术池：治学习惯驱动的医者路径 reinforcement"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "顺势钻研医理",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 4},
+          {"type": "flag_set", "flag": "p27_study_healer_path", "value": true},
+          {"type": "flag_set", "flag": "medical_pure", "value": true},
+          {"type": "flag_set", "flag": "medical_talent", "value": true}
+        ]
+      },
+      {
+        "text": "仍专注文史",
+        "effects": [
+          {"type": "stat_modify", "stat": "knowledge", "value": 3},
+          {"type": "flag_set", "flag": "p27_study_healer_path_declined", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p27", "medical", "habit_trajectory", "non_combat"],
+      "authoringSemantics": {
+        "authoringNotes": "P27 studyHabit-led healer emergence; no high martial stat gate."
+      }
+    }
+  },
+  {
+    "id": "p29_study_habit_case_record_duty",
+    "version": "1.0.0",
+    "category": "medical",
+    "priority": 86,
+    "weight": 72,
+    "ageRange": {"min": 26, "max": 34},
+    "triggers": [
+      {"type": "age_reach", "value": 26}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.studyHabit >= 3"},
+      {"type": "expression", "expression": "flags.p27_study_healer_path == true"}
+    ],
+    "content": {
+      "title": "脉案汇辑",
+      "text": "多年读书养成的辨识与记录习惯，被县中医官看中。请你汇辑近年脉案与方论，供府库存档——若应下，往后数季都要在案牍与诊脉之间分神；若推辞，亦少一条以文济世的声名。",
+      "description": "P29 医术池：治学习惯深化的脉案汇辑义务"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "接下汇辑之责",
+        "effects": [
+          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
+          {"type": "flag_set", "flag": "p29_study_healer_case_duty", "value": true},
+          {"type": "flag_set", "flag": "medical_divine_doctor_fame", "value": true},
+          {"type": "flag_set", "flag": "medical_talent", "value": true}
+        ]
+      },
+      {
+        "text": "推辞，专心行诊",
+        "effects": [
+          {"type": "stat_modify", "stat": "chivalry", "value": 3},
+          {"type": "flag_set", "flag": "p29_study_healer_case_declined", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p29", "medical", "habit_trajectory", "non_combat"],
+      "authoringSemantics": {
+        "authoringNotes": "P29 studyHabit deepening obligation; no high martial stat gate."
+      }
+    }
+  },
+  {
+    "id": "p29_social_momentum_healer_network",
+    "version": "1.0.0",
+    "category": "medical",
+    "priority": 84,
+    "weight": 70,
+    "ageRange": {"min": 24, "max": 32},
+    "triggers": [
+      {"type": "age_reach", "value": 24}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+    ],
+    "content": {
+      "title": "口碑相传",
+      "text": "你在江湖与市井间积攒的人望，让病患不必经武馆或镖局引荐，便寻上门来。有人请你驻点施诊，亦有人愿为医馆作保——这是名望带来的机缘，也意味着此后难以闭门清修。",
+      "description": "P29 医术池：socialMomentum 驱动的医者人脉机缘"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "text": "开设驻点，广接病患",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 6},
+          {"type": "flag_set", "flag": "p29_social_healer_network", "value": true},
+          {"type": "flag_set", "flag": "medical_talent", "value": true}
+        ]
+      },
+      {
+        "text": "择日接诊，控制规模",
+        "effects": [
+          {"type": "stat_modify", "stat": "reputation", "value": 4},
+          {"type": "flag_set", "flag": "p29_social_healer_network_limited", "value": true}
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p29", "medical", "semi_personality", "non_combat"],
+      "authoringSemantics": {
+        "authoringNotes": "P29 socialMomentum medical crossover; material opportunity not flavor-only."
+      }
+    }
+  },
+  {
     "id": "medical_master_apprentice",
     "version": "1.0",
     "category": "medical",
@@ -248,7 +386,8 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 40},
       {"type": "stat_modify", "stat": "charisma", "value": 12},
-      {"type": "stat_modify", "stat": "chivalry", "value": 10}
+      {"type": "stat_modify", "stat": "chivalry", "value": 10},
+      {"type": "flag_set", "flag": "medical_divine_doctor_fame", "value": true}
     ]
   },
   {

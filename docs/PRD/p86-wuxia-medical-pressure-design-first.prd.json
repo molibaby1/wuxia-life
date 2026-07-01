@@ -1,0 +1,101 @@
+{
+  "project": "Wuxia Life P86 Medical Pressure Design-First",
+  "branchName": "codex/p86-wuxia-medical-pressure-design-first",
+  "description": "Design-first contract for medical_sage_healer pressure stage covering both compassionate and pragmatic variants, with tavern-born healer flavor preserved, handing off a bounded implementation target to P87.",
+  "userStories": [
+    {
+      "id": "P86-001",
+      "title": "Audit medical pressure prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the medical pressure stage so P86 starts from the real gating surfaces and not from assumptions.",
+      "acceptanceCriteria": [
+        "Summarize existing medical route flags, markers, events, and expressions (bridge + entry + on-ramp)",
+        "Identify what exists before pressure and what can be reused",
+        "Analyze pressure prerequisite differences between compassionate and pragmatic variants",
+        "Save docs/test-reports/p86-medical-pressure-prerequisite-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Foundational audit — must complete before design begins. Includes 2-variant-specific gap analysis."
+    },
+    {
+      "id": "P86-002",
+      "title": "Lock P86 scope contract",
+      "description": "As a planner, I want a scope contract so P86 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P86 to gap audit, direction comparison, pressure contract, and proof shape only",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, new framework, bulk content wave, payoff design",
+        "Define boundary with P87 (pressure implementation stage)",
+        "Save docs/test-reports/p86-medical-pressure-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope guardrails for the design-first pressure stage — follows P74 renown pattern with 2-variant focus."
+    },
+    {
+      "id": "P86-003",
+      "title": "Compare medical pressure directions (per variant)",
+      "description": "As a designer, I want bounded pressure-direction options for each medical variant so P86 chooses the smallest viable pressure shape before implementation.",
+      "acceptanceCriteria": [
+        "Compassionate variant: compare at least 2 pressure direction candidates (e.g. burnout / herb shortage / exploited kindness)",
+        "Pragmatic variant: compare at least 2 pressure direction candidates (e.g. favors debt / faction siding / fame-vs-profit conflict)",
+        "Each candidate includes: core narrative, trigger conditions, player choice space, tavern-born fit",
+        "Clear recommended direction plus dropped directions for each variant",
+        "Recommendation follows quality-first and small-step principles",
+        "Save comparison document"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Direction selection — 2 variants each with 2+ candidates, choose smallest viable pressure shape per variant."
+    },
+    {
+      "id": "P86-004",
+      "title": "Define medical pressure contract",
+      "description": "As a designer, I want an explicit pressure contract (2 variants) so P87 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define pressure checkpoint, required flags, and corresponding gate acceptance",
+        "Define 1 core pressure event per variant (or 1 tightly coupled small event set each)",
+        "Define at least 2 pressure-specific player-facing signals per variant",
+        "Clarify difference between pressure vs on-ramp and vs generic midlife",
+        "Preserve tavern-born healer flavor (tavern small-clinic background)",
+        "Reserve flag interfaces for subsequent payoff stage",
+        "Continue compassionate / pragmatic differentiation",
+        "Record the contract in docs/PRD/p86-medical-pressure-contract.md"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Pressure contract — 2 variants × tavern-born flavor × payoff flag reservation."
+    },
+    {
+      "id": "P86-005",
+      "title": "Define P87 validation shape",
+      "description": "As a maintainer, I want the P87 validation shape fixed in advance so playable pressure work is judged against explicit proof and regression expectations.",
+      "acceptanceCriteria": [
+        "Define what chain nodes targeted proof must show (on-ramp → pressure → expression changes, both variants)",
+        "Define what assertions regression tests must at least cover",
+        "Define what evidence counts as pressure closed",
+        "Do not require full lifetime exhaust",
+        "Define non-regression boundaries for P83/P84/P85 existing evidence"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Pre-commit validation shape for P87 implementation — 2-variant focus."
+    },
+    {
+      "id": "P86-006",
+      "title": "Produce P86 closure report",
+      "description": "As a maintainer, I want a closure report that locks the medical pressure design-first contract and hands off a bounded implementation target to P87.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p86-medical-pressure-closure-report.md",
+        "Summarize prerequisite audit, scope contract, pressure-direction comparison, pressure contract, validation shape",
+        "Define clear boundary with P87",
+        "List larger medical-expansion items that remain deferred",
+        "State whether pressure stage is worth entering implementation (GO / NO-GO)"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Closure and GO/NO-GO for P87 pressure implementation stage."
+    }
+  ]
+}

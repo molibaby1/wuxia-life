@@ -34,6 +34,20 @@
         </p>
       </div>
 
+      <!-- 长期塑形 -->
+      <div v-if="visibleHabitTrajectory.length > 0" class="memory-section">
+        <p class="memory-section-title">长期塑形</p>
+        <ul class="memory-list memory-list-inline">
+          <li
+            v-for="line in visibleHabitTrajectory"
+            :key="line.id"
+            class="memory-chip"
+          >
+            {{ line.label }} · {{ line.tierLabel }}
+          </li>
+        </ul>
+      </div>
+
       <!-- 风险信号 -->
       <div v-if="visibleRisks.length > 0" class="memory-section">
         <p class="memory-section-title">风险信号</p>
@@ -171,6 +185,7 @@ function filterPlayer<T extends { visibility: LifeMemoryVisibility }>(entries?: 
 }
 
 const visibleRisks = computed(() => filterPlayer(props.summary.risks));
+const visibleHabitTrajectory = computed(() => filterPlayer(props.summary.habitTrajectory));
 const visibleDebts = computed(() => filterPlayer(props.summary.unresolvedDebts));
 const visibleKeyChoices = computed(() => filterPlayer(props.summary.keyChoices));
 const visibleRelationships = computed(() => filterPlayer(props.summary.relationships));

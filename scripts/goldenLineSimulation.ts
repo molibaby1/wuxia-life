@@ -1,4 +1,5 @@
-import { GameProcessSimulator, type GameProcessReport } from '../tests/GameProcessSimulator';
+import { GameProcessSimulator } from '../tests/GameProcessSimulator';
+import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import { GOLDEN_ROMANCE_FAMILY_SAMPLE_ID } from './romanceFamilyArcTelemetry';
 
 /** P3-EVAL / golden-line deterministic end age (US-002 §5.1, US-017). */

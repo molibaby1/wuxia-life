@@ -1,0 +1,125 @@
+{
+  "project": "Wuxia Life P80 Renown Endgame Design-First Contract",
+  "branchName": "codex/p80-wuxia-renown-endgame-design-first",
+  "description": "Design-first contract for jianghu_renown_sage endgame / final legacy stage (60+). Define endgame direction, 3 branches (per late-life), contract, validation shape, and GO/NO-GO assessment. Must be LIGHTWEIGHT: 1 echo event + expression updates only if GO.",
+  "userStories": [
+    {
+      "id": "P80-001",
+      "title": "Audit renown endgame prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the renown endgame stage so P80 starts from the real gating surfaces and not from assumptions.",
+      "acceptanceCriteria": [
+        "Inventory all renown route flags, markers, events, expressions (bridge + entry + on-ramp + pressure + payoff + late-life)",
+        "Document 3 late-life branch state differences (stats + flags + identity)",
+        "Identify what exists before endgame and what can be reused",
+        "Assess reuse potential of existing P19 endgame echo system",
+        "Output docs/test-reports/p80-renown-endgame-prerequisite-audit.md",
+        "No runtime behavior changes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Complete: 16 flags, 7 events, 7 expression surfaces inventoried; 3 late-life branches documented; P19 reuse assessed; 0 runtime changes"
+    },
+    {
+      "id": "P80-002",
+      "title": "Lock P80 scope contract",
+      "description": "As a planner, I want a scope contract so P80 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Define P80 scope: gap audit, direction design, endgame contract, proof shape",
+        "Define allowed layers: docs, contract, targeted proof planning",
+        "Define forbidden items: runtime wiring, new framework, bulk content wave, second route, multi-event arc",
+        "Define lightweight constraint: max 1 echo event + expression updates",
+        "Output docs/test-reports/p80-renown-endgame-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Complete: 7 allowed layers, 13 forbidden items, lightweight constraint (1 echo + expression only), 4 scope guardrails, GO/NO-GO criteria, rollback strategy, P80/P81 boundary"
+    },
+    {
+      "id": "P80-003",
+      "title": "Design endgame direction (GO / NO-GO assessment)",
+      "description": "As a designer, I want a clear assessment of whether renown endgame is worth doing, and if so, what direction it takes.",
+      "acceptanceCriteria": [
+        "Assess whether endgame is needed after late-life: does late-life already provide sufficient closure?",
+        "If GO: define endgame core positioning — life review echo? legacy finalization? natural death culmination?",
+        "If NO-GO: define stopping point (late-life as renown route end) and rationale",
+        "Determine whether 3 late-life branches need distinct endgames or unified echo",
+        "Define essential difference between endgame and late-life (not 'more content' but 'final culmination feel')",
+        "Document conclusion in design document"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "CONDITIONAL_GO: Legacy Echo (身后名之声) — 江湖如何记住你. 3 distinct variants (one per late-life branch). Perspective shift: first-person life → third-person memory. Clear distinction from late-life and P19. 0 runtime changes."
+    },
+    {
+      "id": "P80-004",
+      "title": "Design three endgame branches (if GO)",
+      "description": "As a designer, I want three distinct endgame branches (one per late-life branch) so renown endgame leverages the 3-branch structure for meaningful differentiation — if endgame is worth doing.",
+      "acceptanceCriteria": [
+        "Design Branch A (Burnout / 油尽灯枯) endgame: core narrative + trigger + player experience",
+        "Design Branch B (Lone Wolf / 逍遥自在) endgame: core narrative + trigger + player experience",
+        "Design Branch C (Mentor / 传承授业) endgame: core narrative + trigger + player experience",
+        "Three branches have meaningfully different expressions, not reskinned",
+        "Each branch has tavern-born flavor adaptation",
+        "Define endgame as single echo event vs choice event (recommend single auto echo with 3 variants)",
+        "If NO-GO, mark as skipped with rationale",
+        "Document conclusion in design document"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Complete: 3 branches designed — 叹 (bittersweet legend) / 遥 (distant legend) / 传 (living legend). Single auto echo event with 3 variants. All meaningfully different. All tavern-born flavored. Lightweight compliant. 0 runtime changes."
+    },
+    {
+      "id": "P80-005",
+      "title": "Define renown endgame contract",
+      "description": "As a designer, I want an explicit endgame contract so P81 knows exactly what flags, gates, events, and player-facing meanings must be closed — if endgame is worth doing.",
+      "acceptanceCriteria": [
+        "Define endgame checkpoint, required flags, gate acceptance",
+        "Define endgame event structure (echo type, recommend auto with 3 variants)",
+        "Define stat changes (if any), identity marker, expression differences per branch",
+        "Define at least 2 endgame-specific player-facing signals",
+        "Clarify difference between endgame vs late-life vs generic P19 endgame echo",
+        "Preserve tavern-born flavor",
+        "Define age range (60-65? 65-70?)",
+        "If NO-GO, mark as skipped with rationale",
+        "Write contract to docs/PRD/p80-renown-endgame-contract.md"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Complete: Contract LOCKED — renown_endgame_echo auto event (age 60-65, 3 variants based on late-life branch, no stat changes, 6 expression surfaces, 3+ endgame signals, clear distinction from late-life and P19, tavern-born flavor, 5 reserved flags). 0 runtime changes."
+    },
+    {
+      "id": "P80-006",
+      "title": "Define P81 validation shape (if GO)",
+      "description": "As a maintainer, I want the P81 validation shape fixed in advance so playable endgame work is judged against explicit proof and regression expectations — if endgame is worth doing.",
+      "acceptanceCriteria": [
+        "Define targeted proof chain nodes (late-life → endgame → expression changes)",
+        "All 3 branches have core node verification",
+        "Define regression test minimum assertions",
+        "Define what evidence counts as endgame closed",
+        "No full lifetime exhaust required",
+        "Define no-regression boundary for P71/P72/P73/P75/P77/P79",
+        "If NO-GO, mark as skipped with rationale"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Complete: 7 core + 5 bonus proof nodes; ~22-27 regression tests across 7 groups; 9 closure criteria; no full lifetime exhaust; P71/P72/P73/P75/P77/P79 regression boundaries; implementation→validation mapping; lightweight compliance checks. 0 runtime changes."
+    },
+    {
+      "id": "P80-007",
+      "title": "Produce P80 closure report",
+      "description": "As a maintainer, I want a closure report that locks the renown endgame design-first contract and either hands off a bounded implementation target to P81 or explicitly stops the renown route at late-life.",
+      "acceptanceCriteria": [
+        "Output docs/test-reports/p80-renown-endgame-closure-report.md",
+        "Summarize prerequisite audit, scope contract, endgame direction assessment, branch design (if GO), contract (if GO), validation shape (if GO)",
+        "Clarify boundary with P81 (if GO) or define stopping point (if NO-GO)",
+        "List deferred larger renown-expansion items",
+        "State whether endgame stage is worth implementing (GO / NO-GO)",
+        "If GO: state explicit lightweight constraint",
+        "If NO-GO: explain why renown route culminates at late-life and why that's better"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Complete: Closure report saved. 7/7 stories passed. CONDITIONAL_GO for P81 endgame implementation. Endgame direction: Legacy Echo (身后名之声) — 江湖如何记住你. 3 variants (叹/遥/传). Lightweight: 1 echo event + 6 expression updates, no stat changes. 0 runtime changes."
+    }
+  ]
+}

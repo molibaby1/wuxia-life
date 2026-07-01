@@ -280,7 +280,8 @@
         "effects": [
           { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
           { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
-          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "ally_network", "value": true }
         ]
       },
       {

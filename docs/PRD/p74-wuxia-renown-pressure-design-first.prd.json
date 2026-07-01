@@ -1,0 +1,97 @@
+{
+  "project": "Wuxia Life P74 Renown Pressure Design-First",
+  "branchName": "codex/p74-wuxia-renown-pressure-design-first",
+  "description": "Design-first contract stage for jianghu_renown_sage pressure phase — define the pressure direction, contract, and validation shape before implementation, preserving tavern-born flavor.",
+  "userStories": [
+    {
+      "id": "P74-001",
+      "title": "Audit renown pressure prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the renown pressure stage so P74 starts from the real gating surfaces.",
+      "acceptanceCriteria": [
+        "Summarize existing renown route flags, markers, events, and expressions (bridge + entry + on-ramp)",
+        "Identify what exists before pressure vs what can be reused",
+        "Save docs/test-reports/p74-renown-pressure-prerequisite-audit.md",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Prerequisite audit complete — 3-stage foundation (bridge + entry + on-ramp) verified; 6+ expression surfaces identified; merchant pressure precedent documented; tavern-born flavor consistent."
+    },
+    {
+      "id": "P74-002",
+      "title": "Lock P74 scope contract",
+      "description": "As a planner, I want a scope contract so P74 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P74 to gap audit, direction comparison, pressure contract, and proof shape only",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, new framework, bulk content wave, payoff design",
+        "Save docs/test-reports/p74-renown-pressure-scope-contract.md"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Scope contract locked — 4 allowed layers (audit/compare/contract/shape), 12 forbidden expansions, 4 scope guardrails, NO-GO conditions defined."
+    },
+    {
+      "id": "P74-003",
+      "title": "Compare renown pressure directions",
+      "description": "As a designer, I want bounded pressure-direction options so P74 chooses the smallest viable pressure shape before implementation.",
+      "acceptanceCriteria": [
+        "Compare at least 2 pressure direction candidates (e.g. fame-burden, favor-debt, faction-conflict)",
+        "Each candidate includes: core narrative, trigger conditions, player choice space, tavern-born fit",
+        "Select recommended direction and document rejected alternatives",
+        "Recommendation follows quality-first and small-step principles",
+        "Save comparison document"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Pressure direction comparison complete — 3 candidates evaluated; selected: 人情债渐重 (Favor Debt Burden); rejected: 声名之累 (less unique), 江湖恩怨站队 (too generic/high scope); 5/5 flavor fit, 5/5 boundedness, low risk."
+    },
+    {
+      "id": "P74-004",
+      "title": "Define renown pressure contract",
+      "description": "As a designer, I want an explicit pressure contract so P75 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define pressure checkpoint, required flags, and corresponding gate acceptance",
+        "Define 1 core pressure event (or 1 tightly coupled event group)",
+        "Define at least 2 pressure-specific player-facing signals",
+        "Clarify difference between pressure vs on-ramp and vs generic midlife",
+        "Preserve tavern-born flavor throughout",
+        "Reserve flag interfaces for subsequent payoff stage",
+        "Save contract to docs/PRD/p74-renown-pressure-contract.md"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Pressure contract defined — 人情债渐重 direction; renown_midlife_pressure auto event (age 37-41); renown_midlife_pressure_done checkpoint; 2+ core signals (cost label + current goal); 5 expression surfaces; payoff flag interfaces reserved; tavern-born flavor verified."
+    },
+    {
+      "id": "P74-005",
+      "title": "Define P75 validation shape",
+      "description": "As a maintainer, I want the P75 validation shape fixed in advance so playable pressure work is judged against explicit expectations.",
+      "acceptanceCriteria": [
+        "Define which chain nodes targeted proof must show (on-ramp → pressure → expression changes)",
+        "Define which assertions regression tests must cover at minimum",
+        "Define what evidence counts as pressure closed",
+        "No full lifetime exhaust required",
+        "Define regression boundaries for P71/P72/P73 existing evidence"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "P75 validation shape defined — ~12 targeted proof chain nodes (5 core), ~14-17 regression assertions across 5 groups, 9 closure criteria, P71/P72/P73 regression boundaries, no full lifetime exhaust required."
+    },
+    {
+      "id": "P74-006",
+      "title": "Produce P74 closure report",
+      "description": "As a maintainer, I want a closure report that locks the renown pressure design-first contract and hands off to P75.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p74-renown-pressure-closure-report.md",
+        "Summarize prerequisite audit, scope contract, pressure-direction comparison, pressure contract, validation shape",
+        "Clarify boundary with P75",
+        "List remaining deferred larger renown-expansion items",
+        "State GO / NO-GO for pressure implementation stage"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Closure report complete — 6/6 stories passed; selected direction: 人情债渐重; scope compliance 100%; GO recommendation for P75 pressure implementation."
+    }
+  ]
+}

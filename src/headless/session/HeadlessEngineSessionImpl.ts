@@ -187,6 +187,10 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.pendingDisturbanceNarrative = null;
     this.volatile.pendingPeriodSummary = null;
     this.volatile.passiveNarrative = null;
+    const pendingId = snapshot.state.pendingStoryEventId;
+    if (pendingId) {
+      this.attachStoryEventById(pendingId);
+    }
   }
 
   getLastError(): HeadlessSessionError | null {
@@ -421,11 +425,16 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   }
 
   serialize(): GameStateSnapshot {
-    return this.dependencies.snapshot.toSnapshot(this.engine.getGameState(), {
+    const snapshot = this.dependencies.snapshot.toSnapshot(this.engine.getGameState(), {
       eventCatalogVersion: this.catalogVersion,
       sourcePlatform: 'node-headless',
       time: this.dependencies.time,
     });
+    const current = this.volatile.currentEvent;
+    if (current && !nextRequiresChoice(current)) {
+      snapshot.state.pendingStoryEventId = current.id;
+    }
+    return snapshot;
   }
 
   async restart(options: HeadlessSessionCreateOptions): Promise<void> {

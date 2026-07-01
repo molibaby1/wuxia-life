@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently \"npm run p6b:serve\" \"npm run dev\"",
     "test": "tsx tests/runRealTestGate.ts",
     "test:contracts": "tsx tests/contracts/runContractTests.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
@@ -94,6 +95,7 @@
     "@types/pg": "^8.20.0",
     "@vitejs/plugin-vue": "^6.0.2",
     "@vue/tsconfig": "^0.8.1",
+    "concurrently": "^10.0.3",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",

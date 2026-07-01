@@ -21,6 +21,15 @@ function inferStatus(_event: EventDefinition): EventCatalogStatus {
   return 'active';
 }
 
+function getSupportedVersions(): Set<string> {
+  const envVersion = process.env.EVENT_CATALOG_VERSION?.trim();
+  const versions = new Set([DEFAULT_CATALOG_VERSION]);
+  if (envVersion && envVersion !== DEFAULT_CATALOG_VERSION) {
+    versions.add(envVersion);
+  }
+  return versions;
+}
+
 function eventMinAge(event: EventDefinition): number {
   return event.ageRange?.min ?? 0;
 }
@@ -57,7 +66,7 @@ function toSummary(event: EventDefinition): EventCatalogEntrySummary {
 }
 
 export class InMemoryEventCatalogAdapter implements EventCatalogReadService {
-  private readonly supportedVersions = new Set([DEFAULT_CATALOG_VERSION]);
+  private readonly supportedVersions = getSupportedVersions();
 
   resolveVersion(catalogVersion?: string): string {
     const version = catalogVersion ?? DEFAULT_CATALOG_VERSION;

@@ -29,8 +29,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract: docs/test-reports/p116-founding-patriarch-late-life-scope-contract.md"
     },
     {
       "id": "P116-003",

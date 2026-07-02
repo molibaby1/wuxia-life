@@ -102,7 +102,7 @@
         "Relevant merchant-focused tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Evidence-first closeout. Guard P51 merchant 804 baseline alongside new chain."
     },
     {

@@ -626,6 +626,93 @@
     }
   },
   {
+    "id": "hvg_merchant_midlife_expansion_rhythm",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 26, "max": 30 },
+    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('route_merchant') && flags.has('hvg_merchant_operating_pressure_done') && !flags.has('hvg_merchant_expansion_rhythm_done') && (flags.has('hvg_merchant_ledger_track') || flags.has('hvg_merchant_caravan_track'))"
+      }
+    ],
+    "content": {
+      "title": "扩张节奏确认",
+      "text": "店已站稳，头一回认真考虑扩规模。账房式经营要稳扩守信誉，跑货式经营要赌市扩货吃波动——这一回的选择，会写进往后十年的商路。",
+      "description": "P96 中青年扩张节奏确认"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_expansion_steady",
+        "text": "稳扩门面、控债务，宁可慢一步也不砸招牌",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 10, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_expansion_steady" },
+          { "type": "flag_set", "target": "hvg_merchant_expansion_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_midlife_expansion_rhythm" }
+        ]
+      },
+      {
+        "id": "ledger_expansion_credit",
+        "text": "放宽赊欠换客源，用信誉铺路先扩规模",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 5, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_expansion_credit" },
+          { "type": "flag_set", "target": "hvg_merchant_expansion_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_midlife_expansion_rhythm" }
+        ]
+      },
+      {
+        "id": "caravan_expansion_market",
+        "text": "盯行市赌市扩货，趁涨势把货路铺出去",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 18, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_expansion_market" },
+          { "type": "flag_set", "target": "hvg_merchant_expansion_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_midlife_expansion_rhythm" }
+        ]
+      },
+      {
+        "id": "caravan_expansion_fast",
+        "text": "快周转压货走量，先把规模撑起来再说",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 12, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_expansion_fast" },
+          { "type": "flag_set", "target": "hvg_merchant_expansion_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_midlife_expansion_rhythm" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p96", "hvg", "merchant", "expansion", "midlife", "mainline", "once"]
+    }
+  },
+  {
     "id": "merchant_age40_identity_summary",
     "version": "1.0.0",
     "category": "main_story",

@@ -1,0 +1,124 @@
+{
+  "project": "Wuxia Life P96 Merchant 26-40 Midlife Expansion Identity",
+  "branchName": "codex/p96-wuxia-merchant-26-40-midlife-expansion-identity",
+  "description": "Reinforce the merchant_house 26-40 midlife chain with one mid-20s expansion rhythm confirmation, P95/P96 continuity into midlife debt and age 40 identity spine events, ledger vs caravan age 40 identity expression, and continuity into merchant_age45_expansion_fork. Strictly bounded to merchant midlife identity; no magnate on-ramp, no merchant_martial_patron bridge.",
+  "userStories": [
+    {
+      "id": "P96-001",
+      "title": "Audit the merchant 26-40 midlife gap as a discrete implementation stage",
+      "description": "As a maintainer, I want the merchant 26-40 midlife gap documented as its own bounded stage so implementation targets the missing identity chain instead of reopening the full route.",
+      "acceptanceCriteria": [
+        "Document current merchant anchors across age 25-45 (expansion events, midlife debt, age 40 identity, age 45 fork)",
+        "Explicitly identify the 26-40 gap between P95 operating pressure and age 40 identity",
+        "Note where P95 flags are not read in spine events or expression",
+        "Distinguish events exist from player feels continuous midlife identity",
+        "Save one bounded report under docs/test-reports/",
+        "Do not change runtime behavior in this story",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only anchor and gap inventory. Maps GAP-M96-01/02/03/04 to implementation scope."
+    },
+    {
+      "id": "P96-002",
+      "title": "Add one mid-20s expansion rhythm node in age 26-30",
+      "description": "As a player, I want my early operating choices to carry into a visible expansion rhythm confirmation in my late twenties so ledger and caravan merchants feel like they scale the business differently.",
+      "acceptanceCriteria": [
+        "Add exactly one merchant 26-30 expansion rhythm event or equivalent narrow node",
+        "Node requires P95 chain entry (hvg_merchant_operating_pressure_done or equivalent shop plus track flags)",
+        "Node reads at least one P95 track flag (hvg_merchant_ledger_track or hvg_merchant_caravan_track)",
+        "Ledger and caravan present different player-facing text or outcome emphasis",
+        "Node changes at least one downstream state beyond flavor-only text",
+        "Node remains merchant-only and does not introduce a new progression container",
+        "No regression to P95 16-25 operating chain eligibility",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "First missing link after P95 operating pressure. Ledger = steady expansion; caravan = market-driven scale-up."
+    },
+    {
+      "id": "P96-003",
+      "title": "Wire P95/P96 continuity into midlife spine events age 32-40",
+      "description": "As a maintainer, I want midlife debt and age 40 identity spine events to read operating and expansion chain flags so midlife identity is not generic for all merchants.",
+      "acceptanceCriteria": [
+        "merchant_midlife_debt_milestone and/or merchant_age40_identity_summary reads at least one P95 or P96 chain flag",
+        "At least one spine outcome, condition, or expression branch differs by ledger vs caravan track",
+        "merchant_age45_expansion_fork is not orphaned; at least one upstream read path exists",
+        "P51 seed 804 shop chain baseline does not regress",
+        "No replacement of existing spine event IDs",
+        "npm run typecheck passes",
+        "Relevant merchant-focused tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Continuity-wiring story. Prefer conditioning existing spine events over parallel dead-end branches."
+    },
+    {
+      "id": "P96-004",
+      "title": "Strengthen age 40 identity expression for ledger vs caravan",
+      "description": "As a player, I want my age 40 identity summary to tell me what kind of merchant I became so midlife feels authored rather than a generic wealth label.",
+      "acceptanceCriteria": [
+        "merchantAge40Identity adds or refines at least two ledger vs caravan differentiated branches",
+        "At least one branch reads P95/P96 operating or expansion flags",
+        "Identity text uses player-facing merchant terms rather than raw state-key names",
+        "Magnate bridge paths (magnate_on_ramp_done, bridge flags) remain unchanged in priority",
+        "No new dedicated UI panel is required",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Expression layer for age 40 identity. Magnate bridge branches take precedence over track branches."
+    },
+    {
+      "id": "P96-005",
+      "title": "Strengthen player-facing midlife expression for age 26-40",
+      "description": "As a player, I want currentGoal and cost labels between ages 26 and 40 to reflect my operating track so replay checkpoints stay readable.",
+      "acceptanceCriteria": [
+        "Add or refine at least two player-facing expressions tied to the new 26-40 chain",
+        "At least one expression is immediate to the expansion rhythm outcome",
+        "At least one expression survives into age 32-40 checkpoint, goal, or proof artifact",
+        "Ledger vs caravan voice uses player-facing merchant terms",
+        "No new dedicated UI panel is required",
+        "npm run typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Reuse currentGoal, cost label, and existing player-facing surfaces."
+    },
+    {
+      "id": "P96-006",
+      "title": "Add narrow proof and regression coverage for merchant 26-40",
+      "description": "As a maintainer, I want proof and focused tests for the merchant 26-40 midlife identity chain so the stage closes on evidence instead of intent.",
+      "acceptanceCriteria": [
+        "Add at least one focused test covering expansion rhythm and midlife spine continuity",
+        "Verify ledger and caravan can both reach branch-specific midlife paths",
+        "Produce or update one proof artifact under docs/test-reports/",
+        "Proof shows age, P95/P96 flags, and at least one changed player-facing outcome",
+        "Verification does not require full-lifetime broad audits",
+        "npm run typecheck passes",
+        "Relevant merchant-focused tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Evidence-first closeout. Guard P51 merchant 804 baseline alongside new chain."
+    },
+    {
+      "id": "P96-007",
+      "title": "Produce stage closure and next-step boundary",
+      "description": "As a maintainer, I want a closure report stating what this stage proves and what remains deferred so the next stage stays bounded.",
+      "acceptanceCriteria": [
+        "Save a closure report under docs/test-reports/",
+        "State what was added in age 26-40",
+        "State what remains deferred (magnate on-ramp, martial patron, full route rewrite)",
+        "Explicitly say this stage does not implement merchant_magnate or merchant_martial_patron",
+        "Name the next bounded candidate stage after this one",
+        "npm run typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Close with explicit defer boundaries toward magnate on-ramp or martial patron bridge stages."
+    }
+  ]
+}

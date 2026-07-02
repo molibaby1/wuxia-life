@@ -77,7 +77,7 @@
         "No new dedicated UI panel is required"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Prefer reusing currentGoal, event outcome text, and existing player-facing labels over creating any new surface."
     },
     {

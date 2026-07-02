@@ -44,8 +44,8 @@
         "Save docs/test-reports/p107-merchant-martial-patron-payoff-direction-comparison.md"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Choice-based payoff recommended; auto deepening rejected."
     },
     {
       "id": "P107-004",
@@ -62,8 +62,8 @@
         "Save contract to docs/PRD/p107-merchant-martial-patron-payoff-contract.md"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Payoff contract LOCKED with 3 choice directions and flag interfaces."
     },
     {
       "id": "P107-005",
@@ -79,8 +79,8 @@
         "Save docs/test-reports/p107-p108-validation-shape.md"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P108 validation shape with 12 closure criteria defined."
     },
     {
       "id": "P107-006",
@@ -94,8 +94,8 @@
         "State GO or NO-GO for payoff implementation stage"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report complete; P108 payoff implementation GO."
     }
   ]
 }

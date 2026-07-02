@@ -32,8 +32,8 @@
         "npm run typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract: docs/test-reports/p102-merchant-martial-patron-bridge-scope-contract.md"
     },
     {
       "id": "P102-003",

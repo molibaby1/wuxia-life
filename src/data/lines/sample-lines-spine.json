@@ -3017,5 +3017,115 @@
         "stageSignals": ["patron_bridge_payoff"]
       }
     }
+  },
+  {
+    "id": "merchant_patron_late_life_covenant_bound",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_payoff_done') && flags.has('merchant_patron_payoff_covenant_holder') && !flags.has('merchant_patron_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武一体·晚年几何",
+      "text": "五十二岁这年，你站在账房与演武场之间，想起四十八岁那年的选择。\n\n商武一体的名号传了这些年，江湖上的评价也定了调。可你自己最清楚——当年定下的路，到了晚年，是个什么光景？\n\n盟约越绑越紧。山门的事比账房的事还多——护镖、借道、江湖规矩，一件都不能推。演武场的刀磨了又磨，账房的算盘拨了又拨，两样都没放下。\n\n你知道这辈子退不了，也不想退。这笔晚年的账，算清了——盟约如山，终老不悔。",
+      "description": "P110 商武一体 patron late-life — Branch A 盟约绑紧 (covenant holder payoff)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_late_life_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_life_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_covenant_bound" },
+      { "type": "event_record", "target": "merchant_patron_late_life" },
+      { "type": "stat_modify", "target": "martialPower", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p109", "p110", "merchant", "patron", "late-life", "covenant-bound", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_late_life"]
+      }
+    }
+  },
+  {
+    "id": "merchant_patron_late_life_isolated_merchant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_payoff_done') && flags.has('merchant_patron_payoff_covenant_breaker') && !flags.has('merchant_patron_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武一体·晚年几何",
+      "text": "五十二岁这年，你站在账房与演武场之间，想起四十八岁那年的选择。\n\n商武一体的名号传了这些年，江湖上的评价也定了调。可你自己最清楚——当年定下的路，到了晚年，是个什么光景？\n\n商号靠自己撑起来了，账房里的数字比演武场的刀更可靠。山门的人偶尔路过，点点头又走开——盟约撕了，人情也淡了。\n\n商路上的麻烦要自己扛，没人借道，没人护镖，但也没人指手画脚。自由是真的，孤立也是真的。这笔晚年的账，算清了。",
+      "description": "P110 商武一体 patron late-life — Branch B 自由孤立 (covenant breaker payoff)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_late_life_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_life_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_isolated_merchant" },
+      { "type": "event_record", "target": "merchant_patron_late_life" },
+      { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "martialPower", "value": -1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p109", "p110", "merchant", "patron", "late-life", "isolated-merchant", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_late_life"]
+      }
+    }
+  },
+  {
+    "id": "merchant_patron_late_life_sustainable_covenant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_payoff_done') && flags.has('merchant_patron_payoff_balancer') && !flags.has('merchant_patron_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武一体·晚年几何",
+      "text": "五十二岁这年，你站在账房与演武场之间，想起四十八岁那年的选择。\n\n商武一体的名号传了这些年，江湖上的评价也定了调。可你自己最清楚——当年定下的路，到了晚年，是个什么光景？\n\n当年重谈的盟约规矩还在运转——该出刀时出刀，该算账时算账，商号与山门各守其份。后来人开始来请教商武分寸，你倾囊相授：盟约不是绑死，是谈出来的。\n\n账房与演武场之间，终于不再两头拉扯。这笔晚年的账，算清了——新盟久立，商武一体。",
+      "description": "P110 商武一体 patron late-life — Branch C 新盟可持续 (balancer payoff)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_late_life_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_life_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_late_sustainable_covenant" },
+      { "type": "event_record", "target": "merchant_patron_late_life" },
+      { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "martialPower", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p109", "p110", "merchant", "patron", "late-life", "sustainable-covenant", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_late_life"]
+      }
+    }
   }
 ]

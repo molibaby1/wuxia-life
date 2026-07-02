@@ -1,0 +1,103 @@
+{
+  "project": "Wuxia Life P105 Merchant Martial Patron Pressure Design-First",
+  "branchName": "codex/p105-wuxia-merchant-martial-patron-pressure-design-first",
+  "description": "Design-first contract stage for merchant_martial_patron pressure phase — define pressure direction, contract, and validation shape before implementation, preserving 商武一体 flavor and magnate/renown distinction.",
+  "userStories": [
+    {
+      "id": "P105-001",
+      "title": "Audit patron pressure prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the patron pressure stage so P105 starts from the real gating surfaces.",
+      "acceptanceCriteria": [
+        "Summarize existing patron route flags, markers, events, and expressions (P102 native + P103/P104 bridge-origin + payoff echo)",
+        "Identify what exists before pressure vs what can be reused",
+        "Compare magnate_midlife_pressure and renown_midlife_pressure precedents",
+        "Save docs/test-reports/p105-merchant-martial-patron-pressure-prerequisite-audit.md",
+        "Do not change runtime behavior in this story",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Prerequisite audit saved — patron on-ramp flags/events/expressions mapped; magnate+renown pressure precedents compared; GAP-P104-N01/N02 confirmed."
+    },
+    {
+      "id": "P105-002",
+      "title": "Lock P105 scope contract",
+      "description": "As a planner, I want a scope contract so P105 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P105 to gap audit, direction comparison, pressure contract, and proof shape only",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, P102-P104 rewrite, magnate spine rewrite, payoff redesign, new UI",
+        "Save docs/test-reports/p105-merchant-martial-patron-pressure-scope-contract.md",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P105-003",
+      "title": "Compare patron pressure directions",
+      "description": "As a designer, I want bounded pressure-direction options so P105 chooses the smallest viable pressure shape before implementation.",
+      "acceptanceCriteria": [
+        "Compare at least 2 pressure direction candidates (e.g. martial-backers burden, sect favor-debt, merchant-martial identity split)",
+        "Each candidate includes: core narrative, trigger conditions, player choice space, distinction from magnate/renown pressure",
+        "Select recommended direction and document rejected alternatives",
+        "Recommendation follows quality-first and small-step principles",
+        "Save comparison document under docs/test-reports/",
+        "npm run typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P105-004",
+      "title": "Define patron pressure contract",
+      "description": "As a designer, I want an explicit pressure contract so P106 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define pressure checkpoint, required flags, and corresponding gate acceptance",
+        "Define 1 core pressure event (or 1 tightly coupled event group)",
+        "Define at least 2 pressure-specific player-facing signals",
+        "Clarify difference between pressure vs on-ramp and vs magnate midlife pressure",
+        "Preserve native/bridge-origin variant expression priority rules",
+        "Reserve flag interfaces for subsequent payoff/late-life stages",
+        "Save contract to docs/PRD/p105-merchant-martial-patron-pressure-contract.md",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P105-005",
+      "title": "Define P106 validation shape",
+      "description": "As a maintainer, I want the P106 validation shape fixed in advance so playable pressure work is judged against explicit expectations.",
+      "acceptanceCriteria": [
+        "Define which chain nodes targeted proof must show (on-ramp → pressure → expression changes)",
+        "Define which assertions regression tests must cover at minimum (P102-P104 patron + P97-P101 magnate)",
+        "Define what evidence counts as pressure closed",
+        "No full lifetime exhaust required",
+        "npm run typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P105-006",
+      "title": "Produce P105 closure report",
+      "description": "As a maintainer, I want a closure report that locks the patron pressure design-first contract and hands off to P106.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p105-merchant-martial-patron-pressure-closure-report.md",
+        "Summarize prerequisite audit, scope contract, pressure-direction comparison, pressure contract, validation shape",
+        "Clarify boundary with P106",
+        "List remaining deferred larger patron-expansion items",
+        "State GO / NO-GO for pressure implementation stage",
+        "npm run typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

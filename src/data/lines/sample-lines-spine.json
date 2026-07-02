@@ -3413,5 +3413,78 @@
         "stageSignals": ["founding_patriarch_bridge_payoff"]
       }
     }
+  },
+  {
+    "id": "founding_patriarch_late_life_rule_keeper",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_payoff_done') && flags.has('founding_patriarch_pressure_rule_first') && !flags.has('founding_patriarch_late_life_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派祖师·晚年几何",
+      "text": "五十二岁这年，你站在山门与书斋之间，想起四十岁那年的次序选择。\n\n开宗立派的名号传了这些年，江湖上的评价也定了调。可你自己最清楚——当年定下的治理次序，到了晚年，是个什么光景？\n\n书斋里的卷宗还在翻，弟子争议一件接一件。门规守了一辈子，盟约事务退为背景——治学师承比诸派差遣更占心思。\n\n你知道这辈子退不了，也不想退。这笔晚年的账，算清了——门规守成，终老不悔。",
+      "description": "P117 开派祖师 late-life — Branch A 门规守成终老 (rule_first pressure)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "founding_patriarch_late_life_done" },
+      { "type": "flag_set", "target": "founding_patriarch_late_life_identity_done" },
+      { "type": "flag_set", "target": "founding_patriarch_late_rule_keeper" },
+      { "type": "event_record", "target": "founding_patriarch_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+      { "type": "stat_modify", "target": "martialPower", "value": 1, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p116", "p117", "orthodox", "founding_patriarch", "late-life", "rule-keeper", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_late_life"]
+      }
+    }
+  },
+  {
+    "id": "founding_patriarch_late_life_alliance_bearer",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 52, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 52 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_payoff_done') && flags.has('founding_patriarch_pressure_alliance_first') && !flags.has('founding_patriarch_late_life_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派祖师·晚年几何",
+      "text": "五十二岁这年，你站在山门与书斋之间，想起四十岁那年的次序选择。\n\n开宗立派的名号传了这些年，江湖上的评价也定了调。可你自己最清楚——当年定下的治理次序，到了晚年，是个什么光景？\n\n山门外的盟约还在续，诸派差遣一件接一件。盟约扛了一辈子，门规收束为执行工具——对外续责比书斋治学更占心思。\n\n你知道这辈子退不了，也不想退。这笔晚年的账，算清了——盟约续责，终老不悔。",
+      "description": "P117 开派祖师 late-life — Branch B 盟约续责终老 (alliance_first pressure)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "founding_patriarch_late_life_done" },
+      { "type": "flag_set", "target": "founding_patriarch_late_life_identity_done" },
+      { "type": "flag_set", "target": "founding_patriarch_late_alliance_bearer" },
+      { "type": "event_record", "target": "founding_patriarch_late_life" },
+      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p116", "p117", "orthodox", "founding_patriarch", "late-life", "alliance-bearer", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_late_life"]
+      }
+    }
   }
 ]

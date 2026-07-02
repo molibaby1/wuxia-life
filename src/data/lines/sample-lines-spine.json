@@ -1322,6 +1322,135 @@
     }
   },
   {
+    "id": "magnate_late_life",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 48, "max": 56 },
+    "triggers": [{ "type": "age_reach", "value": 48 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_payoff_done') && !flags.has('magnate_late_life_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "巨贾晚年",
+      "text": "巨贾之位坐稳了，可晚年不比中年轻松——招牌要守、货路要稳、欠情要还、接班要虑。你站在商号门前，想起这一路是怎么走过来的，也想起往后该怎么收束。",
+      "description": "P99 巨贾 late-life — native ledger/caravan 分化"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "magnate_late_life_ledger_steady",
+        "text": "稳态守成：招牌立住了，晚年守信誉比再扩规模更要紧",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_ledger_steady') || (flags.has('magnate_native_ledger_entry') && (flags.has('magnate_native_ledger_steady') || flags.has('hvg_merchant_ledger_expansion_steady'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_ledger_steady" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_ledger_credit",
+        "text": "信誉收束：赊欠铺开了版图，晚年人情账比银钱账更难算清",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_ledger_credit') || (flags.has('magnate_native_ledger_entry') && (flags.has('magnate_native_ledger_credit') || flags.has('hvg_merchant_ledger_expansion_credit'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_ledger_credit" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_caravan_market",
+        "text": "行市收势：赌市扩货铺了货路，晚年涨跌余波仍在心上",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_caravan_market') || (flags.has('magnate_native_caravan_entry') && (flags.has('magnate_native_caravan_market') || flags.has('hvg_merchant_caravan_expansion_market'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_caravan_market" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_caravan_fast",
+        "text": "货路收束：快周转压货撑了规模，晚年货路比利润更金贵",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_caravan_fast') || (flags.has('magnate_native_caravan_entry') && (flags.has('magnate_native_caravan_fast') || flags.has('hvg_merchant_caravan_expansion_fast'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 20, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_caravan_fast" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_ledger_generic",
+        "text": "账房式守成：稳扩积势跨了门槛，晚年守招牌比抢规模要紧",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_ledger') || flags.has('magnate_native_ledger_entry'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_ledger" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_caravan_generic",
+        "text": "跑货式收势：赌市扩货跨了门槛，晚年行市风向比账烫手",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_payoff_caravan') || flags.has('magnate_native_caravan_entry'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "flag_set", "target": "magnate_native_late_caravan" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      },
+      {
+        "id": "magnate_late_life_generic",
+        "text": "巨贾之位已坐稳，晚年仍要守着商号与人情",
+        "effects": [
+          { "type": "flag_set", "target": "magnate_late_life_done" },
+          { "type": "flag_set", "target": "magnate_late_life_identity_done" },
+          { "type": "event_record", "target": "magnate_late_life" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p99", "merchant", "magnate", "late-life", "mainline", "mandatory", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_late_life"]
+      }
+    }
+  },
+  {
     "id": "renown_on_ramp",
     "version": "1.0.0",
     "category": "main_story",

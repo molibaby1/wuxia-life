@@ -151,7 +151,20 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.peasant_merchant_bridge_crossed) {
       return '商号遍九州，车马仓储债也遍九州，运力、仓库、下属工钱让泥腿子巨贾用身体在扛';
     }
-    // P97: Native magnate pressure reads P96 expansion / on-ramp markers
+    // P98: Native magnate pressure reads P98 pressure-phase markers, then P97 entry lineage
+    if (flags.magnate_native_pressure_ledger_steady || flags.magnate_native_pressure_ledger) {
+      return '商号遍九州，稳扩欠下的人情债也遍九州，守信誉比抢规模要紧';
+    }
+    if (flags.magnate_native_pressure_ledger_credit) {
+      return '商号遍九州，赊欠铺开的信誉债也遍九州，人情账比银钱账更难算';
+    }
+    if (flags.magnate_native_pressure_caravan_market || flags.magnate_native_pressure_caravan) {
+      return '商号遍九州，赌市扩货欠下的债也遍九州，行市一跌便喘不过气';
+    }
+    if (flags.magnate_native_pressure_caravan_fast) {
+      return '商号遍九州，快周转撑起的债也遍九州，货路一断便卡死';
+    }
+    // P97 fallback: native entry markers + P96 expansion sub-flags
     if (flags.magnate_native_ledger_entry) {
       if (flags.hvg_merchant_ledger_expansion_credit || flags.magnate_native_ledger_credit) {
         return '商号遍九州，赊欠铺开的信誉债也遍九州，人情账比银钱账更难算';

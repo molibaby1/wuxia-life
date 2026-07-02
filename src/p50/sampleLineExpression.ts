@@ -295,6 +295,19 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '产业初成，巨贾之路刚起步';
   }
+  // P102: Patron bridge goals (magnate tiers above take priority when magnate markers set)
+  if (flags.merchant_patron_payoff_done) {
+    return '商武一体名号已定，门派对投与江湖护卫都成了招牌';
+  }
+  if (flags.merchant_patron_on_ramp_done) {
+    if (flags.merchant_patron_on_ramp_orthodox) {
+      return '银钱换侠义盟约，正把手中的商路与门派的剑绑在同一条绳上';
+    }
+    if (flags.merchant_patron_on_ramp_martial) {
+      return '武力护商路，正把护镖与放贷拧成一条商武绳';
+    }
+    return '商武一体之约已立，门派对投比单纯营利更烫手';
+  }
   if (flags.merchant_age45_expansion_fork_done) {
     if (flags.hvg_merchant_ledger_track && flags.hvg_merchant_expansion_rhythm_done) {
       return '扩张分岔已至，稳扩欠下的人情债在前';
@@ -718,6 +731,19 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       }
       return '巨贾负担';
     }
+    // P102: Patron bridge cost labels (magnate tiers above retain priority)
+    if (flags.merchant_patron_payoff_done) {
+      return '商武名号之累';
+    }
+    if (flags.merchant_patron_on_ramp_done) {
+      if (flags.merchant_patron_on_ramp_orthodox) {
+        return '侠义盟约之累';
+      }
+      if (flags.merchant_patron_on_ramp_martial) {
+        return '护商武力之累';
+      }
+      return '商武盟约之累';
+    }
     if (flags.merchant_midlife_debt) {
       if (flags.merchant_midlife_debt_ledger_steady || flags.merchant_midlife_debt_ledger_credit) {
         return flags.merchant_midlife_debt_ledger_credit ? '赊欠之债' : '稳扩之债';
@@ -1087,6 +1113,25 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
       return '你是靠跑货式经营做起来的巨贾：赌市扩货跨了门槛，财富带来地位，也带来涨跌与押货的风险';
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
+  }
+  // P102: Patron bridge identity (magnate tiers above retain priority)
+  if (flags.merchant_patron_identity_done) {
+    if (flags.merchant_patron_on_ramp_orthodox) {
+      return '你是商武一体的侠义金主：银钱换盟约，正道门派成了幕后靠山，名号落定之后，江湖提起你说的是出钱出刀都在一条绳上';
+    }
+    if (flags.merchant_patron_on_ramp_martial) {
+      return '你是商武一体的武力金主：护镖与放贷拧成一条绳，名号落定之后，商路上的麻烦要按江湖规矩算';
+    }
+    return '你是商武一体的金主：门派对投比单纯营利更烫手，商武复合身份已成定评';
+  }
+  if (flags.merchant_patron_on_ramp_done) {
+    if (flags.merchant_patron_on_ramp_orthodox) {
+      return '你是押注侠义盟约的商武金主：银钱已换得道义靠山，商路与剑鞘绑在一起';
+    }
+    if (flags.merchant_patron_on_ramp_martial) {
+      return '你是押注武力护商的商武金主：护镖放贷成了一体，商路上的恩怨会拖进账本';
+    }
+    return '你是走商武一体之路的金主：门派对投比账本上的数字更烫手';
   }
   if (flags.merchant_shop_failed && !flags.merchant_midlife_debt) {
     return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险';

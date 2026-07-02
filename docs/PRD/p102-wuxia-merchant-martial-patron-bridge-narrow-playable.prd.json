@@ -47,8 +47,8 @@
         "npm run typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Spine: merchant_patron_bridge_entry + merchant_patron_payoff_echo in sample-lines-spine.json"
     },
     {
       "id": "P102-004",

@@ -2728,5 +2728,100 @@
         "stageSignals": ["magnate_endgame"]
       }
     }
+  },
+  {
+    "id": "merchant_patron_bridge_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 34, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 34 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('route_wealth_committed') || flags.has('p22_wealth_route_forked')) && (flags.has('merchant_invest_good') || flags.has('merchant_invest_evil') || flags.has('merchant_invest_both')) && !flags.has('merchant_patron_bridge_crossed') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武盟约",
+      "text": "银钱已投进门派，商路与剑鞘绑在了一起。江湖人提起你，说的不再是掌柜或镖头，而是「这人既出钱又出刀」。\n\n门派对投换来了护镖与借道，可每一笔盟约都意味着：商路上的纠纷，要按江湖规矩算；江湖上的恩怨，也会拖进账本。",
+      "description": "P102 商武一体 patron bridge entry — wealth+invest commitment fork"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "patron_embrace_orthodox_sect",
+        "text": "以侠义盟约护商路，让正道门派成为幕后靠山",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_invest_good') || flags.has('merchant_invest_both')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_crossed" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_done" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_orthodox" },
+          { "type": "event_record", "target": "merchant_patron_bridge_entry" }
+        ]
+      },
+      {
+        "id": "patron_embrace_martial_backer",
+        "text": "以武力护商路，让护镖与放贷拧成一条绳",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_invest_evil') || flags.has('merchant_invest_both')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_crossed" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_done" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_martial" },
+          { "type": "event_record", "target": "merchant_patron_bridge_entry" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p102", "merchant", "patron", "bridge", "entry", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_bridge_entry"]
+      }
+    }
+  },
+  {
+    "id": "merchant_patron_payoff_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 48, "max": 52 },
+    "triggers": [{ "type": "age_reach", "value": 48 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_on_ramp_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武一体·名号落定",
+      "text": "四十八岁这年，你站在商号与山门之间，想起当年那笔门派投资。\n\n银钱换来得不是单纯的利润，而是江湖上的一句定评：「这人商武一体，出钱出刀都在一条绳上。」\n\n门派对投、护镖借道、放贷收息——都化作商武复合身份的回响，比账本上的数字更长久。",
+      "description": "P102 商武一体 patron bridge payoff echo — P93 lightweight terminal"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_payoff_done" },
+      { "type": "flag_set", "target": "merchant_patron_identity_done" },
+      { "type": "event_record", "target": "merchant_patron_payoff_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p102", "merchant", "patron", "bridge", "payoff", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_bridge_payoff"]
+      }
+    }
   }
 ]

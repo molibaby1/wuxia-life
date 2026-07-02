@@ -295,8 +295,17 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '产业初成，巨贾之路刚起步';
   }
-  // P102: Patron bridge goals (magnate tiers above take priority when magnate markers set)
+  // P102/P108: Patron bridge goals (magnate tiers above take priority when magnate markers set)
   if (flags.merchant_patron_payoff_done) {
+    if (flags.merchant_patron_payoff_covenant_holder) {
+      return '硬扛盟约护商，商武名号靠刀与账一起撑';
+    }
+    if (flags.merchant_patron_payoff_covenant_breaker) {
+      return '撕破盟约，商号不再听山门差遣';
+    }
+    if (flags.merchant_patron_payoff_balancer) {
+      return '重谈盟约边界，商武各守其份';
+    }
     return '商武一体名号已定，门派对投与江湖护卫都成了招牌';
   }
   // P106: Patron midlife pressure goals (payoff > pressure > on-ramp)
@@ -761,8 +770,17 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       }
       return '巨贾负担';
     }
-    // P102: Patron bridge cost labels (magnate tiers above retain priority)
+    // P102/P108: Patron bridge cost labels (magnate tiers above retain priority)
     if (flags.merchant_patron_payoff_done) {
+      if (flags.merchant_patron_payoff_covenant_holder) {
+        return '盟约如山之累';
+      }
+      if (flags.merchant_patron_payoff_covenant_breaker) {
+        return '断武从商之快';
+      }
+      if (flags.merchant_patron_payoff_balancer) {
+        return '商武新矩之累';
+      }
       return '商武名号之累';
     }
     // P106: Patron midlife pressure cost labels (payoff > pressure > on-ramp)
@@ -1174,8 +1192,21 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
-  // P102: Patron bridge identity (magnate tiers above retain priority)
+  // P102/P108: Patron bridge identity (magnate tiers above retain priority)
   if (flags.merchant_patron_identity_done) {
+    // P108: payoff choice marker takes priority over entry variant
+    if (flags.merchant_patron_payoff_covenant_holder) {
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '你是靠盟约定型的商武金主：手艺眼光与盟约绑在一起，名号越大担子越重，但从不退缩';
+      }
+      return '你是靠盟约定型的商武金主：出钱出刀都在一条绳上，名号越大，担子越重，但从不退缩';
+    }
+    if (flags.merchant_patron_payoff_covenant_breaker) {
+      return '你是断武从商的巨贾：撕破盟约后商路靠自己，财富保住了，山门庇护没了';
+    }
+    if (flags.merchant_patron_payoff_balancer) {
+      return '你是懂商武分寸的金主：重谈盟约后商号与山门各守其份，不再被两头拉扯';
+    }
     if (flags.merchant_patron_on_ramp_orthodox) {
       return '你是商武一体的侠义金主：银钱换盟约，正道门派成了幕后靠山，名号落定之后，江湖提起你说的是出钱出刀都在一条绳上';
     }

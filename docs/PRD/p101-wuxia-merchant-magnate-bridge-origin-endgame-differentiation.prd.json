@@ -78,8 +78,8 @@
         "P63/P64 bridge tests pass"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Proof at docs/test-reports/p101-merchant-magnate-bridge-origin-endgame-chain-proof.md; closure at docs/test-reports/p101-merchant-magnate-bridge-origin-endgame-closure-report.md; tests/p101MerchantMagnateBridgeOriginEndgameTests.ts passes."
     }
   ]
 }

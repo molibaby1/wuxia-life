@@ -65,8 +65,8 @@
         "npm run typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Pressure contract saved — merchant_patron_midlife_pressure choice event, 6 branches, 2 expression signals, payoff gate note for P106."
     },
     {
       "id": "P105-005",

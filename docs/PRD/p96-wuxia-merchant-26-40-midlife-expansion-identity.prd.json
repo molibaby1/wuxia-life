@@ -84,7 +84,7 @@
         "npm run typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse currentGoal, cost label, and existing player-facing surfaces."
     },
     {

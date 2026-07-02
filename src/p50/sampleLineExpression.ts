@@ -170,6 +170,12 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     return '产业初成，巨贾之路刚起步';
   }
   if (flags.merchant_age45_expansion_fork_done) {
+    if (flags.hvg_merchant_ledger_track && flags.hvg_merchant_expansion_rhythm_done) {
+      return '扩张分岔已至，稳扩欠下的人情债在前';
+    }
+    if (flags.hvg_merchant_caravan_track && flags.hvg_merchant_expansion_rhythm_done) {
+      return '扩张分岔已至，赌市扩货的风险与机遇并行';
+    }
     return '扩张分岔已至，债与人情并重';
   }
   if (flags.merchant_age40_identity_done && age >= 44) {
@@ -178,8 +184,41 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   if (flags.merchant_age40_identity_done) {
     return '财富带来选择，也带来债';
   }
-  if (flags.merchant_midlife_debt || flags.merchant_shop_failed) {
+  if (flags.merchant_midlife_debt) {
+    if (flags.merchant_midlife_debt_ledger_steady) {
+      return age >= 35 ? '稳扩欠下的债，守信誉比抢规模要紧' : '人情债涌来，稳扩的代价落在周转上';
+    }
+    if (flags.merchant_midlife_debt_ledger_credit) {
+      return age >= 35 ? '赊欠铺开的债，人情账比银钱账难算' : '扩张赊欠到期，信誉与周转两头难';
+    }
+    if (flags.merchant_midlife_debt_caravan_market) {
+      return age >= 35 ? '赌市扩货的债，行市一跌便喘不过气' : '行市波动欠下的债，押货脚步慢了下来';
+    }
+    if (flags.merchant_midlife_debt_caravan_fast) {
+      return age >= 35 ? '快周转撑起的债，货路一断便卡死' : '压货扩规模的债，周转比利润更紧';
+    }
     return age >= 32 ? '周转吃紧，人情债未清' : '扩张初尝，债务阴影已现';
+  }
+  if (flags.merchant_shop_failed) {
+    return age >= 32 ? '周转吃紧，人情债未清' : '扩张初尝，债务阴影已现';
+  }
+  if (flags.hvg_merchant_expansion_rhythm_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      if (flags.hvg_merchant_ledger_expansion_credit) {
+        return age >= 28 ? '赊欠铺路扩了规模，信誉与周转两头顾' : '放宽赊欠换客源，头一回认真扩门面';
+      }
+      if (flags.hvg_merchant_ledger_expansion_steady) {
+        return age >= 28 ? '稳扩守信誉，债务控得比库存还紧' : '稳扩门面控债务，慢一步也不砸招牌';
+      }
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      if (flags.hvg_merchant_caravan_expansion_market) {
+        return age >= 28 ? '赌市扩货铺了货路，涨跌都在心上' : '盯行市赌市扩货，趁涨势把规模撑起来';
+      }
+      if (flags.hvg_merchant_caravan_expansion_fast) {
+        return age >= 28 ? '快周转压货撑了规模，货路比利润更紧' : '快周转压货走量，先把货路跑通再说';
+      }
+    }
   }
   if (flags.merchant_caravan_success || flags.merchant_sect_investment_done) {
     return '商队或投资分岔，扩张与风险并行';
@@ -444,6 +483,22 @@ export function deriveSampleLineCostLabel(state: GameState): string {
         return '粮路与买卖的担子';
       }
       return '巨贾负担';
+    }
+    if (flags.merchant_midlife_debt) {
+      if (flags.merchant_midlife_debt_ledger_steady || flags.merchant_midlife_debt_ledger_credit) {
+        return flags.merchant_midlife_debt_ledger_credit ? '赊欠之债' : '稳扩之债';
+      }
+      if (flags.merchant_midlife_debt_caravan_market || flags.merchant_midlife_debt_caravan_fast) {
+        return flags.merchant_midlife_debt_caravan_market ? '行市之债' : '压货之债';
+      }
+    }
+    if (flags.hvg_merchant_expansion_rhythm_done) {
+      if (flags.hvg_merchant_ledger_track) {
+        return flags.hvg_merchant_ledger_expansion_credit ? '扩赊之累' : '稳扩之累';
+      }
+      if (flags.hvg_merchant_caravan_track) {
+        return flags.hvg_merchant_caravan_expansion_market ? '赌市之累' : '压货之累';
+      }
     }
     // P94: early merchant track differentiation at age 10-15
     if (flags.hvg_merchant_operating_pressure_done) {

@@ -1,0 +1,116 @@
+{
+  "project": "Wuxia Life P94 Merchant 10-15 Growth Chain Reinforcement",
+  "branchName": "codex/p94-wuxia-merchant-10-15-growth-chain-reinforcement",
+  "description": "Reinforce the merchant_house 10-15 growth chain with one post-fork visible confirmation, one first merchant challenge, player-facing expression updates, and narrow proof/regression coverage. Strictly bounded to merchant early-growth continuity; no full route rewrite, no skill system, no merchant_martial_patron bridge yet.",
+  "userStories": [
+    {
+      "id": "P94-001",
+      "title": "Audit the merchant 10-15 gap as a discrete implementation stage",
+      "description": "As a maintainer, I want the merchant 10-15 gap documented as its own bounded stage so implementation targets the missing chain instead of reopening the whole route.",
+      "acceptanceCriteria": [
+        "Document the current merchant anchors across age 7-22",
+        "Explicitly identify the 10-15 gap between early fork and later shop or talent expression",
+        "Distinguish route is on from player feels continued growth",
+        "Save or update one bounded report under docs/test-reports/",
+        "Do not change runtime behavior in this story"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only anchor and gap inventory for the implementation stage. Keeps the later stories from drifting into a full merchant rewrite."
+    },
+    {
+      "id": "P94-002",
+      "title": "Add one merchant post-fork confirmation in age 10-12",
+      "description": "As a player, I want my early merchant fork choice to produce a visible confirmation within a short age window so I can tell that ledger and caravan are already shaping me differently.",
+      "acceptanceCriteria": [
+        "Add exactly one merchant 10-12 confirmation event or equivalent narrow reinforcement node",
+        "The node requires merchant route entry plus one of hvg_merchant_ledger_track or hvg_merchant_caravan_track",
+        "Ledger and caravan present different player-facing text or outcome emphasis",
+        "The node changes at least one downstream state beyond flavor-only text",
+        "The node remains merchant-only and does not introduce a new progression container",
+        "No regression to merchant_childhood_seed_milestone or hvg_merchant_early_opportunity_fork eligibility"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "First executable growth-confirmation node after the existing fork. This is the earliest missing link in the 10-15 chain."
+    },
+    {
+      "id": "P94-003",
+      "title": "Add one first merchant challenge in age 13-15",
+      "description": "As a player, I want the merchant route to test the kind of merchant I am becoming so growth feels like responsibility and risk rather than passive accumulation.",
+      "acceptanceCriteria": [
+        "Add exactly one merchant challenge node in age 13-15",
+        "The challenge is legible as a first real responsibility, mistake, or opportunity",
+        "Ledger and caravan differ in either condition, framing, or result",
+        "The challenge creates a small but readable consequence: stat shift, currentGoal change, eligibility shift, or route pressure",
+        "The challenge does not require a new subsystem",
+        "The challenge remains bounded to merchant_house"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "This is the first real pressure point after the confirmation node. Keep it small and readable; do not jump to full shop ownership."
+    },
+    {
+      "id": "P94-004",
+      "title": "Preserve continuity into merchant talent and first shop",
+      "description": "As a maintainer, I want the new 10-15 chain to connect naturally into existing merchant anchors so this stage strengthens continuity instead of creating another isolated branch.",
+      "acceptanceCriteria": [
+        "The new 10-15 nodes do not orphan merchant_talent_discovery",
+        "The new 10-15 nodes keep merchant_first_shop as the next major age-16+ business milestone",
+        "At least one downstream condition, goal, or replay checkpoint reads differently after the new chain",
+        "Existing merchant age-40 identity logic is not weakened",
+        "P50 or replay merchant line remains deterministic under current benchmark expectations"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "This is a continuity-wiring story, not a content-expansion story. The point is to make the new nodes feed existing anchors cleanly."
+    },
+    {
+      "id": "P94-005",
+      "title": "Strengthen player-facing expression for the 10-15 chain",
+      "description": "As a player, I want the route to tell me what sort of merchant I am becoming so the loop feels authored rather than hidden in flags.",
+      "acceptanceCriteria": [
+        "Add or refine at least two player-facing expressions tied to the new 10-15 chain",
+        "At least one expression is immediate to the event outcome",
+        "At least one expression survives into a later checkpoint, goal, or proof artifact",
+        "Expression language uses player-facing merchant terms rather than raw state-key names",
+        "No new dedicated UI panel is required"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Prefer reusing currentGoal, event outcome text, and existing player-facing labels over creating any new surface."
+    },
+    {
+      "id": "P94-006",
+      "title": "Add narrow proof and regression coverage for merchant 10-15",
+      "description": "As a maintainer, I want proof and focused tests for the merchant 10-15 chain so the stage closes on evidence instead of on intent.",
+      "acceptanceCriteria": [
+        "Add at least one focused test covering the new confirmation and challenge chain",
+        "Verify that ledger and caravan can both reach their intended branch-specific confirmation or challenge path",
+        "Produce or update one proof artifact under docs/test-reports/",
+        "Proof shows age, route flags, branch flag, and at least one changed player-facing outcome",
+        "Verification does not require reopening full-lifetime broad audits",
+        "npm run typecheck passes",
+        "Relevant merchant-focused tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Evidence-first closeout. Use narrow regression guards instead of broad all-route retesting unless the implementation actually touches shared engine behavior."
+    },
+    {
+      "id": "P94-007",
+      "title": "Produce stage closure and next-step boundary",
+      "description": "As a maintainer, I want a closure report that states exactly what this stage now proves and what remains deferred so the next stage stays bounded.",
+      "acceptanceCriteria": [
+        "Save a closure report under docs/test-reports/",
+        "State what was added in age 10-15",
+        "State what remains deferred to later merchant route expansion",
+        "Explicitly say this stage does not yet enter merchant_martial_patron",
+        "Name the next bounded candidate stage after this one"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Close with explicit defer boundaries. Prevent the next session from turning this into a merchant full-route redesign."
+    }
+  ]
+}

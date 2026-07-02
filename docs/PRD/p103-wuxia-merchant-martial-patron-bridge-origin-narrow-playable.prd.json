@@ -79,8 +79,8 @@
         "npm run guard:sample-lines-baseline passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Tests: p103MerchantMartialPatronBridgeOriginTests.ts; closure: p103-merchant-martial-patron-bridge-origin-closure-report.md"
     }
   ]
 }

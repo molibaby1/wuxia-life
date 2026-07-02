@@ -1,0 +1,100 @@
+{
+  "project": "Wuxia Life P100 Merchant Magnate Native Endgame Echo Sample",
+  "branchName": "codex/p100-wuxia-merchant-magnate-native-endgame-echo-sample",
+  "description": "Extend P99 native ledger/caravan magnate late-life markers into a bounded post-late-life endgame echo sample with native track expression. Fix P50 sample-line guard regression. Pattern: P93 medical endgame lightweight echo. No full empire rewrite, no merchant_martial_patron bridge, no P97-P99 regression.",
+  "userStories": [
+    {
+      "id": "P100-001",
+      "title": "Fix P50 sample-line guard regression",
+      "description": "As a maintainer, I want the P50/P49 sample-line guard passing so merchant expression tiers do not bleed into orthodox route goals at age 25.",
+      "acceptanceCriteria": [
+        "npm run guard:sample-lines-baseline passes including p49SampleLineReplayTests seed 301 orthodox age-25 goal",
+        "Root cause documented for orthodox goal misalignment",
+        "Fix scoped to expression guard or branching without scheduler rewrite",
+        "P97 P98 P99 merchant tests still pass",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Already fixed on P99 branch: 4776c5c (orthodox age-25 goal text restore — merchant expression tier no longer bleeds into orthodoxCurrentGoal) + b07cfd5 (spine baseline guard). npm run guard:sample-lines-baseline passes."
+    },
+    {
+      "id": "P100-002",
+      "title": "Audit native magnate post-late-life endgame gap",
+      "description": "As a maintainer, I want the post-late-life endgame flattening gap documented so P100 targets the P99 late-life to endgame discontinuity.",
+      "acceptanceCriteria": [
+        "Document magnate spine terminus after magnate_late_life_done and available endgame hooks",
+        "Explicitly identify where P99 late-life markers are not consumed downstream",
+        "Distinguish native track endgame target from bridge-origin defer scope",
+        "Save one bounded report under docs/test-reports/",
+        "Do not change runtime behavior beyond P100-001 fix",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Read-only gap inventory for endgame echo scope."
+    },
+    {
+      "id": "P100-003",
+      "title": "Lock native magnate endgame scope contract",
+      "description": "As a planner, I want a scope contract so P100 stays a bounded endgame echo and does not sprawl into full empire rewrite.",
+      "acceptanceCriteria": [
+        "Define single endgame echo event band and checkpoint flags",
+        "Define allowed surfaces: spine wiring, expression, narrow proof",
+        "Define forbidden items: full empire graph, martial patron, bridge endgame rewrite, new UI, heavy stat changes",
+        "Save scope contract under docs/test-reports/",
+        "npm run typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Scope guardrail before endgame runtime wiring."
+    },
+    {
+      "id": "P100-004",
+      "title": "Wire native late-life lineage into magnate endgame echo",
+      "description": "As a player, I want my ledger or caravan magnate late-life personality to carry into endgame so identity does not reset after age 56.",
+      "acceptanceCriteria": [
+        "Endgame echo event reads P99 late-life markers or P98 P97 fallback for native merchant_house path",
+        "Ledger and caravan produce different player-facing text, condition branch, or downstream marker",
+        "Change sets at least one endgame checkpoint flag beyond flavor-only text",
+        "P55 magnate chain through late-life remains reachable; endgame is additive",
+        "P63 P64 bridge-origin paths do not regress",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Core endgame continuity. Native ledger = steady-scale legacy echo; caravan = market-volatility legacy echo."
+    },
+    {
+      "id": "P100-005",
+      "title": "Strengthen native endgame expression",
+      "description": "As a player, I want endgame goals and burden labels to reflect my native operating track through the magnate arc.",
+      "acceptanceCriteria": [
+        "Add or refine at least two player-facing expression pairs for native ledger vs caravan at endgame",
+        "At least one expression reads P99 late-life or P98 payoff markers",
+        "Bridge-origin expressions retain priority when bridge markers are set",
+        "Identity hooks reflect native track at endgame checkpoint when applicable",
+        "npm run typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Expression layer at endgame checkpoint."
+    },
+    {
+      "id": "P100-006",
+      "title": "Add narrow proof and stage closure",
+      "description": "As a maintainer, I want proof, tests, and a closure report for native magnate endgame differentiation.",
+      "acceptanceCriteria": [
+        "Add focused test covering ledger and caravan native paths through endgame checkpoint",
+        "Produce proof artifact under docs/test-reports/",
+        "Save closure report stating what P100 proves and what remains deferred",
+        "npm run typecheck passes",
+        "P97 P98 P99 merchant tests pass",
+        "npm run guard:sample-lines-baseline passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Evidence-first closeout. Re-guard P50 baseline alongside new native endgame chain."
+    }
+  ]
+}

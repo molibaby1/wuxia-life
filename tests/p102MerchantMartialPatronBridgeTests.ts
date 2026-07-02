@@ -97,9 +97,11 @@ function testEntryChoicesSetCheckpointFlags(): void {
 }
 
 function testPayoffEchoShapeAndGate(): void {
-  assert(payoffEvent?.eventType === 'auto', 'payoff should be auto type');
+  assert(payoffEvent?.eventType === 'choice', 'payoff should be choice type');
+  assert(payoffEvent?.version === '2.0.0', 'payoff version should be 2.0.0');
   assert(payoffEvent?.ageRange?.min === 48, 'payoff min age should be 48');
   assert(payoffEvent?.ageRange?.max === 52, 'payoff max age should be 52');
+  assert((payoffEvent?.choices?.length ?? 0) === 3, 'payoff should have 3 choices');
 
   const evaluator = new ConditionEvaluator();
   const eligible = patronBaseState({
@@ -120,17 +122,35 @@ function testPayoffEchoShapeAndGate(): void {
 }
 
 function testPayoffSetsTerminalFlags(): void {
-  const effects = payoffEvent?.autoEffects ?? [];
+  const shared = payoffEvent?.autoEffects ?? [];
   assert(
-    effects.some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_done'),
+    shared.some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_done'),
     'payoff sets merchant_patron_payoff_done',
   );
   assert(
-    effects.some(e => e.type === 'flag_set' && e.target === 'merchant_patron_identity_done'),
+    shared.some(e => e.type === 'flag_set' && e.target === 'merchant_patron_identity_done'),
     'payoff sets merchant_patron_identity_done',
   );
-  const statEffects = effects.filter(e => e.type === 'stat_modify');
-  assert(statEffects.length === 0, 'payoff should have no stat_modify (P93 lightweight)');
+  assert(
+    shared.some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_resolved'),
+    'payoff sets merchant_patron_payoff_resolved',
+  );
+
+  const hold = payoffEvent!.choices!.find(c => c.id === 'patron_payoff_hold_covenant')!;
+  const breaker = payoffEvent!.choices!.find(c => c.id === 'patron_payoff_break_covenant')!;
+  const balancer = payoffEvent!.choices!.find(c => c.id === 'patron_payoff_balance_covenant')!;
+  assert(
+    (hold.effects ?? []).some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_covenant_holder'),
+    'hold choice sets covenant_holder marker',
+  );
+  assert(
+    (breaker.effects ?? []).some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_covenant_breaker'),
+    'break choice sets covenant_breaker marker',
+  );
+  assert(
+    (balancer.effects ?? []).some(e => e.type === 'flag_set' && e.target === 'merchant_patron_payoff_balancer'),
+    'balance choice sets balancer marker',
+  );
 }
 
 function testPatronExpressionDiffersFromGenericAndMagnate(): void {
@@ -177,15 +197,16 @@ function testPatronPayoffExpressionReadsCheckpoint(): void {
       merchant_patron_on_ramp_martial: true,
       merchant_patron_payoff_done: true,
       merchant_patron_identity_done: true,
+      merchant_patron_payoff_covenant_breaker: true,
     },
   });
   const goal = deriveSampleLineCurrentGoal(payoffState);
   const cost = deriveSampleLineCostLabel(payoffState);
   const identity = deriveSampleLineAge40Identity(payoffState);
 
-  assert(goal.includes('商武一体'), 'payoff goal should mention 商武一体');
-  assert(cost.includes('商武'), 'payoff cost should read patron checkpoint');
-  assert(identity?.includes('武力金主'), 'payoff identity should read martial patron variant');
+  assert(goal.includes('撕破盟约'), 'payoff goal should reflect covenant_breaker choice');
+  assert(cost === '断武从商之快', 'payoff cost should reflect covenant_breaker choice');
+  assert(identity?.includes('断武从商'), 'payoff identity should reflect covenant_breaker choice');
 }
 
 function writeChainProof(): void {
@@ -202,15 +223,24 @@ function writeChainProof(): void {
     '| 1 | 18 | `p22_early_wealth_route_fork` (merchant.json path) | — | `route_wealth_committed`, `p22_wealth_route_forked` |',
     '| 2 | 32 | `merchant_sect_investment` | `merchant_wealthy` | `merchant_invest_good` |',
     `| 3 | 34–38 | \`merchant_patron_bridge_entry\` | ${ENTRY_GATE_EXPR.slice(0, 60)}… | \`merchant_patron_bridge_crossed\`, \`merchant_patron_on_ramp_done\`, variant marker |`,
-    `| 4 | 48–52 | \`merchant_patron_payoff_echo\` | ${PAYOFF_GATE_EXPR.slice(0, 60)}… | \`merchant_patron_payoff_done\`, \`merchant_patron_identity_done\` |`,
+    '| 4 | 40–44 | `merchant_patron_midlife_pressure` | `merchant_patron_on_ramp_done` | `merchant_patron_midlife_pressure_done`, variant pressure marker |',
+    `| 5 | 48–52 | \`merchant_patron_payoff_echo\` (choice v2.0.0) | ${PAYOFF_GATE_EXPR.slice(0, 60)}… | \`merchant_patron_payoff_done\`, \`merchant_patron_identity_done\`, \`merchant_patron_payoff_resolved\`, choice marker |`,
+    '',
+    '## Payoff choice branches (P108)',
+    '',
+    '| Choice | Marker | Cost label | Goal |',
+    '| ------ | ------ | ---------- | ---- |',
+    '| 硬扛盟约 | `merchant_patron_payoff_covenant_holder` | 盟约如山之累 | 硬扛盟约护商 |',
+    '| 撕破盟约 | `merchant_patron_payoff_covenant_breaker` | 断武从商之快 | 撕破盟约，商号不再听山门差遣 |',
+    '| 商武平衡 | `merchant_patron_payoff_balancer` | 商武新矩之累 | 重谈盟约边界 |',
     '',
     '## Expression differentiation',
     '',
     '| Surface | Patron signal | Generic merchant | Magnate priority |',
     '| ------- | ------------- | ---------------- | ---------------- |',
-    '| `merchantCurrentGoal` | 侠义盟约 / 商武一体 | 财富带来选择 | 巨贾 when `magnate_on_ramp_done` |',
-    '| `deriveSampleLineCostLabel` | 侠义盟约之累 / 商武名号之累 | 商路债务 | 巨贾负担 when magnate markers |',
-    '| `merchantAge40Identity` | 商武金主 | 商路中人 | 巨贾 identity when magnate markers |',
+    '| `merchantCurrentGoal` | payoff choice goal / pressure / on-ramp | 财富带来选择 | 巨贾 when `magnate_on_ramp_done` |',
+    '| `deriveSampleLineCostLabel` | payoff choice 之累/之快 / pressure 之债 / on-ramp 之累 | 商路债务 | 巨贾负担 when magnate markers |',
+    '| `merchantAge40Identity` | payoff choice identity + entry overlay | 商路中人 | 巨贾 identity when magnate markers |',
     '',
     '## Regression scope',
     '',
@@ -219,8 +249,9 @@ function writeChainProof(): void {
     '',
     '## Deferred',
     '',
-    '- Ordinary-origin patron bridges (apprentice/tavern/peasant)',
-    '- Full patron pressure/mid/late chain',
+    '- Full 5×3 entry×payoff identity matrix',
+    '- Patron late-life / endgame echo (P109+)',
+    '- Ordinary-origin patron expression',
     '- Full Wave 3 mixed-achievement graph',
   ];
   const outPath = join(process.cwd(), 'docs/test-reports/p102-merchant-martial-patron-bridge-chain-proof.md');

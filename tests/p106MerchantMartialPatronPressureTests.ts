@@ -179,10 +179,11 @@ function testPostPressurePayoffStillWinsOverPressure(): void {
       merchant_patron_on_ramp_orthodox: true,
       merchant_patron_midlife_pressure_done: true,
       merchant_patron_payoff_done: true,
+      merchant_patron_payoff_covenant_holder: true,
     },
   });
   const goal = deriveSampleLineCurrentGoal(state);
-  assert(goal?.includes('名号已定'), 'payoff goal should win over pressure');
+  assert(goal?.includes('硬扛盟约'), 'payoff goal should win over pressure');
 }
 
 // Group 4: Distinct from magnate / renown (2 tests)

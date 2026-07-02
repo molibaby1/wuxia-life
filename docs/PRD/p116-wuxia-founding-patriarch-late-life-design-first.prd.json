@@ -74,8 +74,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Validation shape: docs/test-reports/p116-p117-validation-shape.md"
     },
     {
       "id": "P116-006",

@@ -267,6 +267,38 @@ function testPatriarchExpressionDiffersFromGenericOrthodoxAndRenown(): void {
   assert(isPlayerVisibleSampleLineText(patriarchGoal ?? ''), 'patriarch goal should be player-visible');
 }
 
+function testPatriarchPressureExpressionSignals(): void {
+  const scholarPressureState = patriarchBaseState({
+    player: { age: 42 } as PlayerState,
+    flags: {
+      founding_patriarch_on_ramp_done: true,
+      founding_patriarch_midlife_pressure_done: true,
+      founding_patriarch_pressure_rule_first: true,
+    },
+  });
+  const alliancePressureState = patriarchBaseState({
+    player: { age: 42 } as PlayerState,
+    flags: {
+      founding_patriarch_on_ramp_done: true,
+      founding_patriarch_midlife_pressure_done: true,
+      founding_patriarch_pressure_alliance_first: true,
+    },
+  });
+
+  const scholarGoal = deriveSampleLineCurrentGoal(scholarPressureState);
+  const allianceGoal = deriveSampleLineCurrentGoal(alliancePressureState);
+  const scholarCost = deriveSampleLineCostLabel(scholarPressureState);
+  const allianceCost = deriveSampleLineCostLabel(alliancePressureState);
+
+  assert(scholarCost === '门派延续之重', 'pressure scholar cost label should be 门派延续之重');
+  assert(allianceCost === '门派延续之重', 'pressure alliance cost label should be 门派延续之重');
+  assert(scholarGoal?.includes('门规传承'), 'pressure scholar goal should mention 门规传承');
+  assert(scholarGoal?.includes('盟约续责'), 'pressure scholar goal should mention 盟约续责');
+  assert(allianceGoal?.includes('盟约续责'), 'pressure alliance goal should mention 盟约续责');
+  assert(allianceGoal?.includes('门规传承'), 'pressure alliance goal should mention 门规传承');
+  assert(scholarGoal !== allianceGoal, 'pressure scholar and alliance goals should be distinguishable');
+}
+
 function testPatriarchPayoffExpressionReadsCheckpoint(): void {
   const payoffState = patriarchBaseState({
     player: { age: 50 } as PlayerState,
@@ -348,6 +380,7 @@ const tests: Array<[string, () => void]> = [
   ['payoff echo shape and gate', testPayoffEchoShapeAndGate],
   ['payoff sets terminal flags', testPayoffSetsTerminalFlags],
   ['patriarch expression differs from generic orthodox and renown', testPatriarchExpressionDiffersFromGenericOrthodoxAndRenown],
+  ['patriarch pressure expression signals', testPatriarchPressureExpressionSignals],
   ['patriarch payoff expression reads checkpoint', testPatriarchPayoffExpressionReadsCheckpoint],
 ];
 

@@ -84,6 +84,15 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
       return '盟约师承各守其份，开派之路不再两头拉扯';
     }
   }
+  if (flags.founding_patriarch_midlife_pressure_done) {
+    if (flags.founding_patriarch_pressure_rule_first) {
+      return '先稳门规传承，再承接诸派盟约续责，开派担子已压实';
+    }
+    if (flags.founding_patriarch_pressure_alliance_first) {
+      return '先承接诸派盟约续责，再收束门规传承，开派担子已压实';
+    }
+    return '门规传承与盟约续责并压在肩，开派担子已压实';
+  }
   if (flags.founding_patriarch_on_ramp_done) {
     if (flags.founding_patriarch_on_ramp_scholar) {
       return '学者师徒与治学盟约并进，开宗立派的念头渐明';
@@ -674,6 +683,9 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       if (flags.founding_patriarch_payoff_dual_gate) {
         return '双门并立之累';
       }
+    }
+    if (flags.founding_patriarch_midlife_pressure_done) {
+      return '门派延续之重';
     }
     if (flags.founding_patriarch_on_ramp_done) {
       return '开派盟约之累';

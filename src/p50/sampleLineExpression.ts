@@ -126,6 +126,24 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 }
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.magnate_endgame_echo_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '商号招牌化作身后名，手艺合伙人都还记得你';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '人情商路化作身后名，欠情与引荐都成了江湖谈资';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '粮路奔波化作身后名，车马仓储都还记着你的名号';
+    }
+    if (flags.magnate_native_endgame_ledger_legacy) {
+      return '稳态招牌化作身后名，信誉比规模更长久';
+    }
+    if (flags.magnate_native_endgame_caravan_legacy) {
+      return '行市货路化作身后名，涨跌余波都成了江湖谈资';
+    }
+    return '巨贾之位化作身后回响，商号与人情都留在了江湖';
+  }
   if (flags.magnate_late_life_done) {
     // P64 bridge priority at late-life (expression only; no bridge late-life rewrite)
     if (flags.apprentice_merchant_bridge_crossed) {
@@ -555,6 +573,24 @@ export function deriveSampleLineCostLabel(state: GameState): string {
   }
   if (line === 'merchant') {
     // P66: cost label differentiation persists through pressure and payoff
+    if (flags.magnate_endgame_echo_done) {
+      if (flags.apprentice_merchant_bridge_crossed) {
+        return '手艺身后名';
+      }
+      if (flags.tavern_merchant_bridge_crossed) {
+        return '人情身后名';
+      }
+      if (flags.peasant_merchant_bridge_crossed) {
+        return '粮路身后名';
+      }
+      if (flags.magnate_native_endgame_ledger_legacy) {
+        return '稳态身后回响';
+      }
+      if (flags.magnate_native_endgame_caravan_legacy) {
+        return '行市身后回响';
+      }
+      return '巨贾身后回响';
+    }
     if (flags.magnate_late_life_done) {
       if (flags.apprentice_merchant_bridge_crossed) {
         return '合伙守成之累';
@@ -910,6 +946,24 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   }
   // P67: success-shape differentiation + P66 cost weight
   // Identity now emphasizes what KIND of success, not just where you came from
+  if (flags.magnate_endgame_identity_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '你是身后留名的手艺巨贾：从刨子到账本，商号招牌化作江湖谈资，品质合伙人都还记得你';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '你是身后留名的人情巨贾：从酒肆到商号，欠情与引荐化作江湖谈资，面子比利润更长久';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '你是身后留名的粮路巨贾：从田埂到车马，奔波与仓储化作江湖谈资，脚下的路比田埂还长';
+    }
+    if (flags.magnate_native_endgame_ledger_legacy) {
+      return '你是稳态招牌留名的巨贾：半生稳扩积势守住了信誉，晚年收束之后，江湖提起你说的不是银两多少，而是招牌立得住';
+    }
+    if (flags.magnate_native_endgame_caravan_legacy) {
+      return '你是行市货路留名的巨贾：半生赌市扩货铺了货路，晚年收势之后，江湖提起你说的不是账本多厚，而是货路走得通';
+    }
+    return '你是身后留响的巨贾：巨贾之位坐过，晚年收束过，商号与人情都化作江湖余响';
+  }
   if (flags.magnate_late_life_identity_done) {
     if (flags.apprentice_merchant_bridge_crossed) {
       return '你是守成收束的手艺巨贾：从刨子到账本，晚年仍要看着合伙人与账目，品质招牌比规模更金贵';

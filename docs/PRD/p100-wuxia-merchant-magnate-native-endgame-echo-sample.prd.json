@@ -77,8 +77,8 @@
         "npm run typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "Expression layer at endgame checkpoint."
+      "passes": true,
+      "notes": "Expression endgame tier in merchantCurrentGoal, deriveSampleLineCostLabel, merchantAge40Identity reading P99 late-life and P100 endgame markers."
     },
     {
       "id": "P100-006",

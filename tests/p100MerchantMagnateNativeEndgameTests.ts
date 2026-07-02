@@ -112,8 +112,13 @@ function testNativeLedgerEndgameCondition(): void {
   assert(evaluator.evaluate(caravanCond, caravanState), 'caravan endgame should fire for native caravan late-life');
 }
 
-function testBridgeGetsGenericNotNativeEndgame(): void {
+function testBridgeBlocksNativeEndgameGetsOriginEcho(): void {
   const evaluator = new ConditionEvaluator();
+  const apprenticeEvent = allEvents.find(e => e.id === 'magnate_endgame_echo_apprentice_craft');
+  const tavernEvent = allEvents.find(e => e.id === 'magnate_endgame_echo_tavern_network');
+  assert(Boolean(apprenticeEvent), 'magnate_endgame_echo_apprentice_craft should exist');
+  assert(Boolean(tavernEvent), 'magnate_endgame_echo_tavern_network should exist');
+
   const apprentice = merchantState({
     flags: {
       apprentice_merchant_bridge_crossed: true,
@@ -123,9 +128,22 @@ function testBridgeGetsGenericNotNativeEndgame(): void {
     player: { age: 60 } as PlayerState,
   });
   const ledgerCond = ledgerEndgameEvent!.conditions![0]!;
+  const apprenticeCond = apprenticeEvent!.conditions![0]!;
   const genericCond = genericEndgameEvent!.conditions![0]!;
   assert(!evaluator.evaluate(ledgerCond, apprentice), 'bridge blocks native ledger endgame');
-  assert(evaluator.evaluate(genericCond, apprentice), 'bridge gets generic endgame');
+  assert(evaluator.evaluate(apprenticeCond, apprentice), 'apprentice bridge gets origin-specific endgame');
+  assert(!evaluator.evaluate(genericCond, apprentice), 'bridge no longer routes to generic endgame');
+
+  const tavern = merchantState({
+    flags: {
+      tavern_merchant_bridge_crossed: true,
+      merchant_shop_grocery: false,
+    },
+    player: { age: 60 } as PlayerState,
+  });
+  const tavernCond = tavernEvent!.conditions![0]!;
+  assert(evaluator.evaluate(tavernCond, tavern), 'tavern bridge gets origin-specific endgame');
+  assert(!evaluator.evaluate(genericCond, tavern), 'tavern bridge does not get generic endgame');
 }
 
 function testEndgameGoalsDifferByTrack(): void {
@@ -191,7 +209,7 @@ function testBridgeExpressionPriorityAtEndgame(): void {
     flags: {
       magnate_endgame_echo_done: true,
       magnate_endgame_identity_done: true,
-      magnate_endgame_generic: true,
+      magnate_bridge_endgame_apprentice_craft: true,
       apprentice_merchant_bridge_crossed: true,
       magnate_native_endgame_ledger_legacy: true,
       merchant_shop_grocery: false,
@@ -351,7 +369,7 @@ export async function runP100MerchantMagnateNativeEndgameTests(): Promise<void> 
   testEndgameEventsAreAutoWithAgeBand();
   testEndgameEventsSetCheckpointFlags();
   testNativeLedgerEndgameCondition();
-  testBridgeGetsGenericNotNativeEndgame();
+  testBridgeBlocksNativeEndgameGetsOriginEcho();
   testEndgameGoalsDifferByTrack();
   testEndgameCostLabelsDifferByTrack();
   testBridgeExpressionPriorityAtEndgame();

@@ -2594,6 +2594,108 @@
     }
   },
   {
+    "id": "magnate_endgame_echo_apprentice_craft",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('apprentice_merchant_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·手艺招牌·传",
+      "text": "五十八岁这年，你坐在作坊后院的账房里，指尖抚过刨花留下的木纹。\n\n从刨子到账本，靠手艺的眼光算出了一片商路。晚年收束之后，江湖上提起你，说的不是银两多少，而是「这人招牌上的品质，合伙人都记得」。\n\n徒弟们守着规矩，老主顾记着供货的账期——手艺比规模更长久，这话你晚年懂了，身后也懂了。\n\n你想，巨贾之位终究会过去，但刨花与账本上你的名字，比人活得久。",
+      "description": "P101 巨贾 endgame — apprentice bridge craft legacy echo"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_bridge_endgame_apprentice_craft" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p101", "merchant", "magnate", "endgame", "apprentice", "bridge", "craft", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
+  },
+  {
+    "id": "magnate_endgame_echo_tavern_network",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('tavern_merchant_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·人情商路·遥",
+      "text": "五十八岁这年，你站在酒肆改建的商号门前，想起当年端酒时结识的老主顾。\n\n从酒肆到商号，靠人情的网络织出了八方商路。晚年收束之后，江湖上提起你，说的不是账本多厚，而是「这人欠的情、帮的忙，江湖都记得」。\n\n老主顾们还在串门路，欠情与引荐变了又变，可你的名字还在酒肆与商号之间——面子比利润更烫手，这话你晚年懂了，身后也懂了。\n\n你想，巨贾之位终究会过去，但人情织出的传说，比人走得远。",
+      "description": "P101 巨贾 endgame — tavern bridge network legacy echo"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_bridge_endgame_tavern_network" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p101", "merchant", "magnate", "endgame", "tavern", "bridge", "network", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
+  },
+  {
+    "id": "magnate_endgame_echo_peasant_grain",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && flags.has('peasant_merchant_bridge_crossed')"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·粮路奔波·遥",
+      "text": "五十八岁这年，你站在车马栈门口，想起当年从田埂踩出的第一条粮路。\n\n从田埂到车马，靠脚力和血汗踩出了一条商路。晚年收束之后，江湖上提起你，说的不是银两多少，而是「这人脚下的路、守的仓，车马帮都记得」。\n\n老伙计们还在跑线，仓储与工钱变了又变，可你的名字还在粮帮嘴里——脚下的路比田埂还长，这话你晚年懂了，身后也懂了。\n\n你想，巨贾之位终究会过去，但粮路上的名号，比人走得远。",
+      "description": "P101 巨贾 endgame — peasant bridge grain-route legacy echo"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_bridge_endgame_peasant_grain" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p101", "merchant", "magnate", "endgame", "peasant", "bridge", "grain", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
+  },
+  {
     "id": "magnate_endgame_echo_generic",
     "version": "1.0.0",
     "category": "main_story",
@@ -2604,13 +2706,13 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && (flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed') || (!flags.has('magnate_native_late_ledger_steady') && !flags.has('magnate_native_late_ledger_credit') && !flags.has('magnate_native_late_ledger') && !flags.has('magnate_native_late_caravan_market') && !flags.has('magnate_native_late_caravan_fast') && !flags.has('magnate_native_late_caravan') && !flags.has('magnate_native_payoff_ledger_steady') && !flags.has('magnate_native_payoff_ledger_credit') && !flags.has('magnate_native_payoff_ledger') && !flags.has('magnate_native_payoff_caravan_market') && !flags.has('magnate_native_payoff_caravan_fast') && !flags.has('magnate_native_payoff_caravan') && !flags.has('magnate_native_ledger_entry') && !flags.has('magnate_native_caravan_entry')))"
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (!flags.has('magnate_native_late_ledger_steady') && !flags.has('magnate_native_late_ledger_credit') && !flags.has('magnate_native_late_ledger') && !flags.has('magnate_native_late_caravan_market') && !flags.has('magnate_native_late_caravan_fast') && !flags.has('magnate_native_late_caravan') && !flags.has('magnate_native_payoff_ledger_steady') && !flags.has('magnate_native_payoff_ledger_credit') && !flags.has('magnate_native_payoff_ledger') && !flags.has('magnate_native_payoff_caravan_market') && !flags.has('magnate_native_payoff_caravan_fast') && !flags.has('magnate_native_payoff_caravan') && !flags.has('magnate_native_ledger_entry') && !flags.has('magnate_native_caravan_entry'))"
       }
     ],
     "content": {
       "title": "巨贾身后事·商号余响",
       "text": "五十八岁这年，你站在商号门前，想起这一路是怎么走过来的。\n\n巨贾之位坐过，晚年收束过，江湖上提起你，说的仍是商号与人情。\n\n招牌、货路、账目、欠情——都化作身后余响，比银两更长久。",
-      "description": "P100 巨贾 endgame — generic fallback (bridge or unmatched native)"
+      "description": "P100 巨贾 endgame — generic fallback (unmatched native only; bridge origins use P101 branches)"
     },
     "eventType": "auto",
     "autoEffects": [

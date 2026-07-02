@@ -1,0 +1,86 @@
+{
+  "project": "Wuxia Life P104 Merchant Martial Patron Bridge-Origin Peasant Narrow Playable",
+  "branchName": "codex/p104-wuxia-merchant-martial-patron-bridge-origin-peasant-narrow-playable",
+  "description": "Extend P103 patron bridge entry with bounded peasant bridge-origin branch via peasant_merchant_bridge_crossed. Pattern: P103 bridge-origin patron for third P63 origin. No P102/P103 rewrite, no magnate spine rewrite, no full Wave 3 graph.",
+  "userStories": [
+    {
+      "id": "P104-001",
+      "title": "Audit peasant bridge-origin patron gap",
+      "description": "As a maintainer, I want the peasant bridge-origin patron entry gap documented so P104 targets the P103 peasant deferral.",
+      "acceptanceCriteria": [
+        "Document P103 patron bridge entry gate and where peasant_merchant_bridge_crossed is not consumed",
+        "Distinguish peasant patron target from P103 apprentice/tavern closed scope",
+        "Identify prerequisite flags from P60/P103 evidence",
+        "Save one bounded report under docs/test-reports/",
+        "Do not change runtime behavior in this story",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Audit: p104-merchant-martial-patron-bridge-origin-peasant-gap-audit.md"
+    },
+    {
+      "id": "P104-002",
+      "title": "Lock peasant patron bridge scope contract",
+      "description": "As a planner, I want a scope contract so P104 stays a bounded peasant patron entry and does not sprawl.",
+      "acceptanceCriteria": [
+        "Define peasant-specific patron entry event band and checkpoint flags",
+        "Define allowed surfaces: spine wiring, expression, narrow proof",
+        "Define forbidden items: P102/P103 rewrite, magnate spine rewrite, full mixed graph, new UI, heavy stat changes",
+        "State peasant vs apprentice/tavern vs native entry priority rules",
+        "Save scope contract under docs/test-reports/",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P104-003",
+      "title": "Wire peasant bridge-origin into patron bridge entry",
+      "description": "As a player, I want my farm-peasant bridge origin to open a patron path so the third ordinary bridge origin is playable.",
+      "acceptanceCriteria": [
+        "Patron bridge entry reads peasant_merchant_bridge_crossed or equivalent",
+        "Peasant path produces distinct player-facing text, condition branch, or downstream marker vs apprentice/tavern",
+        "Change sets at least one peasant-specific patron checkpoint flag beyond flavor-only text",
+        "P102 native and P103 apprentice/tavern patron paths remain reachable and unchanged",
+        "P97-P101 magnate tests pass",
+        "npm run typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P104-004",
+      "title": "Strengthen peasant bridge-origin patron expression",
+      "description": "As a player, I want patron goals and identity labels to reflect my peasant bridge origin.",
+      "acceptanceCriteria": [
+        "Add or refine at least one player-facing expression pair for peasant bridge-origin patron path",
+        "Expression reads peasant_merchant_bridge_crossed or peasant checkpoint flag",
+        "Native P102 and P103 bridge expressions retain priority when their markers are set",
+        "Magnate expressions retain priority when magnate markers are set",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P104-005",
+      "title": "Add narrow proof and stage closure",
+      "description": "As a maintainer, I want proof, tests, and a closure report for peasant bridge-origin patron differentiation.",
+      "acceptanceCriteria": [
+        "Add focused test covering peasant bridge-origin path through patron checkpoint",
+        "Produce proof artifact under docs/test-reports/",
+        "Save closure report stating what P104 proves and what remains deferred",
+        "npm run typecheck passes",
+        "P102 and P103 patron bridge tests pass",
+        "npm run guard:sample-lines-baseline passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

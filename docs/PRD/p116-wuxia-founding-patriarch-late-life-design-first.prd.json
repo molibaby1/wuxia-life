@@ -59,8 +59,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Contract: docs/PRD/p116-founding-patriarch-late-life-contract.md"
     },
     {
       "id": "P116-005",

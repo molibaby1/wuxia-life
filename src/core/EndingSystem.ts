@@ -360,89 +360,42 @@ export class EndingSystem {
     data: EndingEvaluationData,
     requirements: EndingInfo['requirements']
   ): boolean {
-    // 检查属性要求
-    if (requirements.chivalry !== undefined) {
-      // 侠义要求：如果要求是负数，表示必须低于该值；如果要求是正数，表示必须高于该值
-      if (requirements.chivalry < 0) {
-        // 要求侠义低于某值（如遗臭万年）
-        if (data.chivalry > requirements.chivalry) {
-          return false;
-        }
-      } else {
-        // 要求侠义高于某值（如传奇英雄）
-        if (data.chivalry < requirements.chivalry) {
-          return false;
-        }
-      }
-    }
-    
-    if (requirements.money !== undefined && data.money < requirements.money) {
-      return false;
-    }
-    if (requirements.comprehension !== undefined && data.comprehension < requirements.comprehension) {
-      return false;
-    }
-    if (requirements.knowledge !== undefined && data.knowledge < requirements.knowledge) {
-      return false;
-    }
-    if (requirements.reputation !== undefined && data.reputation < requirements.reputation) {
-      return false;
-    }
-    if (requirements.martialPower !== undefined && data.martialPower < requirements.martialPower) {
-      return false;
-    }
-    if (requirements.externalSkill !== undefined && data.externalSkill < requirements.externalSkill) {
-      return false;
-    }
-    if (requirements.internalSkill !== undefined && data.internalSkill < requirements.internalSkill) {
-      return false;
-    }
-    if (requirements.qinggong !== undefined && data.qinggong < requirements.qinggong) {
-      return false;
-    }
-    if (requirements.connections !== undefined && data.connections < requirements.connections) {
-      return false;
-    }
-    if (requirements.businessAcumen !== undefined && data.businessAcumen < requirements.businessAcumen) {
-      return false;
-    }
-    if (requirements.influence !== undefined && data.influence < requirements.influence) {
-      return false;
-    }
-    if (requirements.good_karma !== undefined && data.good_karma < requirements.good_karma) {
-      return false;
-    }
-    if (requirements.evil_karma !== undefined && data.evil_karma < requirements.evil_karma) {
-      return false;
-    }
-    if (requirements.age !== undefined && data.age < requirements.age) {
-      return false;
+    const numericFields: Array<keyof EndingInfo['requirements']> = [
+      'money', 'comprehension', 'knowledge', 'reputation', 'martialPower',
+      'externalSkill', 'internalSkill', 'qinggong', 'connections',
+      'businessAcumen', 'influence', 'good_karma', 'evil_karma', 'age',
+    ];
+
+    for (const field of numericFields) {
+      const threshold = requirements[field];
+      if (threshold === undefined) continue;
+      const value = data[field as keyof EndingEvaluationData] as number;
+      if (value < threshold) return false;
     }
 
-    // 检查 Flag 要求
+    if (requirements.chivalry !== undefined) {
+      if (requirements.chivalry < 0) {
+        if (data.chivalry > requirements.chivalry) return false;
+      } else {
+        if (data.chivalry < requirements.chivalry) return false;
+      }
+    }
+
     if (requirements.flags) {
       for (const flag of requirements.flags) {
-        if (!data.flags.includes(flag)) {
-          return false;
-        }
+        if (!data.flags.includes(flag)) return false;
       }
     }
 
-    // 检查 not_flags 要求
     if (requirements.not_flags) {
       for (const flag of requirements.not_flags) {
-        if (data.flags.includes(flag)) {
-          return false;
-        }
+        if (data.flags.includes(flag)) return false;
       }
     }
 
-    // 检查成就要求
     if (requirements.achievements) {
       for (const achievement of requirements.achievements) {
-        if (!data.achievements.includes(achievement)) {
-          return false;
-        }
+        if (!data.achievements.includes(achievement)) return false;
       }
     }
 

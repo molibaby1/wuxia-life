@@ -141,6 +141,7 @@ export function executeActiveActionOnState(
   });
 
   const actionDef = getActionById(resolved.actionId);
+  const beforeBusinessHabit = state.player.lifeStates?.businessHabit ?? 0;
   if (actionDef?.onCompleteFlags?.length) {
     if (!state.flags) state.flags = {};
     if (!state.player.flags) state.player.flags = {};
@@ -216,8 +217,18 @@ export function executeActiveActionOnState(
       ? '练功'
       : resolved.metadata.category === 'study'
         ? '读书'
-        : '交游';
-  const feedbackText = `${categoryLabel}告一段落。${resolved.metadata.rewardSummary}`;
+        : resolved.metadata.category === 'business'
+          ? '营生'
+          : '交游';
+  const afterBusinessHabit = state.player.lifeStates?.businessHabit ?? 0;
+  let feedbackText = `${categoryLabel}告一段落。${resolved.metadata.rewardSummary}`;
+  if (
+    resolved.metadata.category === 'business'
+    && beforeBusinessHabit < 2
+    && afterBusinessHabit >= 2
+  ) {
+    feedbackText += ' 营生塑形渐成，日后或有机会独当一面。';
+  }
 
   return {
     actionResult: resolved,

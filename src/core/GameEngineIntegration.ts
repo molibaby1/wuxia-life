@@ -46,7 +46,6 @@ import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSe
 import { getArchetypeSchedulingMultiplier } from '../p20/archetypeCoverage';
 import { getProfileRepetitionPressureMultiplier } from '../p20/repetitionPressure';
 import { getWholeLifePacingMultiplier } from '../p20/wholeLifePacing';
-import { applyLiveOpsActivationToState } from '../p22/liveOpsActivation';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
@@ -480,31 +479,16 @@ export class GameEngineIntegration {
     return limitedEvents;
   }
 
-  /** ponytail: mandatory/mainline events must survive FORMAL_CANDIDATE_POOL_CAP trimming. */
+  /** ponytail: scheduling-critical events must survive FORMAL_CANDIDATE_POOL_CAP trimming. */
   private isSchedulingValidationEvent(event: EventDefinition): boolean {
     const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
     return (
       tags.includes('p9') ||
       tags.includes('p11') ||
+      tags.includes('hvg') ||
       tags.includes('causality_echo') ||
       (tags.includes('mandatory') && tags.includes('mainline'))
     );
-  }
-
-  private injectMandatoryCandidates(
-    availableEvents: EventDefinition[],
-    limitedEvents: EventDefinition[],
-  ): EventDefinition[] {
-    const result = [...limitedEvents];
-    const selectedIds = new Set(result.map(event => event.id));
-    for (const event of availableEvents) {
-      if (selectedIds.has(event.id) || !this.isSchedulingValidationEvent(event)) {
-        continue;
-      }
-      result.push(event);
-      selectedIds.add(event.id);
-    }
-    return result;
   }
 
   /**
@@ -827,7 +811,7 @@ export class GameEngineIntegration {
     return result;
   }
 
-  /** Ensure exact-age mandatory events are not dropped by FORMAL_CANDIDATE_POOL_CAP. */
+  /** Ensure scheduling-validation and exact-age mandatory events survive FORMAL_CANDIDATE_POOL_CAP. */
   private injectMandatoryCandidates(
     availableEvents: EventDefinition[],
     limitedEvents: EventDefinition[],
@@ -835,6 +819,14 @@ export class GameEngineIntegration {
     const result = [...limitedEvents];
     const selectedIds = new Set(result.map(event => event.id));
     const currentAge = this.gameState.player?.age ?? 0;
+
+    for (const event of availableEvents) {
+      if (selectedIds.has(event.id) || !this.isSchedulingValidationEvent(event)) {
+        continue;
+      }
+      result.push(event);
+      selectedIds.add(event.id);
+    }
 
     for (const event of availableEvents) {
       if (selectedIds.has(event.id) || !this.isMandatoryEvent(event)) {
@@ -2116,19 +2108,17 @@ export class GameEngineIntegration {
     options?: { enableLiveOpsActivation?: boolean },
   ): void {
     const nextState = this.createInitialState();
-    const profile = traitSystem.generateProfile();
+    const profile = traitSystem.generateLatentProfile();
     nextState.player = traitSystem.applyProfile(
       {
         ...nextState.player,
         name,
         gender,
       },
-      profile
+      profile,
+      { bindOrigin: false },
     );
-    const enableLiveOps = options?.enableLiveOpsActivation !== false;
-    this.applyGameState(
-      enableLiveOps ? applyLiveOpsActivationToState(nextState, profile) : nextState,
-    );
+    this.applyGameState(nextState);
   }
   
   /**

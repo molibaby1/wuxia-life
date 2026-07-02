@@ -8,7 +8,8 @@ import { getActionById, getMinimumActions } from '../data/activeActionCatalog';
 import { getP8PersonaById } from '../p8/personas';
 import type { PersonaActionStrategy } from '../p8/types';
 import type { GameState, PlayerState } from '../types/eventTypes';
-import { getOriginSurfaceForPlayer } from './originSurfaces';
+import { resolvePrimaryOriginFamilyFlag } from './primaryOriginFlag';
+import { getCanonicalOriginSurfaceForGameplay } from './originSurfaces';
 
 export const INFANT_MAX_AGE = 2;
 export const DAILY_PLANNING_MIN_AGE = 5;
@@ -151,7 +152,7 @@ function scoreChildhoodCategories(
 
   bump('training', 1);
 
-  const surface = getOriginSurfaceForPlayer(player);
+  const surface = getCanonicalOriginSurfaceForGameplay(player, flags);
   if (surface) {
     const { guidanceQuality, socialCapital, familyResources, hardshipExposure } =
       surface.immediateConditions;
@@ -184,14 +185,47 @@ function isLateChildhoodBand(age: number): boolean {
   return age > EARLY_CHILDHOOD_MAX_AGE && age <= CHILDHOOD_MAX_AGE;
 }
 
-function isCategoryAllowedForChildhoodAge(category: ActionCategory, age: number): boolean {
+function hasTruthyFlag(flags: Record<string, unknown>, key: string): boolean {
+  const value = flags[key];
+  return value !== undefined && value !== false && value !== null && value !== '';
+}
+
+function isMerchantHouseOrigin(
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
+): boolean {
+  const state = {
+    player,
+    flags: {
+      ...(flags ?? {}),
+      ...(player?.flags ?? {}),
+    },
+  } as GameState;
+  return resolvePrimaryOriginFamilyFlag(state) === 'origin_merchant_family';
+}
+
+/** ponytail: merchant-only carve-out; upgrade path is per-origin late-childhood policy table */
+export const MERCHANT_LATE_CHILDHOOD_BUSINESS_LITE_ID = 'action_household_apprentice';
+
+function isCategoryAllowedForChildhoodAge(
+  category: ActionCategory,
+  age: number,
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
+): boolean {
   if (!isLateChildhoodBand(age)) return true;
+  if (category === 'business' && isMerchantHouseOrigin(player, flags)) return true;
   if (LATE_CHILDHOOD_SUPPRESSED_CATEGORIES.has(category)) return false;
   return LATE_CHILDHOOD_ALLOWLIST_CATEGORIES.has(category);
 }
 
-function childhoodLiteForCategory(category: ActionCategory, age: number): ActiveActionDefinition | undefined {
-  if (!isCategoryAllowedForChildhoodAge(category, age)) return undefined;
+function childhoodLiteForCategory(
+  category: ActionCategory,
+  age: number,
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
+): ActiveActionDefinition | undefined {
+  if (!isCategoryAllowedForChildhoodAge(category, age, player, flags)) return undefined;
   const actionId = resolveLiteActionMapForAge(age)[category];
   return getChildhoodActionById(actionId);
 }
@@ -218,11 +252,13 @@ function youthPrefersLiteForCategory(category: ActionCategory, age: number): boo
 function youthActionForCategory(
   category: ActionCategory,
   age: number,
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
 ): ActiveActionDefinition | undefined {
   if (!YOUTH_ALLOWED_CATEGORIES.has(category)) return undefined;
 
   if (youthPrefersLiteForCategory(category, age)) {
-    const lite = childhoodLiteForCategory(category, age);
+    const lite = childhoodLiteForCategory(category, age, player, flags);
     if (lite) return lite;
   }
 
@@ -245,11 +281,11 @@ export function resolveYouthActionPalette(context: ChildhoodPaletteContext): Act
 
   for (const [category] of ranked) {
     if (palette.length >= YOUTH_PALETTE_MAX_CATEGORIES) break;
-    let action = youthActionForCategory(category, age);
+    let action = youthActionForCategory(category, age, player, flags);
     if (!action || seen.has(action.id)) continue;
     const isBasic = ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(action.id);
     if (isBasic && basicCount >= YOUTH_MAX_BASIC_PER_PALETTE) {
-      action = childhoodLiteForCategory(category, age);
+      action = childhoodLiteForCategory(category, age, player, flags);
       if (!action || seen.has(action.id)) continue;
     }
     if (ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(action.id)) {
@@ -297,8 +333,8 @@ export function resolveChildhoodActionPalette(
   const seen = new Set<string>();
   for (const [category] of ranked) {
     if (palette.length >= maxCategories) break;
-    if (!isCategoryAllowedForChildhoodAge(category, age)) continue;
-    const action = childhoodLiteForCategory(category, age);
+    if (!isCategoryAllowedForChildhoodAge(category, age, player, flags)) continue;
+    const action = childhoodLiteForCategory(category, age, player, flags);
     if (!action || seen.has(action.id)) continue;
     seen.add(action.id);
     palette.push(action);
@@ -310,9 +346,21 @@ export function resolveChildhoodActionPalette(
   }
 
   if (flags?.p8_route_demonic === true && age >= 5 && age <= 9) {
-    const travelAction = childhoodLiteForCategory('travel', age);
+    const travelAction = childhoodLiteForCategory('travel', age, player, flags);
     if (travelAction && !seen.has(travelAction.id)) {
       palette.push(travelAction);
+    }
+  }
+
+  // ponytail: merchant_house must see business lite in real play, not only when persona ranks business high
+  if (
+    isMerchantHouseOrigin(player, flags)
+    && age >= DAILY_PLANNING_MIN_AGE
+    && age <= CHILDHOOD_MAX_AGE
+  ) {
+    const businessAction = childhoodLiteForCategory('business', age, player, flags);
+    if (businessAction && !seen.has(businessAction.id)) {
+      palette.push(businessAction);
     }
   }
 
@@ -370,11 +418,6 @@ export function childhoodPalettesDifferByArchetype(): boolean {
   const allOnlyTraining = sets.every(ids => ids.every(id => id === 'action_childhood_training'));
   const pairwiseDistinct = scholar.join() !== business.join() || scholar.join() !== social.join();
   return !allOnlyTraining && pairwiseDistinct;
-}
-
-function hasTruthyFlag(flags: Record<string, unknown>, key: string): boolean {
-  const value = flags[key];
-  return value !== undefined && value !== false && value !== null && value !== '';
 }
 
 function childhoodRouteLocked(flags: Record<string, unknown>): {
@@ -455,7 +498,7 @@ export function applyYouthTransitionSeeds(
   if (previousAge >= YOUTH_MIN_AGE || newAge < YOUTH_MIN_AGE) {
     return;
   }
-  const surface = getOriginSurfaceForPlayer(state.player);
+  const surface = getCanonicalOriginSurfaceForGameplay(state.player, state.flags);
   if (!surface) {
     return;
   }

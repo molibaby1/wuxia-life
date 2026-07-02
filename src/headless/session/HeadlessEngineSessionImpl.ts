@@ -32,7 +32,7 @@ import {
   appendPassiveTitleToHistory,
 } from '../../data/preschoolPassiveSpine';
 import { applyPassiveNarrativeFlags } from '../../data/originInfantPassiveChain';
-import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning, EARLY_CHILDHOOD_MAX_AGE } from '../../p16/childhoodAgency';
+import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning, EARLY_CHILDHOOD_MAX_AGE, CHILDHOOD_MAX_AGE } from '../../p16/childhoodAgency';
 import { progressUntilChoiceOrTerminal } from '../progressionLoop';
 import type { PlanningOptionDto } from '../../contracts/sessionProgression';
 import type { SessionPhase } from '../../contracts/sessionProgression';
@@ -560,12 +560,15 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       this.ensurePassivePresentation();
       return 'passive_progression';
     }
-    // Only return story_event for forced events if not in passive-preferred age range
-    if (this.engine.hasPendingForcedEvent()) {
-      return 'story_event';
-    }
     if (!shouldOfferDailyPlanning(age)) {
       return 'passive_progression';
+    }
+    const planningActions = this.engine.getAvailableActiveActions();
+    if (age <= CHILDHOOD_MAX_AGE && planningActions.length > 0) {
+      return 'active_planning';
+    }
+    if (this.engine.hasPendingForcedEvent()) {
+      return 'story_event';
     }
     return 'active_planning';
   }
@@ -714,7 +717,9 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       this.volatile.pendingPeriodSummary = null;
       await this.resolveAfterPlanningAck();
-      this.ensurePassivePresentation();
+      if (this.getSessionPhase() !== 'active_planning') {
+        this.ensurePassivePresentation();
+      }
       return;
     }
     throw new ProgressionError('INVALID_ACK_KIND', `Unknown ackKind: ${ackKind}`);
@@ -722,6 +727,13 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
 
   private async resolveAfterPlanningAck(): Promise<void> {
     this.volatile.currentEvent = null;
+    const age = this.engine.getGameState().player?.age ?? 0;
+    if (shouldOfferDailyPlanning(age)) {
+      const actions = this.engine.getAvailableActiveActions();
+      if (actions.length > 0) {
+        return;
+      }
+    }
     let guard = 0;
     while (guard < 8) {
       guard += 1;
@@ -732,7 +744,6 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       const actions = this.engine.getAvailableActiveActions();
       if (actions.length > 0) return;
-      const age = this.engine.getGameState().player?.age ?? 0;
       if (!shouldOfferDailyPlanning(age)) {
         this.ensurePassivePresentation();
         return;

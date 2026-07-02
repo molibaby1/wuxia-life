@@ -14,6 +14,7 @@ import type {
   EventCondition,
   GameState,
   IConditionEvaluator,
+  PlayerLifeStates,
 } from '../types/eventTypes';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
 
@@ -164,9 +165,9 @@ export class ConditionEvaluator implements IConditionEvaluator {
     this.handlers.set('stat_check', {
       evaluate: (params, state) => {
         const { stat, min, max } = params || {};
-        const value = (state.player as any)[stat];
+        if (typeof stat !== 'string') return false;
+        const value = readPlayerNumeric(state.player, stat);
         
-        if (value === undefined) return false;
         if (min !== undefined && value < min) return false;
         if (max !== undefined && value > max) return false;
         
@@ -454,7 +455,7 @@ class ConditionExpressionParser {
     }
 
     if (ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has(identifier)) {
-      return (this.state.player as any)?.[identifier] ?? 0;
+      return readPlayerNumeric(this.state.player, identifier);
     }
 
     throw this.error(`Unsupported property "${identifier}"`, token.position);
@@ -505,11 +506,12 @@ class ConditionExpressionParser {
     if (property.startsWith('lifeStates.')) {
       const lifeStateKey = property.slice('lifeStates.'.length);
       this.assertSafeProperty(lifeStateKey, position);
-      return this.state.player?.lifeStates?.[lifeStateKey as keyof typeof this.state.player.lifeStates] ?? 0;
+      return this.state.player?.lifeStates?.[lifeStateKey as keyof PlayerLifeStates] ?? 0;
     }
 
     this.assertSafeProperty(property, position);
-    return (this.state.player as any)?.[property];
+    const playerRecord = this.state.player as unknown as Record<string, unknown>;
+    return playerRecord[property];
   }
 
   private toBoolean(value: unknown): boolean {

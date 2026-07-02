@@ -18,6 +18,7 @@ const SPINE_EVENT_IDS = [
   'demonic_age40_identity_summary',
   'demonic_age45_territory_consolidation',
   'merchant_childhood_seed_milestone',
+  'hvg_merchant_early_opportunity_fork',
   'merchant_age40_identity_summary',
   'merchant_midlife_debt_milestone',
   'merchant_age45_expansion_fork',
@@ -144,10 +145,15 @@ async function testOrthodox301Age25Goal(): Promise<void> {
     routeTrack: 'sect',
     sampleId: 'golden-sect',
   });
+  // mandatory mainline reinjection can surface orthodox_age25_righteousness_cost_milestone first
   assertAge25Goal(
     'seed 301',
     report,
-    (goal) => goal.includes('行侠') || goal.includes('门派'),
+    (goal) =>
+      goal.includes('行侠')
+      || goal.includes('门派')
+      || goal.includes('守正')
+      || goal.includes('义务'),
     ['店铺', '经营', '试探底线', '力量与地盘'],
   );
 }

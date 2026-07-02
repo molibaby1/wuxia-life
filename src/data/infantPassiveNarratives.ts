@@ -5,7 +5,7 @@ import {
   ORIGIN_FLAG_TO_PASSIVE_TAG,
   selectOrderedOriginInfantPassive,
 } from './originInfantPassiveChain';
-import { resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
+import { resolvePassiveGapPlaceholderText, resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
 import { selectPreschoolPassiveEntry } from './preschoolPassiveSpine';
 
 export type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
@@ -43,7 +43,7 @@ function scoreNarrative(entry: PassiveNarrativeEntry, originTags: Set<string>): 
 }
 
 function buildInfantPassiveGapEntry(age: number): PassiveNarrativeEntry {
-  const placeholder = resolvePlanningPlaceholderText(age);
+  const placeholder = resolvePassiveGapPlaceholderText(age);
   return {
     id: 'infant_passive_gap',
     title: placeholder.title,

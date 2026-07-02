@@ -226,23 +226,87 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has('merchant_childhood_seed_done') && (flags.has('p8_route_wealth') || flags.has('p9_echo_business_hook'))"
+        "expression": "!flags.has('merchant_childhood_seed_done') && flags.has('origin_merchant_family') && flags.has('p9_echo_business_hook') && lifeStates.businessHabit >= 2"
       }
     ],
     "content": {
-      "title": "营商天赋",
-      "text": "你从小对买卖、账本、货价格外敏感。长辈说你有营商之才，日后或可走商路立业。",
-      "description": "P47 M-1 童年种子"
+      "title": "营生塑形初现",
+      "text": "你反复帮家里跑腿、记账、认货，长辈说你不是一时贪玩——营生塑形已经初现，日后或可走商路立业。",
+      "description": "HVG 商贾童年营生塑形确认"
     },
-    "eventType": "auto",
-    "autoEffects": [
-      { "type": "flag_set", "target": "merchant_childhood_seed_done" },
-      { "type": "flag_set", "target": "route_merchant" },
-      { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "embrace_business_shaping",
+        "text": "认下这门路，继续练手",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_childhood_seed_done" },
+          { "type": "flag_set", "target": "route_merchant" },
+          { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+        ]
+      },
+      {
+        "id": "hold_business_shaping",
+        "text": "先不急着定论，再多看看",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_childhood_seed_done" },
+          { "type": "flag_set", "target": "route_merchant" },
+          { "type": "flag_set", "target": "hvg_merchant_shaping_watching" },
+          { "type": "event_record", "target": "merchant_childhood_seed_milestone" }
+        ]
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "merchant", "childhood", "mainline", "once"]
+      "tags": ["p47", "hvg", "merchant", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "hvg_merchant_early_opportunity_fork",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 99,
+    "ageRange": { "min": 9, "max": 11 },
+    "triggers": [{ "type": "age_reach", "value": 9 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_childhood_seed_done') && flags.has('origin_merchant_family') && !flags.has('hvg_merchant_early_fork_done')"
+      }
+    ],
+    "content": {
+      "title": "商路初分",
+      "text": "营生塑形既已初现，家里开始让你接触更实在的买卖分寸：是跟着父亲学管账，还是跟商队伙计认货路？",
+      "description": "HVG 商贾早期营生塑形承接分岔"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_apprentice_track",
+        "text": "跟父亲学管账，把账本练熟",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_track" },
+          { "type": "flag_set", "target": "hvg_merchant_early_fork_done" },
+          { "type": "event_record", "target": "hvg_merchant_early_opportunity_fork" }
+        ]
+      },
+      {
+        "id": "caravan_apprentice_track",
+        "text": "跟商队伙计认货路，多见市面",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_track" },
+          { "type": "flag_set", "target": "hvg_merchant_early_fork_done" },
+          { "type": "event_record", "target": "hvg_merchant_early_opportunity_fork" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["hvg", "merchant", "childhood", "mainline", "once"]
     }
   },
   {

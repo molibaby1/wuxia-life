@@ -5,7 +5,7 @@
 import preschoolPassiveSpineJson from './lines/preschool-passive-spine.json';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
 import { infantPassiveNarrativeCatalog } from './infantPassiveNarrativeCatalog';
-import { resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
+import { resolvePassiveGapPlaceholderText } from './passivePlanningPlaceholder';
 import type { GameState } from '../types/eventTypes';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { ORIGIN_FLAG_TO_PASSIVE_TAG } from './originInfantPassiveChain';
@@ -91,7 +91,7 @@ export function isForeignExclusivePreschoolEntry(
 }
 
 function buildPreschoolPassiveGapEntry(age: number, recentTitles: string[] = []): PreschoolPassiveEntry {
-  const placeholder = resolvePlanningPlaceholderText(age);
+  const placeholder = resolvePassiveGapPlaceholderText(age);
   const rotatedTitles =
     age <= 4
       ? [placeholder.title, '檐下晚晴', '童稚年月', '静听风言', '庭院时光']

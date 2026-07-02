@@ -10,7 +10,8 @@ export const P22_WEAK_ORIGIN_IDS: ReadonlySet<OriginId> = new Set([
   'merchant_house',
 ]);
 
-export function shouldActivateLiveOpsForOrigin(originId: OriginId | string): boolean {
+export function shouldActivateLiveOpsForOrigin(originId: OriginId | string | undefined): boolean {
+  if (!originId) return false;
   return P22_WEAK_ORIGIN_IDS.has(originId as OriginId);
 }
 
@@ -18,7 +19,7 @@ export function applyLiveOpsActivationFlags<T extends Record<string, unknown>>(
   flags: T,
   profile: Pick<PlayerTraitProfile, 'origin'>,
 ): T & { p22_live_ops_active?: boolean; p22_weak_origin_band?: boolean } {
-  if (!shouldActivateLiveOpsForOrigin(profile.origin)) {
+  if (!profile.origin || !shouldActivateLiveOpsForOrigin(profile.origin)) {
     return flags;
   }
   return {

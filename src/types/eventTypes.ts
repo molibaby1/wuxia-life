@@ -273,7 +273,8 @@ export interface OriginConfig {
 }
 
 export interface PlayerTraitProfile {
-  origin: OriginId;
+  /** Set after origin_background; absent on fresh new game. */
+  origin?: OriginId;
   coreTalent: CoreTalentId;
   weakness: WeaknessId;
   temperament: TemperamentId;

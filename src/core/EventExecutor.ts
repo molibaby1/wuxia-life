@@ -27,6 +27,7 @@ import {
   applyPrimaryOriginFamilyExclusivity,
   isPrimaryOriginFamilyFlag,
 } from '../p16/primaryOriginFlag';
+import { syncTraitOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
 import { IdentitySystem } from './IdentitySystem';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
@@ -441,23 +442,21 @@ export class FlagSetHandler implements EffectHandler {
       [flagName]: flagValue,
     };
 
-    // origin_background 四选一：设置主出身 flag 时清除其他四主 flag（trait startingFlags 可能已写入冲突项）
+    // origin_background 四选一：设置主出身 flag 时清除其他四主 flag
     if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
       newFlags = applyPrimaryOriginFamilyExclusivity(newFlags, flagName);
     }
-    
+
     // 如果设置 sect_faction，需要清除旧阵营的标记
     if (flagName === 'sect_faction' && flagValue) {
       const faction = flagValue as string;
-      
-      // 清除其他阵营标记
+
       if (faction === 'orthodox') {
         newFlags = {
           ...newFlags,
           sect_faction: 'orthodox',
           orthodox_member: true,
         };
-        // 清除 unconventional 阵营标记
         delete newFlags['unconventional_member'];
       } else if (faction === 'unconventional') {
         newFlags = {
@@ -465,7 +464,6 @@ export class FlagSetHandler implements EffectHandler {
           sect_faction: 'unconventional',
           unconventional_member: true,
         };
-        // 清除 orthodox 阵营标记
         delete newFlags['orthodox_member'];
         delete newFlags['route_orthodox'];
       } else if (faction === 'neutral' || faction === 'none') {
@@ -473,13 +471,12 @@ export class FlagSetHandler implements EffectHandler {
           ...newFlags,
           sect_faction: 'neutral',
         };
-        // 清除所有阵营标记
         delete newFlags['orthodox_member'];
         delete newFlags['unconventional_member'];
       }
     }
-    
-    const result = {
+
+    let result: GameState = {
       ...state,
       flags: newFlags,
       player: {
@@ -487,6 +484,9 @@ export class FlagSetHandler implements EffectHandler {
         flags: newFlags,
       },
     };
+    if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
+      result = syncTraitOriginFromPrimaryChoice(result, flagName);
+    }
     return RouteStateManager.syncFromFlagSet(result, flagName, flagValue);
   }
 }

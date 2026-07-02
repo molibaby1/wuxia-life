@@ -7,7 +7,7 @@ import type { GameState } from '../types/eventTypes';
 import originInfantPassivesJson from './lines/origin-infant-passives.json';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
 import { getRecentPassiveNarrativeTitles } from './preschoolPassiveSpine';
-import { resolvePlanningPlaceholderText } from './passivePlanningPlaceholder';
+import { resolvePassiveGapPlaceholderText } from './passivePlanningPlaceholder';
 
 export interface OriginInfantPassiveNode {
   id: string;
@@ -170,7 +170,7 @@ export function selectOriginInfantSharedFiller(
     pool[0]!.title === lastTitle &&
     recentTitles.filter(title => title === lastTitle).length >= 1
   ) {
-    const placeholder = resolvePlanningPlaceholderText(age);
+    const placeholder = resolvePassiveGapPlaceholderText(age);
     const rotated =
       age <= 1
         ? ['褓中微光', '榻上咿声', '童声初闻', placeholder.title]

@@ -2,11 +2,13 @@
  * Stage-9 US-002: 8-12 P16 agency guardrails matrix.
  */
 import { getActionById } from '../src/data/activeActionCatalog';
+import { getChildhoodActionById } from '../src/data/childhoodActionCatalog';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameStateSnapshot } from '../src/contracts/gameStateSnapshot';
 import {
   ADULT_CHILDHOOD_BLOCKED_ACTIONS,
   LATE_CHILDHOOD_SUPPRESSED_CATEGORIES,
+  MERCHANT_LATE_CHILDHOOD_BUSINESS_LITE_ID,
   resolveChildhoodActionPalette,
 } from '../src/p16/childhoodAgency';
 import type { PrimaryOriginFamilyFlag } from '../src/p16/primaryOriginFlag';
@@ -31,10 +33,21 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function isSuppressedLateChildhoodActionId(actionId: string, age: number): boolean {
+function isSuppressedLateChildhoodActionId(
+  actionId: string,
+  age: number,
+  traitOrigin?: string,
+): boolean {
   if (age < 8 || age > 12) return ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(actionId);
   if (ADULT_CHILDHOOD_BLOCKED_ACTIONS.has(actionId)) return true;
-  const category = getActionById(actionId)?.category;
+  if (
+    traitOrigin === 'merchant_house'
+    && actionId === MERCHANT_LATE_CHILDHOOD_BUSINESS_LITE_ID
+  ) {
+    return false;
+  }
+  const category =
+    getActionById(actionId)?.category ?? getChildhoodActionById(actionId)?.category;
   return Boolean(category && LATE_CHILDHOOD_SUPPRESSED_CATEGORIES.has(category));
 }
 
@@ -76,7 +89,7 @@ function testPaletteMatrix(): void {
         });
         for (const action of palette) {
           assert(
-            !isSuppressedLateChildhoodActionId(action.id, age),
+            !isSuppressedLateChildhoodActionId(action.id, age, origin.traitOrigin),
             `${origin.name} age ${age} tick ${tick}: suppressed action ${action.id}`,
           );
         }
@@ -110,7 +123,7 @@ async function testHeadlessPlanningMatrix(): Promise<void> {
         assert(options.length >= 1, `${origin.name} age ${age} tick ${tick}: empty planning options`);
         for (const option of options) {
           assert(
-            !isSuppressedLateChildhoodActionId(option.actionId, age),
+            !isSuppressedLateChildhoodActionId(option.actionId, age, origin.traitOrigin),
             `${origin.name} age ${age} tick ${tick}: headless suppressed id ${option.actionId}`,
           );
         }

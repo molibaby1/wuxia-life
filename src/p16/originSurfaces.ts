@@ -1,7 +1,9 @@
 import { getWorldProfile } from '../narrative/worldProfile';
 import type { WorldProfileOriginSurface } from '../narrative/profile/types';
-import type { PlayerState } from '../types/eventTypes';
+import type { GameState, PlayerState } from '../types/eventTypes';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
+import { resolvePrimaryOriginFamilyFlag } from './primaryOriginFlag';
+import { PRIMARY_ORIGIN_TO_TRAIT_ORIGIN } from './primaryOriginTraitBridge';
 
 export function getOriginSurfaceForPlayer(
   player: PlayerState | undefined,
@@ -11,6 +13,23 @@ export function getOriginSurfaceForPlayer(
   if (!originId) return undefined;
   const surfaces = getWorldProfile(worldId).originSurfaces ?? [];
   return surfaces.find(surface => surface.originId === originId);
+}
+
+/**
+ * Childhood / sample-line gameplay: primary origin flag is canonical; trait-only origin is ignored.
+ */
+export function getCanonicalOriginSurfaceForGameplay(
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
+  worldId = 'wuxia',
+): WorldProfileOriginSurface | undefined {
+  const state = {
+    player,
+    flags: { ...(flags ?? {}), ...(player?.flags ?? {}) },
+  } as GameState;
+  const primary = resolvePrimaryOriginFamilyFlag(state);
+  if (!primary) return undefined;
+  return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
 }
 
 export function getOriginSurfaceById(

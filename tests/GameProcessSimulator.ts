@@ -427,6 +427,7 @@ export class GameProcessSimulator {
       }
 
       this.gameState = gameEngine.getGameState();
+      record.gameState = JSON.parse(JSON.stringify(this.gameState));
       if (!record.outcomeText) {
         const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
         const baseOutcomeText = event.autoEffects?.length

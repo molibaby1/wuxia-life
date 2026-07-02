@@ -44,6 +44,7 @@ export function runPreschoolPlaceholderGovernanceTests(): void {
 
   const age5 = resolvePlanningPlaceholderText(5);
   assert(age5.title === '童年时光', 'age 5 childhood framing');
+  assert(age5.text.includes('可从下方择一'), 'age 5 planning intro may invite lite actions');
   assertChildhoodPlanningFraming(5);
 
   const age7 = resolvePlanningPlaceholderText(7);

@@ -32,8 +32,8 @@
         "npm run typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract: p104-merchant-martial-patron-bridge-origin-peasant-scope-contract.md"
     },
     {
       "id": "P104-003",

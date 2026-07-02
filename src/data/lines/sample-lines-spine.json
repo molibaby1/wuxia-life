@@ -2740,13 +2740,13 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "(flags.has('route_wealth_committed') || flags.has('p22_wealth_route_forked')) && (flags.has('merchant_invest_good') || flags.has('merchant_invest_evil') || flags.has('merchant_invest_both')) && !flags.has('merchant_patron_bridge_crossed') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+        "expression": "(((flags.has('route_wealth_committed') || flags.has('p22_wealth_route_forked')) && (flags.has('merchant_invest_good') || flags.has('merchant_invest_evil') || flags.has('merchant_invest_both'))) || (flags.has('route_wealth_committed') && (flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed')))) && !flags.has('merchant_patron_bridge_crossed') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
       }
     ],
     "content": {
       "title": "商武盟约",
       "text": "银钱已投进门派，商路与剑鞘绑在了一起。江湖人提起你，说的不再是掌柜或镖头，而是「这人既出钱又出刀」。\n\n门派对投换来了护镖与借道，可每一笔盟约都意味着：商路上的纠纷，要按江湖规矩算；江湖上的恩怨，也会拖进账本。",
-      "description": "P102 商武一体 patron bridge entry — wealth+invest commitment fork"
+      "description": "P102/P103 商武一体 patron bridge entry — native wealth+invest or bridge-origin apprentice/tavern"
     },
     "eventType": "choice",
     "choices": [
@@ -2781,11 +2781,43 @@
           { "type": "flag_set", "target": "merchant_patron_on_ramp_martial" },
           { "type": "event_record", "target": "merchant_patron_bridge_entry" }
         ]
+      },
+      {
+        "id": "patron_bridge_apprentice_craft_alliance",
+        "text": "以手艺眼光换门派护商，让刨花与剑鞘绑成一条绳",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('apprentice_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_crossed" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_done" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_apprentice_craft" },
+          { "type": "event_record", "target": "merchant_patron_bridge_entry" }
+        ]
+      },
+      {
+        "id": "patron_bridge_tavern_network_alliance",
+        "text": "以酒肆人脉换门派借道，让消息网与护镖拧成一条绳",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('tavern_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_crossed" },
+          { "type": "flag_set", "target": "merchant_patron_on_ramp_done" },
+          { "type": "flag_set", "target": "merchant_patron_bridge_tavern_network" },
+          { "type": "event_record", "target": "merchant_patron_bridge_entry" }
+        ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p102", "merchant", "patron", "bridge", "entry", "mainline", "choice", "once"],
+      "tags": ["p102", "p103", "merchant", "patron", "bridge", "entry", "mainline", "choice", "once"],
       "narrativeScheduling": {
         "stageSignals": ["patron_bridge_entry"]
       }

@@ -44,8 +44,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Direction comparison: docs/test-reports/p116-founding-patriarch-late-life-direction-comparison.md"
     },
     {
       "id": "P116-004",

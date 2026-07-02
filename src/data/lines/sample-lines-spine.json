@@ -2960,13 +2960,13 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('merchant_patron_on_ramp_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+        "expression": "flags.has('merchant_patron_midlife_pressure_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
       }
     ],
     "content": {
       "title": "商武一体·名号落定",
       "text": "四十八岁这年，你站在商号与山门之间，想起当年那笔门派投资。\n\n银钱换来得不是单纯的利润，而是江湖上的一句定评：「这人商武一体，出钱出刀都在一条绳上。」\n\n门派对投、护镖借道、放贷收息——都化作商武复合身份的回响，比账本上的数字更长久。",
-      "description": "P102 商武一体 patron bridge payoff echo — P93 lightweight terminal"
+      "description": "P102 商武一体 patron bridge payoff echo — P93 lightweight terminal; gate requires P106 pressure checkpoint. P107+ reserved: merchant_patron_payoff_resolved, merchant_patron_late_life_done"
     },
     "eventType": "auto",
     "autoEffects": [

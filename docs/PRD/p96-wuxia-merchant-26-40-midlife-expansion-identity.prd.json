@@ -52,7 +52,7 @@
         "Relevant merchant-focused tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Continuity-wiring story. Prefer conditioning existing spine events over parallel dead-end branches."
     },
     {

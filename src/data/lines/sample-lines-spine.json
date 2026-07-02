@@ -723,7 +723,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has('merchant_age40_identity_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('orthodox_childhood_seed_done') && (flags.has('merchant_talent') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth'))"
+        "expression": "!flags.has('merchant_age40_identity_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('orthodox_childhood_seed_done') && (flags.has('merchant_talent') || flags.has('merchant_childhood_seed_done') || flags.has('p8_route_wealth')) && (!flags.has('hvg_merchant_operating_pressure_done') || flags.has('hvg_merchant_expansion_rhythm_done') || flags.has('merchant_midlife_debt') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed'))"
       }
     ],
     "content": {
@@ -755,7 +755,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('merchant_talent') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('merchant_midlife_debt') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+        "expression": "(flags.has('route_merchant') || flags.has('merchant_childhood_seed_done') || flags.has('merchant_talent') || flags.has('p8_route_wealth') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb') || flags.has('merchant_shop_failed') || flags.has('merchant_caravan_success') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed')) && !flags.has('merchant_midlife_debt') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && (!flags.has('hvg_merchant_operating_pressure_done') || flags.has('hvg_merchant_expansion_rhythm_done') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed'))"
       }
     ],
     "content": {
@@ -763,14 +763,76 @@
       "text": "扩张之后，赊欠与人情一并涌来。你清楚：商路越宽，周转与信义之债也越难两全——每一笔赊账都在记你的人情账。",
       "description": "P47 商路中年代价"
     },
-    "eventType": "auto",
-    "autoEffects": [
-      { "type": "flag_set", "target": "merchant_midlife_debt" },
-      { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "midlife_debt_ledger_steady",
+        "text": "稳扩欠下的债，一笔笔收、一步步还，守信誉比抢规模要紧",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track') && flags.has('hvg_merchant_ledger_expansion_steady')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_midlife_debt" },
+          { "type": "flag_set", "target": "merchant_midlife_debt_ledger_steady" },
+          { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+        ]
+      },
+      {
+        "id": "midlife_debt_ledger_credit",
+        "text": "赊欠铺开的债涌上来，人情账比银钱账更难算清",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track') && flags.has('hvg_merchant_ledger_expansion_credit')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_midlife_debt" },
+          { "type": "flag_set", "target": "merchant_midlife_debt_ledger_credit" },
+          { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+        ]
+      },
+      {
+        "id": "midlife_debt_caravan_market",
+        "text": "赌市扩货欠下的债，行市一跌便压得人喘不过气",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track') && flags.has('hvg_merchant_caravan_expansion_market')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": -8, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_midlife_debt" },
+          { "type": "flag_set", "target": "merchant_midlife_debt_caravan_market" },
+          { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+        ]
+      },
+      {
+        "id": "midlife_debt_caravan_fast",
+        "text": "快周转撑起的债，货路一断周转便卡死",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track') && flags.has('hvg_merchant_caravan_expansion_fast')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_midlife_debt" },
+          { "type": "flag_set", "target": "merchant_midlife_debt_caravan_fast" },
+          { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+        ]
+      },
+      {
+        "id": "midlife_debt_generic",
+        "text": "扩张之后，赊欠与人情一并涌来，周转与信义之债难两全",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_midlife_debt" },
+          { "type": "event_record", "target": "merchant_midlife_debt_milestone" }
+        ]
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p47", "p54", "merchant", "midlife", "mainline", "mandatory", "once"],
+      "tags": ["p47", "p54", "p96", "merchant", "midlife", "mainline", "mandatory", "once"],
       "narrativeScheduling": {
         "stageSignals": ["residual_merchant_debt"]
       }
@@ -853,7 +915,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('merchant_age40_identity_done') && !flags.has('merchant_age45_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+        "expression": "flags.has('merchant_age40_identity_done') && !flags.has('merchant_age45_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && (!flags.has('hvg_merchant_operating_pressure_done') || flags.has('hvg_merchant_expansion_rhythm_done') || flags.has('merchant_midlife_debt') || flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed'))"
       }
     ],
     "content": {

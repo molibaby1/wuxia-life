@@ -51,8 +51,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docs/test-reports/p109-merchant-martial-patron-late-life-direction-comparison.md"
     },
     {
       "id": "P109-004",

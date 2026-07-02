@@ -452,6 +452,93 @@
     }
   },
   {
+    "id": "hvg_merchant_post_shop_operating_rhythm",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 16, "max": 19 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('route_merchant') && (flags.has('merchant_shop_grocery') || flags.has('merchant_shop_weapon') || flags.has('merchant_shop_herb')) && !flags.has('hvg_merchant_post_shop_rhythm_done') && (flags.has('hvg_merchant_ledger_track') || flags.has('hvg_merchant_caravan_track'))"
+      }
+    ],
+    "content": {
+      "title": "开张后的经营节奏",
+      "text": "店铺开张头一年，账本与货单堆在案头。账房出身的你想着赊欠与库存，跑货出身的你想着行市与周转——头一回自己当家，得先定下经营的步子。",
+      "description": "P95 开店后经营节奏确认"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_rhythm_steady",
+        "text": "守赊欠、控库存，宁可慢周转也不让账滚大",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_rhythm_steady" },
+          { "type": "flag_set", "target": "hvg_merchant_post_shop_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_shop_operating_rhythm" }
+        ]
+      },
+      {
+        "id": "ledger_rhythm_expand",
+        "text": "小步扩货、试探新门路，账要记清但不想错过机会",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_rhythm_expand" },
+          { "type": "flag_set", "target": "hvg_merchant_post_shop_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_shop_operating_rhythm" }
+        ]
+      },
+      {
+        "id": "caravan_rhythm_fast",
+        "text": "快周转、压货走量，先把货路跑通再说",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "money", "value": 8, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_rhythm_fast" },
+          { "type": "flag_set", "target": "hvg_merchant_post_shop_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_shop_operating_rhythm" }
+        ]
+      },
+      {
+        "id": "caravan_rhythm_market",
+        "text": "盯行市、小赌涨跌，见识了波动也尝到了甜头",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 12, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_rhythm_market" },
+          { "type": "flag_set", "target": "hvg_merchant_post_shop_rhythm_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_shop_operating_rhythm" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p95", "hvg", "merchant", "operating", "mainline", "once"]
+    }
+  },
+  {
     "id": "merchant_age40_identity_summary",
     "version": "1.0.0",
     "category": "main_story",

@@ -35,7 +35,7 @@
         "npm run typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "First missing link after shop open. Ledger = steady turnover; caravan = expansion/market trial."
     },
     {

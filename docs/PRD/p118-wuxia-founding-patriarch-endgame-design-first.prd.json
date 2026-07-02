@@ -33,8 +33,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract saved to docs/test-reports/p118-founding-patriarch-endgame-scope-contract.md"
     },
     {
       "id": "P118-003",
@@ -50,8 +50,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Direction assessment saved; CONDITIONAL_GO verdict"
     },
     {
       "id": "P118-004",
@@ -68,8 +68,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Two branch designs saved; not skipped (GO)"
     },
     {
       "id": "P118-005",
@@ -88,8 +88,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Contract saved to docs/PRD/p118-founding-patriarch-endgame-contract.md"
     },
     {
       "id": "P118-006",
@@ -106,8 +106,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Validation shape saved to docs/test-reports/p118-p119-validation-shape.md"
     },
     {
       "id": "P118-007",
@@ -122,8 +122,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report saved; GO for P119"
     }
   ]
 }

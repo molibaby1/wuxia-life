@@ -162,6 +162,18 @@ function testPressureCheckpointAndScholarPriority(): void {
       `${choice.id} sets founding_patriarch_midlife_pressure_done`,
     );
   }
+  assert(
+    (scholarChoice!.effects ?? []).some(
+      e => e.type === 'flag_set' && e.target === 'founding_patriarch_pressure_rule_first',
+    ),
+    'scholar pressure choice should set founding_patriarch_pressure_rule_first',
+  );
+  assert(
+    (allianceChoice!.effects ?? []).some(
+      e => e.type === 'flag_set' && e.target === 'founding_patriarch_pressure_alliance_first',
+    ),
+    'alliance pressure choice should set founding_patriarch_pressure_alliance_first',
+  );
 
   const evaluator = new ConditionEvaluator();
   const bothScholarAndAlliance = patriarchBaseState({
@@ -288,8 +300,9 @@ function writeChainProof(): void {
     '| ---- | --- | ----- | -------- | --------- |',
     '| 1 | 15 | `scholar_mentor_line` rare roll | scholar_house + focus_on_study | `p16_scholar_mentor` |',
     '| 2 | 30 | `p22_faction_sect_continuation` | `sect_exposure`/`joined_sect` | `p22_faction_continuation_active`, `p16_alliance_brokered` |',
-    `| 3 | 32–38 | \`founding_patriarch_bridge_entry\` | ${ENTRY_GATE_EXPR.slice(0, 60)}… | \`founding_patriarch_bridge_crossed\`, \`founding_patriarch_on_ramp_done\`, variant marker |`,
-    `| 4 | 48–52 | \`founding_patriarch_payoff_echo\` (choice v2.0.0) | ${PAYOFF_GATE_EXPR} | \`founding_patriarch_payoff_done\`, \`founding_patriarch_identity_done\`, \`founding_patriarch_payoff_resolved\`, choice marker |`,
+    `| 3 | 32–38 | \`founding_patriarch_bridge_entry\` | ${ENTRY_GATE_EXPR.slice(0, 60)}… | \`founding_patriarch_bridge_crossed\`, \`founding_patriarch_on_ramp_done\`, on-ramp variant marker |`,
+    '| 4 | 40–45 | `founding_patriarch_midlife_pressure` | `founding_patriarch_on_ramp_done && !founding_patriarch_midlife_pressure_done` | `founding_patriarch_midlife_pressure_done`, `founding_patriarch_pressure_rule_first/alliance_first` |',
+    `| 5 | 48–52 | \`founding_patriarch_payoff_echo\` (choice v2.0.0) | ${PAYOFF_GATE_EXPR} | \`founding_patriarch_payoff_done\`, \`founding_patriarch_identity_done\`, \`founding_patriarch_payoff_resolved\`, choice marker |`,
     '',
     '## Payoff choice branches',
     '',

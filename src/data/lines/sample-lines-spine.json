@@ -3321,6 +3321,7 @@
           "expression": "flags.has('p16_scholar_mentor')"
         },
         "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_pressure_rule_first" },
           { "type": "flag_set", "target": "founding_patriarch_midlife_pressure_done" },
           { "type": "event_record", "target": "founding_patriarch_midlife_pressure" }
         ]
@@ -3333,6 +3334,7 @@
           "expression": "(flags.has('p16_alliance_brokered') || flags.has('p22_faction_continuation_active')) && !flags.has('p16_scholar_mentor')"
         },
         "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_pressure_alliance_first" },
           { "type": "flag_set", "target": "founding_patriarch_midlife_pressure_done" },
           { "type": "event_record", "target": "founding_patriarch_midlife_pressure" }
         ]

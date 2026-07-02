@@ -29,8 +29,8 @@
         "Save docs/test-reports/p107-merchant-martial-patron-payoff-scope-contract.md"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract locked; design-first red line enforced."
     },
     {
       "id": "P107-003",

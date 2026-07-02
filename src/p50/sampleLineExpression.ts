@@ -86,7 +86,7 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
     return '灰度压力在肩，守正须付代价';
   }
   if (flags.orthodox_righteousness_cost_visible && age >= 25) {
-    return '守正有代价，义务先于私利';
+    return '守正有代价，门派义务先于私利';
   }
   if (flags.sect_midlife_gray_executed || flags.sect_midlife_gray_leaked || flags.sect_midlife_gray_refused) {
     return '守正有代价，仍在承担门派义务';

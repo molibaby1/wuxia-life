@@ -3229,5 +3229,133 @@
         "stageSignals": ["patron_endgame"]
       }
     }
+  },
+  {
+    "id": "founding_patriarch_bridge_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 32, "max": 38 },
+    "triggers": [{ "type": "age_reach", "value": 32 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "(flags.has('p16_scholar_mentor') || flags.has('p16_alliance_brokered')) && (flags.has('p22_faction_continuation_active') || flags.has('p16_alliance_brokered')) && flags.has('orthodox_childhood_seed_done') && !flags.has('founding_patriarch_bridge_crossed') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done') && !flags.has('tavern_renown_bridge_crossed') && !flags.has('route_renown_committed') && !flags.has('tavern_medical_bridge_crossed') && !flags.has('route_medical_committed')"
+      }
+    ],
+    "content": {
+      "title": "开派之念",
+      "text": "师门盟约与学者师徒两条线在你肩上拧到了一处：一边要续门派香火，一边要守当年引荐的盟约。\n\n江湖人提起你，说的不再只是「正派弟子」，而是「这人既懂治学，又能在诸派之间牵线搭桥」。开宗立派的念头，第一次变得具体。",
+      "description": "P113 开派祖师 founding-patriarch bridge entry — scholar mentor + faction alliance commitment"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "patriarch_embrace_scholar_mentor",
+        "text": "以学者师徒线立派，让治学与武学并传",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('p16_scholar_mentor')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "founding_patriarch_bridge_crossed" },
+          { "type": "flag_set", "target": "founding_patriarch_on_ramp_done" },
+          { "type": "flag_set", "target": "founding_patriarch_on_ramp_scholar" },
+          { "type": "event_record", "target": "founding_patriarch_bridge_entry" }
+        ]
+      },
+      {
+        "id": "patriarch_embrace_alliance_faction",
+        "text": "以门派盟约立派，让续责与开宗并论",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('p16_alliance_brokered') || flags.has('p22_faction_continuation_active')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "founding_patriarch_bridge_crossed" },
+          { "type": "flag_set", "target": "founding_patriarch_on_ramp_done" },
+          { "type": "flag_set", "target": "founding_patriarch_on_ramp_alliance" },
+          { "type": "event_record", "target": "founding_patriarch_bridge_entry" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p113", "orthodox", "founding_patriarch", "bridge", "entry", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_bridge_entry"]
+      }
+    }
+  },
+  {
+    "id": "founding_patriarch_payoff_echo",
+    "version": "2.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 48, "max": 52 },
+    "triggers": [{ "type": "age_reach", "value": 48 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_on_ramp_done') && !flags.has('founding_patriarch_payoff_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派祖师·名号定型",
+      "text": "四十八岁这年，你站在山门与书斋之间，想起当年那笔盟约，也想起学者师徒传下来的治学规矩。\n\n开宗立派的名号已经传开，但你自己最清楚——这名号是靠门派续责撑住的，还是靠治学盟约撑住的，还是两者之间的某条绳？\n\n诸派的人还在等你的回话。这门派，该定下来了。",
+      "description": "P113 开派祖师 founding-patriarch payoff — choice-based 门派延续之解; gate requires on-ramp checkpoint"
+    },
+    "eventType": "choice",
+    "autoEffects": [
+      { "type": "flag_set", "target": "founding_patriarch_payoff_done" },
+      { "type": "flag_set", "target": "founding_patriarch_identity_done" },
+      { "type": "flag_set", "target": "founding_patriarch_payoff_resolved" },
+      { "type": "event_record", "target": "founding_patriarch_payoff_echo" }
+    ],
+    "choices": [
+      {
+        "id": "patriarch_payoff_hold_legacy",
+        "text": "门派香火既续，开派之名便落在续责之上。治学武学，一并传下去。",
+        "description": "续责如山，盟约与师承一个都不能少——开派名号靠门派与治学一起撑",
+        "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_payoff_legacy_holder" },
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "patriarch_payoff_independent_founder",
+        "text": "旧盟约到此为止。我要开自己的山门，治学规矩自己定。",
+        "description": "续责可谢，盟约可断——自立山门，不再听诸派差遣",
+        "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_payoff_independent_founder" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "patriarch_payoff_dual_gate",
+        "text": "盟约可以改，师承也可以谈。诸派各守其份，开派各立其规。",
+        "description": "盟约可改，师承可谈——治学武学各守其份，开派之路不再两头拉扯",
+        "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_payoff_dual_gate" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p113", "orthodox", "founding_patriarch", "bridge", "payoff", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_bridge_payoff"]
+      }
+    }
   }
 ]

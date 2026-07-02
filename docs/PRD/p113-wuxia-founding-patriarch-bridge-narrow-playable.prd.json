@@ -48,8 +48,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "founding_patriarch_bridge_entry + founding_patriarch_payoff_echo in sample-lines-spine.json"
     },
     {
       "id": "P113-004",

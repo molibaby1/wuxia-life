@@ -313,6 +313,10 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
       return '酒肆人脉换门派借道，正把消息网与护镖拧成一条商武绳';
     }
+    // P104: Peasant bridge-origin patron goal (native + apprentice/tavern above retain priority)
+    if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+      return '粮路脚力换门派护商，正把囤粮与护镖拧成一条商武绳';
+    }
     return '商武一体之约已立，门派对投比单纯营利更烫手';
   }
   if (flags.merchant_age45_expansion_fork_done) {
@@ -756,6 +760,10 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
         return '人脉护商之累';
       }
+      // P104: Peasant bridge-origin patron cost label
+      if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+        return '粮路护商之累';
+      }
       return '商武盟约之累';
     }
     if (flags.merchant_midlife_debt) {
@@ -1143,6 +1151,10 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
       return '你是商武一体的人脉金主：酒肆消息网与护镖拧成一条绳，名号落定之后，商路上的借道比银钱更烫手';
     }
+    // P104: Peasant bridge-origin patron payoff identity
+    if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+      return '你是商武一体的粮路金主：囤粮与护镖拧成一条绳，名号落定之后，江湖提起你说的是脚力血汗换门派借道';
+    }
     return '你是商武一体的金主：门派对投比单纯营利更烫手，商武复合身份已成定评';
   }
   if (flags.merchant_patron_on_ramp_done) {
@@ -1158,6 +1170,10 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
       return '你是押注人脉护商的商武金主：酒肆消息网与护镖拧成一条绳，商路上的借道比利润更烫手';
+    }
+    // P104: Peasant bridge-origin patron on-ramp identity
+    if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+      return '你是押注粮路护商的商武金主：囤粮与护镖拧成一条绳，商路上的脚力比利润更烫手';
     }
     return '你是走商武一体之路的金主：门派对投比账本上的数字更烫手';
   }

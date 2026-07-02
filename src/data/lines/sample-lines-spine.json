@@ -3127,5 +3127,107 @@
         "stageSignals": ["patron_late_life"]
       }
     }
+  },
+  {
+    "id": "merchant_patron_endgame_echo_covenant_bound",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 62 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_late_life_done') && flags.has('merchant_patron_late_covenant_bound') && !flags.has('merchant_patron_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武终局回响·担",
+      "text": "六十二岁这年，账房关了最后一本账，演武场收了最后一把刀。\n\n山门使者来取盟约副本，说这笔商武名号要立在山门碑上。你站在账房与演武场之间，想起五十二岁那年的晚年光景——盟约越绑越紧，刀与算盘都没放下。\n\n如今商武名号成了盟约的碑。担子还在，但你知道——盟约比人长久。",
+      "description": "P112 商武一体 patron endgame — Variant A 商武终局·担 (covenant bound late-life)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_endgame_echo_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_covenant_echo" },
+      { "type": "event_record", "target": "merchant_patron_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p111", "p112", "merchant", "patron", "endgame", "covenant-echo", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_endgame"]
+      }
+    }
+  },
+  {
+    "id": "merchant_patron_endgame_echo_isolated_merchant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 62 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_late_life_done') && flags.has('merchant_patron_late_isolated_merchant') && !flags.has('merchant_patron_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武终局回响·孤",
+      "text": "六十二岁这年，账房只有自己人，演武场空着。\n\n没有山门来取盟约，也没有使者登门。商路上的名号是孤商自己的定论——账房自己管，演武场空着，商路上的麻烦自己扛。\n\n你想起五十二岁那年的选择：自由是真的，定论也是自己的。这笔终局的账，算清了。",
+      "description": "P112 商武一体 patron endgame — Variant B 商武终局·孤 (isolated merchant late-life)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_endgame_echo_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_solitary_echo" },
+      { "type": "event_record", "target": "merchant_patron_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p111", "p112", "merchant", "patron", "endgame", "solitary-echo", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_endgame"]
+      }
+    }
+  },
+  {
+    "id": "merchant_patron_endgame_echo_sustainable_covenant",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 62 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_late_life_done') && flags.has('merchant_patron_late_sustainable_covenant') && !flags.has('merchant_patron_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "商武终局回响·传",
+      "text": "六十二岁这年，年轻掌柜来请教商武分寸。\n\n新盟规矩还在运转——该出刀时出刀，该算账时算账，账房与演武场各守其份。你倾囊相授：分寸传下去了，不是名号传下去。\n\n你想起五十二岁那年的晚年光景——新盟久立，商武一体。这笔终局的账，算清了。",
+      "description": "P112 商武一体 patron endgame — Variant C 商武终局·传 (sustainable covenant late-life)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_patron_endgame_echo_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_endgame_legacy_echo" },
+      { "type": "event_record", "target": "merchant_patron_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p111", "p112", "merchant", "patron", "endgame", "legacy-echo", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_endgame"]
+      }
+    }
   }
 ]

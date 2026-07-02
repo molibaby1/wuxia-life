@@ -62,8 +62,8 @@
         "npm run typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Endgame expression reads magnate_bridge_endgame_* markers in sampleLineExpression.ts"
     },
     {
       "id": "P101-005",

@@ -1,0 +1,125 @@
+{
+  "project": "Wuxia Life P95 Merchant 16-25 Operating Pressure Chain",
+  "branchName": "codex/p95-wuxia-merchant-16-25-operating-pressure-chain",
+  "description": "Reinforce the merchant_house 16-25 operating chain with one post-shop rhythm confirmation, one first operating pressure challenge, player-facing expression updates, and continuity into existing shop failure / caravan guard anchors. Strictly bounded to merchant operating continuity; no full route rewrite, no merchant_magnate, no merchant_martial_patron bridge.",
+  "userStories": [
+    {
+      "id": "P95-001",
+      "title": "Audit the merchant 16-25 operating gap as a discrete implementation stage",
+      "description": "As a maintainer, I want the merchant 16-25 operating gap documented as its own bounded stage so implementation targets the missing pressure chain instead of reopening the full route.",
+      "acceptanceCriteria": [
+        "Document current merchant anchors across age 16-30 (shop, failure, caravan, monopoly)",
+        "Explicitly identify the 16-25 gap between first shop and mid-twenties business payoff",
+        "Distinguish events exist from player feels operating pressure loop",
+        "Note where P94 track flags are not read in 16-25 expression or events",
+        "Save one bounded report under docs/test-reports/",
+        "Do not change runtime behavior in this story",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Read-only anchor and gap inventory. Maps GAP-M95-01/02/03 to implementation scope."
+    },
+    {
+      "id": "P95-002",
+      "title": "Add one post-shop operating rhythm node in age 16-19",
+      "description": "As a player, I want my first shop followed by a visible operating rhythm confirmation so ledger and caravan merchants feel like they run the shop differently.",
+      "acceptanceCriteria": [
+        "Add exactly one merchant 16-19 operating rhythm event or equivalent narrow node",
+        "Node requires shop entry (merchant_shop_* or merchant_first_shop record) plus merchant route",
+        "Node reads at least one P94 track flag (hvg_merchant_ledger_track or hvg_merchant_caravan_track)",
+        "Ledger and caravan present different player-facing text or outcome emphasis",
+        "Node changes at least one downstream state beyond flavor-only text",
+        "Node remains merchant-only and does not introduce a new progression container",
+        "No regression to merchant_first_shop or P94 10-15 chain eligibility",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "First missing link after shop open. Ledger = steady turnover; caravan = expansion/market trial."
+    },
+    {
+      "id": "P95-003",
+      "title": "Add one first operating pressure challenge in age 19-22",
+      "description": "As a player, I want the merchant route to test my shop under real operating pressure so growth feels like turnover risk and credit exposure rather than passive accumulation.",
+      "acceptanceCriteria": [
+        "Add exactly one merchant operating pressure node in age 19-22",
+        "Challenge is legible as credit/debt, stockout, or market swing pressure",
+        "Ledger and caravan differ in condition, framing, or result",
+        "Challenge creates readable consequence: stat shift, currentGoal change, eligibility shift, or route pressure flag",
+        "Challenge does not require a new subsystem",
+        "Challenge remains bounded to merchant_house",
+        "npm run typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "First real operating pressure after rhythm node. Keep small; do not jump to monopoly or chamber head."
+    },
+    {
+      "id": "P95-004",
+      "title": "Wire continuity into existing merchant operating events",
+      "description": "As a maintainer, I want the new 16-25 nodes to feed existing shop failure and caravan guard anchors so this stage strengthens continuity instead of creating an isolated branch.",
+      "acceptanceCriteria": [
+        "New nodes do not orphan merchant_shop_failure or merchant_caravan_guard",
+        "At least one downstream condition, goal, or replay checkpoint reads differently after the new chain",
+        "P94 flags (hvg_merchant_first_challenge_done, track flags) remain valid eligibility inputs",
+        "merchant_first_shop remains the age 16-22 entry milestone",
+        "P51 seed 804 shop chain baseline does not regress",
+        "npm run typecheck passes",
+        "Relevant merchant-focused tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Continuity-wiring story. Prefer conditioning existing failure/caravan events over parallel dead-end branches."
+    },
+    {
+      "id": "P95-005",
+      "title": "Strengthen player-facing operating expression for age 16-25",
+      "description": "As a player, I want the route to tell me what kind of operator I am becoming after opening shop so the loop feels authored rather than hidden in flags.",
+      "acceptanceCriteria": [
+        "Add or refine at least two player-facing expressions tied to the new 16-25 chain",
+        "At least one expression is immediate to the event outcome",
+        "At least one expression survives into age 22-25 checkpoint, goal, or proof artifact",
+        "Ledger vs caravan operating voice uses player-facing merchant terms rather than raw state-key names",
+        "No new dedicated UI panel is required",
+        "npm run typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Reuse currentGoal, cost label, and existing player-facing surfaces. Done-flag-first where applicable."
+    },
+    {
+      "id": "P95-006",
+      "title": "Add narrow proof and regression coverage for merchant 16-25",
+      "description": "As a maintainer, I want proof and focused tests for the merchant 16-25 operating chain so the stage closes on evidence instead of intent.",
+      "acceptanceCriteria": [
+        "Add at least one focused test covering the new rhythm and pressure chain",
+        "Verify ledger and caravan can both reach branch-specific operating paths",
+        "Produce or update one proof artifact under docs/test-reports/",
+        "Proof shows age, shop flags, track flag, and at least one changed player-facing outcome",
+        "Verification does not require full-lifetime broad audits",
+        "npm run typecheck passes",
+        "Relevant merchant-focused tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Evidence-first closeout. Guard P51 merchant 804 baseline alongside new chain."
+    },
+    {
+      "id": "P95-007",
+      "title": "Produce stage closure and next-step boundary",
+      "description": "As a maintainer, I want a closure report stating what this stage proves and what remains deferred so the next stage stays bounded.",
+      "acceptanceCriteria": [
+        "Save a closure report under docs/test-reports/",
+        "State what was added in age 16-25",
+        "State what remains deferred (magnate on-ramp, martial patron, full route rewrite)",
+        "Explicitly say this stage does not implement merchant_magnate or merchant_martial_patron",
+        "Name the next bounded candidate stage after this one",
+        "npm run typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Close with explicit defer boundaries toward Wave 3 magnate or martial patron bridge stages."
+    }
+  ]
+}

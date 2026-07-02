@@ -62,7 +62,7 @@
         "P50 or replay merchant line remains deterministic under current benchmark expectations"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This is a continuity-wiring story, not a content-expansion story. The point is to make the new nodes feed existing anchors cleanly."
     },
     {

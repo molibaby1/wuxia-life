@@ -187,6 +187,33 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   if (flags.merchant_shop_grocery || flags.merchant_shop_weapon || flags.merchant_shop_herb) {
     return '第一桶金已得，店铺经营中';
   }
+  // P94: 10-15 growth chain — track-specific goals after confirmation/challenge
+  if (flags.hvg_merchant_first_challenge_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      if (flags.hvg_merchant_ledger_challenge_steady) {
+        return age >= 15 ? '账房稳手已练成，正为开张攒底气' : '逐户收账练出了稳手，学着守账识风险';
+      }
+      if (flags.hvg_merchant_ledger_challenge_rushed) {
+        return age >= 15 ? '赶账收了第一笔，也尝到疏漏的风险' : '先收大头稳了场面，小账的尾巴还在身后';
+      }
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      if (flags.hvg_merchant_caravan_challenge_steady) {
+        return age >= 15 ? '货路押稳了第一次，认得守本分也可起家' : '跟老伙计押货练稳了脚，学着认货见世面';
+      }
+      if (flags.hvg_merchant_caravan_challenge_bold) {
+        return age >= 15 ? '赌行市赢了第一回，也见识了涨跌起伏' : '低价收货赌了一回，行市的波动比账本上写得烫手';
+      }
+    }
+  }
+  if (flags.hvg_merchant_post_fork_confirmation_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      return '账房路已确认，正学着守账识风险';
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      return '货路已确认，正学着认货见世面';
+    }
+  }
   if (flags.merchant_talent || flags.merchant_childhood_seed_done) {
     return '营商天赋已显，尚未开张';
   }
@@ -374,6 +401,23 @@ export function deriveSampleLineCostLabel(state: GameState): string {
         return '粮路与买卖的担子';
       }
       return '巨贾负担';
+    }
+    // P94: early merchant track differentiation at age 10-15
+    if (flags.hvg_merchant_first_challenge_done) {
+      if (flags.hvg_merchant_ledger_track) {
+        return flags.hvg_merchant_ledger_challenge_rushed ? '赶账之累' : '守账之累';
+      }
+      if (flags.hvg_merchant_caravan_track) {
+        return flags.hvg_merchant_caravan_challenge_bold ? '行市之赌' : '货路之累';
+      }
+    }
+    if (flags.hvg_merchant_post_fork_confirmation_done) {
+      if (flags.hvg_merchant_ledger_track) {
+        return '账房见习之累';
+      }
+      if (flags.hvg_merchant_caravan_track) {
+        return '认货跑商之累';
+      }
     }
     return '商路债务';
   }

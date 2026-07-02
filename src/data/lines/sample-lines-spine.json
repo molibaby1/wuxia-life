@@ -2840,6 +2840,116 @@
     }
   },
   {
+    "id": "merchant_patron_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 40, "max": 44 },
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('merchant_patron_on_ramp_done') && !flags.has('merchant_patron_midlife_pressure_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "盟约如山",
+      "text": "商号越扩，门派的刀护得越实在——护镖要出人手，借道要讲规矩，商路上的纠纷得按江湖算法。山门又派人来传话，你站在账房与演武场之间，忽然明白：商武一体，是每一笔都要用刀来算的担子。",
+      "description": "P106 商武一体 patron midlife pressure — 护商武力负担"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "patron_pressure_orthodox_hold",
+        "text": "守侠义盟约，按道义护商，哪怕周转吃紧",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_patron_on_ramp_orthodox')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_orthodox" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patron_pressure_martial_expand",
+        "text": "加派护镖人手，以武力撑商路，债记在盟约上",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_patron_on_ramp_martial')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_martial" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patron_pressure_apprentice_quality",
+        "text": "用手艺标准筛货换护商，品质比规模更烫手",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_patron_bridge_apprentice_craft') || flags.has('apprentice_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_apprentice" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patron_pressure_tavern_network",
+        "text": "靠酒肆消息网调度护商，借道比利润更烫手",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_patron_bridge_tavern_network') || flags.has('tavern_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_tavern" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patron_pressure_peasant_grain",
+        "text": "粮路脚力撑护商，囤粮与护镖两头紧",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('merchant_patron_bridge_peasant_grain') || flags.has('peasant_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_peasant" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patron_pressure_generic",
+        "text": "盟约如山，商路越大，护商武力负担越重",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_patron_midlife_pressure_done" },
+          { "type": "flag_set", "target": "merchant_patron_pressure_generic" },
+          { "type": "event_record", "target": "merchant_patron_midlife_pressure" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p106", "merchant", "patron", "midlife", "pressure", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["patron_midlife_pressure"]
+      }
+    }
+  },
+  {
     "id": "merchant_patron_payoff_echo",
     "version": "1.0.0",
     "category": "main_story",

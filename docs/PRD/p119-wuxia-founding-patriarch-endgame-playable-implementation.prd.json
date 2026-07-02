@@ -1,0 +1,129 @@
+{
+  "project": "Wuxia Life P119 Founding Patriarch Endgame Playable Implementation",
+  "branchName": "codex/p119-wuxia-founding-patriarch-endgame-playable-implementation",
+  "description": "Lightweight implementation of founding_patriarch endgame / final legacy stage (开派终局回响). Strictly follows P118 contract: 1 auto echo event + expression updates, 2 variants (规/盟), no stat changes, founding-patriarch governance flavor.",
+  "userStories": [
+    {
+      "id": "P119-001",
+      "title": "Wire founding-patriarch endgame echo event",
+      "description": "As a developer, I want the founding-patriarch endgame echo event wired so players encounter a final founding legacy settlement echo with 2 variants keyed on late-life branch.",
+      "acceptanceCriteria": [
+        "Configure founding_patriarch_endgame_echo_* auto event(s) in sample-lines-spine.json",
+        "Trigger: founding_patriarch_late_life_done + age 60-65 + mutex guards + orthodox seed + exclude demonic/merchant seed",
+        "2 conditional branches keyed on late-life marker (rule_keeper / alliance_bearer)",
+        "Set founding_patriarch_endgame_echo_done + founding_patriarch_endgame_identity_done + branch marker per branch",
+        "No stat changes",
+        "Do not unset founding_patriarch_late_life_done",
+        "Event placed after late-life events in spine",
+        "No new event framework or scheduler",
+        "P113-P117 existing evidence does not regress",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "See P118 contract §2, §9.1"
+    },
+    {
+      "id": "P119-002",
+      "title": "Add endgame expression — sample line core (P0)",
+      "description": "As a player, I want the founding-patriarch endgame branch reflected in sample line status so the route feels like a meaningful final founding legacy settlement.",
+      "acceptanceCriteria": [
+        "Cost label: late-life -> endgame (开派终局·规 / 开派终局·盟)",
+        "Current goal: late-life -> endgame branch semantics per P118 contract §4.1",
+        "Expression priority: endgame_echo_done > late_life_done > payoff_done > pressure > on-ramp",
+        "At least 2 endgame-specific readable signals (cost label + current goal)",
+        "Two branches have meaningfully different expressions",
+        "Preserve founding-patriarch governance flavor",
+        "No new UI components",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "sampleLineExpression.ts: deriveSampleLineCostLabel, orthodoxCurrentGoal"
+    },
+    {
+      "id": "P119-003",
+      "title": "Add endgame expression — identity (P0)",
+      "description": "As a player, I want an endgame identity summary that reflects my late-life-driven endgame branch.",
+      "acceptanceCriteria": [
+        "orthodoxAge40Identity() returns endgame branch identity after endgame (endgame branch marker wins over late-life)",
+        "Branch A: rule monument founding patriarch identity",
+        "Branch B: alliance monument founding patriarch identity",
+        "Cover at least 1 on-ramp variant overlay with endgame branch (bonus)",
+        "Preserve founding-patriarch governance flavor",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See P118 contract §4.1 Signal 3"
+    },
+    {
+      "id": "P119-004",
+      "title": "Add targeted endgame proof",
+      "description": "As a maintainer, I want bounded proof showing endgame event fires, both branches work, and founding-patriarch flavor is preserved.",
+      "acceptanceCriteria": [
+        "Produce targeted proof (late-life -> endgame -> expression changes)",
+        "Show validation shape §2.2 core nodes for each branch path",
+        "Minimum 2 branch paths: rule_keeper and alliance_bearer",
+        "At least 1 on-ramp variant overlay with endgame branch (bonus)",
+        "No full lifetime exhaust required",
+        "Save as docs/test-reports/p119-founding-patriarch-endgame-targeted-proof.md",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See p118-p119-validation-shape.md §2"
+    },
+    {
+      "id": "P119-005",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow tests guarding the founding-patriarch endgame stage so future edits do not break the endgame milestone.",
+      "acceptanceCriteria": [
+        "Add tests/p119FoundingPatriarchEndgameTests.ts",
+        "Group 1: Event wiring (R1-R11 per validation shape §3.1)",
+        "Group 2: Pre-endgame expression (R12-R13)",
+        "Group 3: Post-endgame expression per branch (R14-R20)",
+        "Group 4: Spine ordering (R21-R22)",
+        "Prior stage regression: P113/P115/P117 + P37 + P102-P110 patron + guard:sample-lines-baseline (R23-R29)",
+        "No stat changes verification (R11)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "See p118-p119-validation-shape.md §3"
+    },
+    {
+      "id": "P119-006",
+      "title": "Update P113 chain proof with endgame nodes",
+      "description": "As a maintainer, I want the P113 founding-patriarch bridge chain proof extended with endgame nodes so the full spine is traceable.",
+      "acceptanceCriteria": [
+        "Update docs/test-reports/p113-founding-patriarch-bridge-chain-proof.md with endgame nodes",
+        "Show late-life -> endgame -> expression chain",
+        "At least 1 endgame path per late-life branch",
+        "Do not break existing P113-P117 chain proof nodes",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Endgame node only; no full chain rerun"
+    },
+    {
+      "id": "P119-007",
+      "title": "Produce P119 closure report",
+      "description": "As a maintainer, I want a closure report that locks the founding-patriarch endgame implementation and confirms whether the route is fully closed.",
+      "acceptanceCriteria": [
+        "Output docs/test-reports/p119-founding-patriarch-endgame-closure-report.md",
+        "Summarize event wiring, expression updates, targeted proof, regression test results",
+        "Clarify whether founding-patriarch route is fully closed (bridge->on-ramp->pressure->payoff->late-life->endgame)",
+        "List deferred larger founding-patriarch-expansion items",
+        "Confirm lightweight constraint maintained (1 event + expression only, no stat changes)",
+        "Confirm no regressions in P113/P115/P117 + P37/P102-P110",
+        "12/12 closure criteria per validation shape §4.1",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

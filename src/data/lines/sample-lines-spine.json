@@ -3486,5 +3486,73 @@
         "stageSignals": ["founding_patriarch_late_life"]
       }
     }
+  },
+  {
+    "id": "founding_patriarch_endgame_echo_rule_keeper",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 62 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_late_life_done') && flags.has('founding_patriarch_late_rule_keeper') && !flags.has('founding_patriarch_endgame_echo_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派终局回响·规",
+      "text": "六十二岁这年，书斋封了最后一卷门规抄本。\n\n弟子在门规碑前立匾，诸派使者来观礼，说开派名号要立在规矩之上。你站在书斋与门规碑之间，想起五十二岁那年的晚年光景——门规守了一辈子，治学师承比盟约差遣更占心思。\n\n如今开派名号成了门规的碑。规矩还在，但你知道——门规比人长久。",
+      "description": "P119 开派祖师 endgame — Variant A 开派终局·规 (rule_keeper late-life)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "founding_patriarch_endgame_echo_done" },
+      { "type": "flag_set", "target": "founding_patriarch_endgame_identity_done" },
+      { "type": "flag_set", "target": "founding_patriarch_endgame_rule_echo" },
+      { "type": "event_record", "target": "founding_patriarch_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p118", "p119", "orthodox", "founding_patriarch", "endgame", "rule-echo", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_endgame"]
+      }
+    }
+  },
+  {
+    "id": "founding_patriarch_endgame_echo_alliance_bearer",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 60, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 62 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_late_life_done') && flags.has('founding_patriarch_late_alliance_bearer') && !flags.has('founding_patriarch_endgame_echo_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派终局回响·盟",
+      "text": "六十二岁这年，诸派使者来取最后一份盟约副本。\n\n山门匾上写着开派名号与续责条款，书斋半掩，门规收束为执行工具。你站在山门与盟约碑之间，想起五十二岁那年的晚年光景——盟约扛了一辈子，诸派差遣比书斋治学更占心思。\n\n如今开派名号成了盟约的碑。续责还在，但你知道——盟约比人长久。",
+      "description": "P119 开派祖师 endgame — Variant B 开派终局·盟 (alliance_bearer late-life)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "founding_patriarch_endgame_echo_done" },
+      { "type": "flag_set", "target": "founding_patriarch_endgame_identity_done" },
+      { "type": "flag_set", "target": "founding_patriarch_endgame_alliance_echo" },
+      { "type": "event_record", "target": "founding_patriarch_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p118", "p119", "orthodox", "founding_patriarch", "endgame", "alliance-echo", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_endgame"]
+      }
+    }
   }
 ]

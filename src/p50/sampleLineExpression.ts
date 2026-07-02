@@ -1218,6 +1218,24 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
+  // P110: Patron late-life identity (late-life branch > payoff choice > entry variant)
+  if (flags.merchant_patron_late_life_identity_done) {
+    if (flags.merchant_patron_late_covenant_bound) {
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '你是盟约终老的商武金主：手艺眼光与盟约绑在一起，晚年山门差遣比账房还多，刨花与剑鞘仍是一条绳';
+      }
+      return '你是盟约终老的商武金主：硬扛了一辈子盟约，晚年山门差遣比账房还多。护镖借道一件接一件，刀与算盘都没放下，但从不退缩';
+    }
+    if (flags.merchant_patron_late_isolated_merchant) {
+      return '你是孤商巨贾：撕破盟约后商号靠自己撑起来了。山门疏远，商路自撑，自由是真的，孤立也是真的';
+    }
+    if (flags.merchant_patron_late_sustainable_covenant) {
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '你是新盟掌局的金主：手艺标准成了新盟规矩的一部分，后来人请教商武分寸，账房与演武场终于不再两头拉扯';
+      }
+      return '你是新盟掌局的金主：重谈的盟约规矩还在运转，商号与山门各守其份。后来人请教商武分寸，账房与演武场终于不再两头拉扯';
+    }
+  }
   // P102/P108: Patron bridge identity (magnate tiers above retain priority)
   if (flags.merchant_patron_identity_done) {
     // P108: payoff choice marker takes priority over entry variant

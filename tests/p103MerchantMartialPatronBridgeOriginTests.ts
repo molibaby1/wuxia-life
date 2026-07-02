@@ -135,6 +135,7 @@ function testBridgeOriginPathsReachPayoffCheckpoint(): void {
       merchant_patron_bridge_crossed: true,
       merchant_patron_on_ramp_done: true,
       merchant_patron_bridge_apprentice_craft: true,
+      merchant_patron_midlife_pressure_done: true,
     },
   });
   const tavernPayoff = bridgePatronState('tavern', {
@@ -143,6 +144,7 @@ function testBridgeOriginPathsReachPayoffCheckpoint(): void {
       merchant_patron_bridge_crossed: true,
       merchant_patron_on_ramp_done: true,
       merchant_patron_bridge_tavern_network: true,
+      merchant_patron_midlife_pressure_done: true,
     },
   });
 

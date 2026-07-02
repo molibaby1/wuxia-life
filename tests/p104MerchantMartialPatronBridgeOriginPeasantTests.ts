@@ -127,6 +127,7 @@ function testPeasantPathReachesPayoffCheckpoint(): void {
       merchant_patron_bridge_crossed: true,
       merchant_patron_on_ramp_done: true,
       merchant_patron_bridge_peasant_grain: true,
+      merchant_patron_midlife_pressure_done: true,
     },
   });
   assert(evaluator.evaluate(payoffGate, peasantPayoff), 'peasant bridge should reach payoff gate');

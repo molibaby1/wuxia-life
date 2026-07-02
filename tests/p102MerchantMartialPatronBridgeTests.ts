@@ -18,7 +18,7 @@ const ENTRY_GATE_EXPR =
   "(flags.has('route_wealth_committed') || flags.has('p22_wealth_route_forked')) && (flags.has('merchant_invest_good') || flags.has('merchant_invest_evil') || flags.has('merchant_invest_both')) && !flags.has('merchant_patron_bridge_crossed') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')";
 
 const PAYOFF_GATE_EXPR =
-  "flags.has('merchant_patron_on_ramp_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')";
+  "flags.has('merchant_patron_midlife_pressure_done') && !flags.has('merchant_patron_payoff_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done')";
 
 function patronBaseState(overrides: Partial<GameState> = {}): GameState {
   return {
@@ -104,12 +104,19 @@ function testPayoffEchoShapeAndGate(): void {
   const evaluator = new ConditionEvaluator();
   const eligible = patronBaseState({
     player: { age: 50 } as PlayerState,
+    flags: {
+      merchant_patron_on_ramp_done: true,
+      merchant_patron_on_ramp_orthodox: true,
+      merchant_patron_midlife_pressure_done: true,
+    },
+  });
+  assert(evaluator.evaluate(payoffEvent!.conditions![0]!, eligible), 'pressure done should pass payoff gate');
+
+  const noPressure = patronBaseState({
+    player: { age: 50 } as PlayerState,
     flags: { merchant_patron_on_ramp_done: true, merchant_patron_on_ramp_orthodox: true },
   });
-  assert(evaluator.evaluate(payoffEvent!.conditions![0]!, eligible), 'on-ramp done should pass payoff gate');
-
-  const noOnRamp = patronBaseState({ player: { age: 50 } as PlayerState });
-  assert(!evaluator.evaluate(payoffEvent!.conditions![0]!, noOnRamp), 'missing on-ramp should fail payoff gate');
+  assert(!evaluator.evaluate(payoffEvent!.conditions![0]!, noPressure), 'missing pressure should fail payoff gate');
 }
 
 function testPayoffSetsTerminalFlags(): void {

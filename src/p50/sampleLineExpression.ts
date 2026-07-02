@@ -295,6 +295,19 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '产业初成，巨贾之路刚起步';
   }
+  // P112: Patron endgame goals (endgame > late_life > payoff > pressure > on-ramp)
+  if (flags.merchant_patron_endgame_echo_done) {
+    if (flags.merchant_patron_endgame_covenant_echo) {
+      return '盟约碑立，商武名号交给后来人记';
+    }
+    if (flags.merchant_patron_endgame_solitary_echo) {
+      return '商号是自己的定论，不再等盟约回音';
+    }
+    if (flags.merchant_patron_endgame_legacy_echo) {
+      return '看后来人按新盟分寸运转，这就够了';
+    }
+    return '商武定型之后，终局自有终局的定论';
+  }
   // P110: Patron late-life goals (late_life > payoff > pressure > on-ramp)
   if (flags.merchant_patron_late_life_done) {
     if (flags.merchant_patron_late_covenant_bound) {
@@ -783,6 +796,19 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       }
       return '巨贾负担';
     }
+    // P112: Patron endgame cost labels (endgame > late_life > payoff > pressure > on-ramp)
+    if (flags.merchant_patron_endgame_echo_done) {
+      if (flags.merchant_patron_endgame_covenant_echo) {
+        return '商武终局·担';
+      }
+      if (flags.merchant_patron_endgame_solitary_echo) {
+        return '商武终局·孤';
+      }
+      if (flags.merchant_patron_endgame_legacy_echo) {
+        return '商武终局·传';
+      }
+      return '商武终局之累';
+    }
     // P110: Patron late-life cost labels (late_life > payoff > pressure > on-ramp)
     if (flags.merchant_patron_late_life_done) {
       if (flags.merchant_patron_late_covenant_bound) {
@@ -1217,6 +1243,24 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
       return '你是靠跑货式经营做起来的巨贾：赌市扩货跨了门槛，财富带来地位，也带来涨跌与押货的风险';
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
+  }
+  // P112: Patron endgame identity (endgame branch > late-life branch > payoff choice > entry variant)
+  if (flags.merchant_patron_endgame_identity_done) {
+    if (flags.merchant_patron_endgame_covenant_echo) {
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '你是盟约碑上的商武金主：手艺眼光与盟约绑在一起，账房关了，刀收了，山门还记着这笔账。商武名号比人长久，担子也还在';
+      }
+      return '你是盟约碑上的商武金主：账房关了，刀收了，山门还记着这笔账。商武名号比人长久，担子也还在';
+    }
+    if (flags.merchant_patron_endgame_solitary_echo) {
+      return '你是孤商终局的巨贾：账房自己管，演武场空着，商路上的名号不靠山门。自由是真的，定论也是自己的';
+    }
+    if (flags.merchant_patron_endgame_legacy_echo) {
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '你是新盟传统的金主：手艺标准成了新盟规矩的一部分，商武分寸传下去了，后来人按你定的规矩运转，新盟比人长久';
+      }
+      return '你是新盟传统的金主：商武分寸传下去了，账房与演武场各守其份。后来人按你定的规矩运转，新盟比人长久';
+    }
   }
   // P110: Patron late-life identity (late-life branch > payoff choice > entry variant)
   if (flags.merchant_patron_late_life_identity_done) {

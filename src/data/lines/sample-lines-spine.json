@@ -3359,7 +3359,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('founding_patriarch_on_ramp_done') && !flags.has('founding_patriarch_payoff_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+        "expression": "flags.has('founding_patriarch_midlife_pressure_done') && !flags.has('founding_patriarch_payoff_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
       }
     ],
     "content": {

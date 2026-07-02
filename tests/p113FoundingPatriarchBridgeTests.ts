@@ -18,7 +18,7 @@ const ENTRY_GATE_EXPR =
   "(flags.has('p16_scholar_mentor') || flags.has('p16_alliance_brokered')) && (flags.has('p22_faction_continuation_active') || flags.has('p16_alliance_brokered')) && flags.has('orthodox_childhood_seed_done')";
 
 const PAYOFF_GATE_EXPR =
-  "flags.has('founding_patriarch_on_ramp_done') && !flags.has('founding_patriarch_payoff_done')";
+  "flags.has('founding_patriarch_midlife_pressure_done') && !flags.has('founding_patriarch_payoff_done')";
 
 function patriarchBaseState(overrides: Partial<GameState> = {}): GameState {
   return {
@@ -115,15 +115,19 @@ function testPayoffEchoShapeAndGate(): void {
   const evaluator = new ConditionEvaluator();
   const eligible = patriarchBaseState({
     player: { age: 50 } as PlayerState,
-    flags: { founding_patriarch_on_ramp_done: true, founding_patriarch_on_ramp_scholar: true },
+    flags: {
+      founding_patriarch_on_ramp_done: true,
+      founding_patriarch_midlife_pressure_done: true,
+      founding_patriarch_on_ramp_scholar: true,
+    },
   });
-  assert(evaluator.evaluate(payoffEvent!.conditions![0]!, eligible), 'on-ramp done should pass payoff gate');
+  assert(evaluator.evaluate(payoffEvent!.conditions![0]!, eligible), 'pressure done should pass payoff gate');
 
-  const noOnRamp = patriarchBaseState({
+  const noPressure = patriarchBaseState({
     player: { age: 50 } as PlayerState,
-    flags: {},
+    flags: { founding_patriarch_on_ramp_done: true },
   });
-  assert(!evaluator.evaluate(payoffEvent!.conditions![0]!, noOnRamp), 'missing on-ramp should fail payoff gate');
+  assert(!evaluator.evaluate(payoffEvent!.conditions![0]!, noPressure), 'missing pressure should fail payoff gate');
 }
 
 function testPressureEventShapeAndGate(): void {

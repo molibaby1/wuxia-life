@@ -11,7 +11,7 @@
 | 2 | 30 | `p22_faction_sect_continuation` | `sect_exposure`/`joined_sect` | `p22_faction_continuation_active`, `p16_alliance_brokered` |
 | 3 | 32–38 | `founding_patriarch_bridge_entry` | (flags.has('p16_scholar_mentor') || flags.has('p16_alliance_… | `founding_patriarch_bridge_crossed`, `founding_patriarch_on_ramp_done`, on-ramp variant marker |
 | 4 | 40–45 | `founding_patriarch_midlife_pressure` | `founding_patriarch_on_ramp_done && !founding_patriarch_midlife_pressure_done` | `founding_patriarch_midlife_pressure_done`, `founding_patriarch_pressure_rule_first/alliance_first` |
-| 5 | 48–52 | `founding_patriarch_payoff_echo` (choice v2.0.0) | flags.has('founding_patriarch_on_ramp_done') && !flags.has('founding_patriarch_payoff_done') | `founding_patriarch_payoff_done`, `founding_patriarch_identity_done`, `founding_patriarch_payoff_resolved`, choice marker |
+| 5 | 48–52 | `founding_patriarch_payoff_echo` (choice v2.0.0) | flags.has('founding_patriarch_midlife_pressure_done') && !flags.has('founding_patriarch_payoff_done') | `founding_patriarch_payoff_done`, `founding_patriarch_identity_done`, `founding_patriarch_payoff_resolved`, choice marker |
 
 ## Payoff choice branches
 

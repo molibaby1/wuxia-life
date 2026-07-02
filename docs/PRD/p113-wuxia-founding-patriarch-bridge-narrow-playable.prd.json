@@ -32,8 +32,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docs/test-reports/p113-founding-patriarch-bridge-scope-contract.md"
     },
     {
       "id": "P113-003",

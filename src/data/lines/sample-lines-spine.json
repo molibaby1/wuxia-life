@@ -2524,5 +2524,107 @@
         "stageSignals": ["medical_endgame"]
       }
     }
+  },
+  {
+    "id": "magnate_endgame_echo_ledger_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_late_ledger_steady') || flags.has('magnate_native_late_ledger_credit') || flags.has('magnate_native_late_ledger') || flags.has('magnate_native_payoff_ledger_steady') || flags.has('magnate_native_payoff_ledger_credit') || flags.has('magnate_native_payoff_ledger') || (flags.has('magnate_native_ledger_entry') && !flags.has('magnate_native_caravan_entry') && !flags.has('magnate_native_late_caravan_market') && !flags.has('magnate_native_late_caravan_fast') && !flags.has('magnate_native_late_caravan') && !flags.has('magnate_native_payoff_caravan_market') && !flags.has('magnate_native_payoff_caravan_fast') && !flags.has('magnate_native_payoff_caravan')))"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·稳态招牌·传",
+      "text": "五十八岁这年，你坐在账房里翻看旧账本，窗外商号招牌依旧端正。\n\n半生稳扩积势，赊欠铺路，信誉守住了版图。晚年收束之后，江湖上提起你，说的不是银两多少，而是「这人招牌立得住」。\n\n徒弟们守着规矩，老主顾记着人情，欠账的也按时来还——稳态比规模更长久，这话你晚年懂了，身后也懂了。\n\n你想，巨贾之位终究会过去，但招牌上的字，比人活得久。",
+      "description": "P100 巨贾 endgame — native ledger steady-scale legacy echo"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_native_endgame_ledger_legacy" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p100", "merchant", "magnate", "endgame", "ledger", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
+  },
+  {
+    "id": "magnate_endgame_echo_caravan_legacy",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_late_caravan_market') || flags.has('magnate_native_late_caravan_fast') || flags.has('magnate_native_late_caravan') || flags.has('magnate_native_payoff_caravan_market') || flags.has('magnate_native_payoff_caravan_fast') || flags.has('magnate_native_payoff_caravan') || (flags.has('magnate_native_caravan_entry') && !flags.has('magnate_native_ledger_entry') && !flags.has('magnate_native_late_ledger_steady') && !flags.has('magnate_native_late_ledger_credit') && !flags.has('magnate_native_late_ledger') && !flags.has('magnate_native_payoff_ledger_steady') && !flags.has('magnate_native_payoff_ledger_credit') && !flags.has('magnate_native_payoff_ledger')))"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·行市货路·遥",
+      "text": "五十八岁这年，你站在货栈门口看车马来去，想起当年赌市扩货的心跳。\n\n半生行市涨跌，快周转压货，货路铺出了版图。晚年收势之后，江湖上提起你，说的不是账本多厚，而是「这人货路走得通」。\n\n老伙计们还在跑线，行市风向变了又变，可你的名字还在货帮嘴里——涨跌余波比利润更烫手，这话你晚年懂了，身后也懂了。\n\n你想，巨贾之位终究会过去，但货路上的传说，比人走得远。",
+      "description": "P100 巨贾 endgame — native caravan market-volatility legacy echo"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_native_endgame_caravan_legacy" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p100", "merchant", "magnate", "endgame", "caravan", "legacy", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
+  },
+  {
+    "id": "magnate_endgame_echo_generic",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 58, "max": 65 },
+    "triggers": [{ "type": "age_reach", "value": 58 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('magnate_late_life_done') && !flags.has('magnate_endgame_echo_done') && !flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && (flags.has('apprentice_merchant_bridge_crossed') || flags.has('tavern_merchant_bridge_crossed') || flags.has('peasant_merchant_bridge_crossed') || (!flags.has('magnate_native_late_ledger_steady') && !flags.has('magnate_native_late_ledger_credit') && !flags.has('magnate_native_late_ledger') && !flags.has('magnate_native_late_caravan_market') && !flags.has('magnate_native_late_caravan_fast') && !flags.has('magnate_native_late_caravan') && !flags.has('magnate_native_payoff_ledger_steady') && !flags.has('magnate_native_payoff_ledger_credit') && !flags.has('magnate_native_payoff_ledger') && !flags.has('magnate_native_payoff_caravan_market') && !flags.has('magnate_native_payoff_caravan_fast') && !flags.has('magnate_native_payoff_caravan') && !flags.has('magnate_native_ledger_entry') && !flags.has('magnate_native_caravan_entry')))"
+      }
+    ],
+    "content": {
+      "title": "巨贾身后事·商号余响",
+      "text": "五十八岁这年，你站在商号门前，想起这一路是怎么走过来的。\n\n巨贾之位坐过，晚年收束过，江湖上提起你，说的仍是商号与人情。\n\n招牌、货路、账目、欠情——都化作身后余响，比银两更长久。",
+      "description": "P100 巨贾 endgame — generic fallback (bridge or unmatched native)"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "magnate_endgame_echo_done" },
+      { "type": "flag_set", "target": "magnate_endgame_identity_done" },
+      { "type": "flag_set", "target": "magnate_endgame_generic" },
+      { "type": "event_record", "target": "magnate_endgame_echo" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p100", "merchant", "magnate", "endgame", "generic", "mainline", "auto", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["magnate_endgame"]
+      }
+    }
   }
 ]

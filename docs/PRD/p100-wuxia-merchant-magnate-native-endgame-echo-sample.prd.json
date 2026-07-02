@@ -62,8 +62,8 @@
         "npm run typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "Core endgame continuity. Native ledger = steady-scale legacy echo; caravan = market-volatility legacy echo."
+      "passes": true,
+      "notes": "Spine: magnate_endgame_echo_ledger_legacy, magnate_endgame_echo_caravan_legacy, magnate_endgame_echo_generic auto events wired after magnate_late_life_done."
     },
     {
       "id": "P100-005",

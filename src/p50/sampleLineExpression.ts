@@ -783,6 +783,19 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       }
       return '巨贾负担';
     }
+    // P110: Patron late-life cost labels (late_life > payoff > pressure > on-ramp)
+    if (flags.merchant_patron_late_life_done) {
+      if (flags.merchant_patron_late_covenant_bound) {
+        return '盟约终老之累';
+      }
+      if (flags.merchant_patron_late_isolated_merchant) {
+        return '孤商自在之快';
+      }
+      if (flags.merchant_patron_late_sustainable_covenant) {
+        return '新盟久立之累';
+      }
+      return '商武晚年之累';
+    }
     // P102/P108: Patron bridge cost labels (magnate tiers above retain priority)
     if (flags.merchant_patron_payoff_done) {
       if (flags.merchant_patron_payoff_covenant_holder) {

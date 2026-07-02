@@ -91,8 +91,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docs/test-reports/p113-founding-patriarch-bridge-closure-report.md"
     }
   ]
 }

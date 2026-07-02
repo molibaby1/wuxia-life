@@ -47,7 +47,7 @@
         "The challenge remains bounded to merchant_house"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "This is the first real pressure point after the confirmation node. Keep it small and readable; do not jump to full shop ownership."
     },
     {

@@ -19,6 +19,8 @@ const SPINE_EVENT_IDS = [
   'demonic_age45_territory_consolidation',
   'merchant_childhood_seed_milestone',
   'hvg_merchant_early_opportunity_fork',
+  'hvg_merchant_post_fork_confirmation',
+  'hvg_merchant_first_responsibility_challenge',
   'merchant_age40_identity_summary',
   'merchant_midlife_debt_milestone',
   'merchant_age45_expansion_fork',

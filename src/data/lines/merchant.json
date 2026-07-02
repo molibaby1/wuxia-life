@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 8}
     ],
     "conditions": [
-      {"type": "expression", "expression": "(charisma >= 12 || money >= 50 || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
+      {"type": "expression", "expression": "(charisma >= 12 || money >= 50 || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
     ],
     "content": {
       "title": "经商天赋",

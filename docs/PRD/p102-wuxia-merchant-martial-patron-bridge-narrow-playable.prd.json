@@ -1,0 +1,84 @@
+{
+  "project": "Wuxia Life P102 Merchant Martial Patron Bridge Narrow Playable",
+  "branchName": "codex/p102-wuxia-merchant-martial-patron-bridge-narrow-playable",
+  "description": "Wire a bounded cross-route bridge from martial/wealth commitment into merchant_martial_patron playable sample. Pattern: P63 bridge entry scope applied to patron payoff. No magnate spine rewrite (P55/P97-P101), no full Wave 3 graph, no North Star §8 broad sweep.",
+  "userStories": [
+    {
+      "id": "P102-001",
+      "title": "Audit merchant martial patron bridge gap",
+      "description": "As a maintainer, I want the patron cross-route bridge gap documented so P102 targets the right wiring surface.",
+      "acceptanceCriteria": [
+        "Document existing merchant_martial_patron achievement and traceability assets and missing spine or sample-line hooks",
+        "Distinguish patron bridge target from magnate spine P55 P97-P101 closed scope",
+        "Identify prerequisite flags from P22 P37 evidence",
+        "Save one bounded report under docs/test-reports/",
+        "Do not change runtime behavior in this story",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Gap audit: docs/test-reports/p102-merchant-martial-patron-bridge-gap-audit.md"
+    },
+    {
+      "id": "P102-002",
+      "title": "Lock merchant martial patron bridge scope contract",
+      "description": "As a planner, I want a scope contract so P102 stays a bounded patron bridge and does not sprawl into magnate rewrite.",
+      "acceptanceCriteria": [
+        "Define patron bridge event band entry checkpoint and terminal checkpoint flags",
+        "Define allowed surfaces spine wiring expression narrow proof",
+        "Define forbidden items magnate spine rewrite full mixed-achievement graph new UI heavy stat changes",
+        "State magnate vs patron path priority or mutual-exclusion rules",
+        "Save scope contract under docs/test-reports/",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P102-003",
+      "title": "Wire cross-route patron bridge entry",
+      "description": "As a player, I want my martial wealth commitment to open a patron path so mixed identity is playable before endgame.",
+      "acceptanceCriteria": [
+        "Bridge entry reads at least one existing wealth or martial commitment flag",
+        "Bridge sets at least one patron checkpoint flag beyond flavor-only text",
+        "Player-facing text or condition branch differs from generic merchant success and magnate on-ramp",
+        "P97 P98 P99 P100 P101 magnate tests pass",
+        "npm run typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P102-004",
+      "title": "Strengthen patron bridge expression",
+      "description": "As a player, I want patron goals and identity labels to reflect mixed merchant-martial identity through the bridge arc.",
+      "acceptanceCriteria": [
+        "Add or refine at least two player-facing expression pairs for patron bridge path",
+        "At least one expression reads patron bridge checkpoint flags",
+        "Magnate expressions retain priority when magnate markers are set",
+        "npm run typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P102-005",
+      "title": "Add narrow proof and stage closure",
+      "description": "As a maintainer, I want proof tests and a closure report for the patron bridge stage.",
+      "acceptanceCriteria": [
+        "Add focused test covering at least one patron bridge path through checkpoint",
+        "Produce proof artifact under docs/test-reports/",
+        "Save closure report stating what P102 proves and what remains deferred",
+        "npm run typecheck passes",
+        "P101 bridge-origin endgame tests pass",
+        "npm run guard:sample-lines-baseline passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

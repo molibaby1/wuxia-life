@@ -30,7 +30,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Addresses GAP-P119-N03; bridge through endgame flag chain."
     },
     {

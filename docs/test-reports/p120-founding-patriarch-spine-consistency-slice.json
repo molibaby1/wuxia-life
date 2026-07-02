@@ -1,0 +1,122 @@
+{
+  "slice": "p120_founding_patriarch_spine_consistency",
+  "spinePathCount": 2,
+  "p39CarryForwardPathCount": 13,
+  "pathCount": 15,
+  "spinePaths": [
+    {
+      "id": "p120_founding_patriarch_spine_rule_keeper_endgame",
+      "label": "P113–P119 scholar → rule_first → rule_keeper → endgame rule_echo",
+      "originId": "scholar_house",
+      "player": {
+        "age": 62,
+        "martialPower": 52,
+        "reputation": 48,
+        "connections": 50,
+        "money": 90,
+        "lifeStates": {
+          "fatigue": 0,
+          "discipline": 0,
+          "indulgence": 0,
+          "familyBond": 0,
+          "socialMomentum": 2,
+          "anxiety": 0,
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "businessHabit": 0
+        }
+      },
+      "flags": {
+        "orthodox_childhood_seed_done": true,
+        "p16_scholar_mentor": true,
+        "p22_faction_continuation_active": true,
+        "p16_alliance_brokered": true,
+        "founding_patriarch_bridge_crossed": true,
+        "founding_patriarch_on_ramp_done": true,
+        "founding_patriarch_midlife_pressure_done": true,
+        "founding_patriarch_payoff_done": true,
+        "founding_patriarch_identity_done": true,
+        "founding_patriarch_payoff_resolved": true,
+        "founding_patriarch_payoff_legacy_holder": true,
+        "founding_patriarch_on_ramp_scholar": true,
+        "founding_patriarch_pressure_rule_first": true,
+        "founding_patriarch_late_life_done": true,
+        "founding_patriarch_late_life_identity_done": true,
+        "founding_patriarch_late_rule_keeper": true,
+        "founding_patriarch_endgame_echo_done": true,
+        "founding_patriarch_endgame_identity_done": true,
+        "founding_patriarch_endgame_rule_echo": true
+      },
+      "summarySignals": [
+        "开派祖师",
+        "门规碑",
+        "治学师承"
+      ]
+    },
+    {
+      "id": "p120_founding_patriarch_spine_alliance_bearer_endgame",
+      "label": "P113–P119 alliance → alliance_first → alliance_bearer → endgame alliance_echo",
+      "originId": "scholar_house",
+      "player": {
+        "age": 62,
+        "martialPower": 52,
+        "reputation": 48,
+        "connections": 50,
+        "money": 90,
+        "lifeStates": {
+          "fatigue": 0,
+          "discipline": 0,
+          "indulgence": 0,
+          "familyBond": 0,
+          "socialMomentum": 2,
+          "anxiety": 0,
+          "trainingHabit": 2,
+          "studyHabit": 0,
+          "businessHabit": 0
+        }
+      },
+      "flags": {
+        "orthodox_childhood_seed_done": true,
+        "p16_scholar_mentor": true,
+        "p22_faction_continuation_active": true,
+        "p16_alliance_brokered": true,
+        "founding_patriarch_bridge_crossed": true,
+        "founding_patriarch_on_ramp_done": true,
+        "founding_patriarch_midlife_pressure_done": true,
+        "founding_patriarch_payoff_done": true,
+        "founding_patriarch_identity_done": true,
+        "founding_patriarch_payoff_resolved": true,
+        "founding_patriarch_payoff_legacy_holder": true,
+        "founding_patriarch_on_ramp_alliance": true,
+        "founding_patriarch_pressure_alliance_first": true,
+        "founding_patriarch_late_life_done": true,
+        "founding_patriarch_late_life_identity_done": true,
+        "founding_patriarch_late_alliance_bearer": true,
+        "founding_patriarch_endgame_echo_done": true,
+        "founding_patriarch_endgame_identity_done": true,
+        "founding_patriarch_endgame_alliance_echo": true
+      },
+      "summarySignals": [
+        "开派祖师",
+        "盟约碑",
+        "诸派续责"
+      ]
+    }
+  ],
+  "findings": [],
+  "perPathFindings": [
+    {
+      "pathId": "p120_founding_patriarch_spine_rule_keeper_endgame",
+      "findings": []
+    },
+    {
+      "pathId": "p120_founding_patriarch_spine_alliance_bearer_endgame",
+      "findings": []
+    }
+  ],
+  "criticalCount": 0,
+  "highSeverityContradictionCount": 0,
+  "mediumLowFindingCount": 0,
+  "passed": true,
+  "section8Item3SpineExtension": "Met"
+}

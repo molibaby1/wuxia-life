@@ -44,10 +44,12 @@ function patriarchBaseState(overrides: Partial<GameState> = {}): GameState {
 
 const allEvents = sampleLinesSpine as SampleLineEvent[];
 const entryEvent = allEvents.find(e => e.id === 'founding_patriarch_bridge_entry');
+const pressureEvent = allEvents.find(e => e.id === 'founding_patriarch_midlife_pressure');
 const payoffEvent = allEvents.find(e => e.id === 'founding_patriarch_payoff_echo');
 
 function testPatriarchBridgeEventsExist(): void {
   assert(Boolean(entryEvent), 'founding_patriarch_bridge_entry should exist');
+  assert(Boolean(pressureEvent), 'founding_patriarch_midlife_pressure should exist');
   assert(Boolean(payoffEvent), 'founding_patriarch_payoff_echo should exist');
 }
 
@@ -122,6 +124,60 @@ function testPayoffEchoShapeAndGate(): void {
     flags: {},
   });
   assert(!evaluator.evaluate(payoffEvent!.conditions![0]!, noOnRamp), 'missing on-ramp should fail payoff gate');
+}
+
+function testPressureEventShapeAndGate(): void {
+  assert(pressureEvent?.eventType === 'choice', 'pressure should be choice type');
+  assert(pressureEvent?.ageRange?.min === 40, 'pressure min age should be 40');
+  assert(pressureEvent?.ageRange?.max === 45, 'pressure max age should be 45');
+  assert((pressureEvent?.choices?.length ?? 0) === 2, 'pressure should have 2 choices');
+
+  const evaluator = new ConditionEvaluator();
+  const eligible = patriarchBaseState({
+    player: { age: 42 } as PlayerState,
+    flags: {
+      founding_patriarch_on_ramp_done: true,
+      p16_scholar_mentor: true,
+    },
+  });
+  assert(evaluator.evaluate(pressureEvent!.conditions![0]!, eligible), 'on-ramp done should pass pressure gate');
+
+  const noOnRamp = patriarchBaseState({
+    player: { age: 42 } as PlayerState,
+    flags: { p16_scholar_mentor: true },
+  });
+  assert(!evaluator.evaluate(pressureEvent!.conditions![0]!, noOnRamp), 'missing on-ramp should fail pressure gate');
+}
+
+function testPressureCheckpointAndScholarPriority(): void {
+  const scholarChoice = pressureEvent!.choices!.find(c => c.id === 'patriarch_pressure_rule_first');
+  const allianceChoice = pressureEvent!.choices!.find(c => c.id === 'patriarch_pressure_alliance_first');
+  assert(Boolean(scholarChoice), 'pressure scholar choice should exist');
+  assert(Boolean(allianceChoice), 'pressure alliance choice should exist');
+
+  for (const choice of [scholarChoice!, allianceChoice!]) {
+    const effects = choice.effects ?? [];
+    assert(
+      effects.some(e => e.type === 'flag_set' && e.target === 'founding_patriarch_midlife_pressure_done'),
+      `${choice.id} sets founding_patriarch_midlife_pressure_done`,
+    );
+  }
+
+  const evaluator = new ConditionEvaluator();
+  const bothScholarAndAlliance = patriarchBaseState({
+    player: { age: 42 } as PlayerState,
+    flags: {
+      founding_patriarch_on_ramp_done: true,
+      p16_scholar_mentor: true,
+      p16_alliance_brokered: true,
+      p22_faction_continuation_active: true,
+    },
+  });
+  assert(evaluator.evaluate(scholarChoice!.condition!, bothScholarAndAlliance), 'scholar branch available when scholar marker is set');
+  assert(
+    !evaluator.evaluate(allianceChoice!.condition!, bothScholarAndAlliance),
+    'alliance-first branch should be blocked when scholar marker is set',
+  );
 }
 
 function testPayoffSetsTerminalFlags(): void {
@@ -274,6 +330,8 @@ const tests: Array<[string, () => void]> = [
   ['entry event shape', testEntryEventShape],
   ['entry gate reads scholar/faction flags', testEntryGateReadsScholarFactionFlags],
   ['entry choices set checkpoint flags', testEntryChoicesSetCheckpointFlags],
+  ['pressure event shape and gate', testPressureEventShapeAndGate],
+  ['pressure checkpoint and scholar priority', testPressureCheckpointAndScholarPriority],
   ['payoff echo shape and gate', testPayoffEchoShapeAndGate],
   ['payoff sets terminal flags', testPayoffSetsTerminalFlags],
   ['patriarch expression differs from generic orthodox and renown', testPatriarchExpressionDiffersFromGenericOrthodoxAndRenown],

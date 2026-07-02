@@ -3293,6 +3293,60 @@
     }
   },
   {
+    "id": "founding_patriarch_midlife_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 40, "max": 45 },
+    "triggers": [{ "type": "age_reach", "value": 40 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('founding_patriarch_on_ramp_done') && !flags.has('founding_patriarch_midlife_pressure_done') && flags.has('orthodox_childhood_seed_done') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "开派中年压肩",
+      "text": "四十岁后，门派香火与治学师承同时压到你肩上。\n\n一边是门规续责，另一边是诸派盟约续责。你意识到：开宗立派不再只是念头，而是必须当下给出次序的担子。",
+      "description": "P115 开派祖师 founding-patriarch midlife pressure — single core choice between rule-first and alliance-first"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "patriarch_pressure_rule_first",
+        "text": "先稳门规传承，再补诸派盟约续责",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('p16_scholar_mentor')"
+        },
+        "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_midlife_pressure_done" },
+          { "type": "event_record", "target": "founding_patriarch_midlife_pressure" }
+        ]
+      },
+      {
+        "id": "patriarch_pressure_alliance_first",
+        "text": "先稳诸派盟约续责，再收束门规传承",
+        "condition": {
+          "type": "expression",
+          "expression": "(flags.has('p16_alliance_brokered') || flags.has('p22_faction_continuation_active')) && !flags.has('p16_scholar_mentor')"
+        },
+        "effects": [
+          { "type": "flag_set", "target": "founding_patriarch_midlife_pressure_done" },
+          { "type": "event_record", "target": "founding_patriarch_midlife_pressure" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p115", "orthodox", "founding_patriarch", "midlife", "pressure", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["founding_patriarch_midlife_pressure"]
+      }
+    }
+  },
+  {
     "id": "founding_patriarch_payoff_echo",
     "version": "2.0.0",
     "category": "main_story",

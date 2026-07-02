@@ -107,7 +107,7 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && !flags.merchant_shop_success"}
+      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && !flags.merchant_shop_success && (flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_ledger_rhythm_expand == true || flags.hvg_merchant_ledger_pressure_stockout == true)"}
     ],
     "content": {
       "title": "经营困境",
@@ -156,7 +156,7 @@
       {"type": "age_reach", "value": 18}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true"}
+      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && (!flags.hvg_merchant_caravan_track || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_caravan_rhythm_fast == true || flags.hvg_merchant_caravan_rhythm_market == true)"}
     ],
     "content": {
       "title": "商队护送",

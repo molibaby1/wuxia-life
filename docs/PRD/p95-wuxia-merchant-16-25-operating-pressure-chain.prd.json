@@ -69,7 +69,7 @@
         "Relevant merchant-focused tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Continuity-wiring story. Prefer conditioning existing failure/caravan events over parallel dead-end branches."
     },
     {

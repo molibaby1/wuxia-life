@@ -48,7 +48,7 @@
         "npm run typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Payoff layer. P64 bridge branches take precedence over native track branches."
     },
     {

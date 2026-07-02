@@ -1202,14 +1202,116 @@
     "content": {
       "title": "巨贾之位",
       "text": "半生经营，你的商号已成江湖不可或缺的血脉。可每一笔利润都沾着人情，每一桩合作都系着风险——巨贾之位，坐上去容易，守住难。",
-      "description": "P55 巨贾 payoff"
+      "description": "P55 巨贾 payoff；P98 native ledger/caravan 分化"
     },
-    "eventType": "auto",
-    "autoEffects": [
-      { "type": "flag_set", "target": "magnate_payoff_done" },
-      { "type": "flag_set", "target": "magnate_payoff_resolved" },
-      { "type": "flag_set", "target": "merchant_age45_payoff_done" },
-      { "type": "event_record", "target": "magnate_payoff" }
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "magnate_payoff_ledger_steady",
+        "text": "稳态巨贾：招牌立住了，守信誉比再扩规模更要紧",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_ledger_steady') || (flags.has('magnate_native_ledger_entry') && (flags.has('magnate_native_ledger_steady') || flags.has('hvg_merchant_ledger_expansion_steady'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_ledger_steady" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_ledger_credit",
+        "text": "信誉资本收束：赊欠铺开了版图，人情账比银钱账更难算清",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_ledger_credit') || (flags.has('magnate_native_ledger_entry') && (flags.has('magnate_native_ledger_credit') || flags.has('hvg_merchant_ledger_expansion_credit'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_ledger_credit" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_caravan_market",
+        "text": "行市赢家收束：赌市扩货铺了货路，涨跌都在心上",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_caravan_market') || (flags.has('magnate_native_caravan_entry') && (flags.has('magnate_native_caravan_market') || flags.has('hvg_merchant_caravan_expansion_market'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_caravan_market" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_caravan_fast",
+        "text": "货路帝国收束：快周转压货撑了规模，货路比利润更金贵",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_caravan_fast') || (flags.has('magnate_native_caravan_entry') && (flags.has('magnate_native_caravan_fast') || flags.has('hvg_merchant_caravan_expansion_fast'))))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 25, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_caravan_fast" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_ledger_generic",
+        "text": "账房式巨贾收束：稳扩积势跨了门槛，招牌比规模更金贵",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_ledger') || flags.has('magnate_native_ledger_entry'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_ledger" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_caravan_generic",
+        "text": "跑货式巨贾收束：赌市扩货跨了门槛，货路比账上数字更烫手",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('magnate_native_pressure_caravan') || flags.has('magnate_native_caravan_entry'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "flag_set", "target": "magnate_native_payoff_caravan" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      },
+      {
+        "id": "magnate_payoff_generic",
+        "text": "半生经营，商号已成江湖血脉，巨贾之位坐上去容易，守住难",
+        "effects": [
+          { "type": "flag_set", "target": "magnate_payoff_done" },
+          { "type": "flag_set", "target": "magnate_payoff_resolved" },
+          { "type": "flag_set", "target": "merchant_age45_payoff_done" },
+          { "type": "event_record", "target": "magnate_payoff" }
+        ]
+      }
     ],
     "metadata": {
       "enabled": true,

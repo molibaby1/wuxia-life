@@ -138,6 +138,31 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.peasant_merchant_bridge_crossed) {
       return '从田埂到车马，靠脚力和血汗踩出了一条粮路，车马仓储踩出了根基，收成赌出了规模，只是脚下的路比田埂还长，赢了但也再回不到田里了';
     }
+    // P98: Native magnate payoff reads P98 payoff markers, then pressure/entry lineage
+    if (flags.magnate_native_payoff_ledger_steady || flags.magnate_native_payoff_ledger) {
+      return '稳态巨贾之位已成：稳扩积势守住了招牌，信誉比规模更金贵，守住比再扩更难';
+    }
+    if (flags.magnate_native_payoff_ledger_credit) {
+      return '信誉资本收束已成：赊欠铺路铺出了版图，人情账比银钱账更难算，守住比再赊更难';
+    }
+    if (flags.magnate_native_payoff_caravan_market || flags.magnate_native_payoff_caravan) {
+      return '行市赢家之位已成：赌市扩货铺了货路，涨跌都在心上，守住比再押更难';
+    }
+    if (flags.magnate_native_payoff_caravan_fast) {
+      return '货路帝国之位已成：快周转压货撑了规模，货路比利润更金贵，守住比再压更难';
+    }
+    if (flags.magnate_native_ledger_entry) {
+      if (flags.magnate_native_pressure_ledger_credit || flags.magnate_native_ledger_credit || flags.hvg_merchant_ledger_expansion_credit) {
+        return '账房式巨贾之位已成：赊欠铺路撑了规模，信誉与周转两头顾，守住比再赊更难';
+      }
+      return '账房式巨贾之位已成：稳扩积势跨了门槛，守信誉比抢规模要紧，守住比再扩更难';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      if (flags.magnate_native_pressure_caravan_fast || flags.magnate_native_caravan_fast || flags.hvg_merchant_caravan_expansion_fast) {
+        return '跑货式巨贾之位已成：快周转压货撑了货路，货路一断便卡死，守住比再压更难';
+      }
+      return '跑货式巨贾之位已成：赌市扩货跨了门槛，行市风向比账烫手，守住比再押更难';
+    }
     return '巨贾之位已成，守住比扩张更难';
   }
   if (flags.magnate_midlife_pressure_done) {

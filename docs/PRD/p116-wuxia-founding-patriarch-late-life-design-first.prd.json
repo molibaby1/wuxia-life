@@ -89,8 +89,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report: docs/test-reports/p116-founding-patriarch-late-life-closure-report.md; GO for P117"
     }
   ]
 }

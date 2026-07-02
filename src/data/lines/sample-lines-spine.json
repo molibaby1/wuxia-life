@@ -954,12 +954,106 @@
     "content": {
       "title": "巨贾门槛",
       "text": "产业初成，商路已铺开半壁江山。你不再是小本经营的掌柜——财富与人脉把你推到了'巨贾'的门槛。可这门槛一旦跨过，便再无退路。",
-      "description": "P55 巨贾 on-ramp"
+      "description": "P55 巨贾 on-ramp；P97 native ledger/caravan 分化"
     },
-    "eventType": "auto",
-    "autoEffects": [
-      { "type": "flag_set", "target": "magnate_on_ramp_done" },
-      { "type": "event_record", "target": "magnate_on_ramp" }
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "magnate_entry_ledger_steady",
+        "text": "稳扩积势已足，守信誉再跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('hvg_merchant_ledger_expansion_steady') || flags.has('hvg_merchant_ledger_pressure_stockout'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_ledger_entry" },
+          { "type": "flag_set", "target": "magnate_native_ledger_steady" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_ledger_credit",
+        "text": "赊欠铺路撑了规模，控债务再跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('hvg_merchant_ledger_expansion_credit') || flags.has('hvg_merchant_ledger_pressure_credit'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_ledger_entry" },
+          { "type": "flag_set", "target": "magnate_native_ledger_credit" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_caravan_market",
+        "text": "赌市扩货撑了货路，押行市跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('hvg_merchant_caravan_expansion_market') || flags.has('hvg_merchant_caravan_pressure_swing_win') || flags.has('hvg_merchant_caravan_pressure_swing_loss'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_caravan_entry" },
+          { "type": "flag_set", "target": "magnate_native_caravan_market" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_caravan_fast",
+        "text": "快周转换了规模，抢货路跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed') && (flags.has('hvg_merchant_caravan_expansion_fast') || flags.has('hvg_merchant_caravan_rhythm_fast'))"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 15, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_caravan_entry" },
+          { "type": "flag_set", "target": "magnate_native_caravan_fast" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_ledger_generic",
+        "text": "账房式积势已足，第一次认真跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_ledger_entry" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_caravan_generic",
+        "text": "跑货式积势已足，第一次认真跨巨贾门槛",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track') && !flags.has('apprentice_merchant_bridge_crossed') && !flags.has('tavern_merchant_bridge_crossed') && !flags.has('peasant_merchant_bridge_crossed')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "flag_set", "target": "magnate_native_caravan_entry" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      },
+      {
+        "id": "magnate_entry_generic",
+        "text": "产业初成，财富与人脉把你推到了巨贾的门槛",
+        "effects": [
+          { "type": "flag_set", "target": "magnate_on_ramp_done" },
+          { "type": "event_record", "target": "magnate_on_ramp" }
+        ]
+      }
     ],
     "metadata": {
       "enabled": true,

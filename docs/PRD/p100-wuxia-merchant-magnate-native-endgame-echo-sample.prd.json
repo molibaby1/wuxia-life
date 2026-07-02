@@ -93,8 +93,8 @@
         "npm run guard:sample-lines-baseline passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Evidence-first closeout. Re-guard P50 baseline alongside new native endgame chain."
+      "passes": true,
+      "notes": "Proof at docs/test-reports/p100-merchant-magnate-native-endgame-chain-proof.md; closure at docs/test-reports/p100-merchant-magnate-native-endgame-closure-report.md; tests/p100MerchantMagnateNativeEndgameTests.ts passes."
     }
   ]
 }

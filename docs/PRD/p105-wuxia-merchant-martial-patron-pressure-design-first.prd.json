@@ -80,8 +80,8 @@
         "npm run typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P106 validation shape saved — 5 core proof nodes, ~19-22 regression assertions, 11 closure criteria."
     },
     {
       "id": "P105-006",

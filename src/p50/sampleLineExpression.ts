@@ -151,6 +151,25 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.peasant_merchant_bridge_crossed) {
       return '商号遍九州，车马仓储债也遍九州，运力、仓库、下属工钱让泥腿子巨贾用身体在扛';
     }
+    // P97: Native magnate pressure reads P96 expansion / on-ramp markers
+    if (flags.magnate_native_ledger_entry) {
+      if (flags.hvg_merchant_ledger_expansion_credit || flags.magnate_native_ledger_credit) {
+        return '商号遍九州，赊欠铺开的信誉债也遍九州，人情账比银钱账更难算';
+      }
+      if (flags.hvg_merchant_ledger_expansion_steady || flags.magnate_native_ledger_steady) {
+        return '商号遍九州，稳扩欠下的人情债也遍九州，守信誉比抢规模要紧';
+      }
+      return '商号遍九州，账房式扩张债也遍九州';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      if (flags.hvg_merchant_caravan_expansion_market || flags.magnate_native_caravan_market) {
+        return '商号遍九州，赌市扩货欠下的债也遍九州，行市一跌便喘不过气';
+      }
+      if (flags.hvg_merchant_caravan_expansion_fast || flags.magnate_native_caravan_fast) {
+        return '商号遍九州，快周转撑起的债也遍九州，货路一断便卡死';
+      }
+      return '商号遍九州，跑货式扩张债也遍九州';
+    }
     return '商号遍九州，人情债也遍九州';
   }
   if (flags.magnate_on_ramp_done) {
@@ -166,6 +185,25 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     // Peasant path: labor + trade → business as labor elevation
     if (flags.peasant_merchant_bridge_crossed) {
       return '粮路跑通、买卖上手，正学着像商人一样思考';
+    }
+    // P97: Native merchant_house ledger/caravan magnate entry
+    if (flags.magnate_native_ledger_entry) {
+      if (flags.magnate_native_ledger_steady || flags.hvg_merchant_ledger_expansion_steady) {
+        return '稳扩积势已足，正守信誉跨巨贾门槛';
+      }
+      if (flags.magnate_native_ledger_credit || flags.hvg_merchant_ledger_expansion_credit) {
+        return '赊欠铺路撑了规模，正控债务再做大';
+      }
+      return '账房式积势已足，正跨巨贾门槛';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      if (flags.magnate_native_caravan_market || flags.hvg_merchant_caravan_expansion_market) {
+        return '赌市扩货撑了货路，正押行市跨巨贾门槛';
+      }
+      if (flags.magnate_native_caravan_fast || flags.hvg_merchant_caravan_expansion_fast) {
+        return '快周转换了规模，正抢货路跨巨贾门槛';
+      }
+      return '跑货式积势已足，正跨巨贾门槛';
     }
     return '产业初成，巨贾之路刚起步';
   }
@@ -482,6 +520,25 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       if (flags.peasant_merchant_bridge_crossed) {
         return '粮路与买卖的担子';
       }
+      // P97: Native ledger/caravan magnate entry cost labels
+      if (flags.magnate_native_ledger_entry) {
+        if (flags.magnate_native_ledger_credit || flags.hvg_merchant_ledger_expansion_credit) {
+          return '赊欠跨门槛之累';
+        }
+        if (flags.magnate_native_ledger_steady || flags.hvg_merchant_ledger_expansion_steady) {
+          return '稳扩跨门槛之累';
+        }
+        return '账房跨门槛之累';
+      }
+      if (flags.magnate_native_caravan_entry) {
+        if (flags.magnate_native_caravan_market || flags.hvg_merchant_caravan_expansion_market) {
+          return '赌市跨门槛之累';
+        }
+        if (flags.magnate_native_caravan_fast || flags.hvg_merchant_caravan_expansion_fast) {
+          return '压货跨门槛之累';
+        }
+        return '跑货跨门槛之累';
+      }
       return '巨贾负担';
     }
     if (flags.merchant_midlife_debt) {
@@ -721,6 +778,25 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     if (flags.peasant_merchant_bridge_crossed) {
       return '你是靠脚力血汗做起来的巨贾：从田埂到车马，粮路踩出了根基，奔波换来了规模，代价是脚下的路比田埂还长，再也回不到守着一亩三分地的安稳';
+    }
+    // P97: Native merchant_house magnate identity
+    if (flags.magnate_native_ledger_entry) {
+      if (flags.magnate_native_ledger_credit || flags.hvg_merchant_ledger_expansion_credit) {
+        return '你是靠赊欠铺路做起来的账房式巨贾：守账识风险，用信誉换规模，跨过门槛后人情账比银钱账更难算清';
+      }
+      if (flags.magnate_native_ledger_steady || flags.hvg_merchant_ledger_expansion_steady) {
+        return '你是靠稳扩积势做起来的账房式巨贾：控债务、守周转，跨过门槛后招牌比规模更金贵';
+      }
+      return '你是靠账房式经营做起来的巨贾：稳扩积势跨了门槛，财富带来地位，也带来赊欠与信义之债';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      if (flags.magnate_native_caravan_market || flags.hvg_merchant_caravan_expansion_market) {
+        return '你是靠赌市扩货做起来的跑货式巨贾：吃波动、押行市，跨过门槛后行市的风向比账本上写得烫手';
+      }
+      if (flags.magnate_native_caravan_fast || flags.hvg_merchant_caravan_expansion_fast) {
+        return '你是靠快周转压货做起来的跑货式巨贾：扩货路、抢规模，跨过门槛后货路一断周转便卡死';
+      }
+      return '你是靠跑货式经营做起来的巨贾：赌市扩货跨了门槛，财富带来地位，也带来涨跌与押货的风险';
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }

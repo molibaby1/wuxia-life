@@ -299,6 +299,25 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   if (flags.merchant_patron_payoff_done) {
     return '商武一体名号已定，门派对投与江湖护卫都成了招牌';
   }
+  // P106: Patron midlife pressure goals (payoff > pressure > on-ramp)
+  if (flags.merchant_patron_midlife_pressure_done) {
+    if (flags.merchant_patron_on_ramp_orthodox) {
+      return '一面守侠义盟约护商，一面应付门派索债般的武力差遣';
+    }
+    if (flags.merchant_patron_on_ramp_martial) {
+      return '一面加派护镖撑商路，一面应付盟约兑现后的武力负担';
+    }
+    if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+      return '一面用手艺标准护商，一面应付盟约兑现后的品质与护镖两头紧';
+    }
+    if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+      return '一面靠消息网调度护商，一面应付盟约兑现后的借道与人手两头紧';
+    }
+    if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+      return '一面用粮路脚力撑护商，一面应付盟约兑现后的囤粮与护镖两头紧';
+    }
+    return '一面扩张商路，一面应付门派护商盟约兑现后的武力负担';
+  }
   if (flags.merchant_patron_on_ramp_done) {
     if (flags.merchant_patron_on_ramp_orthodox) {
       return '银钱换侠义盟约，正把手中的商路与门派的剑绑在同一条绳上';
@@ -745,6 +764,25 @@ export function deriveSampleLineCostLabel(state: GameState): string {
     // P102: Patron bridge cost labels (magnate tiers above retain priority)
     if (flags.merchant_patron_payoff_done) {
       return '商武名号之累';
+    }
+    // P106: Patron midlife pressure cost labels (payoff > pressure > on-ramp)
+    if (flags.merchant_patron_midlife_pressure_done) {
+      if (flags.merchant_patron_on_ramp_orthodox) {
+        return '侠义盟约之债';
+      }
+      if (flags.merchant_patron_on_ramp_martial) {
+        return '护商武力之债';
+      }
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '手艺护商之债';
+      }
+      if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+        return '人脉护商之债';
+      }
+      if (flags.merchant_patron_bridge_peasant_grain || flags.peasant_merchant_bridge_crossed) {
+        return '粮路护商之债';
+      }
+      return '盟约护商之累';
     }
     if (flags.merchant_patron_on_ramp_done) {
       if (flags.merchant_patron_on_ramp_orthodox) {

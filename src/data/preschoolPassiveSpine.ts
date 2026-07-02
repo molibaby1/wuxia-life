@@ -5,7 +5,10 @@
 import preschoolPassiveSpineJson from './lines/preschool-passive-spine.json';
 import type { PassiveNarrativeEntry } from './passiveNarrativeTypes';
 import { infantPassiveNarrativeCatalog } from './infantPassiveNarrativeCatalog';
-import { resolvePassiveGapPlaceholderText } from './passivePlanningPlaceholder';
+import {
+  resolvePassiveGapPlaceholderText,
+  resolvePlanningPlaceholderText,
+} from './passivePlanningPlaceholder';
 import type { GameState } from '../types/eventTypes';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { ORIGIN_FLAG_TO_PASSIVE_TAG } from './originInfantPassiveChain';

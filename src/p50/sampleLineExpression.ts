@@ -73,6 +73,26 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
 }
 
 function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.founding_patriarch_payoff_done) {
+    if (flags.founding_patriarch_payoff_legacy_holder) {
+      return '续责如山，开派名号落在门派与治学一并传承之上';
+    }
+    if (flags.founding_patriarch_payoff_independent_founder) {
+      return '自立山门，治学规矩自己定，不再听诸派差遣';
+    }
+    if (flags.founding_patriarch_payoff_dual_gate) {
+      return '盟约师承各守其份，开派之路不再两头拉扯';
+    }
+  }
+  if (flags.founding_patriarch_on_ramp_done) {
+    if (flags.founding_patriarch_on_ramp_scholar) {
+      return '学者师徒与治学盟约并进，开宗立派的念头渐明';
+    }
+    if (flags.founding_patriarch_on_ramp_alliance) {
+      return '门派续责与诸派盟约并进，开宗立派的担子渐沉';
+    }
+    return '师门盟约与学者线拧在一处，开派之路已开';
+  }
   if (flags.orthodox_age45_legacy_steward_done) {
     return '传承守门，门派遗命在肩';
   }
@@ -644,6 +664,20 @@ export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
   const line = detectSampleLine(flags);
   if (line === 'orthodox') {
+    if (flags.founding_patriarch_payoff_done) {
+      if (flags.founding_patriarch_payoff_legacy_holder) {
+        return '续责开派之累';
+      }
+      if (flags.founding_patriarch_payoff_independent_founder) {
+        return '自立开派之快';
+      }
+      if (flags.founding_patriarch_payoff_dual_gate) {
+        return '双门并立之累';
+      }
+    }
+    if (flags.founding_patriarch_on_ramp_done) {
+      return '开派盟约之累';
+    }
     return '守正代价';
   }
   if (line === 'demonic') {
@@ -1065,6 +1099,23 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
 }
 
 function orthodoxAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (flags.founding_patriarch_identity_done || flags.founding_patriarch_on_ramp_done) {
+    if (flags.founding_patriarch_payoff_independent_founder) {
+      return '你是自立山门的开派武者，为治学规矩与门派名号撕开了旧盟约';
+    }
+    if (flags.founding_patriarch_payoff_legacy_holder) {
+      return '你是续责开派的开宗者，门派香火与学者师承一并扛在肩上';
+    }
+    if (flags.founding_patriarch_payoff_dual_gate) {
+      return '你是双门并立的开宗者，盟约与师承各守其份而开派有名';
+    }
+    if (flags.founding_patriarch_on_ramp_scholar) {
+      return '你是治学盟约并进的开派苗子，学者师徒线拉着开宗念头往前走';
+    }
+    if (flags.founding_patriarch_on_ramp_alliance) {
+      return '你是门派盟约并进的开派苗子，续责诸派牵着开宗念头往前走';
+    }
+  }
   if (!flags.orthodox_age40_identity_done && !flags.sect_midlife_outcome) {
     return undefined;
   }

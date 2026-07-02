@@ -62,8 +62,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "orthodoxCurrentGoal, deriveSampleLineCostLabel, orthodoxAge40Identity founding_patriarch branches"
     },
     {
       "id": "P113-005",

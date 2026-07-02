@@ -310,6 +310,148 @@
     }
   },
   {
+    "id": "hvg_merchant_post_fork_confirmation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 98,
+    "ageRange": { "min": 10, "max": 12 },
+    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('route_merchant') && flags.has('hvg_merchant_early_fork_done') && !flags.has('hvg_merchant_post_fork_confirmation_done') && (flags.has('hvg_merchant_ledger_track') || flags.has('hvg_merchant_caravan_track'))"
+      }
+    ],
+    "content": {
+      "title": "分岔后的第一次确认",
+      "text": "商路初分之后，家里要看看你这半年是更像账房学徒，还是更像跑货的伙计——这一步会决定你接下来先练什么本事。",
+      "description": "P94 商贾分岔后可见成长确认"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_track_confirmation",
+        "text": "账房确认了：你记下了第一笔差错，也学会了怎样不让小错滚成大账",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_confirmed" },
+          { "type": "flag_set", "target": "hvg_merchant_post_fork_confirmation_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_fork_confirmation" }
+        ]
+      },
+      {
+        "id": "caravan_track_confirmation",
+        "text": "货路确认了：你认出了第一回涨跌，也看出了行市里谁是真心谁是虚浮",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_confirmed" },
+          { "type": "flag_set", "target": "hvg_merchant_post_fork_confirmation_done" },
+          { "type": "event_record", "target": "hvg_merchant_post_fork_confirmation" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p94", "hvg", "merchant", "childhood", "mainline", "once"]
+    }
+  },
+  {
+    "id": "hvg_merchant_first_responsibility_challenge",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 97,
+    "ageRange": { "min": 13, "max": 15 },
+    "triggers": [{ "type": "age_reach", "value": 13 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('hvg_merchant_post_fork_confirmation_done') && !flags.has('hvg_merchant_first_challenge_done') && (flags.has('hvg_merchant_ledger_track') || flags.has('hvg_merchant_caravan_track'))"
+      }
+    ],
+    "content": {
+      "title": "第一次担责",
+      "text": "家里终于把一件真买卖交到你手上——不是练手，是担责。账房路和货路，第一次考验来得不一样。",
+      "description": "P94 商贾 13-15 首次小挑战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_steady_collection",
+        "text": "逐户核对赊欠再收账，宁可慢一日也不让账错",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_challenge_steady" },
+          { "type": "flag_set", "target": "hvg_merchant_first_challenge_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_responsibility_challenge" }
+        ]
+      },
+      {
+        "id": "ledger_rushed_collection",
+        "text": "先收大头稳住场面，剩下的小账日后再补",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 10, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_challenge_rushed" },
+          { "type": "flag_set", "target": "hvg_merchant_first_challenge_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_responsibility_challenge" }
+        ]
+      },
+      {
+        "id": "caravan_steady_convoy",
+        "text": "跟老伙计把货押稳，宁可少赚也不赌行市",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_challenge_steady" },
+          { "type": "flag_set", "target": "hvg_merchant_first_challenge_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_responsibility_challenge" }
+        ]
+      },
+      {
+        "id": "caravan_bold_speculation",
+        "text": "抢先低价收一批货赌行市，见识了涨跌也担了风险",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_challenge_bold" },
+          { "type": "flag_set", "target": "hvg_merchant_first_challenge_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_responsibility_challenge" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p94", "hvg", "merchant", "youth", "mainline", "once"]
+    }
+  },
+  {
     "id": "merchant_age40_identity_summary",
     "version": "1.0.0",
     "category": "main_story",

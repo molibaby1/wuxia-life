@@ -31,7 +31,7 @@
         "No regression to merchant_childhood_seed_milestone or hvg_merchant_early_opportunity_fork eligibility"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "First executable growth-confirmation node after the existing fork. This is the earliest missing link in the 10-15 chain."
     },
     {

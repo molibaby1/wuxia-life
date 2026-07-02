@@ -306,6 +306,13 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.merchant_patron_on_ramp_martial) {
       return '武力护商路，正把护镖与放贷拧成一条商武绳';
     }
+    // P103: Bridge-origin patron goals (native orthodox/martial above retain priority)
+    if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+      return '手艺眼光换门派护商，正把刨花与剑鞘绑成一条商武绳';
+    }
+    if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+      return '酒肆人脉换门派借道，正把消息网与护镖拧成一条商武绳';
+    }
     return '商武一体之约已立，门派对投比单纯营利更烫手';
   }
   if (flags.merchant_age45_expansion_fork_done) {
@@ -742,6 +749,13 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       if (flags.merchant_patron_on_ramp_martial) {
         return '护商武力之累';
       }
+      // P103: Bridge-origin patron cost labels (native variants above retain priority)
+      if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+        return '手艺护商之累';
+      }
+      if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+        return '人脉护商之累';
+      }
       return '商武盟约之累';
     }
     if (flags.merchant_midlife_debt) {
@@ -1122,6 +1136,13 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     if (flags.merchant_patron_on_ramp_martial) {
       return '你是商武一体的武力金主：护镖与放贷拧成一条绳，名号落定之后，商路上的麻烦要按江湖规矩算';
     }
+    // P103: Bridge-origin patron payoff identity (native variants above retain priority)
+    if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+      return '你是商武一体的手艺金主：刨花与剑鞘绑成一条绳，名号落定之后，江湖提起你说的是手艺眼光换门派护商';
+    }
+    if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+      return '你是商武一体的人脉金主：酒肆消息网与护镖拧成一条绳，名号落定之后，商路上的借道比银钱更烫手';
+    }
     return '你是商武一体的金主：门派对投比单纯营利更烫手，商武复合身份已成定评';
   }
   if (flags.merchant_patron_on_ramp_done) {
@@ -1130,6 +1151,13 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     if (flags.merchant_patron_on_ramp_martial) {
       return '你是押注武力护商的商武金主：护镖放贷成了一体，商路上的恩怨会拖进账本';
+    }
+    // P103: Bridge-origin patron on-ramp identity (native variants above retain priority)
+    if (flags.merchant_patron_bridge_apprentice_craft || flags.apprentice_merchant_bridge_crossed) {
+      return '你是押注手艺护商的商武金主：刨花与剑鞘绑在一起，商路上的品质比规模更烫手';
+    }
+    if (flags.merchant_patron_bridge_tavern_network || flags.tavern_merchant_bridge_crossed) {
+      return '你是押注人脉护商的商武金主：酒肆消息网与护镖拧成一条绳，商路上的借道比利润更烫手';
     }
     return '你是走商武一体之路的金主：门派对投比账本上的数字更烫手';
   }

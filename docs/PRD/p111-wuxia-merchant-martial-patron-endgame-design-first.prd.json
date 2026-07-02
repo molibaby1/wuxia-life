@@ -88,8 +88,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Endgame contract locked; typecheck passes"
     },
     {
       "id": "P111-006",
@@ -106,8 +106,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "P112 validation shape saved; GO not skipped; typecheck passes"
     },
     {
       "id": "P111-007",

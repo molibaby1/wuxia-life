@@ -669,7 +669,36 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
     }
     return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
   }
-  if (flags.merchant_shop_failed || flags.merchant_midlife_debt) {
+  if (flags.merchant_shop_failed && !flags.merchant_midlife_debt) {
+    return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险';
+  }
+  if (flags.hvg_merchant_ledger_track && flags.hvg_merchant_expansion_rhythm_done) {
+    if (flags.merchant_midlife_debt_ledger_credit || flags.hvg_merchant_ledger_expansion_credit) {
+      return '你是靠赊欠铺路做起来的账房式商人：守账识风险，用信誉换规模，四十岁回望，人情账比银钱账更难算清';
+    }
+    if (flags.merchant_midlife_debt_ledger_steady || flags.hvg_merchant_ledger_expansion_steady) {
+      return '你是靠稳扩守信誉做起来的账房式商人：控债务、守周转，宁可慢一步也不砸招牌，四十岁回望，招牌比规模更金贵';
+    }
+    return '你是靠账房式经营做起来的商路中人：守赊欠、控库存、慢积人脉，财富带来选择，也带来周转与信义之债';
+  }
+  if (flags.hvg_merchant_caravan_track && flags.hvg_merchant_expansion_rhythm_done) {
+    if (flags.merchant_midlife_debt_caravan_market || flags.hvg_merchant_caravan_expansion_market) {
+      return '你是靠赌市扩货做起来的跑货式商人：吃波动、押行市，四十岁回望，行市的风向比账本上写得烫手';
+    }
+    if (flags.merchant_midlife_debt_caravan_fast || flags.hvg_merchant_caravan_expansion_fast) {
+      return '你是靠快周转压货做起来的跑货式商人：扩货路、抢规模，四十岁回望，货路一断周转便卡死';
+    }
+    return '你是靠跑货式经营做起来的商路中人：盯行市、吃波动、快周转，财富带来选择，也带来涨跌与押货的风险';
+  }
+  if (flags.hvg_merchant_operating_pressure_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      return '你是靠账房式经营立足的中年商人：扛过赊欠与断货，财富带来选择，也带来周转与信义之债';
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      return '你是靠跑货式经营立足的中年商人：扛过行市涨跌，财富带来选择，也带来押货与波动的风险';
+    }
+  }
+  if (flags.merchant_midlife_debt) {
     return '你是历经起落仍撑住门面的商路中人，财富带来选择，也带来债、人情与周转风险';
   }
   return '你是靠经营立足的商路中人，财富带来选择，也带来人情与周转压力';

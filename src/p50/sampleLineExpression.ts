@@ -184,7 +184,50 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
   if (flags.merchant_caravan_success || flags.merchant_sect_investment_done) {
     return '商队或投资分岔，扩张与风险并行';
   }
+  // P95: 16-25 operating chain — track-specific goals after rhythm/pressure
+  if (flags.hvg_merchant_operating_pressure_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      if (flags.hvg_merchant_ledger_pressure_credit) {
+        return age >= 22 ? '赊欠已压稳，店铺周转渐入正轨' : '头一回催收赊欠，学着把账收回来';
+      }
+      if (flags.hvg_merchant_ledger_pressure_stockout) {
+        return age >= 22 ? '断货教训在心头，库存管得比人情还紧' : '断货险些砸了招牌，正想法子补库存';
+      }
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      if (flags.hvg_merchant_caravan_pressure_swing_win) {
+        return age >= 22 ? '行市波动扛过来了，敢再押一程货' : '行市大跌时咬牙扛住，见识了涨跌';
+      }
+      if (flags.hvg_merchant_caravan_pressure_swing_loss) {
+        return age >= 22 ? '行市一跌痛彻心扉，押货脚步慢了下来' : '低价囤货吃了亏，行市的风向比账难猜';
+      }
+    }
+  }
+  if (flags.hvg_merchant_post_shop_rhythm_done) {
+    if (flags.hvg_merchant_ledger_track) {
+      if (flags.hvg_merchant_ledger_rhythm_steady) {
+        return '店已开张，守着赊欠与库存周转';
+      }
+      if (flags.hvg_merchant_ledger_rhythm_expand) {
+        return '店已开张，小步扩货试探新门路';
+      }
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      if (flags.hvg_merchant_caravan_rhythm_fast) {
+        return '店已开张，快周转压货把货路跑通';
+      }
+      if (flags.hvg_merchant_caravan_rhythm_market) {
+        return '店已开张，盯行市小赌涨跌吃波动';
+      }
+    }
+  }
   if (flags.merchant_shop_grocery || flags.merchant_shop_weapon || flags.merchant_shop_herb) {
+    if (flags.hvg_merchant_ledger_track) {
+      return '第一桶金已得，账房式经营守周转';
+    }
+    if (flags.hvg_merchant_caravan_track) {
+      return '第一桶金已得，跑货式经营吃波动';
+    }
     return '第一桶金已得，店铺经营中';
   }
   // P94: 10-15 growth chain — track-specific goals after confirmation/challenge
@@ -403,6 +446,22 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       return '巨贾负担';
     }
     // P94: early merchant track differentiation at age 10-15
+    if (flags.hvg_merchant_operating_pressure_done) {
+      if (flags.hvg_merchant_ledger_track) {
+        return flags.hvg_merchant_ledger_pressure_stockout ? '断货之累' : '赊欠之累';
+      }
+      if (flags.hvg_merchant_caravan_track) {
+        return flags.hvg_merchant_caravan_pressure_swing_loss ? '行市之亏' : '波动之赌';
+      }
+    }
+    if (flags.hvg_merchant_post_shop_rhythm_done) {
+      if (flags.hvg_merchant_ledger_track) {
+        return flags.hvg_merchant_ledger_rhythm_expand ? '扩货之累' : '周转之累';
+      }
+      if (flags.hvg_merchant_caravan_track) {
+        return flags.hvg_merchant_caravan_rhythm_market ? '行市之赌' : '压货之累';
+      }
+    }
     if (flags.hvg_merchant_first_challenge_done) {
       if (flags.hvg_merchant_ledger_track) {
         return flags.hvg_merchant_ledger_challenge_rushed ? '赶账之累' : '守账之累';

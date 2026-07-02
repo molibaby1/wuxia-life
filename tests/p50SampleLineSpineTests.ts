@@ -21,6 +21,8 @@ const SPINE_EVENT_IDS = [
   'hvg_merchant_early_opportunity_fork',
   'hvg_merchant_post_fork_confirmation',
   'hvg_merchant_first_responsibility_challenge',
+  'hvg_merchant_post_shop_operating_rhythm',
+  'hvg_merchant_first_operating_pressure',
   'merchant_age40_identity_summary',
   'merchant_midlife_debt_milestone',
   'merchant_age45_expansion_fork',

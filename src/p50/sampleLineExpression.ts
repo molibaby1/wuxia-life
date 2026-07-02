@@ -295,6 +295,19 @@ function merchantCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '产业初成，巨贾之路刚起步';
   }
+  // P110: Patron late-life goals (late_life > payoff > pressure > on-ramp)
+  if (flags.merchant_patron_late_life_done) {
+    if (flags.merchant_patron_late_covenant_bound) {
+      return '守盟约至终，商武名号不能倒';
+    }
+    if (flags.merchant_patron_late_isolated_merchant) {
+      return '商路自分断，不再求山门庇护';
+    }
+    if (flags.merchant_patron_late_sustainable_covenant) {
+      return '守新盟规矩，传商武分寸给后来人';
+    }
+    return '商武定型之后，晚年自有晚年的过法';
+  }
   // P102/P108: Patron bridge goals (magnate tiers above take priority when magnate markers set)
   if (flags.merchant_patron_payoff_done) {
     if (flags.merchant_patron_payoff_covenant_holder) {

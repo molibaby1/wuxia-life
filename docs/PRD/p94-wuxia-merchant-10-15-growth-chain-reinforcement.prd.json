@@ -94,7 +94,7 @@
         "Relevant merchant-focused tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Evidence-first closeout. Use narrow regression guards instead of broad all-route retesting unless the implementation actually touches shared engine behavior."
     },
     {
@@ -109,7 +109,7 @@
         "Name the next bounded candidate stage after this one"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Close with explicit defer boundaries. Prevent the next session from turning this into a merchant full-route redesign."
     }
   ]

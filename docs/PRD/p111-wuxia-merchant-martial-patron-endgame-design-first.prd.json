@@ -69,8 +69,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Three endgame branches designed; GO not skipped; typecheck passes"
     },
     {
       "id": "P111-005",

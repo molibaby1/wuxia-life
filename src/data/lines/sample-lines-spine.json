@@ -539,6 +539,93 @@
     }
   },
   {
+    "id": "hvg_merchant_first_operating_pressure",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 19, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 19 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('route_merchant') && flags.has('hvg_merchant_post_shop_rhythm_done') && !flags.has('hvg_merchant_operating_pressure_done') && (flags.has('hvg_merchant_ledger_track') || flags.has('hvg_merchant_caravan_track'))"
+      }
+    ],
+    "content": {
+      "title": "第一次经营压力",
+      "text": "店开了一两年，头一回真亏真赚落在自己肩上。赊欠到期、库存见底，或是行市忽然变脸——这一回躲不过，得在账本与货单上做个决断。",
+      "description": "P95 第一次经营压力挑战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "ledger_pressure_credit",
+        "text": "逐户催收赊欠，宁可得罪熟客也不让坏账滚大",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_pressure_credit" },
+          { "type": "flag_set", "target": "hvg_merchant_operating_pressure_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_operating_pressure" }
+        ]
+      },
+      {
+        "id": "ledger_pressure_stockout",
+        "text": "断货险些砸了招牌，紧急补货稳住场面",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_ledger_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": -10, "operator": "add" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_ledger_pressure_stockout" },
+          { "type": "flag_set", "target": "hvg_merchant_operating_pressure_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_operating_pressure" }
+        ]
+      },
+      {
+        "id": "caravan_pressure_swing_win",
+        "text": "行市大跌时咬牙扛住，低价补仓等反弹",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": 20, "operator": "add" },
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_pressure_swing_win" },
+          { "type": "flag_set", "target": "hvg_merchant_operating_pressure_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_operating_pressure" }
+        ]
+      },
+      {
+        "id": "caravan_pressure_swing_loss",
+        "text": "行市变脸吃了亏，低价囤货砸在手里",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('hvg_merchant_caravan_track')"
+        },
+        "effects": [
+          { "type": "stat_modify", "target": "money", "value": -15, "operator": "add" },
+          { "type": "stat_modify", "target": "charisma", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "hvg_merchant_caravan_pressure_swing_loss" },
+          { "type": "flag_set", "target": "hvg_merchant_operating_pressure_done" },
+          { "type": "event_record", "target": "hvg_merchant_first_operating_pressure" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p95", "hvg", "merchant", "operating", "pressure", "mainline", "once"]
+    }
+  },
+  {
     "id": "merchant_age40_identity_summary",
     "version": "1.0.0",
     "category": "main_story",

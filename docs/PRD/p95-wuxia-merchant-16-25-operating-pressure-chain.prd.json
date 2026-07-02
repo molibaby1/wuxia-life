@@ -52,7 +52,7 @@
         "npm run typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "First real operating pressure after rhythm node. Keep small; do not jump to monopoly or chamber head."
     },
     {

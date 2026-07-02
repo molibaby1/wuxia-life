@@ -29,6 +29,7 @@ const SPINE_EVENT_IDS = [
   'magnate_on_ramp',
   'magnate_midlife_pressure',
   'magnate_payoff',
+  'magnate_late_life',
 ] as const;
 
 const SPINE_FLAGS = [
@@ -50,6 +51,8 @@ const SPINE_FLAGS = [
   'magnate_on_ramp_done',
   'magnate_midlife_pressure_done',
   'magnate_payoff_done',
+  'magnate_late_life_done',
+  'magnate_late_life_identity_done',
 ] as const;
 
 function assert(condition: boolean, message: string): void {
@@ -333,6 +336,21 @@ async function testMagnateChainSim(): Promise<void> {
   assert(
     goal44.includes('巨贾') || goal44.includes('守住'),
     `seed 804 age-44 goal missing magnate payoff signal: ${goal44}`,
+  );
+
+  const lateLife = report.records.find((record) => record.eventId === 'magnate_late_life');
+  assert(Boolean(lateLife), 'seed 804: magnate_late_life never fired');
+  assert(
+    (lateLife?.age ?? 99) >= 48 && (lateLife?.age ?? 0) <= 56,
+    `seed 804: magnate_late_life at age ${lateLife?.age}, expected 48-56`,
+  );
+
+  const rec50 = [...report.records].reverse().find((record) => record.age <= 50);
+  assert(Boolean(rec50?.gameState.flags?.magnate_late_life_done), 'seed 804: missing magnate_late_life_done by age 50');
+  const goal50 = deriveSampleLineCurrentGoal(rec50!.gameState) ?? '';
+  assert(
+    goal50.includes('晚年') || goal50.includes('收束') || goal50.includes('守成'),
+    `seed 804 age-50 goal missing late-life signal: ${goal50}`,
   );
 
   const rec40 = [...report.records].reverse().find((record) => record.age <= 40);

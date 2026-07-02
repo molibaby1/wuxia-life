@@ -31,8 +31,8 @@
         "npm run typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Scope contract at docs/test-reports/p101-merchant-magnate-bridge-origin-endgame-scope-contract.md"
     },
     {
       "id": "P101-003",

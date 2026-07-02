@@ -80,7 +80,7 @@
         "Relevant merchant-focused tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Evidence-first closeout. Guard P55/P63/P64/P96 baselines alongside new native entry chain."
     },
     {

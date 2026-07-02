@@ -73,6 +73,15 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
 }
 
 function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.founding_patriarch_late_life_done) {
+    if (flags.founding_patriarch_late_rule_keeper) {
+      return '守门规至终，治学师承不能断';
+    }
+    if (flags.founding_patriarch_late_alliance_bearer) {
+      return '守盟约至终，诸派续责不能推';
+    }
+    return '治理次序之后，晚年自有晚年的过法';
+  }
   if (flags.founding_patriarch_payoff_done) {
     if (flags.founding_patriarch_payoff_legacy_holder) {
       return '续责如山，开派名号落在门派与治学一并传承之上';
@@ -673,6 +682,15 @@ export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
   const line = detectSampleLine(flags);
   if (line === 'orthodox') {
+    if (flags.founding_patriarch_late_life_done) {
+      if (flags.founding_patriarch_late_rule_keeper) {
+        return '门规守成之累';
+      }
+      if (flags.founding_patriarch_late_alliance_bearer) {
+        return '盟约续责之累';
+      }
+      return '开派晚年之累';
+    }
     if (flags.founding_patriarch_payoff_done) {
       if (flags.founding_patriarch_payoff_legacy_holder) {
         return '续责开派之累';
@@ -1111,6 +1129,20 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
 }
 
 function orthodoxAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (flags.founding_patriarch_late_life_identity_done) {
+    if (flags.founding_patriarch_late_rule_keeper) {
+      if (flags.founding_patriarch_on_ramp_scholar) {
+        return '你是门规守成的开宗祖师：学者师徒线拉着门规传承，晚年以书斋治学为主。弟子争议、门规执行一件接一件，盟约事务退为背景';
+      }
+      return '你是门规守成的开宗祖师：先稳门规传承的选择，到了晚年以书斋治学为主。弟子争议、门规执行一件接一件，盟约事务退为背景';
+    }
+    if (flags.founding_patriarch_late_alliance_bearer) {
+      if (flags.founding_patriarch_on_ramp_alliance) {
+        return '你是盟约续责的开宗祖师：诸派盟约线拉着续责差遣，晚年以山门对外为主。续责诸派、盟会差遣一件接一件，门规收束为执行工具';
+      }
+      return '你是盟约续责的开宗祖师：先稳诸派盟约的选择，到了晚年以山门对外为主。续责诸派、盟会差遣一件接一件，门规收束为执行工具';
+    }
+  }
   if (flags.founding_patriarch_identity_done || flags.founding_patriarch_on_ramp_done) {
     if (flags.founding_patriarch_payoff_independent_founder) {
       return '你是自立山门的开派武者，为治学规矩与门派名号撕开了旧盟约';

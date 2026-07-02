@@ -32,8 +32,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docs/test-reports/p109-merchant-martial-patron-late-life-scope-contract.md"
     },
     {
       "id": "P109-003",

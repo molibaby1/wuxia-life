@@ -48,8 +48,8 @@
         "npm run typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Extended merchant_patron_bridge_entry gate + patron_bridge_peasant_grain_alliance choice"
     },
     {
       "id": "P104-004",

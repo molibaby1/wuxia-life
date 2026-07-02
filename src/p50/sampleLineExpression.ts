@@ -73,6 +73,15 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
 }
 
 function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.founding_patriarch_endgame_echo_done) {
+    if (flags.founding_patriarch_endgame_rule_echo) {
+      return '门规碑立，治学师承交给后来人续';
+    }
+    if (flags.founding_patriarch_endgame_alliance_echo) {
+      return '盟约碑立，诸派续责交给后来人扛';
+    }
+    return '开派名号已定，终局自有终局的定论';
+  }
   if (flags.founding_patriarch_late_life_done) {
     if (flags.founding_patriarch_late_rule_keeper) {
       return '守门规至终，治学师承不能断';
@@ -682,6 +691,15 @@ export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
   const line = detectSampleLine(flags);
   if (line === 'orthodox') {
+    if (flags.founding_patriarch_endgame_echo_done) {
+      if (flags.founding_patriarch_endgame_rule_echo) {
+        return '开派终局·规';
+      }
+      if (flags.founding_patriarch_endgame_alliance_echo) {
+        return '开派终局·盟';
+      }
+      return '开派终局之累';
+    }
     if (flags.founding_patriarch_late_life_done) {
       if (flags.founding_patriarch_late_rule_keeper) {
         return '门规守成之累';
@@ -1129,6 +1147,20 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
 }
 
 function orthodoxAge40Identity(flags: Record<string, unknown>): string | undefined {
+  if (flags.founding_patriarch_endgame_identity_done) {
+    if (flags.founding_patriarch_endgame_rule_echo) {
+      if (flags.founding_patriarch_on_ramp_scholar) {
+        return '你是门规碑上的开宗祖师：学者师徒线拉着门规传承，书斋封了，门规立了，诸派还照着走。开派名号比人长久，规矩也还在';
+      }
+      return '你是门规碑上的开宗祖师：书斋封了，门规立了，诸派还照着走。开派名号比人长久，规矩也还在';
+    }
+    if (flags.founding_patriarch_endgame_alliance_echo) {
+      if (flags.founding_patriarch_on_ramp_alliance) {
+        return '你是盟约碑上的开宗祖师：诸派盟约线拉着续责差遣，山门立了，盟约续了，诸派还记着这笔账。开派名号比人长久，续责也还在';
+      }
+      return '你是盟约碑上的开宗祖师：山门立了，盟约续了，诸派还记着这笔账。开派名号比人长久，续责也还在';
+    }
+  }
   if (flags.founding_patriarch_late_life_identity_done) {
     if (flags.founding_patriarch_late_rule_keeper) {
       if (flags.founding_patriarch_on_ramp_scholar) {

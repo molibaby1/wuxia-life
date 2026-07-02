@@ -38,7 +38,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "sampleLineExpression.ts: deriveSampleLineCostLabel, orthodoxCurrentGoal"
     },
     {
@@ -54,7 +54,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "See P118 contract §4.1 Signal 3"
     },
     {

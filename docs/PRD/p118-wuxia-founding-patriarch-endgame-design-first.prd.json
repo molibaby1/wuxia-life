@@ -1,0 +1,129 @@
+{
+  "project": "Wuxia Life P118 Founding Patriarch Endgame Design-First",
+  "branchName": "codex/p118-wuxia-founding-patriarch-endgame-design-first",
+  "description": "Design-first contract stage for founding_patriarch endgame / final legacy — define 2 endgame variants (one per late-life branch), GO/NO-GO assessment, contract, and P119 validation shape. Docs-only; no runtime wiring.",
+  "userStories": [
+    {
+      "id": "P118-001",
+      "title": "Audit founding-patriarch endgame prerequisites",
+      "description": "As a maintainer, I want a prerequisite audit for the founding-patriarch endgame stage so P118 starts from the real gating surfaces and not from assumptions.",
+      "acceptanceCriteria": [
+        "Summarize founding-patriarch route flags, markers, events, expressions (P113-P117)",
+        "Document state differences across 2 late-life branches (stats, flags, identity, cost label, goal)",
+        "Identify what exists before endgame vs what can be reused",
+        "Compare with patron P111 and renown P80 endgame precedents for founding-patriarch-unique opportunities",
+        "Save docs/test-reports/p118-founding-patriarch-endgame-prerequisite-audit.md",
+        "Do not change runtime behavior in this story",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Prerequisite audit saved to docs/test-reports/p118-founding-patriarch-endgame-prerequisite-audit.md"
+    },
+    {
+      "id": "P118-002",
+      "title": "Lock P118 scope contract",
+      "description": "As a planner, I want a scope contract so P118 stays design-first and does not slip into partial implementation.",
+      "acceptanceCriteria": [
+        "Limit P118 to prerequisite audit, scope contract, direction design, endgame contract, validation shape, closure",
+        "Define allowed layers: documentation, contract, targeted proof planning",
+        "List forbidden expansions: runtime wiring, P113-P117 rewrite, patron/magnate spine rewrite, multi-event arc, new UI",
+        "Define lightweight constraint: max 1 echo event + expression updates",
+        "Save docs/test-reports/p118-founding-patriarch-endgame-scope-contract.md",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P118-003",
+      "title": "Design endgame direction (GO/NO-GO assessment)",
+      "description": "As a designer, I want a clear assessment of whether founding-patriarch endgame is worth doing, and if so, what direction it takes.",
+      "acceptanceCriteria": [
+        "Assess whether late-life already provides sufficient closure",
+        "If GO: define endgame core positioning (legacy echo vs sect inheritance coda)",
+        "If NO-GO: define stop point at late-life with rationale",
+        "Decide whether 2 late-life branches need distinct endgame variants or unified echo",
+        "Clarify endgame vs late-life essence (final coda, not more content)",
+        "Save design document",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P118-004",
+      "title": "Design two endgame branches (if GO)",
+      "description": "As a designer, I want two distinct endgame branches keyed on late-life markers so founding-patriarch endgame leverages the 2-branch structure.",
+      "acceptanceCriteria": [
+        "Design rule_keeper late-life endgame: narrative + trigger + player experience",
+        "Design alliance_bearer late-life endgame: narrative + trigger + player experience",
+        "Two branches meaningfully different (not reskinned)",
+        "Each branch preserves founding-patriarch governance flavor (rule/alliance/scholar/school gate)",
+        "Recommend single auto echo with 2 variants vs choice event",
+        "If NO-GO mark skipped with rationale",
+        "Save design document",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P118-005",
+      "title": "Define founding-patriarch endgame contract",
+      "description": "As a designer, I want an explicit endgame contract so P119 knows exactly what flags, gates, events, and player-facing meanings must be closed.",
+      "acceptanceCriteria": [
+        "Define endgame checkpoint founding_patriarch_endgame_echo_done, required flags, gate acceptance",
+        "Define endgame event structure (recommend auto with 2 variants keyed on late-life marker)",
+        "Define stat changes (if any), identity markers, expression differences per branch",
+        "Define at least 2 endgame-specific player-facing signals",
+        "Clarify endgame vs late-life vs patron/renown/magnate endgame",
+        "Assess sect inheritance handoff markers within lightweight boundary",
+        "Define age range (e.g. 60-65)",
+        "If NO-GO mark skipped with rationale",
+        "Save contract to docs/PRD/p118-founding-patriarch-endgame-contract.md",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P118-006",
+      "title": "Define P119 validation shape",
+      "description": "As a maintainer, I want the P119 validation shape fixed in advance so playable endgame work is judged against explicit expectations.",
+      "acceptanceCriteria": [
+        "Define targeted proof chain nodes (late-life to endgame to expression changes)",
+        "Both late-life branches must have core node verification",
+        "Define minimum regression coverage: P113-P117 founding-patriarch, P37, P102-P110 patron, guard:sample-lines-baseline",
+        "Define closure criteria count and threshold (P117 12-criteria pattern)",
+        "No full lifetime exhaust required",
+        "If NO-GO mark skipped with rationale",
+        "Save validation shape document",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "P118-007",
+      "title": "Produce P118 closure report",
+      "description": "As a maintainer, I want a closure report that locks the founding-patriarch endgame design-first contract and hands off to P119 or stops at late-life.",
+      "acceptanceCriteria": [
+        "Save docs/test-reports/p118-founding-patriarch-endgame-closure-report.md",
+        "Summarize audit, scope, branch design, contract, validation shape",
+        "State GO or NO-GO for P119 playable endgame with rationale",
+        "List deferred founding-patriarch-expansion items",
+        "Zero runtime changes in P118 stage",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

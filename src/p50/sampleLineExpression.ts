@@ -126,6 +126,38 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
 }
 
 function merchantCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  if (flags.magnate_late_life_done) {
+    // P64 bridge priority at late-life (expression only; no bridge late-life rewrite)
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '晚年守手艺商路：合伙账目与品质招牌都要收束';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '晚年守人情商路：欠情与引荐都要收束，面子比利润更烫手';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '晚年守粮路奔波：车马仓储与下属工钱都要收束';
+    }
+    // P99: Native magnate late-life reads P99 late-life markers, then P98 payoff lineage
+    if (flags.magnate_native_late_ledger_steady) {
+      return '晚年守稳态招牌：信誉比规模更金贵，接班与收束都在眼前';
+    }
+    if (flags.magnate_native_late_ledger_credit) {
+      return '晚年清赊欠人情：人情账比银钱账更难算，收束比再赊更要紧';
+    }
+    if (flags.magnate_native_late_caravan_market) {
+      return '晚年收行市余波：涨跌都在心上，货路收势比再押更难';
+    }
+    if (flags.magnate_native_late_caravan_fast) {
+      return '晚年守货路周转：货路比利润更金贵，收束比再压更要紧';
+    }
+    if (flags.magnate_native_late_ledger) {
+      return '晚年账房式守成：守招牌比抢规模要紧，信誉与接班一并考量';
+    }
+    if (flags.magnate_native_late_caravan) {
+      return '晚年跑货式收势：行市风向比账烫手，货路收束在前';
+    }
+    return '巨贾晚年守成，商号与人情都要收束';
+  }
   if (flags.magnate_payoff_done) {
     // P67: success-shape differentiation — each route succeeds in a different shape
     // P66 cost reflection is preserved and woven into the success shape
@@ -523,6 +555,31 @@ export function deriveSampleLineCostLabel(state: GameState): string {
   }
   if (line === 'merchant') {
     // P66: cost label differentiation persists through pressure and payoff
+    if (flags.magnate_late_life_done) {
+      if (flags.apprentice_merchant_bridge_crossed) {
+        return '合伙守成之累';
+      }
+      if (flags.tavern_merchant_bridge_crossed) {
+        return '人情收束之累';
+      }
+      if (flags.peasant_merchant_bridge_crossed) {
+        return '粮路收束之累';
+      }
+      // P99: Native magnate late-life cost labels
+      if (flags.magnate_native_late_ledger_steady || flags.magnate_native_late_ledger) {
+        return '稳态守成之累';
+      }
+      if (flags.magnate_native_late_ledger_credit) {
+        return '信誉收束之累';
+      }
+      if (flags.magnate_native_late_caravan_market || flags.magnate_native_late_caravan) {
+        return '行市收势之累';
+      }
+      if (flags.magnate_native_late_caravan_fast) {
+        return '货路收束之累';
+      }
+      return '巨贾晚年之累';
+    }
     if (flags.magnate_payoff_done) {
       if (flags.apprentice_merchant_bridge_crossed) {
         return '合伙与账目的担子';
@@ -853,6 +910,37 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   }
   // P67: success-shape differentiation + P66 cost weight
   // Identity now emphasizes what KIND of success, not just where you came from
+  if (flags.magnate_late_life_identity_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '你是守成收束的手艺巨贾：从刨子到账本，晚年仍要看着合伙人与账目，品质招牌比规模更金贵';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '你是守成收束的人情巨贾：从酒肆到商号，晚年欠情与引荐都要收束，面子比利润更烫手';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '你是守成收束的粮路巨贾：从田埂到车马，晚年车马仓储与奔波都要收束，脚下的路比田埂还长';
+    }
+    // P99: Native magnate late-life identity
+    if (flags.magnate_native_late_ledger_steady) {
+      return '你是稳态守成的晚年巨贾：招牌立住了，跨过中年压力后守信誉比再扩规模更要紧，晚年要把接班与收束一并考量';
+    }
+    if (flags.magnate_native_late_ledger_credit) {
+      return '你是信誉收束的晚年巨贾：赊欠铺路铺出了版图，晚年人情账比银钱账更难算清，收束比再赊更要紧';
+    }
+    if (flags.magnate_native_late_caravan_market) {
+      return '你是行市收势的晚年巨贾：赌市扩货铺了货路，晚年涨跌余波仍在心上，收势比再押更难';
+    }
+    if (flags.magnate_native_late_caravan_fast) {
+      return '你是货路收束的晚年巨贾：快周转压货撑了规模，晚年货路比利润更金贵，收束比再压更要紧';
+    }
+    if (flags.magnate_native_late_ledger) {
+      return '你是账房式守成的晚年巨贾：稳扩积势跨了门槛又扛过中年压力，晚年守招牌比抢规模要紧';
+    }
+    if (flags.magnate_native_late_caravan) {
+      return '你是跑货式收势的晚年巨贾：赌市扩货跨了门槛又扛过中年压力，晚年行市风向比账烫手';
+    }
+    return '你是富甲一方却仍在收束的晚年巨贾，商号与人情都要守，接班与余波都在眼前';
+  }
   if (flags.magnate_payoff_done) {
     if (flags.apprentice_merchant_bridge_crossed) {
       return '你是靠手艺眼光做起来的巨贾：从刨子到账本，品质立住了招牌，合伙铺出了版图，代价是再也回不到只管刨花的日子';

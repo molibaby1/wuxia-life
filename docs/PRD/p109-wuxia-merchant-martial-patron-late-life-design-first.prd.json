@@ -69,8 +69,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "docs/PRD/p109-merchant-martial-patron-late-life-contract.md"
     },
     {
       "id": "P109-005",

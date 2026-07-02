@@ -533,6 +533,29 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       if (flags.peasant_merchant_bridge_crossed) {
         return '粮路与奔波的担子';
       }
+      // P98: Native magnate payoff cost labels
+      if (flags.magnate_native_payoff_ledger_steady || flags.magnate_native_payoff_ledger) {
+        return '稳态巨贾之累';
+      }
+      if (flags.magnate_native_payoff_ledger_credit) {
+        return '信誉资本之累';
+      }
+      if (flags.magnate_native_payoff_caravan_market || flags.magnate_native_payoff_caravan) {
+        return '行市赢家之累';
+      }
+      if (flags.magnate_native_payoff_caravan_fast) {
+        return '货路帝国之累';
+      }
+      if (flags.magnate_native_ledger_entry) {
+        return flags.magnate_native_payoff_ledger_credit || flags.magnate_native_ledger_credit
+          ? '信誉资本之累'
+          : '稳态巨贾之累';
+      }
+      if (flags.magnate_native_caravan_entry) {
+        return flags.magnate_native_payoff_caravan_fast || flags.magnate_native_caravan_fast
+          ? '货路帝国之累'
+          : '行市赢家之累';
+      }
       return '巨贾负担';
     }
     if (flags.magnate_midlife_pressure_done) {
@@ -544,6 +567,29 @@ export function deriveSampleLineCostLabel(state: GameState): string {
       }
       if (flags.peasant_merchant_bridge_crossed) {
         return '粮路与奔波的担子';
+      }
+      // P98: Native magnate pressure cost labels
+      if (flags.magnate_native_pressure_ledger_steady || flags.magnate_native_pressure_ledger) {
+        return '稳扩中年之累';
+      }
+      if (flags.magnate_native_pressure_ledger_credit) {
+        return '赊欠中年之累';
+      }
+      if (flags.magnate_native_pressure_caravan_market || flags.magnate_native_pressure_caravan) {
+        return '赌市中年之累';
+      }
+      if (flags.magnate_native_pressure_caravan_fast) {
+        return '压货中年之累';
+      }
+      if (flags.magnate_native_ledger_entry) {
+        return flags.magnate_native_ledger_credit || flags.hvg_merchant_ledger_expansion_credit
+          ? '赊欠中年之累'
+          : '稳扩中年之累';
+      }
+      if (flags.magnate_native_caravan_entry) {
+        return flags.magnate_native_caravan_fast || flags.hvg_merchant_caravan_expansion_fast
+          ? '压货中年之累'
+          : '赌市中年之累';
       }
       return '巨贾负担';
     }
@@ -807,6 +853,68 @@ function merchantAge40Identity(flags: Record<string, unknown>): string | undefin
   }
   // P67: success-shape differentiation + P66 cost weight
   // Identity now emphasizes what KIND of success, not just where you came from
+  if (flags.magnate_payoff_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '你是靠手艺眼光做起来的巨贾：从刨子到账本，品质立住了招牌，合伙铺出了版图，代价是再也回不到只管刨花的日子';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '你是靠人情网络做起来的巨贾：从酒肆到商号，人脉织出了商路，引荐打通了关节，代价是人人都认得你、人人都有求于你';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '你是靠脚力血汗做起来的巨贾：从田埂到车马，粮路踩出了根基，奔波换来了规模，代价是脚下的路比田埂还长，再也回不到守着一亩三分地的安稳';
+    }
+    // P98: Native magnate payoff identity
+    if (flags.magnate_native_payoff_ledger_steady || flags.magnate_native_payoff_ledger) {
+      return '你是稳态巨贾：稳扩积势守住了招牌，跨过中年压力后信誉比规模更金贵，守住比再扩更难';
+    }
+    if (flags.magnate_native_payoff_ledger_credit) {
+      return '你是信誉资本巨贾：赊欠铺路铺出了版图，跨过中年压力后人情账比银钱账更难算清';
+    }
+    if (flags.magnate_native_payoff_caravan_market || flags.magnate_native_payoff_caravan) {
+      return '你是行市赢家巨贾：赌市扩货铺了货路，跨过中年压力后涨跌都在心上';
+    }
+    if (flags.magnate_native_payoff_caravan_fast) {
+      return '你是货路帝国巨贾：快周转压货撑了规模，跨过中年压力后货路比利润更金贵';
+    }
+    if (flags.magnate_native_ledger_entry) {
+      return '你是账房式巨贾：稳扩积势跨了门槛又扛过中年压力，财富带来地位，也带来赊欠与信义之债';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      return '你是跑货式巨贾：赌市扩货跨了门槛又扛过中年压力，财富带来地位，也带来涨跌与押货的风险';
+    }
+    return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
+  }
+  if (flags.magnate_midlife_pressure_done) {
+    if (flags.apprentice_merchant_bridge_crossed) {
+      return '你是扛过合伙与账目债的巨贾：商号遍九州，供货账期与销路分成拴住了手艺人的手脚';
+    }
+    if (flags.tavern_merchant_bridge_crossed) {
+      return '你是扛过人情面子债的巨贾：商号遍九州，老主顾的期待与介绍的欠情让人脉捆住了手脚';
+    }
+    if (flags.peasant_merchant_bridge_crossed) {
+      return '你是扛过车马仓储债的巨贾：商号遍九州，运力、仓库与下属工钱让泥腿子巨贾用身体在扛';
+    }
+    // P98: Native magnate pressure identity
+    if (flags.magnate_native_pressure_ledger_steady || flags.magnate_native_pressure_ledger) {
+      return '你是扛过稳扩债的账房式巨贾：商号遍九州，守信誉比抢规模更要紧，中年压力落在周转与信义上';
+    }
+    if (flags.magnate_native_pressure_ledger_credit) {
+      return '你是扛过赊欠债的账房式巨贾：商号遍九州，人情账比银钱账更难算，中年压力落在信誉与欠情上';
+    }
+    if (flags.magnate_native_pressure_caravan_market || flags.magnate_native_pressure_caravan) {
+      return '你是扛过赌市债的跑货式巨贾：商号遍九州，行市一跌便喘不过气，中年压力落在涨跌与押货上';
+    }
+    if (flags.magnate_native_pressure_caravan_fast) {
+      return '你是扛过快周转债的跑货式巨贾：商号遍九州，货路一断便卡死，中年压力落在压货与运力上';
+    }
+    if (flags.magnate_native_ledger_entry) {
+      return '你是进入中年压力的账房式巨贾：稳扩积势跨了门槛，人情债与周转压力一并涌来';
+    }
+    if (flags.magnate_native_caravan_entry) {
+      return '你是进入中年压力的跑货式巨贾：赌市扩货跨了门槛，行市波动与货路风险一并涌来';
+    }
+    return '你是富甲一方却身不由己的巨贾，财富带来地位，也带来数不清的人情与责任';
+  }
   if (flags.magnate_on_ramp_done) {
     if (flags.apprentice_merchant_bridge_crossed) {
       return '你是靠手艺眼光做起来的巨贾：从刨子到账本，品质立住了招牌，合伙铺出了版图，代价是再也回不到只管刨花的日子';

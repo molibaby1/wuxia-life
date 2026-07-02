@@ -2951,7 +2951,7 @@
   },
   {
     "id": "merchant_patron_payoff_echo",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "category": "main_story",
     "priority": 0,
     "weight": 100,
@@ -2964,19 +2964,55 @@
       }
     ],
     "content": {
-      "title": "商武一体·名号落定",
-      "text": "四十八岁这年，你站在商号与山门之间，想起当年那笔门派投资。\n\n银钱换来得不是单纯的利润，而是江湖上的一句定评：「这人商武一体，出钱出刀都在一条绳上。」\n\n门派对投、护镖借道、放贷收息——都化作商武复合身份的回响，比账本上的数字更长久。",
-      "description": "P102 商武一体 patron bridge payoff echo — P93 lightweight terminal; gate requires P106 pressure checkpoint. P107+ reserved: merchant_patron_payoff_resolved, merchant_patron_late_life_done"
+      "title": "商武一体·名号定型",
+      "text": "四十八岁这年，你站在账房与演武场之间，想起当年那笔门派投资，也想起这些年护镖借道、江湖规矩拖进账本的每一页。\n\n商武一体的名号已经传开，但你自己最清楚——这名号是靠盟约撑住的，还是靠刀撑住的，还是两者之间的某条绳？\n\n山门的人还在等你的回话。这笔账，该定下来了。",
+      "description": "P108 商武一体 patron payoff — choice-based 商武撕裂之解; gate requires P106 pressure checkpoint"
     },
-    "eventType": "auto",
+    "eventType": "choice",
     "autoEffects": [
       { "type": "flag_set", "target": "merchant_patron_payoff_done" },
       { "type": "flag_set", "target": "merchant_patron_identity_done" },
+      { "type": "flag_set", "target": "merchant_patron_payoff_resolved" },
       { "type": "event_record", "target": "merchant_patron_payoff_echo" }
+    ],
+    "choices": [
+      {
+        "id": "patron_payoff_hold_covenant",
+        "text": "盟约既立，就没有退缩的字。护镖、借道、江湖规矩——我全扛。",
+        "description": "盟约如山，护镖借道一个都不能少——商武名号靠刀与账一起撑",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_patron_payoff_covenant_holder" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" }
+        ]
+      },
+      {
+        "id": "patron_payoff_break_covenant",
+        "text": "商号是我的，不是山门的。这盟约，到此为止。",
+        "description": "商号归商号，江湖归江湖——撕破盟约，不再听山门差遣",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_patron_payoff_covenant_breaker" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 4, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": -2, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": -1, "operator": "add" }
+        ]
+      },
+      {
+        "id": "patron_payoff_balance_covenant",
+        "text": "盟约可以改。该出刀时出刀，该算账时算账——咱们重谈规矩。",
+        "description": "盟约可以改，规矩可以谈——商武各守其份，不再两头拉扯",
+        "effects": [
+          { "type": "flag_set", "target": "merchant_patron_payoff_balancer" },
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" }
+        ]
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p102", "merchant", "patron", "bridge", "payoff", "mainline", "auto", "once"],
+      "tags": ["p102", "p107", "p108", "merchant", "patron", "bridge", "payoff", "mainline", "choice", "once"],
       "narrativeScheduling": {
         "stageSignals": ["patron_bridge_payoff"]
       }

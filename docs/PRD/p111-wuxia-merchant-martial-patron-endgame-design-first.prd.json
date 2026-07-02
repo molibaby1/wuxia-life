@@ -122,8 +122,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Closure report saved; GO for P112; zero runtime changes; typecheck passes"
     }
   ]
 }

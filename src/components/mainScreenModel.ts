@@ -1,3 +1,19 @@
+/**
+ * P123 scope lock — first-screen stat surfaces (display emphasis only).
+ *
+ * In scope:
+ * - `coreStats`: first-screen core attribute grid (MainScreenStatsPanel)
+ * - `topResources`: header resource row (GameScreen status bar)
+ *
+ * Baseline composition (pre-P123):
+ * - coreStats: martialPower, externalSkill, internalSkill, qinggong, constitution, money
+ * - topResources: money, constitution, reputation
+ *
+ * Out of scope for P123 (do not modify):
+ * - `fullStatGroups` structure and descriptions (owned by P125)
+ * - `tendencySummary` algorithm (owned by P124)
+ * - event conditions, reward logic, underlying stat calculations
+ */
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
@@ -57,6 +73,7 @@ const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
   high: '高',
 };
 
+/** P123 first-screen core grid — display emphasis only; full values remain in fullStatGroups. */
 const CORE_STATS: Array<{ key: keyof MainScreenPlayer; label: string }> = [
   { key: 'martialPower', label: '功力' },
   { key: 'externalSkill', label: '外功' },
@@ -226,6 +243,7 @@ export function buildMainScreenModel(
 
   return {
     stageTags,
+    // P123 first-screen header row — money / survival base / social standing
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
       createStat('constitution', '体魄', valueOf(player, 'constitution')),

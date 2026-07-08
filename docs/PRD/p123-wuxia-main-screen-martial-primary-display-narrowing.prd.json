@@ -1,0 +1,84 @@
+{
+  "project": "Wuxia Life P123 Main Screen Martial Primary Display Narrowing",
+  "branchName": "codex/p123-wuxia-main-screen-martial-primary-display-narrowing",
+  "description": "Display-first experience slice: reduce first-screen martial stat dominance by narrowing core stat emphasis on the main screen, while preserving full stat access and avoiding any underlying combat-system rewrite.",
+  "userStories": [
+    {
+      "id": "P123-001",
+      "title": "Lock first-screen stat surfaces and scope boundaries",
+      "description": "As a maintainer, I want the current first-screen stat surfaces and scope boundaries locked before editing UI emphasis, so implementation stays on coreStats/topResources only and does not drift into tendencySummary or backend logic.",
+      "acceptanceCriteria": [
+        "Document the current first-screen surfaces as coreStats and topResources in src/components/mainScreenModel.ts",
+        "Confirm coreStats currently includes martialPower, externalSkill, internalSkill, qinggong, constitution, and money",
+        "Confirm topResources currently includes money, constitution, and reputation",
+        "Do not modify fullStatGroups structure, event conditions, reward logic, or tendencySummary in this stage (PRD §4 Out of Scope, §7 Non-Goals)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §3 Core Problem and §4 Scope. This story is the scope lock to prevent P123 from absorbing P124."
+    },
+    {
+      "id": "P123-002",
+      "title": "Narrow coreStats to overall martial readout plus non-martial essentials",
+      "description": "As a player, I want the first screen to stop showing four martial sub-stats at once, so the page reads like a life screen instead of a combat dashboard.",
+      "acceptanceCriteria": [
+        "Main-screen coreStats no longer simultaneously show 功力, 外功, 内功, 轻功, 体魄",
+        "martialPower remains on the first screen as the overall martial readout",
+        "At least two of externalSkill, internalSkill, and qinggong are removed from first-screen coreStats and remain available only via the full stats panel",
+        "No attribute is deleted from the data model or full stats panel",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Implements PRD US-001 and FR-1/FR-2. Keep this strictly to first-screen emphasis."
+    },
+    {
+      "id": "P123-003",
+      "title": "Reframe constitution on the first screen as survival base",
+      "description": "As a player, I want 体魄 to read like survival foundation rather than one more martial specialization, so the first screen stops implying five equal combat branches.",
+      "acceptanceCriteria": [
+        "Constitution's first-screen placement or adjacent wording no longer implies it is co-primary with externalSkill, internalSkill, and qinggong",
+        "If constitution remains on the first screen, its role reads closer to survival base than martial style",
+        "topResources and coreStats no longer double-amplify constitution in a way that recreates the same combat-heavy emphasis",
+        "No new attribute names, panels, or replacement systems are introduced",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Implements PRD US-002 and FR-3. This is the smallest constitution-specific correction."
+    },
+    {
+      "id": "P123-004",
+      "title": "Preserve full stats access after first-screen narrowing",
+      "description": "As a maintainer, I want all martial sub-stats to remain available in the full stats panel, so first-screen simplification does not silently hide important data.",
+      "acceptanceCriteria": [
+        "All existing martial sub-stats remain visible in the expanded full stats panel",
+        "No full stats values or descriptions are removed solely because first-screen emphasis was reduced",
+        "MainScreenStatsPanel still opens and shows complete grouped stat data after the first-screen change",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Implements PRD US-003 and FR-4. Do not turn this into a wording-cleanup pass for the entire panel; P125 owns that."
+    },
+    {
+      "id": "P123-005",
+      "title": "Add narrow verification for first-screen martial emphasis reduction",
+      "description": "As a maintainer, I want targeted verification that the first screen has less martial clutter without losing full-stat completeness, so future edits do not revert the display hierarchy.",
+      "acceptanceCriteria": [
+        "Add or update narrow verification covering coreStats composition after the change",
+        "Verification confirms martialPower remains first-screen visible while at least two martial sub-stats are downgraded from coreStats",
+        "Verification confirms the full stats panel still includes all existing martial sub-stats",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Implements PRD §9 Verification Standard. Reuse existing UI model test patterns instead of creating a broad new test harness."
+    }
+  ]
+}

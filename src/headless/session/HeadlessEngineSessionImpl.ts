@@ -406,6 +406,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       sourceLabel: '剧情抉择',
       headline: event.content?.title ?? '这一回',
       body: choiceBody,
+      lifeStates: this.engine.getGameState().player?.lifeStates,
     });
 
     const nextSnapshot = this.serialize();
@@ -697,6 +698,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           sourceLabel: '剧情事件',
           headline: narrativeTitle,
           body: narrativeBody,
+          lifeStates: this.engine.getGameState().player?.lifeStates,
         });
       }
       this.ensurePassivePresentation();

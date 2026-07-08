@@ -44,6 +44,8 @@ const suites: Suite[] = [
   { name: 'p39ContentPoolConsistencyTests', entry: 'tests/p39ContentPoolConsistencyTests.ts' },
   { name: 'p40ReplayPacingPolishTests', entry: 'tests/p40ReplayPacingPolishTests.ts' },
   { name: 'p41HabitFeedbackTests', entry: 'tests/p41HabitFeedbackTests.ts' },
+  { name: 'p122EarlyVisibleGrowthFeedbackTests', entry: 'tests/p122EarlyVisibleGrowthFeedbackTests.ts' },
+  { name: 'hvgMerchantVisibleGrowthLoopTests', entry: 'tests/hvgMerchantVisibleGrowthLoopTests.ts' },
   { name: 'p41ChoiceFeedbackValidationTests', entry: 'tests/p41ChoiceFeedbackValidationTests.ts' },
   { name: 'p42ContentDensityTests', entry: 'tests/p42ContentDensityTests.ts' },
   { name: 'p43ArchetypeRecapEndingTests', entry: 'tests/p43ArchetypeRecapEndingTests.ts' },

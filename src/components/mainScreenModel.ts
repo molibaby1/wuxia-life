@@ -73,13 +73,9 @@ const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
   high: '高',
 };
 
-/** P123 first-screen core grid — display emphasis only; full values remain in fullStatGroups. */
-const CORE_STATS: Array<{ key: keyof MainScreenPlayer; label: string }> = [
-  { key: 'martialPower', label: '功力' },
-  { key: 'externalSkill', label: '外功' },
-  { key: 'internalSkill', label: '内功' },
-  { key: 'qinggong', label: '轻功' },
-  { key: 'constitution', label: '体魄' },
+/** P123 first-screen core grid — martial overall readout + life essentials only. */
+const CORE_STATS: Array<{ key: keyof MainScreenPlayer; label: string; description?: string }> = [
+  { key: 'martialPower', label: '功力', description: '武学总读数' },
   { key: 'money', label: '银两' },
 ];
 
@@ -254,7 +250,7 @@ export function buildMainScreenModel(
     tendencySummary: buildTendencySummary(player, lifeMemory),
     shapingSummary: buildShapingSummary(player),
     coreStats: CORE_STATS.map((item) =>
-      createStat(String(item.key), item.label, valueOf(player, item.key)),
+      createStat(String(item.key), item.label, valueOf(player, item.key), item.description),
     ),
     fullStatGroups: buildFullStatGroups(player),
   };

@@ -93,6 +93,8 @@ export interface ActiveActionSummaryDisplay {
   nextStepHint: string;
   /** Applied stat deltas this period (player-visible) */
   appliedDeltaSummary?: string;
+  /** P122: player-visible long-term shaping / echo confirmations after action */
+  longTermImpactLines?: string[];
 }
 
 /** Period-end narrative for passive childhood / choice / auto story */

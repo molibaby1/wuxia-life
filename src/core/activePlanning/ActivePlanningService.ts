@@ -18,6 +18,10 @@ import { resolveActiveAction } from './ActionResultResolver';
 import { resolveDisturbanceAfterAction } from './DisturbanceResolver';
 import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
 import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
+import {
+  collectShapingLongTermImpactLines,
+} from '../../utils/habitShapingSummary';
+import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
@@ -141,7 +145,11 @@ export function executeActiveActionOnState(
   });
 
   const actionDef = getActionById(resolved.actionId);
-  const beforeBusinessHabit = state.player.lifeStates?.businessHabit ?? 0;
+  const beforeLifeStates = state.player.lifeStates
+    ? { ...state.player.lifeStates }
+    : createDefaultPlayerLifeStates();
+  const beforeBusinessHabit = beforeLifeStates.businessHabit ?? 0;
+  const flagsBefore = { ...(state.flags ?? {}) };
   if (actionDef?.onCompleteFlags?.length) {
     if (!state.flags) state.flags = {};
     if (!state.player.flags) state.player.flags = {};
@@ -209,8 +217,17 @@ export function executeActiveActionOnState(
     }
   }
 
+  const longTermImpactLines = collectActiveActionLongTermImpactLines(
+    beforeLifeStates,
+    state.player.lifeStates,
+    actionDef?.onCompleteFlags ?? [],
+    flagsBefore,
+    state.flags ?? {},
+  );
+
   const activeActionSummary = buildActiveActionSummaryDisplay(resolved, {
     hasPendingDisturbance: disturbanceNarrative !== null,
+    longTermImpactLines,
   });
   const categoryLabel =
     resolved.metadata.category === 'training'
@@ -238,6 +255,26 @@ export function executeActiveActionOnState(
     activeActionSummary,
     disturbanceNarrative,
   };
+}
+
+function collectActiveActionLongTermImpactLines(
+  beforeLifeStates: ReturnType<typeof createDefaultPlayerLifeStates>,
+  afterLifeStates: ReturnType<typeof createDefaultPlayerLifeStates> | undefined,
+  onCompleteFlags: string[],
+  flagsBefore: Record<string, unknown>,
+  flagsAfter: Record<string, unknown>,
+): string[] {
+  const lines = collectShapingLongTermImpactLines(beforeLifeStates, afterLifeStates);
+  for (const flag of onCompleteFlags) {
+    if (flagsBefore[flag] || !flagsAfter[flag]) {
+      continue;
+    }
+    if (!isPlayerVisibleFlag(flag)) {
+      continue;
+    }
+    lines.push(formatLongTermFlag(flag, true));
+  }
+  return [...new Set(lines)];
 }
 
 export function advanceTimeOnState(

@@ -71,6 +71,15 @@
             <div><dt>消耗</dt><dd>{{ activeActionSummaryDisplay.costSummary }}</dd></div>
             <div><dt>风险</dt><dd>{{ activeActionSummaryDisplay.riskSummary }}</dd></div>
           </dl>
+          <p class="progression-meta">{{ activeActionSummaryDisplay.appliedDeltaSummary }}</p>
+          <div v-if="activeActionLongTermImpacts.length > 0" class="feedback-group active-action-long-term">
+            <p class="feedback-group-title">长期影响</p>
+            <ul class="feedback-list">
+              <li v-for="(line, index) in activeActionLongTermImpacts" :key="`active-lt-${index}`">
+                {{ line }}
+              </li>
+            </ul>
+          </div>
           <p class="progression-hint">{{ activeActionSummaryDisplay.nextStepHint }}</p>
         </div>
 
@@ -287,6 +296,10 @@ const activeActionSummaryDisplay = computed(() => {
   }
   if (engineState.showingDisturbanceNarrative) return null;
   return engineState.lastActiveActionSummary;
+});
+
+const activeActionLongTermImpacts = computed(() => {
+  return activeActionSummaryDisplay.value?.longTermImpactLines ?? [];
 });
 
 const disturbanceNarrativeDisplay = computed(() => {

@@ -1,0 +1,124 @@
+{
+  "project": "Wuxia Life P122 Early Visible Growth Feedback Minimal Implementation",
+  "branchName": "codex/p122-early-visible-growth-feedback-minimal-implementation",
+  "description": "Minimal implementation slice: turn early habit-driven growth from hidden runtime truth into player-visible confirmation on existing summary, feedback, and period-settlement surfaces. Single sample route merchant_house ages 5-12 only; no new growth system or multi-route expansion.",
+  "userStories": [
+    {
+      "id": "P122-001",
+      "title": "Lock merchant_house 5-8 sample baseline",
+      "description": "As a maintainer, I want the merchant_house 5-8 sample path and existing businessHabit thresholds locked before any expression work, so later stories target a single verifiable chain.",
+      "acceptanceCriteria": [
+        "Fix sample scope to merchant_house only; primary age band 5-8 (PRD §7 Minimal Sample)",
+        "Sample actions locked: action_household_errand and action_household_apprentice",
+        "Confirm businessHabit >= 2 is the shaping confirmation threshold on existing habit wiring (no parallel system)",
+        "Baseline chain aligns with docs/test-reports/hvg-merchant-visible-growth-proof.md (errand -> apprentice -> businessHabit 2)",
+        "Do not parallelize a second origin/route sample (PRD §12 Risk 4, US-004)",
+        "Do not add new growth containers, panels, or skill trees (PRD §4 Out of Scope, FR-7, §12 Risk 1)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §13 step 1 — lock sample before expression work. See also §11 Non-Goals."
+    },
+    {
+      "id": "P122-002",
+      "title": "Reinforce shapingSummary growth confirmation",
+      "description": "As a player, I want the main screen to plainly tell me what kind of person I am becoming via existing summary surfaces, so early years feel like growth instead of passive playback.",
+      "acceptanceCriteria": [
+        "On merchant_house 5-8 path, shapingSummary transitions from 塑形未成 to an explicit axis phrase (e.g. 营生 · 渐成) when businessHabit threshold is met (US-001, Signal A)",
+        "Confirmation text comes from existing habit/lifeStates wiring, not a new parallel system (US-001, FR-1)",
+        "Copy expresses growth direction, not repeated origin-background flavor (US-001, §10 Required Acceptance)",
+        "Player can clearly read that a business/营生 direction is forming (US-001)",
+        "Reuse MainScreenLifeSummary / existing tendencySummary+shapingSummary surfaces only; no new UI panel (PRD §6 P0, §4 Out of Scope)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "PRD §13 step 2 — expression layer first. FR-1."
+    },
+    {
+      "id": "P122-003",
+      "title": "Show long-term impact after shaping actions",
+      "description": "As a player, I want shaping actions to leave visible long-term traces in the event feedback area, so I can connect my choices to my growth.",
+      "acceptanceCriteria": [
+        "After sample shaping actions (action_household_errand / action_household_apprentice), feedback area shows at least one player-visible long-term impact confirmation (US-003, Signal C)",
+        "Confirmation is readable as this will continue to affect my life path, not only silver/stat deltas (US-003)",
+        "Reuse existing long-term impact / flag display mechanism; no new feedback framework (US-003, FR-2, PRD §6 P0)",
+        "Does not open a new branch at this step; causal visibility only (US-003)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "PRD §13 step 2 — feedback layer with expression layer. FR-2."
+    },
+    {
+      "id": "P122-004",
+      "title": "Add period settlement growth summary",
+      "description": "As a player, I want age progression to tell me what growth line became clearer this period, so each age step feels like a meaningful change.",
+      "acceptanceCriteria": [
+        "At least one age progression / period settlement on the sample path summarizes shaping change via existing periodSummaryDisplay (US-002, Signal B, FR-3)",
+        "Settlement copy answers what you grew into this period, not only generic narrative or stat fragments (US-002)",
+        "Summary correlates with prior shaping behavior, not passive age-based stat gain (US-002, PRD §4 Out of Scope)",
+        "Reuse GameScreen.vue periodSummaryDisplay; do not add an independent settlement system (US-002, PRD §6 P0)",
+        "Emphasis is growth confirmation, not repeated background flavor (FR-6, §10 Required Acceptance)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "PRD §13 step 3 — age progression settlement after expression/feedback. FR-3."
+    },
+    {
+      "id": "P122-005",
+      "title": "Improve 8-12 route echo readability",
+      "description": "As a player, I want early growth confirmation to make later route continuation easier to read, so 8-12承接 feels like the result of what I already became.",
+      "acceptanceCriteria": [
+        "At least one early growth confirmation is readable through existing echo/callback pattern (e.g. p9_echo_business_hook) (PRD §6 P1, FR-5)",
+        "On merchant_house 8-12 band, existing route flags (p9_early_business_focus, route_merchant, merchant_talent_discovery) read as follow-on from prior visible growth, not isolated events",
+        "Prove readability only; do not expand merchant 10-15 key fork content in this wave (PRD §4 Out of Scope, §11, US-004)",
+        "Stay on merchant_house single-route sample; no second-route parallel work (US-004, §12 Risk 4)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "PRD §13 step 4 — 8-12 light continuation validation. See §6 P1 echo + route承接位."
+    },
+    {
+      "id": "P122-006",
+      "title": "Produce targeted visible-growth loop proof",
+      "description": "As a maintainer, I want one narrow merchant sample proof that the visible growth loop works, so later work can extend the pattern instead of reopening design.",
+      "acceptanceCriteria": [
+        "Produce bounded proof for merchant_house ages 5-12 only (US-004, §10 Verification Standard)",
+        "Evidence shows behavior -> habit accumulation -> visible confirmation -> later continuation more readable",
+        "Player sees at least 2 different timepoint confirmation signals; at least 1 from summary/feedback and at least 1 from period settlement (§10 Required Acceptance)",
+        "Confirmation content distinguishes growth-happened from background flavor; no new system nouns required to explain growth (§10 Required Acceptance, FR-6)",
+        "Do not parallelize a second route; do not bundle merchant 10-15 fork reinforcement (US-004)",
+        "Save as docs/test-reports/p122-early-visible-growth-feedback-targeted-proof.md",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "US-004 proof artifact. PRD §14 — stop after sample is proven; do not expand into unified growth-system design."
+    },
+    {
+      "id": "P122-007",
+      "title": "Add narrow regression coverage",
+      "description": "As a maintainer, I want narrow automated tests guarding the early visible growth loop so future edits do not silently break player-facing confirmation.",
+      "acceptanceCriteria": [
+        "Add tests/p122EarlyVisibleGrowthFeedbackTests.ts (or equivalent narrow harness file)",
+        "Cover shapingSummary confirmation on merchant_house 5-8 sample path",
+        "Cover long-term impact visibility after sample shaping actions",
+        "Cover periodSummaryDisplay growth summary tied to shaping behavior",
+        "Include scope guards: merchant_house only, no 10-15 fork expansion, no second-route parallelization",
+        "Existing hvg merchant visible-growth baseline evidence does not regress",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Regression guard for §10 verification chain. Reuse existing test harness patterns from P106/P119."
+    }
+  ]
+}

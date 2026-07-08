@@ -540,6 +540,7 @@ export function useNewGameEngine() {
       body: selected.text,
       deltas,
       deltaCause: selected.title,
+      lifeStates: gameEngine.getGameState().player?.lifeStates,
     });
     engineState.isPassiveProgressionMode = false;
     engineState.passiveNarrative = null;

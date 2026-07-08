@@ -1,4 +1,6 @@
 import type { PeriodSummaryDisplay } from '../../types/activeActionTypes';
+import { buildShapingPeriodGrowthLine } from '../../utils/habitShapingSummary';
+import type { PlayerLifeStates } from '../../types/eventTypes';
 
 const STAT_LABELS: Record<string, string> = {
   martialPower: '功力',
@@ -35,18 +37,21 @@ export function buildPeriodSummary(params: {
   body: string;
   deltas?: Record<string, number>;
   deltaCause?: string;
+  lifeStates?: Partial<PlayerLifeStates>;
 }): PeriodSummaryDisplay {
   const deltas = params.deltas ?? {};
   const statDeltaSummary = formatStatDeltaSummary(deltas);
   const hasDelta = statDeltaSummary !== '本期未见明显数值变化';
   const cause = params.deltaCause ?? params.headline;
+  const shapingLine = buildShapingPeriodGrowthLine(params.lifeStates);
+  const body = shapingLine ? `${params.body}\n\n${shapingLine}` : params.body;
   const narrativeText = hasDelta
-    ? `${params.body}（因「${cause}」，${statDeltaSummary}）`
-    : params.body;
+    ? `${body}（因「${cause}」，${statDeltaSummary}）`
+    : body;
   return {
     sourceLabel: params.sourceLabel,
     headline: params.headline,
-    body: params.body,
+    body,
     statDeltaSummary: hasDelta ? `因「${cause}」：${statDeltaSummary}` : statDeltaSummary,
     narrativeText,
   };

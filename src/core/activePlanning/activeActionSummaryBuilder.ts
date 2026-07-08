@@ -21,7 +21,7 @@ export function formatActionDurationLabel(duration: ActionDuration): string {
 
 export function buildActiveActionSummaryDisplay(
   actionResult: ActionResult,
-  options?: { hasPendingDisturbance?: boolean },
+  options?: { hasPendingDisturbance?: boolean; longTermImpactLines?: string[] },
 ): ActiveActionSummaryDisplay {
   const action = getActionById(actionResult.actionId);
   const actionName = action?.name ?? actionResult.actionId;
@@ -41,5 +41,8 @@ export function buildActiveActionSummaryDisplay(
         ? formatStatDeltaSummary(actionResult.deltas)
         : `因「${actionName}」：${formatStatDeltaSummary(actionResult.deltas)}`,
     nextStepHint,
+    longTermImpactLines: options?.longTermImpactLines?.length
+      ? options.longTermImpactLines
+      : undefined,
   };
 }

@@ -169,3 +169,28 @@ export function shapingAxisKeyFromFeedbackFlag(flag: string): ShapingAxisKey | n
   const match = /^shaping_(trainingHabit|studyHabit|businessHabit|socialMomentum|familyBond)_up$/.exec(flag);
   return match ? (match[1] as ShapingAxisKey) : null;
 }
+
+/** Period settlement: summarize shaping growth when habit threshold is met (P122 Signal B). */
+export function buildShapingPeriodGrowthLine(
+  lifeStates: Partial<PlayerLifeStates> | undefined,
+): string | null {
+  const summary = buildCurrentShapingSummary(lifeStates);
+  if (summary === '塑形未成') {
+    return null;
+  }
+  return `回看这一期，你的成长主轴是：${summary}。这是你反复做事积累出来的，不是年岁自然带来的。`;
+}
+
+export function collectShapingLongTermImpactLines(
+  before: Partial<PlayerLifeStates> | undefined,
+  after: Partial<PlayerLifeStates> | undefined,
+): string[] {
+  const lines: string[] = [];
+  for (const axis of SHAPING_AXES) {
+    const delta = readShapingAxisValue(after, axis.key) - readShapingAxisValue(before, axis.key);
+    if (delta >= 1) {
+      lines.push(`${axis.shortLabel}加深`);
+    }
+  }
+  return lines;
+}

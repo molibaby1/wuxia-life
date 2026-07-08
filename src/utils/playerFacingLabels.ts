@@ -54,6 +54,8 @@ const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   route_wanderer: '选择游侠',
   route_border: '边城立名',
   route_merchant: '踏上商路',
+  p9_echo_business_hook: '营生方向已被记住，后续机会会由此打开',
+  p9_early_business_focus: '早期营生重心已确立，人生会沿此方向展开',
   hvg_merchant_ledger_track: '走上账房见习之路',
   hvg_merchant_caravan_track: '走上认货跑商之路',
   hvg_merchant_shaping_watching: '营生塑形初现，仍在观望',

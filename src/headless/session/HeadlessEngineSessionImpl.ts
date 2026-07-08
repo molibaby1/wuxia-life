@@ -538,6 +538,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       body: selected.text,
       deltas,
       deltaCause: selected.title,
+      lifeStates: this.engine.getGameState().player?.lifeStates,
     });
     this.volatile.passiveNarrative = null;
     this.volatile.storyGapPassiveServed = true;

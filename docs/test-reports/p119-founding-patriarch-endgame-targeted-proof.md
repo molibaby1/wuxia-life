@@ -44,11 +44,6 @@
 - No stat_modify in endgame autoEffects
 - `founding_patriarch_late_life_done` preserved (not unset)
 
-## Regression
+## Cross-route regression
 
-- `tests/p119FoundingPatriarchEndgameTests.ts` — R1–R29
-- `tests/p113FoundingPatriarchBridgeTests.ts` — P113
-- `tests/p115FoundingPatriarchMidlifePressureTests.ts` — P115
-- `tests/p117FoundingPatriarchLateLifeTests.ts` — P117
-- P102–P112 patron tests pass
-- `guard:sample-lines-baseline` pass
+- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard

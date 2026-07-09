@@ -56,8 +56,6 @@
 - No stat_modify in endgame autoEffects
 - `merchant_patron_late_life_done` preserved (not unset)
 
-## Regression
+## Cross-route regression
 
-- P102–P110 patron tests pass
-- P100/P101 magnate tests pass
-- `guard:sample-lines-baseline` pass
+- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard

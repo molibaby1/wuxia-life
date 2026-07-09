@@ -51,8 +51,6 @@
 
 - `merchant_patron_endgame_echo_done` not set by late-life (reserved P111+)
 
-## Regression
+## Cross-route regression
 
-- P102–P108 patron tests pass
-- P100/P101 magnate tests pass
-- `guard:sample-lines-baseline` pass
+- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard

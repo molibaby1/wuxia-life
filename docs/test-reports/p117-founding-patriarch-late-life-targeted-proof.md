@@ -42,9 +42,6 @@
 - Late-life events do **not** set `founding_patriarch_endgame_echo_done`
 - Pressure markers preserved after late-life (not cleared)
 
-## Regression
+## Cross-route regression
 
-- `tests/p117FoundingPatriarchLateLifeTests.ts` — R1–R30
-- `tests/p113FoundingPatriarchBridgeTests.ts` — P113
-- `tests/p115FoundingPatriarchMidlifePressureTests.ts` — P115
-- `guard:sample-lines-baseline` pass
+- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard

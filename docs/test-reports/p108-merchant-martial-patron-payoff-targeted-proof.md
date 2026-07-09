@@ -48,8 +48,6 @@
 
 - `merchant_patron_late_life_done` not set by payoff (reserved P109+)
 
-## Regression
+## Cross-route regression
 
-- P102–P106 tests pass
-- P100/P101 magnate tests pass
-- `guard:sample-lines-baseline` pass
+- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard

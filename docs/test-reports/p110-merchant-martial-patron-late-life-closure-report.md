@@ -8,7 +8,7 @@
 
 P110 delivers runtime late-life for `merchant_martial_patron`: 3 auto branch events keyed on payoff choice, expression updates (cost label / goal / identity), targeted proof, and regression tests.
 
-## Closure criteria (12/12)
+## Closure criteria (10/10 stage-local)
 
 | # | Criterion | Status | Evidence |
 | - | --------- | ------ | -------- |
@@ -19,11 +19,9 @@ P110 delivers runtime late-life for `merchant_martial_patron`: 3 auto branch eve
 | C5 | Current goal per branch | ✅ | R14, R16, R18 tests |
 | C6 | Identity updates | ✅ | R19, R20 tests |
 | C7 | 商武一体 flavor | ✅ | 账房/演武场/盟约/刀 in narrative + expression |
-| C8 | No P102–P108 regressions | ✅ | R23–R27 |
-| C9 | No magnate regressions | ✅ | R28 |
-| C10 | Typecheck passes | ✅ | npm run typecheck |
-| C11 | Guard sample-lines-baseline | ✅ | R29 |
-| C12 | Endgame interfaces reserved | ✅ | R10 — no `endgame_echo_done` |
+| C8 | Cross-route regression | ✅ | `npm run test:sample-lines-routes` |
+| C9 | Typecheck passes | ✅ | npm run typecheck |
+| C10 | Endgame interfaces reserved | ✅ | R10 — no `endgame_echo_done` |
 
 ## What patron late-life now provides
 

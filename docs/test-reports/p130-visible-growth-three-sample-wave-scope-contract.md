@@ -90,8 +90,8 @@ Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbac
 | P130-001 | This scope contract | ✅ |
 | P130-002 | `p130-visible-growth-three-sample-reconciliation.md` | ✅ |
 | P130-003 | Defer queue section (reconciliation §7) | ✅ |
-| P130-004 | `p130-ordinary-origin-parallel-sample-defer-rationale.md` | Pending |
-| P130-005 | `p130-visible-growth-wave-closure-report.md` | Pending |
+| P130-004 | `p130-ordinary-origin-parallel-sample-defer-rationale.md` | ✅ |
+| P130-005 | `p130-visible-growth-wave-closure-report.md` | ✅ |
 
 ---
 
@@ -104,4 +104,4 @@ Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbac
 | P122 / P127 / P129 referenced, not reopened | **Required** |
 | Farm/apprentice parallel implementation explicitly deferred | **Required** |
 
-**Verdict:** P130-001 scope locked. Proceed to three-sample reconciliation.
+**Verdict:** P130 complete — 5/5 deliverables delivered; three-sample wave closure reconciled.

@@ -78,7 +78,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Real stage goal: prove visible-growth pattern works on ordinary origin with direct socialMomentum axis."
     },
     {

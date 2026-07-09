@@ -66,3 +66,11 @@ Existing `buildCurrentShapingSummary` / `MainScreenLifeSummary` wiring confirmed
 - `socialMomentum >= 2` → `人情 · 渐成` (see `P129_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD`)
 - Copy expresses social shaping direction, not origin flavor (`你出身酒肆` etc.)
 - No new UI panel — reuse only
+
+## Signal B verification (P129-004)
+
+Existing `buildShapingPeriodGrowthLine` via `buildPeriodSummary` confirmed:
+
+- At `socialMomentum >= 2`, period body includes `人情` shaping axis
+- Copy answers what kind of social person you are becoming (`反复做事积累`)
+- Reuses existing settlement surface — no independent settlement system

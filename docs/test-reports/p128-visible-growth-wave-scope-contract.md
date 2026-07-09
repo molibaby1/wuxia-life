@@ -63,8 +63,9 @@
 | --- | --- | --- | --- |
 | P122 | `docs/test-reports/p122-merchant-visible-growth-sample-baseline.md` | `docs/test-reports/p122-early-visible-growth-feedback-targeted-proof.md` | `tests/p122EarlyVisibleGrowthFeedbackTests.ts` |
 | P127 | `docs/test-reports/p127-martial-visible-growth-sample-baseline.md` | `docs/test-reports/p127-martial-second-visible-growth-sample-proof.md` | `tests/p127MartialSecondVisibleGrowthTests.ts` |
+| P129 | `docs/test-reports/p129-ordinary-origin-visible-growth-sample-baseline.md` | `docs/test-reports/p129-ordinary-origin-visible-growth-sample-proof.md` | `tests/p129OrdinaryOriginVisibleGrowthTests.ts` |
 
-Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbackTests.ts`, `npx tsx tests/p127MartialSecondVisibleGrowthTests.ts`.
+Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbackTests.ts`, `npx tsx tests/p127MartialSecondVisibleGrowthTests.ts`, `npx tsx tests/p129OrdinaryOriginVisibleGrowthTests.ts`.
 
 ---
 

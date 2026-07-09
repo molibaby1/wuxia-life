@@ -44,7 +44,7 @@ Bounded proof for `tavern_hand` ages 5–13: behavior → socialMomentum → vis
 - `p28_social_momentum_network_fork` eligible at age 24: **true**
 - p28 title: 人脉成线
 - p28 text excerpt: 长期人情往来塑成的名声与门路，已把熟识之人连成一张能互相引介的网。眼下有人邀你参加一场只认门路不认名帖的私宴。…
-- Early social shaping makes guest-network fork readable as follow-on from prior人情往来
+- Early social shaping makes guest-network fork readable as follow-on from prior 人情往来
 
 ## Required acceptance (§10)
 

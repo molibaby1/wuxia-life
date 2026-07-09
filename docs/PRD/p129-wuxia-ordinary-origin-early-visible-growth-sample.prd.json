@@ -96,7 +96,7 @@
         "Tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Reuse narrow test style from P122/P127. Do not build generic cross-origin framework."
     }
   ]

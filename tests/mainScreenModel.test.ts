@@ -1,7 +1,7 @@
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
 import type { PlayerLifeStates } from '../src/types/eventTypes';
 import type { LifeMemorySummary } from '../src/types/lifeMemory';
-import { buildMainScreenModel, type MainScreenPlayer } from '../src/components/mainScreenModel';
+import { buildMainScreenModel, type MainScreenPlayer, P124_NON_MARTIAL_SAMPLE, P124_MARTIAL_DOMINANT_SAMPLE } from '../src/components/mainScreenModel';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -160,6 +160,75 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(model.tendencySummary === '功力 35', 'near-duplicate martial stats should collapse to one route-explaining stat');
   console.log('✓ avoids noisy duplicate tendency entries');
+}
+
+{
+  const model = buildMainScreenModel(
+    createMainScreenPlayer({
+      martialPower: 22,
+      externalSkill: 18,
+      internalSkill: 16,
+      qinggong: 14,
+      knowledge: 24,
+      connections: 22,
+      charisma: 18,
+      businessAcumen: 20,
+      comprehension: 16,
+      constitution: 14,
+      chivalry: 8,
+      reputation: 12,
+      lifeStates: createLifeStates({ businessHabit: P124_NON_MARTIAL_SAMPLE.businessHabit }),
+    }),
+    createLifeMemory({
+      routeStatus: {
+        primary: {
+          routeId: P124_NON_MARTIAL_SAMPLE.routeId,
+          name: P124_NON_MARTIAL_SAMPLE.routeName,
+          phase: P124_NON_MARTIAL_SAMPLE.routePhase,
+        },
+        diagnostic: { routeStates: {}, activeRouteFlags: [] },
+      },
+    }),
+  );
+
+  assert(
+    !model.tendencySummary.includes('功力')
+    && !model.tendencySummary.includes('内功')
+    && !model.tendencySummary.includes('外功'),
+    'merchant sample should not surface martial tendency when non-martial stats lead',
+  );
+  assert(
+    model.tendencySummary.includes('学识') || model.tendencySummary.includes('经营') || model.tendencySummary.includes('人脉'),
+    'merchant sample should surface non-martial life-direction stats',
+  );
+  assert(model.shapingSummary === '营生 · 渐成', 'merchant shaping should cooperate with tendency read');
+  console.log('✓ merchant route surfaces non-martial tendency summary');
+}
+
+{
+  const model = buildMainScreenModel(
+    createPlayer({
+      martialPower: P124_MARTIAL_DOMINANT_SAMPLE.martialPower,
+      internalSkill: P124_MARTIAL_DOMINANT_SAMPLE.internalSkill,
+      externalSkill: P124_MARTIAL_DOMINANT_SAMPLE.externalSkill,
+      qinggong: 15,
+      constitution: 12,
+      comprehension: 11,
+      chivalry: 9,
+    }),
+    createLifeMemory({
+      routeStatus: {
+        primary: { routeId: 'sect', name: '正道门派', phase: '路线进行中' },
+        diagnostic: { routeStates: {}, activeRouteFlags: [] },
+      },
+    }),
+  );
+
+  assert(
+    model.tendencySummary === `功力 ${P124_MARTIAL_DOMINANT_SAMPLE.martialPower}`,
+    'martial-dominant sample should keep martialPower as top-level combat readout',
+  );
+  console.log('✓ martial-dominant route preserves martial tendency readability');
 }
 
 {

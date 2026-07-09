@@ -31,7 +31,9 @@
           :key="item.key"
           class="resource-item"
         >
-          <span class="resource-label">{{ item.label }}</span>
+          <span class="resource-label">
+            {{ item.label }}<template v-if="item.description">·{{ item.description }}</template>
+          </span>
           <span class="resource-value">{{ item.value }}</span>
         </div>
       </div>
@@ -421,6 +423,7 @@ const attributePanelPlayer = computed((): PlayerState => {
       spouse: null,
       alive: p.alive,
       talents: [],
+      lifeStates: p.lifeStates,
     };
   }
   return gameEngine.getGameState().player;

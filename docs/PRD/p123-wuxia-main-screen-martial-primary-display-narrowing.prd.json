@@ -31,7 +31,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-001 and FR-1/FR-2. Keep this strictly to first-screen emphasis."
     },
     {
@@ -47,7 +47,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-002 and FR-3. This is the smallest constitution-specific correction."
     },
     {

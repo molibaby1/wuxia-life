@@ -242,7 +242,7 @@ export function buildMainScreenModel(
     // P123 first-screen header row — money / survival base / social standing
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
-      createStat('constitution', '体魄', valueOf(player, 'constitution')),
+      createStat('constitution', '体魄', valueOf(player, 'constitution'), '生存底子'),
       createStat('reputation', '声望', valueOf(player, 'reputation')),
     ],
     routeSummary,

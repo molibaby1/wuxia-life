@@ -126,11 +126,83 @@ const TENDENCY_CANDIDATES: Array<{
   { key: 'knowledge', label: '学识', bucket: 'mind', weight: 1.0 },
   { key: 'reputation', label: '声望', bucket: 'jianghu', weight: 0.9 },
   { key: 'connections', label: '人脉', bucket: 'jianghu', weight: 0.9 },
+  { key: 'charisma', label: '魅力', bucket: 'jianghu', weight: 0.88 },
+  { key: 'businessAcumen', label: '经营', bucket: 'livelihood', weight: 1.05 },
   { key: 'martialPower', label: '功力', bucket: 'martial', weight: 1.0 },
-  { key: 'internalSkill', label: '内功', bucket: 'martial', weight: 0.95 },
-  { key: 'externalSkill', label: '外功', bucket: 'martial', weight: 0.92 },
-  { key: 'qinggong', label: '轻功', bucket: 'martial', weight: 0.9 },
 ];
+
+const NON_MARTIAL_ROUTE_IDS = new Set([
+  'merchant',
+  'official',
+  'scholar',
+  'medical',
+  'renown',
+  'hermit',
+]);
+
+function isNonMartialRouteContext(lifeMemory: LifeMemorySummary): boolean {
+  const routeId = lifeMemory.routeStatus?.primary.routeId ?? '';
+  const routeName = lifeMemory.routeStatus?.primary.name ?? '';
+  return (
+    NON_MARTIAL_ROUTE_IDS.has(routeId)
+    || routeName.includes('商')
+    || routeName.includes('医')
+    || routeName.includes('仕途')
+  );
+}
+
+function isMartialDominant(player: MainScreenPlayer): boolean {
+  const martialValues = [
+    valueOf(player, 'martialPower'),
+    valueOf(player, 'internalSkill'),
+    valueOf(player, 'externalSkill'),
+  ].sort((a, b) => b - a);
+
+  return (
+    martialValues[0] >= P124_MARTIAL_DOMINANT_SAMPLE.martialPower - 5
+    && martialValues[0] - martialValues[2] <= P124_MARTIAL_DOMINANT_SAMPLE.martialSpreadMax
+  );
+}
+
+function tendencyContextMultiplier(
+  candidate: (typeof TENDENCY_CANDIDATES)[number],
+  player: MainScreenPlayer,
+  lifeMemory: LifeMemorySummary,
+): number {
+  const lifeStates = player.lifeStates;
+  let multiplier = 1;
+
+  if (isNonMartialRouteContext(lifeMemory) && candidate.bucket === 'martial') {
+    multiplier *= 0.55;
+  }
+
+  if ((lifeStates?.businessHabit ?? 0) >= P124_NON_MARTIAL_SAMPLE.businessHabit) {
+    if (candidate.bucket === 'livelihood' || candidate.key === 'knowledge' || candidate.key === 'connections') {
+      multiplier *= 1.2;
+    }
+    if (candidate.key === 'charisma') {
+      multiplier *= 1.1;
+    }
+  }
+
+  if ((lifeStates?.studyHabit ?? 0) >= 2) {
+    if (candidate.key === 'knowledge' || candidate.key === 'comprehension') {
+      multiplier *= 1.2;
+    }
+  }
+
+  if ((lifeStates?.trainingHabit ?? 0) >= 2 && candidate.bucket === 'martial') {
+    multiplier *= 1.15;
+  }
+
+  if ((lifeStates?.socialMomentum ?? 0) >= 2) {
+    if (candidate.key === 'connections' || candidate.key === 'charisma' || candidate.key === 'reputation') {
+      multiplier *= 1.1;
+    }
+  }
+
+  return multiplier;
+}
 
 function valueOf(player: MainScreenPlayer, key: keyof MainScreenPlayer): number {
   const value = player[key];
@@ -159,38 +231,25 @@ function buildRiskSummary(summary: LifeMemorySummary): string {
 function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySummary): string {
   const phase = lifeMemory.routeStatus?.primary.phase ?? '';
   const prioritizeGrowth = phase.includes('未入门');
-  const martialValues = [
-    valueOf(player, 'martialPower'),
-    valueOf(player, 'internalSkill'),
-    valueOf(player, 'externalSkill'),
-  ].sort((a, b) => b - a);
 
-  if (
-    !prioritizeGrowth
-    && (
-      martialValues[0] >= 30
-      && martialValues[2] >= 0
-      && martialValues[0] - martialValues[2] <= 5
-    )
-  ) {
+  if (!prioritizeGrowth && isMartialDominant(player)) {
     return `功力 ${valueOf(player, 'martialPower')}`;
   }
 
   const ranked = TENDENCY_CANDIDATES.map((candidate) => ({
     ...candidate,
     value: valueOf(player, candidate.key),
-    score: valueOf(player, candidate.key) * candidate.weight,
+    score:
+      valueOf(player, candidate.key)
+      * candidate.weight
+      * tendencyContextMultiplier(candidate, player, lifeMemory),
   }))
     .filter((candidate) => candidate.value > 0)
     .filter((candidate) => !(prioritizeGrowth && candidate.bucket === 'martial'))
     .sort((a, b) => b.score - a.score);
 
   if (ranked.length === 0 || ranked[0].value < 20) {
-    if (
-      martialValues[0] >= 30
-      && martialValues[2] >= 0
-      && martialValues[0] - martialValues[2] <= 5
-    ) {
+    if (isMartialDominant(player)) {
       return `功力 ${valueOf(player, 'martialPower')}`;
     }
     return '尚未成势';

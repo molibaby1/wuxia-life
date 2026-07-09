@@ -47,7 +47,7 @@
         "Typecheck passes if code touched"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Addresses GAP-P131-N01 and GAP-P131-N02; primary end-state assessment artifact."
     },
     {

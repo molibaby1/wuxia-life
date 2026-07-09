@@ -62,7 +62,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-003 and FR-4. Do not turn this into a wording-cleanup pass for the entire panel; P125 owns that."
     },
     {

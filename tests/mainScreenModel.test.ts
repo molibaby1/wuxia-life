@@ -92,11 +92,37 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.shapingSummary === '塑形未成', 'shaping should degrade when no habit axis is strong');
   assert(model.topResources.length === 3, 'top resources should stay capped at three');
   assert(
-    model.coreStats.map((item) => item.label).join(',') === '功力,外功,内功,轻功,体魄,银两',
-    'core stats should keep fixed six-item order',
+    model.coreStats.map((item) => item.label).join(',') === '功力,银两',
+    'core stats should keep narrowed martial readout plus money',
+  );
+  assert(
+    model.coreStats.find((item) => item.key === 'martialPower')?.description === '武学总读数',
+    'martialPower should read as overall martial readout on first screen',
   );
   assert(model.fullStatGroups.length === 4, 'full stats should be grouped into four sections');
   console.log('✓ builds default route/risk/tendency/core groups');
+}
+
+{
+  const model = buildMainScreenModel(createPlayer(), createLifeMemory());
+  const coreLabels = model.coreStats.map((item) => item.label);
+  const combatGroup = model.fullStatGroups.find((group) => group.id === 'combat');
+  const combatLabels = combatGroup?.items.map((item) => item.label) ?? [];
+
+  assert(!coreLabels.includes('外功'), 'externalSkill should be downgraded from first-screen coreStats');
+  assert(!coreLabels.includes('内功'), 'internalSkill should be downgraded from first-screen coreStats');
+  assert(!coreLabels.includes('轻功'), 'qinggong should be downgraded from first-screen coreStats');
+  assert(!coreLabels.includes('体魄'), 'constitution should not double-amplify on first-screen coreStats');
+  assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
+  assert(
+    combatLabels.join(',') === '功力,外功,内功,轻功,体魄',
+    'full stats combat group should still expose all martial sub-stats',
+  );
+  assert(
+    model.topResources.find((item) => item.key === 'constitution')?.description === '生存底子',
+    'constitution in topResources should read as survival base',
+  );
+  console.log('✓ keeps narrowed first-screen emphasis while preserving full martial stat access');
 }
 
 {
@@ -146,6 +172,16 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(model.shapingSummary === '习武 · 成形 / 饱学 · 渐成', 'shaping should rank habit axes with readable labels');
   console.log('✓ surfaces dominant habit shaping on main screen');
+}
+
+{
+  const model = buildMainScreenModel(
+    createPlayer({ lifeStates: createLifeStates({ businessHabit: 2 }) }),
+    createLifeMemory(),
+  );
+
+  assert(model.shapingSummary === '营生 · 渐成', 'PlayerSummaryDto lifeStates should drive shapingSummary in API mode');
+  console.log('✓ PlayerSummaryDto lifeStates feed shaping summary');
 }
 
 console.log('\n=== Main Screen Model Tests Passed ===');

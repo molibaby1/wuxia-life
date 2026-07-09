@@ -30,7 +30,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-001/US-002 and FR-1/FR-3. This is the minimum martial-duplication correction."
     },
     {
@@ -46,7 +46,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-001/US-003 and FR-2/FR-4. Keep this limited to existing context signals."
     },
     {
@@ -61,7 +61,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-002. This story exists to stop the non-martial fix from breaking martial readability."
     },
     {
@@ -76,7 +76,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD §9 Verification Standard. Reuse existing mainScreenModel-oriented tests rather than building a large new harness."
     }
   ]

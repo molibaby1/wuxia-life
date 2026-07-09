@@ -86,12 +86,19 @@ export type MainScreenLifeStates = Pick<
   'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum' | 'familyBond'
 >;
 
+const MARTIAL_DOMINANT_MIN_TOP = 30;
+const MARTIAL_DOMINANT_SPREAD_MAX = 5;
+const BUSINESS_HABIT_TENDENCY_THRESHOLD = 2;
+const STUDY_HABIT_TENDENCY_THRESHOLD = 2;
+const TRAINING_HABIT_TENDENCY_THRESHOLD = 2;
+const SOCIAL_MOMENTUM_TENDENCY_THRESHOLD = 2;
+
 /** P124 locked non-martial verification sample — merchant route with shaping context. */
 export const P124_NON_MARTIAL_SAMPLE = {
   routeId: 'merchant',
   routeName: '商路',
   routePhase: '路线进行中',
-  businessHabit: 2,
+  businessHabit: BUSINESS_HABIT_TENDENCY_THRESHOLD,
 } as const;
 
 /** P124 locked martial-dominant verification sample — clustered martial sub-stats. */
@@ -99,7 +106,7 @@ export const P124_MARTIAL_DOMINANT_SAMPLE = {
   martialPower: 35,
   internalSkill: 34,
   externalSkill: 33,
-  martialSpreadMax: 5,
+  martialSpreadMax: MARTIAL_DOMINANT_SPREAD_MAX,
 } as const;
 
 const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
@@ -159,8 +166,8 @@ function isMartialDominant(player: MainScreenPlayer): boolean {
   ].sort((a, b) => b - a);
 
   return (
-    martialValues[0] >= P124_MARTIAL_DOMINANT_SAMPLE.martialPower - 5
-    && martialValues[0] - martialValues[2] <= P124_MARTIAL_DOMINANT_SAMPLE.martialSpreadMax
+    martialValues[0] >= MARTIAL_DOMINANT_MIN_TOP
+    && martialValues[0] - martialValues[2] <= MARTIAL_DOMINANT_SPREAD_MAX
   );
 }
 
@@ -176,7 +183,7 @@ function tendencyContextMultiplier(
     multiplier *= 0.55;
   }
 
-  if ((lifeStates?.businessHabit ?? 0) >= P124_NON_MARTIAL_SAMPLE.businessHabit) {
+  if ((lifeStates?.businessHabit ?? 0) >= BUSINESS_HABIT_TENDENCY_THRESHOLD) {
     if (candidate.bucket === 'livelihood' || candidate.key === 'knowledge' || candidate.key === 'connections') {
       multiplier *= 1.2;
     }
@@ -185,17 +192,17 @@ function tendencyContextMultiplier(
     }
   }
 
-  if ((lifeStates?.studyHabit ?? 0) >= 2) {
+  if ((lifeStates?.studyHabit ?? 0) >= STUDY_HABIT_TENDENCY_THRESHOLD) {
     if (candidate.key === 'knowledge' || candidate.key === 'comprehension') {
       multiplier *= 1.2;
     }
   }
 
-  if ((lifeStates?.trainingHabit ?? 0) >= 2 && candidate.bucket === 'martial') {
+  if ((lifeStates?.trainingHabit ?? 0) >= TRAINING_HABIT_TENDENCY_THRESHOLD && candidate.bucket === 'martial') {
     multiplier *= 1.15;
   }
 
-  if ((lifeStates?.socialMomentum ?? 0) >= 2) {
+  if ((lifeStates?.socialMomentum ?? 0) >= SOCIAL_MOMENTUM_TENDENCY_THRESHOLD) {
     if (candidate.key === 'connections' || candidate.key === 'charisma' || candidate.key === 'reputation') {
       multiplier *= 1.1;
     }
@@ -236,14 +243,14 @@ function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySu
     return `功力 ${valueOf(player, 'martialPower')}`;
   }
 
-  const ranked = TENDENCY_CANDIDATES.map((candidate) => ({
-    ...candidate,
-    value: valueOf(player, candidate.key),
-    score:
-      valueOf(player, candidate.key)
-      * candidate.weight
-      * tendencyContextMultiplier(candidate, player, lifeMemory),
-  }))
+  const ranked = TENDENCY_CANDIDATES.map((candidate) => {
+    const value = valueOf(player, candidate.key);
+    return {
+      ...candidate,
+      value,
+      score: value * candidate.weight * tendencyContextMultiplier(candidate, player, lifeMemory),
+    };
+  })
     .filter((candidate) => candidate.value > 0)
     .filter((candidate) => !(prioritizeGrowth && candidate.bucket === 'martial'))
     .sort((a, b) => b.score - a.score);

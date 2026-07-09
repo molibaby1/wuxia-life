@@ -31,7 +31,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Addresses GAP-P131-N03; on-ramp through luck echo flag chain."
     },
     {

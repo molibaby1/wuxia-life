@@ -58,6 +58,8 @@ const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   p9_early_business_focus: '早期营生重心已确立，人生会沿此方向展开',
   p9_echo_training_hook: '习武方向已被记住，后续机会会由此打开',
   p9_early_training_focus: '早期习武重心已确立，人生会沿此方向展开',
+  p9_echo_social_hook: '人情方向已被记住，后续机会会由此打开',
+  p9_early_social_focus: '早期人情重心已确立，人生会沿此方向展开',
   hvg_merchant_ledger_track: '走上账房见习之路',
   hvg_merchant_caravan_track: '走上认货跑商之路',
   hvg_merchant_shaping_watching: '营生塑形初现，仍在观望',

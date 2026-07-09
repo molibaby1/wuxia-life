@@ -268,4 +268,45 @@ console.log('=== Main Screen Model Tests ===\n');
   console.log('✓ PlayerSummaryDto lifeStates feed shaping summary');
 }
 
+{
+  const model = buildMainScreenModel(createPlayer(), createLifeMemory());
+  const combatGroup = model.fullStatGroups.find((group) => group.id === 'combat');
+  const survivalGroup = model.fullStatGroups.find((group) => group.id === 'survival');
+
+  assert(combatGroup?.label === '武学', 'P125 combat tab should frame martial readout hierarchy');
+  assert(
+    combatGroup?.items.map((item) => item.key).join(',') === 'martialPower,externalSkill,internalSkill,qinggong',
+    'P125 combat group should keep total readout plus three specialization stats',
+  );
+  assert(
+    combatGroup?.items.find((item) => item.key === 'martialPower')?.label === '功力·总读数',
+    'P125 martialPower label should signal total readout',
+  );
+  assert(
+    combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),
+    'P125 martialPower description should explain overall martial readout',
+  );
+
+  for (const key of ['externalSkill', 'internalSkill', 'qinggong'] as const) {
+    const item = combatGroup?.items.find((stat) => stat.key === key);
+    assert(Boolean(item), `P125 should still expose ${key} in full panel`);
+    assert(item?.description?.includes('风格特长'), `P125 ${key} should read as specialization dimension`);
+    assert(
+      !item?.description?.includes('综合武学总读数'),
+      `P125 ${key} should not borrow total-readout wording`,
+    );
+  }
+
+  assert(survivalGroup?.label === '生存底子', 'P125 constitution should sit in survival-base group');
+  assert(
+    survivalGroup?.items.length === 1 && survivalGroup.items[0]?.key === 'constitution',
+    'P125 survival group should contain constitution only',
+  );
+  assert(
+    survivalGroup?.items[0]?.description?.includes('不是外功/内功/轻功'),
+    'P125 constitution should distance itself from martial specialization trio',
+  );
+  console.log('✓ P125 full-panel role clarification regression');
+}
+
 console.log('\n=== Main Screen Model Tests Passed ===');

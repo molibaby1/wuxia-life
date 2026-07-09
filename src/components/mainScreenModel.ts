@@ -44,6 +44,10 @@
  * - group id `combat`, label `战斗`
  * - items: martialPower, externalSkill, internalSkill, qinggong, constitution (all five retained)
  *
+ * Post-P125 combat/survival layout (locked for narrow tests):
+ * - `combat` (武学): martialPower + externalSkill + internalSkill + qinggong
+ * - `survival` (生存底子): constitution only
+ *
  * In scope for P125:
  * - combat-group label, item ordering, description copy for martial/survival role clarification
  * - optional regrouping of constitution away from pure martial-specialization framing

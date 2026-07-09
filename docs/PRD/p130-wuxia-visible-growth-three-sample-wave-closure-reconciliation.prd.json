@@ -1,0 +1,81 @@
+{
+  "project": "Wuxia Life P130 Visible Growth Three-Sample Wave Closure Reconciliation",
+  "branchName": "codex/p130-wuxia-visible-growth-three-sample-wave-closure-reconciliation",
+  "description": "Docs-only reconciliation after P129: formally close the P122+P127+P129 three-sample visible-growth wave (merchant_house + martial_family + tavern_hand), correct P128 doc drift on ordinary early visible growth, update defer queue (tavern closed, farm/apprentice deferred), and document North Star still-OPEN handoff. No runtime or UI code changes.",
+  "userStories": [
+    {
+      "id": "P130-001",
+      "title": "Lock docs-only scope and anti-respawn boundaries",
+      "description": "As a maintainer, I want P130 scope locked to documentation reconciliation before any work starts, so the stage does not respawn P129 tavern_hand implementation or open farm/apprentice parallel coding.",
+      "acceptanceCriteria": [
+        "Stage is docs-only: no changes to src/, server/, test harness, or gameplay logic (PRD section 3 Non-Goals)",
+        "Do not respawn or reopen P122, P127, or P129 functional stories",
+        "Do not implement farm_peasant, town_apprentice, or scholar_house visible growth in this stage",
+        "Cross-reference existing P122, P127, and P129 proof paths without duplicating runtime verification",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Scope lock first. Mirrors P128 docs-only pattern extended to three samples."
+    },
+    {
+      "id": "P130-002",
+      "title": "Write three-sample cross-reconciliation report",
+      "description": "As a maintainer, I want a reconciliation report mapping P122, P127, and P129 goals to proof artifacts, so the three-sample visible-growth wave can be formally closed.",
+      "acceptanceCriteria": [
+        "Map each P122, P127, and P129 Goal to proof path and regression test pointer (PRD US-002)",
+        "State cross-tier reusability: pattern proven on vivid origins and one ordinary origin, not merchant-only or vivid-only patch",
+        "Note P128 two-sample closure is extended by this three-sample closure without contradiction",
+        "Save as docs/test-reports/p130-visible-growth-three-sample-reconciliation.md",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Primary deliverable for wave closure."
+    },
+    {
+      "id": "P130-003",
+      "title": "Update ordinary-origin defer queue after P129 closure",
+      "description": "As a maintainer, I want the defer queue updated after P129 single-sample closure, so farm/apprentice parallel work does not silently respawn and P128 section 3.2 doc drift is corrected.",
+      "acceptanceCriteria": [
+        "Update defer queue: tavern_hand ordinary visible growth Closed via P129; farm_peasant and town_apprentice Defer with rationale (PRD US-003)",
+        "Correct P128 closure section 3.2 drift: early visible growth on ordinary origins Met for single-sample scope",
+        "Cite P127 section 14 and P129 Non-Goals as stop-expansion rationale",
+        "Document in docs/test-reports/ (section in reconciliation or sibling artifact)",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Prevents silent respawn of multi-origin ordinary batch."
+    },
+    {
+      "id": "P130-004",
+      "title": "Document farm and apprentice parallel-sample defer rationale",
+      "description": "As a maintainer, I want an explicit defer note for farm_peasant and town_apprentice visible growth, so future Discovery does not assume P130 implies multi-origin ordinary batch implementation.",
+      "acceptanceCriteria": [
+        "Document why farm_peasant and town_apprentice remain OUT OF SCOPE after three-sample closure (PRD US-004)",
+        "List optional preconditions for a future second ordinary sample stage without committing to implementation",
+        "Save as docs/test-reports/p130-ordinary-origin-parallel-sample-defer-rationale.md",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Farm/apprentice deferred, not forgotten."
+    },
+    {
+      "id": "P130-005",
+      "title": "Write P130 closure report and end-state OPEN handoff",
+      "description": "As a maintainer, I want a closure report listing North Star still-OPEN items and recommending the next functional stage theme, so pipeline Discovery can spawn P131+ without re-auditing P122-P129.",
+      "acceptanceCriteria": [
+        "List Wave 2-4 achievements, ordinary origins >=3 expansion, section 6 replay proxy, section 8 CLEAR checklist as still OPEN (PRD US-005)",
+        "Recommend one highest-priority functional follow-up theme other than immediate second ordinary-origin visible-growth sample, with evidence pointers only",
+        "Explicit non-recommendation: farm/apprentice parallel samples and scholar third sample",
+        "Save as docs/test-reports/p130-visible-growth-wave-closure-report.md",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Handoff for next Discovery spawn; does not implement recommended theme."
+    }
+  ]
+}

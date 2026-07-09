@@ -47,7 +47,7 @@
         "Artifacts sufficient for A1-verify doc-only pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Consolidates P123-P125 which lack standalone closure reports. References only; no respawn."
     },
     {

@@ -59,7 +59,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-003 and FR-4. This is the minimum reclassification at the explanation layer."
     },
     {

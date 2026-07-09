@@ -99,7 +99,7 @@ console.log('=== Main Screen Model Tests ===\n');
     model.coreStats.find((item) => item.key === 'martialPower')?.description === '武学总读数',
     'martialPower should read as overall martial readout on first screen',
   );
-  assert(model.fullStatGroups.length === 4, 'full stats should be grouped into four sections');
+  assert(model.fullStatGroups.length === 5, 'full stats should be grouped into five sections after survival split');
   console.log('✓ builds default route/risk/tendency/core groups');
 }
 
@@ -115,8 +115,14 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(!coreLabels.includes('体魄'), 'constitution should not double-amplify on first-screen coreStats');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    combatLabels.join(',') === '功力·总读数,外功,内功,轻功,体魄',
-    'full stats combat group should still expose all martial sub-stats with martialPower as total readout',
+    combatLabels.join(',') === '功力·总读数,外功,内功,轻功',
+    'combat group should expose martial total readout plus specialization stats only',
+  );
+  const survivalGroup = model.fullStatGroups.find((group) => group.id === 'survival');
+  assert(survivalGroup?.label === '生存底子', 'constitution should live in survival-base group');
+  assert(
+    survivalGroup?.items.find((item) => item.key === 'constitution')?.description?.includes('承伤耐受'),
+    'constitution in full panel should read as survival foundation',
   );
   assert(
     combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),

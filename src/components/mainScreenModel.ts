@@ -330,7 +330,18 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
           valueOf(player, 'qinggong'),
           '轻功风格特长，侧重身法机动与脱身路数；是战力细分，不单独代表总读数。',
         ),
-        createStat('constitution', '体魄', valueOf(player, 'constitution'), '影响承伤、恢复与生存底子。'),
+      ],
+    },
+    {
+      id: 'survival',
+      label: '生存底子',
+      items: [
+        createStat(
+          'constitution',
+          '体魄',
+          valueOf(player, 'constitution'),
+          '承伤耐受、恢复续航与身体底子的综合读数；不是外功/内功/轻功那样的武学风格细分。',
+        ),
       ],
     },
     {

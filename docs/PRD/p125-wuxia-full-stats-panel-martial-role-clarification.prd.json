@@ -44,7 +44,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-002 and FR-3. Do not turn this into field removal or combat-system redesign."
     },
     {

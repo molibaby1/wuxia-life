@@ -122,6 +122,11 @@ console.log('=== Main Screen Model Tests ===\n');
     combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),
     'martialPower in full panel should read as overall martial readout',
   );
+  for (const key of ['externalSkill', 'internalSkill', 'qinggong'] as const) {
+    const description = combatGroup?.items.find((item) => item.key === key)?.description ?? '';
+    assert(description.includes('风格特长'), `${key} should read as specialization-style dimension`);
+    assert(description.includes('不单独代表总读数'), `${key} should not imply independent total-power readout`);
+  }
   assert(
     model.topResources.find((item) => item.key === 'constitution')?.description === '生存底子',
     'constitution in topResources should read as survival base',

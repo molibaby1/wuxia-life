@@ -27,6 +27,7 @@ function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
     currentYear: time.year,
     currentMonth: time.month,
     currentDay: time.day,
+    lifeStates: player?.lifeStates,
   };
 }
 

@@ -12,6 +12,7 @@ import type {
   PeriodSummaryDisplay,
 } from '../types/activeActionTypes';
 import type { LifeMemorySummary } from '../types/lifeMemory';
+import type { PlayerLifeStates } from '../types/eventTypes';
 
 /**
  * Authoritative session phase for client UI routing.
@@ -91,6 +92,8 @@ export interface PlayerSummaryDto {
   currentYear: number;
   currentMonth: number;
   currentDay: number;
+  /** Habit shaping axes for main-screen shapingSummary (P122 API mode). */
+  lifeStates?: PlayerLifeStates;
 }
 
 /**

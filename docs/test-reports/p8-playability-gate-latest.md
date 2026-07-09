@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-07-02T14:36:24.596Z
+Generated: 2026-07-09T03:26:57.949Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40
@@ -21,7 +21,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 林破竹 (p8-martial-lin)
 
 **Planning / Agency**
-- Active actions: 12; categories: {"training":12}
+- Active actions: 11; categories: {"training":11}
 - Sample selection: age 5 → action_childhood_yard_play (persona_strategy:training prefers training)
 
 **Causality**
@@ -30,10 +30,10 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 10岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [achieved] 打下武功根基 (0-20): martialPower=25 >= 25
-- [achieved] 坚持练功规划 (0-20): training actions=12
+- [missed] 打下武功根基 (0-20): martialPower=23 < 25
+- [achieved] 坚持练功规划 (0-20): training actions=11
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
-- [missed] 三十岁前功力达标 (30-40): martialPower=25 < 45
+- [missed] 三十岁前功力达标 (30-40): martialPower=23 < 45
 
 **Frustration**
 - Opaque setbacks: 0 / 2
@@ -119,7 +119,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 韩守拙 (p8-cautious-han)
 
 **Planning / Agency**
-- Active actions: 15; categories: {"training":14,"study":1}
+- Active actions: 13; categories: {"training":13}
 - Sample selection: age 5 → action_childhood_yard_play (persona_strategy:training prefers training; cautious_childhood_steady)
 
 **Causality**
@@ -128,7 +128,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 
 **Achievement**
 - [achieved] 保持健康 (0-20): health=105 >= 70
-- [achieved] 稳健练功 (0-20): training actions=14
+- [achieved] 稳健练功 (0-20): training actions=13
 - [achieved] 少遭重创 (20-30): no flag major_injury
 - [achieved] 四十岁稳定生存 (30-40): health=105 >= 60
 

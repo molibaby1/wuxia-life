@@ -1,6 +1,6 @@
 {
   "schemaVersion": "p8-v1",
-  "generatedAt": "2026-07-02T14:36:24.596Z",
+  "generatedAt": "2026-07-09T03:26:57.949Z",
   "runtimePath": "headless_server",
   "catalogVersion": "1.0.0",
   "engineVersion": "p8-headless-gate",
@@ -11,12 +11,12 @@
       "personaId": "p8-martial-lin",
       "personaName": "林破竹",
       "agency": {
-        "activeActionCount": 12,
-        "storyEventCount": 47,
-        "choiceEventCount": 25,
+        "activeActionCount": 11,
+        "storyEventCount": 50,
+        "choiceEventCount": 27,
         "forcedEventCount": 0,
         "activeActionByCategory": {
-          "training": 12
+          "training": 11
         },
         "repeatedSameActionStreakMax": 1,
         "repeatedStreakExamples": []
@@ -64,9 +64,9 @@
             "goalId": "lin-martial-base",
             "label": "打下武功根基",
             "ageBand": "0-20",
-            "status": "achieved",
+            "status": "missed",
             "evidence": [
-              "martialPower=25 >= 25"
+              "martialPower=23 < 25"
             ]
           },
           {
@@ -75,7 +75,7 @@
             "ageBand": "0-20",
             "status": "achieved",
             "evidence": [
-              "training actions=12"
+              "training actions=11"
             ]
           },
           {
@@ -93,12 +93,12 @@
             "ageBand": "30-40",
             "status": "missed",
             "evidence": [
-              "martialPower=25 < 45"
+              "martialPower=23 < 45"
             ]
           }
         ],
-        "achievedCount": 2,
-        "missedCount": 2,
+        "achievedCount": 1,
+        "missedCount": 3,
         "unavailableCount": 0
       },
       "frustration": {
@@ -265,6 +265,14 @@
           "personaId": "p8-martial-lin"
         },
         {
+          "eventId": "jianghu_myth_legend_on_ramp_entry",
+          "selectedChoiceId": "myth_embrace_guardian_pinnacle",
+          "selectedScore": 11.6,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-martial-lin"
+        },
+        {
           "eventId": "love_family_obstacle",
           "selectedChoiceId": "love_prove",
           "selectedScore": 16.8,
@@ -337,6 +345,14 @@
           "personaId": "p8-martial-lin"
         },
         {
+          "eventId": "jianghu_myth_legend_luck_window_echo",
+          "selectedChoiceId": "myth_luck_window_miss",
+          "selectedScore": 0,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-martial-lin"
+        },
+        {
           "eventId": "family_child_born",
           "selectedChoiceId": "child_born_simple",
           "selectedScore": -9,
@@ -393,11 +409,6 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 29,
-          "actionId": "action_training_basic",
-          "reason": "persona_strategy:training prefers training"
-        },
-        {
           "age": 30,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
@@ -408,7 +419,7 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 36,
+          "age": 35,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
         },
@@ -1279,13 +1290,12 @@
       "personaId": "p8-cautious-han",
       "personaName": "韩守拙",
       "agency": {
-        "activeActionCount": 15,
+        "activeActionCount": 13,
         "storyEventCount": 44,
-        "choiceEventCount": 22,
+        "choiceEventCount": 24,
         "forcedEventCount": 0,
         "activeActionByCategory": {
-          "training": 14,
-          "study": 1
+          "training": 13
         },
         "repeatedSameActionStreakMax": 1,
         "repeatedStreakExamples": []
@@ -1320,7 +1330,7 @@
             "ageBand": "0-20",
             "status": "achieved",
             "evidence": [
-              "training actions=14"
+              "training actions=13"
             ]
           },
           {
@@ -1388,13 +1398,13 @@
           },
           {
             "age": 22,
-            "kind": "story_event",
-            "text": "仕林初议"
+            "kind": "active_action",
+            "text": "主动练功"
           },
           {
             "age": 39,
             "kind": "active_action",
-            "text": "主动读书"
+            "text": "主动练功"
           },
           {
             "age": 1,
@@ -1532,6 +1542,14 @@
           "personaId": "p8-cautious-han"
         },
         {
+          "eventId": "jianghu_myth_legend_on_ramp_entry",
+          "selectedChoiceId": "myth_embrace_guardian_pinnacle",
+          "selectedScore": 4,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-cautious-han"
+        },
+        {
           "eventId": "love_family_obstacle",
           "selectedChoiceId": "love_prove",
           "selectedScore": 4,
@@ -1556,6 +1574,14 @@
           "personaId": "p8-cautious-han"
         },
         {
+          "eventId": "jianghu_myth_legend_luck_window_echo",
+          "selectedChoiceId": "myth_luck_window_miss",
+          "selectedScore": 0,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-cautious-han"
+        },
+        {
           "eventId": "family_child_born",
           "selectedChoiceId": "child_born_simple",
           "selectedScore": -14,
@@ -1564,11 +1590,11 @@
           "personaId": "p8-cautious-han"
         },
         {
-          "eventId": "love_rival_appears",
-          "selectedChoiceId": "love_duel",
-          "selectedScore": 3,
-          "runnerUpChoiceId": "love_clumsy_mediation",
-          "runnerUpScore": 2,
+          "eventId": "grudge_and_affection",
+          "selectedChoiceId": "avoid_conflict",
+          "selectedScore": 8,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
           "personaId": "p8-cautious-han"
         },
         {
@@ -1620,12 +1646,7 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 26,
-          "actionId": "action_training_basic",
-          "reason": "persona_strategy:training prefers training"
-        },
-        {
-          "age": 27,
+          "age": 28,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
         },
@@ -1645,11 +1666,6 @@
           "reason": "persona_strategy:training prefers training"
         },
         {
-          "age": 35,
-          "actionId": "action_training_basic",
-          "reason": "persona_strategy:training prefers training"
-        },
-        {
           "age": 36,
           "actionId": "action_training_basic",
           "reason": "persona_strategy:training prefers training"
@@ -1661,8 +1677,8 @@
         },
         {
           "age": 39,
-          "actionId": "action_study_basic",
-          "reason": "persona_strategy:training prefers study; broke_focus_streak:4"
+          "actionId": "action_training_basic",
+          "reason": "persona_strategy:training prefers training"
         }
       ]
     },
@@ -2446,37 +2462,37 @@
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-scholar-su",
-        "score": 0.5670002965105855
+        "score": 0.5879439786059273
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-social-gu",
-        "score": 0.444314759996052
+        "score": 0.4608609822938007
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-wealth-shen",
-        "score": 0.4740772355323018
+        "score": 0.4915886246346988
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-cautious-han",
-        "score": 0.7903288007075243
+        "score": 0.7776181399619513
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-deviant-ye",
-        "score": 0.7565139377259337
+        "score": 0.7644259243992719
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-explorer-lu",
-        "score": 0.46831308828259577
+        "score": 0.4855044331373234
       },
       {
         "personaA": "p8-martial-lin",
         "personaB": "p8-balanced-wei",
-        "score": 0.34915271781009477
+        "score": 0.36200991385099424
       },
       {
         "personaA": "p8-scholar-su",
@@ -2491,7 +2507,7 @@
       {
         "personaA": "p8-scholar-su",
         "personaB": "p8-cautious-han",
-        "score": 0.4101410772174358
+        "score": 0.39356216037166414
       },
       {
         "personaA": "p8-scholar-su",
@@ -2516,7 +2532,7 @@
       {
         "personaA": "p8-social-gu",
         "personaB": "p8-cautious-han",
-        "score": 0.44723752008514456
+        "score": 0.4581828342147149
       },
       {
         "personaA": "p8-social-gu",
@@ -2536,7 +2552,7 @@
       {
         "personaA": "p8-wealth-shen",
         "personaB": "p8-cautious-han",
-        "score": 0.5719253214219774
+        "score": 0.5887345057634772
       },
       {
         "personaA": "p8-wealth-shen",
@@ -2556,17 +2572,17 @@
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-deviant-ye",
-        "score": 0.8739351190371839
+        "score": 0.8746336954578542
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-explorer-lu",
-        "score": 0.5739248848918266
+        "score": 0.5906652861838791
       },
       {
         "personaA": "p8-cautious-han",
         "personaB": "p8-balanced-wei",
-        "score": 0.6606239710830757
+        "score": 0.6800469830037855
       },
       {
         "personaA": "p8-deviant-ye",

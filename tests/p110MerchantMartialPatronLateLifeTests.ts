@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
@@ -245,39 +244,7 @@ function testSpineOrdering(): void {
   assert((payoffEvent?.ageRange?.max ?? 0) <= (branchAEvent?.ageRange?.min ?? 99), 'R22: payoff age before late-life');
 }
 
-// Group 5: Prior stage regression (R23–R30)
-
-function testP102Regression(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP103Regression(): void {
-  execSync('npm exec tsx tests/p103MerchantMartialPatronBridgeOriginTests.ts', { stdio: 'pipe' });
-}
-
-function testP104Regression(): void {
-  execSync('npm exec tsx tests/p104MerchantMartialPatronBridgeOriginPeasantTests.ts', { stdio: 'pipe' });
-}
-
-function testP106Regression(): void {
-  execSync('npm exec tsx tests/p106MerchantMartialPatronPressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP108Regression(): void {
-  execSync('npm exec tsx tests/p108MerchantMartialPatronPayoffTests.ts', { stdio: 'pipe' });
-}
-
-function testP100MagnateRegression(): void {
-  execSync('npm exec tsx tests/p100MerchantMagnateNativeEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testP101MagnateRegression(): void {
-  execSync('npm exec tsx tests/p101MerchantMagnateBridgeOriginEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testSampleLinesBaselineGuard(): void {
-  execSync('npm run guard:sample-lines-baseline', { stdio: 'pipe' });
-}
+// Group 4 ends at spine ordering — cross-route regression: npm run test:sample-lines-routes
 
 function writeTargetedProof(): void {
   const lines = [
@@ -334,11 +301,9 @@ function writeTargetedProof(): void {
     '',
     '- `merchant_patron_endgame_echo_done` not set by late-life (reserved P111+)',
     '',
-    '## Regression',
+    '## Cross-route regression',
     '',
-    '- P102–P108 patron tests pass',
-    '- P100/P101 magnate tests pass',
-    '- `guard:sample-lines-baseline` pass',
+    '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
     join(process.cwd(), 'docs/test-reports/p110-merchant-martial-patron-late-life-targeted-proof.md'),
@@ -358,7 +323,7 @@ function writeClosureReport(): void {
     '',
     'P110 delivers runtime late-life for `merchant_martial_patron`: 3 auto branch events keyed on payoff choice, expression updates (cost label / goal / identity), targeted proof, and regression tests.',
     '',
-    '## Closure criteria (12/12)',
+    '## Closure criteria (10/10 stage-local)',
     '',
     '| # | Criterion | Status | Evidence |',
     '| - | --------- | ------ | -------- |',
@@ -369,11 +334,9 @@ function writeClosureReport(): void {
     '| C5 | Current goal per branch | ✅ | R14, R16, R18 tests |',
     '| C6 | Identity updates | ✅ | R19, R20 tests |',
     '| C7 | 商武一体 flavor | ✅ | 账房/演武场/盟约/刀 in narrative + expression |',
-    '| C8 | No P102–P108 regressions | ✅ | R23–R27 |',
-    '| C9 | No magnate regressions | ✅ | R28 |',
-    '| C10 | Typecheck passes | ✅ | npm run typecheck |',
-    '| C11 | Guard sample-lines-baseline | ✅ | R29 |',
-    '| C12 | Endgame interfaces reserved | ✅ | R10 — no `endgame_echo_done` |',
+    '| C8 | Cross-route regression | ✅ | `npm run test:sample-lines-routes` |',
+    '| C9 | Typecheck passes | ✅ | npm run typecheck |',
+    '| C10 | Endgame interfaces reserved | ✅ | R10 — no `endgame_echo_done` |',
     '',
     '## What patron late-life now provides',
     '',
@@ -427,17 +390,6 @@ console.log('  ✓ R13–R20 pass\n');
 console.log('Group 4: Spine ordering');
 testSpineOrdering();
 console.log('  ✓ R21–R22 pass\n');
-
-console.log('Group 5: Prior stage regression');
-testP102Regression();
-testP103Regression();
-testP104Regression();
-testP106Regression();
-testP108Regression();
-testP100MagnateRegression();
-testP101MagnateRegression();
-testSampleLinesBaselineGuard();
-console.log('  ✓ R23–R29 pass\n');
 
 writeTargetedProof();
 writeClosureReport();

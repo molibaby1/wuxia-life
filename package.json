@@ -15,6 +15,7 @@
     "test:contracts:save-schema": "tsx tests/contracts/saveSchemaContract.test.ts",
     "test:headless": "tsx tests/headless/runHeadlessTests.ts",
     "test:headless:parity": "tsx tests/headless/paritySamples.test.ts",
+    "test:sample-lines-routes": "tsx scripts/runSampleLinesRouteRegression.ts",
     "gate:p5": "tsx scripts/runP5ExtractionGate.ts",
     "stability": "tsx scripts/runStabilityGate.ts",
     "validate:event-quality": "tsx scripts/validateEventQuality.ts",

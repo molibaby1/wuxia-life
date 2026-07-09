@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
@@ -204,35 +203,7 @@ function testSpineOrdering(): void {
   assert((pressureEvent?.ageRange?.max ?? 0) < (payoffEvent?.ageRange?.min ?? 99), 'R22: pressure age before payoff');
 }
 
-// Group 5: Prior stage regression (R23–R29)
-
-function testP102Regression(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP103Regression(): void {
-  execSync('npm exec tsx tests/p103MerchantMartialPatronBridgeOriginTests.ts', { stdio: 'pipe' });
-}
-
-function testP104Regression(): void {
-  execSync('npm exec tsx tests/p104MerchantMartialPatronBridgeOriginPeasantTests.ts', { stdio: 'pipe' });
-}
-
-function testP106Regression(): void {
-  execSync('npm exec tsx tests/p106MerchantMartialPatronPressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP100MagnateRegression(): void {
-  execSync('npm exec tsx tests/p100MerchantMagnateNativeEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testP101MagnateRegression(): void {
-  execSync('npm exec tsx tests/p101MerchantMagnateBridgeOriginEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testSampleLinesBaselineGuard(): void {
-  execSync('npm run guard:sample-lines-baseline', { stdio: 'pipe' });
-}
+// Cross-route regression: npm run test:sample-lines-routes
 
 function writeTargetedProof(): void {
   const lines = [
@@ -286,11 +257,9 @@ function writeTargetedProof(): void {
     '',
     '- `merchant_patron_late_life_done` not set by payoff (reserved P109+)',
     '',
-    '## Regression',
+    '## Cross-route regression',
     '',
-    '- P102–P106 tests pass',
-    '- P100/P101 magnate tests pass',
-    '- `guard:sample-lines-baseline` pass',
+    '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   const outPath = join(process.cwd(), 'docs/test-reports/p108-merchant-martial-patron-payoff-targeted-proof.md');
   writeFileSync(outPath, lines.join('\n') + '\n', 'utf8');
@@ -312,13 +281,6 @@ const tests: Array<[string, () => void]> = [
   ['R15-R16 payoff B expression', testPayoffBExpression],
   ['R17-R18-R20 payoff C expression', testPayoffCExpression],
   ['R21-R22 spine ordering', testSpineOrdering],
-  ['R23 p102 regression', testP102Regression],
-  ['R24 p103 regression', testP103Regression],
-  ['R25 p104 regression', testP104Regression],
-  ['R26 p106 regression', testP106Regression],
-  ['R27 p100 magnate regression', testP100MagnateRegression],
-  ['R28 p101 magnate regression', testP101MagnateRegression],
-  ['R29 sample-lines baseline guard', testSampleLinesBaselineGuard],
 ];
 
 for (const [name, fn] of tests) {

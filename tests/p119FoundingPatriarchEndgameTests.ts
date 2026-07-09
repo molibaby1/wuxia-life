@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
@@ -247,47 +246,7 @@ function testSpineOrdering(): void {
   assert((lateLifeAEvent?.ageRange?.max ?? 0) <= (branchAEvent?.ageRange?.min ?? 99), 'R22: late-life age before endgame');
 }
 
-// Prior stage regression (R23–R29)
-
-function testP113Regression(): void {
-  execSync('npm exec tsx tests/p113FoundingPatriarchBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP115Regression(): void {
-  execSync('npm exec tsx tests/p115FoundingPatriarchMidlifePressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP117Regression(): void {
-  execSync('npm exec tsx tests/p117FoundingPatriarchLateLifeTests.ts', { stdio: 'pipe' });
-}
-
-function testP37Regression(): void {
-  execSync('npm exec tsx tests/p37AdditionalMixedPinnacleParityTests.ts', { stdio: 'pipe' });
-}
-
-function testP102Regression(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP106Regression(): void {
-  execSync('npm exec tsx tests/p106MerchantMartialPatronPressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP108Regression(): void {
-  execSync('npm exec tsx tests/p108MerchantMartialPatronPayoffTests.ts', { stdio: 'pipe' });
-}
-
-function testP110Regression(): void {
-  execSync('npm exec tsx tests/p110MerchantMartialPatronLateLifeTests.ts', { stdio: 'pipe' });
-}
-
-function testP112Regression(): void {
-  execSync('npm exec tsx tests/p112MerchantMartialPatronEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testSampleLinesBaselineGuard(): void {
-  execSync('npm run guard:sample-lines-baseline', { stdio: 'pipe' });
-}
+// Cross-route regression: npm run test:sample-lines-routes
 
 function writeTargetedProof(): void {
   const scholarPre = patriarchState({ player: { age: 58 } as PlayerState });
@@ -361,14 +320,9 @@ function writeTargetedProof(): void {
     '- No stat_modify in endgame autoEffects',
     '- `founding_patriarch_late_life_done` preserved (not unset)',
     '',
-    '## Regression',
+    '## Cross-route regression',
     '',
-    '- `tests/p119FoundingPatriarchEndgameTests.ts` — R1–R29',
-    '- `tests/p113FoundingPatriarchBridgeTests.ts` — P113',
-    '- `tests/p115FoundingPatriarchMidlifePressureTests.ts` — P115',
-    '- `tests/p117FoundingPatriarchLateLifeTests.ts` — P117',
-    '- P102–P112 patron tests pass',
-    '- `guard:sample-lines-baseline` pass',
+    '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
     join(process.cwd(), 'docs/test-reports/p119-founding-patriarch-endgame-targeted-proof.md'),
@@ -393,16 +347,6 @@ const tests: Array<[string, () => void]> = [
   ['R14 endgame A cost', testEndgameAExpression],
   ['R16 endgame B cost/goal', testEndgameBExpression],
   ['R21 spine ordering', testSpineOrdering],
-  ['R23 P113 regression', testP113Regression],
-  ['R24 P115 regression', testP115Regression],
-  ['R25 P117 regression', testP117Regression],
-  ['R26 P37 regression', testP37Regression],
-  ['R27 P102 regression', testP102Regression],
-  ['R28 P106 regression', testP106Regression],
-  ['R29 P108 regression', testP108Regression],
-  ['R29 P110 regression', testP110Regression],
-  ['R29 P112 regression', testP112Regression],
-  ['R28 sample-lines-baseline', testSampleLinesBaselineGuard],
 ];
 
 let passed = 0;

@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
@@ -246,39 +245,7 @@ function testLateLifeBranchMatchesPressure(): void {
   }
 }
 
-// Prior stage regression (R22–R30)
-
-function testP113Regression(): void {
-  execSync('npm exec tsx tests/p113FoundingPatriarchBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP115Regression(): void {
-  execSync('npm exec tsx tests/p115FoundingPatriarchMidlifePressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP37Regression(): void {
-  execSync('npm exec tsx tests/p37AdditionalMixedPinnacleParityTests.ts', { stdio: 'pipe' });
-}
-
-function testP102Regression(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP106Regression(): void {
-  execSync('npm exec tsx tests/p106MerchantMartialPatronPressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP108Regression(): void {
-  execSync('npm exec tsx tests/p108MerchantMartialPatronPayoffTests.ts', { stdio: 'pipe' });
-}
-
-function testP110Regression(): void {
-  execSync('npm exec tsx tests/p110MerchantMartialPatronLateLifeTests.ts', { stdio: 'pipe' });
-}
-
-function testSampleLinesBaselineGuard(): void {
-  execSync('npm run guard:sample-lines-baseline', { stdio: 'pipe' });
-}
+// Cross-route regression: npm run test:sample-lines-routes
 
 function writeTargetedProof(): void {
   const scholarPre = patriarchState({ player: { age: 50 } as PlayerState });
@@ -349,12 +316,9 @@ function writeTargetedProof(): void {
     '- Late-life events do **not** set `founding_patriarch_endgame_echo_done`',
     '- Pressure markers preserved after late-life (not cleared)',
     '',
-    '## Regression',
+    '## Cross-route regression',
     '',
-    '- `tests/p117FoundingPatriarchLateLifeTests.ts` — R1–R30',
-    '- `tests/p113FoundingPatriarchBridgeTests.ts` — P113',
-    '- `tests/p115FoundingPatriarchMidlifePressureTests.ts` — P115',
-    '- `guard:sample-lines-baseline` pass',
+    '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
     join(process.cwd(), 'docs/test-reports/p117-founding-patriarch-late-life-targeted-proof.md'),
@@ -379,14 +343,6 @@ const tests: Array<[string, () => void]> = [
   ['R15 late-life B cost/goal', testLateLifeBExpression],
   ['R19 spine ordering', testSpineOrdering],
   ['R21 branch matches pressure', testLateLifeBranchMatchesPressure],
-  ['R22 P113 regression', testP113Regression],
-  ['R23 P115 regression', testP115Regression],
-  ['R24 P37 regression', testP37Regression],
-  ['R25 P102 regression', testP102Regression],
-  ['R26 P106 regression', testP106Regression],
-  ['R27 P108 regression', testP108Regression],
-  ['R28 P110 regression', testP110Regression],
-  ['R29 sample-lines-baseline', testSampleLinesBaselineGuard],
 ];
 
 let passed = 0;

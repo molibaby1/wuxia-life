@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import {
   deriveSampleLineCostLabel,
@@ -231,29 +230,7 @@ function testPatronPressureGoalDistinctFromRenown(): void {
   assert(patronGoal !== renownGoal, 'patron pressure goal should differ from renown');
 }
 
-// Group 5: No regression P102-P104 (3 tests)
-
-function testP102RegressionPasses(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP103RegressionPasses(): void {
-  execSync('npm exec tsx tests/p103MerchantMartialPatronBridgeOriginTests.ts', { stdio: 'pipe' });
-}
-
-function testP104RegressionPasses(): void {
-  execSync('npm exec tsx tests/p104MerchantMartialPatronBridgeOriginPeasantTests.ts', { stdio: 'pipe' });
-}
-
-// Group 6: No regression P97-P101 magnate (2 tests)
-
-function testP100MagnateRegressionPasses(): void {
-  execSync('npm exec tsx tests/p100MerchantMagnateNativeEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testP101MagnateRegressionPasses(): void {
-  execSync('npm exec tsx tests/p101MerchantMagnateBridgeOriginEndgameTests.ts', { stdio: 'pipe' });
-}
+// Cross-route regression: npm run test:sample-lines-routes
 
 function testPayoffGateRequiresPressure(): void {
   const evaluator = new ConditionEvaluator();
@@ -286,12 +263,7 @@ const tests: Array<[string, () => void]> = [
   ['R14 payoff wins over pressure expression', testPostPressurePayoffStillWinsOverPressure],
   ['R15 patron cost distinct from magnate', testPatronPressureCostDistinctFromMagnate],
   ['R16 patron goal distinct from renown', testPatronPressureGoalDistinctFromRenown],
-  ['R17 p102 regression', testP102RegressionPasses],
-  ['R18 p103 regression', testP103RegressionPasses],
-  ['R19 p104 regression', testP104RegressionPasses],
-  ['R20 p100 magnate regression', testP100MagnateRegressionPasses],
-  ['R21 p101 magnate regression', testP101MagnateRegressionPasses],
-  ['R22 payoff gate requires pressure', testPayoffGateRequiresPressure],
+  ['R17 payoff gate requires pressure', testPayoffGateRequiresPressure],
 ];
 
 for (const [name, fn] of tests) {

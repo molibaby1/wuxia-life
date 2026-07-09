@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
@@ -279,43 +278,7 @@ function testSpineOrdering(): void {
   assert((lateLifeAEvent?.ageRange?.max ?? 0) <= (branchAEvent?.ageRange?.min ?? 99), 'R23: late-life age before endgame');
 }
 
-// Group 5: Prior stage regression (R24–R31)
-
-function testP102Regression(): void {
-  execSync('npm exec tsx tests/p102MerchantMartialPatronBridgeTests.ts', { stdio: 'pipe' });
-}
-
-function testP103Regression(): void {
-  execSync('npm exec tsx tests/p103MerchantMartialPatronBridgeOriginTests.ts', { stdio: 'pipe' });
-}
-
-function testP104Regression(): void {
-  execSync('npm exec tsx tests/p104MerchantMartialPatronBridgeOriginPeasantTests.ts', { stdio: 'pipe' });
-}
-
-function testP106Regression(): void {
-  execSync('npm exec tsx tests/p106MerchantMartialPatronPressureTests.ts', { stdio: 'pipe' });
-}
-
-function testP108Regression(): void {
-  execSync('npm exec tsx tests/p108MerchantMartialPatronPayoffTests.ts', { stdio: 'pipe' });
-}
-
-function testP110Regression(): void {
-  execSync('npm exec tsx tests/p110MerchantMartialPatronLateLifeTests.ts', { stdio: 'pipe' });
-}
-
-function testP100MagnateRegression(): void {
-  execSync('npm exec tsx tests/p100MerchantMagnateNativeEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testP101MagnateRegression(): void {
-  execSync('npm exec tsx tests/p101MerchantMagnateBridgeOriginEndgameTests.ts', { stdio: 'pipe' });
-}
-
-function testSampleLinesBaselineGuard(): void {
-  execSync('npm run guard:sample-lines-baseline', { stdio: 'pipe' });
-}
+// Cross-route regression: npm run test:sample-lines-routes
 
 function writeTargetedProof(): void {
   const lines = [
@@ -377,11 +340,9 @@ function writeTargetedProof(): void {
     '- No stat_modify in endgame autoEffects',
     '- `merchant_patron_late_life_done` preserved (not unset)',
     '',
-    '## Regression',
+    '## Cross-route regression',
     '',
-    '- P102–P110 patron tests pass',
-    '- P100/P101 magnate tests pass',
-    '- `guard:sample-lines-baseline` pass',
+    '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
     join(process.cwd(), 'docs/test-reports/p112-merchant-martial-patron-endgame-targeted-proof.md'),
@@ -407,15 +368,6 @@ const tests: Array<[string, () => void]> = [
   ['R18 endgame C cost/goal/identity', testEndgameCExpression],
   ['magnate wins over patron endgame', testMagnateWinsOverPatronEndgame],
   ['R22-R23 spine ordering', testSpineOrdering],
-  ['R24 p102 regression', testP102Regression],
-  ['R25 p103 regression', testP103Regression],
-  ['R26 p104 regression', testP104Regression],
-  ['R27 p106 regression', testP106Regression],
-  ['R28 p108 regression', testP108Regression],
-  ['R29 p110 regression', testP110Regression],
-  ['R30 p100 magnate regression', testP100MagnateRegression],
-  ['R30 p101 magnate regression', testP101MagnateRegression],
-  ['R31 sample-lines baseline', testSampleLinesBaselineGuard],
 ];
 
 console.log('=== P112 Merchant Martial Patron Endgame Tests ===\n');

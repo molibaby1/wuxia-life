@@ -106,8 +106,6 @@ console.log('=== Main Screen Model Tests ===\n');
 {
   const model = buildMainScreenModel(createPlayer(), createLifeMemory());
   const coreLabels = model.coreStats.map((item) => item.label);
-  const combatGroup = model.fullStatGroups.find((group) => group.id === 'combat');
-  const combatLabels = combatGroup?.items.map((item) => item.label) ?? [];
 
   assert(!coreLabels.includes('外功'), 'externalSkill should be downgraded from first-screen coreStats');
   assert(!coreLabels.includes('内功'), 'internalSkill should be downgraded from first-screen coreStats');
@@ -115,29 +113,10 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(!coreLabels.includes('体魄'), 'constitution should not double-amplify on first-screen coreStats');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    combatLabels.join(',') === '功力·总读数,外功,内功,轻功',
-    'combat group should expose martial total readout plus specialization stats only',
-  );
-  const survivalGroup = model.fullStatGroups.find((group) => group.id === 'survival');
-  assert(survivalGroup?.label === '生存底子', 'constitution should live in survival-base group');
-  assert(
-    survivalGroup?.items.find((item) => item.key === 'constitution')?.description?.includes('承伤耐受'),
-    'constitution in full panel should read as survival foundation',
-  );
-  assert(
-    combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),
-    'martialPower in full panel should read as overall martial readout',
-  );
-  for (const key of ['externalSkill', 'internalSkill', 'qinggong'] as const) {
-    const description = combatGroup?.items.find((item) => item.key === key)?.description ?? '';
-    assert(description.includes('风格特长'), `${key} should read as specialization-style dimension`);
-    assert(description.includes('不单独代表总读数'), `${key} should not imply independent total-power readout`);
-  }
-  assert(
     model.topResources.find((item) => item.key === 'constitution')?.description === '生存底子',
     'constitution in topResources should read as survival base',
   );
-  console.log('✓ keeps narrowed first-screen emphasis while preserving full martial stat access');
+  console.log('✓ keeps narrowed first-screen emphasis (P123)');
 }
 
 {

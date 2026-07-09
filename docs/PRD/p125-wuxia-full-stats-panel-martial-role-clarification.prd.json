@@ -29,7 +29,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Implements PRD US-001 and FR-2. Keep this to explanation-layer work only."
     },
     {

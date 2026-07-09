@@ -115,8 +115,12 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(!coreLabels.includes('体魄'), 'constitution should not double-amplify on first-screen coreStats');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    combatLabels.join(',') === '功力,外功,内功,轻功,体魄',
-    'full stats combat group should still expose all martial sub-stats',
+    combatLabels.join(',') === '功力·总读数,外功,内功,轻功,体魄',
+    'full stats combat group should still expose all martial sub-stats with martialPower as total readout',
+  );
+  assert(
+    combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),
+    'martialPower in full panel should read as overall martial readout',
   );
   assert(
     model.topResources.find((item) => item.key === 'constitution')?.description === '生存底子',

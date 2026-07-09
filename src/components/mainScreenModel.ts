@@ -304,9 +304,14 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
   return [
     {
       id: 'combat',
-      label: '战斗',
+      label: '武学',
       items: [
-        createStat('martialPower', '功力', valueOf(player, 'martialPower'), '决定武学根基与整体战力。'),
+        createStat(
+          'martialPower',
+          '功力·总读数',
+          valueOf(player, 'martialPower'),
+          '综合武学总读数，概括你当前整体战力；外功、内功、轻功是风格细分，不等于总读数本身。',
+        ),
         createStat('externalSkill', '外功', valueOf(player, 'externalSkill'), '偏向招式爆发与外门硬功。'),
         createStat('internalSkill', '内功', valueOf(player, 'internalSkill'), '偏向气息、续航与心法修为。'),
         createStat('qinggong', '轻功', valueOf(player, 'qinggong'), '影响身法、追击与脱身能力。'),

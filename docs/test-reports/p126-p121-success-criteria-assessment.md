@@ -116,7 +116,7 @@ Discovery pass on P121 umbrella may output:
 end_state_status: CLEAR
 ```
 
-Subject to P126-004 closure report final sign-off.
+P126-004 closure report signed off (2026-07-09).
 
 ---
 

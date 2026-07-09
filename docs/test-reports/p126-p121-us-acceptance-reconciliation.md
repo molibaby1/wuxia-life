@@ -63,9 +63,9 @@ Map each P121 US-001~004 acceptance criterion to delivered stage evidence (P122,
 | 1 | 不新增技能系统、熟练度树、专精树、第二成长面板 | P122–P125 | 各 stage PRD §Non-Goals; P122 scope guards | **Met** | 无新系统 noun |
 | 2 | 新字段/表达须直接服务成长可感知性 | P122–P125 | P122 habit wiring; P123–P125 仅展示层 | **Met** | 全部映射三目标之一 |
 | 3 | 任一改动映射回三项目标之一 | P122–P125 | P121 §4 delivery mapping; 各 prd.json scope-lock stories | **Met** | 成长显性 / 商贾青春期 / 武功主显 |
-| 4 | 文档列出 defer 项防范围扩散 | P121 §8, P126 | `docs/PRD/p126-...md` §8; closure report US-004 | **Partial** | P121 §8 已有；P126 US-004 将 consolidated defer 写入 closure report |
+| 4 | 文档列出 defer 项防范围扩散 | P121 §8, P126 | `docs/PRD/p126-wuxia-p121-experience-optimization-closure-reconciliation.md` §8; closure report §7 | **Met** | P121 §8 继承 + P126 closure report §7 consolidated defer queue 已写入 |
 
-**US-004 aggregate:** **Met** (4/4 effective; defer consolidation completes in P126-004)
+**US-004 aggregate:** **Met** (4/4)
 
 ---
 

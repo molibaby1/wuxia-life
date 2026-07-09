@@ -57,3 +57,12 @@ Period settlement reuses `buildShapingPeriodGrowthLine` via `periodSummaryDispla
 ## Code anchor
 
 Constants: `src/hvg/p129TavernSampleBaseline.ts`
+
+## Signal A verification (P129-002)
+
+Existing `buildCurrentShapingSummary` / `MainScreenLifeSummary` wiring confirmed:
+
+- `socialMomentum 0` → `塑形未成`
+- `socialMomentum >= 2` → `人情 · 渐成` (see `P129_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD`)
+- Copy expresses social shaping direction, not origin flavor (`你出身酒肆` etc.)
+- No new UI panel — reuse only

@@ -1,0 +1,103 @@
+{
+  "project": "Wuxia Life P129 Ordinary-Origin Early Visible Growth Sample",
+  "branchName": "codex/p129-wuxia-ordinary-origin-early-visible-growth-sample",
+  "description": "Single-sample follow-up to P128: extend early visible growth proof from vivid origins (merchant/martial) to one ordinary origin (tavern_hand) using socialMomentum on existing summary, feedback, settlement, and continuation surfaces. No multi-origin Wave 4 expansion, no scholar work, no new growth system.",
+  "userStories": [
+    {
+      "id": "P129-001",
+      "title": "Lock tavern_hand sample scope and habit axis directness",
+      "description": "As a maintainer, I want P129 scope locked to tavern_hand plus socialMomentum before implementation, so the stage does not sprawl into multi-origin Wave 4 expansion or indirect studyHabit chains.",
+      "acceptanceCriteria": [
+        "Fix sample origin to tavern_hand only; no farm_peasant or town_apprentice parallel work (PRD section 4 Out of Scope)",
+        "Fix shaping axis to socialMomentum only; verify direct path via p9_echo_social_hook mapping in ActivePlanningService (PRD section 3.2)",
+        "Primary action is action_socializing_lite; primary sample band ages 5-8; continuation band ages 8-13",
+        "Continuation targets limited to p9_echo_social_hook, p9_early_social_focus, ordinary_tavern_network_fork, and P28 socialMomentum events for readability only",
+        "Do not add new growth containers, panels, route families, or cross-origin template abstractions",
+        "Do not respawn P122, P127, or P128 closed work",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Scope lock first. Habit directness pre-verified in P128 discovery gaps report."
+    },
+    {
+      "id": "P129-002",
+      "title": "Show socialMomentum shaping confirmation on summary surfaces",
+      "description": "As a player on tavern_hand, I want the main screen to clearly show that repeated early socializing is shaping me, so ordinary childhood feels like growth instead of passive replay.",
+      "acceptanceCriteria": [
+        "On the tavern_hand 5-8 sample path, shapingSummary transitions from 塑形未成 to 人情 · 渐成 when socialMomentum threshold is met (PRD section 6 Signal A, US-002)",
+        "Confirmation text comes from existing socialMomentum/lifeStates wiring, not a new parallel growth system",
+        "Copy expresses social shaping direction rather than repeating origin flavor such as 你出身酒肆",
+        "Reuse existing MainScreenLifeSummary / shapingSummary surfaces only; no new UI panel",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Equivalent to P122/P127 summary-surface proof, but for socialMomentum on ordinary origin."
+    },
+    {
+      "id": "P129-003",
+      "title": "Show long-term impact after early socializing actions",
+      "description": "As a player, I want early socializing actions to leave visible long-term traces in the feedback area, so I can connect my behavior to social shaping.",
+      "acceptanceCriteria": [
+        "After sample early action_socializing_lite actions, feedback area shows at least one player-visible long-term impact confirmation (PRD section 6 Signal C, US-003)",
+        "Confirmation reads as this will continue to affect my life direction, not only charisma/connections stat deltas",
+        "Reuse existing long-term impact / flag display mechanism; no new feedback framework",
+        "Does not open a new branch at this step; causal visibility only",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Keep strictly player-visible and narrow."
+    },
+    {
+      "id": "P129-004",
+      "title": "Add period settlement social shaping summary",
+      "description": "As a player, I want age progression to tell me what social shaping line became clearer this period, so each age step feels like meaningful growth.",
+      "acceptanceCriteria": [
+        "At least one age progression / period settlement on the tavern_hand sample path summarizes shaping change via existing periodSummaryDisplay (PRD section 6 Signal B, US-004)",
+        "Settlement copy answers what kind of social person you are becoming this period, not only generic narrative or stat fragments",
+        "Summary correlates with prior socializing behavior, not passive age-based growth",
+        "Reuse the existing settlement surface; do not add an independent settlement system",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Settlement confirmation required; otherwise slice stays event-local."
+    },
+    {
+      "id": "P129-005",
+      "title": "Prove tavern childhood fork continuation readability",
+      "description": "As a maintainer, I want bounded proof that visible social shaping makes tavern childhood fork continuation easier to read, so P129 demonstrates reuse beyond the first confirmation moment.",
+      "acceptanceCriteria": [
+        "Produce bounded proof for tavern_hand ages 5-13 only",
+        "Evidence shows behavior -> socialMomentum accumulation -> visible confirmation -> ordinary_tavern_network_fork and/or P28 socialMomentum event becoming more readable as continuation",
+        "At least two different player-visible confirmation signals present across summary / feedback / settlement surfaces",
+        "Do not expand P59 merchant bridge, P71 renown bridge, or Wave 4 multi-origin midlife content in this stage",
+        "Save proof as docs/test-reports/p129-ordinary-origin-visible-growth-sample-proof.md",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Real stage goal: prove visible-growth pattern works on ordinary origin with direct socialMomentum axis."
+    },
+    {
+      "id": "P129-006",
+      "title": "Add narrow regression coverage for ordinary-origin visible growth",
+      "description": "As a maintainer, I want narrow automated tests guarding the tavern_hand visible-growth loop so future edits do not silently revert the player-facing confirmation pattern.",
+      "acceptanceCriteria": [
+        "Add or update a narrow test file covering the tavern_hand visible-growth loop (e.g. tests/p129OrdinaryOriginVisibleGrowthTests.ts)",
+        "Cover shapingSummary confirmation on the tavern_hand sample path",
+        "Cover long-term impact visibility after early socializing actions",
+        "Cover periodSummaryDisplay shaping summary tied to socializing behavior",
+        "Cover at least one continuation-readability check for ordinary_tavern_network_fork or P28 socialMomentum event",
+        "Include scope guards: tavern_hand only, socialMomentum only, no multi-origin expansion",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Reuse narrow test style from P122/P127. Do not build generic cross-origin framework."
+    }
+  ]
+}

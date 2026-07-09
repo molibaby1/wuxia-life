@@ -13,6 +13,25 @@
  * - `fullStatGroups` structure and descriptions (owned by P125)
  * - `tendencySummary` algorithm (owned by P124)
  * - event conditions, reward logic, underlying stat calculations
+ *
+ * ---
+ * P124 scope lock — tendencySummary rebalancing (summary ranking only).
+ *
+ * In scope:
+ * - `buildTendencySummary`: single-line growth tendency in MainScreenLifeSummary
+ *
+ * Allowed inputs (existing wiring only):
+ * - player stats on MainScreenPlayer (martial, mind, jianghu, livelihood fields)
+ * - `lifeMemory.routeStatus` (routeId, name, phase — route context, not routeSummary text)
+ * - `player.lifeStates` (habit axes for shaping-aligned boosts; not shapingSummary text)
+ *
+ * Verification samples (locked for P124 narrow tests):
+ * - Non-martial: routeId `merchant`, businessHabit >= 2, modest martial stats
+ * - Martial-dominant: martialPower >= 30 with clustered martial sub-stats
+ *
+ * Out of scope for P124 (do not modify):
+ * - `buildRouteSummary`, `buildShapingSummary`, `buildFullStatGroups`, `CORE_STATS`
+ * - attribute definitions, event conditions, reward logic, underlying stat calculations
  */
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';
@@ -66,6 +85,22 @@ export type MainScreenLifeStates = Pick<
   PlayerLifeStates,
   'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum' | 'familyBond'
 >;
+
+/** P124 locked non-martial verification sample — merchant route with shaping context. */
+export const P124_NON_MARTIAL_SAMPLE = {
+  routeId: 'merchant',
+  routeName: '商路',
+  routePhase: '路线进行中',
+  businessHabit: 2,
+} as const;
+
+/** P124 locked martial-dominant verification sample — clustered martial sub-stats. */
+export const P124_MARTIAL_DOMINANT_SAMPLE = {
+  martialPower: 35,
+  internalSkill: 34,
+  externalSkill: 33,
+  martialSpreadMax: 5,
+} as const;
 
 const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
   low: '低',

@@ -1,0 +1,83 @@
+{
+  "project": "Wuxia Life P124 Non-Martial Tendency Summary Rebalancing",
+  "branchName": "codex/p124-wuxia-non-martial-tendency-summary-rebalancing",
+  "description": "Summary-layer experience slice: rebalance tendencySummary so non-martial routes read like life directions instead of being repeatedly pulled back into combat by martial stat clustering.",
+  "userStories": [
+    {
+      "id": "P124-001",
+      "title": "Lock tendency summary input surfaces and sample states",
+      "description": "As a maintainer, I want the tendency summary inputs and sample route states locked before changing ranking logic, so the work stays inside existing route, shaping, and stat wiring.",
+      "acceptanceCriteria": [
+        "Document the current tendencySummary generation surface in buildTendencySummary within src/components/mainScreenModel.ts",
+        "Identify at least one non-martial sample context and one martial-dominant sample context for targeted verification",
+        "Confirm this stage only reads existing routeStatus, shapingSummary context, lifeStates, and existing player stats",
+        "Do not modify routeSummary, shapingSummary, full stats panel, or attribute definitions in this stage (PRD §4 Out of Scope, §7 Non-Goals)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PRD §3 Core Problem and §4 Scope. This story keeps P124 from leaking into P123 or P125."
+    },
+    {
+      "id": "P124-002",
+      "title": "Reduce repeated martial bucket dominance in tendency summary",
+      "description": "As a player on a non-martial path, I want tendencySummary to stop being captured by multiple martial sub-stats that all point to the same combat direction.",
+      "acceptanceCriteria": [
+        "tendencySummary reduces the chance that 2-3 martial candidates repeat the same martial signal in non-martial contexts",
+        "martialPower is treated as the primary overall martial readout when martial dominance truly applies, instead of allowing multiple sub-stats to crowd it",
+        "The change stays inside summary ranking or weighting logic and does not add a new tendency system",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Implements PRD US-001/US-002 and FR-1/FR-3. This is the minimum martial-duplication correction."
+    },
+    {
+      "id": "P124-003",
+      "title": "Prefer route and shaping context for non-martial summary reads",
+      "description": "As a player on a merchant or other non-martial route, I want tendencySummary to read my current life direction in context, so the summary cooperates with routeSummary and shapingSummary.",
+      "acceptanceCriteria": [
+        "In non-martial route contexts, tendencySummary can prioritize existing non-martial signals such as route, shaping, knowledge, connections, charisma, or comprehension when appropriate",
+        "Merchant-oriented sample states can surface non-martial direction instead of falling back to generic martial emphasis by default",
+        "tendencySummary does not contradict routeSummary or shapingSummary in obvious ways after the change",
+        "No new route score, profession score, or hidden summary-only container is introduced",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Implements PRD US-001/US-003 and FR-2/FR-4. Keep this limited to existing context signals."
+    },
+    {
+      "id": "P124-004",
+      "title": "Preserve martial readability for truly martial-dominant states",
+      "description": "As a martial-heavy player, I still want tendencySummary to read martial when combat genuinely is my main growth axis, so the rebalancing does not overcorrect.",
+      "acceptanceCriteria": [
+        "Martial-dominant sample states still produce a clear martial tendency summary",
+        "martialPower remains the preferred top-level combat readout when martial dominance is real",
+        "The summary does not become so route-driven that it hides actual martial-heavy progression",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Implements PRD US-002. This story exists to stop the non-martial fix from breaking martial readability."
+    },
+    {
+      "id": "P124-005",
+      "title": "Add narrow regression coverage for tendency summary rebalancing",
+      "description": "As a maintainer, I want targeted regression checks for both merchant and martial sample states, so future edits do not silently drag tendencySummary back into the old combat-heavy pattern.",
+      "acceptanceCriteria": [
+        "Add or update narrow tests for at least one non-martial sample state and one martial-dominant sample state",
+        "Regression verifies non-martial contexts can produce non-martial tendency summaries when appropriate",
+        "Regression verifies martial-dominant contexts still produce martial tendency summaries",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Implements PRD §9 Verification Standard. Reuse existing mainScreenModel-oriented tests rather than building a large new harness."
+    }
+  ]
+}

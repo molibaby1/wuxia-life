@@ -88,8 +88,8 @@ Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbac
 | Story | Artifact | Status |
 | --- | --- | --- |
 | P130-001 | This scope contract | ✅ |
-| P130-002 | `p130-visible-growth-three-sample-reconciliation.md` | Pending |
-| P130-003 | Defer queue section (reconciliation §7) | Pending |
+| P130-002 | `p130-visible-growth-three-sample-reconciliation.md` | ✅ |
+| P130-003 | Defer queue section (reconciliation §7) | ✅ |
 | P130-004 | `p130-ordinary-origin-parallel-sample-defer-rationale.md` | Pending |
 | P130-005 | `p130-visible-growth-wave-closure-report.md` | Pending |
 

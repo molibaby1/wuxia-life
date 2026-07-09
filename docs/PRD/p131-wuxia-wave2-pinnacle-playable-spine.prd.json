@@ -59,7 +59,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Player-visible Wave 2 differentiation."
     },
     {
@@ -74,7 +74,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Repo-proven spine chain."
     },
     {
@@ -88,7 +88,7 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Regression guard for dual-gate semantics."
     },
     {

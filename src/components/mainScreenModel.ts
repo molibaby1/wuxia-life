@@ -32,6 +32,25 @@
  * Out of scope for P124 (do not modify):
  * - `buildRouteSummary`, `buildShapingSummary`, `buildFullStatGroups`, `CORE_STATS`
  * - attribute definitions, event conditions, reward logic, underlying stat calculations
+ *
+ * ---
+ * P125 scope lock — full stats panel explanation layer (wording/grouping only).
+ *
+ * Surfaces:
+ * - `buildFullStatGroups`: group labels, item order, per-stat descriptions (MainScreenStatsPanel expanded view)
+ * - `MainScreenStatsPanel.vue`: renders `groups` prop — tab row + detail list; no stat semantics here
+ *
+ * Baseline combat group (pre-P125):
+ * - group id `combat`, label `战斗`
+ * - items: martialPower, externalSkill, internalSkill, qinggong, constitution (all five retained)
+ *
+ * In scope for P125:
+ * - combat-group label, item ordering, description copy for martial/survival role clarification
+ * - optional regrouping of constitution away from pure martial-specialization framing
+ *
+ * Out of scope for P125 (do not modify):
+ * - `CORE_STATS`, `topResources`, `buildTendencySummary`, event logic, attribute calculations
+ * - field removal, value formulas, tendencySummary algorithm (P123/P124)
  */
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';

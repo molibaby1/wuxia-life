@@ -51,6 +51,14 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * P125 scope lock — full stats panel presentation shell only.
+ *
+ * Surfaces: expanded `full-stats-panel` (tab row + detail list with label/value/description).
+ * Stat semantics (grouping, ordering, descriptions) live in `buildFullStatGroups` (mainScreenModel.ts).
+ *
+ * Out of scope for P125: coreStats grid, tendencySummary, event logic, attribute calculations.
+ */
 import { computed, ref } from 'vue';
 import type { MainScreenStatGroup, MainScreenStatItem } from './mainScreenModel';
 

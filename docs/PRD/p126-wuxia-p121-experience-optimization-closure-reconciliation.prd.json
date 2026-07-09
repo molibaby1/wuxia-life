@@ -63,7 +63,7 @@
         "Docs-only; no code changes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Final closure story. Pattern follows docs/test-reports/p120-closure-report.md."
     }
   ]

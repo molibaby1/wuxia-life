@@ -73,10 +73,10 @@ Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbac
 | Story | Artifact | Status |
 | --- | --- | --- |
 | P128-001 | This scope contract | ✅ |
-| P128-002 | `p128-visible-growth-two-sample-reconciliation.md` | Pending |
-| P128-003 | Defer queue section (reconciliation or sibling) | Pending |
-| P128-004 | `p128-scholar-visible-growth-defer-rationale.md` | Pending |
-| P128-005 | `p128-visible-growth-wave-closure-report.md` | Pending |
+| P128-002 | `p128-visible-growth-two-sample-reconciliation.md` | ✅ |
+| P128-003 | Defer queue section (reconciliation §7) | ✅ |
+| P128-004 | `p128-scholar-visible-growth-defer-rationale.md` | ✅ |
+| P128-005 | `p128-visible-growth-wave-closure-report.md` | ✅ |
 
 ---
 
@@ -89,4 +89,4 @@ Post-run validation (already PASS): `npx tsx tests/p122EarlyVisibleGrowthFeedbac
 | P122 / P127 referenced, not reopened | **Required** |
 | Scholar implementation explicitly deferred | **Required** |
 
-**Verdict:** Scope locked. Proceed to P128-002 reconciliation.
+**Verdict:** P128 complete — 5/5 deliverables delivered; two-sample wave closure reconciled.

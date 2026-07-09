@@ -32,7 +32,7 @@
         "Docs-only; no code changes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Primary umbrella closure assessment artifact. Default expectation: CLEAR if no blocking OPEN."
     },
     {

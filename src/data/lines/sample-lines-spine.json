@@ -3554,5 +3554,103 @@
         "stageSignals": ["founding_patriarch_endgame"]
       }
     }
+  },
+  {
+    "id": "jianghu_myth_legend_on_ramp_entry",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 17, "max": 22 },
+    "triggers": [{ "type": "age_reach", "value": 17 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('p16_guardian_oath') && (flags.has('route_orthodox') || flags.has('orthodox_trial_completed')) && !flags.has('jianghu_myth_legend_bridge_crossed') && !flags.has('founding_patriarch_bridge_crossed') && !flags.has('tavern_renown_bridge_crossed') && !flags.has('route_renown_committed') && !flags.has('tavern_medical_bridge_crossed') && !flags.has('route_medical_committed') && !flags.has('demonic_childhood_seed_done') && !flags.has('merchant_childhood_seed_done')"
+      }
+    ],
+    "content": {
+      "title": "护道誓成·神话初形",
+      "text": "入门试炼落幕，你立下护道之誓。\n\n师门长老说：守正护道只是起点，江湖里还有极少数人——不靠门派册封，不靠人情引荐——凭一次奇遇、一生执念，写成武林神话。\n\n你隐约感到，自己的路正在往那个方向收束。",
+      "description": "P131 武林神话 pinnacle on-ramp entry — guardian oath shaping confirmation"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "myth_embrace_guardian_pinnacle",
+        "text": "护道之誓既立，便往武林神话之路精进",
+        "effects": [
+          { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 2, "operator": "add" },
+          { "type": "flag_set", "target": "jianghu_myth_legend_bridge_crossed" },
+          { "type": "flag_set", "target": "jianghu_myth_legend_on_ramp_done" },
+          { "type": "flag_set", "target": "jianghu_myth_legend_on_ramp_guardian" },
+          { "type": "event_record", "target": "jianghu_myth_legend_on_ramp_entry" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p131", "orthodox", "jianghu_myth_legend", "pinnacle", "bridge", "entry", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["jianghu_myth_legend_on_ramp_entry"]
+      }
+    }
+  },
+  {
+    "id": "jianghu_myth_legend_luck_window_echo",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 20, "max": 26 },
+    "triggers": [{ "type": "age_reach", "value": 20 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('jianghu_myth_legend_on_ramp_done') && !flags.has('jianghu_myth_legend_luck_window_done') && (flags.has('p16_rare_master_encounter') || player.age >= 25)"
+      }
+    ],
+    "content": {
+      "title": "隐世线窗口",
+      "text": "二十岁后，江湖里关于「隐世高人」的传闻与你护道之路交叠。\n\n是遇还是不遇，这一线窗口不会等人——武林神话的双门槛，一半在誓，一半在天意。",
+      "description": "P131 武林神话 luck window echo — hidden_master hit/miss player-visible feedback"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "myth_luck_window_hit",
+        "text": "隐世高人已现，奇遇线已开——神话之路的运气门槛已过",
+        "condition": {
+          "type": "expression",
+          "expression": "flags.has('p16_rare_master_encounter')"
+        },
+        "effects": [
+          { "type": "flag_set", "target": "jianghu_myth_legend_luck_hit" },
+          { "type": "flag_set", "target": "jianghu_myth_legend_luck_window_done" },
+          { "type": "event_record", "target": "jianghu_myth_legend_luck_window_echo" }
+        ]
+      },
+      {
+        "id": "myth_luck_window_miss",
+        "text": "窗口已闭，未见高人——光靠苦练，填不满神话之路的运气缺口",
+        "condition": {
+          "type": "expression",
+          "expression": "!flags.has('p16_rare_master_encounter') && player.age >= 25"
+        },
+        "effects": [
+          { "type": "flag_set", "target": "jianghu_myth_legend_luck_miss" },
+          { "type": "flag_set", "target": "jianghu_myth_legend_luck_window_done" },
+          { "type": "event_record", "target": "jianghu_myth_legend_luck_window_echo" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["p131", "orthodox", "jianghu_myth_legend", "pinnacle", "luck", "mainline", "choice", "once"],
+      "narrativeScheduling": {
+        "stageSignals": ["jianghu_myth_legend_luck_window_echo"]
+      }
+    }
   }
 ]

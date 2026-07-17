@@ -6,16 +6,15 @@
 
 ```bash
 cd /Users/zhouyun/code/wuxia-life
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 ```
 
 ### 查看结果
 
-测试完成后，打开生成的 HTML 报告：
+测试完成后直接查看终端输出：
 
 ```bash
-# 最新报告路径（替换为实际生成的文件名）
-open scripts/life-simulator/reports/life-sim-report-*.html
+暂无统一 HTML 报告；需要专项报告时运行对应的 `report:*` 命令。
 ```
 
 或者在浏览器中访问报告中心：
@@ -31,7 +30,7 @@ http://localhost:5174/scripts/life-simulator/index-full.html
 ### 步骤 1️⃣: 运行测试
 
 ```bash
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 ```
 
 **预期输出**:
@@ -93,7 +92,7 @@ open scripts/life-simulator/reports/life-sim-report-最新时间戳.html
 
 ```bash
 # 快速运行所有测试
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 确认所有测试通过后开始开发
 ```
@@ -102,7 +101,7 @@ npx tsx scripts/run-all-tests.ts
 
 ```bash
 # 完成功能开发后
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 查看测试报告，确认没有破坏现有功能
 ```
@@ -111,12 +110,12 @@ npx tsx scripts/run-all-tests.ts
 
 ```bash
 # 优化前运行
-npx tsx scripts/run-all-tests.ts > before.txt
+npm run test:all > before.txt
 
 # 进行性能优化...
 
 # 优化后运行
-npx tsx scripts/run-all-tests.ts > after.txt
+npm run test:all > after.txt
 
 # 对比结果
 diff before.txt after.txt
@@ -126,10 +125,10 @@ diff before.txt after.txt
 
 ```bash
 # 只测试存档功能
-npx tsx tests/testPhase2Features.ts
+npm test
 
 # 只测试性能
-npx tsx tests/testPerformanceOptimization.ts
+npm run test:headless
 ```
 
 ---
@@ -181,7 +180,7 @@ npx tsx tests/testPerformanceOptimization.ts
 **解决**:
 ```bash
 # 使用 npx 运行
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 或全局安装
 npm install -g tsx
@@ -211,7 +210,7 @@ npm install
 
 ```bash
 # 运行完整测试
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 确认通过率 100%
 ```
@@ -220,7 +219,7 @@ npx tsx scripts/run-all-tests.ts
 
 ```bash
 # 生成每日测试报告
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 查看报告中心的历史记录
 ```
@@ -229,7 +228,7 @@ npx tsx scripts/run-all-tests.ts
 
 ```bash
 # 每周运行一次，记录性能数据
-npx tsx scripts/run-all-tests.ts > weekly-report.txt
+npm run test:all > weekly-report.txt
 ```
 
 ---

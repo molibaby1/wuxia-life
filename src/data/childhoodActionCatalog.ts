@@ -64,7 +64,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'energy', amount: 2 }],
     risk: 'low',
     metadata: { focusTag: 'social', childhoodTier: 'lite' },
-    onCompleteFlags: ['p9_echo_social_hook', 'p9_early_social_focus'],
+    onCompleteFlags: ['p9_echo_social_hook'],
   },
   {
     id: 'action_household_errand',
@@ -80,7 +80,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'energy', amount: 2 }],
     risk: 'low',
     metadata: { focusTag: 'business', childhoodTier: 'lite', ageBand: '5-6' },
-    onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
+    onCompleteFlags: ['p9_echo_business_hook'],
   },
   {
     id: 'action_household_apprentice',
@@ -95,7 +95,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'energy', amount: 3 }],
     risk: 'low',
     metadata: { focusTag: 'business', childhoodTier: 'lite' },
-    onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
+    onCompleteFlags: ['p9_echo_business_hook'],
   },
   {
     id: 'action_errand_nearby',
@@ -111,7 +111,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'energy', amount: 3 }],
     risk: 'low',
     metadata: { focusTag: 'exploration', childhoodTier: 'lite' },
-    onCompleteFlags: ['p9_echo_travel_hook', 'p9_early_travel_focus'],
+    onCompleteFlags: ['p9_echo_travel_hook'],
   },
 ];
 

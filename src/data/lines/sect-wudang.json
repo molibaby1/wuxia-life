@@ -688,7 +688,7 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "tags": ["门派", "中年", "正道", "mandatory", "mainline", "sect", "midlife"],
       "autoResolve": true,
       "enabled": true
     }
@@ -754,7 +754,7 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "tags": ["门派", "中年", "正道", "mandatory", "mainline", "sect", "midlife"],
       "enabled": true
     }
   },
@@ -852,7 +852,7 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "tags": ["门派", "中年", "正道", "mandatory", "mainline", "sect", "midlife"],
       "enabled": true
     }
   },
@@ -918,7 +918,7 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "tags": ["门派", "中年", "正道", "mandatory", "mainline", "sect", "midlife"],
       "autoResolve": true,
       "enabled": true
     }
@@ -1011,7 +1011,7 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["门派", "中年", "正道", "mandatory", "sect", "midlife"],
+      "tags": ["门派", "中年", "正道", "mandatory", "mainline", "sect", "midlife"],
       "autoResolve": true,
       "enabled": true
     }

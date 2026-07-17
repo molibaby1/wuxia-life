@@ -9,7 +9,7 @@ import { getP8PersonaById } from '../p8/personas';
 import type { PersonaActionStrategy } from '../p8/types';
 import type { GameState, PlayerState } from '../types/eventTypes';
 import { resolvePrimaryOriginFamilyFlag } from './primaryOriginFlag';
-import { getCanonicalOriginSurfaceForGameplay } from './originSurfaces';
+import { getCanonicalOriginSurfaceForGameplay, getPrimaryOriginSurfaceForChildhoodPalette } from './originSurfaces';
 
 export const INFANT_MAX_AGE = 2;
 export const DAILY_PLANNING_MIN_AGE = 5;
@@ -152,7 +152,7 @@ function scoreChildhoodCategories(
 
   bump('training', 1);
 
-  const surface = getCanonicalOriginSurfaceForGameplay(player, flags);
+  const surface = getPrimaryOriginSurfaceForChildhoodPalette(player, flags);
   if (surface) {
     const { guidanceQuality, socialCapital, familyResources, hardshipExposure } =
       surface.immediateConditions;
@@ -207,7 +207,7 @@ function isMerchantHouseOrigin(
 /** ponytail: merchant-only carve-out; upgrade path is per-origin late-childhood policy table */
 export const MERCHANT_LATE_CHILDHOOD_BUSINESS_LITE_ID = 'action_household_apprentice';
 
-function isCategoryAllowedForChildhoodAge(
+export function isCategoryAllowedForChildhoodAge(
   category: ActionCategory,
   age: number,
   player?: PlayerState,

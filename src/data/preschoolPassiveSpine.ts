@@ -194,7 +194,7 @@ export function getRecentPassiveNarrativeTitles(
     if (record.eventId === 'preschool_passive_gap' || record.eventId.startsWith('preschool_passive_gap::')) {
       const encodedTitle = record.eventId.includes('::')
         ? decodeURIComponent(record.eventId.split('::')[1] ?? '')
-        : resolvePlanningPlaceholderText(record.age ?? state.player?.age ?? 0).title;
+        : resolvePassiveGapPlaceholderText(record.age ?? state.player?.age ?? 0).title;
       if (!titles.includes(encodedTitle)) {
         titles.push(encodedTitle);
       }

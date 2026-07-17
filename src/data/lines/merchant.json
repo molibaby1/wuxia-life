@@ -20,6 +20,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "study_business",
         "text": "学习经商",
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 5},
@@ -29,6 +30,7 @@
         ]
       },
       {
+        "id": "focus_studying",
         "text": "专心读书",
         "effects": [
           {"type": "stat_modify", "stat": "comprehension", "value": 5}
@@ -66,6 +68,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "open_grocery_shop",
         "text": "开设杂货铺（稳健）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -30},
@@ -75,6 +78,7 @@
         ]
       },
       {
+        "id": "open_weapon_shop",
         "text": "开设武器铺（高风险）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -50},
@@ -83,6 +87,7 @@
         ]
       },
       {
+        "id": "open_herb_shop",
         "text": "开设药铺（中庸）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -40},
@@ -117,6 +122,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "invest_more",
         "text": "追加投资（需金钱≥50，扭转局面）",
         "conditions": [
           {"type": "expression", "expression": "money >= 50"}
@@ -128,6 +134,7 @@
         ]
       },
       {
+        "id": "change_strategy",
         "text": "改变经营策略（悟性 +5）",
         "effects": [
           {"type": "stat_modify", "stat": "comprehension", "value": 5},
@@ -136,6 +143,7 @@
         ]
       },
       {
+        "id": "close_shop",
         "text": "关门大吉（金钱 -20，声望 -5）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -20},
@@ -166,6 +174,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "hire_elite_guards",
         "text": "雇佣精锐保镖团队（需金钱≥150，安全率最高）",
         "conditions": [
           {"type": "expression", "expression": "money >= 150"}
@@ -178,6 +187,7 @@
         ]
       },
       {
+        "id": "escort_personally",
         "text": "亲自护送（需武力≥30）",
         "conditions": [
           {"type": "expression", "expression": "martialPower >= 30"}
@@ -189,6 +199,7 @@
         ]
       },
       {
+        "id": "hire_normal_guards",
         "text": "雇佣普通保镖",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": 30},
@@ -218,6 +229,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "monopoly_trade",
         "text": "垄断经营（金钱 +80，声望 -10）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": 80},
@@ -226,6 +238,7 @@
         ]
       },
       {
+        "id": "fair_competition",
         "text": "公平竞争",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": 40},
@@ -256,6 +269,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "heavy_bribe",
         "text": "重孝换取特权（需金钱≥500，声望 +25）",
         "conditions": [
           {"type": "expression", "expression": "money >= 500"}
@@ -269,6 +283,7 @@
         ]
       },
       {
+        "id": "moderate_bribe",
         "text": "适度贿赂（金钱 -30，声望 +15）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -30},
@@ -278,6 +293,7 @@
         ]
       },
       {
+        "id": "refuse_bribe",
         "text": "拒绝，保持清白",
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": 10},
@@ -385,6 +401,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "invest_righteous_heavy",
         "text": "巨额投资正道（需金钱≥500，侠义 +20）",
         "conditions": [
           {"type": "expression", "expression": "money >= 500"}
@@ -398,6 +415,7 @@
         ]
       },
       {
+        "id": "invest_righteous",
         "text": "投资正道门派（侠义 +10）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -100},
@@ -407,6 +425,7 @@
         ]
       },
       {
+        "id": "invest_evil",
         "text": "投资魔教（武力 +15）",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -100},
@@ -416,6 +435,7 @@
         ]
       },
       {
+        "id": "invest_both",
         "text": "多方下注",
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -150},

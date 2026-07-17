@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:all": "concurrently \"npm run p6b:serve\" \"npm run dev\"",
     "test": "tsx tests/runRealTestGate.ts",
+    "test:all": "npm test && npm run test:contracts && npm run test:headless && npm run test:headless:parity && npm run test:sample-lines-routes",
     "test:contracts": "tsx tests/contracts/runContractTests.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
     "test:contracts:choice": "tsx tests/contracts/choiceExecutionContract.test.ts",

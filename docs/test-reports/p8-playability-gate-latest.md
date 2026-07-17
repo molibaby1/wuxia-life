@@ -1,6 +1,6 @@
 # P8 Playability Gate Report
 
-Generated: 2026-07-09T03:26:57.949Z
+Generated: 2026-07-17T14:55:29.155Z
 Runtime: headless_server
 Decision: **PASS**
 End age: 40
@@ -9,11 +9,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ## Summary
 
 ### Warnings
-- causality: p8-wealth-shen: direct echoes 0
-- narrative_memory: p8-wealth-shen: narrative gaps (citations=3)
 - causality: p8-cautious-han: direct echoes 1
-- causality: p8-balanced-wei: direct echoes 0
-- narrative_memory: p8-balanced-wei: narrative gaps (citations=3)
 - replayability: 2 near-duplicate pairs
 
 ## Persona Highlights
@@ -30,10 +26,10 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 10岁: explicit echo flag p9_explicit_training_echo
 
 **Achievement**
-- [missed] 打下武功根基 (0-20): martialPower=23 < 25
+- [missed] 打下武功根基 (0-20): martialPower=24 < 25
 - [achieved] 坚持练功规划 (0-20): training actions=11
 - [missed] 获得门派或江湖身份信号 (20-30): flag joined_sect=undefined
-- [missed] 三十岁前功力达标 (30-40): martialPower=23 < 45
+- [missed] 三十岁前功力达标 (30-40): martialPower=24 < 45
 
 **Frustration**
 - Opaque setbacks: 0 / 2
@@ -71,7 +67,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 顾清仪 (p8-social-gu)
 
 **Planning / Agency**
-- Active actions: 17; categories: {"socializing":16,"study":1}
+- Active actions: 16; categories: {"socializing":16}
 - Sample selection: age 5 → action_socializing_lite (persona_strategy:socializing prefers socializing)
 
 **Causality**
@@ -80,7 +76,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
   - 10岁: explicit echo flag p9_explicit_social_echo
 
 **Achievement**
-- [achieved] 拓展人脉 (0-20): connections=91 >= 15
+- [achieved] 拓展人脉 (0-20): connections=90 >= 15
 - [achieved] 坚持交游规划 (0-20): socializing actions=16
 - [achieved] 建立重要关系 (20-30): spouse=发妻
 - [achieved] 魅力成长 (30-40): charisma=58 >= 35
@@ -96,30 +92,32 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 沈聚财 (p8-wealth-shen)
 
 **Planning / Agency**
-- Active actions: 5; categories: {"business":5}
+- Active actions: 14; categories: {"business":14}
 - Sample selection: age 5 → action_household_errand (persona_strategy:business prefers business)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 6
+  - 10岁: summary echo: 幼年帮工营商的习惯延续至今
+  - 10岁: explicit echo flag p9_explicit_business_echo
 
 **Achievement**
-- [achieved] 积累财富 (0-20): money=324 >= 200
-- [achieved] 坚持营商规划 (0-20): business actions=5
-- [missed] 声望起步 (20-30): reputation=0 < 10
-- [unavailable] 四十岁前的经济基础 (30-40): finalAge 9 < band 30-40
+- [achieved] 积累财富 (0-20): money=1157 >= 200
+- [achieved] 坚持营商规划 (0-20): business actions=14
+- [achieved] 声望起步 (20-30): reputation=41 >= 10
+- [achieved] 四十岁前的经济基础 (30-40): money=1157 >= 500
 
 **Frustration**
-- Opaque setbacks: 0 / 0
+- Opaque setbacks: 0 / 1
 
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；1岁 探索小能手；3岁 伶牙俐齿；4岁 童年选择
-- Turning: (missing)
-- Age-40 identity: 出身：，路线：商路之主（merchant_path），幼年营商 → 商路初成
+- Turning: 16岁 开设店铺
+- Age-40 identity: 出身：，路线：商路之主（merchant_caravan_master），幼年帮工营商的习惯延续至今
 
 ### 韩守拙 (p8-cautious-han)
 
 **Planning / Agency**
-- Active actions: 13; categories: {"training":13}
+- Active actions: 12; categories: {"training":12}
 - Sample selection: age 5 → action_childhood_yard_play (persona_strategy:training prefers training; cautious_childhood_steady)
 
 **Causality**
@@ -128,7 +126,7 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 
 **Achievement**
 - [achieved] 保持健康 (0-20): health=105 >= 70
-- [achieved] 稳健练功 (0-20): training actions=13
+- [achieved] 稳健练功 (0-20): training actions=12
 - [achieved] 少遭重创 (20-30): no flag major_injury
 - [achieved] 四十岁稳定生存 (30-40): health=105 >= 60
 
@@ -191,25 +189,27 @@ Machine-readable: docs/test-reports/p8-playability-gate-latest.json
 ### 卫中和 (p8-balanced-wei)
 
 **Planning / Agency**
-- Active actions: 5; categories: {"socializing":3,"business":2}
+- Active actions: 10; categories: {"socializing":4,"business":4,"study":1,"training":1}
 - Sample selection: age 5 → action_socializing_lite (persona_strategy:balanced prefers socializing)
 
 **Causality**
-- Direct echoes: 0
+- Direct echoes: 3
+  - 10岁: summary echo: ，昔年苦读今见效
+  - 10岁: explicit echo flag p9_explicit_balanced_harmony_echo
 
 **Achievement**
-- [missed] 文武均衡 (0-20): martialPower=0 < 15
-- [missed] 多种主动行动并用 (20-30): study actions=0 < 1
+- [missed] 文武均衡 (0-20): martialPower=2 < 15
+- [achieved] 多种主动行动并用 (20-30): study actions=1
 - [missed] 形成稳定身份标签 (30-40): —
 
 **Frustration**
-- Opaque setbacks: 0 / 0
+- Opaque setbacks: 0 / 4
 
 **Narrative**
 - Early: 0岁 降生武侠世家；1岁 出身背景；1岁 探索小能手；3岁 伶牙俐齿；4岁 童年选择
-- Turning: (missing)
-- Age-40 identity: 出身：，路线：文武兼修（balanced_path），幼年营商 → 商路初成，幼年读书 → 学识回响，幼年交游 → 人脉回响
+- Turning: 16岁 开设店铺
+- Age-40 identity: 出身：，路线：武道（balanced_martial_base），幼年练功 → 中段功底显现，幼年营商 → 商路初成，，昔年苦读今见效，幼年交游 → 人脉回响
 
 ## Replay Similarity
-- p8-wealth-shen ~ p8-balanced-wei (0.88)
-- p8-cautious-han ~ p8-deviant-ye (0.87)
+- p8-cautious-han ~ p8-deviant-ye (0.88)
+- p8-deviant-ye ~ p8-balanced-wei (0.88)

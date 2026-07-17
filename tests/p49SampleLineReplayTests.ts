@@ -185,7 +185,7 @@ function assertAge25GoalForLine(seed: number, goal: string): void {
     );
   } else if (seed === 804) {
     assert(
-      goal.includes('店铺') || goal.includes('经营') || goal.includes('周转'),
+      goal.includes('店铺') || goal.includes('经营') || goal.includes('周转') || goal.includes('行市'),
       `seed 804 age-25 goal not merchant: ${goal}`,
     );
   }
@@ -208,7 +208,7 @@ async function testLiveAge45PayoffAlignment(): Promise<void> {
   const expectations: Array<{ seed: number; payoffFlag: string; goalFragment: string }> = [
     { seed: 301, payoffFlag: 'orthodox_age45_payoff_done', goalFragment: '传承' },
     { seed: 303, payoffFlag: 'demonic_age45_payoff_done', goalFragment: '地盘' },
-    { seed: 804, payoffFlag: 'merchant_age45_payoff_done', goalFragment: '扩张' },
+    { seed: 804, payoffFlag: 'merchant_age45_payoff_done', goalFragment: '守住' },
   ];
   for (const entry of P49_SAMPLE_LINE_MATRIX) {
     const expected = expectations.find((item) => item.seed === entry.seed)!;

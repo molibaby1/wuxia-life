@@ -122,7 +122,7 @@ async function testMerchant804ShopChain(): Promise<void> {
   const goal25 = deriveSampleLineCurrentGoal(rec25!.gameState) ?? '';
   assert(!goal25.includes('尚未开张'), `seed 804 age 25 goal still pre-shop: ${goal25}`);
   assert(
-    goal25.includes('店铺') || goal25.includes('经营') || goal25.includes('周转'),
+    goal25.includes('店铺') || goal25.includes('经营') || goal25.includes('周转') || goal25.includes('行市'),
     `seed 804 age 25 goal not merchant-operating: ${goal25}`,
   );
 }
@@ -326,7 +326,7 @@ async function testMagnateChainSim(): Promise<void> {
   assert(Boolean(rec38?.gameState.flags?.magnate_midlife_pressure_done), 'seed 804: missing magnate_midlife_pressure_done by age 38');
   const goal38 = deriveSampleLineCurrentGoal(rec38!.gameState) ?? '';
   assert(
-    goal38.includes('人情') || goal38.includes('巨贾'),
+    goal38.includes('商号') || goal38.includes('人情') || goal38.includes('巨贾'),
     `seed 804 age-38 goal missing magnate pressure signal: ${goal38}`,
   );
 

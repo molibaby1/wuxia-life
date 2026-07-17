@@ -30,55 +30,36 @@
 #### 方式 1：运行完整测试套件（推荐）⭐
 
 ```bash
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 ```
 
 **说明**: 
-- 自动运行所有 5 个测试套件
-- 生成 HTML + JSON 报告
-- 自动更新 manifest.json
-- 报告保存在 `scripts/life-simulator/reports/`
+- 运行基础测试总集：真实测试门禁、契约、headless、parity 和 sample-lines 路由回归
+- 各测试入口直接输出结果，不生成旧版 HTML/JSON 聚合报告
 
 #### 方式 2：运行单个测试套件
 
 ```bash
-# Phase 2 功能测试
-npx tsx tests/testPhase2Features.ts
+# 真实测试门禁
+npm test
 
-# Phase 2.3 性能优化测试
-npx tsx tests/testPerformanceOptimization.ts
+# 契约测试
+npm run test:contracts
 
-# 游戏整体测试
-npx tsx tests/AllTests.ts
+# Headless 测试
+npm run test:headless
 
-# 游戏引擎集成测试
-npx tsx tests/testGameEngineIntegration.ts
+# Headless parity
+npm run test:headless:parity
 
-# 前端集成测试
-npx tsx tests/testFrontendIntegration.ts
+# Sample-lines 路由回归
+npm run test:sample-lines-routes
 ```
 
-#### 方式 3：添加 npm 脚本（可选）
+#### 方式 3：使用 npm 脚本
 
-在 `package.json` 中添加：
-
-```json
-{
-  "scripts": {
-    "test": "npx tsx scripts/run-all-tests.ts",
-    "test:phase2": "npx tsx tests/testPhase2Features.ts",
-    "test:perf": "npx tsx tests/testPerformanceOptimization.ts",
-    "test:all": "npx tsx tests/AllTests.ts",
-    "test:integration": "npx tsx tests/testGameEngineIntegration.ts",
-    "test:frontend": "npx tsx tests/testFrontendIntegration.ts"
-  }
-}
-```
-
-然后运行：
 ```bash
-npm run test      # 运行完整套件
-npm run test:phase2  # 运行 Phase 2 测试
+npm run test:all  # 运行所有基础测试
 ```
 
 ---
@@ -151,18 +132,10 @@ JSON 格式示例：
 ```
 wuxia-life/
 ├── scripts/
-│   ├── run-all-tests.ts          # ⭐ 统一测试执行脚本
-│   └── life-simulator/
-│       ├── index-full.html       # ⭐ 报告中心页面
-│       └── reports/
-│           ├── manifest.json     # 报告索引
-│           ├── life-sim-report-xxxxxx.html
-│           └── life-sim-report-xxxxxx.json
 ├── tests/
-│   ├── testPhase2Features.ts     # Phase 2 功能测试
-│   ├── testPerformanceOptimization.ts  # 性能优化测试
-│   ├── AllTests.ts               # 游戏整体测试
-│   ├── testGameEngineIntegration.ts    # 引擎集成测试
+│   ├── runRealTestGate.ts         # 真实测试门禁
+│   ├── contracts/                 # 契约测试
+│   └── headless/                  # Headless 与 parity 测试
 │   └── testFrontendIntegration.ts      # 前端集成测试
 └── package.json
 ```
@@ -289,7 +262,7 @@ ls -la scripts/life-simulator/reports/life-sim-report-*.json
 ```bash
 npm install -g tsx
 # 或
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 ```
 
 ### 问题 2: 模块导入错误
@@ -331,7 +304,7 @@ npm install
 npm run test  # 运行完整测试
 
 # 开发过程中
-npm run test:phase2  # 只运行相关测试
+npm run test:contracts  # 只运行契约测试
 
 # 提交代码前
 npm run test  # 确保所有测试通过
@@ -341,7 +314,7 @@ npm run test  # 确保所有测试通过
 
 ```bash
 # 每天结束时
-npx tsx scripts/run-all-tests.ts
+npm run test:all
 
 # 查看历史报告
 http://localhost:5174/scripts/life-simulator/index-full.html
@@ -353,10 +326,10 @@ http://localhost:5174/scripts/life-simulator/index-full.html
 
 ```bash
 # 第一次运行
-npx tsx scripts/run-all-tests.ts > test-baseline.txt
+npm run test:all > test-baseline.txt
 
 # 优化后运行
-npx tsx scripts/run-all-tests.ts > test-optimized.txt
+npm run test:all > test-optimized.txt
 
 # 对比结果
 diff test-baseline.txt test-optimized.txt
@@ -379,11 +352,11 @@ diff test-baseline.txt test-optimized.txt
 
 ### Q3: 报告保存多久？
 
-**A**: 默认保留最新的 100 个报告。可以通过修改 `run-all-tests.ts` 中的 `manifest.reports.slice(0, 100)` 来调整数量。
+**A**: 当前基础测试命令不生成旧版聚合报告；需要报告时运行对应的专项 gate/report 命令。
 
 ### Q4: 可以自定义报告格式吗？
 
-**A**: 可以。修改 `run-all-tests.ts` 中的 `generateHTMLReport()` 函数来自定义 HTML 报告样式。
+**A**: 当前没有旧版聚合报告格式可配置。
 
 ---
 

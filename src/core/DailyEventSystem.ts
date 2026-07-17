@@ -280,6 +280,10 @@ export class DailyEventSystem {
         return this.clampMultiplier(
           1 + discipline * 0.08 - fatigue * 0.1 - anxiety * 0.04
         );
+      case 'study':
+        return this.clampMultiplier(
+          1 + discipline * 0.09 - fatigue * 0.08 - anxiety * 0.05
+        );
       case 'livelihood':
         return this.clampMultiplier(
           1 + socialMomentum * 0.12 + anxiety * 0.04 - fatigue * 0.06

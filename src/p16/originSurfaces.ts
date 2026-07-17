@@ -16,7 +16,8 @@ export function getOriginSurfaceForPlayer(
 }
 
 /**
- * Childhood / sample-line gameplay: primary origin flag is canonical; trait-only origin is ignored.
+ * Childhood / sample-line gameplay: primary origin flag is canonical; trait-only origin is used as fallback
+ * for youth transition seeds (age 12→13). Childhood palette scoring must require the primary flag.
  */
 export function getCanonicalOriginSurfaceForGameplay(
   player?: PlayerState,
@@ -28,8 +29,33 @@ export function getCanonicalOriginSurfaceForGameplay(
     flags: { ...(flags ?? {}), ...(player?.flags ?? {}) },
   } as GameState;
   const primary = resolvePrimaryOriginFamilyFlag(state);
-  if (!primary) return undefined;
-  return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
+  if (primary) {
+    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
+  }
+  const traitOrigin = player?.traitProfile?.origin;
+  if (traitOrigin) {
+    return getOriginSurfaceById(traitOrigin, worldId);
+  }
+  return undefined;
+}
+
+/**
+ * Strict variant for childhood palette scoring: requires primary origin flag, no trait-only fallback.
+ */
+export function getPrimaryOriginSurfaceForChildhoodPalette(
+  player?: PlayerState,
+  flags?: Record<string, unknown>,
+  worldId = 'wuxia',
+): WorldProfileOriginSurface | undefined {
+  const state = {
+    player,
+    flags: { ...(flags ?? {}), ...(player?.flags ?? {}) },
+  } as GameState;
+  const primary = resolvePrimaryOriginFamilyFlag(state);
+  if (primary) {
+    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
+  }
+  return undefined;
 }
 
 export function getOriginSurfaceById(

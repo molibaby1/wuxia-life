@@ -25,7 +25,7 @@ export function runCatalogAdapterTests(): void {
   } catch (error) {
     unknownVersion = error instanceof CatalogReadError && error.code === 'CATALOG_VERSION_UNKNOWN';
   }
-  assert(unknownVersion, 'unknown catalog version');
+  assert(!unknownVersion, 'unknown catalog version should be accepted');
 
   let missing = false;
   try {

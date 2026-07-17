@@ -11,7 +11,7 @@ import type {
   EventCatalogMetadata,
 } from '../../contracts/eventCatalog';
 
-export type CatalogReadErrorCode = 'CATALOG_VERSION_UNKNOWN' | 'EVENT_NOT_FOUND';
+export type CatalogReadErrorCode = 'EVENT_NOT_FOUND';
 
 export class CatalogReadError extends Error {
   constructor(

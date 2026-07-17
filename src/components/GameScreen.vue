@@ -56,17 +56,27 @@
           {{ currentNode.text }}
         </p>
 
-        <div v-if="periodSummaryDisplay" class="progression-card period-summary-card">
+        <div v-if="false && periodSummaryDisplay" class="progression-card period-summary-card">
           <span class="progression-source-label">{{ periodSummaryDisplay.sourceLabel }}</span>
-          <h3 class="progression-card-title">{{ periodSummaryDisplay.headline }}</h3>
+          <h3
+            v-if="periodSummaryDisplay.headline !== currentNode.title"
+            class="progression-card-title"
+          >
+            {{ periodSummaryDisplay.headline }}
+          </h3>
           <p class="disturbance-body">{{ periodSummaryDisplay.body }}</p>
           <p class="progression-meta">{{ periodSummaryDisplay.statDeltaSummary }}</p>
           <p class="progression-hint">本期已落幕，点击继续见证下一季成长。</p>
         </div>
 
-        <div v-if="activeActionSummaryDisplay" class="progression-card active-action-summary-card">
+        <div v-if="false && activeActionSummaryDisplay" class="progression-card active-action-summary-card">
           <span class="progression-source-label">{{ activeActionSummaryDisplay.sourceLabel }}</span>
-          <h3 class="progression-card-title">{{ activeActionSummaryDisplay.actionName }}</h3>
+          <h3
+            v-if="activeActionSummaryDisplay.actionName !== currentNode.title"
+            class="progression-card-title"
+          >
+            {{ activeActionSummaryDisplay.actionName }}
+          </h3>
           <dl class="progression-detail-list">
             <div><dt>耗时</dt><dd>{{ activeActionSummaryDisplay.durationLabel }}</dd></div>
             <div><dt>收益</dt><dd>{{ activeActionSummaryDisplay.rewardSummary }}</dd></div>
@@ -85,9 +95,14 @@
           <p class="progression-hint">{{ activeActionSummaryDisplay.nextStepHint }}</p>
         </div>
 
-        <div v-if="disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
+        <div v-if="false && disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
           <span class="progression-source-label">{{ disturbanceNarrativeDisplay.sourceLabel }}</span>
-          <h3 class="progression-card-title">{{ disturbanceNarrativeDisplay.title }}</h3>
+          <h3
+            v-if="disturbanceNarrativeDisplay.title !== currentNode.title"
+            class="progression-card-title"
+          >
+            {{ disturbanceNarrativeDisplay.title }}
+          </h3>
           <p class="disturbance-body">{{ disturbanceNarrativeDisplay.bodyText }}</p>
           <p class="progression-meta">缘起：{{ disturbanceNarrativeDisplay.sourceActionName }}</p>
           <p class="progression-meta">{{ disturbanceNarrativeDisplay.impactSummary }}</p>
@@ -136,6 +151,22 @@
             </div>
           </div>
         </div>
+        <div v-if="progressionFeedbackToast" class="progression-feedback-toast" role="status">
+          {{ progressionFeedbackToast }}
+        </div>
+        <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
+          <button
+            v-for="choice in availableChoices"
+            :key="choice.id"
+            class="choice-btn btn"
+            :class="{ 'choice-locked': choice.locked }"
+            @click="makeChoice(choice)"
+          >
+            <span class="choice-text">{{ choice.text }}</span>
+            <span v-if="choice.locked" class="lock-hint">🔒 {{ choice.lockReason || '条件不足' }}</span>
+            <span v-else-if="choice.description" class="choice-desc">{{ choice.description }}</span>
+          </button>
+        </div>
         <div v-if="isAutoPlaying" class="auto-play-indicator">
           <span class="loading-dot"></span>
           <span class="loading-dot"></span>
@@ -171,25 +202,12 @@
         :groups="mainScreenModel.fullStatGroups"
       />
 
-      <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
-        <button
-          v-for="choice in availableChoices"
-          :key="choice.id"
-          class="choice-btn btn"
-          :class="{ 'choice-locked': choice.locked }"
-          @click="makeChoice(choice)"
-        >
-          <span class="choice-text">{{ choice.text }}</span>
-          <span v-if="choice.locked" class="lock-hint">🔒 {{ choice.lockReason || '条件不足' }}</span>
-          <span v-else-if="choice.description" class="choice-desc">{{ choice.description }}</span>
-        </button>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
 import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
@@ -344,6 +362,35 @@ const showNarrativeFallbackHint = computed(() => {
   }
   const fallbackUsed = lastChoiceFeedback.value?.diagnostic.fallbackUsed ?? false;
   return fallbackUsed || !hasStructuredFeedback.value;
+});
+
+const progressionFeedbackToast = computed(() => {
+  if (periodSummaryDisplay.value) {
+    return periodSummaryDisplay.value.statDeltaSummary || periodSummaryDisplay.value.body;
+  }
+  if (activeActionSummaryDisplay.value) {
+    return activeActionSummaryDisplay.value.appliedDeltaSummary || activeActionSummaryDisplay.value.nextStepHint;
+  }
+  if (disturbanceNarrativeDisplay.value) {
+    return disturbanceNarrativeDisplay.value.bodyText;
+  }
+  return null;
+});
+
+const progressionFeedbackKey = computed(() => {
+  const toast = progressionFeedbackToast.value;
+  return toast ? `${props.apiSessionPhase ?? 'local'}:${toast}` : null;
+});
+
+let progressionTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(progressionFeedbackKey, key => {
+  if (!key) return;
+  if (progressionTimer) clearTimeout(progressionTimer);
+  progressionTimer = setTimeout(() => {
+    progressionTimer = null;
+    continueToNext();
+  }, 1200);
 });
 
 const continueToNext = () => {
@@ -671,6 +718,7 @@ const loadLatestSave = () => {
   border-radius: 20px;
   background: #fffdf7;
   border: 1px solid rgba(139, 105, 20, 0.12);
+  overflow: visible;
 }
 
 .event-header {
@@ -862,6 +910,22 @@ const loadLatestSave = () => {
   animation: fadeIn 0.3s ease-out;
 }
 
+.progression-feedback-toast {
+  position: sticky;
+  top: 12px;
+  z-index: 3;
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(92, 74, 26, 0.94);
+  color: #fffaf1;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(92, 74, 26, 0.18);
+  animation: fadeIn 0.2s ease-out;
+}
+
 .outcome-fallback-hint {
   margin-top: 8px;
   color: #8b6914;
@@ -897,9 +961,14 @@ const loadLatestSave = () => {
 }
 
 .event-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 2;
   margin-top: 18px;
+  padding-top: 10px;
   display: grid;
   gap: 10px;
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0), #fffdf7 18%);
 }
 
 .continue-btn {

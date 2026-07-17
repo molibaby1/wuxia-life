@@ -39,7 +39,7 @@ export async function upsertCatalogVersion(
     metadata: Record<string, unknown>;
     bundle: EventBundleResponse;
   },
-): Promise<void> {
+): Promise<string> {
   const existing = await getCatalogByVersion(db, params.catalogVersion);
   if (existing && existing.content_hash !== params.contentHash) {
     throw new ApiError(
@@ -61,4 +61,14 @@ export async function upsertCatalogVersion(
       JSON.stringify(params.bundle),
     ],
   );
+  return params.catalogVersion;
+}
+
+export function incrementPatchVersion(version: string): string {
+  const parts = version.split('.');
+  if (parts.length !== 3 || parts.some(p => !/^\d+$/.test(p))) {
+    return `${version}-1`;
+  }
+  const [major, minor, patch] = parts.map(Number);
+  return `${major}.${minor}.${patch + 1}`;
 }

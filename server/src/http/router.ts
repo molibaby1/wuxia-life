@@ -364,15 +364,40 @@ export function createRouter(env: BackendEnv, logger: StructuredLogger): ServerR
 
 export async function seedActiveCatalog(env: BackendEnv): Promise<void> {
   const adapter = createDefaultInMemoryCatalogAdapter();
-  const bundle = adapter.getEventBundle({ catalogVersion: env.eventCatalogVersion });
-  const metadata = adapter.getMetadata(env.eventCatalogVersion);
+  let bundle = adapter.getEventBundle({ catalogVersion: env.eventCatalogVersion });
+  let metadata = adapter.getMetadata(env.eventCatalogVersion);
   const contentHash = computeContentHash(JSON.stringify(bundle));
   const db = getPool(env.databaseUrl);
-  await catalogRepo.upsertCatalogVersion(db, {
-    catalogVersion: env.eventCatalogVersion,
-    contentHash,
-    status: 'active',
-    metadata: metadata as unknown as Record<string, unknown>,
-    bundle,
-  });
+
+  let catalogVersion = env.eventCatalogVersion;
+  try {
+    await catalogRepo.upsertCatalogVersion(db, {
+      catalogVersion,
+      contentHash,
+      status: 'active',
+      metadata: metadata as unknown as Record<string, unknown>,
+      bundle,
+    });
+  } catch (err) {
+    if (
+      err instanceof ApiError &&
+      err.code === 'VALIDATION_ERROR' &&
+      err.message === 'Catalog version content hash cannot change'
+    ) {
+      catalogVersion = catalogRepo.incrementPatchVersion(catalogVersion);
+      metadata = { ...metadata, catalogVersion };
+      await catalogRepo.upsertCatalogVersion(db, {
+        catalogVersion,
+        contentHash,
+        status: 'active',
+        metadata: metadata as unknown as Record<string, unknown>,
+        bundle,
+      });
+    } else {
+      throw err;
+    }
+  }
+
+  env.eventCatalogVersion = catalogVersion;
+  process.env.EVENT_CATALOG_VERSION = catalogVersion;
 }

@@ -216,6 +216,185 @@
     }
   },
   {
+    "id": "merchant_childhood_preference",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 4, "max": 4 },
+    "triggers": [{ "type": "age_reach", "value": 4 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && !flags.has('merchant_childhood_preference_done')"
+      }
+    ],
+    "content": {
+      "title": "柜台边的小主意",
+      "text": "四岁这年，你总爱踮脚趴在柜台边。家里人笑着问你，是想拨几颗算盘珠子，还是想跟来往的熟客打招呼。",
+      "description": "商贾出身的童年偏好"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "merchant_childhood_choose_abacus",
+        "text": "拨算盘珠子",
+        "description": "你伸出小手，把珠子拨得噼啪响。父亲扶正算盘，笑着让你慢慢数。",
+        "effects": [
+          { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_childhood_abacus_memory" },
+          { "type": "flag_set", "target": "merchant_childhood_preference_done" },
+          { "type": "time_advance", "target": "age", "value": 2, "timeUnit": "year" },
+          { "type": "event_record", "target": "merchant_childhood_preference" }
+        ]
+      },
+      {
+        "id": "merchant_childhood_choose_customers",
+        "text": "跟熟客打招呼",
+        "description": "你学着大人的样子喊人，虽把称呼叫反了，母亲还是笑着教你重来一遍。",
+        "effects": [
+          { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "merchant_childhood_customer_memory" },
+          { "type": "flag_set", "target": "merchant_childhood_preference_done" },
+          { "type": "time_advance", "target": "age", "value": 2, "timeUnit": "year" },
+          { "type": "event_record", "target": "merchant_childhood_preference" }
+        ]
+      }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["merchant", "childhood", "mainline", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "merchant_childhood_recognition_abacus_base",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 6, "max": 6 },
+    "triggers": [{ "type": "age_reach", "value": 6 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('merchant_childhood_abacus_memory') && !flags.has('merchant_childhood_recognition_done') && player.businessAcumen >= 5 && player.businessAcumen < 6"
+      }
+    ],
+    "content": {
+      "title": "头一回看真账",
+      "text": "父亲把你抱上柜台后的高凳，头一回摊开真账本让你挨着看，不再只拿空算盘哄你玩。他轻轻点了点一笔漏记，你顺着手指找出了少算的那串铜钱；往后，家里肯让你在旁边看几页日账了。",
+      "description": "成人轻提示后，孩子得到看账机会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_recognition_done" },
+      { "type": "flag_set", "target": "p9_echo_business_hook" },
+      { "type": "flag_set", "target": "p9_early_business_focus" },
+      { "type": "flag_set", "target": "merchant_childhood_ledger_opportunity" },
+      { "type": "event_record", "target": "merchant_childhood_recognition_abacus_base" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["merchant", "childhood", "recognition", "mainline", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "merchant_childhood_recognition_abacus_strong",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 6, "max": 6 },
+    "triggers": [{ "type": "age_reach", "value": 6 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('merchant_childhood_abacus_memory') && !flags.has('merchant_childhood_recognition_done') && player.businessAcumen >= 6"
+      }
+    ],
+    "content": {
+      "title": "自己看出的错账",
+      "text": "父亲收起逗孩子的口气，把一页真账本推到你面前，第一次等着听你的主意。没人提醒，你便发现货数和银钱对不上，还把错处圈给他看；从那天起，家里每天留一小页账给你试着核对。",
+      "description": "孩子自主发现错账，得到固定看账机会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_recognition_done" },
+      { "type": "flag_set", "target": "p9_echo_business_hook" },
+      { "type": "flag_set", "target": "p9_early_business_focus" },
+      { "type": "flag_set", "target": "merchant_childhood_ledger_opportunity" },
+      { "type": "event_record", "target": "merchant_childhood_recognition_abacus_strong" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["merchant", "childhood", "recognition", "mainline", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "merchant_childhood_recognition_customer_base",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 6, "max": 6 },
+    "triggers": [{ "type": "age_reach", "value": 6 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('merchant_childhood_customer_memory') && !flags.has('merchant_childhood_recognition_done') && player.connections >= 3 && player.connections < 4"
+      }
+    ],
+    "content": {
+      "title": "柜台前的小招呼",
+      "text": "母亲不再把你领去后院，头一回让你留在柜台里侧招呼熟客。她悄悄提醒了一声来客爱喝什么茶，你便想起称呼，把茶盏稳稳递过去；此后熟客上门，家里也肯让你跟着照应了。",
+      "description": "成人轻提示后，孩子得到接待熟客的机会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_recognition_done" },
+      { "type": "flag_set", "target": "p9_echo_business_hook" },
+      { "type": "flag_set", "target": "p9_early_business_focus" },
+      { "type": "flag_set", "target": "merchant_childhood_customer_opportunity" },
+      { "type": "event_record", "target": "merchant_childhood_recognition_customer_base" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["merchant", "childhood", "recognition", "mainline", "mandatory", "once"]
+    }
+  },
+  {
+    "id": "merchant_childhood_recognition_customer_strong",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 0,
+    "weight": 100,
+    "ageRange": { "min": 6, "max": 6 },
+    "triggers": [{ "type": "age_reach", "value": 6 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has('origin_merchant_family') && flags.has('merchant_childhood_customer_memory') && !flags.has('merchant_childhood_recognition_done') && player.connections >= 4"
+      }
+    ],
+    "content": {
+      "title": "你认得这位客人",
+      "text": "母亲不再让你站在身后，而是把柜台前的位置让出半步，第一次等你自己招呼来客。没人提醒，你已认出来人的姓氏、常买的货和爱坐的位置；往后几位老客进门，家里都放心让你先迎上去。",
+      "description": "孩子自主认出熟客，得到固定接待机会"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "flag_set", "target": "merchant_childhood_recognition_done" },
+      { "type": "flag_set", "target": "p9_echo_business_hook" },
+      { "type": "flag_set", "target": "p9_early_business_focus" },
+      { "type": "flag_set", "target": "merchant_childhood_customer_opportunity" },
+      { "type": "event_record", "target": "merchant_childhood_recognition_customer_strong" }
+    ],
+    "metadata": {
+      "enabled": true,
+      "tags": ["merchant", "childhood", "recognition", "mainline", "mandatory", "once"]
+    }
+  },
+  {
     "id": "merchant_childhood_seed_milestone",
     "version": "1.0.0",
     "category": "main_story",

@@ -230,6 +230,12 @@
         "value": 4
       }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!flags.has('origin_merchant_family')"
+      }
+    ],
     "content": {
       "text": "到了启蒙的年纪，家里开始教你读书识字，练习基本功。但你似乎对这些都不太感兴趣，更喜欢在外面玩耍。",
       "title": "童年选择",

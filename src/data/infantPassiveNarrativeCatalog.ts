@@ -27,6 +27,7 @@ export const infantPassiveNarrativeCatalog: PassiveNarrativeEntry[] = [
     originTags: ['merchant'],
     ageMin: 3,
     ageMax: 4,
+    statDeltas: { businessAcumen: 1 },
   },
   {
     id: 'toddler_frontier_wind',
@@ -69,6 +70,7 @@ export const infantPassiveNarrativeCatalog: PassiveNarrativeEntry[] = [
     originTags: ['merchant'],
     ageMin: 3,
     ageMax: 7,
+    statDeltas: { connections: 1 },
   },
   {
     id: 'child_frontier_drill',

@@ -537,6 +537,7 @@ export function useNewGameEngine() {
     engineState.pendingDisturbanceNarrative = null;
     engineState.showingDisturbanceNarrative = false;
     engineState.pendingPeriodSummary = null;
+    engineState.annualPassiveMemory = null;
   };
 
   const executePassiveChildhoodTick = () => {

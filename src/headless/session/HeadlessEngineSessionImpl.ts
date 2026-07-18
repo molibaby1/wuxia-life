@@ -461,6 +461,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       pendingDisturbanceNarrative: null,
       pendingPeriodSummary: null,
       passiveNarrative: null,
+      annualPassiveMemory: null,
       storyGapPassiveServed: false,
     };
     this.lastError = null;

@@ -4,6 +4,7 @@ import {
   isAnnualPassiveMemoryAge,
   prepareAnnualPassiveMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
+import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
@@ -60,6 +61,38 @@ async function testHeadlessAnnualAdvance(): Promise<void> {
   assert(after.passiveNarrative?.title === '2岁这一年', 'the same acknowledgement reaches the next annual card');
 }
 
+async function testAnnualPlanClearsAcrossProgressionResets(): Promise<void> {
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '清理年度记忆',
+    gender: 'female',
+    catalogVersion: '1.0.0',
+    randomSeed: 18,
+  });
+  const snapshot = bootstrap.serialize();
+  snapshot.state.player.age = 1;
+  snapshot.state.flags = { ...(snapshot.state.flags ?? {}), origin_merchant_family: true };
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+  session.ensurePassivePresentation();
+  assert(session.getProgressionVolatileState().annualPassiveMemory !== null, 'headless setup has annual plan');
+  await session.hydrate(snapshot);
+  assert(session.getProgressionVolatileState().annualPassiveMemory === null, 'hydrate clears annual plan');
+
+  session.ensurePassivePresentation();
+  await session.restart({
+    playerName: '重开年度记忆',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+    randomSeed: 19,
+  });
+  assert(session.getProgressionVolatileState().annualPassiveMemory === null, 'restart clears annual plan');
+
+  const browser = useNewGameEngine();
+  browser.engineState.annualPassiveMemory = prepareAnnualPassiveMemory(merchantInfantState(1), () => 0);
+  browser.restartGame();
+  assert(browser.engineState.annualPassiveMemory === null, 'browser reset clears annual plan');
+}
+
 export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(isAnnualPassiveMemoryAge(0), 'age 0 is annual-memory band');
   assert(isAnnualPassiveMemoryAge(3), 'age 3 is annual-memory band');
@@ -88,6 +121,7 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   );
   assert(result.entryIds.join(',') === plan.entries.map(entry => entry.id).join(','), 'commit uses the displayed entries');
   await testHeadlessAnnualAdvance();
+  await testAnnualPlanClearsAcrossProgressionResets();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

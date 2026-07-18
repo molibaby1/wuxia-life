@@ -43,7 +43,11 @@ function applyEntry(state: GameState, entry: PassiveNarrativeEntry, deltas: Reco
   addDeltas(deltas, applied);
   if (!state.eventHistory) state.eventHistory = [];
   if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
-    state.eventHistory.push({ eventId: entry.id, age });
+    state.eventHistory.push({
+      eventId: entry.id,
+      age,
+      ...(state.currentTime ? { timestamp: { ...state.currentTime } } : {}),
+    });
   }
   appendPassiveTitleToHistory(state, entry.title);
 }

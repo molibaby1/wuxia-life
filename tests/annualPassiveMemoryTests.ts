@@ -22,6 +22,7 @@ function merchantInfantState(age = 0): GameState {
       flags: {},
     } as PlayerState,
     flags: { origin_merchant_family: true },
+    currentTime: { year: 1, month: 2, day: 3 },
     eventHistory: [],
   } as GameState;
 }
@@ -44,6 +45,14 @@ export function runAnnualPassiveMemoryTests(): void {
   assert((state.eventHistory ?? []).length === 2, 'both source events remain traceable');
   assert(Boolean(state.flags?.merchant_infant_shop_birth), 'first source flag applied');
   assert(Boolean(state.flags?.merchant_infant_swaddle_abacus), 'second source flag applied');
+  const timestamp = state.eventHistory?.[0]?.timestamp;
+  assert(
+    typeof timestamp === 'object' &&
+      timestamp.year === 1 &&
+      timestamp.month === 2 &&
+      timestamp.day === 3,
+    'source event carries a copy of current time',
+  );
   assert(result.entryIds.join(',') === plan.entries.map(entry => entry.id).join(','), 'commit uses the displayed entries');
 }
 

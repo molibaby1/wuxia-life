@@ -4,6 +4,7 @@ import {
   isAnnualPassiveMemoryAge,
   prepareAnnualPassiveMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
+import { reactive } from 'vue';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
@@ -27,6 +28,15 @@ function merchantInfantState(age = 0): GameState {
     currentTime: { year: 1, month: 2, day: 3 },
     eventHistory: [],
   } as GameState;
+}
+
+function testPrepareAnnualPassiveMemoryWithReactiveState(): void {
+  const plan = prepareAnnualPassiveMemory(reactive(merchantInfantState(1)), () => 0);
+
+  assert(
+    plan.entries.length === ANNUAL_PASSIVE_MEMORY_ENTRY_COUNT,
+    'annual memory prepares entries from Vue reactive game state',
+  );
 }
 
 async function testHeadlessAnnualAdvance(): Promise<void> {
@@ -97,6 +107,7 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(isAnnualPassiveMemoryAge(0), 'age 0 is annual-memory band');
   assert(isAnnualPassiveMemoryAge(3), 'age 3 is annual-memory band');
   assert(!isAnnualPassiveMemoryAge(4), 'age 4 leaves annual-memory band');
+  testPrepareAnnualPassiveMemoryWithReactiveState();
 
   const state = merchantInfantState(0);
   const plan = prepareAnnualPassiveMemory(state, () => 0);

@@ -3,7 +3,6 @@
  */
 
 import { GameEngineIntegration } from '../../core/GameEngineIntegration';
-import { toRaw } from 'vue';
 import { generateChoiceFeedback } from '../../core/ChoiceFeedbackGenerator';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import { resolveChoiceEffects } from '../../core/ChoiceOutcomeResolver';
@@ -510,7 +509,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     if (!this.volatile.passiveNarrative) {
       this.runWithRandomSync(() => {
         if (isAnnualPassiveMemoryAge(age)) {
-          const annual = prepareAnnualPassiveMemory(toRaw(this.engine.getGameState()));
+          const annual = prepareAnnualPassiveMemory(this.engine.getGameState());
           this.volatile.annualPassiveMemory = annual;
           this.volatile.passiveNarrative = { title: annual.headline, text: annual.body };
         } else {

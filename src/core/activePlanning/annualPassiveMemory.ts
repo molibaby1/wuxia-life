@@ -56,7 +56,7 @@ export function prepareAnnualPassiveMemory(
   state: GameState,
   random: () => number = Math.random,
 ): AnnualPassiveMemoryPlan {
-  const working = structuredClone(state);
+  const working = JSON.parse(JSON.stringify(state)) as GameState;
   const entries: PassiveNarrativeEntry[] = [];
   for (let index = 0; index < ANNUAL_PASSIVE_MEMORY_ENTRY_COUNT; index += 1) {
     const entry = selectPassiveNarrative(working, random);

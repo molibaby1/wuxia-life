@@ -8,7 +8,7 @@
  * - 提供 Vue 响应式接口
  */
 
-import { reactive, ref, computed, toRaw } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { saveManager } from '../core/SaveManager';
 import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
@@ -177,7 +177,7 @@ export function useNewGameEngine() {
         engineState.isActiveActionMode = false;
         engineState.isPassiveProgressionMode = true;
         if (isAnnualPassiveMemoryAge(age)) {
-          const annual = prepareAnnualPassiveMemory(toRaw(gameEngine.getGameState()));
+          const annual = prepareAnnualPassiveMemory(gameEngine.getGameState());
           engineState.annualPassiveMemory = annual;
           engineState.passiveNarrative = { title: annual.headline, text: annual.body };
         } else {
@@ -204,7 +204,7 @@ export function useNewGameEngine() {
           engineState.isActiveActionMode = false;
           engineState.isPassiveProgressionMode = true;
           if (isAnnualPassiveMemoryAge(age)) {
-            const annual = prepareAnnualPassiveMemory(toRaw(gameEngine.getGameState()));
+            const annual = prepareAnnualPassiveMemory(gameEngine.getGameState());
             engineState.annualPassiveMemory = annual;
             engineState.passiveNarrative = { title: annual.headline, text: annual.body };
           } else {

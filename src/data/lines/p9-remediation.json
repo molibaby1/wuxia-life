@@ -73,7 +73,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p9_echo_travel_hook\") && flags.has(\"p8_route_wanderer\") && !flags.has(\"p9_early_business_focus\") && !flags.has(\"p8_route_demonic\")"
+        "expression": "flags.has(\"p9_echo_travel_hook\") && flags.has(\"p8_route_wanderer\") && !flags.has(\"p8_route_demonic\")"
       }
     ],
     "content": {
@@ -713,6 +713,7 @@
       { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
       { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
       { "type": "flag_set", "target": "p9_explicit_balanced_harmony_echo", "value": true },
+      { "type": "flag_set", "target": "p9_summary_echo_study", "value": "幼年读书的习惯延续至今" },
       { "type": "flag_set", "target": "p9_route_identity_balanced", "value": "balanced_harmony_steward" }
     ],
     "metadata": {

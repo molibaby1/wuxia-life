@@ -21,6 +21,7 @@ const STRATEGY_YOUTH_SEEDS: Record<P8Persona['strategy'], Record<string, boolean
   },
   travel: {
     p9_early_travel_focus: true,
+    p9_echo_travel_hook: true,
     p16_deferred_travel_upbringing: true,
   },
   balanced: {

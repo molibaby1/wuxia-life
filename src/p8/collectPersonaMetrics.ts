@@ -595,11 +595,12 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
     personaSignal * 2,
     p9RouteSignal * 4,
     echoSignature(flags) * 2,
-    training * 12,
-    study * 12,
-    business * 12,
-    travel * 12,
-    socializing * 12,
+    // Keep observed playstyle differences stronger than roster-order identity noise.
+    training * 16,
+    study * 16,
+    business * 16,
+    travel * 16,
+    socializing * 16,
   ];
 }
 

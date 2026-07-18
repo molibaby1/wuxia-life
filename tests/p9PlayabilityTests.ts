@@ -4,6 +4,7 @@
 
 import { buildWarningTriageReport } from '../src/p9/warningTriage';
 import { loadP8BaselineReport } from '../src/p9/loadP8Baseline';
+import { eventLoader } from '../src/core/EventLoader';
 import type { P8PlayabilityReport } from '../src/p8/types';
 import type { P9WarningTriageReport, WarningBucket } from '../src/p9/types';
 import { getStageForAge, getAllStageConfigs } from '../src/narrative/config/stageConfig';
@@ -118,6 +119,13 @@ function testEchoHooksCoverMinimumActions(): void {
   assert(
     getEchoHookByActionId('action_travel_basic')?.summaryContribution?.enabled === true,
     'travel hook contributes summary echo',
+  );
+  const balancedHarmony = eventLoader.getEventById('p9_balanced_midlife_harmony');
+  assert(
+    balancedHarmony?.autoEffects?.some(
+      effect => effect.type === 'flag_set' && effect.target === 'p9_summary_echo_study',
+    ) === true,
+    'balanced midlife harmony preserves the early study echo',
   );
 }
 

@@ -8,7 +8,7 @@
  * - 提供 Vue 响应式接口
  */
 
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, toRaw } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { saveManager } from '../core/SaveManager';
 import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
@@ -25,6 +25,12 @@ import type {
 import { applyStatDeltas } from '../core/activePlanning/ActivePlanningService';
 import { clampPassiveStatDeltasForAge } from '../core/activePlanning/ageActionStatCaps';
 import { buildPeriodSummary } from '../core/activePlanning/periodSummaryBuilder';
+import {
+  commitAnnualPassiveMemory,
+  isAnnualPassiveMemoryAge,
+  prepareAnnualPassiveMemory,
+  type AnnualPassiveMemoryPlan,
+} from '../core/activePlanning/annualPassiveMemory';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../data/infantPassiveNarratives';
 import { applyPassiveNarrativeFlags } from '../data/originInfantPassiveChain';
 import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning } from '../p16/childhoodAgency';
@@ -52,6 +58,7 @@ interface EventState {
   showingDisturbanceNarrative: boolean;
   isPassiveProgressionMode: boolean;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   storyGapPassiveServed: boolean;
 }
@@ -79,6 +86,7 @@ function getEngineStateInstance() {
         showingDisturbanceNarrative: false,
         isPassiveProgressionMode: false,
         passiveNarrative: null,
+        annualPassiveMemory: null,
         pendingPeriodSummary: null,
         storyGapPassiveServed: false,
       }),
@@ -168,8 +176,15 @@ export function useNewGameEngine() {
         engineState.availableActiveActions = [];
         engineState.isActiveActionMode = false;
         engineState.isPassiveProgressionMode = true;
-        const entry = selectPassiveNarrative(gameEngine.getGameState());
-        engineState.passiveNarrative = { title: entry.title, text: entry.text };
+        if (isAnnualPassiveMemoryAge(age)) {
+          const annual = prepareAnnualPassiveMemory(toRaw(gameEngine.getGameState()));
+          engineState.annualPassiveMemory = annual;
+          engineState.passiveNarrative = { title: annual.headline, text: annual.body };
+        } else {
+          const entry = selectPassiveNarrative(gameEngine.getGameState());
+          engineState.annualPassiveMemory = null;
+          engineState.passiveNarrative = { title: entry.title, text: entry.text };
+        }
         return;
       }
       if (actions.length > 0) {
@@ -179,6 +194,7 @@ export function useNewGameEngine() {
         engineState.isActiveActionMode = true;
         engineState.isPassiveProgressionMode = false;
         engineState.passiveNarrative = null;
+        engineState.annualPassiveMemory = null;
       } else {
         const fallbackAge = gameEngine.getGameState().player?.age ?? 0;
         if (!shouldOfferDailyPlanning(fallbackAge)) {
@@ -187,8 +203,15 @@ export function useNewGameEngine() {
           engineState.availableActiveActions = [];
           engineState.isActiveActionMode = false;
           engineState.isPassiveProgressionMode = true;
-          const entry = selectPassiveNarrative(gameEngine.getGameState());
-          engineState.passiveNarrative = { title: entry.title, text: entry.text };
+          if (isAnnualPassiveMemoryAge(age)) {
+            const annual = prepareAnnualPassiveMemory(toRaw(gameEngine.getGameState()));
+            engineState.annualPassiveMemory = annual;
+            engineState.passiveNarrative = { title: annual.headline, text: annual.body };
+          } else {
+            const entry = selectPassiveNarrative(gameEngine.getGameState());
+            engineState.annualPassiveMemory = null;
+            engineState.passiveNarrative = { title: entry.title, text: entry.text };
+          }
           return;
         }
         gameEngine.advanceTime(3, 'month');
@@ -519,6 +542,18 @@ export function useNewGameEngine() {
   const executePassiveChildhoodTick = () => {
     const state = gameEngine.getGameState();
     const age = state.player?.age ?? 0;
+    if (isAnnualPassiveMemoryAge(age)) {
+      const annual = engineState.annualPassiveMemory;
+      if (!annual) throw new Error('Annual passive memory must be prepared before acknowledgement');
+      commitAnnualPassiveMemory(state, annual);
+      gameEngine.advanceTime(1, 'year');
+      engineState.annualPassiveMemory = null;
+      engineState.passiveNarrative = null;
+      engineState.isPassiveProgressionMode = false;
+      engineState.storyGapPassiveServed = false;
+      getNextEvent();
+      return;
+    }
     const selected = selectPassiveNarrative(state);
     const deltas = clampPassiveStatDeltasForAge(age, selected.statDeltas);
     applyStatDeltas(state.player, deltas);
@@ -544,6 +579,7 @@ export function useNewGameEngine() {
     });
     engineState.isPassiveProgressionMode = false;
     engineState.passiveNarrative = null;
+    engineState.annualPassiveMemory = null;
     engineState.storyGapPassiveServed = true;
   };
 

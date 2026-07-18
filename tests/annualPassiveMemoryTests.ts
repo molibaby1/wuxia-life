@@ -4,6 +4,7 @@ import {
   isAnnualPassiveMemoryAge,
   prepareAnnualPassiveMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -27,7 +28,39 @@ function merchantInfantState(age = 0): GameState {
   } as GameState;
 }
 
-export function runAnnualPassiveMemoryTests(): void {
+async function testHeadlessAnnualAdvance(): Promise<void> {
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '年度记忆',
+    gender: 'female',
+    catalogVersion: '1.0.0',
+    randomSeed: 17,
+  });
+  const snapshot = bootstrap.serialize();
+  snapshot.state.player.age = 1;
+  snapshot.state.flags = { ...(snapshot.state.flags ?? {}), origin_merchant_family: true };
+  snapshot.state.player.flags = { ...(snapshot.state.player.flags ?? {}), origin_merchant_family: true };
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+  session.ensurePassivePresentation();
+  const before = session.getProgressionVolatileState();
+  assert(before.passiveNarrative?.title === '1岁这一年', 'the visible node is the combined annual card');
+  assert(before.annualPassiveMemory?.entries.length === 2, 'volatile state keeps the exact displayed entries');
+  const restored = HeadlessEngineSessionImpl.create({ snapshot: session.serialize() });
+  restored.applyProgressionVolatileState(before);
+  assert(
+    restored.getProgressionVolatileState().annualPassiveMemory?.entries.map(entry => entry.id).join(',') ===
+      before.annualPassiveMemory?.entries.map(entry => entry.id).join(','),
+    'request-boundary restoration preserves the displayed entries',
+  );
+  await restored.acknowledgeProgression('passive_continue');
+
+  assert(restored.getRuntimeState().player.age === 2, 'one passive acknowledgement advances one year');
+  const after = restored.getProgressionVolatileState();
+  assert(after.pendingPeriodSummary === null, 'annual card does not add a second summary acknowledgement');
+  assert(after.passiveNarrative?.title === '2岁这一年', 'the same acknowledgement reaches the next annual card');
+}
+
+export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(isAnnualPassiveMemoryAge(0), 'age 0 is annual-memory band');
   assert(isAnnualPassiveMemoryAge(3), 'age 3 is annual-memory band');
   assert(!isAnnualPassiveMemoryAge(4), 'age 4 leaves annual-memory band');
@@ -54,9 +87,14 @@ export function runAnnualPassiveMemoryTests(): void {
     'source event carries a copy of current time',
   );
   assert(result.entryIds.join(',') === plan.entries.map(entry => entry.id).join(','), 'commit uses the displayed entries');
+  await testHeadlessAnnualAdvance();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runAnnualPassiveMemoryTests();
-  console.log('annualPassiveMemoryTests: ok');
+  runAnnualPassiveMemoryTests()
+    .then(() => console.log('annualPassiveMemoryTests: ok'))
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
 }

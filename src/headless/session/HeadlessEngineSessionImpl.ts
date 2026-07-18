@@ -3,6 +3,7 @@
  */
 
 import { GameEngineIntegration } from '../../core/GameEngineIntegration';
+import { toRaw } from 'vue';
 import { generateChoiceFeedback } from '../../core/ChoiceFeedbackGenerator';
 import { deriveLifeMemorySummary } from '../../core/deriveLifeMemorySummary';
 import { resolveChoiceEffects } from '../../core/ChoiceOutcomeResolver';
@@ -26,6 +27,11 @@ import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturb
 import { applyStatDeltas, hasPendingForcedEvent as checkPendingForcedEventAtAge } from '../../core/activePlanning/ActivePlanningService';
 import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
 import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
+import {
+  commitAnnualPassiveMemory,
+  isAnnualPassiveMemoryAge,
+  prepareAnnualPassiveMemory,
+} from '../../core/activePlanning/annualPassiveMemory';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
 import {
   resolvePreschoolPassiveEntryByTitle,
@@ -91,6 +97,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     pendingDisturbanceNarrative: null,
     pendingPeriodSummary: null,
     passiveNarrative: null,
+    annualPassiveMemory: null,
     storyGapPassiveServed: false,
   };
   private lastError: HeadlessSessionError | null = null;
@@ -191,6 +198,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.pendingDisturbanceNarrative = null;
     this.volatile.pendingPeriodSummary = null;
     this.volatile.passiveNarrative = null;
+    this.volatile.annualPassiveMemory = null;
     const pendingId = snapshot.state.pendingStoryEventId;
     if (pendingId) {
       this.attachStoryEventById(pendingId);
@@ -500,8 +508,15 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     }
     if (!this.volatile.passiveNarrative) {
       this.runWithRandomSync(() => {
-        const entry = selectPassiveNarrative(this.engine.getGameState());
-        this.volatile.passiveNarrative = { title: entry.title, text: entry.text };
+        if (isAnnualPassiveMemoryAge(age)) {
+          const annual = prepareAnnualPassiveMemory(toRaw(this.engine.getGameState()));
+          this.volatile.annualPassiveMemory = annual;
+          this.volatile.passiveNarrative = { title: annual.headline, text: annual.body };
+        } else {
+          const entry = selectPassiveNarrative(this.engine.getGameState());
+          this.volatile.annualPassiveMemory = null;
+          this.volatile.passiveNarrative = { title: entry.title, text: entry.text };
+        }
       });
     }
   }
@@ -509,6 +524,23 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   private async executePassiveChildhoodTick(): Promise<void> {
     const state = this.engine.getGameState();
     const age = state.player?.age ?? 0;
+    if (isAnnualPassiveMemoryAge(age)) {
+      const annual = this.volatile.annualPassiveMemory;
+      if (!annual) {
+        throw new ProgressionError(
+          'INVALID_SESSION_PHASE',
+          'Annual passive memory must be prepared before acknowledgement',
+        );
+      }
+      commitAnnualPassiveMemory(state, annual);
+      this.engine.advanceTime(1, 'year');
+      this.volatile.annualPassiveMemory = null;
+      this.volatile.passiveNarrative = null;
+      this.volatile.storyGapPassiveServed = false;
+      await this.resolveAfterPlanningAck();
+      if (this.getSessionPhase() !== 'active_planning') this.ensurePassivePresentation();
+      return;
+    }
     const displayedTitle = this.volatile.passiveNarrative?.title;
     const { selected, deltas } = await this.runWithRandomAsync(async () => {
       const entry = selectPassiveNarrative(state);
@@ -542,6 +574,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       lifeStates: this.engine.getGameState().player?.lifeStates,
     });
     this.volatile.passiveNarrative = null;
+    this.volatile.annualPassiveMemory = null;
     this.volatile.storyGapPassiveServed = true;
   }
 
@@ -593,6 +626,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       pendingDisturbanceNarrative: this.volatile.pendingDisturbanceNarrative,
       pendingPeriodSummary: this.volatile.pendingPeriodSummary,
       passiveNarrative: this.volatile.passiveNarrative,
+      annualPassiveMemory: this.volatile.annualPassiveMemory,
       pendingStoryEventId,
       pendingEphemeralStoryEvent,
     };
@@ -603,6 +637,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     this.volatile.pendingDisturbanceNarrative = state.pendingDisturbanceNarrative;
     this.volatile.pendingPeriodSummary = state.pendingPeriodSummary;
     this.volatile.passiveNarrative = state.passiveNarrative;
+    this.volatile.annualPassiveMemory = state.annualPassiveMemory;
     if (state.pendingEphemeralStoryEvent) {
       this.volatile.currentEvent = state.pendingEphemeralStoryEvent;
     } else if (state.pendingStoryEventId) {

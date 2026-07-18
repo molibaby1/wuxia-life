@@ -11,6 +11,7 @@ import type {
 } from '../../types/activeActionTypes';
 import type { SessionPhase } from '../../contracts/sessionProgression';
 import type { EventDefinition } from '../../types/eventTypes';
+import type { AnnualPassiveMemoryPlan } from '../../core/activePlanning/annualPassiveMemory';
 
 export type HeadlessErrorCode =
   | 'CATALOG_VERSION_UNKNOWN'
@@ -75,6 +76,7 @@ export interface HeadlessProgressionVolatileState {
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   /** Automatic story event awaiting player continue (not in snapshot). */
   pendingStoryEventId: string | null;
   /** Daily / runtime-built events not resolvable via catalog id alone. */
@@ -89,6 +91,7 @@ export interface HeadlessSessionVolatileState {
   pendingDisturbanceNarrative: DisturbanceNarrativeDisplay | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   passiveNarrative: PassiveNarrativeDisplay | null;
+  annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   /** True after story-gap passive served for ages 5–7; allows lite planning on same gap. */
   storyGapPassiveServed: boolean;
 }

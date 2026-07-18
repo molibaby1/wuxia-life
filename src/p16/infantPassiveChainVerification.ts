@@ -5,18 +5,17 @@
 
 import { HeadlessEngineSessionImpl } from '../headless/session/HeadlessEngineSessionImpl';
 import type { GameStateSnapshot } from '../contracts/gameStateSnapshot';
-import { applyStatDeltas } from '../core/activePlanning/ActivePlanningService';
-import { clampPassiveStatDeltasForAge } from '../core/activePlanning/ageActionStatCaps';
+import {
+  commitAnnualPassiveMemory,
+  prepareAnnualPassiveMemory,
+} from '../core/activePlanning/annualPassiveMemory';
 import {
   getOriginInfantPassiveChains,
   isOriginInfantChainComplete,
-  applyPassiveNarrativeFlags,
   resolveOriginInfantChain,
 } from '../data/originInfantPassiveChain';
 import {
   resolvePlanningPlaceholderText,
-  selectPassiveNarrative,
-  shouldRecordPassiveNarrativeInHistory,
 } from '../data/infantPassiveNarratives';
 import type { GameState, PlayerState } from '../types/eventTypes';
 
@@ -193,15 +192,8 @@ function verifyChainOrder(chainNodeIds: string[], expectedIds: string[]): string
   return violations;
 }
 
-function advanceInfantAgeBand(state: GameState, tickIndex: number): void {
-  if (!state.player) return;
-  // 4 季度 ≈ 1 岁，与 passive_continue 的 3 月/期对齐
-  state.player.age = Math.min(2, Math.floor(tickIndex / 4));
-}
-
 function simulatePassiveChainWithSelector(
   origin: OriginInfantVerificationOrigin,
-  ticks = 12,
   randomSeed = 0,
 ): SelectorSimulationTrace {
   const state = {
@@ -214,22 +206,16 @@ function simulatePassiveChainWithSelector(
   const agesPerTick: number[] = [];
   let roll = randomSeed;
 
-  for (let tick = 0; tick < ticks; tick += 1) {
-    advanceInfantAgeBand(state, tick);
-    agesPerTick.push(state.player?.age ?? 0);
-    const entry = selectPassiveNarrative(state, () => {
-      roll = (roll * 1664525 + 1013904223) % 0x100000000;
-      return roll / 0x100000000;
-    });
-    passiveIds.push(entry.id);
-    const age = state.player?.age ?? 0;
-    const deltas = clampPassiveStatDeltasForAge(age, entry.statDeltas);
-    applyStatDeltas(state.player, deltas);
-    applyPassiveNarrativeFlags(state, entry.flags);
-    if (!state.eventHistory) state.eventHistory = [];
-    if (shouldRecordPassiveNarrativeInHistory(entry.id)) {
-      state.eventHistory.push({ eventId: entry.id, age });
-    }
+  const seededRandom = () => {
+    roll = (roll * 1664525 + 1013904223) % 0x100000000;
+    return roll / 0x100000000;
+  };
+  for (const age of [0, 1, 2]) {
+    if (state.player) state.player.age = age;
+    agesPerTick.push(age);
+    const plan = prepareAnnualPassiveMemory(state, seededRandom);
+    const result = commitAnnualPassiveMemory(state, plan);
+    passiveIds.push(...result.entryIds);
   }
 
   const chainNodeIds = passiveIds.filter(id => id.startsWith(origin.idPrefix));
@@ -346,7 +332,7 @@ export async function runInfantPassiveChainVerification(
   randomSeed = 20260618,
 ): Promise<InfantPassiveChainVerificationReport> {
   const selectorTraces = ORIGIN_INFANT_VERIFICATION_ORIGINS.map((origin, index) =>
-    simulatePassiveChainWithSelector(origin, 12, randomSeed + index * 97),
+    simulatePassiveChainWithSelector(origin, randomSeed + index * 97),
   );
 
   const headlessTraces: HeadlessPassiveTrace[] = [];
@@ -374,7 +360,7 @@ export async function runInfantPassiveChainVerification(
           trace.placeholderHits === 0 &&
           trace.planningOptionMax === 0 &&
           trace.emptyNarrativeBeforeContinue === 0,
-      ) && selectorTraces.every(trace => trace.passiveIds.length >= 10),
+      ) && selectorTraces.every(trace => trace.passiveIds.length === 6),
     traces: selectorTraces.map((trace, index) => ({
       origin: trace.label,
       passivePeriods: trace.passiveIds.length,
@@ -430,7 +416,7 @@ export function formatInfantPassiveChainVerificationMarkdown(
 
   const selectorSection = report.selectorTraces
     .map(trace => {
-      return `### ${trace.label}（选择器模拟 12 期）
+      return `### ${trace.label}（选择器模拟 3 年 / 6 个记忆节点）
 
 | 项 | 值 |
 | --- | --- |
@@ -480,8 +466,8 @@ export function formatInfantPassiveChainVerificationMarkdown(
 
 | AC | 描述 | 方法 | 结果 |
 | --- | --- | --- | --- |
-| AC-X-1 | 互斥：0～2 岁被动 ID 仅本链前缀 + 共用 filler | 选择器 12 期模拟 | ${status(report.acX1.pass)} |
-| AC-X-2 | Agency：10 期无三选一、无规划占位句 | 选择器 ≥10 期 + headless 0/1/2 岁相位 | ${status(report.acX2.pass)} |
+| AC-X-1 | 互斥：0～2 岁被动 ID 仅本链前缀 + 共用 filler | 选择器 3 年 / 6 个记忆节点模拟 | ${status(report.acX1.pass)} |
+| AC-X-2 | Agency：3 年 / 6 个记忆节点无三选一、无规划占位句 | 选择器 3 年 / 6 个记忆节点 + headless 0/1/2 岁相位 | ${status(report.acX2.pass)} |
 | AC-X-3 | 差异化：两两链节点重合度 <50%，链收官 | 选择器模拟至 2 岁 | ${status(report.acX3.pass)} |
 | AC-X-4 | 继续前叙事非空、首回合无荒谬数值跳变 | headless 首 tick | ${status(report.acX4.pass)} |
 

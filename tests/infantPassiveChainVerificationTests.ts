@@ -29,7 +29,7 @@ export async function runInfantPassiveChainVerificationTests(): Promise<InfantPa
   }
 
   for (const trace of report.selectorTraces) {
-    assert(trace.passiveIds.length >= 10, `${trace.label}: expected >=10 passive periods`);
+    assert(trace.passiveIds.length === 6, `${trace.label}: expected 6 annual-memory beats`);
   }
 
   return report;

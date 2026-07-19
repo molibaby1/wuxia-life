@@ -64,7 +64,8 @@ import {
 const FORMAL_CANDIDATE_POOL_CAP = 12;
 
 function engineDiagnosticsEnabled(): boolean {
-  return process.env.WUXIA_ENGINE_QUIET !== '1';
+  const quiet = typeof process !== 'undefined' && process.env ? process.env.WUXIA_ENGINE_QUIET : undefined;
+  return quiet !== '1';
 }
 
 /**

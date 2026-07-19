@@ -105,6 +105,12 @@
           },
           {
             "type": "stat_modify",
+            "target": "connections",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
             "target": "charisma",
             "value": 6,
             "operator": "add"

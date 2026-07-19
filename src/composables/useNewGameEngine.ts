@@ -112,7 +112,10 @@ export function useNewGameEngine() {
     const age = gameState.player?.age || 0;
 
     // 选择一个事件
-    const selectedEvent = gameEngine.selectEvent(age);
+    const selectedEvent =
+      isAnnualPassiveMemoryAge(age) && gameState.flags?.origin_id
+        ? null
+        : gameEngine.selectEvent(age);
 
     if (selectedEvent) {
       engineState.storyGapPassiveServed = false;
@@ -236,6 +239,17 @@ export function useNewGameEngine() {
       // 执行事件效果
       await gameEngine.executeAutoEvent(event);
       engineState.lastEffects = event.autoEffects;
+
+      if (
+        event.id === 'merchant_childhood_recognition_abacus_base' ||
+        event.id === 'merchant_childhood_recognition_abacus_strong' ||
+        event.id === 'merchant_childhood_recognition_customer_base' ||
+        event.id === 'merchant_childhood_recognition_customer_strong'
+      ) {
+        engineState.isAutoPlaying = false;
+        isProcessing.value = false;
+        return;
+      }
 
       // 检查是否是结局事件
       if (event.eventType === 'ending') {

@@ -121,7 +121,7 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §7. Run narrow affected tests first; defer unrelated full-suite failures."
     }
   ]

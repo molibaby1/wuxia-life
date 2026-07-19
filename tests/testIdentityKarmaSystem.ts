@@ -3,7 +3,7 @@
  */
 
 import { IdentitySystem } from '../src/core/IdentitySystem';
-import { KarmaSystem } from '../src/core/KarmaSystem';
+import { KarmaManager } from '../src/core/KarmaSystem';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function createTestState(): GameState {
@@ -66,26 +66,26 @@ console.log('=== 身份系统与因果系统测试 ===\n');
 console.log('测试 1: 初始状态');
 let state = createTestState();
 console.log('身份:', state.identity || '无');
-console.log('因果:', KarmaSystem.getNetKarma(state));
-console.log('因果等级:', KarmaSystem.getKarmaLevel(state));
+  console.log('因果:', KarmaManager.getNetKarma(state));
+  console.log('因果等级:', KarmaManager.getKarmaLevel(state));
 console.log('');
 
 // 测试 2: 行善积德
 console.log('测试 2: 行善积德（+100 善行）');
-state = KarmaSystem.addKarma(state, 100, '拯救村庄', 200101);
+  state = KarmaManager.addKarma(state, 100, '拯救村庄', 200101);
 console.log('善行:', state.karma?.good_karma);
 console.log('恶行:', state.karma?.evil_karma);
-console.log('因果净值:', KarmaSystem.getNetKarma(state));
-console.log('因果等级:', KarmaSystem.getKarmaLevel(state));
+  console.log('因果净值:', KarmaManager.getNetKarma(state));
+  console.log('因果等级:', KarmaManager.getKarmaLevel(state));
 console.log('');
 
 // 测试 3: 作恶多端
 console.log('测试 3: 作恶多端（-150 恶行）');
-state = KarmaSystem.addKarma(state, -150, '杀害无辜', 200201);
+state = KarmaManager.addKarma(state, -150, '杀害无辜', 200201);
 console.log('善行:', state.karma?.good_karma);
 console.log('恶行:', state.karma?.evil_karma);
-console.log('因果净值:', KarmaSystem.getNetKarma(state));
-console.log('因果等级:', KarmaSystem.getKarmaLevel(state));
+console.log('因果净值:', KarmaManager.getNetKarma(state));
+console.log('因果等级:', KarmaManager.getKarmaLevel(state));
 console.log('');
 
 // 测试 4: 大侠身份判定
@@ -133,13 +133,13 @@ console.log('');
 console.log('测试 8: 因果报应');
 state = createTestState();
 state.karma!.good_karma = 250;
-const reward = KarmaSystem.getKarmaReward(state);
+const reward = KarmaManager.getKarmaReward(state);
 console.log('善行 250 的报应:', reward);
 console.log('预期：divine_blessing（天神庇佑）');
 
 state.karma!.good_karma = 0;
 state.karma!.evil_karma = 250;
-const punishment = KarmaSystem.getKarmaReward(state);
+const punishment = KarmaManager.getKarmaReward(state);
 console.log('恶行 250 的报应:', punishment);
 console.log('预期：divine_punishment（天谴）');
 console.log('');

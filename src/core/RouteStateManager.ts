@@ -1,4 +1,5 @@
-import type { GameState } from '../types/eventTypes';
+import type { GameState, RoadCommitmentRecord } from '../types/eventTypes';
+import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 import { getRouteCompatibilityRule, type RouteIdentity } from './RouteCompatibilityRules';
 
 export type RouteLifecycleState =
@@ -73,7 +74,136 @@ const FACTION_TO_ROUTE_ID: Record<string, string> = {
 
 const COMMITTED_ROUTE_LIFECYCLES: RouteLifecycleState[] = ['active', 'locked_in', 'temporary'];
 
+const LEGACY_ROUTE_TO_LIFE_ROAD: Record<string, LifeRoadId> = {
+  merchant: 'statecraft',
+  hero: 'martial',
+  sect: 'martial',
+  demonic: 'martial',
+  official: 'official',
+  hermit: 'hermit',
+  wanderer: 'hermit',
+};
+
 export class RouteStateManager {
+  static commitRoad(
+    state: GameState,
+    roadId: LifeRoadId,
+    input: { choiceId?: string; eventId?: string } = {},
+  ): GameState {
+    const current = state.roadCommitments?.[roadId];
+    const commitment: RoadCommitmentRecord = current || {
+      roadId,
+      committedAtAge: state.player?.age ?? 0,
+      sourceChoiceId: input.choiceId,
+      sourceEventId: input.eventId,
+      proofCount: 0,
+      lifecycle: 'active',
+    };
+    return {
+      ...RouteStateManager.writeRouteState(state, {
+        routeId: roadId,
+        lifecycle: commitment.lifecycle,
+        category: 'main',
+        lockedIn: commitment.lifecycle === 'locked_in' || commitment.lifecycle === 'completed',
+        eventId: input.eventId,
+        reason: 'road_commitment',
+      }),
+      roadCommitments: {
+        ...(state.roadCommitments || {}),
+        [roadId]: commitment,
+      },
+    };
+  }
+
+  static recordRoadActivity(state: GameState, roadId: LifeRoadId, eventId?: string): GameState {
+    const commitment = state.roadCommitments?.[roadId];
+    if (commitment || RouteStateManager.readRouteState(state, roadId).lifecycle !== 'inactive') {
+      return state;
+    }
+    return RouteStateManager.writeRouteState(state, {
+      routeId: roadId,
+      lifecycle: 'temporary',
+      category: 'main',
+      eventId,
+      reason: 'road_activity_without_commitment',
+    });
+  }
+
+  static recordRoadProof(state: GameState, roadId: LifeRoadId, eventId?: string): GameState {
+    const commitment = state.roadCommitments?.[roadId];
+    if (!commitment || commitment.lifecycle !== 'active') {
+      return state;
+    }
+    const nextCommitment: RoadCommitmentRecord = {
+      ...commitment,
+      proofCount: commitment.proofCount + 1,
+      latestProofEventId: eventId,
+      lifecycle: 'locked_in',
+    };
+    return {
+      ...RouteStateManager.writeRouteState(state, {
+        routeId: roadId,
+        lifecycle: 'locked_in',
+        category: 'main',
+        lockedIn: true,
+        eventId,
+        reason: 'road_proof',
+      }),
+      roadCommitments: {
+        ...(state.roadCommitments || {}),
+        [roadId]: nextCommitment,
+      },
+    };
+  }
+
+  static migrateLegacyRoutes(state: GameState): GameState {
+    let nextState = state;
+    for (const [legacyRouteId, legacyState] of Object.entries(state.routeStates || {})) {
+      const roadId = LEGACY_ROUTE_TO_LIFE_ROAD[legacyRouteId];
+      if (!roadId || nextState.roadCommitments?.[roadId]) {
+        continue;
+      }
+      if (legacyState.lifecycle === 'temporary') {
+        nextState = RouteStateManager.recordRoadActivity(nextState, roadId, legacyState.sourceEventId);
+        continue;
+      }
+      if (!['active', 'locked_in', 'completed'].includes(legacyState.lifecycle)) {
+        continue;
+      }
+      const lifecycle: LifeRoadStage = legacyState.lifecycle;
+      const commitment: RoadCommitmentRecord = {
+        roadId,
+        committedAtAge: legacyState.lastChangedAtAge ?? state.player?.age ?? 0,
+        sourceEventId: legacyState.sourceEventId,
+        proofCount: lifecycle === 'active' ? 0 : 1,
+        lifecycle,
+      };
+      nextState = {
+        ...nextState,
+        roadCommitments: {
+          ...(nextState.roadCommitments || {}),
+          [roadId]: commitment,
+        },
+        routeStates: {
+          ...(nextState.routeStates || {}),
+          [roadId]: {
+            ...legacyState,
+            routeId: roadId,
+            lifecycle,
+            lockedIn: lifecycle === 'locked_in' || lifecycle === 'completed',
+            reason: 'legacy_route_migration',
+          },
+        },
+      };
+    }
+    return nextState;
+  }
+
+  static readRoadStage(state: GameState, roadId: LifeRoadId): LifeRoadStage {
+    return state.roadCommitments?.[roadId]?.lifecycle
+      ?? (RouteStateManager.readRouteState(state, roadId).lifecycle as LifeRoadStage);
+  }
+
   static readRouteState(state: GameState, routeId: string): RouteStateRecord {
     const existing = state.routeStates?.[routeId];
     if (existing) {

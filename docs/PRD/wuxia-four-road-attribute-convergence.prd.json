@@ -34,7 +34,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §3.2, US-002, and §6. Reuse the existing lifecycle states."
     },
     {

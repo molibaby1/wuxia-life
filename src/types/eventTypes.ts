@@ -1,5 +1,6 @@
 import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
+import type { LifeRoadId, LifeRoadStage } from './lifeRoad';
 
 /**
  * 事件系统类型定义
@@ -1079,6 +1080,7 @@ export interface GameState {
     sourceEventId?: string;
     reason?: string;
   }>;
+  roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
   routeHistory?: Array<{
     routeId: string;
     from: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
@@ -1105,6 +1107,16 @@ export interface GameState {
   p16TendencyShaping?: import('../narrative/profile/types').OriginWorldviewShaping;
   /** P16: rare event line ids that fired */
   p16RareLineLog?: string[];
+}
+
+export interface RoadCommitmentRecord {
+  roadId: LifeRoadId;
+  committedAtAge: number;
+  sourceChoiceId?: string;
+  sourceEventId?: string;
+  proofCount: number;
+  latestProofEventId?: string;
+  lifecycle: LifeRoadStage;
 }
 
 /**

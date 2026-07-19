@@ -13,7 +13,8 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity, PlayerLifeStates, PlayerTraitProfile, CriticalChoices } from '../types/eventTypes';
+import type { GameState, PlayerIdentity, PlayerLifeStates, PlayerTraitProfile, CriticalChoices, RoadCommitmentRecord } from '../types/eventTypes';
+import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
@@ -31,6 +32,8 @@ export type EndingType =
   | 'beloved_saint'        // 在世活佛 - 善行 > 100, 救人 > 500
   | 'heavenly_immortal'    // 得道成仙 - 综合 > 90, 因果 > 100
   | 'great_scholar'        // 一代宗师 - 学识 > 90, 著作流传
+  | 'official_minister'
+  | 'hermit_master'
   
   // 中性结局
   | 'bittersweet_success'  // 有成有憾 - 有所成就，但代价明显
@@ -73,6 +76,7 @@ export interface EndingInfo {
     knowledge?: number;
     businessAcumen?: number;
     influence?: number;
+    road?: { id: LifeRoadId; stages: LifeRoadStage[]; minProofCount: number };
   };
   priority: number;  // 优先级，用于冲突时判定
 }
@@ -100,6 +104,7 @@ interface EndingEvaluationData {
   lifeStates: PlayerLifeStates;
   traitProfile?: PlayerTraitProfile;
   choices?: CriticalChoices;
+  roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
 }
 
 export class EndingSystem {
@@ -132,6 +137,7 @@ export class EndingSystem {
         internalSkill: 80,
         qinggong: 80,
         age: 68,
+        road: { id: 'martial', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 100,  // 最高优先级
     },
@@ -145,6 +151,7 @@ export class EndingSystem {
         martialPower: 70,
         flags: ['establish_sect', 'succession_completed'],
         age: 65,
+        road: { id: 'martial', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 90,
     },
@@ -158,6 +165,7 @@ export class EndingSystem {
         businessAcumen: 70,
         flags: ['business_empire'],
         age: 60,
+        road: { id: 'statecraft', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 85,
     },
@@ -198,6 +206,29 @@ export class EndingSystem {
         age: 65,
       },
       priority: 87,
+    },
+    {
+      id: 'official_minister',
+      name: '定国名臣',
+      description: '你在制度中承担公共责任，以持续治理成果留下了清明而有力的名声。',
+      category: 'positive',
+      requirements: {
+        reputation: 70,
+        age: 60,
+        road: { id: 'official', stages: ['locked_in', 'completed'], minProofCount: 1 },
+      },
+      priority: 89,
+    },
+    {
+      id: 'hermit_master',
+      name: '隐逸高士',
+      description: '你主动退出公共竞争，并以持续独立的生活实践守住了自己的清静道路。',
+      category: 'positive',
+      requirements: {
+        age: 60,
+        road: { id: 'hermit', stages: ['locked_in', 'completed'], minProofCount: 1 },
+      },
+      priority: 86,
     },
     
     // ========== 中性结局 ==========
@@ -328,6 +359,7 @@ export class EndingSystem {
         anxiety: 0,
       },
       traitProfile: player.traitProfile,
+      roadCommitments: state.roadCommitments,
     };
 
     const negative = this.ENDINGS
@@ -396,6 +428,15 @@ export class EndingSystem {
     if (requirements.achievements) {
       for (const achievement of requirements.achievements) {
         if (!data.achievements.includes(achievement)) return false;
+      }
+    }
+
+    if (requirements.road) {
+      const commitment = data.roadCommitments?.[requirements.road.id];
+      if (!commitment
+        || !requirements.road.stages.includes(commitment.lifecycle)
+        || commitment.proofCount < requirements.road.minProofCount) {
+        return false;
       }
     }
 
@@ -564,6 +605,18 @@ export class EndingSystem {
       flags: Object.keys(player.flags || {}).filter(f => player.flags?.[f]),
       achievements: achievements || [],
       age: player.age,
+      spouse: player.spouse,
+      children: player.children,
+      lifeStates: player.lifeStates || {
+        fatigue: 0,
+        discipline: 0,
+        indulgence: 0,
+        familyBond: 0,
+        socialMomentum: 0,
+        anxiety: 0,
+      },
+      traitProfile: player.traitProfile,
+      roadCommitments: state.roadCommitments,
     };
     
     return this.meetsEndingRequirements(playerData, ending.requirements);

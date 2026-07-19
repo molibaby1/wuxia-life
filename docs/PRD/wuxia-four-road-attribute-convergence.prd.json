@@ -86,7 +86,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §3.3, US-005, and §6. Combination endings are deferred."
     },
     {

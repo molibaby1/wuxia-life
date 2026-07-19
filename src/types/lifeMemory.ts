@@ -44,6 +44,15 @@ export interface LifeMemoryRouteStatus {
   };
 }
 
+export interface LifeMemoryRoadCommitment {
+  roadId: string;
+  name: string;
+  phase: string;
+  proofCount: number;
+  sourceChoiceId?: string;
+  sourceEventId?: string;
+}
+
 export interface LifeMemoryKeyChoiceEntry extends LifeMemoryEntryBase {
   label: string;
   consequence?: string;
@@ -87,6 +96,8 @@ export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
   routeStatus?: LifeMemoryRouteStatus;
+  roadCommitments?: LifeMemoryRoadCommitment[];
+  identity?: { primary: string; all: string[] };
   habitTrajectory?: LifeMemoryHabitTrajectoryEntry[];
   keyChoices?: LifeMemoryKeyChoiceEntry[];
   relationships?: LifeMemoryRelationshipEntry[];

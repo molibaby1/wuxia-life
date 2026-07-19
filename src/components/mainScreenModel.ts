@@ -78,6 +78,9 @@ export interface MainScreenModel {
   stageTags: string[];
   topResources: MainScreenStatItem[];
   routeSummary: string;
+  roadCommitmentSummary: string;
+  identitySummary: string;
+  experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;
   shapingSummary: string;
@@ -258,6 +261,24 @@ function buildRiskSummary(summary: LifeMemorySummary): string {
   return `${RISK_LEVEL_LABELS[risk.severity]} · ${risk.label}`;
 }
 
+function buildRoadCommitmentSummary(summary: LifeMemorySummary): string {
+  const commitments = summary.roadCommitments ?? [];
+  if (commitments.length === 0) return '暂无明确承诺';
+  return commitments.map((item) => `${item.name} · ${item.phase} · 证明 ${item.proofCount}`).join(' / ');
+}
+
+function buildIdentitySummary(summary: LifeMemorySummary): string {
+  const identities = summary.identity?.all ?? [];
+  return identities.length > 0 ? identities.join(' / ') : '暂无身份';
+}
+
+function buildExperienceSummary(summary: LifeMemorySummary): string {
+  const achievements = summary.achievements ?? [];
+  return achievements.length > 0
+    ? achievements.slice(0, 3).map((item) => item.label).join(' / ')
+    : '暂无经历';
+}
+
 function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySummary): string {
   const phase = lifeMemory.routeStatus?.primary.phase ?? '';
   const prioritizeGrowth = phase.includes('未入门');
@@ -398,9 +419,12 @@ export function buildMainScreenModel(
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
       createStat('constitution', '体魄', valueOf(player, 'constitution'), '生存底子'),
-      createStat('reputation', '声望', valueOf(player, 'reputation')),
+      createStat('reputation', '声望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接推进道路'),
     ],
     routeSummary,
+    roadCommitmentSummary: buildRoadCommitmentSummary(lifeMemory),
+    identitySummary: buildIdentitySummary(lifeMemory),
+    experienceSummary: buildExperienceSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player, lifeMemory),
     shapingSummary: buildShapingSummary(player),

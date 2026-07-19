@@ -1,0 +1,37 @@
+import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
+import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { RouteStateManager } from '../src/core/RouteStateManager';
+import type { GameState, PlayerState } from '../src/types/eventTypes';
+
+const player: PlayerState = {
+  name: '界面测试', gender: 'male', age: 31, martialPower: 8,
+  externalSkill: 0, internalSkill: 0, qinggong: 0, chivalry: 20,
+  charisma: 0, constitution: 30, comprehension: 30, money: 100,
+  reputation: 40, connections: 12, health: 100, energy: 100, alive: true,
+  items: [], flags: {}, events: [], relationships: [],
+};
+let state: GameState = {
+  player, flags: {}, relations: {}, eventHistory: [],
+  identity: { identities: ['merchant', 'doctor'], primary: 'merchant' },
+  achievements: ['merchant_shop_grocery'],
+};
+state = RouteStateManager.commitRoad(state, 'statecraft', {
+  choiceId: 'merchant_entry_choice', eventId: 'merchant_entry',
+});
+const summary = deriveLifeMemorySummary(state);
+const model = buildMainScreenModel(player, summary);
+
+if (!summary.roadCommitments?.some((item) => item.name === '经世' && item.phase === 'active')) {
+  throw new Error('人生记忆必须显示规范道路与阶段');
+}
+if (model.identitySummary !== 'merchant / doctor') {
+  throw new Error('人生摘要必须独立显示身份');
+}
+if (!model.routeSummary.includes('经世')) {
+  throw new Error('主界面路线摘要必须读取规范道路名');
+}
+if (!model.topResources.find((item) => item.key === 'reputation')?.description?.includes('不直接推进道路')) {
+  throw new Error('主界面必须解释声望不是道路投入');
+}
+
+console.log('US-004 canonical life memory UI model tests passed');

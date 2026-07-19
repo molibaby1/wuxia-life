@@ -10,6 +10,18 @@
         <span class="summary-value">{{ routeSummary }}</span>
       </div>
       <div class="summary-row">
+        <span class="summary-label">承诺</span>
+        <span class="summary-value">{{ roadCommitmentSummary }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">身份</span>
+        <span class="summary-value">{{ identitySummary }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">经历</span>
+        <span class="summary-value">{{ experienceSummary }}</span>
+      </div>
+      <div class="summary-row">
         <span class="summary-label">风险</span>
         <span class="summary-value summary-risk">{{ riskSummary }}</span>
       </div>
@@ -28,6 +40,9 @@
 <script setup lang="ts">
 defineProps<{
   routeSummary: string;
+  roadCommitmentSummary: string;
+  identitySummary: string;
+  experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;
   shapingSummary: string;

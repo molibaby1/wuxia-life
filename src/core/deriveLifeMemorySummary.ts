@@ -25,8 +25,10 @@ import {
   type LifeMemoryRelationshipEntry,
   type LifeMemoryRiskEntry,
   type LifeMemoryRouteStatus,
+  type LifeMemoryRoadCommitment,
   type LifeMemorySummary,
 } from '../types/lifeMemory';
+import { formatLifeRoadLabel, type LifeRoadId } from '../types/lifeRoad';
 import {
   ROUTE_DISPLAY_NAMES,
   formatRouteLabel,
@@ -942,6 +944,24 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
     derivedAtAge: state.player.age,
     routeStatus,
   };
+
+  const roadCommitments: LifeMemoryRoadCommitment[] = Object.values(state.roadCommitments ?? {})
+    .filter((commitment): commitment is NonNullable<typeof commitment> => Boolean(commitment))
+    .map((commitment) => ({
+      roadId: commitment.roadId,
+      name: formatLifeRoadLabel(commitment.roadId as LifeRoadId),
+      phase: commitment.lifecycle,
+      proofCount: commitment.proofCount,
+      sourceChoiceId: commitment.sourceChoiceId,
+      sourceEventId: commitment.sourceEventId,
+    }));
+  if (roadCommitments.length > 0) summary.roadCommitments = roadCommitments;
+  if (state.identity) {
+    summary.identity = {
+      primary: state.identity.primary,
+      all: [...state.identity.identities],
+    };
+  }
 
   const optionalKeyChoices = omitEmpty(keyChoices);
   const optionalRelationships = omitEmpty(relationships);

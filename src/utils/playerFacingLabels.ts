@@ -20,6 +20,8 @@ export const ROUTE_DISPLAY_NAMES: Record<string, string> = {
   demonic_path: '魔道',
   renown: '江湖名宿',
   medical: '医者之路',
+  martial: '武道',
+  statecraft: '经世',
 };
 
 const ROUTE_FLAG_LABELS: Record<string, string> = {

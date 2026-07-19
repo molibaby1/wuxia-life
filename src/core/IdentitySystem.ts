@@ -11,6 +11,21 @@
 import type { PlayerIdentity, IdentityCriteria, IdentityEffects, GameState } from '../types/eventTypes';
 
 export class IdentitySystem {
+  static recordIdentity(state: GameState, identity: PlayerIdentity): GameState {
+    const current = state.identity || { identities: [], primary: 'none' as const };
+    const identities = current.identities.includes(identity)
+      ? current.identities
+      : [...current.identities, identity];
+    return {
+      ...state,
+      identity: {
+        ...current,
+        identities,
+        primary: current.primary === 'none' ? identity : current.primary,
+      },
+    };
+  }
+
   /**
    * 身份判定标准
    * 按优先级排序，优先级高的先判定

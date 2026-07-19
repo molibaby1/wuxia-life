@@ -77,13 +77,7 @@ export class EventExecutor implements IEventExecutor {
     // 重新判定身份（如果有变化）
     const newIdentity = IdentitySystem.determineIdentity(newState);
     if (newIdentity) {
-      const currentPrimary = newState.identity?.primary;
-      if (newIdentity !== currentPrimary) {
-        newState.identity = {
-          identities: [newIdentity],
-          primary: newIdentity,
-        };
-      }
+      newState = IdentitySystem.recordIdentity(newState, newIdentity);
     }
     
     // 处理结局效果
@@ -922,5 +916,4 @@ export class LifepathAddRelationshipHandler implements EffectHandler {
     };
   }
 }
-
 

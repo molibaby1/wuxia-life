@@ -98,6 +98,9 @@ export enum EffectType {
   
   /** 添加承诺 */
   LIFEPATH_ADD_COMMITMENT = 'lifepath_add_commitment',
+
+  /** 规范道路生命周期：承诺或成果证明 */
+  ROAD_LIFECYCLE = 'road_lifecycle',
   
   /** 添加关系 */
   LIFEPATH_ADD_RELATIONSHIP = 'lifepath_add_relationship',
@@ -587,6 +590,10 @@ export interface EffectDefinition {
   stat?: string;
   flag?: string;
   event?: string;
+
+  /** ========== 规范道路生命周期 ========== */
+  roadId?: LifeRoadId;
+  roadAction?: 'commit' | 'proof';
 
   /** 因果变化 - 善行值（用于 karma_change 效果） */
   good?: number;

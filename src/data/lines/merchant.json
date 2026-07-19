@@ -26,7 +26,8 @@
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "stat_modify", "stat": "money", "value": 20},
           {"type": "flag_set", "flag": "merchant_talent", "value": true},
-          {"type": "flag_set", "flag": "route_merchant", "value": true}
+          {"type": "flag_set", "flag": "route_merchant", "value": true},
+          {"type": "road_lifecycle", "roadId": "statecraft", "roadAction": "commit", "target": "study_business", "event": "merchant_talent_discovery"}
         ]
       },
       {
@@ -74,7 +75,8 @@
           {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
-          {"type": "event_record", "target": "merchant_first_shop_grocery"}
+          {"type": "event_record", "target": "merchant_first_shop_grocery"},
+          {"type": "road_lifecycle", "roadId": "statecraft", "roadAction": "proof", "event": "merchant_first_shop_grocery"}
         ]
       },
       {
@@ -83,7 +85,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "flag_set", "flag": "merchant_shop_weapon", "value": true},
-          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "road_lifecycle", "roadId": "statecraft", "roadAction": "proof", "event": "merchant_first_shop_weapon"}
         ]
       },
       {
@@ -92,7 +95,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -40},
           {"type": "flag_set", "flag": "merchant_shop_herb", "value": true},
-          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "road_lifecycle", "roadId": "statecraft", "roadAction": "proof", "event": "merchant_first_shop_herb"}
         ]
       }
     ],

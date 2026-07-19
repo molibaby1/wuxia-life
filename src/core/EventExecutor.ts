@@ -191,6 +191,7 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.LIFEPATH_ADD_FOCUS, new LifepathAddFocusHandler());
     this.handlers.set(EffectType.LIFEPATH_RECORD_ACHIEVEMENT, new LifepathRecordAchievementHandler());
     this.handlers.set(EffectType.LIFEPATH_ADD_COMMITMENT, new LifepathAddCommitmentHandler());
+    this.handlers.set(EffectType.ROAD_LIFECYCLE, new RoadLifecycleHandler());
     this.handlers.set(EffectType.LIFEPATH_ADD_RELATIONSHIP, new LifepathAddRelationshipHandler());
     
     this.handlers.set(EffectType.LIFE_STATE_CHANGE, new LifeStateChangeHandler());
@@ -201,6 +202,22 @@ export class EventExecutor implements IEventExecutor {
    */
   registerHandler(type: EffectType, handler: EffectHandler) {
     this.handlers.set(type, handler);
+  }
+}
+
+/** 规范道路承诺/成果证明处理器 */
+export class RoadLifecycleHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    if (!effect.roadId || !effect.roadAction) {
+      return state;
+    }
+    if (effect.roadAction === 'commit') {
+      return RouteStateManager.commitRoad(state, effect.roadId, {
+        choiceId: effect.target,
+        eventId: effect.event,
+      });
+    }
+    return RouteStateManager.recordRoadProof(state, effect.roadId, effect.event);
   }
 }
 
@@ -916,4 +933,3 @@ export class LifepathAddRelationshipHandler implements EffectHandler {
     };
   }
 }
-

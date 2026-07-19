@@ -49,10 +49,7 @@
             </h3>
           </div>
         </div>
-        <p
-          v-if="!activeActionSummaryDisplay && !disturbanceNarrativeDisplay && !periodSummaryDisplay"
-          class="story-text story-text-clamped"
-        >
+        <p class="story-text story-text-clamped">
           {{ currentNode.text }}
         </p>
 
@@ -405,6 +402,7 @@ const continueToNext = () => {
 
 const showContinueButton = computed(() => {
   if (props.isAutoPlaying) return false;
+  if (progressionFeedbackToast.value) return false;
   if (props.availableChoices.length > 0) return false;
   if (props.apiMode) {
     return props.apiNeedsProgressionAck === true;
@@ -911,11 +909,15 @@ const loadLatestSave = () => {
 }
 
 .progression-feedback-toast {
-  position: sticky;
-  top: 12px;
-  z-index: 3;
-  margin: 12px 0 0;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 20;
+  width: min(calc(100vw - 32px), 520px);
+  margin: 0;
   padding: 10px 14px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
   border-radius: 12px;
   background: rgba(92, 74, 26, 0.94);
   color: #fffaf1;
@@ -923,7 +925,16 @@ const loadLatestSave = () => {
   line-height: 1.5;
   text-align: center;
   box-shadow: 0 4px 14px rgba(92, 74, 26, 0.18);
-  animation: fadeIn 0.2s ease-out;
+  animation: progressionToastIn 0.2s ease-out;
+}
+
+@keyframes progressionToastIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .outcome-fallback-hint {

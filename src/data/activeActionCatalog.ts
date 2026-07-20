@@ -72,7 +72,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     id: 'action_business_basic',
     category: 'business',
     name: '营商',
-    playerIntent: '经营小本买卖，积累银两与声望',
+    playerIntent: '经营小本买卖，积累银两与名望',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
       { stat: 'money', min: 15, max: 35 },
@@ -84,7 +84,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
       { stat: 'money', amount: 25 },
     ],
     risk: 'medium',
-    metadata: { focusTag: 'wealth', useCase: '缺钱或想走商路时优先' },
+    metadata: { focusTag: 'wealth', useCase: '缺钱或想做经营时优先' },
     onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
   },
   {

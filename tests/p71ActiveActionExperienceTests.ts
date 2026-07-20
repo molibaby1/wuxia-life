@@ -1,4 +1,7 @@
-import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
+import {
+  buildActiveActionChoices,
+  executeActiveActionOnState,
+} from '../src/core/activePlanning/ActivePlanningService';
 import { buildActiveActionSummaryDisplay } from '../src/core/activePlanning/activeActionSummaryBuilder';
 import { markDisturbanceNarrativeShown } from '../src/core/activePlanning/disturbanceNarrativeBuilder';
 import { getDisturbanceNarrativeCopy } from '../src/core/activePlanning/disturbanceNarrativeCatalog';
@@ -22,6 +25,10 @@ function createState(): GameState {
 }
 
 export async function runP71ActiveActionSummaryTests(): Promise<void> {
+  const businessChoice = buildActiveActionChoices().find(choice => choice.actionId === 'action_business_basic');
+  assert(businessChoice?.description.includes('名望') === true, 'business action should expose 名望');
+  assert(businessChoice?.description.includes('声望') === false, 'business action must not expose 声望 as an attribute name');
+
   const state = createState();
   const result = executeActiveActionOnState(state, 'action_training_basic', {
     random: () => 0.5,

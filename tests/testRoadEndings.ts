@@ -15,6 +15,11 @@ function createState(): GameState {
 
 let state = createState();
 state.player.flags.business_empire = true;
+state.player.businessAcumen = 0;
+if (EndingSystem.canUnlockEnding(state, 'richest_man')) {
+  throw new Error('businessAcumen=0 不应解锁 richest_man');
+}
+state.player.businessAcumen = 80;
 if (EndingSystem.determineEnding(state).id === 'richest_man') {
   throw new Error('财富和商业 flag 不应单独替代经世道路证明');
 }

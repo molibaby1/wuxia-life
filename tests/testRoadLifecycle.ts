@@ -1,4 +1,5 @@
 import { RouteStateManager } from '../src/core/RouteStateManager';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function createState(): GameState {
@@ -51,6 +52,39 @@ if (legacy.roadCommitments?.statecraft?.lifecycle !== 'active') {
 }
 if (legacy.roadCommitments?.statecraft?.sourceEventId !== 'legacy_merchant_entry') {
   throw new Error('迁移应保留旧路线来源证据');
+}
+
+const expectedLegacyRoads: Record<string, string> = {
+  merchant: 'statecraft',
+  official: 'official',
+  hermit: 'hermit',
+};
+for (const legacyRouteId of ['merchant', 'official', 'hermit', 'sect', 'hero', 'demonic', 'wanderer']) {
+  const fixture = createState();
+  fixture.routeStates = {
+    [legacyRouteId]: {
+      routeId: legacyRouteId,
+      lifecycle: 'active',
+      category: 'main',
+      lockedIn: false,
+      sourceEventId: `legacy_${legacyRouteId}`,
+    },
+  };
+  const migrated = RouteStateManager.migrateLegacyRoutes(fixture);
+  const expectedRoadId = expectedLegacyRoads[legacyRouteId];
+  if (expectedRoadId) {
+    if (migrated.roadCommitments?.[expectedRoadId as keyof typeof migrated.roadCommitments]?.lifecycle !== 'active') {
+      throw new Error(`${legacyRouteId} should migrate to ${expectedRoadId}`);
+    }
+  } else if (migrated.roadCommitments && Object.keys(migrated.roadCommitments).length > 0) {
+    throw new Error(`${legacyRouteId} must remain historical and not become a canonical road`);
+  }
+}
+
+const loadEngine = new GameEngineIntegration();
+loadEngine.loadGameState(legacy);
+if (loadEngine.getGameState().roadCommitments?.statecraft?.lifecycle !== 'active') {
+  throw new Error('loadGameState must be the legacy migration boundary');
 }
 
 console.log('US-002 route lifecycle tests passed');

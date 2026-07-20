@@ -30,7 +30,7 @@ import { dailyEventSystem } from './DailyEventSystem';
 import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
-import { isCoreRouteIdentity } from './RouteStateManager';
+import { isCoreRouteIdentity, RouteStateManager } from './RouteStateManager';
 import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
 import { appendFormalEventHistory } from './EventHistory';
 import {
@@ -361,6 +361,14 @@ export class GameEngineIntegration {
         )
       : {};
     this.gameState.routeHistory = [...(nextState.routeHistory || [])];
+    this.gameState.roadCommitments = nextState.roadCommitments
+      ? Object.fromEntries(
+          Object.entries(nextState.roadCommitments).map(([roadId, commitment]) => [
+            roadId,
+            { ...commitment },
+          ]),
+        )
+      : {};
     this.gameState.ending = nextState.ending;
     this.gameState.saveVersion = nextState.saveVersion;
     this.gameState.lastSavedAt = nextState.lastSavedAt;
@@ -378,7 +386,7 @@ export class GameEngineIntegration {
   }
 
   public loadGameState(savedState: GameState): void {
-    this.applyGameState(savedState);
+    this.applyGameState(RouteStateManager.migrateLegacyRoutes(savedState));
     const currentAge = this.gameState.player?.age || 0;
     const currentYearEvents = (this.gameState.eventHistory || []).filter(
       record => (record.age ?? currentAge) === currentAge,

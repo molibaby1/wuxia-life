@@ -76,12 +76,8 @@ const COMMITTED_ROUTE_LIFECYCLES: RouteLifecycleState[] = ['active', 'locked_in'
 
 const LEGACY_ROUTE_TO_LIFE_ROAD: Record<string, LifeRoadId> = {
   merchant: 'statecraft',
-  hero: 'martial',
-  sect: 'martial',
-  demonic: 'martial',
   official: 'official',
   hermit: 'hermit',
-  wanderer: 'hermit',
 };
 
 export class RouteStateManager {
@@ -170,7 +166,10 @@ export class RouteStateManager {
       if (!['active', 'locked_in', 'completed'].includes(legacyState.lifecycle)) {
         continue;
       }
-      const lifecycle: LifeRoadStage = legacyState.lifecycle;
+      const lifecycle = toLifeRoadStage(legacyState.lifecycle);
+      if (!lifecycle || lifecycle === 'inactive' || lifecycle === 'temporary') {
+        continue;
+      }
       const commitment: RoadCommitmentRecord = {
         roadId,
         committedAtAge: legacyState.lastChangedAtAge ?? state.player?.age ?? 0,
@@ -419,6 +418,17 @@ export class RouteStateManager {
         },
       ],
     };
+  }
+}
+
+function toLifeRoadStage(lifecycle: RouteLifecycleState): LifeRoadStage | null {
+  switch (lifecycle) {
+    case 'active':
+    case 'locked_in':
+    case 'completed':
+      return lifecycle;
+    default:
+      return null;
   }
 }
 

@@ -30,6 +30,14 @@ if (model.identitySummary !== 'merchant / doctor') {
 if (!model.routeSummary.includes('经世')) {
   throw new Error('主界面路线摘要必须读取规范道路名');
 }
+if (!model.roadCommitmentSummary.includes('入局')) {
+  throw new Error('经世 active 阶段应显示玩家语义“入局”');
+}
+state = RouteStateManager.recordRoadProof(state, 'statecraft', 'merchant_proof');
+const lockedModel = buildMainScreenModel(player, deriveLifeMemorySummary(state));
+if (!lockedModel.roadCommitmentSummary.includes('经世 · 深耕 · 证明 1')) {
+  throw new Error('经世 locked_in 阶段应显示玩家语义“深耕”');
+}
 if (!model.topResources.find((item) => item.key === 'reputation')?.description?.includes('不直接推进道路')) {
   throw new Error('主界面必须解释声望不是道路投入');
 }

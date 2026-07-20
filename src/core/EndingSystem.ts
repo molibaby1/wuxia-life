@@ -107,6 +107,18 @@ interface EndingEvaluationData {
   roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
 }
 
+const EMPTY_LIFE_STATES: PlayerLifeStates = {
+  fatigue: 0,
+  discipline: 0,
+  indulgence: 0,
+  familyBond: 0,
+  socialMomentum: 0,
+  anxiety: 0,
+  trainingHabit: 0,
+  studyHabit: 0,
+  businessHabit: 0,
+};
+
 export class EndingSystem {
   /**
    * 结局定义
@@ -339,9 +351,9 @@ export class EndingSystem {
       internalSkill: player.internalSkill,
       qinggong: player.qinggong,
       connections: player.connections,
-      knowledge: player.knowledge,
-      businessAcumen: player.businessAcumen,
-      influence: player.influence,
+      knowledge: player.knowledge ?? 0,
+      businessAcumen: player.businessAcumen ?? 0,
+      influence: player.influence ?? 0,
       good_karma: karma?.good_karma || 0,
       evil_karma: karma?.evil_karma || 0,
       flags: Object.keys(player.flags || {}).filter(f => player.flags?.[f]),
@@ -350,14 +362,7 @@ export class EndingSystem {
       age: player.age,
       spouse: player.spouse,
       children: player.children,
-      lifeStates: player.lifeStates || {
-        fatigue: 0,
-        discipline: 0,
-        indulgence: 0,
-        familyBond: 0,
-        socialMomentum: 0,
-        anxiety: 0,
-      },
+      lifeStates: player.lifeStates || EMPTY_LIFE_STATES,
       traitProfile: player.traitProfile,
       roadCommitments: state.roadCommitments,
     };
@@ -392,7 +397,11 @@ export class EndingSystem {
     data: EndingEvaluationData,
     requirements: EndingInfo['requirements']
   ): boolean {
-    const numericFields: Array<keyof EndingInfo['requirements']> = [
+    const numericFields: Array<
+      'money' | 'comprehension' | 'knowledge' | 'reputation' | 'martialPower'
+      | 'externalSkill' | 'internalSkill' | 'qinggong' | 'connections'
+      | 'businessAcumen' | 'influence' | 'good_karma' | 'evil_karma' | 'age'
+    > = [
       'money', 'comprehension', 'knowledge', 'reputation', 'martialPower',
       'externalSkill', 'internalSkill', 'qinggong', 'connections',
       'businessAcumen', 'influence', 'good_karma', 'evil_karma', 'age',
@@ -600,6 +609,9 @@ export class EndingSystem {
       internalSkill: player.internalSkill,
       qinggong: player.qinggong,
       connections: player.connections,
+      knowledge: player.knowledge ?? 0,
+      businessAcumen: player.businessAcumen ?? 0,
+      influence: player.influence ?? 0,
       good_karma: karma?.good_karma || 0,
       evil_karma: karma?.evil_karma || 0,
       flags: Object.keys(player.flags || {}).filter(f => player.flags?.[f]),
@@ -607,14 +619,7 @@ export class EndingSystem {
       age: player.age,
       spouse: player.spouse,
       children: player.children,
-      lifeStates: player.lifeStates || {
-        fatigue: 0,
-        discipline: 0,
-        indulgence: 0,
-        familyBond: 0,
-        socialMomentum: 0,
-        anxiety: 0,
-      },
+      lifeStates: player.lifeStates || EMPTY_LIFE_STATES,
       traitProfile: player.traitProfile,
       roadCommitments: state.roadCommitments,
     };

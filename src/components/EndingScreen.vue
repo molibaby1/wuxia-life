@@ -15,6 +15,12 @@
         <div class="death-reason">
           <p>{{ player?.deathReason }}</p>
         </div>
+
+        <div class="road-ending" aria-label="道路结局">
+          <p><strong>道路结局：</strong>{{ canonicalRoad ? `${canonicalRoad.name}道路结局` : '未形成明确道路结局' }}</p>
+          <p v-if="canonicalRoad">阶段：{{ canonicalRoad.phase }} · 证明：{{ canonicalRoad.proofCount }}</p>
+          <p><strong>身份摘要：</strong>{{ lifeMemory?.identity?.all?.join(' / ') || '暂无身份' }}</p>
+        </div>
         
         <div class="final-stats">
           <h3>人生回顾</h3>
@@ -77,6 +83,9 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import type { LifeMemorySummary } from '../types/lifeMemory';
+
 const emit = defineEmits(['restart', 'load-latest-save']);
 const props = defineProps<{
   player: {
@@ -94,10 +103,18 @@ const props = defineProps<{
   } | null;
   hasLatestSave?: boolean;
   latestSaveLabel?: string;
+  lifeMemory?: LifeMemorySummary | null;
 }>();
 const player = props.player;
 const hasLatestSave = props.hasLatestSave ?? false;
 const latestSaveLabel = props.latestSaveLabel ?? '';
+const canonicalRoad = computed(() => {
+  const memory = props.lifeMemory;
+  const primaryId = memory?.routeStatus?.primary.routeId;
+  return memory?.roadCommitments?.find((road) => road.roadId === primaryId)
+    ?? memory?.roadCommitments?.[0]
+    ?? null;
+});
 
 const share = () => {
   const shareText = `${player?.name}的武侠人生：${player?.deathReason}，获得称号「${player?.title}」！快来试试你的武侠人生吧！`;

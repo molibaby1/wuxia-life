@@ -97,12 +97,6 @@ function buildDailyReplayEvent(
         value: true,
         flag,
       })) as EventDefinition['autoEffects']),
-      {
-        type: EffectType.TIME_ADVANCE,
-        target: 'time',
-        value: 1,
-        timeUnit: 'year',
-      },
     ],
   };
 }

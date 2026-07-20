@@ -8,6 +8,7 @@ import { gameEngine } from './core/GameEngineIntegration';
 import { resolvePlanningPlaceholderText } from './data/infantPassiveNarratives';
 import { isPlayerDebugEnabled } from './utils/debugAccess';
 import { webPlatformStorage } from './adapters/platform/webPlatformStorage';
+import { deriveLifeMemorySummary } from './core/deriveLifeMemorySummary';
 
 const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
 const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
@@ -323,6 +324,11 @@ const endingPlayer = computed(() => {
   return gameEngine.getGameState().player ?? null;
 });
 
+const endingLifeMemory = computed(() => {
+  if (apiMode) return apiLifeMemory.value;
+  return deriveLifeMemorySummary(gameEngine.getGameState());
+});
+
 const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {
   if (apiMode) {
     if (choice.isActiveAction) {
@@ -402,6 +408,7 @@ const onApiManualSave = async () => {
     <EndingScreen
       v-else
       :player="endingPlayer"
+      :life-memory="endingLifeMemory"
       :has-latest-save="!!latestSave && !apiMode"
       :latest-save-label="latestSaveLabel"
       @restart="handleRestart"

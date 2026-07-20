@@ -87,7 +87,7 @@
       ],
       "priority": 5,
       "passes": true,
-      "notes": "See PRD §3.3, US-005, and §6. Combination endings are deferred."
+      "notes": "Verified: road-ending tests and businessAcumen=0 regression pass; build no longer reports EndingSystem errors. Remaining build failures are outside this PRD in HVG/P16 fixtures."
     },
     {
       "id": "US-006",
@@ -106,7 +106,7 @@
       ],
       "priority": 6,
       "passes": true,
-      "notes": "See PRD US-006 and §6. Reuse existing merchant lines and fixtures; do not batch-edit all src/data/lines/*.json."
+      "notes": "Verified through GameEngineIntegration, including auto event, load/reset, snapshot, and UI deepening label. Reuse existing merchant lines; no batch migration."
     },
     {
       "id": "US-007",
@@ -122,7 +122,7 @@
       ],
       "priority": 7,
       "passes": true,
-      "notes": "See PRD §7. Run narrow affected tests first; defer unrelated full-suite failures."
+      "notes": "Verified: typecheck, lifecycle, merchant, snapshot, parity, ending, and canonical UI tests pass. Full build remains blocked only by unrelated HVG/P16 baseline errors."
     }
   ]
 }

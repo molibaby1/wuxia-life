@@ -264,7 +264,16 @@ function buildRiskSummary(summary: LifeMemorySummary): string {
 function buildRoadCommitmentSummary(summary: LifeMemorySummary): string {
   const commitments = summary.roadCommitments ?? [];
   if (commitments.length === 0) return '暂无明确承诺';
-  return commitments.map((item) => `${item.name} · ${item.phase} · 证明 ${item.proofCount}`).join(' / ');
+  const phaseLabels: Record<string, string> = {
+    inactive: '未入门',
+    temporary: '试探',
+    active: '入局',
+    locked_in: '深耕',
+    completed: '终局',
+  };
+  return commitments
+    .map((item) => `${item.name} · ${phaseLabels[item.phase] ?? item.phase} · 证明 ${item.proofCount}`)
+    .join(' / ');
 }
 
 function buildIdentitySummary(summary: LifeMemorySummary): string {

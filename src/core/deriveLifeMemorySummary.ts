@@ -123,6 +123,15 @@ function isCoPrimaryLifecycle(lifecycle: RouteLifecycleState): boolean {
 }
 
 function readActiveRoutes(state: GameState): ActiveRoute[] {
+  const commitments = Object.values(state.roadCommitments ?? {}).filter(Boolean);
+  if (commitments.length > 0) {
+    return commitments.map((commitment) => ({
+      routeId: commitment!.roadId,
+      lifecycle: commitment!.lifecycle,
+      lockedIn: commitment!.lifecycle === 'locked_in' || commitment!.lifecycle === 'completed',
+    }));
+  }
+
   const routeStates = state.routeStates || {};
   const active: ActiveRoute[] = [];
 

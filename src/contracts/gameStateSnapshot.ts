@@ -18,6 +18,7 @@ import type {
   PlayerTraitProfile,
   Relationship,
 } from '../types/eventTypes';
+import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
 export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '1.0.0' as const;
@@ -65,6 +66,16 @@ export interface SnapshotRouteHistoryEntry {
   eventId?: string;
   reason?: string;
   timestamp: number;
+}
+
+export interface SnapshotRoadCommitment {
+  roadId: LifeRoadId;
+  committedAtAge: number;
+  sourceChoiceId?: string;
+  sourceEventId?: string;
+  proofCount: number;
+  latestProofEventId?: string;
+  lifecycle: LifeRoadStage;
 }
 
 /** Engine calendar time (§5). */
@@ -156,6 +167,7 @@ export interface GameStateSnapshotState {
   currentTime?: SnapshotCurrentTime;
   routeStates?: Record<string, SnapshotRouteState>;
   routeHistory?: SnapshotRouteHistoryEntry[];
+  roadCommitments?: Partial<Record<LifeRoadId, SnapshotRoadCommitment>>;
   lifePath?: LifePath;
   identity?: IdentityInfo;
   karma?: KarmaSystem;

@@ -12,6 +12,17 @@ export function runSnapshotAdapterTests(): void {
   const before = gameEngine.getGameState();
   before.routeStates = before.routeStates ?? {};
   before.eventHistory = before.eventHistory ?? [];
+  before.roadCommitments = {
+    statecraft: {
+      roadId: 'statecraft',
+      committedAtAge: 16,
+      sourceChoiceId: 'study_business',
+      sourceEventId: 'merchant_talent_discovery',
+      proofCount: 1,
+      latestProofEventId: 'merchant_first_shop_grocery',
+      lifecycle: 'locked_in',
+    },
+  };
   const memoryBefore = deriveLifeMemorySummary(before);
 
   const snapshot = defaultSnapshotConverter.toSnapshot(before, {
@@ -24,6 +35,9 @@ export function runSnapshotAdapterTests(): void {
   const hydrated = defaultSnapshotConverter.fromSnapshot(snapshot);
   assert(hydrated.player.name === before.player.name, 'player name round trip');
   assert(JSON.stringify(hydrated.routeStates) === JSON.stringify(before.routeStates), 'route state');
+  assert(hydrated.roadCommitments?.statecraft?.lifecycle === 'locked_in', 'road lifecycle');
+  assert(hydrated.roadCommitments?.statecraft?.proofCount === 1, 'road proof count');
+  assert(hydrated.roadCommitments?.statecraft?.sourceEventId === 'merchant_talent_discovery', 'road source event');
   assert(hydrated.eventHistory.length === before.eventHistory.length, 'event history length');
 
   gameEngine.loadGameState(hydrated);

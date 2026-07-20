@@ -488,7 +488,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         : null;
       return {
         isTerminal: true,
-        isAlive: true,
+        isAlive: player.alive,
+        deathReason: player.deathReason ?? endingInfo?.name,
         endingId: endingInfo?.id ?? String(ending),
         ending: endingInfo?.id && endingInfo.name && endingInfo.description && endingInfo.category
           ? {

@@ -29,7 +29,7 @@ const STAT_LABELS: Record<string, string> = {
   charisma: '魅力',
   comprehension: '悟性',
   chivalry: '侠义',
-  reputation: '声望',
+  reputation: '名望',
   connections: '人脉',
   knowledge: '学识',
   money: '银两',

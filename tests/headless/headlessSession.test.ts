@@ -29,6 +29,27 @@ export async function runHeadlessSessionTests(): Promise<void> {
   const memory = hydrated.getLifeMemory();
   assert(memory.schemaVersion.length > 0, 'life memory read');
 
+  const terminalSnapshot = session.serialize();
+  terminalSnapshot.state.player.alive = false;
+  terminalSnapshot.state.player.deathReason = undefined;
+  terminalSnapshot.state.ending = {
+    id: 'richest_man',
+    name: '经世巨贾',
+    description: '以经营立身，富甲一方。',
+    category: 'positive',
+  };
+  const terminalSession = HeadlessEngineSessionImpl.create({ snapshot: terminalSnapshot });
+  const terminal = terminalSession.getTerminalState();
+  assert(terminal?.isAlive === false, 'ending terminal must reflect runtime player.alive');
+  assert(terminal?.deathReason === '经世巨贾', 'ending name should fill missing deathReason');
+  assert(
+    terminal?.ending?.id === 'richest_man' &&
+      terminal.ending.name === '经世巨贾' &&
+      terminal.ending.description === '以经营立身，富甲一方。' &&
+      terminal.ending.category === 'positive',
+    'ending terminal must return the complete ending payload',
+  );
+
   await session.restart({ playerName: '重启', gender: 'female', randomSeed: 202 });
   assert(session.getTerminalState() === null || session.getTerminalState() !== null, 'terminal read callable');
 

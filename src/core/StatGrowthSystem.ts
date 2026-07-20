@@ -205,7 +205,7 @@ export class StatGrowthSystem {
       'comprehension': '悟性',
       'knowledge': '学识',
       'connections': '人脉',
-      'reputation': '声望',
+      'reputation': '名望',
       'wealth': '财富',
       'chivalry': '侠义'
     };

@@ -713,7 +713,7 @@ export function useNewGameEngine() {
             parts.push(isPositive ? '你的身体更加健壮' : '你似乎更容易感到疲惫');
           } else if (statName === '悟性') {
             parts.push(isPositive ? '你对武学的理解更加深刻' : '有些道理似乎变得难以领悟');
-          } else if (statName === '声望') {
+          } else if (statName === '名望') {
             parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
           } else if (statName === '学识') {
             parts.push(isPositive ? '你的见识增长了不少' : '你意识到自己还有太多不懂');
@@ -725,7 +725,7 @@ export function useNewGameEngine() {
             parts.push(isPositive ? '你在江湖中的分量更重了' : '你感到自己说话不那么管用了');
           } else if (statName === '人脉') {
             parts.push(isPositive ? '你结识了新的朋友' : '某些关系似乎变得淡漠了');
-          } else if (statName === '商路') {
+          } else if (statName === '经营') {
             parts.push(isPositive ? '你的生意头脑愈发灵活' : '你对商场的感觉有些迟钝');
           }
           break;
@@ -824,11 +824,11 @@ export function useNewGameEngine() {
       charisma: '魅力',
       constitution: '体质',
       comprehension: '悟性',
-      reputation: '声望',
+      reputation: '名望',
       influence: '影响力',
       connections: '人脉',
       knowledge: '学识',
-      businessAcumen: '商路',
+      businessAcumen: '经营',
       money: '金钱',
       health: '健康',
     };

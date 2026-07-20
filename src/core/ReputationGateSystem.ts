@@ -50,7 +50,7 @@ export function checkReputationGate(
     return {
       canTrigger: false,
       currentTier,
-      reason: `声望不足（当前: ${playerReputation}, 要求: ≥${adjustedMin}，还需 ${distance} 点）`,
+      reason: `名望不足（当前: ${playerReputation}, 要求: ≥${adjustedMin}，还需 ${distance} 点）`,
       distanceToNextTier: distance
     };
   }
@@ -61,14 +61,14 @@ export function checkReputationGate(
     return {
       canTrigger: false,
       currentTier,
-      reason: `声望过高（当前: ${playerReputation}, 要求: ≤${adjustedMax}）`
+      reason: `名望过高（当前: ${playerReputation}, 要求: ≤${adjustedMax}）`
     };
   }
 
   return {
     canTrigger: true,
     currentTier,
-    reason: '声望满足要求'
+    reason: '名望满足要求'
   };
 }
 
@@ -86,14 +86,14 @@ export function checkEventTypeAvailability(
     return {
       canTrigger: false,
       currentTier,
-      reason: `当前声望等级「${currentTier.name}」无法触发 ${category} 类型事件`
+      reason: `当前名望等级「${currentTier.name}」无法触发 ${category} 类型事件`
     };
   }
 
   return {
     canTrigger: true,
     currentTier,
-    reason: `声望等级「${currentTier.name}」可触发此类事件`
+    reason: `名望等级「${currentTier.name}」可触发此类事件`
   };
 }
 
@@ -111,7 +111,7 @@ export function getReputationAdvice(event: EventDefinition): string {
 
   const currentTier = getReputationTier(adjustedMin);
 
-  return `建议达到「${currentTier.name}」后再尝试触发此事件（声望 ≥ ${adjustedMin}）`;
+  return `建议达到「${currentTier.name}」后再尝试触发此事件（名望 ≥ ${adjustedMin}）`;
 }
 
 /**
@@ -123,10 +123,10 @@ export function getReputationImprovementTips(currentReputation: number): string[
 
   if (nextTier) {
     const distance = getDistanceToNextTier(currentReputation);
-    tips.push(`再获得 ${distance} 点声望即可晋升为「${nextTier.name}」`);
+    tips.push(`再获得 ${distance} 点名望即可晋升为「${nextTier.name}」`);
     tips.push(`「${nextTier.name}」可解锁: ${nextTier.unlockedEvents.length} 个特殊事件`);
   } else {
-    tips.push('你已达到最高声望等级！');
+    tips.push('你已达到最高名望等级！');
   }
 
   const currentTier = getReputationTier(currentReputation);

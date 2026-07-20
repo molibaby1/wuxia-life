@@ -10,7 +10,7 @@ export const WUXIA_PROFILE_STATS: WorldProfileStatEntry[] = [
   { id: 'comprehension', label: '悟性', role: 'implicit' },
   { id: 'charisma', label: '魅力', role: 'action_reward' },
   { id: 'connections', label: '人脉', role: 'action_reward' },
-  { id: 'reputation', label: '声望', role: 'implicit' },
+  { id: 'reputation', label: '名望', role: 'implicit' },
   { id: 'chivalry', label: '侠义', role: 'implicit' },
   { id: 'knowledge', label: '学识', role: 'scheduling_relevant' },
   { id: 'money', label: '银两', role: 'scheduling_relevant' },

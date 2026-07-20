@@ -56,6 +56,23 @@ if (RouteStateManager.readRoadStage({
   throw new Error('invalid legacy lifecycle must not be forced into a canonical road stage');
 }
 
+const reversedPositions = createState();
+reversedPositions.roadCommitments = {
+  official: {
+    roadId: 'official', position: 'secondary', committedAtAge: 24,
+    proofCount: 1, lifecycle: 'locked_in', sourceEventId: 'official_entry',
+  },
+  statecraft: {
+    roadId: 'statecraft', position: 'primary', committedAtAge: 23,
+    proofCount: 2, lifecycle: 'locked_in', sourceEventId: 'statecraft_entry',
+  },
+};
+const normalizedReversed = RouteStateManager.normalizeRoadCommitments(reversedPositions);
+if (normalizedReversed.roadCommitments?.official?.position !== 'secondary'
+  || normalizedReversed.roadCommitments?.statecraft?.position !== 'primary') {
+  throw new Error('normalization must preserve explicit primary/secondary positions');
+}
+
 let legacy = createState();
 legacy.routeStates = {
   merchant: {

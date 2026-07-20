@@ -241,10 +241,16 @@ export class RouteStateManager {
     if (entries.length === 0) {
       return { ...state, roadCommitments: {} };
     }
-    const roadCommitments = Object.fromEntries(entries.map(([roadId, commitment], index) => [
-      roadId,
-      { ...commitment, position: index === 0 ? 'primary' : 'secondary' },
-    ]));
+    const usedPositions = new Set(entries
+      .map(([, commitment]) => commitment.position)
+      .filter((position): position is 'primary' | 'secondary' =>
+        position === 'primary' || position === 'secondary'));
+    const missingPositions: Array<'primary' | 'secondary'> = ['primary', 'secondary']
+      .filter(position => !usedPositions.has(position));
+    const roadCommitments = Object.fromEntries(entries.map(([roadId, commitment]) => {
+      const position = commitment.position ?? missingPositions.shift();
+      return [roadId, { ...commitment, position }];
+    }));
     return { ...state, roadCommitments };
   }
 

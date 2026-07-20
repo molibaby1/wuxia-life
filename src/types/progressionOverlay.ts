@@ -45,11 +45,11 @@ function getStatName(stat: string): string {
     charisma: '魅力',
     constitution: '体魄',
     comprehension: '悟性',
-    reputation: '声望',
+    reputation: '名望',
     influence: '影响力',
     connections: '人脉',
     knowledge: '学识',
-    businessAcumen: '商路',
+    businessAcumen: '经营',
     money: '银两',
     health: '健康',
   };

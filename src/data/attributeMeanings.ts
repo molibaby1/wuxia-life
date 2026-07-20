@@ -67,7 +67,7 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
   },
   {
     key: 'reputation',
-    name: '声望',
+    name: '名望',
     purpose: '江湖名望，解锁高门槛事件',
     examples: ['侠名远播', '恶名昭彰'],
     visibilityTier: 'implicit',

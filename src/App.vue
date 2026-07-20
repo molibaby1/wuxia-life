@@ -329,6 +329,11 @@ const endingLifeMemory = computed(() => {
   return deriveLifeMemorySummary(gameEngine.getGameState());
 });
 
+const endingInfo = computed(() => {
+  if (apiMode) return activeSession.value?.terminal?.ending ?? null;
+  return gameEngine.getGameState().ending ?? null;
+});
+
 const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {
   if (apiMode) {
     if (choice.isActiveAction) {
@@ -409,6 +414,7 @@ const onApiManualSave = async () => {
       v-else
       :player="endingPlayer"
       :life-memory="endingLifeMemory"
+      :ending="endingInfo"
       :has-latest-save="!!latestSave && !apiMode"
       :latest-save-label="latestSaveLabel"
       @restart="handleRestart"

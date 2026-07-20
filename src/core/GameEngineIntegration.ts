@@ -386,7 +386,9 @@ export class GameEngineIntegration {
   }
 
   public loadGameState(savedState: GameState): void {
-    this.applyGameState(RouteStateManager.migrateLegacyRoutes(savedState));
+    this.applyGameState(RouteStateManager.normalizeRoadCommitments(
+      RouteStateManager.migrateLegacyRoutes(savedState),
+    ));
     const currentAge = this.gameState.player?.age || 0;
     const currentYearEvents = (this.gameState.eventHistory || []).filter(
       record => (record.age ?? currentAge) === currentAge,

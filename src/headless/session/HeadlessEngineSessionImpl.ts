@@ -473,7 +473,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   getTerminalState(): HeadlessTerminalState | null {
     const player = this.engine.getGameState().player;
     if (!player) return null;
-    if (player.alive === false) {
+    const ending = this.engine.getGameState().ending;
+    if (player.alive === false && !ending) {
       return {
         isTerminal: true,
         isAlive: false,
@@ -481,12 +482,22 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         age: player.age,
       };
     }
-    const ending = this.engine.getGameState().ending;
     if (ending) {
+      const endingInfo = typeof ending === 'object' && ending !== null
+        ? ending as { id?: string; name?: string; description?: string; category?: string }
+        : null;
       return {
         isTerminal: true,
         isAlive: true,
-        endingId: String(ending),
+        endingId: endingInfo?.id ?? String(ending),
+        ending: endingInfo?.id && endingInfo.name && endingInfo.description && endingInfo.category
+          ? {
+              id: endingInfo.id,
+              name: endingInfo.name,
+              description: endingInfo.description,
+              category: endingInfo.category,
+            }
+          : undefined,
         age: player.age,
       };
     }

@@ -215,7 +215,7 @@ const nonCombatStatConfigs = [
   { key: 'charisma', name: '魅力' },
   { key: 'comprehension', name: '悟性' },
   { key: 'chivalry', name: '侠义', min: -100, max: 100 },
-  { key: 'reputation', name: '声望', min: -1000, max: 1000 },
+  { key: 'reputation', name: '名望', min: -1000, max: 1000 },
   { key: 'connections', name: '人脉' },
   { key: 'knowledge', name: '学识' },
   { key: 'wealth', name: '财富', max: 10000 }
@@ -481,7 +481,7 @@ const getStatName = (key: string) => {
     'charisma': '魅力',
     'comprehension': '悟性',
     'chivalry': '侠义',
-    'reputation': '声望',
+    'reputation': '名望',
     'connections': '人脉',
     'knowledge': '学识',
     'wealth': '财富'

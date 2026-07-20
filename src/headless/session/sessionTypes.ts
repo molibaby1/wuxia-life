@@ -68,6 +68,7 @@ export interface HeadlessTerminalState {
   isAlive: boolean;
   deathReason?: string;
   endingId?: string;
+  ending?: { id: string; name: string; description: string; category: string };
   age: number;
 }
 

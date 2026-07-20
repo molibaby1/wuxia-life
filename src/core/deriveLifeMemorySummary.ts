@@ -29,10 +29,10 @@ import {
   type LifeMemorySummary,
 } from '../types/lifeMemory';
 import { formatLifeRoadLabel, type LifeRoadId } from '../types/lifeRoad';
+import { isLifeRoadId } from '../types/lifeRoad';
 import {
   ROUTE_DISPLAY_NAMES,
   formatRouteLabel,
-  getPlayerRouteSummary,
   lifecyclePhaseLabel,
 } from '../utils/playerFacingLabels';
 import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
@@ -112,6 +112,7 @@ type ActiveRoute = {
   routeId: string;
   lifecycle: RouteLifecycleState;
   lockedIn: boolean;
+  position?: 'primary' | 'secondary';
 };
 
 function isActiveLifecycle(lifecycle: RouteLifecycleState): boolean {
@@ -125,18 +126,21 @@ function isCoPrimaryLifecycle(lifecycle: RouteLifecycleState): boolean {
 function readActiveRoutes(state: GameState): ActiveRoute[] {
   const commitments = Object.values(state.roadCommitments ?? {}).filter(Boolean);
   if (commitments.length > 0) {
-    return commitments.map((commitment) => ({
-      routeId: commitment!.roadId,
-      lifecycle: commitment!.lifecycle,
-      lockedIn: commitment!.lifecycle === 'locked_in' || commitment!.lifecycle === 'completed',
-    }));
+    return commitments
+      .sort((a, b) => (a!.position === 'primary' ? -1 : 1) - (b!.position === 'primary' ? -1 : 1))
+      .map((commitment) => ({
+        routeId: commitment!.roadId,
+        lifecycle: commitment!.lifecycle,
+        lockedIn: commitment!.lifecycle === 'locked_in' || commitment!.lifecycle === 'completed',
+        position: commitment!.position,
+      }));
   }
 
   const routeStates = state.routeStates || {};
   const active: ActiveRoute[] = [];
 
   for (const [routeId, record] of Object.entries(routeStates)) {
-    if (record && isActiveLifecycle(record.lifecycle)) {
+    if (record && isLifeRoadId(routeId) && isActiveLifecycle(record.lifecycle)) {
       active.push({
         routeId,
         lifecycle: record.lifecycle,
@@ -147,27 +151,6 @@ function readActiveRoutes(state: GameState): ActiveRoute[] {
 
   if (active.length > 0) {
     return active;
-  }
-
-  const flags = state.flags || {};
-  if (flags.route_orthodox) {
-    active.push({ routeId: 'sect', lifecycle: 'active', lockedIn: false });
-  } else if (flags.route_demonic) {
-    active.push({ routeId: 'demonic', lifecycle: 'active', lockedIn: false });
-  } else if (flags.route_wanderer || flags.route_border) {
-    active.push({ routeId: 'wanderer', lifecycle: 'active', lockedIn: false });
-  } else if (
-    flags.route_merchant
-    || flags.route_wealth_committed
-    || flags.p22_wealth_route_forked
-    || flags.p9_merchant_midlife_path
-    || flags.p9_wealth_caravan_gate_done
-    || (
-      flags.p8_route_wealth
-      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
-    )
-  ) {
-    active.push({ routeId: 'merchant', lifecycle: 'active', lockedIn: false });
   }
 
   return active;
@@ -191,9 +174,16 @@ function pickPrimaryAndSecondary(state: GameState): {
   }
 
   let primary = activeRoutes.find((route) =>
-    (PRIORITY_ROUTE_IDS as readonly string[]).includes(route.routeId)
+    route.position === 'primary'
     && isCoPrimaryLifecycle(route.lifecycle),
   );
+
+  if (!primary) {
+    primary = activeRoutes.find((route) =>
+    (PRIORITY_ROUTE_IDS as readonly string[]).includes(route.routeId)
+    && isCoPrimaryLifecycle(route.lifecycle),
+    );
+  }
 
   if (!primary) {
     primary = activeRoutes.find((route) => isCoPrimaryLifecycle(route.lifecycle));
@@ -229,19 +219,16 @@ function buildRouteStatus(state: GameState): LifeMemoryRouteStatus {
 
   const activeRouteFlags = Object.keys(flags).filter((key) => key.startsWith('route_') && flags[key]);
 
-  let legacySource: string | undefined;
-  let primarySummary = getPlayerRouteSummary(state);
+  const legacySource = Object.keys(routeStates).some((routeId) => !isLifeRoadId(routeId))
+    || activeRouteFlags.length > 0
+    ? 'legacy-route-data'
+    : undefined;
+  let primarySummary = { name: '未定', phase: '未入门' };
 
   if (primary) {
     primarySummary = {
       name: ROUTE_DISPLAY_NAMES[primary.routeId] || formatRouteLabel(primary.routeId),
       phase: lifecyclePhaseLabel(primary.lifecycle, primary.lockedIn),
-    };
-  } else if (state.lifePath?.faction && !flags.sect_faction && Object.keys(routeStates).length === 0) {
-    legacySource = 'lifePath.faction';
-    primarySummary = {
-      name: formatRouteLabel(state.lifePath.faction),
-      phase: '未入门',
     };
   }
 

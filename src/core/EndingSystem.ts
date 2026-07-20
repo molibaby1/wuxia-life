@@ -338,34 +338,7 @@ export class EndingSystem {
    * 根据玩家状态判定最匹配的结局
    */
   static determineEnding(state: GameState): EndingInfo {
-    const { player, karma, criticalChoices, achievements } = state;
-    
-    // 构建判定数据
-    const playerData = {
-      chivalry: player.chivalry,
-      money: player.money,
-      comprehension: player.comprehension,
-      reputation: player.reputation,
-      martialPower: player.martialPower,
-      externalSkill: player.externalSkill,
-      internalSkill: player.internalSkill,
-      qinggong: player.qinggong,
-      connections: player.connections,
-      knowledge: player.knowledge ?? 0,
-      businessAcumen: player.businessAcumen ?? 0,
-      influence: player.influence ?? 0,
-      good_karma: karma?.good_karma || 0,
-      evil_karma: karma?.evil_karma || 0,
-      flags: Object.keys(player.flags || {}).filter(f => player.flags?.[f]),
-      achievements: achievements || [],
-      choices: criticalChoices || {},
-      age: player.age,
-      spouse: player.spouse,
-      children: player.children,
-      lifeStates: player.lifeStates || EMPTY_LIFE_STATES,
-      traitProfile: player.traitProfile,
-      roadCommitments: state.roadCommitments,
-    };
+    const playerData = this.buildEndingEvaluationData(state);
 
     const negative = this.ENDINGS
       .filter(ending => ending.category === 'negative')
@@ -597,9 +570,15 @@ export class EndingSystem {
     const ending = this.getEndingById(endingId);
     if (!ending) return false;
     
-    const { player, karma, achievements } = state;
-    
-    const playerData = {
+    const playerData = this.buildEndingEvaluationData(state);
+    const meetsRequirements = this.meetsEndingRequirements(playerData, ending.requirements);
+    return meetsRequirements
+      && (ending.category !== 'positive' || this.qualifiesForPositiveEnding(playerData, ending.id));
+  }
+
+  private static buildEndingEvaluationData(state: GameState): EndingEvaluationData {
+    const { player, karma, criticalChoices, achievements } = state;
+    return {
       chivalry: player.chivalry,
       money: player.money,
       comprehension: player.comprehension,
@@ -616,6 +595,7 @@ export class EndingSystem {
       evil_karma: karma?.evil_karma || 0,
       flags: Object.keys(player.flags || {}).filter(f => player.flags?.[f]),
       achievements: achievements || [],
+      choices: criticalChoices || {},
       age: player.age,
       spouse: player.spouse,
       children: player.children,
@@ -623,8 +603,6 @@ export class EndingSystem {
       traitProfile: player.traitProfile,
       roadCommitments: state.roadCommitments,
     };
-    
-    return this.meetsEndingRequirements(playerData, ending.requirements);
   }
 
   /**

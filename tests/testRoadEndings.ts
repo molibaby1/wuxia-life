@@ -1,4 +1,5 @@
 import { EndingSystem } from '../src/core/EndingSystem';
+import { EventExecutor } from '../src/core/EventExecutor';
 import { RouteStateManager } from '../src/core/RouteStateManager';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
@@ -35,6 +36,19 @@ if (!EndingSystem.canUnlockEnding(state, 'richest_man')) {
   throw new Error('richest_man 在经世 locked_in + proof 后应被解锁');
 }
 
+const qualificationBlocked = createState();
+qualificationBlocked.player.flags.business_empire = true;
+qualificationBlocked.player.lifeStates = {
+  fatigue: 0, discipline: 0, indulgence: 0, familyBond: 3,
+  socialMomentum: 0, anxiety: 0, trainingHabit: 0, studyHabit: 0, businessHabit: 0,
+};
+let blockedRoad = RouteStateManager.commitRoad(qualificationBlocked, 'statecraft', { eventId: 'merchant_commitment' });
+blockedRoad = RouteStateManager.recordRoadProof(blockedRoad, 'statecraft', 'merchant_proof');
+if (EndingSystem.canUnlockEnding(blockedRoad, 'richest_man')
+  || EndingSystem.determineEnding(blockedRoad).id === 'richest_man') {
+  throw new Error('canUnlockEnding and determineEnding must share positive ending qualification gates');
+}
+
 let martial = createState();
 martial = RouteStateManager.commitRoad(martial, 'martial', { eventId: 'martial_commitment' });
 martial = RouteStateManager.recordRoadProof(martial, 'martial', 'martial_proof');
@@ -60,3 +74,46 @@ if (!EndingSystem.canUnlockEnding(official, 'official_minister')) {
 }
 
 console.log('US-005 road ending tests passed');
+
+async function verifyEndingRoadCompletion(): Promise<void> {
+  const executor = new EventExecutor();
+  let successful = createState();
+  successful.player.flags.business_empire = true;
+  successful = RouteStateManager.commitRoad(successful, 'statecraft', { eventId: 'merchant_commitment' });
+  successful = RouteStateManager.recordRoadProof(successful, 'statecraft', 'merchant_proof');
+  successful = await executor.executeEffects([{ type: 'special', target: 'end_game' }], successful);
+  if (successful.roadCommitments?.statecraft?.lifecycle !== 'completed') {
+    throw new Error('successful road ending must complete the canonical road');
+  }
+  if (successful.ending?.id !== 'richest_man') {
+    throw new Error('successful ending must persist the real ending prototype');
+  }
+
+  let neutral = createState();
+  neutral.player.martialPower = 0;
+  neutral.player.externalSkill = 0;
+  neutral.player.internalSkill = 0;
+  neutral.player.qinggong = 0;
+  neutral.player.money = 0;
+  neutral.player.businessAcumen = 0;
+  neutral = RouteStateManager.commitRoad(neutral, 'statecraft', { eventId: 'merchant_commitment' });
+  neutral = RouteStateManager.recordRoadProof(neutral, 'statecraft', 'merchant_proof');
+  neutral = await executor.executeEffects([{ type: 'special', target: 'end_game' }], neutral);
+  if (neutral.roadCommitments?.statecraft?.lifecycle !== 'locked_in') {
+    throw new Error('neutral ending must not complete the canonical road');
+  }
+
+  let negative = createState();
+  negative.karma = { good_karma: 0, evil_karma: 100, history: [] };
+  negative = RouteStateManager.commitRoad(negative, 'statecraft', { eventId: 'merchant_commitment' });
+  negative = RouteStateManager.recordRoadProof(negative, 'statecraft', 'merchant_proof');
+  negative = await executor.executeEffects([{ type: 'special', target: 'end_game' }], negative);
+  if (negative.roadCommitments?.statecraft?.lifecycle !== 'locked_in') {
+    throw new Error('negative ending must not complete the canonical road');
+  }
+}
+
+verifyEndingRoadCompletion().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

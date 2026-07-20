@@ -209,7 +209,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 
   const summary = deriveLifeMemorySummary(state);
   assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 1.0.0');
-  assert(summary.routeStatus?.primary.name === '正道门派', 'primary route name should be player-facing');
+  assert(summary.routeStatus?.primary.name === '未定', 'legacy route must not become canonical player-facing road');
   assert(summary.routeStatus?.factionLabel === '传统门派', 'faction label should be mapped');
   assert(summary.derivedAtAge === 20, 'derivedAtAge should match player age');
   assert(
@@ -390,8 +390,8 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   assertCoreScenarioCoverage(summary);
 
   assert(
-    summary.routeStatus?.primary.phase === '已承诺',
-    'locked-in route phase should be player-facing',
+    summary.routeStatus?.primary.phase === '未入门',
+    'legacy route phase must not become player-facing',
   );
   assert(
     summary.routeStatus?.lastTransition !== undefined,

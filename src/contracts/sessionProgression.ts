@@ -72,6 +72,7 @@ export interface HeadlessTerminalDto {
   isAlive: boolean;
   deathReason?: string;
   endingId?: string;
+  ending?: { id: string; name: string; description: string; category: string };
   age: number;
 }
 
@@ -87,6 +88,12 @@ export interface PlayerSummaryDto {
   constitution: number;
   comprehension: number;
   money: number;
+  reputation: number;
+  connections: number;
+  knowledge: number;
+  businessAcumen: number;
+  influence: number;
+  charisma: number;
   sect?: string;
   alive: boolean;
   currentYear: number;

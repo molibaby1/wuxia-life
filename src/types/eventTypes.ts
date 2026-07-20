@@ -1118,6 +1118,7 @@ export interface GameState {
 
 export interface RoadCommitmentRecord {
   roadId: LifeRoadId;
+  position?: 'primary' | 'secondary';
   committedAtAge: number;
   sourceChoiceId?: string;
   sourceEventId?: string;

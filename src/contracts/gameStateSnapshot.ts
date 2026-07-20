@@ -70,6 +70,7 @@ export interface SnapshotRouteHistoryEntry {
 
 export interface SnapshotRoadCommitment {
   roadId: LifeRoadId;
+  position?: 'primary' | 'secondary';
   committedAtAge: number;
   sourceChoiceId?: string;
   sourceEventId?: string;

@@ -36,6 +36,26 @@ if (commitment?.lifecycle !== 'locked_in' || commitment.proofCount !== 1) {
   throw new Error('道路承诺必须经过成果证明才能 locked_in');
 }
 
+let bounded = createState();
+bounded = RouteStateManager.commitRoad(bounded, 'statecraft', { eventId: 'statecraft_entry' });
+bounded = RouteStateManager.commitRoad(bounded, 'official', { eventId: 'official_entry' });
+const beforeThirdCommit = bounded;
+bounded = RouteStateManager.commitRoad(bounded, 'martial', { eventId: 'martial_entry' });
+if (Object.keys(bounded.roadCommitments ?? {}).length !== 2) {
+  throw new Error('canonical road commitments must be limited to primary + secondary');
+}
+if (bounded !== beforeThirdCommit || bounded.roadCommitments?.statecraft?.position !== 'primary'
+  || bounded.roadCommitments?.official?.position !== 'secondary') {
+  throw new Error('third road commitment must be rejected without changing the first two slots');
+}
+if (RouteStateManager.readRoadStage({
+  ...bounded,
+  routeStates: { statecraft: { routeId: 'statecraft', lifecycle: 'failed', category: 'main', lockedIn: false } },
+  roadCommitments: undefined,
+}, 'statecraft') !== 'inactive') {
+  throw new Error('invalid legacy lifecycle must not be forced into a canonical road stage');
+}
+
 let legacy = createState();
 legacy.routeStates = {
   merchant: {

@@ -157,7 +157,7 @@ const TENDENCY_CANDIDATES: Array<{
   { key: 'constitution', label: '体魄', bucket: 'body', weight: 1.15 },
   { key: 'chivalry', label: '侠义', bucket: 'virtue', weight: 1.05 },
   { key: 'knowledge', label: '学识', bucket: 'mind', weight: 1.0 },
-  { key: 'reputation', label: '声望', bucket: 'jianghu', weight: 0.9 },
+  { key: 'reputation', label: '名望', bucket: 'jianghu', weight: 0.9 },
   { key: 'connections', label: '人脉', bucket: 'jianghu', weight: 0.9 },
   { key: 'charisma', label: '魅力', bucket: 'jianghu', weight: 0.88 },
   { key: 'businessAcumen', label: '经营', bucket: 'livelihood', weight: 1.05 },
@@ -383,7 +383,7 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
       label: '江湖',
       items: [
         createStat('chivalry', '侠义', valueOf(player, 'chivalry'), '决定你在江湖中的取向与名节。'),
-        createStat('reputation', '声望', valueOf(player, 'reputation'), '影响旁人对你的评价与机会。'),
+        createStat('reputation', '名望', valueOf(player, 'reputation'), '影响旁人对你的评价与机会。'),
         createStat('connections', '人脉', valueOf(player, 'connections'), '决定可调动的关系与支援。'),
         createStat('charisma', '魅力', valueOf(player, 'charisma'), '影响结交、说服与情感互动。'),
       ],
@@ -428,7 +428,7 @@ export function buildMainScreenModel(
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
       createStat('constitution', '体魄', valueOf(player, 'constitution'), '生存底子'),
-      createStat('reputation', '声望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接推进道路'),
+      createStat('reputation', '名望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接推进道路'),
     ],
     routeSummary,
     roadCommitmentSummary: buildRoadCommitmentSummary(lifeMemory),

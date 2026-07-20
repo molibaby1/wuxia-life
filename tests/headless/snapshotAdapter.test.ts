@@ -15,6 +15,7 @@ export function runSnapshotAdapterTests(): void {
   before.roadCommitments = {
     statecraft: {
       roadId: 'statecraft',
+      position: 'primary',
       committedAtAge: 16,
       sourceChoiceId: 'study_business',
       sourceEventId: 'merchant_talent_discovery',
@@ -38,6 +39,7 @@ export function runSnapshotAdapterTests(): void {
   assert(hydrated.roadCommitments?.statecraft?.lifecycle === 'locked_in', 'road lifecycle');
   assert(hydrated.roadCommitments?.statecraft?.proofCount === 1, 'road proof count');
   assert(hydrated.roadCommitments?.statecraft?.sourceEventId === 'merchant_talent_discovery', 'road source event');
+  assert(hydrated.roadCommitments?.statecraft?.position === 'primary', 'primary road position');
   assert(hydrated.eventHistory.length === before.eventHistory.length, 'event history length');
 
   gameEngine.loadGameState(hydrated);

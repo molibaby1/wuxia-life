@@ -238,7 +238,7 @@ function testMerchantRouteSignal(): void {
     report,
   });
 
-  assert(summary.checkpoints[1]?.routeSignal.includes('商路'), `merchant route signal missing: ${summary.checkpoints[1]?.routeSignal}`);
+  assert(summary.checkpoints[1]?.routeSignal.includes('未定'), `legacy merchant route must not become canonical: ${summary.checkpoints[1]?.routeSignal}`);
 }
 
 function main(): void {

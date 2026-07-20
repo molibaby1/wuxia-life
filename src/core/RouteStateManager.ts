@@ -1,5 +1,5 @@
 import type { GameState, RoadCommitmentRecord } from '../types/eventTypes';
-import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
+import { isLifeRoadId, isLifeRoadStage, type LifeRoadId, type LifeRoadStage } from '../types/lifeRoad';
 import { getRouteCompatibilityRule, type RouteIdentity } from './RouteCompatibilityRules';
 
 export type RouteLifecycleState =
@@ -87,8 +87,14 @@ export class RouteStateManager {
     input: { choiceId?: string; eventId?: string } = {},
   ): GameState {
     const current = state.roadCommitments?.[roadId];
+    if (!current && Object.keys(state.roadCommitments ?? {}).length >= 2) {
+      return state;
+    }
+    const position = current?.position
+      ?? (Object.keys(state.roadCommitments ?? {}).length === 0 ? 'primary' : 'secondary');
     const commitment: RoadCommitmentRecord = current || {
       roadId,
+      position,
       committedAtAge: state.player?.age ?? 0,
       sourceChoiceId: input.choiceId,
       sourceEventId: input.eventId,
@@ -195,12 +201,51 @@ export class RouteStateManager {
         },
       };
     }
-    return nextState;
+    return RouteStateManager.normalizeRoadCommitments(nextState);
   }
 
   static readRoadStage(state: GameState, roadId: LifeRoadId): LifeRoadStage {
-    return state.roadCommitments?.[roadId]?.lifecycle
-      ?? (RouteStateManager.readRouteState(state, roadId).lifecycle as LifeRoadStage);
+    const commitmentStage = state.roadCommitments?.[roadId]?.lifecycle;
+    if (commitmentStage && isLifeRoadStage(commitmentStage)) {
+      return commitmentStage;
+    }
+    const routeStage = RouteStateManager.readRouteState(state, roadId).lifecycle;
+    return isLifeRoadStage(routeStage) ? routeStage : 'inactive';
+  }
+
+  static completeRoad(state: GameState, roadId: LifeRoadId, eventId?: string): GameState {
+    const commitment = state.roadCommitments?.[roadId];
+    if (!commitment || commitment.lifecycle !== 'locked_in') {
+      return state;
+    }
+    return {
+      ...RouteStateManager.writeRouteState(state, {
+        routeId: roadId,
+        lifecycle: 'completed',
+        category: commitment.position === 'secondary' ? 'secondary' : 'main',
+        lockedIn: true,
+        eventId,
+        reason: 'road_ending_completed',
+      }),
+      roadCommitments: {
+        ...(state.roadCommitments || {}),
+        [roadId]: { ...commitment, lifecycle: 'completed' },
+      },
+    };
+  }
+
+  static normalizeRoadCommitments(state: GameState): GameState {
+    const entries = Object.entries(state.roadCommitments ?? {})
+      .filter(([roadId, commitment]) => isLifeRoadId(roadId) && Boolean(commitment))
+      .slice(0, 2);
+    if (entries.length === 0) {
+      return { ...state, roadCommitments: {} };
+    }
+    const roadCommitments = Object.fromEntries(entries.map(([roadId, commitment], index) => [
+      roadId,
+      { ...commitment, position: index === 0 ? 'primary' : 'secondary' },
+    ]));
+    return { ...state, roadCommitments };
   }
 
   static readRouteState(state: GameState, routeId: string): RouteStateRecord {

@@ -1,5 +1,27 @@
-# Vue 3 + TypeScript + Vite
+# 项目文档索引
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+本索引只登记当前明确具备权威性的文档，不尝试为仓库中一千多份历史文档建立完整索引。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 当前权威文档
+
+- [玩家模型](product/player-model.md)：江湖世界玩家状态的当前权威规范。
+
+## 权威层级
+
+文档权威性按以下层级判断：
+
+1. 本文件明确列出的产品规范；
+2. 本文件明确列出的当前架构和接口契约；
+3. 当前任务明确指定的已批准实施文档；
+4. 其他未分类文档不具有产品规则权威性。
+
+## 冲突处理规则
+
+- 发现冲突时不得自行综合不同方案；
+- 以更高层级的文档为准；
+- 无法判断层级或适用范围时，停止并向用户报告；
+- 测试存在不代表旧产品行为必须保留。
+
+## 文档状态说明
+
+当前仓库仍有大量未分类历史文档。在后续清理完成前，agent 不得默认将它们视为当前设计。

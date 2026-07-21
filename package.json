@@ -81,9 +81,11 @@
     "report:v1-0-closure": "tsx scripts/runV10ClosureReport.ts",
     "p49:replay": "tsx scripts/runP49SampleLineReplay.ts",
     "guard:sample-lines-baseline": "npm exec tsx tests/p50SampleLineSpineTests.ts && npm exec tsx tests/p50SampleLineExpressionTests.ts && npm exec tsx tests/p49SampleLineReplayTests.ts",
-    "typecheck": "tsc --noEmit",
-    "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json",
+    "typecheck": "vue-tsc -b --pretty false && npm run typecheck:p6b",
+    "typecheck:p6b": "tsc --noEmit -p tsconfig.p6b.json --pretty false",
     "build": "vue-tsc -b && vite build",
+    "verify:quick": "npm run typecheck && npm run test:p6b:unit && npm run test:contracts",
+    "verify:full": "npm run verify:quick && npm run build && npm test && npm run test:headless && npm run test:headless:parity && npm run test:sample-lines-routes && npm run validate:event-quality && npm run gate:playability && npm run gate:golden-line && npm run gate:experience",
     "validate": "npm run typecheck && npm run build && npm test && npm run validate:event-quality && npm run stability && npm run gate:experience",
     "preview": "vite preview"
   },

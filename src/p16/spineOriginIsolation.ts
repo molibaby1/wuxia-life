@@ -47,7 +47,7 @@ function collectConditionExpressions(event: EventDefinition): string {
       parts.push(condition.expression);
     }
   }
-  const required = event.thresholds?.required ?? [];
+  const required = event.thresholds?.background?.required ?? [];
   for (const flag of required) {
     parts.push(flag);
   }
@@ -75,13 +75,16 @@ function primaryFromConditions(event: EventDefinition): PrimaryOriginFamilyFlag 
 }
 
 /** Infer which primary origin flag this event is exclusive to, if any. */
-export function inferEventExclusivePrimaryFlag(event: EventDefinition): PrimaryOriginFamilyFlag | null {
+export function inferEventExclusivePrimaryFlag(
+  event: EventDefinition,
+  runtimeStageFit?: readonly string[],
+): PrimaryOriginFamilyFlag | null {
   if (NEUTRAL_SPINE_EVENT_IDS.has(event.id)) {
     return null;
   }
 
   const stagePrimaries = new Set<PrimaryOriginFamilyFlag>();
-  for (const fit of event.metadata?.authoringSemantics?.stageFit ?? []) {
+  for (const fit of runtimeStageFit ?? event.metadata?.authoringSemantics?.stageFit ?? []) {
     const mapped = STAGEFIT_TO_PRIMARY[fit];
     if (mapped) stagePrimaries.add(mapped);
   }
@@ -111,11 +114,12 @@ export function isSpineOriginEligible(
   event: EventDefinition,
   primaryOriginFlag: string | null,
   age: number,
+  runtimeStageFit?: readonly string[],
 ): boolean {
   if (age > SPINE_ORIGIN_EXCLUSIVE_AGE_MAX) {
     return true;
   }
-  const exclusive = inferEventExclusivePrimaryFlag(event);
+  const exclusive = inferEventExclusivePrimaryFlag(event, runtimeStageFit);
   if (!exclusive) {
     return true;
   }

@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
 import { assembleP16GateReport, formatP16GateMarkdown } from '../src/p16/reportBuilder';
-import { runOriginChoiceLuckSlice, runOriginVarianceSlice } from '../src/p16/validationSlices';
+import { runOriginChoiceLuckSlice, runOriginVarianceSlice } from './validation/p16/validationSlices';
 
 const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
 

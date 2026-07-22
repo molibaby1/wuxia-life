@@ -10,7 +10,7 @@ function collectConditionExpressions(event: EventDefinition): string {
       parts.push(condition.expression);
     }
   }
-  for (const flag of event.thresholds?.required ?? []) {
+  for (const flag of event.thresholds?.background?.required ?? []) {
     parts.push(flag);
   }
   return parts.join(' ');

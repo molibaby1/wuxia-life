@@ -32,7 +32,7 @@ import {
   profileHasP16Sections,
   runOriginChoiceLuckSlice,
   runOriginVarianceSlice,
-} from '../src/p16/validationSlices';
+} from '../scripts/validation/p16/validationSlices';
 import {
   applyChildhoodShapingFromEvent,
   buildTendencySurfaceSummary,

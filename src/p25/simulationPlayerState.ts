@@ -60,6 +60,7 @@ export function createSimulationPlayerState({
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
+    investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
     flags: {},
     events: [],
     children: 0,

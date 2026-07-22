@@ -45,6 +45,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     martialHeritage: 5,
     scholarlyHeritage: 5,
     merchantNetwork: 5,
+    investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
     children: 0,
     spouse: null,
     alive: true,

@@ -466,6 +466,7 @@ const attributePanelPlayer = computed((): PlayerState => {
       martialHeritage: 0,
       scholarlyHeritage: 0,
       merchantNetwork: 0,
+      investments: p.investments,
       flags: {},
       children: 0,
       spouse: null,

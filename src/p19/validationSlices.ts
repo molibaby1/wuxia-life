@@ -31,6 +31,7 @@ function baseLateLifeState(): GameState {
       martialHeritage: 8,
       scholarlyHeritage: 5,
       merchantNetwork: 5,
+      investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
       children: 0,
       spouse: null,
       flags: { hermit_withdrawal: true, lonely_elder: true },

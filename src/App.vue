@@ -9,6 +9,32 @@ import { resolvePlanningPlaceholderText } from './data/infantPassiveNarratives';
 import { isPlayerDebugEnabled } from './utils/debugAccess';
 import { webPlatformStorage } from './adapters/platform/webPlatformStorage';
 import { deriveLifeMemorySummary } from './core/deriveLifeMemorySummary';
+import type { HeadlessTerminalDto } from './contracts/sessionProgression';
+
+type EndingPayload = NonNullable<HeadlessTerminalDto['ending']>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function toEndingPayload(value: unknown): EndingPayload | null {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== 'string' ||
+    typeof value.name !== 'string' ||
+    typeof value.description !== 'string' ||
+    typeof value.category !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    id: value.id,
+    name: value.name,
+    description: value.description,
+    category: value.category,
+  };
+}
 
 const GameScreen = defineAsyncComponent(() => import('./components/GameScreen.vue'));
 const EndingScreen = defineAsyncComponent(() => import('./components/EndingScreen.vue'));
@@ -330,8 +356,10 @@ const endingLifeMemory = computed(() => {
 });
 
 const endingInfo = computed(() => {
-  if (apiMode) return activeSession.value?.terminal?.ending ?? null;
-  return gameEngine.getGameState().ending ?? null;
+  const ending = apiMode
+    ? activeSession.value?.terminal?.ending
+    : gameEngine.getGameState().ending;
+  return toEndingPayload(ending);
 });
 
 const onChoice = (choice: { id: string; text: string; actionId?: string; isActiveAction?: boolean; locked?: boolean }) => {

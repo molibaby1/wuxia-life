@@ -12,7 +12,7 @@ import type {
   PeriodSummaryDisplay,
 } from '../types/activeActionTypes';
 import type { LifeMemorySummary } from '../types/lifeMemory';
-import type { PlayerLifeStates } from '../types/eventTypes';
+import type { Investments, PlayerLifeStates } from '../types/eventTypes';
 
 /**
  * Authoritative session phase for client UI routing.
@@ -96,6 +96,7 @@ export interface PlayerSummaryDto {
   charisma: number;
   sect?: string;
   alive: boolean;
+  investments: Investments;
   currentYear: number;
   currentMonth: number;
   currentDay: number;

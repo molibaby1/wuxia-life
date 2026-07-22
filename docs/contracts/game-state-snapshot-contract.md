@@ -52,7 +52,7 @@ Three independent version dimensions appear in snapshot metadata. They must not 
 
 | Field | Constant (documented) | Meaning | Current reference value |
 | --- | --- | --- | --- |
-| **`schemaVersion`** | `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` | Shape and field policy of **this contract** | `1.0.0` |
+| **`schemaVersion`** | `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` | Shape and field policy of **this contract** | `2.0.0` |
 | **`engineVersion`** | — | Build of the game engine that produced or last mutated the snapshot | Package/app semver at build time (e.g. `0.0.0` from `package.json`) |
 | **`eventCatalogVersion`** | — | Version of the bundled event catalog used for selection/execution | `1.0.0` from `src/data/events.json` `version` |
 
@@ -164,6 +164,7 @@ The `state` object mirrors the **persisted subset** of runtime `GameState`. Fiel
 | `spouse`, `children` | persisted | Family summary |
 | `timeUnit`, `monthProgress`, `dayProgress` | persisted | Sub-year pacing |
 | `growthBiasSummary` | persisted | Narrative bias tags |
+| `investments` | persisted | Required canonical lifetime investment directions: `martial`, `statecraft`, `official`, `hermit` |
 
 ### 6.2 Deprecated player fields
 
@@ -456,7 +457,7 @@ Abbreviated 0–50 midlife sample — no local paths; full fixture in US-005.
 ```json
 {
   "metadata": {
-    "schemaVersion": "1.0.0",
+    "schemaVersion": "2.0.0",
     "engineVersion": "0.0.0",
     "eventCatalogVersion": "1.0.0",
     "createdAt": 1717200000000,

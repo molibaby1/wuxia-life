@@ -10,8 +10,19 @@ function assert(condition: boolean, message: string): void {
 export function runSnapshotAdapterTests(): void {
   gameEngine.startNewGame('快照测试', 'male');
   const before = gameEngine.getGameState();
+  assert(
+    JSON.stringify(before.player.investments) ===
+      JSON.stringify({ martial: 0, statecraft: 0, official: 0, hermit: 0 }),
+    'new game investments start at zero',
+  );
   before.routeStates = before.routeStates ?? {};
   before.eventHistory = before.eventHistory ?? [];
+  before.player.investments = {
+    martial: 1.5,
+    statecraft: 3,
+    official: 0,
+    hermit: 8.25,
+  };
   before.roadCommitments = {
     statecraft: {
       roadId: 'statecraft',
@@ -35,6 +46,10 @@ export function runSnapshotAdapterTests(): void {
 
   const hydrated = defaultSnapshotConverter.fromSnapshot(snapshot);
   assert(hydrated.player.name === before.player.name, 'player name round trip');
+  assert(
+    JSON.stringify(hydrated.player.investments) === JSON.stringify(before.player.investments),
+    'investments round trip',
+  );
   assert(JSON.stringify(hydrated.routeStates) === JSON.stringify(before.routeStates), 'route state');
   assert(hydrated.roadCommitments?.statecraft?.lifecycle === 'locked_in', 'road lifecycle');
   assert(hydrated.roadCommitments?.statecraft?.proofCount === 1, 'road proof count');
@@ -43,6 +58,11 @@ export function runSnapshotAdapterTests(): void {
   assert(hydrated.eventHistory.length === before.eventHistory.length, 'event history length');
 
   gameEngine.loadGameState(hydrated);
+  assert(
+    JSON.stringify(gameEngine.getGameState().player.investments) ===
+      JSON.stringify(before.player.investments),
+    'restored runtime investments',
+  );
   const memoryAfter = deriveLifeMemorySummary(gameEngine.getGameState());
   assert(
     JSON.stringify(memoryAfter) === JSON.stringify(memoryBefore),

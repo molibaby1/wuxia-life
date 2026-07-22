@@ -16,12 +16,13 @@ import type {
   LifePath,
   PlayerLifeStates,
   PlayerTraitProfile,
+  Investments,
   Relationship,
 } from '../types/eventTypes';
 import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '1.0.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '2.0.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -116,6 +117,7 @@ export interface SnapshotPlayerState {
   martialHeritage?: number;
   scholarlyHeritage?: number;
   merchantNetwork?: number;
+  investments: Investments;
 
   traitProfile?: PlayerTraitProfile;
   lifeStates?: PlayerLifeStates;

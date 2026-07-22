@@ -51,7 +51,7 @@ const FORBIDDEN_SNAPSHOT_STATE_KEYS = [
   'engineState',
 ] as const;
 
-const REQUIRED_SNAPSHOT_PLAYER_KEYS = ['name', 'age', 'gender', 'alive'] as const;
+const REQUIRED_SNAPSHOT_PLAYER_KEYS = ['name', 'age', 'gender', 'alive', 'investments'] as const;
 
 export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<GameStateSnapshot> {
   const errors: string[] = [];

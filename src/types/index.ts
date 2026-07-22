@@ -19,6 +19,8 @@ import type {
   EventPriority,
   TalentDefinition,
   PlayerState,
+  InvestmentId,
+  Investments,
   GameState,
   EventRecord,
   EventCondition,
@@ -46,7 +48,7 @@ export interface Effect {
   effects?: Effect[];
 }
 
-export type { PlayerState, GameState, EventRecord };
+export type { PlayerState, InvestmentId, Investments, GameState, EventRecord };
 export type { EffectDefinition };
 export {
   LIFE_ROAD_IDS,

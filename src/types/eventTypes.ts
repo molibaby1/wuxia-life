@@ -852,31 +852,40 @@ export interface EventDefinition {
  * 玩家属性
  * 
  * 属性说明：
- * - 所有属性范围：0-100（部分属性如声望、侠义可为负数）
+ * - Canonical 六项属性没有固定产品上限；功力、体魄、学识、人脉、名望不低于 0，侠义声誉允许负值
  * - 属性之间相互影响，共同决定角色发展方向
  * - 属性值通过事件、修炼、天赋等方式提升
  */
 export interface PlayerStats {
   // ========== 战斗属性 ==========
-  martialPower: number;      // 功力/武功：0-100，综合武力水平，决定整体战斗能力
+  martialPower: number;      // 功力：非负的综合武学能力，无固定上限
   externalSkill: number;     // 外功：0-100，招式技巧，影响物理攻击和武技威力
   internalSkill: number;     // 内功：0-100，内力修为，影响内力储备和内功威力
   qinggong: number;          // 轻功：0-100，身法速度，影响闪避、先手和移动能力
-  constitution: number;      // 体魄：0-100，身体素质，影响生命值、防御和耐力
+  constitution: number;      // 体魄：非负的长期身体基础
   
   // ========== 非战斗属性 ==========
   charisma: number;          // 魅力：0-100，个人魅力，影响社交、说服和 NPC 态度
   comprehension: number;     // 悟性：0-100，领悟能力，影响学习速度和技能理解
-  chivalry: number;          // 侠义：-100~100，道德倾向，正值为侠义，负值为邪恶
-  reputation: number;        // 声望：-1000~1000，江湖名望，影响 NPC 态度和事件触发
-  connections: number;       // 人脉：0-100，人际关系，影响信息获取和求助成功率
-  knowledge: number;         // 学识：0-100，文化修养，影响读书、仕途和非战斗选项
+  chivalry: number;          // 侠义声誉：允许负值、中立和正值，无固定上限
+  reputation: number;        // 名望：非负的知名程度和影响传播范围，无固定上限
+  connections: number;       // 人脉：非负的社会关系网络能力，无固定上限
+  knowledge: number;         // 学识：非负的知识、理解和文化积累，无固定上限
   wealth?: number;           // 财富：0-10000，经济状况，影响购买力和资源获取
   
   // ========== 隐藏属性（通过天赋影响） ==========
   martialPotential?: number; // 武学潜力：0-100，影响战斗属性成长速度（天赋决定）
   socialPotential?: number;  // 社交潜力：0-100，影响社交属性成长速度（天赋决定）
   learningPotential?: number;// 学习潜力：0-100，影响知识和技能学习速度（天赋决定）
+}
+
+export type InvestmentId = 'martial' | 'statecraft' | 'official' | 'hermit';
+
+export interface Investments {
+  martial: number;
+  statecraft: number;
+  official: number;
+  hermit: number;
 }
 
 /**
@@ -924,6 +933,9 @@ export interface PlayerState {
   scholarlyHeritage: number;
   /** 商脉 - 商人身份专用 */
   merchantNetwork: number;
+
+  /** Canonical lifetime investment directions. */
+  investments: Investments;
 
   // ========== 兼容历史字段 ==========
   health?: number;

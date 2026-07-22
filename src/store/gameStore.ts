@@ -25,6 +25,12 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
+    investments: {
+      martial: 0,
+      statecraft: 0,
+      official: 0,
+      hermit: 0,
+    },
     connections: 0,
     money: 0,
     

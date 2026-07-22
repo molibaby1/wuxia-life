@@ -250,6 +250,14 @@ export class StatModifyHandler implements EffectHandler {
     'energy',
   ]);
 
+  private static readonly NON_NEGATIVE_CANONICAL_STATS = new Set([
+    'martialPower',
+    'constitution',
+    'knowledge',
+    'connections',
+    'reputation',
+  ]);
+
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
     const target = effect.target || (effect as any).stat;
     const { value, operator = 'set', randomRange } = effect;
@@ -328,18 +336,21 @@ export class StatModifyHandler implements EffectHandler {
    * 限制值在合理范围内
    */
   private clampValue(value: number, statName: string): number {
-    // 不同属性有不同的范围限制
+    if (StatModifyHandler.NON_NEGATIVE_CANONICAL_STATS.has(statName)) {
+      return Math.max(0, value);
+    }
+
+    if (statName === 'chivalry') {
+      return value;
+    }
+
+    // Legacy 属性仍保留既有运行时边界；Canonical 属性不在这里设置固定上限。
     const ranges: Record<string, [number, number]> = {
-      martialPower: [0, 999],
       externalSkill: [0, 999],
       internalSkill: [0, 999],
       qinggong: [0, 999],
-      chivalry: [0, 100],
       charisma: [0, 100],
-      constitution: [0, 100],
       comprehension: [0, 100],
-      reputation: [-100, 100],
-      connections: [0, 100],
       money: [0, Number.MAX_SAFE_INTEGER],
     };
     

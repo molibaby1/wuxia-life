@@ -120,6 +120,12 @@ export class GameEngineIntegration {
         martialHeritage: 0,
         scholarlyHeritage: 0,
         merchantNetwork: 0,
+        investments: {
+          martial: 0,
+          statecraft: 0,
+          official: 0,
+          hermit: 0,
+        },
         money: 100,
         reputation: 0,
         connections: 0,
@@ -269,6 +275,7 @@ export class GameEngineIntegration {
         player.martialHeritage = nextState.player.martialHeritage;
         player.scholarlyHeritage = nextState.player.scholarlyHeritage;
         player.merchantNetwork = nextState.player.merchantNetwork;
+        player.investments = { ...nextState.player.investments };
         player.money = nextState.player.money;
         player.reputation = nextState.player.reputation;
         player.connections = nextState.player.connections;

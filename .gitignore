@@ -23,6 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.zip
 
 # Game saves and temporary files
 .wuxia_saves/

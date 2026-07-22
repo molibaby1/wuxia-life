@@ -47,7 +47,8 @@ function testFormalProfileSchema(): void {
 function testProfileSmokeSupply(): void {
   const profile = getWorldProfile();
   assert(profile.stats.some(s => s.role === 'scheduling_relevant'), 'scheduling stats');
-  assert(profile.resources.length >= 2, 'resources');
+  assert(profile.resources.length >= 1, 'resources');
+  assert(profile.resources.some(resource => resource.id === 'money'), 'money resource');
   assert(profile.identityTracks.length >= 8, 'identity tracks');
   assert(profile.actionFamilies.length >= 5, 'action families');
   assert(profile.summarySignals.some(s => s.variableName === 'echo_suffix'), 'echo summary signal');

@@ -151,12 +151,18 @@ export class TraitSystem {
 
   /** Metadata only — origin_background choice effects own stat deltas. */
   bindTraitOrigin(player: PlayerState, originId: OriginId): PlayerState {
-    // ponytail: legacy fixtures may omit latent fields; fill minimal defaults for sync path.
     const latent = (player.traitProfile ?? {}) as Partial<PlayerTraitProfile>;
+    const temperament = latent.temperament;
+    if (!temperament || !this.temperamentMap.has(temperament)) {
+      return {
+        ...player,
+        growthBiasSummary: [],
+      };
+    }
     const profile: PlayerTraitProfile = {
       coreTalent: latent.coreTalent ?? 'keen_mind',
       weakness: latent.weakness ?? 'lazy',
-      temperament: latent.temperament ?? 'bold',
+      temperament,
       rareComboTitle: latent.rareComboTitle,
       rareComboDescription: latent.rareComboDescription,
       origin: originId,

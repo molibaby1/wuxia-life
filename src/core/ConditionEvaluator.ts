@@ -153,9 +153,14 @@ export class ConditionEvaluator implements IConditionEvaluator {
       evaluate: (params, state) => {
         const { min, max } = params || {};
         const age = state.player.age;
+        const minValue = typeof min === 'number' && Number.isFinite(min) ? min : undefined;
+        const maxValue = typeof max === 'number' && Number.isFinite(max) ? max : undefined;
+
+        if (min !== undefined && minValue === undefined) return false;
+        if (max !== undefined && maxValue === undefined) return false;
         
-        if (min !== undefined && age < min) return false;
-        if (max !== undefined && age > max) return false;
+        if (minValue !== undefined && age < minValue) return false;
+        if (maxValue !== undefined && age > maxValue) return false;
         
         return true;
       },
@@ -166,10 +171,14 @@ export class ConditionEvaluator implements IConditionEvaluator {
       evaluate: (params, state) => {
         const { stat, min, max } = params || {};
         if (typeof stat !== 'string') return false;
+        const minValue = typeof min === 'number' && Number.isFinite(min) ? min : undefined;
+        const maxValue = typeof max === 'number' && Number.isFinite(max) ? max : undefined;
+        if (min !== undefined && minValue === undefined) return false;
+        if (max !== undefined && maxValue === undefined) return false;
         const value = readPlayerNumeric(state.player, stat);
         
-        if (min !== undefined && value < min) return false;
-        if (max !== undefined && value > max) return false;
+        if (minValue !== undefined && value < minValue) return false;
+        if (maxValue !== undefined && value > maxValue) return false;
         
         return true;
       },
@@ -179,9 +188,11 @@ export class ConditionEvaluator implements IConditionEvaluator {
     this.handlers.set('flag_check', {
       evaluate: (params, state) => {
         const { flag, has } = params || {};
+        if (typeof flag !== 'string') return false;
+        if (has !== undefined && typeof has !== 'boolean') return false;
         const hasFlag = !!state.flags[flag];
         
-        return has ? hasFlag : !hasFlag;
+        return has === true ? hasFlag : !hasFlag;
       },
     });
   }

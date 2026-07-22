@@ -40,7 +40,7 @@ export class DailyEventSystem {
       .filter(item => {
         const probe = this.buildProbeEvent(item.event, state);
         return (
-          isSpineOriginEligible(probe, primaryOrigin, age) &&
+          isSpineOriginEligible(probe, primaryOrigin, age, item.event.spineOriginStageFit) &&
           isTraitLineSpineEligible(probe, state)
         );
       });
@@ -159,9 +159,6 @@ export class DailyEventSystem {
         updatedAt: Date.now(),
         tags: ['daily', config.group, 'daily_pool'],
         enabled: true,
-        authoringSemantics: config.spineOriginStageFit?.length
-          ? { stageFit: config.spineOriginStageFit }
-          : undefined,
       },
     };
   }
@@ -217,9 +214,6 @@ export class DailyEventSystem {
         updatedAt: Date.now(),
         tags: ['daily', config.group, 'daily_pool'],
         enabled: true,
-        authoringSemantics: config.spineOriginStageFit?.length
-          ? { stageFit: config.spineOriginStageFit }
-          : undefined,
       },
     };
   }

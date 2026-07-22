@@ -858,7 +858,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   private toSessionError(error: unknown): HeadlessSessionError {
     if (error instanceof CatalogReadError) {
       return {
-        code: error.code === 'CATALOG_VERSION_UNKNOWN' ? 'CATALOG_VERSION_UNKNOWN' : 'EVENT_NOT_FOUND',
+        code: 'EVENT_NOT_FOUND',
         message: error.message,
         details: error.details,
       };

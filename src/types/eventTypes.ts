@@ -322,7 +322,7 @@ export interface DailyEventVariantConfig {
 
 export interface DailyEventConfig {
   id: string;
-  group: 'training' | 'livelihood' | 'family' | 'emotion';
+  group: 'training' | 'study' | 'livelihood' | 'family' | 'emotion';
   title: string;
   ageRange: {
     min: number;

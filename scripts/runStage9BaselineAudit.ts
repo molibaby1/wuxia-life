@@ -191,8 +191,8 @@ function auditPalette() {
     for (const age of ages) {
       const palette = resolveChildhoodActionPalette({
         age,
-        player: { traitProfile: { origin: origin.traitOrigin } } as PlayerState,
-        flags: { [origin.flag]: true, p8_persona_id: origin.personaId },
+        player: { traits: [] } as PlayerState,
+        flags: { [origin.flag]: true, origin_id: origin.traitOrigin, p8_persona_id: origin.personaId },
       });
       const ids = palette.map(a => a.id);
       const categories = palette.map(a => a.category);

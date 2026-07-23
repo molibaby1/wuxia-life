@@ -142,8 +142,8 @@ function auditYouthPalette() {
     for (const age of YOUTH_AUDIT_AGES) {
       const palette = resolveChildhoodActionPalette({
         age,
-        player: { traitProfile: { origin: origin.traitOrigin } } as PlayerState,
-        flags: { [origin.flag]: true, p8_persona_id: origin.personaId },
+        player: { traits: [] } as PlayerState,
+        flags: { [origin.flag]: true, origin_id: origin.traitOrigin, p8_persona_id: origin.personaId },
       });
       const ids = palette.map(a => a.id);
       const categories = palette.map(a => a.category);
@@ -199,10 +199,10 @@ function auditYouthTransitionSeeds() {
   for (const origin of PRIMARY_ORIGINS) {
     const surface = getOriginSurfaceById(origin.traitOrigin);
     const state: GameState = {
-      flags: {},
+      flags: { [origin.flag]: true, origin_id: origin.traitOrigin },
       player: {
         age: 12,
-        traitProfile: { origin: origin.traitOrigin },
+        traits: [],
       } as PlayerState,
     } as GameState;
     applyYouthTransitionSeeds(state, 12, 13);

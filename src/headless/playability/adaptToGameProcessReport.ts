@@ -4,6 +4,8 @@
 
 import type { GameProcessReport } from '../../types/simulationRecordTypes';
 import type { HeadlessPersonaRunConfig, HeadlessPersonaRunResult } from './types';
+import { traitSystem } from '../../core/TraitSystem';
+import { getOriginId } from '../../p20/stateAccess';
 
 export function adaptHeadlessRunToGameProcessReport(
   config: HeadlessPersonaRunConfig,
@@ -11,6 +13,7 @@ export function adaptHeadlessRunToGameProcessReport(
 ): GameProcessReport {
   const { persona } = config;
   const finalState = result.finalGameState;
+  const traitNames = traitSystem.getTraitNames(finalState?.player?.traits);
 
   let childhoodEvents = 0;
   let youthEvents = 0;
@@ -80,13 +83,13 @@ export function adaptHeadlessRunToGameProcessReport(
       sectStatus: null,
       spouse: null,
       children: 0,
-      origin: '',
-      coreTalent: '',
-      weakness: '',
-      temperament: '',
+      origin: traitSystem.getOriginName(finalState ? getOriginId(finalState) : undefined),
+      coreTalent: traitNames.coreTalent,
+      weakness: traitNames.weakness,
+      temperament: traitNames.temperament,
       lifeStates: { ...(finalState?.player?.lifeStates ?? {}) },
       dailyEventCount: 0,
-      growthBiasSummary: [...(finalState?.player?.growthBiasSummary ?? [])],
+      growthBiasSummary: traitSystem.getGrowthBiasSummary(finalState?.player?.traits),
       endingSummary: null,
       flags: Object.fromEntries(
         Object.entries(finalState?.flags ?? {}).filter(([, v]) => typeof v === 'boolean' && v),

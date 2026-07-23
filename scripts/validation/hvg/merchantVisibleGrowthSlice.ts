@@ -167,11 +167,7 @@ export function runFlagOnlyMerchantScenario(): MerchantScenarioProof {
   const state: GameState = {
     player: {
       age: 5,
-      traitProfile: {
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates(),
       flags: {},
     } as PlayerState,
@@ -189,12 +185,7 @@ export function runTraitOnlyMerchantScenario(): MerchantScenarioProof {
   const state: GameState = {
     player: {
       age: 5,
-      traitProfile: {
-        origin: 'merchant_house',
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates(),
       flags: {},
     } as PlayerState,
@@ -235,8 +226,8 @@ function assertRealisticMerchantState(state: GameState): void {
   if (resolvePrimaryOriginFamilyFlag(state) !== 'origin_merchant_family') {
     throw new Error('realistic scenario requires origin_merchant_family primary flag');
   }
-  if (state.player?.traitProfile?.origin !== 'merchant_house') {
-    throw new Error('realistic scenario requires synced traitProfile.origin');
+  if (state.flags?.origin_id !== 'merchant_house') {
+    throw new Error('realistic scenario requires canonical flags.origin_id');
   }
 }
 

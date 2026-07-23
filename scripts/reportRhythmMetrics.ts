@@ -1,6 +1,5 @@
 import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
 import { EventPriority, type EventDefinition, type GameState } from '../src/types/eventTypes';
 
@@ -111,7 +110,6 @@ async function executeSelectedEvent(
 
 export async function simulateSample(seed: number, maxAge: number): Promise<SimulationSample> {
   return withSeed(seed, async () => {
-    await talentSystem.loadTalents();
     await eventLoader.loadAllEvents();
 
     const gameEngine = new GameEngineIntegration();
@@ -120,7 +118,6 @@ export async function simulateSample(seed: number, maxAge: number): Promise<Simu
     if (state.player) {
       state.player.name = `rhythm-${seed}`;
       state.player.gender = 'male';
-      state.player.talents = ['martial_genius', 'quick_learner'];
     }
 
     const timeline: SimulatedEvent[] = [];

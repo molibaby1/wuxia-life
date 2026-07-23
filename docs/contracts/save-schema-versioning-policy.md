@@ -6,7 +6,7 @@ Policy for future persisted save compatibility without implementing migrations i
 
 | Field | Format | Example |
 | --- | --- | --- |
-| `schemaVersion` | Semver (snapshot contract) | `2.0.0` |
+| `schemaVersion` | Semver (snapshot contract) | `3.1.0` |
 | `saveVersion` | Client save payload tag | `2.0.0-p2` |
 | `engineVersion` | Package/engine semver | `0.0.0` |
 | `eventCatalogVersion` | Catalog bundle semver | `1.0.0` |
@@ -22,8 +22,8 @@ Policy for future persisted save compatibility without implementing migrations i
 
 ## 3. Supported Range (Initial)
 
-- Snapshot schema `2.0.x` readable without migration.
-- Client save `2.0.0-p2` remains compatible with snapshot envelope mapping.
+- Snapshot schema `3.1.x` readable without migration.
+- Client save `2.0.0-p2` remains a separate client save tag; it does not provide a migration path for the incompatible snapshot shape.
 - Catalog version mismatch: reject execution, allow read-only inspection when safe.
 
 ## 4. Reject Instead of Migrate

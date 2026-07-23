@@ -16,12 +16,7 @@ function merchantState(): GameState {
   return {
     player: {
       age: 5,
-      traitProfile: {
-        origin: P122_SAMPLE_ORIGIN_ID,
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates({ businessHabit: 0 }),
       flags: {},
     } as PlayerState,

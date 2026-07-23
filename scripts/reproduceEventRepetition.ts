@@ -1,6 +1,5 @@
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
-import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
 import { detectEventClasses, type EventClass } from './eventRepetitionClassDetection';
@@ -77,7 +76,6 @@ async function executeSelectedEvent(
 
 async function simulateWithSeed(seed: number, maxAge: number): Promise<ReproductionResult> {
   return withSeed(seed, async () => {
-    await talentSystem.loadTalents();
     await eventLoader.loadAllEvents();
 
     const gameEngine = new GameEngineIntegration();
@@ -86,7 +84,6 @@ async function simulateWithSeed(seed: number, maxAge: number): Promise<Reproduct
     if (state.player) {
       state.player.name = 'US-007-repro';
       state.player.gender = 'male';
-      state.player.talents = ['martial_genius', 'quick_learner'];
     }
 
     const timeline: SimulatedEvent[] = [];

@@ -1,6 +1,5 @@
 import { getWorldProfile } from '../../../src/narrative/worldProfile';
-import type { PlayerState } from '../../../src/types/eventTypes';
-import { traitSystem } from '../../../src/core/TraitSystem';
+import type { GameState, PlayerState } from '../../../src/types/eventTypes';
 import {
   getOriginChildhoodEventMultiplier,
   getOriginGuidanceEventMultiplier,
@@ -44,14 +43,16 @@ function makePlayerWithOrigin(originId: string, age = 8): PlayerState {
   const player: PlayerState = {
     name: 'test',
     age,
-    traitProfile: {
-      origin: originId as PlayerState['traitProfile'] extends { origin: infer O } ? O : never,
-      coreTalent: 'keen_mind',
-      weakness: 'frail',
-      temperament: 'disciplined',
-    },
+    traits: ['keen_mind', 'frail', 'disciplined'],
   } as PlayerState;
-  return traitSystem.applyProfile(player, player.traitProfile!);
+  return player;
+}
+
+function makeStateWithOrigin(originId: string, age = 8): GameState {
+  return {
+    player: makePlayerWithOrigin(originId, age),
+    flags: { origin_id: originId },
+  } as GameState;
 }
 
 export function runOriginVarianceSlice(): OriginVarianceSliceResult {
@@ -63,12 +64,12 @@ export function runOriginVarianceSlice(): OriginVarianceSliceResult {
 
   const originIds = ['merchant_house', 'poor_family', 'scholar_house'];
   const weightSamples = originIds.map(originId => {
-    const player = makePlayerWithOrigin(originId);
+    const state = makeStateWithOrigin(originId);
     const surface = getOriginSurfaceById(originId);
     const survival = getOriginMaterialEventMultiplier(surface, new Set(['survival']));
     const comprehension = getOriginGuidanceEventMultiplier(surface, new Set(['comprehension']));
-    const combinedSurvival = getOriginChildhoodEventMultiplier(player, new Set(['survival']));
-    const combinedComprehension = getOriginChildhoodEventMultiplier(player, new Set(['comprehension']));
+    const combinedSurvival = getOriginChildhoodEventMultiplier(state, new Set(['survival']));
+    const combinedComprehension = getOriginChildhoodEventMultiplier(state, new Set(['comprehension']));
     return {
       originId,
       survivalTagMultiplier: combinedSurvival,
@@ -117,7 +118,7 @@ export function runOriginChoiceLuckSlice(): OriginChoiceLuckSliceResult {
     : null;
 
   const basePlayer = makePlayerWithOrigin('martial_family', 12);
-  const baseFlags = { p9_early_training_focus: true };
+  const baseFlags = { p9_early_training_focus: true, origin_id: 'martial_family' };
   let seed = 0.05;
   const rngA = () => {
     seed = (seed * 1103515245 + 12345) % 2147483648;

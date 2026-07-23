@@ -47,6 +47,7 @@ async function assertRecognitionRemainsVisible(
         age: 6,
         alive: true,
         businessAcumen: 4,
+        traits: [],
         connections: 2,
         flags: { ...flags },
         ...stats,

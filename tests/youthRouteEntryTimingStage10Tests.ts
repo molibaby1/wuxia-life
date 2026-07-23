@@ -46,7 +46,7 @@ function testChildhoodPaletteDoesNotExposeEarlyFocusActions(): void {
     for (const age of CHILDHOOD_AGES) {
       const palette = resolveChildhoodActionPalette({
         age,
-        player: { traitProfile: { origin: origin.traitOrigin } } as PlayerState,
+        player: { traits: [] } as PlayerState,
         flags: { [origin.flag]: true, p8_persona_id: origin.personaId },
       });
       for (const action of palette) {
@@ -63,8 +63,8 @@ function testChildhoodPaletteDoesNotExposeEarlyFocusActions(): void {
 function testYouthTransitionSeedsPerOrigin(): void {
   for (const origin of ORIGINS) {
     const state: GameState = {
-      flags: {},
-      player: { age: 12, traitProfile: { origin: origin.traitOrigin } } as PlayerState,
+      flags: { [origin.flag]: true, origin_id: origin.traitOrigin },
+      player: { age: 12, traits: [] } as PlayerState,
     } as GameState;
     applyYouthTransitionSeeds(state, 12, 13);
     const surface = getOriginSurfaceById(origin.traitOrigin);
@@ -87,7 +87,7 @@ function testYouthTransitionSeedsPerOrigin(): void {
     for (const age of CHILDHOOD_AGES) {
       const palette = resolveChildhoodActionPalette({
         age,
-        player: { traitProfile: { origin: origin.traitOrigin } } as PlayerState,
+        player: { traits: [] } as PlayerState,
         flags: { ...state.flags, [origin.flag]: true, p8_persona_id: origin.personaId },
       });
       for (const action of palette) {
@@ -103,14 +103,14 @@ function testYouthTransitionSeedsPerOrigin(): void {
 function testYouthRouteEntryPromotionRegression(): void {
   const deferredOnly: GameState = {
     flags: { p16_deferred_business_upbringing: true },
-    player: { age: 13, traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    player: { age: 13, traits: [] } as PlayerState,
   } as GameState;
   promoteYouthRouteEntryFromUpbringing(deferredOnly);
   assert(deferredOnly.flags.p9_early_business_focus === true, 'deferred business promotes early focus');
 
   const demonicTravelEcho: GameState = {
     flags: { p8_route_demonic: true, p9_echo_travel_hook: true },
-    player: { age: 13 } as PlayerState,
+    player: { age: 13, traits: [] } as PlayerState,
   } as GameState;
   promoteYouthRouteEntryFromUpbringing(demonicTravelEcho);
   assert(demonicTravelEcho.flags.p9_early_travel_focus !== true, 'demonic echo must not promote wanderer focus');

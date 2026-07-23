@@ -28,7 +28,7 @@ function mythBaseState(overrides: Partial<GameState> = {}): GameState {
       reputation: 45,
       connections: 30,
       money: 20,
-      traitProfile: { origin: 'martial_family' },
+      traits: [],
       ...(overrides.player ?? {}),
     } as PlayerState,
     flags: {
@@ -169,7 +169,7 @@ function testGrindOnlyPathStaysLocked(): void {
   const player = {
     name: 'grind-test',
     age: grindPath.player.age ?? 40,
-    traitProfile: { origin: grindPath.originId },
+    traits: [],
     ...grindPath.player,
   } as PlayerState;
   const report = evaluateCompositeDestinyOutcome(outcome, player, { ...grindPath.flags });
@@ -183,7 +183,7 @@ function testDualGateSuccessUnlocks(): void {
   const player = {
     name: 'dual-test',
     age: dualPath.player.age ?? 39,
-    traitProfile: { origin: dualPath.originId },
+    traits: [],
     ...dualPath.player,
   } as PlayerState;
   const report = evaluateCompositeDestinyOutcome(outcome, player, { ...dualPath.flags });

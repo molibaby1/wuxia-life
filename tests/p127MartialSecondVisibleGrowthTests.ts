@@ -28,12 +28,7 @@ function martialSampleState(overrides: Partial<GameState> = {}): GameState {
     ...overrides,
     player: {
       age: 5,
-      traitProfile: {
-        origin: P127_SAMPLE_ORIGIN_ID,
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates({ trainingHabit: 0 }),
       flags: {},
       ...overrides.player,
@@ -190,7 +185,7 @@ function testNoScholarParallelization(): void {
   const scholar = martialSampleState({
     flags: { origin_scholar_family: true, origin_wuxia_family: false },
     player: {
-      traitProfile: { origin: 'scholar_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
   });
   assert(!isP127MartialSampleScope(scholar), 'scholar route excluded from P127 sample');

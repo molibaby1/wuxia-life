@@ -122,17 +122,17 @@ function testLiveOpsActivation(): void {
       flags: { origin_streetborn: true },
       player: {
         flags: { origin_streetborn: true },
-        traitProfile: { origin: 'streetborn' },
+        traits: [],
       },
     } as ReturnType<typeof gameEngine.getGameState>,
-    { origin: 'streetborn' },
+    'streetborn',
   );
   assert(activated.flags[P22_LIVE_OPS_ACTIVE_FLAG] === true, 'weak origin sets activation flag');
 
   const inactive = applyLiveOpsActivationToState(
     {
       flags: {},
-      player: { flags: {}, traitProfile: { origin: 'martial_family' } },
+      player: { flags: {}, traits: [] },
     } as ReturnType<typeof gameEngine.getGameState>,
     { origin: 'martial_family' },
   );

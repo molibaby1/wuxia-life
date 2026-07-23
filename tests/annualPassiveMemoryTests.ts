@@ -24,6 +24,7 @@ function merchantInfantState(age = 0): GameState {
       businessAcumen: 4,
       connections: 2,
       flags: {},
+      traits: [],
     } as PlayerState,
     flags: { origin_merchant_family: true, origin_id: 'merchant_house' },
     currentTime: { year: 1, month: 2, day: 3 },

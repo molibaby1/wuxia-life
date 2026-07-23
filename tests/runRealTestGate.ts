@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import {
   GATE_BLOCKER_SUBSTRINGS,
   findBlockerKeywordInLog,
@@ -69,40 +69,68 @@ const suites: Suite[] = [
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },
   { name: 'testLifeMemorySummary', entry: 'tests/testLifeMemorySummary.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },
+  { name: 'canonicalPlayerStateSlice2b1Tests', entry: 'tests/canonicalPlayerStateSlice2b1.test.ts' },
+  { name: 'canonicalPlayerStateSlice2b2Tests', entry: 'tests/canonicalPlayerStateSlice2b2.test.ts' },
 ];
 
-let failed = false;
-let aggregatedLog = '';
+function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {
+  return new Promise(resolve => {
+    const child = spawn('npx', ['tsx', suite.entry], {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      env: gateChildEnv(),
+    });
+    let log = '';
 
-for (const suite of suites) {
-  console.log(`\n▶ Running ${suite.name} (${suite.entry})`);
-  const result = spawnSync('npx', ['tsx', suite.entry], {
-    stdio: ['inherit', 'pipe', 'pipe'],
-    maxBuffer: 64 * 1024 * 1024,
-    env: gateChildEnv(),
+    child.stdout.on('data', chunk => {
+      const text = chunk.toString();
+      log += text;
+      process.stdout.write(text);
+    });
+    child.stderr.on('data', chunk => {
+      const text = chunk.toString();
+      log += text;
+      process.stderr.write(text);
+    });
+    child.on('close', status => resolve({ status, log }));
+    child.on('error', error => {
+      const text = `${error}\n`;
+      process.stderr.write(text);
+      resolve({ status: null, log: text });
+    });
   });
-  const stdout = result.stdout instanceof Buffer ? result.stdout.toString('utf8') : (result.stdout ?? '');
-  const stderr = result.stderr instanceof Buffer ? result.stderr.toString('utf8') : (result.stderr ?? '');
-  process.stdout.write(stdout);
-  process.stderr.write(stderr);
-  aggregatedLog += stdout + stderr;
+}
 
-  if (result.status !== 0) {
-    failed = true;
-    console.error(`✖ ${suite.name} failed with exit code ${result.status ?? 'unknown'}`);
-  } else {
-    console.log(`✔ ${suite.name} passed`);
+async function main(): Promise<void> {
+  let failed = false;
+  let aggregatedLog = '';
+
+  for (const suite of suites) {
+    console.log(`\n▶ Running ${suite.name} (${suite.entry})`);
+    const result = await runSuite(suite);
+    aggregatedLog += result.log;
+
+    if (result.status !== 0) {
+      failed = true;
+      console.error(`✖ ${suite.name} failed with exit code ${result.status ?? 'unknown'}`);
+    } else {
+      console.log(`✔ ${suite.name} passed`);
+    }
   }
+
+  const blockerHit = findBlockerKeywordInLog(aggregatedLog);
+  if (blockerHit !== undefined) {
+    console.error(
+      `\n✖ Log-aware gate: blocker keyword detected in output: "${blockerHit}"\n` +
+        '  Policy: any of these substrings in gate logs fails the run regardless of exit codes:\n' +
+        `  ${GATE_BLOCKER_SUBSTRINGS.map((s) => `  - ${s}`).join('\n')}`,
+    );
+    failed = true;
+  }
+
+  process.exitCode = failed ? 1 : 0;
 }
 
-const blockerHit = findBlockerKeywordInLog(aggregatedLog);
-if (blockerHit !== undefined) {
-  console.error(
-    `\n✖ Log-aware gate: blocker keyword detected in output: "${blockerHit}"\n` +
-      '  Policy: any of these substrings in gate logs fails the run regardless of exit codes:\n' +
-      `  ${GATE_BLOCKER_SUBSTRINGS.map((s) => `  - ${s}`).join('\n')}`,
-  );
-  failed = true;
-}
-
-process.exit(failed ? 1 : 0);
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

@@ -15,7 +15,7 @@ function snapshotScholar(age: number): GameStateSnapshot {
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
   snap.state.player.alive = true;
-  snap.state.player.traitProfile = { origin: 'scholar_house' };
+  snap.state.player.traits = [];
   snap.state.flags = { ...(snap.state.flags ?? {}), origin_scholar_family: true };
   return snap;
 }

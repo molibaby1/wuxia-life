@@ -5,7 +5,6 @@
 
 import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { talentSystem } from '../src/core/TalentSystem';
 import { eventLoader } from '../src/core/EventLoader';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
 
@@ -63,14 +62,12 @@ async function runSimulation() {
   console.log('='.repeat(100));
   console.log('');
 
-  await talentSystem.loadTalents();
   await eventLoader.loadAllEvents();
 
   const gameEngine = new GameEngineIntegration();
   const gameState = gameEngine.getGameState();
 
   if (gameState.player) {
-    gameState.player.talents = ['martial_genius', 'quick_learner'];
     gameState.player.name = '测试玩家';
     gameState.player.gender = 'male';
   }

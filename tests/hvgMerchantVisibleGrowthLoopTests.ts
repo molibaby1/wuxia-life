@@ -22,11 +22,7 @@ function merchantState(overrides: Partial<GameState> = {}): GameState {
     ...overrides,
     player: {
       age: 7,
-      traitProfile: {
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates,
       flags: {},
       ...overrides.player,
@@ -180,7 +176,7 @@ function testMerchantLateChildhoodBusinessPalette(): void {
   const palette = resolveChildhoodActionPalette({
     age: 10,
     player: {
-      traitProfile: { coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
     flags: { origin_merchant_family: true },
   });
@@ -192,7 +188,7 @@ function testMerchantLateChildhoodBusinessPalette(): void {
   const earlyPalette = resolveChildhoodActionPalette({
     age: 6,
     player: {
-      traitProfile: { coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
     flags: { origin_merchant_family: true },
   });
@@ -203,7 +199,7 @@ function testMerchantLateChildhoodBusinessPalette(): void {
 
   const scholarPalette = resolveChildhoodActionPalette({
     age: 10,
-    player: { traitProfile: { origin: 'scholar_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' } } as PlayerState,
+    player: { traits: ['keen_mind', 'lazy', 'bold'] } as PlayerState,
     flags: { origin_scholar_family: true, p8_persona_id: 'p8-scholar-su' },
   });
   assert(
@@ -214,7 +210,7 @@ function testMerchantLateChildhoodBusinessPalette(): void {
   const traitOnlyMerchant = resolveChildhoodActionPalette({
     age: 6,
     player: {
-      traitProfile: { origin: 'merchant_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
     flags: {},
   });

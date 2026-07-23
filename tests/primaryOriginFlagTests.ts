@@ -19,7 +19,7 @@ function buildMerchantTraitState(age = 1): GameState {
     player: {
       age,
       flags: { origin_merchant_family: true },
-      traitProfile: { origin: 'merchant_house' },
+      traits: [],
     },
     flags: { origin_merchant_family: true },
     eventHistory: [],

@@ -20,12 +20,7 @@ function merchantAgeSnapshot(age: number): GameStateSnapshot {
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
   snap.state.player.alive = true;
-  snap.state.player.traitProfile = {
-    coreTalent: 'keen_mind',
-    weakness: 'lazy',
-    temperament: 'bold',
-    origin: 'merchant_house',
-  };
+  snap.state.player.traits = ['keen_mind', 'lazy', 'bold'];
   snap.state.flags = {
     ...(snap.state.flags ?? {}),
     origin_merchant_family: true,

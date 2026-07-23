@@ -11,7 +11,7 @@ const player: PlayerState = {
   items: [], flags: {}, events: [], relationships: [],
 };
 let state: GameState = {
-  player, flags: {}, relations: {}, eventHistory: [],
+  player, facts: {}, flags: {}, relations: {}, eventHistory: [],
   identity: { identities: ['merchant', 'doctor'], primary: 'merchant' },
   achievements: ['merchant_shop_grocery'],
 };

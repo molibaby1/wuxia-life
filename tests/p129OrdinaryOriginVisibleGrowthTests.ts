@@ -29,12 +29,7 @@ function tavernSampleState(overrides: Partial<GameState> = {}): GameState {
     ...overrides,
     player: {
       age: 5,
-      traitProfile: {
-        origin: P129_SAMPLE_ORIGIN_ID,
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates({ socialMomentum: 0 }),
       flags: {},
       ...overrides.player,
@@ -198,7 +193,7 @@ function testNoMultiOriginParallelization(): void {
   const farmPeasant = tavernSampleState({
     flags: { origin_farm_peasant: true, origin_tavern_hand: false },
     player: {
-      traitProfile: { origin: 'farm_peasant', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
   });
   assert(!isP129TavernSampleScope(farmPeasant), 'farm_peasant excluded from P129 sample');
@@ -206,7 +201,7 @@ function testNoMultiOriginParallelization(): void {
   const merchant = tavernSampleState({
     flags: { origin_merchant_family: true, origin_tavern_hand: false },
     player: {
-      traitProfile: { origin: 'merchant_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
   });
   assert(!isP129TavernSampleScope(merchant), 'merchant_house excluded from P129 sample');

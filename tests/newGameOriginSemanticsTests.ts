@@ -10,7 +10,7 @@ import {
   PRIMARY_ORIGIN_FAMILY_FLAGS,
   resolvePrimaryOriginFamilyFlag,
 } from '../src/p16/primaryOriginFlag';
-import { PRIMARY_ORIGIN_TO_TRAIT_ORIGIN } from '../src/p16/primaryOriginTraitBridge';
+import { PRIMARY_ORIGIN_TO_ORIGIN_ID } from '../src/p16/primaryOriginTraitBridge';
 import { resolveChildhoodActionPalette } from '../src/p16/childhoodAgency';
 import type { GameState } from '../src/types/eventTypes';
 
@@ -23,7 +23,8 @@ function assertNoPrimaryOrigin(state: GameState, label: string): void {
     assert(!state.flags?.[flag], `${label}: top-level ${flag} must be absent`);
     assert(!state.player?.flags?.[flag], `${label}: player.${flag} must be absent`);
   }
-  assert(!state.player?.traitProfile?.origin, `${label}: traitProfile.origin must be unset`);
+  assert(!state.flags?.origin_id, `${label}: origin_id must be unset`);
+  assert(!('traitProfile' in (state.player ?? {})), `${label}: traitProfile must be absent`);
 }
 
 function testFreshEngineGameHasNoPresetPrimaryOrigin(): void {
@@ -31,8 +32,8 @@ function testFreshEngineGameHasNoPresetPrimaryOrigin(): void {
   engine.startNewGame('语义探针', 'male');
   assertNoPrimaryOrigin(engine.getGameState(), 'GameEngineIntegration.startNewGame');
   assert(
-    Boolean(engine.getGameState().player?.traitProfile?.coreTalent),
-    'latent coreTalent should still be assigned',
+    engine.getGameState().player?.traits.length === 3,
+    'new game should assign three canonical traits',
   );
 }
 
@@ -66,8 +67,8 @@ async function testOriginBackgroundMerchantSyncsTraitAndOpensGate(): Promise<voi
     'primary origin must be merchant flag after choice',
   );
   assert(
-    state.player?.traitProfile?.origin === PRIMARY_ORIGIN_TO_TRAIT_ORIGIN.origin_merchant_family,
-    'traitProfile.origin must sync from origin_background choice',
+    state.flags?.origin_id === PRIMARY_ORIGIN_TO_ORIGIN_ID.origin_merchant_family,
+    'origin_id must sync from origin_background choice',
   );
   assert(state.flags?.origin_id === 'merchant_house', 'origin_id must mirror trait origin');
 
@@ -85,7 +86,7 @@ async function testOriginBackgroundMerchantSyncsTraitAndOpensGate(): Promise<voi
 function testTraitOnlyMerchantDoesNotOpenChildhoodGate(): void {
   const palette = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'merchant_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' } } as never,
+    player: { traits: [] } as never,
     flags: {},
   });
   assert(
@@ -114,8 +115,8 @@ async function testHeadlessExecuteOriginBackgroundSyncsTrait(): Promise<void> {
     'headless executeChoice must set merchant primary flag',
   );
   assert(
-    state.player?.traitProfile?.origin === 'merchant_house',
-    'headless executeChoice must sync trait origin after origin_background',
+    state.flags?.origin_id === 'merchant_house',
+    'headless executeChoice must sync origin_id after origin_background',
   );
 }
 

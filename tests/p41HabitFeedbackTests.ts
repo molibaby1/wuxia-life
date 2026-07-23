@@ -92,7 +92,6 @@ console.log('=== P41 Habit Feedback Regression ===\n');
     children: 0,
     spouse: null,
     alive: true,
-    talents: [],
     lifeStates: { ...baseLifeStates(), ...lifeStates },
   });
 

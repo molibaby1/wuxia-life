@@ -41,7 +41,7 @@ function assert(condition: boolean, message: string): void {
 function buildState(flag: PrimaryOriginFamilyFlag, age: number, extraFlags: Record<string, boolean> = {}): GameState {
   const flags = { [flag]: true, ...extraFlags };
   return {
-    player: { age, flags },
+    player: { age, flags, traits: [] },
     flags,
   } as GameState;
 }
@@ -58,11 +58,11 @@ function testPrimaryResolverScholarOverPoor(): void {
 }
 
 function testPrimaryResolverNullBeforeOriginBackground(): void {
-  const age0 = { player: { age: 0, flags: {} }, flags: {} } as GameState;
+  const age0 = { player: { age: 0, flags: {}, traits: [] }, flags: {} } as GameState;
   assert(resolvePrimaryOriginFamilyFlag(age0) === null, 'age 0 without primary flags must return null');
 
   const poorOnly = {
-    player: { age: 1, flags: { origin_poor_family: true } },
+    player: { age: 1, flags: { origin_poor_family: true }, traits: [] },
     flags: { origin_poor_family: true },
   } as GameState;
   assert(

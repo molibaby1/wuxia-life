@@ -17,6 +17,9 @@ import {
   gameStateSnapshotAge50,
   serializeGameStateSnapshotAge50Fixture,
 } from '../../src/contracts/fixtures/gameStateSnapshotAge50';
+import { GameEngineIntegration } from '../../src/core/GameEngineIntegration';
+import { FixedTimeSource } from '../../src/headless/adapters/timeSource';
+import { defaultSnapshotConverter } from '../../src/headless/snapshot/SnapshotConverter';
 
 const REQUIRED_METADATA_KEYS: (keyof GameStateSnapshotMetadata)[] = [
   'schemaVersion',
@@ -27,9 +30,9 @@ const REQUIRED_METADATA_KEYS: (keyof GameStateSnapshotMetadata)[] = [
   'sourcePlatform',
 ];
 
-const REQUIRED_STATE_KEYS = ['player', 'flags', 'relations', 'eventHistory'] as const;
+const REQUIRED_STATE_KEYS = ['player', 'facts', 'flags', 'relations', 'eventHistory'] as const;
 
-const REQUIRED_PLAYER_KEYS = ['name', 'age', 'gender', 'alive', 'investments'] as const;
+const REQUIRED_PLAYER_KEYS = ['name', 'age', 'gender', 'alive', 'investments', 'traits'] as const;
 
 /** Derived or volatile keys that must not be required for a valid persisted snapshot. */
 const OPTIONAL_DERIVED_OR_VOLATILE_STATE_KEYS = [
@@ -135,12 +138,14 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
       sourcePlatform: 'node-headless',
     },
     state: {
+      facts: {},
       player: {
         name: 'Minimal',
         age: 1,
         gender: 'male',
         alive: true,
         investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
+        traits: [],
       },
       flags: {},
       relations: {},
@@ -261,6 +266,37 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   );
 
   console.log('✓ forbidden fields detection');
+}
+
+// Canonical Player State V1 Slice 3A: facts are required, persisted, and independent from legacy flags.
+{
+  const engine = new GameEngineIntegration();
+  const initialState = engine.getGameState();
+  assertDeepEqual(initialState.facts, {}, 'new GameState initializes facts to an empty object');
+  assert(!Object.prototype.hasOwnProperty.call(initialState.player, 'facts'), 'PlayerState must not contain facts');
+
+  initialState.facts = {
+    boolean_fact: true,
+    string_fact: 'resolved',
+    number_fact: 3,
+  };
+  initialState.flags = { legacy_marker: true };
+  initialState.player.flags = { player_legacy_marker: true };
+
+  const snapshot = defaultSnapshotConverter.toSnapshot(initialState, {
+    eventCatalogVersion: '1.0.0',
+    sourcePlatform: 'node-headless',
+    time: new FixedTimeSource(1717200000000),
+  });
+  const roundTrippedSnapshot = JSON.parse(JSON.stringify(snapshot)) as GameStateSnapshot;
+  const restored = defaultSnapshotConverter.fromSnapshot(roundTrippedSnapshot);
+
+  assertDeepEqual(restored.facts, initialState.facts, 'facts preserve boolean/string/number values through persistence');
+  assert(restored.flags.legacy_marker === true, 'legacy top-level flag remains in flags');
+  assert(!Object.prototype.hasOwnProperty.call(restored.facts, 'legacy_marker'), 'legacy flags are not copied into facts');
+  assert(!Object.prototype.hasOwnProperty.call(restored.flags, 'boolean_fact'), 'facts are not copied into flags');
+  assert(!Object.prototype.hasOwnProperty.call(restored.player, 'facts'), 'restored PlayerState must not contain facts');
+  console.log('✓ canonical facts initialize and round-trip independently from legacy flags');
 }
 
 console.log('\n✅ All snapshot contract tests passed');

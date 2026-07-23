@@ -24,12 +24,7 @@ function merchantSampleState(overrides: Partial<GameState> = {}): GameState {
     ...overrides,
     player: {
       age: 5,
-      traitProfile: {
-        origin: P122_SAMPLE_ORIGIN_ID,
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'bold'],
       lifeStates: createDefaultPlayerLifeStates({ businessHabit: 0 }),
       flags: {},
       ...overrides.player,
@@ -154,7 +149,7 @@ function testNoSecondRouteParallelization(): void {
   const scholar = merchantSampleState({
     flags: { origin_scholar_family: true, origin_merchant_family: false },
     player: {
-      traitProfile: { origin: 'scholar_house', coreTalent: 'keen_mind', weakness: 'lazy', temperament: 'bold' },
+      traits: ['keen_mind', 'lazy', 'bold'],
     } as PlayerState,
   });
   assert(!isP122MerchantSampleScope(scholar), 'scholar route excluded from P122 sample');

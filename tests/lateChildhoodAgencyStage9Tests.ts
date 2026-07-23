@@ -65,7 +65,7 @@ function snapshotForOrigin(
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
   snap.state.player.alive = true;
-  snap.state.player.traitProfile = { origin: origin.traitOrigin };
+  snap.state.player.traits = [];
   snap.state.flags = {
     ...(snap.state.flags ?? {}),
     [origin.flag]: true,
@@ -80,7 +80,7 @@ function testPaletteMatrix(): void {
       for (let tick = 0; tick < TICKS; tick += 1) {
         const palette = resolveChildhoodActionPalette({
           age,
-          player: { traitProfile: { origin: origin.traitOrigin } } as PlayerState,
+          player: { traits: [] } as PlayerState,
           flags: {
             [origin.flag]: true,
             p8_persona_id: origin.personaId,

@@ -66,18 +66,15 @@ function testOriginEventWeighting(): void {
   const player: PlayerState = {
     name: 't',
     age: 8,
-    traitProfile: {
-      origin: 'poor_family',
-      coreTalent: 'keen_mind',
-      weakness: 'frail',
-      temperament: 'disciplined',
-    },
+    traits: ['keen_mind', 'frail', 'disciplined'],
+    flags: {},
   } as PlayerState;
-  const poorSurvival = getOriginChildhoodEventMultiplier(player, new Set(['survival']));
-  player.traitProfile!.origin = 'merchant_house';
-  const merchantBusiness = getOriginChildhoodEventMultiplier(player, new Set(['business']));
-  player.traitProfile!.origin = 'scholar_house';
-  const scholarComprehension = getOriginChildhoodEventMultiplier(player, new Set(['comprehension']));
+  const state = { player, flags: { origin_id: 'poor_family' } } as GameState;
+  const poorSurvival = getOriginChildhoodEventMultiplier(state, new Set(['survival']));
+  state.flags.origin_id = 'merchant_house';
+  const merchantBusiness = getOriginChildhoodEventMultiplier(state, new Set(['business']));
+  state.flags.origin_id = 'scholar_house';
+  const scholarComprehension = getOriginChildhoodEventMultiplier(state, new Set(['comprehension']));
   assert(poorSurvival > 1, 'poor survival bias');
   assert(merchantBusiness > 1, 'merchant business bias');
   assert(scholarComprehension > 1, 'scholar comprehension bias');
@@ -87,13 +84,13 @@ function testOriginEventWeighting(): void {
 
 function testOriginPassiveNarratives(): void {
   const scholarState = {
-    player: { age: 0, traitProfile: { origin: 'scholar_house' } } as PlayerState,
-    flags: { origin_scholar_family: true },
+    player: { age: 0, traits: [] } as PlayerState,
+    flags: { origin_scholar_family: true, origin_id: 'scholar_house' },
     eventHistory: [],
   } as GameState;
   const frontierState = {
-    player: { age: 0, traitProfile: { origin: 'frontier_military' } } as PlayerState,
-    flags: { origin_frontier: true },
+    player: { age: 0, traits: [] } as PlayerState,
+    flags: { origin_frontier: true, origin_id: 'frontier_military' },
     eventHistory: [],
   } as GameState;
   const scholarPick = selectPassiveNarrative(scholarState, () => 0);
@@ -128,13 +125,15 @@ function testChildhoodAgency(): void {
 
   const age5Palette = resolveChildhoodActionPalette({
     age: 5,
-    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
+    flags: { origin_scholar_family: true, origin_id: 'scholar_house' },
   });
   assert(age5Palette.length >= 1 && age5Palette.length <= 2, 'age 5 offers light planning');
 
   const age7Palette = resolveChildhoodActionPalette({
     age: 7,
-    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
+    flags: { origin_scholar_family: true, origin_id: 'scholar_house' },
   });
   assert(age7Palette.length >= 1 && age7Palette.length <= 2, 'age 7 offers light planning');
   assert(
@@ -148,13 +147,13 @@ function testChildhoodAgency(): void {
 
   const martialAge5 = resolveChildhoodActionPalette({
     age: 5,
-    player: { traitProfile: { origin: 'martial_house' } } as PlayerState,
-    flags: { origin_wuxia_family: true },
+    player: { traits: [] } as PlayerState,
+    flags: { origin_wuxia_family: true, origin_id: 'martial_family' },
   });
   const martialAge7 = resolveChildhoodActionPalette({
     age: 7,
-    player: { traitProfile: { origin: 'martial_house' } } as PlayerState,
-    flags: { origin_wuxia_family: true },
+    player: { traits: [] } as PlayerState,
+    flags: { origin_wuxia_family: true, origin_id: 'martial_family' },
   });
   assert(
     martialAge5.map(a => a.id).join(',') !== martialAge7.map(a => a.id).join(','),
@@ -164,7 +163,7 @@ function testChildhoodAgency(): void {
 
   const infantAction = resolveActiveAction({
     state: {
-      player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10 } as PlayerState,
+      player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10, traits: [] } as PlayerState,
       flags: {},
     } as GameState,
     actionId: 'action_childhood_training',
@@ -177,7 +176,7 @@ function testChildhoodAgency(): void {
 
   const scholarPalette = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
     flags: { p8_persona_id: 'p8-scholar-su' },
   });
   assert(
@@ -191,7 +190,7 @@ function testChildhoodAgency(): void {
 
   const businessPalette = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
     flags: { p8_persona_id: 'p8-wealth-shen' },
   });
   assert(
@@ -204,7 +203,7 @@ function testChildhoodAgency(): void {
   );
   const businessAge7 = resolveChildhoodActionPalette({
     age: 7,
-    player: { traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
     flags: { p8_persona_id: 'p8-wealth-shen' },
   });
   assert(
@@ -215,7 +214,7 @@ function testChildhoodAgency(): void {
 
   const socialPalette = resolveChildhoodActionPalette({
     age: 8,
-    player: { traitProfile: { origin: 'streetborn' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
     flags: { p8_persona_id: 'p8-social-gu' },
   });
   assert(
@@ -229,7 +228,7 @@ function testChildhoodAgency(): void {
 
   const travelPalette = resolveChildhoodActionPalette({
     age: 8,
-    player: { traitProfile: { origin: 'frontier_military' } } as PlayerState,
+    player: { traits: [] } as PlayerState,
     flags: { p8_persona_id: 'p8-explorer-lu' },
   });
   assert(!travelPalette.some(a => a.category === 'travel'), 'late childhood suppresses travel at age 8');
@@ -261,10 +260,11 @@ function testTendencyShaping(): void {
     category: 'random_encounter',
     metadata: { tags: ['survival'] },
   } as EventDefinition;
-  const player = { name: 't', age: 6, traitProfile: { origin: 'frontier_military' } } as PlayerState;
+  const player = { name: 't', age: 6, traits: [] } as PlayerState;
+  const state = { player, flags: { origin_id: 'frontier_military' } } as GameState;
   let acc = createEmptyTendencyAccumulator();
   for (let i = 0; i < 3; i++) {
-    acc = applyChildhoodShapingFromEvent(acc, event, player);
+    acc = applyChildhoodShapingFromEvent(acc, event, state);
   }
   const surfaced = buildTendencySurfaceSummary(acc);
   assert(surfaced.length >= 1, 'endurance surfaced');
@@ -291,11 +291,12 @@ function testRareEventLines(): void {
   const player = {
     name: 't',
     age: 12,
-    traitProfile: { origin: 'martial_family', coreTalent: 'keen_mind', weakness: 'frail', temperament: 'disciplined' },
+    traits: ['keen_mind', 'frail', 'disciplined'],
   } as PlayerState;
-  const prob = computeRareLineProbability(lines[0], player, { p9_early_training_focus: true });
+  const rareFlags = { p9_early_training_focus: true, origin_id: 'martial_family' };
+  const prob = computeRareLineProbability(lines[0], player, rareFlags);
   assert(prob > 0, 'eligible rare line probability');
-  const rolls = rollRareEventLines(player, { p9_early_training_focus: true }, () => 0.01);
+  const rolls = rollRareEventLines(player, rareFlags, () => 0.01);
   assert(rolls.some(r => r.triggered), 'low roll triggers line');
 }
 
@@ -317,7 +318,7 @@ function testP16GateReport(): void {
 function testYouthRouteEntryPromotion(): void {
   const deferredOnly: GameState = {
     flags: { p16_deferred_business_upbringing: true },
-    player: { age: 13, traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    player: { age: 13, traits: [] } as PlayerState,
   } as GameState;
   promoteYouthRouteEntryFromUpbringing(deferredOnly);
   assert(deferredOnly.flags.p9_early_business_focus === true, 'deferred business promotes early focus');
@@ -331,8 +332,8 @@ function testYouthRouteEntryPromotion(): void {
   assert(echoOnly.flags.p9_early_business_focus === true, 'childhood echo hook promotes early focus');
 
   const youthTransition: GameState = {
-    flags: {},
-    player: { age: 12, traitProfile: { origin: 'merchant_house' } } as PlayerState,
+    flags: { origin_merchant_family: true, origin_id: 'merchant_house' },
+    player: { age: 12, traits: [] } as PlayerState,
   } as GameState;
   applyYouthTransitionSeeds(youthTransition, 12, 13);
   assert(
@@ -350,7 +351,7 @@ function testYouthRouteEntryPromotion(): void {
       p9_early_business_focus: true,
       p16_deferred_travel_upbringing: true,
     },
-    player: { age: 13, traitProfile: { origin: 'streetborn' } } as PlayerState,
+    player: { age: 13, traits: [] } as PlayerState,
   } as GameState;
   promoteYouthRouteEntryFromUpbringing(businessLocked);
   assert(
@@ -374,7 +375,7 @@ function testYouthRouteEntryPromotion(): void {
 
   const demonicDeferredTravel: GameState = {
     flags: { p8_route_demonic: true, p16_deferred_travel_upbringing: true },
-    player: { age: 13, traitProfile: { origin: 'streetborn' } } as PlayerState,
+    player: { age: 13, traits: [] } as PlayerState,
   } as GameState;
   promoteYouthRouteEntryFromUpbringing(demonicDeferredTravel);
   assert(

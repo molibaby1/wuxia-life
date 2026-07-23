@@ -25,7 +25,7 @@ function buildState(
 ): GameState {
   const flags = { [primary]: true, ...extraFlags };
   return {
-    player: { age, flags },
+    player: { age, flags, traits: [] },
     flags,
   } as GameState;
 }

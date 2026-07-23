@@ -17,6 +17,7 @@ import { RouteStateManager } from '../src/core/RouteStateManager';
 import { saveManager } from '../src/core/SaveManager';
 import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
+import { getOriginId } from '../src/p20/stateAccess';
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
 import type {
@@ -1200,7 +1201,7 @@ export class GameProcessSimulator {
     
     const spouse = finalState?.player?.spouse || undefined;
     const children = finalState?.player?.children || 0;
-    const traitNames = traitSystem.getTraitNames(finalState?.player?.traitProfile);
+    const traitNames = traitSystem.getTraitNames(finalState?.player?.traits);
     const dailyEventCount = this.records.filter(r => r.eventId.startsWith('daily_')).length;
     let endingSummary: string | undefined;
     if (finalState && gameEnded) {
@@ -1250,13 +1251,13 @@ export class GameProcessSimulator {
         sectStatus,
         spouse,
         children,
-        origin: traitNames.origin,
+        origin: traitSystem.getOriginName(finalState ? getOriginId(finalState) : undefined),
         coreTalent: traitNames.coreTalent,
         weakness: traitNames.weakness,
         temperament: traitNames.temperament,
         lifeStates: { ...(finalState?.player?.lifeStates || {}) },
         dailyEventCount,
-        growthBiasSummary: [...(finalState?.player?.growthBiasSummary || [])],
+        growthBiasSummary: traitSystem.getGrowthBiasSummary(finalState?.player?.traits),
         endingSummary,
         flags: Object.fromEntries(
           Object.entries(flags).filter(([_, v]) => typeof v === 'boolean' && v)

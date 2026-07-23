@@ -10,19 +10,18 @@ import type {
   EventDefinition,
   GameState,
   LifeStateKey,
-  OriginConfig,
   OriginId,
   PlayerLifeStates,
   PlayerState,
-  PlayerTraitProfile,
   TemperamentConfig,
+  TraitId,
   TraitStatKey,
   WeaknessConfig,
   WeaknessId,
   TemperamentId,
 } from '../types/eventTypes';
 
-type TraitConfig = CoreTalentConfig | WeaknessConfig | TemperamentConfig | OriginConfig;
+type TraitConfig = CoreTalentConfig | WeaknessConfig | TemperamentConfig;
 
 const EXCLUSIONS = new Set([
   'keen_mind:slow_witted',
@@ -30,30 +29,14 @@ const EXCLUSIONS = new Set([
   'disciplined:lazy',
 ]);
 
-const RARE_COMBOS: Array<{
-  traits: string[];
-  title: string;
-  description: string;
-}> = [
-  {
-    traits: ['martial_born', 'lazy'],
-    title: '璞玉蒙尘',
-    description: '资质极佳，却总难把劲使到正地方。',
-  },
-  {
-    traits: ['heroic_heart', 'profit_driven'],
-    title: '义利两难',
-    description: '你并非不讲义气，只是不愿轻看得失。',
-  },
-  {
-    traits: ['cold_reader', 'affectionate'],
-    title: '冷眼热心',
-    description: '你看事很冷静，心却没法真正变冷。',
-  },
-];
-
 function randomPick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+interface TraitSelection {
+  coreTalent: CoreTalentId;
+  weakness: WeaknessId;
+  temperament: TemperamentId;
 }
 
 export class TraitSystem {
@@ -69,48 +52,26 @@ export class TraitSystem {
     }, {} as PlayerLifeStates);
   }
 
-  /** Latent traits only — no origin binding until origin_background. */
-  generateLatentProfile(): PlayerTraitProfile {
-    let profile: PlayerTraitProfile;
+  generateTraits(): TraitId[] {
+    let selection: TraitSelection;
     do {
-      profile = {
+      selection = {
         coreTalent: randomPick(coreTalents).id,
         weakness: randomPick(weaknesses).id,
         temperament: randomPick(temperaments).id,
       };
-    } while (!this.isValidProfile(profile));
-
-    const combo = this.getRareCombo(profile);
-    if (combo) {
-      profile.rareComboTitle = combo.title;
-      profile.rareComboDescription = combo.description;
-    }
-    return profile;
+    } while (!this.isValidSelection(selection));
+    return [selection.coreTalent, selection.weakness, selection.temperament];
   }
 
-  /** @deprecated prefer generateLatentProfile + bindTraitOrigin after origin_background */
-  generateProfile(): PlayerTraitProfile {
-    return {
-      ...this.generateLatentProfile(),
-      origin: randomPick(origins).id,
-    };
-  }
-
-  applyProfile(
-    player: PlayerState,
-    profile: PlayerTraitProfile,
-    options?: { bindOrigin?: boolean },
-  ): PlayerState {
+  applyTraits(player: PlayerState, traits: TraitId[]): PlayerState {
     const nextPlayer = {
       ...player,
-      traitProfile: profile,
+      traits: [...traits],
       lifeStates: this.createInitialLifeStates(),
-      growthBiasSummary: this.getGrowthBiasSummary(profile),
     };
 
-    const bindOrigin = options?.bindOrigin !== false && profile.origin !== undefined;
-    const allConfigs = this.getAllConfigs(profile, bindOrigin);
-    for (const config of allConfigs) {
+    for (const config of this.getTraitConfigs(traits)) {
       if ('initialStats' in config && config.initialStats) {
         for (const modifier of config.initialStats) {
           const current = Number(nextPlayer[modifier.stat] || 0);
@@ -137,48 +98,12 @@ export class TraitSystem {
       }
     }
 
-    const flags = { ...(nextPlayer.flags || {}) } as Record<string, boolean>;
-    if (bindOrigin && profile.origin) {
-      const originConfig = this.originMap.get(profile.origin);
-      for (const flag of originConfig?.startingFlags || []) {
-        flags[flag] = true;
-      }
-    }
-    nextPlayer.flags = flags;
-
     return nextPlayer;
   }
 
-  /** Metadata only — origin_background choice effects own stat deltas. */
-  bindTraitOrigin(player: PlayerState, originId: OriginId): PlayerState {
-    const latent = (player.traitProfile ?? {}) as Partial<PlayerTraitProfile>;
-    const temperament = latent.temperament;
-    if (!temperament || !this.temperamentMap.has(temperament)) {
-      return {
-        ...player,
-        growthBiasSummary: [],
-      };
-    }
-    const profile: PlayerTraitProfile = {
-      coreTalent: latent.coreTalent ?? 'keen_mind',
-      weakness: latent.weakness ?? 'lazy',
-      temperament,
-      rareComboTitle: latent.rareComboTitle,
-      rareComboDescription: latent.rareComboDescription,
-      origin: originId,
-    };
-    return {
-      ...player,
-      traitProfile: profile,
-      growthBiasSummary: this.getGrowthBiasSummary(profile),
-    };
-  }
-
   getGrowthMultiplier(player: PlayerState | undefined, stat: string): number {
-    if (!player?.traitProfile) return 1;
-    const profile = player.traitProfile;
     let multiplier = 1;
-    for (const config of this.getAllConfigs(profile)) {
+    for (const config of this.getTraitConfigs(player?.traits)) {
       if ('growthModifiers' in config && config.growthModifiers) {
         const hit = config.growthModifiers.find(item => item.stat === stat);
         if (hit) {
@@ -189,12 +114,13 @@ export class TraitSystem {
     return multiplier;
   }
 
-  getEventWeightMultiplier(player: PlayerState | undefined, event: EventDefinition): number {
-    if (!player?.traitProfile) return 1;
+  getEventWeightMultiplier(state: GameState, event: EventDefinition): number {
+    const player = state.player;
+    if (!player) return 1;
     const tags = this.getEventBiasTags(event);
     let multiplier = 1;
-    for (const config of this.getAllConfigs(player.traitProfile)) {
-      const biases = 'eventBiases' in config ? config.eventBiases : config.earlyEventBiases;
+    for (const config of this.getTraitConfigs(player.traits)) {
+      const biases = 'eventBiases' in config ? config.eventBiases : [];
       for (const bias of biases || []) {
         if (tags.has(bias.tag)) {
           multiplier *= bias.multiplier;
@@ -202,8 +128,9 @@ export class TraitSystem {
       }
     }
 
-    if ((player.age || 0) > 18 && player.traitProfile.origin) {
-      const originConfig = this.originMap.get(player.traitProfile.origin);
+    const originId = this.getOriginId(state);
+    if ((player.age || 0) > 18 && originId) {
+      const originConfig = this.originMap.get(originId);
       for (const bias of originConfig?.earlyEventBiases || []) {
         if (tags.has(bias.tag)) {
           multiplier /= bias.multiplier;
@@ -214,27 +141,27 @@ export class TraitSystem {
     return Math.max(0.35, Math.min(2.5, multiplier));
   }
 
-  getTraitNames(profile: PlayerTraitProfile | undefined): {
-    origin?: string;
+  getTraitNames(traits: TraitId[] | undefined): {
     coreTalent?: string;
     weakness?: string;
     temperament?: string;
   } {
-    if (!profile) return {};
+    const selection = this.getTraitSelection(traits);
+    if (!selection) return {};
     return {
-      origin: profile.origin ? this.originMap.get(profile.origin)?.name : undefined,
-      coreTalent: this.coreTalentMap.get(profile.coreTalent)?.name,
-      weakness: this.weaknessMap.get(profile.weakness)?.name,
-      temperament: this.temperamentMap.get(profile.temperament)?.name,
+      coreTalent: this.coreTalentMap.get(selection.coreTalent)?.name,
+      weakness: this.weaknessMap.get(selection.weakness)?.name,
+      temperament: this.temperamentMap.get(selection.temperament)?.name,
     };
   }
 
-  getGrowthBiasSummary(profile: PlayerTraitProfile): string[] {
+  getGrowthBiasSummary(traits: TraitId[] | undefined): string[] {
     const summary: string[] = [];
-    const core = this.coreTalentMap.get(profile.coreTalent);
-    const weakness = this.weaknessMap.get(profile.weakness);
-    const temperament = this.temperamentMap.get(profile.temperament);
-    const origin = this.originMap.get(profile.origin);
+    const selection = this.getTraitSelection(traits);
+    if (!selection) return summary;
+    const core = this.coreTalentMap.get(selection.coreTalent);
+    const weakness = this.weaknessMap.get(selection.weakness);
+    const temperament = this.temperamentMap.get(selection.temperament);
 
     if (core) {
       summary.push(`强项：${core.summary}`);
@@ -245,10 +172,11 @@ export class TraitSystem {
     if (temperament) {
       summary.push(`气质：${temperament.summary}`);
     }
-    if (origin) {
-      summary.push(`出身：${origin.summary}`);
-    }
     return summary;
+  }
+
+  getOriginName(originId: string | undefined): string | undefined {
+    return originId ? this.originMap.get(originId as OriginId)?.name : undefined;
   }
 
   clampLifeState(stateKey: LifeStateKey, value: number): number {
@@ -257,43 +185,39 @@ export class TraitSystem {
     return Math.max(config.min, Math.min(config.max, value));
   }
 
-  private getRareCombo(profile: PlayerTraitProfile) {
-    const traitIds: Array<CoreTalentId | WeaknessId | TemperamentId | OriginId> = [
-      profile.coreTalent,
-      profile.weakness,
-      profile.temperament,
-    ];
-    if (profile.origin) {
-      traitIds.push(profile.origin);
-    }
-    return RARE_COMBOS.find(combo => combo.traits.every(trait => traitIds.includes(trait as typeof traitIds[number])));
-  }
-
-  private isValidProfile(profile: PlayerTraitProfile): boolean {
+  private isValidSelection(selection: TraitSelection): boolean {
     const pairs: Array<[string, string]> = [
-      [profile.coreTalent, profile.weakness],
-      [profile.temperament, profile.weakness],
-      [profile.coreTalent, profile.temperament],
+      [selection.coreTalent, selection.weakness],
+      [selection.temperament, selection.weakness],
+      [selection.coreTalent, selection.temperament],
     ];
-    if (profile.origin) {
-      pairs.push([profile.origin, profile.coreTalent]);
-    }
     return pairs.every(([left, right]) => !EXCLUSIONS.has(`${left}:${right}`) && !EXCLUSIONS.has(`${right}:${left}`));
   }
 
-  private getAllConfigs(profile: PlayerTraitProfile, includeOrigin = true): TraitConfig[] {
+  private getTraitConfigs(traits: TraitId[] | undefined): TraitConfig[] {
+    if (!traits) return [];
     const configs: TraitConfig[] = [
-      this.coreTalentMap.get(profile.coreTalent),
-      this.weaknessMap.get(profile.weakness),
-      this.temperamentMap.get(profile.temperament),
+      ...traits.map(trait => this.coreTalentMap.get(trait as CoreTalentId)),
+      ...traits.map(trait => this.weaknessMap.get(trait as WeaknessId)),
+      ...traits.map(trait => this.temperamentMap.get(trait as TemperamentId)),
     ].filter(Boolean) as TraitConfig[];
-    if (includeOrigin && profile.origin) {
-      const originConfig = this.originMap.get(profile.origin);
-      if (originConfig) {
-        configs.unshift(originConfig);
-      }
-    }
     return configs;
+  }
+
+  private getTraitSelection(traits: TraitId[] | undefined): TraitSelection | undefined {
+    if (!traits) return undefined;
+    const coreTalent = traits.find(trait => this.coreTalentMap.has(trait as CoreTalentId)) as CoreTalentId | undefined;
+    const weakness = traits.find(trait => this.weaknessMap.has(trait as WeaknessId)) as WeaknessId | undefined;
+    const temperament = traits.find(trait => this.temperamentMap.has(trait as TemperamentId)) as TemperamentId | undefined;
+    if (!coreTalent || !weakness || !temperament) return undefined;
+    return { coreTalent, weakness, temperament };
+  }
+
+  private getOriginId(state: GameState): OriginId | undefined {
+    const originId = state.flags?.origin_id;
+    return typeof originId === 'string' && this.originMap.has(originId as OriginId)
+      ? originId as OriginId
+      : undefined;
   }
 
   public getEventBiasTags(event: EventDefinition): Set<EventBiasTag> {

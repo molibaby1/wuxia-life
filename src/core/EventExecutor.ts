@@ -27,7 +27,7 @@ import {
   applyPrimaryOriginFamilyExclusivity,
   isPrimaryOriginFamilyFlag,
 } from '../p16/primaryOriginFlag';
-import { syncTraitOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
+import { syncOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
 import { IdentitySystem } from './IdentitySystem';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
@@ -507,7 +507,7 @@ export class FlagSetHandler implements EffectHandler {
       },
     };
     if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
-      result = syncTraitOriginFromPrimaryChoice(result, flagName);
+      result = syncOriginFromPrimaryChoice(result, flagName);
     }
     return RouteStateManager.syncFromFlagSet(result, flagName, flagValue);
   }

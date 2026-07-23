@@ -51,6 +51,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
     const now = options.time.now();
     const {
       player,
+      facts,
       flags,
       eventHistory,
       relations,
@@ -85,6 +86,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
           ...playerCore,
           flags: playerFlags,
         },
+        facts: { ...facts },
         flags: { ...flags, ...(playerFlags ?? {}) },
         relations,
         eventHistory: [...(eventHistory ?? [])],
@@ -115,13 +117,14 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         );
       }
     }
-    const { player, flags, ...rest } = snapshot.state;
+    const { player, facts, flags, ...rest } = snapshot.state;
     if (!player?.name) {
       throw new SnapshotConversionError('SNAPSHOT_INVALID', 'Snapshot missing player.name');
     }
     const mergedFlags = { ...flags, ...(player.flags ?? {}) };
     const hydrated: GameState = {
-      ...(rest as Omit<GameState, 'player' | 'flags'>),
+      ...(rest as Omit<GameState, 'player' | 'flags' | 'facts'>),
+      facts: { ...facts },
       player: {
         ...player,
         flags: mergedFlags,

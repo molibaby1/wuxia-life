@@ -13,7 +13,7 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity, PlayerLifeStates, PlayerTraitProfile, CriticalChoices, RoadCommitmentRecord } from '../types/eventTypes';
+import type { GameState, PlayerIdentity, PlayerLifeStates, CriticalChoices, RoadCommitmentRecord } from '../types/eventTypes';
 import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
@@ -102,7 +102,6 @@ interface EndingEvaluationData {
   spouse: string | null;
   children: number;
   lifeStates: PlayerLifeStates;
-  traitProfile?: PlayerTraitProfile;
   choices?: CriticalChoices;
   roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
 }
@@ -600,7 +599,6 @@ export class EndingSystem {
       spouse: player.spouse,
       children: player.children,
       lifeStates: player.lifeStates || EMPTY_LIFE_STATES,
-      traitProfile: player.traitProfile,
       roadCommitments: state.roadCommitments,
     };
   }

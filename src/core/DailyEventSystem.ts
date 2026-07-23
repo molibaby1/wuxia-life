@@ -2,6 +2,7 @@ import { dailyEvents } from '../data/life/dailyEvents';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
+import { getOriginId } from '../p20/stateAccess';
 import { EffectType, EventCategory, EventPriority, type DailyEventConfig, type DailyEventVariantConfig, type EventDefinition, type EventTrigger, type GameState } from '../types/eventTypes';
 
 // ponytail: built once at load; getConfigByVariantId was O(configs × variants) per daily event.
@@ -76,6 +77,13 @@ export class DailyEventSystem {
       if (traitIds.has(trait)) {
         weight *= 0.75;
       }
+    }
+    const originId = getOriginId(state);
+    if (originId && config.preferredOrigins?.includes(originId as typeof config.preferredOrigins[number])) {
+      weight *= 1.2;
+    }
+    if (originId && config.suppressedOrigins?.includes(originId as typeof config.suppressedOrigins[number])) {
+      weight *= 0.75;
     }
     for (const stateRule of config.preferredStates || []) {
       const value = state.player?.lifeStates?.[stateRule.state] || 0;
@@ -223,12 +231,19 @@ export class DailyEventSystem {
     let neutral = 1.4;
     let negative = 1;
     const traitIds = this.getPlayerTraits(state);
+    const originId = getOriginId(state);
 
     for (const trait of config.outcomeBias?.positiveByTraits || []) {
       if (traitIds.has(trait)) positive += 0.5;
     }
     for (const trait of config.outcomeBias?.negativeByTraits || []) {
       if (traitIds.has(trait)) negative += 0.6;
+    }
+    for (const origin of config.outcomeBias?.positiveByOrigins || []) {
+      if (origin === originId) positive += 0.5;
+    }
+    for (const origin of config.outcomeBias?.negativeByOrigins || []) {
+      if (origin === originId) negative += 0.6;
     }
 
     const fatigue = state.player?.lifeStates?.fatigue || 0;
@@ -249,12 +264,7 @@ export class DailyEventSystem {
   }
 
   private getPlayerTraits(state: GameState): Set<string> {
-    const profile = state.player?.traitProfile;
-    return new Set(
-      profile
-        ? [profile.origin, profile.coreTalent, profile.weakness, profile.temperament]
-        : []
-    );
+    return new Set(state.player?.traits || []);
   }
 
   private getGroupStateMultiplier(config: DailyEventConfig, state: GameState): number {

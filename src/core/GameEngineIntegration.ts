@@ -17,7 +17,6 @@ import type { EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStat
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
-import { talentSystem } from './TalentSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { LifePathManager } from './LifePathSystem';
 import { difficultyManager } from './DifficultyManager';
@@ -87,8 +86,6 @@ export class GameEngineIntegration {
   constructor() {
     this.eventExecutor = new EventExecutor();
     this.conditionEvaluator = new ConditionEvaluator();
-    // 初始化天赋系统
-    talentSystem.loadTalents();
     // 先创建普通对象
     const initialState = this.createInitialState();
     // 然后包装为响应式
@@ -138,6 +135,7 @@ export class GameEngineIntegration {
         flags: {},
         events: [],
         relationships: [],
+        traits: [],
         lifeStates: traitSystem.createInitialLifeStates(),
       },
       currentTime: {
@@ -145,6 +143,7 @@ export class GameEngineIntegration {
         month: 1,
         day: 1,
       },
+      facts: {},
       flags: {},
       events: [],
       eventHistory: [],
@@ -290,9 +289,8 @@ export class GameEngineIntegration {
         player.events = [...(nextState.player.events || [])];
         player.flags = { ...(nextState.player.flags || {}) };
         player.relationships = [...(nextState.player.relationships || [])];
-        player.traitProfile = nextState.player.traitProfile ? { ...nextState.player.traitProfile } : undefined;
+        player.traits = [...nextState.player.traits];
         player.lifeStates = nextState.player.lifeStates ? { ...nextState.player.lifeStates } : traitSystem.createInitialLifeStates();
-        player.growthBiasSummary = [...(nextState.player.growthBiasSummary || [])];
       }
     }
 
@@ -1413,11 +1411,11 @@ export class GameEngineIntegration {
     const totalWeight = events.reduce((sum, event) => {
       const baseWeight = eventLoader.getWeightForAge(event, currentAge);
       const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
+      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
         getOriginChildhoodEventMultiplier(
-          this.gameState.player,
+          this.gameState,
           traitSystem.getEventBiasTags(event),
         );
       const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
@@ -1438,11 +1436,11 @@ export class GameEngineIntegration {
 
     for (const event of events) {
       const pathAdjusted = this.adjustWeightByPath(event, eventLoader.getWeightForAge(event, currentAge), dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState.player, event);
+      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
         getOriginChildhoodEventMultiplier(
-          this.gameState.player,
+          this.gameState,
           traitSystem.getEventBiasTags(event),
         );
       const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
@@ -1944,7 +1942,7 @@ export class GameEngineIntegration {
     this.gameState.p16TendencyShaping = applyChildhoodShapingFromEvent(
       accumulator,
       event,
-      this.gameState.player,
+      this.gameState,
     );
   }
 
@@ -2126,15 +2124,14 @@ export class GameEngineIntegration {
     options?: { enableLiveOpsActivation?: boolean },
   ): void {
     const nextState = this.createInitialState();
-    const profile = traitSystem.generateLatentProfile();
-    nextState.player = traitSystem.applyProfile(
+    const traits = traitSystem.generateTraits();
+    nextState.player = traitSystem.applyTraits(
       {
         ...nextState.player,
         name,
         gender,
       },
-      profile,
-      { bindOrigin: false },
+      traits,
     );
     this.applyGameState(nextState);
   }

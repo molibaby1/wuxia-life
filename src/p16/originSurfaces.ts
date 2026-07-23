@@ -2,14 +2,15 @@ import { getWorldProfile } from '../narrative/worldProfile';
 import type { WorldProfileOriginSurface } from '../narrative/profile/types';
 import type { GameState, PlayerState } from '../types/eventTypes';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
+import { getOriginId } from '../p20/stateAccess';
 import { resolvePrimaryOriginFamilyFlag } from './primaryOriginFlag';
-import { PRIMARY_ORIGIN_TO_TRAIT_ORIGIN } from './primaryOriginTraitBridge';
+import { PRIMARY_ORIGIN_TO_ORIGIN_ID } from './primaryOriginTraitBridge';
 
-export function getOriginSurfaceForPlayer(
-  player: PlayerState | undefined,
+export function getOriginSurfaceForState(
+  state: GameState,
   worldId = 'wuxia',
 ): WorldProfileOriginSurface | undefined {
-  const originId = player?.traitProfile?.origin;
+  const originId = getOriginId(state);
   if (!originId) return undefined;
   const surfaces = getWorldProfile(worldId).originSurfaces ?? [];
   return surfaces.find(surface => surface.originId === originId);
@@ -30,11 +31,7 @@ export function getCanonicalOriginSurfaceForGameplay(
   } as GameState;
   const primary = resolvePrimaryOriginFamilyFlag(state);
   if (primary) {
-    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
-  }
-  const traitOrigin = player?.traitProfile?.origin;
-  if (traitOrigin) {
-    return getOriginSurfaceById(traitOrigin, worldId);
+    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_ORIGIN_ID[primary], worldId);
   }
   return undefined;
 }
@@ -53,7 +50,7 @@ export function getPrimaryOriginSurfaceForChildhoodPalette(
   } as GameState;
   const primary = resolvePrimaryOriginFamilyFlag(state);
   if (primary) {
-    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_TRAIT_ORIGIN[primary], worldId);
+    return getOriginSurfaceById(PRIMARY_ORIGIN_TO_ORIGIN_ID[primary], worldId);
   }
   return undefined;
 }
@@ -107,13 +104,13 @@ export function getOriginGuidanceEventMultiplier(
 }
 
 export function getOriginChildhoodEventMultiplier(
-  player: PlayerState | undefined,
+  state: GameState,
   eventTags: Set<string>,
   worldId = 'wuxia',
 ): number {
-  const age = player?.age ?? 0;
+  const age = state.player?.age ?? 0;
   if (age > 18) return 1;
-  const surface = getOriginSurfaceForPlayer(player, worldId);
+  const surface = getOriginSurfaceForState(state, worldId);
   const material = getOriginMaterialEventMultiplier(surface, eventTags);
   const guidance = getOriginGuidanceEventMultiplier(surface, eventTags);
   return Math.max(0.35, Math.min(2.5, material * guidance));

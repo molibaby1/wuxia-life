@@ -56,8 +56,8 @@ export function assembleP16GateReport(
   const suppressedAtAge5 = [...ADULT_CHILDHOOD_BLOCKED_ACTIONS];
   const scholarPaletteAge6 = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
-    flags: { p8_persona_id: 'p8-scholar-su' },
+    player: { traits: [] } as PlayerState,
+    flags: { p8_persona_id: 'p8-scholar-su', origin_scholar_family: true, origin_id: 'scholar_house' },
   }).map(action => action.id);
 
   const outcomes = profile.compositeDestinyOutcomes ?? [];
@@ -100,8 +100,8 @@ export function assembleP16GateReport(
       suppressedAtAge5,
       allowlistAtAge10: resolveChildhoodActionPalette({
         age: 10,
-        player: { traitProfile: { origin: 'merchant_house' } } as PlayerState,
-        flags: { p8_persona_id: 'p8-wealth-shen' },
+        player: { traits: [] } as PlayerState,
+        flags: { p8_persona_id: 'p8-wealth-shen', origin_merchant_family: true, origin_id: 'merchant_house' },
       }).map(action => action.id),
       scholarPaletteAtAge6: scholarPaletteAge6,
     },

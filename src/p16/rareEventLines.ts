@@ -39,7 +39,7 @@ export function computeRareLineProbability(
   flags: Record<string, unknown>,
 ): number {
   const age = player?.age ?? 0;
-  const originId = player?.traitProfile?.origin;
+  const originId = typeof flags.origin_id === 'string' ? flags.origin_id : undefined;
   if (!matchesOrigin(line, originId)) return 0;
   if (!matchesStage(line, age)) return 0;
   if (!matchesPriorChoices(line, flags)) return 0;

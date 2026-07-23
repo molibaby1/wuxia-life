@@ -46,6 +46,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     scholarlyHeritage: 5,
     merchantNetwork: 5,
     investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
+    traits: [],
     children: 0,
     spouse: null,
     alive: true,
@@ -61,6 +62,7 @@ type GameStateFixtureInput = Omit<Partial<GameState>, 'player'> & {
 function baseState(partial: GameStateFixtureInput = {}): GameState {
   return {
     player: basePlayer(partial.player),
+    facts: {},
     flags: { origin_id: 'martial_family', ...(partial.flags ?? {}) },
     relations: partial.relations ?? {},
     lifePath: partial.lifePath,

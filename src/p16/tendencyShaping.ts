@@ -1,7 +1,7 @@
 import { getWorldProfile } from '../narrative/worldProfile';
 import type { OriginWorldviewShaping } from '../narrative/profile/types';
-import type { EventDefinition, PlayerState } from '../types/eventTypes';
-import { getOriginSurfaceForPlayer } from './originSurfaces';
+import type { EventDefinition, GameState } from '../types/eventTypes';
+import { getOriginSurfaceForState } from './originSurfaces';
 
 export type TendencyAccumulator = OriginWorldviewShaping;
 
@@ -31,16 +31,16 @@ function getEventTags(event: EventDefinition): Set<string> {
 export function applyChildhoodShapingFromEvent(
   accumulator: TendencyAccumulator,
   event: EventDefinition,
-  player: PlayerState | undefined,
+  state: GameState,
   worldId = 'wuxia',
 ): TendencyAccumulator {
-  const age = player?.age ?? 0;
+  const age = state.player?.age ?? 0;
   if (age > 18) return accumulator;
 
   const rules = getWorldProfile(worldId).childhoodShapingRules ?? [];
   const tags = getEventTags(event);
   const next = { ...accumulator };
-  const surface = getOriginSurfaceForPlayer(player, worldId);
+  const surface = getOriginSurfaceForState(state, worldId);
 
   for (const rule of rules) {
     if (!tags.has(rule.sourceTag)) continue;

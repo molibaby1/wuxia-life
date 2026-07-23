@@ -395,23 +395,23 @@ export function getChildhoodAgencyPaletteIds(context: ChildhoodPaletteContext): 
 export function childhoodPalettesDifferByArchetype(): boolean {
   const scholar = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'scholar_house' } } as PlayerState,
-    flags: { p8_persona_id: 'p8-scholar-su' },
+    player: { traits: [] } as PlayerState,
+    flags: { p8_persona_id: 'p8-scholar-su', origin_scholar_family: true, origin_id: 'scholar_house' },
   }).map(a => a.id);
   const business = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'merchant_house' } } as PlayerState,
-    flags: { p8_persona_id: 'p8-wealth-shen' },
+    player: { traits: [] } as PlayerState,
+    flags: { p8_persona_id: 'p8-wealth-shen', origin_merchant_family: true, origin_id: 'merchant_house' },
   }).map(a => a.id);
   const social = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'streetborn' } } as PlayerState,
-    flags: { p8_persona_id: 'p8-social-gu' },
+    player: { traits: [] } as PlayerState,
+    flags: { p8_persona_id: 'p8-social-gu', origin_id: 'streetborn' },
   }).map(a => a.id);
   const travel = resolveChildhoodActionPalette({
     age: 6,
-    player: { traitProfile: { origin: 'frontier_military' } } as PlayerState,
-    flags: { p8_persona_id: 'p8-explorer-lu' },
+    player: { traits: [] } as PlayerState,
+    flags: { p8_persona_id: 'p8-explorer-lu', origin_frontier: true, origin_id: 'frontier_military' },
   }).map(a => a.id);
 
   const sets = [scholar, business, social, travel];

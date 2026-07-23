@@ -70,6 +70,7 @@ function basePlayer(
     spouse: null,
     alive: true,
     lifeStates: createDefaultPlayerLifeStates(lifeStatesOverride),
+    facts: {},
     flags: {},
     ...rest,
   } as PlayerState;
@@ -93,6 +94,7 @@ function makeState(habits: {
         familyBond: habits.familyBond ?? 0,
       },
     }),
+    facts: {},
     flags: {},
     relations: {},
     achievements: [],

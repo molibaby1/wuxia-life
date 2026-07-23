@@ -32,13 +32,11 @@ export function getPlayerAge(state: GameState): number {
 }
 
 export function getOriginId(state: GameState): string | undefined {
-  const flags = getMergedFlags(state);
-  const fromFlag = flags.origin_id ?? flags.originId;
+  const fromFlag = state.flags?.origin_id ?? state.flags?.originId;
   if (typeof fromFlag === 'string') {
     return fromFlag;
   }
-  const fromTrait = state.player?.traitProfile?.origin;
-  return typeof fromTrait === 'string' ? fromTrait : undefined;
+  return undefined;
 }
 
 export function getActiveRouteKeys(state: GameState): string[] {

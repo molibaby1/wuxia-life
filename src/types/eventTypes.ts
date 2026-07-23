@@ -174,6 +174,11 @@ export type TemperamentId =
   | 'disciplined'
   | 'indulgent';
 
+export type TraitId = CoreTalentId | WeaknessId | TemperamentId;
+
+export type FactValue = boolean | string | number;
+export type Facts = Record<string, FactValue>;
+
 export type OriginId =
   | 'martial_family'
   | 'merchant_house'
@@ -276,16 +281,6 @@ export interface OriginConfig {
   startingFlags?: string[];
 }
 
-export interface PlayerTraitProfile {
-  /** Set after origin_background; absent on fresh new game. */
-  origin?: OriginId;
-  coreTalent: CoreTalentId;
-  weakness: WeaknessId;
-  temperament: TemperamentId;
-  rareComboTitle?: string;
-  rareComboDescription?: string;
-}
-
 export interface PlayerLifeStates {
   fatigue: number;
   discipline: number;
@@ -329,8 +324,10 @@ export interface DailyEventConfig {
     max: number;
   };
   baseWeight: number;
-  preferredTraits?: Array<CoreTalentId | WeaknessId | TemperamentId | OriginId>;
-  suppressedTraits?: Array<CoreTalentId | WeaknessId | TemperamentId | OriginId>;
+  preferredTraits?: TraitId[];
+  suppressedTraits?: TraitId[];
+  preferredOrigins?: OriginId[];
+  suppressedOrigins?: OriginId[];
   preferredStates?: Array<{
     state: LifeStateKey;
     min?: number;
@@ -343,8 +340,10 @@ export interface DailyEventConfig {
     negative: DailyEventVariantConfig[];
   };
   outcomeBias?: {
-    positiveByTraits?: Array<CoreTalentId | WeaknessId | TemperamentId | OriginId>;
-    negativeByTraits?: Array<CoreTalentId | WeaknessId | TemperamentId | OriginId>;
+    positiveByTraits?: TraitId[];
+    negativeByTraits?: TraitId[];
+    positiveByOrigins?: OriginId[];
+    negativeByOrigins?: OriginId[];
   };
   longTermHooks?: {
     addTendency?: string[];
@@ -956,18 +955,12 @@ export interface PlayerState {
   monthProgress?: number;
   dayProgress?: number;
   
-  // ========== 新增：天赋系统 ==========
-  /** 玩家拥有的天赋列表 */
-  talents?: string[];  // 存储天赋 ID
-
-  /** 角色底色 */
-  traitProfile?: PlayerTraitProfile;
+  /** Canonical stable personal traits. */
+  traits: TraitId[];
 
   /** 生活状态 */
   lifeStates?: PlayerLifeStates;
 
-  /** 成长偏向摘要 */
-  growthBiasSummary?: string[];
 }
 
 /**
@@ -979,67 +972,6 @@ export interface Relationship {
   name: string;
   affinity: number;
   status?: string;
-}
-
-/**
- * 天赋定义
- * 
- * 天赋说明：
- * - 天赋在出生时确定，影响属性成长速度和上限
- * - 天赋可见，但后期可用文案包装（如"资质平平"、"武学奇才"）
- * - 每个天赋都有独特的成长加成的效果
- * 
- * @since 2026-03-14
- */
-export interface TalentDefinition {
-  /** 天赋唯一标识 */
-  id: string;
-  
-  /** 天赋名称 */
-  name: string;
-  
-  /** 天赋描述（给玩家看） */
-  description: string;
-  
-  /** 天赋类型 */
-  type: 'combat' | 'social' | 'learning' | 'special' | string;
-  
-  /** 稀有度 */
-  rarity: 'common' | 'uncommon' | 'rare' | 'legendary' | string;
-  
-  /** 影响的属性成长加成（百分比，0.1 = 10%） */
-  growthBonus?: {
-    martialPower?: number;      // 功力成长加成
-    externalSkill?: number;     // 外功成长加成
-    internalSkill?: number;     // 内功成长加成
-    qinggong?: number;          // 轻功成长加成
-    constitution?: number;      // 体魄成长加成
-    charisma?: number;          // 魅力成长加成
-    comprehension?: number;     // 悟性成长加成
-    chivalry?: number;          // 侠义成长加成
-    reputation?: number;        // 声望成长加成
-    connections?: number;       // 人脉成长加成
-    knowledge?: number;         // 学识成长加成
-    wealth?: number;            // 财富成长加成
-  };
-  
-  /** 属性上限提升（突破 100 限制） */
-  statCapBonus?: {
-    martialPower?: number;      // 功力上限提升
-    externalSkill?: number;     // 外功上限提升
-    internalSkill?: number;     // 内功上限提升
-    qinggong?: number;          // 轻功上限提升
-    constitution?: number;      // 体魄上限提升
-  };
-  
-  /** 初始属性加成 */
-  initialBonus?: {
-    [stat: string]: number;
-  };
-  
-  /** 特殊效果（可选） */
-  specialEffects?: string[];
-  penalties?: Record<string, number>;
 }
 
 /**
@@ -1067,6 +999,7 @@ export interface GameState {
   events?: EventRecord[];
   
   // 世界状态
+  facts: Facts;
   flags: Record<string, any>;
   relations: Record<string, number>;
   inventory?: InventoryItem[];

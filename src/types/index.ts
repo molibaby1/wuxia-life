@@ -17,10 +17,12 @@ import type {
   EffectType,
   EventCategory,
   EventPriority,
-  TalentDefinition,
   PlayerState,
+  TraitId,
   InvestmentId,
   Investments,
+  FactValue,
+  Facts,
   GameState,
   EventRecord,
   EventCondition,
@@ -36,7 +38,7 @@ export interface Condition {
 }
 
 // 从 eventTypes 重新导出
-export type { EffectOperator, EffectType, EventCategory, EventPriority, TalentDefinition };
+export type { EffectOperator, EffectType, EventCategory, EventPriority };
 
 export interface Effect {
   op?: EffectOperator;
@@ -48,7 +50,7 @@ export interface Effect {
   effects?: Effect[];
 }
 
-export type { PlayerState, InvestmentId, Investments, GameState, EventRecord };
+export type { PlayerState, TraitId, InvestmentId, Investments, FactValue, Facts, GameState, EventRecord };
 export type { EffectDefinition };
 export {
   LIFE_ROAD_IDS,

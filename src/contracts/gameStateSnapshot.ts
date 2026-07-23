@@ -15,14 +15,15 @@ import type {
   KarmaSystem,
   LifePath,
   PlayerLifeStates,
-  PlayerTraitProfile,
+  TraitId,
+  Facts,
   Investments,
   Relationship,
 } from '../types/eventTypes';
 import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '2.0.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.1.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -119,16 +120,14 @@ export interface SnapshotPlayerState {
   merchantNetwork?: number;
   investments: Investments;
 
-  traitProfile?: PlayerTraitProfile;
+  traits: TraitId[];
   lifeStates?: PlayerLifeStates;
-  talents?: string[];
   relationships?: Relationship[];
   spouse?: string | null;
   children?: number;
   timeUnit?: 'year' | 'month' | 'day';
   monthProgress?: number;
   dayProgress?: number;
-  growthBiasSummary?: string[];
   deathReason?: string;
 
   /** @deprecated Prefer top-level `state.flags` (§6.2). */
@@ -163,6 +162,7 @@ export interface SnapshotEventRecord {
  */
 export interface GameStateSnapshotState {
   player: SnapshotPlayerState;
+  facts: Facts;
   flags: Record<string, unknown>;
   relations: Record<string, number>;
   eventHistory: SnapshotEventRecord[];

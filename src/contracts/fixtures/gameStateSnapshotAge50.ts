@@ -40,6 +40,7 @@ export const gameStateSnapshotAge50 = {
     lastSavedAt: FIXTURE_UPDATED_AT,
     gameTimestamp: FIXTURE_GAME_TIMESTAMP,
     currentTime: { year: 50, month: 3, day: 15 },
+    facts: {},
     player: {
       name: '沈无名',
       age: 50,
@@ -71,13 +72,7 @@ export const gameStateSnapshotAge50 = {
       children: 2,
       timeUnit: 'month',
       monthProgress: 3,
-      growthBiasSummary: ['侠义正道', '武学精进', '家庭和睦'],
-      traitProfile: {
-        origin: 'martial_family',
-        coreTalent: 'heroic_heart',
-        weakness: 'grand_dreams_poor_followthrough',
-        temperament: 'disciplined',
-      },
+      traits: ['heroic_heart', 'grand_dreams_poor_followthrough', 'disciplined'],
       lifeStates: createDefaultPlayerLifeStates({
         fatigue: 35,
         discipline: 78,
@@ -86,7 +81,6 @@ export const gameStateSnapshotAge50 = {
         socialMomentum: 55,
         anxiety: 28,
       }),
-      talents: ['iron_body', 'swift_strike'],
       relationships: [
         {
           id: 'spouse_lin',
@@ -239,6 +233,7 @@ export const gameStateSnapshotAge50 = {
             alive: true,
             reputation: 320,
             investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
+            traits: [],
           },
           flags: { route_hero_locked_in: true },
         },

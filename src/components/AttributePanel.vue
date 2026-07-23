@@ -90,37 +90,6 @@
 
     <!-- 详细信息（展开） -->
     <div v-if="showDetail" class="stats-detail">
-      <!-- 天赋展示 -->
-      <div class="talents-section">
-        <h4>天赋潜能</h4>
-        <div class="talent-list">
-          <div 
-            v-for="talent in playerTalents" 
-            :key="talent.id"
-            class="talent-item"
-            :class="talent.rarity"
-          >
-            <div class="talent-header">
-              <span class="talent-name">{{ talent.name }}</span>
-              <span class="talent-rarity">{{ getRarityName(talent.rarity) }}</span>
-            </div>
-            <p class="talent-desc">{{ getTalentNarrative(talent.id) }}</p>
-            <div class="talent-effects" v-if="showDetail && talent.growthBonus">
-              <div 
-                v-for="(effect, key) in talent.growthBonus" 
-                :key="key"
-                class="talent-effect"
-              >
-                {{ getStatName(key) }} +{{ ((effect || 0) * 100).toFixed(0) }}%
-              </div>
-            </div>
-          </div>
-          <div v-if="playerTalents.length === 0" class="no-talent">
-            尚未发现天赋
-          </div>
-        </div>
-      </div>
-
       <!-- 属性详情 -->
       <div class="stats-breakdown">
         <h4>属性详情</h4>
@@ -134,12 +103,6 @@
               <div class="breakdown-row">
                 <span class="label">基础值:</span>
                 <span class="value">{{ detail.base }}</span>
-              </div>
-              <div class="breakdown-row">
-                <span class="label">天赋加成:</span>
-                <span class="value" :class="{ positive: detail.talentBonus > 0 }">
-                  {{ detail.talentBonus > 0 ? '+' : '' }}{{ (detail.talentBonus * 100).toFixed(0) }}%
-                </span>
               </div>
               <div class="breakdown-row">
                 <span class="label">成长速度:</span>
@@ -176,7 +139,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { ArrowUpIcon, ArrowDownIcon, CheckIcon, XIcon } from 'lucide-vue-next';
-import type { PlayerState, TalentDefinition } from '../types/eventTypes';
+import type { PlayerState } from '../types/eventTypes';
 import {
   attributeMeaningCatalog,
   defaultSelfAwareness,
@@ -187,12 +150,9 @@ import {
 
 interface Props {
   player: PlayerState;
-  talents?: TalentDefinition[];
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  talents: () => []
-});
+const props = defineProps<Props>();
 
 const showDetail = ref(false);
 
@@ -280,12 +240,6 @@ const attributeGuidanceTips = computed(() =>
       example: entry.examples[0] ? `例：${entry.examples[0]}` : '',
     })),
 );
-
-// 获取玩家天赋
-const playerTalents = computed(() => {
-  if (!props.player.talents) return [];
-  return props.talents.filter(t => props.player.talents?.includes(t.id));
-});
 
 // 门派名称映射
 const sectNameMap: Record<string, { name: string; faction: string }> = {
@@ -428,73 +382,11 @@ const getStatBarClass = (statKey: string) => {
   return classMap[statKey] || '';
 };
 
-// 获取稀有度名称
-const getRarityName = (rarity: string) => {
-  const names: { [key: string]: string } = {
-    'common': '普通',
-    'uncommon': '优秀',
-    'rare': '稀有',
-    'legendary': '传说'
-  };
-  return names[rarity] || rarity;
-};
-
-// 天赋叙事文本
-const talentNarratives: { [key: string]: string } = {
-  // 战斗天赋
-  'martial_genius': '你生来就展现出非凡的武学天赋，一招一式都能迅速领悟',
-  'internal_focus': '你性情沉静，适合修炼内功心法，真气运转比常人顺畅',
-  'external_focus': '你筋骨强健，天生神力，外功招式上手极快',
-  'qigong_master': '你天生对气息敏感，轻功身法一点就通',
-  'iron_body': '你体质特殊，皮糙肉厚，抗击打能力远超常人',
-  
-  // 学习天赋
-  'quick_learner': '你天资聪颖，任何知识都能快速掌握',
-  'scholar': '你酷爱读书，过目不忘，学识积累速度惊人',
-  'martial_scholar': '你悟性超群，能触类旁通，从武学中领悟道理',
-  
-  // 社交天赋
-  'charismatic': '你天生具有领袖气质，言谈举止自然吸引他人',
-  'networker': '你善于交际，人脉广阔，消息灵通',
-  'generous': '你乐善好施，侠名远播，容易获得他人好感',
-  'diplomat': '你口才出众，善于说服，谈判能力极强',
-  
-  // 特殊天赋
-  'lucky': '你运气极佳，总能在关键时刻化险为夷',
-  'wealthy': '你出身富裕，家底丰厚，银钱来源不断',
-  'martial_family': '你生于武学世家，从小耳濡目染，起点更高'
-};
-
-// 获取天赋叙事文本
-const getTalentNarrative = (talentId: string): string => {
-  return talentNarratives[talentId] || '你展现出特殊的天赋潜能';
-};
-
-// 获取属性名称
-const getStatName = (key: string) => {
-  const names: { [key: string]: string } = {
-    'martialPower': '功力',
-    'externalSkill': '外功',
-    'internalSkill': '内功',
-    'qinggong': '轻功',
-    'constitution': '体魄',
-    'charisma': '魅力',
-    'comprehension': '悟性',
-    'chivalry': '侠义',
-    'reputation': '名望',
-    'connections': '人脉',
-    'knowledge': '学识',
-    'wealth': '财富'
-  };
-  return names[key] || key;
-};
-
 // 属性详情
 const allStatDetails = computed(() => {
   const allConfigs = [...combatStatConfigs, ...nonCombatStatConfigs];
   return allConfigs.map(config => {
     const currentValue = props.player[config.key as keyof PlayerState] as number || 0;
-    const talentBonus = calculateTalentBonus(config.key);
     const max = config.max || 100;
     
     return {
@@ -503,27 +395,10 @@ const allStatDetails = computed(() => {
       current: currentValue,
       max: max,
       base: currentValue, // TODO: 分离基础值和加成
-      talentBonus: talentBonus,
       growthRate: 0 // TODO: 从成长系统获取
     };
   });
 });
-
-// 计算天赋加成
-const calculateTalentBonus = (statKey: string): number => {
-  if (!props.player.talents) return 0;
-  
-  let bonus = 0;
-  props.player.talents.forEach(talentId => {
-    const talent = props.talents.find(t => t.id === talentId);
-    const growthMap = talent?.growthBonus as Record<string, number> | undefined;
-    if (growthMap && growthMap[statKey]) {
-      bonus += growthMap[statKey];
-    }
-  });
-  
-  return bonus;
-};
 
 </script>
 
@@ -666,95 +541,16 @@ const calculateTalentBonus = (statKey: string): number => {
   border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.talents-section,
 .stats-breakdown,
 .suggestions-section {
   margin-bottom: 20px;
 }
 
-.talents-section h4,
 .stats-breakdown h4,
 .suggestions-section h4 {
   margin: 0 0 12px 0;
   font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
-}
-
-.talent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.talent-item {
-  padding: 12px;
-  border-radius: 8px;
-  border-left: 4px solid;
-}
-
-.talent-item.legendary {
-  background: rgba(234, 179, 8, 0.1);
-  border-color: #eab308;
-}
-
-.talent-item.rare {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: #8b5cf6;
-}
-
-.talent-item.uncommon {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-}
-
-.talent-item.common {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.talent-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.talent-name {
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.talent-rarity {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.talent-desc {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 8px 0;
-}
-
-.talent-effects {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.talent-effect {
-  font-size: 12px;
-  color: #4ade80;
-  background: rgba(74, 222, 128, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.no-talent {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 20px;
 }
 
 .breakdown-grid {

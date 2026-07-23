@@ -467,11 +467,11 @@ const attributePanelPlayer = computed((): PlayerState => {
       scholarlyHeritage: 0,
       merchantNetwork: 0,
       investments: p.investments,
+      traits: [],
       flags: {},
       children: 0,
       spouse: null,
       alive: p.alive,
-      talents: [],
       lifeStates: p.lifeStates,
     };
   }

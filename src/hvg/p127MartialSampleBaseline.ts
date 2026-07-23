@@ -41,7 +41,7 @@ export function isP127MartialSampleScope(state: GameState): boolean {
   if (age < P127_PRIMARY_AGE_MIN || age > P127_CONTINUATION_AGE_MAX) {
     return false;
   }
-  const originId = state.flags?.origin_id ?? state.player?.traitProfile?.origin;
+  const originId = state.flags?.origin_id;
   const martialFamily = resolvePrimaryOriginFamilyFlag(state) === 'origin_wuxia_family';
   return martialFamily && (originId === P127_SAMPLE_ORIGIN_ID || originId === undefined);
 }

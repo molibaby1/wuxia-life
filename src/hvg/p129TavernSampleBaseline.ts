@@ -39,7 +39,7 @@ export function isP129TavernSampleScope(state: GameState): boolean {
   if (age < P129_PRIMARY_AGE_MIN || age > P129_CONTINUATION_AGE_MAX) {
     return false;
   }
-  const originId = state.flags?.origin_id ?? state.player?.traitProfile?.origin;
+  const originId = state.flags?.origin_id;
   const tavernHand = Boolean(state.flags?.origin_tavern_hand);
   return tavernHand && (originId === P129_SAMPLE_ORIGIN_ID || originId === undefined);
 }

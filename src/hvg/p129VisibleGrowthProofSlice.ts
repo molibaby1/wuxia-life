@@ -21,12 +21,7 @@ function tavernState(overrides: Partial<GameState> = {}): GameState {
     ...overrides,
     player: {
       age: 5,
-      traitProfile: {
-        origin: P129_SAMPLE_ORIGIN_ID,
-        coreTalent: 'keen_mind',
-        weakness: 'lazy',
-        temperament: 'bold',
-      },
+      traits: ['keen_mind', 'lazy', 'disciplined'],
       lifeStates: createDefaultPlayerLifeStates({ socialMomentum: 0 }),
       flags: {},
       ...overrides.player,

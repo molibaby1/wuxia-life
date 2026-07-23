@@ -36,7 +36,7 @@ export function isP122MerchantSampleScope(state: GameState): boolean {
   if (age < P122_PRIMARY_AGE_MIN || age > P122_CONTINUATION_AGE_MAX) {
     return false;
   }
-  const originId = state.flags?.origin_id ?? state.player?.traitProfile?.origin;
+  const originId = state.flags?.origin_id;
   const merchantFamily = Boolean(state.flags?.origin_merchant_family);
   return merchantFamily && (originId === P122_SAMPLE_ORIGIN_ID || originId === undefined);
 }

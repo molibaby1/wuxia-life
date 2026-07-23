@@ -5,7 +5,14 @@ import { getP8GatePersonas, getP8PersonaById } from '../p8/personas';
 import { buildPersonaRunMetrics } from '../p8/collectPersonaMetrics';
 import type { PersonaSimulationBundle } from './types';
 
+const personaSimulationCache = new Map<string, PersonaSimulationBundle>();
+
 export async function runPersonaSimulation(personaId: string) {
+  const cached = personaSimulationCache.get(personaId);
+  if (cached) {
+    return cached;
+  }
+
   const persona = getP8PersonaById(personaId);
   if (!persona) {
     throw new Error(`Unknown persona: ${personaId}`);
@@ -25,7 +32,9 @@ export async function runPersonaSimulation(personaId: string) {
     report.p8ChoiceDiagnostics ?? [],
     report.p8ActiveActionReasons ?? [],
   );
-  return { personaId: persona.id, report, records: report.records, metrics };
+  const result = { personaId: persona.id, report, records: report.records, metrics };
+  personaSimulationCache.set(personaId, result);
+  return result;
 }
 
 export async function runAllPersonaSimulations(): Promise<PersonaSimulationBundle[]> {

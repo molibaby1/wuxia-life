@@ -569,7 +569,9 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
   const persona = getP8PersonaById(personaId);
   const routeIdentity = getRouteIdentityFromFlags(flags, persona?.routePreference) ?? '';
   const identityText = persona
-    ? resolveConfiguredAge40Identity(flags, persona.routePreference, report.statistics.origin ?? null)
+    // Origin is intentionally excluded from replay-similarity identity hashing:
+    // it is a starting-background fact, not observed persona playstyle.
+    ? resolveConfiguredAge40Identity(flags, persona.routePreference, '')
     : '';
   const routeSignal = hashLabel(`${routeIdentity}|${identityText}`) % 100;
   const routePrefSignal = hashLabel(persona?.routePreference ?? personaId) % 100;

@@ -23,12 +23,6 @@ function resolvePlayerOriginTags(state: GameState): Set<string> {
       tags.add(tag);
     }
   }
-  const traitOrigin = state.player?.traitProfile?.origin;
-  if (traitOrigin === 'scholar_house') tags.add('scholar');
-  if (traitOrigin === 'merchant_house') tags.add('merchant');
-  if (traitOrigin === 'frontier_military') tags.add('frontier');
-  if (traitOrigin === 'streetborn' || traitOrigin === 'poor_family') tags.add('neutral');
-  if (traitOrigin && traitOrigin.includes('martial')) tags.add('martial');
   return tags;
 }
 
@@ -109,4 +103,3 @@ export function selectPassiveNarrative(
 export function shouldRecordPassiveNarrativeInHistory(entryId: string): boolean {
   return entryId !== 'infant_passive_gap';
 }
-

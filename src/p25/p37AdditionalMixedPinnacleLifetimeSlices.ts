@@ -176,7 +176,7 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
     },
   ];
 
-  let flags: Record<string, unknown> = { origin_merchant_family: true };
+  let flags: Record<string, unknown> = { origin_merchant_family: true, origin_id: 'merchant_house' };
 
   const businessRamp = [
     { age: 10, action: 'family_ledger (+3 business)', gain: 3, moneyGain: 40 },
@@ -355,7 +355,7 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
     },
   ];
 
-  let flags: Record<string, unknown> = { focus_on_study: true };
+  let flags: Record<string, unknown> = { focus_on_study: true, origin_id: 'scholar_house' };
   const eventSequence: P35LifetimeEventStep[] = [];
 
   const trainingRamp = [

@@ -143,7 +143,7 @@ export function runP25PinnacleBaseline(
     const player = {
       name: `pinnacle-sim-${seed}`,
       age: path.player.age ?? 40,
-      traitProfile: { origin: path.originId },
+      traits: ['keen_mind', 'lazy', 'competitive'],
       ...path.player,
     } as PlayerState;
     const flags = { ...path.flags };

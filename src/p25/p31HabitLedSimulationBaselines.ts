@@ -34,7 +34,7 @@ function fixtureToPlayer(path: LifePathFixture): PlayerState {
   return {
     name: 'p31-sim',
     age: path.player.age ?? 35,
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...path.player,
   } as PlayerState;
 }

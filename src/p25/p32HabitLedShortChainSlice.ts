@@ -68,7 +68,7 @@ export function runP32RenownShortChainSlice(): P32ShortChainSliceResult {
 
   const player = {
     name: 'p32-short-chain',
-    traitProfile: { origin: 'scholar_house' },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...RENOWN_SHORT_CHAIN_PLAYER,
   } as PlayerState;
 
@@ -122,7 +122,7 @@ export function runP33MedicalShortChainSlice(): P32ShortChainSliceResult {
 
   const player = {
     name: 'p33-medical-short-chain',
-    traitProfile: { origin: 'poor_family' },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...MEDICAL_SHORT_CHAIN_PLAYER,
   } as PlayerState;
 

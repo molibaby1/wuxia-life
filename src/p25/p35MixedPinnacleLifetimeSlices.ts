@@ -149,6 +149,7 @@ function childhoodTrainingFlags(): Record<string, unknown> {
   return {
     p9_echo_training_hook: true,
     p9_early_training_focus: true,
+    origin_id: 'martial_family',
   };
 }
 

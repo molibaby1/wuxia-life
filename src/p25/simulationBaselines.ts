@@ -32,7 +32,7 @@ function seededPlayer(seed: number): { player: PlayerState; flags: Record<string
   const player = {
     name: `sim-${seed}`,
     age: (path.player.age ?? 35) + (seed % 5),
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     martialPower: (path.player.martialPower ?? 50) + variance * 2,
     reputation: (path.player.reputation ?? 50) + variance,
     connections: (path.player.connections ?? 40) + variance,

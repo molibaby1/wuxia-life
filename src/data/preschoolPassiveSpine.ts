@@ -40,12 +40,6 @@ function resolveOriginTags(state: GameState): Set<string> {
     if (tag) tags.add(tag);
     return tags;
   }
-  const traitOrigin = state.player?.traitProfile?.origin;
-  if (traitOrigin === 'scholar_house') tags.add('scholar');
-  if (traitOrigin === 'merchant_house') tags.add('merchant');
-  if (traitOrigin === 'frontier_military') tags.add('frontier');
-  if (traitOrigin === 'streetborn' || traitOrigin === 'poor_family') tags.add('neutral');
-  if (traitOrigin && traitOrigin.includes('martial')) tags.add('martial');
   return tags;
 }
 
@@ -135,7 +129,7 @@ function scoreEntry(entry: PreschoolPassiveEntry, originTags: Set<string>, state
   }
   if (entry.originTags.includes('neutral') && score === 1) score += 0.5;
   const biasTags = new Set(entry.originTags.filter(t => t !== 'neutral'));
-  score *= getOriginChildhoodEventMultiplier(state.player, biasTags);
+  score *= getOriginChildhoodEventMultiplier(state, biasTags);
   return score;
 }
 

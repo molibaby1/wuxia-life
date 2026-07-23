@@ -1,4 +1,4 @@
-import type { GameState, OriginId, PlayerTraitProfile } from '../types/eventTypes';
+import type { GameState, OriginId } from '../types/eventTypes';
 
 export const P22_LIVE_OPS_ACTIVE_FLAG = 'p22_live_ops_active';
 
@@ -17,9 +17,9 @@ export function shouldActivateLiveOpsForOrigin(originId: OriginId | string | und
 
 export function applyLiveOpsActivationFlags<T extends Record<string, unknown>>(
   flags: T,
-  profile: Pick<PlayerTraitProfile, 'origin'>,
+  originId: OriginId | undefined,
 ): T & { p22_live_ops_active?: boolean; p22_weak_origin_band?: boolean } {
-  if (!profile.origin || !shouldActivateLiveOpsForOrigin(profile.origin)) {
+  if (!originId || !shouldActivateLiveOpsForOrigin(originId)) {
     return flags;
   }
   return {
@@ -29,20 +29,15 @@ export function applyLiveOpsActivationFlags<T extends Record<string, unknown>>(
   };
 }
 
-export function applyLiveOpsActivationToState(state: GameState, profile: PlayerTraitProfile): GameState {
+export function applyLiveOpsActivationToState(state: GameState, originId: OriginId | undefined): GameState {
   const mergedFlags = {
     ...(state.flags ?? {}),
     ...(state.player?.flags ?? {}),
   };
-  const activated = applyLiveOpsActivationFlags(mergedFlags, profile);
+  const activated = applyLiveOpsActivationFlags(mergedFlags, originId);
   return {
     ...state,
     flags: activated,
-    player: state.player
-      ? {
-          ...state.player,
-          flags: activated,
-        }
-      : state.player,
+    player: state.player,
   };
 }

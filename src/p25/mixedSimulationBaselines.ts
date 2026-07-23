@@ -112,7 +112,7 @@ export function runP25MixedBaseline(
     const player = {
       name: `mixed-sim-${seed}`,
       age: path.player.age ?? 40,
-      traitProfile: { origin: path.originId },
+      traits: ['keen_mind', 'lazy', 'competitive'],
       ...path.player,
     } as PlayerState;
     const flags = { ...path.flags };

@@ -61,13 +61,12 @@ export function createSimulationPlayerState({
     scholarlyHeritage: 0,
     merchantNetwork: 0,
     investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
-    flags: {},
+    flags: { origin_id: origin },
     events: [],
     children: 0,
     spouse: null,
     alive,
-    talents: [],
-    traitProfile: { origin, coreTalent, weakness, temperament },
+    traits: [coreTalent, weakness, temperament],
     lifeStates: createDefaultPlayerLifeStates(lifeStates),
   };
 }

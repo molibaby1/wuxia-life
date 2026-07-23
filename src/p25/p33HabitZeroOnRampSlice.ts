@@ -49,7 +49,7 @@ function gameStateAtStudyHabit(studyHabit: number, age: number): GameState {
     player: {
       age,
       name: 'p33-habit-zero',
-      traitProfile: { origin: 'scholar_house' },
+      traits: [],
       lifeStates: {
         trainingHabit: 0,
         studyHabit,
@@ -58,6 +58,7 @@ function gameStateAtStudyHabit(studyHabit: number, age: number): GameState {
         familyBond: 0,
       },
     } as PlayerState,
+    facts: {},
     flags: {},
     relations: {},
     achievements: [],

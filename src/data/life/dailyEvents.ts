@@ -146,7 +146,8 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '临帖抄书',
     ageRange: { min: 8, max: 60 },
     baseWeight: 32,
-    preferredTraits: ['keen_mind', 'disciplined', 'scholar_house'],
+    preferredTraits: ['keen_mind', 'disciplined'],
+    preferredOrigins: ['scholar_house'],
     suppressedTraits: ['lazy', 'unstable_mood'],
     preferredStates: [
       { state: 'discipline', min: 1, weightMultiplier: 1.12 },
@@ -197,7 +198,8 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '读书摘记',
     ageRange: { min: 12, max: 70 },
     baseWeight: 28,
-    preferredTraits: ['keen_mind', 'scholar_house', 'grand_dreams_poor_followthrough'],
+    preferredTraits: ['keen_mind', 'grand_dreams_poor_followthrough'],
+    preferredOrigins: ['scholar_house'],
     suppressedTraits: ['indulgent'],
     preferredStates: [
       { state: 'discipline', min: 1, weightMultiplier: 1.08 },
@@ -246,7 +248,8 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '接点零活',
     ageRange: { min: 12, max: 70 },
     baseWeight: 38,
-    preferredTraits: ['poor_family', 'streetborn', 'unyielding', 'iron_abacus'],
+    preferredTraits: ['unyielding', 'iron_abacus'],
+    preferredOrigins: ['poor_family', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
       { state: 'anxiety', min: 1, weightMultiplier: 1.12 },
@@ -295,7 +298,8 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '小本生意',
     ageRange: { min: 15, max: 70 },
     baseWeight: 34,
-    preferredTraits: ['merchant_house', 'iron_abacus', 'profit_driven', 'streetborn'],
+    preferredTraits: ['iron_abacus', 'profit_driven'],
+    preferredOrigins: ['merchant_house', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
       { state: 'socialMomentum', min: 1, weightMultiplier: 1.2 },
@@ -342,8 +346,9 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '手头拮据',
     ageRange: { min: 14, max: 80 },
     baseWeight: 22,
-    preferredTraits: ['poor_family', 'fear_of_responsibility'],
-    suppressedTraits: ['merchant_house'],
+    preferredTraits: ['fear_of_responsibility'],
+    preferredOrigins: ['poor_family'],
+    suppressedOrigins: ['merchant_house'],
     preferredStates: [
       { state: 'anxiety', min: 2, weightMultiplier: 1.18 },
       { state: 'fatigue', min: 2, weightMultiplier: 1.08 },
@@ -387,7 +392,8 @@ export const dailyEvents: DailyEventConfig[] = [
     title: '家中来信',
     ageRange: { min: 12, max: 70 },
     baseWeight: 20,
-    preferredTraits: ['affectionate', 'poor_family', 'risk_averse'],
+    preferredTraits: ['affectionate', 'risk_averse'],
+    preferredOrigins: ['poor_family'],
     suppressedTraits: ['loner'],
     preferredStates: [
       { state: 'familyBond', max: 2, weightMultiplier: 1.18 },

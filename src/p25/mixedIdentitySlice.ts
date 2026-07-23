@@ -39,7 +39,7 @@ function evaluateMixedIdentity(path: LifePathFixture, worldId = 'wuxia'): MixedI
   const player = {
     name: 'identity-sim',
     age: path.player.age ?? 40,
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...path.player,
   } as PlayerState;
   const flags = { ...path.flags };

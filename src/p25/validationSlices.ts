@@ -146,7 +146,7 @@ export function evaluateHabitLedPathWithP31Bridges(
   const player = {
     name: 'p31-fixture',
     age: path.player.age ?? 35,
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...path.player,
   } as PlayerState;
   const resolvedFlags = resolveHabitLedFixtureFlags(path);
@@ -212,7 +212,7 @@ function findPathContradictions(path: LifePathFixture): ContradictionFinding[] {
   const player = {
     name: 'sim',
     age: path.player.age ?? 30,
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...path.player,
   } as PlayerState;
 

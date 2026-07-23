@@ -38,7 +38,7 @@ function explainMissedLine(
   const prob = computeRareLineProbability(line, player, flags);
   if (prob <= 0) {
     const age = player?.age ?? 0;
-    const origin = player?.traitProfile?.origin;
+    const origin = typeof flags.origin_id === 'string' ? flags.origin_id : undefined;
     if (line.originConditions?.length && (!origin || !line.originConditions.includes(origin))) {
       return {
         lineId,

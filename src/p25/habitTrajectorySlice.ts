@@ -353,6 +353,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
         age: 28,
         lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
       }),
+      facts: {},
       flags: { p27_study_healer_path: true },
       relations: {},
       achievements: [],

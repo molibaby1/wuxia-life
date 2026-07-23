@@ -39,6 +39,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     scholarlyHeritage: 5,
     merchantNetwork: 5,
     investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
+    traits: [],
     children: 0,
     spouse: null,
     alive: true,
@@ -62,6 +63,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   if (family === P20_MARTIAL_ASCENDANT.id) {
     return {
       player: basePlayer({ age: 15, flags: seedFlags }),
+      facts: {},
       flags: { origin_id: 'martial_family', ...seedFlags },
       achievements: [],
       eventHistory: [],
@@ -71,6 +73,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   if (family === P20_SCHOLAR_STATESMAN.id) {
     return {
       player: basePlayer({ age: 55, knowledge: 70, scholarlyHeritage: 45, flags: seedFlags }),
+      facts: {},
       flags: { origin_id: 'scholar_house', ...seedFlags },
       achievements: [],
       eventHistory: [],
@@ -89,6 +92,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   if (family === P20_DEMONIC_OUTLAW.id) {
     return {
       player: basePlayer({ age: 42, flags: seedFlags }),
+      facts: {},
       flags: { origin_id: 'martial_family', ...seedFlags },
       achievements: [],
       eventHistory: [],
@@ -107,6 +111,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   if (family === P20_WEALTH_MERCHANT.id) {
     return {
       player: basePlayer({ age: 35, money: 1800, merchantNetwork: 40, flags: seedFlags }),
+      facts: {},
       flags: { origin_id: 'merchant_house', ...seedFlags },
       achievements: [],
       eventHistory: [],
@@ -125,6 +130,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   if (family === P20_HERMIT_WITHDRAWAL.id) {
     return {
       player: basePlayer({ age: 62, flags: seedFlags }),
+      facts: {},
       flags: { origin_id: 'poor_family', ...seedFlags },
       achievements: [],
       eventHistory: [],

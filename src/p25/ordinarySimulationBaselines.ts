@@ -174,7 +174,7 @@ export function runP25OrdinaryBaseline(
     const player = {
       name: `ordinary-sim-${seed}`,
       age: path.player.age ?? 40,
-      traitProfile: { origin: path.originId },
+      traits: ['keen_mind', 'lazy', 'competitive'],
       ...path.player,
     } as PlayerState;
     const flags = { ...path.flags };
@@ -227,7 +227,7 @@ export function runP25OrdinaryBaseline(
   const showcasePlayer = {
     name: 'ordinary-pinnacle-showcase',
     age: pinnacleShowcase.player.age ?? 39,
-    traitProfile: { origin: pinnacleShowcase.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...pinnacleShowcase.player,
   } as PlayerState;
   const pinnaclePossibleOnOrdinary = evaluatePinnacleAchievementProgress(
@@ -337,7 +337,7 @@ export function evaluateOrdinaryMidTierReachability(
     const player = {
       name: 'mid-tier-check',
       age: path.player.age ?? 40,
-      traitProfile: { origin: path.originId },
+      traits: ['keen_mind', 'lazy', 'competitive'],
       ...path.player,
     } as PlayerState;
     const flags = { ...path.flags };

@@ -43,7 +43,7 @@ function evaluateWindowWaste(path: LifePathFixture, worldId = 'wuxia'): RareWind
   const player = {
     name: 'waste-sim',
     age: path.player.age ?? 40,
-    traitProfile: { origin: path.originId },
+    traits: ['keen_mind', 'lazy', 'competitive'],
     ...path.player,
   } as PlayerState;
   const flags = { ...path.flags };

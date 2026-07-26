@@ -1,12 +1,14 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { coreTalents } from '../src/data/traits/coreTalents';
 import { weaknesses } from '../src/data/traits/weaknesses';
 import { createDefaultPlayerLifeStates, lifeStates } from '../src/data/life/lifeStates';
 import { dailyEvents } from '../src/data/life/dailyEvents';
 import { DailyEventSystem } from '../src/core/DailyEventSystem';
+import { EndingSystem } from '../src/core/EndingSystem';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import { EffectType } from '../src/types/eventTypes';
 import { traitSystem } from '../src/core/TraitSystem';
 import type { DailyEventConfig, GameState, PlayerState } from '../src/types/eventTypes';
@@ -107,6 +109,11 @@ export async function runCanonicalFatigueAnxietyStatusMigrationTests(): Promise<
 
   assertDailyStatusEffects();
   assertFormalStatusEffects();
+  assertEndingInvariance(absentState);
+  assertLifeMemoryInvariance(absentState);
+  await assertFormalOutcomeInvariance(absentState);
+  assertDailyWeightInvariance(absentState);
+  assertNoNumericFatigueAnxietyReferences();
 }
 
 function cloneState(state: GameState): GameState {
@@ -243,6 +250,127 @@ function assertFormalStatusEffects(): void {
       : findChoiceContaining(values, id === 'career_sect_expansion' ? '暂缓扩建' : '暂时退让');
     assert((target.effects ?? []).some((effect: any) => effect.type === 'status_remove' && effect.status === status), `${id} must remove ${status}`);
   }
+}
+
+function assertEndingInvariance(control: GameState): void {
+  const subject = cloneState(control);
+  subject.player.statuses = ['fatigued', 'anxious'];
+
+  const controlEnding = EndingSystem.determineEnding(control);
+  const subjectEnding = EndingSystem.determineEnding(subject);
+  assert(controlEnding.id === subjectEnding.id, 'fatigue/anxiety must not change Ending id');
+  assert(controlEnding.category === subjectEnding.category, 'fatigue/anxiety must not change Ending category');
+
+  const controlEligible = EndingSystem.getUnlockableEndings(control).map(ending => ending.id);
+  const subjectEligible = EndingSystem.getUnlockableEndings(subject).map(ending => ending.id);
+  assert(JSON.stringify(controlEligible) === JSON.stringify(subjectEligible), 'fatigue/anxiety must not change Ending eligibility');
+}
+
+function assertLifeMemoryInvariance(control: GameState): void {
+  const subject = cloneState(control);
+  subject.player.statuses = ['fatigued', 'anxious'];
+  const controlSummary = deriveLifeMemorySummary(control);
+  const subjectSummary = deriveLifeMemorySummary(subject);
+  assert(JSON.stringify(controlSummary) === JSON.stringify(subjectSummary), 'fatigue/anxiety must not change Life Memory summary');
+}
+
+async function assertFormalOutcomeInvariance(control: GameState): Promise<void> {
+  const choice = findFormalChoice('倾囊相授，友好交流');
+  const effects = choice.effects ?? [];
+  assert(
+    effects.every((effect: any) => !String(effect.type).startsWith('status_')),
+    'formal invariance fixture must not contain Status effects',
+  );
+
+  const subject = cloneState(control);
+  subject.player.statuses = ['fatigued', 'anxious'];
+  const executor = new EventExecutor();
+  const [controlResult, subjectResult] = await Promise.all([
+    executor.executeEffects(effects, control),
+    executor.executeEffects(effects, subject),
+  ]);
+  const controlObservable = {
+    connections: controlResult.player.connections,
+    externalSkill: controlResult.player.externalSkill,
+  };
+  const subjectObservable = {
+    connections: subjectResult.player.connections,
+    externalSkill: subjectResult.player.externalSkill,
+  };
+  assert(JSON.stringify(controlObservable) === JSON.stringify(subjectObservable), 'fatigue/anxiety must not change formal non-Status outcome');
+}
+
+function assertDailyWeightInvariance(control: GameState): void {
+  const ordinary: DailyEventConfig = {
+    id: 'test_status_invariant_daily_event',
+    group: 'training',
+    title: 'ordinary daily event',
+    ageRange: { min: 0, max: 100 },
+    baseWeight: 7,
+    variants: {
+      positive: [{
+        id: 'test_status_invariant_daily_positive',
+        weight: 1,
+        text: 'positive',
+        statEffects: [{ stat: 'martialPower', value: 1 }],
+      }],
+      neutral: [{ id: 'test_status_invariant_daily_neutral', weight: 1, text: 'neutral' }],
+      negative: [{ id: 'test_status_invariant_daily_negative', weight: 1, text: 'negative' }],
+    },
+  };
+  const subject = cloneState(control);
+  subject.player.statuses = ['fatigued', 'anxious'];
+  const system = new DailyEventSystem();
+  const controlEvent = withDeterministicRandom(() => system.selectEvent(control, [ordinary]));
+  const subjectEvent = withDeterministicRandom(() => system.selectEvent(subject, [ordinary]));
+  assert(controlEvent !== null && subjectEvent !== null, 'ordinary DailyEvent must remain eligible');
+  assert(controlEvent!.id === subjectEvent!.id, 'fatigue/anxiety must not change ordinary DailyEvent outcome');
+  assert(controlEvent!.weight === subjectEvent!.weight, 'fatigue/anxiety must not change ordinary DailyEvent weight');
+  assert(
+    JSON.stringify(controlEvent!.autoEffects) === JSON.stringify(subjectEvent!.autoEffects),
+    'fatigue/anxiety must not change ordinary DailyEvent outcome effects',
+  );
+}
+
+function findFormalChoice(text: string): any {
+  const files = ['middle-age-career.json', 'family-life.json', 'love.json'];
+  const visit = (value: any): any => {
+    if (!value || typeof value !== 'object') return undefined;
+    if (typeof value.text === 'string' && value.text.includes(text) && Array.isArray(value.effects)) return value;
+    for (const child of Array.isArray(value) ? value : Object.values(value)) {
+      const found = visit(child);
+      if (found) return found;
+    }
+    return undefined;
+  };
+  for (const file of files) {
+    const found = visit(JSON.parse(readFileSync(resolve('src/data/lines', file), 'utf8')));
+    if (found) return found;
+  }
+  throw new Error(`formal choice not found: ${text}`);
+}
+
+function assertNoNumericFatigueAnxietyReferences(): void {
+  const sourceFiles = collectSourceFiles(resolve('src'));
+  const forbidden = [
+    /\blifeStates\.(?:fatigue|anxiety)\b/,
+    /\bstate\s*:\s*['"](?:fatigue|anxiety)['"]/,
+    /['"]?(?:fatigue|anxiety)['"]?\s*:/,
+  ];
+  for (const file of sourceFiles) {
+    const source = readFileSync(file, 'utf8');
+    for (const pattern of forbidden) {
+      assert(!pattern.test(source), `numeric fatigue/anxiety contract leaked into ${file}`);
+    }
+  }
+}
+
+function collectSourceFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) return collectSourceFiles(path);
+    return statSync(path).isFile() && /\.(json|ts|tsx)$/.test(entry.name) ? [path] : [];
+  });
 }
 
 function findChoiceContaining(values: unknown[], text: string): any {

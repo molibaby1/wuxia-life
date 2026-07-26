@@ -97,6 +97,15 @@
 
 现阶段不建设通用 NPC 好感度或关系数值系统。
 
+### 5.1 Fatigued 与 Anxious
+
+- `fatigued` 表示当前因持续或高强度消耗而尚未恢复的临时状态。
+- `anxious` 表示当前因压力、危机、冲突或反复忧虑而尚未平复的临时状态。
+
+两者均为二值 Status，可以同时存在。它们只由语义明确的具体事件添加或移除；Trait 不直接初始化 Status，也不进行年度或时间自动衰减。两者不具有 `level`、`severity`、`stack`、`value`、`duration` 或 `recoveryProgress`，不与 `constitution`、`healthStatus` 自动同步。
+
+`fatigued` 与 `anxious` 只允许用于具体事件的 `status_has` 条件和明确的内容调度，不参与全局 DailyEvent outcome 权重、正式事件全局 scheduling multiplier 或全局收益 friction，也不参与 Ending 分类或资格、Life Memory 人生评价。当前不需要 `status_absent`。
+
 ## 6. 身份边界
 
 身份不是投入方向。身份可能与投入有关，但不能与投入等同。

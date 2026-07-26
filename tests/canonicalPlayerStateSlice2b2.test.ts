@@ -47,7 +47,11 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
   );
   assert(behaviorPlayer.comprehension === 6, 'trait initial stat modifier must be preserved');
   assert(behaviorPlayer.constitution === -8, 'weakness constitution bias must be preserved');
-  assert(behaviorPlayer.lifeStates?.discipline === 1, 'temperament life-state bias must be preserved');
+  assert(behaviorPlayer.traits.includes('disciplined'), 'disciplined trait must remain canonical');
+  assert(
+    !Object.prototype.hasOwnProperty.call(behaviorPlayer.lifeStates ?? {}, 'discipline'),
+    'disciplined trait must not project a discipline life state',
+  );
   assert(
     traitSystem.getGrowthMultiplier(behaviorPlayer, 'comprehension') === 1.3,
     'trait growth multiplier must read canonical traits',
@@ -68,8 +72,8 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
   });
   assert(
     snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION &&
-      snapshot.metadata.schemaVersion === '3.5.0',
-    'canonical traits snapshot must use schema 3.5.0',
+      snapshot.metadata.schemaVersion === '3.6.0',
+    'canonical traits snapshot must use schema 3.6.0',
   );
   assertDeepEqual(snapshot.state.player.traits, traits, 'snapshot must persist traits');
   assert(!('traitProfile' in snapshot.state.player), 'snapshot must not persist traitProfile');

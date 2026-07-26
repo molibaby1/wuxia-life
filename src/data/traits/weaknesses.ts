@@ -44,7 +44,6 @@ export const weaknesses: WeaknessConfig[] = [
       { tag: 'indulgence', multiplier: 1.4 },
       { tag: 'training', multiplier: 0.8 },
     ],
-    stateBiases: [{ state: 'indulgence', value: 1 }],
     removable: false,
   },
   {

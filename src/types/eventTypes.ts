@@ -218,14 +218,15 @@ export type OriginId =
   | 'poor_family'
   | 'streetborn';
 
-export type LifeStateKey =
-  | 'discipline'
-  | 'indulgence'
-  | 'familyBond'
-  | 'socialMomentum'
-  | 'trainingHabit'
-  | 'studyHabit'
-  | 'businessHabit';
+export const LIFE_STATE_KEYS = [
+  'familyBond',
+  'socialMomentum',
+  'trainingHabit',
+  'studyHabit',
+  'businessHabit',
+] as const;
+
+export type LifeStateKey = (typeof LIFE_STATE_KEYS)[number];
 
 export interface TraitStatModifier {
   stat: TraitStatKey;
@@ -311,8 +312,6 @@ export interface OriginConfig {
 }
 
 export interface PlayerLifeStates {
-  discipline: number;
-  indulgence: number;
   familyBond: number;
   socialMomentum: number;
   trainingHabit: number;

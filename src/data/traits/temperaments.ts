@@ -84,7 +84,6 @@ export const temperaments: TemperamentConfig[] = [
       { tag: 'training', multiplier: 1.15 },
       { tag: 'indulgence', multiplier: 0.75 },
     ],
-    startingStates: [{ state: 'discipline', value: 1 }],
     autoChoiceBias: { disciplined: 0.3, indulgent: -0.2 },
   },
   {
@@ -97,7 +96,6 @@ export const temperaments: TemperamentConfig[] = [
       { tag: 'discipline', multiplier: 0.75 },
       { tag: 'social', multiplier: 1.1 },
     ],
-    startingStates: [{ state: 'indulgence', value: 1 }],
     autoChoiceBias: { indulgent: 0.3, disciplined: -0.15 },
   },
 ];

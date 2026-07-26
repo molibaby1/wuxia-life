@@ -65,6 +65,17 @@ function testDailyEventSchedulingConsumers(): void {
   assert(source.includes('studyHabit'), 'DailyEventSystem must use studyHabit for study group');
 }
 
+function testFormalEventConsumers(): void {
+  const source = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
+  assert(!/lifeStates[^\n]*\.(?:discipline|indulgence)/.test(source), 'Formal Event code must not read legacy life states');
+  assert(!source.includes('getFormalEventOutcomeFriction'), 'Formal Event friction helper must be removed');
+  assert(!source.includes('shrinkPositiveGain'), 'Formal Event gain shrinking helper must be removed');
+  assert(!source.includes('buildPartialOutcomeNote'), 'Formal Event partial outcome helper must be removed');
+  assert(source.includes('trainingHabit'), 'Formal Event scheduling must use trainingHabit');
+  assert(source.includes('studyHabit'), 'Formal Event scheduling must use studyHabit');
+  assert(source.includes('Math.max('), 'Formal Event combined training/comprehension habit must use max');
+}
+
 function testSnapshotBoundary(): void {
   assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.6.0', 'snapshot schema must be 3.6.0');
   assert(validateGameStateSnapshot(gameStateSnapshotAge50).ok, 'age-50 fixture must be valid');
@@ -100,6 +111,7 @@ export function runCanonicalDisciplineIndulgenceRemovalTests(): void {
   testCanonicalLifeStates();
   testDailyEventMapping();
   testDailyEventSchedulingConsumers();
+  testFormalEventConsumers();
   testSnapshotBoundary();
   testSourceGuard();
 }

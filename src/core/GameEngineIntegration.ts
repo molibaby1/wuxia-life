@@ -2259,23 +2259,28 @@ export class GameEngineIntegration {
     }
 
     const tags = traitSystem.getEventBiasTags(event);
-    const { discipline = 0, indulgence = 0, familyBond = 0, socialMomentum = 0 } = this.gameState.player.lifeStates;
+    const {
+      trainingHabit = 0,
+      studyHabit = 0,
+      familyBond = 0,
+      socialMomentum = 0,
+    } = this.gameState.player.lifeStates;
     let multiplier = 1;
 
     if (tags.has('training') || tags.has('comprehension')) {
-      multiplier *= this.clampWeight(1 + discipline * 0.06 - indulgence * 0.08, 0.52, 1.22);
+      const practiceHabit = Math.max(
+        tags.has('training') ? trainingHabit : 0,
+        tags.has('comprehension') ? studyHabit : 0,
+      );
+      multiplier *= this.clampWeight(1 + practiceHabit * 0.06, 1, 1.22);
     }
 
     if (tags.has('business') || tags.has('social') || tags.has('reputation')) {
-      multiplier *= this.clampWeight(1 + socialMomentum * 0.08 + indulgence * 0.03, 0.7, 1.2);
+      multiplier *= this.clampWeight(1 + socialMomentum * 0.08, 0.7, 1.2);
     }
 
     if (tags.has('family') || tags.has('romance')) {
       multiplier *= this.clampWeight(1 + familyBond * 0.06, 0.72, 1.18);
-    }
-
-    if (event.isSetbackEvent) {
-      multiplier *= this.clampWeight(1 + indulgence * 0.05 - discipline * 0.03, 0.8, 1.25);
     }
 
     return multiplier;
@@ -2347,62 +2352,18 @@ export class GameEngineIntegration {
   }
 
   private applyFormalEventConsequences(previousState: GameState, nextState: GameState, event: EventDefinition): GameState {
+    this.pendingEventOutcomeNote = null;
     if (event.category === 'daily_event' || !previousState.player || !nextState.player) {
-      this.pendingEventOutcomeNote = null;
       return nextState;
     }
 
     const tags = traitSystem.getEventBiasTags(event);
-    const sourceLifeStates = previousState.player.lifeStates || traitSystem.createInitialLifeStates();
     const lifeStates = {
       ...(nextState.player.lifeStates || traitSystem.createInitialLifeStates()),
     };
-    const adjustedPlayer = { ...nextState.player };
-    const friction = this.getFormalEventOutcomeFriction(sourceLifeStates, tags);
-    let hadReducedOutcome = false;
 
-    if (friction > 0.08) {
-      const shrinkFactor = this.clampWeight(1 - friction, 0.58, 0.94);
-
-      if (tags.has('training') || tags.has('risk')) {
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'martialPower', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'externalSkill', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'internalSkill', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'qinggong', shrinkFactor) || hadReducedOutcome;
-      }
-
-      if (tags.has('comprehension')) {
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'comprehension', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'knowledge', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'internalSkill', shrinkFactor) || hadReducedOutcome;
-      }
-
-      if (tags.has('business')) {
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'money', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'businessAcumen', shrinkFactor) || hadReducedOutcome;
-      }
-
-      if (tags.has('social') || tags.has('reputation') || tags.has('romance') || tags.has('family')) {
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'charisma', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'connections', shrinkFactor) || hadReducedOutcome;
-        hadReducedOutcome =
-          this.shrinkPositiveGain(previousState.player, adjustedPlayer, 'reputation', shrinkFactor) || hadReducedOutcome;
-      }
-    }
-
-    const statDelta = (key: keyof typeof adjustedPlayer) =>
-      Number((adjustedPlayer as any)[key] || 0) - Number((previousState.player as any)[key] || 0);
+    const statDelta = (key: keyof typeof nextState.player) =>
+      Number((nextState.player as any)[key] || 0) - Number((previousState.player as any)[key] || 0);
 
     const martialGain =
       statDelta('martialPower') +
@@ -2415,18 +2376,6 @@ export class GameEngineIntegration {
       statDelta('charisma') + statDelta('connections') + statDelta('reputation') / 5 + statDelta('influence') * 2;
     const academicGain = statDelta('comprehension') + statDelta('knowledge') + statDelta('internalSkill');
     const familyGain = statDelta('chivalry') + statDelta('reputation') / 10;
-
-    if (hadReducedOutcome) {
-      this.pendingEventOutcomeNote = this.buildPartialOutcomeNote(event, tags, friction);
-      if ((tags.has('training') || tags.has('comprehension')) && sourceLifeStates.indulgence >= 2) {
-        lifeStates.discipline = traitSystem.clampLifeState('discipline', lifeStates.discipline - 1);
-      }
-      if ((tags.has('business') || tags.has('social') || tags.has('reputation')) && lifeStates.socialMomentum > 0) {
-        lifeStates.socialMomentum = traitSystem.clampLifeState('socialMomentum', lifeStates.socialMomentum - 1);
-      }
-    } else {
-      this.pendingEventOutcomeNote = null;
-    }
 
     if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
       lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
@@ -2449,27 +2398,18 @@ export class GameEngineIntegration {
 
     if ((tags.has('family') || tags.has('romance')) && familyGain >= 2) {
       lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond + 1);
-      if (lifeStates.discipline > 0) {
-        lifeStates.discipline = traitSystem.clampLifeState('discipline', lifeStates.discipline - 1);
-      }
-    }
-
-    if (event.isSetbackEvent) {
-      if (lifeStates.discipline > 0) {
-        lifeStates.discipline = traitSystem.clampLifeState('discipline', lifeStates.discipline - 1);
-      }
     }
 
     const projected = this.projectHabitCompatibilityFlags(
       lifeStates,
-      adjustedPlayer.flags || {},
+      nextState.player.flags || {},
       nextState.flags || {},
     );
 
     return {
       ...nextState,
       player: {
-        ...adjustedPlayer,
+        ...nextState.player,
         lifeStates: projected.lifeStates,
         flags: projected.playerFlags,
       },
@@ -2575,127 +2515,6 @@ export class GameEngineIntegration {
       playerFlags: nextPlayerFlags,
       gameFlags: nextGameFlags,
     };
-  }
-
-  private getFormalEventOutcomeFriction(
-    lifeStates: ReturnType<typeof traitSystem.createInitialLifeStates>,
-    tags: Set<string>
-  ): number {
-    let friction =
-      lifeStates.indulgence * 0.05 -
-      lifeStates.discipline * 0.04;
-
-    if (tags.has('training') || tags.has('comprehension')) {
-      friction += lifeStates.indulgence * 0.05;
-    }
-    return this.clampWeight(friction, 0, 0.42);
-  }
-
-  private shrinkPositiveGain(
-    previousPlayer: GameState['player'],
-    nextPlayer: GameState['player'],
-    key: keyof GameState['player'],
-    factor: number
-  ): boolean {
-    const previousValue = Number((previousPlayer as any)[key] || 0);
-    const nextValue = Number((nextPlayer as any)[key] || 0);
-    const delta = nextValue - previousValue;
-
-    if (delta <= 0) {
-      return false;
-    }
-
-    const reducedDelta = Math.max(1, Math.ceil(delta * factor));
-    (nextPlayer as any)[key] = previousValue + reducedDelta;
-    return reducedDelta < delta;
-  }
-
-  private buildPartialOutcomeNote(event: EventDefinition, tags: Set<string>, friction: number): string {
-    const title = event.content?.title || event.id;
-
-    switch (title) {
-      case '喜得贵子':
-        return friction > 0.24
-          ? '家里确实添了喜气，只是接踵而来的花销与牵挂也比你预想中更重，欢喜里终究掺了几分仓促。'
-          : '孩子顺利降生，家中多了盼头，只是往后的担子也实实在在压到了肩上。';
-      case '家族危机':
-        return friction > 0.24
-          ? '这场风波总算没有彻底失控，可你终究没能把局面稳到最好，家底还是被磨去了几分。'
-          : '你替家里扛下了最难的那一段，只是危机虽缓，元气也跟着伤了些。';
-      case '门派壮大':
-        return friction > 0.24
-          ? '门下声势是起来了，只是人多事杂，你终究没能把每一处都收束妥帖。'
-          : '门派比从前更兴旺了，只是摊子越大，落到你肩上的琐事也越多。';
-      case '武林大会':
-      case '武林大会邀请':
-        return friction > 0.24
-          ? '你在大会上仍算露了脸，可真正能一锤定音的那一下，终究还是差了些火候。'
-          : '你借着大会让人记住了自己，只是离真正扬名立万，还隔着一层。';
-      case '武学创新':
-        return friction > 0.24
-          ? '新路子确实摸出来了一点，可最关键的那口气没能续上，成果便显得半成半熟。'
-          : '你把旧路数往前推了一步，只是这门新意还需要时日打磨。';
-      case '武学交流':
-        return friction > 0.24
-          ? '这一番切磋不是没有所得，只是彼此都留了余地，真正能拿走的精华不算多。'
-          : '你从这次交流里学到了东西，只是更多还停留在点到即止的层面。';
-      case '隐世高手':
-        return friction > 0.24
-          ? '高人的指点确有价值，可你当下心境不稳，最终只留下几分若有若无的体会。'
-          : '你得了前辈一番点拨，眼界是开了些，只是还没来得及全都化成自己的东西。';
-      case '选择传人':
-        return friction > 0.24
-          ? '你总算挑中了可托付的人，只是心里仍留着迟疑，这份传承还没真正稳住。'
-          : '你开始把手里的东西往下交了，只是传承从来不是一朝一夕就能定下的。';
-      case '传授孙儿':
-        return friction > 0.24
-          ? '孩子确实学进去了些，可火候还浅，你想留下的那份本事暂时只传到了外面一层。'
-          : '你把一身所学慢慢讲给后辈听，这份心意已经落下，只是功夫还得靠年月去养。';
-      case '情敌出现':
-        return friction > 0.24
-          ? '这场较劲你并非全无招架之力，只是心里越在意，举止便越不够从容。'
-          : '你总算没有在这段关系里轻易退开，只是局面也因此变得更难收拾了。';
-      case '恩怨情仇':
-        return friction > 0.24
-          ? '旧事终究还是碰到了心口上，你虽撑住了场面，却没能把这段纠葛真正理顺。'
-          : '这段恩怨算是往前推了一步，只是情和仇交缠在一起，终究难有痛快了断。';
-      default:
-        break;
-    }
-
-    if (tags.has('training') || tags.has('risk')) {
-      return friction > 0.24
-        ? '你本可更进一步，却终究差了一口气，收获没有落到最满。'
-        : '事情办成了，只是火候还差一点，没能把机会完全吃透。';
-    }
-
-    if (tags.has('comprehension')) {
-      return friction > 0.24
-        ? '你隐约摸到了门道，却没能真正把它握住，只留下半明半暗的一点所得。'
-        : '这一回确实有所领会，只是心神不够稳，终究没能尽兴。';
-    }
-
-    if (tags.has('business')) {
-      return friction > 0.24
-        ? '这笔事并非没有做成，只是中途耗掉了太多，最后到手的比原本能有的少了一截。'
-        : '你抓住了机会，但没能把账算到最漂亮，终究还是漏了些本该到手的好处。';
-    }
-
-    if (tags.has('social') || tags.has('reputation')) {
-      return friction > 0.24
-        ? '你把场面撑住了，却没能把人心也一并拿下，结果比预想中浅了一层。'
-        : '名声和关系都有推进，只是比起你本来能做到的，终究还是轻了些。';
-    }
-
-    if (tags.has('family') || tags.has('romance')) {
-      return friction > 0.24
-        ? '关系并非没有靠近，只是现实和心事都夹在中间，让这一步走得不够完整。'
-        : '你们之间确实向前了一点，只是还留着些没说开的牵扯。';
-    }
-
-    return friction > 0.24
-      ? '事情有了结果，却没能走到最理想的那一步。'
-      : '这次并非没有收获，只是终究差了那么一点。';
   }
 
   public consumeLastEventOutcomeNote(): string | null {

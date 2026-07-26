@@ -76,6 +76,7 @@ const suites: Suite[] = [
   { name: 'canonicalHealthNoiseEliminationTests', entry: 'tests/canonicalHealthNoiseElimination.test.ts' },
   { name: 'canonicalHealthStatusContractTests', entry: 'tests/canonicalHealthStatusContract.test.ts' },
   { name: 'canonicalLegacyHealthRemovalTests', entry: 'tests/canonicalLegacyHealthRemoval.test.ts' },
+  { name: 'canonicalFatigueAnxietyStatusMigrationTests', entry: 'tests/canonicalFatigueAnxietyStatusMigration.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

@@ -46,7 +46,7 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
     ['keen_mind', 'frail', 'disciplined'],
   );
   assert(behaviorPlayer.comprehension === 6, 'trait initial stat modifier must be preserved');
-  assert(behaviorPlayer.lifeStates?.fatigue === 1, 'weakness life-state bias must be preserved');
+  assert(behaviorPlayer.constitution === -5, 'weakness constitution bias must be preserved');
   assert(behaviorPlayer.lifeStates?.discipline === 1, 'temperament life-state bias must be preserved');
   assert(
     traitSystem.getGrowthMultiplier(behaviorPlayer, 'comprehension') === 1.3,

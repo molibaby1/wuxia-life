@@ -252,9 +252,7 @@ export class DailyEventSystem {
       if (origin === originId) negative += 0.6;
     }
 
-    const discipline = state.player?.lifeStates?.discipline || 0;
     const socialMomentum = state.player?.lifeStates?.socialMomentum || 0;
-    positive += discipline * 0.16;
     positive += socialMomentum * 0.08;
 
     const total = positive + neutral + negative;
@@ -276,18 +274,19 @@ export class DailyEventSystem {
       return 1;
     }
 
-    const discipline = lifeStates.discipline || 0;
+    const trainingHabit = lifeStates.trainingHabit || 0;
+    const studyHabit = lifeStates.studyHabit || 0;
     const familyBond = lifeStates.familyBond || 0;
     const socialMomentum = lifeStates.socialMomentum || 0;
 
     switch (config.group) {
       case 'training':
         return this.clampMultiplier(
-          1 + discipline * 0.08
+          1 + trainingHabit * 0.08
         );
       case 'study':
         return this.clampMultiplier(
-          1 + discipline * 0.09
+          1 + studyHabit * 0.09
         );
       case 'livelihood':
         return this.clampMultiplier(

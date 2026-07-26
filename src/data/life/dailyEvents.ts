@@ -10,7 +10,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['martial_born', 'keen_mind', 'unyielding', 'disciplined'],
     suppressedTraits: ['lazy', 'indulgent'],
     preferredStates: [
-      { state: 'discipline', min: 1, weightMultiplier: 1.2 },
+      { state: 'trainingHabit', min: 1, weightMultiplier: 1.2 },
     ],
     variants: {
       positive: [
@@ -22,7 +22,6 @@ export const dailyEvents: DailyEventConfig[] = [
             { stat: 'martialPower', value: 1 },
             { stat: 'externalSkill', value: 1 },
           ],
-          stateEffects: [{ state: 'discipline', value: 1 }],
         },
       ],
       neutral: [
@@ -47,7 +46,6 @@ export const dailyEvents: DailyEventConfig[] = [
     },
     longTermHooks: {
       addTendency: ['training_habit'],
-      addStateOnRepeat: [{ state: 'discipline', increment: 1, repeatThreshold: 3 }],
     },
   },
   {
@@ -59,7 +57,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['lazy', 'indulgent', 'unstable_mood'],
     suppressedTraits: ['disciplined', 'unyielding'],
     preferredStates: [
-      { state: 'discipline', min: 2, weightMultiplier: 0.8 },
+      { state: 'trainingHabit', min: 2, weightMultiplier: 0.8 },
     ],
     variants: {
       positive: [
@@ -82,7 +80,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_skip_training_neg_1',
           weight: 1,
           text: '偷懒时固然舒服，到了夜里，你又隐隐觉得自己在原地打转。',
-          stateEffects: [{ state: 'discipline', value: -1 }],
           effects: [{ type: EffectType.STATUS_ADD, status: 'anxious' }],
         },
       ],
@@ -101,7 +98,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['martial_born', 'keen_mind', 'grand_dreams_poor_followthrough'],
     suppressedTraits: ['lazy'],
     preferredStates: [
-      { state: 'discipline', min: 2, weightMultiplier: 1.15 },
+      { state: 'trainingHabit', min: 2, weightMultiplier: 1.15 },
     ],
     variants: {
       positive: [
@@ -110,7 +107,7 @@ export const dailyEvents: DailyEventConfig[] = [
           weight: 2,
           text: '你在老地方卡了许久，终于从一丝别扭里摸到了一点门道。',
           statEffects: [{ stat: 'martialPower', value: 1 }],
-          stateEffects: [{ state: 'discipline', value: 1 }],
+          stateEffects: [{ state: 'trainingHabit', value: 1 }],
         },
       ],
       neutral: [
@@ -144,7 +141,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredOrigins: ['scholar_house'],
     suppressedTraits: ['lazy', 'unstable_mood'],
     preferredStates: [
-      { state: 'discipline', min: 1, weightMultiplier: 1.12 },
+      { state: 'studyHabit', min: 1, weightMultiplier: 1.12 },
     ],
     variants: {
       positive: [
@@ -156,7 +153,6 @@ export const dailyEvents: DailyEventConfig[] = [
             { stat: 'comprehension', value: 1 },
             { stat: 'knowledge', value: 1 },
           ],
-          stateEffects: [{ state: 'discipline', value: 1 }],
         },
       ],
       neutral: [
@@ -181,7 +177,6 @@ export const dailyEvents: DailyEventConfig[] = [
     },
     longTermHooks: {
       addTendency: ['study_habit'],
-      addStateOnRepeat: [{ state: 'discipline', increment: 1, repeatThreshold: 3 }],
     },
   },
   {
@@ -194,7 +189,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredOrigins: ['scholar_house'],
     suppressedTraits: ['indulgent'],
     preferredStates: [
-      { state: 'discipline', min: 1, weightMultiplier: 1.08 },
+      { state: 'studyHabit', min: 1, weightMultiplier: 1.08 },
     ],
     variants: {
       positive: [
@@ -337,8 +332,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['fear_of_responsibility'],
     preferredOrigins: ['poor_family'],
     suppressedOrigins: ['merchant_house'],
-    preferredStates: [
-    ],
     variants: {
       positive: [
         {
@@ -487,7 +480,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_household_burden_neg_1',
           weight: 2,
           text: '一件接一件的小事压上来，让你忽然觉得，日子比江湖还难应付。',
-          stateEffects: [{ state: 'discipline', value: -1 }],
           effects: [{ type: EffectType.STATUS_ADD, status: 'anxious' }],
         },
       ],
@@ -546,7 +538,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 20,
     preferredTraits: ['unstable_mood', 'grand_dreams_poor_followthrough', 'affectionate'],
     preferredStates: [
-      { state: 'discipline', min: 2, weightMultiplier: 0.9 },
     ],
     variants: {
       positive: [
@@ -554,7 +545,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_second_guess_pos_1',
           weight: 1,
           text: '你心里虽乱，最后却还是把疑问理成了下一步要走的路。',
-          stateEffects: [{ state: 'discipline', value: 1 }],
         },
       ],
       neutral: [
@@ -569,7 +559,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_second_guess_neg_1',
           weight: 2,
           text: '越想越觉得自己哪条路都差了一口气，连心里的那点劲也跟着散了。',
-          stateEffects: [{ state: 'discipline', value: -1 }],
           effects: [{ type: EffectType.STATUS_ADD, status: 'anxious' }],
         },
       ],
@@ -594,7 +583,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_get_back_spirit_pos_1',
           weight: 2,
           text: '也不知是因为什么，你忽然又把那口气提了起来，觉得自己还能继续往前走。',
-          stateEffects: [{ state: 'discipline', value: 1 }],
           effects: [{ type: EffectType.STATUS_REMOVE, status: 'anxious' }],
         },
       ],

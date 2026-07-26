@@ -42,6 +42,7 @@ function testDailyEventMapping(): void {
   assert(preferredState('daily_copybook_practice').some(rule => rule.state === 'studyHabit' && rule.min === 1), 'copybook practice must prefer studyHabit >= 1');
   assert(preferredState('daily_reading_notes').some(rule => rule.state === 'studyHabit' && rule.min === 1), 'reading notes must prefer studyHabit >= 1');
   assertNoLegacyState(preferredState('daily_second_guess'), 'second guess must not prefer legacy state');
+  assert(findDailyEvent('daily_morning_training').outcomeBias?.positiveByTraits?.includes('disciplined') === true, 'disciplined trait outcome bias must remain');
 
   for (const event of dailyEvents) {
     assertNoLegacyState(event.preferredStates, `${event.id} must not consume legacy states`);
@@ -54,6 +55,14 @@ function testDailyEventMapping(): void {
     }
     assertNoLegacyState(event.longTermHooks?.addStateOnRepeat, `${event.id} repeat hook must not use legacy states`);
   }
+}
+
+function testDailyEventSchedulingConsumers(): void {
+  const source = fs.readFileSync(path.resolve('src/core/DailyEventSystem.ts'), 'utf8');
+  assert(!/lifeStates[^\n]*\.(?:discipline|indulgence)/.test(source), 'DailyEventSystem must not read legacy life states');
+  assert(!/positive \+= discipline/.test(source), 'DailyEventSystem must not apply global discipline outcome bonus');
+  assert(source.includes('trainingHabit'), 'DailyEventSystem must use trainingHabit for training group');
+  assert(source.includes('studyHabit'), 'DailyEventSystem must use studyHabit for study group');
 }
 
 function testSnapshotBoundary(): void {
@@ -90,6 +99,7 @@ function testSourceGuard(): void {
 export function runCanonicalDisciplineIndulgenceRemovalTests(): void {
   testCanonicalLifeStates();
   testDailyEventMapping();
+  testDailyEventSchedulingConsumers();
   testSnapshotBoundary();
   testSourceGuard();
 }

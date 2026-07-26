@@ -362,8 +362,6 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     player: {
       ...createBaseState().player,
       lifeStates: {
-        discipline: 0,
-        indulgence: 0,
         trainingHabit: 4,
         studyHabit: 2,
         businessHabit: 0,

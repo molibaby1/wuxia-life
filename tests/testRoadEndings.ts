@@ -39,7 +39,7 @@ if (!EndingSystem.canUnlockEnding(state, 'richest_man')) {
 const qualificationBlocked = createState();
 qualificationBlocked.player.flags.business_empire = true;
 qualificationBlocked.player.lifeStates = {
-  discipline: 0, indulgence: 0, familyBond: 3,
+  familyBond: 3,
   socialMomentum: 0, trainingHabit: 0, studyHabit: 0, businessHabit: 0,
 };
 let blockedRoad = RouteStateManager.commitRoad(qualificationBlocked, 'statecraft', { eventId: 'merchant_commitment' });

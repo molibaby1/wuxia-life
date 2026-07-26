@@ -11,8 +11,6 @@ function assert(condition: boolean, message: string): void {
 
 function baseLifeStates(): PlayerState['lifeStates'] {
   return {
-    discipline: 0,
-    indulgence: 0,
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,

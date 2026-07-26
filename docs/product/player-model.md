@@ -97,6 +97,16 @@
 
 现阶段不建设通用 NPC 好感度或关系数值系统。
 
+### Discipline 与 Indulgence
+
+通用的“自律积累”和“放纵积累”数值不属于正式玩家模型。
+
+稳定的自律、享乐或懒散倾向由 Trait 表达。Trait 不生成对应的持久数值投影，也不形成等级或成长系统。
+
+练功、读书和营生等长期行为只进入对应领域 habit。家庭投入、挫折和临时心理变化不得自动映射为通用人格数值。
+
+`discipline` / `indulgence` 不参与全局 DailyEvent outcome 权重、正式事件全局 scheduling multiplier、收益 friction、Ending 分类或资格。内容标签与 P16 出身塑形中的同名单词不属于 PlayerLifeStates，禁止与玩家持久状态相互生成或同步。
+
 ### 5.1 Fatigued 与 Anxious
 
 - `fatigued` 表示当前因持续或高强度消耗而尚未恢复的临时状态。
@@ -135,6 +145,7 @@
 - 将商人、官员、隐士等身份直接映射为投入方向；
 - 将外功、内功、轻功与功力同时作为成长值；
 - 长期精力值；
+- 通用 discipline / indulgence 玩家成长数值轴；
 - 通用 NPC 好感度系统。
 
 ## 8. 世界观边界

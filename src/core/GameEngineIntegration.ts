@@ -2233,10 +2233,6 @@ export class GameEngineIntegration {
     }
 
     for (let i = 0; i < yearlyRecovery; i++) {
-      lifeStates.fatigue = Math.max(0, lifeStates.fatigue - 1);
-      if (lifeStates.anxiety > 1) {
-        lifeStates.anxiety -= 1;
-      }
       if (lifeStates.socialMomentum > 2) {
         lifeStates.socialMomentum -= 1;
       }
@@ -2263,27 +2259,23 @@ export class GameEngineIntegration {
     }
 
     const tags = traitSystem.getEventBiasTags(event);
-    const { fatigue = 0, anxiety = 0, discipline = 0, indulgence = 0, familyBond = 0, socialMomentum = 0 } = this.gameState.player.lifeStates;
+    const { discipline = 0, indulgence = 0, familyBond = 0, socialMomentum = 0 } = this.gameState.player.lifeStates;
     let multiplier = 1;
 
     if (tags.has('training') || tags.has('comprehension')) {
-      multiplier *= this.clampWeight(1 + discipline * 0.06 - fatigue * 0.09 - indulgence * 0.08 - anxiety * 0.04, 0.52, 1.22);
+      multiplier *= this.clampWeight(1 + discipline * 0.06 - indulgence * 0.08, 0.52, 1.22);
     }
 
     if (tags.has('business') || tags.has('social') || tags.has('reputation')) {
-      multiplier *= this.clampWeight(1 + socialMomentum * 0.08 + indulgence * 0.03 - fatigue * 0.04, 0.7, 1.2);
+      multiplier *= this.clampWeight(1 + socialMomentum * 0.08 + indulgence * 0.03, 0.7, 1.2);
     }
 
     if (tags.has('family') || tags.has('romance')) {
-      multiplier *= this.clampWeight(1 + familyBond * 0.06 + anxiety * 0.02, 0.72, 1.18);
-    }
-
-    if (tags.has('risk')) {
-      multiplier *= this.clampWeight(1 - anxiety * 0.05 - fatigue * 0.05, 0.62, 1.08);
+      multiplier *= this.clampWeight(1 + familyBond * 0.06, 0.72, 1.18);
     }
 
     if (event.isSetbackEvent) {
-      multiplier *= this.clampWeight(1 + anxiety * 0.04 + indulgence * 0.05 - discipline * 0.03, 0.8, 1.25);
+      multiplier *= this.clampWeight(1 + indulgence * 0.05 - discipline * 0.03, 0.8, 1.25);
     }
 
     return multiplier;
@@ -2426,7 +2418,6 @@ export class GameEngineIntegration {
 
     if (hadReducedOutcome) {
       this.pendingEventOutcomeNote = this.buildPartialOutcomeNote(event, tags, friction);
-      lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       if ((tags.has('training') || tags.has('comprehension')) && sourceLifeStates.indulgence >= 2) {
         lifeStates.discipline = traitSystem.clampLifeState('discipline', lifeStates.discipline - 1);
       }
@@ -2438,20 +2429,14 @@ export class GameEngineIntegration {
     }
 
     if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
-      lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
       lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
-      if (martialGain >= 12) {
-        lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
-      }
     }
 
     if (tags.has('comprehension') && academicGain >= 3) {
-      lifeStates.fatigue = traitSystem.clampLifeState('fatigue', lifeStates.fatigue + 1);
       lifeStates.studyHabit = traitSystem.clampLifeState('studyHabit', (lifeStates.studyHabit || 0) + 1);
     }
 
     if (tags.has('business') && (moneyGain >= 25 || businessGain >= 1)) {
-      lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       lifeStates.businessHabit = traitSystem.clampLifeState('businessHabit', (lifeStates.businessHabit || 0) + 1);
       if (moneyGain >= 150 && lifeStates.familyBond > 0) {
         lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond - 1);
@@ -2460,9 +2445,6 @@ export class GameEngineIntegration {
 
     if ((tags.has('social') || tags.has('reputation')) && socialGain >= 3) {
       lifeStates.socialMomentum = traitSystem.clampLifeState('socialMomentum', lifeStates.socialMomentum + 1);
-      if (socialGain >= 6) {
-        lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
-      }
     }
 
     if ((tags.has('family') || tags.has('romance')) && familyGain >= 2) {
@@ -2473,7 +2455,6 @@ export class GameEngineIntegration {
     }
 
     if (event.isSetbackEvent) {
-      lifeStates.anxiety = traitSystem.clampLifeState('anxiety', lifeStates.anxiety + 1);
       if (lifeStates.discipline > 0) {
         lifeStates.discipline = traitSystem.clampLifeState('discipline', lifeStates.discipline - 1);
       }
@@ -2601,21 +2582,12 @@ export class GameEngineIntegration {
     tags: Set<string>
   ): number {
     let friction =
-      lifeStates.fatigue * 0.05 +
-      lifeStates.anxiety * 0.06 +
       lifeStates.indulgence * 0.05 -
       lifeStates.discipline * 0.04;
 
     if (tags.has('training') || tags.has('comprehension')) {
       friction += lifeStates.indulgence * 0.05;
     }
-    if (tags.has('business')) {
-      friction += lifeStates.anxiety * 0.02;
-    }
-    if (tags.has('social') || tags.has('reputation') || tags.has('family') || tags.has('romance')) {
-      friction += lifeStates.anxiety * 0.02;
-    }
-
     return this.clampWeight(friction, 0, 0.42);
   }
 

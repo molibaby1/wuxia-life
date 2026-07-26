@@ -246,13 +246,10 @@ export class DailyEventSystem {
       if (origin === originId) negative += 0.6;
     }
 
-    const fatigue = state.player?.lifeStates?.fatigue || 0;
-    const anxiety = state.player?.lifeStates?.anxiety || 0;
     const discipline = state.player?.lifeStates?.discipline || 0;
     const socialMomentum = state.player?.lifeStates?.socialMomentum || 0;
-    positive += Math.max(0, discipline - fatigue) * 0.16;
+    positive += discipline * 0.16;
     positive += socialMomentum * 0.08;
-    negative += (fatigue * 0.08) + (anxiety * 0.1);
 
     const total = positive + neutral + negative;
     let random = Math.random() * total;
@@ -273,8 +270,6 @@ export class DailyEventSystem {
       return 1;
     }
 
-    const fatigue = lifeStates.fatigue || 0;
-    const anxiety = lifeStates.anxiety || 0;
     const discipline = lifeStates.discipline || 0;
     const familyBond = lifeStates.familyBond || 0;
     const socialMomentum = lifeStates.socialMomentum || 0;
@@ -282,23 +277,23 @@ export class DailyEventSystem {
     switch (config.group) {
       case 'training':
         return this.clampMultiplier(
-          1 + discipline * 0.08 - fatigue * 0.1 - anxiety * 0.04
+          1 + discipline * 0.08
         );
       case 'study':
         return this.clampMultiplier(
-          1 + discipline * 0.09 - fatigue * 0.08 - anxiety * 0.05
+          1 + discipline * 0.09
         );
       case 'livelihood':
         return this.clampMultiplier(
-          1 + socialMomentum * 0.12 + anxiety * 0.04 - fatigue * 0.06
+          1 + socialMomentum * 0.12
         );
       case 'family':
         return this.clampMultiplier(
-          1 + Math.max(0, 2 - familyBond) * 0.08 + anxiety * 0.03
+          1 + Math.max(0, 2 - familyBond) * 0.08
         );
       case 'emotion':
         return this.clampMultiplier(
-          1 + anxiety * 0.12 + fatigue * 0.05 - socialMomentum * 0.08
+          1 - socialMomentum * 0.08
         );
       default:
         return 1;

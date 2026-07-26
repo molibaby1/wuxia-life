@@ -32,10 +32,8 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
 
 function createLifeStates(overrides: Partial<PlayerLifeStates> = {}): PlayerLifeStates {
   return {
-    fatigue: 0,
     discipline: 0,
     indulgence: 0,
-    anxiety: 0,
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,

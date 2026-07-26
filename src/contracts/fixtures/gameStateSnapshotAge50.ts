@@ -76,12 +76,10 @@ export const gameStateSnapshotAge50 = {
       healthStatus: 'healthy',
       statuses: [],
       lifeStates: createDefaultPlayerLifeStates({
-        fatigue: 35,
         discipline: 78,
         indulgence: 12,
         familyBond: 82,
         socialMomentum: 55,
-        anxiety: 28,
       }),
       relationships: [
         {

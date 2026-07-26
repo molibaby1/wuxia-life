@@ -225,12 +225,6 @@
             "operator": "add"
           },
           {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
-            "operator": "add"
-          },
-          {
             "type": "stat_modify",
             "target": "children",
             "value": 1,
@@ -448,7 +442,7 @@
     },
     "choices": [
       {
-        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20, 家庭牵绊 +1, 焦虑 +1)",
+        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20, 家庭牵绊 +1)",
         "effects": [
           {
             "type": "stat_modify",
@@ -467,28 +461,16 @@
             "target": "familyBond",
             "value": 1,
             "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
-            "operator": "add"
           }
         ]
       },
       {
-        "text": "尽力而为，量力而行 (财富 -30, 焦虑 +1)",
+        "text": "尽力而为，量力而行 (财富 -30)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "money",
             "value": -30,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
             "operator": "add"
           }
         ]

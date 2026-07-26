@@ -219,12 +219,10 @@ export type OriginId =
   | 'streetborn';
 
 export type LifeStateKey =
-  | 'fatigue'
   | 'discipline'
   | 'indulgence'
   | 'familyBond'
   | 'socialMomentum'
-  | 'anxiety'
   | 'trainingHabit'
   | 'studyHabit'
   | 'businessHabit';
@@ -313,12 +311,10 @@ export interface OriginConfig {
 }
 
 export interface PlayerLifeStates {
-  fatigue: number;
   discipline: number;
   indulgence: number;
   familyBond: number;
   socialMomentum: number;
-  anxiety: number;
   trainingHabit: number;
   studyHabit: number;
   businessHabit: number;

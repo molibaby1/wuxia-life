@@ -35,10 +35,8 @@ function makePlayer(lifeStates: Partial<PlayerState['lifeStates']>): PlayerState
     spouse: null,
     alive: true,
     lifeStates: {
-      fatigue: 0,
       discipline: 0,
       indulgence: 0,
-      anxiety: 0,
       trainingHabit: 0,
       studyHabit: 0,
       businessHabit: 0,

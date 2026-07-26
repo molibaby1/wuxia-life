@@ -107,12 +107,10 @@ interface EndingEvaluationData {
 }
 
 const EMPTY_LIFE_STATES: PlayerLifeStates = {
-  fatigue: 0,
   discipline: 0,
   indulgence: 0,
   familyBond: 0,
   socialMomentum: 0,
-  anxiety: 0,
   trainingHabit: 0,
   studyHabit: 0,
   businessHabit: 0,
@@ -519,21 +517,15 @@ export class EndingSystem {
     const shapingRecap = buildLateLifeShapingRecapLine(state.player.lifeStates);
 
     const lifeStates = state.player.lifeStates || {
-      fatigue: 0,
       discipline: 0,
       indulgence: 0,
       familyBond: 0,
       socialMomentum: 0,
-      anxiety: 0,
     };
 
     let categoryLine: string;
     if (ending.category === 'positive') {
-      if (lifeStates.anxiety >= 3 || lifeStates.fatigue >= 3) {
-        categoryLine = '虽有高成就，但一路代价不小。';
-      } else {
-        categoryLine = '高门槛成就成立，人生主轴清晰且完成度高。';
-      }
+      categoryLine = '高门槛成就成立，人生主轴清晰且完成度高。';
     } else if (ending.id === 'bittersweet_success') {
       categoryLine = '有明显成就，但状态、关系或代价阻止了它成为完美结局。';
     } else if (ending.id === 'quiet_family_life') {
@@ -614,26 +606,24 @@ export class EndingSystem {
 
   private static qualifiesForPositiveEnding(data: EndingEvaluationData, endingId: EndingType): boolean {
     const { lifeStates } = data;
-    const fatigue = lifeStates?.fatigue || 0;
-    const anxiety = lifeStates?.anxiety || 0;
     const discipline = lifeStates?.discipline || 0;
     const familyBond = lifeStates?.familyBond || 0;
 
     switch (endingId) {
       case 'legendary_hero':
-        return anxiety <= 2 && data.chivalry >= 80 && data.reputation >= 85 && data.good_karma >= 70;
+        return data.chivalry >= 80 && data.reputation >= 85 && data.good_karma >= 70;
       case 'martial_god':
-        return fatigue <= 2 && anxiety <= 2 && data.martialPower >= 95;
+        return data.martialPower >= 95;
       case 'sect_founder':
-        return anxiety <= 3 && data.reputation >= 80 && data.influence >= 35;
+        return data.reputation >= 80 && data.influence >= 35;
       case 'richest_man':
-        return anxiety <= 2 && familyBond <= 2;
+        return familyBond <= 2;
       case 'beloved_saint':
-        return anxiety <= 3 && data.good_karma >= 110;
+        return data.good_karma >= 110;
       case 'heavenly_immortal':
-        return fatigue <= 2 && anxiety <= 2 && discipline >= 2;
+        return discipline >= 2;
       case 'great_scholar':
-        return fatigue <= 3 && discipline >= 1 && data.knowledge >= 85;
+        return discipline >= 1 && data.knowledge >= 85;
       default:
         return true;
     }
@@ -641,8 +631,6 @@ export class EndingSystem {
 
   private static determineNeutralEnding(data: EndingEvaluationData): EndingInfo {
     const { lifeStates } = data;
-    const fatigue = lifeStates?.fatigue || 0;
-    const anxiety = lifeStates?.anxiety || 0;
     const familyBond = lifeStates?.familyBond || 0;
     const socialMomentum = lifeStates?.socialMomentum || 0;
     const discipline = lifeStates?.discipline || 0;
@@ -663,7 +651,6 @@ export class EndingSystem {
       data.flags.includes('retired') &&
       familyBond <= 1 &&
       socialMomentum <= 1 &&
-      anxiety <= 1 &&
       discipline >= 1
     ) {
       return this.ENDINGS.find(e => e.id === 'hermit_life')!;
@@ -672,7 +659,6 @@ export class EndingSystem {
     if (
       hasFamilyAnchor &&
       !highAchievement &&
-      anxiety <= 2 &&
       data.reputation < 70 &&
       data.money < 900
     ) {
@@ -681,14 +667,14 @@ export class EndingSystem {
 
     if (
       highAchievement &&
-      (anxiety >= 2 || fatigue >= 2 || data.money < 0 || familyBond <= 1 || indulgence >= 2)
+      (data.money < 0 || familyBond <= 1 || indulgence >= 2)
     ) {
       return this.ENDINGS.find(e => e.id === 'bittersweet_success')!;
     }
 
     if (
       hasModerateAchievement &&
-      (!hasFamilyAnchor || anxiety >= 1 || discipline <= 1)
+      (!hasFamilyAnchor || discipline <= 1)
     ) {
       return this.ENDINGS.find(e => e.id === 'unfulfilled_ambition')!;
     }

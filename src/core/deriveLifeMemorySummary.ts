@@ -753,29 +753,6 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
     );
   }
 
-  const anxiety = player.lifeStates?.anxiety ?? 0;
-  const fatigue = player.lifeStates?.fatigue ?? 0;
-  if (anxiety >= 70) {
-    pushRisk(
-      'risk-anxiety',
-      RISK_SIGNAL_LABELS.highAnxiety,
-      'low',
-      'L0',
-      [],
-      [`anxiety:${anxiety}`],
-    );
-  }
-  if (fatigue >= 70) {
-    pushRisk(
-      'risk-fatigue',
-      RISK_SIGNAL_LABELS.highFatigue,
-      'low',
-      'L0',
-      [],
-      [`fatigue:${fatigue}`],
-    );
-  }
-
   entries.sort((a, b) => a.sortKey - b.sortKey);
   return entries.slice(0, 4);
 }

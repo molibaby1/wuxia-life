@@ -185,6 +185,5 @@ export const coreTalents: CoreTalentConfig[] = [
       { tag: 'discipline', multiplier: 1.05 },
       { tag: 'indulgence', multiplier: 0.9 },
     ],
-    stateBiases: [{ state: 'anxiety', value: 1 }],
   },
 ];

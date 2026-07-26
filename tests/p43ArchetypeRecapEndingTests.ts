@@ -47,10 +47,8 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       flags: {},
       alive: false,
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 0,
         studyHabit: 0,
         businessHabit: 0,
@@ -74,10 +72,8 @@ function testLateLifeShapingRecap(): void {
   const martial = makeState({
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 5,
         studyHabit: 2,
         businessHabit: 0,
@@ -102,10 +98,8 @@ function testP19CompositionIncludesShaping(): void {
     flags: { route_orthodox: true },
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 4,
         studyHabit: 0,
         businessHabit: 0,
@@ -132,10 +126,8 @@ function testSameRouteShapingDifferentiation(): void {
     flags: baseFlags,
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 5,
         studyHabit: 2,
         businessHabit: 0,
@@ -148,10 +140,8 @@ function testSameRouteShapingDifferentiation(): void {
     flags: baseFlags,
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 2,
         studyHabit: 5,
         businessHabit: 0,
@@ -182,10 +172,8 @@ function testSameRouteShapingDifferentiation(): void {
     flags: merchantFlags,
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 0,
         studyHabit: 0,
         businessHabit: 4,
@@ -198,10 +186,8 @@ function testSameRouteShapingDifferentiation(): void {
     flags: merchantFlags,
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 0,
         studyHabit: 0,
         businessHabit: 2,
@@ -228,10 +214,8 @@ function testLifeMemoryAndEndingLabelAlignment(): void {
   const state = makeState({
     player: {
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 4,
         studyHabit: 3,
         businessHabit: 0,

@@ -112,7 +112,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
     if (snapshot.metadata.schemaVersion !== GAME_STATE_SNAPSHOT_SCHEMA_VERSION) {
       throw new SnapshotConversionError(
         'SNAPSHOT_INVALID',
-        `Unsupported snapshot schema: ${snapshot.metadata.schemaVersion}`,
+        `Unsupported snapshot schema: ${snapshot.metadata.schemaVersion}; expected ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
       );
     }
     for (const key of FORBIDDEN_TOP_LEVEL) {

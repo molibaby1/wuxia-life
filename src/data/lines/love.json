@@ -292,34 +292,31 @@
     "choices": [
       {
         "id": "love_duel",
-        "text": "正面对决 (功力 +3, 焦虑 +1)",
+        "text": "正面对决 (功力 +3)",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-          { "type": "life_state_change", "target": "anxiety", "value": 1, "operator": "add" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_duel" }
         ]
       },
       {
         "id": "love_withdraw",
-        "text": "暂时退让 (关系 -6, 焦虑 -1)",
+        "text": "暂时退让 (关系 -6)",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
-          { "type": "life_state_change", "target": "anxiety", "value": -1, "operator": "add" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_withdraw" }
         ]
       },
       {
         "id": "love_clumsy_mediation",
-        "text": "设法缓和局面 (魅力 +2, 关系 -2, 焦虑 +1)",
+        "text": "设法缓和局面 (魅力 +2, 关系 -2)",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
           { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -2 } },
-          { "type": "life_state_change", "target": "anxiety", "value": 1, "operator": "add" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_mediation" }
         ]

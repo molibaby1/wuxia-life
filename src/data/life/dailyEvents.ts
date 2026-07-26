@@ -11,8 +11,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['lazy', 'indulgent'],
     preferredStates: [
       { state: 'discipline', min: 1, weightMultiplier: 1.2 },
-      { state: 'fatigue', min: 2, weightMultiplier: 0.72 },
-      { state: 'anxiety', min: 2, weightMultiplier: 0.85 },
     ],
     variants: {
       positive: [
@@ -39,7 +37,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_morning_training_neg_1',
           weight: 1,
           text: '你勉强练完，心里却始终烦躁，没什么收获。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -61,7 +58,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['lazy', 'indulgent', 'unstable_mood'],
     suppressedTraits: ['disciplined', 'unyielding'],
     preferredStates: [
-      { state: 'fatigue', min: 2, weightMultiplier: 1.18 },
       { state: 'discipline', min: 2, weightMultiplier: 0.8 },
     ],
     variants: {
@@ -70,7 +66,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_skip_training_pos_1',
           weight: 2,
           text: '你给自己放了一天假，反倒觉得筋骨和心气都松快了些。',
-          stateEffects: [{ state: 'fatigue', value: -1 }],
         },
       ],
       neutral: [
@@ -85,10 +80,7 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_skip_training_neg_1',
           weight: 1,
           text: '偷懒时固然舒服，到了夜里，你又隐隐觉得自己在原地打转。',
-          stateEffects: [
-            { state: 'discipline', value: -1 },
-            { state: 'anxiety', value: 1 },
-          ],
+          stateEffects: [{ state: 'discipline', value: -1 }],
         },
       ],
     },
@@ -107,7 +99,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['lazy'],
     preferredStates: [
       { state: 'discipline', min: 2, weightMultiplier: 1.15 },
-      { state: 'anxiety', min: 2, weightMultiplier: 1.1 },
     ],
     variants: {
       positive: [
@@ -131,7 +122,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_training_bottleneck_neg_1',
           weight: 1,
           text: '越是想突破，越是觉得气不顺，最后只剩下一肚子烦闷。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -151,8 +141,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['lazy', 'unstable_mood'],
     preferredStates: [
       { state: 'discipline', min: 1, weightMultiplier: 1.12 },
-      { state: 'fatigue', min: 2, weightMultiplier: 0.82 },
-      { state: 'anxiety', min: 2, weightMultiplier: 0.88 },
     ],
     variants: {
       positive: [
@@ -179,7 +167,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_copybook_practice_neg_1',
           weight: 1,
           text: '你抄到后面已觉眼花，字迹渐乱，只得先搁下笔。',
-          stateEffects: [{ state: 'fatigue', value: 1 }],
         },
       ],
     },
@@ -203,7 +190,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['indulgent'],
     preferredStates: [
       { state: 'discipline', min: 1, weightMultiplier: 1.08 },
-      { state: 'anxiety', min: 2, weightMultiplier: 0.9 },
     ],
     variants: {
       positive: [
@@ -230,7 +216,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_reading_notes_neg_1',
           weight: 1,
           text: '你记了半天，越看越觉得前后矛盾，心里反倒添了几分烦躁。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -252,9 +237,7 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredOrigins: ['poor_family', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
-      { state: 'anxiety', min: 1, weightMultiplier: 1.12 },
       { state: 'socialMomentum', min: 1, weightMultiplier: 1.15 },
-      { state: 'fatigue', min: 3, weightMultiplier: 0.8 },
     ],
     variants: {
       positive: [
@@ -279,7 +262,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_take_odd_job_neg_1',
           weight: 1,
           text: '你白忙一场，银钱没攒下多少，心里却更紧了。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -303,7 +285,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['heroic_heart'],
     preferredStates: [
       { state: 'socialMomentum', min: 1, weightMultiplier: 1.2 },
-      { state: 'anxiety', min: 1, weightMultiplier: 1.08 },
     ],
     variants: {
       positive: [
@@ -327,7 +308,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_small_trade_neg_1',
           weight: 1,
           text: '你看走了眼，白忙一场不说，心里还添了几分懊恼。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -350,8 +330,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredOrigins: ['poor_family'],
     suppressedOrigins: ['merchant_house'],
     preferredStates: [
-      { state: 'anxiety', min: 2, weightMultiplier: 1.18 },
-      { state: 'fatigue', min: 2, weightMultiplier: 1.08 },
     ],
     variants: {
       positive: [
@@ -359,7 +337,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_tight_budget_pos_1',
           weight: 1,
           text: '你咬咬牙把开销都压了下来，这阵子总算还能撑过去。',
-          stateEffects: [{ state: 'anxiety', value: -1 }],
         },
       ],
       neutral: [
@@ -374,7 +351,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_tight_budget_neg_1',
           weight: 2,
           text: '手头一紧，许多原本不值一提的小事，也都压得人透不过气来。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -397,7 +373,6 @@ export const dailyEvents: DailyEventConfig[] = [
     suppressedTraits: ['loner'],
     preferredStates: [
       { state: 'familyBond', max: 2, weightMultiplier: 1.18 },
-      { state: 'anxiety', min: 2, weightMultiplier: 1.08 },
     ],
     variants: {
       positive: [
@@ -420,7 +395,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_home_letter_neg_1',
           weight: 1,
           text: '字里行间尽是操心与盼望，让你一时也轻松不起来。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -446,7 +420,6 @@ export const dailyEvents: DailyEventConfig[] = [
           text: '难得大家都在，你安安稳稳吃了一顿饭，心里也跟着松了一截。',
           stateEffects: [
             { state: 'familyBond', value: 1 },
-            { state: 'fatigue', value: -1 },
           ],
         },
       ],
@@ -462,7 +435,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_shared_meal_neg_1',
           weight: 1,
           text: '本想好好吃顿饭，话题却又拐到了那些说不清的旧账上。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -480,7 +452,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['affectionate', 'fear_of_responsibility'],
     preferredStates: [
       { state: 'familyBond', min: 1, weightMultiplier: 1.15 },
-      { state: 'anxiety', min: 1, weightMultiplier: 1.05 },
     ],
     variants: {
       positive: [
@@ -503,10 +474,7 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_household_burden_neg_1',
           weight: 2,
           text: '一件接一件的小事压上来，让你忽然觉得，日子比江湖还难应付。',
-          stateEffects: [
-            { state: 'anxiety', value: 1 },
-            { state: 'discipline', value: -1 },
-          ],
+          stateEffects: [{ state: 'discipline', value: -1 }],
         },
       ],
     },
@@ -524,8 +492,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['unstable_mood', 'perfect_memory', 'loner'],
     suppressedTraits: ['competitive'],
     preferredStates: [
-      { state: 'anxiety', min: 1, weightMultiplier: 1.22 },
-      { state: 'fatigue', min: 2, weightMultiplier: 1.08 },
       { state: 'socialMomentum', min: 2, weightMultiplier: 0.88 },
     ],
     variants: {
@@ -534,10 +500,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_night_reflection_pos_1',
           weight: 2,
           text: '夜深人静时，你忽然把近来的心绪理顺了些。',
-          stateEffects: [
-            { state: 'anxiety', value: -1 },
-            { state: 'fatigue', value: -1 },
-          ],
         },
       ],
       neutral: [
@@ -552,7 +514,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_night_reflection_neg_1',
           weight: 1,
           text: '旧事忽然翻涌上来，让你心里更乱了。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },
@@ -569,7 +530,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 20,
     preferredTraits: ['unstable_mood', 'grand_dreams_poor_followthrough', 'affectionate'],
     preferredStates: [
-      { state: 'anxiety', min: 1, weightMultiplier: 1.18 },
       { state: 'discipline', min: 2, weightMultiplier: 0.9 },
     ],
     variants: {
@@ -593,10 +553,7 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_second_guess_neg_1',
           weight: 2,
           text: '越想越觉得自己哪条路都差了一口气，连心里的那点劲也跟着散了。',
-          stateEffects: [
-            { state: 'anxiety', value: 1 },
-            { state: 'discipline', value: -1 },
-          ],
+          stateEffects: [{ state: 'discipline', value: -1 }],
         },
       ],
     },
@@ -613,8 +570,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 18,
     preferredTraits: ['unyielding', 'disciplined', 'heroic_heart'],
     preferredStates: [
-      { state: 'anxiety', min: 1, weightMultiplier: 1.1 },
-      { state: 'fatigue', min: 1, weightMultiplier: 1.05 },
     ],
     variants: {
       positive: [
@@ -622,10 +577,7 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_get_back_spirit_pos_1',
           weight: 2,
           text: '也不知是因为什么，你忽然又把那口气提了起来，觉得自己还能继续往前走。',
-          stateEffects: [
-            { state: 'anxiety', value: -1 },
-            { state: 'discipline', value: 1 },
-          ],
+          stateEffects: [{ state: 'discipline', value: 1 }],
         },
       ],
       neutral: [
@@ -640,7 +592,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_get_back_spirit_neg_1',
           weight: 1,
           text: '你本想振作，可那股劲只亮了一下，终究还是没稳住。',
-          stateEffects: [{ state: 'anxiety', value: 1 }],
         },
       ],
     },

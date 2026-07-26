@@ -128,7 +128,7 @@
     "choices": [
       {
         "id": "innovate_full",
-        "text": "闭关创作 (功力 +10, 外功 +10, 内功 +10, 疲惫 +1, 焦虑 +1)",
+        "text": "闭关创作 (功力 +10, 外功 +10, 内功 +10)",
         "effects": [
           {
             "type": "stat_modify",
@@ -146,18 +146,6 @@
             "type": "stat_modify",
             "target": "internalSkill",
             "value": 10,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "fatigue",
-            "value": 1,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
             "operator": "add"
           }
         ]
@@ -182,7 +170,7 @@
       },
       {
         "id": "innovate_suspend",
-        "text": "先记下心得，暂不强求突破 (悟性 +3, 内功 +2, 焦虑 -1)",
+        "text": "先记下心得，暂不强求突破 (悟性 +3, 内功 +2)",
         "effects": [
           {
             "type": "stat_modify",
@@ -194,12 +182,6 @@
             "type": "stat_modify",
             "target": "internalSkill",
             "value": 2,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": -1,
             "operator": "add"
           }
         ]
@@ -334,7 +316,7 @@
     },
     "choices": [
       {
-        "text": "参加比武，争夺盟主 (武力检定, 疲惫 +1)",
+        "text": "参加比武，争夺盟主 (武力检定)",
         "effects": [
           {
             "type": "random",
@@ -350,12 +332,6 @@
               "value": -10,
               "operator": "add"
             }
-          },
-          {
-            "type": "life_state_change",
-            "target": "fatigue",
-            "value": 1,
-            "operator": "add"
           }
         ]
       },
@@ -377,7 +353,7 @@
         ]
       },
       {
-        "text": "借机结交同道 (人脉 +15, 声望 +8, 焦虑 +1)",
+        "text": "借机结交同道 (人脉 +15, 声望 +8)",
         "effects": [
           {
             "type": "stat_modify",
@@ -389,12 +365,6 @@
             "type": "stat_modify",
             "target": "reputation",
             "value": 8,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
             "operator": "add"
           }
         ]
@@ -448,7 +418,7 @@
     },
     "choices": [
       {
-        "text": "大规模扩建 (财富 -200, 声望 +30, 焦虑 +1)",
+        "text": "大规模扩建 (财富 -200, 声望 +30)",
         "effects": [
           {
             "type": "stat_modify",
@@ -460,12 +430,6 @@
             "type": "stat_modify",
             "target": "reputation",
             "value": 30,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
             "operator": "add"
           }
         ]
@@ -488,7 +452,7 @@
         ]
       },
       {
-        "text": "暂缓扩建，先整顿门规 (财富 -20, 悟性 +4, 焦虑 -1)",
+        "text": "暂缓扩建，先整顿门规 (财富 -20, 悟性 +4)",
         "effects": [
           {
             "type": "stat_modify",
@@ -500,12 +464,6 @@
             "type": "stat_modify",
             "target": "comprehension",
             "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": -1,
             "operator": "add"
           }
         ]
@@ -558,7 +516,7 @@
     },
     "choices": [
       {
-        "text": "倾囊相授，友好交流 (人脉 +20, 外功 +5, 焦虑 +1)",
+        "text": "倾囊相授，友好交流 (人脉 +20, 外功 +5)",
         "effects": [
           {
             "type": "stat_modify",
@@ -570,12 +528,6 @@
             "type": "stat_modify",
             "target": "externalSkill",
             "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "anxiety",
-            "value": 1,
             "operator": "add"
           }
         ]

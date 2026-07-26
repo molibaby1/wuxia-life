@@ -14,7 +14,6 @@ export const weaknesses: WeaknessConfig[] = [
       { tag: 'training', multiplier: 0.9 },
       { tag: 'survival', multiplier: 1.25 },
     ],
-    stateBiases: [{ state: 'fatigue', value: 1 }],
     resultModifiers: { failureBonus: 0.15, stressBonus: 0.1 },
     removable: false,
   },
@@ -71,7 +70,6 @@ export const weaknesses: WeaknessConfig[] = [
       { tag: 'family', multiplier: 1.15 },
       { tag: 'indulgence', multiplier: 1.15 },
     ],
-    stateBiases: [{ state: 'anxiety', value: 1 }],
     removable: false,
   },
   {

@@ -220,6 +220,16 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
     'missing schemaVersion must be reported',
   );
 
+  const oldSnapshot = structuredClone(gameStateSnapshotAge50);
+  oldSnapshot.metadata.schemaVersion = '3.4.0' as never;
+  let rejected = false;
+  try {
+    defaultSnapshotConverter.fromSnapshot(oldSnapshot);
+  } catch (error) {
+    rejected = error instanceof Error && /3\.5\.0/.test(error.message);
+  }
+  assert(rejected, '3.4.0 snapshot must be rejected without migration');
+
   console.log('✓ required metadata present');
 }
 

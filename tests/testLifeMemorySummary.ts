@@ -307,7 +307,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
       ...createBaseState().player,
       healthStatus: 'seriously_ill',
       constitution: 35,
-      lifeStates: { anxiety: 80, fatigue: 0 },
+      lifeStates: {},
     },
   });
 
@@ -362,10 +362,8 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     player: {
       ...createBaseState().player,
       lifeStates: {
-        fatigue: 0,
         discipline: 0,
         indulgence: 0,
-        anxiety: 0,
         trainingHabit: 4,
         studyHabit: 2,
         businessHabit: 0,

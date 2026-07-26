@@ -3,6 +3,7 @@ import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import { getOriginId } from '../p20/stateAccess';
+import { ConditionEvaluator } from './ConditionEvaluator';
 import { EffectType, EventCategory, EventPriority, type DailyEventConfig, type DailyEventVariantConfig, type EventDefinition, type EventTrigger, type GameState } from '../types/eventTypes';
 
 // ponytail: built once at load; getConfigByVariantId was O(configs × variants) per daily event.
@@ -27,15 +28,19 @@ function pickWeightedVariant(variants: DailyEventVariantConfig[]): DailyEventVar
 }
 
 export class DailyEventSystem {
+  private readonly conditionEvaluator = new ConditionEvaluator();
+
   getConfigByVariantId(eventId: string): DailyEventConfig | null {
     return dailyConfigByVariantId.get(eventId) ?? null;
   }
 
   selectEvent(state: GameState, configs: DailyEventConfig[] = dailyEvents): EventDefinition | null {
+    this.conditionEvaluator.clearCache();
     const age = state.player?.age || 0;
     const primaryOrigin = resolvePrimaryOriginFamilyFlag(state);
     const candidates = configs
       .filter(event => age >= event.ageRange.min && age <= event.ageRange.max)
+      .filter(event => (event.conditions ?? []).every(condition => this.conditionEvaluator.evaluate(condition, state)))
       .map(event => ({ event, weight: this.getWeight(event, state) }))
       .filter(item => item.weight > 0)
       .filter(item => {
@@ -204,6 +209,7 @@ export class DailyEventSystem {
           value: effect.value,
           operator: 'add' as const,
         })),
+        ...(variant.effects || []),
         ...((variant.flags || []).map(flag => ({
           type: EffectType.FLAG_SET,
           target: 'player.flags',

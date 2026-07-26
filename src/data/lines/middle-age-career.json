@@ -147,6 +147,14 @@
             "target": "internalSkill",
             "value": 10,
             "operator": "add"
+          },
+          {
+            "type": "status_add",
+            "status": "fatigued"
+          },
+          {
+            "type": "status_add",
+            "status": "anxious"
           }
         ]
       },
@@ -183,6 +191,10 @@
             "target": "internalSkill",
             "value": 2,
             "operator": "add"
+          },
+          {
+            "type": "status_remove",
+            "status": "anxious"
           }
         ]
       }
@@ -332,6 +344,10 @@
               "value": -10,
               "operator": "add"
             }
+          },
+          {
+            "type": "status_add",
+            "status": "fatigued"
           }
         ]
       },
@@ -431,6 +447,10 @@
             "target": "reputation",
             "value": 30,
             "operator": "add"
+          },
+          {
+            "type": "status_add",
+            "status": "anxious"
           }
         ]
       },
@@ -465,6 +485,10 @@
             "target": "comprehension",
             "value": 4,
             "operator": "add"
+          },
+          {
+            "type": "status_remove",
+            "status": "anxious"
           }
         ]
       }

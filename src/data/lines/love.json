@@ -296,6 +296,7 @@
         "effects": [
           { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "status_add", "status": "anxious" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_duel" }
         ]
@@ -306,6 +307,7 @@
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
+          { "type": "status_remove", "status": "anxious" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_withdraw" }
         ]
@@ -317,6 +319,7 @@
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
           { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -2 } },
+          { "type": "status_add", "status": "anxious" },
           { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_mediation" }
         ]

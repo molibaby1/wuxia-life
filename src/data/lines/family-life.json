@@ -461,6 +461,10 @@
             "target": "familyBond",
             "value": 1,
             "operator": "add"
+          },
+          {
+            "type": "status_add",
+            "status": "anxious"
           }
         ]
       },
@@ -472,6 +476,10 @@
             "target": "money",
             "value": -30,
             "operator": "add"
+          },
+          {
+            "type": "status_add",
+            "status": "anxious"
           }
         ]
       },

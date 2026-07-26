@@ -339,6 +339,7 @@ export interface DailyEventVariantConfig {
   text: string;
   statEffects?: TraitStatModifier[];
   stateEffects?: LifeStateModifier[];
+  effects?: EffectDefinition[];
   flags?: string[];
 }
 
@@ -351,6 +352,7 @@ export interface DailyEventConfig {
     max: number;
   };
   baseWeight: number;
+  conditions?: EventCondition[];
   preferredTraits?: TraitId[];
   suppressedTraits?: TraitId[];
   preferredOrigins?: OriginId[];

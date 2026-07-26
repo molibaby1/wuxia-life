@@ -76,6 +76,14 @@ function testFormalEventConsumers(): void {
   assert(source.includes('Math.max('), 'Formal Event combined training/comprehension habit must use max');
 }
 
+function testEndingConsumers(): void {
+  const source = fs.readFileSync(path.resolve('src/core/EndingSystem.ts'), 'utf8');
+  assert(!/lifeStates[^\n]*\.(?:discipline|indulgence)/.test(source), 'EndingSystem must not read legacy life states');
+  assert(!source.includes('discipline >='), 'EndingSystem must not require discipline');
+  assert(!source.includes('discipline <='), 'EndingSystem must not classify by discipline');
+  assert(!source.includes('indulgence >='), 'EndingSystem must not classify by indulgence');
+}
+
 function testSnapshotBoundary(): void {
   assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.6.0', 'snapshot schema must be 3.6.0');
   assert(validateGameStateSnapshot(gameStateSnapshotAge50).ok, 'age-50 fixture must be valid');
@@ -112,6 +120,7 @@ export function runCanonicalDisciplineIndulgenceRemovalTests(): void {
   testDailyEventMapping();
   testDailyEventSchedulingConsumers();
   testFormalEventConsumers();
+  testEndingConsumers();
   testSnapshotBoundary();
   testSourceGuard();
 }

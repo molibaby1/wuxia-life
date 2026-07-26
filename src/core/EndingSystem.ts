@@ -107,8 +107,6 @@ interface EndingEvaluationData {
 }
 
 const EMPTY_LIFE_STATES: PlayerLifeStates = {
-  discipline: 0,
-  indulgence: 0,
   familyBond: 0,
   socialMomentum: 0,
   trainingHabit: 0,
@@ -516,13 +514,6 @@ export class EndingSystem {
 
     const shapingRecap = buildLateLifeShapingRecapLine(state.player.lifeStates);
 
-    const lifeStates = state.player.lifeStates || {
-      discipline: 0,
-      indulgence: 0,
-      familyBond: 0,
-      socialMomentum: 0,
-    };
-
     let categoryLine: string;
     if (ending.category === 'positive') {
       categoryLine = '高门槛成就成立，人生主轴清晰且完成度高。';
@@ -605,9 +596,7 @@ export class EndingSystem {
   }
 
   private static qualifiesForPositiveEnding(data: EndingEvaluationData, endingId: EndingType): boolean {
-    const { lifeStates } = data;
-    const discipline = lifeStates?.discipline || 0;
-    const familyBond = lifeStates?.familyBond || 0;
+    const familyBond = data.lifeStates?.familyBond || 0;
 
     switch (endingId) {
       case 'legendary_hero':
@@ -621,9 +610,9 @@ export class EndingSystem {
       case 'beloved_saint':
         return data.good_karma >= 110;
       case 'heavenly_immortal':
-        return discipline >= 2;
+        return true;
       case 'great_scholar':
-        return discipline >= 1 && data.knowledge >= 85;
+        return data.knowledge >= 85;
       default:
         return true;
     }
@@ -633,8 +622,6 @@ export class EndingSystem {
     const { lifeStates } = data;
     const familyBond = lifeStates?.familyBond || 0;
     const socialMomentum = lifeStates?.socialMomentum || 0;
-    const discipline = lifeStates?.discipline || 0;
-    const indulgence = lifeStates?.indulgence || 0;
     const hasFamilyAnchor = Boolean(data.spouse) || data.children > 0 || familyBond >= 2;
     const hasModerateAchievement =
       data.martialPower >= 55 ||
@@ -650,8 +637,7 @@ export class EndingSystem {
     if (
       data.flags.includes('retired') &&
       familyBond <= 1 &&
-      socialMomentum <= 1 &&
-      discipline >= 1
+      socialMomentum <= 1
     ) {
       return this.ENDINGS.find(e => e.id === 'hermit_life')!;
     }
@@ -667,14 +653,14 @@ export class EndingSystem {
 
     if (
       highAchievement &&
-      (data.money < 0 || familyBond <= 1 || indulgence >= 2)
+      (data.money < 0 || familyBond <= 1)
     ) {
       return this.ENDINGS.find(e => e.id === 'bittersweet_success')!;
     }
 
     if (
       hasModerateAchievement &&
-      (!hasFamilyAnchor || discipline <= 1)
+      !hasFamilyAnchor
     ) {
       return this.ENDINGS.find(e => e.id === 'unfulfilled_ambition')!;
     }
@@ -683,7 +669,6 @@ export class EndingSystem {
       socialMomentum <= 1 &&
       data.connections <= 10 &&
       familyBond <= 1 &&
-      discipline <= 1 &&
       !hasModerateAchievement
     ) {
       return this.ENDINGS.find(e => e.id === 'wanderer_life')!;

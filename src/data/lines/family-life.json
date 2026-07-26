@@ -268,7 +268,7 @@
       },
       {
         "id": "child_born_care",
-        "text": "亲自照料，暂缓外务 (财富 -20, 家庭牵绊 +2, 自律 -1)",
+        "text": "亲自照料，暂缓外务 (财富 -20, 家庭牵绊 +2)",
         "effects": [
           {
             "type": "stat_modify",
@@ -280,12 +280,6 @@
             "type": "life_state_change",
             "target": "familyBond",
             "value": 2,
-            "operator": "add"
-          },
-          {
-            "type": "life_state_change",
-            "target": "discipline",
-            "value": -1,
             "operator": "add"
           },
           {

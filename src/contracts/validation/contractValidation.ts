@@ -11,8 +11,8 @@ import {
   type GameStateSnapshot,
   type GameStateSnapshotMetadata,
 } from '../gameStateSnapshot';
-import type { EffectDefinition, EventCondition } from '../../types/eventTypes';
-import { EffectType, isHealthStatus, isStatusId } from '../../types/eventTypes';
+import type { EffectDefinition, EventCondition, PlayerLifeStates } from '../../types/eventTypes';
+import { EffectType, isHealthStatus, isStatusId, LIFE_STATE_KEYS } from '../../types/eventTypes';
 import type { ReplayLog, ReplayLogEntry } from '../replayLog';
 
 export interface ValidationSuccess<T> {
@@ -58,6 +58,33 @@ function pass<T>(value: T): ValidationSuccess<T> {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function validatePlayerLifeStates(value: unknown): ValidationResult<PlayerLifeStates> {
+  if (!isPlainObject(value)) return fail(['player.lifeStates must be an object']);
+
+  const errors: string[] = [];
+  const expected = new Set<string>(LIFE_STATE_KEYS);
+  for (const key of LIFE_STATE_KEYS) {
+    if (!(key in value)) {
+      errors.push(`player.lifeStates.${key} required`);
+    }
+  }
+  for (const key of Object.keys(value)) {
+    if (!expected.has(key)) {
+      errors.push(`player.lifeStates.${key} is forbidden`);
+    }
+  }
+  for (const key of LIFE_STATE_KEYS) {
+    const stateValue = value[key];
+    if (typeof stateValue !== 'number' || !Number.isFinite(stateValue)) {
+      errors.push(`player.lifeStates.${key} must be a finite number`);
+    } else if (stateValue < 0 || stateValue > 5) {
+      errors.push(`player.lifeStates.${key} must be between 0 and 5`);
+    }
+  }
+  if (errors.length > 0) return fail(errors);
+  return pass(value as unknown as PlayerLifeStates);
 }
 
 const REQUIRED_SNAPSHOT_METADATA: (keyof GameStateSnapshotMetadata)[] = [
@@ -124,6 +151,10 @@ export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<G
         if (player[key] === undefined || player[key] === null || player[key] === '') {
           errors.push(`state.player.${key} required`);
         }
+      }
+      if (player.lifeStates !== undefined) {
+        const lifeStatesResult = validatePlayerLifeStates(player.lifeStates);
+        if ('errors' in lifeStatesResult) errors.push(...lifeStatesResult.errors);
       }
     }
     for (const key of FORBIDDEN_SNAPSHOT_STATE_KEYS) {

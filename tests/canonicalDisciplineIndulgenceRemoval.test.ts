@@ -15,8 +15,9 @@ function findDailyEvent(id: string) {
 }
 
 function assertNoLegacyState(value: unknown, message: string): void {
+  const serialized = JSON.stringify(value) ?? '';
   assert(
-    !JSON.stringify(value).match(/\b(?:discipline|indulgence)\b/),
+    !serialized.match(/\b(?:discipline|indulgence)\b/),
     message,
   );
 }

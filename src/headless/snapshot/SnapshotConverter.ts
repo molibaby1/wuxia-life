@@ -4,6 +4,7 @@
 
 import type { GameStateSnapshot, GameStateSnapshotMetadata } from '../../contracts/gameStateSnapshot';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../../contracts/gameStateSnapshot';
+import { validatePlayerLifeStates } from '../../contracts/validation/contractValidation';
 import type { GameState } from '../../types/eventTypes';
 import type { TimeSource } from '../adapters/timeSource';
 
@@ -138,6 +139,12 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         'SNAPSHOT_FORBIDDEN_FIELD',
         'Forbidden snapshot player field: health',
       );
+    }
+    if (player.lifeStates !== undefined) {
+      const lifeStatesValidation = validatePlayerLifeStates(player.lifeStates);
+      if ('errors' in lifeStatesValidation) {
+        throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
+      }
     }
     const mergedFlags = { ...flags, ...(player.flags ?? {}) };
     const hydrated: GameState = {

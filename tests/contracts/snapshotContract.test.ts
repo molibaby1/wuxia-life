@@ -20,6 +20,7 @@ import {
 import { GameEngineIntegration } from '../../src/core/GameEngineIntegration';
 import { FixedTimeSource } from '../../src/headless/adapters/timeSource';
 import { defaultSnapshotConverter } from '../../src/headless/snapshot/SnapshotConverter';
+import { validateGameStateSnapshot } from '../../src/contracts/validation/contractValidation';
 
 const REQUIRED_METADATA_KEYS: (keyof GameStateSnapshotMetadata)[] = [
   'schemaVersion',
@@ -201,6 +202,33 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   console.log('✓ valid snapshot JSON round trip');
 }
 
+{
+  const minimal = createMinimalValidSnapshot();
+  assert(validateGameStateSnapshot(minimal).ok, 'minimal snapshot without lifeStates remains valid');
+  const restoredMinimal = defaultSnapshotConverter.fromSnapshot(minimal);
+  assert(restoredMinimal.player.lifeStates === undefined, 'minimal snapshot does not gain lifeStates on restore');
+
+  const valid = JSON.parse(JSON.stringify(gameStateSnapshotAge50)) as GameStateSnapshot;
+  assert(validateGameStateSnapshot(valid).ok, 'valid five-key lifeStates snapshot passes');
+  defaultSnapshotConverter.fromSnapshot(valid);
+
+  const legacy = JSON.parse(JSON.stringify(valid)) as any;
+  legacy.metadata.schemaVersion = '3.5.0';
+  assert(!validateGameStateSnapshot(legacy).ok, 'snapshot schema 3.5.0 must be rejected');
+
+  const legacyField = JSON.parse(JSON.stringify(valid)) as any;
+  legacyField.state.player.lifeStates.discipline = 1;
+  assert(!validateGameStateSnapshot(legacyField).ok, 'legacy discipline field must be rejected');
+  let threw = false;
+  try {
+    defaultSnapshotConverter.fromSnapshot(legacyField);
+  } catch {
+    threw = true;
+  }
+  assert(threw, 'converter must reject legacy discipline field');
+  console.log('✓ lifeStates snapshot validation and conversion boundary');
+}
+
 // 2. Required metadata present
 {
   assertRequiredMetadataPresent(gameStateSnapshotAge50.metadata);
@@ -226,7 +254,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.5\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.6\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

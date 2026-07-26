@@ -21,6 +21,7 @@ import {
   validateEventCatalogBundle,
   validateEventCatalogSummary,
   validateGameStateSnapshot,
+  validatePlayerLifeStates,
   validateReplayLog,
 } from '../../src/contracts/validation/contractValidation';
 
@@ -50,6 +51,34 @@ console.log('=== P4 US-023: Contract Validation Helper Tests ===\n');
     'snapshot player required field detected',
   );
   console.log('✓ snapshot validation helper');
+}
+
+{
+  const validLifeStates = gameStateSnapshotAge50.state.player.lifeStates!;
+  assert(validatePlayerLifeStates(validLifeStates).ok, 'valid five-key lifeStates passes');
+
+  const invalidCases: Array<[string, (lifeStates: any) => void]> = [
+    ['discipline', lifeStates => { lifeStates.discipline = 1; }],
+    ['indulgence', lifeStates => { lifeStates.indulgence = 1; }],
+    ['missing trainingHabit', lifeStates => { delete lifeStates.trainingHabit; }],
+    ['unknown extraState', lifeStates => { lifeStates.extraState = 1; }],
+    ['trainingHabit -1', lifeStates => { lifeStates.trainingHabit = -1; }],
+    ['trainingHabit 6', lifeStates => { lifeStates.trainingHabit = 6; }],
+    ['trainingHabit NaN', lifeStates => { lifeStates.trainingHabit = Number.NaN; }],
+    ['trainingHabit Infinity', lifeStates => { lifeStates.trainingHabit = Number.POSITIVE_INFINITY; }],
+    ['trainingHabit string', lifeStates => { lifeStates.trainingHabit = '2'; }],
+  ];
+  for (const [name, mutate] of invalidCases) {
+    const lifeStates = JSON.parse(JSON.stringify(validLifeStates));
+    mutate(lifeStates);
+    const result = validatePlayerLifeStates(lifeStates);
+    assert(!result.ok, `${name} must be rejected`);
+    const snapshot = JSON.parse(JSON.stringify(gameStateSnapshotAge50));
+    snapshot.state.player.lifeStates = lifeStates;
+    assert(!validateGameStateSnapshot(snapshot).ok, `${name} snapshot must be rejected`);
+  }
+  assert(!validatePlayerLifeStates([]).ok, 'array lifeStates must be rejected');
+  console.log('✓ player lifeStates validation helper');
 }
 
 {

@@ -94,7 +94,6 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "chivalry", "value": 5},
-      {"type": "stat_modify", "stat": "health", "value": -5},
       {"type": "stat_modify", "stat": "comprehension", "value": 8}
     ]
   },
@@ -353,7 +352,6 @@
       {"type": "stat_modify", "stat": "reputation", "value": 100},
       {"type": "stat_modify", "stat": "charisma", "value": 40},
       {"type": "stat_modify", "stat": "chivalry", "value": 30},
-      {"type": "stat_modify", "stat": "health", "value": 20},
       {"type": "flag_set", "flag": "crisis_legend", "value": true}
     ]
   }

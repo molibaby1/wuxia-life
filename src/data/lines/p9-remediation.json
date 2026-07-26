@@ -222,7 +222,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-      { "type": "stat_modify", "target": "health", "value": 5, "operator": "add" },
       { "type": "flag_set", "target": "p9_childhood_steady_gate", "value": true },
       { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "cautious_steady_foundation" }
     ],

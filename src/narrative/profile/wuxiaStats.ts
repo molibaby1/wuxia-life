@@ -14,6 +14,5 @@ export const WUXIA_PROFILE_STATS: WorldProfileStatEntry[] = [
   { id: 'chivalry', label: '侠义', role: 'implicit' },
   { id: 'knowledge', label: '学识', role: 'scheduling_relevant' },
   { id: 'money', label: '银两', role: 'scheduling_relevant' },
-  { id: 'energy', label: '精力', role: 'action_reward' },
   { id: 'businessAcumen', label: '经营', role: 'action_reward' },
 ];

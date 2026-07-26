@@ -73,6 +73,8 @@ export const gameStateSnapshotAge50 = {
       timeUnit: 'month',
       monthProgress: 3,
       traits: ['heroic_heart', 'grand_dreams_poor_followthrough', 'disciplined'],
+      healthStatus: 'healthy',
+      statuses: [],
       lifeStates: createDefaultPlayerLifeStates({
         fatigue: 35,
         discipline: 78,
@@ -234,6 +236,8 @@ export const gameStateSnapshotAge50 = {
             reputation: 320,
             investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
             traits: [],
+            healthStatus: 'healthy',
+            statuses: [],
           },
           flags: { route_hero_locked_in: true },
         },

@@ -8,7 +8,6 @@ export const weaknesses: WeaknessConfig[] = [
     flavor: '你天生身子骨偏弱，很多别人扛得住的苦，对你来说都更重。',
     initialStats: [
       { stat: 'constitution', value: -5 },
-      { stat: 'health', value: -15 },
     ],
     growthModifiers: [{ stat: 'constitution', multiplier: 0.82 }],
     eventBiases: [
@@ -66,7 +65,7 @@ export const weaknesses: WeaknessConfig[] = [
     name: '情绪不稳',
     summary: '心气起伏更大，关系和状态波动更明显。',
     flavor: '你的心气起伏比别人更大，好的时候锋芒毕露，坏的时候也容易失控。',
-    initialStats: [{ stat: 'health', value: -5 }],
+    initialStats: [],
     eventBiases: [
       { tag: 'social', multiplier: 1.1 },
       { tag: 'family', multiplier: 1.15 },

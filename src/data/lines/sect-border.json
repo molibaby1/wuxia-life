@@ -975,12 +975,8 @@
             "value": 5,
             "operator": "add"
           },
-          {
-            "type": "stat_modify",
-            "target": "health",
-            "value": 6,
-            "operator": "subtract"
-          },
+          { "type": "health_status_set", "value": "unwell" },
+          { "type": "status_add", "status": "injured" },
           {
             "type": "flag_set",
             "target": "border_crisis"

@@ -66,7 +66,6 @@ const STAT_KEYS = new Set([
   'businessAcumen',
   'influence',
   'money',
-  'health',
   'wealth',
 ]);
 const SAME_AGE_CONGESTION_THRESHOLD = 18;

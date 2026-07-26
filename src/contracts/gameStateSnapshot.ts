@@ -15,6 +15,8 @@ import type {
   KarmaSystem,
   LifePath,
   PlayerLifeStates,
+  HealthStatus,
+  StatusId,
   TraitId,
   Facts,
   Investments,
@@ -23,7 +25,7 @@ import type {
 import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.1.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.4.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -121,6 +123,8 @@ export interface SnapshotPlayerState {
   investments: Investments;
 
   traits: TraitId[];
+  healthStatus: HealthStatus;
+  statuses: StatusId[];
   lifeStates?: PlayerLifeStates;
   relationships?: Relationship[];
   spouse?: string | null;
@@ -136,10 +140,6 @@ export interface SnapshotPlayerState {
   events?: unknown[];
   /** @deprecated Prefer `state.inventory` (§6.2). */
   items?: unknown[];
-  /** @deprecated Legacy compat stat (§6.2). */
-  health?: number;
-  /** @deprecated Legacy compat stat (§6.2). */
-  energy?: number;
 }
 
 /** Canonical triggered-event audit record (§9.1). */

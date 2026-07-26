@@ -71,6 +71,11 @@ const suites: Suite[] = [
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },
   { name: 'canonicalPlayerStateSlice2b1Tests', entry: 'tests/canonicalPlayerStateSlice2b1.test.ts' },
   { name: 'canonicalPlayerStateSlice2b2Tests', entry: 'tests/canonicalPlayerStateSlice2b2.test.ts' },
+  { name: 'canonicalStatusFoundationTests', entry: 'tests/canonicalStatusFoundation.test.ts' },
+  { name: 'canonicalEnergyEliminationTests', entry: 'tests/canonicalEnergyElimination.test.ts' },
+  { name: 'canonicalHealthNoiseEliminationTests', entry: 'tests/canonicalHealthNoiseElimination.test.ts' },
+  { name: 'canonicalHealthStatusContractTests', entry: 'tests/canonicalHealthStatusContract.test.ts' },
+  { name: 'canonicalLegacyHealthRemovalTests', entry: 'tests/canonicalLegacyHealthRemoval.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

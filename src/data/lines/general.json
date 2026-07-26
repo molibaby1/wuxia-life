@@ -969,8 +969,8 @@
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
           { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
-          { "type": "flag_set", "target": "trial_basic_failed" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "event_record", "target": "sect_trial_basic_fail" }
         ]
       },
@@ -995,8 +995,8 @@
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
           { "type": "time_advance", "target": "age", "value": 8, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 8, "operator": "subtract" },
-          { "type": "flag_set", "target": "trial_agile_failed" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "event_record", "target": "sect_trial_agile_fail" }
         ]
       },
@@ -1101,7 +1101,11 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"sect_trial_active\") && (flags.has(\"trial_basic_failed\") || flags.has(\"trial_agile_failed\"))"
+        "expression": "flags.has(\"sect_trial_active\")"
+      },
+      {
+        "type": "status_has",
+        "status": "injured"
       }
     ],
     "content": {
@@ -1112,9 +1116,8 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-      { "type": "stat_modify", "target": "health", "value": 12, "operator": "add" },
-      { "type": "flag_unset", "target": "trial_basic_failed" },
-      { "type": "flag_unset", "target": "trial_agile_failed" },
+      { "type": "status_remove", "status": "injured" },
+      { "type": "health_status_set", "value": "unwell" },
       { "type": "event_record", "target": "sect_trial_recover" }
     ],
     "metadata": {

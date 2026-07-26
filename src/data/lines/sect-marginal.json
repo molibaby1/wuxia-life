@@ -194,9 +194,9 @@
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "flag_set", "target": "demonic_trial_shadow_done" },
-          { "type": "flag_set", "target": "demonic_trial_injured" },
           { "type": "event_record", "target": "demonic_trial_shadow_injury" }
         ]
       },
@@ -286,7 +286,11 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"demonic_trial_active\") && flags.has(\"demonic_trial_injured\")"
+        "expression": "flags.has(\"demonic_trial_active\")"
+      },
+      {
+        "type": "status_has",
+        "status": "injured"
       }
     ],
     "content": {
@@ -297,8 +301,8 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
-      { "type": "stat_modify", "target": "health", "value": 12, "operator": "add" },
-      { "type": "flag_unset", "target": "demonic_trial_injured" },
+      { "type": "status_remove", "status": "injured" },
+      { "type": "health_status_set", "value": "unwell" },
       { "type": "event_record", "target": "demonic_trial_recover" }
     ],
     "metadata": {
@@ -464,7 +468,8 @@
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 15, "operator": "subtract" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "flag_set", "target": "demonic_usurp_failed" },
           { "type": "flag_set", "target": "demonic_usurp_done" },
           { "type": "event_record", "target": "demonic_usurp_fail" }
@@ -674,7 +679,8 @@
         "weight": 1,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 18, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 12, "operator": "subtract" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "flag_set", "target": "demonic_redemption_tested" },
           { "type": "flag_set", "target": "demonic_redemption_failed" },
           { "type": "event_record", "target": "demonic_redemption_fail" }
@@ -947,7 +953,6 @@
         "description": "你选择正面硬抗——性命可能不保，身负重伤亦难幸免。",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 25, "operator": "subtract" },
           { "type": "flag_set", "target": "demonic_purge_wounded" },
           { "type": "flag_set", "target": "demonic_ending_purge" },
           { "type": "event_record", "target": "demonic_purge_fight" }

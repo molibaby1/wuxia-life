@@ -4,6 +4,8 @@
  * 声明式效果系统，用于统一处理事件效果
  */
 
+import type { HealthStatus, StatusId } from './eventTypes';
+
 /**
  * 效果类型定义
  */
@@ -48,6 +50,16 @@ export type EffectDefinition =
       target: string;
     }
 
+  // Canonical health/status operations
+  | {
+      type: 'health_status_set';
+      value: HealthStatus;
+    }
+  | {
+      type: 'status_add' | 'status_remove';
+      status: StatusId;
+    }
+
   // 事件记录
   | {
       type: 'event_record';
@@ -87,8 +99,6 @@ export type StatType =
   | 'knowledge'
   | 'businessAcumen'
   | 'money'
-  | 'health'
-  | 'energy'
   | 'scholarlyHeritage'
   | 'martialHeritage'
   | 'merchantNetwork';

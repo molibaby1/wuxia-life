@@ -854,7 +854,7 @@ export class GameProcessSimulator {
         const stat = effect.target;
 
         if (tendency === 'martial') {
-          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'comprehension', 'constitution', 'health'].includes(stat)) {
+          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'comprehension', 'constitution'].includes(stat)) {
             score += normalizedValue * 3;
           } else if (stat === 'money') {
             score += normalizedValue * 0.8;
@@ -867,7 +867,7 @@ export class GameProcessSimulator {
         if (tendency === 'wealth') {
           if (['money', 'businessAcumen', 'reputation', 'connections'].includes(stat)) {
             score += normalizedValue * 3;
-          } else if (['health', 'constitution'].includes(stat)) {
+          } else if (['constitution'].includes(stat)) {
             score += normalizedValue * 1.2;
           } else {
             score += normalizedValue * 0.7;
@@ -878,7 +878,7 @@ export class GameProcessSimulator {
         if (tendency === 'risk_averse') {
           if (normalizedValue < 0) {
             score += normalizedValue * 4;
-          } else if (['health', 'constitution', 'money', 'reputation'].includes(stat)) {
+          } else if (['constitution', 'money', 'reputation'].includes(stat)) {
             score += normalizedValue * 2;
           } else {
             score += normalizedValue * 1.2;
@@ -887,7 +887,7 @@ export class GameProcessSimulator {
         }
 
         // balanced / relationship 默认策略
-        if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution', 'health'].includes(stat)) {
+        if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(stat)) {
           score += normalizedValue * 2;
         } else {
           score += normalizedValue;
@@ -963,8 +963,6 @@ export class GameProcessSimulator {
           parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
         } else if (statName === '金钱') {
           parts.push(isPositive ? '你的钱袋鼓了起来' : '你的积蓄少了一些');
-        } else if (statName === '健康') {
-          parts.push(isPositive ? '你的身体状态好转了' : '你感到有些不适');
         }
       } else if (effect.type === 'flag_set' && effect.value === true) {
         parts.push(`你获得了新的体悟`);
@@ -1065,7 +1063,6 @@ export class GameProcessSimulator {
       knowledge: '学识',
       businessAcumen: '商路',
       money: '金钱',
-      health: '健康',
     };
     return statNames[stat] || stat;
   }
@@ -1144,7 +1141,6 @@ export class GameProcessSimulator {
       alive: String(Boolean(state.player?.alive)),
       martialPower: String(state.player?.martialPower ?? 0),
       money: String(state.player?.money ?? 0),
-      health: String(state.player?.health ?? 0),
       eventHistoryCount: String(state.eventHistory?.length ?? 0),
       routeStateCount: String(Object.keys(state.routeStates || {}).length),
       routeHistoryCount: String(state.routeHistory?.length ?? 0),

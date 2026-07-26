@@ -128,14 +128,14 @@ export class GameEngineIntegration {
         connections: 0,
         children: 0,
         spouse: null,
-        health: 100,
-        energy: 100,
         alive: true,
         items: [],
         flags: {},
         events: [],
         relationships: [],
         traits: [],
+        healthStatus: 'healthy',
+        statuses: [],
         lifeStates: traitSystem.createInitialLifeStates(),
       },
       currentTime: {
@@ -280,8 +280,6 @@ export class GameEngineIntegration {
         player.connections = nextState.player.connections;
         player.sect = nextState.player.sect;
         player.title = nextState.player.title;
-        player.health = nextState.player.health;
-        player.energy = nextState.player.energy;
         player.children = nextState.player.children;
         player.spouse = nextState.player.spouse;
         player.alive = nextState.player.alive;
@@ -290,6 +288,12 @@ export class GameEngineIntegration {
         player.flags = { ...(nextState.player.flags || {}) };
         player.relationships = [...(nextState.player.relationships || [])];
         player.traits = [...nextState.player.traits];
+        if (nextState.player.healthStatus !== undefined) {
+          player.healthStatus = nextState.player.healthStatus;
+        }
+        if (Array.isArray(nextState.player.statuses)) {
+          player.statuses = [...nextState.player.statuses];
+        }
         player.lifeStates = nextState.player.lifeStates ? { ...nextState.player.lifeStates } : traitSystem.createInitialLifeStates();
       }
     }

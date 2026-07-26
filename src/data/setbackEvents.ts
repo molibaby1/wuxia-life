@@ -22,8 +22,7 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     effects: {
       statChanges: {
         constitution: -15,
-        martialPower: -10,
-        energy: -20
+        martialPower: -10
       },
       duration: 180
     },
@@ -31,7 +30,7 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
       constitutionThreshold: 60,
       baseRate: 30
     },
-    description: '一场突如其来的大病让你卧床不起，消耗大量精力',
+    description: '一场突如其来的大病让你卧床不起，打乱修行节奏',
     failureText: '病来如山倒，你不得不停下修炼的脚步'
   },
   {

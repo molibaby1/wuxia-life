@@ -112,7 +112,7 @@ export function buildActiveActionChoices(
     description: action.playerIntent,
     actionId: action.id,
     rewardSummary: action.rewards.map(r => `${r.stat}+${r.min}~${r.max}`).join('，'),
-    costSummary: action.costs.map(c => `${c.stat ?? 'resource'}-${c.amount}`).join('，'),
+    costSummary: action.costs.map(c => `${c.stat ?? 'resource'}-${c.amount}`).join('，') || '时间投入',
     riskLevel: action.risk,
   }));
 }

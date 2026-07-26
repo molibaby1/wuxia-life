@@ -2,6 +2,8 @@
  * P8 playability gate — shared types.
  */
 
+import type { HealthStatus } from '../types/eventTypes';
+
 export type PersonaActionStrategy =
   | 'training'
   | 'study'
@@ -18,6 +20,7 @@ export type PersonaGoalEvidenceType =
   | 'flag'
   | 'route_state'
   | 'stat_threshold'
+  | 'health_status'
   | 'relationship'
   | 'event_id'
   | 'action_category_count';
@@ -29,6 +32,7 @@ export interface PersonaGoalEvidenceSpec {
   routeMinStage?: number;
   stat?: string;
   statMin?: number;
+  healthStatuses?: HealthStatus[];
   relationshipKey?: string;
   eventId?: string;
   actionCategory?: string;

@@ -40,6 +40,8 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     merchantNetwork: 5,
     investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
     traits: [],
+    healthStatus: 'healthy',
+    statuses: [],
     children: 0,
     spouse: null,
     alive: true,

@@ -239,7 +239,9 @@
       {"type": "age_reach", "value": 25},
       {"type": "random", "value": 0.2}
     ],
-    "conditions": [],
+    "conditions": [
+      {"type": "status_has", "status": "injured"}
+    ],
     "content": {
       "title": "疗伤休养",
       "text": "之前的战斗留下了旧伤，你花时间调养身体。健康才是革命的本钱。",
@@ -248,7 +250,8 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "constitution", "value": 6},
-      {"type": "stat_modify", "stat": "health", "value": 10}
+      {"type": "status_remove", "status": "injured"},
+      {"type": "health_status_set", "value": "unwell"}
     ]
   },
   {
@@ -473,7 +476,8 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "internalSkill", "value": -5},
       {"type": "stat_modify", "stat": "constitution", "value": -3},
-      {"type": "stat_modify", "stat": "health", "value": -5}
+      {"type": "health_status_set", "value": "seriously_injured"},
+      {"type": "status_add", "status": "injured"}
     ]
   },
   {
@@ -521,8 +525,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "charisma", "value": 4},
-      {"type": "stat_modify", "stat": "health", "value": 5}
+      {"type": "stat_modify", "stat": "charisma", "value": 4}
     ]
   },
   {
@@ -544,7 +547,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "health", "value": 5},
       {"type": "stat_modify", "stat": "charisma", "value": 2}
     ]
   },
@@ -636,8 +638,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 3},
-      {"type": "stat_modify", "stat": "health", "value": 3}
+      {"type": "stat_modify", "stat": "comprehension", "value": 3}
     ]
   },
   {
@@ -729,7 +730,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "health", "value": 8},
       {"type": "stat_modify", "stat": "constitution", "value": 2}
     ]
   },
@@ -851,7 +851,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "health", "value": 4},
       {"type": "stat_modify", "stat": "charisma", "value": 2}
     ]
   },
@@ -874,7 +873,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "health", "value": 5},
       {"type": "stat_modify", "stat": "comprehension", "value": 3}
     ]
   },

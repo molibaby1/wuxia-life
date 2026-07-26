@@ -108,11 +108,9 @@ export const coreTalents: CoreTalentConfig[] = [
     flavor: '你未必是最耀眼的那一个，却总能在别人熬不住的时候继续往前。',
     initialStats: [
       { stat: 'constitution', value: 3 },
-      { stat: 'health', value: 10 },
     ],
     growthModifiers: [
       { stat: 'constitution', multiplier: 1.1 },
-      { stat: 'health', multiplier: 1.15 },
       { stat: 'martialPower', multiplier: 1.05 },
     ],
     eventBiases: [

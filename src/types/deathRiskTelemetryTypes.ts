@@ -36,7 +36,6 @@ export type DeathRiskTelemetry = {
   mitigationAvailable: boolean;
   mitigationTaken: boolean;
   deathWithoutWarning: boolean;
-  healthAtDeath: number | null;
   constitutionAtDeath: number | null;
   cohort: SimulationCohort;
 };

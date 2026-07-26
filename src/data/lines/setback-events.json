@@ -48,12 +48,6 @@
         "operator": "add"
       },
       {
-        "type": "stat_modify",
-        "target": "energy",
-        "value": -20,
-        "operator": "add"
-      },
-      {
         "type": "flag_set",
         "target": "setback_illness_active",
         "value": true
@@ -122,9 +116,12 @@
         "operator": "add"
       },
       {
-        "type": "flag_set",
-        "target": "setback_injury_active",
-        "value": true
+        "type": "health_status_set",
+        "value": "unwell"
+      },
+      {
+        "type": "status_add",
+        "status": "injured"
       }
     ],
     "isSetbackEvent": true,

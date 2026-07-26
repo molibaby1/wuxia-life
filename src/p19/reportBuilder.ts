@@ -76,6 +76,8 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       merchantNetwork: 15,
       investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
       traits: [],
+      healthStatus: 'healthy',
+      statuses: [],
       children: 1,
       spouse: 'spouse',
       flags: {},

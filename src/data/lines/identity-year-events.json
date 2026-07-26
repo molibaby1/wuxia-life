@@ -34,8 +34,7 @@
         "id": "farming_leisure",
         "text": "适度耕作，多休息",
         "effects": [
-          { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" },
-          { "type": "stat_modify", "target": "health", "value": 5, "operator": "add" }
+          { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
         ]
       }
     ]
@@ -152,8 +151,7 @@
         "text": "冒险走小路，缩短行程",
         "effects": [
           { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
-          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "health", "value": -5, "operator": "add" }
+          { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" }
         ]
       },
       {

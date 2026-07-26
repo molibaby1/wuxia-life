@@ -89,7 +89,7 @@
     {
       "keyChoiceEventId": "orthodox_trial_entry",
       "choiceIds": ["orthodox_trial_mind", "orthodox_trial_force", "orthodox_trial_mind_delay", "orthodox_trial_force_fail"],
-      "durableWrites": ["orthodox_trial_mind_done", "orthodox_trial_force_done", "orthodox_trial_mind_delayed", "orthodox_trial_force_failed"],
+      "durableWrites": ["orthodox_trial_mind_done", "orthodox_trial_force_done", "orthodox_trial_mind_delayed"],
       "payoffs": [
         {
           "eventId": "orthodox_trial_service",
@@ -100,7 +100,7 @@
         {
           "eventId": "orthodox_trial_recovery",
           "ageRange": [13, 18],
-          "readMechanism": "reads orthodox_trial_force_failed",
+          "readMechanism": "reads status_has injured",
           "payoffType": "altered_event_availability"
         },
         {

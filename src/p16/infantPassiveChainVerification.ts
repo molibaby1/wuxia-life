@@ -43,7 +43,6 @@ export interface InfantStatSnapshot {
   money: number;
   comprehension: number;
   constitution: number;
-  health: number;
 }
 
 export interface SelectorSimulationTrace {
@@ -130,7 +129,6 @@ function snapshotPlayerStats(player: PlayerState | undefined): InfantStatSnapsho
     money: player?.money ?? 0,
     comprehension: player?.comprehension ?? 0,
     constitution: player?.constitution ?? 0,
-    health: player?.health ?? 0,
   };
 }
 

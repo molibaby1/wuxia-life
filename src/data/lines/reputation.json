@@ -302,10 +302,9 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "彻底隐居（声望 -50，健康 +20）",
+        "text": "彻底隐居（声望 -50，魅力 +10）",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": -50},
-          {"type": "stat_modify", "stat": "health", "value": 20},
           {"type": "stat_modify", "stat": "charisma", "value": 10},
           {"type": "flag_set", "flag": "reputation_hermit", "value": true}
         ]

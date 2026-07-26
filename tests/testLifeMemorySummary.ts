@@ -39,8 +39,10 @@ function createBaseState(overrides: Partial<GameState> = {}): GameState {
     reputation: 30,
     sect: null,
     title: null,
-    health: 100,
-    energy: 100,
+    healthStatus: 'healthy',
+    statuses: [],
+    healthStatus: 'healthy',
+    statuses: [],
     alive: true,
     items: [],
     flags: {},
@@ -158,7 +160,7 @@ function createCoreMidlifeOrthodoxState(): GameState {
       ...createBaseState().player,
       age: 42,
       spouse: '林婉儿',
-      health: 30,
+      healthStatus: 'seriously_injured',
       constitution: 45,
       relationships: [
         { id: 'master_wudang', role: 'master', name: '张真人', affinity: 65, status: 'close' },
@@ -303,7 +305,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   const state = createBaseState({
     player: {
       ...createBaseState().player,
-      health: 25,
+      healthStatus: 'seriously_ill',
       constitution: 35,
       lifeStates: { anxiety: 80, fatigue: 0 },
     },
@@ -320,6 +322,19 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     'risks must remain player-visible for UI consumption',
   );
   console.log('✓ unresolved risk when present');
+}
+
+// Canonical stable health must not create the severe health risk entry.
+{
+  const state = createBaseState({
+    player: {
+      ...createBaseState().player,
+      constitution: 90,
+      healthStatus: 'unwell',
+    },
+  });
+  const summary = deriveLifeMemorySummary(state);
+  assert(!summary.risks?.some((entry) => entry.id === 'risk-health'), 'healthy/unwell must not create severe health risk');
 }
 
 // Achievements

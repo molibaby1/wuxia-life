@@ -558,12 +558,6 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "health",
-            "value": 12,
-            "operator": "subtract"
-          },
-          {
-            "type": "stat_modify",
             "target": "martialPower",
             "value": 3,
             "operator": "add"
@@ -898,7 +892,7 @@
       },
       {
         "id": "ally_pay_ransom",
-        "text": "倾囊涉险营救 (银两 -20 或 健康 -10)",
+        "text": "倾囊涉险营救（银两 -20）",
         "description": "你倾囊或涉险营救——可能身负重伤，但可换他们脱困。",
         "condition": {
           "type": "expression",
@@ -906,7 +900,6 @@
         },
         "effects": [
           { "type": "stat_modify", "target": "money", "value": 20, "operator": "subtract" },
-          { "type": "stat_modify", "target": "health", "value": 10, "operator": "subtract" },
           { "type": "flag_set", "target": "hero_ally_ransomed", "value": true },
           { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
           { "type": "event_record", "target": "ally_pay_ransom" }

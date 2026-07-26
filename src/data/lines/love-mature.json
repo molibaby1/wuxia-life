@@ -283,7 +283,6 @@
           {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_elderly", "name": "伴雪", "role": "lover", "delta": 25}},
           {"type": "stat_modify", "target": "charisma", "value": 10, "operator": "add"},
           {"type": "stat_modify", "target": "constitution", "value": 8, "operator": "add"},
-          {"type": "stat_modify", "target": "health", "value": 20, "operator": "add"},
           {"type": "event_record", "target": "love_elderly_accept"}
         ]
       },
@@ -293,7 +292,6 @@
         "effects": [
           {"type": "flag_set", "target": "love_elderly_friend"},
           {"type": "stat_modify", "target": "charisma", "value": 5, "operator": "add"},
-          {"type": "stat_modify", "target": "health", "value": 10, "operator": "add"},
           {"type": "event_record", "target": "love_elderly_friend"}
         ]
       }
@@ -327,7 +325,6 @@
       {"type": "time_advance", "target": "age", "value": 6, "timeUnit": "month"},
       {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_elderly", "name": "伴雪", "role": "lover", "delta": 30}},
       {"type": "stat_modify", "target": "charisma", "value": 12, "operator": "add"},
-      {"type": "stat_modify", "target": "health", "value": 25, "operator": "add"},
       {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
       {"type": "flag_set", "target": "love_elderly_memories"},
       {"type": "event_record", "target": "love_elderly_memories"}

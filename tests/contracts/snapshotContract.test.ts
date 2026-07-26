@@ -32,7 +32,16 @@ const REQUIRED_METADATA_KEYS: (keyof GameStateSnapshotMetadata)[] = [
 
 const REQUIRED_STATE_KEYS = ['player', 'facts', 'flags', 'relations', 'eventHistory'] as const;
 
-const REQUIRED_PLAYER_KEYS = ['name', 'age', 'gender', 'alive', 'investments', 'traits'] as const;
+const REQUIRED_PLAYER_KEYS = [
+  'name',
+  'age',
+  'gender',
+  'alive',
+  'investments',
+  'traits',
+  'healthStatus',
+  'statuses',
+] as const;
 
 /** Derived or volatile keys that must not be required for a valid persisted snapshot. */
 const OPTIONAL_DERIVED_OR_VOLATILE_STATE_KEYS = [
@@ -146,6 +155,8 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         alive: true,
         investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
         traits: [],
+        healthStatus: 'healthy',
+        statuses: [],
       },
       flags: {},
       relations: {},

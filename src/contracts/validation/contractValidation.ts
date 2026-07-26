@@ -6,7 +6,13 @@
 
 import type { ChoiceExecutionRequest, ChoiceExecutionResponse } from '../choiceExecution';
 import type { EventCatalogValidationSummary, EventBundleResponse } from '../eventCatalog';
-import type { GameStateSnapshot, GameStateSnapshotMetadata } from '../gameStateSnapshot';
+import {
+  GAME_STATE_SNAPSHOT_SCHEMA_VERSION,
+  type GameStateSnapshot,
+  type GameStateSnapshotMetadata,
+} from '../gameStateSnapshot';
+import type { EffectDefinition, EventCondition } from '../../types/eventTypes';
+import { EffectType, isHealthStatus, isStatusId } from '../../types/eventTypes';
 import type { ReplayLog, ReplayLogEntry } from '../replayLog';
 
 export interface ValidationSuccess<T> {
@@ -20,6 +26,27 @@ export interface ValidationFailure {
 }
 
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure;
+
+export function validateHealthStatusEffect(effect: unknown): ValidationResult<EffectDefinition> {
+  if (!isPlainObject(effect)) return fail(['effect must be an object']);
+  if (effect.type === EffectType.HEALTH_STATUS_SET) {
+    if (!isHealthStatus(effect.value)) return fail(['health_status_set.value must be a valid HealthStatus']);
+    return pass(effect as unknown as EffectDefinition);
+  }
+  if (effect.type === EffectType.STATUS_ADD || effect.type === EffectType.STATUS_REMOVE) {
+    if (!isStatusId(effect.status)) return fail([`${effect.type}.status must be a valid StatusId`]);
+    return pass(effect as unknown as EffectDefinition);
+  }
+  return fail(['unsupported health/status effect type']);
+}
+
+export function validateStatusCondition(condition: unknown): ValidationResult<EventCondition> {
+  if (!isPlainObject(condition) || condition.type !== 'status_has') {
+    return fail(['condition.type must be status_has']);
+  }
+  if (!isStatusId(condition.status)) return fail(['status_has.status must be a valid StatusId']);
+  return pass(condition as unknown as EventCondition);
+}
 
 function fail(errors: string[]): ValidationFailure {
   return { ok: false, errors };
@@ -51,7 +78,15 @@ const FORBIDDEN_SNAPSHOT_STATE_KEYS = [
   'engineState',
 ] as const;
 
-const REQUIRED_SNAPSHOT_PLAYER_KEYS = ['name', 'age', 'gender', 'alive', 'investments'] as const;
+const REQUIRED_SNAPSHOT_PLAYER_KEYS = [
+  'name',
+  'age',
+  'gender',
+  'alive',
+  'investments',
+  'healthStatus',
+  'statuses',
+] as const;
 
 export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<GameStateSnapshot> {
   const errors: string[] = [];
@@ -63,6 +98,9 @@ export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<G
     errors.push('metadata required');
   } else {
     const m = s.metadata;
+    if (m.schemaVersion !== GAME_STATE_SNAPSHOT_SCHEMA_VERSION) {
+      errors.push(`metadata.schemaVersion must be ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`);
+    }
     for (const key of REQUIRED_SNAPSHOT_METADATA) {
       if (m[key] === undefined || m[key] === null || m[key] === '') {
         errors.push(`metadata.${key} required`);
@@ -80,6 +118,8 @@ export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<G
       errors.push('state.player required');
     } else {
       const player = st.player;
+      if ('energy' in player) errors.push('forbidden state.player.energy');
+      if ('health' in player) errors.push('forbidden state.player.health');
       for (const key of REQUIRED_SNAPSHOT_PLAYER_KEYS) {
         if (player[key] === undefined || player[key] === null || player[key] === '') {
           errors.push(`state.player.${key} required`);

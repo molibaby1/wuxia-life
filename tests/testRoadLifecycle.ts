@@ -7,7 +7,7 @@ function createState(): GameState {
     name: '路线测试', gender: 'male', age: 24, martialPower: 10,
     externalSkill: 0, internalSkill: 0, qinggong: 0, chivalry: 0,
     charisma: 0, constitution: 10, comprehension: 10, money: 20,
-    reputation: 0, connections: 0, health: 100, energy: 100, alive: true,
+    reputation: 0, connections: 0, healthStatus: 'healthy', statuses: [], alive: true,
     items: [], flags: {}, events: [], relationships: [],
   };
   return { player, flags: {}, relations: {}, eventHistory: [] };

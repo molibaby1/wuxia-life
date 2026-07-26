@@ -285,6 +285,16 @@ export function evaluatePersonaGoals(
       }
     }
 
+    if (spec.healthStatuses && spec.healthStatuses.length > 0) {
+      const healthStatus = finalState?.player?.healthStatus;
+      if (healthStatus && spec.healthStatuses.includes(healthStatus)) {
+        status = 'achieved';
+        evidence.push(`healthStatus=${healthStatus} is allowed`);
+      } else {
+        evidence.push(`healthStatus=${healthStatus ?? 'unknown'} is not allowed`);
+      }
+    }
+
     if (spec.flag) {
       const val = readFlag(finalState, spec.flag);
       if (val === false || val === undefined) {
@@ -353,9 +363,7 @@ export function collectFrustrationMetrics(records: GameProcessRecord[]): Frustra
 
   for (const record of records) {
     const text = record.outcomeText ?? record.eventText ?? '';
-    const negative =
-      /损失|受伤|失败|降低|扣除|危机|重创|死亡/.test(text) ||
-      (record.gameState?.player?.health !== undefined && record.gameState.player.health < 40);
+    const negative = /损失|受伤|失败|降低|扣除|危机|重创|死亡/.test(text);
 
     if (!negative) {
       continue;

@@ -33,6 +33,8 @@ function baseLateLifeState(): GameState {
       merchantNetwork: 5,
     investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
     traits: [],
+      healthStatus: 'healthy',
+      statuses: [],
       children: 0,
       spouse: null,
       flags: { hermit_withdrawal: true, lonely_elder: true },

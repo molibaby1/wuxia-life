@@ -19,6 +19,8 @@ import type {
   EventPriority,
   PlayerState,
   TraitId,
+  HealthStatus,
+  StatusId,
   InvestmentId,
   Investments,
   FactValue,
@@ -50,7 +52,18 @@ export interface Effect {
   effects?: Effect[];
 }
 
-export type { PlayerState, TraitId, InvestmentId, Investments, FactValue, Facts, GameState, EventRecord };
+export type {
+  PlayerState,
+  TraitId,
+  HealthStatus,
+  StatusId,
+  InvestmentId,
+  Investments,
+  FactValue,
+  Facts,
+  GameState,
+  EventRecord,
+};
 export type { EffectDefinition };
 export {
   LIFE_ROAD_IDS,

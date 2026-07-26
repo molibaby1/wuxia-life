@@ -105,7 +105,7 @@ export class AiEvaluator {
       // 战斗选择应该有属性变化
       if (choiceId.includes('fight') || choiceId.includes('battle')) {
         const hasRelevantChange = stateChanges.some(change =>
-          ['martialPower', 'internalSkill', 'externalSkill', 'health'].includes(change.field)
+          ['martialPower', 'internalSkill', 'externalSkill'].includes(change.field)
         );
         if (!hasRelevantChange && stateChanges.length > 0) {
           score -= 3;
@@ -153,14 +153,6 @@ export class AiEvaluator {
       // 检查门派状态
       if (prev.state.sect && !curr.state.sect && !prev.state.deathReason) {
         score -= 15; // 门派消失（非死亡情况）
-      }
-
-      // 检查生命值（如果有）
-      if ((curr.state as any).health !== undefined && (prev.state as any).health !== undefined) {
-        const healthDiff = (curr.state as any).health - (prev.state as any).health;
-        if (healthDiff < -50) {
-          score -= 10; // 生命骤降
-        }
       }
 
       // 检查 flags 的一致性

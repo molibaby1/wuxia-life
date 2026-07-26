@@ -116,14 +116,8 @@
       },
       {
         "id": "training_rest",
-        "text": "休息调整（健康 +10）",
+        "text": "休息调整",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "health",
-            "value": 10,
-            "operator": "add"
-          },
           {
             "type": "time_advance",
             "target": "age",
@@ -174,7 +168,7 @@
     "choices": [
       {
         "id": "training_intensive_3months",
-        "text": "闭关 3 个月（外功 +8~12，内功 +8~12，健康 -10）",
+        "text": "闭关 3 个月（外功 +8~12，内功 +8~12）",
         "effects": [
           {
             "type": "stat_modify",
@@ -195,12 +189,6 @@
             "maxValue": 12
           },
           {
-            "type": "stat_modify",
-            "target": "health",
-            "value": -10,
-            "operator": "add"
-          },
-          {
             "type": "time_advance",
             "target": "age",
             "value": 3,
@@ -214,9 +202,9 @@
       },
       {
         "id": "training_intensive_6months",
-        "text": "闭关 6 个月（外功 +15~20，内功 +15~20，健康 -20）",
+        "text": "闭关 6 个月（外功 +15~20，内功 +15~20）",
         "conditions": [
-          { "type": "expression", "expression": "health >= 50" }
+          { "type": "expression", "expression": "player.healthStatus == \"healthy\" || player.healthStatus == \"unwell\"" }
         ],
         "effects": [
           {
@@ -236,12 +224,6 @@
             "variable": true,
             "minValue": 15,
             "maxValue": 20
-          },
-          {
-            "type": "stat_modify",
-            "target": "health",
-            "value": -20,
-            "operator": "add"
           },
           {
             "type": "time_advance",
@@ -306,12 +288,6 @@
         "type": "stat_modify",
         "target": "comprehension",
         "value": 2,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "health",
-        "value": 5,
         "operator": "add"
       },
       {
@@ -501,12 +477,6 @@
         "maxValue": 4
       },
       {
-        "type": "stat_modify",
-        "target": "health",
-        "value": 10,
-        "operator": "add"
-      },
-      {
         "type": "time_advance",
         "target": "age",
         "value": 1,
@@ -548,7 +518,7 @@
     "choices": [
       {
         "id": "training_breakthrough_success",
-        "text": "全力冲击（成功：功力 +10~15，失败：健康 -10）",
+        "text": "全力冲击（成功：功力 +10~15，失败：暂未突破）",
         "effects": [
           {
             "type": "stat_modify",
@@ -559,13 +529,6 @@
             "minValue": 10,
             "maxValue": 15,
             "successRate": 0.7
-          },
-          {
-            "type": "stat_modify",
-            "target": "health",
-            "value": -10,
-            "operator": "add",
-            "onFailure": true
           },
           {
             "type": "time_advance",

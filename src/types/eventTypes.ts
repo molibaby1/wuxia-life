@@ -62,6 +62,11 @@ export enum EffectType {
   /** Flag 操作 */
   FLAG_SET = 'flag_set',
   FLAG_UNSET = 'flag_unset',
+
+  /** Canonical health/status operations */
+  HEALTH_STATUS_SET = 'health_status_set',
+  STATUS_ADD = 'status_add',
+  STATUS_REMOVE = 'status_remove',
   
   /** Event 记录 */
   EVENT_RECORD = 'event_record',
@@ -128,8 +133,7 @@ export type TraitStatKey =
   | 'knowledge'
   | 'businessAcumen'
   | 'influence'
-  | 'money'
-  | 'health';
+  | 'money';
 
 export type EventBiasTag =
   | 'training'
@@ -175,6 +179,33 @@ export type TemperamentId =
   | 'indulgent';
 
 export type TraitId = CoreTalentId | WeaknessId | TemperamentId;
+
+export type HealthStatus =
+  | 'healthy'
+  | 'unwell'
+  | 'seriously_ill'
+  | 'seriously_injured'
+  | 'critical';
+
+export type StatusId = 'fatigued' | 'anxious' | 'injured' | 'ill';
+
+export const HEALTH_STATUS_VALUES: readonly HealthStatus[] = [
+  'healthy',
+  'unwell',
+  'seriously_ill',
+  'seriously_injured',
+  'critical',
+];
+
+export const STATUS_ID_VALUES: readonly StatusId[] = ['fatigued', 'anxious', 'injured', 'ill'];
+
+export function isHealthStatus(value: unknown): value is HealthStatus {
+  return typeof value === 'string' && (HEALTH_STATUS_VALUES as readonly string[]).includes(value);
+}
+
+export function isStatusId(value: unknown): value is StatusId {
+  return typeof value === 'string' && (STATUS_ID_VALUES as readonly string[]).includes(value);
+}
 
 export type FactValue = boolean | string | number;
 export type Facts = Record<string, FactValue>;
@@ -514,10 +545,15 @@ export interface CustomTrigger {
 /**
  * 条件定义
  */
-export interface EventCondition {
-  type: 'expression';
-  expression: ConditionExpression;
-}
+export type EventCondition =
+  | {
+      type: 'expression';
+      expression: ConditionExpression;
+    }
+  | {
+      type: 'status_has';
+      status: StatusId;
+    };
 
 /**
  * 依赖关系
@@ -542,6 +578,9 @@ export interface EffectDefinition {
   
   /** 变化值 */
   value?: any;
+
+  /** Canonical status identifier for status_add/status_remove effects. */
+  status?: StatusId;
   
   /** 操作符 */
   operator?: EffectOperator;
@@ -936,9 +975,6 @@ export interface PlayerState {
   /** Canonical lifetime investment directions. */
   investments: Investments;
 
-  // ========== 兼容历史字段 ==========
-  health?: number;
-  energy?: number;
   items?: unknown[];
   flags: any;
   events?: any;
@@ -957,6 +993,12 @@ export interface PlayerState {
   
   /** Canonical stable personal traits. */
   traits: TraitId[];
+
+  /** Canonical overall physical condition. */
+  healthStatus: HealthStatus;
+
+  /** Canonical present circumstances that affect future content. */
+  statuses: StatusId[];
 
   /** 生活状态 */
   lifeStates?: PlayerLifeStates;

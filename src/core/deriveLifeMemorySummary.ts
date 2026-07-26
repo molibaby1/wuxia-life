@@ -15,7 +15,7 @@ import {
 import type { RouteIdentity } from './RouteCompatibilityRules';
 import { getRouteCompatibilityRule } from './RouteCompatibilityRules';
 import type { RouteLifecycleState } from './RouteStateManager';
-import type { EventRecord, GameState, Relationship } from '../types/eventTypes';
+import type { EventRecord, GameState, HealthStatus, Relationship } from '../types/eventTypes';
 import {
   LIFE_MEMORY_SCHEMA_VERSION,
   type LifeMemoryAchievementEntry,
@@ -651,16 +651,16 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
     });
   };
 
-  const health = player.health ?? 100;
   const constitution = player.constitution ?? 50;
-  if (health < 40 || constitution < 50) {
+  const severeHealthStatuses: HealthStatus[] = ['seriously_ill', 'seriously_injured', 'critical'];
+  if (severeHealthStatuses.includes(player.healthStatus)) {
     pushRisk(
       'risk-health',
       RISK_SIGNAL_LABELS.lowHealth,
       'medium',
       'L0',
       [],
-      [`health:${health}`, `constitution:${constitution}`],
+      [`healthStatus:${player.healthStatus}`],
     );
   }
 

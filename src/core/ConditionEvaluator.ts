@@ -16,6 +16,7 @@ import type {
   IConditionEvaluator,
   PlayerLifeStates,
 } from '../types/eventTypes';
+import { isStatusId } from '../types/eventTypes';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
 
 export type Condition = EventCondition;
@@ -57,8 +58,6 @@ export class ConditionEvaluator implements IConditionEvaluator {
     'businessAcumen',
     'influence',
     'wealth',
-    'health',
-    'energy',
   ]);
   
   constructor() {
@@ -71,6 +70,9 @@ export class ConditionEvaluator implements IConditionEvaluator {
    * 评估条件
    */
   evaluate(condition: EventCondition, state: GameState): boolean {
+    if (condition.type === 'status_has') {
+      return isStatusId(condition.status) && state.player.statuses.includes(condition.status);
+    }
     if (condition.type === 'expression') {
       return this.evaluateExpression(condition.expression, state);
     }
@@ -136,6 +138,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
     }
     return JSON.stringify({
       player: playerSlice,
+      healthStatus: state.player?.healthStatus,
       lifeStates: state.player?.lifeStates || {},
       flags: state.flags,
       playerFlags: state.player?.flags || {},

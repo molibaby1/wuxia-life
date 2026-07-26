@@ -390,12 +390,6 @@
         "operator": "add"
       },
       {
-        "type": "stat_modify",
-        "target": "health",
-        "value": 15,
-        "operator": "add"
-      },
-      {
         "type": "time_advance",
         "target": "age",
         "value": 1,

@@ -717,8 +717,6 @@ export function useNewGameEngine() {
             parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
           } else if (statName === '学识') {
             parts.push(isPositive ? '你的见识增长了不少' : '你意识到自己还有太多不懂');
-          } else if (statName === '健康') {
-            parts.push(isPositive ? '你的身体状态好转了' : '你感到有些不适');
           } else if (statName === '金钱') {
             parts.push(isPositive ? '你的钱袋鼓了起来' : '你的积蓄少了一些');
           } else if (statName === '影响力') {
@@ -830,7 +828,6 @@ export function useNewGameEngine() {
       knowledge: '学识',
       businessAcumen: '经营',
       money: '金钱',
-      health: '健康',
     };
     return statNames[stat] || stat;
   };

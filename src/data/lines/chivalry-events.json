@@ -151,7 +151,8 @@
             "effects": [
               {"type": "stat_modify", "stat": "chivalry", "value": 15, "operator": "add"},
               {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"},
-              {"type": "stat_modify", "stat": "health", "value": -10, "operator": "add"},
+              {"type": "health_status_set", "value": "unwell"},
+              {"type": "status_add", "status": "injured"},
               {"type": "flag_set", "flag": "hero_saved_girl", "value": true},
               {"type": "event_record", "target": "hero_rescue_injured"}
             ]

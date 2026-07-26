@@ -29,16 +29,6 @@
         ]
       },
       {
-        "text": "购买疗伤药（金钱 -30，健康 +20）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 30"}
-        ],
-        "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -30},
-          {"type": "stat_modify", "stat": "health", "value": 20}
-        ]
-      },
-      {
         "text": "随便看看",
         "effects": []
       }
@@ -268,34 +258,13 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "购买大还丹（金钱 -200，内力 +20，健康 +30）",
+        "text": "购买大还丹（金钱 -200，内力 +20）",
         "conditions": [
           {"type": "expression", "expression": "money >= 200"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -200},
-          {"type": "stat_modify", "stat": "internalSkill", "value": 20},
-          {"type": "stat_modify", "stat": "health", "value": 30}
-        ]
-      },
-      {
-        "text": "购买金创药（金钱 -80，健康 +25）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 80"}
-        ],
-        "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -80},
-          {"type": "stat_modify", "stat": "health", "value": 25}
-        ]
-      },
-      {
-        "text": "购买普通草药（金钱 -30，健康 +10）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 30"}
-        ],
-        "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -30},
-          {"type": "stat_modify", "stat": "health", "value": 10}
+          {"type": "stat_modify", "stat": "internalSkill", "value": 20}
         ]
       }
     ]
@@ -539,14 +508,13 @@
         ]
       },
       {
-        "text": "购买千年灵芝（金钱 -1000，寿命 +10 年）",
+        "text": "购买千年灵芝（金钱 -1000，体质 +50）",
         "conditions": [
           {"type": "expression", "expression": "money >= 1000"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -1000},
-          {"type": "stat_modify", "stat": "constitution", "value": 50},
-          {"type": "stat_modify", "stat": "health", "value": 100}
+          {"type": "stat_modify", "stat": "constitution", "value": 50}
         ]
       }
     ]
@@ -592,9 +560,8 @@
         ]
       },
       {
-        "text": "只收下一部分（免费获得药品，健康 +50）",
+        "text": "只收下一部分（免费获得药品）",
         "effects": [
-          {"type": "stat_modify", "stat": "health", "value": 50},
           {"type": "stat_modify", "stat": "internalSkill", "value": 10},
           {"type": "stat_modify", "stat": "chivalry", "value": 3}
         ]

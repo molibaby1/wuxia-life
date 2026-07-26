@@ -68,8 +68,8 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
   });
   assert(
     snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION &&
-      snapshot.metadata.schemaVersion === '3.1.0',
-    'canonical traits snapshot must use schema 3.1.0',
+      snapshot.metadata.schemaVersion === '3.4.0',
+    'canonical traits snapshot must use schema 3.4.0',
   );
   assertDeepEqual(snapshot.state.player.traits, traits, 'snapshot must persist traits');
   assert(!('traitProfile' in snapshot.state.player), 'snapshot must not persist traitProfile');

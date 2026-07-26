@@ -67,6 +67,8 @@ export function createSimulationPlayerState({
     spouse: null,
     alive,
     traits: [coreTalent, weakness, temperament],
+    healthStatus: 'healthy',
+    statuses: [],
     lifeStates: createDefaultPlayerLifeStates(lifeStates),
   };
 }

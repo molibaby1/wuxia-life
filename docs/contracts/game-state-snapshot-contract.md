@@ -161,6 +161,7 @@ The `state` object mirrors the **persisted subset** of runtime `GameState`. Fiel
 | Combat/social stats (`martialPower`, `reputation`, `money`, …) | persisted | All numeric progression fields |
 | `sect`, `title`, `alive`, `deathReason` | persisted | Status |
 | `traits`, `lifeStates` | persisted | Canonical trait ids and temporary life states |
+| `healthStatus`, `statuses` | persisted | Canonical overall condition and current status ids |
 | `relationships` | persisted | Structured NPC list (§8.1) |
 | `spouse`, `children` | persisted | Family summary |
 | `timeUnit`, `monthProgress`, `dayProgress` | persisted | Sub-year pacing |
@@ -173,7 +174,7 @@ The `state` object mirrors the **persisted subset** of runtime `GameState`. Fiel
 | `flags` (on player) | deprecated | Duplicate of world flags; normalize to `state.flags` on ingest |
 | `events` (on player) | deprecated | Legacy event list; prefer `state.eventHistory` |
 | `items` | deprecated | Prefer `state.inventory` |
-| `health`, `energy`, `wealth` | deprecated | Optional compat; map to current stat model when migrating |
+| `wealth` | deprecated | Optional compat; prefer the current wealth model |
 
 ### 6.3 Forbidden in snapshot
 
@@ -352,7 +353,7 @@ Life memory is **derived-only** at runtime (`src/types/lifeMemory.ts`, `deriveLi
 | `lifePath` (faction, commitments, achievements, relationships) | Faction label, debts, allies/enemies |
 | `achievements`, `identity.achievements`, `lifePath.achievements` | Achievement entries |
 | `player.age` | `derivedAtAge` |
-| Player stats (`health`, `constitution`, karma, …) | Risk entries |
+| Player stats (`constitution`, karma, …) | Risk entries |
 
 ### 10.2 Derived output (forbidden in `state`)
 

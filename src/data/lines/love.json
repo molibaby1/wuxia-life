@@ -525,7 +525,8 @@
         "text": "舍身救她",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 5, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "health", "value": 12, "operator": "subtract" },
+          { "type": "health_status_set", "value": "seriously_injured" },
+          { "type": "status_add", "status": "injured" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 10 } },
           { "type": "flag_set", "target": "love_life_or_death" },
           { "type": "event_record", "target": "love_life_or_death_save" }

@@ -95,10 +95,10 @@ export const P8_PERSONA_ROSTER: P8Persona[] = [
     relationshipPreference: 'medium',
     choiceTendency: 'risk_averse',
     shortTermGoals: [
-      goal('han-health', '保持健康', '0-20', ['stat_threshold'], { stat: 'health', statMin: 70 }),
+      goal('han-health', '保持身体稳定', '0-20', ['health_status'], { healthStatuses: ['healthy', 'unwell'] }),
       goal('han-safe-training', '稳健练功', '0-20', ['action_category_count'], { actionCategory: 'training', actionCategoryMinCount: 2 }),
       goal('han-avoid-setback', '少遭重创', '20-30', ['flag'], { flag: 'major_injury' }),
-      goal('han-stable-40', '四十岁稳定生存', '30-40', ['stat_threshold'], { stat: 'health', statMin: 60 }),
+      goal('han-stable-40', '四十岁身体稳定', '30-40', ['health_status'], { healthStatuses: ['healthy', 'unwell'] }),
     ],
   },
   {

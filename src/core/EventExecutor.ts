@@ -11,6 +11,7 @@
  */
 
 import { EffectType } from '../types/eventTypes';
+import { isHealthStatus, isStatusId } from '../types/eventTypes';
 import type {
   EffectDefinition,
   EffectOperator,
@@ -22,6 +23,8 @@ import type {
   EventDefinition,
   FactionType,
   FocusType,
+  HealthStatus,
+  StatusId,
 } from '../types/eventTypes';
 import {
   applyPrimaryOriginFamilyExclusivity,
@@ -179,6 +182,9 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.TIME_ADVANCE, new TimeAdvanceHandler());
     this.handlers.set(EffectType.FLAG_SET, new FlagSetHandler());
     this.handlers.set(EffectType.FLAG_UNSET, new FlagUnsetHandler());
+    this.handlers.set(EffectType.HEALTH_STATUS_SET, new HealthStatusSetHandler());
+    this.handlers.set(EffectType.STATUS_ADD, new StatusAddHandler());
+    this.handlers.set(EffectType.STATUS_REMOVE, new StatusRemoveHandler());
     this.handlers.set(EffectType.EVENT_RECORD, new EventRecordHandler());
     this.handlers.set(EffectType.RELATION_CHANGE, new RelationChangeHandler());
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
@@ -246,8 +252,6 @@ export class StatModifyHandler implements EffectHandler {
     'scholarlyHeritage',
     'merchantNetwork',
     'wealth',
-    'health',
-    'energy',
   ]);
 
   private static readonly NON_NEGATIVE_CANONICAL_STATS = new Set([
@@ -266,7 +270,7 @@ export class StatModifyHandler implements EffectHandler {
       console.warn('[StatModifyHandler] 跳过无效属性修改效果:', effect);
       return state;
     }
-    
+
     // 处理随机效果
     let finalValue = value;
     if (randomRange) {
@@ -279,7 +283,6 @@ export class StatModifyHandler implements EffectHandler {
     // 获取当前值
     const rawCurrentValue = (state.player as any)[target];
     if (rawCurrentValue === undefined && !StatModifyHandler.MODIFIABLE_PLAYER_STATS.has(target)) {
-      console.warn(`Unknown stat: ${target}`);
       return state;
     }
     const currentValue = rawCurrentValue ?? 0;
@@ -510,6 +513,57 @@ export class FlagSetHandler implements EffectHandler {
       result = syncOriginFromPrimaryChoice(result, flagName);
     }
     return RouteStateManager.syncFromFlagSet(result, flagName, flagValue);
+  }
+}
+
+export class HealthStatusSetHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    if (!isHealthStatus(effect.value)) {
+      console.warn('[HealthStatusSetHandler] invalid health status, skipping:', effect.value);
+      return state;
+    }
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        healthStatus: effect.value as HealthStatus,
+      },
+    };
+  }
+}
+
+export class StatusAddHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    if (!isStatusId(effect.status)) {
+      console.warn('[StatusAddHandler] invalid status, skipping:', effect.status);
+      return state;
+    }
+    const statuses = state.player.statuses.includes(effect.status)
+      ? [...state.player.statuses]
+      : [...state.player.statuses, effect.status];
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        statuses,
+      },
+    };
+  }
+}
+
+export class StatusRemoveHandler implements EffectHandler {
+  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
+    if (!isStatusId(effect.status)) {
+      console.warn('[StatusRemoveHandler] invalid status, skipping:', effect.status);
+      return state;
+    }
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        statuses: state.player.statuses.filter(status => status !== (effect.status as StatusId)),
+      },
+    };
   }
 }
 

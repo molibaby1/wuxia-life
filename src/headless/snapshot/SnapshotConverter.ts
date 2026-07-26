@@ -109,6 +109,12 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
   }
 
   fromSnapshot(snapshot: GameStateSnapshot): GameState {
+    if (snapshot.metadata.schemaVersion !== GAME_STATE_SNAPSHOT_SCHEMA_VERSION) {
+      throw new SnapshotConversionError(
+        'SNAPSHOT_INVALID',
+        `Unsupported snapshot schema: ${snapshot.metadata.schemaVersion}`,
+      );
+    }
     for (const key of FORBIDDEN_TOP_LEVEL) {
       if (key in (snapshot.state as unknown as Record<string, unknown>)) {
         throw new SnapshotConversionError(
@@ -120,6 +126,18 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
     const { player, facts, flags, ...rest } = snapshot.state;
     if (!player?.name) {
       throw new SnapshotConversionError('SNAPSHOT_INVALID', 'Snapshot missing player.name');
+    }
+    if ('energy' in (player as unknown as Record<string, unknown>)) {
+      throw new SnapshotConversionError(
+        'SNAPSHOT_FORBIDDEN_FIELD',
+        'Forbidden snapshot player field: energy',
+      );
+    }
+    if ('health' in (player as unknown as Record<string, unknown>)) {
+      throw new SnapshotConversionError(
+        'SNAPSHOT_FORBIDDEN_FIELD',
+        'Forbidden snapshot player field: health',
+      );
     }
     const mergedFlags = { ...flags, ...(player.flags ?? {}) };
     const hydrated: GameState = {

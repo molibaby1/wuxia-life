@@ -7,7 +7,7 @@ function createState(): GameState {
     name: '身份测试', gender: 'female', age: 35, martialPower: 10,
     externalSkill: 0, internalSkill: 0, qinggong: 0, chivalry: 60,
     charisma: 0, constitution: 10, comprehension: 70, money: 6000,
-    reputation: 60, connections: 10, health: 100, energy: 100, alive: true,
+    reputation: 60, connections: 10, healthStatus: 'healthy', statuses: [], alive: true,
     items: [], flags: { business_empire: true, heal_many_people: true },
     events: [], relationships: [],
   };

@@ -7,7 +7,7 @@ const player: PlayerState = {
   name: '界面测试', gender: 'male', age: 31, martialPower: 8,
   externalSkill: 0, internalSkill: 0, qinggong: 0, chivalry: 20,
   charisma: 0, constitution: 30, comprehension: 30, money: 100,
-  reputation: 40, connections: 12, health: 100, energy: 100, alive: true,
+  reputation: 40, connections: 12, healthStatus: 'healthy', statuses: [], alive: true,
   items: [], flags: {}, events: [], relationships: [],
 };
 let state: GameState = {

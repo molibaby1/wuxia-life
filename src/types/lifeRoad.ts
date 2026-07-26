@@ -33,7 +33,7 @@ export const PUBLIC_ATTRIBUTE_LABELS: Record<PublicAttributeKey, string> = {
   chivalry: '侠义',
 };
 
-export const NON_ROAD_STATE_KEYS = ['money', 'health', 'energy', 'lifeStates'] as const;
+export const NON_ROAD_STATE_KEYS = ['money', 'lifeStates'] as const;
 
 export type NonRoadStateKey = (typeof NON_ROAD_STATE_KEYS)[number];
 

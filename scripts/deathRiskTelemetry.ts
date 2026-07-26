@@ -347,7 +347,6 @@ export function buildDeathRiskTelemetry(
     mitigationAvailable,
     mitigationTaken,
     deathWithoutWarning,
-    healthAtDeath: finalState?.player?.health ?? null,
     constitutionAtDeath: finalState?.player?.constitution ?? null,
     cohort: inferSimulationCohort(report, sampleId),
   };

@@ -212,7 +212,7 @@ import { gameEngine } from '../core/GameEngineIntegration';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
 import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
 import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
-import { buildMainScreenModel } from './mainScreenModel';
+import { buildMainScreenModel, type MainScreenPlayer } from './mainScreenModel';
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
 import type { StoryChoice } from '../types';
 import {
@@ -227,7 +227,6 @@ import type {
 } from '../types/activeActionTypes';
 import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
-import type { PlayerState } from '../types/eventTypes';
 
 const props = defineProps<{
   currentNode: any;
@@ -440,13 +439,10 @@ const player = computed(() => {
   return state.player;
 });
 
-const attributePanelPlayer = computed((): PlayerState => {
+const attributePanelPlayer = computed((): MainScreenPlayer => {
   if (props.apiMode && props.apiPlayer) {
     const p = props.apiPlayer;
     return {
-      name: p.name,
-      age: p.age,
-      gender: 'male',
       martialPower: p.martialPower,
       externalSkill: p.externalSkill,
       internalSkill: p.internalSkill,
@@ -455,7 +451,6 @@ const attributePanelPlayer = computed((): PlayerState => {
       constitution: p.constitution,
       comprehension: p.comprehension,
       sect: p.sect ?? null,
-      title: null,
       reputation: p.reputation,
       money: p.money,
       knowledge: p.knowledge,
@@ -463,15 +458,6 @@ const attributePanelPlayer = computed((): PlayerState => {
       businessAcumen: p.businessAcumen,
       influence: p.influence,
       connections: p.connections,
-      martialHeritage: 0,
-      scholarlyHeritage: 0,
-      merchantNetwork: 0,
-      investments: p.investments,
-      traits: [],
-      flags: {},
-      children: 0,
-      spouse: null,
-      alive: p.alive,
       lifeStates: p.lifeStates,
     };
   }
@@ -543,7 +529,6 @@ const getStatName = (stat: string): string => {
     knowledge: '学识',
     businessAcumen: '经营',
     money: '银两',
-    health: '健康',
   };
   return statNames[stat] || stat;
 };

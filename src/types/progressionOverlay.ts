@@ -51,7 +51,6 @@ function getStatName(stat: string): string {
     knowledge: '学识',
     businessAcumen: '经营',
     money: '银两',
-    health: '健康',
   };
   return statNames[stat] || stat;
 }

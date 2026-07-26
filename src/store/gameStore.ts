@@ -36,6 +36,8 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     
     flags: {},
     traits: [],
+    healthStatus: 'healthy',
+    statuses: [],
     events: [],
     wealth: 0,
     children: 0,

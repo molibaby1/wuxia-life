@@ -23,7 +23,7 @@ export function runEarlyChildhoodStatNarrativeTests(): void {
     deltas: { externalSkill: 1 },
     metadata: {
       rewardSummary: '外功+1',
-      costSummary: '精力-3',
+      costSummary: '时间投入',
       riskSummary: '低',
     },
   } as ActionResult);

@@ -55,7 +55,6 @@ export const origins: OriginConfig[] = [
     flavor: '风沙、兵气和不确定，反而更像你的故乡。',
     initialStats: [
       { stat: 'constitution', value: 4 },
-      { stat: 'health', value: 10 },
       { stat: 'reputation', value: -1 },
     ],
     earlyEventBiases: [

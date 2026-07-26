@@ -148,20 +148,22 @@
         ]
       },
       {
-        "text": "普通治疗（金钱 -50，恢复健康）",
+        "text": "普通治疗（金钱 -50，缓解伤势）",
         "conditions": [
           {"type": "expression", "expression": "money >= 50"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -50},
-          {"type": "stat_modify", "stat": "health", "value": 50},
+          {"type": "status_remove", "status": "injured"},
+          {"type": "health_status_set", "value": "unwell"},
           {"type": "stat_modify", "stat": "constitution", "value": 3}
         ]
       },
       {
-        "text": "硬扛（健康 -30，体质 -5）",
+        "text": "硬扛（伤势恶化，体质 -5）",
         "effects": [
-          {"type": "stat_modify", "stat": "health", "value": -30},
+          {"type": "health_status_set", "value": "seriously_injured"},
+          {"type": "status_add", "status": "injured"},
           {"type": "stat_modify", "stat": "constitution", "value": -5}
         ]
       }

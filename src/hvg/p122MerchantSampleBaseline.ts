@@ -12,7 +12,7 @@ export const P122_CONTINUATION_AGE_MAX = 12;
 export const P122_SAMPLE_ACTION_ERRAND = 'action_household_errand' as const;
 export const P122_SAMPLE_ACTION_APPRENTICE = 'action_household_apprentice' as const;
 
-/** Existing habit wiring threshold — shapingSummary shows axis at ≥2 (see habitShapingSummary). */
+/** Existing habit wiring threshold for visible practice feedback. */
 export const P122_BUSINESS_HABIT_SHAPING_THRESHOLD = 2;
 
 export const P122_SAMPLE_ACTIONS = [

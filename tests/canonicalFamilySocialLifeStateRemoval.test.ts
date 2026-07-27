@@ -359,6 +359,30 @@ function testSnapshot380Boundary(): void {
   assert(serializeThrew, 'serializer must reject runtime residue instead of cleaning it');
 }
 
+function testRepositoryGuard(): void {
+  const forbidden = [
+    { token: /\bfamilyBond\b/, label: 'familyBond' },
+    { token: /\bsocialMomentum\b/, label: 'socialMomentum' },
+    { token: /habitShapingSummary/, label: 'habitShapingSummary' },
+    { token: /shaping_(?:familyBond|socialMomentum)_up/, label: 'legacy shaping feedback flag' },
+  ];
+  const visit = (directory: string): void => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const filePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(filePath);
+        continue;
+      }
+      if (!/\.(ts|tsx|json)$/.test(entry.name)) continue;
+      const source = fs.readFileSync(filePath, 'utf8');
+      for (const rule of forbidden) {
+        assert(!rule.token.test(source), `${rule.label} found in ${path.relative(process.cwd(), filePath)}`);
+      }
+    }
+  };
+  visit(path.resolve('src'));
+}
+
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
@@ -370,6 +394,7 @@ export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testSocialEventCopyAndExpressions();
   testShapingUIIdentityEndingFeedbackRemoved();
   testSnapshot380Boundary();
+  testRepositoryGuard();
 }
 
 runCanonicalFamilySocialLifeStateRemovalTests();

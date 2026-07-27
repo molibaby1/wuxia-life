@@ -13,7 +13,7 @@ export const P127_CONTINUATION_AGE_MAX = 16;
 export const P127_PRIMARY_ACTION = 'action_childhood_training' as const;
 export const P127_PRELUDE_ACTION = 'action_childhood_yard_play' as const;
 
-/** Existing habit wiring threshold — shapingSummary shows axis at ≥2 (see habitShapingSummary). */
+/** Existing habit wiring threshold for visible practice feedback. */
 export const P127_TRAINING_HABIT_SHAPING_THRESHOLD = 2;
 
 /** P127-002: expected main-screen shapingSummary at threshold on sample path. */

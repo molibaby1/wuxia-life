@@ -52,11 +52,11 @@ Three independent version dimensions appear in snapshot metadata. They must not 
 
 | Field | Constant (documented) | Meaning | Current reference value |
 | --- | --- | --- | --- |
-| **`schemaVersion`** | `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` | Shape and field policy of **this contract** | `3.7.0` |
+| **`schemaVersion`** | `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` | Shape and field policy of **this contract** | `3.8.0` |
 | **`engineVersion`** | — | Build of the game engine that produced or last mutated the snapshot | Package/app semver at build time (e.g. `0.0.0` from `package.json`) |
 | **`eventCatalogVersion`** | — | Version of the bundled event catalog used for selection/execution | `1.0.0` from `src/data/events.json` `version` |
 
-Snapshot readers accept only the exact current `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` (`3.7.0`). A `3.6.x` or older snapshot is rejected; this change does not provide migration, fallback, or shadow fields. The legacy habit flags are forbidden recursively in state, player, and history snapshots.
+Snapshot readers accept only the exact current `GAME_STATE_SNAPSHOT_SCHEMA_VERSION` (`3.8.0`). A `3.7.x` or older snapshot is rejected; this change does not provide migration, fallback, cleaning, conversion, or history reconstruction. The legacy habit flags are forbidden recursively in state, player, and history snapshots.
 
 **Distinction from P2 save schema:** Runtime `GameState.saveVersion` (e.g. `2.0.0-p2`, stamped by `SaveManager`) tracks **legacy client save compatibility**. Snapshot `schemaVersion` tracks the **P4 transport contract**. Both may appear in the same payload during transition; US-017 defines save migration policy.
 
@@ -162,7 +162,7 @@ The `state` object mirrors the **persisted subset** of runtime `GameState`. Fiel
 | `name`, `age`, `gender` | persisted | Identity basics |
 | Combat/social stats (`martialPower`, `reputation`, `money`, …) | persisted | All numeric progression fields |
 | `sect`, `title`, `alive`, `deathReason` | persisted | Status |
-| `traits`, `lifeStates` | persisted | Canonical trait ids and temporary life states |
+| `traits`, `lifeStates` | persisted | Canonical trait ids and exactly three long-term practice Habit numbers: `trainingHabit`, `studyHabit`, `businessHabit` |
 | `healthStatus`, `statuses` | persisted | Canonical overall condition and current status ids |
 | `relationships` | persisted | Structured NPC list (§8.1) |
 | `spouse`, `children` | persisted | Family summary |
@@ -460,7 +460,7 @@ Abbreviated 0–50 midlife sample — no local paths; full fixture in US-005.
 ```json
 {
   "metadata": {
-    "schemaVersion": "3.7.0",
+    "schemaVersion": "3.8.0",
     "engineVersion": "0.0.0",
     "eventCatalogVersion": "1.0.0",
     "createdAt": 1717200000000,

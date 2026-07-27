@@ -117,6 +117,16 @@
 
 Habit 可以开启一个新的路线选择机会，但不能单独证明玩家已经拥有该路线或身份。身份型内容必须使用明确路线/身份事实，并在确有必要时同时要求 Habit 门槛。
 
+### Family / Social life-state removal
+
+`familyBond` / `socialMomentum` 已从 Canonical Player State 删除。
+
+家庭语义由 Trait、spouse、children、具体 relationship 与事件专属 Fact 承载。
+社交语义由 connections、reputation、具体 relationship 与事件专属 Fact 承载。
+
+不得建立替代的家庭／社交通用数值轴；不得从 Trait、tag、收益、echo flag、时间或成功失败自动推导。
+上述语义不得作为全局事件权重、人物原型、身份判断或 Ending 隐藏轴。
+
 ### 5.1 Fatigued 与 Anxious
 
 - `fatigued` 表示当前因持续或高强度消耗而尚未恢复的临时状态。

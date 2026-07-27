@@ -124,9 +124,7 @@ function findDailyEvent(id: string) {
 function testDailyHabitProducerAndWeightNarrowing(): void {
   for (const event of dailyEvents) {
     assert(!('longTermHooks' in event), `${event.id} must not expose longTermHooks`);
-    const habitPreferences = (event.preferredStates ?? []).filter(rule =>
-      rule.state === 'trainingHabit' || rule.state === 'studyHabit' || rule.state === 'businessHabit');
-    assert(habitPreferences.length === 0, `${event.id} must not use Habit as preferredStates weight`);
+    assert(!('preferredStates' in event), `${event.id} must not expose removed preferredStates contract`);
   }
 
   const bottleneck = findDailyEvent('daily_training_bottleneck');
@@ -206,7 +204,10 @@ function testRepositoryGuard(): void {
     assert(start >= 0 && end > start, `${file} guard markers must exist`);
     assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), `${file} global multiplier must ignore practice habits`);
   };
-  assertFunctionRangeClean('src/core/DailyEventSystem.ts', 'getGroupStateMultiplier', 'clampMultiplier');
+  const dailyEventSystemSource = fs.readFileSync(path.resolve('src/core/DailyEventSystem.ts'), 'utf8');
+  assert(!dailyEventSystemSource.includes('preferredStates'), 'DailyEventSystem must not interpret preferredStates');
+  assert(!dailyEventSystemSource.includes('getGroupStateMultiplier'), 'DailyEventSystem group multiplier helper must be removed');
+  assert(!/socialMomentum|familyBond/.test(dailyEventSystemSource), 'DailyEventSystem must not read deleted axes');
   assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getFormalEventStateMultiplier', 'getSpecializationMultiplier');
   assertFunctionRangeClean('src/components/mainScreenModel.ts', 'tendencyContextMultiplier', 'export function buildMainScreenModel');
   const replaySource = fs.readFileSync(path.resolve('src/narrative/profile/wuxiaReplayabilitySurfaces.ts'), 'utf8');

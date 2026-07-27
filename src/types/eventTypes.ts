@@ -353,12 +353,6 @@ export interface DailyEventConfig {
   suppressedTraits?: TraitId[];
   preferredOrigins?: OriginId[];
   suppressedOrigins?: OriginId[];
-  preferredStates?: Array<{
-    state: LifeStateKey;
-    min?: number;
-    max?: number;
-    weightMultiplier: number;
-  }>;
   variants: {
     positive: DailyEventVariantConfig[];
     neutral: DailyEventVariantConfig[];

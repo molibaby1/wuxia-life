@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { assert, assertDeepEqual, GameTestFramework } from './GameTestFramework';
 import { temperaments } from '../src/data/traits/temperaments';
+import { dailyEvents } from '../src/data/life/dailyEvents';
+import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import type { GameState } from '../src/types/eventTypes';
@@ -42,9 +44,55 @@ function testSocialEchoRemainsFactOnly(): void {
   assert(!source.includes('collectShapingLongTermImpactLines'), 'active action must not emit shaping impacts');
 }
 
+function findDailyEvent(id: string) {
+  const event = dailyEvents.find(item => item.id === id);
+  if (!event) throw new Error(`daily event not found: ${id}`);
+  return event;
+}
+
+function testDailyEventsDoNotUseDeletedAxes(): void {
+  const eventTypesSource = fs.readFileSync(path.resolve('src/types/eventTypes.ts'), 'utf8');
+  assert(!eventTypesSource.includes('preferredStates'), 'DailyEventConfig must not expose preferredStates');
+
+  for (const event of dailyEvents) {
+    assert(!('preferredStates' in event), `${event.id} must not expose preferredStates`);
+    for (const variant of Object.values(event.variants).flat()) {
+      assert(
+        !(variant.stateEffects ?? []).some(effect =>
+          effect.state === ('familyBond' as never) || effect.state === ('socialMomentum' as never)),
+        `${variant.id} must not produce deleted life states`,
+      );
+    }
+  }
+
+  const source = fs.readFileSync(path.resolve('src/core/DailyEventSystem.ts'), 'utf8');
+  assert(!source.includes('preferredStates'), 'DailyEventSystem must not interpret preferredStates');
+  assert(!source.includes('getGroupStateMultiplier'), 'deleted axes must not drive group multipliers');
+  assert(!/socialMomentum|familyBond/.test(source), 'DailyEventSystem must not read deleted axes');
+}
+
+function testDailyWeightsAreAxisIndependent(): void {
+  const state = createState();
+  state.player.age = 30;
+  state.player.lifeStates = createDefaultPlayerLifeStates();
+  const config = findDailyEvent('daily_take_odd_job');
+  const getWeight = (dailyEventSystem as unknown as {
+    getWeight(config: typeof config, state: GameState): number;
+  }).getWeight.bind(dailyEventSystem);
+
+  const base = getWeight(config, state);
+  const legacyInjected = structuredClone(state) as GameState;
+  (legacyInjected.player.lifeStates as unknown as Record<string, number>).socialMomentum = 5;
+  (legacyInjected.player.lifeStates as unknown as Record<string, number>).familyBond = 5;
+
+  assert(getWeight(config, legacyInjected) === base, 'legacy injected axes must not affect daily weight');
+}
+
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
+  testDailyEventsDoNotUseDeletedAxes();
+  testDailyWeightsAreAxisIndependent();
 }
 
 runCanonicalFamilySocialLifeStateRemovalTests();

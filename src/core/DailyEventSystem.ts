@@ -90,16 +90,6 @@ export class DailyEventSystem {
     if (originId && config.suppressedOrigins?.includes(originId as typeof config.suppressedOrigins[number])) {
       weight *= 0.75;
     }
-    for (const stateRule of config.preferredStates || []) {
-      const value = state.player?.lifeStates?.[stateRule.state] || 0;
-      const meetsMin = stateRule.min === undefined || value >= stateRule.min;
-      const meetsMax = stateRule.max === undefined || value <= stateRule.max;
-      if (meetsMin && meetsMax) {
-        weight *= stateRule.weightMultiplier;
-      }
-    }
-
-    weight *= this.getGroupStateMultiplier(config, state);
     weight *= this.getRecentRepeatPenalty(config, state);
 
     return weight;
@@ -252,9 +242,6 @@ export class DailyEventSystem {
       if (origin === originId) negative += 0.6;
     }
 
-    const socialMomentum = state.player?.lifeStates?.socialMomentum || 0;
-    positive += socialMomentum * 0.08;
-
     const total = positive + neutral + negative;
     let random = Math.random() * total;
     random -= positive;
@@ -266,36 +253,6 @@ export class DailyEventSystem {
 
   private getPlayerTraits(state: GameState): Set<string> {
     return new Set(state.player?.traits || []);
-  }
-
-  private getGroupStateMultiplier(config: DailyEventConfig, state: GameState): number {
-    const lifeStates = state.player?.lifeStates;
-    if (!lifeStates) {
-      return 1;
-    }
-
-    const familyBond = lifeStates.familyBond || 0;
-    const socialMomentum = lifeStates.socialMomentum || 0;
-
-    switch (config.group) {
-      case 'training':
-      case 'study':
-        return 1;
-      case 'livelihood':
-        return this.clampMultiplier(
-          1 + socialMomentum * 0.12
-        );
-      case 'family':
-        return this.clampMultiplier(
-          1 + Math.max(0, 2 - familyBond) * 0.08
-        );
-      case 'emotion':
-        return this.clampMultiplier(
-          1 - socialMomentum * 0.08
-        );
-      default:
-        return 1;
-    }
   }
 
   private clampMultiplier(value: number): number {

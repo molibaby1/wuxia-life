@@ -36,15 +36,12 @@ function testCanonicalLifeStates(): void {
 }
 
 function testDailyEventMapping(): void {
-  const preferredState = (id: string) => findDailyEvent(id).preferredStates ?? [];
-  for (const id of ['daily_morning_training', 'daily_skip_training', 'daily_training_bottleneck', 'daily_copybook_practice', 'daily_reading_notes']) {
-    assert(!preferredState(id).some(rule => rule.state === 'trainingHabit' || rule.state === 'studyHabit' || rule.state === 'businessHabit'), `${id} must not prefer practice habits`);
+  for (const event of dailyEvents) {
+    assert(!('preferredStates' in event), `${event.id} must not expose removed preferredStates contract`);
   }
-  assertNoLegacyState(preferredState('daily_second_guess'), 'second guess must not prefer legacy state');
   assert(findDailyEvent('daily_morning_training').outcomeBias?.positiveByTraits?.includes('disciplined') === true, 'disciplined trait outcome bias must remain');
 
   for (const event of dailyEvents) {
-    assertNoLegacyState(event.preferredStates, `${event.id} must not consume legacy states`);
     for (const variant of [
       ...event.variants.positive,
       ...event.variants.neutral,

@@ -213,9 +213,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['unyielding', 'iron_abacus'],
     preferredOrigins: ['poor_family', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
-    preferredStates: [
-      { state: 'socialMomentum', min: 1, weightMultiplier: 1.15 },
-    ],
     variants: {
       positive: [
         {
@@ -223,7 +220,6 @@ export const dailyEvents: DailyEventConfig[] = [
           weight: 3,
           text: '你忙活了一天，虽然辛苦，好歹把眼下的日子稳住了。',
           statEffects: [{ stat: 'money', value: 25 }],
-          stateEffects: [{ state: 'socialMomentum', value: 1 }],
         },
       ],
       neutral: [
@@ -257,9 +253,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['iron_abacus', 'profit_driven'],
     preferredOrigins: ['merchant_house', 'streetborn'],
     suppressedTraits: ['heroic_heart'],
-    preferredStates: [
-      { state: 'socialMomentum', min: 1, weightMultiplier: 1.2 },
-    ],
     variants: {
       positive: [
         {
@@ -267,7 +260,6 @@ export const dailyEvents: DailyEventConfig[] = [
           weight: 2,
           text: '你试着周转了一笔小买卖，赚得不算多，却让手头松快了些。',
           statEffects: [{ stat: 'money', value: 35 }],
-          stateEffects: [{ state: 'socialMomentum', value: 1 }],
         },
       ],
       neutral: [
@@ -339,16 +331,12 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['affectionate', 'risk_averse'],
     preferredOrigins: ['poor_family'],
     suppressedTraits: ['loner'],
-    preferredStates: [
-      { state: 'familyBond', max: 2, weightMultiplier: 1.18 },
-    ],
     variants: {
       positive: [
         {
           id: 'daily_home_letter_pos_1',
           weight: 2,
           text: '家中来信写得平平淡淡，却让你觉得这世上仍有人等你回去。',
-          stateEffects: [{ state: 'familyBond', value: 1 }],
         },
       ],
       neutral: [
@@ -380,16 +368,12 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 18,
     preferredTraits: ['affectionate', 'risk_averse'],
     suppressedTraits: ['loner'],
-    preferredStates: [{ state: 'familyBond', max: 2, weightMultiplier: 1.15 }],
     variants: {
       positive: [
         {
           id: 'daily_shared_meal_pos_1',
           weight: 2,
           text: '难得大家都在，你安安稳稳吃了一顿饭，心里也跟着松了一截。',
-          stateEffects: [
-            { state: 'familyBond', value: 1 },
-          ],
           effects: [{ type: EffectType.STATUS_REMOVE, status: 'fatigued' }],
         },
       ],
@@ -421,16 +405,12 @@ export const dailyEvents: DailyEventConfig[] = [
     ageRange: { min: 20, max: 80 },
     baseWeight: 20,
     preferredTraits: ['affectionate', 'fear_of_responsibility'],
-    preferredStates: [
-      { state: 'familyBond', min: 1, weightMultiplier: 1.15 },
-    ],
     variants: {
       positive: [
         {
           id: 'daily_household_burden_pos_1',
           weight: 1,
           text: '这些琐事虽烦，你却还是一件件处理了下来，心里也没那么虚了。',
-          stateEffects: [{ state: 'familyBond', value: 1 }],
         },
       ],
       neutral: [
@@ -462,9 +442,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 26,
     preferredTraits: ['unstable_mood', 'perfect_memory', 'loner'],
     suppressedTraits: ['competitive'],
-    preferredStates: [
-      { state: 'socialMomentum', min: 2, weightMultiplier: 0.88 },
-    ],
     variants: {
       positive: [
         {
@@ -502,8 +479,6 @@ export const dailyEvents: DailyEventConfig[] = [
     ageRange: { min: 14, max: 75 },
     baseWeight: 20,
     preferredTraits: ['unstable_mood', 'grand_dreams_poor_followthrough', 'affectionate'],
-    preferredStates: [
-    ],
     variants: {
       positive: [
         {
@@ -540,8 +515,6 @@ export const dailyEvents: DailyEventConfig[] = [
     ageRange: { min: 14, max: 80 },
     baseWeight: 18,
     preferredTraits: ['unyielding', 'disciplined', 'heroic_heart'],
-    preferredStates: [
-    ],
     variants: {
       positive: [
         {

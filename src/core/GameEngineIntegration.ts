@@ -1422,8 +1422,7 @@ export class GameEngineIntegration {
           this.gameState,
           traitSystem.getEventBiasTags(event),
         );
-      const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
-      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
+      const specializationAdjusted = originAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const profileRepetitionAdjusted =
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
@@ -1447,8 +1446,7 @@ export class GameEngineIntegration {
           this.gameState,
           traitSystem.getEventBiasTags(event),
         );
-      const stateAdjusted = originAdjusted * this.getFormalEventStateMultiplier(event);
-      const specializationAdjusted = stateAdjusted * this.getSpecializationMultiplier(event);
+      const specializationAdjusted = originAdjusted * this.getSpecializationMultiplier(event);
       const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const profileRepetitionAdjusted =
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
@@ -1894,14 +1892,13 @@ export class GameEngineIntegration {
       return { gameState: this.gameState, event };
     }
     
-    const previousState = this.snapshotState(this.gameState);
-    
     // 执行效果
     const updatedState = await this.eventExecutor.executeEffects(
       event.autoEffects,
       this.gameState
     );
-    let adjustedState = this.applyFormalEventConsequences(previousState, updatedState, event);
+    this.pendingEventOutcomeNote = null;
+    const adjustedState = updatedState;
     this.applyGameState(adjustedState);
     
     // 记录事件触发（用于年度事件限制）
@@ -1974,13 +1971,12 @@ export class GameEngineIntegration {
   public async executeChoiceEffects(effects: Effect[], eventId?: string, choiceId?: string): Promise<{ gameState: GameState, triggeredEvent?: EventDefinition }> {
     // 记录事件前的年龄
     const ageBeforeEvent = this.gameState.player?.age || 0;
-    const previousState = this.snapshotState(this.gameState);
-    
     const updatedState = await this.eventExecutor.executeEffects(effects, this.gameState);
     const eventDefinition = this.getEventDefinition(eventId);
-    const adjustedState = eventDefinition
-      ? this.applyFormalEventConsequences(previousState, updatedState, eventDefinition)
-      : updatedState;
+    if (eventDefinition) {
+      this.pendingEventOutcomeNote = null;
+    }
+    const adjustedState = updatedState;
     
     this.applyGameState(adjustedState);
     
@@ -2208,36 +2204,10 @@ export class GameEngineIntegration {
     this.gameState.currentTime = { year, month, day };
     applyYouthTransitionSeeds(this.gameState, previousAge, age);
     this.applyP16RareLineCheckpoints(previousAge, age);
-    this.applyLifeStateRecovery(value, unit);
     
     const unitLabel = unit === 'year' ? '年' : unit === 'month' ? '月' : '天';
     if (engineDiagnosticsEnabled()) {
       console.log(`[GameEngine] 时间推进 ${value} ${unitLabel}`);
-    }
-  }
-
-  private applyLifeStateRecovery(value: number, unit: 'year' | 'month' | 'day'): void {
-    const lifeStates = this.gameState.player?.lifeStates;
-    if (!lifeStates) {
-      return;
-    }
-
-    const yearlyRecovery =
-      unit === 'year' ? value :
-      unit === 'month' ? Math.floor(value / 12) :
-      Math.floor(value / 360);
-
-    if (yearlyRecovery <= 0) {
-      return;
-    }
-
-    for (let i = 0; i < yearlyRecovery; i++) {
-      if (lifeStates.socialMomentum > 2) {
-        lifeStates.socialMomentum -= 1;
-      }
-      if (lifeStates.familyBond > 3) {
-        lifeStates.familyBond -= 1;
-      }
     }
   }
 
@@ -2246,30 +2216,6 @@ export class GameEngineIntegration {
       return undefined;
     }
     return eventLoader.getEventById(eventId);
-  }
-
-  private snapshotState(state: GameState): GameState {
-    return JSON.parse(JSON.stringify(state));
-  }
-
-  private getFormalEventStateMultiplier(event: EventDefinition): number {
-    if (event.category === 'daily_event' || !this.gameState.player?.lifeStates) {
-      return 1;
-    }
-
-    const tags = traitSystem.getEventBiasTags(event);
-    const { familyBond = 0, socialMomentum = 0 } = this.gameState.player.lifeStates;
-    let multiplier = 1;
-
-    if (tags.has('business') || tags.has('social') || tags.has('reputation')) {
-      multiplier *= this.clampWeight(1 + socialMomentum * 0.08, 0.7, 1.2);
-    }
-
-    if (tags.has('family') || tags.has('romance')) {
-      multiplier *= this.clampWeight(1 + familyBond * 0.06, 0.72, 1.18);
-    }
-
-    return multiplier;
   }
 
   private getSpecializationMultiplier(event: EventDefinition): number {
@@ -2335,42 +2281,6 @@ export class GameEngineIntegration {
 
   private clampWeight(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
-  }
-
-  private applyFormalEventConsequences(previousState: GameState, nextState: GameState, event: EventDefinition): GameState {
-    this.pendingEventOutcomeNote = null;
-    if (event.category === 'daily_event' || !previousState.player || !nextState.player) {
-      return nextState;
-    }
-
-    const tags = traitSystem.getEventBiasTags(event);
-    const lifeStates = {
-      ...(nextState.player.lifeStates || traitSystem.createInitialLifeStates()),
-    };
-
-    const statDelta = (key: keyof typeof nextState.player) =>
-      Number((nextState.player as any)[key] || 0) - Number((previousState.player as any)[key] || 0);
-
-    const socialGain =
-      statDelta('charisma') + statDelta('connections') + statDelta('reputation') / 5 + statDelta('influence') * 2;
-    const familyGain = statDelta('chivalry') + statDelta('reputation') / 10;
-
-    if ((tags.has('social') || tags.has('reputation')) && socialGain >= 3) {
-      lifeStates.socialMomentum = traitSystem.clampLifeState('socialMomentum', lifeStates.socialMomentum + 1);
-    }
-
-    if ((tags.has('family') || tags.has('romance')) && familyGain >= 2) {
-      lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond + 1);
-    }
-
-    return {
-      ...nextState,
-      player: {
-        ...nextState.player,
-        lifeStates,
-      },
-      flags: nextState.flags,
-    };
   }
 
   public consumeLastEventOutcomeNote(): string | null {

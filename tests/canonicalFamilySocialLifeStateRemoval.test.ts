@@ -44,6 +44,14 @@ function testSocialEchoRemainsFactOnly(): void {
   assert(!source.includes('collectShapingLongTermImpactLines'), 'active action must not emit shaping impacts');
 }
 
+function testFormalRuntimeDoesNotUseDeletedAxes(): void {
+  const source = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
+  assert(!source.includes('applyLifeStateRecovery'), 'time advancement must not decay deleted axes');
+  assert(!source.includes('getFormalEventStateMultiplier'), 'formal scheduling must not use deleted axes');
+  assert(!source.includes('applyFormalEventConsequences'), 'formal results must not synthesize deleted axes');
+  assert(!/socialGain|familyGain/.test(source), 'tag/stat gain thresholds must not synthesize life states');
+}
+
 function findDailyEvent(id: string) {
   const event = dailyEvents.find(item => item.id === id);
   if (!event) throw new Error(`daily event not found: ${id}`);
@@ -91,6 +99,7 @@ function testDailyWeightsAreAxisIndependent(): void {
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
+  testFormalRuntimeDoesNotUseDeletedAxes();
   testDailyEventsDoNotUseDeletedAxes();
   testDailyWeightsAreAxisIndependent();
 }

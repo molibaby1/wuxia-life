@@ -208,7 +208,7 @@ function testRepositoryGuard(): void {
   assert(!dailyEventSystemSource.includes('preferredStates'), 'DailyEventSystem must not interpret preferredStates');
   assert(!dailyEventSystemSource.includes('getGroupStateMultiplier'), 'DailyEventSystem group multiplier helper must be removed');
   assert(!/socialMomentum|familyBond/.test(dailyEventSystemSource), 'DailyEventSystem must not read deleted axes');
-  assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getFormalEventStateMultiplier', 'getSpecializationMultiplier');
+  assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getSpecializationMultiplier', 'getEventFocus');
   assertFunctionRangeClean('src/components/mainScreenModel.ts', 'tendencyContextMultiplier', 'export function buildMainScreenModel');
   const replaySource = fs.readFileSync(path.resolve('src/narrative/profile/wuxiaReplayabilitySurfaces.ts'), 'utf8');
   assert(!/growthPatternFlags[\s\S]{0,500}(training_habit|study_habit|business_habit)/.test(replaySource), 'replayability growth flags must not use legacy habit flags');
@@ -261,8 +261,9 @@ function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
 
 function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {
   const source = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
-  const start = source.indexOf('private getFormalEventStateMultiplier');
-  const end = source.indexOf('private getSpecializationMultiplier');
+  const start = source.indexOf('private getSpecializationMultiplier');
+  const end = source.indexOf('private getEventFocus');
+  assert(start >= 0 && end > start, 'formal scheduling guard markers must exist');
   assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), 'formal state multiplier must ignore practice habits');
 }
 

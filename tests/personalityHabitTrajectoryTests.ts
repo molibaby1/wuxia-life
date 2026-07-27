@@ -3,6 +3,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import type { GameState } from '../src/types/eventTypes';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { runP20HabitTrajectorySlice } from '../src/p20/habitTrajectorySlice';
+import { runP25HabitTrajectorySlice } from '../src/p25/habitTrajectorySlice';
 import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
 import {
   P20_MARTIAL_ASCENDANT,
@@ -141,6 +142,13 @@ function testP20HabitTrajectorySlice(): void {
   const result = runP20HabitTrajectorySlice();
   assert(result.materiallyDiffers, 'high vs low habit profiles should differ materially');
   assert(result.passed, `P20 habit slice: ${JSON.stringify(result)}`);
+}
+
+function testP25HabitTrajectorySlice(): void {
+  const result = runP25HabitTrajectorySlice();
+  assert(result.earlyFormationPassed, 'early habit formation should unlock fork/reinforcement samples');
+  assert(result.laterEchoPassed, 'later callbacks/consequences should echo early habits');
+  assert(result.passed, `P25 habit slice: ${JSON.stringify(result.findings)}`);
 }
 
 function assertHabitGatedEventOr(
@@ -372,6 +380,7 @@ async function main(): Promise<void> {
   testP42ArchetypeDifferentiation();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();
+  testP25HabitTrajectorySlice();
   console.log('personalityHabitTrajectoryTests: all passed');
 }
 

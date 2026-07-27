@@ -23,12 +23,14 @@ function assertNoLegacyState(value: unknown, message: string): void {
 }
 
 function testCanonicalLifeStates(): void {
-  const defaults = createDefaultPlayerLifeStates() as unknown as Record<string, unknown>;
+  const defaults = createDefaultPlayerLifeStates();
   assertDeepEqual(
     Object.keys(defaults).sort(),
-    ['businessHabit', 'familyBond', 'socialMomentum', 'studyHabit', 'trainingHabit'].sort(),
-    'canonical lifeStates must contain only five approved keys',
+    ['businessHabit', 'studyHabit', 'trainingHabit'].sort(),
+    'canonical lifeStates must contain only three approved keys',
   );
+  assert(!('familyBond' in defaults), 'lifeStates.familyBond must not exist');
+  assert(!('socialMomentum' in defaults), 'lifeStates.socialMomentum must not exist');
   assert(!('discipline' in defaults), 'lifeStates.discipline must not exist');
   assert(!('indulgence' in defaults), 'lifeStates.indulgence must not exist');
   assert(!lifeStates.some(item => item.key === ('discipline' as never)), 'discipline config must not exist');

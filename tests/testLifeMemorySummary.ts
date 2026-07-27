@@ -4,6 +4,7 @@
  */
 
 import { RouteStateManager } from '../src/core/RouteStateManager';
+import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import {
   deriveLifeMemorySummary,
   serializeLifeMemorySummary,
@@ -307,7 +308,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
       ...createBaseState().player,
       healthStatus: 'seriously_ill',
       constitution: 35,
-      lifeStates: {},
+      lifeStates: createDefaultPlayerLifeStates(),
     },
   });
 

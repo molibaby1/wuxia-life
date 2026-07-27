@@ -30,36 +30,6 @@ function makeState(): GameState {
   return state;
 }
 
-function assertSemiPersonalityGatedEvent(
-  eventId: string,
-  axisKey: 'socialMomentum' | 'familyBond',
-  axisValue: number,
-  age = 24,
-): void {
-  const loader = EventLoader.getInstance();
-  const evaluator = new ConditionEvaluator();
-  const event = loader.getEventById(eventId);
-  assert(event, `missing ${eventId}`);
-  const expression = event?.conditions?.[0]?.type === 'expression'
-    ? event.conditions[0].expression
-    : '';
-  assert(
-    expression.includes(`lifeStates.${axisKey}`),
-    `${eventId} should use lifeStates.${axisKey}, got: ${expression}`,
-  );
-
-  const state = makeState();
-  state.player.age = age;
-  state.player.lifeStates = {
-    ...state.player.lifeStates,
-    [axisKey]: axisValue,
-  };
-  assert(
-    evaluator.evaluate({ type: 'expression', expression }, state) === true,
-    `${eventId} should trigger from ${axisKey}=${axisValue}`,
-  );
-}
-
 function assertConcreteSocialEvent(
   eventId: string,
   expression: string,

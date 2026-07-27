@@ -219,8 +219,6 @@ export type OriginId =
   | 'streetborn';
 
 export const LIFE_STATE_KEYS = [
-  'familyBond',
-  'socialMomentum',
   'trainingHabit',
   'studyHabit',
   'businessHabit',
@@ -309,8 +307,6 @@ export interface OriginConfig {
 }
 
 export interface PlayerLifeStates {
-  familyBond: number;
-  socialMomentum: number;
   trainingHabit: number;
   studyHabit: number;
   businessHabit: number;

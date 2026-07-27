@@ -209,7 +209,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   assert(restoredMinimal.player.lifeStates === undefined, 'minimal snapshot does not gain lifeStates on restore');
 
   const valid = JSON.parse(JSON.stringify(gameStateSnapshotAge50)) as GameStateSnapshot;
-  assert(validateGameStateSnapshot(valid).ok, 'valid five-key lifeStates snapshot passes');
+  assert(validateGameStateSnapshot(valid).ok, 'valid three-key lifeStates snapshot passes');
   defaultSnapshotConverter.fromSnapshot(valid);
 
   const legacy = JSON.parse(JSON.stringify(valid)) as any;

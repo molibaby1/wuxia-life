@@ -218,8 +218,6 @@ function testMerchantRouteSignal(): void {
       trainingHabit: 1,
       studyHabit: 0,
       businessHabit: 3,
-      socialMomentum: 0,
-      familyBond: 0,
     },
     money: 260,
     businessAcumen: 18,

@@ -269,7 +269,7 @@ function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {
 
 function testPracticeTrajectoryIsDescriptiveOnly(): void {
   const state = createState();
-  state.player.lifeStates = { ...createDefaultPlayerLifeStates(), trainingHabit: 3, studyHabit: 4, businessHabit: 2, socialMomentum: 5, familyBond: 5 };
+  state.player.lifeStates = { ...createDefaultPlayerLifeStates(), trainingHabit: 3, studyHabit: 4, businessHabit: 2 };
   assertDeepEqual(derivePracticeTrajectoryLines(state.player.lifeStates, 3).map(line => line.label), ['读书实践', '练功实践', '营生实践'], 'practice trajectory must include only three practice habits');
   const recap = buildLateLifePracticeRecapLine(state.player.lifeStates);
   assert(recap.includes('读书实践'), 'recap names practice');
@@ -279,7 +279,8 @@ function testPracticeTrajectoryIsDescriptiveOnly(): void {
 }
 
 function testIdentityEndingToneHelperIsRemoved(): void {
-  const source = fs.readFileSync(path.resolve('src/utils/habitShapingSummary.ts'), 'utf8') + fs.readFileSync(path.resolve('src/p19/finalSummaryComposition.ts'), 'utf8');
+  const source = fs.readFileSync(path.resolve('src/p19/finalSummaryComposition.ts'), 'utf8');
+  assert(!source.includes('habitShapingSummary'), 'final summary composition must not import the removed shaping helper');
   assert(!source.includes('buildShapingPatternEndingTone'), 'identity ending tone helper must be removed');
 }
 

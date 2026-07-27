@@ -55,7 +55,7 @@ console.log('=== P4 US-023: Contract Validation Helper Tests ===\n');
 
 {
   const validLifeStates = gameStateSnapshotAge50.state.player.lifeStates!;
-  assert(validatePlayerLifeStates(validLifeStates).ok, 'valid five-key lifeStates passes');
+  assert(validatePlayerLifeStates(validLifeStates).ok, 'valid three-key lifeStates passes');
 
   const invalidCases: Array<[string, (lifeStates: any) => void]> = [
     ['discipline', lifeStates => { lifeStates.discipline = 1; }],

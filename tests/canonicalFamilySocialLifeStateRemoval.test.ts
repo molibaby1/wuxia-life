@@ -60,10 +60,31 @@ function testTraitDoesNotWriteLifeState(): void {
   assert(affectionate !== undefined, 'affectionate temperament exists');
   assert(!('startingStates' in affectionate), 'affectionate must not initialize family state');
 
+  const defaults = createDefaultPlayerLifeStates();
+  assertDeepEqual(
+    Object.keys(defaults).sort(),
+    ['businessHabit', 'studyHabit', 'trainingHabit'].sort(),
+    'canonical lifeStates must contain only three practice keys',
+  );
+  assert(!('familyBond' in defaults), 'familyBond must not exist');
+  assert(!('socialMomentum' in defaults), 'socialMomentum must not exist');
+
   const eventTypesSource = fs.readFileSync(path.resolve('src/types/eventTypes.ts'), 'utf8');
   const traitSystemSource = fs.readFileSync(path.resolve('src/core/TraitSystem.ts'), 'utf8');
+  const lifeStatesSource = fs.readFileSync(path.resolve('src/data/life/lifeStates.ts'), 'utf8');
   assert(!/startingStates\??:|stateBiases\??:/.test(eventTypesSource), 'Trait contract must not expose life-state modifiers');
   assert(!/startingStates|stateBiases/.test(traitSystemSource), 'TraitSystem must not apply life-state modifiers');
+  assert(!/familyBond|socialMomentum/.test(lifeStatesSource), 'lifeStates config must not mention deleted axes');
+
+  for (const legacyKey of ['familyBond', 'socialMomentum'] as const) {
+    let error = '';
+    try {
+      createDefaultPlayerLifeStates({ [legacyKey]: 1 } as never);
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : String(caught);
+    }
+    assert(error === `Unknown player life state: ${legacyKey}`, `${legacyKey} must be rejected by the life-state factory`);
+  }
 }
 
 function testSocialEchoRemainsFactOnly(): void {
@@ -275,8 +296,8 @@ function testShapingUIIdentityEndingFeedbackRemoved(): void {
   const identityBase = inferLivedSelfUnderstanding(state);
   const endingBase = EndingSystem.determineEnding(state);
   const injected = structuredClone(state);
-  (injected.player.lifeStates as unknown as Record<string, number>).familyBond = 5;
-  (injected.player.lifeStates as unknown as Record<string, number>).socialMomentum = 5;
+  injected.player.lifeStates.trainingHabit = 5;
+  injected.player.lifeStates.studyHabit = 5;
   assert(
     inferLivedSelfUnderstanding(injected) === identityBase,
     'legacy life states must not change self-understanding',

@@ -38,6 +38,16 @@ export interface ActionCostChannel {
   amount: number;
 }
 
+export type PracticeHabitKey =
+  | 'trainingHabit'
+  | 'studyHabit'
+  | 'businessHabit';
+
+export interface PracticeHabitEffect {
+  state: PracticeHabitKey;
+  value: number;
+}
+
 export interface ActiveActionDefinition {
   id: string;
   category: ActionCategory;
@@ -48,6 +58,7 @@ export interface ActiveActionDefinition {
   costs: ActionCostChannel[];
   risk: RiskLevel;
   metadata?: Record<string, unknown>;
+  habitEffects?: PracticeHabitEffect[];
   /** P9: flags set on action completion for echo/route hooks */
   onCompleteFlags?: string[];
 }

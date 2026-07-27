@@ -28,6 +28,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'money', amount: 10 }],
     risk: 'low',
     metadata: { focusTag: 'martial' },
+    habitEffects: [{ state: 'trainingHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_training_hook', 'p9_early_training_focus'],
   },
   {
@@ -44,6 +45,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'money', amount: 15 }],
     risk: 'low',
     metadata: { focusTag: 'scholarly' },
+    habitEffects: [{ state: 'studyHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_study_hook'],
   },
   {
@@ -76,6 +78,7 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     costs: [{ stat: 'money', amount: 25 }],
     risk: 'medium',
     metadata: { focusTag: 'wealth', useCase: '缺钱或想做经营时优先' },
+    habitEffects: [{ state: 'businessHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_business_hook', 'p9_early_business_focus'],
   },
   {

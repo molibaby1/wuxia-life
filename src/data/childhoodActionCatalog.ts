@@ -34,6 +34,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [],
     risk: 'low',
     metadata: { focusTag: 'martial', childhoodTier: 'lite' },
+    habitEffects: [{ state: 'trainingHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_training_hook', 'p9_early_training_focus'],
   },
   {
@@ -49,6 +50,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [],
     risk: 'low',
     metadata: { focusTag: 'scholarly', childhoodTier: 'lite' },
+    habitEffects: [{ state: 'studyHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_study_hook'],
   },
   {
@@ -95,6 +97,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     costs: [],
     risk: 'low',
     metadata: { focusTag: 'business', childhoodTier: 'lite' },
+    habitEffects: [{ state: 'businessHabit', value: 1 }],
     onCompleteFlags: ['p9_echo_business_hook'],
   },
   {

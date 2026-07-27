@@ -94,17 +94,18 @@ export async function runP71ReportChecks(): Promise<void> {
 export async function runP71LongTermShapingTests(): Promise<void> {
   const trainingState = createState();
   executeActiveActionOnState(trainingState, 'action_training_basic', { random: () => 0.5, includeDisturbance: false });
-  assert(trainingState.player.lifeStates.trainingHabit >= 1, 'training action should deepen trainingHabit');
-  assert(trainingState.flags.training_habit === true, 'training action should project training_habit flag');
+  assert(trainingState.player.lifeStates.trainingHabit === 1, 'training action adds explicit training practice');
+  assert(trainingState.flags.training_habit === undefined, 'training action must not project legacy habit flag');
 
   const businessState = createState();
   executeActiveActionOnState(businessState, 'action_household_apprentice', { random: () => 0.5, includeDisturbance: false });
-  assert(businessState.player.lifeStates.businessHabit >= 1, 'childhood business action should deepen businessHabit');
-  assert(businessState.flags.business_habit === true, 'childhood business action should project business_habit flag');
+  assert(businessState.player.lifeStates.businessHabit === 1, 'quarterly apprenticeship adds explicit business practice');
+  assert(businessState.flags.business_habit === undefined, 'business action must not project legacy habit flag');
 
   const studyState = createState();
   executeActiveActionOnState(studyState, 'action_study_basic', { random: () => 0.5, includeDisturbance: false });
-  assert(studyState.player.lifeStates.studyHabit >= 1, 'study action should deepen studyHabit');
+  assert(studyState.player.lifeStates.studyHabit === 1, 'study action adds explicit study practice');
+  assert(studyState.flags.study_habit === undefined, 'study action must not project legacy habit flag');
 }
 
 export async function runP71SummaryBuilderTests(): Promise<void> {

@@ -134,8 +134,8 @@ function testArchetypeSelection(): void {
   const martial = makeState({
     flags: {
       origin_id: 'martial_family',
-      training_habit: true,
       martial_talent_acknowledged: true,
+      joined_sect: true,
       has_disciples: true,
     },
     player: { age: 40, martialPower: 70 },
@@ -164,7 +164,7 @@ function testRepetitionPressure(): void {
 
 function testWholeLifePacing(): void {
   const scholar = makeState({
-    flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true },
+    flags: { origin_id: 'scholar_house', scholar_path_started: true, mentor_bond: true },
     player: { age: 14, knowledge: 25 },
   });
   const report = buildWholeLifePacingReport(scholar);

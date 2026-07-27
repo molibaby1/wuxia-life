@@ -151,6 +151,18 @@ function testDailyGroupWeightsIgnorePracticeHabits(): void {
   assert(getWeight(study, state) === lowStudy, 'studyHabit must not change daily study weight');
 }
 
+function testNoLegacyHabitFlagConsumers(): void {
+  const p21 = fs.readFileSync(path.resolve('src/data/lines/p21-content-samples.json'), 'utf8');
+  const p22 = fs.readFileSync(path.resolve('src/data/lines/p22-content-expansions.json'), 'utf8');
+  const replay = fs.readFileSync(path.resolve('src/narrative/profile/wuxiaReplayabilitySurfaces.ts'), 'utf8');
+  const validation = fs.readFileSync(path.resolve('src/p20/validationSlices.ts'), 'utf8');
+  const flagFallback = /flags\.has\("(?:training_habit|study_habit|business_habit)"\)/;
+  assert(!flagFallback.test(p21), 'P21 content must not read legacy habit flags');
+  assert(!flagFallback.test(p22), 'P22 content must not read legacy habit flags');
+  assert(!/["'](?:training_habit|study_habit|business_habit)["']/.test(replay), 'P20 replay config must not use legacy habit flags');
+  assert(!/["'](?:training_habit|study_habit|business_habit)["']/.test(validation), 'P20 validation fixtures must not use legacy habit flags');
+}
+
 export function runCanonicalHabitPracticeNarrowingTests(): void {
   testExplicitActiveActionHabitEffects();
   testActiveActionDoesNotProjectLegacyHabitFlags();
@@ -159,6 +171,7 @@ export function runCanonicalHabitPracticeNarrowingTests(): void {
   testFormalEventTagsDoNotAutoCreateHabit();
   testDailyHabitProducerAndWeightNarrowing();
   testDailyGroupWeightsIgnorePracticeHabits();
+  testNoLegacyHabitFlagConsumers();
 }
 
 runCanonicalHabitPracticeNarrowingTests();

@@ -62,7 +62,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
       age: 18,
       lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
     }),
-    flags: {},
+    flags: { martial_path_started: true },
     relations: {},
     achievements: [],
     eventHistory: [],
@@ -74,6 +74,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
       age: 18,
       lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
     }),
+    flags: { scholar_path_started: true },
   };
 
   findings.push({

@@ -148,12 +148,12 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
   const martial = baseState({
     flags: {
       origin_id: 'martial_family',
-      training_habit: true,
       martial_talent_acknowledged: true,
+      joined_sect: true,
       has_disciples: true,
       martial_transmission: true,
     },
-    player: { age: 45, martialPower: 80, martialHeritage: 50, flags: { training_habit: true } },
+    player: { age: 45, martialPower: 80, martialHeritage: 50, flags: { martial_talent_acknowledged: true, joined_sect: true } },
     lifePath: {
       primaryIdentity: 'martial',
       faction: 'orthodox',
@@ -169,7 +169,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
     flags: {
       origin_id: 'scholar_house',
       scholar_path_started: true,
-      study_habit: true,
       mentor_bond: true,
       teaching_legacy: true,
     },
@@ -193,8 +192,8 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
   const wealth = baseState({
     flags: {
       origin_id: 'merchant_house',
-      business_habit: true,
       merchant_network_growing: true,
+      wealth_milestone: true,
       family_heir: true,
     },
     player: {
@@ -288,11 +287,11 @@ export function runRepetitionOverlapSlice(): RepetitionOverlapSliceResult {
 
 export function runPacingDifferentiationSlice(): PacingDifferentiationSliceResult {
   const martial = baseState({
-    flags: { origin_id: 'martial_family', training_habit: true, martial_talent_acknowledged: true },
+    flags: { origin_id: 'martial_family', martial_talent_acknowledged: true, joined_sect: true },
     player: { age: 15 },
   });
   const scholar = baseState({
-    flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true },
+    flags: { origin_id: 'scholar_house', scholar_path_started: true, mentor_bond: true },
     player: { age: 15, knowledge: 30 },
   });
 
@@ -321,7 +320,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       expectedFamily: P20_MARTIAL_ASCENDANT.id,
       signals: ['origin', 'growth'],
       state: baseState({
-        flags: { origin_id: 'martial_family', training_habit: true, martial_talent_acknowledged: true },
+        flags: { origin_id: 'martial_family', martial_talent_acknowledged: true, joined_sect: true },
         player: { age: 12 },
       }),
     },
@@ -360,7 +359,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       expectedFamily: P20_WEALTH_MERCHANT.id,
       signals: ['origin', 'growth'],
       state: baseState({
-        flags: { origin_id: 'merchant_house', business_habit: true, merchant_network_growing: true },
+        flags: { origin_id: 'merchant_house', merchant_network_growing: true, wealth_milestone: true },
         player: { age: 32, merchantNetwork: 30 },
       }),
     },
@@ -400,8 +399,8 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       state: baseState({
         flags: {
           origin_id: 'martial_family',
-          training_habit: true,
           martial_talent_acknowledged: true,
+          joined_sect: true,
           martial_transmission: true,
           has_disciples: true,
         },
@@ -415,7 +414,6 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
         flags: {
           origin_id: 'scholar_house',
           scholar_path_started: true,
-          study_habit: true,
           teaching_legacy: true,
         },
         player: { age: 48, knowledge: 70 },
@@ -425,7 +423,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       configId: P20_WEALTH_MERCHANT.id,
       label: P20_WEALTH_MERCHANT.label,
       state: baseState({
-        flags: { origin_id: 'merchant_house', business_habit: true, family_heir: true },
+        flags: { origin_id: 'merchant_house', wealth_milestone: true, family_heir: true },
         player: { age: 44, money: 1800 },
       }),
     },
@@ -493,7 +491,7 @@ export function runReplayabilityValidationComparison(): {
 
   const scholarCandidate = resolveArchetypeCandidates(
     baseState({
-      flags: { origin_id: 'scholar_house', scholar_path_started: true, study_habit: true, mentor_bond: true },
+      flags: { origin_id: 'scholar_house', scholar_path_started: true, mentor_bond: true },
       player: { age: 40, knowledge: 55 },
     }),
   )[0];

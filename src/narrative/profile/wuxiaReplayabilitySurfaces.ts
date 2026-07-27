@@ -13,7 +13,7 @@ export const P20_MARTIAL_ASCENDANT: ArchetypeFamilyConfig = {
   lifecycleSignals: {
     originIds: ['martial_family', 'poor_family', 'frontier_military'],
     originTags: ['training', 'martial'],
-    growthPatternFlags: ['training_habit', 'martial_talent_acknowledged', 'joined_sect'],
+    growthPatternFlags: ['martial_talent_acknowledged', 'joined_sect'],
     routeIdentityKeys: ['martial', 'orthodox'],
     socialRoleFlags: ['has_disciples', 'hero_rep_mantle'],
     legacyShapeFlags: ['martial_transmission', 'master_legacy', 'inheritance_legacy_complete'],
@@ -37,7 +37,7 @@ export const P20_SCHOLAR_STATESMAN: ArchetypeFamilyConfig = {
   lifecycleSignals: {
     originIds: ['scholar_house', 'poor_family'],
     originTags: ['study', 'scholarly'],
-    growthPatternFlags: ['scholar_path_started', 'study_habit', 'mentor_bond'],
+    growthPatternFlags: ['scholar_path_started', 'mentor_bond'],
     routeIdentityKeys: ['scholarly', 'academic'],
     socialRoleFlags: ['mentor_bond', 'ally_network'],
     legacyShapeFlags: ['scholarly_heritage_high', 'teaching_legacy'],
@@ -60,7 +60,7 @@ export const P20_WEALTH_MERCHANT: ArchetypeFamilyConfig = {
   lifecycleSignals: {
     originIds: ['merchant_house', 'streetborn'],
     originTags: ['business', 'trade'],
-    growthPatternFlags: ['business_habit', 'merchant_network_growing', 'wealth_milestone'],
+    growthPatternFlags: ['merchant_network_growing', 'wealth_milestone'],
     routeIdentityKeys: ['wealth', 'merchant'],
     socialRoleFlags: ['merchant_network', 'trade_alliance'],
     legacyShapeFlags: ['family_heir', 'merchant_dynasty'],
@@ -228,7 +228,7 @@ export const P20_SLICE_ORIGIN_EARLY: ReplaySliceConfig = {
   label: '出身与早期成长分歧切片',
   emphasis: 'origin_early_growth',
   archetypeFamilyId: P20_MARTIAL_ASCENDANT.id,
-  seedFlags: ['training_habit', 'martial_talent_acknowledged'],
+  seedFlags: ['martial_talent_acknowledged', 'joined_sect'],
   validationSignals: ['origin_divergence', 'early_action_histogram', 'route_entry_timing'],
 };
 
@@ -255,7 +255,7 @@ export const P20_SLICE_WEALTH_PACING: ReplaySliceConfig = {
   label: '商贾节奏分歧切片',
   emphasis: 'midlife_consequence',
   archetypeFamilyId: P20_WEALTH_MERCHANT.id,
-  seedFlags: ['business_habit', 'merchant_network_growing'],
+  seedFlags: ['merchant_network_growing', 'p9_early_business_focus'],
   validationSignals: ['payoff_spacing', 'route_pressure_timing'],
 };
 

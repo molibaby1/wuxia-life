@@ -80,6 +80,10 @@ function assertHabitGatedEvent(
 
   const state = makeState();
   state.player.age = age;
+  if (eventId === 'p21_scholar_route_reinforcement') state.flags.scholar_path_started = true;
+  if (eventId === 'p21_martial_route_reinforcement') state.flags.martial_path_started = true;
+  if (eventId === 'p22_early_wealth_route_fork') state.flags.origin_merchant_family = true;
+  if (eventId === 'p22_early_martial_route_fork') state.flags.martial_path_started = true;
   state.player.lifeStates = {
     ...state.player.lifeStates,
     [habitKey]: habitValue,

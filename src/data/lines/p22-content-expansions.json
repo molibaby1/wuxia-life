@@ -272,7 +272,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "lifeStates.businessHabit >= 2 || flags.has(\"business_habit\") || flags.has(\"origin_merchant_family\")"
+        "expression": "lifeStates.businessHabit >= 2 || flags.has(\"origin_merchant_family\")"
       }
     ],
     "content": {

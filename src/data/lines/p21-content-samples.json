@@ -10,7 +10,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"scholar_path_started\") || lifeStates.studyHabit >= 2 || flags.has(\"study_habit\")"
+        "expression": "flags.has(\"scholar_path_started\") && lifeStates.studyHabit >= 2"
       }
     ],
     "content": {
@@ -124,7 +124,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "lifeStates.trainingHabit >= 2 || flags.has(\"training_habit\") || flags.has(\"martial_path_started\")"
+        "expression": "flags.has(\"martial_path_started\") && lifeStates.trainingHabit >= 2"
       }
     ],
     "content": {

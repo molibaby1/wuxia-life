@@ -139,12 +139,12 @@
       {"type": "age_reach", "value": 24}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+      {"type": "expression", "expression": "flags.medical_talent == true && (connections >= 10 || reputation >= 10)"}
     ],
     "content": {
       "title": "口碑相传",
-      "text": "你在江湖与市井间积攒的人望，让病患不必经武馆或镖局引荐，便寻上门来。有人请你驻点施诊，亦有人愿为医馆作保——这是名望带来的机缘，也意味着此后难以闭门清修。",
-      "description": "P29 医术池：socialMomentum 驱动的医者人脉机缘"
+      "text": "你已有医术经历，又在江湖与市井间积攒了口碑，让病患不必经武馆或镖局引荐，便寻上门来。有人请你驻点施诊，亦有人愿为医馆作保。",
+      "description": "P29 医术池：医术经历与口碑带来的医者人脉"
     },
     "eventType": "choice",
     "choices": [
@@ -167,9 +167,9 @@
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p29", "medical", "semi_personality", "non_combat"],
+      "tags": ["p29", "medical", "non_combat"],
       "authoringSemantics": {
-        "authoringNotes": "P29 socialMomentum medical crossover; material opportunity not flavor-only."
+        "authoringNotes": "P29 medical crossover; requires medical talent plus reputation or connections."
       }
     }
   },

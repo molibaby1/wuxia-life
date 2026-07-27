@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { EventLoader } from '../src/core/EventLoader';
 import { assert, assertDeepEqual, GameTestFramework } from './GameTestFramework';
 import { temperaments } from '../src/data/traits/temperaments';
 import { dailyEvents } from '../src/data/life/dailyEvents';
@@ -12,6 +13,41 @@ const framework = new GameTestFramework();
 
 function createState(): GameState {
   return (framework as unknown as { createTestState(): GameState }).createTestState();
+}
+
+function getEvent(id: string): any {
+  const event = EventLoader.getInstance().getEventById(id);
+  assert(event != null, `missing event: ${id}`);
+  return event;
+}
+
+function assertSocialEventRewrite(
+  id: string,
+  expression: string,
+  content: {
+    title?: string;
+    text?: string;
+    description?: string;
+    metadata?: Record<string, unknown>;
+  },
+): void {
+  const event = getEvent(id);
+  const condition = event.conditions?.[0];
+  assert(condition?.type === 'expression', `${id} must use an expression condition`);
+  assert(condition.expression === expression, `${id} expression mismatch: ${condition.expression}`);
+
+  if (content.title !== undefined) {
+    assert(event.content?.title === content.title, `${id} title mismatch: ${event.content?.title}`);
+  }
+  if (content.text !== undefined) {
+    assert(event.content?.text === content.text, `${id} text mismatch: ${event.content?.text}`);
+  }
+  if (content.description !== undefined) {
+    assert(event.content?.description === content.description, `${id} description mismatch: ${event.content?.description}`);
+  }
+  if (content.metadata !== undefined) {
+    assertDeepEqual(event.metadata, content.metadata, `${id} metadata mismatch`);
+  }
 }
 
 function testTraitDoesNotWriteLifeState(): void {
@@ -96,12 +132,62 @@ function testDailyWeightsAreAxisIndependent(): void {
   assert(getWeight(config, legacyInjected) === base, 'legacy injected axes must not affect daily weight');
 }
 
+function testSocialEventCopyAndExpressions(): void {
+  assertSocialEventRewrite('p42_social_momentum_youth_introduction', 'connections >= 5 || reputation >= 10', {
+    title: '初识引见',
+    text: '你平日积下的口碑，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。',
+    description: 'P42 青年社交：已有门路或口碑带来的引见',
+  });
+
+  assertSocialEventRewrite('p28_social_momentum_network_fork', 'connections >= 10 || flags.p42_social_youth_intro_accepted == true', {
+    title: '人脉成线',
+    text: '你已有的门路和人情往来，已把熟识之人连成一张能互相引介的网。眼下有人邀你参加一场只认门路不认名帖的私宴。',
+    description: 'P28 社交分岔：现实门路形成的人脉网络',
+  });
+
+  assertSocialEventRewrite('p28_social_reputation_reinforcement', 'flags.p28_social_network_opened == true', {
+    title: '席间扬名',
+    text: '你在既有门路里积攒的信用终于有了回响。一次席间议事中，你被推到台前，若应对得当，不仅能得名，还能把零散关系拧成真正可用的同盟。',
+    description: 'P28 社交强化：既有网络带来的同盟',
+  });
+
+  assertSocialEventRewrite('p29_social_momentum_patron_obligation', 'flags.ally_network == true', {
+    title: '人情担保',
+    text: '你和同盟之间的往来终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。',
+    description: 'P29 社交后果：可用同盟带来的人情担保义务',
+  });
+
+  assertSocialEventRewrite(
+    'p42_social_momentum_later_testimonial',
+    'reputation >= 20 && (flags.p28_social_reputation_reinforced == true || flags.p29_social_patron_obligation_taken == true)',
+    {
+      title: '晚岁证名',
+      text: '数十年人脉与信用，让你在暮年仍被请出来为后辈作保、为旧友作证。这份晚岁回响不是一时名头，而是长期声望与长期社会经历的兑现。',
+      description: 'P42 晚年社交：长期声望与回响',
+    },
+  );
+
+  assertSocialEventRewrite('p29_social_momentum_healer_network', 'flags.medical_talent == true && (connections >= 10 || reputation >= 10)', {
+    title: '口碑相传',
+    text: '你已有医术经历，又在江湖与市井间积攒了口碑，让病患不必经武馆或镖局引荐，便寻上门来。有人请你驻点施诊，亦有人愿为医馆作保。',
+    description: 'P29 医术池：医术经历与口碑带来的医者人脉',
+    metadata: {
+      enabled: true,
+      tags: ['p29', 'medical', 'non_combat'],
+      authoringSemantics: {
+        authoringNotes: 'P29 medical crossover; requires medical talent plus reputation or connections.',
+      },
+    },
+  });
+}
+
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
   testFormalRuntimeDoesNotUseDeletedAxes();
   testDailyEventsDoNotUseDeletedAxes();
   testDailyWeightsAreAxisIndependent();
+  testSocialEventCopyAndExpressions();
 }
 
 runCanonicalFamilySocialLifeStateRemovalTests();

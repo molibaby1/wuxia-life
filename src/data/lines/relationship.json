@@ -372,12 +372,12 @@
       {"type": "age_reach", "value": 24}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+      {"type": "expression", "expression": "connections >= 10 || flags.p42_social_youth_intro_accepted == true"}
     ],
     "content": {
       "title": "人脉成线",
-      "text": "长期人情往来塑成的名声与门路，已把熟识之人连成一张能互相引介的网。眼下有人邀你参加一场只认门路不认名帖的私宴。",
-      "description": "P28 半性格轴：socialMomentum 驱动的人脉分岔"
+      "text": "你已有的门路和人情往来，已把熟识之人连成一张能互相引介的网。眼下有人邀你参加一场只认门路不认名帖的私宴。",
+      "description": "P28 社交分岔：现实门路形成的人脉网络"
     },
     "eventType": "choice",
     "choices": [
@@ -410,12 +410,12 @@
       {"type": "age_reach", "value": 26}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+      {"type": "expression", "expression": "flags.p28_social_network_opened == true"}
     ],
     "content": {
       "title": "席间扬名",
-      "text": "你在人情往来间积攒的信用终于有了回响。一次席间议事中，你被推到台前，若应对得当，不仅能得名，还能把零散关系拧成真正可用的同盟。",
-      "description": "P28 半性格轴：socialMomentum 驱动的声望强化与桥接"
+      "text": "你在既有门路里积攒的信用终于有了回响。一次席间议事中，你被推到台前，若应对得当，不仅能得名，还能把零散关系拧成真正可用的同盟。",
+      "description": "P28 社交强化：既有网络带来的同盟"
     },
     "eventType": "choice",
     "choices": [
@@ -450,12 +450,12 @@
       {"type": "age_reach", "value": 36}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 3"}
+      {"type": "expression", "expression": "flags.ally_network == true"}
     ],
     "content": {
       "title": "人情担保",
-      "text": "你这些年结下的人望终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。",
-      "description": "P29 半性格轴：deep socialMomentum 带来的人情担保义务"
+      "text": "你和同盟之间的往来终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。",
+      "description": "P29 社交后果：可用同盟带来的人情担保义务"
     },
     "eventType": "choice",
     "choices": [
@@ -489,12 +489,12 @@
       {"type": "age_reach", "value": 17}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 2"}
+      {"type": "expression", "expression": "connections >= 5 || reputation >= 10"}
     ],
     "content": {
       "title": "初识引见",
-      "text": "你平日待人接物积下的好感，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。",
-      "description": "P42 青年塑形：社交势能驱动的初次引见"
+      "text": "你平日积下的口碑，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。",
+      "description": "P42 青年社交：已有门路或口碑带来的引见"
     },
     "eventType": "choice",
     "choices": [
@@ -528,12 +528,12 @@
       {"type": "age_reach", "value": 50}
     ],
     "conditions": [
-      {"type": "expression", "expression": "lifeStates.socialMomentum >= 3"}
+      {"type": "expression", "expression": "reputation >= 20 && (flags.p28_social_reputation_reinforced == true || flags.p29_social_patron_obligation_taken == true)"}
     ],
     "content": {
       "title": "晚岁证名",
-      "text": "数十年人情往来塑成的信用，让你在暮年仍被请出来为后辈作保、为旧友作证。这份晚岁回响不是一时名头，而是长期社交势能的兑现。",
-      "description": "P42 晚年塑形：社交势能驱动的证名回响"
+      "text": "数十年人脉与信用，让你在暮年仍被请出来为后辈作保、为旧友作证。这份晚岁回响不是一时名头，而是长期声望与长期社会经历的兑现。",
+      "description": "P42 晚年社交：长期声望与回响"
     },
     "eventType": "choice",
     "choices": [

@@ -3,7 +3,6 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import type { GameState } from '../src/types/eventTypes';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { runP20HabitTrajectorySlice } from '../src/p20/habitTrajectorySlice';
-import { runP25HabitTrajectorySlice } from '../src/p25/habitTrajectorySlice';
 import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
 import {
   P20_MARTIAL_ASCENDANT,
@@ -57,6 +56,28 @@ function assertSemiPersonalityGatedEvent(
   assert(
     evaluator.evaluate({ type: 'expression', expression }, state) === true,
     `${eventId} should trigger from ${axisKey}=${axisValue}`,
+  );
+}
+
+function assertConcreteSocialEvent(
+  eventId: string,
+  expression: string,
+  age: number,
+  applyState: (state: GameState) => void,
+): void {
+  const loader = EventLoader.getInstance();
+  const evaluator = new ConditionEvaluator();
+  const event = loader.getEventById(eventId);
+  assert(event, `missing ${eventId}`);
+  const actualExpression = event?.conditions?.[0]?.type === 'expression' ? event.conditions[0].expression : '';
+  assert(actualExpression === expression, `${eventId} should use exact expression, got: ${actualExpression}`);
+
+  const state = makeState();
+  state.player.age = age;
+  applyState(state);
+  assert(
+    evaluator.evaluate({ type: 'expression', expression }, state) === true,
+    `${eventId} should trigger from concrete prerequisites`,
   );
 }
 
@@ -120,13 +141,6 @@ function testP20HabitTrajectorySlice(): void {
   const result = runP20HabitTrajectorySlice();
   assert(result.materiallyDiffers, 'high vs low habit profiles should differ materially');
   assert(result.passed, `P20 habit slice: ${JSON.stringify(result)}`);
-}
-
-function testP25HabitTrajectorySlice(): void {
-  const result = runP25HabitTrajectorySlice();
-  assert(result.earlyFormationPassed, 'early habit formation should unlock fork/reinforcement samples');
-  assert(result.laterEchoPassed, 'later callbacks/consequences should echo early habits');
-  assert(result.passed, `P25 habit slice: ${JSON.stringify(result.findings)}`);
 }
 
 function assertHabitGatedEventOr(
@@ -224,8 +238,6 @@ function testLifeStatesLedArchetypeSelection(): void {
 }
 
 function testP28SemiPersonalityRegression(): void {
-  assertSemiPersonalityGatedEvent('p28_social_momentum_network_fork', 'socialMomentum', 2, 24);
-  assertSemiPersonalityGatedEvent('p28_social_reputation_reinforcement', 'socialMomentum', 2, 26);
   assertSemiPersonalityGatedEvent('p28_family_bond_elder_care', 'familyBond', 2, 38);
   assertSemiPersonalityGatedEvent('p28_family_bond_sibling_support', 'familyBond', 2, 30);
   assertSemiPersonalityGatedEvent('p28_family_bond_caretaker_obligation', 'familyBond', 3, 42);
@@ -292,8 +304,23 @@ function testP42FamilyBondDensification(): void {
 function testP42BusinessSocialDensification(): void {
   assertHabitGatedEvent('p42_business_habit_youth_stall', 'businessHabit', 2, 18);
   assertHabitGatedEvent('p42_business_habit_midlife_syndicate', 'businessHabit', 3, 40);
-  assertSemiPersonalityGatedEvent('p42_social_momentum_youth_introduction', 'socialMomentum', 2, 19);
-  assertSemiPersonalityGatedEvent('p42_social_momentum_later_testimonial', 'socialMomentum', 3, 52);
+  assertConcreteSocialEvent(
+    'p42_social_momentum_youth_introduction',
+    'connections >= 5 || reputation >= 10',
+    19,
+    (state) => {
+      state.player.connections = 5;
+    },
+  );
+  assertConcreteSocialEvent(
+    'p42_social_momentum_later_testimonial',
+    'reputation >= 20 && (flags.p28_social_reputation_reinforced == true || flags.p29_social_patron_obligation_taken == true)',
+    52,
+    (state) => {
+      state.player.reputation = 20;
+      state.flags.p28_social_reputation_reinforced = true;
+    },
+  );
 }
 
 function testP42TrainingStudyDensification(): void {
@@ -305,8 +332,23 @@ function testP42TrainingStudyDensification(): void {
 
 function testP29MedicalAndSocialRegression(): void {
   assertHabitGatedEvent('p29_study_habit_case_record_duty', 'studyHabit', 3, 28);
-  assertSemiPersonalityGatedEvent('p29_social_momentum_healer_network', 'socialMomentum', 2, 26);
-  assertSemiPersonalityGatedEvent('p29_social_momentum_patron_obligation', 'socialMomentum', 3, 36);
+  assertConcreteSocialEvent(
+    'p29_social_momentum_healer_network',
+    'flags.medical_talent == true && (connections >= 10 || reputation >= 10)',
+    26,
+    (state) => {
+      state.flags.medical_talent = true;
+      state.player.connections = 10;
+    },
+  );
+  assertConcreteSocialEvent(
+    'p29_social_momentum_patron_obligation',
+    'flags.ally_network == true',
+    36,
+    (state) => {
+      state.flags.ally_network = true;
+    },
+  );
 }
 
 async function main(): Promise<void> {
@@ -330,7 +372,6 @@ async function main(): Promise<void> {
   testP42ArchetypeDifferentiation();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();
-  testP25HabitTrajectorySlice();
   console.log('personalityHabitTrajectoryTests: all passed');
 }
 

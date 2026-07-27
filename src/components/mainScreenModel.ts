@@ -26,7 +26,7 @@
  * - `player.lifeStates` (social/family context only; not shapingSummary text)
  *
  * Verification samples (locked for P124 narrow tests):
- * - Non-martial: routeId `merchant`, businessHabit >= 2, modest martial stats
+ * - Non-martial: routeId `merchant`, modest martial stats
  * - Martial-dominant: martialPower >= 30 with clustered martial sub-stats
  *
  * Out of scope for P124 (do not modify):

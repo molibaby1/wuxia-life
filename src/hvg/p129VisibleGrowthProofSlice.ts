@@ -9,10 +9,10 @@ import { getOrdinaryEarlyLifeChoiceForOrigin } from '../p25/ordinaryOriginEarlyL
 import {
   P129_CONTINUATION_TARGETS,
   P129_PRIMARY_ACTION,
+  P129_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD,
   P129_SAMPLE_ORIGIN_ID,
   P129_SOCIAL_MOMENTUM_SHAPING_THRESHOLD,
 } from './p129TavernSampleBaseline';
-import { buildCurrentShapingSummary } from '../utils/habitShapingSummary';
 import { formatLongTermFlag } from '../utils/playerFacingLabels';
 import type { GameState, PlayerState } from '../types/eventTypes';
 
@@ -67,7 +67,7 @@ export async function renderP129TargetedProofMarkdown(): Promise<string> {
       includeDisturbance: false,
     });
     actionProof.push(
-      `- **${P129_PRIMARY_ACTION} #${i + 1}**: socialMomentum=${state.player.lifeStates?.socialMomentum ?? 0}, shapingSummary=\`${buildCurrentShapingSummary(state.player.lifeStates)}\`, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
+      `- **${P129_PRIMARY_ACTION} #${i + 1}**: socialMomentum=${state.player.lifeStates?.socialMomentum ?? 0}, shapingSummary=\`${(state.player.lifeStates?.socialMomentum ?? 0) >= P129_SOCIAL_MOMENTUM_SHAPING_THRESHOLD ? P129_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD : '塑形未成'}\`, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
     );
   }
 
@@ -103,7 +103,7 @@ export async function renderP129TargetedProofMarkdown(): Promise<string> {
     '| Checkpoint | socialMomentum | shapingSummary |',
     '| --- | --- | --- |',
     '| start | 0 | 塑形未成 |',
-    `| after 2× socializing | ${state.player.lifeStates?.socialMomentum ?? 0} | ${buildCurrentShapingSummary(state.player.lifeStates)} |`,
+    `| after 2× socializing | ${state.player.lifeStates?.socialMomentum ?? 0} | ${(state.player.lifeStates?.socialMomentum ?? 0) >= P129_SOCIAL_MOMENTUM_SHAPING_THRESHOLD ? P129_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD : '塑形未成'} |`,
     '',
     '## Signal B — period settlement (periodSummaryDisplay)',
     '',

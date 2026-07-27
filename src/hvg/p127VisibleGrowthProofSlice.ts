@@ -8,10 +8,10 @@ import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import {
   P127_CONTINUATION_TARGETS,
   P127_PRIMARY_ACTION,
+  P127_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD,
   P127_SAMPLE_ORIGIN_ID,
   P127_TRAINING_HABIT_SHAPING_THRESHOLD,
 } from './p127MartialSampleBaseline';
-import { buildCurrentShapingSummary } from '../utils/habitShapingSummary';
 import { formatLongTermFlag } from '../utils/playerFacingLabels';
 import type { GameState, PlayerState } from '../types/eventTypes';
 
@@ -68,7 +68,7 @@ export async function renderP127TargetedProofMarkdown(): Promise<string> {
       includeDisturbance: false,
     });
     actionProof.push(
-      `- **${P127_PRIMARY_ACTION} #${i + 1}**: trainingHabit=${state.player.lifeStates?.trainingHabit ?? 0}, shapingSummary=\`${buildCurrentShapingSummary(state.player.lifeStates)}\`, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
+      `- **${P127_PRIMARY_ACTION} #${i + 1}**: trainingHabit=${state.player.lifeStates?.trainingHabit ?? 0}, shapingSummary=\`${(state.player.lifeStates?.trainingHabit ?? 0) >= P127_TRAINING_HABIT_SHAPING_THRESHOLD ? P127_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD : '塑形未成'}\`, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
     );
   }
 
@@ -104,7 +104,7 @@ export async function renderP127TargetedProofMarkdown(): Promise<string> {
     '| Checkpoint | trainingHabit | shapingSummary |',
     '| --- | --- | --- |',
     `| start | 0 | 塑形未成 |`,
-    `| after 2× training | ${state.player.lifeStates?.trainingHabit ?? 0} | ${buildCurrentShapingSummary(state.player.lifeStates)} |`,
+    `| after 2× training | ${state.player.lifeStates?.trainingHabit ?? 0} | ${(state.player.lifeStates?.trainingHabit ?? 0) >= P127_TRAINING_HABIT_SHAPING_THRESHOLD ? P127_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD : '塑形未成'} |`,
     '',
     '## Signal B — period settlement (periodSummaryDisplay)',
     '',

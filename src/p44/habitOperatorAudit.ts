@@ -2,7 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EventLoader } from '../core/EventLoader';
 import type { EventDefinition } from '../types/eventTypes';
-import { SHAPING_AXES, type ShapingAxisKey } from '../utils/habitShapingSummary';
+
+const AXIS_KEYS = ['socialMomentum', 'familyBond'] as const;
+type ShapingAxisKey = (typeof AXIS_KEYS)[number];
 
 export const AUDIT_VERSION = 'p44-v1';
 
@@ -82,8 +84,6 @@ export interface P44HabitOperatorAuditResult {
   archetypeDifferentiation: ArchetypeDifferentiationResult;
   recapAbsorption: RecapAbsorptionResult;
 }
-
-const AXIS_KEYS = SHAPING_AXES.map((axis) => axis.key);
 
 function ageBandsForRange(minAge: number, maxAge: number): AgeBandId[] {
   return AGE_BANDS.filter((band) => minAge <= band.max && maxAge >= band.min).map((band) => band.id);
@@ -259,7 +259,7 @@ export function runArchetypeDifferentiationAudit(
 }
 
 const RECAP_SURFACE_EXPECTATIONS: Array<{ surface: string; file: string; helpers: string[] }> = [
-  { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helpers: ['buildCurrentShapingSummary'] },
+  { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helpers: ['buildTendencySummary'] },
   { surface: 'Life-memory practice trajectory', file: 'src/core/deriveLifeMemorySummary.ts', helpers: ['derivePracticeTrajectoryLines'] },
   {
     surface: 'P19 final summary',

@@ -15,19 +15,13 @@ const HABIT_TRAJECTORY_EVENT_IDS = [
   'p27_mentor_obligation_consequence',
   'p27_renown_upkeep_pressure',
   'p27_study_habit_healer_reinforcement',
-  'p28_social_momentum_network_fork',
-  'p28_social_reputation_reinforcement',
   'p29_study_habit_case_record_duty',
-  'p29_social_momentum_healer_network',
-  'p29_social_momentum_patron_obligation',
   'p42_training_habit_youth_sparring',
   'p42_training_habit_later_guardian',
   'p42_study_habit_childhood_copybook',
   'p42_study_habit_later_chronicle',
   'p42_business_habit_youth_stall',
   'p42_business_habit_midlife_syndicate',
-  'p42_social_momentum_youth_introduction',
-  'p42_social_momentum_later_testimonial',
   'p42_training_habit_martial_clan_echo',
   'p42_training_habit_scholar_body_echo',
   'p42_study_habit_scholar_academy_echo',
@@ -75,18 +69,14 @@ function makeState(habits: {
   trainingHabit?: number;
   studyHabit?: number;
   businessHabit?: number;
-  socialMomentum?: number;
-  familyBond?: number;
 }): GameState {
   return {
     player: basePlayer({
-      age: habits.socialMomentum || habits.familyBond ? 34 : 24,
+      age: 24,
       lifeStates: {
         trainingHabit: habits.trainingHabit ?? 0,
         studyHabit: habits.studyHabit ?? 0,
         businessHabit: habits.businessHabit ?? 0,
-        socialMomentum: habits.socialMomentum ?? 0,
-        familyBond: habits.familyBond ?? 0,
       },
     }),
     facts: {},
@@ -127,15 +117,11 @@ export function runP20HabitTrajectorySlice(): P20HabitTrajectorySliceResult {
     trainingHabit: 3,
     studyHabit: 3,
     businessHabit: 3,
-    socialMomentum: 3,
-    familyBond: 3,
   });
   const low = makeState({
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   });
   const highEligibleEvents = eligibleHabitEvents(high);
   const lowEligibleEvents = eligibleHabitEvents(low);

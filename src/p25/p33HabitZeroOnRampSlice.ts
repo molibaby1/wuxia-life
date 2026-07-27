@@ -54,8 +54,6 @@ function gameStateAtStudyHabit(studyHabit: number, age: number): GameState {
         trainingHabit: 0,
         studyHabit,
         businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
       },
     } as PlayerState,
     facts: {},
@@ -80,8 +78,6 @@ export function runP33HabitZeroOnRampSlice(): P33HabitZeroOnRampResult {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
 
   const onRampSequence: P33OnRampStep[] = [];

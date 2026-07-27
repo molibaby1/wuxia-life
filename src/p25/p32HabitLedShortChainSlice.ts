@@ -2,7 +2,7 @@
  * P32 habit-led short-chain sim slice — event-driven unlock without static resolver.
  *
  * Renown path seed + sequence:
- * - Player: socialMomentum=2, stat gates met (martial 50, rep 70, connections 60), no key_choice flags
+ * - Player: `p28_social_network_opened=true`, stat gates met (martial 50, rep 70, connections 60), no key_choice flags
  * - Event sequence: `p28_social_reputation_reinforcement` → positive choice `attend_banquet`
  * - Outcome: `jianghu_renown_sage` unlock via JSON `ally_network` (not direct fixture seed)
  */
@@ -42,9 +42,7 @@ const RENOWN_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
   reputation: 70,
   connections: 60,
   money: 35,
-  lifeStates: createDefaultPlayerLifeStates({
-    socialMomentum: 2,
-  }),
+  lifeStates: createDefaultPlayerLifeStates(),
 };
 
 const MEDICAL_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
@@ -64,7 +62,7 @@ export function runP32RenownShortChainSlice(): P32ShortChainSliceResult {
   const choiceIndex = 0;
   const event = EventLoader.getInstance().getEventById(eventId)!;
   const choice = event.choices?.[choiceIndex];
-  const flags = applyEventChoiceFlagSets(event, choiceIndex, {});
+  const flags = applyEventChoiceFlagSets(event, choiceIndex, { p28_social_network_opened: true });
 
   const player = {
     name: 'p32-short-chain',

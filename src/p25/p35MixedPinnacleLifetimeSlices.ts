@@ -213,8 +213,6 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
   let martialPower = 28;
   let reputation = 14;
@@ -413,8 +411,6 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
   let martialPower = 32;
   let reputation = 18;

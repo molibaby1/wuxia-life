@@ -6,9 +6,7 @@ import type { GameState, PlayerLifeStates, PlayerState } from '../types/eventTyp
 export type HabitTrajectoryAxis =
   | 'trainingHabit'
   | 'studyHabit'
-  | 'businessHabit'
-  | 'socialMomentum'
-  | 'familyBond';
+  | 'businessHabit';
 
 export interface P25HabitEchoFinding {
   phase: 'early_formation' | 'later_echo';
@@ -60,7 +58,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const earlyTraining = {
     player: basePlayer({
       age: 18,
-      lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 2, studyHabit: 0, businessHabit: 0 },
     }),
     flags: { martial_path_started: true },
     relations: {},
@@ -73,7 +71,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     ...earlyTraining,
     player: basePlayer({
       age: 18,
-      lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0 },
     }),
     flags: { scholar_path_started: true },
   };
@@ -104,7 +102,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const earlyHealer = {
     player: basePlayer({
       age: 20,
-      lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0 },
     }),
     flags: {},
     relations: {},
@@ -122,44 +120,10 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     detail: 'P27 medical healer reinforcement from study habit',
   });
 
-  const earlySocial = {
-    player: basePlayer({
-      age: 24,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 2, familyBond: 0 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'early_formation',
-    eventId: 'p28_social_momentum_network_fork',
-    habitAxis: 'socialMomentum',
-    habitValue: 2,
-    eligible: evaluateEvent('p28_social_momentum_network_fork', earlySocial),
-    pointer: 'event:p28_social_momentum_network_fork @ socialMomentum=2 age=24',
-    detail: 'P28 social fork accessible from accumulated social momentum',
-  });
-
-  findings.push({
-    phase: 'early_formation',
-    eventId: 'p29_social_momentum_healer_network',
-    habitAxis: 'socialMomentum',
-    habitValue: 2,
-    eligible: evaluateEvent('p29_social_momentum_healer_network', {
-      ...earlySocial,
-      player: { ...earlySocial.player!, age: 26 },
-    }),
-    pointer: 'event:p29_social_momentum_healer_network @ socialMomentum=2 age=26',
-    detail: 'P29 medical healer network from social momentum',
-  });
-
   const laterTrainingEcho = {
     player: basePlayer({
       age: 26,
-      lifeStates: { trainingHabit: 3, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 3, studyHabit: 0, businessHabit: 0 },
     }),
     flags: {},
     relations: {},
@@ -170,7 +134,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const laterStudyEcho = {
     player: basePlayer({
       age: 24,
-      lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0 },
     }),
     flags: {},
     relations: {},
@@ -181,7 +145,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const laterBusinessConsequence = {
     player: basePlayer({
       age: 34,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 3, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 3 },
     }),
     flags: {},
     relations: {},
@@ -222,7 +186,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const laterMentorObligation = {
     player: basePlayer({
       age: 32,
-      lifeStates: { trainingHabit: 3, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 3, studyHabit: 0, businessHabit: 0 },
     }),
     flags: {},
     relations: {},
@@ -243,7 +207,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
   const laterRenownPressure = {
     player: basePlayer({
       age: 34,
-      lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+      lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0 },
     }),
     flags: {},
     relations: {},
@@ -261,27 +225,6 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     detail: 'P27 renown upkeep pressure from accumulated study habit',
   });
 
-  const laterSocialReinforcement = {
-    player: basePlayer({
-      age: 28,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 2, familyBond: 0 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'later_echo',
-    eventId: 'p28_social_reputation_reinforcement',
-    habitAxis: 'socialMomentum',
-    habitValue: 2,
-    eligible: evaluateEvent('p28_social_reputation_reinforcement', laterSocialReinforcement),
-    pointer: 'event:p28_social_reputation_reinforcement @ socialMomentum=2 age=28',
-    detail: 'P28 social reputation reinforcement from social momentum',
-  });
-
   findings.push({
     phase: 'later_echo',
     eventId: 'p29_study_habit_case_record_duty',
@@ -290,7 +233,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     eligible: evaluateEvent('p29_study_habit_case_record_duty', {
       player: basePlayer({
         age: 28,
-        lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0, socialMomentum: 0, familyBond: 0 },
+        lifeStates: { trainingHabit: 0, studyHabit: 3, businessHabit: 0 },
       }),
       facts: {},
       flags: { p27_study_healer_path: true },
@@ -300,27 +243,6 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     } as GameState),
     pointer: 'event:p29_study_habit_case_record_duty @ studyHabit=3 age=28 + p27_study_healer_path',
     detail: 'P29 studyHabit case-record duty from deep study habit',
-  });
-
-  const laterSocialPatron = {
-    player: basePlayer({
-      age: 36,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 3, familyBond: 0 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'later_echo',
-    eventId: 'p29_social_momentum_patron_obligation',
-    habitAxis: 'socialMomentum',
-    habitValue: 3,
-    eligible: evaluateEvent('p29_social_momentum_patron_obligation', laterSocialPatron),
-    pointer: 'event:p29_social_momentum_patron_obligation @ socialMomentum=3 age=36',
-    detail: 'P29 social patron obligation from deep social momentum',
   });
 
   const earlyFormationPassed = findings

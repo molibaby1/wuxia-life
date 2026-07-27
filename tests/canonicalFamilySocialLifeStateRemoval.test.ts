@@ -137,6 +137,26 @@ function testDailyWeightsAreAxisIndependent(): void {
   assert(getWeight(config, legacyInjected) === base, 'legacy injected axes must not affect daily weight');
 }
 
+function testHistoricalSourceAssetsDoNotModelDeletedAxes(): void {
+  const roots = ['src/p20', 'src/p25', 'src/p44', 'src/p45', 'src/hvg'];
+  for (const root of roots) {
+    if (!fs.existsSync(root)) continue;
+    const stack = [root];
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+        const full = path.join(current, entry.name);
+        if (entry.isDirectory()) {
+          stack.push(full);
+        } else if (/\.(ts|tsx|json)$/.test(entry.name)) {
+          const source = fs.readFileSync(full, 'utf8');
+          assert(!/familyBond|socialMomentum/.test(source), `obsolete axis remains in ${full}`);
+        }
+      }
+    }
+  }
+}
+
 function eventHasLifeStateTarget(eventId: string, target: string): boolean {
   const event = EventLoader.getInstance().getEventById(eventId);
   if (!event) throw new Error(`event not found: ${eventId}`);
@@ -279,6 +299,7 @@ export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testFormalRuntimeDoesNotUseDeletedAxes();
   testDailyEventsDoNotUseDeletedAxes();
   testDailyWeightsAreAxisIndependent();
+  testHistoricalSourceAssetsDoNotModelDeletedAxes();
   testFamilyContentRemoval();
   testSocialEventCopyAndExpressions();
   testShapingUIIdentityEndingFeedbackRemoved();

@@ -49,7 +49,6 @@ export interface P37PinnacleFoundingPatriarchLifetimeResult {
     originId: string;
     birthAge: number;
     trainingHabitStart: number;
-    socialMomentumStart: number;
   };
   ageProgression: P35LifetimeAgeStep[];
   eventSequence: P35LifetimeEventStep[];
@@ -88,15 +87,6 @@ export function incrementBusinessHabitFromGain(
   return next;
 }
 
-/** ponytail: socialMomentum bump for semi-personality on-ramp observability */
-export function incrementSocialMomentumFromEvent(
-  lifeStates: Record<string, number>,
-): Record<string, number> {
-  const next = { ...lifeStates };
-  next.socialMomentum = Math.min(5, (next.socialMomentum ?? 0) + 1);
-  return next;
-}
-
 function activeFlags(flags: Record<string, unknown>): string[] {
   return Object.keys(flags).filter(k => flags[k] === true);
 }
@@ -117,8 +107,8 @@ function buildMixedMerchantPlayer(
     alive: age < MIXED_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
+      studyHabit: lifeStates.studyHabit ?? 0,
       businessHabit: lifeStates.businessHabit ?? 0,
-      socialMomentum: lifeStates.socialMomentum ?? 0,
     },
   });
 }
@@ -139,7 +129,7 @@ function buildPinnaclePatriarchPlayer(
     alive: age < PINNACLE_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
-      socialMomentum: lifeStates.socialMomentum ?? 0,
+      studyHabit: lifeStates.studyHabit ?? 0,
     },
   });
 }
@@ -156,8 +146,6 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
   let martialPower = 24;
   let reputation = 12;
@@ -326,8 +314,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
   let martialPower = 26;
   let reputation = 14;
@@ -338,7 +324,7 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
     {
       age: 0,
       phase: 'birth',
-      action: 'born scholar_house; trainingHabit/socialMomentum at 0',
+      action: 'born scholar_house; trainingHabit at 0',
       trainingHabit: 0,
       studyHabit: 0,
       martialPower,
@@ -381,13 +367,12 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
     { age: 14, action: 'alliance_dinner' },
   ];
   for (const tick of socialRamp) {
-    lifeStates = incrementSocialMomentumFromEvent(lifeStates);
     connections += 8;
     reputation += 4;
     ageProgression.push({
       age: tick.age,
       phase: tick.age < 13 ? 'childhood' : 'youth',
-      action: `${tick.action} → socialMomentum ${lifeStates.socialMomentum}`,
+      action: `${tick.action} → connections ${connections}, reputation ${reputation}`,
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: 0,
       martialPower,
@@ -514,7 +499,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
       originId: 'scholar_house',
       birthAge: 0,
       trainingHabitStart: 0,
-      socialMomentumStart: 0,
     },
     ageProgression,
     eventSequence,
@@ -596,7 +580,7 @@ export function formatP37PinnacleFoundingPatriarchMarkdown(
     '',
     `- Origin: \`${result.seed.originId}\``,
     `- Birth age: **${result.seed.birthAge}**`,
-    `- trainingHabit / socialMomentum start: **${result.seed.trainingHabitStart}** / **${result.seed.socialMomentumStart}**`,
+    `- trainingHabit start: **${result.seed.trainingHabitStart}**`,
     '- Childhood `focus_on_study` enables scholar_mentor_line precondition',
     '',
     '## Luck window',

@@ -16,7 +16,7 @@ export interface P31BridgeEventSpec {
   eventId: string;
   choiceIndex: number;
   bridgeFlag: P31BridgeFlag;
-  habitAxis: 'socialMomentum' | 'studyHabit';
+  habitAxis: 'studyHabit';
   threshold: number;
   /** Bridge precondition flags the resolver expects before setting bridgeFlag. */
   resolverPreconditions: string[];
@@ -27,9 +27,9 @@ export const P31_BRIDGE_EVENT_SPECS: P31BridgeEventSpec[] = [
     eventId: 'p28_social_reputation_reinforcement',
     choiceIndex: 0,
     bridgeFlag: 'ally_network',
-    habitAxis: 'socialMomentum',
+    habitAxis: 'studyHabit',
     threshold: 2,
-    resolverPreconditions: ['p28_social_reputation_reinforced'],
+    resolverPreconditions: ['p28_social_network_opened'],
   },
   {
     eventId: 'p27_study_habit_healer_reinforcement',

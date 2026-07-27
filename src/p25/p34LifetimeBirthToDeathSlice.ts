@@ -82,8 +82,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
   let reputation = 12;
   let money = 8;

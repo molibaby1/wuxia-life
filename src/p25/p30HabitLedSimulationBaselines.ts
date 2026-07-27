@@ -60,10 +60,7 @@ function evaluatePathForOutcome(
   const statDims = report.dimensions.filter(d => d.dimension !== 'key_choices');
   const bridgeFlags = Object.keys(path.flags).filter(f => /^p2[789]_/.test(f));
   const lifeStates = path.player.lifeStates;
-  const habitAxisValue =
-    outcomeId === 'jianghu_renown_sage'
-      ? (lifeStates?.socialMomentum ?? null)
-      : (lifeStates?.studyHabit ?? null);
+  const habitAxisValue = lifeStates?.studyHabit ?? null;
 
   return {
     pathId: path.id,

@@ -118,10 +118,9 @@ export function buildP37LifetimeTraceFixtures(): LifePathFixture[] {
         reputation: patriarchTerminal.reputation,
         connections: 72,
         money: 56,
-        lifeStates: createDefaultPlayerLifeStates({
-          trainingHabit: patriarchTerminal.trainingHabit,
-          socialMomentum: 2,
-        }),
+      lifeStates: createDefaultPlayerLifeStates({
+        trainingHabit: patriarchTerminal.trainingHabit,
+      }),
       },
       flags: patriarchFlags,
       summarySignals: ['开派祖师', '盟会'],

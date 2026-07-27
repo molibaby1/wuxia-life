@@ -8,16 +8,7 @@ export function resolveP31HabitLedKeyChoiceBridges(
 ): Record<string, unknown> {
   const resolved = { ...flags };
   const lifeStates = player?.lifeStates ?? createDefaultPlayerLifeStates();
-  const socialMomentum = lifeStates.socialMomentum ?? 0;
   const studyHabit = lifeStates.studyHabit ?? 0;
-
-  if (
-    socialMomentum >= 2 &&
-    resolved.p28_social_reputation_reinforced === true &&
-    resolved.medical_poison_path !== true
-  ) {
-    resolved.ally_network = true;
-  }
 
   if (
     studyHabit >= 2 &&
@@ -34,6 +25,10 @@ export function resolveP31HabitLedKeyChoiceBridges(
     resolved.medical_poison_path !== true
   ) {
     resolved.medical_divine_doctor_fame = true;
+  }
+
+  if (resolved.p28_social_reputation_reinforced === true && resolved.medical_poison_path !== true) {
+    resolved.ally_network = true;
   }
 
   return resolved;

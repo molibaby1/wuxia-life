@@ -9,6 +9,10 @@ import path from 'node:path';
 import { EventLoader } from '../src/core/EventLoader';
 import { dailyEvents } from '../src/data/life/dailyEvents';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
+import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { LIFE_MEMORY_SCHEMA_VERSION } from '../src/types/lifeMemory';
+import { inferLivedSelfUnderstanding } from '../src/p19/stateAccess';
+import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -163,6 +167,39 @@ function testNoLegacyHabitFlagConsumers(): void {
   assert(!/["'](?:training_habit|study_habit|business_habit)["']/.test(validation), 'P20 validation fixtures must not use legacy habit flags');
 }
 
+function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
+  const base = createState();
+  base.player.age = 40;
+  base.flags = { origin_id: 'poor_family' };
+  base.player.flags = { origin_id: 'poor_family' };
+  base.player.martialPower = 25;
+  base.player.knowledge = 25;
+  base.player.businessAcumen = 25;
+  base.player.connections = 25;
+  base.player.reputation = 25;
+  const withHabits = (value: number): GameState => {
+    const clone = structuredClone(base);
+    clone.player.lifeStates = createDefaultPlayerLifeStates();
+    clone.player.lifeStates.trainingHabit = value;
+    clone.player.lifeStates.studyHabit = value;
+    clone.player.lifeStates.businessHabit = value;
+    return clone;
+  };
+  const low = withHabits(0);
+  const high = withHabits(5);
+  assert(selectArchetypeFamily(low).familyId === selectArchetypeFamily(high).familyId, 'Habit-only changes must not change P20 archetype');
+  assert(inferLivedSelfUnderstanding(low) === inferLivedSelfUnderstanding(high), 'Habit-only changes must not change lived self identity');
+  const lifeMemory = { schemaVersion: LIFE_MEMORY_SCHEMA_VERSION, derivedAtAge: 40 } as const;
+  assert(buildMainScreenModel(low.player, lifeMemory).tendencySummary === buildMainScreenModel(high.player, lifeMemory).tendencySummary, 'Habit-only changes must not change main-screen tendency ranking');
+}
+
+function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {
+  const source = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
+  const start = source.indexOf('private getFormalEventStateMultiplier');
+  const end = source.indexOf('private getSpecializationMultiplier');
+  assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), 'formal state multiplier must ignore practice habits');
+}
+
 export function runCanonicalHabitPracticeNarrowingTests(): void {
   testExplicitActiveActionHabitEffects();
   testActiveActionDoesNotProjectLegacyHabitFlags();
@@ -172,6 +209,8 @@ export function runCanonicalHabitPracticeNarrowingTests(): void {
   testDailyHabitProducerAndWeightNarrowing();
   testDailyGroupWeightsIgnorePracticeHabits();
   testNoLegacyHabitFlagConsumers();
+  testPracticeHabitsDoNotDefineIdentityOrTendency();
+  testFormalSchedulingSourceDoesNotReadPracticeHabits();
 }
 
 runCanonicalHabitPracticeNarrowingTests();

@@ -167,7 +167,7 @@ console.log('=== Main Screen Model Tests ===\n');
       constitution: 14,
       chivalry: 8,
       reputation: 12,
-      lifeStates: createLifeStates({ businessHabit: P124_NON_MARTIAL_SAMPLE.businessHabit }),
+      lifeStates: createLifeStates(),
     }),
     createLifeMemory({
       routeStatus: {
@@ -191,7 +191,34 @@ console.log('=== Main Screen Model Tests ===\n');
     model.tendencySummary.includes('学识') || model.tendencySummary.includes('经营') || model.tendencySummary.includes('人脉'),
     'merchant sample should surface non-martial life-direction stats',
   );
-  assert(model.shapingSummary === '营生 · 渐成', 'merchant shaping should cooperate with tendency read');
+  const highHabitModel = buildMainScreenModel(
+    createMainScreenPlayer({
+      martialPower: 22,
+      externalSkill: 18,
+      internalSkill: 16,
+      qinggong: 14,
+      knowledge: 24,
+      connections: 22,
+      charisma: 18,
+      businessAcumen: 20,
+      comprehension: 16,
+      constitution: 14,
+      chivalry: 8,
+      reputation: 12,
+      lifeStates: createLifeStates({ businessHabit: 5 }),
+    }),
+    createLifeMemory({
+      routeStatus: {
+        primary: {
+          routeId: P124_NON_MARTIAL_SAMPLE.routeId,
+          name: P124_NON_MARTIAL_SAMPLE.routeName,
+          phase: P124_NON_MARTIAL_SAMPLE.routePhase,
+        },
+        diagnostic: { routeStates: {}, activeRouteFlags: [] },
+      },
+    }),
+  );
+  assert(model.tendencySummary === highHabitModel.tendencySummary, 'businessHabit must not change tendency summary');
   console.log('✓ merchant route surfaces non-martial tendency summary');
 }
 

@@ -2258,21 +2258,8 @@ export class GameEngineIntegration {
     }
 
     const tags = traitSystem.getEventBiasTags(event);
-    const {
-      trainingHabit = 0,
-      studyHabit = 0,
-      familyBond = 0,
-      socialMomentum = 0,
-    } = this.gameState.player.lifeStates;
+    const { familyBond = 0, socialMomentum = 0 } = this.gameState.player.lifeStates;
     let multiplier = 1;
-
-    if (tags.has('training') || tags.has('comprehension')) {
-      const practiceHabit = Math.max(
-        tags.has('training') ? trainingHabit : 0,
-        tags.has('comprehension') ? studyHabit : 0,
-      );
-      multiplier *= this.clampWeight(1 + practiceHabit * 0.06, 1, 1.22);
-    }
 
     if (tags.has('business') || tags.has('social') || tags.has('reputation')) {
       multiplier *= this.clampWeight(1 + socialMomentum * 0.08, 0.7, 1.2);

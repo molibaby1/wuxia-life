@@ -23,7 +23,7 @@
  * Allowed inputs (existing wiring only):
  * - player stats on MainScreenPlayer (martial, mind, jianghu, livelihood fields)
  * - `lifeMemory.routeStatus` (routeId, name, phase — route context, not routeSummary text)
- * - `player.lifeStates` (habit axes for shaping-aligned boosts; not shapingSummary text)
+ * - `player.lifeStates` (social/family context only; not shapingSummary text)
  *
  * Verification samples (locked for P124 narrow tests):
  * - Non-martial: routeId `merchant`, businessHabit >= 2, modest martial stats
@@ -109,14 +109,11 @@ export type MainScreenPlayer = Pick<
 
 export type MainScreenLifeStates = Pick<
   PlayerLifeStates,
-  'trainingHabit' | 'studyHabit' | 'businessHabit' | 'socialMomentum' | 'familyBond'
+  'socialMomentum' | 'familyBond'
 >;
 
 const MARTIAL_DOMINANT_MIN_TOP = 30;
 const MARTIAL_DOMINANT_SPREAD_MAX = 5;
-const BUSINESS_HABIT_TENDENCY_THRESHOLD = 2;
-const STUDY_HABIT_TENDENCY_THRESHOLD = 2;
-const TRAINING_HABIT_TENDENCY_THRESHOLD = 2;
 const SOCIAL_MOMENTUM_TENDENCY_THRESHOLD = 2;
 
 /** P124 locked non-martial verification sample — merchant route with shaping context. */
@@ -124,7 +121,6 @@ export const P124_NON_MARTIAL_SAMPLE = {
   routeId: 'merchant',
   routeName: '商路',
   routePhase: '路线进行中',
-  businessHabit: BUSINESS_HABIT_TENDENCY_THRESHOLD,
 } as const;
 
 /** P124 locked martial-dominant verification sample — clustered martial sub-stats. */
@@ -207,25 +203,6 @@ function tendencyContextMultiplier(
 
   if (isNonMartialRouteContext(lifeMemory) && candidate.bucket === 'martial') {
     multiplier *= 0.55;
-  }
-
-  if ((lifeStates?.businessHabit ?? 0) >= BUSINESS_HABIT_TENDENCY_THRESHOLD) {
-    if (candidate.bucket === 'livelihood' || candidate.key === 'knowledge' || candidate.key === 'connections') {
-      multiplier *= 1.2;
-    }
-    if (candidate.key === 'charisma') {
-      multiplier *= 1.1;
-    }
-  }
-
-  if ((lifeStates?.studyHabit ?? 0) >= STUDY_HABIT_TENDENCY_THRESHOLD) {
-    if (candidate.key === 'knowledge' || candidate.key === 'comprehension') {
-      multiplier *= 1.2;
-    }
-  }
-
-  if ((lifeStates?.trainingHabit ?? 0) >= TRAINING_HABIT_TENDENCY_THRESHOLD && candidate.bucket === 'martial') {
-    multiplier *= 1.15;
   }
 
   if ((lifeStates?.socialMomentum ?? 0) >= SOCIAL_MOMENTUM_TENDENCY_THRESHOLD) {

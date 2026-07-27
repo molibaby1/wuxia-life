@@ -211,11 +211,15 @@ function testFamilyContentRemoval(): void {
 }
 
 function testSocialEventCopyAndExpressions(): void {
-  assertSocialEventRewrite('p42_social_momentum_youth_introduction', 'connections >= 5 || reputation >= 10', {
-    title: '初识引见',
-    text: '你平日积下的口碑，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。',
-    description: 'P42 青年社交：已有门路或口碑带来的引见',
-  });
+  assertSocialEventRewrite(
+    'p42_social_momentum_youth_introduction',
+    '(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)',
+    {
+      title: '初识引见',
+      text: '你平日积下的口碑，让一位长辈愿意把你引荐给更有门路的人。这是青年时少见的机会——接下引见，便要开始维护更上一层的关系。',
+      description: 'P42 青年社交：已有门路或口碑带来的引见',
+    },
+  );
 
   assertSocialEventRewrite('p28_social_momentum_network_fork', 'connections >= 10 || flags.p42_social_youth_intro_accepted == true', {
     title: '人脉成线',

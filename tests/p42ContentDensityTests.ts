@@ -67,7 +67,8 @@ function testP42SocialEventsUseConcretePrerequisites(): void {
   assert(youthIntroduction != null, 'missing p42_social_momentum_youth_introduction');
   assert(
     youthIntroduction?.conditions?.[0]?.type === 'expression'
-      && youthIntroduction.conditions[0].expression === 'connections >= 5 || reputation >= 10',
+      && youthIntroduction.conditions[0].expression ===
+        '(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)',
     'p42_social_momentum_youth_introduction must use the concrete social prerequisite',
   );
 

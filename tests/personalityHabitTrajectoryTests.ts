@@ -273,10 +273,11 @@ function testP42BusinessSocialDensification(): void {
   assertHabitGatedEvent('p42_business_habit_midlife_syndicate', 'businessHabit', 3, 40);
   assertConcreteSocialEvent(
     'p42_social_momentum_youth_introduction',
-    'connections >= 5 || reputation >= 10',
+    '(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)',
     19,
     (state) => {
       state.player.connections = 5;
+      state.flags.p8_route_social = true;
     },
   );
   assertConcreteSocialEvent(

@@ -489,7 +489,7 @@
       {"type": "age_reach", "value": 17}
     ],
     "conditions": [
-      {"type": "expression", "expression": "connections >= 5 || reputation >= 10"}
+      {"type": "expression", "expression": "(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)"}
     ],
     "content": {
       "title": "初识引见",

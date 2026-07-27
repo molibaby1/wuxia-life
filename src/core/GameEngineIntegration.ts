@@ -2365,32 +2365,9 @@ export class GameEngineIntegration {
     const statDelta = (key: keyof typeof nextState.player) =>
       Number((nextState.player as any)[key] || 0) - Number((previousState.player as any)[key] || 0);
 
-    const martialGain =
-      statDelta('martialPower') +
-      statDelta('externalSkill') +
-      statDelta('internalSkill') +
-      statDelta('qinggong');
-    const moneyGain = statDelta('money');
-    const businessGain = statDelta('businessAcumen');
     const socialGain =
       statDelta('charisma') + statDelta('connections') + statDelta('reputation') / 5 + statDelta('influence') * 2;
-    const academicGain = statDelta('comprehension') + statDelta('knowledge') + statDelta('internalSkill');
     const familyGain = statDelta('chivalry') + statDelta('reputation') / 10;
-
-    if ((tags.has('training') || tags.has('risk')) && martialGain >= 8) {
-      lifeStates.trainingHabit = traitSystem.clampLifeState('trainingHabit', (lifeStates.trainingHabit || 0) + 1);
-    }
-
-    if (tags.has('comprehension') && academicGain >= 3) {
-      lifeStates.studyHabit = traitSystem.clampLifeState('studyHabit', (lifeStates.studyHabit || 0) + 1);
-    }
-
-    if (tags.has('business') && (moneyGain >= 25 || businessGain >= 1)) {
-      lifeStates.businessHabit = traitSystem.clampLifeState('businessHabit', (lifeStates.businessHabit || 0) + 1);
-      if (moneyGain >= 150 && lifeStates.familyBond > 0) {
-        lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond - 1);
-      }
-    }
 
     if ((tags.has('social') || tags.has('reputation')) && socialGain >= 3) {
       lifeStates.socialMomentum = traitSystem.clampLifeState('socialMomentum', lifeStates.socialMomentum + 1);
@@ -2400,20 +2377,13 @@ export class GameEngineIntegration {
       lifeStates.familyBond = traitSystem.clampLifeState('familyBond', lifeStates.familyBond + 1);
     }
 
-    const projected = this.projectHabitCompatibilityFlags(
-      lifeStates,
-      nextState.player.flags || {},
-      nextState.flags || {},
-    );
-
     return {
       ...nextState,
       player: {
         ...nextState.player,
-        lifeStates: projected.lifeStates,
-        flags: projected.playerFlags,
+        lifeStates,
       },
-      flags: projected.gameFlags,
+      flags: nextState.flags,
     };
   }
 

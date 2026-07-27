@@ -169,12 +169,6 @@
             "operator": "add"
           },
           {
-            "type": "life_state_change",
-            "target": "studyHabit",
-            "value": 1,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "balancedStart"
           }

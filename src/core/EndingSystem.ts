@@ -18,7 +18,7 @@ import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
-import { buildLateLifeShapingRecapLine } from '../utils/habitShapingSummary';
+import { buildLateLifePracticeRecapLine } from '../utils/practiceTrajectorySummary';
 
 /**
  * 结局类型
@@ -512,7 +512,7 @@ export class EndingSystem {
       return composeP19FinalSummary(state, ending).composedSummary;
     }
 
-    const shapingRecap = buildLateLifeShapingRecapLine(state.player.lifeStates);
+    const shapingRecap = buildLateLifePracticeRecapLine(state.player.lifeStates);
 
     let categoryLine: string;
     if (ending.category === 'positive') {

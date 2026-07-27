@@ -35,7 +35,7 @@ import {
   formatRouteLabel,
   lifecyclePhaseLabel,
 } from '../utils/playerFacingLabels';
-import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
+import { derivePracticeTrajectoryLines } from '../utils/practiceTrajectorySummary';
 import {
   deriveSampleLineAge40Identity,
   deriveSampleLineCurrentGoal,
@@ -887,7 +887,7 @@ function omitEmpty<T>(array: T[] | undefined): T[] | undefined {
 }
 
 function buildHabitTrajectory(state: GameState): LifeMemoryHabitTrajectoryEntry[] {
-  return deriveDominantShapingLines(state.player.lifeStates, 3).map((line, index) => ({
+  return derivePracticeTrajectoryLines(state.player.lifeStates, 3).map((line, index) => ({
     id: `habit-trajectory-${index}`,
     label: line.label,
     tierLabel: line.tierLabel,

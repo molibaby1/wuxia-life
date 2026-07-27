@@ -851,7 +851,6 @@ export interface P19FinalSummaryComposition {
   /** P43: dominant long-term shaping recap for late-life closure. */
   shapingRecapLine?: string;
   /** P43: same-route-family tone keyed by shaping pattern. */
-  shapingPatternToneLine?: string;
 }
 
 export type ArchetypeFamilyKind =

@@ -13,6 +13,8 @@ import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import { LIFE_MEMORY_SCHEMA_VERSION } from '../src/types/lifeMemory';
 import { inferLivedSelfUnderstanding } from '../src/p19/stateAccess';
 import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
+import { buildLateLifePracticeRecapLine, derivePracticeTrajectoryLines } from '../src/utils/practiceTrajectorySummary';
+import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -200,6 +202,22 @@ function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {
   assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), 'formal state multiplier must ignore practice habits');
 }
 
+function testPracticeTrajectoryIsDescriptiveOnly(): void {
+  const state = createState();
+  state.player.lifeStates = { ...createDefaultPlayerLifeStates(), trainingHabit: 3, studyHabit: 4, businessHabit: 2, socialMomentum: 5, familyBond: 5 };
+  assertDeepEqual(derivePracticeTrajectoryLines(state.player.lifeStates, 3).map(line => line.label), ['读书实践', '练功实践', '营生实践'], 'practice trajectory must include only three practice habits');
+  const recap = buildLateLifePracticeRecapLine(state.player.lifeStates);
+  assert(recap.includes('读书实践'), 'recap names practice');
+  assert(!/塑形|入骨|立身|身份|主轴|绝活/.test(recap), 'recap must not claim identity');
+  const memory = deriveLifeMemorySummary(state);
+  assert((memory.habitTrajectory ?? []).every(item => /实践$/.test(item.label)), 'Life Memory labels must be practice labels');
+}
+
+function testIdentityEndingToneHelperIsRemoved(): void {
+  const source = fs.readFileSync(path.resolve('src/utils/habitShapingSummary.ts'), 'utf8') + fs.readFileSync(path.resolve('src/p19/finalSummaryComposition.ts'), 'utf8');
+  assert(!source.includes('buildShapingPatternEndingTone'), 'identity ending tone helper must be removed');
+}
+
 export function runCanonicalHabitPracticeNarrowingTests(): void {
   testExplicitActiveActionHabitEffects();
   testActiveActionDoesNotProjectLegacyHabitFlags();
@@ -211,6 +229,8 @@ export function runCanonicalHabitPracticeNarrowingTests(): void {
   testNoLegacyHabitFlagConsumers();
   testPracticeHabitsDoNotDefineIdentityOrTendency();
   testFormalSchedulingSourceDoesNotReadPracticeHabits();
+  testPracticeTrajectoryIsDescriptiveOnly();
+  testIdentityEndingToneHelperIsRemoved();
 }
 
 runCanonicalHabitPracticeNarrowingTests();

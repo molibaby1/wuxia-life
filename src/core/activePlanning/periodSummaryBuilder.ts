@@ -1,5 +1,5 @@
 import type { PeriodSummaryDisplay } from '../../types/activeActionTypes';
-import { buildShapingPeriodGrowthLine } from '../../utils/habitShapingSummary';
+import { buildPracticePeriodGrowthLine } from '../../utils/practiceTrajectorySummary';
 import type { PlayerLifeStates } from '../../types/eventTypes';
 
 const STAT_LABELS: Record<string, string> = {
@@ -41,7 +41,7 @@ export function buildPeriodSummary(params: {
   const statDeltaSummary = formatStatDeltaSummary(deltas);
   const hasDelta = statDeltaSummary !== '本期未见明显数值变化';
   const cause = params.deltaCause ?? params.headline;
-  const shapingLine = buildShapingPeriodGrowthLine(params.lifeStates);
+  const shapingLine = buildPracticePeriodGrowthLine(params.lifeStates);
   const body = shapingLine ? `${params.body}\n\n${shapingLine}` : params.body;
   const narrativeText = hasDelta
     ? `${body}（因「${cause}」，${statDeltaSummary}）`

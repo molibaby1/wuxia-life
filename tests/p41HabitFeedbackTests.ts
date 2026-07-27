@@ -1,9 +1,8 @@
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
-import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import { generateChoiceFeedback } from '../src/core/ChoiceFeedbackGenerator';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import type { PlayerState } from '../src/types/eventTypes';
-import { formatLongTermFlag } from '../src/utils/playerFacingLabels';
+import { derivePracticeTrajectoryLines } from '../src/utils/practiceTrajectorySummary';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -22,13 +21,12 @@ function baseLifeStates(): PlayerState['lifeStates'] {
 console.log('=== P41 Habit Feedback Regression ===\n');
 
 {
-  const summary = buildCurrentShapingSummary({
+  const summary = derivePracticeTrajectoryLines({
     ...baseLifeStates(),
     studyHabit: 3,
     businessHabit: 2,
   });
-  assert(summary === '饱学 · 成形 / 营生 · 渐成', 'shaping summary uses readable labels');
-  assert(!summary.includes('studyHabit'), 'shaping summary must not expose raw keys');
+  assert(summary.map(line => line.label).join(' / ') === '读书实践 / 营生实践', 'practice summary uses readable labels');
   console.log('✓ player-facing shaping summary output');
 }
 
@@ -45,7 +43,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       reputation: 10,
       money: 50,
       sect: '少林',
-      lifeStates: { ...baseLifeStates(), trainingHabit: 3 },
+      lifeStates: { ...baseLifeStates(), socialMomentum: 3 },
     },
     {
       schemaVersion: '1.0.0',
@@ -56,7 +54,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       },
     },
   );
-  assert(model.shapingSummary.includes('习武'), 'main screen model exposes shaping summary');
+  assert(model.shapingSummary.includes('人情'), 'main screen model exposes remaining shaping summary');
   console.log('✓ main screen shaping integration');
 }
 
@@ -97,9 +95,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
     beforePlayer: player({ businessHabit: 1 }),
     afterPlayer: player({ businessHabit: 2 }),
   });
-  const shapingFlag = feedback.player.longTermFlags.find((item) => item.flag === 'shaping_businessHabit_up');
-  assert(shapingFlag?.visibility === 'player', 'business shaping hint should be player-visible');
-  assert(formatLongTermFlag('shaping_businessHabit_up', true) === '营生塑形加深', 'business shaping copy');
+  assert(!feedback.player.longTermFlags.some((item) => item.flag === 'shaping_businessHabit_up'), 'business habit must not use shaping feedback');
   console.log('✓ choice feedback shaping hints');
 }
 
@@ -151,8 +147,8 @@ console.log('=== P41 Habit Feedback Regression ===\n');
   };
   const memory = deriveLifeMemorySummary(state);
   const lines = (memory.habitTrajectory ?? []).map((entry) => `${entry.label} · ${entry.tierLabel}`).join(', ');
-  assert(lines.includes('亲族牵绊'), 'life memory recap includes family bond shaping');
-  assert(lines.includes('饱学塑形'), 'life memory recap includes study shaping');
+  assert(lines.includes('读书实践'), 'life memory recap includes study practice');
+  assert(!lines.includes('亲族牵绊'), 'life memory practice trajectory excludes family shaping');
   console.log('✓ life memory habit trajectory recap');
 }
 

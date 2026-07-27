@@ -1,11 +1,7 @@
 import type { EndingInfo } from '../core/EndingSystem';
 import type { P19FinalSummaryComposition } from '../narrative/profile/types';
 import type { GameState } from '../types/eventTypes';
-import {
-  buildLateLifeShapingRecapLine,
-  buildShapingPatternEndingTone,
-} from '../utils/habitShapingSummary';
-import { readMergedFlags } from '../p17/stateAccess';
+import { buildLateLifePracticeRecapLine } from '../utils/practiceTrajectorySummary';
 import { buildLaterLifeLegacyReport } from '../p18/laterLifeLegacySelection';
 import { buildEndgameCategoryReport } from './endgameCategories';
 import { buildHistoricalMemoryReport } from './historicalMemory';
@@ -50,11 +46,7 @@ export function composeP19FinalSummary(
         : [];
 
   const legacyLine = legacyContinuationLine(state, worldId);
-  const shapingRecapLine = buildLateLifeShapingRecapLine(state.player?.lifeStates);
-  const shapingPatternToneLine = buildShapingPatternEndingTone(
-    state.player?.lifeStates,
-    readMergedFlags(state),
-  );
+  const shapingRecapLine = buildLateLifePracticeRecapLine(state.player?.lifeStates);
   const historicalMemoryLines = [
     memoryReport.posthumousReputation,
     memoryReport.divergenceScore >= 0.35
@@ -65,7 +57,6 @@ export function composeP19FinalSummary(
   const sections = [
     personalFateLine(ending, categoryReport.selectedCategory.label),
     shapingRecapLine,
-    ...(shapingPatternToneLine ? [shapingPatternToneLine] : []),
     ...recoveryLines,
     legacyLine,
     ...historicalMemoryLines,
@@ -79,7 +70,6 @@ export function composeP19FinalSummary(
     historicalMemoryLines,
     composedSummary: sections.join('\n'),
     shapingRecapLine,
-    shapingPatternToneLine: shapingPatternToneLine || undefined,
   };
 }
 

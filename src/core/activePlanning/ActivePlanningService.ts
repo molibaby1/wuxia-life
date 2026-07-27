@@ -21,6 +21,7 @@ import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder'
 import {
   collectShapingLongTermImpactLines,
 } from '../../utils/habitShapingSummary';
+import { collectPracticeImpactLines } from '../../utils/practiceTrajectorySummary';
 import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
 import type {
   ActiveActionSummaryDisplay,
@@ -260,7 +261,10 @@ function collectActiveActionLongTermImpactLines(
   flagsBefore: Record<string, unknown>,
   flagsAfter: Record<string, unknown>,
 ): string[] {
-  const lines = collectShapingLongTermImpactLines(beforeLifeStates, afterLifeStates);
+  const lines = [
+    ...collectPracticeImpactLines(beforeLifeStates, afterLifeStates),
+    ...collectShapingLongTermImpactLines(beforeLifeStates, afterLifeStates),
+  ];
   for (const flag of onCompleteFlags) {
     if (flagsBefore[flag] || !flagsAfter[flag]) {
       continue;

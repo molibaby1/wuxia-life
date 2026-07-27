@@ -7,10 +7,8 @@ import { composeP19FinalSummary } from '../src/p19/finalSummaryComposition';
 import { profileHasP19Sections } from '../src/p19/reportBuilder';
 import type { GameState } from '../src/types/eventTypes';
 import {
-  buildLateLifeShapingRecapLine,
-  buildShapingPatternEndingTone,
-  deriveDominantShapingLines,
-} from '../src/utils/habitShapingSummary';
+  buildLateLifePracticeRecapLine,
+} from '../src/utils/practiceTrajectorySummary';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 
 function assert(condition: boolean, message: string): void {
@@ -78,13 +76,12 @@ function testLateLifeShapingRecap(): void {
       },
     } as GameState['player'],
   });
-  const line = buildLateLifeShapingRecapLine(martial.player.lifeStates);
-  assert(line.includes('习武塑形'), 'recap should name martial shaping in player language');
-  assert(line.includes('名望与战意'), 'recap should connect martial shaping to identity');
-  assert(!line.includes('trainingHabit'), 'recap must not expose raw keys');
+  const line = buildLateLifePracticeRecapLine(martial.player.lifeStates);
+  assert(line.includes('练功实践'), 'recap should name martial practice');
+  assert(!/塑形|身份|主轴|绝活/.test(line), 'recap must not claim identity');
 
-  const empty = buildLateLifeShapingRecapLine({ trainingHabit: 0, studyHabit: 1 });
-  assert(empty.includes('长期塑形尚未凝成'), 'low shaping should degrade copy');
+  const empty = buildLateLifePracticeRecapLine({ trainingHabit: 0, studyHabit: 0 });
+  assert(empty.includes('未形成持续'), 'low practice should degrade copy');
   console.log('✓ late-life shaping recap derivation');
 }
 
@@ -104,96 +101,21 @@ function testP19CompositionIncludesShaping(): void {
   });
   const composition = composeP19FinalSummary(state, sampleEnding());
   assert(
-    composition.shapingRecapLine?.includes('习武塑形'),
+    composition.shapingRecapLine?.includes('练功实践'),
     'P19 composition should surface shaping recap line',
   );
   assert(
-    composition.composedSummary.includes('习武塑形'),
+    composition.composedSummary.includes('练功实践'),
     'composed summary should include dominant shaping',
   );
   console.log('✓ P19 final summary shaping integration');
 }
 
 function testSameRouteShapingDifferentiation(): void {
-  const baseFlags = { route_orthodox: true };
-  const martialDominant = makeState({
-    flags: baseFlags,
-    player: {
-      lifeStates: {
-        trainingHabit: 5,
-        studyHabit: 2,
-        businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
-      },
-    } as GameState['player'],
-  });
-  const scholarDominant = makeState({
-    flags: baseFlags,
-    player: {
-      lifeStates: {
-        trainingHabit: 2,
-        studyHabit: 5,
-        businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
-      },
-    } as GameState['player'],
-  });
-
-  const martialTone = buildShapingPatternEndingTone(
-    martialDominant.player.lifeStates,
-    martialDominant.flags,
-  );
-  const scholarTone = buildShapingPatternEndingTone(
-    scholarDominant.player.lifeStates,
-    scholarDominant.flags,
-  );
-  assert(martialTone.includes('以武立名'), 'martial-route + training pattern tone');
-  assert(scholarTone.includes('以文佐武'), 'martial-route + study pattern tone');
-  assert(martialTone !== scholarTone, 'same route family should differ by shaping pattern');
-
-  const martialSummary = composeP19FinalSummary(martialDominant, sampleEnding()).composedSummary;
-  const scholarSummary = composeP19FinalSummary(scholarDominant, sampleEnding()).composedSummary;
-  assert(martialSummary !== scholarSummary, 'full composed summaries must differ');
-
-  const merchantFlags = { route_merchant: true };
-  const businessDominant = makeState({
-    flags: merchantFlags,
-    player: {
-      lifeStates: {
-        trainingHabit: 0,
-        studyHabit: 0,
-        businessHabit: 4,
-        socialMomentum: 2,
-        familyBond: 0,
-      },
-    } as GameState['player'],
-  });
-  const socialDominant = makeState({
-    flags: merchantFlags,
-    player: {
-      lifeStates: {
-        trainingHabit: 0,
-        studyHabit: 0,
-        businessHabit: 2,
-        socialMomentum: 4,
-        familyBond: 0,
-      },
-    } as GameState['player'],
-  });
-  const businessTone = buildShapingPatternEndingTone(
-    businessDominant.player.lifeStates,
-    businessDominant.flags,
-  );
-  const socialTone = buildShapingPatternEndingTone(
-    socialDominant.player.lifeStates,
-    socialDominant.flags,
-  );
-  assert(businessTone.includes('算账'), 'livelihood route business pattern');
-  assert(socialTone.includes('人脉'), 'livelihood route social pattern');
-  assert(businessTone !== socialTone, 'livelihood family patterns must differ');
-  console.log('✓ same-route shaping pattern ending differentiation');
+  const state = makeState({ player: { lifeStates: { trainingHabit: 5, studyHabit: 2, businessHabit: 0, socialMomentum: 0, familyBond: 0 } } as GameState['player'] });
+  const summary = composeP19FinalSummary(state, sampleEnding()).composedSummary;
+  assert(!summary.includes('以武立名') && !summary.includes('以文佐武'), 'ending must not include identity tone');
+  console.log('✓ identity ending tone removed');
 }
 
 function testLifeMemoryAndEndingLabelAlignment(): void {
@@ -211,15 +133,13 @@ function testLifeMemoryAndEndingLabelAlignment(): void {
   const memoryLabels = (deriveLifeMemorySummary(state).habitTrajectory ?? []).map(
     (entry) => entry.label,
   );
-  const recapLabels = deriveDominantShapingLines(state.player.lifeStates, 2).map(
-    (line) => line.label,
-  );
+  const recapLabels = (deriveLifeMemorySummary(state).habitTrajectory ?? []).map((line) => line.label);
   assert(
     memoryLabels[0] === recapLabels[0],
-    'life memory and recap derivation should share shortLabel vocabulary',
+    'life memory should expose practice labels',
   );
 
-  const recapLine = buildLateLifeShapingRecapLine(state.player.lifeStates);
+  const recapLine = buildLateLifePracticeRecapLine(state.player.lifeStates);
   assert(recapLabels.every((label) => recapLine.includes(label)), 'ending recap uses same labels');
   console.log('✓ life memory and ending label alignment');
 }

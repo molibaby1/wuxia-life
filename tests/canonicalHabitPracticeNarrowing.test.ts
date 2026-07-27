@@ -7,6 +7,8 @@ import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import fs from 'node:fs';
 import path from 'node:path';
 import { EventLoader } from '../src/core/EventLoader';
+import { dailyEvents } from '../src/data/life/dailyEvents';
+import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -106,12 +108,57 @@ function testFormalEventTagsDoNotAutoCreateHabit(): void {
   assert(!/moneyGain\s*>=\s*25[\s\S]{0,320}businessHabit/.test(source), 'business gain threshold must not create businessHabit');
 }
 
+function findDailyEvent(id: string) {
+  const event = dailyEvents.find(item => item.id === id);
+  if (!event) throw new Error(`daily event not found: ${id}`);
+  return event;
+}
+
+function testDailyHabitProducerAndWeightNarrowing(): void {
+  for (const event of dailyEvents) {
+    assert(!('longTermHooks' in event), `${event.id} must not expose longTermHooks`);
+    const habitPreferences = (event.preferredStates ?? []).filter(rule =>
+      rule.state === 'trainingHabit' || rule.state === 'studyHabit' || rule.state === 'businessHabit');
+    assert(habitPreferences.length === 0, `${event.id} must not use Habit as preferredStates weight`);
+  }
+
+  const bottleneck = findDailyEvent('daily_training_bottleneck');
+  const positive = bottleneck.variants.positive.find(item => item.id === 'daily_training_bottleneck_pos_1');
+  assert(
+    positive?.stateEffects?.some(effect => effect.state === 'trainingHabit' && effect.value === 1) === true,
+    'training bottleneck explicit producer must remain',
+  );
+}
+
+function testDailyGroupWeightsIgnorePracticeHabits(): void {
+  const state = createState();
+  state.player.age = 20;
+  state.player.lifeStates = createDefaultPlayerLifeStates();
+  state.player.lifeStates.trainingHabit = 0;
+  state.player.lifeStates.studyHabit = 0;
+  const training = findDailyEvent('daily_morning_training');
+  const study = findDailyEvent('daily_copybook_practice');
+  const getWeight = (dailyEventSystem as unknown as {
+    getWeight(config: typeof training, state: GameState): number;
+  }).getWeight.bind(dailyEventSystem);
+
+  const lowTraining = getWeight(training, state);
+  const lowStudy = getWeight(study, state);
+  state.player.lifeStates.trainingHabit = 5;
+  state.player.lifeStates.studyHabit = 5;
+
+  assert(getWeight(training, state) === lowTraining, 'trainingHabit must not change daily training weight');
+  assert(getWeight(study, state) === lowStudy, 'studyHabit must not change daily study weight');
+}
+
 export function runCanonicalHabitPracticeNarrowingTests(): void {
   testExplicitActiveActionHabitEffects();
   testActiveActionDoesNotProjectLegacyHabitFlags();
   testEchoFlagDoesNotCreateHabit();
   testRejectedExplicitFormalProducersAreRemoved();
   testFormalEventTagsDoNotAutoCreateHabit();
+  testDailyHabitProducerAndWeightNarrowing();
+  testDailyGroupWeightsIgnorePracticeHabits();
 }
 
 runCanonicalHabitPracticeNarrowingTests();

@@ -2,8 +2,6 @@ import { EventLoader } from '../src/core/EventLoader';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import type { GameState } from '../src/types/eventTypes';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { dailyEventSystem } from '../src/core/DailyEventSystem';
-import { dailyEvents } from '../src/data/life/dailyEvents';
 import { runP20HabitTrajectorySlice } from '../src/p20/habitTrajectorySlice';
 import { runP25HabitTrajectorySlice } from '../src/p25/habitTrajectorySlice';
 import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
@@ -90,30 +88,6 @@ function assertHabitGatedEvent(
     evaluator.evaluate({ type: 'expression', expression }, state) === true,
     `${eventId} should trigger from ${habitKey}=${habitValue} without legacy habit flag`,
   );
-}
-
-async function testDailyHookRuntime(): Promise<void> {
-  const engine = new GameEngineIntegration() as any;
-  const state = engine.getGameState();
-  state.player.age = 18;
-  state.player.lifeStates = {
-    ...state.player.lifeStates,
-    trainingHabit: 0,
-    studyHabit: 0,
-    businessHabit: 0,
-  };
-  state.flags = {};
-  state.player.flags = {};
-
-  const trainingConfig = dailyEvents.find((event) => event.id === 'daily_morning_training');
-  assert(trainingConfig, 'missing daily_morning_training config');
-
-  const buildDailyEvent = (dailyEventSystem as any).buildEvent.bind(dailyEventSystem);
-  await engine.executeAutoEvent(buildDailyEvent(trainingConfig, state));
-  assert(engine.getGameState().player.lifeStates.trainingHabit === 1, 'first trainingHabit increment');
-  await engine.executeAutoEvent(buildDailyEvent(trainingConfig, engine.getGameState()));
-  assert(engine.getGameState().player.lifeStates.trainingHabit === 2, 'second trainingHabit increment');
-  assert(engine.getGameState().flags.training_habit === true, 'training_habit compatibility flag projected');
 }
 
 function testConditionEvaluatorLifeStateAccess(): void {
@@ -332,7 +306,6 @@ function testP29MedicalAndSocialRegression(): void {
 }
 
 async function main(): Promise<void> {
-  await testDailyHookRuntime();
   testConditionEvaluatorLifeStateAccess();
   assertHabitGatedEvent('p21_scholar_route_reinforcement', 'studyHabit', 2, 22);
   assertHabitGatedEvent('p21_martial_route_reinforcement', 'trainingHabit', 2, 20);

@@ -65,22 +65,12 @@ function testLivelihoodDailyEventsAccumulateBusinessHabit(): void {
   const livelihoodEvents = dailyEvents.filter(event => event.group === 'livelihood');
   assert(livelihoodEvents.length >= 3, 'expected livelihood daily events');
   for (const event of livelihoodEvents) {
-    assert(
-      event.longTermHooks?.addTendency?.includes('business_habit') === true,
-      `${event.id} should add business_habit long-term tendency`,
-    );
+    assert(!('longTermHooks' in event), `${event.id} must not expose longTermHooks`);
   }
 }
 
 function testLivelihoodDailyEventsHaveEarlyRepeatBoost(): void {
-  const boosted = dailyEvents
-    .filter(event => event.group === 'livelihood')
-    .filter(event =>
-      event.longTermHooks?.addStateOnRepeat?.some(rule =>
-        rule.state === 'businessHabit' && rule.repeatThreshold <= 2 && rule.increment >= 1,
-      ),
-    );
-  assert(boosted.length >= 2, `expected >=2 livelihood repeat boosts, got ${boosted.length}`);
+  assert(dailyEvents.every(event => !('longTermHooks' in event)), 'DailyEvent configs must not expose repeat hooks');
 }
 
 function testStudyDailyEventsAccumulateStudyHabit(): void {
@@ -88,8 +78,8 @@ function testStudyDailyEventsAccumulateStudyHabit(): void {
   assert(studyEvents.length >= 2, `expected >=2 study daily events, got ${studyEvents.length}`);
   for (const event of studyEvents) {
     assert(
-      event.longTermHooks?.addTendency?.includes('study_habit') === true,
-      `${event.id} should add study_habit long-term tendency`,
+      !('longTermHooks' in event),
+      `${event.id} must not expose longTermHooks`,
     );
   }
 }

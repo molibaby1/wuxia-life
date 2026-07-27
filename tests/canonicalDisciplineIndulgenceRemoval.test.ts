@@ -37,11 +37,9 @@ function testCanonicalLifeStates(): void {
 
 function testDailyEventMapping(): void {
   const preferredState = (id: string) => findDailyEvent(id).preferredStates ?? [];
-  assert(preferredState('daily_morning_training').some(rule => rule.state === 'trainingHabit' && rule.min === 1), 'morning training must prefer trainingHabit >= 1');
-  assert(preferredState('daily_skip_training').some(rule => rule.state === 'trainingHabit' && rule.min === 2), 'skip training must prefer trainingHabit >= 2');
-  assert(preferredState('daily_training_bottleneck').some(rule => rule.state === 'trainingHabit' && rule.min === 2), 'training bottleneck must prefer trainingHabit >= 2');
-  assert(preferredState('daily_copybook_practice').some(rule => rule.state === 'studyHabit' && rule.min === 1), 'copybook practice must prefer studyHabit >= 1');
-  assert(preferredState('daily_reading_notes').some(rule => rule.state === 'studyHabit' && rule.min === 1), 'reading notes must prefer studyHabit >= 1');
+  for (const id of ['daily_morning_training', 'daily_skip_training', 'daily_training_bottleneck', 'daily_copybook_practice', 'daily_reading_notes']) {
+    assert(!preferredState(id).some(rule => rule.state === 'trainingHabit' || rule.state === 'studyHabit' || rule.state === 'businessHabit'), `${id} must not prefer practice habits`);
+  }
   assertNoLegacyState(preferredState('daily_second_guess'), 'second guess must not prefer legacy state');
   assert(findDailyEvent('daily_morning_training').outcomeBias?.positiveByTraits?.includes('disciplined') === true, 'disciplined trait outcome bias must remain');
 
@@ -54,7 +52,7 @@ function testDailyEventMapping(): void {
     ]) {
       assertNoLegacyState(variant.stateEffects, `${variant.id} must not produce legacy states`);
     }
-    assertNoLegacyState(event.longTermHooks?.addStateOnRepeat, `${event.id} repeat hook must not use legacy states`);
+    assert(!('longTermHooks' in event), `${event.id} must not expose longTermHooks`);
   }
 }
 
@@ -62,8 +60,8 @@ function testDailyEventSchedulingConsumers(): void {
   const source = fs.readFileSync(path.resolve('src/core/DailyEventSystem.ts'), 'utf8');
   assert(!/lifeStates[^\n]*\.(?:discipline|indulgence)/.test(source), 'DailyEventSystem must not read legacy life states');
   assert(!/positive \+= discipline/.test(source), 'DailyEventSystem must not apply global discipline outcome bonus');
-  assert(source.includes('trainingHabit'), 'DailyEventSystem must use trainingHabit for training group');
-  assert(source.includes('studyHabit'), 'DailyEventSystem must use studyHabit for study group');
+  assert(!/getGroupStateMultiplier[\s\S]*trainingHabit/.test(source), 'DailyEventSystem group multiplier must ignore trainingHabit');
+  assert(!/getGroupStateMultiplier[\s\S]*studyHabit/.test(source), 'DailyEventSystem group multiplier must ignore studyHabit');
 }
 
 function testFormalEventConsumers(): void {
@@ -72,9 +70,6 @@ function testFormalEventConsumers(): void {
   assert(!source.includes('getFormalEventOutcomeFriction'), 'Formal Event friction helper must be removed');
   assert(!source.includes('shrinkPositiveGain'), 'Formal Event gain shrinking helper must be removed');
   assert(!source.includes('buildPartialOutcomeNote'), 'Formal Event partial outcome helper must be removed');
-  assert(source.includes('trainingHabit'), 'Formal Event scheduling must use trainingHabit');
-  assert(source.includes('studyHabit'), 'Formal Event scheduling must use studyHabit');
-  assert(source.includes('Math.max('), 'Formal Event combined training/comprehension habit must use max');
 }
 
 function testEndingConsumers(): void {

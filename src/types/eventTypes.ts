@@ -373,14 +373,6 @@ export interface DailyEventConfig {
     positiveByOrigins?: OriginId[];
     negativeByOrigins?: OriginId[];
   };
-  longTermHooks?: {
-    addTendency?: string[];
-    addStateOnRepeat?: Array<{
-      state: LifeStateKey;
-      increment: number;
-      repeatThreshold: number;
-    }>;
-  };
   /** Optional origin gate probe metadata for daily pool entries (Stage-7). */
   spineOriginStageFit?: string[];
 }

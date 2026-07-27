@@ -9,9 +9,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 40,
     preferredTraits: ['martial_born', 'keen_mind', 'unyielding', 'disciplined'],
     suppressedTraits: ['lazy', 'indulgent'],
-    preferredStates: [
-      { state: 'trainingHabit', min: 1, weightMultiplier: 1.2 },
-    ],
     variants: {
       positive: [
         {
@@ -44,9 +41,6 @@ export const dailyEvents: DailyEventConfig[] = [
       positiveByTraits: ['disciplined', 'martial_born'],
       negativeByTraits: ['lazy', 'unstable_mood'],
     },
-    longTermHooks: {
-      addTendency: ['training_habit'],
-    },
   },
   {
     id: 'daily_skip_training',
@@ -56,9 +50,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 28,
     preferredTraits: ['lazy', 'indulgent', 'unstable_mood'],
     suppressedTraits: ['disciplined', 'unyielding'],
-    preferredStates: [
-      { state: 'trainingHabit', min: 2, weightMultiplier: 0.8 },
-    ],
     variants: {
       positive: [
         {
@@ -97,9 +88,6 @@ export const dailyEvents: DailyEventConfig[] = [
     baseWeight: 24,
     preferredTraits: ['martial_born', 'keen_mind', 'grand_dreams_poor_followthrough'],
     suppressedTraits: ['lazy'],
-    preferredStates: [
-      { state: 'trainingHabit', min: 2, weightMultiplier: 1.15 },
-    ],
     variants: {
       positive: [
         {
@@ -140,9 +128,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['keen_mind', 'disciplined'],
     preferredOrigins: ['scholar_house'],
     suppressedTraits: ['lazy', 'unstable_mood'],
-    preferredStates: [
-      { state: 'studyHabit', min: 1, weightMultiplier: 1.12 },
-    ],
     variants: {
       positive: [
         {
@@ -175,9 +160,6 @@ export const dailyEvents: DailyEventConfig[] = [
       positiveByTraits: ['keen_mind', 'disciplined'],
       negativeByTraits: ['unstable_mood'],
     },
-    longTermHooks: {
-      addTendency: ['study_habit'],
-    },
   },
   {
     id: 'daily_reading_notes',
@@ -188,9 +170,6 @@ export const dailyEvents: DailyEventConfig[] = [
     preferredTraits: ['keen_mind', 'grand_dreams_poor_followthrough'],
     preferredOrigins: ['scholar_house'],
     suppressedTraits: ['indulgent'],
-    preferredStates: [
-      { state: 'studyHabit', min: 1, weightMultiplier: 1.08 },
-    ],
     variants: {
       positive: [
         {
@@ -223,9 +202,6 @@ export const dailyEvents: DailyEventConfig[] = [
     outcomeBias: {
       positiveByTraits: ['keen_mind'],
       negativeByTraits: ['soft_eared'],
-    },
-    longTermHooks: {
-      addTendency: ['study_habit'],
     },
   },
   {
@@ -271,10 +247,6 @@ export const dailyEvents: DailyEventConfig[] = [
       positiveByTraits: ['iron_abacus', 'profit_driven'],
       negativeByTraits: ['grand_dreams_poor_followthrough'],
     },
-    longTermHooks: {
-      addTendency: ['business_habit'],
-      addStateOnRepeat: [{ state: 'businessHabit', increment: 1, repeatThreshold: 2 }],
-    },
   },
   {
     id: 'daily_small_trade',
@@ -318,10 +290,6 @@ export const dailyEvents: DailyEventConfig[] = [
       positiveByTraits: ['iron_abacus', 'profit_driven'],
       negativeByTraits: ['soft_eared'],
     },
-    longTermHooks: {
-      addTendency: ['business_habit'],
-      addStateOnRepeat: [{ state: 'businessHabit', increment: 1, repeatThreshold: 2 }],
-    },
   },
   {
     id: 'daily_tight_budget',
@@ -360,9 +328,6 @@ export const dailyEvents: DailyEventConfig[] = [
     outcomeBias: {
       positiveByTraits: ['unyielding'],
       negativeByTraits: ['indulgent'],
-    },
-    longTermHooks: {
-      addTendency: ['business_habit'],
     },
   },
   {

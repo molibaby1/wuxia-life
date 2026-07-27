@@ -60,6 +60,8 @@ console.log('=== P4 US-023: Contract Validation Helper Tests ===\n');
   const invalidCases: Array<[string, (lifeStates: any) => void]> = [
     ['discipline', lifeStates => { lifeStates.discipline = 1; }],
     ['indulgence', lifeStates => { lifeStates.indulgence = 1; }],
+    ['familyBond', lifeStates => { lifeStates.familyBond = 1; }],
+    ['socialMomentum', lifeStates => { lifeStates.socialMomentum = 1; }],
     ['missing trainingHabit', lifeStates => { delete lifeStates.trainingHabit; }],
     ['unknown extraState', lifeStates => { lifeStates.extraState = 1; }],
     ['trainingHabit -1', lifeStates => { lifeStates.trainingHabit = -1; }],

@@ -213,8 +213,8 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   defaultSnapshotConverter.fromSnapshot(valid);
 
   const legacy = JSON.parse(JSON.stringify(valid)) as any;
-  legacy.metadata.schemaVersion = '3.5.0';
-  assert(!validateGameStateSnapshot(legacy).ok, 'snapshot schema 3.5.0 must be rejected');
+  legacy.metadata.schemaVersion = '3.7.0';
+  assert(!validateGameStateSnapshot(legacy).ok, 'snapshot schema 3.7.0 must be rejected');
 
   const legacyField = JSON.parse(JSON.stringify(valid)) as any;
   legacyField.state.player.lifeStates.discipline = 1;
@@ -226,6 +226,19 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
     threw = true;
   }
   assert(threw, 'converter must reject legacy discipline field');
+
+  for (const key of ['familyBond', 'socialMomentum']) {
+    const oldAxis = JSON.parse(JSON.stringify(valid)) as any;
+    oldAxis.state.player.lifeStates[key] = 1;
+    assert(!validateGameStateSnapshot(oldAxis).ok, `${key} snapshot must be rejected`);
+    let axisThrew = false;
+    try {
+      defaultSnapshotConverter.fromSnapshot(oldAxis);
+    } catch {
+      axisThrew = true;
+    }
+    assert(axisThrew, `converter must reject ${key}`);
+  }
   console.log('✓ lifeStates snapshot validation and conversion boundary');
 }
 
@@ -254,7 +267,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.7\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.8\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

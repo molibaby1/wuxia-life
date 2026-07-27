@@ -12,6 +12,10 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
+import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
+import { gameStateSnapshotAge50 } from '../src/contracts/fixtures/gameStateSnapshotAge50';
+import { validateGameStateSnapshot, validatePlayerLifeStates } from '../src/contracts/validation/contractValidation';
+import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -314,6 +318,47 @@ function testShapingUIIdentityEndingFeedbackRemoved(): void {
   }
 }
 
+function testSnapshot380Boundary(): void {
+  assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.8.0', 'Snapshot schema must be 3.8.0');
+  assert(validatePlayerLifeStates({ trainingHabit: 0, studyHabit: 0, businessHabit: 0 }).ok, 'three-key lifeStates pass');
+
+  for (const key of ['familyBond', 'socialMomentum']) {
+    const invalid = { trainingHabit: 0, studyHabit: 0, businessHabit: 0, [key]: 1 };
+    assert(!validatePlayerLifeStates(invalid).ok, `${key} must be forbidden`);
+  }
+
+  const oldVersion = structuredClone(gameStateSnapshotAge50) as any;
+  oldVersion.metadata.schemaVersion = '3.7.0';
+  assert(!validateGameStateSnapshot(oldVersion).ok, '3.7.0 snapshot must be rejected');
+
+  for (const key of ['familyBond', 'socialMomentum']) {
+    const invalid = structuredClone(gameStateSnapshotAge50) as any;
+    invalid.state.player.lifeStates[key] = 1;
+    assert(!validateGameStateSnapshot(invalid).ok, `${key} snapshot must be rejected`);
+    let threw = false;
+    try {
+      defaultSnapshotConverter.fromSnapshot(invalid);
+    } catch {
+      threw = true;
+    }
+    assert(threw, `converter must reject ${key}`);
+  }
+
+  const runtime = defaultSnapshotConverter.fromSnapshot(structuredClone(gameStateSnapshotAge50));
+  (runtime.player.lifeStates as unknown as Record<string, number>).familyBond = 1;
+  let serializeThrew = false;
+  try {
+    defaultSnapshotConverter.toSnapshot(runtime, {
+      eventCatalogVersion: '1.0.0',
+      sourcePlatform: 'node-headless',
+      time: { now: () => 1717200000000 },
+    });
+  } catch {
+    serializeThrew = true;
+  }
+  assert(serializeThrew, 'serializer must reject runtime residue instead of cleaning it');
+}
+
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
@@ -324,6 +369,7 @@ export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testFamilyContentRemoval();
   testSocialEventCopyAndExpressions();
   testShapingUIIdentityEndingFeedbackRemoved();
+  testSnapshot380Boundary();
 }
 
 runCanonicalFamilySocialLifeStateRemovalTests();

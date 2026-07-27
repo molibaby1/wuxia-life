@@ -23,7 +23,6 @@
  * Allowed inputs (existing wiring only):
  * - player stats on MainScreenPlayer (martial, mind, jianghu, livelihood fields)
  * - `lifeMemory.routeStatus` (routeId, name, phase — route context, not routeSummary text)
- * - `player.lifeStates` (social/family context only; not shapingSummary text)
  *
  * Verification samples (locked for P124 narrow tests):
  * - Non-martial: routeId `merchant`, modest martial stats
@@ -57,9 +56,8 @@
  * - field removal, value formulas, tendencySummary algorithm (P123/P124)
  */
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
-import type { PlayerLifeStates, PlayerState } from '../types/eventTypes';
+import type { PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
-import { buildCurrentShapingSummary } from '../utils/habitShapingSummary';
 
 export interface MainScreenStatItem {
   key: string;
@@ -83,7 +81,6 @@ export interface MainScreenModel {
   experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;
-  shapingSummary: string;
   coreStats: MainScreenStatItem[];
   fullStatGroups: MainScreenStatGroup[];
 }
@@ -107,15 +104,8 @@ export type MainScreenPlayer = Pick<
 > &
   Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>>;
 
-export type MainScreenLifeStates = Pick<
-  PlayerLifeStates,
-  'socialMomentum' | 'familyBond'
->;
-
 const MARTIAL_DOMINANT_MIN_TOP = 30;
 const MARTIAL_DOMINANT_SPREAD_MAX = 5;
-const SOCIAL_MOMENTUM_TENDENCY_THRESHOLD = 2;
-
 /** P124 locked non-martial verification sample — merchant route with shaping context. */
 export const P124_NON_MARTIAL_SAMPLE = {
   routeId: 'merchant',
@@ -195,20 +185,12 @@ function isMartialDominant(player: MainScreenPlayer): boolean {
 
 function tendencyContextMultiplier(
   candidate: (typeof TENDENCY_CANDIDATES)[number],
-  player: MainScreenPlayer,
   lifeMemory: LifeMemorySummary,
 ): number {
-  const lifeStates = player.lifeStates;
   let multiplier = 1;
 
   if (isNonMartialRouteContext(lifeMemory) && candidate.bucket === 'martial') {
     multiplier *= 0.55;
-  }
-
-  if ((lifeStates?.socialMomentum ?? 0) >= SOCIAL_MOMENTUM_TENDENCY_THRESHOLD) {
-    if (candidate.key === 'connections' || candidate.key === 'charisma' || candidate.key === 'reputation') {
-      multiplier *= 1.1;
-    }
   }
 
   return multiplier;
@@ -278,7 +260,7 @@ function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySu
     return {
       ...candidate,
       value,
-      score: value * candidate.weight * tendencyContextMultiplier(candidate, player, lifeMemory),
+      score: value * candidate.weight * tendencyContextMultiplier(candidate, lifeMemory),
     };
   })
     .filter((candidate) => candidate.value > 0)
@@ -384,10 +366,6 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
   ];
 }
 
-function buildShapingSummary(player: MainScreenPlayer): string {
-  return buildCurrentShapingSummary(player.lifeStates);
-}
-
 export function buildMainScreenModel(
   playerLike: MainScreenPlayer | PlayerSummaryDto,
   lifeMemory: LifeMemorySummary,
@@ -413,7 +391,6 @@ export function buildMainScreenModel(
     experienceSummary: buildExperienceSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player, lifeMemory),
-    shapingSummary: buildShapingSummary(player),
     coreStats: CORE_STATS.map((item) =>
       createStat(String(item.key), item.label, valueOf(player, item.key), item.description),
     ),

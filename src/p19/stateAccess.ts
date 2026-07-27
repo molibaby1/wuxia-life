@@ -89,15 +89,6 @@ export function inferLivedSelfUnderstanding(state: GameState): string {
   const player = state.player;
   if (!player) return '一生经历难以概括。';
 
-  const socialMomentum = player.lifeStates?.socialMomentum ?? 0;
-  const familyBond = player.lifeStates?.familyBond ?? 0;
-  if (socialMomentum >= 2) {
-    return '你自觉人情往来织就了你的江湖版图。';
-  }
-  if (familyBond >= 2) {
-    return '你自觉亲族牵绊锚定了许多归宿与抉择。';
-  }
-
   const chivalry = player.chivalry ?? 0;
   const reputation = player.reputation ?? 0;
   if (chivalry >= 60 && reputation >= 70) {

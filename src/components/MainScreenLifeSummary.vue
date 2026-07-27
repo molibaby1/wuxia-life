@@ -29,10 +29,6 @@
         <span class="summary-label">倾向</span>
         <span class="summary-value">{{ tendencySummary }}</span>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">塑形</span>
-        <span class="summary-value">{{ shapingSummary }}</span>
-      </div>
     </div>
   </section>
 </template>
@@ -45,7 +41,6 @@ defineProps<{
   experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;
-  shapingSummary: string;
 }>();
 </script>
 

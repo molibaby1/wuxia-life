@@ -13,8 +13,6 @@ function baseLifeStates(): PlayerState['lifeStates'] {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
   };
 }
 
@@ -43,7 +41,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       reputation: 10,
       money: 50,
       sect: '少林',
-      lifeStates: { ...baseLifeStates(), socialMomentum: 3 },
+      lifeStates: { ...baseLifeStates(), trainingHabit: 3 },
     },
     {
       schemaVersion: '1.0.0',
@@ -54,7 +52,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       },
     },
   );
-  assert(model.shapingSummary.includes('人情'), 'main screen model exposes remaining shaping summary');
+  assert(!('shapingSummary' in model), 'main screen model must not expose shaping summary');
   console.log('✓ main screen shaping integration');
 }
 
@@ -83,10 +81,10 @@ console.log('=== P41 Habit Feedback Regression ===\n');
     sect: null,
     title: null,
     flags: {},
-    children: 0,
-    spouse: null,
-    alive: true,
-    lifeStates: { ...baseLifeStates(), ...lifeStates },
+      children: 0,
+      spouse: null,
+      alive: true,
+      lifeStates: { ...baseLifeStates(), ...lifeStates },
   });
 
   const feedback = generateChoiceFeedback({
@@ -136,7 +134,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       relationships: [],
       children: 0,
       spouse: null,
-      lifeStates: { ...baseLifeStates(), familyBond: 3, studyHabit: 2 },
+      lifeStates: { ...baseLifeStates(), studyHabit: 2 },
     },
     currentTime: { year: 40, month: 1, day: 1 },
     flags: {},

@@ -106,13 +106,11 @@ interface EndingEvaluationData {
   roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
 }
 
-const EMPTY_LIFE_STATES: PlayerLifeStates = {
-  familyBond: 0,
-  socialMomentum: 0,
+const EMPTY_LIFE_STATES = {
   trainingHabit: 0,
   studyHabit: 0,
   businessHabit: 0,
-};
+} as PlayerLifeStates;
 
 export class EndingSystem {
   /**
@@ -596,8 +594,6 @@ export class EndingSystem {
   }
 
   private static qualifiesForPositiveEnding(data: EndingEvaluationData, endingId: EndingType): boolean {
-    const familyBond = data.lifeStates?.familyBond || 0;
-
     switch (endingId) {
       case 'legendary_hero':
         return data.chivalry >= 80 && data.reputation >= 85 && data.good_karma >= 70;
@@ -606,7 +602,7 @@ export class EndingSystem {
       case 'sect_founder':
         return data.reputation >= 80 && data.influence >= 35;
       case 'richest_man':
-        return familyBond <= 2;
+        return true;
       case 'beloved_saint':
         return data.good_karma >= 110;
       case 'heavenly_immortal':
@@ -619,10 +615,7 @@ export class EndingSystem {
   }
 
   private static determineNeutralEnding(data: EndingEvaluationData): EndingInfo {
-    const { lifeStates } = data;
-    const familyBond = lifeStates?.familyBond || 0;
-    const socialMomentum = lifeStates?.socialMomentum || 0;
-    const hasFamilyAnchor = Boolean(data.spouse) || data.children > 0 || familyBond >= 2;
+    const hasFamilyAnchor = Boolean(data.spouse) || data.children > 0;
     const hasModerateAchievement =
       data.martialPower >= 55 ||
       data.money >= 400 ||
@@ -634,11 +627,7 @@ export class EndingSystem {
       data.reputation >= 70 ||
       data.knowledge >= 75;
 
-    if (
-      data.flags.includes('retired') &&
-      familyBond <= 1 &&
-      socialMomentum <= 1
-    ) {
+    if (data.flags.includes('retired')) {
       return this.ENDINGS.find(e => e.id === 'hermit_life')!;
     }
 
@@ -653,7 +642,7 @@ export class EndingSystem {
 
     if (
       highAchievement &&
-      (data.money < 0 || familyBond <= 1)
+      data.money < 0
     ) {
       return this.ENDINGS.find(e => e.id === 'bittersweet_success')!;
     }
@@ -666,9 +655,7 @@ export class EndingSystem {
     }
 
     if (
-      socialMomentum <= 1 &&
       data.connections <= 10 &&
-      familyBond <= 1 &&
       !hasModerateAchievement
     ) {
       return this.ENDINGS.find(e => e.id === 'wanderer_life')!;

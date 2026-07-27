@@ -1,9 +1,5 @@
 import type { GameState } from '../types/eventTypes';
 import type { RouteLifecycleState } from '../core/RouteStateManager';
-import {
-  SHAPING_AXES,
-  shapingAxisKeyFromFeedbackFlag,
-} from './habitShapingSummary';
 
 const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
@@ -43,13 +39,6 @@ const SECT_FACTION_LABELS: Record<string, string> = {
   neutral: '中立门派',
 };
 
-const SHAPING_FEEDBACK_LABELS = Object.fromEntries(
-  SHAPING_AXES.map((axis) => [
-    `shaping_${axis.key}_up`,
-    `${axis.shortLabel}加深`,
-  ]),
-) as Record<string, string>;
-
 const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   route_orthodox: '踏上正道',
   route_demonic: '堕入魔道',
@@ -60,8 +49,8 @@ const LONG_TERM_FLAG_LABELS: Record<string, string> = {
   p9_early_business_focus: '早期营生重心已确立，人生会沿此方向展开',
   p9_echo_training_hook: '习武方向已被记住，后续机会会由此打开',
   p9_early_training_focus: '早期习武重心已确立，人生会沿此方向展开',
-  p9_echo_social_hook: '人情方向已被记住，后续机会会由此打开',
-  p9_early_social_focus: '早期人情重心已确立，人生会沿此方向展开',
+  p9_echo_social_hook: '童年交游经历已被记录',
+  p9_early_social_focus: '早期交游重心已确立，人生会沿此方向展开',
   hvg_merchant_ledger_track: '走上账房见习之路',
   hvg_merchant_caravan_track: '走上认货跑商之路',
   hvg_merchant_shaping_watching: '营生塑形初现，仍在观望',
@@ -125,7 +114,7 @@ export function lifecyclePhaseLabel(
 }
 
 export function formatLongTermFlag(flag: string, value: boolean): string {
-  const label = LONG_TERM_FLAG_LABELS[flag] || SHAPING_FEEDBACK_LABELS[flag];
+  const label = LONG_TERM_FLAG_LABELS[flag];
   if (label) {
     return value ? label : `失去：${label}`;
   }
@@ -136,9 +125,7 @@ export function isPlayerVisibleFlag(flag: string): boolean {
   return Boolean(
     LONG_TERM_FLAG_LABELS[flag]
     || ROUTE_FLAG_LABELS[flag]
-    || SHAPING_FEEDBACK_LABELS[flag]
     || flag === 'sect_faction'
-    || shapingAxisKeyFromFeedbackFlag(flag),
   );
 }
 

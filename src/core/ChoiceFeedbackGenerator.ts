@@ -5,11 +5,6 @@ import {
   isPlayerVisibleFlag,
   readRawRouteKeyFromFlags,
 } from '../utils/playerFacingLabels';
-import {
-  SHAPING_AXES,
-  readShapingAxisValue,
-  shapingFeedbackFlagKey,
-} from '../utils/habitShapingSummary';
 
 interface GenerateChoiceFeedbackInput {
   narrativeResult?: string | null;
@@ -98,33 +93,7 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
     baseFeedback.player.routeImpact = routeImpact;
   }
 
-  appendShapingFeedbackHints(baseFeedback, input.beforePlayer, input.afterPlayer);
-
   return baseFeedback;
-}
-
-function appendShapingFeedbackHints(
-  feedback: ChoiceFeedbackModel,
-  beforePlayer?: PlayerState,
-  afterPlayer?: PlayerState,
-): void {
-  if (!beforePlayer && !afterPlayer) {
-    return;
-  }
-
-  for (const axis of SHAPING_AXES) {
-    const delta = readShapingAxisValue(afterPlayer?.lifeStates, axis.key)
-      - readShapingAxisValue(beforePlayer?.lifeStates, axis.key);
-    if (delta < 1) {
-      continue;
-    }
-    const flag = shapingFeedbackFlagKey(axis.key);
-    feedback.player.longTermFlags.push({
-      flag,
-      value: true,
-      visibility: isPlayerVisibleFlag(flag) ? 'player' : 'hidden',
-    });
-  }
 }
 
 function resolveRouteImpact(

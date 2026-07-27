@@ -100,7 +100,7 @@ export interface PlayerSummaryDto {
   currentYear: number;
   currentMonth: number;
   currentDay: number;
-  /** Habit shaping axes for main-screen shapingSummary (P122 API mode). */
+  /** Practice trajectory state available to client UI. */
   lifeStates?: PlayerLifeStates;
 }
 

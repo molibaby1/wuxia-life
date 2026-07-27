@@ -48,8 +48,6 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
         trainingHabit: 0,
         studyHabit: 0,
         businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
       },
       ...(overrides.player ?? {}),
     },
@@ -71,8 +69,6 @@ function testLateLifeShapingRecap(): void {
         trainingHabit: 5,
         studyHabit: 2,
         businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
       },
     } as GameState['player'],
   });
@@ -94,8 +90,6 @@ function testP19CompositionIncludesShaping(): void {
         trainingHabit: 4,
         studyHabit: 0,
         businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
       },
     } as GameState['player'],
   });
@@ -112,7 +106,7 @@ function testP19CompositionIncludesShaping(): void {
 }
 
 function testSameRouteShapingDifferentiation(): void {
-  const state = makeState({ player: { lifeStates: { trainingHabit: 5, studyHabit: 2, businessHabit: 0, socialMomentum: 0, familyBond: 0 } } as GameState['player'] });
+  const state = makeState({ player: { lifeStates: { trainingHabit: 5, studyHabit: 2, businessHabit: 0 } } as GameState['player'] });
   const summary = composeP19FinalSummary(state, sampleEnding()).composedSummary;
   assert(!summary.includes('以武立名') && !summary.includes('以文佐武'), 'ending must not include identity tone');
   console.log('✓ identity ending tone removed');
@@ -125,8 +119,6 @@ function testLifeMemoryAndEndingLabelAlignment(): void {
         trainingHabit: 4,
         studyHabit: 3,
         businessHabit: 0,
-        socialMomentum: 0,
-        familyBond: 0,
       },
     } as GameState['player'],
   });

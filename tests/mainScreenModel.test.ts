@@ -35,8 +35,6 @@ function createLifeStates(overrides: Partial<PlayerLifeStates> = {}): PlayerLife
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
-    socialMomentum: 0,
-    familyBond: 0,
     ...overrides,
   };
 }
@@ -85,7 +83,7 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.stageTags[1] === '未入门', 'stage tags second item should be route phase');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '悟性 24 / 体魄 18', 'tendency should prefer representative stats');
-  assert(model.shapingSummary === '塑形未成', 'shaping should degrade when no habit axis is strong');
+  assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
   assert(model.topResources.length === 3, 'top resources should stay capped at three');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,银两',
@@ -256,7 +254,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createLifeMemory(),
   );
 
-  assert(model.shapingSummary === '塑形未成', 'practice habits must not define main-screen shaping summary');
+  assert(!('shapingSummary' in model), 'practice habits must not define main-screen shaping summary');
   console.log('✓ keeps practice out of main-screen shaping summary');
 }
 
@@ -266,7 +264,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createLifeMemory(),
   );
 
-  assert(model.shapingSummary === '塑形未成', 'PlayerSummaryDto practice lifeStates must not drive shaping summary');
+  assert(!('shapingSummary' in model), 'PlayerSummaryDto practice lifeStates must not drive shaping summary');
   console.log('✓ PlayerSummaryDto practice lifeStates stay out of shaping summary');
 }
 

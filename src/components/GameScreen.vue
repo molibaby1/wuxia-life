@@ -193,7 +193,6 @@
         :experience-summary="mainScreenModel.experienceSummary"
         :risk-summary="mainScreenModel.riskSummary"
         :tendency-summary="mainScreenModel.tendencySummary"
-        :shaping-summary="mainScreenModel.shapingSummary"
       />
 
       <MainScreenStatsPanel

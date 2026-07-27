@@ -5,8 +5,13 @@ import { assert, assertDeepEqual, GameTestFramework } from './GameTestFramework'
 import { temperaments } from '../src/data/traits/temperaments';
 import { dailyEvents } from '../src/data/life/dailyEvents';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
+import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { generateChoiceFeedback } from '../src/core/ChoiceFeedbackGenerator';
+import { inferLivedSelfUnderstanding } from '../src/p19/stateAccess';
+import { EndingSystem } from '../src/core/EndingSystem';
 import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
+import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -209,6 +214,65 @@ function testSocialEventCopyAndExpressions(): void {
   });
 }
 
+function testShapingUIIdentityEndingFeedbackRemoved(): void {
+  const state = createState();
+  state.player.lifeStates = createDefaultPlayerLifeStates();
+  const lifeMemory = deriveLifeMemorySummary(state);
+  const model = buildMainScreenModel(state.player, lifeMemory);
+
+  assert(!('shapingSummary' in model), 'main-screen model must not expose shapingSummary');
+
+  const uiSource = [
+    'src/components/MainScreenLifeSummary.vue',
+    'src/components/GameScreen.vue',
+    'src/core/ChoiceFeedbackGenerator.ts',
+    'src/utils/playerFacingLabels.ts',
+    'src/components/mainScreenModel.ts',
+  ].map(file => fs.readFileSync(path.resolve(file), 'utf8')).join('\n');
+  assert(!/shapingSummary|SHAPING_AXES|shaping_familyBond_up|shaping_socialMomentum_up/.test(uiSource), 'UI and feedback surfaces must not expose deleted shaping axes');
+
+  const feedback = generateChoiceFeedback({
+    narrativeResult: '你照拂亲族，也结交旧友。',
+    effects: [],
+    beforePlayer: {
+      ...state.player,
+      lifeStates: createDefaultPlayerLifeStates(),
+    } as GameState['player'],
+    afterPlayer: {
+      ...state.player,
+      lifeStates: {
+        ...createDefaultPlayerLifeStates(),
+        familyBond: 2 as never,
+        socialMomentum: 2 as never,
+      },
+    } as GameState['player'],
+  });
+  assert(
+    !feedback.player.longTermFlags.some(item => item.flag.startsWith('shaping_')),
+    'choice feedback must not synthesize shaping flags for deleted axes',
+  );
+
+  const identityBase = inferLivedSelfUnderstanding(state);
+  const endingBase = EndingSystem.determineEnding(state);
+  const injected = structuredClone(state);
+  (injected.player.lifeStates as unknown as Record<string, number>).familyBond = 5;
+  (injected.player.lifeStates as unknown as Record<string, number>).socialMomentum = 5;
+  assert(
+    inferLivedSelfUnderstanding(injected) === identityBase,
+    'legacy life states must not change self-understanding',
+  );
+  assert(
+    EndingSystem.determineEnding(injected).id === endingBase.id,
+    'legacy life states must not change ending selection',
+  );
+  for (const ending of EndingSystem.getAllEndings()) {
+    assert(
+      EndingSystem.canUnlockEnding(state, ending.id) === EndingSystem.canUnlockEnding(injected, ending.id),
+      `legacy life states must not change eligibility for ${ending.id}`,
+    );
+  }
+}
+
 export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testTraitDoesNotWriteLifeState();
   testSocialEchoRemainsFactOnly();
@@ -217,6 +281,7 @@ export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testDailyWeightsAreAxisIndependent();
   testFamilyContentRemoval();
   testSocialEventCopyAndExpressions();
+  testShapingUIIdentityEndingFeedbackRemoved();
 }
 
 runCanonicalFamilySocialLifeStateRemovalTests();

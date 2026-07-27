@@ -365,8 +365,6 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
         trainingHabit: 4,
         studyHabit: 2,
         businessHabit: 0,
-        socialMomentum: 3,
-        familyBond: 0,
       },
     },
   });

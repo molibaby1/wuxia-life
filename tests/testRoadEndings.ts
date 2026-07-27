@@ -39,14 +39,34 @@ if (!EndingSystem.canUnlockEnding(state, 'richest_man')) {
 const qualificationBlocked = createState();
 qualificationBlocked.player.flags.business_empire = true;
 qualificationBlocked.player.lifeStates = {
-  familyBond: 3,
-  socialMomentum: 0, trainingHabit: 0, studyHabit: 0, businessHabit: 0,
+  trainingHabit: 0,
+  studyHabit: 0,
+  businessHabit: 0,
 };
 let blockedRoad = RouteStateManager.commitRoad(qualificationBlocked, 'statecraft', { eventId: 'merchant_commitment' });
 blockedRoad = RouteStateManager.recordRoadProof(blockedRoad, 'statecraft', 'merchant_proof');
-if (EndingSystem.canUnlockEnding(blockedRoad, 'richest_man')
-  || EndingSystem.determineEnding(blockedRoad).id === 'richest_man') {
-  throw new Error('canUnlockEnding and determineEnding must share positive ending qualification gates');
+if (!EndingSystem.canUnlockEnding(blockedRoad, 'richest_man')
+  || EndingSystem.determineEnding(blockedRoad).id !== 'richest_man') {
+  throw new Error('richest_man should unlock once general requirements pass');
+}
+
+const familyAnchored = createState();
+familyAnchored.player.spouse = '阿宁';
+familyAnchored.player.children = 2;
+familyAnchored.player.martialPower = 0;
+familyAnchored.player.externalSkill = 0;
+familyAnchored.player.internalSkill = 0;
+familyAnchored.player.qinggong = 0;
+familyAnchored.player.money = 10;
+familyAnchored.player.businessAcumen = 0;
+familyAnchored.player.reputation = 10;
+familyAnchored.player.lifeStates = {
+  trainingHabit: 0,
+  studyHabit: 0,
+  businessHabit: 0,
+};
+if (EndingSystem.determineEnding(familyAnchored).id !== 'quiet_family_life') {
+  throw new Error('spouse/children anchor should drive quiet_family_life');
 }
 
 let martial = createState();

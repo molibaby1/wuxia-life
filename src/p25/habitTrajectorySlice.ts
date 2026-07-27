@@ -66,6 +66,7 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     relations: {},
     achievements: [],
     eventHistory: [],
+    facts: {},
   } as GameState;
 
   const earlyStudy = {

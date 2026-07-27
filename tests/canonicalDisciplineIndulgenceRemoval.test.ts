@@ -81,7 +81,7 @@ function testEndingConsumers(): void {
 }
 
 function testSnapshotBoundary(): void {
-  assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.6.0', 'snapshot schema must be 3.6.0');
+  assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.7.0', 'snapshot schema must be 3.7.0');
   assert(validateGameStateSnapshot(gameStateSnapshotAge50).ok, 'age-50 fixture must be valid');
 
   for (const key of ['discipline', 'indulgence']) {

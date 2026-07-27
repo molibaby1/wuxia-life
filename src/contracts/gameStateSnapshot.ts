@@ -25,7 +25,7 @@ import type {
 import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.6.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.7.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =

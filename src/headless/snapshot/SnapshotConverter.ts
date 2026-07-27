@@ -4,7 +4,7 @@
 
 import type { GameStateSnapshot, GameStateSnapshotMetadata } from '../../contracts/gameStateSnapshot';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../../contracts/gameStateSnapshot';
-import { validatePlayerLifeStates } from '../../contracts/validation/contractValidation';
+import { findForbiddenHabitFlagPaths, validatePlayerLifeStates } from '../../contracts/validation/contractValidation';
 import type { GameState } from '../../types/eventTypes';
 import type { TimeSource } from '../adapters/timeSource';
 
@@ -72,6 +72,14 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
       gameTimestamp,
     } = state;
     const { flags: playerFlags, events: _legacyEvents, items: _legacyItems, ...playerCore } = player;
+    const runtimeFlagPaths = [
+      ...findForbiddenHabitFlagPaths(flags, 'state.flags'),
+      ...findForbiddenHabitFlagPaths(playerFlags, 'state.player.flags'),
+      ...findForbiddenHabitFlagPaths(eventHistory, 'state.eventHistory'),
+    ];
+    if (runtimeFlagPaths.length > 0) {
+      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden snapshot field: ${runtimeFlagPaths[0]}`);
+    }
 
     return {
       metadata: {
@@ -123,6 +131,14 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
           `Forbidden snapshot field: ${key}`,
         );
       }
+    }
+    const forbiddenPaths = [
+      ...findForbiddenHabitFlagPaths(snapshot.state.flags, 'state.flags'),
+      ...findForbiddenHabitFlagPaths(snapshot.state.player?.flags, 'state.player.flags'),
+      ...findForbiddenHabitFlagPaths(snapshot.state.eventHistory, 'state.eventHistory'),
+    ];
+    if (forbiddenPaths.length > 0) {
+      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden snapshot field: ${forbiddenPaths[0]}`);
     }
     const { player, facts, flags, ...rest } = snapshot.state;
     if (!player?.name) {

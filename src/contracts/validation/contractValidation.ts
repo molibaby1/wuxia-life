@@ -115,6 +115,26 @@ const REQUIRED_SNAPSHOT_PLAYER_KEYS = [
   'statuses',
 ] as const;
 
+export const FORBIDDEN_HABIT_FLAG_KEYS = ['training_habit', 'study_habit', 'business_habit'] as const;
+
+export function findForbiddenHabitFlagPaths(value: unknown, rootPath: string): string[] {
+  const paths: string[] = [];
+  const visit = (current: unknown, currentPath: string): void => {
+    if (Array.isArray(current)) {
+      current.forEach((item, index) => visit(item, `${currentPath}[${index}]`));
+      return;
+    }
+    if (!isPlainObject(current)) return;
+    for (const [key, child] of Object.entries(current)) {
+      const childPath = currentPath ? `${currentPath}.${key}` : key;
+      if ((FORBIDDEN_HABIT_FLAG_KEYS as readonly string[]).includes(key)) paths.push(childPath);
+      visit(child, childPath);
+    }
+  };
+  visit(value, rootPath);
+  return paths;
+}
+
 export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<GameStateSnapshot> {
   const errors: string[] = [];
   if (!isPlainObject(snapshot)) {
@@ -138,6 +158,9 @@ export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<G
     errors.push('state required');
   } else {
     const st = s.state;
+    errors.push(...findForbiddenHabitFlagPaths(st.flags, 'state.flags').map(path => `forbidden ${path}`));
+    errors.push(...findForbiddenHabitFlagPaths(st.player, 'state.player').map(path => `forbidden ${path}`));
+    errors.push(...findForbiddenHabitFlagPaths(st.eventHistory, 'state.eventHistory').map(path => `forbidden ${path}`));
     for (const key of ['player', 'flags', 'relations', 'eventHistory']) {
       if (!(key in st)) errors.push(`state.${key} required`);
     }

@@ -41,7 +41,7 @@ function main(): void {
     '',
     ...metrics.habitLedObservability.jianghu_renown_sage.paths.map(
       s =>
-        `- \`${s.pathId}\` → \`${s.outcomeId}\`: unlocked=${s.unlocked}, bridgeFlags=[${s.bridgeFlagsPresent.join(', ')}], socialMomentum=${s.habitAxisValue}`,
+        `- \`${s.pathId}\` → \`${s.outcomeId}\`: unlocked=${s.unlocked}, bridgeFlags=[${s.bridgeFlagsPresent.join(', ')}], habitAxisValue=${s.habitAxisValue}`,
     ),
     ...metrics.habitLedObservability.medical_sage_healer.paths.map(
       s =>

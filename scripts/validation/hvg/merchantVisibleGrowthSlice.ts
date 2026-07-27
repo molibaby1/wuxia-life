@@ -8,13 +8,11 @@ import { EventLoader } from '../../../src/core/EventLoader';
 import { createDefaultPlayerLifeStates } from '../../../src/data/life/lifeStates';
 import { resolveChildhoodActionPalette } from '../../../src/p16/childhoodAgency';
 import { resolvePrimaryOriginFamilyFlag } from '../../../src/p16/primaryOriginFlag';
-import { buildCurrentShapingSummary } from '../../../src/utils/habitShapingSummary';
 import type { GameState, PlayerState } from '../../../src/types/eventTypes';
 
 export interface MerchantVisibleGrowthCheckpoint {
   age: number;
   businessHabit: number;
-  shapingSummary: string;
   flags: string[];
   notes: string;
 }
@@ -121,7 +119,6 @@ function runBusinessLoop(
     checkpoints.push({
       age,
       businessHabit: state.player.lifeStates?.businessHabit ?? 0,
-      shapingSummary: buildCurrentShapingSummary(state.player.lifeStates),
       flags: collectFlags(state),
       notes,
     });
@@ -259,12 +256,12 @@ export function renderMerchantVisibleGrowthProofMarkdown(
       `- merchant_talent_discovery via ledger track: **${scenario.talentEligibleLedger}**`,
       `- merchant_talent_discovery via caravan track: **${scenario.talentEligibleCaravan}**`,
       '',
-      '| Age | businessHabit | shapingSummary | flags | notes |',
-      '| --- | --- | --- | --- | --- |',
+      '| Age | businessHabit | flags | notes |',
+      '| --- | --- | --- | --- |',
     );
     for (const cp of scenario.checkpoints) {
       lines.push(
-        `| ${cp.age} | ${cp.businessHabit} | ${cp.shapingSummary} | ${cp.flags.join(', ') || 'none'} | ${cp.notes} |`,
+        `| ${cp.age} | ${cp.businessHabit} | ${cp.flags.join(', ') || 'none'} | ${cp.notes} |`,
       );
     }
     lines.push('');

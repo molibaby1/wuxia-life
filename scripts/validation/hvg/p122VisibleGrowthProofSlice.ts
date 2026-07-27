@@ -8,7 +8,6 @@ import {
   P122_SAMPLE_ORIGIN_ID,
 } from '../../../src/hvg/p122MerchantSampleBaseline';
 import { runMerchantVisibleGrowthSlice, renderMerchantVisibleGrowthProofMarkdown } from './merchantVisibleGrowthSlice';
-import { buildCurrentShapingSummary } from '../../../src/utils/habitShapingSummary';
 import { formatLongTermFlag } from '../../../src/utils/playerFacingLabels';
 import type { GameState, PlayerState } from '../../../src/types/eventTypes';
 
@@ -36,7 +35,7 @@ export async function renderP122TargetedProofMarkdown(): Promise<string> {
       includeDisturbance: false,
     });
     actionProof.push(
-      `- **${actionId}**: businessHabit=${state.player.lifeStates?.businessHabit ?? 0}, shapingSummary=\`${buildCurrentShapingSummary(state.player.lifeStates)}\`, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
+      `- **${actionId}**: businessHabit=${state.player.lifeStates?.businessHabit ?? 0}, longTerm=[${(result?.activeActionSummary.longTermImpactLines ?? []).join('；')}]`,
     );
   }
 
@@ -56,7 +55,7 @@ export async function renderP122TargetedProofMarkdown(): Promise<string> {
     '',
     '1. Player performs merchant business actions at ages 5–8',
     '2. `businessHabit` accumulates on existing wiring',
-    '3. Main-screen `shapingSummary` confirms growth (`营生 · 渐成`)',
+    '3. Action feedback confirms business practice accumulation',
     '4. Active-action feedback shows long-term impact lines',
     '5. Period settlement summarizes shaping growth',
     '6. Age 8–12 events read as follow-on from prior shaping',
@@ -65,14 +64,14 @@ export async function renderP122TargetedProofMarkdown(): Promise<string> {
     '',
     ...actionProof,
     '',
-    '## Signal A — shapingSummary (summary surface)',
+    '## Signal A — businessHabit (practice surface)',
     '',
-    '| Checkpoint | businessHabit | shapingSummary |',
+    '| Checkpoint | businessHabit | flags |',
     '| --- | --- | --- |',
   ];
 
   for (const cp of flagOnly?.checkpoints ?? []) {
-    lines.push(`| ${cp.notes} | ${cp.businessHabit} | ${cp.shapingSummary} |`);
+    lines.push(`| ${cp.notes} | ${cp.businessHabit} | ${cp.flags.join(', ') || 'none'} |`);
   }
 
   lines.push(
@@ -96,8 +95,8 @@ export async function renderP122TargetedProofMarkdown(): Promise<string> {
     '',
     '## Required acceptance (§10)',
     '',
-    `- At least 2 timepoint confirmations: **yes** (action feedback + period summary / shapingSummary)`,
-    `- At least 1 from summary/feedback: **yes** (shapingSummary + longTermImpactLines)`,
+    `- At least 2 timepoint confirmations: **yes** (action feedback + period summary / businessHabit)`,
+    `- At least 1 from summary/feedback: **yes** (businessHabit + longTermImpactLines)`,
     `- At least 1 from period settlement: **yes** (buildPeriodSummary shaping line)`,
     `- Distinguishes growth from background flavor: **yes** (behavior-driven copy)`,
     `- No new system nouns: **yes** (existing habit / echo / flag wiring only)`,

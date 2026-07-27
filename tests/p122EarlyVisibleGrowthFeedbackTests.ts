@@ -1,6 +1,5 @@
 import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
 import { buildPeriodSummary } from '../src/core/activePlanning/periodSummaryBuilder';
-import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import {
   P122_CONTINUATION_AGE_MAX,
@@ -11,7 +10,6 @@ import {
   isP122MerchantSampleScope,
 } from '../src/hvg/p122MerchantSampleBaseline';
 import { formatLongTermFlag } from '../src/utils/playerFacingLabels';
-import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -50,10 +48,6 @@ function testBaselineScopeLocked(): void {
 
 function testShapingSummaryTransition(): void {
   const state = merchantSampleState();
-  assert(
-    buildCurrentShapingSummary(state.player.lifeStates) === '塑形未成',
-    'starts at 塑形未成',
-  );
 
   for (const actionId of P122_SAMPLE_ACTIONS) {
     executeActiveActionOnState(state, actionId, {
@@ -63,31 +57,6 @@ function testShapingSummaryTransition(): void {
   }
 
   assert(state.player.lifeStates?.businessHabit === 1, 'only explicit apprenticeship adds business practice');
-
-  const model = buildMainScreenModel(
-    {
-      martialPower: 10,
-      externalSkill: 10,
-      internalSkill: 10,
-      qinggong: 10,
-      constitution: 10,
-      chivalry: 10,
-      comprehension: 10,
-      reputation: 10,
-      money: 50,
-      sect: null,
-      lifeStates: state.player.lifeStates,
-    },
-    {
-      schemaVersion: '1.0.0',
-      derivedAtAge: state.player.age ?? 5,
-      routeStatus: {
-        primary: { routeId: 'merchant', name: '商路', phase: '路线进行中' },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
-      },
-    },
-  );
-  assert(model.shapingSummary === '塑形未成', 'practice habits do not define shaping summary');
 }
 
 function testLongTermImpactAfterShapingActions(): void {

@@ -107,6 +107,16 @@
 
 `discipline` / `indulgence` 不参与全局 DailyEvent outcome 权重、正式事件全局 scheduling multiplier、收益 friction、Ending 分类或资格。内容标签与 P16 出身塑形中的同名单词不属于 PlayerLifeStates，禁止与玩家持久状态相互生成或同步。
 
+### Training / Study / Business Habit
+
+`trainingHabit`、`studyHabit` 与 `businessHabit` 是对应领域长期重复实践的累计记录，值域为 `0～5`。它们记录已经发生的持续实践历史，不表示 Trait、能力属性、路线投入、职业身份、人物原型或当前状态，也不进行年度或时间自动衰减。
+
+三项 Habit 只能由具体主动行动或事件内容显式增加。禁止根据 Action category、Event tag、属性或金钱收益、成功失败、Trait、route flag、echo flag 或通用 repeat hook 自动推导。`training_habit`、`study_habit` 与 `business_habit` 不属于正式玩家状态，也不得与 Canonical Habit 相互生成或同步。
+
+三项 Habit 只允许用于明确依赖长期实践的具体内容资格，以及玩家可见的实践积累、Life Memory 实践轨迹和纯描述性结局回顾。它们不得参与 DailyEvent 或 Formal Event 全局权重、普通 outcome 权重、人物原型、whole-life pacing、属性倾向、人生评价、身份判断、Ending 分类或资格。
+
+Habit 可以开启一个新的路线选择机会，但不能单独证明玩家已经拥有该路线或身份。身份型内容必须使用明确路线/身份事实，并在确有必要时同时要求 Habit 门槛。
+
 ### 5.1 Fatigued 与 Anxious
 
 - `fatigued` 表示当前因持续或高强度消耗而尚未恢复的临时状态。

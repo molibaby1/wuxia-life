@@ -170,6 +170,49 @@ function testNoLegacyHabitFlagConsumers(): void {
   assert(!/["'](?:training_habit|study_habit|business_habit)["']/.test(validation), 'P20 validation fixtures must not use legacy habit flags');
 }
 
+function testRepositoryGuard(): void {
+  const forbiddenMechanisms: Array<{ pattern: RegExp; message: string }> = [
+    { pattern: /\btraining_habit\b(?![a-z0-9_])/, message: 'legacy training_habit flag' },
+    { pattern: /\bstudy_habit\b(?![a-z0-9_])/, message: 'legacy study_habit flag' },
+    { pattern: /\bbusiness_habit\b(?![a-z0-9_])/, message: 'legacy business_habit flag' },
+    { pattern: /projectHabitCompatibilityFlags/, message: 'habit compatibility projection' },
+    { pattern: /mapLegacyHabitFlagToLifeState/, message: 'legacy habit flag mapping' },
+    { pattern: /buildShapingPatternEndingTone/, message: 'identity ending tone' },
+  ];
+  const allowedFiles = new Set([
+    path.normalize('src/contracts/validation/contractValidation.ts'),
+    path.normalize('src/p44/habitOperatorAudit.ts'),
+  ]);
+  const visit = (directory: string): void => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const filePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(filePath);
+        continue;
+      }
+      if (!/\.(ts|tsx|json)$/.test(entry.name) || allowedFiles.has(path.normalize(path.relative(process.cwd(), filePath)))) continue;
+      const source = fs.readFileSync(filePath, 'utf8');
+      for (const rule of forbiddenMechanisms) {
+        assert(!rule.pattern.test(source), `${rule.message} found in ${path.relative(process.cwd(), filePath)}`);
+      }
+    }
+  };
+  visit(path.resolve('src'));
+
+  const assertFunctionRangeClean = (file: string, startMarker: string, endMarker: string): void => {
+    const source = fs.readFileSync(path.resolve(file), 'utf8');
+    const start = source.indexOf(startMarker);
+    const end = source.indexOf(endMarker, start + startMarker.length);
+    assert(start >= 0 && end > start, `${file} guard markers must exist`);
+    assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), `${file} global multiplier must ignore practice habits`);
+  };
+  assertFunctionRangeClean('src/core/DailyEventSystem.ts', 'getGroupStateMultiplier', 'clampMultiplier');
+  assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getFormalEventStateMultiplier', 'getSpecializationMultiplier');
+  assertFunctionRangeClean('src/components/mainScreenModel.ts', 'tendencyContextMultiplier', 'export function buildMainScreenModel');
+  const replaySource = fs.readFileSync(path.resolve('src/narrative/profile/wuxiaReplayabilitySurfaces.ts'), 'utf8');
+  assert(!/growthPatternFlags[\s\S]{0,500}(training_habit|study_habit|business_habit)/.test(replaySource), 'replayability growth flags must not use legacy habit flags');
+}
+
 function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
   const base = createState();
   base.player.age = 40;
@@ -247,6 +290,7 @@ export function runCanonicalHabitPracticeNarrowingTests(): void {
   testDailyHabitProducerAndWeightNarrowing();
   testDailyGroupWeightsIgnorePracticeHabits();
   testNoLegacyHabitFlagConsumers();
+  testRepositoryGuard();
   testPracticeHabitsDoNotDefineIdentityOrTendency();
   testFormalSchedulingSourceDoesNotReadPracticeHabits();
   testPracticeTrajectoryIsDescriptiveOnly();

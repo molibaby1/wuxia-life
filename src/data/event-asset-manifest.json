@@ -2428,17 +2428,6 @@
       "notes": "File classified deferred for golden line"
     },
     {
-      "eventId": "family_child_born",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 25,
-      "ageMax": 40,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
       "eventId": "family_child_education",
       "sourceFile": "family-life.json",
       "runtimeLoaded": true,
@@ -2446,17 +2435,6 @@
       "ageMin": 28,
       "ageMax": 45,
       "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
-      "eventId": "family_crisis",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 35,
-      "ageMax": 50,
-      "overlapsGoldenLine": false,
       "eventType": "choice",
       "notes": "Failed event quality or loader validation"
     },

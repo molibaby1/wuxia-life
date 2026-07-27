@@ -245,12 +245,6 @@ function testLifeStatesLedArchetypeSelection(): void {
   assert(wealthFamily.familyId === P20_WEALTH_MERCHANT.id, 'wealth archetype from lifeStates.businessHabit');
 }
 
-function testP28SemiPersonalityRegression(): void {
-  assertSemiPersonalityGatedEvent('p28_family_bond_elder_care', 'familyBond', 2, 38);
-  assertSemiPersonalityGatedEvent('p28_family_bond_sibling_support', 'familyBond', 2, 30);
-  assertSemiPersonalityGatedEvent('p28_family_bond_caretaker_obligation', 'familyBond', 3, 42);
-}
-
 function testP42ArchetypeDifferentiation(): void {
   const loader = EventLoader.getInstance();
   const evaluator = new ConditionEvaluator();
@@ -302,11 +296,6 @@ function testP42ArchetypeDifferentiation(): void {
   const merchantStudyExpr = merchantStudyEvent?.conditions?.[0]?.type === 'expression' ? merchantStudyEvent.conditions[0].expression : '';
   assert(merchantStudyExpr.includes('businessHabit'), 'merchant echo should dual-read business context');
   assert(evaluator.evaluate({ type: 'expression', expression: merchantStudyExpr }, merchantStudyState) === true, 'merchant cluster triggers ledger echo');
-}
-
-function testP42FamilyBondDensification(): void {
-  assertSemiPersonalityGatedEvent('p42_family_bond_festival_reunion', 'familyBond', 2, 48);
-  assertSemiPersonalityGatedEvent('p42_family_bond_estate_trust', 'familyBond', 3, 52);
 }
 
 function testP42BusinessSocialDensification(): void {
@@ -372,11 +361,9 @@ async function main(): Promise<void> {
   assertHabitGatedEventOr('p27_mentor_obligation_consequence', 'trainingHabit', 3, 30);
   assertHabitGatedEvent('p27_renown_upkeep_pressure', 'studyHabit', 3, 32);
   assertHabitGatedEvent('p27_study_habit_healer_reinforcement', 'studyHabit', 2, 20);
-  testP28SemiPersonalityRegression();
   testP29MedicalAndSocialRegression();
   testP42TrainingStudyDensification();
   testP42BusinessSocialDensification();
-  testP42FamilyBondDensification();
   testP42ArchetypeDifferentiation();
   testLifeStatesLedArchetypeSelection();
   testP20HabitTrajectorySlice();

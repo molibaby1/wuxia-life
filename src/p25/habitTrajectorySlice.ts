@@ -282,69 +282,6 @@ export function runP25HabitTrajectorySlice(): P25HabitTrajectorySliceResult {
     detail: 'P28 social reputation reinforcement from social momentum',
   });
 
-  const laterFamilyElderCare = {
-    player: basePlayer({
-      age: 40,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 2 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'later_echo',
-    eventId: 'p28_family_bond_elder_care',
-    habitAxis: 'familyBond',
-    habitValue: 2,
-    eligible: evaluateEvent('p28_family_bond_elder_care', laterFamilyElderCare),
-    pointer: 'event:p28_family_bond_elder_care @ familyBond=2 age=40',
-    detail: 'P28 elder care obligation from family bond',
-  });
-
-  const laterFamilySibling = {
-    player: basePlayer({
-      age: 32,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 2 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'later_echo',
-    eventId: 'p28_family_bond_sibling_support',
-    habitAxis: 'familyBond',
-    habitValue: 2,
-    eligible: evaluateEvent('p28_family_bond_sibling_support', laterFamilySibling),
-    pointer: 'event:p28_family_bond_sibling_support @ familyBond=2 age=32',
-    detail: 'P28 sibling support from family bond',
-  });
-
-  const laterFamilyStewardship = {
-    player: basePlayer({
-      age: 44,
-      lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0, socialMomentum: 0, familyBond: 3 },
-    }),
-    flags: {},
-    relations: {},
-    achievements: [],
-    eventHistory: [],
-  } as GameState;
-
-  findings.push({
-    phase: 'later_echo',
-    eventId: 'p28_family_bond_caretaker_obligation',
-    habitAxis: 'familyBond',
-    habitValue: 3,
-    eligible: evaluateEvent('p28_family_bond_caretaker_obligation', laterFamilyStewardship),
-    pointer: 'event:p28_family_bond_caretaker_obligation @ familyBond=3 age=44',
-    detail: 'P28 family caretaker consequence from deep family bond',
-  });
-
   findings.push({
     phase: 'later_echo',
     eventId: 'p29_study_habit_case_record_duty',

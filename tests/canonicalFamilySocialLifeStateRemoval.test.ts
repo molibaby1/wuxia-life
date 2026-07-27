@@ -132,6 +132,34 @@ function testDailyWeightsAreAxisIndependent(): void {
   assert(getWeight(config, legacyInjected) === base, 'legacy injected axes must not affect daily weight');
 }
 
+function eventHasLifeStateTarget(eventId: string, target: string): boolean {
+  const event = EventLoader.getInstance().getEventById(eventId);
+  if (!event) throw new Error(`event not found: ${eventId}`);
+  const effects = [
+    ...(event.autoEffects ?? []),
+    ...(event.choices ?? []).flatMap(choice => choice.effects ?? []),
+  ];
+  return effects.some(effect => effect.type === 'life_state_change' && effect.target === target);
+}
+
+function testFamilyContentRemoval(): void {
+  assert(!eventHasLifeStateTarget('family_child_born', 'familyBond'), 'child birth uses children and has_child only');
+  assert(!eventHasLifeStateTarget('family_crisis', 'familyBond'), 'family crisis uses concrete outcomes only');
+
+  for (const id of [
+    'p28_family_bond_elder_care',
+    'p28_family_bond_sibling_support',
+    'p28_family_bond_caretaker_obligation',
+    'p42_family_bond_festival_reunion',
+    'p42_family_bond_estate_trust',
+  ]) {
+    assert(EventLoader.getInstance().getEventById(id) === undefined, `${id} must not be in the active event pool`);
+  }
+
+  const manifest = fs.readFileSync(path.resolve('src/data/event-asset-manifest.json'), 'utf8');
+  assert(!/p28_family_bond_|p42_family_bond_/.test(manifest), 'deleted family-axis events must leave manifest');
+}
+
 function testSocialEventCopyAndExpressions(): void {
   assertSocialEventRewrite('p42_social_momentum_youth_introduction', 'connections >= 5 || reputation >= 10', {
     title: '初识引见',
@@ -187,6 +215,7 @@ export function runCanonicalFamilySocialLifeStateRemovalTests(): void {
   testFormalRuntimeDoesNotUseDeletedAxes();
   testDailyEventsDoNotUseDeletedAxes();
   testDailyWeightsAreAxisIndependent();
+  testFamilyContentRemoval();
   testSocialEventCopyAndExpressions();
 }
 

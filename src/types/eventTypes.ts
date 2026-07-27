@@ -243,7 +243,7 @@ export interface EventBiasModifier {
   multiplier: number;
 }
 
-export interface LifeStateModifier {
+export interface LifeStateEffect {
   state: LifeStateKey;
   value: number;
 }
@@ -257,7 +257,6 @@ export interface CoreTalentConfig {
   initialStats: TraitStatModifier[];
   growthModifiers: TraitGrowthModifier[];
   eventBiases: EventBiasModifier[];
-  stateBiases?: LifeStateModifier[];
   resultModifiers?: {
     successBonus?: number;
     failureBonus?: number;
@@ -275,7 +274,6 @@ export interface WeaknessConfig {
   initialStats?: TraitStatModifier[];
   growthModifiers?: TraitGrowthModifier[];
   eventBiases: EventBiasModifier[];
-  stateBiases?: LifeStateModifier[];
   resultModifiers?: {
     successPenalty?: number;
     failureBonus?: number;
@@ -290,7 +288,6 @@ export interface TemperamentConfig {
   summary: string;
   flavor: string;
   eventBiases: EventBiasModifier[];
-  startingStates?: LifeStateModifier[];
   autoChoiceBias?: {
     aggressive?: number;
     cautious?: number;
@@ -337,7 +334,7 @@ export interface DailyEventVariantConfig {
   weight: number;
   text: string;
   statEffects?: TraitStatModifier[];
-  stateEffects?: LifeStateModifier[];
+  stateEffects?: LifeStateEffect[];
   effects?: EffectDefinition[];
   flags?: string[];
 }

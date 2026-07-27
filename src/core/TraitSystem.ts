@@ -78,24 +78,6 @@ export class TraitSystem {
           nextPlayer[modifier.stat] = current + modifier.value;
         }
       }
-
-      if ('startingStates' in config && config.startingStates) {
-        for (const modifier of config.startingStates) {
-          nextPlayer.lifeStates![modifier.state] = this.clampLifeState(
-            modifier.state,
-            nextPlayer.lifeStates![modifier.state] + modifier.value
-          );
-        }
-      }
-
-      if ('stateBiases' in config && config.stateBiases) {
-        for (const modifier of config.stateBiases) {
-          nextPlayer.lifeStates![modifier.state] = this.clampLifeState(
-            modifier.state,
-            nextPlayer.lifeStates![modifier.state] + modifier.value
-          );
-        }
-      }
     }
 
     return nextPlayer;

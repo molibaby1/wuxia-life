@@ -23,7 +23,6 @@ export const temperaments: TemperamentConfig[] = [
       { tag: 'family', multiplier: 1.35 },
       { tag: 'social', multiplier: 1.15 },
     ],
-    startingStates: [{ state: 'familyBond', value: 1 }],
     autoChoiceBias: { relational: 0.25, profitable: -0.1 },
   },
   {

@@ -1,7 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { coreTalents } from '../src/data/traits/coreTalents';
-import { weaknesses } from '../src/data/traits/weaknesses';
 import { createDefaultPlayerLifeStates, lifeStates } from '../src/data/life/lifeStates';
 import { dailyEvents } from '../src/data/life/dailyEvents';
 import { DailyEventSystem } from '../src/core/DailyEventSystem';
@@ -31,16 +29,12 @@ export async function runCanonicalFatigueAnxietyStatusMigrationTests(): Promise<
   assert(!traitPlayer.statuses?.includes('fatigued'), 'frail must not initialize fatigued');
   assert(!traitPlayer.statuses?.includes('anxious'), 'traits must not initialize anxious');
 
-  assert(
-    !weaknesses.some(item => item.stateBiases?.some(
-      bias => bias.state === ('fatigue' as never) || bias.state === ('anxiety' as never),
-    )),
-    'weakness configs must not reference fatigue/anxiety',
-  );
-  assert(
-    !coreTalents.some(item => item.stateBiases?.some(bias => bias.state === ('anxiety' as never))),
-    'core talents must not reference anxiety',
-  );
+  const traitSources = [
+    'src/data/traits/coreTalents.ts',
+    'src/data/traits/weaknesses.ts',
+    'src/data/traits/temperaments.ts',
+  ].map(file => readFileSync(resolve(file), 'utf8')).join('\n');
+  assert(!/stateBiases|startingStates/.test(traitSources), 'Trait configs must not write lifeStates');
 
   const engine = new GameEngineIntegration();
   engine.startNewGame('Canonical Status Migration', 'male');

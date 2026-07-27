@@ -18,26 +18,12 @@ import { resolveActiveAction } from './ActionResultResolver';
 import { resolveDisturbanceAfterAction } from './DisturbanceResolver';
 import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
 import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
-import {
-  collectShapingLongTermImpactLines,
-} from '../../utils/habitShapingSummary';
 import { collectPracticeImpactLines } from '../../utils/practiceTrajectorySummary';
 import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
 } from '../../types/activeActionTypes';
-
-function mapEchoFlagToLifeState(
-  flag: string,
-): 'socialMomentum' | null {
-  switch (flag) {
-    case 'p9_echo_social_hook':
-      return 'socialMomentum';
-    default:
-      return null;
-  }
-}
 
 export interface ActiveActionExecutionResult {
   actionResult: ActionResult;
@@ -148,11 +134,7 @@ export function executeActiveActionOnState(
   if (actionDef?.onCompleteFlags?.length) {
     if (!state.flags) state.flags = {};
     if (!state.player.flags) state.player.flags = {};
-    if (!state.player.lifeStates) {
-      state.player.lifeStates = createDefaultPlayerLifeStates();
-    }
     const demonicRoute = state.flags?.p8_route_demonic === true;
-    const touchedLifeStates = new Set<'socialMomentum'>();
     for (const flag of actionDef.onCompleteFlags) {
       if (demonicRoute && flag === 'p9_early_travel_focus') {
         state.flags.p9_demonic_restless_journey = true;
@@ -161,16 +143,6 @@ export function executeActiveActionOnState(
       }
       state.flags[flag] = true;
       state.player.flags[flag] = true;
-      const lifeStateKey = mapEchoFlagToLifeState(flag);
-      if (lifeStateKey) {
-        touchedLifeStates.add(lifeStateKey);
-      }
-    }
-    for (const lifeStateKey of touchedLifeStates) {
-      state.player.lifeStates[lifeStateKey] = Math.min(
-        5,
-        (state.player.lifeStates[lifeStateKey] ?? 0) + 1,
-      );
     }
   }
 
@@ -261,10 +233,7 @@ function collectActiveActionLongTermImpactLines(
   flagsBefore: Record<string, unknown>,
   flagsAfter: Record<string, unknown>,
 ): string[] {
-  const lines = [
-    ...collectPracticeImpactLines(beforeLifeStates, afterLifeStates),
-    ...collectShapingLongTermImpactLines(beforeLifeStates, afterLifeStates),
-  ];
+  const lines = collectPracticeImpactLines(beforeLifeStates, afterLifeStates);
   for (const flag of onCompleteFlags) {
     if (flagsBefore[flag] || !flagsAfter[flag]) {
       continue;

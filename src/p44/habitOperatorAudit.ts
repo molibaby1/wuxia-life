@@ -3,7 +3,7 @@ import * as path from 'path';
 import { EventLoader } from '../core/EventLoader';
 import type { EventDefinition } from '../types/eventTypes';
 
-const AXIS_KEYS = ['socialMomentum', 'familyBond'] as const;
+const AXIS_KEYS = ['trainingHabit', 'studyHabit', 'businessHabit'] as const;
 type ShapingAxisKey = (typeof AXIS_KEYS)[number];
 
 export const AUDIT_VERSION = 'p44-v1';
@@ -93,8 +93,6 @@ function poolHintFromEvent(event: EventDefinition): string {
   const id = event.id ?? '';
   if (id.includes('merchant') || id.includes('business')) return 'merchant';
   if (id.includes('medical') || id.includes('healer')) return 'medical';
-  if (id.includes('family')) return 'family-life';
-  if (id.includes('social') || id.includes('relationship') || id.includes('patron')) return 'relationship';
   if (id.startsWith('p22')) return 'p22';
   if (id.startsWith('p21') || id.startsWith('p26') || id.startsWith('p27')) return 'p21';
   if (id.startsWith('p42')) return 'p42';
@@ -203,8 +201,6 @@ const CLUSTER_SIGNALS: Array<{ id: string; patterns: RegExp[] }> = [
   { id: 'scholar', patterns: [/scholar/i, /academy/i, /copybook/i, /chronicle/i, /study/i] },
   { id: 'merchant', patterns: [/merchant/i, /ledger/i, /stall/i, /syndicate/i, /wealth/i, /business/i] },
   { id: 'healer', patterns: [/healer/i, /medical/i, /case_record/i] },
-  { id: 'social', patterns: [/social/i, /patron/i, /network/i, /introduction/i, /testimonial/i] },
-  { id: 'family', patterns: [/family/i, /reunion/i, /estate/i, /elder_care/i, /sibling/i] },
 ];
 
 function detectClusterVariants(eventIds: string[]): string[] {
@@ -267,7 +263,6 @@ const RECAP_SURFACE_EXPECTATIONS: Array<{ surface: string; file: string; helpers
     helpers: ['buildLateLifePracticeRecapLine'],
   },
   { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helpers: ['buildLateLifePracticeRecapLine'] },
-  { surface: 'Self-understanding', file: 'src/p19/stateAccess.ts', helpers: ['socialMomentum', 'familyBond'] },
 ];
 
 const DEFERRED_SURFACES: RecapSurfaceReport[] = [

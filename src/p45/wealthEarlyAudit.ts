@@ -7,7 +7,6 @@ export interface WealthEarlyCheckpoint {
     trainingHabit: number;
     studyHabit: number;
     businessHabit: number;
-    socialMomentum: number;
   };
   money: number;
   businessAcumen: number;
@@ -116,7 +115,6 @@ export function summarizeWealthEarlyAudit(report: GameProcessReport): WealthEarl
           trainingHabit: record?.gameState.player.lifeStates.trainingHabit ?? 0,
           studyHabit: record?.gameState.player.lifeStates.studyHabit ?? 0,
           businessHabit: record?.gameState.player.lifeStates.businessHabit ?? 0,
-          socialMomentum: record?.gameState.player.lifeStates.socialMomentum ?? 0,
         },
         money: record?.gameState.player.money ?? 0,
         businessAcumen: record?.gameState.player.businessAcumen ?? 0,
@@ -146,10 +144,10 @@ export function formatWealthEarlyAuditMarkdown(audit: WealthEarlyAudit): string 
   }
   lines.push('');
   lines.push('## Checkpoints');
-  lines.push('| Age | trainingHabit | studyHabit | businessHabit | socialMomentum | money | businessAcumen | routeFlags |');
-  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+  lines.push('| Age | trainingHabit | studyHabit | businessHabit | money | businessAcumen | routeFlags |');
+  lines.push('| --- | --- | --- | --- | --- | --- | --- |');
   for (const cp of audit.checkpoints) {
-    lines.push(`| ${cp.age} | ${cp.lifeStates.trainingHabit} | ${cp.lifeStates.studyHabit} | ${cp.lifeStates.businessHabit} | ${cp.lifeStates.socialMomentum} | ${cp.money} | ${cp.businessAcumen} | ${cp.routeFlags.join(', ') || 'none'} |`);
+    lines.push(`| ${cp.age} | ${cp.lifeStates.trainingHabit} | ${cp.lifeStates.studyHabit} | ${cp.lifeStates.businessHabit} | ${cp.money} | ${cp.businessAcumen} | ${cp.routeFlags.join(', ') || 'none'} |`);
   }
   lines.push('');
   lines.push('## Route Signal Ages');

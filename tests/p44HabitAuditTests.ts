@@ -8,7 +8,7 @@ import {
   runRecapAbsorptionAudit,
   type P44HabitOperatorAuditResult,
 } from '../src/p44/habitOperatorAudit';
-import { SHAPING_AXES } from '../src/utils/habitShapingSummary';
+const EXPECTED_AXES = ['trainingHabit', 'studyHabit', 'businessHabit'] as const;
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -19,11 +19,11 @@ function testCoverageAuditShape(): void {
   assert(result.readers.length > 0, 'coverage audit should inventory gated readers');
   assert(result.gaps.length > 0, 'expected at least one coverage gap in current pool');
 
-  for (const axis of SHAPING_AXES) {
-    const row = result.matrix[axis.key];
-    assert(typeof row.total === 'number', `matrix missing total for ${axis.key}`);
+  for (const axis of EXPECTED_AXES) {
+    const row = result.matrix[axis];
+    assert(typeof row.total === 'number', `matrix missing total for ${axis}`);
     for (const band of AGE_BANDS) {
-      assert(typeof row[band.id] === 'number', `matrix missing band ${band.id} for ${axis.key}`);
+      assert(typeof row[band.id] === 'number', `matrix missing band ${band.id} for ${axis}`);
     }
   }
 
@@ -48,9 +48,11 @@ function testCanonicalOperatorAuditShape(): void {
 function testArchetypeDifferentiationAudit(): void {
   const coverage = runHabitCoverageAudit();
   const result = runArchetypeDifferentiationAudit(coverage);
-  assert(result.axes.length === SHAPING_AXES.length, 'archetype audit should cover all axes');
-
-  assert(result.axes.every((axis) => axis.axis === 'socialMomentum' || axis.axis === 'familyBond'), 'only social/family axes remain');
+  assert(result.axes.length === EXPECTED_AXES.length, 'archetype audit should cover all axes');
+  assert(
+    result.axes.map((axis) => axis.axis).join(',') === EXPECTED_AXES.join(','),
+    'only the three practice habit axes remain',
+  );
   assert(result.convergenceWarnings.length > 0, 'should surface at least one convergence warning');
 }
 

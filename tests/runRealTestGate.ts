@@ -78,6 +78,7 @@ const suites: Suite[] = [
   { name: 'canonicalLegacyHealthRemovalTests', entry: 'tests/canonicalLegacyHealthRemoval.test.ts' },
   { name: 'canonicalFatigueAnxietyStatusMigrationTests', entry: 'tests/canonicalFatigueAnxietyStatusMigration.test.ts' },
   { name: 'canonicalDisciplineIndulgenceRemovalTests', entry: 'tests/canonicalDisciplineIndulgenceRemoval.test.ts' },
+  { name: 'canonicalHabitPracticeNarrowingTests', entry: 'tests/canonicalHabitPracticeNarrowing.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

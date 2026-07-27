@@ -3,10 +3,9 @@ import {
   AGE_BANDS,
   runArchetypeDifferentiationAudit,
   runHabitCoverageAudit,
-  runLegacyFlagDriftAudit,
+  runCanonicalOperatorAudit,
   runP44HabitOperatorAudit,
   runRecapAbsorptionAudit,
-  type HabitCoverageAuditResult,
   type P44HabitOperatorAuditResult,
 } from '../src/p44/habitOperatorAudit';
 import { SHAPING_AXES } from '../src/utils/habitShapingSummary';
@@ -38,17 +37,12 @@ function testCoverageAuditShape(): void {
   }
 }
 
-function testLegacyDriftAuditShape(): void {
-  const result = runLegacyFlagDriftAudit();
-  assert(result.hits.length > 0, 'legacy drift should find known compatibility hits');
-  assert(result.allowedCount + result.suspiciousCount === result.hits.length, 'hit counts must reconcile');
-
-  const contentHits = result.hits.filter((hit) => hit.file.startsWith('src/data/lines/'));
-  assert(contentHits.length > 0, 'should scan content pools for legacy references');
-  assert(
-    contentHits.every((hit) => hit.classification === 'allowed_compatibility'),
-    'content co-gates with lifeStates should classify as allowed compatibility',
-  );
+function testCanonicalOperatorAuditShape(): void {
+  const result = runCanonicalOperatorAudit();
+  assert(result.producerCount > 0, 'canonical audit should find explicit practice producers');
+  assert(result.consumerCount > 0, 'canonical audit should find practice trajectory consumers');
+  assert(result.forbiddenReferences.length === 0, 'removed compatibility and identity helpers must stay absent');
+  assert(result.blockers.length === 0, 'global multipliers must not read practice habits');
 }
 
 function testArchetypeDifferentiationAudit(): void {
@@ -56,16 +50,7 @@ function testArchetypeDifferentiationAudit(): void {
   const result = runArchetypeDifferentiationAudit(coverage);
   assert(result.axes.length === SHAPING_AXES.length, 'archetype audit should cover all axes');
 
-  const training = result.axes.find((axis) => axis.axis === 'trainingHabit');
-  assert(training != null, 'trainingHabit report missing');
-  assert(training.differentiation === 'strong', 'trainingHabit should have strong differentiation after P42');
-
-  const business = result.axes.find((axis) => axis.axis === 'businessHabit');
-  assert(business != null, 'businessHabit report missing');
-  assert(
-    business.differentiation === 'partial' || business.differentiation === 'thin',
-    'businessHabit should remain partial or thin differentiation',
-  );
+  assert(result.axes.every((axis) => axis.axis === 'socialMomentum' || axis.axis === 'familyBond'), 'only social/family axes remain');
   assert(result.convergenceWarnings.length > 0, 'should surface at least one convergence warning');
 }
 
@@ -84,26 +69,18 @@ function testFullAuditEnvelope(): void {
   assert(result.auditVersion === AUDIT_VERSION, 'audit version mismatch');
   assert(result.generatedAt.length > 0, 'generatedAt required');
   assert(result.coverage.readers.length > 0, 'envelope coverage required');
-  assert(Array.isArray(result.legacyDrift.hits), 'legacyDrift.hits required');
+  assert(typeof result.operatorAudit.producerCount === 'number', 'operator audit producer count required');
+  assert(typeof result.operatorAudit.consumerCount === 'number', 'operator audit consumer count required');
   assert(Array.isArray(result.archetypeDifferentiation.axes), 'archetypeDifferentiation.axes required');
   assert(typeof result.recapAbsorption.allRequiredEngineSurfacesWired === 'boolean', 'recap flag required');
 }
 
-function testP42ChildhoodReaderPresent(coverage: HabitCoverageAuditResult): void {
-  const childhoodStudy = coverage.readers.find(
-    (reader) => reader.eventId === 'p42_study_habit_childhood_copybook',
-  );
-  assert(childhoodStudy != null, 'P42 childhood study reader should be inventoried');
-  assert(childhoodStudy.bands.includes('childhood'), 'childhood copybook should map to childhood band');
-}
-
 function main(): void {
   testCoverageAuditShape();
-  testLegacyDriftAuditShape();
+  testCanonicalOperatorAuditShape();
   testArchetypeDifferentiationAudit();
   testRecapAbsorptionAudit();
   testFullAuditEnvelope();
-  testP42ChildhoodReaderPresent(runHabitCoverageAudit());
   console.log('p44HabitAuditTests: all passed');
 }
 

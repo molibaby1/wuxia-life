@@ -18,10 +18,7 @@ export function scorePlaytestSlice(sliceId: string, dimension: PlaytestDimension
       const pacing = scoreSliceExperience(sliceId, 'stage_pacing_health');
       const route = scoreSliceExperience(sliceId, 'route_differentiation');
       const momentumBoost = emphasis === 'origin_early_growth' ? 0.22 : 0;
-      const delayedPayoffPenalty =
-        sliceId === 'p20_slice_wealth_pacing' || slice?.seedFlags.includes('business_habit')
-          ? 0.22
-          : 0;
+      const delayedPayoffPenalty = sliceId === 'p20_slice_wealth_pacing' ? 0.22 : 0;
       return Math.max(
         0,
         pacing * 0.3 +

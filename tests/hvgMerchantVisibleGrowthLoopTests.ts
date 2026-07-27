@@ -2,7 +2,6 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventLoader } from '../src/core/EventLoader';
 import { executeActiveActionOnState } from '../src/core/activePlanning/ActivePlanningService';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
-import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import {
   MERCHANT_LATE_CHILDHOOD_BUSINESS_LITE_ID,
   resolveChildhoodActionPalette,
@@ -41,18 +40,14 @@ function testBusinessActionsAccumulateHabit(): void {
     includeDisturbance: false,
   });
   assert(errand !== null, 'errand should execute');
-  assert((state.player.lifeStates?.businessHabit ?? 0) >= 1, 'errand should add businessHabit');
+  assert(state.player.lifeStates?.businessHabit === 0, 'one-month errand must not add business practice');
 
   const apprentice = executeActiveActionOnState(state, 'action_household_apprentice', {
     random: () => 0.5,
     includeDisturbance: false,
   });
   assert(apprentice !== null, 'apprentice should execute');
-  assert((state.player.lifeStates?.businessHabit ?? 0) >= 2, 'two business actions should reach businessHabit 2');
-  assert(
-    buildCurrentShapingSummary(state.player.lifeStates).includes('营生'),
-    'shaping summary should show business axis at tier 2',
-  );
+  assert(state.player.lifeStates?.businessHabit === 1, 'only explicit apprenticeship adds business practice');
 }
 
 function testConfirmationRequiresHabitNotWealthAlone(): void {
@@ -231,8 +226,8 @@ function testBusinessFeedbackOnTierCross(): void {
     includeDisturbance: false,
   });
   assert(
-    second?.feedbackText.includes('营生塑形渐成'),
-    'businessHabit tier cross should append shaping feedback',
+    second?.activeActionSummary.longTermImpactLines?.includes('营生实践有所积累') === true,
+    'explicit apprenticeship should append practice feedback',
   );
   assert(second?.feedbackText.includes('营生告一段落'), 'business category label should be 营生');
 }

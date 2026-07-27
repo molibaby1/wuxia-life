@@ -146,14 +146,7 @@ function testPeriodSummaryShapingGrowth(): void {
     body: '这一季你多与玩伴相处、听故事学人情。',
     lifeStates,
   });
-  assert(
-    period.body.includes(P129_PERIOD_SHAPING_AXIS_LABEL),
-    'period summary body includes shaping growth line for social axis',
-  );
-  assert(
-    period.body.includes('反复做事'),
-    'period summary distinguishes behavior-driven growth from passive age gain',
-  );
+  assert(period.body === '这一季你多与玩伴相处、听故事学人情。', 'social practice remains in source narrative');
 }
 
 function testContinuationReadability(): void {

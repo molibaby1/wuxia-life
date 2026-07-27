@@ -1,6 +1,6 @@
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
 import { getP8PersonaById } from '../p8/personas';
-import { deriveDominantShapingLines } from '../utils/habitShapingSummary';
+import { derivePracticeTrajectoryLines } from '../utils/practiceTrajectorySummary';
 import type { GameState } from '../types/eventTypes';
 import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { GameProcessRecord, GameProcessReport } from '../types/simulationRecordTypes';
@@ -55,7 +55,7 @@ function findCheckpointRecord(records: GameProcessRecord[], age: number): GamePr
 }
 
 function formatDominantAxes(state: GameState): string[] {
-  return deriveDominantShapingLines(state.player.lifeStates, 2)
+  return derivePracticeTrajectoryLines(state.player.lifeStates, 2)
     .map(line => `${line.label} · ${line.tierLabel}`);
 }
 

@@ -9,13 +9,10 @@ import {
   P127_PRIMARY_ACTION,
   P127_PRIMARY_AGE_MIN,
   P127_PRIMARY_AGE_MAX,
-  P127_PERIOD_SHAPING_AXIS_LABEL,
   P127_SAMPLE_ORIGIN_ID,
-  P127_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD,
   P127_TRAINING_HABIT_SHAPING_THRESHOLD,
   isP127MartialSampleScope,
 } from '../src/hvg/p127MartialSampleBaseline';
-import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import { formatLongTermFlag } from '../src/utils/playerFacingLabels';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
@@ -56,10 +53,6 @@ function testBaselineScopeLocked(): void {
 
 function testShapingSummaryTransition(): void {
   const state = martialSampleState();
-  assert(
-    buildCurrentShapingSummary(state.player.lifeStates) === '塑形未成',
-    'starts at 塑形未成',
-  );
 
   for (let i = 0; i < P127_TRAINING_HABIT_SHAPING_THRESHOLD; i++) {
     executeActiveActionOnState(state, P127_PRIMARY_ACTION, {
@@ -72,11 +65,6 @@ function testShapingSummaryTransition(): void {
     (state.player.lifeStates?.trainingHabit ?? 0) >= P127_TRAINING_HABIT_SHAPING_THRESHOLD,
     'two training actions reach trainingHabit threshold',
   );
-  const summary = buildCurrentShapingSummary(state.player.lifeStates);
-  assert(summary.includes('习武'), 'shapingSummary shows martial axis');
-  assert(summary.includes('渐成'), 'shapingSummary shows tier at threshold 2');
-  assert(summary === P127_EXPECTED_SHAPING_SUMMARY_AT_THRESHOLD, 'expected martial shaping phrase at threshold');
-  assert(!summary.includes('武学世家'), 'copy is growth direction not origin flavor');
 
   const model = buildMainScreenModel(
     {
@@ -101,7 +89,7 @@ function testShapingSummaryTransition(): void {
       },
     },
   );
-  assert(model.shapingSummary === summary, 'main screen shapingSummary matches habit wiring');
+  assert(model.shapingSummary === '塑形未成', 'practice habits do not define shaping summary');
 }
 
 function testLongTermImpactAfterTrainingActions(): void {
@@ -113,8 +101,8 @@ function testLongTermImpactAfterTrainingActions(): void {
   assert(first !== null, 'first training executes');
   const firstImpacts = first!.activeActionSummary.longTermImpactLines ?? [];
   assert(
-    firstImpacts.some(line => line.includes('习武塑形加深') || line.includes('习武方向已被记住')),
-    'first training shows shaping or echo long-term impact',
+    firstImpacts.includes('练功实践有所积累'),
+    'first training shows explicit practice feedback',
   );
 
   const second = executeActiveActionOnState(state, P127_PRIMARY_ACTION, {
@@ -124,8 +112,8 @@ function testLongTermImpactAfterTrainingActions(): void {
   assert(second !== null, 'second training executes');
   const secondImpacts = second!.activeActionSummary.longTermImpactLines ?? [];
   assert(
-    secondImpacts.some(line => line.includes('习武塑形加深')),
-    'second training tier cross shows shaping long-term impact',
+    secondImpacts.includes('练功实践有所积累'),
+    'second training keeps explicit practice feedback',
   );
   assert(
     formatLongTermFlag('p9_echo_training_hook', true).includes('习武方向'),
@@ -146,12 +134,12 @@ function testPeriodSummaryShapingGrowth(): void {
     lifeStates,
   });
   assert(
-    period.body.includes(P127_PERIOD_SHAPING_AXIS_LABEL),
-    'period summary body includes shaping growth line for martial axis',
+    period.body.includes('练功实践'),
+    'period summary body includes descriptive martial practice line',
   );
   assert(
-    period.body.includes('反复做事'),
-    'period summary distinguishes behavior-driven growth from passive age gain',
+    period.body.includes('开始重复'),
+    'period summary distinguishes repeated practice from passive age gain',
   );
 }
 

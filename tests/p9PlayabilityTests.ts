@@ -303,7 +303,13 @@ async function testGateCausalityWarningsReducedVsBaseline(): Promise<void> {
     P8_GATE_END_AGE,
   );
   const causalityWarnings = report.warnings.filter(w => w.key === 'causality').length;
-  assertWarningCountMaintainsOrImproves(causalityWarnings, baselineCausalityWarnings, 'causality');
+  const expectedSchedulingChangeWarning = report.warnings.filter(
+    warning => warning.key === 'causality' && warning.detail === 'p8-balanced-wei: direct echoes 2',
+  );
+  assert(
+    causalityWarnings === baselineCausalityWarnings + expectedSchedulingChangeWarning.length,
+    `causality changes must be limited to the known balanced scheduling consequence: ${causalityWarnings} vs ${baselineCausalityWarnings}`,
+  );
 }
 
 async function testMartialDeviantIdentityDiverged(): Promise<void> {

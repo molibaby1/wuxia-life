@@ -3,7 +3,6 @@ import { buildPeriodSummary } from '../src/core/activePlanning/periodSummaryBuil
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import {
-  P122_BUSINESS_HABIT_SHAPING_THRESHOLD,
   P122_CONTINUATION_AGE_MAX,
   P122_PRIMARY_AGE_MAX,
   P122_PRIMARY_AGE_MIN,
@@ -11,8 +10,8 @@ import {
   P122_SAMPLE_ORIGIN_ID,
   isP122MerchantSampleScope,
 } from '../src/hvg/p122MerchantSampleBaseline';
-import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import { formatLongTermFlag } from '../src/utils/playerFacingLabels';
+import { buildCurrentShapingSummary } from '../src/utils/habitShapingSummary';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -39,7 +38,6 @@ function merchantSampleState(overrides: Partial<GameState> = {}): GameState {
 
 function testBaselineScopeLocked(): void {
   assert(P122_SAMPLE_ACTIONS.length === 2, 'sample actions locked to errand + apprentice');
-  assert(P122_BUSINESS_HABIT_SHAPING_THRESHOLD === 2, 'businessHabit threshold is 2');
   assert(P122_PRIMARY_AGE_MIN === 5 && P122_PRIMARY_AGE_MAX === 8, 'primary band 5-8');
   assert(P122_CONTINUATION_AGE_MAX === 12, 'continuation band ends at 12');
 
@@ -64,13 +62,7 @@ function testShapingSummaryTransition(): void {
     });
   }
 
-  assert(
-    (state.player.lifeStates?.businessHabit ?? 0) >= P122_BUSINESS_HABIT_SHAPING_THRESHOLD,
-    'two sample actions reach businessHabit threshold',
-  );
-  const summary = buildCurrentShapingSummary(state.player.lifeStates);
-  assert(summary.includes('营生'), 'shapingSummary shows business axis');
-  assert(summary.includes('渐成'), 'shapingSummary shows tier at threshold 2');
+  assert(state.player.lifeStates?.businessHabit === 1, 'only explicit apprenticeship adds business practice');
 
   const model = buildMainScreenModel(
     {
@@ -95,7 +87,7 @@ function testShapingSummaryTransition(): void {
       },
     },
   );
-  assert(model.shapingSummary === summary, 'main screen shapingSummary matches habit wiring');
+  assert(model.shapingSummary === '塑形未成', 'practice habits do not define shaping summary');
 }
 
 function testLongTermImpactAfterShapingActions(): void {
@@ -107,8 +99,8 @@ function testLongTermImpactAfterShapingActions(): void {
   assert(first !== null, 'errand executes');
   const firstImpacts = first!.activeActionSummary.longTermImpactLines ?? [];
   assert(
-    firstImpacts.some(line => line.includes('营生塑形加深') || line.includes('营生方向已被记住')),
-    'errand shows shaping or echo long-term impact',
+    firstImpacts.includes('营生方向已被记住，后续机会会由此打开'),
+    'errand keeps route echo feedback without creating practice',
   );
 
   const second = executeActiveActionOnState(state, P122_SAMPLE_ACTIONS[1], {
@@ -118,8 +110,8 @@ function testLongTermImpactAfterShapingActions(): void {
   assert(second !== null, 'apprentice executes');
   const secondImpacts = second!.activeActionSummary.longTermImpactLines ?? [];
   assert(
-    secondImpacts.some(line => line.includes('营生塑形加深')),
-    'apprentice tier cross shows shaping long-term impact',
+    secondImpacts.includes('营生实践有所积累'),
+    'apprentice shows explicit practice feedback',
   );
   assert(
     formatLongTermFlag('p9_echo_business_hook', true).includes('营生方向'),
@@ -136,12 +128,12 @@ function testPeriodSummaryShapingGrowth(): void {
     lifeStates,
   });
   assert(
-    period.body.includes('营生'),
-    'period summary body includes shaping growth line for business axis',
+    period.body.includes('营生实践'),
+    'period summary body includes descriptive business practice line',
   );
   assert(
-    period.body.includes('反复做事'),
-    'period summary distinguishes behavior-driven growth from passive age gain',
+    period.body.includes('开始重复'),
+    'period summary distinguishes repeated practice from passive age gain',
   );
 }
 
@@ -167,8 +159,8 @@ function testHvgBaselineDoesNotRegress(): void {
     includeDisturbance: false,
   });
   assert(
-    buildCurrentShapingSummary(state.player.lifeStates) === '营生 · 渐成',
-    'hvg baseline shapingSummary unchanged',
+    state.player.lifeStates?.businessHabit === 1,
+    'hvg baseline keeps only explicit apprenticeship practice',
   );
 }
 

@@ -15,6 +15,7 @@ import { inferLivedSelfUnderstanding } from '../src/p19/stateAccess';
 import { selectArchetypeFamily } from '../src/p20/archetypeCoverage';
 import { buildLateLifePracticeRecapLine, derivePracticeTrajectoryLines } from '../src/utils/practiceTrajectorySummary';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
+import { EndingSystem } from '../src/core/EndingSystem';
 import type { GameState } from '../src/types/eventTypes';
 
 const framework = new GameTestFramework();
@@ -193,6 +194,25 @@ function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
   assert(inferLivedSelfUnderstanding(low) === inferLivedSelfUnderstanding(high), 'Habit-only changes must not change lived self identity');
   const lifeMemory = { schemaVersion: LIFE_MEMORY_SCHEMA_VERSION, derivedAtAge: 40 } as const;
   assert(buildMainScreenModel(low.player, lifeMemory).tendencySummary === buildMainScreenModel(high.player, lifeMemory).tendencySummary, 'Habit-only changes must not change main-screen tendency ranking');
+
+  const lowEnding = EndingSystem.determineEnding(low);
+  const highEnding = EndingSystem.determineEnding(high);
+  assert(lowEnding.id === highEnding.id && lowEnding.category === highEnding.category, 'Habit-only changes must not change ending selection');
+  for (const ending of EndingSystem.ENDINGS) {
+    assert(
+      EndingSystem.canUnlockEnding(low, ending.id) === EndingSystem.canUnlockEnding(high, ending.id),
+      `Habit-only changes must not change ending eligibility for ${ending.id}`,
+    );
+  }
+
+  const lowMemory = deriveLifeMemorySummary(low);
+  const highMemory = deriveLifeMemorySummary(high);
+  const stripTrajectory = (summary: ReturnType<typeof deriveLifeMemorySummary>) => {
+    const clone = structuredClone(summary);
+    delete clone.habitTrajectory;
+    return clone;
+  };
+  assertDeepEqual(stripTrajectory(lowMemory), stripTrajectory(highMemory), 'Habit-only changes must not alter other memory fields');
 }
 
 function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {

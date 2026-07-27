@@ -182,7 +182,7 @@ function testTrajectorySummaryShape(): void {
 
   assert(summary.checkpoints.length === 4, `expected 4 checkpoints, got ${summary.checkpoints.length}`);
   assert(summary.checkpoints[0]?.age === 10, 'checkpoint age 10 missing');
-  assert(summary.checkpoints[1]?.dominantAxes.some(axis => axis.includes('习武塑形')), 'age20 dominant axis should include training');
+  assert(summary.checkpoints[1]?.dominantAxes.some(axis => axis.includes('练功实践')), 'age20 dominant axis should include training practice');
   assert(summary.checkpoints[2]?.consequenceSignals.some(signal => signal.includes('p26_training_habit_midlife_callback')), 'age30 consequence signal should capture callback');
 
   const lifeMemory = deriveLifeMemorySummary(report.records.at(-1)!.gameState);

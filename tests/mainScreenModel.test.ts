@@ -256,8 +256,8 @@ console.log('=== Main Screen Model Tests ===\n');
     createLifeMemory(),
   );
 
-  assert(model.shapingSummary === '习武 · 成形 / 饱学 · 渐成', 'shaping should rank habit axes with readable labels');
-  console.log('✓ surfaces dominant habit shaping on main screen');
+  assert(model.shapingSummary === '塑形未成', 'practice habits must not define main-screen shaping summary');
+  console.log('✓ keeps practice out of main-screen shaping summary');
 }
 
 {
@@ -266,8 +266,8 @@ console.log('=== Main Screen Model Tests ===\n');
     createLifeMemory(),
   );
 
-  assert(model.shapingSummary === '营生 · 渐成', 'PlayerSummaryDto lifeStates should drive shapingSummary in API mode');
-  console.log('✓ PlayerSummaryDto lifeStates feed shaping summary');
+  assert(model.shapingSummary === '塑形未成', 'PlayerSummaryDto practice lifeStates must not drive shaping summary');
+  console.log('✓ PlayerSummaryDto practice lifeStates stay out of shaping summary');
 }
 
 {

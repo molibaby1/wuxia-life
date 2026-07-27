@@ -16,10 +16,6 @@ export const AGE_BANDS = [
 
 export type AgeBandId = (typeof AGE_BANDS)[number]['id'];
 
-export const LEGACY_HABIT_FLAGS = ['training_habit', 'study_habit', 'business_habit'] as const;
-
-export type LegacyFlag = (typeof LEGACY_HABIT_FLAGS)[number];
-
 export interface CoverageReader {
   eventId: string;
   axis: ShapingAxisKey;
@@ -43,24 +39,11 @@ export interface HabitCoverageAuditResult {
   readers: CoverageReader[];
 }
 
-export interface LegacyFlagHit {
-  file: string;
-  flag: LegacyFlag;
-  line: number;
-  classification:
-    | 'allowed_compatibility'
-    | 'allowed_fixture'
-    | 'allowed_replayability'
-    | 'allowed_documentation'
-    | 'suspicious_primary';
-  excerpt: string;
-}
-
-export interface LegacyFlagDriftResult {
-  hits: LegacyFlagHit[];
-  suspiciousReaders: LegacyFlagHit[];
-  allowedCount: number;
-  suspiciousCount: number;
+export interface CanonicalOperatorAuditResult {
+  producerCount: number;
+  consumerCount: number;
+  forbiddenReferences: string[];
+  blockers: string[];
 }
 
 export interface ArchetypeAxisReport {
@@ -95,7 +78,7 @@ export interface P44HabitOperatorAuditResult {
   auditVersion: typeof AUDIT_VERSION;
   generatedAt: string;
   coverage: HabitCoverageAuditResult;
-  legacyDrift: LegacyFlagDriftResult;
+  operatorAudit: CanonicalOperatorAuditResult;
   archetypeDifferentiation: ArchetypeDifferentiationResult;
   recapAbsorption: RecapAbsorptionResult;
 }
@@ -185,80 +168,6 @@ export function runHabitCoverageAudit(loader = EventLoader.getInstance()): Habit
   return { matrix, gaps, lowDensity, readers };
 }
 
-const LEGACY_ALLOWLIST: Array<{ pattern: RegExp; classification: LegacyFlagHit['classification'] }> = [
-  { pattern: /GameEngineIntegration\.ts$/, classification: 'allowed_compatibility' },
-  { pattern: /dailyEvents\.ts$/, classification: 'allowed_compatibility' },
-  { pattern: /wuxiaReplayabilitySurfaces\.ts$/, classification: 'allowed_replayability' },
-  { pattern: /validationSlices\.ts$/, classification: 'allowed_fixture' },
-  { pattern: /sliceFixtures\.ts$/, classification: 'allowed_fixture' },
-  { pattern: /^tests\//, classification: 'allowed_fixture' },
-  { pattern: /^docs\//, classification: 'allowed_documentation' },
-  { pattern: /^agent_docs\//, classification: 'allowed_documentation' },
-  { pattern: /habitOperatorAudit\.ts$/, classification: 'allowed_documentation' },
-  { pattern: /p44HabitAuditTests\.ts$/, classification: 'allowed_fixture' },
-];
-
-function lineReferencesLegacyFlag(line: string, flag: LegacyFlag): boolean {
-  if (!line.includes(flag)) return false;
-  if (new RegExp(`flags\\.has\\([^)]*${flag}`).test(line)) return true;
-  if (new RegExp(`["']${flag}["']`).test(line)) {
-    if (new RegExp(`"id"\\s*:\\s*"[^"]*${flag}`).test(line)) return false;
-    return true;
-  }
-  return false;
-}
-
-function hasLifeStatesCoGate(line: string): boolean {
-  return /lifeStates\.(trainingHabit|studyHabit|businessHabit)/.test(line);
-}
-
-function classifyLegacyHit(relativePath: string, lineText: string): LegacyFlagHit['classification'] {
-  for (const rule of LEGACY_ALLOWLIST) {
-    if (rule.pattern.test(relativePath)) return rule.classification;
-  }
-  if (/^src\/p25\//.test(relativePath) || /^src\/p20\/habitTrajectorySlice\.ts$/.test(relativePath)) {
-    return 'allowed_fixture';
-  }
-  if (/^src\/data\/lines\/.*\.json$/.test(relativePath)) {
-    return hasLifeStatesCoGate(lineText) ? 'allowed_compatibility' : 'suspicious_primary';
-  }
-  if (/^src\//.test(relativePath)) {
-    if (hasLifeStatesCoGate(lineText)) return 'allowed_compatibility';
-    if (/eventId:|getEventById\(|evaluateEvent\(/.test(lineText)) return 'allowed_fixture';
-    return 'suspicious_primary';
-  }
-  return 'allowed_documentation';
-}
-
-function scanLegacyFlagHits(rootDir = process.cwd()): LegacyFlagHit[] {
-  const hits: LegacyFlagHit[] = [];
-  const scanRoots = ['src', 'tests', 'docs', 'agent_docs'];
-
-  for (const scanRoot of scanRoots) {
-    const absRoot = path.join(rootDir, scanRoot);
-    if (!fs.existsSync(absRoot)) continue;
-    walkFiles(absRoot, (filePath) => {
-      if (!/\.(ts|tsx|json|md)$/.test(filePath)) return;
-      const relative = path.relative(rootDir, filePath).replace(/\\/g, '/');
-      const lines = fs.readFileSync(filePath, 'utf8').split('\n');
-      lines.forEach((line, index) => {
-        for (const flag of LEGACY_HABIT_FLAGS) {
-          if (!lineReferencesLegacyFlag(line, flag)) continue;
-          hits.push({
-            file: relative,
-            flag,
-            line: index + 1,
-            classification: classifyLegacyHit(relative, line),
-            excerpt: line.trim().slice(0, 120),
-          });
-        }
-      });
-    });
-  }
-
-  return hits;
-}
-
 function walkFiles(dir: string, onFile: (filePath: string) => void): void {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -267,16 +176,26 @@ function walkFiles(dir: string, onFile: (filePath: string) => void): void {
   }
 }
 
-export function runLegacyFlagDriftAudit(rootDir = process.cwd()): LegacyFlagDriftResult {
-  const hits = scanLegacyFlagHits(rootDir);
-  const suspiciousReaders = hits.filter((hit) => hit.classification === 'suspicious_primary');
-  const allowedCount = hits.length - suspiciousReaders.length;
-  return {
-    hits,
-    suspiciousReaders,
-    allowedCount,
-    suspiciousCount: suspiciousReaders.length,
-  };
+export function runCanonicalOperatorAudit(rootDir = process.cwd()): CanonicalOperatorAuditResult {
+  let producerCount = 0;
+  let consumerCount = 0;
+  const forbiddenReferences: string[] = [];
+  const blockers: string[] = [];
+  const scanRoots = ['src/data', 'src/core', 'src/components', 'src/p19', 'src/p20', 'src/utils', 'src/p44'];
+  walkFiles(path.join(rootDir, 'src'), (filePath) => {
+    if (!/\.(ts|tsx|json)$/.test(filePath) || filePath.endsWith('habitOperatorAudit.ts')) return;
+    const relative = path.relative(rootDir, filePath).replace(/\\/g, '/');
+    if (!scanRoots.some(root => relative.startsWith(root))) return;
+    const source = fs.readFileSync(filePath, 'utf8');
+    producerCount += (source.match(/habitEffects|type:\s*['"]life_state_change['"]|stateEffects/g) ?? []).length;
+    consumerCount += (source.match(/practiceTrajectorySummary|lifeStates\.(trainingHabit|studyHabit|businessHabit)/g) ?? []).length;
+    if (/projectHabitCompatibilityFlags|mapLegacyHabitFlagToLifeState|buildShapingPatternEndingTone/.test(source)) {
+      forbiddenReferences.push(relative);
+    }
+    if (/getWeight[\s\S]{0,500}(trainingHabit|studyHabit|businessHabit)/.test(source)) blockers.push(`${relative}: group multiplier reads practice`);
+    if (/getFormalEventStateMultiplier[\s\S]{0,500}(trainingHabit|studyHabit|businessHabit)/.test(source)) blockers.push(`${relative}: formal multiplier reads practice`);
+  });
+  return { producerCount, consumerCount, forbiddenReferences, blockers };
 }
 
 const CLUSTER_SIGNALS: Array<{ id: string; patterns: RegExp[] }> = [
@@ -341,21 +260,21 @@ export function runArchetypeDifferentiationAudit(
 
 const RECAP_SURFACE_EXPECTATIONS: Array<{ surface: string; file: string; helpers: string[] }> = [
   { surface: 'Main-screen shaping row', file: 'src/components/mainScreenModel.ts', helpers: ['buildCurrentShapingSummary'] },
-  { surface: 'Life-memory 长期塑形', file: 'src/core/deriveLifeMemorySummary.ts', helpers: ['deriveDominantShapingLines'] },
+  { surface: 'Life-memory practice trajectory', file: 'src/core/deriveLifeMemorySummary.ts', helpers: ['derivePracticeTrajectoryLines'] },
   {
     surface: 'P19 final summary',
     file: 'src/p19/finalSummaryComposition.ts',
-    helpers: ['buildLateLifeShapingRecapLine', 'buildShapingPatternEndingTone'],
+    helpers: ['buildLateLifePracticeRecapLine'],
   },
-  { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helpers: ['buildLateLifeShapingRecapLine'] },
-  { surface: 'Self-understanding', file: 'src/p19/stateAccess.ts', helpers: ['deriveDominantShapingLines'] },
+  { surface: 'Ending fallback summary', file: 'src/core/EndingSystem.ts', helpers: ['buildLateLifePracticeRecapLine'] },
+  { surface: 'Self-understanding', file: 'src/p19/stateAccess.ts', helpers: ['socialMomentum', 'familyBond'] },
 ];
 
 const DEFERRED_SURFACES: RecapSurfaceReport[] = [
   {
     surface: 'Ending UI',
     file: 'src/components/EndingScreen.vue',
-    helper: 'buildLateLifeShapingRecapLine',
+    helper: 'buildLateLifePracticeRecapLine',
     wired: false,
     reason: 'deferred UI wiring',
   },
@@ -395,7 +314,7 @@ export function runP44HabitOperatorAudit(rootDir = process.cwd()): P44HabitOpera
     auditVersion: AUDIT_VERSION,
     generatedAt: new Date().toISOString(),
     coverage,
-    legacyDrift: runLegacyFlagDriftAudit(rootDir),
+    operatorAudit: runCanonicalOperatorAudit(rootDir),
     archetypeDifferentiation: runArchetypeDifferentiationAudit(coverage),
     recapAbsorption: runRecapAbsorptionAudit(rootDir),
   };
@@ -464,19 +383,14 @@ export function formatArchetypeDifferentiationMarkdown(result: ArchetypeDifferen
   ].join('\n');
 }
 
-export function formatLegacyDriftMarkdown(result: LegacyFlagDriftResult): string {
-  const suspicious = result.suspiciousReaders
-    .map((hit) => `- \`${hit.file}:${hit.line}\` **${hit.flag}** — ${hit.excerpt}`)
-    .join('\n');
-
+export function formatCanonicalOperatorMarkdown(result: CanonicalOperatorAuditResult): string {
   return [
-    '# P44 Legacy Flag Drift Audit',
+    '# P44 Canonical Operator Audit',
     '',
-    `- Allowed hits: ${result.allowedCount}`,
-    `- Suspicious hits: ${result.suspiciousCount}`,
-    '',
-    '## Suspicious readers',
-    suspicious || '- *(none)*',
+    `- Habit producers: ${result.producerCount}`,
+    `- Practice consumers: ${result.consumerCount}`,
+    `- Forbidden helper references: ${result.forbiddenReferences.join(', ') || '(none)'}`,
+    `- Multiplier blockers: ${result.blockers.join(', ') || '(none)'}`,
   ].join('\n');
 }
 
@@ -490,7 +404,7 @@ export function formatP44AuditSummaryMarkdown(result: P44HabitOperatorAuditResul
     '',
     '---',
     '',
-    formatLegacyDriftMarkdown(result.legacyDrift),
+    formatCanonicalOperatorMarkdown(result.operatorAudit),
     '',
     '---',
     '',

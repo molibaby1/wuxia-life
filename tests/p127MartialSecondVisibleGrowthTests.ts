@@ -14,6 +14,7 @@ import {
   isP127MartialSampleScope,
 } from '../src/hvg/p127MartialSampleBaseline';
 import { formatLongTermFlag } from '../src/utils/playerFacingLabels';
+import { inferLivedSelfUnderstanding } from '../src/p19/stateAccess';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -51,7 +52,7 @@ function testBaselineScopeLocked(): void {
   assert(!isP127MartialSampleScope(outScope), 'age 18 outside sample scope');
 }
 
-function testShapingSummaryTransition(): void {
+function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
   const state = martialSampleState();
 
   for (let i = 0; i < P127_TRAINING_HABIT_SHAPING_THRESHOLD; i++) {
@@ -64,6 +65,25 @@ function testShapingSummaryTransition(): void {
   assert(
     (state.player.lifeStates?.trainingHabit ?? 0) >= P127_TRAINING_HABIT_SHAPING_THRESHOLD,
     'two training actions reach trainingHabit threshold',
+  );
+
+  assert(!Object.keys(state.flags).some(flag =>
+    flag === 'shaping_familyBond_up' || flag === 'shaping_socialMomentum_up'),
+    'training actions must not create deleted-axis shaping flags',
+  );
+  const identityBeforeLegacyInjection = inferLivedSelfUnderstanding(state);
+  const legacyInjected = structuredClone(state);
+  (legacyInjected.player.lifeStates as unknown as Record<string, number>).familyBond = 5;
+  (legacyInjected.player.lifeStates as unknown as Record<string, number>).socialMomentum = 5;
+  assert(
+    inferLivedSelfUnderstanding(legacyInjected) === identityBeforeLegacyInjection,
+    'deleted axes must not change lived identity evaluation',
+  );
+  assert(
+    legacyInjected.player.martialPower === state.player.martialPower &&
+      legacyInjected.player.knowledge === state.player.knowledge &&
+      legacyInjected.player.reputation === state.player.reputation,
+    'deleted axes must not change player attributes or long-term evaluation inputs',
   );
 
   const model = buildMainScreenModel(
@@ -89,7 +109,11 @@ function testShapingSummaryTransition(): void {
       },
     },
   );
-  assert(model.shapingSummary === '塑形未成', 'practice habits do not define shaping summary');
+  assert(!('shapingSummary' in model), 'practice habits must not recreate shaping summary');
+  assert(
+    (state.player.lifeStates?.trainingHabit ?? 0) > 0,
+    'trainingHabit practice trajectory remains intact',
+  );
 }
 
 function testLongTermImpactAfterTrainingActions(): void {
@@ -181,7 +205,7 @@ function testNoScholarParallelization(): void {
 
 export async function runP127MartialSecondVisibleGrowthTests(): Promise<void> {
   testBaselineScopeLocked();
-  testShapingSummaryTransition();
+  testLegacyShapingIsRemovedWithoutLosingPracticeFeedback();
   testLongTermImpactAfterTrainingActions();
   testPeriodSummaryShapingGrowth();
   testContinuationReadability();

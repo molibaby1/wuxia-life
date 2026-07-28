@@ -29,8 +29,7 @@ import { dailyEventSystem } from './DailyEventSystem';
 import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
-import { isCoreRouteIdentity, RouteStateManager } from './RouteStateManager';
-import type { RouteIdentity } from './RouteCompatibilityRules';
+import { RouteStateManager } from './RouteStateManager';
 import { appendFormalEventHistory } from './EventHistory';
 import {
   buildActiveActionChoices,
@@ -493,7 +492,6 @@ export class GameEngineIntegration {
     });
     
     let limitedEvents = availableEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP);
-    limitedEvents = this.injectActiveRouteCandidates(availableEvents, limitedEvents);
     limitedEvents = this.injectMandatoryCandidates(availableEvents, limitedEvents);
 
     return limitedEvents;
@@ -735,102 +733,6 @@ export class GameEngineIntegration {
     return true;
   }
   
-  private getActivePlayerRouteKeys(): string[] {
-    const keys = new Set<string>();
-
-    for (const [routeId, routeState] of Object.entries(this.gameState.routeStates || {})) {
-      if (routeState.lifecycle === 'active' || routeState.lifecycle === 'locked_in' || routeState.lifecycle === 'temporary') {
-        keys.add(routeId);
-      }
-    }
-
-    const flags = this.gameState.player?.flags || {};
-    for (const [flagName, flagValue] of Object.entries(flags)) {
-      if (!flagValue || !flagName.startsWith('route_')) {
-        continue;
-      }
-      if (flagName.endsWith('_completed') || flagName.endsWith('_failed') || flagName.endsWith('_locked')) {
-        continue;
-      }
-      const routeKey = flagName.replace(/^route_/, '');
-      if (routeKey) {
-        keys.add(routeKey);
-      }
-    }
-
-    return [...keys];
-  }
-
-  private eventBelongsToActiveRoute(event: EventDefinition, activeRouteKeys: string[]): boolean {
-    if (activeRouteKeys.length === 0) {
-      return false;
-    }
-
-    const routeTargets = event.metadata?.routeTargets || [];
-    for (const routeKey of activeRouteKeys) {
-      if (routeTargets.includes(routeKey)) {
-        return true;
-      }
-    }
-
-    const coreCandidates = this.getEventRouteCandidates(event);
-    for (const routeKey of activeRouteKeys) {
-      if (coreCandidates.includes(routeKey as RouteIdentity)) {
-        return true;
-      }
-    }
-
-    const serialized = JSON.stringify({
-      conditions: event.conditions,
-      autoEffects: event.autoEffects,
-      choices: event.choices,
-    });
-    for (const routeKey of activeRouteKeys) {
-      if (
-        serialized.includes(`"route_${routeKey}"`) ||
-        serialized.includes(`flags.has("route_${routeKey}")`) ||
-        serialized.includes(`flags.has('route_${routeKey}')`)
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * 方案乙：活跃路线在候选池中至少保留 1 个相关事件（可略超 cap）
-   */
-  private injectActiveRouteCandidates(
-    availableEvents: EventDefinition[],
-    limitedEvents: EventDefinition[]
-  ): EventDefinition[] {
-    const activeRouteKeys = this.getActivePlayerRouteKeys();
-    if (activeRouteKeys.length === 0) {
-      return limitedEvents;
-    }
-
-    const result = [...limitedEvents];
-    const selectedIds = new Set(result.map(event => event.id));
-
-    for (const routeKey of activeRouteKeys) {
-      const alreadyRepresented = result.some(event => this.eventBelongsToActiveRoute(event, [routeKey]));
-      if (alreadyRepresented) {
-        continue;
-      }
-
-      const reserved = availableEvents.find(
-        event => !selectedIds.has(event.id) && this.eventBelongsToActiveRoute(event, [routeKey])
-      );
-      if (reserved) {
-        result.push(reserved);
-        selectedIds.add(reserved.id);
-      }
-    }
-
-    return result;
-  }
-
   /** Ensure scheduling-validation and exact-age mandatory events survive FORMAL_CANDIDATE_POOL_CAP. */
   private injectMandatoryCandidates(
     availableEvents: EventDefinition[],
@@ -886,13 +788,6 @@ export class GameEngineIntegration {
   ): number {
     const romanceFamilyMultiplier = this.getRomanceFamilySchedulingMultiplier(event);
     const wandererMidlifeMultiplier = this.getWandererMidlifeSchedulingMultiplier(event);
-    const activeRouteKeys = this.getActivePlayerRouteKeys();
-    const routeMultiplier =
-      activeRouteKeys.length === 0
-        ? 1
-        : this.eventBelongsToActiveRoute(event, activeRouteKeys)
-          ? 1.35
-          : 1;
     const context = narrativeContext ?? buildNarrativeSchedulingContextFromState(this.gameState);
     const narrativeMultiplier = getNarrativeSchedulingMultiplier(event, context);
     const { multiplier: laterLifeConsequenceMultiplier } = getLaterLifeConsequenceMultiplier(
@@ -910,7 +805,6 @@ export class GameEngineIntegration {
     const archetypeMultiplier = getArchetypeSchedulingMultiplier(this.gameState, event);
     const pacingMultiplier = getWholeLifePacingMultiplier(this.gameState, event);
     return (
-      routeMultiplier *
       romanceFamilyMultiplier *
       wandererMidlifeMultiplier *
       narrativeMultiplier *
@@ -998,192 +892,6 @@ export class GameEngineIntegration {
     const age = this.gameState.player?.age ?? 0;
     const flags = this.gameState.player?.flags ?? {};
     return age >= 26 && age <= 30 && !flags.married && Boolean(flags.love_started);
-  }
-
-  /**
-   * 获取玩家当前主导路径（优先 routeStates / route_* 标记，再回退启发式）
-   */
-  private getDominantPaths(): string[] {
-    const paths = new Set<string>(this.getActivePlayerRouteKeys());
-
-    const flags = this.gameState.player?.flags || {};
-
-    if (flags.scholar_path || flags.origin_scholar_family ||
-        (this.gameState.player?.comprehension || 0) >= 50) {
-      paths.add('scholar');
-    }
-
-    if (flags.merchant_path || flags.origin_merchant_family ||
-        (this.gameState.player?.money || 0) >= 500) {
-      paths.add('merchant');
-    }
-
-    if (flags.martial_path || flags.origin_wuxia_family ||
-        (this.gameState.player?.martialPower || 0) >= 50) {
-      paths.add('martial_artist');
-    }
-
-    if (flags.demon_path || flags.sect_faction === 'unconventional' ||
-        flags.unconventional_member || flags.route_demonic) {
-      paths.add('demonic');
-    }
-
-    if (flags.official_path || flags.civil_service_passed ||
-        flags.route_official || (this.gameState.player?.reputation || 0) >= 100) {
-      paths.add('official');
-    }
-
-    if (flags.hermit_path || (this.gameState.player?.chivalry || 0) >= 80) {
-      paths.add('hermit');
-    }
-
-    if (flags.route_beggars) {
-      paths.add('beggars');
-    }
-
-    return [...paths];
-  }
-
-  private extractRouteCandidatesFromEffects(effects: Effect[] | undefined): RouteIdentity[] {
-    if (!effects || effects.length === 0) {
-      return [];
-    }
-    const candidates = new Set<RouteIdentity>();
-    const factionToRoute: Record<string, RouteIdentity> = {
-      orthodox: 'sect',
-      unconventional: 'demonic',
-      neutral: 'wanderer',
-      none: 'wanderer',
-    };
-
-    for (const effect of effects) {
-      if (effect.type !== 'flag_set') {
-        continue;
-      }
-      const flagName = effect.flag || effect.target;
-      if (!flagName || typeof flagName !== 'string') {
-        continue;
-      }
-
-      if (flagName === 'sect_faction' && typeof effect.value === 'string') {
-        const mappedRoute = factionToRoute[effect.value];
-        if (mappedRoute) {
-          candidates.add(mappedRoute);
-        }
-        continue;
-      }
-
-      if (!flagName.startsWith('route_')) {
-        continue;
-      }
-
-      const rawRouteId = flagName.replace(/^route_/, '').replace(/_(locked|completed|failed)$/, '');
-      const normalizedRoute = rawRouteId === 'demon' ? 'demonic' : rawRouteId;
-      if (isCoreRouteIdentity(normalizedRoute)) {
-        candidates.add(normalizedRoute);
-      }
-    }
-
-    return Array.from(candidates);
-  }
-
-  private getEventRouteCandidates(event: EventDefinition): RouteIdentity[] {
-    const metadataTargets = event.metadata?.routeTargets || [];
-    const candidates = new Set<RouteIdentity>();
-
-    for (const route of metadataTargets) {
-      if (typeof route === 'string' && route.length > 0) {
-        if (isCoreRouteIdentity(route)) {
-          candidates.add(route);
-        }
-      }
-    }
-
-    for (const route of this.extractRouteCandidatesFromEffects(event.autoEffects)) {
-      candidates.add(route);
-    }
-
-    for (const choice of event.choices || []) {
-      for (const route of this.extractRouteCandidatesFromEffects(choice.effects)) {
-        candidates.add(route);
-      }
-      for (const outcome of choice.outcomes || []) {
-        for (const route of this.extractRouteCandidatesFromEffects(outcome.effects)) {
-          candidates.add(route);
-        }
-      }
-    }
-
-    return Array.from(candidates);
-  }
-
-  /**
-   * 检查事件是否与当前主导路径冲突
-   */
-  private isPathConflicting(event: EventDefinition, dominantPaths: string[]): boolean {
-    const eventPath = event.metadata?.pathAffinity;
-    const eventConflicts = event.metadata?.pathConflicts;
-    
-    if (!eventPath && !eventConflicts) {
-      return false; // 没有路径信息的事件不冲突
-    }
-    
-    // 检查事件是否与主导路径强烈冲突
-    if (eventConflicts) {
-      for (const path of dominantPaths) {
-        const conflictLevel = eventConflicts[path];
-        if (conflictLevel && conflictLevel > 50) {
-          // 强烈冲突的事件直接过滤掉
-          return true;
-        }
-      }
-    }
-    
-    return false;
-  }
-
-  /**
-   * 根据路径兼容性调整事件权重
-   */
-  private adjustWeightByPath(event: EventDefinition, baseWeight: number, dominantPaths: string[]): number {
-    const eventPath = event.metadata?.pathAffinity;
-    const eventConflicts = event.metadata?.pathConflicts;
-    
-    if (!eventPath && !eventConflicts) {
-      return baseWeight; // 没有路径信息的事件保持原权重
-    }
-    
-    let adjustedWeight = baseWeight;
-    
-    // 检查与主导路径的亲和性
-    if (eventPath) {
-      for (const path of dominantPaths) {
-        const affinity = eventPath[path];
-        if (affinity) {
-          adjustedWeight *= (1 + affinity / 100); // 亲和性提升权重
-        }
-      }
-    }
-    
-    // 检查与主导路径的冲突性
-    if (eventConflicts) {
-      for (const path of dominantPaths) {
-        const conflictLevel = eventConflicts[path];
-        if (conflictLevel) {
-          if (conflictLevel > 80) {
-            adjustedWeight *= 0.05; // 极度冲突
-          } else if (conflictLevel > 50) {
-            adjustedWeight *= 0.2; // 强烈冲突
-          } else if (conflictLevel > 20) {
-            adjustedWeight *= 0.5; // 中等冲突
-          } else {
-            adjustedWeight *= 0.8; // 轻微冲突
-          }
-        }
-      }
-    }
-    
-    return Math.max(adjustedWeight, 1); // 确保最小权重为 1
   }
 
   /**
@@ -1311,8 +1019,7 @@ export class GameEngineIntegration {
 
   private pickWeightedFormalEvent(
     events: EventDefinition[],
-    currentAge: number,
-    dominantPaths: string[]
+    currentAge: number
   ): EventDefinition | null {
     if (events.length === 0) {
       return null;
@@ -1330,8 +1037,7 @@ export class GameEngineIntegration {
 
     const totalWeight = events.reduce((sum, event) => {
       const baseWeight = eventLoader.getWeightForAge(event, currentAge);
-      const pathAdjusted = this.adjustWeightByPath(event, baseWeight, dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState, event);
+      const traitAdjusted = baseWeight * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
         getOriginChildhoodEventMultiplier(
@@ -1354,8 +1060,7 @@ export class GameEngineIntegration {
     let random = Math.random() * totalWeight;
 
     for (const event of events) {
-      const pathAdjusted = this.adjustWeightByPath(event, eventLoader.getWeightForAge(event, currentAge), dominantPaths);
-      const traitAdjusted = pathAdjusted * traitSystem.getEventWeightMultiplier(this.gameState, event);
+      const traitAdjusted = eventLoader.getWeightForAge(event, currentAge) * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
         getOriginChildhoodEventMultiplier(
@@ -1611,7 +1316,7 @@ export class GameEngineIntegration {
   }
 
   /**
-   * 选择一个事件（加权随机，带路径互斥检查）
+   * 选择一个事件（加权随机）
    */
   public selectEvent(age?: number): EventDefinition | null {
     // 如果没有传入年龄参数，使用游戏引擎当前年龄
@@ -1673,23 +1378,9 @@ export class GameEngineIntegration {
       return dailyEventSystem.selectEvent(this.gameState);
     }
     
-    // 获取玩家当前主导路径
-    const dominantPaths = this.getDominantPaths();
-    
-    // 过滤掉与主导路径强烈冲突的事件
-    const compatibleEvents = untriggeredEvents.filter(event => {
-      if (this.isPathConflicting(event, dominantPaths)) {
-        return false; // 过滤冲突事件
-      }
-      return true;
-    });
-    
-    // 如果没有兼容事件，回退到所有未触发事件
-    const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : untriggeredEvents;
-
     // 声望门槛检查：过滤不满足声望要求的事件
     const playerReputation = this.gameState.player?.reputation || 0;
-    const reputationFilteredEvents = finalEvents.filter(event => {
+    const reputationFilteredEvents = untriggeredEvents.filter(event => {
       const gateCheck = checkReputationGate(event, playerReputation);
       if (!gateCheck.canTrigger && difficultyManager.config.eventThresholdCoefficient > 1.0) {
         return false;
@@ -1697,7 +1388,7 @@ export class GameEngineIntegration {
       return true;
     });
 
-    const eventsToSelect = reputationFilteredEvents.length > 0 ? reputationFilteredEvents : finalEvents;
+    const eventsToSelect = reputationFilteredEvents.length > 0 ? reputationFilteredEvents : untriggeredEvents;
 
     if (eventsToSelect.length === 0) {
       return dailyEventSystem.selectEvent(this.gameState);
@@ -1711,13 +1402,13 @@ export class GameEngineIntegration {
     }
 
     // Layer 1: critical lane, never paused by rhythm pressure.
-    const criticalSelection = this.pickWeightedFormalEvent(criticalEvents, currentAge, dominantPaths);
+    const criticalSelection = this.pickWeightedFormalEvent(criticalEvents, currentAge);
     if (criticalSelection) {
       return criticalSelection;
     }
 
     // Layer 2: storyline lane, protected from daily fallback unless empty.
-    const storylineSelection = this.pickWeightedFormalEvent(storylineEvents, currentAge, dominantPaths);
+    const storylineSelection = this.pickWeightedFormalEvent(storylineEvents, currentAge);
     if (storylineSelection) {
       return storylineSelection;
     }
@@ -1746,7 +1437,7 @@ export class GameEngineIntegration {
       return dailyEventSystem.selectEvent(this.gameState);
     }
 
-    const regularSelection = this.pickWeightedFormalEvent(regularFormalEvents, currentAge, dominantPaths);
+    const regularSelection = this.pickWeightedFormalEvent(regularFormalEvents, currentAge);
     if (regularSelection) {
       return regularSelection;
     }

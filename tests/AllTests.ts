@@ -1869,25 +1869,6 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线候选池 - 活跃路线保底注入',
-      description: '测试方案乙：活跃路线事件可注入候选池',
-      test: () => {
-        const engine = new GameEngineIntegration() as any;
-        const state = engine.getGameState();
-        state.player.age = 25;
-        state.player.flags.route_official = true;
-        RouteStateManager.syncFromFlagSet(state, 'route_official', true, 'test');
-
-        const pool = engine.getAvailableEvents(25);
-        const hasOfficial = pool.some((event: { id: string }) =>
-          event.id === 'official_first_post' ||
-          event.id === 'official_love_obstacle' ||
-          event.id === 'official_resign'
-        );
-        assert(hasOfficial, '活跃官府路线应在候选池中有代表事件');
-      },
-    },
-    {
       name: '路线状态管理 - 统一入口支持读写锁定完成失败',
       description: '测试 RouteStateManager 的 read/write/lock/complete/fail 闭环能力',
       test: () => {

@@ -326,6 +326,10 @@ function testSnapshot380Boundary(): void {
   assert(GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.8.0', 'Snapshot schema must be 3.8.0');
   assert(validatePlayerLifeStates({ trainingHabit: 0, studyHabit: 0, businessHabit: 0 }).ok, 'three-key lifeStates pass');
 
+  const missingLifeStates = structuredClone(gameStateSnapshotAge50) as any;
+  delete missingLifeStates.state.player.lifeStates;
+  assert(!validateGameStateSnapshot(missingLifeStates).ok, '3.8.0 snapshot must require lifeStates');
+
   for (const key of ['familyBond', 'socialMomentum']) {
     const invalid = { trainingHabit: 0, studyHabit: 0, businessHabit: 0, [key]: 1 };
     assert(!validatePlayerLifeStates(invalid).ok, `${key} must be forbidden`);

@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import type { PlayerState } from '../types';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { advanceTime } from '../utils/timeSystem';
 
 function createInitialState(name: string, gender: 'male' | 'female'): PlayerState {
@@ -38,6 +39,7 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     traits: [],
     healthStatus: 'healthy',
     statuses: [],
+    lifeStates: createDefaultPlayerLifeStates(),
     events: [],
     wealth: 0,
     children: 0,

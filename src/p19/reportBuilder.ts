@@ -2,6 +2,7 @@ import type { WorldProfile } from '../narrative/profile/types';
 import { getWorldProfile } from '../narrative/worldProfile';
 import type { EndingInfo } from '../core/EndingSystem';
 import type { GameState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { composeP19FinalSummary } from './finalSummaryComposition';
 import {
   runEndgameCategoryComparisonSlice,
@@ -78,6 +79,7 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       traits: [],
       healthStatus: 'healthy',
       statuses: [],
+      lifeStates: createDefaultPlayerLifeStates(),
       children: 1,
       spouse: 'spouse',
       flags: {},

@@ -49,11 +49,9 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
     if (!state.player?.name) {
       throw new SnapshotConversionError('MISSING_PLAYER', 'Cannot serialize snapshot without player');
     }
-    if (state.player.lifeStates !== undefined) {
-      const lifeStatesValidation = validatePlayerLifeStates(state.player.lifeStates);
-      if ('errors' in lifeStatesValidation) {
-        throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
-      }
+    const lifeStatesValidation = validatePlayerLifeStates(state.player.lifeStates);
+    if ('errors' in lifeStatesValidation) {
+      throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
     }
     const now = options.time.now();
     const {
@@ -162,11 +160,9 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         'Forbidden snapshot player field: health',
       );
     }
-    if (player.lifeStates !== undefined) {
-      const lifeStatesValidation = validatePlayerLifeStates(player.lifeStates);
-      if ('errors' in lifeStatesValidation) {
-        throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
-      }
+    const lifeStatesValidation = validatePlayerLifeStates(player.lifeStates);
+    if ('errors' in lifeStatesValidation) {
+      throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
     }
     const mergedFlags = { ...flags, ...(player.flags ?? {}) };
     const hydrated: GameState = {

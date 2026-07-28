@@ -8,6 +8,7 @@ import {
 import type { ExperienceDimension, ReplaySliceConfig } from '../narrative/profile/types';
 import { getWorldProfile } from '../narrative/worldProfile';
 import type { GameState, PlayerState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { buildArchetypeCoverageReport } from '../p20/archetypeCoverage';
 import { buildWholeLifePacingReport } from '../p20/wholeLifePacing';
 import { buildEndgameCategoryReport } from '../p19/endgameCategories';
@@ -42,6 +43,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     traits: [],
     healthStatus: 'healthy',
     statuses: [],
+    lifeStates: createDefaultPlayerLifeStates(),
     children: 0,
     spouse: null,
     alive: true,

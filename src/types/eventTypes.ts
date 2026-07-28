@@ -976,8 +976,8 @@ export interface PlayerState {
   /** Canonical present circumstances that affect future content. */
   statuses: StatusId[];
 
-  /** 生活状态 */
-  lifeStates?: PlayerLifeStates;
+  /** Canonical long-term practice habits. */
+  lifeStates: PlayerLifeStates;
 
 }
 

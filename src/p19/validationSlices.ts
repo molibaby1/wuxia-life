@@ -1,5 +1,6 @@
 import { getWorldProfile } from '../narrative/worldProfile';
 import type { GameState } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { buildEndgameCategoryReport } from './endgameCategories';
 import { composeP19FinalSummary } from './finalSummaryComposition';
 import { buildHistoricalMemoryReport } from './historicalMemory';
@@ -35,6 +36,7 @@ function baseLateLifeState(): GameState {
     traits: [],
       healthStatus: 'healthy',
       statuses: [],
+      lifeStates: createDefaultPlayerLifeStates(),
       children: 0,
       spouse: null,
       flags: { hermit_withdrawal: true, lonely_elder: true },

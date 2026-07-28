@@ -235,6 +235,7 @@ export const gameStateSnapshotAge50 = {
             traits: [],
             healthStatus: 'healthy',
             statuses: [],
+            lifeStates: createDefaultPlayerLifeStates(),
           },
           flags: { route_hero_locked_in: true },
         },

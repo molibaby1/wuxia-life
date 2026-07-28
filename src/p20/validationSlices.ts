@@ -14,6 +14,7 @@ import {
   type GameState,
   type PlayerState,
 } from '../types/eventTypes';
+import { createDefaultPlayerLifeStates } from '../data/life/lifeStates';
 import { buildArchetypeCoverageReport, resolveArchetypeCandidates } from './archetypeCoverage';
 import { buildRepetitionPressureReport } from './repetitionPressure';
 import { buildWholeLifePacingReport, formatPacingComparisonMarkdown } from './wholeLifePacing';
@@ -49,6 +50,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     traits: [],
     healthStatus: 'healthy',
     statuses: [],
+    lifeStates: createDefaultPlayerLifeStates(),
     children: 0,
     spouse: null,
     alive: true,

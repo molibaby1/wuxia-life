@@ -125,7 +125,7 @@ export interface SnapshotPlayerState {
   traits: TraitId[];
   healthStatus: HealthStatus;
   statuses: StatusId[];
-  lifeStates?: PlayerLifeStates;
+  lifeStates: PlayerLifeStates;
   relationships?: Relationship[];
   spouse?: string | null;
   children?: number;

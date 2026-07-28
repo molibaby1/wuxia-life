@@ -113,6 +113,7 @@ const REQUIRED_SNAPSHOT_PLAYER_KEYS = [
   'investments',
   'healthStatus',
   'statuses',
+  'lifeStates',
 ] as const;
 
 export const FORBIDDEN_HABIT_FLAG_KEYS = ['training_habit', 'study_habit', 'business_habit'] as const;
@@ -175,10 +176,8 @@ export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<G
           errors.push(`state.player.${key} required`);
         }
       }
-      if (player.lifeStates !== undefined) {
-        const lifeStatesResult = validatePlayerLifeStates(player.lifeStates);
-        if ('errors' in lifeStatesResult) errors.push(...lifeStatesResult.errors);
-      }
+      const lifeStatesResult = validatePlayerLifeStates(player.lifeStates);
+      if ('errors' in lifeStatesResult) errors.push(...lifeStatesResult.errors);
     }
     for (const key of FORBIDDEN_SNAPSHOT_STATE_KEYS) {
       if (key in st) errors.push(`forbidden state.${key}`);

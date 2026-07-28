@@ -42,6 +42,7 @@ const REQUIRED_PLAYER_KEYS = [
   'traits',
   'healthStatus',
   'statuses',
+  'lifeStates',
 ] as const;
 
 /** Derived or volatile keys that must not be required for a valid persisted snapshot. */
@@ -158,6 +159,7 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         traits: [],
         healthStatus: 'healthy',
         statuses: [],
+        lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0 },
       },
       flags: {},
       relations: {},
@@ -204,9 +206,13 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
 
 {
   const minimal = createMinimalValidSnapshot();
-  assert(validateGameStateSnapshot(minimal).ok, 'minimal snapshot without lifeStates remains valid');
+  assert(validateGameStateSnapshot(minimal).ok, 'minimal snapshot with complete lifeStates is valid');
   const restoredMinimal = defaultSnapshotConverter.fromSnapshot(minimal);
-  assert(restoredMinimal.player.lifeStates === undefined, 'minimal snapshot does not gain lifeStates on restore');
+  assertDeepEqual(
+    restoredMinimal.player.lifeStates,
+    { trainingHabit: 0, studyHabit: 0, businessHabit: 0 },
+    'minimal snapshot preserves complete lifeStates on restore',
+  );
 
   const valid = JSON.parse(JSON.stringify(gameStateSnapshotAge50)) as GameStateSnapshot;
   assert(validateGameStateSnapshot(valid).ok, 'valid three-key lifeStates snapshot passes');
@@ -238,6 +244,29 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
       axisThrew = true;
     }
     assert(axisThrew, `converter must reject ${key}`);
+  }
+
+  const missingLifeStates = JSON.parse(JSON.stringify(valid)) as any;
+  delete missingLifeStates.state.player.lifeStates;
+  assert(!validateGameStateSnapshot(missingLifeStates).ok, 'snapshot missing lifeStates must be rejected');
+  let missingThrew = false;
+  try {
+    defaultSnapshotConverter.fromSnapshot(missingLifeStates);
+  } catch {
+    missingThrew = true;
+  }
+  assert(missingThrew, 'converter must reject snapshot missing lifeStates');
+
+  for (const key of ['trainingHabit', 'studyHabit', 'businessHabit']) {
+    const missingHabit = JSON.parse(JSON.stringify(valid)) as any;
+    delete missingHabit.state.player.lifeStates[key];
+    assert(!validateGameStateSnapshot(missingHabit).ok, `${key} missing must be rejected`);
+  }
+
+  for (const value of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, -1, 6]) {
+    const invalidValue = JSON.parse(JSON.stringify(valid)) as any;
+    invalidValue.state.player.lifeStates.trainingHabit = value;
+    assert(!validateGameStateSnapshot(invalidValue).ok, `lifeStates value ${String(value)} must be rejected`);
   }
   console.log('✓ lifeStates snapshot validation and conversion boundary');
 }
@@ -359,6 +388,27 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   assert(!Object.prototype.hasOwnProperty.call(restored.flags, 'boolean_fact'), 'facts are not copied into flags');
   assert(!Object.prototype.hasOwnProperty.call(restored.player, 'facts'), 'restored PlayerState must not contain facts');
   console.log('✓ canonical facts initialize and round-trip independently from legacy flags');
+}
+
+{
+  const runtime = new GameEngineIntegration().getGameState();
+  delete (runtime.player as any).lifeStates;
+  let serializeThrew = false;
+  try {
+    defaultSnapshotConverter.toSnapshot(runtime, {
+      eventCatalogVersion: '1.0.0',
+      sourcePlatform: 'node-headless',
+      time: new FixedTimeSource(1717200000000),
+    });
+  } catch {
+    serializeThrew = true;
+  }
+  assert(serializeThrew, 'serializer must reject missing lifeStates instead of completing it');
+  assert(
+    validateGameStateSnapshot(createMinimalValidSnapshot()).ok,
+    'valid complete lifeStates remains accepted',
+  );
+  console.log('✓ lifeStates is mandatory for validation and serialization');
 }
 
 console.log('\n✅ All snapshot contract tests passed');

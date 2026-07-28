@@ -30,7 +30,7 @@ import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingConte
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
 import { isCoreRouteIdentity, RouteStateManager } from './RouteStateManager';
-import { resolveRouteConflict, type RouteIdentity } from './RouteCompatibilityRules';
+import type { RouteIdentity } from './RouteCompatibilityRules';
 import { appendFormalEventHistory } from './EventHistory';
 import {
   buildActiveActionChoices,
@@ -1044,39 +1044,6 @@ export class GameEngineIntegration {
     return [...paths];
   }
 
-  private getLockedCoreRoutes(): RouteIdentity[] {
-    const routeStates = this.gameState.routeStates || {};
-    return Object.values(routeStates)
-      .filter(routeState => {
-        if (!routeState.lockedIn) {
-          return false;
-        }
-        if (routeState.lifecycle === 'failed') {
-          return false;
-        }
-        return isCoreRouteIdentity(routeState.routeId);
-      })
-      .map(routeState => routeState.routeId as RouteIdentity);
-  }
-
-  private getActiveCoreRoutes(): Array<{ routeId: RouteIdentity; lockedIn: boolean }> {
-    const routeStates = this.gameState.routeStates || {};
-    return Object.values(routeStates)
-      .filter(routeState => {
-        if (!isCoreRouteIdentity(routeState.routeId)) {
-          return false;
-        }
-        if (routeState.lifecycle === 'failed' || routeState.lifecycle === 'turned') {
-          return false;
-        }
-        return ['active', 'locked_in', 'temporary'].includes(routeState.lifecycle);
-      })
-      .map(routeState => ({
-        routeId: routeState.routeId as RouteIdentity,
-        lockedIn: routeState.lockedIn,
-      }));
-  }
-
   private extractRouteCandidatesFromEffects(effects: Effect[] | undefined): RouteIdentity[] {
     if (!effects || effects.length === 0) {
       return [];
@@ -1148,57 +1115,6 @@ export class GameEngineIntegration {
     }
 
     return Array.from(candidates);
-  }
-
-  private isExplicitRouteTransitionEvent(event: EventDefinition): boolean {
-    const transition = event.metadata?.routeTransition;
-    if (
-      transition === 'turn' ||
-      transition === 'betrayal' ||
-      transition === 'corruption' ||
-      transition === 'redemption' ||
-      transition === 'exile'
-    ) {
-      return true;
-    }
-    return event.metadata?.tags?.includes('route_turn') === true;
-  }
-
-  private passesRouteConflictChecks(event: EventDefinition): boolean {
-    const activeRoutes = this.getActiveCoreRoutes();
-    if (activeRoutes.length === 0) {
-      return true;
-    }
-
-    const candidateRoutes = this.getEventRouteCandidates(event);
-    if (candidateRoutes.length === 0) {
-      return true;
-    }
-
-    const allowsTransition = this.isExplicitRouteTransitionEvent(event);
-
-    for (const candidateRoute of candidateRoutes) {
-      for (const { routeId: existingRoute, lockedIn } of activeRoutes) {
-        if (existingRoute === candidateRoute) {
-          continue;
-        }
-        const conflict = resolveRouteConflict({
-          currentMainRoute: existingRoute,
-          candidateRoute,
-          lockedIn,
-        });
-        if (conflict.level === 'strong_exclusion' && conflict.action === 'block_candidate') {
-          if (!allowsTransition) {
-            return false;
-          }
-        }
-        if (conflict.action === 'require_turn_event' && !allowsTransition) {
-          return false;
-        }
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -1757,17 +1673,11 @@ export class GameEngineIntegration {
       return dailyEventSystem.selectEvent(this.gameState);
     }
     
-    const routeConflictCheckedEvents = untriggeredEvents.filter(event => this.passesRouteConflictChecks(event));
-
-    if (routeConflictCheckedEvents.length === 0) {
-      return dailyEventSystem.selectEvent(this.gameState);
-    }
-
     // 获取玩家当前主导路径
     const dominantPaths = this.getDominantPaths();
     
     // 过滤掉与主导路径强烈冲突的事件
-    const compatibleEvents = routeConflictCheckedEvents.filter(event => {
+    const compatibleEvents = untriggeredEvents.filter(event => {
       if (this.isPathConflicting(event, dominantPaths)) {
         return false; // 过滤冲突事件
       }
@@ -1775,7 +1685,7 @@ export class GameEngineIntegration {
     });
     
     // 如果没有兼容事件，回退到所有未触发事件
-    const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : routeConflictCheckedEvents;
+    const finalEvents = compatibleEvents.length > 0 ? compatibleEvents : untriggeredEvents;
 
     // 声望门槛检查：过滤不满足声望要求的事件
     const playerReputation = this.gameState.player?.reputation || 0;

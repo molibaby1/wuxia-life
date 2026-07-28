@@ -1,6 +1,6 @@
 import type { GameState, RoadCommitmentRecord } from '../types/eventTypes';
 import { isLifeRoadId, isLifeRoadStage, type LifeRoadId, type LifeRoadStage } from '../types/lifeRoad';
-import { getRouteCompatibilityRule, type RouteIdentity } from './RouteCompatibilityRules';
+import type { RouteIdentity } from './RouteCompatibilityRules';
 
 export type RouteLifecycleState =
   | 'inactive'
@@ -341,37 +341,6 @@ export class RouteStateManager {
     });
   }
 
-  static resolveStrongExclusionsBeforeActivate(
-    state: GameState,
-    candidateRouteId: string,
-    eventId?: string,
-  ): GameState {
-    if (!isCoreRouteIdentity(candidateRouteId)) {
-      return state;
-    }
-    const candidateRoute = candidateRouteId as RouteIdentity;
-    let nextState = state;
-    for (const [routeId, record] of Object.entries(state.routeStates || {})) {
-      if (!isCoreRouteIdentity(routeId) || routeId === candidateRouteId) {
-        continue;
-      }
-      if (!COMMITTED_ROUTE_LIFECYCLES.includes(record.lifecycle)) {
-        continue;
-      }
-      const rule = getRouteCompatibilityRule(routeId as RouteIdentity, candidateRoute);
-      if (rule.level !== 'strong_exclusion') {
-        continue;
-      }
-      nextState = RouteStateManager.turnRoute(
-        nextState,
-        routeId,
-        eventId,
-        `strong_exclusion:activate:${candidateRoute}`,
-      );
-    }
-    return nextState;
-  }
-
   static syncFromFlagUnset(state: GameState, flagName: string, eventId?: string): GameState {
     const routeFromFlag = RouteStateManager.resolveRouteFromFlag(flagName, true);
     if (!routeFromFlag) {
@@ -398,12 +367,7 @@ export class RouteStateManager {
     if (flagName.startsWith('route_') && flagName.endsWith('_failed')) {
       return RouteStateManager.failRoute(state, routeFromFlag, eventId, 'sync_flag_failed');
     }
-    const withExclusionsResolved = RouteStateManager.resolveStrongExclusionsBeforeActivate(
-      state,
-      routeFromFlag,
-      eventId,
-    );
-    return RouteStateManager.writeRouteState(withExclusionsResolved, {
+    return RouteStateManager.writeRouteState(state, {
       routeId: routeFromFlag,
       lifecycle: 'active',
       category: 'main',

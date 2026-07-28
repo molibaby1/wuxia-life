@@ -21,7 +21,6 @@ import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegra
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { evaluateSaveCompatibility, P2_SAVE_SCHEMA_VERSION, saveManager } from '../src/core/SaveManager';
-import { getRouteCompatibilityRule, resolveRouteConflict } from '../src/core/RouteCompatibilityRules';
 import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
@@ -1889,56 +1888,6 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线兼容规则 - 强互斥与共存规则可判定',
-      description: '测试 hero/demonic 为强互斥，merchant/official 为可共存',
-      test: () => {
-        const strongConflict = getRouteCompatibilityRule('hero', 'demonic');
-        assertEqual(strongConflict.level, 'strong_exclusion', 'hero 与 demonic 应为强互斥');
-        assertEqual(strongConflict.resolution, 'block_candidate', '强互斥默认应阻断候选路线');
-
-        const coexist = getRouteCompatibilityRule('merchant', 'official');
-        assertEqual(coexist.level, 'coexist', 'merchant 与 official 应可共存');
-        assertEqual(coexist.resolution, 'allow_coexist', '共存关系应允许并行');
-      },
-    },
-    {
-      name: '路线兼容规则 - 软互斥在锁定前后解析不同',
-      description: '测试 soft conflict 在 lockedIn=false 时允许并存，lockedIn=true 时要求转向事件',
-      test: () => {
-        const unlockedResult = resolveRouteConflict({
-          currentMainRoute: 'hero',
-          candidateRoute: 'merchant',
-          lockedIn: false,
-        });
-        assertEqual(unlockedResult.level, 'soft_exclusion', 'hero 与 merchant 应识别为软互斥');
-        assertEqual(unlockedResult.action, 'allow_coexist', '未锁定主线时软互斥可先并存');
-
-        const lockedResult = resolveRouteConflict({
-          currentMainRoute: 'hero',
-          candidateRoute: 'merchant',
-          lockedIn: true,
-        });
-        assertEqual(lockedResult.level, 'soft_exclusion', '锁定后仍应识别为软互斥');
-        assertEqual(lockedResult.action, 'require_turn_event', '锁定后进入软互斥应要求转向事件');
-      },
-    },
-    {
-      name: '路线兼容规则 - 强互斥优先级高于软互斥',
-      description: '测试当候选同时命中软互斥和强互斥时，最终动作为 block_candidate',
-      test: () => {
-        const result = resolveRouteConflict({
-          currentMainRoute: 'merchant',
-          currentSecondaryRoutes: ['hero'],
-          candidateRoute: 'demonic',
-          lockedIn: true,
-        });
-
-        assertEqual(result.level, 'strong_exclusion', '应按最高冲突级别返回 strong_exclusion');
-        assertEqual(result.action, 'block_candidate', '强互斥优先级最高，应直接阻断候选');
-        assert(result.conflictWith.includes('hero'), '冲突详情应包含强互斥来源路线');
-      },
-    },
-    {
       name: '路线状态管理 - 统一入口支持读写锁定完成失败',
       description: '测试 RouteStateManager 的 read/write/lock/complete/fail 闭环能力',
       test: () => {
@@ -1995,33 +1944,35 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线状态管理 - sect_faction 侧路激活会转向互斥 sect',
-      description: '测试 unconventional 阵营同步时 strong_exclusion 会将已 active 的 sect 标记为 turned',
+      name: '路线状态管理 - 新路线旗标与已有路线共存',
+      description: '测试设置新 route flag 时不会自动将已有路线转为 turned',
       test: async () => {
         const executor = new EventExecutor();
         let state = framework.createTestState();
         state = RouteStateManager.writeRouteState(state, {
           routeId: 'sect',
-          lifecycle: 'active',
+          lifecycle: 'locked_in',
           category: 'main',
-          eventId: 'sect_path_choice',
-          reason: 'sync_flag:route_orthodox',
+          lockedIn: true,
+          eventId: 'sect_path_lock',
         });
-        state.flags = { ...(state.flags || {}), route_orthodox: true };
-        state.player.flags = state.flags;
 
         const nextState = await executor.executeEffects(
-          [{ type: EffectType.FLAG_SET, target: 'sect_faction', value: 'unconventional' }],
+          [{ type: EffectType.FLAG_SET, target: 'route_demonic', value: true }],
           state,
         );
 
         assertEqual(
           RouteStateManager.readRouteState(nextState, 'sect').lifecycle,
-          'turned',
-          'sect 应在 demonic 激活前被 strong_exclusion 转向',
+          'locked_in',
+          '设置新路线旗标不应自动转向已有路线',
         );
         assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'active', 'demonic 应成为 active');
-        assertEqual(nextState.flags?.route_orthodox, undefined, 'route_orthodox 应在转入魔道时清除');
+        assertEqual(nextState.flags?.route_demonic, true, 'route_demonic 应正常写入');
+        assert(
+          !(nextState.routeHistory || []).some(item => item.routeId === 'sect' && item.to === 'turned'),
+          '不应写入 sect turned 历史',
+        );
       },
     },
     {
@@ -2041,188 +1992,6 @@ const coreFunctionSuite: TestSuite = {
         assert((state.routeHistory || []).length >= 3, '关键路线状态变化应写入 routeHistory');
         const historyEventIds = (state.eventHistory || []).map(item => item.eventId);
         assert(historyEventIds.some(eventId => eventId.startsWith('route_state:merchant:')), '关键路线状态变化应写入 eventHistory');
-      },
-    },
-    {
-      name: '路线冲突门禁 - active 未锁定路线下强冲突事件不可触发',
-      description: '测试 active 但未 locked_in 的 sect 会阻断 demonic 候选事件',
-      test: () => {
-        const engine = new GameEngineIntegration() as any;
-        const state = engine.getGameState();
-        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
-        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
-        const originalDailySelector = dailyEventSystem.selectEvent;
-
-        state.player.age = 23;
-        state.routeStates = {
-          sect: {
-            routeId: 'sect',
-            lifecycle: 'active',
-            category: 'main',
-            lockedIn: false,
-          },
-        };
-
-        const strongConflictEvent = {
-          id: 'route_conflict_sect_demonic_unlocked',
-          version: '1.0.0',
-          category: EventCategory.SIDE_QUEST,
-          priority: EventPriority.NORMAL,
-          weight: 100,
-          ageRange: { min: 20, max: 40 },
-          triggers: [],
-          content: { title: '强冲突路线事件', text: '尝试转入魔道主线' },
-          eventType: 'auto',
-          autoEffects: [{ type: EffectType.FLAG_SET, target: 'sect_faction', value: 'unconventional' }],
-          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
-        } as any;
-
-        const fallbackDailyEvent = {
-          id: 'daily_after_active_sect_conflict_block',
-          category: 'daily_event',
-          priority: EventPriority.LOW,
-          content: { title: '日常补位', text: 'active sect 阻断魔道侧路' },
-          metadata: { tags: ['daily_pool'] },
-        };
-
-        try {
-          engine.getAvailableEvents = () => [strongConflictEvent];
-          engine.shouldPauseEventsThisYear = () => false;
-          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
-          const selected = engine.selectEvent(23);
-          assertEqual(selected?.id, 'daily_after_active_sect_conflict_block', 'active sect 应阻断 demonic 侧路事件');
-        } finally {
-          engine.getAvailableEvents = originalGetAvailableEvents;
-          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
-          (dailyEventSystem as any).selectEvent = originalDailySelector;
-        }
-      },
-    },
-    {
-      name: '路线冲突门禁 - 锁定路线下强冲突事件不可触发',
-      description: '测试 locked_in 路线会阻断 strong_exclusion 候选路线事件',
-      test: () => {
-        const engine = new GameEngineIntegration() as any;
-        const state = engine.getGameState();
-        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
-        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
-        const originalDailySelector = dailyEventSystem.selectEvent;
-
-        state.player.age = 22;
-        state.routeStates = {
-          hero: {
-            routeId: 'hero',
-            lifecycle: 'locked_in',
-            category: 'main',
-            lockedIn: true,
-          },
-        };
-
-        const strongConflictEvent = {
-          id: 'route_conflict_official_demonic',
-          version: '1.0.0',
-          category: EventCategory.SIDE_QUEST,
-          priority: EventPriority.NORMAL,
-          weight: 100,
-          ageRange: { min: 20, max: 40 },
-          triggers: [],
-          content: { title: '强冲突路线事件', text: '尝试转入魔道主线' },
-          eventType: 'auto',
-          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_demonic' }],
-          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
-        } as any;
-
-        const fallbackDailyEvent = {
-          id: 'daily_after_strong_conflict_block',
-          category: 'daily_event',
-          priority: EventPriority.LOW,
-          content: { title: '日常补位', text: '冲突后未触发正式事件' },
-          metadata: { tags: ['daily_pool'] },
-        };
-
-        try {
-          engine.getAvailableEvents = () => [strongConflictEvent];
-          engine.shouldPauseEventsThisYear = () => false;
-          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
-          const selected = engine.selectEvent(22);
-          assertEqual(selected?.id, 'daily_after_strong_conflict_block', '强冲突路线事件应被阻断并回退 daily');
-        } finally {
-          engine.getAvailableEvents = originalGetAvailableEvents;
-          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
-          (dailyEventSystem as any).selectEvent = originalDailySelector;
-        }
-      },
-    },
-    {
-      name: '路线冲突门禁 - 软冲突仅允许显式 turn 事件',
-      description: '测试 locked_in 软冲突路线转入必须通过显式 turn 事件',
-      test: () => {
-        const engine = new GameEngineIntegration() as any;
-        const state = engine.getGameState();
-        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
-        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
-        const originalDailySelector = dailyEventSystem.selectEvent;
-
-        state.player.age = 28;
-        state.routeStates = {
-          hero: {
-            routeId: 'hero',
-            lifecycle: 'locked_in',
-            category: 'main',
-            lockedIn: true,
-          },
-        };
-
-        const softConflictNoTurn = {
-          id: 'route_soft_conflict_without_turn',
-          version: '1.0.0',
-          category: EventCategory.SIDE_QUEST,
-          priority: EventPriority.NORMAL,
-          weight: 100,
-          ageRange: { min: 20, max: 40 },
-          triggers: [],
-          content: { title: '软冲突未转向', text: '尝试进入商道但未触发转向' },
-          eventType: 'auto',
-          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_merchant' }],
-          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
-        } as any;
-
-        const softConflictWithTurn = {
-          ...softConflictNoTurn,
-          id: 'route_soft_conflict_with_turn',
-          metadata: {
-            createdAt: 0,
-            updatedAt: 0,
-            enabled: true,
-            tags: ['route_turn'],
-            routeTransition: 'turn',
-          },
-        } as any;
-
-        const fallbackDailyEvent = {
-          id: 'daily_after_soft_conflict_block',
-          category: 'daily_event',
-          priority: EventPriority.LOW,
-          content: { title: '日常补位', text: '等待显式转向事件' },
-          metadata: { tags: ['daily_pool'] },
-        };
-
-        try {
-          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
-          engine.shouldPauseEventsThisYear = () => false;
-
-          engine.getAvailableEvents = () => [softConflictNoTurn];
-          const blockedSelection = engine.selectEvent(28);
-          assertEqual(blockedSelection?.id, 'daily_after_soft_conflict_block', '无 turn 标记的软冲突事件应被阻断');
-
-          engine.getAvailableEvents = () => [softConflictWithTurn];
-          const turnSelection = engine.selectEvent(28);
-          assertEqual(turnSelection?.id, 'route_soft_conflict_with_turn', '显式 turn 事件应允许通过软冲突门禁');
-        } finally {
-          engine.getAvailableEvents = originalGetAvailableEvents;
-          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
-          (dailyEventSystem as any).selectEvent = originalDailySelector;
-        }
       },
     },
     {
@@ -2272,54 +2041,6 @@ const coreFunctionSuite: TestSuite = {
           'route_breakage',
           'merchant 失败应记录断裂原因',
         );
-
-        const engine = new GameEngineIntegration() as any;
-        const engineState = engine.getGameState();
-        engineState.player.age = 26;
-        engineState.routeStates = {
-          hero: {
-            routeId: 'hero',
-            lifecycle: 'locked_in',
-            category: 'main',
-            lockedIn: true,
-          },
-        };
-
-        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
-        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
-        const originalDailySelector = dailyEventSystem.selectEvent;
-        const strongConflictEvent = {
-          id: 'hero_locked_conflict_demonic',
-          version: '1.0.0',
-          category: EventCategory.SIDE_QUEST,
-          priority: EventPriority.NORMAL,
-          weight: 100,
-          ageRange: { min: 20, max: 40 },
-          triggers: [],
-          content: { title: '冲突事件', text: '试图转入魔道路线' },
-          eventType: 'auto',
-          autoEffects: [{ type: EffectType.FLAG_SET, target: 'route_demonic' }],
-          metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
-        } as any;
-        const fallbackDailyEvent = {
-          id: 'daily_after_route_conflict_block',
-          category: 'daily_event',
-          priority: EventPriority.LOW,
-          content: { title: '日常补位', text: '冲突被阻断后触发日常' },
-          metadata: { tags: ['daily_pool'] },
-        };
-
-        try {
-          engine.getAvailableEvents = () => [strongConflictEvent];
-          engine.shouldPauseEventsThisYear = () => false;
-          (dailyEventSystem as any).selectEvent = () => fallbackDailyEvent;
-          const selected = engine.selectEvent(26);
-          assertEqual(selected?.id, 'daily_after_route_conflict_block', '锁定 hero 后强冲突路线应被阻断');
-        } finally {
-          engine.getAvailableEvents = originalGetAvailableEvents;
-          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
-          (dailyEventSystem as any).selectEvent = originalDailySelector;
-        }
 
         const routeTransitionIds = (state.routeHistory || [])
           .filter(item => item.routeId === 'hero' || item.routeId === 'merchant')

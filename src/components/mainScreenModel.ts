@@ -22,7 +22,6 @@
  *
  * Allowed inputs (existing wiring only):
  * - player stats on MainScreenPlayer (martial, mind, jianghu, livelihood fields)
- * - `lifeMemory.routeStatus` (routeId, name, phase — route context, not routeSummary text)
  *
  * Verification samples (locked for P124 narrow tests):
  * - Non-martial: routeId `merchant`, modest martial stats
@@ -75,8 +74,7 @@ export interface MainScreenStatGroup {
 export interface MainScreenModel {
   stageTags: string[];
   topResources: MainScreenStatItem[];
-  routeSummary: string;
-  roadCommitmentSummary: string;
+  currentGoalSummary: string;
   identitySummary: string;
   experienceSummary: string;
   riskSummary: string;
@@ -106,13 +104,6 @@ export type MainScreenPlayer = Pick<
 
 const MARTIAL_DOMINANT_MIN_TOP = 30;
 const MARTIAL_DOMINANT_SPREAD_MAX = 5;
-/** P124 locked non-martial verification sample — merchant route with shaping context. */
-export const P124_NON_MARTIAL_SAMPLE = {
-  routeId: 'merchant',
-  routeName: '商路',
-  routePhase: '路线进行中',
-} as const;
-
 /** P124 locked martial-dominant verification sample — clustered martial sub-stats. */
 export const P124_MARTIAL_DOMINANT_SAMPLE = {
   martialPower: 35,
@@ -150,26 +141,6 @@ const TENDENCY_CANDIDATES: Array<{
   { key: 'martialPower', label: '功力', bucket: 'martial', weight: 1.0 },
 ];
 
-const NON_MARTIAL_ROUTE_IDS = new Set([
-  'merchant',
-  'official',
-  'scholar',
-  'medical',
-  'renown',
-  'hermit',
-]);
-
-function isNonMartialRouteContext(lifeMemory: LifeMemorySummary): boolean {
-  const routeId = lifeMemory.routeStatus?.primary.routeId ?? '';
-  const routeName = lifeMemory.routeStatus?.primary.name ?? '';
-  return (
-    NON_MARTIAL_ROUTE_IDS.has(routeId)
-    || routeName.includes('商')
-    || routeName.includes('医')
-    || routeName.includes('仕途')
-  );
-}
-
 function isMartialDominant(player: MainScreenPlayer): boolean {
   const martialValues = [
     valueOf(player, 'martialPower'),
@@ -183,32 +154,9 @@ function isMartialDominant(player: MainScreenPlayer): boolean {
   );
 }
 
-function tendencyContextMultiplier(
-  candidate: (typeof TENDENCY_CANDIDATES)[number],
-  lifeMemory: LifeMemorySummary,
-): number {
-  let multiplier = 1;
-
-  if (isNonMartialRouteContext(lifeMemory) && candidate.bucket === 'martial') {
-    multiplier *= 0.55;
-  }
-
-  return multiplier;
-}
-
 function valueOf(player: MainScreenPlayer, key: keyof MainScreenPlayer): number {
   const value = player[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function buildRouteSummary(summary: LifeMemorySummary): string {
-  const primary = summary.routeStatus?.primary;
-  if (!primary) {
-    return '未定 · 未入门';
-  }
-  const goal = summary.routeStatus?.currentGoalLabel;
-  const base = `${primary.name} · ${primary.phase}`;
-  return goal ? `${base} · ${goal}` : base;
 }
 
 function buildRiskSummary(summary: LifeMemorySummary): string {
@@ -218,21 +166,6 @@ function buildRiskSummary(summary: LifeMemorySummary): string {
   }
   const risk = [...visibleRisks].sort((a, b) => b.sortKey - a.sortKey)[0];
   return `${RISK_LEVEL_LABELS[risk.severity]} · ${risk.label}`;
-}
-
-function buildRoadCommitmentSummary(summary: LifeMemorySummary): string {
-  const commitments = summary.roadCommitments ?? [];
-  if (commitments.length === 0) return '暂无明确承诺';
-  const phaseLabels: Record<string, string> = {
-    inactive: '未入门',
-    temporary: '试探',
-    active: '入局',
-    locked_in: '深耕',
-    completed: '终局',
-  };
-  return commitments
-    .map((item) => `${item.name} · ${phaseLabels[item.phase] ?? item.phase} · 证明 ${item.proofCount}`)
-    .join(' / ');
 }
 
 function buildIdentitySummary(summary: LifeMemorySummary): string {
@@ -247,11 +180,8 @@ function buildExperienceSummary(summary: LifeMemorySummary): string {
     : '暂无经历';
 }
 
-function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySummary): string {
-  const phase = lifeMemory.routeStatus?.primary.phase ?? '';
-  const prioritizeGrowth = phase.includes('未入门');
-
-  if (!prioritizeGrowth && isMartialDominant(player)) {
+function buildTendencySummary(player: MainScreenPlayer): string {
+  if (isMartialDominant(player)) {
     return `功力 ${valueOf(player, 'martialPower')}`;
   }
 
@@ -260,11 +190,10 @@ function buildTendencySummary(player: MainScreenPlayer, lifeMemory: LifeMemorySu
     return {
       ...candidate,
       value,
-      score: value * candidate.weight * tendencyContextMultiplier(candidate, lifeMemory),
+      score: value * candidate.weight,
     };
   })
     .filter((candidate) => candidate.value > 0)
-    .filter((candidate) => !(prioritizeGrowth && candidate.bucket === 'martial'))
     .sort((a, b) => b.score - a.score);
 
   if (ranked.length === 0 || ranked[0].value < 20) {
@@ -371,9 +300,7 @@ export function buildMainScreenModel(
   lifeMemory: LifeMemorySummary,
 ): MainScreenModel {
   const player = playerLike as MainScreenPlayer;
-  const routeSummary = buildRouteSummary(lifeMemory);
-  // 顶部状态条第三行只展示“门派标签 + 阶段标签”（不展示路线名称）
-  const stageTags = [player.sect, lifeMemory.routeStatus?.primary.phase]
+  const stageTags = [player.sect]
     .filter((value): value is string => Boolean(value))
     .slice(0, 2);
 
@@ -383,14 +310,13 @@ export function buildMainScreenModel(
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
       createStat('constitution', '体魄', valueOf(player, 'constitution'), '生存底子'),
-      createStat('reputation', '名望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接推进道路'),
+      createStat('reputation', '名望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接代表人生投入'),
     ],
-    routeSummary,
-    roadCommitmentSummary: buildRoadCommitmentSummary(lifeMemory),
+    currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',
     identitySummary: buildIdentitySummary(lifeMemory),
     experienceSummary: buildExperienceSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
-    tendencySummary: buildTendencySummary(player, lifeMemory),
+    tendencySummary: buildTendencySummary(player),
     coreStats: CORE_STATS.map((item) =>
       createStat(String(item.key), item.label, valueOf(player, item.key), item.description),
     ),

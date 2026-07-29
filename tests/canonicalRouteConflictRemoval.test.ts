@@ -95,7 +95,10 @@ async function testRouteFlagActivationCoexists(): Promise<void> {
     !(nextState.routeHistory ?? []).some(item => item.routeId === 'sect' && item.to === 'turned'),
     'activating a new route flag must not write a sect turned history record',
   );
-  assert(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle === 'active', 'demonic route state remains active');
+  assert(
+    RouteStateManager.readRouteState(nextState, 'demonic').lifecycle === 'inactive',
+    'setting a route flag must not project a demonic route state',
+  );
 }
 
 function testExplicitConditionsStillFilterCandidates(): void {

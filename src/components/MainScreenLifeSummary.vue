@@ -6,12 +6,8 @@
 
     <div class="summary-rows">
       <div class="summary-row">
-        <span class="summary-label">路线</span>
-        <span class="summary-value">{{ routeSummary }}</span>
-      </div>
-      <div class="summary-row">
-        <span class="summary-label">承诺</span>
-        <span class="summary-value">{{ roadCommitmentSummary }}</span>
+        <span class="summary-label">目标</span>
+        <span class="summary-value">{{ currentGoalSummary }}</span>
       </div>
       <div class="summary-row">
         <span class="summary-label">身份</span>
@@ -35,8 +31,7 @@
 
 <script setup lang="ts">
 defineProps<{
-  routeSummary: string;
-  roadCommitmentSummary: string;
+  currentGoalSummary: string;
   identitySummary: string;
   experienceSummary: string;
   riskSummary: string;

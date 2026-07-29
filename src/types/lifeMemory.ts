@@ -3,7 +3,7 @@
  * Serializable, derived-only — not persisted as redundant game state.
  */
 
-export const LIFE_MEMORY_SCHEMA_VERSION = '1.0.0' as const;
+export const LIFE_MEMORY_SCHEMA_VERSION = '2.0.0' as const;
 
 export type LifeMemoryVisibility = 'player' | 'hidden' | 'diagnostic';
 
@@ -29,28 +29,6 @@ export interface LifeMemoryEntryBase {
   visibility: LifeMemoryVisibility;
   occurredAtAge?: number;
   sortKey: number;
-}
-
-export interface LifeMemoryRouteStatus {
-  primary: { routeId: string; name: string; phase: string };
-  secondary?: { routeId: string; name: string; phase: string };
-  factionLabel?: string;
-  currentGoalLabel?: string;
-  lastTransition?: { label: string; age?: number };
-  diagnostic: {
-    routeStates: Record<string, { lifecycle: string; lockedIn: boolean }>;
-    activeRouteFlags: string[];
-    legacySource?: string;
-  };
-}
-
-export interface LifeMemoryRoadCommitment {
-  roadId: string;
-  name: string;
-  phase: string;
-  proofCount: number;
-  sourceChoiceId?: string;
-  sourceEventId?: string;
 }
 
 export interface LifeMemoryKeyChoiceEntry extends LifeMemoryEntryBase {
@@ -95,8 +73,7 @@ export interface LifeMemoryHabitTrajectoryEntry extends LifeMemoryEntryBase {
 export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
-  routeStatus?: LifeMemoryRouteStatus;
-  roadCommitments?: LifeMemoryRoadCommitment[];
+  currentGoalLabel?: string;
   identity?: { primary: string; all: string[] };
   habitTrajectory?: LifeMemoryHabitTrajectoryEntry[];
   keyChoices?: LifeMemoryKeyChoiceEntry[];

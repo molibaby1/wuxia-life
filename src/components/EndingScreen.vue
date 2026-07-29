@@ -19,7 +19,6 @@
         <div class="road-ending" aria-label="结局信息">
           <p><strong>终局原型：</strong>{{ endingInfo?.name || player?.title || '人生落幕' }}</p>
           <p v-if="endingInfo?.description">{{ endingInfo.description }}</p>
-          <p v-if="canonicalRoad">道路阶段：{{ roadStageLabel }} · 证明：{{ canonicalRoad.proofCount }}</p>
           <p><strong>身份摘要：</strong>{{ lifeMemory?.identity?.all?.join(' / ') || '暂无身份' }}</p>
         </div>
         
@@ -110,21 +109,7 @@ const props = defineProps<{
 const player = props.player;
 const hasLatestSave = props.hasLatestSave ?? false;
 const latestSaveLabel = props.latestSaveLabel ?? '';
-const canonicalRoad = computed(() => {
-  const memory = props.lifeMemory;
-  const primaryId = memory?.routeStatus?.primary.routeId;
-  return memory?.roadCommitments?.find((road) => road.roadId === primaryId)
-    ?? memory?.roadCommitments?.[0]
-    ?? null;
-});
 const endingInfo = computed(() => props.ending ?? null);
-const roadStageLabel = computed(() => ({
-  inactive: '未入门',
-  temporary: '试探',
-  active: '入局',
-  locked_in: '深耕',
-  completed: '完成',
-}[canonicalRoad.value?.phase] ?? canonicalRoad.value?.phase ?? '未入门'));
 
 const share = () => {
   const shareText = `${player?.name}的武侠人生：${player?.deathReason}，获得称号「${player?.title}」！快来试试你的武侠人生吧！`;

@@ -59,16 +59,16 @@ function formatDominantAxes(state: GameState): string[] {
     .map(line => `${line.label} · ${line.tierLabel}`);
 }
 
-function formatRouteSignal(lifeMemory: LifeMemorySummary): string {
-  const primary = lifeMemory.routeStatus?.primary;
-  if (!primary) {
-    return 'route: none';
-  }
-  const secondary = lifeMemory.routeStatus?.secondary
-    ? ` / secondary=${lifeMemory.routeStatus.secondary.name}(${lifeMemory.routeStatus.secondary.phase})`
+function formatRouteSignal(state: GameState): string {
+  const flags = Object.keys(state.flags ?? {})
+    .filter((key) => key.startsWith('route_') && state.flags?.[key] === true)
+    .sort();
+  const faction = typeof state.flags?.sect_faction === 'string'
+    ? ` / faction=${state.flags.sect_faction}`
     : '';
-  const faction = lifeMemory.routeStatus?.factionLabel ? ` / faction=${lifeMemory.routeStatus.factionLabel}` : '';
-  return `route: ${primary.name}(${primary.phase})${secondary}${faction}`;
+  return flags.length > 0 || faction
+    ? `route-flags: ${flags.join(' / ') || 'none'}${faction}`
+    : 'route-flags: none';
 }
 
 function collectIdentitySignals(state: GameState): string[] {
@@ -146,16 +146,15 @@ export function summarizeTrajectoryRun(input: {
       return {
         age,
         dominantAxes: [],
-        routeSignal: 'route: none',
+        routeSignal: 'route-flags: none',
         identitySignals: [],
         consequenceSignals: [],
       };
     }
-    const lifeMemory = deriveLifeMemorySummary(record.gameState);
     return {
       age,
       dominantAxes: formatDominantAxes(record.gameState),
-      routeSignal: formatRouteSignal(lifeMemory),
+      routeSignal: formatRouteSignal(record.gameState),
       identitySignals: collectIdentitySignals(record.gameState),
       consequenceSignals: collectConsequenceSignals(input.report.records, age),
     };
@@ -170,7 +169,7 @@ export function summarizeTrajectoryRun(input: {
     seed: input.seed,
     checkpoints,
     finalSummary: {
-      routeSignal: finalLifeMemory ? formatRouteSignal(finalLifeMemory) : 'route: none',
+      routeSignal: finalState ? formatRouteSignal(finalState) : 'route-flags: none',
       lifeMemoryEntryPoints: finalLifeMemory ? buildLifeMemoryEntryPoints(finalLifeMemory) : [],
       summaryEntry: finalLifeMemory ? buildSummaryEntry(input.report, finalLifeMemory) : 'summary: none',
     },

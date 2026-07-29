@@ -209,7 +209,9 @@ function testRepositoryGuard(): void {
   assert(!dailyEventSystemSource.includes('getGroupStateMultiplier'), 'DailyEventSystem group multiplier helper must be removed');
   assert(!/socialMomentum|familyBond/.test(dailyEventSystemSource), 'DailyEventSystem must not read deleted axes');
   assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getSpecializationMultiplier', 'getEventFocus');
-  assertFunctionRangeClean('src/components/mainScreenModel.ts', 'tendencyContextMultiplier', 'export function buildMainScreenModel');
+  const mainScreenModelSource = fs.readFileSync(path.resolve('src/components/mainScreenModel.ts'), 'utf8');
+  assert(!mainScreenModelSource.includes('tendencyContextMultiplier'), 'main screen tendency must not use context multipliers');
+  assertFunctionRangeClean('src/components/mainScreenModel.ts', 'function buildTendencySummary', 'function createStat');
   const replaySource = fs.readFileSync(path.resolve('src/narrative/profile/wuxiaReplayabilitySurfaces.ts'), 'utf8');
   assert(!/growthPatternFlags[\s\S]{0,500}(training_habit|study_habit|business_habit)/.test(replaySource), 'replayability growth flags must not use legacy habit flags');
 }

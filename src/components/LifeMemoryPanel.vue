@@ -13,25 +13,9 @@
     </header>
 
     <div v-show="expanded" class="life-memory-body">
-      <!-- 人生路线：始终显示 -->
-      <div class="memory-section">
-        <p class="memory-section-title">人生路线</p>
-        <div class="route-primary">
-          <span class="route-name">{{ routePrimary.name }}</span>
-          <span class="route-phase">{{ routePrimary.phase }}</span>
-        </div>
-        <div v-if="routeStatus?.secondary" class="route-secondary">
-          <span class="route-secondary-label">兼修</span>
-          <span class="route-name">{{ routeStatus.secondary.name }}</span>
-          <span class="route-phase">{{ routeStatus.secondary.phase }}</span>
-        </div>
-        <p v-if="routeStatus?.factionLabel" class="route-meta">
-          门派倾向：{{ routeStatus.factionLabel }}
-        </p>
-        <p v-if="routeStatus?.lastTransition" class="route-meta">
-          {{ routeStatus.lastTransition.label }}
-          <span v-if="routeStatus.lastTransition.age">（{{ routeStatus.lastTransition.age }}岁）</span>
-        </p>
+      <div v-if="summary.currentGoalLabel" class="memory-section">
+        <p class="memory-section-title">当前目标</p>
+        <p class="memory-label">{{ summary.currentGoalLabel }}</p>
       </div>
 
       <!-- 长期塑形 -->
@@ -170,16 +154,6 @@ const props = defineProps<{
 const expanded = ref(true);
 const showDiagnostic = isPlayerDebugEnabled();
 
-const routeStatus = computed(() => props.summary.routeStatus);
-
-const routePrimary = computed(() => {
-  const primary = routeStatus.value?.primary;
-  if (primary) {
-    return primary;
-  }
-  return { routeId: 'unknown', name: '未定', phase: '未入门' };
-});
-
 function filterPlayer<T extends { visibility: LifeMemoryVisibility }>(entries?: T[]): T[] {
   return (entries ?? []).filter((entry) => entry.visibility === 'player');
 }
@@ -197,7 +171,6 @@ const diagnosticJson = computed(() => {
   }
   return JSON.stringify(
     {
-      routeStatus: routeStatus.value?.diagnostic,
       keyChoices: visibleKeyChoices.value.map((entry) => entry.diagnostic),
       relationships: visibleRelationships.value.map((entry) => entry.diagnostic),
       unresolvedDebts: visibleDebts.value.map((entry) => entry.diagnostic),
@@ -318,43 +291,6 @@ function affinityClass(band?: string): string {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
-  color: #8b6914;
-}
-
-.route-primary,
-.route-secondary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.route-secondary {
-  padding-left: 4px;
-}
-
-.route-secondary-label {
-  font-size: 11px;
-  color: #b08a44;
-}
-
-.route-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.route-phase {
-  font-size: 12px;
-  color: #8b6914;
-  background: rgba(139, 105, 20, 0.08);
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-
-.route-meta {
-  margin: 0;
-  font-size: 12px;
   color: #8b6914;
 }
 

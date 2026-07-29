@@ -1,7 +1,7 @@
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
 import type { PlayerLifeStates } from '../src/types/eventTypes';
 import type { LifeMemorySummary } from '../src/types/lifeMemory';
-import { buildMainScreenModel, type MainScreenPlayer, P124_NON_MARTIAL_SAMPLE, P124_MARTIAL_DOMINANT_SAMPLE } from '../src/components/mainScreenModel';
+import { buildMainScreenModel, type MainScreenPlayer, P124_MARTIAL_DOMINANT_SAMPLE } from '../src/components/mainScreenModel';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -48,15 +48,8 @@ function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): Main
 
 function createLifeMemory(overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     derivedAtAge: 19,
-    routeStatus: {
-      primary: { routeId: 'sect', name: '中立门派', phase: '未入门' },
-      diagnostic: {
-        routeStates: {},
-        activeRouteFlags: [],
-      },
-    },
     risks: [
       {
         id: 'body-weak',
@@ -77,12 +70,11 @@ console.log('=== Main Screen Model Tests ===\n');
 {
   const model = buildMainScreenModel(createPlayer(), createLifeMemory());
 
-  assert(model.routeSummary === '中立门派 · 未入门', 'route summary should join name and phase');
-  assert(model.stageTags.length === 2, 'stage tags should expose sect + phase only');
+  assert(model.currentGoalSummary === '暂无明确目标', 'current goal should degrade to explicit empty copy');
+  assert(model.stageTags.length === 1, 'stage tags should expose sect only');
   assert(model.stageTags[0] === '武当', 'stage tags first item should be sect');
-  assert(model.stageTags[1] === '未入门', 'stage tags second item should be route phase');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
-  assert(model.tendencySummary === '悟性 24 / 体魄 18', 'tendency should prefer representative stats');
+  assert(model.tendencySummary === '功力 42 / 悟性 24', 'tendency should use numeric signals without route modifiers');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
   assert(model.topResources.length === 3, 'top resources should stay capped at three');
   assert(
@@ -94,7 +86,7 @@ console.log('=== Main Screen Model Tests ===\n');
     'martialPower should read as overall martial readout on first screen',
   );
   assert(model.fullStatGroups.length === 5, 'full stats should be grouped into five sections after survival split');
-  console.log('✓ builds default route/risk/tendency/core groups');
+  console.log('✓ builds canonical goal/risk/tendency/core groups');
 }
 
 {
@@ -167,27 +159,12 @@ console.log('=== Main Screen Model Tests ===\n');
       reputation: 12,
       lifeStates: createLifeStates(),
     }),
-    createLifeMemory({
-      routeStatus: {
-        primary: {
-          routeId: P124_NON_MARTIAL_SAMPLE.routeId,
-          name: P124_NON_MARTIAL_SAMPLE.routeName,
-          phase: P124_NON_MARTIAL_SAMPLE.routePhase,
-        },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
-      },
-    }),
+    createLifeMemory(),
   );
 
   assert(
-    !model.tendencySummary.includes('功力')
-    && !model.tendencySummary.includes('内功')
-    && !model.tendencySummary.includes('外功'),
-    'merchant sample should not surface martial tendency when non-martial stats lead',
-  );
-  assert(
     model.tendencySummary.includes('学识') || model.tendencySummary.includes('经营') || model.tendencySummary.includes('人脉'),
-    'merchant sample should surface non-martial life-direction stats',
+    'merchant sample should surface numeric life-direction stats',
   );
   const highHabitModel = buildMainScreenModel(
     createMainScreenPlayer({
@@ -205,19 +182,10 @@ console.log('=== Main Screen Model Tests ===\n');
       reputation: 12,
       lifeStates: createLifeStates({ businessHabit: 5 }),
     }),
-    createLifeMemory({
-      routeStatus: {
-        primary: {
-          routeId: P124_NON_MARTIAL_SAMPLE.routeId,
-          name: P124_NON_MARTIAL_SAMPLE.routeName,
-          phase: P124_NON_MARTIAL_SAMPLE.routePhase,
-        },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
-      },
-    }),
+    createLifeMemory(),
   );
   assert(model.tendencySummary === highHabitModel.tendencySummary, 'businessHabit must not change tendency summary');
-  console.log('✓ merchant route surfaces non-martial tendency summary');
+  console.log('✓ merchant tendency surfaces non-martial numeric signals');
 }
 
 {
@@ -231,19 +199,14 @@ console.log('=== Main Screen Model Tests ===\n');
       comprehension: 11,
       chivalry: 9,
     }),
-    createLifeMemory({
-      routeStatus: {
-        primary: { routeId: 'sect', name: '正道门派', phase: '路线进行中' },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
-      },
-    }),
+    createLifeMemory(),
   );
 
   assert(
     model.tendencySummary === `功力 ${P124_MARTIAL_DOMINANT_SAMPLE.martialPower}`,
     'martial-dominant sample should keep martialPower as top-level combat readout',
   );
-  console.log('✓ martial-dominant route preserves martial tendency readability');
+  console.log('✓ martial-dominant tendency remains independent of route lifecycle');
 }
 
 {

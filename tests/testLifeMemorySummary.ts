@@ -3,7 +3,6 @@
  * Ensures player-facing history categories do not silently disappear in core scenarios.
  */
 
-import { RouteStateManager } from '../src/core/RouteStateManager';
 import { createDefaultPlayerLifeStates } from '../src/data/life/lifeStates';
 import {
   deriveLifeMemorySummary,
@@ -82,17 +81,7 @@ function filterPlayerVisible<T extends { visibility: LifeMemoryVisibility }>(
 
 function collectPlayerFacingStrings(summary: LifeMemorySummary): string {
   const parts: string[] = [];
-  if (summary.routeStatus) {
-    parts.push(
-      summary.routeStatus.primary.name,
-      summary.routeStatus.primary.phase,
-      summary.routeStatus.factionLabel ?? '',
-      summary.routeStatus.lastTransition?.label ?? '',
-    );
-    if (summary.routeStatus.secondary) {
-      parts.push(summary.routeStatus.secondary.name, summary.routeStatus.secondary.phase);
-    }
-  }
+  if (summary.currentGoalLabel) parts.push(summary.currentGoalLabel);
   for (const entry of summary.keyChoices ?? []) {
     parts.push(entry.label, entry.consequence ?? '');
   }
@@ -133,11 +122,6 @@ function assertNoRawEventIds(summary: LifeMemorySummary): void {
 
 /** US-028: all required player-facing categories must be present when state has data. */
 function assertCoreScenarioCoverage(summary: LifeMemorySummary): void {
-  assert(summary.routeStatus !== undefined, 'route status must not silently disappear');
-  assert(
-    summary.routeStatus!.primary.name.length > 0,
-    'route primary name must be player-facing',
-  );
   assert(
     (summary.keyChoices?.length ?? 0) >= 1,
     'key choices must not silently disappear when event history has spine choices',
@@ -187,43 +171,28 @@ function createCoreMidlifeOrthodoxState(): GameState {
     achievements: ['save_village'],
   });
 
-  state = RouteStateManager.writeRouteState(state, {
-    routeId: 'sect',
-    lifecycle: 'locked_in',
-    category: 'main',
-    lockedIn: true,
-  });
-
   return state;
 }
 
 console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 
-// Route state in memory summary
+// Route lifecycle state is not part of canonical Life Memory
 {
   let state = createBaseState();
-  state = RouteStateManager.writeRouteState(state, {
-    routeId: 'sect',
-    lifecycle: 'active',
-    category: 'main',
-    lockedIn: false,
-  });
-  state.flags = { ...state.flags, route_orthodox: true, sect_faction: 'orthodox' };
+  state.flags = { ...state.flags, route_orthodox: true, sect_faction: 'orthodox', orthodox_childhood_seed_done: true };
+  state.routeStates = {
+    sect: { lifecycle: 'active', category: 'main', lockedIn: false },
+  } as GameState['routeStates'];
+  state.routeHistory = [{ routeId: 'sect', from: 'inactive', to: 'active', age: 14 }];
+  state.roadCommitments = [{ roadId: 'sect', status: 'active', proofCount: 2 }];
 
   const summary = deriveLifeMemorySummary(state);
-  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 1.0.0');
-  assert(summary.routeStatus?.primary.name === '未定', 'legacy route must not become canonical player-facing road');
-  assert(summary.routeStatus?.factionLabel === '传统门派', 'faction label should be mapped');
+  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 2.0.0');
+  assert(!('routeStatus' in summary), 'route status must not be canonical Life Memory');
+  assert(!('roadCommitments' in summary), 'road commitments must not be canonical Life Memory');
+  assert(summary.currentGoalLabel === '门派倾向已显，尚未立誓入门', 'current goal should come from explicit origin facts');
   assert(summary.derivedAtAge === 20, 'derivedAtAge should match player age');
-  assert(
-    summary.routeStatus?.diagnostic.routeStates.sect?.lifecycle === 'active',
-    'routeStates diagnostic must reflect written route state',
-  );
-  assert(
-    summary.routeStatus?.diagnostic.activeRouteFlags.includes('route_orthodox'),
-    'active route flags must be captured in diagnostic',
-  );
-  console.log('✓ route state in memory summary');
+  console.log('✓ route lifecycle state stays outside memory summary');
 }
 
 // Key choices
@@ -399,14 +368,6 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 
   assertCoreScenarioCoverage(summary);
 
-  assert(
-    summary.routeStatus?.primary.phase === '未入门',
-    'legacy route phase must not become player-facing',
-  );
-  assert(
-    summary.routeStatus?.lastTransition !== undefined,
-    'route transition history must not silently disappear',
-  );
   assert(
     summary.unresolvedDebts?.some((entry) => entry.label.includes('师门')),
     'midlife sect debt should surface in core scenario',

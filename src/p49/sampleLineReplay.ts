@@ -106,10 +106,8 @@ function collectRecentEventIds(records: GameProcessRecord[], age: number, limit 
 
 function buildLifeMemoryEntry(lifeMemory: LifeMemorySummary): string {
   const parts: string[] = [];
-  if (lifeMemory.routeStatus?.currentGoalLabel) {
-    parts.push(`goal=${lifeMemory.routeStatus.currentGoalLabel}`);
-  } else if (lifeMemory.routeStatus?.primary) {
-    parts.push(`route=${lifeMemory.routeStatus.primary.name}`);
+  if (lifeMemory.currentGoalLabel) {
+    parts.push(`goal=${lifeMemory.currentGoalLabel}`);
   }
   if (lifeMemory.keyChoices?.[0]) {
     parts.push(`choice=${lifeMemory.keyChoices[0].label}`);

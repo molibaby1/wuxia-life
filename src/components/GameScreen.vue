@@ -132,12 +132,6 @@
                 </li>
               </ul>
             </div>
-            <div v-if="displayedRouteImpact" class="feedback-group">
-              <p class="feedback-group-title">路线变化</p>
-              <p class="feedback-line">
-                {{ formatRouteLabel(displayedRouteImpact.from) }} → {{ formatRouteLabel(displayedRouteImpact.to) }}
-              </p>
-            </div>
             <div v-if="visibleLongTermFlags.length > 0" class="feedback-group">
               <p class="feedback-group-title">长期影响</p>
               <ul class="feedback-list">
@@ -187,8 +181,7 @@
       <MainScreenLifeSummary
         ref="summarySectionRef"
         class="summary-section"
-        :route-summary="mainScreenModel.routeSummary"
-        :road-commitment-summary="mainScreenModel.roadCommitmentSummary"
+        :current-goal-summary="mainScreenModel.currentGoalSummary"
         :identity-summary="mainScreenModel.identitySummary"
         :experience-summary="mainScreenModel.experienceSummary"
         :risk-summary="mainScreenModel.riskSummary"
@@ -214,10 +207,7 @@ import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
 import { buildMainScreenModel, type MainScreenPlayer } from './mainScreenModel';
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
 import type { StoryChoice } from '../types';
-import {
-  formatLongTermFlag,
-  formatRouteLabel,
-} from '../utils/playerFacingLabels';
+import { formatLongTermFlag } from '../utils/playerFacingLabels';
 
 import type {
   ActiveActionSummaryDisplay,
@@ -272,17 +262,6 @@ const visibleRelationshipImpacts = computed(() => {
   );
 });
 
-const displayedRouteImpact = computed(() => {
-  const routeImpact = lastChoiceFeedback.value?.player.routeImpact;
-  if (!routeImpact || routeImpact.visibility !== 'player') {
-    return null;
-  }
-  if (!routeImpact.from && !routeImpact.to) {
-    return null;
-  }
-  return routeImpact;
-});
-
 const visibleLongTermFlags = computed(() => {
   return (lastChoiceFeedback.value?.player.longTermFlags || []).filter(
     flag => flag.visibility === 'player',
@@ -293,7 +272,6 @@ const hasStructuredFeedback = computed(() => {
   return (
     visibleStatImpacts.value.length > 0 ||
     visibleRelationshipImpacts.value.length > 0 ||
-    !!displayedRouteImpact.value ||
     visibleLongTermFlags.value.length > 0
   );
 });

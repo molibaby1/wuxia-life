@@ -7,14 +7,10 @@ import {
   MIDLIFE_OUTCOME_LABELS,
   RELATIONSHIP_ROLE_LABELS,
   RISK_SIGNAL_LABELS,
-  ROUTE_TRANSITION_LABELS,
   affinityToBand,
   affinityToStatusLabel,
   formatKeyChoiceLabel,
 } from '../data/lifeMemoryLabels';
-import type { RouteIdentity } from './RouteCompatibilityRules';
-import { getRouteCompatibilityRule } from './RouteCompatibilityRules';
-import type { RouteLifecycleState } from './RouteStateManager';
 import type { EventRecord, GameState, HealthStatus, Relationship } from '../types/eventTypes';
 import {
   LIFE_MEMORY_SCHEMA_VERSION,
@@ -24,17 +20,8 @@ import {
   type LifeMemoryKeyChoiceEntry,
   type LifeMemoryRelationshipEntry,
   type LifeMemoryRiskEntry,
-  type LifeMemoryRouteStatus,
-  type LifeMemoryRoadCommitment,
   type LifeMemorySummary,
 } from '../types/lifeMemory';
-import { formatLifeRoadLabel, type LifeRoadId } from '../types/lifeRoad';
-import { isLifeRoadId } from '../types/lifeRoad';
-import {
-  ROUTE_DISPLAY_NAMES,
-  formatRouteLabel,
-  lifecyclePhaseLabel,
-} from '../utils/playerFacingLabels';
 import { derivePracticeTrajectoryLines } from '../utils/practiceTrajectorySummary';
 import {
   deriveSampleLineAge40Identity,
@@ -45,8 +32,6 @@ import {
   deriveOrdinaryOriginLifeMemory,
   deriveOrdinaryOriginSummary,
 } from '../p56/ordinaryOriginExpression';
-
-const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
 
 const MIDLIFE_KEY_CHOICE_EVENT_IDS = [
   'sect_midlife_faction_pressure',
@@ -63,12 +48,6 @@ const MIDLIFE_KEY_CHOICE_EVENT_IDS = [
   'merchant_shop_failure',
   'merchant_crisis',
 ] as const;
-
-const SECT_FACTION_LABELS: Record<string, string> = {
-  orthodox: '传统门派',
-  unconventional: '非传统门派',
-  neutral: '中立门派',
-};
 
 const PAYOFF_MAP_BY_EVENT = new Map(
   goldenLinePayoffMap.entries.map((entry) => [entry.keyChoiceEventId, entry]),
@@ -107,177 +86,6 @@ const ACHIEVEMENT_FLAG_PATTERNS: Array<{
   { flag: 'sect_trial_completed', label: '通过门派试炼', category: 'martial' },
   { flag: 'orthodox_trial_completed', label: '完成正道试炼', category: 'martial' },
 ];
-
-type ActiveRoute = {
-  routeId: string;
-  lifecycle: RouteLifecycleState;
-  lockedIn: boolean;
-  position?: 'primary' | 'secondary';
-};
-
-function isActiveLifecycle(lifecycle: RouteLifecycleState): boolean {
-  return lifecycle !== 'inactive';
-}
-
-function isCoPrimaryLifecycle(lifecycle: RouteLifecycleState): boolean {
-  return lifecycle === 'active' || lifecycle === 'locked_in' || lifecycle === 'temporary';
-}
-
-function readActiveRoutes(state: GameState): ActiveRoute[] {
-  const commitments = Object.values(state.roadCommitments ?? {}).filter(Boolean);
-  if (commitments.length > 0) {
-    return commitments
-      .sort((a, b) => (a!.position === 'primary' ? -1 : 1) - (b!.position === 'primary' ? -1 : 1))
-      .map((commitment) => ({
-        routeId: commitment!.roadId,
-        lifecycle: commitment!.lifecycle,
-        lockedIn: commitment!.lifecycle === 'locked_in' || commitment!.lifecycle === 'completed',
-        position: commitment!.position,
-      }));
-  }
-
-  const routeStates = state.routeStates || {};
-  const active: ActiveRoute[] = [];
-
-  for (const [routeId, record] of Object.entries(routeStates)) {
-    if (record && isLifeRoadId(routeId) && isActiveLifecycle(record.lifecycle)) {
-      active.push({
-        routeId,
-        lifecycle: record.lifecycle,
-        lockedIn: record.lockedIn,
-      });
-    }
-  }
-
-  if (active.length > 0) {
-    return active;
-  }
-
-  return active;
-}
-
-function routesCanCoexist(primaryId: string, secondaryId: string): boolean {
-  const rule = getRouteCompatibilityRule(
-    primaryId as RouteIdentity,
-    secondaryId as RouteIdentity,
-  );
-  return rule.resolution === 'allow_coexist';
-}
-
-function pickPrimaryAndSecondary(state: GameState): {
-  primary?: ActiveRoute;
-  secondary?: ActiveRoute;
-} {
-  const activeRoutes = readActiveRoutes(state);
-  if (activeRoutes.length === 0) {
-    return {};
-  }
-
-  let primary = activeRoutes.find((route) =>
-    route.position === 'primary'
-    && isCoPrimaryLifecycle(route.lifecycle),
-  );
-
-  if (!primary) {
-    primary = activeRoutes.find((route) =>
-    (PRIORITY_ROUTE_IDS as readonly string[]).includes(route.routeId)
-    && isCoPrimaryLifecycle(route.lifecycle),
-    );
-  }
-
-  if (!primary) {
-    primary = activeRoutes.find((route) => isCoPrimaryLifecycle(route.lifecycle));
-  }
-
-  if (!primary) {
-    primary = activeRoutes[0];
-  }
-
-  const secondary = activeRoutes.find(
-    (route) =>
-      route.routeId !== primary!.routeId
-      && isCoPrimaryLifecycle(route.lifecycle)
-      && routesCanCoexist(primary!.routeId, route.routeId),
-  );
-
-  return { primary, secondary };
-}
-
-function buildRouteStatus(state: GameState): LifeMemoryRouteStatus {
-  const routeStates = state.routeStates || {};
-  const flags = state.flags || {};
-  const { primary, secondary } = pickPrimaryAndSecondary(state);
-
-  const diagnosticRouteStates: LifeMemoryRouteStatus['diagnostic']['routeStates'] = {};
-  for (const [routeId, record] of Object.entries(routeStates)) {
-    if (!record) continue;
-    diagnosticRouteStates[routeId] = {
-      lifecycle: record.lifecycle,
-      lockedIn: record.lockedIn,
-    };
-  }
-
-  const activeRouteFlags = Object.keys(flags).filter((key) => key.startsWith('route_') && flags[key]);
-
-  const legacySource = Object.keys(routeStates).some((routeId) => !isLifeRoadId(routeId))
-    || activeRouteFlags.length > 0
-    ? 'legacy-route-data'
-    : undefined;
-  let primarySummary = { name: '未定', phase: '未入门' };
-
-  if (primary) {
-    primarySummary = {
-      name: ROUTE_DISPLAY_NAMES[primary.routeId] || formatRouteLabel(primary.routeId),
-      phase: lifecyclePhaseLabel(primary.lifecycle, primary.lockedIn),
-    };
-  }
-
-  const routeStatus: LifeMemoryRouteStatus = {
-    primary: {
-      routeId: primary?.routeId ?? 'unknown',
-      name: primarySummary.name,
-      phase: primarySummary.phase,
-    },
-    diagnostic: {
-      routeStates: diagnosticRouteStates,
-      activeRouteFlags,
-      ...(legacySource ? { legacySource } : {}),
-    },
-  };
-
-  if (secondary) {
-    routeStatus.secondary = {
-      routeId: secondary.routeId,
-      name: ROUTE_DISPLAY_NAMES[secondary.routeId] || formatRouteLabel(secondary.routeId),
-      phase: lifecyclePhaseLabel(secondary.lifecycle, secondary.lockedIn),
-    };
-  }
-
-  const faction = flags.sect_faction;
-  if (typeof faction === 'string' && SECT_FACTION_LABELS[faction]) {
-    routeStatus.factionLabel = SECT_FACTION_LABELS[faction];
-  }
-
-  const currentGoalLabel = deriveSampleLineCurrentGoal(state)
-    ?? deriveOrdinaryOriginCurrentGoal(state);
-  if (currentGoalLabel) {
-    routeStatus.currentGoalLabel = currentGoalLabel;
-  }
-
-  const history = state.routeHistory || [];
-  const lastTransition = [...history].reverse().find((entry) => entry.to !== 'inactive');
-  if (lastTransition) {
-    const transitionLabel =
-      ROUTE_TRANSITION_LABELS[lastTransition.to]
-      || `${ROUTE_DISPLAY_NAMES[lastTransition.routeId] || '路线'}变化`;
-    routeStatus.lastTransition = {
-      label: transitionLabel,
-      age: lastTransition.age,
-    };
-  }
-
-  return routeStatus;
-}
 
 function findEventRecord(state: GameState, eventId: string): EventRecord | undefined {
   return state.eventHistory?.find((record) => record.eventId === eventId);
@@ -590,7 +398,7 @@ function buildUnresolvedDebts(state: GameState): LifeMemoryDebtEntry[] {
   }
 
   if (
-    (flags.route_wanderer || state.routeStates?.wanderer?.lifecycle === 'active')
+    flags.route_wanderer
     && age >= 43
     && countHeroMidlifeBeats(flags) >= 3
     && !flags.hero_freedom_settlement_done
@@ -855,18 +663,6 @@ function buildAchievements(state: GameState): LifeMemoryAchievementEntry[] {
     pushAchievement('achievement-children', '膝下有子', 'family', 'children');
   }
 
-  for (const [routeId, record] of Object.entries(state.routeStates ?? {})) {
-    if (record?.lifecycle === 'completed') {
-      pushAchievement(
-        `achievement-route-${routeId}`,
-        `${ROUTE_DISPLAY_NAMES[routeId] || routeId}之路已竟`,
-        'route',
-        routeId,
-        [`routeStates.${routeId}.completed`],
-      );
-    }
-  }
-
   entries.sort((a, b) => a.sortKey - b.sortKey);
   return entries.slice(0, 6);
 }
@@ -901,7 +697,6 @@ function buildHabitTrajectory(state: GameState): LifeMemoryHabitTrajectoryEntry[
  * Does not mutate state or persist redundant memory fields.
  */
 export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
-  const routeStatus = buildRouteStatus(state);
   const keyChoices = buildKeyChoices(state);
   const relationships = buildRelationships(state);
   const unresolvedDebts = buildUnresolvedDebts(state);
@@ -915,20 +710,10 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   const summary: LifeMemorySummary = {
     schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
     derivedAtAge: state.player.age,
-    routeStatus,
   };
-
-  const roadCommitments: LifeMemoryRoadCommitment[] = Object.values(state.roadCommitments ?? {})
-    .filter((commitment): commitment is NonNullable<typeof commitment> => Boolean(commitment))
-    .map((commitment) => ({
-      roadId: commitment.roadId,
-      name: formatLifeRoadLabel(commitment.roadId as LifeRoadId),
-      phase: commitment.lifecycle,
-      proofCount: commitment.proofCount,
-      sourceChoiceId: commitment.sourceChoiceId,
-      sourceEventId: commitment.sourceEventId,
-    }));
-  if (roadCommitments.length > 0) summary.roadCommitments = roadCommitments;
+  const currentGoalLabel = deriveSampleLineCurrentGoal(state)
+    ?? deriveOrdinaryOriginCurrentGoal(state);
+  if (currentGoalLabel) summary.currentGoalLabel = currentGoalLabel;
   if (state.identity) {
     summary.identity = {
       primary: state.identity.primary,

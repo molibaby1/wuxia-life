@@ -236,7 +236,7 @@ function testMerchantRouteSignal(): void {
     report,
   });
 
-  assert(summary.checkpoints[1]?.routeSignal.includes('未定'), `legacy merchant route must not become canonical: ${summary.checkpoints[1]?.routeSignal}`);
+  assert(summary.checkpoints[1]?.routeSignal.includes('route_wealth_committed'), `P45 route signal must report explicit flags: ${summary.checkpoints[1]?.routeSignal}`);
 }
 
 function main(): void {

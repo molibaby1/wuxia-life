@@ -84,6 +84,7 @@ const suites: Suite[] = [
   { name: 'canonicalRouteSchedulingRemovalTests', entry: 'tests/canonicalRouteSchedulingRemoval.test.ts' },
   { name: 'canonicalP11RouteBiasRemovalTests', entry: 'tests/canonicalP11RouteBiasRemoval.test.ts' },
   { name: 'canonicalRouteFlagProjectionRemovalTests', entry: 'tests/canonicalRouteFlagProjectionRemoval.test.ts' },
+  { name: 'canonicalRouteTrackMidlifeContinuityTests', entry: 'tests/canonicalRouteTrackMidlifeContinuity.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

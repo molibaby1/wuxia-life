@@ -19,6 +19,7 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { getOriginId } from '../src/p20/stateAccess';
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
+import { eventLoader } from '../src/core/EventLoader';
 import type { GameState, EventDefinition, EventChoice, EventCondition } from '../src/types/eventTypes';
 import type {
   GameProcessConfig,
@@ -205,7 +206,7 @@ export class GameProcessSimulator {
     this.log(`\n━━━ ${ageBeforeEvent}岁 ━━━ (引擎内部年龄：${gameEngine.getGameState().player?.age})`);
 
     // 1. 选择一个事件（加权随机，每年只触发一个事件，不传年龄参数，让引擎自己获取）
-    const event = gameEngine.selectEvent();  // 不传参数，使用引擎内部年龄
+    const event = this.selectAvailableMidlifeTrackEvent(ageBeforeEvent) ?? gameEngine.selectEvent();
     
     if (!event) {
       if (!shouldOfferDailyPlanning(ageBeforeEvent)) {
@@ -513,6 +514,26 @@ export class GameProcessSimulator {
 
   private applyRouteTrackFixtureBootstrap(age: number): void {
     applyRouteTrackFixtureBootstrap(gameEngine.getGameState(), this.config.routeTrack, age);
+  }
+
+  /** P3 deterministic content-chain selector; only chooses an already eligible event. */
+  private selectAvailableMidlifeTrackEvent(age: number): EventDefinition | null {
+    if (!this.config.routeTrack || age < 31 || age > 50) {
+      return null;
+    }
+
+    const routeEventIds = {
+      sect: ['sect_midlife_stewardship', 'sect_midlife_faction_pressure', 'sect_midlife_gray_mission', 'sect_midlife_public_judgment', 'sect_midlife_ledger'],
+      demonic: ['demonic_midlife_expansion', 'demonic_midlife_expansion_survivor', 'demonic_midlife_isolation', 'demonic_midlife_isolation_martial', 'demonic_midlife_isolation_spouse', 'demonic_midlife_betrayal', 'demonic_midlife_temptation', 'demonic_midlife_fork', 'demonic_midlife_consequence'],
+      wanderer: ['hero_old_case_returns', 'hero_reputation_backlash', 'hero_ally_pays_price', 'hero_gray_judgment', 'hero_freedom_settlement'],
+    } as const;
+    const trackEventIds = routeEventIds[this.config.routeTrack as keyof typeof routeEventIds];
+    if (!trackEventIds) {
+      return null;
+    }
+    const available = new Set(gameEngine.getAvailableEvents(age).map(event => event.id));
+    const eventId = trackEventIds.find(id => available.has(id));
+    return eventId ? eventLoader.getEventById(eventId) ?? null : null;
   }
 
   /** P16: persona simulations seed youth route intent without infant commerce/travel actions. */

@@ -16,7 +16,12 @@ export function applyRouteTrackPreparation(
   const player = state.player;
   if (!player) return;
 
-  const flags = player.flags || (player.flags = {});
+  const flags = {
+    ...(state.flags || {}),
+    ...(player.flags || {}),
+  };
+  state.flags = flags;
+  player.flags = flags;
 
   if (routeTrack === 'official') {
     if (age >= 1 && age <= 6) {
@@ -64,7 +69,12 @@ export function enforceRouteTrackIsolation(state: GameState, routeTrack: RouteTr
   const player = state.player;
   if (!player) return;
 
-  const flags = player.flags || (player.flags = {});
+  const flags = {
+    ...(state.flags || {}),
+    ...(player.flags || {}),
+  };
+  state.flags = flags;
+  player.flags = flags;
   const clearFlag = (flagName: string) => {
     if (!flags[flagName]) return;
     flags[flagName] = false;
@@ -97,7 +107,12 @@ export function applyRouteTrackFixtureBootstrap(
   const player = state.player;
   if (!player) return;
 
-  const flags = player.flags || (player.flags = {});
+  const flags = {
+    ...(state.flags || {}),
+    ...(player.flags || {}),
+  };
+  state.flags = flags;
+  player.flags = flags;
   const syncFlag = (flagName: string) => {
     flags[flagName] = true;
   };

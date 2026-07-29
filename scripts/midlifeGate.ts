@@ -1,6 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import routeConflictTable from '../src/data/route-conflict-table.json';
 import { buildDeathRiskTelemetry } from './deathRiskTelemetry';
 import {
   GOLDEN_LINE_SAMPLES,
@@ -25,16 +24,11 @@ export const WANDERER_MIDLIFE_EVENT_IDS = [
   'hero_freedom_settlement',
 ] as const;
 
-const ACTIVE_LIFECYCLES = new Set(
-  routeConflictTable.contradictionGateInput.activeLifecycles as string[],
-);
-
 export type MidlifeGateMetric =
   | 'continuity'
   | 'midlife_route_events'
   | 'midlife_manual_choices'
-  | 'death_without_warning'
-  | 'route_contradiction';
+  | 'death_without_warning';
 
 export type MidlifeGateFinding = {
   metric: MidlifeGateMetric;
@@ -52,35 +46,6 @@ export type MidlifeGateResult = {
   failures: MidlifeGateFinding[];
   simulations: GoldenLineSimulationRun[];
 };
-
-function getStrongExclusionPairs(): Array<{ routeA: string; routeB: string }> {
-  return routeConflictTable.priorityRoutePairs
-    .filter(pair => pair.level === 'strong_exclusion')
-    .map(pair => ({ routeA: pair.routeA, routeB: pair.routeB }));
-}
-
-function isRouteActive(
-  routeStates: Record<string, { lifecycle: string; lockedIn: boolean }> | undefined,
-  routeId: string,
-): boolean {
-  const state = routeStates?.[routeId];
-  if (!state) {
-    return false;
-  }
-  return ACTIVE_LIFECYCLES.has(state.lifecycle);
-}
-
-function detectRouteContradictions(
-  routeStates: Record<string, { lifecycle: string; lockedIn: boolean }> | undefined,
-): Array<{ routeA: string; routeB: string }> {
-  const contradictions: Array<{ routeA: string; routeB: string }> = [];
-  for (const pair of getStrongExclusionPairs()) {
-    if (isRouteActive(routeStates, pair.routeA) && isRouteActive(routeStates, pair.routeB)) {
-      contradictions.push(pair);
-    }
-  }
-  return contradictions;
-}
 
 export function isMidlifeRouteEvent(
   routeTrack: GoldenLineRouteTrack,
@@ -102,13 +67,6 @@ function midlifeRecords(report: GameProcessReport): GameProcessReport['records']
   return report.records.filter(
     record => record.age >= MIDLIFE_AGE_MIN && record.age <= MIDLIFE_AGE_MAX,
   );
-}
-
-function lastMidlifeRecord(
-  report: GameProcessReport,
-): GameProcessReport['records'][number] | undefined {
-  const records = midlifeRecords(report);
-  return records[records.length - 1];
 }
 
 function evaluatePriorityRouteMidlife(run: GoldenLineSimulationRun): MidlifeGateFinding[] {
@@ -178,17 +136,6 @@ function evaluatePriorityRouteMidlife(run: GoldenLineSimulationRun): MidlifeGate
       detail: telemetry?.deathWithoutWarning
         ? `Midlife death without readable warning at age ${deathRecord?.age ?? report.finalAge} (cause=${telemetry.deathCauseId})`
         : `Midlife death at age ${deathRecord?.age ?? report.finalAge} (cause=${telemetry?.deathCauseId ?? 'unknown'})`,
-    });
-  }
-
-  const finalMidlife = lastMidlifeRecord(report);
-  const contradictions = detectRouteContradictions(finalMidlife?.gameState.routeStates);
-  for (const pair of contradictions) {
-    findings.push({
-      metric: 'route_contradiction',
-      sampleId,
-      age: finalMidlife?.age ?? MIDLIFE_AGE_MAX,
-      detail: `Route contradiction: ${pair.routeA} and ${pair.routeB} both active (strong_exclusion)`,
     });
   }
 

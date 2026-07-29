@@ -85,9 +85,6 @@ export interface NarrativeSchedulingContext {
   expectedStageSignals: StageSignalKey[];
   satisfiedStageSignals: StageSignalKey[];
   missingStageSignals: StageSignalKey[];
-  activeRouteIds: string[];
-  relevantReinforcementPoints: RouteSignalPoint[];
-  relevantDivergencePoints: RouteSignalPoint[];
 }
 
 export interface P11SchedulingGateReport {

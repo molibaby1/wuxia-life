@@ -1,19 +1,15 @@
 import {
-  getProfileRouteDefinition,
   getProfileStageForAge,
   getProfileStageConfigs,
-  getWorldProfile,
 } from '../narrative/worldProfile';
 import type { GameProcessRecord } from '../types/simulationRecordTypes';
 import type { GameState } from '../types/eventTypes';
-import type { RouteSignalPoint } from '../narrative/config/routeDefinitions';
 import { eventLoader } from '../core/EventLoader';
 import {
   detectStageSignalsForStage,
   getSatisfiedStageSignals,
   getStageExpectedSignals,
 } from './signalDetection';
-import { ageInBand } from './signalVocabulary';
 import type { NarrativeSchedulingContext, StageSignalKey } from './types';
 
 export const PERSONA_ROUTE_MAP: Record<string, string> = {
@@ -26,129 +22,6 @@ export const PERSONA_ROUTE_MAP: Record<string, string> = {
   'p8-explorer-lu': 'route_wanderer',
   'p8-balanced-wei': 'route_balanced',
 };
-
-function readMergedFlags(state?: GameState): Record<string, unknown> {
-  return {
-    ...(state?.flags ?? {}),
-    ...(state?.player?.flags ?? {}),
-  };
-}
-
-const ROUTE_ENTRY_FLAG_ALIASES: Record<string, string[]> = {
-  route_wealth: ['p9_echo_business_hook', 'p16_deferred_business_upbringing'],
-  route_wanderer: ['p9_echo_travel_hook', 'p16_deferred_travel_upbringing'],
-  route_social: ['p9_echo_social_hook', 'p16_deferred_social_upbringing'],
-};
-
-function routeHasEntrySignal(routeId: string, flags: Record<string, unknown>): boolean {
-  const route = getWorldProfile('wuxia').routeDefinitions.find(item => item.id === routeId);
-  if (!route) {
-    return false;
-  }
-  const declaredEntry = route.entrySignals.some(
-    point => point.flagKey && hasRouteFlag(flags, point.flagKey),
-  );
-  if (declaredEntry) {
-    return true;
-  }
-  return (ROUTE_ENTRY_FLAG_ALIASES[routeId] ?? []).some(key => hasRouteFlag(flags, key));
-}
-
-function resolveActiveRouteIds(flags: Record<string, unknown>, routePreference?: string | null): string[] {
-  const routeDefinitions = getWorldProfile('wuxia').routeDefinitions;
-  const active: string[] = [];
-  const demonicLocked = hasRouteFlag(flags, 'p8_route_demonic');
-  for (const route of routeDefinitions) {
-    if (demonicLocked && route.id === 'route_wanderer') {
-      continue;
-    }
-    const hasEntry = routeHasEntrySignal(route.id, flags);
-    const hasIdentity = route.identityResolution.candidates.some(
-      candidate => flags[candidate.flagKey],
-    );
-    const prefMatch =
-      routePreference &&
-      route.identityResolution.routePreferenceFallbacks.includes(routePreference);
-    if (hasEntry || hasIdentity || prefMatch) {
-      active.push(route.id);
-    }
-  }
-  if (active.length === 0 && routePreference) {
-    const fallback = routeDefinitions.find(route =>
-      route.identityResolution.routePreferenceFallbacks.includes(routePreference),
-    );
-    if (fallback) {
-      active.push(fallback.id);
-    }
-  }
-  return active;
-}
-
-function resolveRoutePreferenceFromState(state: GameState): string | null {
-  const flags = readMergedFlags(state);
-
-  for (const [flagName, flagValue] of Object.entries(flags)) {
-    if (!flagValue || !flagName.startsWith('p8_route_')) {
-      continue;
-    }
-    const preference = flagName.slice('p8_route_'.length);
-    if (preference) {
-      return preference;
-    }
-  }
-
-  if (hasRouteFlag(flags, 'p9_early_business_focus') || hasRouteFlag(flags, 'p16_deferred_business_upbringing')) {
-    return 'wealth';
-  }
-  if (
-    !hasRouteFlag(flags, 'p8_route_demonic') &&
-    (hasRouteFlag(flags, 'p9_early_travel_focus') || hasRouteFlag(flags, 'p16_deferred_travel_upbringing'))
-  ) {
-    return 'wanderer';
-  }
-  if (hasRouteFlag(flags, 'p9_early_social_focus') || hasRouteFlag(flags, 'p16_deferred_social_upbringing')) {
-    return 'social';
-  }
-  if (hasRouteFlag(flags, 'p9_echo_study_hook')) {
-    return 'scholar';
-  }
-  if (hasRouteFlag(flags, 'p9_echo_training_hook')) {
-    return 'martial';
-  }
-
-  for (const [routeId, routeState] of Object.entries(state.routeStates ?? {})) {
-    if (
-      routeState.lifecycle === 'active' ||
-      routeState.lifecycle === 'locked_in' ||
-      routeState.lifecycle === 'temporary'
-    ) {
-      return routeId.startsWith('route_') ? routeId.slice('route_'.length) : routeId;
-    }
-  }
-
-  return null;
-}
-
-function hasRouteFlag(flags: Record<string, unknown>, key: string): boolean {
-  const value = flags[key];
-  return value !== undefined && value !== false && value !== null && value !== '';
-}
-
-function filterRelevantRoutePoints(
-  points: RouteSignalPoint[],
-  age: number,
-  flags: Record<string, unknown>,
-): RouteSignalPoint[] {
-  return points.filter(point => {
-    if (!ageInBand(age, point.ageBand)) {
-      return false;
-    }
-    if (point.flagKey && flags[point.flagKey]) {
-      return false;
-    }
-    return true;
-  });
-}
 
 export function recordsFromGameState(state: GameState): GameProcessRecord[] {
   const storyRecords = (state.eventHistory ?? []).map(record => ({
@@ -185,40 +58,17 @@ export function buildNarrativeSchedulingContext(
 ): NarrativeSchedulingContext {
   const age = state.player?.age ?? 0;
   const stage = getProfileStageForAge(age);
-  const flags = readMergedFlags(state);
   const expectedStageSignals = getStageExpectedSignals(age);
   const satisfiedStageSignals = getSatisfiedStageSignals(records, state, age + 1);
   const missingStageSignals = expectedStageSignals.filter(
     signal => !satisfiedStageSignals.includes(signal),
   );
-  const routePreference = resolveRoutePreferenceFromState(state);
-  const activeRouteIds = resolveActiveRouteIds(flags, routePreference);
-
-  const relevantReinforcementPoints = activeRouteIds.flatMap(routeId => {
-    const route = getProfileRouteDefinition(routeId);
-    if (!route) {
-      return [];
-    }
-    return filterRelevantRoutePoints(route.reinforcementPoints, age, flags);
-  });
-
-  const relevantDivergencePoints = activeRouteIds.flatMap(routeId => {
-    const route = getProfileRouteDefinition(routeId);
-    if (!route) {
-      return [];
-    }
-    return filterRelevantRoutePoints(route.divergencePoints, age, flags);
-  });
-
   return {
     age,
     stageId: stage?.id ?? null,
     expectedStageSignals,
     satisfiedStageSignals,
     missingStageSignals,
-    activeRouteIds,
-    relevantReinforcementPoints,
-    relevantDivergencePoints,
   };
 }
 

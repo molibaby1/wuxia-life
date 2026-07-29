@@ -103,7 +103,8 @@ function testProfileFirstReaders(): void {
     flags: {},
   } as GameState;
   const ctx = buildNarrativeSchedulingContextFromState(state);
-  assert(ctx.activeRouteIds.includes('route_martial'), 'P11 scheduling context resolves routes via profile');
+  assert(ctx.stageId === 'stage_20_30', 'P11 scheduling context reads stage from World Profile');
+  assert(ctx.expectedStageSignals.length > 0, 'P11 scheduling context reads expected stage signals');
 }
 
 function testCrossReferenceValidation(): void {

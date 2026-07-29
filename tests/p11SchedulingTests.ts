@@ -8,7 +8,6 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import {
   detectStageSignalsForStage,
   eventCoversMissingStageSignal,
-  eventCoversRoutePoint,
   listEventsCoveringStageSignal,
 } from '../src/p11/signalDetection';
 import {
@@ -19,8 +18,6 @@ import {
 import {
   describeSchedulingBias,
   getNarrativeSchedulingMultiplier,
-  getRouteDivergenceMultiplier,
-  getRouteReinforcementMultiplier,
   getStageSchedulingMultiplier,
   STAGE_BIAS_MULTIPLIER,
 } from '../src/p11/schedulingPolicy';
@@ -107,7 +104,7 @@ function testStageSchedulingMultiplier(): void {
   } as GameState;
   const context = buildNarrativeSchedulingContext(records, state);
   const multiplier = getStageSchedulingMultiplier(event!, context);
-  assert(multiplier === STAGE_BIAS_MULTIPLIER, 'stage bias applies when signal missing and route matches');
+  assert(multiplier === STAGE_BIAS_MULTIPLIER, 'stage bias applies when signal is missing');
   assert(
     eventCoversMissingStageSignal(event!, ['relationship_shift']),
     'event declares relationship_shift coverage',
@@ -133,35 +130,6 @@ function testWealthReinforcementAcceptsDeferredUpbringing(): void {
   assert(
     evaluator.evaluate(event!.conditions![0], earlyFocus),
     'p11_wealth_reinforcement_first_deal should accept p9_early_business_focus',
-  );
-}
-
-function testRouteReinforcementAndDivergenceMultipliers(): void {
-  const socialEvent = eventLoader.getEventById('p11_social_reinforcement_gathering');
-  const divergenceEvent = eventLoader.getEventById('p11_wealth_wanderer_divergence_fork');
-  assert(socialEvent !== undefined, 'social reinforcement event loaded');
-  assert(divergenceEvent !== undefined, 'divergence event loaded');
-
-  const socialState = {
-    player: { age: 23, flags: { p9_early_social_focus: true }, routePreference: 'social' },
-    flags: { p9_early_social_focus: true },
-    eventHistory: [],
-  } as GameState;
-  const socialContext = buildNarrativeSchedulingContextFromState(socialState);
-  assert(
-    getRouteReinforcementMultiplier(socialEvent!, socialContext, 'route_social') > 1,
-    'social reinforcement multiplier > 1',
-  );
-
-  const wealthState = {
-    player: { age: 30, flags: { p9_early_business_focus: true }, routePreference: 'wealth' },
-    flags: { p9_early_business_focus: true },
-    eventHistory: [],
-  } as GameState;
-  const wealthContext = buildNarrativeSchedulingContextFromState(wealthState);
-  assert(
-    getRouteDivergenceMultiplier(divergenceEvent!, wealthContext, 'route_wealth') > 1,
-    'wealth divergence multiplier > 1',
   );
 }
 
@@ -276,7 +244,6 @@ export async function runP11SchedulingTests(): Promise<void> {
   testSchedulingContext();
   testStageSchedulingMultiplier();
   testWealthReinforcementAcceptsDeferredUpbringing();
-  testRouteReinforcementAndDivergenceMultipliers();
   testSchedulerWiringDiagnostics();
   testContentMetadataCoverage();
   testPersonaRouteMapCoversPrimaryRoutes();

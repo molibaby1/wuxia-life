@@ -44,12 +44,6 @@ export const PROFILE_READER_REGISTRY: ProfileReaderEntry[] = [
     status: 'profile-first',
   },
   {
-    id: 'p11.scheduling_routes',
-    module: 'p11/schedulingContext.resolveActiveRouteIds',
-    description: 'P11 active route resolution',
-    status: 'profile-first',
-  },
-  {
     id: 'p11.report_routes',
     module: 'p11/reportBuilder.buildRouteBaseline',
     description: 'P11 route baseline reporting',

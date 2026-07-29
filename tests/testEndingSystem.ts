@@ -18,7 +18,7 @@ function createTestState(): GameState {
     charisma: 50,
     constitution: 50,
     comprehension: 50,
-    money: 1000,
+    money: 100,
     reputation: 30,
     connections: 20,
     healthStatus: 'healthy',
@@ -59,12 +59,17 @@ function createTestState(): GameState {
   };
 }
 
+function assert(condition: boolean, message: string): void {
+  if (!condition) throw new Error(message);
+}
+
 console.log('=== 结局系统测试 ===\n');
 
 // 测试 1: 平凡一生（默认结局）
 console.log('测试 1: 平凡一生（默认结局）');
 let state = createTestState();
 const ending1 = EndingSystem.determineEnding(state);
+assert(ending1.id === 'ordinary_life', 'default ending should be ordinary_life');
 console.log('结局:', ending1.name);
 console.log('描述:', ending1.description.substring(0, 50) + '...');
 console.log('分类:', EndingSystem.getEndingCategory(ending1));
@@ -78,6 +83,7 @@ state.player.chivalry = 85;
 state.player.reputation = 85;
 state.karma!.good_karma = 120;
 const ending2 = EndingSystem.determineEnding(state);
+assert(ending2.id === 'legendary_hero', 'hero prerequisites should unlock legendary_hero');
 console.log('结局:', ending2.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending2));
 console.log('预期：传奇英雄（正面）');
@@ -91,6 +97,7 @@ state.player.externalSkill = 95;
 state.player.internalSkill = 95;
 state.player.qinggong = 95;
 const ending3 = EndingSystem.determineEnding(state);
+assert(ending3.id === 'martial_god', 'martial thresholds should unlock martial_god without road data');
 console.log('结局:', ending3.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending3));
 console.log('预期：武学之神（正面）');
@@ -99,10 +106,12 @@ console.log('');
 // 测试 4: 开宗立派
 console.log('测试 4: 开宗立派');
 state = createTestState();
-state.player.reputation = 65;
+state.player.reputation = 80;
 state.player.martialPower = 75;
+state.player.influence = 35;
 state.player.flags = { establish_sect: true, succession_completed: true };
 const ending4 = EndingSystem.determineEnding(state);
+assert(ending4.id === 'sect_founder', 'founding facts should unlock sect_founder without road data');
 console.log('结局:', ending4.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending4));
 console.log('预期：开宗立派（正面）');
@@ -112,8 +121,10 @@ console.log('');
 console.log('测试 5: 首富');
 state = createTestState();
 state.player.money = 12000;
+state.player.businessAcumen = 70;
 state.player.flags = { business_empire: true };
 const ending5 = EndingSystem.determineEnding(state);
+assert(ending5.id === 'richest_man', 'business facts should unlock richest_man without road data');
 console.log('结局:', ending5.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending5));
 console.log('预期：首富（正面）');
@@ -126,6 +137,7 @@ state.player.chivalry = 75;
 state.karma!.good_karma = 160;
 state.player.flags = { heal_many_people: true, save_village: true };
 const ending6 = EndingSystem.determineEnding(state);
+assert(ending6.id === 'beloved_saint', 'good deeds should unlock beloved_saint');
 console.log('结局:', ending6.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending6));
 console.log('预期：在世活佛（正面）');
@@ -140,6 +152,7 @@ state.player.comprehension = 92;
 state.karma!.good_karma = 110;
 state.player.flags = { retired: true };
 const ending7 = EndingSystem.determineEnding(state);
+assert(ending7.id === 'heavenly_immortal', 'immortal prerequisites should unlock heavenly_immortal');
 console.log('结局:', ending7.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending7));
 console.log('预期：得道成仙（正面）');
@@ -150,6 +163,7 @@ console.log('测试 8: 隐士生活');
 state = createTestState();
 state.player.flags = { retired: true };
 const ending8 = EndingSystem.determineEnding(state);
+assert(ending8.id === 'hermit_life', 'retired alone should only unlock neutral hermit_life');
 console.log('结局:', ending8.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending8));
 console.log('预期：隐士生活（中性）');
@@ -171,9 +185,18 @@ state = createTestState();
 state.player.chivalry = -85;
 state.karma!.evil_karma = 220;
 const ending10 = EndingSystem.determineEnding(state);
+assert(ending10.id === 'eternal_damnation', 'evil prerequisites should unlock eternal_damnation');
 console.log('结局:', ending10.name);
 console.log('分类:', EndingSystem.getEndingCategory(ending10));
 console.log('预期：遗臭万年（负面）');
+console.log('');
+
+console.log('测试 10b: 隐逸高士');
+state = createTestState();
+state.player.flags = { peacefulHermit: true, retiredInCountryside: true };
+const ending10b = EndingSystem.determineEnding(state);
+assert(ending10b.id === 'hermit_master', 'explicit two-stage retreat facts should unlock hermit_master');
+console.log('结局:', ending10b.name);
 console.log('');
 
 // 测试 11: 结局评价生成

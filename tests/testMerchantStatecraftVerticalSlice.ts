@@ -97,8 +97,16 @@ async function run(): Promise<void> {
   moneyOnly.player.money = 10000;
   moneyOnly.player.businessAcumen = 100;
   moneyOnly.player.flags = { business_empire: true };
-  if (EndingSystem.canUnlockEnding(moneyOnly, 'richest_man')) {
-    throw new Error('money and merchant flags alone must not unlock richest_man');
+  if (!EndingSystem.canUnlockEnding(moneyOnly, 'richest_man')) {
+    throw new Error('money, businessAcumen, business_empire and age should unlock richest_man without road proof');
+  }
+
+  const proofOnly = merchantEngine().getGameState();
+  proofOnly.player.flags = {};
+  const proofState = RouteStateManager.commitRoad(proofOnly, 'statecraft', { eventId: 'merchant_commitment' });
+  const proofStateWithProof = RouteStateManager.recordRoadProof(proofState, 'statecraft', 'merchant_proof');
+  if (EndingSystem.canUnlockEnding(proofStateWithProof, 'richest_man')) {
+    throw new Error('statecraft road proof without business_empire must not unlock richest_man');
   }
 
   console.log('US-006 merchant statecraft vertical slice passed');

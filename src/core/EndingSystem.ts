@@ -13,8 +13,7 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity, PlayerLifeStates, CriticalChoices, RoadCommitmentRecord } from '../types/eventTypes';
-import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
+import type { GameState, PlayerIdentity, PlayerLifeStates, CriticalChoices } from '../types/eventTypes';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
@@ -76,7 +75,6 @@ export interface EndingInfo {
     knowledge?: number;
     businessAcumen?: number;
     influence?: number;
-    road?: { id: LifeRoadId; stages: LifeRoadStage[]; minProofCount: number };
   };
   priority: number;  // 优先级，用于冲突时判定
 }
@@ -103,7 +101,6 @@ interface EndingEvaluationData {
   children: number;
   lifeStates: PlayerLifeStates;
   choices?: CriticalChoices;
-  roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
 }
 
 const EMPTY_LIFE_STATES = {
@@ -142,7 +139,6 @@ export class EndingSystem {
         internalSkill: 80,
         qinggong: 80,
         age: 68,
-        road: { id: 'martial', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 100,  // 最高优先级
     },
@@ -156,7 +152,6 @@ export class EndingSystem {
         martialPower: 70,
         flags: ['establish_sect', 'succession_completed'],
         age: 65,
-        road: { id: 'martial', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 90,
     },
@@ -170,7 +165,6 @@ export class EndingSystem {
         businessAcumen: 70,
         flags: ['business_empire'],
         age: 60,
-        road: { id: 'statecraft', stages: ['locked_in', 'completed'], minProofCount: 1 },
       },
       priority: 85,
     },
@@ -220,7 +214,7 @@ export class EndingSystem {
       requirements: {
         reputation: 70,
         age: 60,
-        road: { id: 'official', stages: ['locked_in', 'completed'], minProofCount: 1 },
+        flags: ['official_first_post', 'route_official_completed'],
       },
       priority: 89,
     },
@@ -231,7 +225,7 @@ export class EndingSystem {
       category: 'positive',
       requirements: {
         age: 60,
-        road: { id: 'hermit', stages: ['locked_in', 'completed'], minProofCount: 1 },
+        flags: ['peacefulHermit', 'retiredInCountryside'],
       },
       priority: 86,
     },
@@ -406,15 +400,6 @@ export class EndingSystem {
       }
     }
 
-    if (requirements.road) {
-      const commitment = data.roadCommitments?.[requirements.road.id];
-      if (!commitment
-        || !requirements.road.stages.includes(commitment.lifecycle)
-        || commitment.proofCount < requirements.road.minProofCount) {
-        return false;
-      }
-    }
-
     return true;
   }
 
@@ -580,7 +565,6 @@ export class EndingSystem {
       spouse: player.spouse,
       children: player.children,
       lifeStates: player.lifeStates || EMPTY_LIFE_STATES,
-      roadCommitments: state.roadCommitments,
     };
   }
 

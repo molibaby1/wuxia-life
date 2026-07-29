@@ -829,23 +829,17 @@ export class SpecialEffectHandler implements EffectHandler {
       
       // 触发结局判定
       const ending = EndingSystem.determineEnding(state);
-      const completedRoadId = ending.category === 'positive'
-        ? ending.requirements.road?.id
-        : undefined;
-      const completedState = completedRoadId
-        ? RouteStateManager.completeRoad(state, completedRoadId, `ending:${ending.id}`)
-        : state;
       
       // 设置游戏结束标志和结局信息
       return {
-        ...completedState,
-        player: completedState.player ? {
-          ...completedState.player,
+        ...state,
+        player: state.player ? {
+          ...state.player,
           alive: false,
           deathReason: ending.name,
-        } : completedState.player,
+        } : state.player,
         flags: {
-          ...completedState.flags,
+          ...state.flags,
           gameEnded: true,
           ending_triggered: true,
           [`ending_${ending.id}`]: true,

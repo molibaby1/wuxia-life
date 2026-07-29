@@ -44,36 +44,6 @@ type WriteRouteStateInput = {
   reason?: string;
 };
 
-const ROUTE_FLAG_TO_ROUTE_ID: Record<string, string> = {
-  merchant_path: 'merchant',
-  hero_path: 'hero',
-  official_path: 'official',
-  hermit_path: 'hermit',
-  demon_path: 'demonic',
-  martial_path: 'sect',
-  wanderer_path: 'wanderer',
-};
-
-/** route_* 玩家标记到 routeStates 键（含非 core 子线） */
-const ROUTE_PLAYER_FLAG_TO_STATE_ID: Record<string, string> = {
-  route_official: 'official',
-  route_beggars: 'beggars',
-  route_demonic: 'demonic',
-  route_orthodox: 'sect',
-  route_border: 'wanderer',
-  route_buddhist: 'wanderer',
-  route_wanderer: 'wanderer',
-};
-
-const FACTION_TO_ROUTE_ID: Record<string, string> = {
-  orthodox: 'sect',
-  unconventional: 'demonic',
-  neutral: 'wanderer',
-  none: 'wanderer',
-};
-
-const COMMITTED_ROUTE_LIFECYCLES: RouteLifecycleState[] = ['active', 'locked_in', 'temporary'];
-
 const LEGACY_ROUTE_TO_LIFE_ROAD: Record<string, LifeRoadId> = {
   merchant: 'statecraft',
   official: 'official',
@@ -339,61 +309,6 @@ export class RouteStateManager {
       eventId,
       reason: reason || 'deactivate_route',
     });
-  }
-
-  static syncFromFlagUnset(state: GameState, flagName: string, eventId?: string): GameState {
-    const routeFromFlag = RouteStateManager.resolveRouteFromFlag(flagName, true);
-    if (!routeFromFlag) {
-      return state;
-    }
-    const current = RouteStateManager.readRouteState(state, routeFromFlag);
-    if (current.lifecycle === 'inactive') {
-      return state;
-    }
-    return RouteStateManager.deactivateRoute(state, routeFromFlag, eventId, `unset_flag:${flagName}`);
-  }
-
-  static syncFromFlagSet(state: GameState, flagName: string, flagValue: unknown, eventId?: string): GameState {
-    const routeFromFlag = RouteStateManager.resolveRouteFromFlag(flagName, flagValue);
-    if (!routeFromFlag) {
-      return state;
-    }
-    if (flagName.startsWith('route_') && flagName.endsWith('_locked')) {
-      return RouteStateManager.lockRoute(state, routeFromFlag, eventId, 'sync_flag_locked');
-    }
-    if (flagName.startsWith('route_') && flagName.endsWith('_completed')) {
-      return RouteStateManager.completeRoute(state, routeFromFlag, eventId, 'sync_flag_completed');
-    }
-    if (flagName.startsWith('route_') && flagName.endsWith('_failed')) {
-      return RouteStateManager.failRoute(state, routeFromFlag, eventId, 'sync_flag_failed');
-    }
-    return RouteStateManager.writeRouteState(state, {
-      routeId: routeFromFlag,
-      lifecycle: 'active',
-      category: 'main',
-      eventId,
-      reason: `sync_flag:${flagName}`,
-    });
-  }
-
-  private static resolveRouteFromFlag(flagName: string, flagValue: unknown): string | null {
-    if (!flagValue) {
-      return null;
-    }
-    if (flagName === 'sect_faction' && typeof flagValue === 'string') {
-      return FACTION_TO_ROUTE_ID[flagValue] || null;
-    }
-    if (ROUTE_FLAG_TO_ROUTE_ID[flagName]) {
-      return ROUTE_FLAG_TO_ROUTE_ID[flagName];
-    }
-    if (ROUTE_PLAYER_FLAG_TO_STATE_ID[flagName]) {
-      return ROUTE_PLAYER_FLAG_TO_STATE_ID[flagName];
-    }
-    if (flagName.startsWith('route_')) {
-      const routeId = flagName.replace(/^route_/, '').replace(/_(locked|completed|failed)$/, '');
-      return routeId || null;
-    }
-    return null;
   }
 
   private static appendHistory(

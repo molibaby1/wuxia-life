@@ -5,6 +5,12 @@ import { ROUTE_TRACK_SAMPLES } from './runGameplaySimulation';
 
 async function main(): Promise<void> {
   let completedSamples = 0;
+  const completionFlags: Record<string, string[]> = {
+    official: ['route_official_completed'],
+    beggars: ['route_beggars_completed'],
+    demonic: ['route_demonic_completed'],
+    sect: ['orthodox_trial_completed', 'sect_trial_completed'],
+  };
 
   for (const sample of ROUTE_TRACK_SAMPLES) {
     const simulator = new GameProcessSimulator({
@@ -24,18 +30,18 @@ async function main(): Promise<void> {
 
     const report = await simulator.simulate();
     const finalState = report.records.at(-1)?.gameState;
-    const lifecycle = Object.entries(finalState?.routeStates || {})
-      .map(([routeId, state]) => `${routeId}:${state.lifecycle}`)
-      .join(', ');
-
-    const hasCompleted = Object.values(finalState?.routeStates || {}).some(
-      routeState => routeState.lifecycle === 'completed'
-    );
+    const flags = {
+      ...(finalState?.flags ?? {}),
+      ...(finalState?.player?.flags ?? {}),
+    };
+    const completed = (completionFlags[sample.routeTrack ?? ''] ?? [])
+      .filter(flagName => Boolean(flags[flagName]));
+    const hasCompleted = completed.length > 0;
     if (hasCompleted) {
       completedSamples += 1;
     }
 
-    console.log(`${sample.id} => ${lifecycle || 'no-route-states'}${hasCompleted ? ' [COMPLETED]' : ''}`);
+    console.log(`${sample.id} => ${completed.join(', ') || 'no-completion-flag'}${hasCompleted ? ' [COMPLETED]' : ''}`);
   }
 
   console.log(`\ncompletedSamples=${completedSamples}/${ROUTE_TRACK_SAMPLES.length}`);

@@ -1807,36 +1807,8 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线生命周期 - completion flag 写入 routeStates',
-      description: '测试 route_*_completed 会同步为 completed 生命周期',
-      test: () => {
-        const state = framework.createTestState();
-        state.player.age = 30;
-        state.player.flags.route_beggars = true;
-
-        const afterStart = RouteStateManager.syncFromFlagSet(state, 'route_beggars', true, 'beggars_join');
-        assertEqual(
-          RouteStateManager.readRouteState(afterStart, 'beggars').lifecycle,
-          'active',
-          'route_beggars 应激活 beggars 路线状态'
-        );
-
-        const afterComplete = RouteStateManager.syncFromFlagSet(
-          afterStart,
-          'route_beggars_completed',
-          true,
-          'beggars_ending'
-        );
-        assertEqual(
-          RouteStateManager.readRouteState(afterComplete, 'beggars').lifecycle,
-          'completed',
-          'route_beggars_completed 应完成 beggars 路线'
-        );
-      },
-    },
-    {
-      name: '路线专项样本 - 模拟可推进至 completed',
-      description: '测试 routeTrack 样本在固定 seed 下可产生 completed 路线状态',
+      name: '路线专项样本 - 模拟可产生明确完成事实',
+      description: '测试 routeTrack 样本在固定 seed 下可产生明确 completion flag',
       test: async () => {
         const { ROUTE_TRACK_SAMPLES } = await import('../scripts/runGameplaySimulation');
 
@@ -1861,11 +1833,13 @@ const coreFunctionSuite: TestSuite = {
         const finalState = report.records.length > 0
           ? report.records[report.records.length - 1].gameState
           : undefined;
-        const hasCompleted = Object.values(finalState?.routeStates || {}).some(
-          routeState => routeState.lifecycle === 'completed'
-        );
+        const finalFlags = {
+          ...(finalState?.flags ?? {}),
+          ...(finalState?.player?.flags ?? {}),
+        };
+        const hasCompleted = finalFlags.route_official_completed === true;
 
-        assert(hasCompleted, '路线专项样本应能将至少一条路线推进至 completed');
+        assert(hasCompleted, '路线专项样本应能产生 route_official_completed 明确事实');
       },
     },
     {
@@ -1895,8 +1869,8 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线状态管理 - 旗标同步不破坏身份与阵营字段',
-      description: '测试旗标同步通过统一入口更新路线状态，同时保持 identity/lifePath.faction 不被破坏',
+      name: '明确 faction flag 不破坏身份与阵营字段',
+      description: '测试 faction membership flag 保持明确语义且不投影为路线状态',
       test: async () => {
         const executor = new EventExecutor();
         const state = framework.createTestState();
@@ -1921,7 +1895,7 @@ const coreFunctionSuite: TestSuite = {
 
         assertEqual(nextState.identity?.primary, 'heroic', 'identity 字段应保持不变');
         assertEqual(nextState.lifePath?.faction, 'orthodox', 'lifePath.faction 不应被路线状态同步改写');
-        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'active', '阵营旗标应同步为 demonic active');
+        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'inactive', '阵营旗标不应投影为 demonic routeState');
       },
     },
     {
@@ -1948,7 +1922,7 @@ const coreFunctionSuite: TestSuite = {
           'locked_in',
           '设置新路线旗标不应自动转向已有路线',
         );
-        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'active', 'demonic 应成为 active');
+        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'inactive', 'route flag 不应生成 demonic routeState');
         assertEqual(nextState.flags?.route_demonic, true, 'route_demonic 应正常写入');
         assert(
           !(nextState.routeHistory || []).some(item => item.routeId === 'sect' && item.to === 'turned'),

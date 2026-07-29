@@ -512,7 +512,7 @@ export class FlagSetHandler implements EffectHandler {
     if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
       result = syncOriginFromPrimaryChoice(result, flagName);
     }
-    return RouteStateManager.syncFromFlagSet(result, flagName, flagValue);
+    return result;
   }
 }
 
@@ -591,7 +591,7 @@ export class FlagUnsetHandler implements EffectHandler {
         flags: newFlags,
       },
     };
-    return RouteStateManager.syncFromFlagUnset(result, flagName);
+    return result;
   }
 }
 

@@ -2,7 +2,6 @@
  * Shared route-track fixtures for GameProcessSimulator and headless parity replay.
  */
 
-import { RouteStateManager } from '../../core/RouteStateManager';
 import type { GameState } from '../../types/eventTypes';
 
 export type RouteTrack = 'official' | 'beggars' | 'demonic' | 'sect' | 'wanderer';
@@ -69,43 +68,20 @@ export function enforceRouteTrackIsolation(state: GameState, routeTrack: RouteTr
   const clearFlag = (flagName: string) => {
     if (!flags[flagName]) return;
     flags[flagName] = false;
-    const updated = RouteStateManager.syncFromFlagSet(state, flagName, false, 'route-track-fixture-clear');
-    state.routeStates = updated.routeStates;
-    state.routeHistory = updated.routeHistory;
-  };
-
-  const deactivateRoute = (routeId: string) => {
-    const updated = RouteStateManager.writeRouteState(state, {
-      routeId,
-      lifecycle: 'inactive',
-      lockedIn: false,
-      reason: 'route-track-isolation',
-    });
-    state.routeStates = updated.routeStates;
-    state.routeHistory = updated.routeHistory;
   };
 
   if (routeTrack === 'sect') {
     clearFlag('route_demonic');
     clearFlag('route_beggars');
     clearFlag('route_official');
-    deactivateRoute('demonic');
-    deactivateRoute('beggars');
-    deactivateRoute('official');
   } else if (routeTrack === 'wanderer') {
     clearFlag('route_demonic');
     clearFlag('route_orthodox');
     clearFlag('route_beggars');
-    deactivateRoute('demonic');
-    deactivateRoute('sect');
-    deactivateRoute('beggars');
   } else if (routeTrack === 'demonic') {
     clearFlag('route_orthodox');
     clearFlag('route_beggars');
     clearFlag('route_official');
-    deactivateRoute('sect');
-    deactivateRoute('beggars');
-    deactivateRoute('official');
   }
 }
 
@@ -122,20 +98,14 @@ export function applyRouteTrackFixtureBootstrap(
   if (!player) return;
 
   const flags = player.flags || (player.flags = {});
-  const syncFlag = (flagName: string, eventId: string) => {
+  const syncFlag = (flagName: string) => {
     flags[flagName] = true;
-    const updated = RouteStateManager.syncFromFlagSet(state, flagName, true, eventId);
-    state.routeStates = updated.routeStates;
-    state.routeHistory = updated.routeHistory;
-    if (updated.eventHistory) {
-      state.eventHistory = updated.eventHistory;
-    }
   };
 
   if (routeTrack === 'official') {
     if (age === 22 && !flags.route_official) {
       flags.origin_scholar_family = true;
-      syncFlag('route_official', 'route-track-fixture-official-entry');
+      syncFlag('route_official');
     }
     if (flags.route_official && age >= 24 && !flags.official_first_post) {
       flags.official_first_post = true;
@@ -144,13 +114,13 @@ export function applyRouteTrackFixtureBootstrap(
       flags.official_love_obstacle = true;
     }
     if (flags.route_official && age >= 34 && !flags.route_official_completed) {
-      syncFlag('route_official_completed', 'route-track-fixture-official-complete');
+      syncFlag('route_official_completed');
     }
   }
 
   if (routeTrack === 'beggars') {
     if (age === 14 && !flags.route_beggars) {
-      syncFlag('route_beggars', 'route-track-fixture-beggars-entry');
+      syncFlag('route_beggars');
       flags.current_sect = 'beggars';
     }
     if (flags.route_beggars && age >= 20 && !flags.beggars_rumor_network) {
@@ -160,7 +130,7 @@ export function applyRouteTrackFixtureBootstrap(
       flags.beggars_strife_done = true;
     }
     if (flags.route_beggars && age >= 26 && !flags.route_beggars_completed) {
-      syncFlag('route_beggars_completed', 'route-track-fixture-beggars-complete');
+      syncFlag('route_beggars_completed');
     }
   }
 
@@ -169,7 +139,7 @@ export function applyRouteTrackFixtureBootstrap(
       flags.p8_route_demonic = true;
     }
     if (age === 14 && !flags.route_demonic) {
-      syncFlag('route_demonic', 'route-track-fixture-demonic-entry');
+      syncFlag('route_demonic');
     }
     if (flags.route_demonic && age >= 20) {
       flags.demonic_trial_active = true;
@@ -181,7 +151,7 @@ export function applyRouteTrackFixtureBootstrap(
       flags.demonic_path_usurp = true;
     }
     if (flags.route_demonic && age >= 28 && !flags.route_demonic_completed) {
-      syncFlag('route_demonic_completed', 'route-track-fixture-demonic-complete');
+      syncFlag('route_demonic_completed');
     }
   }
 
@@ -190,7 +160,7 @@ export function applyRouteTrackFixtureBootstrap(
       flags.p8_route_martial = true;
     }
     if (age === 13 && !flags.route_orthodox) {
-      syncFlag('route_orthodox', 'route-track-fixture-sect-entry');
+      syncFlag('route_orthodox');
       flags.orthodox_trial_active = true;
     }
     if (flags.route_orthodox && age >= 16) {
@@ -210,7 +180,7 @@ export function applyRouteTrackFixtureBootstrap(
 
   if (routeTrack === 'wanderer') {
     if (age === 13 && !flags.route_wanderer) {
-      syncFlag('route_wanderer', 'route-track-fixture-wanderer-entry');
+      syncFlag('route_wanderer');
     }
     if (flags.route_wanderer && age >= 20 && !flags.hero_first_case) {
       flags.hero_first_case = true;

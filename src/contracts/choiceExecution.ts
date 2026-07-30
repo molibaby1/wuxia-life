@@ -12,7 +12,6 @@ import type {
   GameStateSnapshot,
   GameStateSnapshotState,
   SnapshotEventRecord,
-  SnapshotRouteHistoryEntry,
   SourcePlatform,
 } from './gameStateSnapshot';
 
@@ -64,7 +63,6 @@ export interface ExecutionAppend {
 }
 
 export interface ExecutionDeltas {
-  routeChanges?: SnapshotRouteHistoryEntry[];
   relationshipChanges?: Array<{ relationId: string; delta: number }>;
   lifeMemoryInputs?: Partial<
     Pick<GameStateSnapshotState, 'flags' | 'criticalChoices' | 'lifePath'>

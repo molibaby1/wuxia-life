@@ -8,13 +8,9 @@ export {
   type GameStateSnapshot,
   type GameStateSnapshotMetadata,
   type GameStateSnapshotState,
-  type RouteCategory,
-  type RouteLifecycle,
   type SnapshotCurrentTime,
   type SnapshotEventRecord,
   type SnapshotPlayerState,
-  type SnapshotRouteHistoryEntry,
-  type SnapshotRouteState,
   type SourcePlatform,
 } from './gameStateSnapshot';
 

@@ -79,7 +79,6 @@ export type GoldenLineReplayRecord = {
   eventId: string;
   choiceId?: string;
   outcomeText?: string;
-  routeStates: Record<string, { lifecycle: string; lockedIn: boolean }>;
   routeFlags: string[];
   appliedEffects?: unknown[];
 };
@@ -98,20 +97,11 @@ function extractRouteFlags(gameState: GameProcessReport['records'][0]['gameState
 }
 
 function toReplayRecord(record: GameProcessReport['records'][number]): GoldenLineReplayRecord {
-  const routeStates: GoldenLineReplayRecord['routeStates'] = {};
-  for (const [routeId, state] of Object.entries(record.gameState.routeStates ?? {})) {
-    routeStates[routeId] = {
-      lifecycle: state.lifecycle,
-      lockedIn: state.lockedIn,
-    };
-  }
-
   return {
     age: record.age,
     eventId: record.eventId,
     choiceId: record.selectedChoice?.id,
     outcomeText: record.outcomeText,
-    routeStates,
     routeFlags: extractRouteFlags(record.gameState),
   };
 }

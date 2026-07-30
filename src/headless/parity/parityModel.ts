@@ -15,14 +15,14 @@ import {
 export type ParityMismatchCategory =
   | 'snapshot_hash'
   | 'feedback'
-  | 'route_state'
+  | 'route_flags'
   | 'life_memory'
   | 'event_history';
 
 export interface ParityComparisonFields {
   snapshotHash: string;
   feedbackDigest: string;
-  routeStateJson: string;
+  routeFlagsJson: string;
   lifeMemoryJson: string;
   eventHistoryDigest: string;
 }
@@ -112,7 +112,7 @@ export function buildParityFingerprint(digest: ParityComparisonFields): string {
     .createHash('sha256')
     .update(
       [
-        digest.routeStateJson,
+        digest.routeFlagsJson,
         digest.lifeMemoryJson,
         digest.eventHistoryDigest,
         digest.feedbackDigest,
@@ -125,10 +125,7 @@ export function digestGameState(state: GameState): ParityComparisonFields {
   const routeFlags = Object.fromEntries(
     Object.entries(state.flags ?? {}).filter(([key]) => key.startsWith('route_')),
   );
-  const routeStateJson = JSON.stringify({
-    routeStates: state.routeStates ?? {},
-    routeFlags,
-  });
+  const routeFlagsJson = JSON.stringify(routeFlags);
   const lifeMemoryJson = JSON.stringify(
     stripVolatileLifeMemory(deriveLifeMemorySummary(state)),
   );
@@ -136,7 +133,7 @@ export function digestGameState(state: GameState): ParityComparisonFields {
   return {
     snapshotHash: '',
     feedbackDigest: '',
-    routeStateJson,
+    routeFlagsJson,
     lifeMemoryJson,
     eventHistoryDigest,
   };
@@ -155,7 +152,7 @@ export function compareParityFields(
   const pairs: Array<[ParityMismatchCategory, keyof ParityComparisonFields]> = [
     ['snapshot_hash', 'snapshotHash'],
     ['feedback', 'feedbackDigest'],
-    ['route_state', 'routeStateJson'],
+    ['route_flags', 'routeFlagsJson'],
     ['life_memory', 'lifeMemoryJson'],
     ['event_history', 'eventHistoryDigest'],
   ];

@@ -51,7 +51,6 @@ type SampleSummary = {
   routeTrack?: string;
   origin: string;
   routeSummary: string[];
-  routeLifecycleSummary: string[];
   endingSummary: string;
   choiceSummary: {
     totalChoices: number;
@@ -248,17 +247,11 @@ function writeMachineReadableOutput(report: GameProcessReport): string {
 }
 
 function buildSampleSummary(sample: SimulationSample, report: GameProcessReport): SampleSummary {
-  const finalState = report.records.length > 0 ? report.records[report.records.length - 1].gameState : undefined;
   const flags = report.statistics.flags || {};
   const routeSummary = Object.keys(flags)
     .filter(key => key.startsWith('route_'))
     .sort();
-  const routeLifecycleSummary = finalState?.routeStates
-    ? Object.entries(finalState.routeStates)
-      .filter(([, state]) => state.lifecycle && state.lifecycle !== 'inactive')
-      .map(([routeId, state]) => `${routeId}:${state.lifecycle}`)
-      .sort()
-    : [];
+  const finalState = report.records.length > 0 ? report.records[report.records.length - 1].gameState : undefined;
   const notableRelations = finalState?.relations
     ? Object.entries(finalState.relations)
       .filter(([_, value]) => typeof value === 'number' && value >= 40)
@@ -278,7 +271,6 @@ function buildSampleSummary(sample: SimulationSample, report: GameProcessReport)
     routeTrack: sample.routeTrack,
     origin: report.statistics.origin || 'unknown',
     routeSummary: routeSummary.length > 0 ? routeSummary : ['none'],
-    routeLifecycleSummary: routeLifecycleSummary.length > 0 ? routeLifecycleSummary : ['none'],
     endingSummary: report.statistics.endingSummary || report.deathReason || '未触发结局',
     choiceSummary: {
       totalChoices: report.totalChoices,
@@ -304,7 +296,6 @@ function printSampleSummary(sampleSummary: SampleSummary): void {
     console.log(`Route track: ${sampleSummary.routeTrack}`);
   }
   console.log(`Route summary: ${sampleSummary.routeSummary.join(', ')}`);
-  console.log(`Route lifecycle: ${sampleSummary.routeLifecycleSummary.join(', ')}`);
   console.log(`Ending summary: ${sampleSummary.endingSummary}`);
   console.log(`Choice summary: ${sampleSummary.choiceSummary.totalChoices}/${sampleSummary.choiceSummary.totalEvents} (${sampleSummary.choiceSummary.choiceRate})`);
   console.log(`Death summary: ${sampleSummary.deathSummary}`);

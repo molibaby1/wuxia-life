@@ -6,8 +6,6 @@ export interface SimulationMetricDefinition {
   key:
     | 'choice_rate'
     | 'auto_event_rate'
-    | 'route_completion_rate'
-    | 'route_breakage_rate'
     | 'death_rate'
     | 'ending_distribution'
     | 'romance_family_achievement_rate'
@@ -46,30 +44,6 @@ export const P2_SIMULATION_METRIC_DEFINITIONS: ReadonlyArray<SimulationMetricDef
       min: 0.25,
       max: 0.8,
       note: '建议与 choice_rate 联合观察，避免全自动或全手动偏态。',
-    },
-  },
-  {
-    key: 'route_completion_rate',
-    label: 'Route Completion Rate',
-    description: '路线从启动到完成的比例，用于评估路线结构可达性。',
-    severity: 'warning',
-    baseline: {
-      mode: 'observation_baseline',
-      min: 0.1,
-      max: 0.6,
-      note: '当前作为观察基线，后续可按路线类型拆分阈值。',
-    },
-  },
-  {
-    key: 'route_breakage_rate',
-    label: 'Route Breakage Rate',
-    description: '已启动路线进入失败/断裂的比例，用于识别路线结构脆弱性。',
-    severity: 'blocker',
-    baseline: {
-      mode: 'target_range',
-      min: 0,
-      max: 0.4,
-      note: '高于 40% 视为主结构风险，需优先治理。',
     },
   },
   {

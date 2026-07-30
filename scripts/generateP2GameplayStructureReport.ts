@@ -107,8 +107,6 @@ function buildReport(params: {
 }) {
   const { generatedAt, choiceFeedbackCoverage, gate, saveConsistency, sampleReports } = params;
   const diagnosticsSection = formatDiagnosticsMarkdownSection(sampleReports);
-  const routeCompletionRate = findMetricValue(gate.warningMetrics, 'route_completion_rate');
-  const routeBreakageRate = findMetricValue(gate.blockingMetrics, 'route_breakage_rate');
   const metricRows = [...gate.blockingMetrics, ...gate.warningMetrics, ...gate.infoMetrics]
     .map(item => {
       const actual = item.actualValue === null ? 'N/A' : item.key === 'save_count'
@@ -230,8 +228,6 @@ async function main() {
   console.log('[US-023] P2 gameplay structure report generated');
   console.log(`output=${OUTPUT_PATH}`);
   console.log(`choiceFeedbackCoverage=${choiceFeedbackCoverage.passed}/${choiceFeedbackCoverage.total}`);
-  console.log(`routeCompletionRate=${findMetricValue(gate.warningMetrics, 'route_completion_rate')}`);
-  console.log(`routeBreakageRate=${findMetricValue(gate.blockingMetrics, 'route_breakage_rate')}`);
   console.log(`saveConsistency=${saveConsistency.passedChecks}/${saveConsistency.totalChecks}`);
 }
 

@@ -32,7 +32,6 @@ export type SimulationSegmentMetrics = {
   ageRange: { min: number; max: number };
   eventCount: number;
   choiceCount: number;
-  routeState: Record<string, { lifecycle: string; lockedIn: boolean }>;
   routeFlags: string[];
   relationshipState: RelationshipStateSummary;
   deathStatus: SegmentDeathStatus;
@@ -140,7 +139,6 @@ function buildSegmentMetrics(
     ageRange: segmentAgeBounds(segment),
     eventCount: segmentRecords.length,
     choiceCount: segmentRecords.filter(record => record.eventType === 'choice').length,
-    routeState: finalReplay?.routeStates ?? {},
     routeFlags: finalReplay?.routeFlags ?? [],
     relationshipState: buildRelationshipState(run.report, segment),
     deathStatus: buildDeathStatus(run.report, segment),

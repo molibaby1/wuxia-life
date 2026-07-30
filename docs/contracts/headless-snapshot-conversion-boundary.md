@@ -1,30 +1,25 @@
-# Headless Snapshot Conversion Boundary (P5 US-010)
+# Headless Snapshot Conversion Boundary
 
-## Responsibilities
+`DefaultSnapshotConverter` converts between runtime `GameState` and the `3.9.0` `GameStateSnapshot` contract.
 
-- **Runtime state:** `GameState` in `src/types/eventTypes.ts` (may include derived `statistics`, Vue-held proxies in Web path).
-- **Transport state:** `GameStateSnapshot` in `src/contracts/gameStateSnapshot.ts` (plain JSON, versioned metadata).
+## Persisted data
 
-`DefaultSnapshotConverter` in `src/headless/snapshot/SnapshotConverter.ts` implements both directions.
+The converter preserves the canonical player core, required `player.lifeStates`, facts, flags, relations, event history, life path, identity, karma, critical choices, inventory, ending, and save metadata.
 
-## Field treatment
+Route flags are persisted as ordinary content flags. No route lifecycle container is part of runtime state or snapshot state.
 
-| Class | Fields | Rule |
-| --- | --- | --- |
-| Persisted | `player` core, `flags`, `relations`, `eventHistory`, `routeStates`, `routeHistory`, `lifePath`, `identity`, `karma`, `criticalChoices`, `inventory`, `ending`, time/save metadata | Round-trip required |
-| Derived | `statistics`, life memory summary | Omit from snapshot; recompute on read |
-| Volatile | `currentEvent`, `availableChoices`, UI feedback | Never serialized |
-| Deprecated | `player.events`, `player.items`, legacy `triggeredEvents` | Map to canonical fields on read; omit on write when possible |
-| Forbidden | Volatile session keys inside `state` payload | `fromSnapshot` rejects |
+## Rejection rules
 
-## Errors
+The converter rejects:
 
-| Code | When |
-| --- | --- |
-| `MISSING_PLAYER` | Serialize without `player.name` |
-| `SNAPSHOT_INVALID` | Hydrate without required player |
-| `SNAPSHOT_FORBIDDEN_FIELD` | Volatile keys present in `state` |
+- snapshots older than `3.9.0`;
+- removed route lifecycle fields (`routeStates`, `routeHistory`, `roadCommitments`);
+- missing required player state or invalid `lifeStates`.
 
-## Catalog version
+The converter does not add defaults, normalize legacy route data, re-compute routes from event history, or translate removed fields.
 
-`metadata.eventCatalogVersion` is required on serialize; hydrate validates via catalog read service.
+## Derived and volatile data
+
+Statistics, life-memory presentation, UI state, and other volatile session values are omitted. They are derived after hydration where required.
+
+`toSnapshot()` fails if a removed field is injected into the runtime object. `fromSnapshot()` returns only the current canonical runtime shape.

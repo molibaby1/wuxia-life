@@ -106,7 +106,6 @@ interface ExecutionAppend {
 }
 
 interface ExecutionDeltas {
-  routeChanges?: SnapshotRouteHistoryEntry[];
   relationshipChanges?: Array<{ relationId: string; delta: number }>;
   lifeMemoryInputs?: Partial<Pick<GameStateSnapshotState, 'flags' | 'criticalChoices' | 'lifePath'>>;
 }

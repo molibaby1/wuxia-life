@@ -21,7 +21,6 @@ import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegra
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
 import { evaluateSaveCompatibility, P2_SAVE_SCHEMA_VERSION, saveManager } from '../src/core/SaveManager';
-import { RouteStateManager } from '../src/core/RouteStateManager';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 import { evaluateSimulationGate, parseWaiverArg } from '../scripts/gameplaySimulationGate';
@@ -577,27 +576,6 @@ async function runMainFlowSaveLoadCase() {
     runtimeState.player.relationships = [
       { id: 'ally_001', role: 'friend', name: '阿青', affinity: 72 },
     ];
-    runtimeState.routeStates = {
-      hero: {
-        routeId: 'hero',
-        lifecycle: 'locked_in',
-        category: 'main',
-        lockedIn: true,
-        lastChangedAtAge: runtimeState.player.age,
-      },
-    };
-    runtimeState.routeHistory = [
-      {
-        routeId: 'hero',
-        from: 'active',
-        to: 'locked_in',
-        category: 'main',
-        lockedIn: true,
-        age: runtimeState.player.age,
-        eventId: 'us_019_lock',
-        timestamp: Date.now(),
-      },
-    ];
     runtimeState.eventHistory = [
       {
         eventId: 'us_019_history_event',
@@ -617,8 +595,6 @@ async function runMainFlowSaveLoadCase() {
     runtimeState.currentTime.year = 99;
     runtimeState.flags.us_019_marker = false;
     runtimeState.player.relationships = [];
-    runtimeState.routeStates = {};
-    runtimeState.routeHistory = [];
     runtimeState.eventHistory = [];
     runtimeState.ending = null;
 
@@ -629,7 +605,6 @@ async function runMainFlowSaveLoadCase() {
     assertEqual(restored.player.name, 'SaveLoadHero', '读档后玩家信息应恢复');
     assertEqual(restored.currentTime?.year, 33, '读档后时间应恢复');
     assert((restored.eventHistory || []).length > 0, '读档后事件历史应恢复');
-    assertEqual(restored.routeStates?.hero?.lifecycle, 'locked_in', '读档后路线状态应恢复');
     assertEqual(restored.player.relationships?.[0]?.name, '阿青', '读档后关系状态应恢复');
     assertEqual((restored.ending as any)?.id, 'us_019_future_ending', '读档后结局相关状态应恢复');
 
@@ -762,27 +737,6 @@ async function runSaveRegressionCoverageCase() {
     state.player.relationships = [
       { id: 'ally_021', role: 'friend', name: '赵灵', affinity: 81 },
     ];
-    state.routeStates = {
-      hero: {
-        routeId: 'hero',
-        lifecycle: 'locked_in',
-        category: 'main',
-        lockedIn: true,
-        lastChangedAtAge: state.player.age,
-      },
-    };
-    state.routeHistory = [
-      {
-        routeId: 'hero',
-        from: 'active',
-        to: 'locked_in',
-        category: 'main',
-        lockedIn: true,
-        age: state.player.age,
-        eventId: 'us_021_lock_route',
-        timestamp: Date.now(),
-      },
-    ];
     state.eventHistory = [
       {
         eventId: 'us_021_history_event',
@@ -810,8 +764,6 @@ async function runSaveRegressionCoverageCase() {
     state.flags.us_021_checkpoint = false;
     state.player.flags.route_hero = false;
     state.player.relationships = [];
-    state.routeStates = {};
-    state.routeHistory = [];
     state.eventHistory = [];
     state.identity = undefined;
     state.lifePath = undefined;
@@ -825,7 +777,6 @@ async function runSaveRegressionCoverageCase() {
     assertEqual(restoredAfterLoad.identity?.primary, 'hero', 'US-021: 读档后身份字段应恢复');
     assertEqual(restoredAfterLoad.player.relationships?.[0]?.name, '赵灵', 'US-021: 读档后关系字段应恢复');
     assertEqual(restoredAfterLoad.eventHistory?.[0]?.eventId, 'us_021_history_event', 'US-021: 读档后事件历史应恢复');
-    assertEqual(restoredAfterLoad.routeStates?.hero?.lifecycle, 'locked_in', 'US-021: 读档后路线状态应恢复');
 
     assert(engine.engineState.currentEvent !== null, 'US-021: 继续阶段应恢复到可推进事件流');
 
@@ -1843,32 +1794,6 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '路线状态管理 - 统一入口支持读写锁定完成失败',
-      description: '测试 RouteStateManager 的 read/write/lock/complete/fail 闭环能力',
-      test: () => {
-        let state = framework.createTestState();
-        const initial = RouteStateManager.readRouteState(state, 'hero');
-        assertEqual(initial.lifecycle, 'inactive', '未写入路线时应返回 inactive');
-
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'hero',
-          lifecycle: 'active',
-          category: 'main',
-          eventId: 'route_open_event',
-        });
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'active', '写入后应可读取 active');
-
-        state = RouteStateManager.lockRoute(state, 'hero', 'route_lock_event');
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lockedIn, true, '锁定后 lockedIn 应为 true');
-
-        state = RouteStateManager.completeRoute(state, 'hero', 'route_complete_event');
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'completed', '完成后应进入 completed');
-
-        state = RouteStateManager.failRoute(state, 'hero', 'route_fail_event');
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'failed', '失败后应进入 failed');
-      },
-    },
-    {
       name: '明确 faction flag 不破坏身份与阵营字段',
       description: '测试 faction membership flag 保持明确语义且不投影为路线状态',
       test: async () => {
@@ -1895,117 +1820,6 @@ const coreFunctionSuite: TestSuite = {
 
         assertEqual(nextState.identity?.primary, 'heroic', 'identity 字段应保持不变');
         assertEqual(nextState.lifePath?.faction, 'orthodox', 'lifePath.faction 不应被路线状态同步改写');
-        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'inactive', '阵营旗标不应投影为 demonic routeState');
-      },
-    },
-    {
-      name: '路线状态管理 - 新路线旗标与已有路线共存',
-      description: '测试设置新 route flag 时不会自动将已有路线转为 turned',
-      test: async () => {
-        const executor = new EventExecutor();
-        let state = framework.createTestState();
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'sect',
-          lifecycle: 'locked_in',
-          category: 'main',
-          lockedIn: true,
-          eventId: 'sect_path_lock',
-        });
-
-        const nextState = await executor.executeEffects(
-          [{ type: EffectType.FLAG_SET, target: 'route_demonic', value: true }],
-          state,
-        );
-
-        assertEqual(
-          RouteStateManager.readRouteState(nextState, 'sect').lifecycle,
-          'locked_in',
-          '设置新路线旗标不应自动转向已有路线',
-        );
-        assertEqual(RouteStateManager.readRouteState(nextState, 'demonic').lifecycle, 'inactive', 'route flag 不应生成 demonic routeState');
-        assertEqual(nextState.flags?.route_demonic, true, 'route_demonic 应正常写入');
-        assert(
-          !(nextState.routeHistory || []).some(item => item.routeId === 'sect' && item.to === 'turned'),
-          '不应写入 sect turned 历史',
-        );
-      },
-    },
-    {
-      name: '路线状态管理 - 关键变化写入 route 与 event 历史',
-      description: '测试 unified entry 在状态变化时写入 routeHistory 与 eventHistory',
-      test: () => {
-        let state = framework.createTestState();
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'merchant',
-          lifecycle: 'active',
-          category: 'main',
-          eventId: 'merchant_route_open',
-        });
-        state = RouteStateManager.lockRoute(state, 'merchant', 'merchant_route_lock');
-        state = RouteStateManager.completeRoute(state, 'merchant', 'merchant_route_complete');
-
-        assert((state.routeHistory || []).length >= 3, '关键路线状态变化应写入 routeHistory');
-        const historyEventIds = (state.eventHistory || []).map(item => item.eventId);
-        assert(historyEventIds.some(eventId => eventId.startsWith('route_state:merchant:')), '关键路线状态变化应写入 eventHistory');
-      },
-    },
-    {
-      name: '路线进展回归 - 启动推进锁定冲突阻断完成与断裂',
-      description: '测试 hero 与 merchant 两条路线覆盖 start/progress/lock-in/conflict/completion/failure 链路',
-      test: () => {
-        let state = framework.createTestState();
-        state.player.age = 26;
-
-        // hero 主线：start -> progress -> lock-in -> completion
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'hero',
-          lifecycle: 'temporary',
-          category: 'main',
-          eventId: 'hero_route_start',
-        });
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'hero',
-          lifecycle: 'active',
-          category: 'main',
-          eventId: 'hero_route_progress',
-        });
-        state = RouteStateManager.lockRoute(state, 'hero', 'hero_route_lock');
-        state = RouteStateManager.completeRoute(state, 'hero', 'hero_route_complete');
-
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lifecycle, 'completed', 'hero 路线应完成');
-        assertEqual(RouteStateManager.readRouteState(state, 'hero').lockedIn, true, 'hero 完成后应保持锁定');
-
-        // merchant 次路线：start -> progress -> failure(=breakage)
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'merchant',
-          lifecycle: 'temporary',
-          category: 'secondary',
-          eventId: 'merchant_route_start',
-        });
-        state = RouteStateManager.writeRouteState(state, {
-          routeId: 'merchant',
-          lifecycle: 'active',
-          category: 'secondary',
-          eventId: 'merchant_route_progress',
-        });
-        state = RouteStateManager.failRoute(state, 'merchant', 'merchant_route_breakage', 'route_breakage');
-
-        assertEqual(RouteStateManager.readRouteState(state, 'merchant').lifecycle, 'failed', 'merchant 路线应进入失败/断裂');
-        assertEqual(
-          RouteStateManager.readRouteState(state, 'merchant').reason,
-          'route_breakage',
-          'merchant 失败应记录断裂原因',
-        );
-
-        const routeTransitionIds = (state.routeHistory || [])
-          .filter(item => item.routeId === 'hero' || item.routeId === 'merchant')
-          .map(item => `${item.routeId}:${item.from}->${item.to}`);
-        assert(routeTransitionIds.includes('hero:inactive->temporary'), '应记录 hero start 历史');
-        assert(routeTransitionIds.includes('hero:temporary->active'), '应记录 hero progress 历史');
-        assert(routeTransitionIds.includes('hero:active->completed'), '应记录 hero completion 历史');
-        assert(routeTransitionIds.includes('merchant:inactive->temporary'), '应记录 merchant start 历史');
-        assert(routeTransitionIds.includes('merchant:temporary->active'), '应记录 merchant progress 历史');
-        assert(routeTransitionIds.includes('merchant:active->failed'), '应记录 merchant failure/breakage 历史');
       },
     },
     {
@@ -2188,8 +2002,8 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '体验健康门禁 - route_load_parity 与复读指标可计算',
-      description: '测试包 D 衍生指标与加载一致性门禁',
+      name: '体验健康门禁 - 复读指标可计算',
+      description: '测试包 D 衍生指标与体验健康门禁',
       test: () => {
         const report = createSimulationReportStub({
           records: [
@@ -2214,7 +2028,6 @@ const coreFunctionSuite: TestSuite = {
         });
 
         const derived = computeExperienceDerivedMetrics([report]);
-        assertEqual(derived.route_load_parity, 1, 'events.json 应与 EventLoader 一致');
         assert(
           (derived.adjacent_same_event_rate ?? 0) > 0,
           '相邻同事件应可检测到复读率',
@@ -2230,12 +2043,12 @@ const coreFunctionSuite: TestSuite = {
     },
     {
       name: '体验健康门禁 - 不可 waiver 的指标应拒绝',
-      description: '测试 route_breakage_rate / route_load_parity 不可 waiver',
+      description: '测试 blocker 指标不可 waiver',
       test: () => {
         let thrown = false;
         try {
           validateExperienceWaivers([
-            { metricKey: 'route_breakage_rate', reason: 'short' },
+            { metricKey: 'death_without_warning_count', reason: 'short' },
           ]);
         } catch (error) {
           thrown = String(error).includes('at least 10 characters');
@@ -2246,14 +2059,14 @@ const coreFunctionSuite: TestSuite = {
         try {
           validateExperienceWaivers([
             {
-              metricKey: 'route_load_parity',
-              reason: 'EG-DEV-attempt-bypass-load-parity-check',
+              metricKey: 'death_without_warning_count',
+              reason: 'EG-DEV-attempt-bypass-warning-check',
             },
           ]);
         } catch (error) {
           thrownNonWaivable = String(error).includes('cannot be waived');
         }
-        assert(thrownNonWaivable, 'route_load_parity 不可 waiver');
+        assert(thrownNonWaivable, 'death_without_warning_count 不可 waiver');
       },
     },
     {
@@ -2738,14 +2551,12 @@ const coreFunctionSuite: TestSuite = {
             age: 4,
             eventId: 'childhood_preference',
             choiceId: 'balance_both',
-            routeStates: {},
             routeFlags: [],
           },
           {
             age: 6,
             eventId: 'martial_arts_enlightenment',
             choiceId: 'agile_path',
-            routeStates: {},
             routeFlags: [],
           },
         ];
@@ -2804,14 +2615,12 @@ const coreFunctionSuite: TestSuite = {
             age: 4,
             eventId: 'childhood_preference',
             choiceId: 'balance_both',
-            routeStates: {},
             routeFlags: [],
           },
           {
             age: 6,
             eventId: 'martial_arts_enlightenment',
             choiceId: 'agile_path',
-            routeStates: {},
             routeFlags: [],
           },
         ];
@@ -2889,14 +2698,12 @@ const coreFunctionSuite: TestSuite = {
             age: 4,
             eventId: 'childhood_preference',
             choiceId: 'balance_both',
-            routeStates: {},
             routeFlags: [],
           },
           {
             age: 6,
             eventId: 'martial_arts_enlightenment',
             choiceId: 'agile_path',
-            routeStates: {},
             routeFlags: [],
           },
         ];
@@ -2963,7 +2770,6 @@ const coreFunctionSuite: TestSuite = {
         const m = segmentReport.midlife;
         assert(typeof m.eventCount === 'number', 'midlife eventCount');
         assert(typeof m.choiceCount === 'number', 'midlife choiceCount');
-        assert(typeof m.routeState === 'object', 'midlife routeState');
         assert(Array.isArray(m.routeFlags), 'midlife routeFlags');
         assert(m.relationshipState !== undefined, 'midlife relationshipState');
         assert(m.deathStatus !== undefined, 'midlife deathStatus');

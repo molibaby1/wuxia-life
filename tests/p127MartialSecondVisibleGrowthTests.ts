@@ -105,7 +105,7 @@ function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
       derivedAtAge: state.player.age ?? 5,
       routeStatus: {
         primary: { routeId: 'wanderer', name: '未定', phase: '未入门' },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
+        diagnostic: { activeRouteFlags: [] },
       },
     },
   );

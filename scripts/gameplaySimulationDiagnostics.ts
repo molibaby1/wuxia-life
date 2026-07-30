@@ -5,11 +5,6 @@ import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 export type EventFrequencyRow = { eventId: string; count: number };
 
-export type RouteLifecycleSummary = {
-  byLifecycle: Record<string, number>;
-  routeIdsSample: string[];
-};
-
 export type RomanceFamilySummary = {
   livesWithSpouse: number;
   livesWithChildren: number;
@@ -31,24 +26,6 @@ export function topRepeatedEvents(report: GameProcessReport, limit = 12): EventF
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([eventId, count]) => ({ eventId, count }));
-}
-
-export function summarizeRouteLifecycle(report: GameProcessReport): RouteLifecycleSummary {
-  const final = report.records.length > 0 ? report.records[report.records.length - 1].gameState : null;
-  const routeStates = final?.routeStates || {};
-  const byLifecycle: Record<string, number> = {};
-  const routeIdsSample: string[] = [];
-
-  for (const [routeId, state] of Object.entries(routeStates)) {
-    if (!state || typeof state !== 'object') continue;
-    const lifecycle = (state as { lifecycle?: string }).lifecycle || 'unknown';
-    byLifecycle[lifecycle] = (byLifecycle[lifecycle] || 0) + 1;
-    if (routeIdsSample.length < 8) {
-      routeIdsSample.push(`${routeId}:${lifecycle}`);
-    }
-  }
-
-  return { byLifecycle, routeIdsSample };
 }
 
 export function summarizeRomanceFamilyAcrossReports(reports: GameProcessReport[]): RomanceFamilySummary {
@@ -93,11 +70,9 @@ export function formatDiagnosticsMarkdownSection(reports: GameProcessReport[]): 
   const perSample = reports
     .map((report, i) => {
       const top = topRepeatedEvents(report, 5);
-      const route = summarizeRouteLifecycle(report);
       const ending = report.statistics.endingSummary || report.deathReason || 'unknown';
       const topStr = top.map(t => `${t.eventId}×${t.count}`).join(', ');
-      const routeStr = Object.entries(route.byLifecycle).map(([k, v]) => `${k}:${v}`).join(', ') || 'none';
-      return `| ${i + 1} | ${report.config.playerName} | ${ending} | ${topStr} | ${routeStr} |`;
+      return `| ${i + 1} | ${report.config.playerName} | ${ending} | ${topStr} |`;
     })
     .join('\n');
 
@@ -116,11 +91,11 @@ export function formatDiagnosticsMarkdownSection(reports: GameProcessReport[]): 
     `- lives with children > 0 (count / ${reports.length}): ${rf.livesWithChildren}`,
     `- avg relation keys in final state: ${rf.avgNotableRelations.toFixed(2)}`,
     '',
-    'Per-sample: top 5 event IDs by count; routeStates lifecycle histogram.',
+    'Per-sample: top 5 event IDs by count.',
     '',
-    '| sample | persona | ending | top5 events | routeStates lifecycle counts |',
-    '|---:|---|---|---|---|',
-    perSample || '| 1 | — | — | — | — |',
+    '| sample | persona | ending | top5 events |',
+    '|---:|---|---|---|',
+    perSample || '| 1 | — | — | — |',
     '',
   ].join('\n');
 }

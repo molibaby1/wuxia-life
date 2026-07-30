@@ -65,34 +65,6 @@ function evaluateRange(
   return { status: 'pass', detail: pieces.join(', ') };
 }
 
-function countRouteLifecycle(
-  reports: GameProcessReport[],
-): { started: number; completed: number; failed: number } {
-  let started = 0;
-  let completed = 0;
-  let failed = 0;
-  for (const report of reports) {
-    const finalState = report.records.length > 0 ? report.records[report.records.length - 1].gameState : null;
-    const routeStates = finalState?.routeStates || {};
-    for (const routeState of Object.values(routeStates)) {
-      if (!routeState || typeof routeState !== 'object') {
-        continue;
-      }
-      const lifecycle = (routeState as { lifecycle?: string }).lifecycle;
-      if (!lifecycle || lifecycle === 'inactive') {
-        continue;
-      }
-      started += 1;
-      if (lifecycle === 'completed') {
-        completed += 1;
-      } else if (lifecycle === 'failed') {
-        failed += 1;
-      }
-    }
-  }
-  return { started, completed, failed };
-}
-
 function computeMetrics(reports: GameProcessReport[]): Record<SimulationMetricDefinition['key'], number | null> {
   const totalEvents = reports.reduce((sum, report) => sum + report.totalEvents, 0);
   const totalChoices = reports.reduce((sum, report) => sum + report.totalChoices, 0);
@@ -115,13 +87,9 @@ function computeMetrics(reports: GameProcessReport[]): Record<SimulationMetricDe
     ? Math.max(...Array.from(endingCounts.values())) / lifeCount
     : null;
 
-  const { started, completed, failed } = countRouteLifecycle(reports);
-
   return {
     choice_rate: totalEvents > 0 ? totalChoices / totalEvents : null,
     auto_event_rate: totalEvents > 0 ? totalAutoEvents / totalEvents : null,
-    route_completion_rate: started > 0 ? completed / started : null,
-    route_breakage_rate: started > 0 ? failed / started : null,
     death_rate: lifeCount > 0 ? deaths / lifeCount : null,
     ending_distribution: maxEndingShare,
     romance_family_achievement_rate: lifeCount > 0 ? withFamilyOrRomance / lifeCount : null,

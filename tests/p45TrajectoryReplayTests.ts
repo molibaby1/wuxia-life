@@ -54,7 +54,6 @@ function makeState(
     relations: {},
     achievements: [],
     eventHistory: [],
-    routeStates: {},
   } as GameState;
 }
 

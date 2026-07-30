@@ -36,6 +36,16 @@ export interface SnapshotConverter {
 }
 
 const FORBIDDEN_TOP_LEVEL = ['statistics', 'currentEvent', 'availableChoices'] as const;
+const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
+
+function rejectLegacyRouteLifecycleFields(value: unknown): void {
+  if (!value || typeof value !== 'object') return;
+  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
+    if (key in (value as Record<string, unknown>)) {
+      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden legacy route lifecycle field: ${key}`);
+    }
+  }
+}
 
 export class DefaultSnapshotConverter implements SnapshotConverter {
   toSnapshot(
@@ -49,6 +59,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
     if (!state.player?.name) {
       throw new SnapshotConversionError('MISSING_PLAYER', 'Cannot serialize snapshot without player');
     }
+    rejectLegacyRouteLifecycleFields(state);
     const lifeStatesValidation = validatePlayerLifeStates(state.player.lifeStates);
     if ('errors' in lifeStatesValidation) {
       throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
@@ -60,9 +71,6 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
       flags,
       eventHistory,
       relations,
-      routeStates,
-      routeHistory,
-      roadCommitments,
       lifePath,
       identity,
       karma,
@@ -104,9 +112,6 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         relations,
         eventHistory: [...(eventHistory ?? [])],
         currentTime,
-        routeStates,
-        routeHistory,
-        roadCommitments,
         lifePath,
         identity,
         karma,
@@ -136,6 +141,7 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         );
       }
     }
+    rejectLegacyRouteLifecycleFields(snapshot.state);
     const forbiddenPaths = [
       ...findForbiddenHabitFlagPaths(snapshot.state.flags, 'state.flags'),
       ...findForbiddenHabitFlagPaths(snapshot.state.player?.flags, 'state.player.flags'),

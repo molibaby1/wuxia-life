@@ -165,9 +165,6 @@ function createCoreMidlifeOrthodoxState(): GameState {
       { eventId: 'sect_path_choice', age: 14, selectedChoice: 'join_orthodox' },
       { eventId: 'sect_midlife_gray_mission', age: 38, selectedChoice: 'execute_gray' },
     ],
-    routeHistory: [
-      { routeId: 'sect', from: 'inactive', to: 'active', age: 14 },
-    ],
     achievements: ['save_village'],
   });
 
@@ -176,23 +173,17 @@ function createCoreMidlifeOrthodoxState(): GameState {
 
 console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 
-// Route lifecycle state is not part of canonical Life Memory
+// Route flags remain content inputs, while lifecycle containers are absent.
 {
   let state = createBaseState();
   state.flags = { ...state.flags, route_orthodox: true, sect_faction: 'orthodox', orthodox_childhood_seed_done: true };
-  state.routeStates = {
-    sect: { lifecycle: 'active', category: 'main', lockedIn: false },
-  } as GameState['routeStates'];
-  state.routeHistory = [{ routeId: 'sect', from: 'inactive', to: 'active', age: 14 }];
-  state.roadCommitments = [{ roadId: 'sect', status: 'active', proofCount: 2 }];
 
   const summary = deriveLifeMemorySummary(state);
   assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 2.0.0');
   assert(!('routeStatus' in summary), 'route status must not be canonical Life Memory');
-  assert(!('roadCommitments' in summary), 'road commitments must not be canonical Life Memory');
   assert(summary.currentGoalLabel === '门派倾向已显，尚未立誓入门', 'current goal should come from explicit origin facts');
   assert(summary.derivedAtAge === 20, 'derivedAtAge should match player age');
-  console.log('✓ route lifecycle state stays outside memory summary');
+  console.log('✓ route flags stay outside lifecycle presentation');
 }
 
 // Key choices

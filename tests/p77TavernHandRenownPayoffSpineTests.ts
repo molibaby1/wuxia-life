@@ -56,7 +56,6 @@ function makeState(age: number, flags: Record<string, unknown>): GameState {
     relations: {},
     achievements: [],
     eventHistory: [],
-    routeStates: {},
   } as GameState;
 }
 

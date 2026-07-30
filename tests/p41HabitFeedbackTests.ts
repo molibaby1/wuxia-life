@@ -48,7 +48,7 @@ console.log('=== P41 Habit Feedback Regression ===\n');
       derivedAtAge: 22,
       routeStatus: {
         primary: { routeId: 'sect', name: '正道门派', phase: '路线进行中' },
-        diagnostic: { routeStates: {}, activeRouteFlags: [] },
+        diagnostic: { activeRouteFlags: [] },
       },
     },
   );

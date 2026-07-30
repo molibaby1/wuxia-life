@@ -15,6 +15,17 @@ export const P2_SAVE_SCHEMA_VERSION = '2.0.0-p2';
 export const P2_MIN_READABLE_SAVE_VERSION = '1.0.0';
 export const P2_MAX_READABLE_SAVE_VERSION = '2.x';
 
+const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
+
+function rejectLegacyRouteLifecycleFields(value: unknown): void {
+  if (!value || typeof value !== 'object') return;
+  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
+    if (key in (value as Record<string, unknown>)) {
+      throw new Error(`Incompatible save: legacy route lifecycle field ${key} is not supported`);
+    }
+  }
+}
+
 export type SaveCompatibilityStatus = 'supported' | 'unsupported_missing_version' | 'unsupported_legacy_version' | 'unsupported_future_version';
 
 export interface SaveCompatibilityResult {
@@ -124,6 +135,7 @@ export class SaveManager {
    * 保存游戏
    */
   public saveGame(gameState: GameState, name: string = '自动存档'): string {
+    rejectLegacyRouteLifecycleFields(gameState);
     const normalizedGameState = applyP2SaveVersionMarker(gameState);
     const saveData: SaveData = {
       id: this.generateSaveId(),
@@ -166,6 +178,7 @@ export class SaveManager {
     
     if (save) {
       const compatibility = evaluateSaveCompatibility(save.gameData?.saveVersion);
+      rejectLegacyRouteLifecycleFields(save.gameData);
       if (!compatibility.supported) {
         console.warn(
           `[SaveManager] 拒绝加载不兼容存档：${saveId}（version=${save.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
@@ -216,6 +229,7 @@ export class SaveManager {
    * 自动保存
    */
   public autoSave(gameState: GameState): void {
+    rejectLegacyRouteLifecycleFields(gameState);
     const normalizedGameState = applyP2SaveVersionMarker(gameState);
     const saveData: SaveData = {
       id: this.generateSaveId(),
@@ -249,6 +263,7 @@ export class SaveManager {
       
       const saveData: SaveData = JSON.parse(autoSaveJson);
       const compatibility = evaluateSaveCompatibility(saveData.gameData?.saveVersion);
+      rejectLegacyRouteLifecycleFields(saveData.gameData);
       if (!compatibility.supported) {
         console.warn(
           `[SaveManager] 拒绝加载不兼容自动存档（version=${saveData.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
@@ -298,6 +313,7 @@ export class SaveManager {
       }
       
       const save: SaveData = exportData.save;
+      rejectLegacyRouteLifecycleFields(save.gameData);
       save.id = this.generateSaveId();
       save.timestamp = Date.now();
       

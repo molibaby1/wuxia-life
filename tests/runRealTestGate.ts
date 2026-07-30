@@ -68,6 +68,7 @@ const suites: Suite[] = [
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },
   { name: 'testLifeMemorySummary', entry: 'tests/testLifeMemorySummary.ts' },
+  { name: 'merchantStatecraftVerticalSlice', entry: 'tests/testMerchantStatecraftVerticalSlice.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },
   { name: 'canonicalPlayerStateSlice2b1Tests', entry: 'tests/canonicalPlayerStateSlice2b1.test.ts' },
   { name: 'canonicalPlayerStateSlice2b2Tests', entry: 'tests/canonicalPlayerStateSlice2b2.test.ts' },
@@ -80,18 +81,12 @@ const suites: Suite[] = [
   { name: 'canonicalDisciplineIndulgenceRemovalTests', entry: 'tests/canonicalDisciplineIndulgenceRemoval.test.ts' },
   { name: 'canonicalHabitPracticeNarrowingTests', entry: 'tests/canonicalHabitPracticeNarrowing.test.ts' },
   { name: 'canonicalFamilySocialLifeStateRemovalTests', entry: 'tests/canonicalFamilySocialLifeStateRemoval.test.ts' },
-  { name: 'canonicalRouteConflictRemovalTests', entry: 'tests/canonicalRouteConflictRemoval.test.ts' },
-  { name: 'canonicalRouteSchedulingRemovalTests', entry: 'tests/canonicalRouteSchedulingRemoval.test.ts' },
-  { name: 'canonicalP11RouteBiasRemovalTests', entry: 'tests/canonicalP11RouteBiasRemoval.test.ts' },
-  { name: 'canonicalRouteFlagProjectionRemovalTests', entry: 'tests/canonicalRouteFlagProjectionRemoval.test.ts' },
-  { name: 'canonicalRouteTrackMidlifeContinuityTests', entry: 'tests/canonicalRouteTrackMidlifeContinuity.test.ts' },
-  { name: 'canonicalRouteLifecyclePresentationRemovalTests', entry: 'tests/canonicalRouteLifecyclePresentationRemoval.test.ts' },
-  { name: 'canonicalEndingRoadLifecycleRemovalTests', entry: 'tests/canonicalEndingRoadLifecycleRemoval.test.ts' },
+  { name: 'canonicalRouteLifecycleRemovalTests', entry: 'tests/canonicalRouteLifecycleRemoval.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {
   return new Promise(resolve => {
-    const child = spawn('npx', ['tsx', suite.entry], {
+    const child = spawn('npm', ['exec', '--', 'tsx', suite.entry], {
       stdio: ['inherit', 'pipe', 'pipe'],
       env: gateChildEnv(),
     });

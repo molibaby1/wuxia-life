@@ -53,21 +53,14 @@ function testExplicitEndingPrerequisites(): void {
   assert(!EndingSystem.canUnlockEnding(ordinaryRetirement, 'hermit_master'), 'retired alone must not unlock hermit_master');
 }
 
-async function testEndGamePreservesRoadLifecycle(): Promise<void> {
+async function testEndGameUsesExplicitEndingEffects(): Promise<void> {
   const state = createState();
   state.player.age = 60;
   state.player.money = 1500;
   state.player.businessAcumen = 70;
   state.player.flags = { business_empire: true };
-  state.routeStates = { statecraft: { routeId: 'statecraft', lifecycle: 'locked_in', category: 'main', lockedIn: true } } as any;
-  state.routeHistory = [{ routeId: 'statecraft', from: 'active', to: 'locked_in', age: 50 }] as any;
-  state.roadCommitments = {
-    statecraft: { roadId: 'statecraft', lifecycle: 'locked_in', proofCount: 3, position: 'primary' },
-  } as any;
-  const before = JSON.stringify({ routeStates: state.routeStates, routeHistory: state.routeHistory, roadCommitments: state.roadCommitments });
   const result = await new EventExecutor().executeEffects([{ type: 'special', target: 'end_game' }], state);
 
-  assert(JSON.stringify({ routeStates: result.routeStates, routeHistory: result.routeHistory, roadCommitments: result.roadCommitments }) === before, 'end_game must not complete or mutate roads');
   assert(result.ending?.id === 'richest_man', 'positive ending must still persist');
   assert(result.player.alive === false, 'end_game must mark player dead');
   assert(result.flags.gameEnded === true && result.flags.ending_triggered === true, 'end_game flags must persist');
@@ -75,5 +68,5 @@ async function testEndGamePreservesRoadLifecycle(): Promise<void> {
 }
 
 testExplicitEndingPrerequisites();
-await testEndGamePreservesRoadLifecycle();
+await testEndGameUsesExplicitEndingEffects();
 console.log('US-005 ending prerequisite tests passed');

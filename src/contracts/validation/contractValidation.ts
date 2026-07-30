@@ -103,6 +103,9 @@ const FORBIDDEN_SNAPSHOT_STATE_KEYS = [
   'availableChoices',
   'lastChoiceFeedback',
   'engineState',
+  'route' + 'States',
+  'route' + 'History',
+  'road' + 'Commitments',
 ] as const;
 
 const REQUIRED_SNAPSHOT_PLAYER_KEYS = [

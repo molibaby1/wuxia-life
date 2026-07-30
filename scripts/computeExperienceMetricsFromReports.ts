@@ -19,8 +19,6 @@ export interface ExperienceDerivedMetrics {
   daily_event_ratio: number | null;
   top_event_concentration: number | null;
   family_event_share: number | null;
-  route_load_parity: number | null;
-  route_stuck_active_rate: number | null;
 }
 
 const SHORT_WINDOW_SIZE = 5;
@@ -176,35 +174,6 @@ function computeRhythmRates(timeline: TimelineEvent[]): Pick<
   };
 }
 
-function computeRouteDerivedMetrics(reports: GameProcessReport[]): Pick<
-  ExperienceDerivedMetrics,
-  'route_load_parity' | 'route_stuck_active_rate'
-> {
-  const missingImports = eventLoader.getUndeclaredImportPaths();
-  const routeLoadParity = missingImports.length === 0 ? 1 : 0;
-
-  let started = 0;
-  let stuckActive = 0;
-  for (const report of reports) {
-    const finalState = report.records.length > 0 ? report.records[report.records.length - 1].gameState : null;
-    const routeStates = finalState?.routeStates || {};
-    for (const routeState of Object.values(routeStates)) {
-      if (!routeState || routeState.lifecycle === 'inactive') {
-        continue;
-      }
-      started += 1;
-      if (routeState.lifecycle === 'active') {
-        stuckActive += 1;
-      }
-    }
-  }
-
-  return {
-    route_load_parity: routeLoadParity,
-    route_stuck_active_rate: started > 0 ? stuckActive / started : null,
-  };
-}
-
 export function computeExperienceDerivedMetrics(
   reports: GameProcessReport[],
 ): ExperienceDerivedMetrics {
@@ -221,6 +190,5 @@ export function computeExperienceDerivedMetrics(
     daily_event_ratio: averageSampleRate(rhythmBySample.map(sample => sample.daily_event_ratio)),
     top_event_concentration: maxSampleRate(rhythmBySample.map(sample => sample.top_event_concentration)),
     family_event_share: averageSampleRate(rhythmBySample.map(sample => sample.family_event_share)),
-    ...computeRouteDerivedMetrics(reports),
   };
 }

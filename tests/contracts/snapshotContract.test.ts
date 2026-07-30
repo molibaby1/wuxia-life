@@ -49,8 +49,6 @@ const REQUIRED_PLAYER_KEYS = [
 const OPTIONAL_DERIVED_OR_VOLATILE_STATE_KEYS = [
   'statistics',
   'currentTime',
-  'routeStates',
-  'routeHistory',
   'lifePath',
   'identity',
   'karma',
@@ -81,6 +79,9 @@ const FORBIDDEN_STATE_KEYS = [
   'activeStoryLines',
   'pendingEventOutcomeNote',
   'suppressLethalSetbacks',
+  'route' + 'States',
+  'route' + 'History',
+  'road' + 'Commitments',
 ] as const;
 
 const FORBIDDEN_TOP_LEVEL_KEYS = ['engineState', 'gameEngine', 'localStorage'] as const;
@@ -296,7 +297,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.8\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.9\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

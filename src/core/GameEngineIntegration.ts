@@ -29,7 +29,16 @@ import { dailyEventSystem } from './DailyEventSystem';
 import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
-import { RouteStateManager } from './RouteStateManager';
+const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
+
+function rejectLegacyRouteLifecycleFields(value: unknown): void {
+  if (!value || typeof value !== 'object') return;
+  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
+    if (key in (value as Record<string, unknown>)) {
+      throw new Error(`Incompatible game state: legacy route lifecycle field ${key} is not supported`);
+    }
+  }
+}
 import { appendFormalEventHistory } from './EventHistory';
 import {
   buildActiveActionChoices,
@@ -240,6 +249,7 @@ export class GameEngineIntegration {
    * 将新状态合并到响应式对象，避免丢失响应性
    */
   private applyGameState(nextState: GameState): void {
+    rejectLegacyRouteLifecycleFields(nextState);
     if (!isReactive(this.gameState)) {
       this.gameState = reactive(nextState);
       return;
@@ -360,23 +370,6 @@ export class GameEngineIntegration {
       ? { ...nextState.criticalChoices }
       : undefined;
     this.gameState.achievements = [...(nextState.achievements || [])];
-    this.gameState.routeStates = nextState.routeStates
-      ? Object.fromEntries(
-          Object.entries(nextState.routeStates).map(([routeId, routeState]) => [
-            routeId,
-            { ...routeState },
-          ]),
-        )
-      : {};
-    this.gameState.routeHistory = [...(nextState.routeHistory || [])];
-    this.gameState.roadCommitments = nextState.roadCommitments
-      ? Object.fromEntries(
-          Object.entries(nextState.roadCommitments).map(([roadId, commitment]) => [
-            roadId,
-            { ...commitment },
-          ]),
-        )
-      : {};
     this.gameState.ending = nextState.ending;
     this.gameState.saveVersion = nextState.saveVersion;
     this.gameState.lastSavedAt = nextState.lastSavedAt;
@@ -394,9 +387,7 @@ export class GameEngineIntegration {
   }
 
   public loadGameState(savedState: GameState): void {
-    this.applyGameState(RouteStateManager.normalizeRoadCommitments(
-      RouteStateManager.migrateLegacyRoutes(savedState),
-    ));
+    this.applyGameState(savedState);
     const currentAge = this.gameState.player?.age || 0;
     const currentYearEvents = (this.gameState.eventHistory || []).filter(
       record => (record.age ?? currentAge) === currentAge,

@@ -22,10 +22,9 @@ import type {
   Investments,
   Relationship,
 } from '../types/eventTypes';
-import type { LifeRoadId, LifeRoadStage } from '../types/lifeRoad';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.8.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.9.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -34,54 +33,6 @@ export type SourcePlatform =
   | 'export-json'
   | 'api-server'
   | 'mini-program';
-
-/** Route lifecycle phase (§7.1). */
-export type RouteLifecycle =
-  | 'inactive'
-  | 'temporary'
-  | 'active'
-  | 'locked_in'
-  | 'turned'
-  | 'completed'
-  | 'failed';
-
-/** Route category (§7.1). */
-export type RouteCategory = 'main' | 'secondary';
-
-/** Structured route state entry keyed by routeId (§7.1). */
-export interface SnapshotRouteState {
-  routeId: string;
-  lifecycle: RouteLifecycle;
-  category: RouteCategory;
-  lockedIn: boolean;
-  lastChangedAtAge?: number;
-  sourceEventId?: string;
-  reason?: string;
-}
-
-/** Append-only route transition log entry (§7.2). */
-export interface SnapshotRouteHistoryEntry {
-  routeId: string;
-  from: RouteLifecycle;
-  to: RouteLifecycle;
-  category: RouteCategory;
-  lockedIn: boolean;
-  age?: number;
-  eventId?: string;
-  reason?: string;
-  timestamp: number;
-}
-
-export interface SnapshotRoadCommitment {
-  roadId: LifeRoadId;
-  position?: 'primary' | 'secondary';
-  committedAtAge: number;
-  sourceChoiceId?: string;
-  sourceEventId?: string;
-  proofCount: number;
-  latestProofEventId?: string;
-  lifecycle: LifeRoadStage;
-}
 
 /** Engine calendar time (§5). */
 export interface SnapshotCurrentTime {
@@ -168,9 +119,6 @@ export interface GameStateSnapshotState {
   eventHistory: SnapshotEventRecord[];
 
   currentTime?: SnapshotCurrentTime;
-  routeStates?: Record<string, SnapshotRouteState>;
-  routeHistory?: SnapshotRouteHistoryEntry[];
-  roadCommitments?: Partial<Record<LifeRoadId, SnapshotRoadCommitment>>;
   lifePath?: LifePath;
   identity?: IdentityInfo;
   karma?: KarmaSystem;

@@ -1,6 +1,5 @@
 import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
-import type { LifeRoadId, LifeRoadStage } from './lifeRoad';
 
 /**
  * 事件系统类型定义
@@ -104,8 +103,6 @@ export enum EffectType {
   /** 添加承诺 */
   LIFEPATH_ADD_COMMITMENT = 'lifepath_add_commitment',
 
-  /** 规范道路生命周期：承诺或成果证明 */
-  ROAD_LIFECYCLE = 'road_lifecycle',
   
   /** 添加关系 */
   LIFEPATH_ADD_RELATIONSHIP = 'lifepath_add_relationship',
@@ -605,10 +602,6 @@ export interface EffectDefinition {
   flag?: string;
   event?: string;
 
-  /** ========== 规范道路生命周期 ========== */
-  roadId?: LifeRoadId;
-  roadAction?: 'commit' | 'proof';
-
   /** 因果变化 - 善行值（用于 karma_change 效果） */
   good?: number;
 
@@ -1041,27 +1034,6 @@ export interface GameState {
   
   // 成就列表
   achievements?: string[];
-  routeStates?: Record<string, {
-    routeId: string;
-    lifecycle: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
-    category: 'main' | 'secondary';
-    lockedIn: boolean;
-    lastChangedAtAge?: number;
-    sourceEventId?: string;
-    reason?: string;
-  }>;
-  roadCommitments?: Partial<Record<LifeRoadId, RoadCommitmentRecord>>;
-  routeHistory?: Array<{
-    routeId: string;
-    from: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
-    to: 'inactive' | 'temporary' | 'active' | 'locked_in' | 'turned' | 'completed' | 'failed';
-    category: 'main' | 'secondary';
-    lockedIn: boolean;
-    age?: number;
-    eventId?: string;
-    reason?: string;
-    timestamp: number;
-  }>;
   ending?: unknown;
 
   /** P7: active action history entries */
@@ -1077,17 +1049,6 @@ export interface GameState {
   p16TendencyShaping?: import('../narrative/profile/types').OriginWorldviewShaping;
   /** P16: rare event line ids that fired */
   p16RareLineLog?: string[];
-}
-
-export interface RoadCommitmentRecord {
-  roadId: LifeRoadId;
-  position?: 'primary' | 'secondary';
-  committedAtAge: number;
-  sourceChoiceId?: string;
-  sourceEventId?: string;
-  proofCount: number;
-  latestProofEventId?: string;
-  lifecycle: LifeRoadStage;
 }
 
 /**

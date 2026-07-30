@@ -13,7 +13,6 @@
  */
 
 import { gameEngine } from '../src/core/GameEngineIntegration';
-import { RouteStateManager } from '../src/core/RouteStateManager';
 import { saveManager } from '../src/core/SaveManager';
 import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
@@ -1163,8 +1162,6 @@ export class GameProcessSimulator {
       martialPower: String(state.player?.martialPower ?? 0),
       money: String(state.player?.money ?? 0),
       eventHistoryCount: String(state.eventHistory?.length ?? 0),
-      routeStateCount: String(Object.keys(state.routeStates || {}).length),
-      routeHistoryCount: String(state.routeHistory?.length ?? 0),
       year: String(state.currentTime?.year ?? 0),
       month: String(state.currentTime?.month ?? 0),
       day: String(state.currentTime?.day ?? 0),

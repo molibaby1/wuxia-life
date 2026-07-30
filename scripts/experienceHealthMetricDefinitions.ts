@@ -5,8 +5,6 @@ export type ExperienceHealthMetricSeverity = 'blocker' | 'warning' | 'info';
 export type ExperienceHealthMetricKey =
   | 'choice_rate'
   | 'auto_event_rate'
-  | 'route_completion_rate'
-  | 'route_breakage_rate'
   | 'death_rate'
   | 'death_without_warning_count'
   | 'p2_legacy_death_rate'
@@ -22,8 +20,6 @@ export type ExperienceHealthMetricKey =
   | 'daily_event_ratio'
   | 'top_event_concentration'
   | 'family_event_share'
-  | 'route_load_parity'
-  | 'route_stuck_active_rate';
 
 export interface ExperienceHealthMetricDefinition {
   key: ExperienceHealthMetricKey;
@@ -127,28 +123,6 @@ const EXPERIENCE_ONLY_METRIC_DEFINITIONS: ReadonlyArray<ExperienceHealthMetricDe
     },
   },
   {
-    key: 'route_load_parity',
-    label: 'Route Load Parity',
-    description: 'events.json 声明的 import 是否均已进入 EventLoader（1=通过，0=失败）。',
-    severity: 'blocker',
-    nonWaivable: true,
-    baseline: {
-      min: 1,
-      max: 1,
-      note: '必须为 1；包 C 加载一致性门禁。',
-    },
-  },
-  {
-    key: 'route_stuck_active_rate',
-    label: 'Route Stuck Active Rate',
-    description: '已启动路线中终局仍为 active 的比例。',
-    severity: 'info',
-    baseline: {
-      max: 0.7,
-      note: '观察路线只启动不完成的问题。',
-    },
-  },
-  {
     key: 'death_without_warning_count',
     label: 'Death Without Warning Count',
     description: 'P3-EVAL 0–50 deterministic 样本中无预警死亡数量（US-006 / US-029 blocker）。',
@@ -208,7 +182,7 @@ function mapP2ToExperienceDefinition(
       max: def.baseline.max,
       note: def.baseline.note,
     },
-    nonWaivable: def.key === 'route_breakage_rate',
+    nonWaivable: false,
   };
 }
 

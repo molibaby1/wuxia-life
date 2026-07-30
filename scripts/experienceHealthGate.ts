@@ -82,8 +82,6 @@ const P2_KEYS = new Set(
     [
       'choice_rate',
       'auto_event_rate',
-      'route_completion_rate',
-      'route_breakage_rate',
       'death_rate',
       'ending_distribution',
       'romance_family_achievement_rate',

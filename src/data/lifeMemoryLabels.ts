@@ -130,13 +130,6 @@ export const RISK_SIGNAL_LABELS = {
   highFatigue: '身心俱疲',
 } as const;
 
-export const ROUTE_TRANSITION_LABELS: Record<string, string> = {
-  turned: '人生路线已转向',
-  locked_in: '人生路线已承诺',
-  completed: '一段路线已告完成',
-  failed: '一段路线已中断',
-};
-
 /**
  * Player-facing key choice label; never returns raw eventId.
  */

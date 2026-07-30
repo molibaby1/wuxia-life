@@ -5,7 +5,7 @@ function assert(condition: boolean, message: string): void {
 }
 
 const baseDigest = {
-  routeStateJson: '{}',
+  routeFlagsJson: '{}',
   lifeMemoryJson: '{}',
   eventHistoryDigest: '[]',
 };

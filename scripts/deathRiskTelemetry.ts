@@ -14,7 +14,6 @@ export type {
   WarningLevel,
   SimulationCohort,
   RecentKeyChoice,
-  RouteStateSnapshot,
   DeathRiskTelemetry,
   DeathCauseCount,
 } from '../src/types/deathRiskTelemetryTypes';
@@ -24,7 +23,6 @@ import type {
   DeathLifePhase,
   DeathRiskTelemetry,
   RecentKeyChoice,
-  RouteStateSnapshot,
   SimulationCohort,
   WarningLevel,
 } from '../src/types/deathRiskTelemetryTypes';
@@ -107,23 +105,6 @@ export function inferSimulationCohort(
     return 'p2_legacy';
   }
   return 'other';
-}
-
-function extractRouteStateSnapshot(state: GameState | undefined): RouteStateSnapshot {
-  const snapshot: RouteStateSnapshot = {};
-  if (!state?.routeStates) {
-    return snapshot;
-  }
-  for (const [routeId, routeState] of Object.entries(state.routeStates)) {
-    if (!routeState || routeState.lifecycle === 'inactive') {
-      continue;
-    }
-    snapshot[routeId] = {
-      lifecycle: routeState.lifecycle,
-      lockedIn: routeState.lockedIn,
-    };
-  }
-  return snapshot;
 }
 
 function extractRecentKeyChoices(records: GameProcessRecord[]): RecentKeyChoice[] {
@@ -340,7 +321,6 @@ export function buildDeathRiskTelemetry(
     deathAge,
     deathLifePhase: resolveDeathLifePhase(deathAge),
     deathEventId,
-    routeStateAtDeath: extractRouteStateSnapshot(finalState),
     recentKeyChoices: extractRecentKeyChoices(report.records),
     warningLevelMax: warningMeta.warningLevelMax,
     warningSatisfied: warningMeta.warningSatisfied,

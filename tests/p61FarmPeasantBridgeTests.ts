@@ -194,7 +194,6 @@ function makeGameState(flags: Record<string, boolean>, age = 30): GameState {
     relations: {},
     achievements: [],
     eventHistory: [],
-    routeStates: {},
   } as GameState;
 }
 

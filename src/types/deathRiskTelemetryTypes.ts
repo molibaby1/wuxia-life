@@ -18,18 +18,12 @@ export type RecentKeyChoice = {
   age: number;
 };
 
-export type RouteStateSnapshot = Record<
-  string,
-  { lifecycle: string; lockedIn: boolean }
->;
-
 export type DeathRiskTelemetry = {
   deathCauseId: string;
   deathCauseCategory: DeathCauseCategory;
   deathAge: number;
   deathLifePhase: DeathLifePhase;
   deathEventId: string;
-  routeStateAtDeath: RouteStateSnapshot;
   recentKeyChoices: RecentKeyChoice[];
   warningLevelMax: WarningLevel;
   warningSatisfied: boolean;

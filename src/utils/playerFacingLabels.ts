@@ -1,8 +1,3 @@
-import type { GameState } from '../types/eventTypes';
-import type { RouteLifecycleState } from '../core/RouteStateManager';
-
-const PRIORITY_ROUTE_IDS = ['sect', 'wanderer', 'demonic'] as const;
-
 export const ROUTE_DISPLAY_NAMES: Record<string, string> = {
   sect: '正道门派',
   wanderer: '流浪侠客',
@@ -88,31 +83,6 @@ export function formatRouteLabel(raw: string | null | undefined): string {
   );
 }
 
-export function lifecyclePhaseLabel(
-  lifecycle: RouteLifecycleState,
-  lockedIn: boolean,
-): string {
-  if (lifecycle === 'inactive') {
-    return '未入门';
-  }
-  if (lifecycle === 'completed') {
-    return '已完成';
-  }
-  if (lifecycle === 'failed') {
-    return '已失败';
-  }
-  if (lifecycle === 'turned') {
-    return '已转向';
-  }
-  if (lockedIn || lifecycle === 'locked_in') {
-    return '已承诺';
-  }
-  if (lifecycle === 'temporary' || lifecycle === 'active') {
-    return '路线进行中';
-  }
-  return '路线进行中';
-}
-
 export function formatLongTermFlag(flag: string, value: boolean): string {
   const label = LONG_TERM_FLAG_LABELS[flag];
   if (label) {
@@ -127,63 +97,6 @@ export function isPlayerVisibleFlag(flag: string): boolean {
     || ROUTE_FLAG_LABELS[flag]
     || flag === 'sect_faction'
   );
-}
-
-export function getPlayerRouteSummary(state: GameState): { name: string; phase: string } {
-  const routeStates = state.routeStates || {};
-  for (const routeId of PRIORITY_ROUTE_IDS) {
-    const routeState = routeStates[routeId];
-    if (!routeState || routeState.lifecycle === 'inactive') {
-      continue;
-    }
-    return {
-      name: ROUTE_DISPLAY_NAMES[routeId] || routeId,
-      phase: lifecyclePhaseLabel(routeState.lifecycle, routeState.lockedIn),
-    };
-  }
-
-  const flags = state.flags || {};
-  if (flags.route_orthodox) {
-    return { name: '正道门派', phase: '路线进行中' };
-  }
-  if (flags.route_demonic) {
-    return { name: '魔道', phase: '路线进行中' };
-  }
-  if (flags.route_wanderer || flags.route_border) {
-    return { name: '流浪侠客', phase: '路线进行中' };
-  }
-  if (flags.tavern_renown_bridge_crossed || flags.route_renown_committed) {
-    return { name: '江湖名宿', phase: '路线进行中' };
-  }
-  if (flags.tavern_medical_bridge_crossed || flags.route_medical_committed) {
-    if (flags.tavern_embrace_compassionate_healer) {
-      return { name: '仁心医者', phase: '路线进行中' };
-    }
-    if (flags.tavern_embrace_pragmatic_healer) {
-      return { name: '世故人医', phase: '路线进行中' };
-    }
-    return { name: '医者之路', phase: '路线进行中' };
-  }
-  if (
-    flags.route_merchant
-    || flags.route_wealth_committed
-    || flags.p22_wealth_route_forked
-    || flags.p9_merchant_midlife_path
-    || flags.p9_wealth_caravan_gate_done
-    || (
-      flags.p8_route_wealth
-      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
-    )
-  ) {
-    return { name: '商路', phase: '路线进行中' };
-  }
-
-  const faction = flags.sect_faction;
-  if (typeof faction === 'string' && SECT_FACTION_LABELS[faction]) {
-    return { name: SECT_FACTION_LABELS[faction], phase: '未入门' };
-  }
-
-  return { name: '未定', phase: '未入门' };
 }
 
 export function readRouteLabelFromFlags(flags: Record<string, unknown> | undefined): string | null {

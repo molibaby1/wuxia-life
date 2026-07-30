@@ -56,7 +56,6 @@ function makeRecord(
       relations: {},
       achievements: [],
       eventHistory: [],
-      routeStates: {},
     } as GameProcessRecord['gameState'],
     timestamp: new Date(`2026-01-${String(Math.min(age + 1, 28)).padStart(2, '0')}T00:00:00.000Z`).toISOString(),
     ...extra,

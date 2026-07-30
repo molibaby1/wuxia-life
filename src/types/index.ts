@@ -65,24 +65,6 @@ export type {
   EventRecord,
 };
 export type { EffectDefinition };
-export {
-  LIFE_ROAD_IDS,
-  LIFE_ROAD_LABELS,
-  LIFE_ROAD_STAGES,
-  NON_ROAD_STATE_KEYS,
-  PUBLIC_ATTRIBUTE_KEYS,
-  PUBLIC_ATTRIBUTE_LABELS,
-  formatLifeRoadLabel,
-  isLifeRoadId,
-  isLifeRoadStage,
-} from './lifeRoad';
-export type {
-  LifeRoadId,
-  LifeRoadStage,
-  NonRoadStateKey,
-  PublicAttributeKey,
-} from './lifeRoad';
-
 export interface PlayerStateUpdates {
   [key: string]: unknown;
   flags?: Set<string>;

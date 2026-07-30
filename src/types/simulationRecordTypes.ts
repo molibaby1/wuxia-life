@@ -98,6 +98,13 @@ export interface GameProcessReport {
     }[];
   };
   records: GameProcessRecord[];
+  /**
+   * Authoritative post-run state for metrics.
+   *
+   * Replay records may intentionally contain pre-choice or pre-action snapshots
+   * and must not be treated as the final simulation state.
+   */
+  finalGameState?: GameState;
   statistics: {
     childhoodEvents: number;
     youthEvents: number;

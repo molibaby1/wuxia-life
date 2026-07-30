@@ -70,6 +70,7 @@ export function adaptHeadlessRunToGameProcessReport(
       results: [],
     },
     records: result.records,
+    finalGameState: JSON.parse(JSON.stringify(result.finalGameState)),
     statistics: {
       childhoodEvents,
       youthEvents,

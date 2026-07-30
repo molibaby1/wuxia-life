@@ -570,7 +570,7 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
   const stats = report.statistics;
   const actions = report.records.filter(r => r.progressionKind === 'active_action').length;
   const choices = report.totalChoices;
-  const finalState = report.records[report.records.length - 1]?.gameState;
+  const finalState = report.finalGameState ?? report.records[report.records.length - 1]?.gameState;
   const martial = finalState?.player?.martialPower ?? 0;
   const money = finalState?.player?.money ?? 0;
   const flags = finalState?.flags ?? {};

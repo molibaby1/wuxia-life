@@ -1252,6 +1252,7 @@ export class GameProcessSimulator {
         results: this.consistencyChecks,
       },
       records: this.records,
+      finalGameState: JSON.parse(JSON.stringify(finalState)),
       statistics: {
         childhoodEvents,
         youthEvents,

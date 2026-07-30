@@ -20,6 +20,7 @@ import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
 import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
 import { collectPracticeImpactLines } from '../../utils/practiceTrajectorySummary';
 import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
+import { applyPracticeHabitEffects } from './applyPracticeHabitEffects';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
@@ -150,12 +151,7 @@ export function executeActiveActionOnState(
     if (!state.player.lifeStates) {
       state.player.lifeStates = createDefaultPlayerLifeStates();
     }
-    for (const effect of actionDef.habitEffects) {
-      state.player.lifeStates[effect.state] = Math.max(
-        0,
-        Math.min(5, (state.player.lifeStates[effect.state] ?? 0) + effect.value),
-      );
-    }
+    state.player.lifeStates = applyPracticeHabitEffects(state.player.lifeStates, actionDef.habitEffects);
   }
 
   let disturbanceId: string | null = null;

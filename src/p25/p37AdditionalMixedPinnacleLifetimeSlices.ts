@@ -8,15 +8,17 @@ import {
   type RareLineRollResult,
 } from '../p16/rareEventLines';
 import { EventLoader } from '../core/EventLoader';
+import { getActionById } from '../data/activeActionCatalog';
 import { getWorldProfile } from '../narrative/worldProfile';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
 import {
-  incrementTrainingHabitFromMartialGain,
   type P35LifetimeAgeStep,
   type P35LifetimeEventStep,
   type P35PinnacleFailureAttribution,
 } from './p35MixedPinnacleLifetimeSlices';
+import { applyDeclaredActionHabitEffects } from './declaredHabitActionSimulation';
 import { createSimulationPlayerState } from './simulationPlayerState';
+import type { PlayerLifeStates } from '../types/eventTypes';
 
 export interface P37MixedMerchantPatronLifetimeResult {
   slice: 'p37_mixed_merchant_patron_lifetime';
@@ -74,26 +76,13 @@ export interface P37PinnacleFoundingPatriarchLifetimeResult {
 const MIXED_TERMINAL_AGE = 68;
 const PINNACLE_TERMINAL_AGE = 72;
 
-/** ponytail: mirrors GameEngineIntegration business tag + gain/money threshold */
-export function incrementBusinessHabitFromGain(
-  lifeStates: Record<string, number>,
-  businessGain: number,
-  moneyGain = 0,
-): Record<string, number> {
-  const next = { ...lifeStates };
-  if (businessGain >= 2 || moneyGain >= 100) {
-    next.businessHabit = Math.min(5, (next.businessHabit ?? 0) + 1);
-  }
-  return next;
-}
-
 function activeFlags(flags: Record<string, unknown>): string[] {
   return Object.keys(flags).filter(k => flags[k] === true);
 }
 
 function buildMixedMerchantPlayer(
   age: number,
-  lifeStates: Record<string, number>,
+  lifeStates: PlayerLifeStates,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
 ) {
   return createSimulationPlayerState({
@@ -115,7 +104,7 @@ function buildMixedMerchantPlayer(
 
 function buildPinnaclePatriarchPlayer(
   age: number,
-  lifeStates: Record<string, number>,
+  lifeStates: PlayerLifeStates,
   stats: { martialPower: number; reputation: number; money: number; connections: number },
 ) {
   return createSimulationPlayerState({
@@ -142,7 +131,7 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   const wealthChoice = wealthFork.choices?.[0];
   const investChoice = sectInvest.choices?.[1];
 
-  let lifeStates: Record<string, number> = {
+  let lifeStates: PlayerLifeStates = {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
@@ -167,18 +156,22 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   let flags: Record<string, unknown> = { origin_merchant_family: true, origin_id: 'merchant_house' };
 
   const businessRamp = [
-    { age: 10, action: 'family_ledger (+3 business)', gain: 3, moneyGain: 40 },
-    { age: 14, action: 'trade_apprentice (+2 business)', gain: 2, moneyGain: 80 },
-    { age: 16, action: 'route_scouting (+3 business)', gain: 3, moneyGain: 120 },
+    { age: 10, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 3, money: 40 } },
+    { age: 14, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 2, money: 80 } },
+    { age: 16, actionId: 'action_business_basic', simulatedStatDelta: { businessAcumen: 3, money: 120 } },
   ];
   for (const tick of businessRamp) {
-    lifeStates = incrementBusinessHabitFromGain(lifeStates, tick.gain, tick.moneyGain);
-    money += tick.moneyGain;
+    lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
+    money += tick.simulatedStatDelta.money!;
     reputation += 3;
+    const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
       phase: tick.age < 18 ? 'childhood' : 'youth',
-      action: `${tick.action} → businessHabit ${lifeStates.businessHabit}`,
+      action: `${action.name} → businessHabit ${lifeStates.businessHabit}`,
+      actionId: tick.actionId,
+      simulatedStatDelta: tick.simulatedStatDelta,
+      declaredHabitEffect: action.habitEffects?.[0],
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: lifeStates.studyHabit ?? 0,
       martialPower,
@@ -187,16 +180,20 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   }
 
   const martialRamp = [
-    { age: 12, gain: 7, action: 'guard_training (+7 martial)' },
-    { age: 15, gain: 6, action: 'caravan_escort (+6 martial)' },
+    { age: 12, actionId: 'action_childhood_training', simulatedStatDelta: { martialPower: 7 } },
+    { age: 15, actionId: 'action_childhood_training', simulatedStatDelta: { martialPower: 6 } },
   ];
   for (const tick of martialRamp) {
-    lifeStates = incrementTrainingHabitFromMartialGain(lifeStates, tick.gain);
-    martialPower += tick.gain;
+    lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
+    martialPower += tick.simulatedStatDelta.martialPower!;
+    const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
       phase: 'youth',
-      action: `${tick.action} → trainingHabit ${lifeStates.trainingHabit}`,
+      action: `${action.name} → trainingHabit ${lifeStates.trainingHabit}`,
+      actionId: tick.actionId,
+      simulatedStatDelta: tick.simulatedStatDelta,
+      declaredHabitEffect: action.habitEffects?.[0],
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: lifeStates.studyHabit ?? 0,
       martialPower,
@@ -310,7 +307,7 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   const factionContinuation = loader.getEventById('p22_faction_sect_continuation')!;
   const factionChoice = factionContinuation.choices?.[0];
 
-  let lifeStates: Record<string, number> = {
+  let lifeStates: PlayerLifeStates = {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
@@ -345,16 +342,20 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   const eventSequence: P35LifetimeEventStep[] = [];
 
   const trainingRamp = [
-    { age: 10, gain: 7, action: 'academy_drill (+7 martial)' },
-    { age: 12, gain: 6, action: 'sect_prep (+6 martial)' },
+    { age: 10, actionId: 'action_childhood_training', simulatedStatDelta: { martialPower: 7 } },
+    { age: 12, actionId: 'action_childhood_training', simulatedStatDelta: { martialPower: 6 } },
   ];
   for (const tick of trainingRamp) {
-    lifeStates = incrementTrainingHabitFromMartialGain(lifeStates, tick.gain);
-    martialPower += tick.gain;
+    lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
+    martialPower += tick.simulatedStatDelta.martialPower!;
+    const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
       phase: 'childhood',
-      action: `${tick.action} → trainingHabit ${lifeStates.trainingHabit}`,
+      action: `${action.name} → trainingHabit ${lifeStates.trainingHabit}`,
+      actionId: tick.actionId,
+      simulatedStatDelta: tick.simulatedStatDelta,
+      declaredHabitEffect: action.habitEffects?.[0],
       trainingHabit: lifeStates.trainingHabit ?? 0,
       studyHabit: 0,
       martialPower,

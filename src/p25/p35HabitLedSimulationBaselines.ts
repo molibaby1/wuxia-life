@@ -47,7 +47,7 @@ export function runP35MixedPinnacleSimBaseline(): P35MixedPinnacleSimBaselineMet
   const p35PinnacleRate = pinnacleLifetime.terminalCheckpoint.unlocked ? 1 : 0;
 
   const parityNotes = [
-    'P35 mixed lifetime uses dual habit on-ramp + JSON bridges; P25 static mixed fixtures seed flags directly.',
+    'P35 mixed lifetime uses explicit action-driven dual Habit on-ramp + JSON bridges; P25 static mixed fixtures seed flags directly.',
     'P35 pinnacle lifetime chains orthodox trial JSON + rare line roll; P25 static pinnacle fixtures seed luck/choice flags.',
     'Lifetime unlock rates are single-path traces (100% or 0%); P25 baselines are multi-fixture seed distributions.',
   ];

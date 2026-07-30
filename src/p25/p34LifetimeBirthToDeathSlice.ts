@@ -5,15 +5,21 @@
  */
 import { evaluateCompositeDestinyOutcome } from '../p16/compositeDestiny';
 import { EventLoader } from '../core/EventLoader';
+import { getActionById } from '../data/activeActionCatalog';
 import { getWorldProfile } from '../narrative/worldProfile';
 import { applyEventChoiceFlagSets } from './p32BridgeParity';
-import { incrementStudyHabitFromComprehension } from './p33HabitZeroOnRampSlice';
+import { applyDeclaredActionHabitEffects } from './declaredHabitActionSimulation';
 import { createSimulationPlayerState } from './simulationPlayerState';
+import type { PracticeHabitEffect } from '../types/activeActionTypes';
+import type { PlayerLifeStates } from '../types/eventTypes';
 
 export interface P34LifetimeAgeStep {
   age: number;
   phase: 'birth' | 'childhood' | 'youth' | 'midlife' | 'bridge' | 'terminal';
   action: string;
+  actionId?: string;
+  simulatedStatDelta?: Record<string, number>;
+  declaredHabitEffect?: PracticeHabitEffect;
   studyHabit: number;
   reputation: number;
   money: number;
@@ -52,7 +58,7 @@ const TERMINAL_AGE = 72;
 
 function buildPlayer(
   age: number,
-  lifeStates: Record<string, number>,
+  lifeStates: PlayerLifeStates,
   stats: { reputation: number; money: number; martialPower: number; connections: number },
 ) {
   return createSimulationPlayerState({
@@ -78,7 +84,7 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
   const p27Choice = p27Event.choices?.[0];
   const p29Choice = p29Event.choices?.[0];
 
-  let lifeStates: Record<string, number> = {
+  let lifeStates: PlayerLifeStates = {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
@@ -100,19 +106,23 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
   ];
 
   const onRampTicks = [
-    { age: 16, action: 'childhood_comprehension_study (+5 academic)', gain: 5 },
-    { age: 18, action: 'youth_comprehension_study (+4 academic)', gain: 4 },
-    { age: 24, action: 'apprentice_case_records (+4 academic)', gain: 4 },
+    { age: 16, actionId: 'action_study_lite', simulatedStatDelta: { knowledge: 5, reputation: 8, money: 6 } },
+    { age: 18, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8, money: 6 } },
+    { age: 24, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8, money: 6 } },
   ];
 
   for (const tick of onRampTicks) {
-    lifeStates = incrementStudyHabitFromComprehension(lifeStates, tick.gain);
-    reputation += 8;
-    money += 6;
+    lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
+    reputation += tick.simulatedStatDelta.reputation!;
+    money += tick.simulatedStatDelta.money!;
+    const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
       phase: tick.age <= 18 ? 'childhood' : 'youth',
-      action: `${tick.action} → studyHabit ${lifeStates.studyHabit}`,
+      action: `${action.name} → studyHabit ${lifeStates.studyHabit}`,
+      actionId: tick.actionId,
+      simulatedStatDelta: tick.simulatedStatDelta,
+      declaredHabitEffect: action.habitEffects?.[0],
       studyHabit: lifeStates.studyHabit ?? 0,
       reputation,
       money,

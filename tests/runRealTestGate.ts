@@ -81,6 +81,7 @@ const suites: Suite[] = [
   { name: 'canonicalFatigueAnxietyStatusMigrationTests', entry: 'tests/canonicalFatigueAnxietyStatusMigration.test.ts' },
   { name: 'canonicalDisciplineIndulgenceRemovalTests', entry: 'tests/canonicalDisciplineIndulgenceRemoval.test.ts' },
   { name: 'canonicalHabitPracticeNarrowingTests', entry: 'tests/canonicalHabitPracticeNarrowing.test.ts' },
+  { name: 'canonicalP25HabitSimulationNarrowing', entry: 'tests/canonicalP25HabitSimulationNarrowing.test.ts' },
   { name: 'canonicalFamilySocialLifeStateRemovalTests', entry: 'tests/canonicalFamilySocialLifeStateRemoval.test.ts' },
   { name: 'canonicalRouteLifecycleRemovalTests', entry: 'tests/canonicalRouteLifecycleRemoval.test.ts' },
 ];

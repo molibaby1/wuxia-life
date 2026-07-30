@@ -63,7 +63,7 @@ export function runP37AdditionalMixedPinnacleSimBaseline(): P37AdditionalMixedPi
   const p37PinnacleRate = pinnacleLifetime.terminalCheckpoint.unlocked ? 1 : 0;
 
   const parityNotes = [
-    'P37 mixed lifetime uses dual business+training on-ramp + wealth/sect JSON bridges; P25 static seeds flags directly.',
+    'P37 mixed lifetime uses explicit declared business+training action effects + wealth/sect JSON bridges; P25 static seeds flags directly.',
     'P37 pinnacle lifetime chains faction continuation + scholar_mentor_line; P25 static pinnacle fixtures seed luck/choice flags.',
     'Lifetime unlock rates are single-path traces (100% or 0%); P25 baselines are multi-fixture seed distributions.',
     'P35 category traces (healer_swordsman, jianghu_myth_legend) unchanged; P37 closes additional outcomes only.',

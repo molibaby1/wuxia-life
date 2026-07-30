@@ -1,16 +1,22 @@
 /**
  * P33 habit-zero on-ramp minimal e2e slice — studyHabit 0 → bridge threshold without seeded habits.
  *
- * Models runtime habit accumulation (comprehension-tagged academic activity) then verifies
+ * Models runtime habit accumulation from explicit declared study actions then verifies
  * p27 bridge event eligibility at studyHabit >= 2.
  */
 import { EventLoader } from '../core/EventLoader';
 import { ConditionEvaluator } from '../core/ConditionEvaluator';
-import type { GameState, PlayerState } from '../types/eventTypes';
+import { getActionById } from '../data/activeActionCatalog';
+import { applyDeclaredActionHabitEffects } from './declaredHabitActionSimulation';
+import type { PracticeHabitEffect } from '../types/activeActionTypes';
+import type { GameState, PlayerLifeStates, PlayerState } from '../types/eventTypes';
 
 export interface P33OnRampStep {
   step: number;
   action: string;
+  actionId: string;
+  simulatedStatDelta: Record<string, number>;
+  declaredHabitEffect?: PracticeHabitEffect;
   studyHabitBefore: number;
   studyHabitAfter: number;
   bridgeEventEligible: boolean;
@@ -30,18 +36,6 @@ export interface P33HabitZeroOnRampResult {
   thresholdReached: boolean;
   bridgeEventId: 'p27_study_habit_healer_reinforcement';
   bridgeEventEligibleAtThreshold: boolean;
-}
-
-/** ponytail: mirrors GameEngineIntegration comprehension + academicGain >= 4 → studyHabit +1 */
-export function incrementStudyHabitFromComprehension(
-  lifeStates: Record<string, number>,
-  academicGain: number,
-): Record<string, number> {
-  const next = { ...lifeStates };
-  if (academicGain >= 4) {
-    next.studyHabit = Math.min(5, (next.studyHabit ?? 0) + 1);
-  }
-  return next;
 }
 
 function gameStateAtStudyHabit(studyHabit: number, age: number): GameState {
@@ -71,10 +65,10 @@ function isBridgeEventEligible(studyHabit: number, age: number): boolean {
   return event.conditions.every(c => evaluator.evaluate(c, gameStateAtStudyHabit(studyHabit, age)));
 }
 
-/** studyHabit 0 → comprehension on-ramp ticks → threshold 2 → p27 bridge eligibility. */
+/** studyHabit 0 → explicit study actions → threshold 2 → p27 bridge eligibility. */
 export function runP33HabitZeroOnRampSlice(): P33HabitZeroOnRampResult {
   const age = 20;
-  let lifeStates: Record<string, number> = {
+  let lifeStates: PlayerLifeStates = {
     trainingHabit: 0,
     studyHabit: 0,
     businessHabit: 0,
@@ -82,17 +76,22 @@ export function runP33HabitZeroOnRampSlice(): P33HabitZeroOnRampResult {
 
   const onRampSequence: P33OnRampStep[] = [];
   const rampActions = [
-    { action: 'comprehension_study_session_1 (knowledge +5)', academicGain: 5 },
-    { action: 'comprehension_study_session_2 (knowledge +4)', academicGain: 4 },
+    { actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 5 } },
+    { actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4 } },
   ];
 
   for (let i = 0; i < rampActions.length; i++) {
     const before = lifeStates.studyHabit ?? 0;
-    lifeStates = incrementStudyHabitFromComprehension(lifeStates, rampActions[i]!.academicGain);
+    const tick = rampActions[i]!;
+    lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
     const after = lifeStates.studyHabit ?? 0;
+    const action = getActionById(tick.actionId)!;
     onRampSequence.push({
       step: i + 1,
-      action: rampActions[i]!.action,
+      action: `${action.name} → studyHabit ${before}→${after}`,
+      actionId: tick.actionId,
+      simulatedStatDelta: tick.simulatedStatDelta,
+      declaredHabitEffect: action.habitEffects?.[0],
       studyHabitBefore: before,
       studyHabitAfter: after,
       bridgeEventEligible: isBridgeEventEligible(after, age),
@@ -127,7 +126,7 @@ export function formatP33HabitZeroOnRampMarkdown(result: P33HabitZeroOnRampResul
     `- studyHabit start: **${result.seed.studyHabitStart}**`,
     `- Age: ${result.seed.age}`,
     '',
-    '## On-ramp sequence (comprehension academic ticks, no seeded threshold)',
+    '## On-ramp sequence (explicit study actions with declared habitEffects)',
     '',
     ...result.onRampSequence.map(
       s =>
@@ -142,7 +141,7 @@ export function formatP33HabitZeroOnRampMarkdown(result: P33HabitZeroOnRampResul
     '',
     '## Scope note',
     '',
-    'Partial slice only — not full birth→death. On-ramp models runtime habit increment; bridge unlock chain continues in P33-001 medical short-chain.',
+    'Partial slice only — not full birth→death. On-ramp applies declared action effects; bridge unlock chain continues in P33-001 medical short-chain.',
     '',
   ].join('\n');
 }

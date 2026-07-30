@@ -35,7 +35,7 @@ export function runP34LifetimeSimBaseline(): P34LifetimeSimBaselineMetrics {
   const p34LifetimeRate = lifetime.terminalCheckpoint.unlocked ? 1 : 0;
 
   const parityNotes = [
-    'P34 lifetime uses same JSON flag_set bridge path as P33 short-chain; adds birth→terminal age progression and habit-zero on-ramp.',
+    'P34 lifetime uses explicit action habitEffects for its habit-zero on-ramp, then the same JSON flag_set bridge path as P33 short-chain.',
     'P31 static baseline uses resolveP31HabitLedKeyChoiceBridges; P34 lifetime avoids static resolver.',
     'Lifetime unlock rate compared against P33 short-chain (midlife seed) and P31 static (resolver fixtures).',
   ];

@@ -147,7 +147,7 @@ export class IdentitySystem {
     hermit: {
       identity: 'hermit',
       events: ['hermit_meditate', 'hermit_seek_dao', 'hermit_transcend'],
-      endings: ['heavenly_immortal', 'peaceful_hermit'],
+      endings: ['peaceful_hermit'],
       bonuses: {
         internalSkill: 1.3,
         constitution: 1.2,

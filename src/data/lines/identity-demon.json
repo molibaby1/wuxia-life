@@ -45,7 +45,6 @@
               {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_core_disciple", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 15, "operator": "add"},
-              {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -8, "operator": "add"},
               {"type": "event_record", "target": "outlaw_join_core"}
             ]
@@ -912,7 +911,6 @@
         "text": "远遁江湖，切断门内纠葛",
         "description": "你远遁江湖，切断门内纠葛——若曾按兵不动且夺位失败，此路尤为可行。",
         "effects": [
-          {"type": "stat_modify", "target": "qinggong", "value": 6, "operator": "add"},
           {"type": "stat_modify", "target": "connections", "value": 8, "operator": "subtract"},
           {"type": "flag_set", "target": "demonic_midlife_legacy_exile"},
           {"type": "flag_set", "target": "demonic_midlife_consequence_done"},

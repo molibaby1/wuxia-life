@@ -31,7 +31,6 @@
               {"type": "flag_set", "target": "buddhist_core_disciple", "value": true},
               {"type": "flag_set", "target": "buddhist_dharma_name", "value": "慧明"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
-              {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
               {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
               {"type": "event_record", "target": "buddhist_entry_accept_core"}
@@ -45,7 +44,6 @@
               {"type": "flag_set", "target": "route_buddhist"},
               {"type": "flag_set", "target": "buddhist_dharma_name", "value": "慧能"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
-              {"type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
               {"type": "event_record", "target": "buddhist_entry_accept"}
             ]
@@ -59,7 +57,6 @@
               {"type": "flag_set", "target": "buddhist_menial_worker", "value": true},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
               {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
-              {"type": "stat_modify", "target": "internalSkill", "value": 2, "operator": "add"},
               {"type": "event_record", "target": "buddhist_entry_accept_menial"}
             ]
           }
@@ -192,7 +189,6 @@
           { "type": "flag_unset", "target": "current_sect" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
-          { "type": "stat_modify", "target": "internalSkill", "value": -5, "operator": "add" },
           { "type": "event_record", "target": "buddhist_secularize_leave" }
         ]
       },

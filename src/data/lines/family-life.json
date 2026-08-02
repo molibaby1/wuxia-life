@@ -320,20 +320,8 @@
     },
     "choices": [
       {
-        "text": "习武：传承你的武学 (外功 +5, 内功 +5)",
+        "text": "习武：传承你的武学",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 5,
-            "operator": "add"
-          },
           {
             "type": "flag_set",
             "flag": "child_martial",
@@ -686,21 +674,8 @@
     },
     "choices": [
       {
-        "text": "悉心教导，倾囊相授 (外功 +5, 内功 +5)",
-        "effects": [
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 5,
-            "operator": "add"
-          }
-        ]
+        "text": "悉心教导，倾囊相授",
+        "effects": []
       },
       {
         "text": "顺其自然，快乐成长",

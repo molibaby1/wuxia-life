@@ -596,7 +596,6 @@
           { "type": "flag_unset", "target": "current_sect" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
-          { "type": "stat_modify", "target": "internalSkill", "value": -5, "operator": "add" },
           { "type": "event_record", "target": "orthodox_departure_leave" }
         ]
       },

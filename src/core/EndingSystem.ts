@@ -25,11 +25,10 @@ import { buildLateLifePracticeRecapLine } from '../utils/practiceTrajectorySumma
 export type EndingType =
   // 正面结局
   | 'legendary_hero'       // 传奇英雄 - 侠义 > 80, 声望 > 80
-  | 'martial_god'          // 武学之神 - 全武学 > 90
+  | 'martial_god'          // 武学之神 - 功力 >= 95 且年龄 >= 68
   | 'sect_founder'         // 开宗立派 - 建立门派，弟子 > 100
   | 'richest_man'          // 首富 - 财富 > 10000
   | 'beloved_saint'        // 在世活佛 - 善行 > 100, 救人 > 500
-  | 'heavenly_immortal'    // 得道成仙 - 综合 > 90, 因果 > 100
   | 'great_scholar'        // 一代宗师 - 学识 > 90, 著作流传
   | 'official_minister'
   | 'hermit_master'
@@ -68,9 +67,6 @@ export interface EndingInfo {
     not_flags?: string[];
     achievements?: string[];
     age?: number;
-    externalSkill?: number;
-    internalSkill?: number;
-    qinggong?: number;
     connections?: number;
     knowledge?: number;
     businessAcumen?: number;
@@ -85,9 +81,6 @@ interface EndingEvaluationData {
   comprehension: number;
   reputation: number;
   martialPower: number;
-  externalSkill: number;
-  internalSkill: number;
-  qinggong: number;
   connections: number;
   knowledge: number;
   businessAcumen: number;
@@ -131,13 +124,10 @@ export class EndingSystem {
     {
       id: 'martial_god',
       name: '武学之神',
-      description: '你穷尽一生钻研武学，外功、内功、轻功皆臻化境，成为武林中公认的武学之神。一招一式皆含天地之威。',
+      description: '你穷尽一生钻研武学，功力臻于化境，成为武林中公认的武学之神。一招一式皆含天地之威。',
       category: 'positive',
       requirements: {
         martialPower: 95,
-        externalSkill: 80,
-        internalSkill: 80,
-        qinggong: 80,
         age: 68,
       },
       priority: 100,  // 最高优先级
@@ -179,20 +169,6 @@ export class EndingSystem {
         age: 65,
       },
       priority: 88,
-    },
-    {
-      id: 'heavenly_immortal',
-      name: '得道成仙',
-      description: '你超脱世俗，悟得大道，最终得道成仙。传说你在某日驾鹤西去，留下凡人无尽的敬仰。',
-      category: 'positive',
-      requirements: {
-        martialPower: 90,
-        internalSkill: 88,
-        comprehension: 88,
-        good_karma: 85,
-        age: 68,
-      },
-      priority: 98,
     },
     {
       id: 'great_scholar',
@@ -359,11 +335,11 @@ export class EndingSystem {
   ): boolean {
     const numericFields: Array<
       'money' | 'comprehension' | 'knowledge' | 'reputation' | 'martialPower'
-      | 'externalSkill' | 'internalSkill' | 'qinggong' | 'connections'
+      | 'connections'
       | 'businessAcumen' | 'influence' | 'good_karma' | 'evil_karma' | 'age'
     > = [
       'money', 'comprehension', 'knowledge', 'reputation', 'martialPower',
-      'externalSkill', 'internalSkill', 'qinggong', 'connections',
+      'connections',
       'businessAcumen', 'influence', 'good_karma', 'evil_karma', 'age',
     ];
 
@@ -549,9 +525,6 @@ export class EndingSystem {
       comprehension: player.comprehension,
       reputation: player.reputation,
       martialPower: player.martialPower,
-      externalSkill: player.externalSkill,
-      internalSkill: player.internalSkill,
-      qinggong: player.qinggong,
       connections: player.connections,
       knowledge: player.knowledge ?? 0,
       businessAcumen: player.businessAcumen ?? 0,
@@ -589,8 +562,6 @@ export class EndingSystem {
         return true;
       case 'beloved_saint':
         return data.good_karma >= 110;
-      case 'heavenly_immortal':
-        return true;
       case 'great_scholar':
         return data.knowledge >= 85;
       default:

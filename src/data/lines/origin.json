@@ -39,12 +39,6 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
             "target": "constitution",
             "value": 6,
             "operator": "add"
@@ -63,12 +57,6 @@
           {
             "type": "flag_set",
             "target": "origin_scholar_family"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 4,
-            "operator": "add"
           },
           {
             "type": "stat_modify",

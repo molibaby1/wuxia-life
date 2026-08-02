@@ -25,7 +25,6 @@
         ],
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 20},
-          {"type": "stat_modify", "stat": "internalSkill", "value": 15},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "flag_set", "flag": "has_master", "value": true}
         ]
@@ -99,7 +98,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "internalSkill", "value": 30},
       {"type": "stat_modify", "stat": "martialPower", "value": 25},
       {"type": "stat_modify", "stat": "comprehension", "value": 15},
       {"type": "flag_set", "flag": "master_legacy", "value": true}

@@ -128,23 +128,11 @@
     "choices": [
       {
         "id": "innovate_full",
-        "text": "闭关创作 (功力 +10, 外功 +10, 内功 +10)",
+        "text": "闭关创作 (功力 +10)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "martialPower",
-            "value": 10,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 10,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
             "value": 10,
             "operator": "add"
           },
@@ -178,18 +166,12 @@
       },
       {
         "id": "innovate_suspend",
-        "text": "先记下心得，暂不强求突破 (悟性 +3, 内功 +2)",
+        "text": "先记下心得，暂不强求突破 (悟性 +3)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "comprehension",
             "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 2,
             "operator": "add"
           },
           {
@@ -540,31 +522,19 @@
     },
     "choices": [
       {
-        "text": "倾囊相授，友好交流 (人脉 +20, 外功 +5)",
+        "text": "倾囊相授，友好交流 (人脉 +20)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "connections",
             "value": 20,
             "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
           }
         ]
       },
       {
-        "text": "保留绝学，只作表面交流 (内功 +2, 声望 -5)",
+        "text": "保留绝学，只作表面交流 (声望 -5)",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 2,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "reputation",

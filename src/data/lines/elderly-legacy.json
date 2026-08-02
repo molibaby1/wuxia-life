@@ -194,14 +194,8 @@
     },
     "choices": [
       {
-        "text": "传给最有天赋的弟子 (外功 +10)",
+        "text": "传给最有天赋的弟子",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 10,
-            "operator": "add"
-          },
           {
             "type": "flag_set",
             "flag": "has_successor",

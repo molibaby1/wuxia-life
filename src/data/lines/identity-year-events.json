@@ -327,7 +327,6 @@
         "id": "training_external",
         "text": "专注外功修炼",
         "effects": [
-          { "type": "stat_modify", "target": "externalSkill", "value": 5, "operator": "add" },
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
         ]
       },

@@ -661,7 +661,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "martialPower", "value": 28, "operator": "add" },
-      { "type": "stat_modify", "target": "externalSkill", "value": 15, "operator": "add" },
       { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
       { "type": "stat_modify", "target": "chivalry", "value": 12, "operator": "add" },
       { "type": "flag_set", "target": "p9_explicit_martial_proving_echo", "value": true },

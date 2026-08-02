@@ -38,12 +38,6 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
             "target": "martialPower",
             "value": 2,
             "operator": "add"
@@ -74,12 +68,6 @@
           },
           {
             "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
             "target": "martialPower",
             "value": 2,
             "operator": "add"
@@ -107,12 +95,6 @@
             "type": "time_advance",
             "target": "age",
             "value": 1
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
-            "value": 5,
-            "operator": "add"
           },
           {
             "type": "stat_modify",
@@ -188,12 +170,6 @@
             "type": "stat_modify",
             "target": "martialPower",
             "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 2,
             "operator": "add"
           },
           {
@@ -354,18 +330,6 @@
             "value": 1
           },
           {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "diligentDisciple"
           },
@@ -457,18 +421,6 @@
         "type": "stat_modify",
         "target": "martialPower",
         "value": 12,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "externalSkill",
-        "value": 5,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "internalSkill",
-        "value": 5,
         "operator": "add"
       },
       {
@@ -567,18 +519,6 @@
         "text": "内外兼修",
         "description": "你选择内外兼修，虽进展不快，却几乎没有明显短板。",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 4,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "martialPower",
@@ -775,18 +715,6 @@
         "operator": "add"
       },
       {
-        "type": "stat_modify",
-        "target": "externalSkill",
-        "value": 3,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "internalSkill",
-        "value": 3,
-        "operator": "add"
-      },
-      {
         "type": "flag_set",
         "target": "steadyProgress"
       },
@@ -846,12 +774,6 @@
         "type": "stat_modify",
         "target": "martialPower",
         "value": 20,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "internalSkill",
-        "value": 15,
         "operator": "add"
       },
       {

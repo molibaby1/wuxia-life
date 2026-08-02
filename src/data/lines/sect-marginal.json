@@ -816,7 +816,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "year" },
-      { "type": "stat_modify", "target": "qinggong", "value": 4, "operator": "add" },
       { "type": "flag_set", "target": "demonic_redemption_chase" },
       { "type": "event_record", "target": "demonic_redemption_chase" }
     ],

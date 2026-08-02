@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_border\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.qinggong >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+        "expression": "!flags.has(\"route_border\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.martialPower >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
       }
     ],
     "content": {
@@ -666,12 +666,6 @@
             "type": "stat_modify",
             "target": "martialPower",
             "value": 10,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 8,
             "operator": "add"
           },
           {

@@ -335,7 +335,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "internalSkill > 30 && constitution < 70"
+        "expression": "lifeStates.trainingHabit >= 4 && martialPower > 30 && constitution < 70"
       }
     ],
     "content": {
@@ -345,12 +345,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {
-        "type": "stat_modify",
-        "target": "internalSkill",
-        "value": -20,
-        "operator": "add"
-      },
       {
         "type": "stat_modify",
         "target": "martialPower",

@@ -163,7 +163,7 @@ function testChildhoodAgency(): void {
 
   const infantAction = resolveActiveAction({
     state: {
-      player: { age: 0, martialPower: 0, chivalry: 0, internalSkill: 0, comprehension: 10, traits: [] } as PlayerState,
+      player: { age: 0, martialPower: 0, chivalry: 0, comprehension: 10, traits: [] } as PlayerState,
       flags: {},
     } as GameState,
     actionId: 'action_childhood_training',
@@ -171,7 +171,10 @@ function testChildhoodAgency(): void {
   });
   assert(infantAction !== null, 'infant action resolves');
   assert((infantAction!.deltas.chivalry ?? 0) === 0, 'infant no chivalry from training');
-  assert((infantAction!.deltas.internalSkill ?? 0) === 0, 'infant no internal skill from training');
+  assert(
+    !Object.prototype.hasOwnProperty.call(infantAction!.deltas, 'internalSkill'),
+    'infant training must not write deleted internalSkill field',
+  );
   assert(isInfantBand(0), 'age 0 is infant band');
 
   const scholarPalette = resolveChildhoodActionPalette({

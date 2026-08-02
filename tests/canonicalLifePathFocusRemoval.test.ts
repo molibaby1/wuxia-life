@@ -77,10 +77,10 @@ assert.equal(
   'identity conversion must ignore injected legacy focus',
 );
 
-assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.11.0');
+assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.12.0');
 const converter = new DefaultSnapshotConverter();
 const snapshot = clone(gameStateSnapshotAge50);
-assert.equal(snapshot.metadata.schemaVersion, '3.11.0');
+assert.equal(snapshot.metadata.schemaVersion, '3.12.0');
 assert.equal('focus' in (snapshot.state.lifePath ?? {}), false, 'normal snapshot must not contain focus');
 
 const oldVersion = clone(snapshot);

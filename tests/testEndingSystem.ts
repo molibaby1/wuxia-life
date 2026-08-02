@@ -11,9 +11,6 @@ function createTestState(): GameState {
     gender: 'male',
     age: 70,
     martialPower: 50,
-    externalSkill: 40,
-    internalSkill: 40,
-    qinggong: 30,
     chivalry: 0,
     charisma: 50,
     constitution: 50,
@@ -93,9 +90,6 @@ console.log('');
 console.log('测试 3: 武学之神');
 state = createTestState();
 state.player.martialPower = 95;
-state.player.externalSkill = 95;
-state.player.internalSkill = 95;
-state.player.qinggong = 95;
 const ending3 = EndingSystem.determineEnding(state);
 assert(ending3.id === 'martial_god', 'martial thresholds should unlock martial_god without road data');
 console.log('结局:', ending3.name);
@@ -147,7 +141,6 @@ console.log('');
 console.log('测试 7: 得道成仙');
 state = createTestState();
 state.player.martialPower = 92;
-state.player.internalSkill = 92;
 state.player.comprehension = 92;
 state.karma!.good_karma = 110;
 state.player.flags = { retired: true };

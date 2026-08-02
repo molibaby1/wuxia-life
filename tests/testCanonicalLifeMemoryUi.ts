@@ -4,7 +4,7 @@ import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 const player: PlayerState = {
   name: '界面测试', gender: 'male', age: 31, martialPower: 8,
-  externalSkill: 0, internalSkill: 0, qinggong: 0, chivalry: 20,
+  chivalry: 20,
   charisma: 0, constitution: 30, comprehension: 30, money: 100,
   reputation: 40, connections: 12, healthStatus: 'healthy', statuses: [], alive: true,
   items: [], flags: { merchant_childhood_seed_done: true }, events: [], relationships: [],

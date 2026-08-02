@@ -14,9 +14,6 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     name: '沈孤舟',
     age: 19,
     martialPower: 42,
-    externalSkill: 31,
-    internalSkill: 27,
-    qinggong: 22,
     chivalry: 13,
     constitution: 18,
     comprehension: 24,
@@ -74,7 +71,7 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.stageTags.length === 1, 'stage tags should expose sect only');
   assert(model.stageTags[0] === '武当', 'stage tags first item should be sect');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
-  assert(model.tendencySummary === '功力 42 / 悟性 24', 'tendency should use numeric signals without route modifiers');
+  assert(model.tendencySummary === '功力 42', 'martial-dominant tendency collapses to martialPower readout');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
   assert(model.topResources.length === 3, 'top resources should stay capped at three');
   assert(
@@ -109,9 +106,6 @@ console.log('=== Main Screen Model Tests ===\n');
   const model = buildMainScreenModel(
     createPlayer({
       martialPower: 12,
-      externalSkill: 11,
-      internalSkill: 10,
-      qinggong: 9,
       constitution: 8,
       comprehension: 7,
       chivalry: 6,
@@ -128,9 +122,6 @@ console.log('=== Main Screen Model Tests ===\n');
   const model = buildMainScreenModel(
     createPlayer({
       martialPower: 35,
-      internalSkill: 34,
-      externalSkill: 33,
-      qinggong: 15,
       constitution: 12,
       comprehension: 11,
       chivalry: 9,
@@ -146,9 +137,6 @@ console.log('=== Main Screen Model Tests ===\n');
   const model = buildMainScreenModel(
     createMainScreenPlayer({
       martialPower: 22,
-      externalSkill: 18,
-      internalSkill: 16,
-      qinggong: 14,
       knowledge: 24,
       connections: 22,
       charisma: 18,
@@ -169,9 +157,6 @@ console.log('=== Main Screen Model Tests ===\n');
   const highHabitModel = buildMainScreenModel(
     createMainScreenPlayer({
       martialPower: 22,
-      externalSkill: 18,
-      internalSkill: 16,
-      qinggong: 14,
       knowledge: 24,
       connections: 22,
       charisma: 18,
@@ -192,9 +177,6 @@ console.log('=== Main Screen Model Tests ===\n');
   const model = buildMainScreenModel(
     createPlayer({
       martialPower: P124_MARTIAL_DOMINANT_SAMPLE.martialPower,
-      internalSkill: P124_MARTIAL_DOMINANT_SAMPLE.internalSkill,
-      externalSkill: P124_MARTIAL_DOMINANT_SAMPLE.externalSkill,
-      qinggong: 15,
       constitution: 12,
       comprehension: 11,
       chivalry: 9,
@@ -238,8 +220,8 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(combatGroup?.label === '武学', 'P125 combat tab should frame martial readout hierarchy');
   assert(
-    combatGroup?.items.map((item) => item.key).join(',') === 'martialPower,externalSkill,internalSkill,qinggong',
-    'P125 combat group should keep total readout plus three specialization stats',
+    combatGroup?.items.map((item) => item.key).join(',') === 'martialPower',
+    'P125 combat group should expose martialPower only',
   );
   assert(
     combatGroup?.items.find((item) => item.key === 'martialPower')?.label === '功力·总读数',
@@ -249,14 +231,10 @@ console.log('=== Main Screen Model Tests ===\n');
     combatGroup?.items.find((item) => item.key === 'martialPower')?.description?.includes('综合武学总读数'),
     'P125 martialPower description should explain overall martial readout',
   );
-
   for (const key of ['externalSkill', 'internalSkill', 'qinggong'] as const) {
-    const item = combatGroup?.items.find((stat) => stat.key === key);
-    assert(Boolean(item), `P125 should still expose ${key} in full panel`);
-    assert(item?.description?.includes('风格特长'), `P125 ${key} should read as specialization dimension`);
     assert(
-      !item?.description?.includes('综合武学总读数'),
-      `P125 ${key} should not borrow total-readout wording`,
+      !combatGroup?.items.some((stat) => stat.key === key),
+      `P125 combat group must not expose deleted field ${key}`,
     );
   }
 
@@ -266,8 +244,8 @@ console.log('=== Main Screen Model Tests ===\n');
     'P125 survival group should contain constitution only',
   );
   assert(
-    survivalGroup?.items[0]?.description?.includes('不是外功/内功/轻功'),
-    'P125 constitution should distance itself from martial specialization trio',
+    survivalGroup?.items[0]?.description?.includes('身体底子'),
+    'P125 constitution should describe survival base',
   );
   console.log('✓ P125 full-panel role clarification regression');
 }

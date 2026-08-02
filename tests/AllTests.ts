@@ -3091,14 +3091,14 @@ const compatibilitySuite: TestSuite = {
     },
     {
       name: '兼容性测试 - Canonical Snapshot 存档',
-      description: '测试 saveGame 只写入 Canonical Snapshot 3.11.0',
+      description: '测试 saveGame 只写入 Canonical Snapshot 3.12.0',
       test: () => {
         saveManager.clearAllSaves();
         const state = new GameEngineIntegration().getGameState();
         const saveId = saveManager.saveGame(state, 'us-018-version-marker');
         const loaded = saveManager.loadGame(saveId);
         assert(loaded !== null, '当前版本存档应可正常读取');
-        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.11.0', '存档应写入 Canonical Snapshot 3.11.0');
+        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.12.0', '存档应写入 Canonical Snapshot 3.12.0');
       },
     },
     {

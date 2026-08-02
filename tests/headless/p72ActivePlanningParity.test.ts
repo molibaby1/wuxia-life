@@ -43,8 +43,8 @@ export async function runP72ActivePlanningParityTests(): Promise<void> {
     const headlessState = headless.getRuntimeState();
 
     assert(
-      coreState.player.externalSkill === headlessState.player.externalSkill,
-      `externalSkill parity for ${actionId}`,
+      coreState.player.martialPower === headlessState.player.martialPower,
+      `martialPower parity for ${actionId}`,
     );
     assert(
       coreState.player.comprehension === headlessState.player.comprehension,

@@ -20,15 +20,15 @@ export function runEarlyChildhoodStatNarrativeTests(): void {
   const action = buildActiveActionSummaryDisplay({
     actionId: 'action_childhood_training',
     duration: { value: 1, unit: 'quarter' },
-    deltas: { externalSkill: 1 },
+    deltas: { martialPower: 1 },
     metadata: {
-      rewardSummary: '外功+1',
+      rewardSummary: '功力+1',
       costSummary: '时间投入',
       riskSummary: '低',
     },
   } as ActionResult);
   assert(action.appliedDeltaSummary.includes('因「'), 'active action summary binds cause');
-  assert(action.appliedDeltaSummary.includes('外功'), 'active action summary includes stat');
+  assert(action.appliedDeltaSummary.includes('功力'), 'active action summary includes stat');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

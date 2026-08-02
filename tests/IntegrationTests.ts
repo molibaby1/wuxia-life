@@ -224,7 +224,6 @@ const multiPathSuite: TestSuite = {
         // 测试少林路径
         let state1 = framework.createTestState();
         state1.player.age = 14;
-        state1.player.externalSkill = 20;
         const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
         const sectEvent = youthEvents.find(e => e.id === 'sect_choice');
         if (sectEvent && sectEvent.choices) {
@@ -238,7 +237,6 @@ const multiPathSuite: TestSuite = {
         // 测试武当路径
         let state2 = framework.createTestState();
         state2.player.age = 14;
-        state2.player.internalSkill = 20;
         if (sectEvent && sectEvent.choices) {
           const wudangChoice = sectEvent.choices.find(c => c.id === 'join_wudang');
           if (wudangChoice?.effects?.length) {
@@ -250,7 +248,6 @@ const multiPathSuite: TestSuite = {
         // 测试峨眉路径
         let state3 = framework.createTestState();
         state3.player.age = 14;
-        state3.player.qinggong = 20;
         if (sectEvent && sectEvent.choices) {
           const emeiChoice = sectEvent.choices.find(c => c.id === 'join_emei');
           if (emeiChoice?.effects?.length) {

@@ -8,7 +8,7 @@ function assert(condition: boolean, message: string): void {
 
 export function runEarlyChildhoodDisturbanceGuardTests(): void {
   const state = {
-    player: { age: 5, martialPower: 0, chivalry: 0, internalSkill: 0 } as PlayerState,
+    player: { age: 5, martialPower: 0, chivalry: 0} as PlayerState,
     flags: {},
   } as GameState;
   const action = resolveActiveAction({

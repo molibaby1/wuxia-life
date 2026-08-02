@@ -89,9 +89,6 @@ function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
   const model = buildMainScreenModel(
     {
       martialPower: 10,
-      externalSkill: 10,
-      internalSkill: 10,
-      qinggong: 10,
       constitution: 10,
       chivalry: 10,
       comprehension: 10,

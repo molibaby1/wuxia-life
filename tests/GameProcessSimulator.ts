@@ -876,7 +876,7 @@ export class GameProcessSimulator {
         const stat = effect.target;
 
         if (tendency === 'martial') {
-          if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'comprehension', 'constitution'].includes(stat)) {
+          if (['martialPower', 'comprehension', 'constitution'].includes(stat)) {
             score += normalizedValue * 3;
           } else if (stat === 'money') {
             score += normalizedValue * 0.8;
@@ -909,7 +909,7 @@ export class GameProcessSimulator {
         }
 
         // balanced / relationship 默认策略
-        if (['martialPower', 'internalSkill', 'externalSkill', 'qinggong', 'chivalry', 'comprehension', 'constitution'].includes(stat)) {
+        if (['martialPower', 'chivalry', 'comprehension', 'constitution'].includes(stat)) {
           score += normalizedValue * 2;
         } else {
           score += normalizedValue;
@@ -1017,7 +1017,7 @@ export class GameProcessSimulator {
     );
     const positiveMartial = effects.some(effect =>
       effect.type === 'stat_modify' &&
-      ['martialPower', 'externalSkill', 'internalSkill', 'qinggong'].includes(effect.target || effect.stat) &&
+      ['martialPower'].includes(effect.target || effect.stat) &&
       typeof effect.value === 'number' &&
       effect.value > 0 &&
       effect.operator === 'add'
@@ -1072,9 +1072,6 @@ export class GameProcessSimulator {
   private getStatName(stat: string): string {
     const statNames: Record<string, string> = {
       martialPower: '武力',
-      internalSkill: '内功',
-      externalSkill: '外功',
-      qinggong: '轻功',
       chivalry: '侠义',
       charisma: '魅力',
       constitution: '体质',

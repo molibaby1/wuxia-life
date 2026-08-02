@@ -285,11 +285,9 @@ async function assertFormalOutcomeInvariance(control: GameState): Promise<void> 
   ]);
   const controlObservable = {
     connections: controlResult.player.connections,
-    externalSkill: controlResult.player.externalSkill,
   };
   const subjectObservable = {
     connections: subjectResult.player.connections,
-    externalSkill: subjectResult.player.externalSkill,
   };
   assert(JSON.stringify(controlObservable) === JSON.stringify(subjectObservable), 'fatigue/anxiety must not change formal non-Status outcome');
 }

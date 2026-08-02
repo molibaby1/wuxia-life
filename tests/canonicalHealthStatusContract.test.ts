@@ -175,7 +175,8 @@ async function run(): Promise<void> {
   const herbChoices = findEvent('shop.json', 'shop_herb_shop').choices;
   assert(!herbChoices.some((choice: any) => choice.text.includes('金创药') || choice.text.includes('普通草药')), 'empty herb choices must be removed');
   const gratefulPartial = findEvent('shop.json', 'shop_grateful_vendor').choices.find((choice: any) => choice.text.includes('只收下一部分'));
-  assert(gratefulPartial.effects.some((effect: any) => effect.stat === 'internalSkill'), 'grateful partial choice must retain internalSkill reward');
+  assert(!gratefulPartial.effects.some((effect: any) => effect.stat === 'internalSkill'), 'grateful partial choice must not retain pruned internalSkill reward');
+  assert(gratefulPartial.effects.some((effect: any) => effect.stat === 'chivalry'), 'grateful partial choice must retain chivalry reward');
 
   const cautiousPersona = P8_PERSONA_ROSTER.find(persona => persona.id === 'p8-cautious-han');
   assert(cautiousPersona !== undefined, 'cautious persona must exist');

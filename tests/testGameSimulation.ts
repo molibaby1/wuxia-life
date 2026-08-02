@@ -15,8 +15,6 @@ interface SimulationResult {
   eventType: string;
   stats: {
     martialPower: number;
-    externalSkill: number;
-    internalSkill: number;
     knowledge: number;
     chivalry: number;
     constitution: number;
@@ -103,8 +101,6 @@ async function runSimulation() {
         eventType,
         stats: {
           martialPower: gameState.player.martialPower || 0,
-          externalSkill: gameState.player.externalSkill || 0,
-          internalSkill: gameState.player.internalSkill || 0,
           knowledge: gameState.player.knowledge || 0,
           chivalry: gameState.player.chivalry || 0,
           constitution: gameState.player.constitution || 0,
@@ -152,13 +148,11 @@ async function runSimulation() {
   if (lastResult) {
     console.log(`30 岁时属性:`);
     console.log(`  功力：${lastResult.stats.martialPower}`);
-    console.log(`  外功：${lastResult.stats.externalSkill}`);
-    console.log(`  内功：${lastResult.stats.internalSkill}`);
     console.log(`  学识：${lastResult.stats.knowledge}`);
     console.log(`  侠义：${lastResult.stats.chivalry}`);
     console.log(`  体魄：${lastResult.stats.constitution}`);
 
-    const totalMartial = lastResult.stats.martialPower + lastResult.stats.externalSkill + lastResult.stats.internalSkill;
+    const totalMartial = lastResult.stats.martialPower;
     if (totalMartial < 1) {
       console.log('  ⚠️  警告：战斗属性成长过低，建议增加修炼事件权重');
     } else if (totalMartial > 200) {

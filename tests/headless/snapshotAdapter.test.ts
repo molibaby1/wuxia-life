@@ -16,7 +16,7 @@ export function runSnapshotAdapterTests(): void {
     sourcePlatform: 'node-headless',
     time: createDefaultTimeSource(),
   });
-  assert(snapshot.metadata.schemaVersion === '3.11.0', 'current snapshot schema version');
+  assert(snapshot.metadata.schemaVersion === '3.12.0', 'current snapshot schema version');
   assert(snapshot.metadata.eventCatalogVersion === '1.0.0', 'catalog version preserved');
   assert(snapshot.state.player.lifeStates !== undefined, 'lifeStates persisted');
 

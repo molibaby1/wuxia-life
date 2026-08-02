@@ -24,6 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
+package-project.sh
 
 # Game saves and temporary files
 .wuxia_saves/
@@ -35,6 +36,7 @@ scripts/life-simulator/reports/*.json
 !scripts/life-simulator/reports/manifest.json
 tests/reports/*.html
 tests/reports/*.json
+*/test-reports/
 
 # Test report markdown files
 tests/*.md

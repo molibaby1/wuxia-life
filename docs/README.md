@@ -5,6 +5,8 @@
 ## 当前权威文档
 
 - [玩家模型](product/player-model.md)：江湖世界玩家状态的当前权威规范。
+- [Snapshot Contract](contracts/game-state-snapshot-contract.md)：Snapshot 3.11.0、统一持久化校验与严格拒绝规则。
+- [Save Schema Policy](contracts/save-schema-versioning-policy.md)：浏览器与 Headless 存档版本边界及无迁移策略。
 
 ## 权威层级
 

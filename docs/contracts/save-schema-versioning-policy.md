@@ -1,13 +1,13 @@
 # Save Schema Versioning Policy (P4 US-017)
 
-Policy for future persisted save compatibility without implementing migrations in P4.
+Policy for the current strict save contract. This repository does not implement backward migrations.
 
 ## 1. Version Format
 
 | Field | Format | Example |
 | --- | --- | --- |
-| `schemaVersion` | Semver (snapshot contract) | `3.9.0` |
-| `saveVersion` | Client save payload tag | `2.0.0-p2` |
+| `schemaVersion` | Semver (snapshot contract) | `3.11.0` |
+| `saveVersion` | Optional state provenance tag | Current runtime value only; it does not widen the accepted schema |
 | `engineVersion` | Package/engine semver | `0.0.0` |
 | `eventCatalogVersion` | Catalog bundle semver | `1.0.0` |
 
@@ -16,14 +16,14 @@ Policy for future persisted save compatibility without implementing migrations i
 | State | Meaning | Action |
 | --- | --- | --- |
 | `readable` | Exact schema match | Load directly |
-| `migratable` | Within supported backward range | Run ordered migrations |
+| `migratable` | Not a runtime state | External tooling must recreate a current snapshot |
 | `unsupported_legacy` | Below minimum supported | Reject with upgrade message |
 | `unsupported_future` | Newer than client | Reject with client update message |
 
 ## 3. Supported Range (Initial)
 
-- Snapshot schema `3.9.0` is the current contract line; `3.8.x` and earlier snapshots are rejected. `player.lifeStates` contains exactly the three long-term practice Habit numbers `trainingHabit`, `studyHabit`, and `businessHabit`. `familyBond` and `socialMomentum` are forbidden unknown keys. There is no migration, fallback, cleaning, conversion, or history reconstruction.
-- Client save `2.0.0-p2` remains a separate client save tag; it does not provide a migration path for the incompatible snapshot shape.
+- Snapshot schema `3.11.0` is the only accepted contract line. `3.10.x` and earlier snapshots are rejected. `lifePath.focus` is a forbidden unknown field at both top-level and nested `stateSnapshot` boundaries. `player.lifeStates` contains exactly `trainingHabit`, `studyHabit`, and `businessHabit`; `familyBond` and `socialMomentum` are forbidden unknown keys. There is no migration, compatibility, fallback, cleaning, conversion, or history reconstruction.
+- Browser and Headless persistence now use only Snapshot schema `3.11.0`. The old P2 raw `GameState` save shape is not readable and is not migrated.
 - Catalog version mismatch: reject execution, allow read-only inspection when safe.
 
 ## 4. Reject Instead of Migrate
@@ -45,4 +45,4 @@ Reject when:
 ## 6. Non-Goals
 
 - No migration implementation in P4.
-- No save behavior changes.
+- Save, autosave, import, and load all validate the canonical Snapshot before persistence or hydration. Missing or invalid required state is rejected; no fallback fills missing fields.

@@ -20,8 +20,6 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '专注习武，提升武功根基',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'externalSkill', min: 2, max: 4 },
-      { stat: 'internalSkill', min: 1, max: 3 },
       { stat: 'martialPower', min: 1, max: 2 },
       { stat: 'constitution', min: 0, max: 1 },
     ],

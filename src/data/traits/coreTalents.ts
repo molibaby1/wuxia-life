@@ -5,19 +5,16 @@ export const coreTalents: CoreTalentConfig[] = [
     id: 'martial_born',
     name: '武骨天成',
     rarity: 'rare',
-    summary: '外功与体魄突出，但精微领悟较慢。',
+    summary: '功力与体魄突出，但精微领悟较慢。',
     flavor: '你筋骨结实，习武比常人更容易入门。',
     initialStats: [
-      { stat: 'externalSkill', value: 6 },
       { stat: 'constitution', value: 5 },
       { stat: 'martialPower', value: 3 },
       { stat: 'comprehension', value: -3 },
     ],
     growthModifiers: [
-      { stat: 'externalSkill', multiplier: 1.3 },
       { stat: 'constitution', multiplier: 1.2 },
       { stat: 'martialPower', multiplier: 1.15 },
-      { stat: 'internalSkill', multiplier: 0.88 },
       { stat: 'comprehension', multiplier: 0.9 },
     ],
     eventBiases: [
@@ -31,20 +28,17 @@ export const coreTalents: CoreTalentConfig[] = [
     id: 'keen_mind',
     name: '灵心慧根',
     rarity: 'rare',
-    summary: '悟性与内功成长出色，但体魄偏弱。',
+    summary: '悟性与学识成长出色，但体魄偏弱。',
     flavor: '你心思清明，最擅长从细微处见真章。',
     initialStats: [
       { stat: 'comprehension', value: 6 },
-      { stat: 'internalSkill', value: 5 },
       { stat: 'knowledge', value: 4 },
       { stat: 'constitution', value: -3 },
     ],
     growthModifiers: [
       { stat: 'comprehension', multiplier: 1.3 },
-      { stat: 'internalSkill', multiplier: 1.25 },
       { stat: 'knowledge', multiplier: 1.2 },
       { stat: 'constitution', multiplier: 0.88 },
-      { stat: 'externalSkill', multiplier: 0.92 },
     ],
     eventBiases: [
       { tag: 'comprehension', multiplier: 1.35 },
@@ -67,7 +61,6 @@ export const coreTalents: CoreTalentConfig[] = [
       { stat: 'charisma', multiplier: 1.3 },
       { stat: 'connections', multiplier: 1.25 },
       { stat: 'reputation', multiplier: 1.15 },
-      { stat: 'internalSkill', multiplier: 0.95 },
     ],
     eventBiases: [
       { tag: 'social', multiplier: 1.35 },
@@ -173,12 +166,10 @@ export const coreTalents: CoreTalentConfig[] = [
     initialStats: [
       { stat: 'knowledge', value: 6 },
       { stat: 'comprehension', value: 4 },
-      { stat: 'internalSkill', value: 2 },
     ],
     growthModifiers: [
       { stat: 'knowledge', multiplier: 1.3 },
       { stat: 'comprehension', multiplier: 1.2 },
-      { stat: 'internalSkill', multiplier: 1.1 },
     ],
     eventBiases: [
       { tag: 'comprehension', multiplier: 1.3 },

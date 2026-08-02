@@ -25,8 +25,7 @@
           {"type": "flag_set", "flag": "sect_faction", "value": "unconventional"},
           {"type": "flag_set", "flag": "route_demonic"},
           {"type": "flag_set", "flag": "current_sect", "value": "shadow_sect"},
-          {"type": "stat_modify", "stat": "martialPower", "value": 5},
-          {"type": "stat_modify", "stat": "externalSkill", "value": 3}
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
         ]
       },
       {
@@ -62,7 +61,6 @@
         "text": "专注实战技巧",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 8},
-          {"type": "stat_modify", "stat": "externalSkill", "value": 5},
           {"type": "stat_modify", "stat": "constitution", "value": -3}
         ]
       },
@@ -70,7 +68,6 @@
         "text": "专注内功心法",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 6},
-          {"type": "stat_modify", "stat": "internalSkill", "value": 5},
           {"type": "stat_modify", "stat": "comprehension", "value": 3}
         ]
       }
@@ -100,7 +97,6 @@
         "text": "拜他为师",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 10},
-          {"type": "stat_modify", "stat": "internalSkill", "value": 8},
           {"type": "flag_set", "flag": "outlaw_mentor", "value": true}
         ]
       },

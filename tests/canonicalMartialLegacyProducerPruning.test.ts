@@ -44,68 +44,100 @@ function collectBranches(events: EventDefinition[]): Branch[] {
   return branches;
 }
 
-const EXPECTED_REMAINING_BRANCHES = [
-  'origin_background::choice::origin_frontier',
-  'childhood_preference::choice::focus_on_study',
-  'childhood_preference::choice::balance_both',
-  'preteen_training::auto',
-  'sect_choice::choice::stay_home',
-  'sect_trial_entry::choice::trial_agile',
-  'independent_path::choice::serve_government',
-  'beggars_encounter::choice::beggars_join::outcome::success',
-  'border_trial_entry::choice::border_trial_hunt',
-  'border_trial_entry::choice::border_trial_scout',
-  'demonic_trial_shadow::choice::demonic_trial_shadow_success',
-  'demonic_renounce_path::auto',
-  'orthodox_trial_entry::choice::orthodox_trial_force',
-  'orthodox_trial_completion::auto',
-  'martial_arts_enlightenment::choice::balanced_start',
-  'sect_trial::choice::meditate',
-  'training_focus::choice::focus_internal',
-  'training_focus::choice::focus_external',
-  'comprehension_breakthrough::auto',
-  'constitution_breakthrough::auto',
-  'career_martial_innovation::choice::innovate_steady',
-  'career_martial_arts_conference::choice::作为观众，观摩学习 (外功 +5, 内功 +5)',
-  'career_martial_exchange::choice::点到即止，彼此试探 (人脉 +8, 内功 +3)',
-  'jianghu_hero_meeting::choice::decline_meeting',
-  'jianghu_hermit_master::choice::learn_from_master',
-  'jianghu_hermit_master::choice::spar_with_master',
-  'demonic_midlife_expansion::choice::demonic_expand_secret_art',
-  'demonic_midlife_expansion_survivor::choice::demonic_expand_secret_art',
-  'jianghu_year_training::choice::training_internal',
-  'jianghu_year_training::choice::training_qinggong',
-  'outlaw_path_beginning::choice::加入幽影门',
-  'outlaw_training::choice::专注实战技巧',
-  'outlaw_training::choice::专注内功心法',
-  'outlaw_mentor::choice::拜他为师',
-  'discover_wudang_internal_struggle::choice::假装不知，继续修炼',
-] as const;
-
-function testInventoryBaseline(events: EventDefinition[], branches: Branch[]): void {
+function testFinalInventory(events: EventDefinition[], branches: Branch[]): void {
   assert(eventsIndexJson.imports.length === 29, `formal EventLoader file count must be 29, got ${eventsIndexJson.imports.length}`);
   assert(events.length === 425, `formal EventLoader event count must be 425, got ${events.length}`);
-  assert(branches.length === 89, `pre-change producer branch count must be 89, got ${branches.length}`);
-  assert(
-    branches.reduce((count, branch) => count + branch.effects.length, 0) === 111,
-    'pre-change legacy effect count must be 111',
-  );
-  assert(new Set(branches.map(branch => branch.eventId)).size === 57, 'pre-change producer event count must be 57');
+  assert(branches.length === 0, `formal EventLoader must have 0 legacy producer branches, got ${branches.length}`);
+  assert(branches.reduce((count, branch) => count + branch.effects.length, 0) === 0, 'formal EventLoader must have 0 legacy effects');
+  assert(new Set(branches.map(branch => branch.eventId)).size === 0, 'formal EventLoader must have 0 legacy producer events');
 }
 
-function testRemainingWhitelist(branches: Branch[]): void {
-  const actual = branches.map(branch => branch.key).sort();
-  const expected = [...EXPECTED_REMAINING_BRANCHES].sort();
+function findChoice(events: EventDefinition[], eventId: string, key: string): NonNullable<EventDefinition['choices']>[number] {
+  const event = events.find(candidate => candidate.id === eventId);
+  const choice = event?.choices?.find(candidate => candidate.id === key || candidate.text === key);
+  assert(Boolean(choice), `${eventId} choice ${key} must exist`);
+  return choice!;
+}
+
+function findAutoEffects(events: EventDefinition[], eventId: string): EffectDefinition[] {
+  const event = events.find(candidate => candidate.id === eventId);
+  assert(Boolean(event), `${eventId} must exist`);
+  return event?.autoEffects ?? [];
+}
+
+function assertMartialPower(events: EventDefinition[], eventId: string, text: string, value: number): void {
+  const choice = findChoice(events, eventId, text);
   assert(
-    JSON.stringify(actual) === JSON.stringify(expected),
-    `remaining producer branches must match the 35-branch whitelist; actual=${actual.join('|')}; expected=${expected.join('|')}`,
+    choice.effects?.filter(effect => (effect.target ?? effect.stat) === 'martialPower' && effect.value === value).length === 1,
+    `${eventId} / ${text} must have exactly martialPower ${value}`,
   );
-  assert(branches.length === 35, `post-change producer branch count must be 35, got ${branches.length}`);
+}
+
+function assertAutoMartialPower(events: EventDefinition[], eventId: string, value: number): void {
+  const effects = findAutoEffects(events, eventId);
   assert(
-    branches.reduce((count, branch) => count + branch.effects.length, 0) === 46,
-    'post-change legacy effect count must be 46',
+    effects.filter(effect => (effect.target ?? effect.stat) === 'martialPower' && effect.value === value).length === 1,
+    `${eventId} auto must have exactly martialPower ${value}`,
   );
-  assert(new Set(branches.map(branch => branch.eventId)).size === 29, 'post-change producer event count must be 29');
+}
+
+function assertNoMartialPower(events: EventDefinition[], eventId: string, text: string): void {
+  const choice = findChoice(events, eventId, text);
+  assert(
+    !(choice.effects ?? []).some(effect => (effect.target ?? effect.stat) === 'martialPower'),
+    `${eventId} / ${text} must not add martialPower`,
+  );
+}
+
+function testMartialPowerMigrations(events: EventDefinition[]): void {
+  for (const [eventId, text, value] of [
+    ['origin_background', 'origin_frontier', 4],
+    ['childhood_preference', 'focus_on_study', 2],
+    ['childhood_preference', 'balance_both', 1],
+    ['sect_choice', 'stay_home', 5],
+    ['orthodox_trial_entry', 'orthodox_trial_force', 3],
+    ['martial_arts_enlightenment', 'balanced_start', 2],
+    ['sect_trial', 'meditate', 8],
+    ['training_focus', 'focus_internal', 4],
+    ['training_focus', 'focus_external', 4],
+    ['career_martial_innovation', 'innovate_steady', 5],
+    ['career_martial_arts_conference', '作为观众，观摩学习 (功力 +5)', 5],
+    ['jianghu_hero_meeting', 'decline_meeting', 5],
+    ['jianghu_hermit_master', 'learn_from_master', 15],
+    ['jianghu_hermit_master', 'spar_with_master', 5],
+    ['demonic_midlife_expansion', 'demonic_expand_secret_art', 8],
+    ['demonic_midlife_expansion_survivor', 'demonic_expand_secret_art', 8],
+    ['jianghu_year_training', 'training_internal', 3],
+    ['jianghu_year_training', 'training_qinggong', 3],
+    ['discover_wudang_internal_struggle', '假装不知，继续修炼', 5],
+  ] as const) {
+    assertMartialPower(events, eventId, text, value);
+  }
+  for (const [eventId, value] of [
+    ['preteen_training', 2],
+    ['demonic_renounce_path', 3],
+    ['comprehension_breakthrough', 8],
+    ['constitution_breakthrough', 8],
+  ] as const) {
+    assertAutoMartialPower(events, eventId, value);
+  }
+}
+
+function testNoCompensationBranches(events: EventDefinition[]): void {
+  for (const [eventId, text] of [
+    ['sect_trial_entry', 'trial_agile'],
+    ['border_trial_entry', 'border_trial_hunt'],
+    ['border_trial_entry', 'border_trial_scout'],
+    ['demonic_trial_shadow', 'demonic_trial_shadow_success'],
+    ['independent_path', 'serve_government'],
+    ['career_martial_exchange', '点到即止，彼此试探 (人脉 +8)'],
+  ] as const) {
+    assertNoMartialPower(events, eventId, text);
+  }
+  assert(
+    !findAutoEffects(events, 'orthodox_trial_completion').some(effect => (effect.target ?? effect.stat) === 'martialPower'),
+    'orthodox_trial_completion auto must not add martialPower',
+  );
 }
 
 function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
@@ -129,35 +161,31 @@ function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
   assert(events.includes(disciple as EventDefinition) && events.includes(legacy as EventDefinition), 'relationship events must be formally loaded');
 }
 
-function testFiveDeferredBranchesRemain(branches: Branch[]): void {
-  const byKey = new Map(branches.map(branch => [branch.key, branch]));
-  for (const [key, expected] of [
-    ['outlaw_path_beginning::choice::加入幽影门', [['externalSkill', 3]]],
-    ['outlaw_training::choice::专注实战技巧', [['externalSkill', 5]]],
-    ['outlaw_training::choice::专注内功心法', [['internalSkill', 5]]],
-    ['outlaw_mentor::choice::拜他为师', [['internalSkill', 8]]],
-    ['discover_wudang_internal_struggle::choice::假装不知，继续修炼', [['internalSkill', 8]]],
+function testExistingCanonicalWrites(events: EventDefinition[]): void {
+  for (const [eventId, text, value] of [
+    ['outlaw_path_beginning', '加入幽影门', 5],
+    ['outlaw_training', '专注实战技巧', 8],
+    ['outlaw_training', '专注内功心法', 6],
+    ['outlaw_mentor', '拜他为师', 10],
   ] as const) {
-    const branch = byKey.get(key);
-    assert(Boolean(branch), `${key} must remain in the M3B whitelist`);
-    for (const [target, value] of expected) {
-      assert(
-        hasStatEffect(branch?.effects, target, value),
-        `${key} must retain ${target} ${value}`,
-      );
-    }
+    const choice = findChoice(events, eventId, text);
+    assert(
+      choice.effects?.filter(effect => (effect.target ?? effect.stat) === 'martialPower' && effect.value === value).length === 1,
+      `${eventId} / ${text} must retain exactly martialPower ${value}`,
+    );
+    assert(
+      !(choice.effects ?? []).some(effect => LEGACY_MARTIAL_FIELDS.has(effect.target ?? effect.stat ?? '')),
+      `${eventId} / ${text} must not retain legacy martial fields`,
+    );
   }
 }
 
 const events = EventLoader.getInstance().getAllEvents();
 const branches = collectBranches(events);
 
-if (branches.length === 89) {
-  testInventoryBaseline(events, branches);
-  assert(false, 'RED: baseline inventory confirmed; producer pruning is not implemented yet');
-} else {
-  testRemainingWhitelist(branches);
-  testRelationshipDuplicateWrites(events);
-  testFiveDeferredBranchesRemain(branches);
-  console.log('canonicalMartialLegacyProducerPruning.test.ts: ok');
-}
+testFinalInventory(events, branches);
+testMartialPowerMigrations(events);
+testNoCompensationBranches(events);
+testRelationshipDuplicateWrites(events);
+testExistingCanonicalWrites(events);
+console.log('canonicalMartialLegacyProducerPruning.test.ts: ok');

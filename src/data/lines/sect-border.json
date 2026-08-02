@@ -145,12 +145,6 @@
             "timeUnit": "day"
           },
           {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 3,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "border_trial_started"
           },
@@ -174,12 +168,6 @@
             "target": "age",
             "value": 10,
             "timeUnit": "day"
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
-            "value": 2,
-            "operator": "add"
           },
           {
             "type": "flag_set",

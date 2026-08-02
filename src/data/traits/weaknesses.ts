@@ -28,7 +28,6 @@ export const weaknesses: WeaknessConfig[] = [
     ],
     growthModifiers: [
       { stat: 'comprehension', multiplier: 0.82 },
-      { stat: 'internalSkill', multiplier: 0.9 },
     ],
     eventBiases: [{ tag: 'comprehension', multiplier: 0.75 }],
     removable: false,

@@ -30,6 +30,43 @@ export type SetbackCheckOptions = {
 
 const LETHAL_SETBACK_IDS = new Set(['early_death']);
 
+/** Canonical numeric stats currently used by formal Setback configs. */
+export const SETBACK_MODIFIABLE_STATS = new Set([
+  'martialPower',
+  'constitution',
+  'money',
+  'chivalry',
+  'connections',
+  'reputation',
+  'knowledge',
+  'businessAcumen',
+] as const);
+
+type SetbackModifiableStat = typeof SETBACK_MODIFIABLE_STATS extends Set<infer T> ? T : never;
+
+function isSetbackModifiableStat(stat: string): stat is SetbackModifiableStat {
+  return (SETBACK_MODIFIABLE_STATS as Set<string>).has(stat);
+}
+
+/**
+ * Apply Setback numeric deltas with an explicit allowlist.
+ * Unknown / legacy keys are silently ignored; no ghost properties are created.
+ */
+export function applySetbackStatChanges(
+  player: PlayerState,
+  statChanges: Record<string, number> | undefined,
+): PlayerState {
+  if (!statChanges) return player;
+
+  const nextPlayer = { ...player };
+  for (const [stat, value] of Object.entries(statChanges)) {
+    if (!isSetbackModifiableStat(stat)) continue;
+    const currentValue = Number(nextPlayer[stat] ?? 0);
+    nextPlayer[stat] = Math.max(0, currentValue + value);
+  }
+  return nextPlayer;
+}
+
 /**
  * 检查所有可能触发的挫折事件
  * 每次年度事件触发前调用
@@ -123,17 +160,7 @@ export function applySetbackEffects(
   let newState = { ...state };
 
   if (newState.player) {
-    newState.player = { ...newState.player };
-  }
-
-  if (event.effects.statChanges) {
-    for (const [stat, value] of Object.entries(event.effects.statChanges)) {
-      const currentValue = (newState.player as any)[stat] || 0;
-      (newState.player as any)[stat] = Math.max(
-        0,
-        currentValue + value
-      );
-    }
+    newState.player = applySetbackStatChanges(newState.player, event.effects.statChanges);
   }
 
   if (event.effects.deathProbability && event.effects.deathProbability >= 100) {

@@ -29,7 +29,7 @@ export async function runP7ActionResolverTests(): Promise<void> {
   const state = createP7State();
   const training = resolveActiveAction({ state, actionId: 'action_training_basic', random: () => 0.5 });
   assert(training !== null, 'training action should resolve');
-  assert((training!.deltas.externalSkill ?? 0) > 0, 'training should boost externalSkill');
+  assert((training!.deltas.martialPower ?? 0) > 0, 'training should boost martialPower');
 
   const study = resolveActiveAction({ state, actionId: 'action_study_basic', random: () => 0.5 });
   assert(study !== null, 'study action should resolve');

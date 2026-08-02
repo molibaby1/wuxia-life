@@ -233,7 +233,7 @@
         "effects": [
           { "type": "flag_set", "target": "orthodox_trial_started" },
           { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "internalSkill", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
           { "type": "flag_set", "target": "orthodox_trial_force_done" },
           { "type": "event_record", "target": "orthodox_trial_force" }
         ]
@@ -495,7 +495,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
-      { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
       { "type": "flag_set", "target": "orthodox_trial_completed" },
       { "type": "flag_set", "target": "orthodox_youth_recognized" },
       { "type": "flag_set", "target": "p16_guardian_oath", "value": true },

@@ -8,7 +8,6 @@ export const origins: OriginConfig[] = [
     flavor: '你生来就活在刀光剑影的影子里。',
     initialStats: [
       { stat: 'martialPower', value: 3 },
-      { stat: 'externalSkill', value: 3 },
       { stat: 'reputation', value: 2 },
     ],
     earlyEventBiases: [

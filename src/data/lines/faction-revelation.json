@@ -67,7 +67,7 @@
       {
         "text": "假装不知，继续修炼",
         "effects": [
-          {"type": "stat_modify", "stat": "internalSkill", "value": 8}
+          {"type": "stat_modify", "stat": "martialPower", "value": 5}
         ]
       }
     ]

@@ -319,7 +319,7 @@
         "id": "training_internal",
         "text": "专注内功修炼",
         "effects": [
-          { "type": "stat_modify", "target": "internalSkill", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
           { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
         ]
       },
@@ -334,7 +334,7 @@
         "id": "training_qinggong",
         "text": "修炼轻功",
         "effects": [
-          { "type": "stat_modify", "target": "qinggong", "value": 5, "operator": "add" },
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
           { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" }
         ]
       }

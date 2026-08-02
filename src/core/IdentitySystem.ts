@@ -149,7 +149,6 @@ export class IdentitySystem {
       events: ['hermit_meditate', 'hermit_seek_dao', 'hermit_transcend'],
       endings: ['peaceful_hermit'],
       bonuses: {
-        internalSkill: 1.3,
         constitution: 1.2,
       },
     },
@@ -168,7 +167,6 @@ export class IdentitySystem {
       endings: ['shadow_master', 'tragic_assassin'],
       bonuses: {
         martialPower: 1.4,
-        qinggong: 1.3,
       },
     },
     doctor: {
@@ -186,7 +184,6 @@ export class IdentitySystem {
       endings: ['beggar_king', 'street_legend'],
       bonuses: {
         connections: 1.5,
-        externalSkill: 1.2,
       },
     },
     official: {

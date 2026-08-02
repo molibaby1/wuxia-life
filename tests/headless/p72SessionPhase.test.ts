@@ -72,8 +72,7 @@ export async function runP72SessionPhaseTests(): Promise<void> {
   );
   const after = actionSession.getRuntimeState().player;
   assert(
-    (after.externalSkill ?? 0) !== (beforeStats.externalSkill ?? 0) ||
-      (after.internalSkill ?? 0) !== (beforeStats.internalSkill ?? 0),
+    (after.martialPower ?? 0) !== (beforeStats.martialPower ?? 0),
     'stat delta applied',
   );
 

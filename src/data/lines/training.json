@@ -128,19 +128,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 2,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 2,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
+            "target": "martialPower",
             "value": 2,
             "operator": "add"
           },
@@ -355,8 +343,8 @@
           },
           {
             "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 10,
+            "target": "martialPower",
+            "value": 8,
             "operator": "add"
           },
           {
@@ -475,8 +463,8 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 8,
+            "target": "martialPower",
+            "value": 4,
             "operator": "add"
           },
           {
@@ -498,8 +486,8 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 8,
+            "target": "martialPower",
+            "value": 4,
             "operator": "add"
           },
           {
@@ -586,8 +574,8 @@
       },
       {
         "type": "stat_modify",
-        "target": "internalSkill",
-        "value": 10,
+        "target": "martialPower",
+        "value": 8,
         "operator": "add"
       },
       {
@@ -648,8 +636,8 @@
       },
       {
         "type": "stat_modify",
-        "target": "externalSkill",
-        "value": 10,
+        "target": "martialPower",
+        "value": 8,
         "operator": "add"
       },
       {

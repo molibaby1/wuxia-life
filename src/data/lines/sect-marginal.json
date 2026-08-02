@@ -182,7 +182,6 @@
         "weight": 3,
         "effects": [
           { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "qinggong", "value": 3, "operator": "add" },
           { "type": "flag_set", "target": "demonic_trial_shadow_done" },
           { "type": "event_record", "target": "demonic_trial_shadow_success" }
         ]
@@ -511,7 +510,7 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
-      { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
+      { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
       { "type": "flag_set", "target": "demonic_renounce_done" },
       { "type": "event_record", "target": "demonic_renounce_path" }
     ],

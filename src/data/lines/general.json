@@ -249,13 +249,13 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
+            "target": "martialPower",
             "value": 2,
             "operator": "add"
           },
           {
             "type": "stat_modify",
-            "target": "internalSkill",
+            "target": "martialPower",
             "value": 1,
             "operator": "add"
           },
@@ -315,13 +315,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 1,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
+            "target": "martialPower",
             "value": 1,
             "operator": "add"
           },
@@ -447,7 +441,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "externalSkill",
+        "target": "martialPower",
         "value": 2,
         "operator": "add"
       },
@@ -769,20 +763,8 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
-            "value": 3,
+            "target": "martialPower",
+            "value": 5,
             "operator": "add"
           },
           {
@@ -942,7 +924,6 @@
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
           { "type": "time_advance", "target": "age", "value": 12, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "qinggong", "value": 2, "operator": "add" },
           { "type": "flag_set", "target": "trial_agile_done" },
           { "type": "event_record", "target": "sect_trial_agile" }
         ]
@@ -1931,12 +1912,6 @@
             "type": "time_advance",
             "target": "age",
             "value": 1
-          },
-          {
-            "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 10,
-            "operator": "add"
           },
           {
             "type": "stat_modify",

@@ -148,7 +148,7 @@
       },
       {
         "id": "innovate_steady",
-        "text": "参考古籍，稳步创新 (学识 +5, 外功 +5)",
+        "text": "参考古籍，稳步创新 (学识 +5, 功力 +5)",
         "effects": [
           {
             "type": "stat_modify",
@@ -158,7 +158,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
+            "target": "martialPower",
             "value": 5,
             "operator": "add"
           }
@@ -334,17 +334,11 @@
         ]
       },
       {
-        "text": "作为观众，观摩学习 (外功 +5, 内功 +5)",
+        "text": "作为观众，观摩学习 (功力 +5)",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
+            "target": "martialPower",
             "value": 5,
             "operator": "add"
           }
@@ -544,18 +538,12 @@
         ]
       },
       {
-        "text": "点到即止，彼此试探 (人脉 +8, 内功 +3)",
+        "text": "点到即止，彼此试探 (人脉 +8)",
         "effects": [
           {
             "type": "stat_modify",
             "target": "connections",
             "value": 8,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
-            "value": 3,
             "operator": "add"
           }
         ]

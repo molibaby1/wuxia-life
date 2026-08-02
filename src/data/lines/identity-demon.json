@@ -393,7 +393,7 @@
         "text": "闭关炼化禁术",
         "description": "闭关冲击镇派禁术——心志与侠义恐被侵蚀，若曾走暗影试炼，旧债亦会在关内翻涌。",
         "effects": [
-          {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
           {"type": "stat_modify", "target": "chivalry", "value": 6, "operator": "subtract"},
           {"type": "flag_set", "target": "demonic_midlife_expansion_secret"},
           {"type": "flag_set", "target": "demonic_midlife_expansion_done"},
@@ -465,7 +465,7 @@
         "text": "闭关炼化禁术",
         "description": "闭关冲击禁术——心志恐被魔功侵蚀，若曾走暗影试炼，旧债会在关内翻涌。",
         "effects": [
-          {"type": "stat_modify", "target": "internalSkill", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
           {"type": "stat_modify", "target": "chivalry", "value": 6, "operator": "subtract"},
           {"type": "flag_set", "target": "demonic_midlife_expansion_secret"},
           {"type": "flag_set", "target": "demonic_midlife_expansion_done"},

@@ -150,7 +150,6 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     },
     effects: {
       statChanges: {
-        internalSkill: -20,
         martialPower: -15,
         constitution: -10
       },

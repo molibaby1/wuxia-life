@@ -215,9 +215,6 @@ export class StatModifyHandler implements EffectHandler {
     'age',
     'children',
     'martialPower',
-    'externalSkill',
-    'internalSkill',
-    'qinggong',
     'chivalry',
     'charisma',
     'constitution',
@@ -260,24 +257,16 @@ export class StatModifyHandler implements EffectHandler {
       );
     }
     
-    // 获取当前值
-    const rawCurrentValue = (state.player as any)[target];
-    if (rawCurrentValue === undefined && !StatModifyHandler.MODIFIABLE_PLAYER_STATS.has(target)) {
+    if (!StatModifyHandler.MODIFIABLE_PLAYER_STATS.has(target)) {
       return state;
     }
+
+    // 获取当前值
+    const rawCurrentValue = (state.player as any)[target];
     const currentValue = rawCurrentValue ?? 0;
     
-    // 为内外功提供差异化成长加成
     let adjustedValue = finalValue;
     if (operator === 'add') {
-      if (target === 'internalSkill') {
-        const bonus = Math.floor(((state.player as any).comprehension || 0) / 20);
-        adjustedValue += bonus;
-      } else if (target === 'externalSkill') {
-        const bonus = Math.floor(((state.player as any).constitution || 0) / 20);
-        adjustedValue += bonus;
-      }
-
       if (adjustedValue > 0) {
         const multiplier = traitSystem.getGrowthMultiplier(state.player, target);
         adjustedValue = Math.max(1, Math.round(adjustedValue * multiplier));
@@ -327,11 +316,8 @@ export class StatModifyHandler implements EffectHandler {
       return value;
     }
 
-    // Legacy 属性仍保留既有运行时边界；Canonical 属性不在这里设置固定上限。
+    // Canonical 属性不在这里设置固定上限；其余保留既有运行时边界。
     const ranges: Record<string, [number, number]> = {
-      externalSkill: [0, 999],
-      internalSkill: [0, 999],
-      qinggong: [0, 999],
       charisma: [0, 100],
       comprehension: [0, 100],
       money: [0, Number.MAX_SAFE_INTEGER],

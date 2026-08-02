@@ -13,7 +13,6 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     duration: { value: 1, unit: 'quarter' },
     rewards: [
       { stat: 'constitution', min: 0, max: 2 },
-      { stat: 'externalSkill', min: 0, max: 1 },
     ],
     costs: [],
     risk: 'low',
@@ -27,7 +26,6 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '在家人看护下活动筋骨，模仿大人练几式基本功',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'externalSkill', min: 1, max: 2 },
       { stat: 'constitution', min: 0, max: 1 },
       { stat: 'martialPower', min: 0, max: 1 },
     ],

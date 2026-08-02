@@ -60,7 +60,6 @@
               {"type": "flag_set", "target": "beggars_trial_active"},
               {"type": "flag_set", "target": "beggars_rank", "value": 4},
               {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
-              {"type": "stat_modify", "target": "qinggong", "value": 3, "operator": "add"},
               {"type": "event_record", "target": "beggars_encounter_join"}
             ]
           },

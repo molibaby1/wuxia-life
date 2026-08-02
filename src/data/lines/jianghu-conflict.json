@@ -413,17 +413,11 @@
       },
       {
         "id": "decline_meeting",
-        "text": "婉拒，专心修炼 (外功 +5, 内功 +5)",
+        "text": "婉拒，专心修炼 (功力 +5)",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
+            "target": "martialPower",
             "value": 5,
             "operator": "add"
           }
@@ -537,17 +531,11 @@
     "choices": [
       {
         "id": "learn_from_master",
-        "text": "虚心请教，学习绝学 (外功 +15, 内功 +15)",
+        "text": "虚心请教，学习绝学 (功力 +15)",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 15,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
+            "target": "martialPower",
             "value": 15,
             "operator": "add"
           }
@@ -555,17 +543,11 @@
       },
       {
         "id": "spar_with_master",
-        "text": "切磋交流，互相学习 (外功 +5, 内功 +5)",
+        "text": "切磋交流，互相学习 (功力 +5)",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "internalSkill",
+            "target": "martialPower",
             "value": 5,
             "operator": "add"
           }

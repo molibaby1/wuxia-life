@@ -174,7 +174,6 @@ export class CriticalChoiceSystem {
           player.flags['establish_sect'] = true;
         } else if (option === 'hermit') {
           player.flags['retired'] = true;
-          player.internalSkill += 10;
         }
         break;
 

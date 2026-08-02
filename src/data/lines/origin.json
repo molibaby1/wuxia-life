@@ -120,13 +120,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "externalSkill",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "qinggong",
+            "target": "martialPower",
             "value": 4,
             "operator": "add"
           },

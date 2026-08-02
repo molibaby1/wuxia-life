@@ -115,9 +115,6 @@ export enum EffectType {
 
 export type TraitStatKey =
   | 'martialPower'
-  | 'externalSkill'
-  | 'internalSkill'
-  | 'qinggong'
   | 'constitution'
   | 'comprehension'
   | 'charisma'
@@ -863,9 +860,6 @@ export interface EventDefinition {
 export interface PlayerStats {
   // ========== 战斗属性 ==========
   martialPower: number;      // 功力：非负的综合武学能力，无固定上限
-  externalSkill: number;     // 外功：0-100，招式技巧，影响物理攻击和武技威力
-  internalSkill: number;     // 内功：0-100，内力修为，影响内力储备和内功威力
-  qinggong: number;          // 轻功：0-100，身法速度，影响闪避、先手和移动能力
   constitution: number;      // 体魄：非负的长期身体基础
   
   // ========== 非战斗属性 ==========
@@ -903,9 +897,6 @@ export interface PlayerState {
   
   // 武功属性
   martialPower: number;
-  externalSkill: number;
-  internalSkill: number;
-  qinggong: number;
   chivalry: number;
   constitution: number;
   comprehension: number;

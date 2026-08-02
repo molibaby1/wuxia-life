@@ -86,9 +86,6 @@ export type EffectDefinition =
 export type StatType =
   | 'age'
   | 'martialPower'
-  | 'internalSkill'
-  | 'externalSkill'
-  | 'qinggong'
   | 'chivalry'
   | 'charisma'
   | 'constitution'

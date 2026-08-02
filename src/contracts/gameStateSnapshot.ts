@@ -26,7 +26,7 @@ import type { ActionFocusStreak, ActionHistoryEntry } from '../types/activeActio
 import type { OriginWorldviewShaping } from '../narrative/profile/types';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.11.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.12.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -54,9 +54,6 @@ export interface SnapshotPlayerState {
   alive: boolean;
 
   martialPower: number;
-  externalSkill: number;
-  internalSkill: number;
-  qinggong: number;
   chivalry: number;
   constitution: number;
   comprehension: number;

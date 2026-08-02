@@ -38,9 +38,6 @@ function formatDelta(value: number): string {
 function getStatName(stat: string): string {
   const statNames: Record<string, string> = {
     martialPower: '功力',
-    externalSkill: '外功',
-    internalSkill: '内功',
-    qinggong: '轻功',
     chivalry: '侠义',
     charisma: '魅力',
     constitution: '体魄',

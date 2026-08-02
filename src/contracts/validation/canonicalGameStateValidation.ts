@@ -57,7 +57,7 @@ const RUNTIME_STATE_KEYS = new Set([
   ...SNAPSHOT_STATE_KEYS, 'statistics', 'selfAwareness', 'playerFeedbackMessage', 'p16RareLineLog',
 ]);
 const PLAYER_KEYS = new Set([
-  'age', 'gender', 'name', 'martialPower', 'externalSkill', 'internalSkill', 'qinggong', 'chivalry',
+  'age', 'gender', 'name', 'martialPower', 'chivalry',
   'constitution', 'comprehension', 'sect', 'title', 'reputation', 'money', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage',
   'merchantNetwork', 'investments', 'items',
@@ -65,7 +65,7 @@ const PLAYER_KEYS = new Set([
   'monthProgress', 'dayProgress', 'traits', 'healthStatus', 'statuses', 'lifeStates',
 ]);
 const REQUIRED_PLAYER_KEYS = [
-  'name', 'age', 'gender', 'alive', 'martialPower', 'externalSkill', 'internalSkill', 'qinggong',
+  'name', 'age', 'gender', 'alive', 'martialPower',
   'chivalry', 'constitution', 'comprehension', 'sect', 'title', 'reputation', 'money', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork',
   'investments', 'flags', 'children', 'spouse', 'traits', 'healthStatus', 'statuses', 'lifeStates',
@@ -391,7 +391,7 @@ function validateEventRecord(value: unknown, path: string, issues: CanonicalVali
 function validatePlayer(value: unknown, path: string, issues: CanonicalValidationIssue[], partial: boolean): void {
   if (!objectAt(value, path, issues)) return; exactKeys(value, path, PLAYER_KEYS, issues); if (!partial) required(value, path, REQUIRED_PLAYER_KEYS, issues);
   if (hasOwn(value, 'name')) stringValue(value.name, `${path}.name`, issues, true); if (hasOwn(value, 'age')) finite(value.age, `${path}.age`, issues); if (hasOwn(value, 'gender') && !['male', 'female'].includes(value.gender as string)) addIssue(issues, `${path}.gender`, 'invalid_value', 'unknown gender'); if (hasOwn(value, 'alive')) booleanValue(value.alive, `${path}.alive`, issues);
-  const numericKeys = ['martialPower', 'externalSkill', 'internalSkill', 'qinggong', 'chivalry', 'constitution', 'comprehension', 'reputation', 'money', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
+  const numericKeys = ['martialPower', 'chivalry', 'constitution', 'comprehension', 'reputation', 'money', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
   for (const key of ['sect', 'title', 'spouse'] as const) if (hasOwn(value, key) && value[key] !== null) stringValue(value[key], `${path}.${key}`, issues);
   if (hasOwn(value, 'deathReason')) stringValue(value.deathReason, `${path}.deathReason`, issues); if (hasOwn(value, 'timeUnit') && !['year', 'month', 'day'].includes(value.timeUnit as string)) addIssue(issues, `${path}.timeUnit`, 'invalid_value', 'unknown time unit');
   if (hasOwn(value, 'investments')) validateInvestments(value.investments, `${path}.investments`, issues); if (hasOwn(value, 'flags')) validateFlags(value.flags, `${path}.flags`, issues); if (hasOwn(value, 'traits')) { if (!Array.isArray(value.traits)) addIssue(issues, `${path}.traits`, 'invalid_type', 'must be an array'); else value.traits.forEach((trait, index) => { if (typeof trait !== 'string' || !TRAIT_IDS.has(trait)) addIssue(issues, `${path}.traits[${index}]`, 'invalid_value', 'unknown trait'); }); }

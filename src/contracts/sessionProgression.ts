@@ -81,9 +81,6 @@ export interface PlayerSummaryDto {
   name: string;
   age: number;
   martialPower: number;
-  externalSkill: number;
-  internalSkill: number;
-  qinggong: number;
   chivalry: number;
   constitution: number;
   comprehension: number;

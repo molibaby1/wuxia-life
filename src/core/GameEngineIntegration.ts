@@ -108,9 +108,6 @@ export class GameEngineIntegration {
         gender: 'male',
         age: 0,
         martialPower: 0,
-        externalSkill: 0,
-        internalSkill: 0,
-        qinggong: 0,
         chivalry: 0,
         charisma: 10,
         constitution: 10,
@@ -268,9 +265,6 @@ export class GameEngineIntegration {
         player.gender = nextState.player.gender;
         player.age = nextState.player.age;
         player.martialPower = nextState.player.martialPower;
-        player.externalSkill = nextState.player.externalSkill;
-        player.internalSkill = nextState.player.internalSkill;
-        player.qinggong = nextState.player.qinggong;
         player.chivalry = nextState.player.chivalry;
         player.charisma = nextState.player.charisma;
         player.constitution = nextState.player.constitution;

@@ -17,7 +17,6 @@ export const dailyEvents: DailyEventConfig[] = [
           text: '你照常起身练功，一招一式都比昨日更稳。',
           statEffects: [
             { stat: 'martialPower', value: 1 },
-            { stat: 'externalSkill', value: 1 },
           ],
         },
       ],

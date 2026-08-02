@@ -14,6 +14,28 @@ import type {
 import { CHALLENGE_SCENES, getChallengeScene } from '../data/challengeScenes';
 import { difficultyManager } from './DifficultyManager';
 
+/** Canonical stats currently referenced by formal Challenge configs. */
+export const CHALLENGE_MODIFIABLE_STATS = new Set([
+  'martialPower',
+  'constitution',
+  'comprehension',
+  'knowledge',
+  'charisma',
+  'businessAcumen',
+  'connections',
+] as const);
+
+type ChallengeModifiableStat = typeof CHALLENGE_MODIFIABLE_STATS extends Set<infer T> ? T : never;
+
+function isChallengeModifiableStat(stat: string): stat is ChallengeModifiableStat {
+  return (CHALLENGE_MODIFIABLE_STATS as Set<string>).has(stat);
+}
+
+function readChallengeStat(playerStats: PlayerStats, stat: ChallengeModifiableStat): number {
+  const record = playerStats as unknown as Record<string, number | undefined>;
+  return Number(record[stat] ?? 0);
+}
+
 /**
  * 计算挑战失败概率
  *
@@ -22,6 +44,7 @@ import { difficultyManager } from './DifficultyManager';
  * 能力修正规则:
  * - 能力 < 合格阈值: +20%
  * - 能力 >= 优秀阈值: -failureRateReduction
+ * - 未知 / 非 allowlist key: 跳过，不参与 modifier
  */
 export function calculateFailureProbability(
   scene: ChallengeScene,
@@ -33,31 +56,31 @@ export function calculateFailureProbability(
   let totalModifier = 1.0;
 
   for (const stat of scene.relevantStats) {
-    const statValue = (playerStats as any)[stat] || 0;
+    if (!isChallengeModifiableStat(stat)) continue;
     const threshold = scene.thresholds[stat];
+    if (!threshold) continue;
 
-    if (threshold) {
-      let status: 'insufficient' | 'qualified' | 'excellent' = 'qualified';
-      let modifier = 0;
+    const statValue = readChallengeStat(playerStats, stat);
+    let status: 'insufficient' | 'qualified' | 'excellent' = 'qualified';
+    let modifier = 0;
 
-      if (statValue < threshold.qualified) {
-        status = 'insufficient';
-        modifier = 0.2;
-        totalModifier += 0.2;
-      } else if (statValue >= threshold.excellent) {
-        status = 'excellent';
-        modifier = -threshold.failureRateReduction;
-        totalModifier -= threshold.failureRateReduction;
-      }
-
-      abilityAssessment.push({
-        stat,
-        value: statValue,
-        threshold: threshold.qualified,
-        status,
-        modifier
-      });
+    if (statValue < threshold.qualified) {
+      status = 'insufficient';
+      modifier = 0.2;
+      totalModifier += 0.2;
+    } else if (statValue >= threshold.excellent) {
+      status = 'excellent';
+      modifier = -threshold.failureRateReduction;
+      totalModifier -= threshold.failureRateReduction;
     }
+
+    abilityAssessment.push({
+      stat,
+      value: statValue,
+      threshold: threshold.qualified,
+      status,
+      modifier
+    });
   }
 
   const difficultyCoefficient = difficultyManager.config.failureProbabilityCoefficient;

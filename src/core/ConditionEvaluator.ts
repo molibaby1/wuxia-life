@@ -44,9 +44,6 @@ export class ConditionEvaluator implements IConditionEvaluator {
   static readonly DIRECT_PLAYER_PROPERTIES = new Set([
     'age',
     'martialPower',
-    'externalSkill',
-    'internalSkill',
-    'qinggong',
     'constitution',
     'charisma',
     'comprehension',

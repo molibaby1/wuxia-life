@@ -1,7 +1,7 @@
 import { EARLY_CHILDHOOD_MAX_AGE, INFANT_MAX_AGE } from '../../p16/childhoodAgency';
 
 const INFANT_ALLOWED_STATS = new Set(['constitution', 'comprehension']);
-const EARLY_FORBIDDEN_STATS = new Set(['chivalry', 'internalSkill', 'martialPower']);
+const EARLY_FORBIDDEN_STATS = new Set(['chivalry', 'martialPower']);
 
 export function clampActionDeltasForAge(
   age: number,

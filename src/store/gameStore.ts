@@ -11,9 +11,6 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     sect: null,
     
     martialPower: 0,
-    externalSkill: 0,
-    internalSkill: 0,
-    qinggong: 0,
     
     chivalry: 0,
     constitution: 0,

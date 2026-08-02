@@ -78,11 +78,6 @@
           {
             "type": "event_record",
             "target": "fight_bandits"
-          },
-          {
-            "type": "lifepath_add_focus",
-            "focusType": "martial",
-            "value": 5
           }
         ]
       },
@@ -201,11 +196,6 @@
             "value": true
           },
           {
-            "type": "lifepath_add_focus",
-            "focusType": "martial",
-            "value": 10
-          },
-          {
             "type": "lifepath_record_achievement",
             "achievement": "saved_village",
             "description": "拯救村庄"
@@ -246,11 +236,6 @@
           {
             "type": "event_record",
             "target": "organize_villagers"
-          },
-          {
-            "type": "lifepath_add_focus",
-            "focusType": "leadership",
-            "value": 10
           }
         ]
       }

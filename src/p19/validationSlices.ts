@@ -100,7 +100,6 @@ export function runEndgameCategoryComparisonSlice(): EndgameCategoryComparisonSl
     achievements: [],
     relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const factionReport = buildEndgameCategoryReport(factionHeavy);
 
@@ -122,7 +121,6 @@ export function runEndgameCategoryComparisonSlice(): EndgameCategoryComparisonSl
     achievements: [],
     relationships: { allies: ['a'], enemies: [], mentors: [], disciples: ['d1', 'd2'] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const legacyReport = buildEndgameCategoryReport(legacyHeavy);
 

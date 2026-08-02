@@ -22,7 +22,6 @@ import type {
   KarmaChange,
   EventDefinition,
   FactionType,
-  FocusType,
   HealthStatus,
   StatusId,
 } from '../types/eventTypes';
@@ -193,7 +192,6 @@ export class EventExecutor implements IEventExecutor {
     
     // 新增：人生轨迹系统处理器
     this.handlers.set(EffectType.SET_FACTION, new SetFactionHandler());
-    this.handlers.set(EffectType.LIFEPATH_ADD_FOCUS, new LifepathAddFocusHandler());
     this.handlers.set(EffectType.LIFEPATH_RECORD_ACHIEVEMENT, new LifepathRecordAchievementHandler());
     this.handlers.set(EffectType.LIFEPATH_ADD_COMMITMENT, new LifepathAddCommitmentHandler());
     this.handlers.set(EffectType.LIFEPATH_ADD_RELATIONSHIP, new LifepathAddRelationshipHandler());
@@ -857,33 +855,6 @@ export class SetFactionHandler implements EffectHandler {
       lifePath: {
         ...state.lifePath!,
         faction,
-      },
-    };
-  }
-}
-
-/**
- * 添加专注度处理器
- */
-export class LifepathAddFocusHandler implements EffectHandler {
-  async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const { target, value = 1 } = effect;
-    const focusType: FocusType = target as FocusType;
-    
-    if (!state.lifePath) {
-      state = LifePathManager.initialize(state);
-    }
-    
-    const currentFocus = state.lifePath.focus || { martial: 0, business: 0, academic: 0, leadership: 0 };
-    
-    return {
-      ...state,
-      lifePath: {
-        ...state.lifePath!,
-        focus: {
-          ...currentFocus,
-          [focusType]: (currentFocus[focusType] || 0) + value,
-        },
       },
     };
   }

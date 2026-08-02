@@ -89,7 +89,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
         achievements: [],
         relationships: { allies: ['a1'], enemies: [], mentors: ['m1'], disciples: ['d1'] },
         commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-        focus: { martial: 0, business: 0, academic: 1, leadership: 0.2 },
       },
     };
   }
@@ -108,7 +107,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
         achievements: [],
         relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
         commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
-        focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
       },
     };
   }
@@ -127,7 +125,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
         achievements: [],
         relationships: { allies: ['t1'], enemies: [], mentors: [], disciples: [] },
         commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-        focus: { martial: 0, business: 1, academic: 0, leadership: 0.3 },
       },
     };
   }

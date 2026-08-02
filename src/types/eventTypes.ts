@@ -94,9 +94,6 @@ export enum EffectType {
   /** 设置阵营 */
   SET_FACTION = 'set_faction',
   
-  /** 添加专注度 */
-  LIFEPATH_ADD_FOCUS = 'lifepath_add_focus',
-  
   /** 记录成就 */
   LIFEPATH_RECORD_ACHIEVEMENT = 'lifepath_record_achievement',
   
@@ -1069,11 +1066,6 @@ export type LifeStage = 'growth' | 'development' | 'achievement' | 'legacy';
 export type FactionType = string;
 
 /**
- * 专注度类型
- */
-export type FocusType = 'martial' | 'business' | 'academic' | 'leadership';
-
-/**
  * 人生轨迹
  * 
  * 追踪玩家的核心人生选择、身份、阵营和成长轨迹，
@@ -1107,13 +1099,6 @@ export interface LifePath {
     swornEnemies: string[]; // 誓敌
   };
   
-  // 专注度（限制多修）
-  focus: {
-    martial: number;   // 武学专注度 (0-100)
-    business: number;  // 商业专注度 (0-100)
-    academic: number;  // 学术专注度 (0-100)
-    leadership: number; // 领导力专注度 (0-100)
-  };
 }
 
 /**

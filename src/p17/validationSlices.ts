@@ -80,7 +80,6 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
     achievements: [],
     relationships: { allies: [], enemies: ['rival_mo'], mentors: [], disciples: [] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['rival_mo'] },
-    focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
   };
   const feudReport = buildLaterLifeConsequenceReport(
     feudEnemy,

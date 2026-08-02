@@ -121,7 +121,6 @@ export function assembleP17GateReport(
       achievements: [],
       relationships: { allies: [], enemies: ['rival_mo'], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['rival_mo'] },
-      focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
     },
   });
   const orthodoxState = makeSampleState({

@@ -111,7 +111,6 @@ function testEndgameCategorySelection(): void {
       achievements: [],
       relationships: { allies: ['a'], enemies: [], mentors: [], disciples: ['d1'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
   const category = selectEndgameCategory(legendary);
@@ -128,7 +127,6 @@ function testEndgameCategorySelection(): void {
       achievements: [],
       relationships: { allies: [], enemies: ['e'], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e'] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
   const infamousCategory = selectEndgameCategory(infamous);

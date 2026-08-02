@@ -94,7 +94,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
     achievements: [],
     relationships: { allies: [], enemies: [], mentors: [], disciples: ['a', 'b'] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const investedReport = buildLaterLifeLegacyReport(invested, new Set(['legacy', 'continuity']), 50);
 
@@ -111,7 +110,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
     achievements: [],
     relationships: { allies: [], enemies: [], mentors: [], disciples: ['x', 'y', 'z'] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const neglectedReport = buildLaterLifeLegacyReport(neglected, new Set(['legacy', 'decline']), 50);
 
@@ -177,7 +175,6 @@ export function runInheritedBurdenComparisonSlice(): InheritedBurdenComparisonSl
     achievements: [],
     relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['nemesis'] },
-    focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
   };
   const withReport = buildLaterLifeLegacyReport(withBurdenState, new Set(['legacy', 'feud', 'obligation']), 52);
 
@@ -214,7 +211,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
     achievements: [],
     relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1', 'd2'] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const weakLegacyReport = buildLaterLifeLegacyReport(
     highAchievement,
@@ -240,7 +236,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
     achievements: [],
     relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1', 'd2', 'd3'] },
     commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-    focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
   };
   const strongReport = buildLaterLifeLegacyReport(
     strongCultivation,

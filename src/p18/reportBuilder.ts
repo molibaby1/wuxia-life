@@ -133,7 +133,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['disciple_a', 'disciple_b'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0.5 },
     },
   });
 
@@ -160,7 +159,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['old_enemy'] },
-      focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
     },
   });
 
@@ -181,7 +179,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1', 'd2', 'd3'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
     },
   });
 

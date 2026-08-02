@@ -31,12 +31,6 @@ export class LifePathManager {
         mustProtect: [],
         swornEnemies: []
       },
-      focus: {
-        martial: 0,
-        business: 0,
-        academic: 0,
-        leadership: 0
-      }
     };
   }
 
@@ -100,19 +94,6 @@ export class LifePathManager {
       }
     }
 
-    // 专注度检查：如果某项专注度已经很高，不能突然转换
-    if (lifePath.focus.martial > 80) {
-      if (['merchant', 'scholar', 'official'].includes(newIdentity)) {
-        return false;
-      }
-    }
-
-    if (lifePath.focus.business > 80) {
-      if (['hero', 'assassin', 'beggar'].includes(newIdentity)) {
-        return false;
-      }
-    }
-
     return true;
   }
 
@@ -152,10 +133,6 @@ export class LifePathManager {
         lifePath.commitments.mustProtect.push('common_people');
         break;
 
-      case 'created_sect':
-        lifePath.focus.leadership = Math.min(100, lifePath.focus.leadership + 30);
-        break;
-
       case 'became_hero':
         lifePath.faction = 'orthodox';
         lifePath.primaryIdentity = 'hero';
@@ -167,30 +144,6 @@ export class LifePathManager {
         lifePath.commitments.cannotJoin.push('zhengdao');
         break;
     }
-  }
-
-  /**
-   * 增加专注度
-   */
-  static addFocus(
-    state: GameState,
-    type: 'martial' | 'business' | 'academic' | 'leadership',
-    amount: number
-  ): GameState {
-    if (!state.lifePath) {
-      state.lifePath = this.create();
-    }
-
-    const { lifePath } = state;
-    const oldValue = lifePath.focus[type];
-    lifePath.focus[type] = Math.min(100, lifePath.focus[type] + amount);
-
-    if (oldValue < 50 && lifePath.focus[type] >= 50) {
-    }
-    if (oldValue < 80 && lifePath.focus[type] >= 80) {
-    }
-
-    return state;
   }
 
   /**
@@ -239,15 +192,7 @@ export class LifePathManager {
       }
     }
 
-    // 4. 检查专注度
-    if (requirements.minFocus) {
-      const { type, value } = requirements.minFocus;
-      if (lifePath.focus[type] < value) {
-        return false;
-      }
-    }
-
-    // 5. 检查成就要求
+    // 4. 检查成就要求
     if (requirements.requiredAchievements) {
       for (const achievement of requirements.requiredAchievements) {
         if (!lifePath.achievements.includes(achievement)) {
@@ -256,7 +201,7 @@ export class LifePathManager {
       }
     }
 
-    // 6. 检查人生阶段
+    // 5. 检查人生阶段
     if (requirements.lifeStage) {
       if (lifePath.lifeStage !== requirements.lifeStage) {
         return false;
@@ -387,12 +332,6 @@ export class LifePathManager {
         mustProtect: [],
         swornEnemies: []
       },
-      focus: data.focus || {
-        martial: 0,
-        business: 0,
-        academic: 0,
-        leadership: 0
-      }
     };
   }
 }

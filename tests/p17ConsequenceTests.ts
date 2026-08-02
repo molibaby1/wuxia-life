@@ -81,7 +81,6 @@ function testRelationshipPatternsDiffer(): void {
       achievements: [],
       relationships: { allies: [], enemies: ['x'], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['x'] },
-      focus: { martial: 0, social: 0, wealth: 0, comprehension: 0 },
     },
   });
   const obligation = makeState({ flags: { has_life_debt: true }, player: { flags: { has_life_debt: true } } as GameState['player'] });

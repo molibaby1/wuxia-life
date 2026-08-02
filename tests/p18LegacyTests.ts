@@ -98,7 +98,6 @@ function testSuccessorRolesAndChannels(): void {
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['a', 'b'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
   const burden = makeState({
@@ -114,7 +113,6 @@ function testSuccessorRolesAndChannels(): void {
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['enemy'] },
-      focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
     },
   });
 
@@ -160,7 +158,6 @@ function testCultivationPressure(): void {
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1', 'd2', 'd3'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
     },
   });
 
@@ -187,7 +184,6 @@ function testLegacyOutcomes(): void {
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
   const rupture = makeState({

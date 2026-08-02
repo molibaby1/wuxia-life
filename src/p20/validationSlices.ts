@@ -163,7 +163,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       achievements: [],
       relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1'] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
 
@@ -187,7 +186,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       achievements: [],
       relationships: { allies: ['a1'], enemies: [], mentors: ['m1'], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 0, business: 0, academic: 1, leadership: 0.2 },
     },
   });
 
@@ -211,7 +209,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       achievements: [],
       relationships: { allies: ['t1'], enemies: [], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-      focus: { martial: 0, business: 1, academic: 0, leadership: 0.3 },
     },
   });
 
@@ -231,7 +228,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       achievements: [],
       relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
-      focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
     },
   });
 
@@ -341,7 +337,6 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
           achievements: [],
           relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
           commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
-          focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
         },
       }),
     },
@@ -450,7 +445,6 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
           achievements: [],
           relationships: { allies: [], enemies: ['e1'], mentors: [], disciples: [] },
           commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['e1'] },
-          focus: { martial: 1, business: 0, academic: 0, leadership: 0 },
         },
       }),
     },

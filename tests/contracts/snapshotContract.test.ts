@@ -31,13 +31,16 @@ const REQUIRED_METADATA_KEYS: (keyof GameStateSnapshotMetadata)[] = [
   'sourcePlatform',
 ];
 
-const REQUIRED_STATE_KEYS = ['player', 'facts', 'flags', 'relations', 'eventHistory'] as const;
+const REQUIRED_STATE_KEYS = ['player', 'facts', 'flags', 'relations', 'eventHistory', 'actionHistory', 'actionFocusStreak'] as const;
 
 const REQUIRED_PLAYER_KEYS = [
   'name',
   'age',
   'gender',
   'alive',
+  'sect',
+  'title',
+  'spouse',
   'investments',
   'traits',
   'healthStatus',
@@ -156,15 +159,41 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         age: 1,
         gender: 'male',
         alive: true,
+        sect: null,
+        title: null,
+        sect: null,
+        title: null,
+        martialPower: 0,
+        externalSkill: 0,
+        internalSkill: 0,
+        qinggong: 0,
+        chivalry: 0,
+        constitution: 0,
+        comprehension: 0,
+        reputation: 0,
+        money: 0,
+        knowledge: 0,
+        charisma: 0,
+        businessAcumen: 0,
+        influence: 0,
+        connections: 0,
+        martialHeritage: 0,
+        scholarlyHeritage: 0,
+        merchantNetwork: 0,
         investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
+        flags: {},
+        children: 0,
         traits: [],
         healthStatus: 'healthy',
         statuses: [],
         lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0 },
+        spouse: null,
       },
       flags: {},
       relations: {},
       eventHistory: [],
+      actionHistory: [],
+      actionFocusStreak: { category: null, count: 0 },
     },
   };
 }
@@ -297,7 +326,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.9\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.11\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

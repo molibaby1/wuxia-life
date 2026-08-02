@@ -118,6 +118,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { saveManager, type SaveData } from '../core/SaveManager';
+import { defaultSnapshotConverter } from '../headless/snapshot/SnapshotConverter';
 import { gameEngine } from '../core/GameEngineIntegration';
 
 const emits = defineEmits<{
@@ -159,7 +160,7 @@ const autoSaveNow = () => {
 const loadSave = (saveId: string) => {
   const save = saveManager.loadGame(saveId);
   if (save) {
-    emits('gameLoaded', save.gameData);
+    emits('gameLoaded', defaultSnapshotConverter.fromSnapshot(save.snapshot));
     alert('游戏已加载！');
   }
 };
@@ -168,7 +169,7 @@ const loadSave = (saveId: string) => {
 const loadAutoSave = () => {
   const autoSave = saveManager.loadAutoSave();
   if (autoSave) {
-    emits('gameLoaded', autoSave.gameData);
+    emits('gameLoaded', defaultSnapshotConverter.fromSnapshot(autoSave.snapshot));
     saveManager.clearAutoSave();
     hasAutoSave.value = false;
     alert('自动存档已加载！');

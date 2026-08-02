@@ -1,77 +1,33 @@
 /**
- * 存档管理器 - 本地存储集成
- * 
- * 功能：
- * - 游戏存档保存
- * - 游戏存档加载
- * - 存档列表管理
- * - 自动保存
- * - 存档导入/导出
+ * Canonical browser persistence boundary.
+ *
+ * Browser and headless saves persist the same Snapshot 3.11.0 shape. Legacy
+ * raw GameState/P2 saves are rejected; no migration or compatibility read is
+ * provided.
  */
 
+import type { GameStateSnapshot } from '../contracts/gameStateSnapshot';
+import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../contracts/gameStateSnapshot';
 import type { GameState } from '../types/eventTypes';
+import { defaultSnapshotConverter } from '../headless/snapshot/SnapshotConverter';
+import { assertCanonicalSaveData, assertCanonicalSaveExport, CanonicalValidationError } from '../contracts/validation/canonicalGameStateValidation';
 
-export const P2_SAVE_SCHEMA_VERSION = '2.0.0-p2';
-export const P2_MIN_READABLE_SAVE_VERSION = '1.0.0';
-export const P2_MAX_READABLE_SAVE_VERSION = '2.x';
+const isBrowser = typeof window !== 'undefined' && !!window.localStorage;
 
-const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
-
-function rejectLegacyRouteLifecycleFields(value: unknown): void {
-  if (!value || typeof value !== 'object') return;
-  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
-    if (key in (value as Record<string, unknown>)) {
-      throw new Error(`Incompatible save: legacy route lifecycle field ${key} is not supported`);
-    }
-  }
+class MemoryStorage {
+  private readonly map = new Map<string, string>();
+  getItem(key: string): string | null { return this.map.get(key) ?? null; }
+  setItem(key: string, value: string): void { this.map.set(key, value); }
+  removeItem(key: string): void { this.map.delete(key); }
 }
 
-export type SaveCompatibilityStatus = 'supported' | 'unsupported_missing_version' | 'unsupported_legacy_version' | 'unsupported_future_version';
-
-export interface SaveCompatibilityResult {
-  status: SaveCompatibilityStatus;
-  supported: boolean;
-}
-
-function parseSemver(version: string): { major: number; minor: number; patch: number } | null {
-  const normalized = version.trim().split('-')[0];
-  const match = normalized.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) {
-    return null;
-  }
-  return {
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
-  };
-}
-
-export function evaluateSaveCompatibility(saveVersion?: string): SaveCompatibilityResult {
-  if (!saveVersion) {
-    return { status: 'unsupported_missing_version', supported: false };
-  }
-
-  const parsed = parseSemver(saveVersion);
-  if (!parsed) {
-    return { status: 'unsupported_legacy_version', supported: false };
-  }
-
-  if (parsed.major < 1) {
-    return { status: 'unsupported_legacy_version', supported: false };
-  }
-
-  if (parsed.major > 2) {
-    return { status: 'unsupported_future_version', supported: false };
-  }
-
-  return { status: 'supported', supported: true };
-}
+const memoryStorage = new MemoryStorage();
 
 export interface SaveData {
   id: string;
   name: string;
   timestamp: number;
-  gameData: GameState;
+  snapshot: GameStateSnapshot;
   metadata: SaveMetadata;
 }
 
@@ -79,303 +35,149 @@ export interface SaveMetadata {
   playerAge: number;
   playerName: string;
   eventCount: number;
-  playTime: number; // 游戏时长（秒）
+  playTime: number;
 }
 
-export function applyP2SaveVersionMarker(gameState: GameState): GameState {
+function storage(): Storage | MemoryStorage {
+  return isBrowser ? localStorage : memoryStorage;
+}
+
+function sourcePlatform(): 'web-browser' | 'node-headless' {
+  return isBrowser ? 'web-browser' : 'node-headless';
+}
+
+function createSaveData(gameState: GameState, id: string, name: string): SaveData {
+  const snapshot = defaultSnapshotConverter.toSnapshot(gameState, {
+    eventCatalogVersion: '1.0.0',
+    sourcePlatform: sourcePlatform(),
+    time: { now: () => Date.now() },
+  });
   return {
-    ...gameState,
-    saveVersion: P2_SAVE_SCHEMA_VERSION,
-    lastSavedAt: Date.now(),
-    gameTimestamp: Date.now(),
+    id,
+    name,
+    timestamp: Date.now(),
+    snapshot,
+    metadata: {
+      playerAge: snapshot.state.player.age,
+      playerName: snapshot.state.player.name,
+      eventCount: snapshot.state.eventHistory.length,
+      playTime: snapshot.state.eventHistory.length * 30,
+    },
   };
 }
 
-// 检测是否在浏览器环境（须使用真实 window.localStorage，避免 Node 实验性 globalThis.localStorage）
-const isBrowser = typeof window !== 'undefined' && !!window.localStorage;
-
-/**
- * 非浏览器环境（单元测试、CLI 模拟）使用进程内 Map，避免在源码中静态 import `fs`/`path`
- * 导致 Vite 将 Node 内建模块 externalize 进浏览器包并产生构建告警。
- */
-class MemoryStorage {
-  private readonly map = new Map<string, string>();
-
-  getItem(key: string): string | null {
-    return this.map.has(key) ? this.map.get(key)! : null;
-  }
-
-  setItem(key: string, value: string): void {
-    this.map.set(key, value);
-  }
-
-  removeItem(key: string): void {
-    this.map.delete(key);
+function parseSaveData(value: unknown): SaveData | null {
+  try {
+    assertCanonicalSaveData(value);
+    defaultSnapshotConverter.fromSnapshot(value.snapshot);
+    return value as SaveData;
+  } catch (error) {
+    if (!(error instanceof CanonicalValidationError)) return null;
+    return null;
   }
 }
-
-const memoryStorage = new MemoryStorage();
 
 export class SaveManager {
   private static instance: SaveManager;
   private readonly STORAGE_KEY = 'wuxia_life_saves';
   private readonly AUTO_SAVE_KEY = 'wuxia_life_auto_save';
-  private readonly MAX_SAVES = 10; // 最多保存 10 个存档
-  
+  private readonly MAX_SAVES = 10;
+
   private constructor() {}
-  
+
   public static getInstance(): SaveManager {
-    if (!SaveManager.instance) {
-      SaveManager.instance = new SaveManager();
-    }
+    if (!SaveManager.instance) SaveManager.instance = new SaveManager();
     return SaveManager.instance;
   }
-  
-  /**
-   * 保存游戏
-   */
-  public saveGame(gameState: GameState, name: string = '自动存档'): string {
-    rejectLegacyRouteLifecycleFields(gameState);
-    const normalizedGameState = applyP2SaveVersionMarker(gameState);
-    const saveData: SaveData = {
-      id: this.generateSaveId(),
-      name,
-      timestamp: Date.now(),
-      gameData: normalizedGameState,
-      metadata: {
-        playerAge: normalizedGameState.player?.age || 0,
-        playerName: normalizedGameState.player?.name || '未知',
-        eventCount: normalizedGameState.player?.events?.length || 0,
-        playTime: this.calculatePlayTime(normalizedGameState),
-      },
-    };
-    
-    // 获取现有存档
+
+  public saveGame(gameState: GameState, name = '自动存档'): string {
+    const saveData = createSaveData(gameState, this.generateSaveId(), name);
     const saves = this.getAllSaves();
-    
-    // 添加新存档
     saves.unshift(saveData);
-    
-    // 限制存档数量
-    if (saves.length > this.MAX_SAVES) {
-      saves.pop();
-    }
-    
-    // 保存到存储
-    const storage = isBrowser ? localStorage : memoryStorage;
-    storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
-    
-    
+    storage().setItem(this.STORAGE_KEY, JSON.stringify(saves.slice(0, this.MAX_SAVES)));
     return saveData.id;
   }
-  
-  /**
-   * 加载游戏
-   */
+
   public loadGame(saveId: string): SaveData | null {
-    const saves = this.getAllSaves();
-    const save = saves.find(s => s.id === saveId);
-    
-    if (save) {
-      const compatibility = evaluateSaveCompatibility(save.gameData?.saveVersion);
-      rejectLegacyRouteLifecycleFields(save.gameData);
-      if (!compatibility.supported) {
-        console.warn(
-          `[SaveManager] 拒绝加载不兼容存档：${saveId}（version=${save.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
-        );
-        return null;
-      }
-      return save;
-    }
-    
-    console.warn(`[SaveManager] 未找到存档：${saveId}`);
-    return null;
+    const save = this.getAllSaves().find(item => item.id === saveId);
+    if (!save) return null;
+    return parseSaveData(save);
   }
-  
-  /**
-   * 获取所有存档
-   */
+
   public getAllSaves(): SaveData[] {
     try {
-      const storage = isBrowser ? localStorage : memoryStorage;
-      const savesJson = storage.getItem(this.STORAGE_KEY);
-      if (!savesJson) return [];
-      
-      const saves: SaveData[] = JSON.parse(savesJson);
-      return saves.sort((a, b) => b.timestamp - a.timestamp);
-    } catch (error) {
-      console.error('[SaveManager] 读取存档失败:', error);
+      const raw = storage().getItem(this.STORAGE_KEY);
+      if (!raw) return [];
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map(parseSaveData).filter((save): save is SaveData => save !== null).sort((a, b) => b.timestamp - a.timestamp);
+    } catch {
       return [];
     }
   }
-  
-  /**
-   * 删除存档
-   */
+
   public deleteSave(saveId: string): boolean {
     const saves = this.getAllSaves();
-    const filteredSaves = saves.filter(s => s.id !== saveId);
-    
-    if (filteredSaves.length !== saves.length) {
-      const storage = isBrowser ? localStorage : memoryStorage;
-      storage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSaves));
-      return true;
-    }
-    
-    return false;
+    const filtered = saves.filter(save => save.id !== saveId);
+    if (filtered.length === saves.length) return false;
+    storage().setItem(this.STORAGE_KEY, JSON.stringify(filtered));
+    return true;
   }
-  
-  /**
-   * 自动保存
-   */
+
   public autoSave(gameState: GameState): void {
-    rejectLegacyRouteLifecycleFields(gameState);
-    const normalizedGameState = applyP2SaveVersionMarker(gameState);
-    const saveData: SaveData = {
-      id: this.generateSaveId(),
-      name: '自动存档',
-      timestamp: Date.now(),
-      gameData: normalizedGameState,
-      metadata: {
-        playerAge: normalizedGameState.player?.age || 0,
-        playerName: normalizedGameState.player?.name || '未知',
-        eventCount: normalizedGameState.player?.events?.length || 0,
-        playTime: this.calculatePlayTime(normalizedGameState),
-      },
-    };
-    
-    try {
-      const storage = isBrowser ? localStorage : memoryStorage;
-      storage.setItem(this.AUTO_SAVE_KEY, JSON.stringify(saveData));
-    } catch (error) {
-      console.error('[SaveManager] 自动保存失败:', error);
-    }
+    const saveData = createSaveData(gameState, this.generateSaveId(), '自动存档');
+    storage().setItem(this.AUTO_SAVE_KEY, JSON.stringify(saveData));
   }
-  
-  /**
-   * 加载自动存档
-   */
+
   public loadAutoSave(): SaveData | null {
     try {
-      const storage = isBrowser ? localStorage : memoryStorage;
-      const autoSaveJson = storage.getItem(this.AUTO_SAVE_KEY);
-      if (!autoSaveJson) return null;
-      
-      const saveData: SaveData = JSON.parse(autoSaveJson);
-      const compatibility = evaluateSaveCompatibility(saveData.gameData?.saveVersion);
-      rejectLegacyRouteLifecycleFields(saveData.gameData);
-      if (!compatibility.supported) {
-        console.warn(
-          `[SaveManager] 拒绝加载不兼容自动存档（version=${saveData.gameData?.saveVersion || 'missing'}，supported=${P2_MIN_READABLE_SAVE_VERSION}~${P2_MAX_READABLE_SAVE_VERSION}；历史全量迁移不在 P2 范围）`,
-        );
-        return null;
-      }
-      return saveData;
-    } catch (error) {
-      console.error('[SaveManager] 加载自动存档失败:', error);
+      const raw = storage().getItem(this.AUTO_SAVE_KEY);
+      return raw ? parseSaveData(JSON.parse(raw)) : null;
+    } catch {
       return null;
     }
   }
-  
-  /**
-   * 清除自动存档
-   */
-  public clearAutoSave(): void {
-    const storage = isBrowser ? localStorage : memoryStorage;
-    storage.removeItem(this.AUTO_SAVE_KEY);
-  }
-  
-  /**
-   * 导出存档
-   */
+
+  public clearAutoSave(): void { storage().removeItem(this.AUTO_SAVE_KEY); }
+
   public exportSave(saveId: string): string | null {
     const save = this.loadGame(saveId);
     if (!save) return null;
-    
-    const exportData = {
-      version: '1.0',
-      exportTime: Date.now(),
-      save: save,
-    };
-    
-    return JSON.stringify(exportData, null, 2);
+    return JSON.stringify({ version: GAME_STATE_SNAPSHOT_SCHEMA_VERSION, exportTime: Date.now(), save }, null, 2);
   }
-  
-  /**
-   * 导入存档
-   */
+
   public importSave(exportDataStr: string): boolean {
     try {
-      const exportData = JSON.parse(exportDataStr);
-      
-      if (!exportData.version || !exportData.save) {
-        throw new Error('无效的存档格式');
-      }
-      
-      const save: SaveData = exportData.save;
-      rejectLegacyRouteLifecycleFields(save.gameData);
-      save.id = this.generateSaveId();
-      save.timestamp = Date.now();
-      
+      const exported: unknown = JSON.parse(exportDataStr);
+      assertCanonicalSaveExport(exported);
+      const parsed = parseSaveData(exported.save);
+      if (!parsed) return false;
+      const save = { ...parsed, id: this.generateSaveId(), timestamp: Date.now() };
       const saves = this.getAllSaves();
       saves.unshift(save);
-      
-      if (saves.length > this.MAX_SAVES) {
-        saves.pop();
-      }
-      
-      const storage = isBrowser ? localStorage : memoryStorage;
-      storage.setItem(this.STORAGE_KEY, JSON.stringify(saves));
-      
+      storage().setItem(this.STORAGE_KEY, JSON.stringify(saves.slice(0, this.MAX_SAVES)));
       return true;
-    } catch (error) {
-      console.error('[SaveManager] 导入存档失败:', error);
+    } catch {
       return false;
     }
   }
-  
-  /**
-   * 清空所有存档
-   */
+
   public clearAllSaves(): void {
-    const storage = isBrowser ? localStorage : memoryStorage;
-    storage.removeItem(this.STORAGE_KEY);
-    storage.removeItem(this.AUTO_SAVE_KEY);
+    storage().removeItem(this.STORAGE_KEY);
+    storage().removeItem(this.AUTO_SAVE_KEY);
   }
-  
-  /**
-   * 计算游戏时长
-   */
-  private calculatePlayTime(gameState: GameState): number {
-    // 简单实现：根据事件数量估算
-    // 每个事件约 30 秒
-    const eventCount = gameState.player?.events?.length || 0;
-    return eventCount * 30;
-  }
-  
-  /**
-   * 生成存档 ID
-   */
-  private generateSaveId(): string {
-    return `save_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-  }
-  
-  /**
-   * 格式化游戏时长
-   */
+
   public formatPlayTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) {
-      return `${hours}小时${minutes % 60}分钟`;
-    }
-    if (minutes > 0) {
-      return `${minutes}分钟`;
-    }
+    if (hours > 0) return `${hours}小时${minutes % 60}分钟`;
+    if (minutes > 0) return `${minutes}分钟`;
     return `${seconds}秒`;
+  }
+
+  private generateSaveId(): string {
+    return `save_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }
 
-// 导出单例
 export const saveManager = SaveManager.getInstance();

@@ -6,7 +6,7 @@ import {
 } from '../src/core/activePlanning/annualPassiveMemory';
 import { reactive } from 'vue';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState, PlayerState } from '../src/types/eventTypes';
 
@@ -15,8 +15,11 @@ function assert(condition: boolean, message: string): void {
 }
 
 function merchantInfantState(age = 0): GameState {
+  const base = new GameEngineIntegration().getGameState();
   return {
+    ...base,
     player: {
+      ...base.player,
       age,
       comprehension: 10,
       constitution: 10,
@@ -27,10 +30,10 @@ function merchantInfantState(age = 0): GameState {
       flags: {},
       traits: [],
     } as PlayerState,
-    flags: { origin_merchant_family: true, origin_id: 'merchant_house' },
+    flags: { ...base.flags, origin_merchant_family: true, origin_id: 'merchant_house' },
     currentTime: { year: 1, month: 2, day: 3 },
     eventHistory: [],
-  } as GameState;
+  };
 }
 
 function testPrepareAnnualPassiveMemoryWithReactiveState(): void {

@@ -14,6 +14,7 @@
 
 import { gameEngine } from '../src/core/GameEngineIntegration';
 import { saveManager } from '../src/core/SaveManager';
+import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import { EndingSystem } from '../src/core/EndingSystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { getOriginId } from '../src/p20/stateAccess';
@@ -469,11 +470,12 @@ export class GameProcessSimulator {
       state.eventHistory = [];
     }
     if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
-      state.eventHistory.push({
+      const record = {
         eventId: selected.id,
         age: state.player?.age ?? ageBeforeEvent,
-        timestamp: state.currentTime ? { ...state.currentTime } : undefined,
-      });
+        ...(state.currentTime ? { timestamp: { ...state.currentTime } } : {}),
+      };
+      state.eventHistory.push(record);
     }
 
     this.log(`   童年被动推进：${selected.title}`);
@@ -1136,7 +1138,7 @@ export class GameProcessSimulator {
     }
 
     const beforeSaveSnapshot = this.buildConsistencySnapshot(this.gameState);
-    gameEngine.loadGameState(saveEntry.gameData);
+    gameEngine.loadGameState(defaultSnapshotConverter.fromSnapshot(saveEntry.snapshot));
     const restoredState = gameEngine.getGameState();
     this.gameState = restoredState;
     this.loadCount++;

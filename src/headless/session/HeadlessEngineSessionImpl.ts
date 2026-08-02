@@ -568,11 +568,12 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
         state.eventHistory = [];
       }
       if (shouldRecordPassiveNarrativeInHistory(historyEntry.id)) {
-        state.eventHistory.push({
+        const record = {
           eventId: historyEntry.id,
           age: state.player.age,
-          timestamp: state.currentTime ? { ...state.currentTime } : undefined,
-        });
+          ...(state.currentTime ? { timestamp: { ...state.currentTime } } : {}),
+        };
+        state.eventHistory.push(record);
       }
       appendPassiveTitleToHistory(state, displayedTitle ?? historyEntry.title);
       return { selected: historyEntry, deltas: appliedDeltas };

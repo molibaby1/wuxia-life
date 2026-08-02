@@ -22,9 +22,11 @@ import type {
   Investments,
   Relationship,
 } from '../types/eventTypes';
+import type { ActionFocusStreak, ActionHistoryEntry } from '../types/activeActionTypes';
+import type { OriginWorldviewShaping } from '../narrative/profile/types';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.9.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.11.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -51,26 +53,26 @@ export interface SnapshotPlayerState {
   gender: 'male' | 'female';
   alive: boolean;
 
-  martialPower?: number;
-  externalSkill?: number;
-  internalSkill?: number;
-  qinggong?: number;
-  chivalry?: number;
-  constitution?: number;
-  comprehension?: number;
-  sect?: string | null;
-  title?: string | null;
-  reputation?: number;
-  money?: number;
-  knowledge?: number;
-  charisma?: number;
-  businessAcumen?: number;
-  influence?: number;
+  martialPower: number;
+  externalSkill: number;
+  internalSkill: number;
+  qinggong: number;
+  chivalry: number;
+  constitution: number;
+  comprehension: number;
+  sect: string | null;
+  title: string | null;
+  reputation: number;
+  money: number;
+  knowledge: number;
+  charisma: number;
+  businessAcumen: number;
+  influence: number;
   wealth?: number;
-  connections?: number;
-  martialHeritage?: number;
-  scholarlyHeritage?: number;
-  merchantNetwork?: number;
+  connections: number;
+  martialHeritage: number;
+  scholarlyHeritage: number;
+  merchantNetwork: number;
   investments: Investments;
 
   traits: TraitId[];
@@ -78,15 +80,15 @@ export interface SnapshotPlayerState {
   statuses: StatusId[];
   lifeStates: PlayerLifeStates;
   relationships?: Relationship[];
-  spouse?: string | null;
-  children?: number;
+  spouse: string | null;
+  children: number;
   timeUnit?: 'year' | 'month' | 'day';
   monthProgress?: number;
   dayProgress?: number;
   deathReason?: string;
 
   /** @deprecated Prefer top-level `state.flags` (§6.2). */
-  flags?: Record<string, unknown>;
+  flags: Record<string, unknown>;
   /** @deprecated Prefer `state.eventHistory` (§6.2). */
   events?: unknown[];
   /** @deprecated Prefer `state.inventory` (§6.2). */
@@ -103,7 +105,7 @@ export interface SnapshotEventRecord {
   realTime?: number;
   selectedChoice?: string;
   /** Partial snapshot at event time; nested keys follow same contract rules (§9.3). */
-  stateSnapshot?: Partial<GameStateSnapshotState>;
+  stateSnapshot?: PartialGameStateSnapshotState;
   appliedEffects?: EffectDefinition[];
 }
 
@@ -130,6 +132,13 @@ export interface GameStateSnapshotState {
   lastSavedAt?: number;
   gameTimestamp?: number;
 
+  /** Active planning history required for future scheduling context. */
+  actionHistory: ActionHistoryEntry[];
+  /** Active planning streak required for future action availability. */
+  actionFocusStreak: ActionFocusStreak;
+  /** Childhood shaping accumulator; explicitly save-compatible. */
+  p16TendencyShaping?: OriginWorldviewShaping;
+
   /** Pending automatic story event ID for volatile state restoration across server restarts. */
   pendingStoryEventId?: string;
 
@@ -138,6 +147,14 @@ export interface GameStateSnapshotState {
   /** @deprecated Legacy alias; prefer `eventHistory` (§9.2). */
   events?: SnapshotEventRecord[];
 }
+
+/**
+ * Strict partial state used only inside eventHistory[*].stateSnapshot.
+ * Presence is optional, but every present key remains closed and validated.
+ */
+export type PartialGameStateSnapshotState = Omit<Partial<GameStateSnapshotState>, 'player'> & {
+  player?: Partial<SnapshotPlayerState>;
+};
 
 /** Required and optional snapshot envelope metadata (§3.1). */
 export interface GameStateSnapshotMetadata {

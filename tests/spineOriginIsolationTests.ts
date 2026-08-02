@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
-import { gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import {
   inferEventExclusivePrimaryFlag,
@@ -39,11 +39,13 @@ function assert(condition: boolean, message: string): void {
 }
 
 function buildState(flag: PrimaryOriginFamilyFlag, age: number, extraFlags: Record<string, boolean> = {}): GameState {
+  const base = new GameEngineIntegration().getGameState();
   const flags = { [flag]: true, ...extraFlags };
   return {
-    player: { age, flags, traits: [] },
-    flags,
-  } as GameState;
+    ...base,
+    player: { ...base.player, age, flags, traits: [] },
+    flags: { ...base.flags, ...flags },
+  };
 }
 
 function testPrimaryResolverScholarOverPoor(): void {

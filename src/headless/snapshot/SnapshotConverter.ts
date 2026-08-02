@@ -4,7 +4,14 @@
 
 import type { GameStateSnapshot, GameStateSnapshotMetadata } from '../../contracts/gameStateSnapshot';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../../contracts/gameStateSnapshot';
-import { findForbiddenHabitFlagPaths, validatePlayerLifeStates } from '../../contracts/validation/contractValidation';
+import {
+  assertCanonicalGameState,
+  assertCanonicalSnapshot,
+  CanonicalValidationError,
+  cloneCanonicalJsonValue,
+  CANONICAL_SNAPSHOT_PLAYER_KEYS,
+  CANONICAL_SNAPSHOT_STATE_KEYS,
+} from '../../contracts/validation/canonicalGameStateValidation';
 import type { GameState } from '../../types/eventTypes';
 import type { TimeSource } from '../adapters/timeSource';
 
@@ -35,16 +42,25 @@ export interface SnapshotConverter {
   fromSnapshot(snapshot: GameStateSnapshot): GameState;
 }
 
-const FORBIDDEN_TOP_LEVEL = ['statistics', 'currentEvent', 'availableChoices'] as const;
-const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
-
-function rejectLegacyRouteLifecycleFields(value: unknown): void {
-  if (!value || typeof value !== 'object') return;
-  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
-    if (key in (value as Record<string, unknown>)) {
-      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden legacy route lifecycle field: ${key}`);
+function assertBoundary(value: unknown, kind: 'state' | 'snapshot'): void {
+  try {
+    if (kind === 'state') assertCanonicalGameState(value);
+    else assertCanonicalSnapshot(value);
+  } catch (error) {
+    if (error instanceof CanonicalValidationError) {
+      const forbidden = error.issues.some(issue => issue.code === 'forbidden');
+      throw new SnapshotConversionError(forbidden ? 'SNAPSHOT_FORBIDDEN_FIELD' : 'SNAPSHOT_INVALID', error.message);
     }
+    throw error;
   }
+}
+
+function pickAllowed(source: Record<string, unknown>, keys: readonly string[]): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) result[key] = source[key];
+  }
+  return result;
 }
 
 export class DefaultSnapshotConverter implements SnapshotConverter {
@@ -56,44 +72,16 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
       time: TimeSource;
     },
   ): GameStateSnapshot {
-    if (!state.player?.name) {
-      throw new SnapshotConversionError('MISSING_PLAYER', 'Cannot serialize snapshot without player');
-    }
-    rejectLegacyRouteLifecycleFields(state);
-    const lifeStatesValidation = validatePlayerLifeStates(state.player.lifeStates);
-    if ('errors' in lifeStatesValidation) {
-      throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
-    }
+    assertBoundary(state, 'state');
     const now = options.time.now();
-    const {
-      player,
-      facts,
-      flags,
-      eventHistory,
-      relations,
-      lifePath,
-      identity,
-      karma,
-      criticalChoices,
-      achievements,
-      inventory,
-      ending,
-      currentTime,
-      saveVersion,
-      lastSavedAt,
-      gameTimestamp,
-    } = state;
-    const { flags: playerFlags, events: _legacyEvents, items: _legacyItems, ...playerCore } = player;
-    const runtimeFlagPaths = [
-      ...findForbiddenHabitFlagPaths(flags, 'state.flags'),
-      ...findForbiddenHabitFlagPaths(playerFlags, 'state.player.flags'),
-      ...findForbiddenHabitFlagPaths(eventHistory, 'state.eventHistory'),
-    ];
-    if (runtimeFlagPaths.length > 0) {
-      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden snapshot field: ${runtimeFlagPaths[0]}`);
-    }
-
-    return {
+    const player = cloneCanonicalJsonValue(pickAllowed(state.player as unknown as Record<string, unknown>, CANONICAL_SNAPSHOT_PLAYER_KEYS));
+    const snapshotState = cloneCanonicalJsonValue(pickAllowed(state as unknown as Record<string, unknown>, CANONICAL_SNAPSHOT_STATE_KEYS));
+    snapshotState.player = player;
+    snapshotState.facts = cloneCanonicalJsonValue(state.facts);
+    snapshotState.flags = cloneCanonicalJsonValue(state.flags);
+    snapshotState.relations = cloneCanonicalJsonValue(state.relations);
+    snapshotState.eventHistory = cloneCanonicalJsonValue(state.eventHistory);
+    const snapshot: GameStateSnapshot = {
       metadata: {
         schemaVersion: GAME_STATE_SNAPSHOT_SCHEMA_VERSION,
         engineVersion: 'p5-headless',
@@ -103,86 +91,33 @@ export class DefaultSnapshotConverter implements SnapshotConverter {
         sourcePlatform: options.sourcePlatform,
       },
       state: {
-        player: {
-          ...playerCore,
-          flags: playerFlags,
-        },
-        facts: { ...facts },
-        flags: { ...flags, ...(playerFlags ?? {}) },
-        relations,
-        eventHistory: [...(eventHistory ?? [])],
-        currentTime,
-        lifePath,
-        identity,
-        karma,
-        criticalChoices,
-        achievements,
-        inventory,
-        ending,
-        saveVersion,
-        lastSavedAt,
-        gameTimestamp,
-      },
+        ...snapshotState,
+        player: player as unknown as GameStateSnapshot['state']['player'],
+        facts: cloneCanonicalJsonValue(state.facts),
+        flags: cloneCanonicalJsonValue(state.flags),
+        relations: cloneCanonicalJsonValue(state.relations),
+        eventHistory: cloneCanonicalJsonValue(state.eventHistory),
+      } as GameStateSnapshot['state'],
     };
+    assertBoundary(snapshot, 'snapshot');
+    return snapshot;
   }
 
   fromSnapshot(snapshot: GameStateSnapshot): GameState {
-    if (snapshot.metadata.schemaVersion !== GAME_STATE_SNAPSHOT_SCHEMA_VERSION) {
-      throw new SnapshotConversionError(
-        'SNAPSHOT_INVALID',
-        `Unsupported snapshot schema: ${snapshot.metadata.schemaVersion}; expected ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
-      );
-    }
-    for (const key of FORBIDDEN_TOP_LEVEL) {
-      if (key in (snapshot.state as unknown as Record<string, unknown>)) {
-        throw new SnapshotConversionError(
-          'SNAPSHOT_FORBIDDEN_FIELD',
-          `Forbidden snapshot field: ${key}`,
-        );
-      }
-    }
-    rejectLegacyRouteLifecycleFields(snapshot.state);
-    const forbiddenPaths = [
-      ...findForbiddenHabitFlagPaths(snapshot.state.flags, 'state.flags'),
-      ...findForbiddenHabitFlagPaths(snapshot.state.player?.flags, 'state.player.flags'),
-      ...findForbiddenHabitFlagPaths(snapshot.state.eventHistory, 'state.eventHistory'),
-    ];
-    if (forbiddenPaths.length > 0) {
-      throw new SnapshotConversionError('SNAPSHOT_FORBIDDEN_FIELD', `Forbidden snapshot field: ${forbiddenPaths[0]}`);
-    }
-    const { player, facts, flags, ...rest } = snapshot.state;
-    if (!player?.name) {
-      throw new SnapshotConversionError('SNAPSHOT_INVALID', 'Snapshot missing player.name');
-    }
-    if ('energy' in (player as unknown as Record<string, unknown>)) {
-      throw new SnapshotConversionError(
-        'SNAPSHOT_FORBIDDEN_FIELD',
-        'Forbidden snapshot player field: energy',
-      );
-    }
-    if ('health' in (player as unknown as Record<string, unknown>)) {
-      throw new SnapshotConversionError(
-        'SNAPSHOT_FORBIDDEN_FIELD',
-        'Forbidden snapshot player field: health',
-      );
-    }
-    const lifeStatesValidation = validatePlayerLifeStates(player.lifeStates);
-    if ('errors' in lifeStatesValidation) {
-      throw new SnapshotConversionError('SNAPSHOT_INVALID', lifeStatesValidation.errors.join('; '));
-    }
-    const mergedFlags = { ...flags, ...(player.flags ?? {}) };
+    assertBoundary(snapshot, 'snapshot');
+    const state = cloneCanonicalJsonValue(pickAllowed(snapshot.state as unknown as Record<string, unknown>, CANONICAL_SNAPSHOT_STATE_KEYS));
+    const sourcePlayer = snapshot.state.player as unknown as Record<string, unknown>;
+    const player = cloneCanonicalJsonValue(pickAllowed(sourcePlayer, CANONICAL_SNAPSHOT_PLAYER_KEYS));
+    state.player = player;
     const hydrated: GameState = {
-      ...(rest as Omit<GameState, 'player' | 'flags' | 'facts'>),
-      facts: { ...facts },
-      player: {
-        ...player,
-        flags: mergedFlags,
-      } as GameState['player'],
-      flags: mergedFlags,
-      saveVersion: snapshot.state.saveVersion,
-      lastSavedAt: snapshot.metadata.updatedAt,
-      gameTimestamp: snapshot.metadata.updatedAt,
+      player: player as unknown as GameState['player'],
+      facts: state.facts as GameState['facts'],
+      flags: state.flags as GameState['flags'],
+      relations: state.relations as GameState['relations'],
+      eventHistory: state.eventHistory as GameState['eventHistory'],
     };
+    Object.assign(hydrated, state);
+    assertBoundary(hydrated, 'state');
     return hydrated;
   }
 }

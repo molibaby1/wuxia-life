@@ -11,9 +11,9 @@
  * @since 2026-03-12
  */
 
-import { reactive, isReactive } from 'vue';
+import { reactive } from 'vue';
 import { EventPriority } from '../types/eventTypes';
-import type { EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStates } from '../types/eventTypes';
+import type { CriticalChoices, EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStates } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
@@ -29,16 +29,6 @@ import { dailyEventSystem } from './DailyEventSystem';
 import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
 import type { NarrativeSchedulingContext } from '../p11/types';
 import { getNarrativeSchedulingMultiplier } from '../p11/schedulingPolicy';
-const LEGACY_ROUTE_LIFECYCLE_KEYS = ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'] as const;
-
-function rejectLegacyRouteLifecycleFields(value: unknown): void {
-  if (!value || typeof value !== 'object') return;
-  for (const key of LEGACY_ROUTE_LIFECYCLE_KEYS) {
-    if (key in (value as Record<string, unknown>)) {
-      throw new Error(`Incompatible game state: legacy route lifecycle field ${key} is not supported`);
-    }
-  }
-}
 import { appendFormalEventHistory } from './EventHistory';
 import {
   buildActiveActionChoices,
@@ -58,6 +48,7 @@ import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
+import { cloneCanonicalGameState } from '../contracts/validation/canonicalGameStateValidation';
 import {
   applyRareLineFlags,
   rollRareEventLines,
@@ -69,6 +60,13 @@ import {
 
 /** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
 const FORMAL_CANDIDATE_POOL_CAP = 12;
+
+const SECT_CHOICE_VALUE_BY_CHOICE_ID = {
+  join_shaolin: 'orthodox',
+  join_wudang: 'orthodox',
+  join_emei: 'orthodox',
+  stay_home: 'none',
+} satisfies Record<string, NonNullable<CriticalChoices['sect_choice']>>;
 
 function engineDiagnosticsEnabled(): boolean {
   const quiet = typeof process !== 'undefined' && process.env ? process.env.WUXIA_ENGINE_QUIET : undefined;
@@ -249,11 +247,11 @@ export class GameEngineIntegration {
    * 将新状态合并到响应式对象，避免丢失响应性
    */
   private applyGameState(nextState: GameState): void {
-    rejectLegacyRouteLifecycleFields(nextState);
-    if (!isReactive(this.gameState)) {
-      this.gameState = reactive(nextState);
-      return;
-    }
+    const stateRecord = this.gameState as unknown as Record<string, unknown>;
+    const assignOptional = (key: keyof GameState, value: unknown): void => {
+      if (value === undefined) delete stateRecord[key];
+      else stateRecord[key] = value;
+    };
 
     // 记录更新前的属性值
     const oldMartialPower = this.gameState.player?.martialPower;
@@ -280,6 +278,20 @@ export class GameEngineIntegration {
         player.knowledge = nextState.player.knowledge;
         player.businessAcumen = nextState.player.businessAcumen;
         player.influence = nextState.player.influence;
+        const replaceOptionalPlayerField = (key: 'wealth' | 'deathReason' | 'timeUnit' | 'monthProgress' | 'dayProgress'): void => {
+          const source = nextState.player as unknown as Record<string, unknown>;
+          const target = player as unknown as Record<string, unknown>;
+          if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) {
+            target[key] = source[key];
+          } else {
+            delete target[key];
+          }
+        };
+        replaceOptionalPlayerField('wealth');
+        replaceOptionalPlayerField('deathReason');
+        replaceOptionalPlayerField('timeUnit');
+        replaceOptionalPlayerField('monthProgress');
+        replaceOptionalPlayerField('dayProgress');
         player.martialHeritage = nextState.player.martialHeritage;
         player.scholarlyHeritage = nextState.player.scholarlyHeritage;
         player.merchantNetwork = nextState.player.merchantNetwork;
@@ -292,88 +304,84 @@ export class GameEngineIntegration {
         player.children = nextState.player.children;
         player.spouse = nextState.player.spouse;
         player.alive = nextState.player.alive;
-        player.items = [...(nextState.player.items || [])];
-        player.events = [...(nextState.player.events || [])];
-        player.flags = { ...(nextState.player.flags || {}) };
-        player.relationships = [...(nextState.player.relationships || [])];
+        if (nextState.player.items === undefined) delete player.items;
+        else player.items = [...nextState.player.items];
+        if (nextState.player.events === undefined) delete player.events;
+        else player.events = [...nextState.player.events];
+        player.flags = { ...nextState.player.flags };
+        if (nextState.player.relationships === undefined) delete player.relationships;
+        else player.relationships = [...nextState.player.relationships];
         player.traits = [...nextState.player.traits];
-        if (nextState.player.healthStatus !== undefined) {
-          player.healthStatus = nextState.player.healthStatus;
-        }
-        if (Array.isArray(nextState.player.statuses)) {
-          player.statuses = [...nextState.player.statuses];
-        }
-        player.lifeStates = nextState.player.lifeStates ? { ...nextState.player.lifeStates } : traitSystem.createInitialLifeStates();
+        player.healthStatus = nextState.player.healthStatus;
+        player.statuses = [...nextState.player.statuses];
+        player.lifeStates = { ...nextState.player.lifeStates };
       }
     }
 
-    if (nextState.currentTime) {
-      if (!this.gameState.currentTime) {
-        this.gameState.currentTime = reactive(nextState.currentTime);
-      } else {
-        this.gameState.currentTime.year = nextState.currentTime.year;
-        this.gameState.currentTime.month = nextState.currentTime.month;
-        this.gameState.currentTime.day = nextState.currentTime.day;
-      }
+    if (Object.prototype.hasOwnProperty.call(nextState, 'currentTime') && nextState.currentTime !== undefined) {
+      this.gameState.currentTime = {
+        ...nextState.currentTime,
+      };
+    } else {
+      delete stateRecord.currentTime;
     }
 
-    this.gameState.flags = { ...(nextState.flags || {}) };
-    this.gameState.events = [...(nextState.events || [])];
-    this.gameState.eventHistory = [...(nextState.eventHistory || [])];
-    this.gameState.actionHistory = [...(nextState.actionHistory || [])];
-    this.gameState.actionFocusStreak = nextState.actionFocusStreak
+    this.gameState.facts = { ...nextState.facts };
+    this.gameState.flags = { ...nextState.flags };
+    assignOptional('events', nextState.events ? [...nextState.events] : undefined);
+    this.gameState.eventHistory = [...nextState.eventHistory];
+    assignOptional('actionHistory', nextState.actionHistory ? [...nextState.actionHistory] : undefined);
+    assignOptional('actionFocusStreak', nextState.actionFocusStreak
       ? { ...nextState.actionFocusStreak }
-      : { category: null, count: 0 };
-    this.gameState.triggeredEvents = [...(nextState.triggeredEvents || [])];
-    this.gameState.relations = { ...(nextState.relations || {}) };
-    this.gameState.inventory = [...(nextState.inventory || [])];
-    this.gameState.statistics = nextState.statistics ? { ...nextState.statistics } : undefined;
-    this.gameState.identity = nextState.identity
+      : undefined);
+    assignOptional('triggeredEvents', nextState.triggeredEvents ? [...nextState.triggeredEvents] : undefined);
+    this.gameState.relations = { ...nextState.relations };
+    assignOptional('inventory', nextState.inventory ? [...nextState.inventory] : undefined);
+    assignOptional('statistics', nextState.statistics ? { ...nextState.statistics } : undefined);
+    assignOptional('identity', nextState.identity
       ? {
           ...nextState.identity,
-          identities: [...(nextState.identity.identities || [])],
+          identities: [...nextState.identity.identities],
           achievements: [...(nextState.identity.achievements || [])],
         }
-      : undefined;
-    this.gameState.lifePath = nextState.lifePath
+      : undefined);
+    assignOptional('lifePath', nextState.lifePath
       ? {
           ...nextState.lifePath,
-          achievements: [...(nextState.lifePath.achievements || [])],
+          achievements: [...nextState.lifePath.achievements],
           relationships: {
-            allies: [...(nextState.lifePath.relationships?.allies || [])],
-            enemies: [...(nextState.lifePath.relationships?.enemies || [])],
-            mentors: [...(nextState.lifePath.relationships?.mentors || [])],
-            disciples: [...(nextState.lifePath.relationships?.disciples || [])],
+            allies: [...nextState.lifePath.relationships.allies],
+            enemies: [...nextState.lifePath.relationships.enemies],
+            mentors: [...nextState.lifePath.relationships.mentors],
+            disciples: [...nextState.lifePath.relationships.disciples],
           },
           commitments: {
-            cannotJoin: [...(nextState.lifePath.commitments?.cannotJoin || [])],
-            mustProtect: [...(nextState.lifePath.commitments?.mustProtect || [])],
-            swornEnemies: [...(nextState.lifePath.commitments?.swornEnemies || [])],
-          },
-          focus: {
-            ...(nextState.lifePath.focus || {
-              martial: 0,
-              business: 0,
-              academic: 0,
-              leadership: 0,
-            }),
+            cannotJoin: [...nextState.lifePath.commitments.cannotJoin],
+            mustProtect: [...nextState.lifePath.commitments.mustProtect],
+            swornEnemies: [...nextState.lifePath.commitments.swornEnemies],
           },
         }
-      : undefined;
-    this.gameState.karma = nextState.karma
+      : undefined);
+    assignOptional('karma', nextState.karma
       ? {
           ...nextState.karma,
           history: [...(nextState.karma.history || [])],
         }
-      : undefined;
-    this.gameState.criticalChoices = nextState.criticalChoices
+      : undefined);
+    assignOptional('criticalChoices', nextState.criticalChoices
       ? { ...nextState.criticalChoices }
-      : undefined;
-    this.gameState.achievements = [...(nextState.achievements || [])];
-    this.gameState.ending = nextState.ending;
-    this.gameState.saveVersion = nextState.saveVersion;
-    this.gameState.lastSavedAt = nextState.lastSavedAt;
-    this.gameState.gameTimestamp = nextState.gameTimestamp;
+      : undefined);
+    assignOptional('achievements', nextState.achievements ? [...nextState.achievements] : undefined);
+    assignOptional('ending', nextState.ending);
+    assignOptional('saveVersion', nextState.saveVersion);
+    assignOptional('lastSavedAt', nextState.lastSavedAt);
+    assignOptional('gameTimestamp', nextState.gameTimestamp);
+    assignOptional('selfAwareness', nextState.selfAwareness);
+    assignOptional('playerFeedbackMessage', nextState.playerFeedbackMessage);
+    assignOptional('p16TendencyShaping', nextState.p16TendencyShaping
+      ? { ...nextState.p16TendencyShaping }
+      : undefined);
+    assignOptional('p16RareLineLog', nextState.p16RareLineLog ? [...nextState.p16RareLineLog] : undefined);
     
     // 记录更新后的属性值，确认数据确实在变化
     const newMartialPower = this.gameState.player?.martialPower;
@@ -387,7 +395,8 @@ export class GameEngineIntegration {
   }
 
   public loadGameState(savedState: GameState): void {
-    this.applyGameState(savedState);
+    const detachedState = cloneCanonicalGameState(savedState);
+    this.applyGameState(detachedState);
     const currentAge = this.gameState.player?.age || 0;
     const currentYearEvents = (this.gameState.eventHistory || []).filter(
       record => (record.age ?? currentAge) === currentAge,
@@ -1035,8 +1044,7 @@ export class GameEngineIntegration {
           this.gameState,
           traitSystem.getEventBiasTags(event),
         );
-      const specializationAdjusted = originAdjusted * this.getSpecializationMultiplier(event);
-      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      const repetitionAdjusted = originAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const profileRepetitionAdjusted =
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
       const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
@@ -1058,8 +1066,7 @@ export class GameEngineIntegration {
           this.gameState,
           traitSystem.getEventBiasTags(event),
         );
-      const specializationAdjusted = originAdjusted * this.getSpecializationMultiplier(event);
-      const repetitionAdjusted = specializationAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
+      const repetitionAdjusted = originAdjusted * this.getFormalRepetitionSuppressionMultiplier(event);
       const profileRepetitionAdjusted =
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
       const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
@@ -1247,6 +1254,10 @@ export class GameEngineIntegration {
       return 1;
     }
     return getProfileRepetitionPressureMultiplier(this.gameState, event);
+  }
+
+  private clampWeight(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
   }
 
   /**
@@ -1612,8 +1623,13 @@ export class GameEngineIntegration {
           'remain_free': 'none',
           // 可以根据需要添加更多映射
         };
-        
-        const choiceValue = choiceValueMap[choiceId] || choiceId;
+
+        const choiceValue = eventId === 'sect_choice'
+          ? SECT_CHOICE_VALUE_BY_CHOICE_ID[choiceId]
+          : choiceValueMap[choiceId] || choiceId;
+        if (choiceValue === undefined) {
+          throw new Error(`Unknown sect choice ID: ${choiceId}`);
+        }
         CriticalChoiceSystem.recordChoice(this.gameState, eventId, choiceValue, true);
       }
     }
@@ -1810,71 +1826,6 @@ export class GameEngineIntegration {
     return eventLoader.getEventById(eventId);
   }
 
-  private getSpecializationMultiplier(event: EventDefinition): number {
-    if (event.category === 'daily_event' || !this.gameState.player) {
-      return 1;
-    }
-
-    const eventFocus = this.getEventFocus(event);
-    if (!eventFocus) {
-      return 1;
-    }
-
-    const focusScores = this.getFocusScores();
-    const ranked = Object.entries(focusScores).sort((a, b) => b[1] - a[1]);
-    const [topFocus, topScore] = ranked[0] as [string, number];
-    const secondScore = ranked[1]?.[1] ?? topScore;
-    const gap = topScore - secondScore;
-
-    if (gap < 12) {
-      return 1;
-    }
-
-    if (eventFocus === topFocus) {
-      return this.clampWeight(1 + gap / 90, 1, 1.18);
-    }
-
-    return this.clampWeight(1 - gap / 110, 0.72, 1);
-  }
-
-  private getFocusScores(): Record<'martial' | 'business' | 'academic' | 'social', number> {
-    const player = this.gameState.player!;
-    return {
-      martial:
-        player.martialPower +
-        player.externalSkill +
-        player.internalSkill +
-        player.qinggong +
-        player.constitution,
-      business:
-        player.businessAcumen * 2 +
-        player.money / 40 +
-        player.influence,
-      academic:
-        player.comprehension * 2 +
-        player.knowledge * 2 +
-        player.internalSkill,
-      social:
-        player.charisma * 2 +
-        player.connections * 2 +
-        player.reputation / 10 +
-        player.influence,
-    };
-  }
-
-  private getEventFocus(event: EventDefinition): 'martial' | 'business' | 'academic' | 'social' | null {
-    const tags = traitSystem.getEventBiasTags(event);
-    if (tags.has('business')) return 'business';
-    if (tags.has('comprehension')) return 'academic';
-    if (tags.has('training') || tags.has('risk') || tags.has('survival')) return 'martial';
-    if (tags.has('social') || tags.has('family') || tags.has('romance') || tags.has('reputation')) return 'social';
-    return null;
-  }
-
-  private clampWeight(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
-  }
-
   public consumeLastEventOutcomeNote(): string | null {
     const note = this.pendingEventOutcomeNote;
     this.pendingEventOutcomeNote = null;
@@ -1917,13 +1868,18 @@ export class GameEngineIntegration {
   }
 
   public setPlayerFeedbackMessage(message: string | null): void {
-    this.gameState.playerFeedbackMessage = message ?? undefined;
+    if (message === null) {
+      delete this.gameState.playerFeedbackMessage;
+      return;
+    }
+
+    this.gameState.playerFeedbackMessage = message;
   }
 
   public consumePlayerFeedbackMessage(): string | null {
-    const msg = this.gameState.playerFeedbackMessage ?? null;
-    this.gameState.playerFeedbackMessage = undefined;
-    return msg;
+    const message = this.gameState.playerFeedbackMessage ?? null;
+    delete this.gameState.playerFeedbackMessage;
+    return message;
   }
 }
 

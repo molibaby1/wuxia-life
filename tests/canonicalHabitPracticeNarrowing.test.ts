@@ -204,11 +204,15 @@ function testRepositoryGuard(): void {
     assert(start >= 0 && end > start, `${file} guard markers must exist`);
     assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), `${file} global multiplier must ignore practice habits`);
   };
+
   const dailyEventSystemSource = fs.readFileSync(path.resolve('src/core/DailyEventSystem.ts'), 'utf8');
   assert(!dailyEventSystemSource.includes('preferredStates'), 'DailyEventSystem must not interpret preferredStates');
   assert(!dailyEventSystemSource.includes('getGroupStateMultiplier'), 'DailyEventSystem group multiplier helper must be removed');
   assert(!/socialMomentum|familyBond/.test(dailyEventSystemSource), 'DailyEventSystem must not read deleted axes');
-  assertFunctionRangeClean('src/core/GameEngineIntegration.ts', 'getSpecializationMultiplier', 'getEventFocus');
+  const gameEngineSource = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
+  assert(!gameEngineSource.includes('getSpecializationMultiplier'), 'specialization multiplier must be removed');
+  assert(!gameEngineSource.includes('getFocusScores'), 'focus scores must be removed');
+  assert(!gameEngineSource.includes('getEventFocus'), 'event focus must be removed');
   const mainScreenModelSource = fs.readFileSync(path.resolve('src/components/mainScreenModel.ts'), 'utf8');
   assert(!mainScreenModelSource.includes('tendencyContextMultiplier'), 'main screen tendency must not use context multipliers');
   assertFunctionRangeClean('src/components/mainScreenModel.ts', 'function buildTendencySummary', 'function createStat');
@@ -263,10 +267,9 @@ function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
 
 function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {
   const source = fs.readFileSync(path.resolve('src/core/GameEngineIntegration.ts'), 'utf8');
-  const start = source.indexOf('private getSpecializationMultiplier');
-  const end = source.indexOf('private getEventFocus');
-  assert(start >= 0 && end > start, 'formal scheduling guard markers must exist');
-  assert(!/trainingHabit|studyHabit|businessHabit/.test(source.slice(start, end)), 'formal state multiplier must ignore practice habits');
+  for (const helper of ['getSpecializationMultiplier', 'getFocusScores', 'getEventFocus']) {
+    assert(!source.includes(helper), `${helper} must not remain in formal scheduling`);
+  }
 }
 
 function testPracticeTrajectoryIsDescriptiveOnly(): void {

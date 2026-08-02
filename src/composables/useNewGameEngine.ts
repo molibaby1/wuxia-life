@@ -11,6 +11,7 @@
 import { reactive, ref, computed } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { saveManager } from '../core/SaveManager';
+import { defaultSnapshotConverter } from '../headless/snapshot/SnapshotConverter';
 import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
 import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
@@ -578,11 +579,12 @@ export function useNewGameEngine() {
       state.eventHistory = [];
     }
     if (shouldRecordPassiveNarrativeInHistory(selected.id)) {
-      state.eventHistory.push({
+      const record = {
         eventId: selected.id,
         age: state.player.age,
-        timestamp: state.currentTime ? { ...state.currentTime } : undefined,
-      });
+        ...(state.currentTime ? { timestamp: { ...state.currentTime } } : {}),
+      };
+      state.eventHistory.push(record);
     }
     engineState.pendingPeriodSummary = buildPeriodSummary({
       sourceLabel: '童年岁月',
@@ -674,7 +676,7 @@ export function useNewGameEngine() {
     if (!saveData) {
       return false;
     }
-    gameEngine.loadGameState(saveData.gameData);
+    gameEngine.loadGameState(defaultSnapshotConverter.fromSnapshot(saveData.snapshot));
     engineState.currentEvent = null;
     engineState.availableChoices = [];
     engineState.availableActiveActions = [];

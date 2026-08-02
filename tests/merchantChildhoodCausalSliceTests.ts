@@ -1,7 +1,7 @@
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventLoader } from '../src/core/EventLoader';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
-import { gameEngine } from '../src/core/GameEngineIntegration';
+import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import type { Effect, GameState, PlayerState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
@@ -12,15 +12,18 @@ function state(
   flags: Record<string, unknown>,
   stats: Partial<PlayerState>,
 ): GameState {
+  const base = new GameEngineIntegration().getGameState();
   return {
+    ...base,
     player: {
+      ...base.player,
       age: 6,
       businessAcumen: 4,
       connections: 2,
       ...stats,
     } as PlayerState,
-    flags: { origin_merchant_family: true, ...flags },
-  } as GameState;
+    flags: { ...base.flags, origin_merchant_family: true, ...flags },
+  };
 }
 
 function hasEffect(effects: Effect[] | undefined, type: string, target: string): boolean {
@@ -42,8 +45,11 @@ async function assertRecognitionRemainsVisible(
     setTimeout(() => callback(Date.now()), 0) as unknown as number;
   const browser = useNewGameEngine();
   try {
+    const base = new GameEngineIntegration().getGameState();
     gameEngine.applyGameState({
+      ...base,
       player: {
+        ...base.player,
         age: 6,
         alive: true,
         businessAcumen: 4,
@@ -52,7 +58,7 @@ async function assertRecognitionRemainsVisible(
         flags: { ...flags },
         ...stats,
       } as PlayerState,
-      flags: { origin_merchant_family: true, ...flags },
+      flags: { ...base.flags, origin_merchant_family: true, ...flags },
       currentTime: { year: 7, month: 1, day: 1 },
       eventHistory: [],
     } as GameState);

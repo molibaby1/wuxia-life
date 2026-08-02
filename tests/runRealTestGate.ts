@@ -84,6 +84,15 @@ const suites: Suite[] = [
   { name: 'canonicalP25HabitSimulationNarrowing', entry: 'tests/canonicalP25HabitSimulationNarrowing.test.ts' },
   { name: 'canonicalFamilySocialLifeStateRemovalTests', entry: 'tests/canonicalFamilySocialLifeStateRemoval.test.ts' },
   { name: 'canonicalRouteLifecycleRemovalTests', entry: 'tests/canonicalRouteLifecycleRemoval.test.ts' },
+  { name: 'canonicalLifePathFocusRemovalTests', entry: 'tests/canonicalLifePathFocusRemoval.test.ts' },
+  { name: 'canonicalPersistenceBoundaryTests', entry: 'tests/canonicalPersistenceBoundary.test.ts' },
+  { name: 'canonicalCriticalChoiceNormalizationTests', entry: 'tests/canonicalCriticalChoiceNormalization.test.ts' },
+  { name: 'canonicalRuntimeLoadIsolationTests', entry: 'tests/canonicalRuntimeLoadIsolation.test.ts' },
+  { name: 'canonicalRuntimeExactApplicationTests', entry: 'tests/canonicalRuntimeExactApplication.test.ts' },
+  { name: 'canonicalJsonContainerBoundaryTests', entry: 'tests/canonicalJsonContainerBoundary.test.ts' },
+  { name: 'canonicalUndefinedPropertyEliminationTests', entry: 'tests/canonicalUndefinedPropertyElimination.test.ts' },
+  { name: 'canonicalMartialLegacyConsumerRemovalTests', entry: 'tests/canonicalMartialLegacyConsumerRemoval.test.ts' },
+  { name: 'canonicalMartialLegacyProducerPruningTests', entry: 'tests/canonicalMartialLegacyProducerPruning.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

@@ -61,6 +61,9 @@ export const gameStateSnapshotAge50 = {
       charisma: 62,
       businessAcumen: 25,
       influence: 180,
+      martialHeritage: 0,
+      scholarlyHeritage: 0,
+      merchantNetwork: 0,
       investments: {
         martial: 1.5,
         statecraft: 3,
@@ -80,6 +83,7 @@ export const gameStateSnapshotAge50 = {
         studyHabit: 3,
         businessHabit: 2,
       }),
+      flags: {},
       relationships: [
         {
           id: 'spouse_lin',
@@ -278,12 +282,6 @@ export const gameStateSnapshotAge50 = {
         mustProtect: ['spouse_lin', 'disciple_chen'],
         swornEnemies: ['rival_mo'],
       },
-      focus: {
-        martial: 75,
-        business: 10,
-        academic: 20,
-        leadership: 45,
-      },
     },
     identity: {
       identities: ['hero', 'wudang_elder'],
@@ -326,6 +324,8 @@ export const gameStateSnapshotAge50 = {
       { id: 'item_healing_pill', name: '疗伤丹', quantity: 3 },
       { id: 'item_silver', name: '银两', quantity: 3200 },
     ],
+    actionHistory: [],
+    actionFocusStreak: { category: null, count: 0 },
   },
 } satisfies GameStateSnapshot;
 

@@ -44,15 +44,15 @@ function testRuntimeShapeAndLegacyRejection(): void {
   }
 }
 
-function testSnapshot3_9Contract(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.9.0');
+function testSnapshot3_11Contract(): void {
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.11.0');
   const converter = createConverter();
   const snapshot = converter.toSnapshot(createState(), {
     eventCatalogVersion: 'test',
     sourcePlatform: 'node-headless',
     time: { now: () => 123 },
   });
-  assert.equal(snapshot.metadata.schemaVersion, '3.9.0');
+  assert.equal(snapshot.metadata.schemaVersion, '3.11.0');
   for (const key of legacyKeys) assert.equal(key in snapshot.state, false, `snapshot emits ${key}`);
   converter.fromSnapshot(snapshot);
 
@@ -64,7 +64,7 @@ function testSnapshot3_9Contract(): void {
   for (const key of legacyKeys) {
     const invalid = clone(snapshot) as any;
     invalid.state[key] = {};
-    expectSnapshotError(() => converter.fromSnapshot(invalid), `3.9.0 + ${key} must be rejected`);
+    expectSnapshotError(() => converter.fromSnapshot(invalid), `3.11.0 + ${key} must be rejected`);
     const validation = validateGameStateSnapshot(invalid);
     assert.equal('errors' in validation, true, `validator must reject ${key}`);
   }
@@ -133,7 +133,7 @@ function testRepositoryRemoval(): void {
 }
 
 testRuntimeShapeAndLegacyRejection();
-testSnapshot3_9Contract();
+testSnapshot3_11Contract();
 testSaveRejectsLegacyFields();
 testRepositoryRemoval();
 console.log('canonicalRouteLifecycleRemoval.test.ts passed');

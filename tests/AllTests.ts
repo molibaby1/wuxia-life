@@ -20,7 +20,8 @@ import { detectEventClasses } from '../scripts/eventRepetitionClassDetection';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
-import { evaluateSaveCompatibility, P2_SAVE_SCHEMA_VERSION, saveManager } from '../src/core/SaveManager';
+import { saveManager } from '../src/core/SaveManager';
+import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import { eventExamples } from '../src/data/eventExamples';
 import { evaluateSimulationGate, parseWaiverArg } from '../scripts/gameplaySimulationGate';
@@ -500,7 +501,7 @@ async function runStateConsistencyRegressionCase() {
     const loadedSave = saveManager.loadGame(saveId);
     assert(loadedSave !== null, '保存后无法读取存档，状态持久化链路异常');
     assert(
-      loadedSave!.gameData.flags.state_consistency_choice_done === true,
+      defaultSnapshotConverter.fromSnapshot(loadedSave!.snapshot).flags.state_consistency_choice_done === true,
       '存档读回未保留选择后的 flag，状态同步可能在保存流程中断裂',
     );
 
@@ -661,7 +662,7 @@ async function runRestartContinueEndingSaveBehaviorCase() {
     assertEqual(stateAfterRestart.player.age, 0, '重开后应回到初始化年龄');
     const savedAfterRestart = saveManager.loadGame(saveId);
     assert(savedAfterRestart !== null, '重开不应破坏已有存档');
-    assertEqual(savedAfterRestart?.gameData.flags.us_020_checkpoint, true, '重开后旧存档内容应保持不变');
+    assertEqual(defaultSnapshotConverter.fromSnapshot(savedAfterRestart!.snapshot).flags.us_020_checkpoint, true, '重开后旧存档内容应保持不变');
 
     const loadedAfterRestart = engine.loadGameFromSave(saveId);
     assert(loadedAfterRestart, '重开后应可继续读取既有存档');
@@ -745,15 +746,18 @@ async function runSaveRegressionCoverageCase() {
       },
     ];
     state.identity = {
-      current: ['hero'],
-      unlocked: ['commoner', 'hero'],
+      identities: ['hero'],
       primary: 'hero',
       title: '江湖义士',
-      reputations: {},
+      achievements: [],
     } as any;
     state.lifePath = {
       primaryIdentity: 'hero',
       faction: 'orthodox',
+      lifeStage: 'development',
+      achievements: [],
+      relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
+      commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
     } as any;
 
     const saveId = engine.saveCurrentGame('US-021-regression');
@@ -785,7 +789,7 @@ async function runSaveRegressionCoverageCase() {
     assertEqual(restartedState.player.age, 0, 'US-021: 重开后应回到初始化状态');
     const stillSaved = saveManager.loadGame(saveId);
     assert(stillSaved !== null, 'US-021: 重开后历史存档不应丢失');
-    assertEqual(stillSaved?.gameData.flags.us_021_checkpoint, true, 'US-021: 重开后历史存档内容应保持完整');
+    assertEqual(defaultSnapshotConverter.fromSnapshot(stillSaved!.snapshot).flags.us_021_checkpoint, true, 'US-021: 重开后历史存档内容应保持完整');
 
     const loadedAfterRestart = engine.loadGameFromSave(saveId);
     assert(loadedAfterRestart, 'US-021: 重开后应可继续读取历史存档');
@@ -1810,7 +1814,6 @@ const coreFunctionSuite: TestSuite = {
           achievements: [],
           relationships: { allies: [], enemies: [], mentors: [], disciples: [] },
           commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
-          focus: { martial: 0, business: 0, academic: 0, leadership: 0 },
         };
 
         const nextState = await executor.executeEffects(
@@ -3087,39 +3090,26 @@ const compatibilitySuite: TestSuite = {
       },
     },
     {
-      name: '兼容性测试 - P2 存档版本标记写入',
-      description: '测试 saveGame 会写入 P2 schema marker，避免后续版本静默混读',
+      name: '兼容性测试 - Canonical Snapshot 存档',
+      description: '测试 saveGame 只写入 Canonical Snapshot 3.11.0',
       test: () => {
         saveManager.clearAllSaves();
-        const state = framework.createTestState();
+        const state = new GameEngineIntegration().getGameState();
         const saveId = saveManager.saveGame(state, 'us-018-version-marker');
         const loaded = saveManager.loadGame(saveId);
         assert(loaded !== null, '当前版本存档应可正常读取');
-        assertEqual(
-          loaded!.gameData.saveVersion,
-          P2_SAVE_SCHEMA_VERSION,
-          '存档应写入统一 P2 saveVersion 标记',
-        );
+        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.11.0', '存档应写入 Canonical Snapshot 3.11.0');
       },
     },
     {
-      name: '兼容性测试 - P2 可读版本边界',
-      description: '测试 legacy/future 不支持版本会被拒绝，历史全量迁移不在 P2 范围',
+      name: '兼容性测试 - 旧 raw GameState 拒绝',
+      description: '测试旧 raw GameState 不会被当作当前存档读取',
       test: () => {
-        const missingVersion = evaluateSaveCompatibility(undefined);
-        assertEqual(missingVersion.supported, false, '缺失版本号的存档应拒绝加载');
-        assertEqual(missingVersion.status, 'unsupported_missing_version', '缺失版本应返回明确状态');
-
-        const legacyVersion = evaluateSaveCompatibility('0.9.0');
-        assertEqual(legacyVersion.supported, false, '过旧 legacy 版本应拒绝加载');
-        assertEqual(legacyVersion.status, 'unsupported_legacy_version', 'legacy 版本应返回明确状态');
-
-        const futureVersion = evaluateSaveCompatibility('3.0.0');
-        assertEqual(futureVersion.supported, false, '未来版本应拒绝加载');
-        assertEqual(futureVersion.status, 'unsupported_future_version', 'future 版本应返回明确状态');
-
-        const readableLegacy = evaluateSaveCompatibility('1.0.0');
-        assertEqual(readableLegacy.supported, true, '定义范围内的可读 legacy 版本应允许加载');
+        const legacyRawSave = JSON.stringify({
+          version: '1.0',
+          save: { id: 'legacy', name: 'legacy', timestamp: Date.now(), gameData: framework.createTestState(), metadata: {} },
+        });
+        assertEqual(saveManager.importSave(legacyRawSave), false, '旧 raw GameState 存档应拒绝导入');
       },
     },
   ],

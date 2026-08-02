@@ -14,6 +14,7 @@ import {
 import type { EffectDefinition, EventCondition, PlayerLifeStates } from '../../types/eventTypes';
 import { EffectType, isHealthStatus, isStatusId, LIFE_STATE_KEYS } from '../../types/eventTypes';
 import type { ReplayLog, ReplayLogEntry } from '../replayLog';
+import { validateCanonicalSnapshot } from './canonicalGameStateValidation';
 
 export interface ValidationSuccess<T> {
   ok: true;
@@ -140,52 +141,12 @@ export function findForbiddenHabitFlagPaths(value: unknown, rootPath: string): s
 }
 
 export function validateGameStateSnapshot(snapshot: unknown): ValidationResult<GameStateSnapshot> {
-  const errors: string[] = [];
-  if (!isPlainObject(snapshot)) {
-    return fail(['snapshot must be an object']);
-  }
-  const s = snapshot;
-  if (!isPlainObject(s.metadata)) {
-    errors.push('metadata required');
-  } else {
-    const m = s.metadata;
-    if (m.schemaVersion !== GAME_STATE_SNAPSHOT_SCHEMA_VERSION) {
-      errors.push(`metadata.schemaVersion must be ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`);
-    }
-    for (const key of REQUIRED_SNAPSHOT_METADATA) {
-      if (m[key] === undefined || m[key] === null || m[key] === '') {
-        errors.push(`metadata.${key} required`);
-      }
-    }
-  }
-  if (!isPlainObject(s.state)) {
-    errors.push('state required');
-  } else {
-    const st = s.state;
-    errors.push(...findForbiddenHabitFlagPaths(st.flags, 'state.flags').map(path => `forbidden ${path}`));
-    errors.push(...findForbiddenHabitFlagPaths(st.player, 'state.player').map(path => `forbidden ${path}`));
-    errors.push(...findForbiddenHabitFlagPaths(st.eventHistory, 'state.eventHistory').map(path => `forbidden ${path}`));
-    for (const key of ['player', 'flags', 'relations', 'eventHistory']) {
-      if (!(key in st)) errors.push(`state.${key} required`);
-    }
-    if (!isPlainObject(st.player)) {
-      errors.push('state.player required');
-    } else {
-      const player = st.player;
-      if ('energy' in player) errors.push('forbidden state.player.energy');
-      if ('health' in player) errors.push('forbidden state.player.health');
-      for (const key of REQUIRED_SNAPSHOT_PLAYER_KEYS) {
-        if (player[key] === undefined || player[key] === null || player[key] === '') {
-          errors.push(`state.player.${key} required`);
-        }
-      }
-      const lifeStatesResult = validatePlayerLifeStates(player.lifeStates);
-      if ('errors' in lifeStatesResult) errors.push(...lifeStatesResult.errors);
-    }
-    for (const key of FORBIDDEN_SNAPSHOT_STATE_KEYS) {
-      if (key in st) errors.push(`forbidden state.${key}`);
-    }
-  }
+  const errors = validateCanonicalSnapshot(snapshot).map(({ path, code, message }) => {
+    const normalizedPath = path.replace(/^snapshot\./, '');
+    if (code === 'forbidden') return `forbidden ${normalizedPath}`;
+    if (code === 'required') return `${normalizedPath} required`;
+    return `${normalizedPath}: ${message}`;
+  });
   if (errors.length > 0) return fail(errors);
   return pass(snapshot as unknown as GameStateSnapshot);
 }

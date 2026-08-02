@@ -101,3 +101,14 @@ export {
   type ValidationResult,
   type ValidationSuccess,
 } from './validation/contractValidation';
+
+export {
+  assertCanonicalGameState,
+  assertCanonicalSnapshot,
+  assertCanonicalSaveData,
+  assertCanonicalSaveExport,
+  CanonicalValidationError,
+  validateCanonicalGameState,
+  validateCanonicalSnapshot,
+  type CanonicalValidationIssue,
+} from './validation/canonicalGameStateValidation';

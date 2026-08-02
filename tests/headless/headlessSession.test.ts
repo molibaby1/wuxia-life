@@ -31,7 +31,7 @@ export async function runHeadlessSessionTests(): Promise<void> {
 
   const terminalSnapshot = session.serialize();
   terminalSnapshot.state.player.alive = false;
-  terminalSnapshot.state.player.deathReason = undefined;
+  delete terminalSnapshot.state.player.deathReason;
   terminalSnapshot.state.ending = {
     id: 'richest_man',
     name: '经世巨贾',

@@ -6,7 +6,7 @@
  * - `topResources`: header resource row (GameScreen status bar)
  *
  * Baseline composition (pre-P123):
- * - coreStats: martialPower, externalSkill, internalSkill, qinggong, constitution, money
+ * - coreStats: martialPower, constitution, money
  * - topResources: money, constitution, reputation
  *
  * Out of scope for P123 (do not modify):
@@ -25,7 +25,7 @@
  *
  * Verification samples (locked for P124 narrow tests):
  * - Non-martial: routeId `merchant`, modest martial stats
- * - Martial-dominant: martialPower >= 30 with clustered martial sub-stats
+ * - Martial-dominant: martialPower >= 30
  *
  * Out of scope for P124 (do not modify):
  * - `buildRouteSummary`, `buildShapingSummary`, `buildFullStatGroups`, `CORE_STATS`
@@ -40,10 +40,10 @@
  *
  * Baseline combat group (pre-P125):
  * - group id `combat`, label `战斗`
- * - items: martialPower, externalSkill, internalSkill, qinggong, constitution (all five retained)
+ * - items: martialPower, constitution
  *
  * Post-P125 combat/survival layout (locked for narrow tests):
- * - `combat` (武学): martialPower + externalSkill + internalSkill + qinggong
+ * - `combat` (武学): martialPower
  * - `survival` (生存底子): constitution only
  *
  * In scope for P125:
@@ -86,9 +86,6 @@ export interface MainScreenModel {
 export type MainScreenPlayer = Pick<
   PlayerState,
   | 'martialPower'
-  | 'externalSkill'
-  | 'internalSkill'
-  | 'qinggong'
   | 'constitution'
   | 'chivalry'
   | 'comprehension'
@@ -103,13 +100,9 @@ export type MainScreenPlayer = Pick<
   Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>>;
 
 const MARTIAL_DOMINANT_MIN_TOP = 30;
-const MARTIAL_DOMINANT_SPREAD_MAX = 5;
-/** P124 locked martial-dominant verification sample — clustered martial sub-stats. */
+/** P124 locked martial-dominant verification sample. */
 export const P124_MARTIAL_DOMINANT_SAMPLE = {
   martialPower: 35,
-  internalSkill: 34,
-  externalSkill: 33,
-  martialSpreadMax: MARTIAL_DOMINANT_SPREAD_MAX,
 } as const;
 
 const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
@@ -142,16 +135,7 @@ const TENDENCY_CANDIDATES: Array<{
 ];
 
 function isMartialDominant(player: MainScreenPlayer): boolean {
-  const martialValues = [
-    valueOf(player, 'martialPower'),
-    valueOf(player, 'internalSkill'),
-    valueOf(player, 'externalSkill'),
-  ].sort((a, b) => b - a);
-
-  return (
-    martialValues[0] >= MARTIAL_DOMINANT_MIN_TOP
-    && martialValues[0] - martialValues[2] <= MARTIAL_DOMINANT_SPREAD_MAX
-  );
+  return valueOf(player, 'martialPower') >= MARTIAL_DOMINANT_MIN_TOP;
 }
 
 function valueOf(player: MainScreenPlayer, key: keyof MainScreenPlayer): number {
@@ -232,25 +216,7 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
           'martialPower',
           '功力·总读数',
           valueOf(player, 'martialPower'),
-          '综合武学总读数，概括你当前整体战力；外功、内功、轻功是风格细分，不等于总读数本身。',
-        ),
-        createStat(
-          'externalSkill',
-          '外功',
-          valueOf(player, 'externalSkill'),
-          '外功风格特长，侧重招式爆发与硬功路数；是战力细分，不单独代表总读数。',
-        ),
-        createStat(
-          'internalSkill',
-          '内功',
-          valueOf(player, 'internalSkill'),
-          '内功风格特长，侧重气息续航与心法路数；是战力细分，不单独代表总读数。',
-        ),
-        createStat(
-          'qinggong',
-          '轻功',
-          valueOf(player, 'qinggong'),
-          '轻功风格特长，侧重身法机动与脱身路数；是战力细分，不单独代表总读数。',
+          '综合武学总读数，概括你当前整体战力。',
         ),
       ],
     },
@@ -262,7 +228,7 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
           'constitution',
           '体魄',
           valueOf(player, 'constitution'),
-          '承伤耐受、恢复续航与身体底子的综合读数；不是外功/内功/轻功那样的武学风格细分。',
+          '承伤耐受、恢复续航与身体底子的综合读数。',
         ),
       ],
     },

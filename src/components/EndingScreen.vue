@@ -30,18 +30,6 @@
               <span class="value">{{ player?.martialPower }}</span>
             </div>
             <div class="stat">
-              <span class="label">外功</span>
-              <span class="value">{{ player?.externalSkill }}</span>
-            </div>
-            <div class="stat">
-              <span class="label">内功</span>
-              <span class="value">{{ player?.internalSkill }}</span>
-            </div>
-            <div class="stat">
-              <span class="label">轻功</span>
-              <span class="value">{{ player?.qinggong }}</span>
-            </div>
-            <div class="stat">
               <span class="label">侠义值</span>
               <span class="value">{{ player?.chivalry }}</span>
             </div>
@@ -95,9 +83,6 @@ const props = defineProps<{
     sect?: string;
     deathReason?: string;
     martialPower?: number;
-    externalSkill?: number;
-    internalSkill?: number;
-    qinggong?: number;
     chivalry?: number;
     money?: number;
   } | null;

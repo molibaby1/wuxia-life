@@ -164,9 +164,6 @@ const toggleDetail = () => {
 // 战斗属性配置
 const combatStatConfigs = [
   { key: 'martialPower', name: '功力', max: 120 },
-  { key: 'externalSkill', name: '外功', max: 115 },
-  { key: 'internalSkill', name: '内功', max: 115 },
-  { key: 'qinggong', name: '轻功', max: 110 },
   { key: 'constitution', name: '体魄', max: 110 }
 ];
 
@@ -374,9 +371,6 @@ const getStatPercent = (value: number, max: number) => {
 const getStatBarClass = (statKey: string) => {
   const classMap: { [key: string]: string } = {
     'martialPower': 'bar-martial',
-    'externalSkill': 'bar-external',
-    'internalSkill': 'bar-internal',
-    'qinggong': 'bar-qinggong',
     'constitution': 'bar-constitution'
   };
   return classMap[statKey] || '';
@@ -530,9 +524,6 @@ const allStatDetails = computed(() => {
 }
 
 .bar-martial { background: linear-gradient(90deg, #ef4444, #f97316); }
-.bar-external { background: linear-gradient(90deg, #f97316, #eab308); }
-.bar-internal { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
-.bar-qinggong { background: linear-gradient(90deg, #10b981, #3b82f6); }
 .bar-constitution { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
 
 .stats-detail {

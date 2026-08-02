@@ -496,7 +496,7 @@ export function useNewGameEngine() {
           if (effect.operator === 'add') {
                 const value = typeof effect.value === 'number' ? effect.value : 0;
             const target = effect.stat || effect.target || '';
-            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+            if (['martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
                   outcomeScore += value * 2;
                 } else {
                   outcomeScore += value;
@@ -525,7 +525,7 @@ export function useNewGameEngine() {
           if (effect.operator === 'add') {
             const value = typeof effect.value === 'number' ? effect.value : 0;
             const target = effect.stat || effect.target || '';
-            if (['externalSkill', 'internalSkill', 'qinggong', 'martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+            if (['martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
               score += value * 2;
             } else {
               score += value;
@@ -817,9 +817,6 @@ export function useNewGameEngine() {
   const getStatName = (stat: string): string => {
     const statNames: Record<string, string> = {
       martialPower: '武力',
-      internalSkill: '内功',
-      externalSkill: '外功',
-      qinggong: '轻功',
       chivalry: '侠义',
       charisma: '魅力',
       constitution: '体质',

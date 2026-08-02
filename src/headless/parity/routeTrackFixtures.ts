@@ -38,7 +38,6 @@ export function applyRouteTrackPreparation(
 
   if (routeTrack === 'beggars' && age >= 13 && age <= 22) {
     player.chivalry = Math.max(player.chivalry || 0, 18);
-    player.qinggong = Math.max(player.qinggong || 0, 12);
     player.connections = Math.max(player.connections || 0, 16);
   }
 
@@ -56,7 +55,6 @@ export function applyRouteTrackPreparation(
 
   if (routeTrack === 'wanderer' && age >= 13 && age <= 22) {
     player.chivalry = Math.max(player.chivalry || 0, 18);
-    player.qinggong = Math.max(player.qinggong || 0, 12);
     player.connections = Math.max(player.connections || 0, 14);
   }
 }

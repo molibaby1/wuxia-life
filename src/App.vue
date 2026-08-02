@@ -338,9 +338,6 @@ const endingPlayer = computed(() => {
         deathReason: terminal.deathReason ?? terminal.ending?.name ?? '人生落幕',
         title: terminal.ending?.name ?? '江湖过客',
         martialPower: player?.martialPower ?? 0,
-        externalSkill: player?.externalSkill ?? 0,
-        internalSkill: player?.internalSkill ?? 0,
-        qinggong: player?.qinggong ?? 0,
         chivalry: player?.chivalry ?? 0,
         money: player?.money ?? 0,
       };

@@ -17,27 +17,6 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
     visibilityTier: 'explicit',
   },
   {
-    key: 'externalSkill',
-    name: '外功',
-    purpose: '招式技巧，决定外家拳法与兵刃威力',
-    examples: ['练剑', '擂台比试'],
-    visibilityTier: 'explicit',
-  },
-  {
-    key: 'internalSkill',
-    name: '内功',
-    purpose: '内力修为，支撑长战与高深武学',
-    examples: ['打坐', '传功'],
-    visibilityTier: 'explicit',
-  },
-  {
-    key: 'qinggong',
-    name: '轻功',
-    purpose: '身法速度，影响闪避与追击',
-    examples: ['夜探', '逃命'],
-    visibilityTier: 'explicit',
-  },
-  {
     key: 'constitution',
     name: '体魄',
     purpose: '身体底子，影响耐伤与恢复',
@@ -97,9 +76,6 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
 
 export const ALWAYS_VISIBLE_ATTRIBUTE_KEYS = [
   'martialPower',
-  'externalSkill',
-  'internalSkill',
-  'qinggong',
   'constitution',
   'money',
 ];

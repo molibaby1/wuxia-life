@@ -117,7 +117,7 @@ export function applyPersonaChoiceBias(ctx: PersonaChoiceBiasContext): number {
     if (persona.routePreference === 'wealth' && effect.target === 'money') {
       bonus += delta * 1.2;
     }
-    if (persona.routePreference === 'martial' && ['martialPower', 'externalSkill', 'internalSkill'].includes(effect.target)) {
+    if (persona.routePreference === 'martial' && effect.target === 'martialPower') {
       bonus += delta * 1.2;
     }
   }

@@ -4,9 +4,6 @@ import type { PlayerLifeStates } from '../../types/eventTypes';
 
 const STAT_LABELS: Record<string, string> = {
   martialPower: '功力',
-  externalSkill: '外功',
-  internalSkill: '内功',
-  qinggong: '轻功',
   chivalry: '侠义',
   charisma: '魅力',
   constitution: '体魄',

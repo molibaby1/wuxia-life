@@ -22,9 +22,6 @@ export interface ChoiceExplanationResult {
 
 const STAT_LABELS: Record<string, string> = {
   martialPower: '功力',
-  externalSkill: '外功',
-  internalSkill: '内功',
-  qinggong: '轻功',
   constitution: '体魄',
   charisma: '魅力',
   comprehension: '悟性',

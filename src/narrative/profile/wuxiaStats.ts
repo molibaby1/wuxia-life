@@ -3,9 +3,6 @@ import type { WorldProfileStatEntry } from './types';
 /** Wuxia player-facing and scheduling-relevant stats — metadata only; save shape unchanged. */
 export const WUXIA_PROFILE_STATS: WorldProfileStatEntry[] = [
   { id: 'martialPower', label: '功力', role: 'player_facing' },
-  { id: 'externalSkill', label: '外功', role: 'player_facing' },
-  { id: 'internalSkill', label: '内功', role: 'player_facing' },
-  { id: 'qinggong', label: '轻功', role: 'player_facing' },
   { id: 'constitution', label: '体魄', role: 'player_facing' },
   { id: 'comprehension', label: '悟性', role: 'implicit' },
   { id: 'charisma', label: '魅力', role: 'action_reward' },

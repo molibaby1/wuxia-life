@@ -421,9 +421,6 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
     const p = props.apiPlayer;
     return {
       martialPower: p.martialPower,
-      externalSkill: p.externalSkill,
-      internalSkill: p.internalSkill,
-      qinggong: p.qinggong,
       chivalry: p.chivalry,
       constitution: p.constitution,
       comprehension: p.comprehension,
@@ -493,9 +490,6 @@ const describeFlag = (flag: string, value: boolean) => formatLongTermFlag(flag, 
 const getStatName = (stat: string): string => {
   const statNames: Record<string, string> = {
     martialPower: '功力',
-    externalSkill: '外功',
-    internalSkill: '内功',
-    qinggong: '轻功',
     chivalry: '侠义',
     charisma: '魅力',
     constitution: '体魄',

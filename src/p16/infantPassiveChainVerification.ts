@@ -20,7 +20,7 @@ import {
 import type { GameState, PlayerState } from '../types/eventTypes';
 
 const PLANNING_PLACEHOLDER_SNIPPET = '本期暂无强求的江湖变故';
-const FORBIDDEN_INFANT_STATS = ['chivalry', 'internalSkill', 'martialPower', 'money'] as const;
+const FORBIDDEN_INFANT_STATS = ['chivalry', 'martialPower', 'money'] as const;
 const SHARED_PASSIVE_IDS = new Set(['infant_crawl_home', 'infant_passive_gap']);
 
 export interface OriginInfantVerificationOrigin {
@@ -38,7 +38,6 @@ export const ORIGIN_INFANT_VERIFICATION_ORIGINS: OriginInfantVerificationOrigin[
 
 export interface InfantStatSnapshot {
   chivalry: number;
-  internalSkill: number;
   martialPower: number;
   money: number;
   comprehension: number;
@@ -124,7 +123,6 @@ export interface InfantPassiveChainVerificationReport {
 function snapshotPlayerStats(player: PlayerState | undefined): InfantStatSnapshot {
   return {
     chivalry: player?.chivalry ?? 0,
-    internalSkill: player?.internalSkill ?? 0,
     martialPower: player?.martialPower ?? 0,
     money: player?.money ?? 0,
     comprehension: player?.comprehension ?? 0,
@@ -503,7 +501,7 @@ ${pairwiseTable || '| — | — | — | — | — |'}
 | --- | --- | --- | --- |
 ${report.acX4.traces.map(t => `| ${t.origin} | ${t.emptyNarrativeBeforeContinue} | ${t.statViolations.length ? t.statViolations.join('; ') : '无'} | ${JSON.stringify(t.firstPassiveStatDelta)} |`).join('\n')}
 
-首回合禁止 \`chivalry\` / \`internalSkill\` / \`martialPower\` / \`money\` 跳变（仅审计 passive tick 本身，不含 spine）。
+首回合禁止 \`chivalry\` / \`martialPower\` / \`money\` 跳变（仅审计 passive tick 本身，不含 spine）。
 
 ---
 

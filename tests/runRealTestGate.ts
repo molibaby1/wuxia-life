@@ -51,6 +51,7 @@ const suites: Suite[] = [
   { name: 'p122EarlyVisibleGrowthFeedbackTests', entry: 'tests/p122EarlyVisibleGrowthFeedbackTests.ts' },
   { name: 'p127MartialSecondVisibleGrowthTests', entry: 'tests/p127MartialSecondVisibleGrowthTests.ts' },
   { name: 'mainScreenModelTests', entry: 'tests/mainScreenModel.test.ts' },
+  { name: 'gameScreenPresentationTests', entry: 'tests/gameScreenPresentationTests.ts' },
   { name: 'hvgMerchantVisibleGrowthLoopTests', entry: 'tests/hvgMerchantVisibleGrowthLoopTests.ts' },
   { name: 'p41ChoiceFeedbackValidationTests', entry: 'tests/p41ChoiceFeedbackValidationTests.ts' },
   { name: 'p42ContentDensityTests', entry: 'tests/p42ContentDensityTests.ts' },

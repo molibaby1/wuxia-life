@@ -49,11 +49,11 @@
             </h3>
           </div>
         </div>
-        <p class="story-text story-text-clamped">
+        <p v-if="!hasCanonicalProgressionCard" class="story-text">
           {{ currentNode.text }}
         </p>
 
-        <div v-if="false && periodSummaryDisplay" class="progression-card period-summary-card">
+        <div v-if="periodSummaryDisplay" class="progression-card period-summary-card">
           <span class="progression-source-label">{{ periodSummaryDisplay.sourceLabel }}</span>
           <h3
             v-if="periodSummaryDisplay.headline !== currentNode.title"
@@ -66,7 +66,7 @@
           <p class="progression-hint">本期已落幕，点击继续见证下一季成长。</p>
         </div>
 
-        <div v-if="false && activeActionSummaryDisplay" class="progression-card active-action-summary-card">
+        <div v-if="activeActionSummaryDisplay" class="progression-card active-action-summary-card">
           <span class="progression-source-label">{{ activeActionSummaryDisplay.sourceLabel }}</span>
           <h3
             v-if="activeActionSummaryDisplay.actionName !== currentNode.title"
@@ -92,7 +92,7 @@
           <p class="progression-hint">{{ activeActionSummaryDisplay.nextStepHint }}</p>
         </div>
 
-        <div v-if="false && disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
+        <div v-if="disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
           <span class="progression-source-label">{{ disturbanceNarrativeDisplay.sourceLabel }}</span>
           <h3
             v-if="disturbanceNarrativeDisplay.title !== currentNode.title"
@@ -141,9 +141,6 @@
               </ul>
             </div>
           </div>
-        </div>
-        <div v-if="progressionFeedbackToast" class="progression-feedback-toast" role="status">
-          {{ progressionFeedbackToast }}
         </div>
         <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
           <button
@@ -199,7 +196,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
 import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
@@ -307,8 +304,16 @@ const disturbanceNarrativeDisplay = computed(() => {
   return engineState.pendingDisturbanceNarrative;
 });
 
+const hasCanonicalProgressionCard = computed(() => {
+  return Boolean(
+    periodSummaryDisplay.value ||
+      activeActionSummaryDisplay.value ||
+      disturbanceNarrativeDisplay.value,
+  );
+});
+
 const storyEventSourceLabel = computed(() => {
-  if (activeActionSummaryDisplay.value || disturbanceNarrativeDisplay.value) return null;
+  if (hasCanonicalProgressionCard.value) return null;
   if (!props.currentNode?.id || props.currentNode.id.startsWith('active_')) return null;
   if (props.currentNode.id === 'action_or_choice_result' || props.currentNode.id === 'disturbance_narrative') {
     return null;
@@ -319,7 +324,7 @@ const storyEventSourceLabel = computed(() => {
 });
 
 const displayedNarrative = computed(() => {
-  if (activeActionSummaryDisplay.value || disturbanceNarrativeDisplay.value) {
+  if (hasCanonicalProgressionCard.value) {
     return null;
   }
   const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
@@ -340,48 +345,25 @@ const showNarrativeFallbackHint = computed(() => {
   return fallbackUsed || !hasStructuredFeedback.value;
 });
 
-const progressionFeedbackToast = computed(() => {
-  if (periodSummaryDisplay.value) {
-    return periodSummaryDisplay.value.statDeltaSummary || periodSummaryDisplay.value.body;
-  }
-  if (activeActionSummaryDisplay.value) {
-    return activeActionSummaryDisplay.value.appliedDeltaSummary || activeActionSummaryDisplay.value.nextStepHint;
-  }
-  if (disturbanceNarrativeDisplay.value) {
-    return disturbanceNarrativeDisplay.value.bodyText;
-  }
-  return null;
-});
-
-const progressionFeedbackKey = computed(() => {
-  const toast = progressionFeedbackToast.value;
-  return toast ? `${props.apiSessionPhase ?? 'local'}:${toast}` : null;
-});
-
-let progressionTimer: ReturnType<typeof setTimeout> | null = null;
-
-watch(progressionFeedbackKey, key => {
-  if (!key) return;
-  if (progressionTimer) clearTimeout(progressionTimer);
-  progressionTimer = setTimeout(() => {
-    progressionTimer = null;
-    continueToNext();
-  }, 1200);
-});
+let continueClickLocked = false;
 
 const continueToNext = () => {
+  if (continueClickLocked || props.isAutoPlaying) return;
+  continueClickLocked = true;
   if (props.apiMode) {
     if (props.apiNeedsProgressionAck) {
       emit('api-progression-ack');
     }
-    return;
+  } else {
+    continueProgressionFlow();
   }
-  continueProgressionFlow();
+  void nextTick(() => {
+    continueClickLocked = false;
+  });
 };
 
 const showContinueButton = computed(() => {
   if (props.isAutoPlaying) return false;
-  if (progressionFeedbackToast.value) return false;
   if (props.availableChoices.length > 0) return false;
   if (props.apiMode) {
     return props.apiNeedsProgressionAck === true;
@@ -704,14 +686,6 @@ const loadLatestSave = () => {
   margin: 0;
 }
 
-.story-text-clamped {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .auto-play-indicator {
   display: flex;
   justify-content: center;
@@ -866,35 +840,6 @@ const loadLatestSave = () => {
   padding-top: 1rem;
   border-top: 1px dashed var(--border-color);
   animation: fadeIn 0.3s ease-out;
-}
-
-.progression-feedback-toast {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  z-index: 20;
-  width: min(calc(100vw - 32px), 520px);
-  margin: 0;
-  padding: 10px 14px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  border-radius: 12px;
-  background: rgba(92, 74, 26, 0.94);
-  color: #fffaf1;
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: center;
-  box-shadow: 0 4px 14px rgba(92, 74, 26, 0.18);
-  animation: progressionToastIn 0.2s ease-out;
-}
-
-@keyframes progressionToastIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .outcome-fallback-hint {

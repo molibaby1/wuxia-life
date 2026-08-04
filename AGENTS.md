@@ -123,3 +123,18 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
 ***
+## Current governance documents
+
+Before analysis or implementation, read:
+
+1. `docs/product/player-model.md`
+2. `docs/governance/project-convergence.md`
+3. `docs/governance/product-decisions.md`
+4. `docs/governance/current-product-stage.md`
+5. `docs/governance/ai-collaboration-workflow.md`
+
+Use stage-goal execution:
+
+- Codex may autonomously close ordinary implementation issues inside the current stage.
+- Stop only for structural blockers defined by the current-stage and collaboration documents.
+- Do not proceed into candidate next stages after the current completion criteria are met.

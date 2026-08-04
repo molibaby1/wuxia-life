@@ -136,20 +136,96 @@ Habit 可以开启一个新的路线选择机会，但不能单独证明玩家�
 
 `fatigued` 与 `anxious` 只允许用于具体事件的 `status_has` 条件和明确的内容调度，不参与全局 DailyEvent outcome 权重、正式事件全局 scheduling multiplier 或全局收益 friction，也不参与 Ending 分类或资格、Life Memory 人生评价。当前不需要 `status_absent`。
 
-## 6. 身份边界
+## 6. 身份、归属、称号与人生方向
 
-身份不是投入方向。身份可能与投入有关，但不能与投入等同。
+不得再使用一个通用 `identity` 或 `primaryIdentity` 字段概括“玩家是谁”。以下概念必须分开：
 
-| 概念 | 定位 |
-| --- | --- |
-| 商人 | 身份、职业或客观经历 |
-| 官员 | 职位或身份 |
-| 隐士 | 生活状态或外界评价 |
-| 大侠 | 由名望、侠义声誉、能力和经历形成的评价 |
-| 魔道人物 | 阵营、身份、外界评价或故事事实 |
-| 门派弟子、掌门 | 组织身份 |
-| 游侠 | 生活方式或外界评价 |
+| 概念 | 正式语义 | 是否作为独立 canonical state |
+| --- | --- | --- |
+| Affiliation | 玩家当前客观所属的组织，例如少林、武当、丐帮、边关守军或幽影门 | 是，单一当前值 |
+| Title | 世界内由明确事件正式授予的社会称号 | 是，可空 |
+| Occupation | 商人、学者、官员、医者等长期从业方向 | 当前不建立通用状态 |
+| Reputation / Life identity | 大侠、恶人、传奇、隐士等外界评价或人生概括 | 当前不建立通用状态 |
+| Narrative direction | 武道、商路、仕途、学者、游侠等叙事方向 | 只作事件、摘要和分析的确定性派生 |
+| Ending | 对完整人生的最终分类与解释 | 独立终局状态 |
 
+### 6.1 Canonical Affiliation
+
+正式组织归属为：
+
+```ts
+player.affiliation: AffiliationId | null
+```
+
+当前正式 ID 集合：
+
+```text
+shaolin
+wudang
+beggars
+border
+shadow_sect
+```
+
+规则：
+
+- 当前最多一个 Affiliation；
+- 可以加入、离开或转换；
+- 不建立 affiliation history；
+- 不支持多个组织并存；
+- Snapshot 保存稳定 ID，不保存展示名称；
+- 展示名称由正式 catalog 确定性派生；
+- `player.sect` 与 `flags.current_sect` 不再作为平行来源；
+- `sect_faction`、`lifePath.faction` 和 route flags 不自动等于 Affiliation，它们仍是阵营、调度或叙事信号。
+
+### 6.2 Title
+
+```ts
+player.title: string | null
+```
+
+Title 只表示世界内明确授予的称号。
+
+禁止：
+
+- 根据属性自动计算 Title；
+- 从 route、Affiliation 或 ending 推导 Title；
+- 把 ending name 写入 `player.title`；
+- 把 UI 临时标签当作正式 Title。
+
+没有正式 producer 时，Title 保持 `null`。
+
+### 6.3 Generic Identity 退出
+
+以下结构不再属于正式玩家模型：
+
+```text
+state.identity
+state.identity.primary
+state.identity.identities
+IdentityInfo
+PlayerIdentity
+IdentitySystem
+lifePath.primaryIdentity
+```
+
+事件资格必须使用其真实条件，例如属性、明确 flags、关键经历、成就、Affiliation 或其他现有 canonical facts。不得通过新的通用身份分类器、事件文本解析或 event ID 猜测恢复上述模型。
+
+### 6.4 玩家可见展示
+
+玩家界面应分别展示：
+
+```text
+所属
+称号
+人生方向
+重要经历
+最终结局
+```
+
+不得继续使用“暂无身份”概括玩家全部人生状态。
+
+“商人”“学者”“大侠”“隐士”等词仍可出现在叙事和确定性摘要中，但不因此成为新的持久化 identity source。
 ## 7. 明确废弃
 
 以下内容不再属于正式产品模型：
@@ -163,6 +239,9 @@ Habit 可以开启一个新的路线选择机会，但不能单独证明玩家�
 - 四项投入之间的强互斥、软互斥；
 - 为改变投入设置转向事件；
 - 将商人、官员、隐士等身份直接映射为投入方向；
+- 通用 `state.identity`、`primaryIdentity` 和自动身份判定；
+- 将 ending name 临时写入 `player.title`；
+- 使用 `player.sect` 与 `flags.current_sect` 维护两个组织归属来源；
 - 将外功、内功、轻功与功力同时作为成长值；
 - 长期精力值；
 - 通用 discipline / indulgence 玩家成长数值轴；

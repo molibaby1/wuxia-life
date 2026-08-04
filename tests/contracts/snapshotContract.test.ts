@@ -38,7 +38,7 @@ const REQUIRED_PLAYER_KEYS = [
   'age',
   'gender',
   'alive',
-  'sect',
+  'affiliation',
   'title',
   'spouse',
   'investments',
@@ -159,9 +159,7 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         age: 1,
         gender: 'male',
         alive: true,
-        sect: null,
-        title: null,
-        sect: null,
+        affiliation: null,
         title: null,
         martialPower: 0,
         chivalry: 0,
@@ -323,7 +321,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.12\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.13\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

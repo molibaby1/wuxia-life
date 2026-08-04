@@ -12,6 +12,7 @@ import type {
   PeriodSummaryDisplay,
 } from '../types/activeActionTypes';
 import type { LifeMemorySummary } from '../types/lifeMemory';
+import type { AffiliationId } from '../types/eventTypes';
 import type { Investments, PlayerLifeStates } from '../types/eventTypes';
 
 /**
@@ -91,7 +92,8 @@ export interface PlayerSummaryDto {
   businessAcumen: number;
   influence: number;
   charisma: number;
-  sect?: string;
+  affiliation: AffiliationId | null;
+  title: string | null;
   alive: boolean;
   investments: Investments;
   currentYear: number;

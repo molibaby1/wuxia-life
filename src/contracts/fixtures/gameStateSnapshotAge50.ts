@@ -50,7 +50,7 @@ export const gameStateSnapshotAge50 = {
       chivalry: 85,
       constitution: 70,
       comprehension: 55,
-      sect: '武当派',
+      affiliation: 'wudang',
       title: '武当长老',
       reputation: 420,
       money: 3200,
@@ -264,7 +264,6 @@ export const gameStateSnapshotAge50 = {
       },
     ],
     lifePath: {
-      primaryIdentity: 'hero',
       faction: 'orthodox',
       lifeStage: 'achievement',
       achievements: ['achievement_sword_master', 'wudang_elder_title'],
@@ -279,13 +278,6 @@ export const gameStateSnapshotAge50 = {
         mustProtect: ['spouse_lin', 'disciple_chen'],
         swornEnemies: ['rival_mo'],
       },
-    },
-    identity: {
-      identities: ['hero', 'wudang_elder'],
-      primary: 'hero',
-      title: '武当长老',
-      acquiredAt: 42,
-      achievements: ['wudang_elder_title'],
     },
     karma: {
       good_karma: 120,

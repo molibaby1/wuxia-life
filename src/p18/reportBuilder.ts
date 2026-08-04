@@ -46,7 +46,7 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       chivalry: 60,
       constitution: 55,
       comprehension: 65,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 70,
       money: 1500,
@@ -124,7 +124,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       connections: 70,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'neutral',
       lifeStage: 'legacy',
       achievements: [],
@@ -150,7 +149,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       martialPower: 40,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'legacy',
       achievements: [],
@@ -170,7 +168,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       children: 2,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'legacy',
       achievements: [],

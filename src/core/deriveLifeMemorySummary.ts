@@ -613,7 +613,6 @@ function buildAchievements(state: GameState): LifeMemoryAchievementEntry[] {
   const achievementIds = [
     ...(state.achievements ?? []),
     ...(state.lifePath?.achievements ?? []),
-    ...(state.identity?.achievements ?? []),
   ];
 
   for (const achievementId of achievementIds) {
@@ -714,13 +713,6 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   const currentGoalLabel = deriveSampleLineCurrentGoal(state)
     ?? deriveOrdinaryOriginCurrentGoal(state);
   if (currentGoalLabel) summary.currentGoalLabel = currentGoalLabel;
-  if (state.identity) {
-    summary.identity = {
-      primary: state.identity.primary,
-      all: [...state.identity.identities],
-    };
-  }
-
   const optionalKeyChoices = omitEmpty(keyChoices);
   const optionalRelationships = omitEmpty(relationships);
   const optionalDebts = omitEmpty(unresolvedDebts);

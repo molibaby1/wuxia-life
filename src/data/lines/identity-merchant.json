@@ -24,9 +24,6 @@
       "age": {
         "min": 20,
         "max": 30
-      },
-      "identity": {
-        "required": ["merchant"]
       }
     },
     "content": {
@@ -105,9 +102,6 @@
       "age": {
         "min": 30,
         "max": 45
-      },
-      "identity": {
-        "required": ["merchant"]
       },
       "flags": {
         "required": ["merchant_first_trade"]
@@ -190,9 +184,6 @@
         "min": 40,
         "max": 55
       },
-      "identity": {
-        "required": ["merchant"]
-      },
       "flags": {
         "required": ["business_expansion"]
       }
@@ -267,9 +258,6 @@
         "forbidden": ["origin_wuxia_family", "origin_scholar_family"],
         "evaluation": "at_least_one"
       },
-      "identity": {
-        "required": ["merchant"]
-      },
       "experience": {
         "required": ["merchant_expand_business", "merchant_crisis"],
         "evaluation": "at_least_one"
@@ -282,9 +270,6 @@
       "age": {
         "min": 50,
         "max": 70
-      },
-      "identity": {
-        "required": ["merchant"]
       },
       "flags": {
         "required": ["survived_crisis"]
@@ -339,9 +324,6 @@
       "age": {
         "min": 45,
         "max": 65
-      },
-      "identity": {
-        "required": ["merchant"]
       }
     },
     "content": {

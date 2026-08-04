@@ -45,7 +45,7 @@ export function inferFactionScore(state: GameState): number {
 function playerSect(state: GameState): boolean {
   const flags = readMergedFlags(state);
   return Boolean(
-    state.player?.sect ||
+    state.player?.affiliation ||
       flagIsActive(flags, 'sectMember') ||
       flagIsActive(flags, 'shaolinDisciple') ||
       flagIsActive(flags, 'wudangDisciple'),

@@ -67,7 +67,7 @@ for (const [label, mutate] of [
 
 for (const [label, mutate] of [
   ['non-player potential field', snapshot => { (snapshot.state.player as Record<string, unknown>).martialPotential = 1; }],
-  ['missing sect', snapshot => { delete (snapshot.state.player as Record<string, unknown>).sect; }],
+  ['missing affiliation', snapshot => { delete (snapshot.state.player as Record<string, unknown>).affiliation; }],
   ['missing title', snapshot => { delete (snapshot.state.player as Record<string, unknown>).title; }],
   ['missing spouse', snapshot => { delete (snapshot.state.player as Record<string, unknown>).spouse; }],
   ['missing action history', snapshot => { delete (snapshot.state as Record<string, unknown>).actionHistory; }],
@@ -149,7 +149,7 @@ const saveId = manager.saveGame(runtimeState, 'canonical-boundary');
 const save = manager.loadGame(saveId);
 assert(save, 'canonical save should load');
 assert('snapshot' in save, 'browser save must persist a canonical snapshot');
-assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.12.0');
+assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.13.0');
 const restored = defaultSnapshotConverter.fromSnapshot(save.snapshot);
 assert.deepEqual(restored.actionHistory, runtimeState.actionHistory, 'actionHistory must round-trip');
 assert.deepEqual(restored.actionFocusStreak, runtimeState.actionFocusStreak, 'actionFocusStreak must round-trip');

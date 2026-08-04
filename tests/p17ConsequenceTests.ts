@@ -35,7 +35,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       chivalry: 50,
       constitution: 50,
       comprehension: 50,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 40,
       money: 200,
@@ -73,7 +73,6 @@ function testRelationshipPatternsDiffer(): void {
   const sworn = makeState({ flags: { has_sworn_siblings: true }, player: { flags: { has_sworn_siblings: true } } as GameState['player'] });
   const feud = makeState({
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       achievements: [],
       relationships: { allies: [], enemies: ['x'], mentors: [], disciples: [] },

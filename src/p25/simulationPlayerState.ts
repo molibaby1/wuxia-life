@@ -45,7 +45,7 @@ export function createSimulationPlayerState({
     chivalry: 0,
     constitution: 0,
     comprehension: 0,
-    sect: null,
+    affiliation: null,
     title: null,
     reputation,
     money,

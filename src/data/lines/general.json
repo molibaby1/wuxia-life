@@ -589,14 +589,14 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_wanderer\") && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\")"
+        "expression": "!flags.has(\"route_wanderer\") && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\")"
       }
     ],
     "requirements": {
       "notFlag": ["has_sect"]
     },
     "content": {
-      "text": "到了离家闯荡的年纪。江湖上有几大著名门派：少林、武当、峨眉。家族长辈询问你的意愿，想要拜入哪一门派。",
+      "text": "到了离家闯荡的年纪。家族长辈询问你的意愿，你需要决定接下来如何继续修炼。",
       "title": "门派选择",
       "description": "选择将影响你的武学道路。"
     },
@@ -621,7 +621,7 @@
               {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
-              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "affiliation_set", "value": "shaolin"},
               {"type": "flag_set", "target": "shaolin_elite"},
               {"type": "event_record", "target": "join_shaolin_elite"}
             ]
@@ -635,7 +635,7 @@
               {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
-              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "affiliation_set", "value": "shaolin"},
               {"type": "event_record", "target": "join_shaolin"}
             ]
           },
@@ -649,7 +649,7 @@
               {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
-              {"type": "flag_set", "target": "current_sect", "value": "shaolin"},
+              {"type": "affiliation_set", "value": "shaolin"},
               {"type": "flag_set", "target": "shaolin_outer"},
               {"type": "event_record", "target": "join_shaolin_outer"}
             ]
@@ -676,7 +676,7 @@
               {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
               {"type": "flag_set", "target": "wudangDisciple"},
               {"type": "flag_set", "target": "sect_wudang"},
-              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "affiliation_set", "value": "wudang"},
               {"type": "flag_set", "target": "wudang_elite"},
               {"type": "event_record", "target": "join_wudang_elite"}
             ]
@@ -691,7 +691,7 @@
               {"type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add"},
               {"type": "flag_set", "target": "wudangDisciple"},
               {"type": "flag_set", "target": "sect_wudang"},
-              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "affiliation_set", "value": "wudang"},
               {"type": "event_record", "target": "join_wudang"}
             ]
           },
@@ -706,7 +706,7 @@
               {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
               {"type": "flag_set", "target": "wudangDisciple"},
               {"type": "flag_set", "target": "sect_wudang"},
-              {"type": "flag_set", "target": "current_sect", "value": "wudang"},
+              {"type": "affiliation_set", "value": "wudang"},
               {"type": "flag_set", "target": "wudang_probationary"},
               {"type": "event_record", "target": "join_wudang_probationary"}
             ]
@@ -2706,6 +2706,10 @@
       {
         "type": "event_record",
         "target": "ordinary_life"
+      },
+      {
+        "type": "special",
+        "target": "end_game"
       }
     ],
     "metadata": {

@@ -179,7 +179,7 @@
         ref="summarySectionRef"
         class="summary-section"
         :current-goal-summary="mainScreenModel.currentGoalSummary"
-        :identity-summary="mainScreenModel.identitySummary"
+        :affiliation-summary="mainScreenModel.affiliationSummary"
         :experience-summary="mainScreenModel.experienceSummary"
         :risk-summary="mainScreenModel.riskSummary"
         :tendency-summary="mainScreenModel.tendencySummary"
@@ -406,7 +406,8 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
       chivalry: p.chivalry,
       constitution: p.constitution,
       comprehension: p.comprehension,
-      sect: p.sect ?? null,
+      affiliation: p.affiliation,
+      title: p.title,
       reputation: p.reputation,
       money: p.money,
       knowledge: p.knowledge,

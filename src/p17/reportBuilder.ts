@@ -46,7 +46,7 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       chivalry: 50,
       constitution: 50,
       comprehension: 50,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 30,
       money: 100,
@@ -112,7 +112,6 @@ export function assembleP17GateReport(
   });
   const feudState = makeSampleState({
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'growth',
       achievements: [],

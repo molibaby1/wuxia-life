@@ -17,7 +17,7 @@ function baseLateLifeState(): GameState {
       chivalry: 38,
       constitution: 50,
       comprehension: 45,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 32,
       money: 400,
@@ -91,7 +91,6 @@ export function runEndgameCategoryComparisonSlice(): EndgameCategoryComparisonSl
   factionHeavy.flags = { sect_exposure: true, blood_feud_active: true, demonic_reputation: true };
   factionHeavy.player!.flags = { ...factionHeavy.flags };
   factionHeavy.lifePath = {
-    primaryIdentity: 'martial',
     faction: 'evil',
     lifeStage: 'legacy',
     achievements: [],
@@ -112,7 +111,6 @@ export function runEndgameCategoryComparisonSlice(): EndgameCategoryComparisonSl
   legacyHeavy.player!.martialPower = 92;
   legacyHeavy.player!.martialHeritage = 75;
   legacyHeavy.lifePath = {
-    primaryIdentity: 'martial',
     faction: 'orthodox',
     lifeStage: 'legacy',
     achievements: [],

@@ -18,7 +18,7 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     constitution: 18,
     comprehension: 24,
     money: 88,
-    sect: '武当',
+    affiliation: 'wudang',
     alive: true,
     currentYear: 19,
     currentMonth: 6,
@@ -45,7 +45,7 @@ function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): Main
 
 function createLifeMemory(overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary {
   return {
-    schemaVersion: '2.0.0',
+    schemaVersion: '3.0.0',
     derivedAtAge: 19,
     risks: [
       {
@@ -68,8 +68,8 @@ console.log('=== Main Screen Model Tests ===\n');
   const model = buildMainScreenModel(createPlayer(), createLifeMemory());
 
   assert(model.currentGoalSummary === '暂无明确目标', 'current goal should degrade to explicit empty copy');
-  assert(model.stageTags.length === 1, 'stage tags should expose sect only');
-  assert(model.stageTags[0] === '武当', 'stage tags first item should be sect');
+  assert(model.stageTags.length === 1, 'stage tags should expose affiliation only');
+  assert(model.stageTags[0] === '武当派', 'stage tags first item should be affiliation');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '功力 42', 'martial-dominant tendency collapses to martialPower readout');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');

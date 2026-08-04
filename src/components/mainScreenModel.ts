@@ -57,6 +57,7 @@
 import type { PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
+import { getAffiliationDefinition } from '../core/affiliationCatalog';
 
 export interface MainScreenStatItem {
   key: string;
@@ -75,7 +76,8 @@ export interface MainScreenModel {
   stageTags: string[];
   topResources: MainScreenStatItem[];
   currentGoalSummary: string;
-  identitySummary: string;
+  affiliationSummary: string;
+  titleSummary: string;
   experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;
@@ -95,7 +97,8 @@ export type MainScreenPlayer = Pick<
   | 'charisma'
   | 'connections'
   | 'influence'
-  | 'sect'
+  | 'affiliation'
+  | 'title'
 > &
   Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>>;
 
@@ -152,9 +155,10 @@ function buildRiskSummary(summary: LifeMemorySummary): string {
   return `${RISK_LEVEL_LABELS[risk.severity]} · ${risk.label}`;
 }
 
-function buildIdentitySummary(summary: LifeMemorySummary): string {
-  const identities = summary.identity?.all ?? [];
-  return identities.length > 0 ? identities.join(' / ') : '暂无身份';
+function buildAffiliationSummary(player: MainScreenPlayer): string {
+  return player.affiliation
+    ? getAffiliationDefinition(player.affiliation).displayName
+    : '无固定所属';
 }
 
 function buildExperienceSummary(summary: LifeMemorySummary): string {
@@ -266,7 +270,10 @@ export function buildMainScreenModel(
   lifeMemory: LifeMemorySummary,
 ): MainScreenModel {
   const player = playerLike as MainScreenPlayer;
-  const stageTags = [player.sect]
+  const stageTags = [
+    player.affiliation ? getAffiliationDefinition(player.affiliation).displayName : null,
+    player.title,
+  ]
     .filter((value): value is string => Boolean(value))
     .slice(0, 2);
 
@@ -279,7 +286,8 @@ export function buildMainScreenModel(
       createStat('reputation', '名望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接代表人生投入'),
     ],
     currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',
-    identitySummary: buildIdentitySummary(lifeMemory),
+    affiliationSummary: buildAffiliationSummary(player),
+    titleSummary: player.title ?? '暂无正式称号',
     experienceSummary: buildExperienceSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player),

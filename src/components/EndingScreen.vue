@@ -3,13 +3,14 @@
     <div class="content">
       <div class="poster card">
         <div class="poster-header">
-          <h2 class="title">{{ player?.title }}</h2>
+          <h2 class="title">{{ endingInfo?.name || '人生落幕' }}</h2>
         </div>
         
         <div class="poster-content">
           <p class="name">{{ player?.name }}</p>
           <p class="age">享年 {{ player?.age }} 岁</p>
-          <p v-if="player?.sect" class="sect">{{ player.sect }}弟子</p>
+          <p v-if="player?.affiliation" class="affiliation">所属：{{ affiliationLabel }}</p>
+          <p v-if="player?.title" class="title-line">称号：{{ player.title }}</p>
         </div>
         
         <div class="death-reason">
@@ -17,9 +18,8 @@
         </div>
 
         <div class="road-ending" aria-label="结局信息">
-          <p><strong>终局原型：</strong>{{ endingInfo?.name || player?.title || '人生落幕' }}</p>
+          <p><strong>终局原型：</strong>{{ endingInfo?.name || '人生落幕' }}</p>
           <p v-if="endingInfo?.description">{{ endingInfo.description }}</p>
-          <p><strong>身份摘要：</strong>{{ lifeMemory?.identity?.all?.join(' / ') || '暂无身份' }}</p>
         </div>
         
         <div class="final-stats">
@@ -41,7 +41,7 @@
         </div>
         
         <div class="epitaph">
-          <p>「 {{ player?.title }} 」</p>
+          <p>「 {{ endingInfo?.name || '人生落幕' }} 」</p>
         </div>
       </div>
       
@@ -72,7 +72,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import type { LifeMemorySummary } from '../types/lifeMemory';
+import type { AffiliationId } from '../types/eventTypes';
 
 const emit = defineEmits(['restart', 'load-latest-save']);
 const props = defineProps<{
@@ -80,7 +82,7 @@ const props = defineProps<{
     name?: string;
     title?: string;
     age?: number;
-    sect?: string;
+    affiliation?: AffiliationId | null;
     deathReason?: string;
     martialPower?: number;
     chivalry?: number;
@@ -95,9 +97,13 @@ const player = props.player;
 const hasLatestSave = props.hasLatestSave ?? false;
 const latestSaveLabel = props.latestSaveLabel ?? '';
 const endingInfo = computed(() => props.ending ?? null);
+const affiliationLabel = computed(() => {
+  if (!player?.affiliation) return '';
+  return getAffiliationDefinition(player.affiliation).displayName;
+});
 
 const share = () => {
-  const shareText = `${player?.name}的武侠人生：${player?.deathReason}，获得称号「${player?.title}」！快来试试你的武侠人生吧！`;
+  const shareText = `${player?.name}的武侠人生：${endingInfo.value?.name ?? player?.deathReason ?? '人生落幕'}！快来试试你的武侠人生吧！`;
   
   if (navigator.share) {
     navigator.share({
@@ -164,7 +170,7 @@ const loadLatestSave = () => {
   margin-bottom: 4px;
 }
 
-.poster-content .sect {
+.poster-content .affiliation {
   font-size: 16px;
   color: #666;
   margin-bottom: 20px;

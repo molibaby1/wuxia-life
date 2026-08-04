@@ -1204,7 +1204,7 @@ export class GameProcessSimulator {
     const sectJoined = flags.sect_shaolin ? '少林派' :
                        flags.sect_wudang ? '武当派' :
                        flags.sect_emei ? '峨眉派' :
-                       finalState?.player?.sect || null;
+                       finalState?.player?.affiliation || null;
     
     // 从 flags 中提取更多信息
     const sectStatus = flags.sectLeader ? '掌门' : 

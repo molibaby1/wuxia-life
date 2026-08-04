@@ -327,7 +327,7 @@ export class GameTestFramework {
         charisma: 20,
         knowledge: 20,
         connections: 10,
-        sect: '武当派',
+        affiliation: 'wudang',
         title: null,
         reputation: 50,
         money: 100,

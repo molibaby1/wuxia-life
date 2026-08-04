@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 15}
     ],
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown') && !flags.has('p8_route_martial') && !flags.has('p8_route_conservative') && (chivalry <= 20 || flags.wandering == true)"}
+      {"type": "expression", "expression": "!player.affiliation && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown') && !flags.has('p8_route_martial') && !flags.has('p8_route_conservative') && (chivalry <= 20 || flags.wandering == true)"}
     ],
     "content": {
       "title": "另一条路",
@@ -24,7 +24,7 @@
         "effects": [
           {"type": "flag_set", "flag": "sect_faction", "value": "unconventional"},
           {"type": "flag_set", "flag": "route_demonic"},
-          {"type": "flag_set", "flag": "current_sect", "value": "shadow_sect"},
+          {"type": "affiliation_set", "value": "shadow_sect"},
           {"type": "stat_modify", "stat": "martialPower", "value": 5}
         ]
       },

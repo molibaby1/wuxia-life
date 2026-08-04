@@ -22,7 +22,6 @@
     ],
     "requirements": {
       "faction": "orthodox",
-      "identity": ["hero"],
       "attributes": {
         "chivalry": { "min": 10 },
         "martialPower": { "min": 20 }
@@ -33,9 +32,6 @@
       "age": {
         "min": 20,
         "max": 30
-      },
-      "identity": {
-        "required": ["hero"]
       }
     },
     "content": {
@@ -138,7 +134,6 @@
     ],
     "requirements": {
       "faction": "orthodox",
-      "identity": ["hero"],
       "attributes": {
         "chivalry": { "min": 20 },
         "martialPower": { "min": 30 }
@@ -150,9 +145,6 @@
       "age": {
         "min": 25,
         "max": 40
-      },
-      "identity": {
-        "required": ["hero"]
       },
       "flags": {
         "required": ["hero_first_case"]
@@ -273,9 +265,6 @@
         "min": 35,
         "max": 50
       },
-      "identity": {
-        "required": ["hero"]
-      },
       "flags": {
         "required": ["save_village"],
         "not": ["route_wanderer"]
@@ -378,9 +367,6 @@
       }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["hero"]
-      },
       "experience": {
         "required": ["hero_fight_evil", "jianghu_rescue"],
         "evaluation": "at_least_one"
@@ -394,9 +380,6 @@
       "age": {
         "min": 50,
         "max": 70
-      },
-      "identity": {
-        "required": ["hero"]
       },
       "flags": {
         "required": ["defeat_demon Sect", "save_village"]
@@ -450,9 +433,6 @@
       "age": {
         "min": 45,
         "max": 65
-      },
-      "identity": {
-        "required": ["hero"]
       }
     },
     "content": {
@@ -525,9 +505,6 @@
       "age": {
         "min": 24,
         "max": 40
-      },
-      "identity": {
-        "required": ["hero"]
       }
     },
     "content": {

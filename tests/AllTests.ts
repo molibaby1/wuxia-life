@@ -745,14 +745,9 @@ async function runSaveRegressionCoverageCase() {
         triggeredAt: state.currentTime.year,
       },
     ];
-    state.identity = {
-      identities: ['hero'],
-      primary: 'hero',
-      title: '江湖义士',
-      achievements: [],
-    } as any;
+    state.player.affiliation = 'wudang';
+    state.player.title = '江湖义士';
     state.lifePath = {
-      primaryIdentity: 'hero',
       faction: 'orthodox',
       lifeStage: 'development',
       achievements: [],
@@ -769,7 +764,6 @@ async function runSaveRegressionCoverageCase() {
     state.player.flags.route_hero = false;
     state.player.relationships = [];
     state.eventHistory = [];
-    state.identity = undefined;
     state.lifePath = undefined;
 
     const loaded = engine.loadGameFromSave(saveId);
@@ -778,7 +772,8 @@ async function runSaveRegressionCoverageCase() {
     assertEqual(restoredAfterLoad.currentTime?.year, 27, 'US-021: 读档后时间字段应恢复');
     assertEqual(restoredAfterLoad.flags.route_hero, true, 'US-021: 读档后路线字段应恢复');
     assertEqual(restoredAfterLoad.flags.us_021_checkpoint, true, 'US-021: 读档后关键 checkpoint 应恢复');
-    assertEqual(restoredAfterLoad.identity?.primary, 'hero', 'US-021: 读档后身份字段应恢复');
+    assertEqual(restoredAfterLoad.player.affiliation, 'wudang', 'US-021: 读档后所属字段应恢复');
+    assertEqual(restoredAfterLoad.player.title, '江湖义士', 'US-021: 读档后称号字段应恢复');
     assertEqual(restoredAfterLoad.player.relationships?.[0]?.name, '赵灵', 'US-021: 读档后关系字段应恢复');
     assertEqual(restoredAfterLoad.eventHistory?.[0]?.eventId, 'us_021_history_event', 'US-021: 读档后事件历史应恢复');
 
@@ -795,7 +790,7 @@ async function runSaveRegressionCoverageCase() {
     assert(loadedAfterRestart, 'US-021: 重开后应可继续读取历史存档');
     const restoredAfterRestartLoad = engine.getGameState();
     assertEqual(restoredAfterRestartLoad.flags.route_hero, true, 'US-021: 重开后读档仍应恢复路线字段');
-    assertEqual(restoredAfterRestartLoad.identity?.primary, 'hero', 'US-021: 重开后读档仍应恢复身份字段');
+    assertEqual(restoredAfterRestartLoad.player.affiliation, 'wudang', 'US-021: 重开后读档仍应恢复所属字段');
 
     restoredAfterRestartLoad.player.alive = false;
     restoredAfterRestartLoad.ending = {
@@ -809,7 +804,7 @@ async function runSaveRegressionCoverageCase() {
     assertEqual(restoredFromEnding.player.alive, true, 'US-021: 结局后读档应恢复为可继续状态');
     assertEqual(restoredFromEnding.currentTime?.year, 27, 'US-021: 结局后读档时间字段应恢复');
     assertEqual(restoredFromEnding.flags.route_hero, true, 'US-021: 结局后读档路线字段应恢复');
-    assertEqual(restoredFromEnding.identity?.primary, 'hero', 'US-021: 结局后读档身份字段应恢复');
+    assertEqual(restoredFromEnding.player.affiliation, 'wudang', 'US-021: 结局后读档所属字段应恢复');
     assertEqual(restoredFromEnding.player.relationships?.[0]?.name, '赵灵', 'US-021: 结局后读档关系字段应恢复');
     assertEqual(restoredFromEnding.eventHistory?.[0]?.eventId, 'us_021_history_event', 'US-021: 结局后读档事件历史应恢复');
     assert(engine.engineState.currentEvent !== null, 'US-021: 结局后读档应可继续推进流程');
@@ -1248,16 +1243,13 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '运行时门禁 - triggerConditions 不满足时事件不得触发',
-      description: '测试 getAvailableEvents 会统一校验 legacy triggerConditions，失败时过滤事件',
+      name: '运行时门禁 - generic identity gate 不再生效',
+      description: '测试 getAvailableEvents 不再读取已删除的 generic identity gate',
       test: () => {
         const engine = new GameEngineIntegration() as any;
         const state = engine.getGameState();
         state.player.age = 22;
-        state.identity = {
-          identities: ['hero'],
-          primary: 'hero',
-        };
+        state.player.affiliation = 'wudang';
 
         const originalGetEventsByAge = eventLoader.getEventsByAge.bind(eventLoader);
         try {
@@ -1284,7 +1276,7 @@ const coreFunctionSuite: TestSuite = {
           ];
 
           const available = engine.getAvailableEvents(22);
-          assertEqual(available.length, 0, 'triggerConditions 不满足时不应进入可选事件列表');
+          assertEqual(available.length, 1, 'generic identity gate 不应再过滤正式事件候选');
         } finally {
           (eventLoader as any).getEventsByAge = originalGetEventsByAge;
         }
@@ -1803,12 +1795,8 @@ const coreFunctionSuite: TestSuite = {
       test: async () => {
         const executor = new EventExecutor();
         const state = framework.createTestState();
-        state.identity = {
-          identities: ['heroic'],
-          primary: 'heroic',
-        };
+        state.player.affiliation = 'wudang';
         state.lifePath = {
-          primaryIdentity: 'heroic',
           faction: 'orthodox',
           lifeStage: 'development',
           achievements: [],
@@ -1821,7 +1809,7 @@ const coreFunctionSuite: TestSuite = {
           state,
         );
 
-        assertEqual(nextState.identity?.primary, 'heroic', 'identity 字段应保持不变');
+        assertEqual(nextState.player.affiliation, 'wudang', 'affiliation 字段应保持不变');
         assertEqual(nextState.lifePath?.faction, 'orthodox', 'lifePath.faction 不应被路线状态同步改写');
       },
     },
@@ -3091,14 +3079,14 @@ const compatibilitySuite: TestSuite = {
     },
     {
       name: '兼容性测试 - Canonical Snapshot 存档',
-      description: '测试 saveGame 只写入 Canonical Snapshot 3.12.0',
+      description: '测试 saveGame 只写入 Canonical Snapshot 3.13.0',
       test: () => {
         saveManager.clearAllSaves();
         const state = new GameEngineIntegration().getGameState();
         const saveId = saveManager.saveGame(state, 'us-018-version-marker');
         const loaded = saveManager.loadGame(saveId);
         assert(loaded !== null, '当前版本存档应可正常读取');
-        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.12.0', '存档应写入 Canonical Snapshot 3.12.0');
+        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.13.0', '存档应写入 Canonical Snapshot 3.13.0');
       },
     },
     {

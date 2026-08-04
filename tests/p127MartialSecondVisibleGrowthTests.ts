@@ -94,7 +94,7 @@ function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
       comprehension: 10,
       reputation: 10,
       money: 50,
-      sect: null,
+      affiliation: null,
       lifeStates: state.player.lifeStates,
     },
     {

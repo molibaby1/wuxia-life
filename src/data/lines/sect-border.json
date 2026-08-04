@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_border\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.martialPower >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+        "expression": "!flags.has(\"route_border\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\") && (player.martialPower >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
       }
     ],
     "content": {
@@ -40,7 +40,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_border"},
-              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "affiliation_set", "value": "border"},
               {"type": "flag_set", "target": "border_trial_active"},
               {"type": "flag_set", "target": "border_rank", "value": "officer"},
               {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
@@ -56,7 +56,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_border"},
-              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "affiliation_set", "value": "border"},
               {"type": "flag_set", "target": "border_trial_active"},
               {"type": "flag_set", "target": "border_rank", "value": "soldier"},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
@@ -71,7 +71,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_border"},
-              {"type": "flag_set", "target": "current_sect", "value": "border"},
+              {"type": "affiliation_set", "value": "border"},
               {"type": "flag_set", "target": "border_trial_active"},
               {"type": "flag_set", "target": "border_rank", "value": "support"},
               {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
@@ -1406,7 +1406,7 @@
           { "type": "flag_unset", "target": "route_border" },
           { "type": "flag_unset", "target": "border_trial_active" },
           { "type": "flag_set", "target": "border_departed" },
-          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "affiliation_clear" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -10, "operator": "add" },
           { "type": "stat_modify", "target": "connections", "value": -5, "operator": "add" },

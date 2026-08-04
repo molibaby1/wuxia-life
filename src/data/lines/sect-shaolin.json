@@ -186,7 +186,7 @@
           { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
           { "type": "flag_unset", "target": "route_buddhist" },
           { "type": "flag_set", "target": "buddhist_secularized" },
-          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "affiliation_clear" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
           { "type": "event_record", "target": "buddhist_secularize_leave" }

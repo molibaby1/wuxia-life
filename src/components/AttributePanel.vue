@@ -52,29 +52,17 @@
       </div>
     </div>
 
-    <!-- 门派与身份信息 -->
-    <div class="identity-section" v-if="currentSectInfo || playerIdentities.length > 0">
-      <h4>门派与身份</h4>
-      <div class="identity-content">
-        <!-- 当前门派 -->
-        <div v-if="currentSectInfo" class="sect-badge" :class="currentSectInfo.faction">
-          <span class="sect-name">{{ currentSectInfo.name }}</span>
-          <span class="sect-faction">{{ currentSectInfo.factionName }}</span>
+    <!-- 所属与称号信息 -->
+    <div class="affiliation-section" v-if="currentAffiliationInfo || player.title || importantFlags.length > 0">
+      <h4>所属与称号</h4>
+      <div class="affiliation-content">
+        <div v-if="currentAffiliationInfo" class="affiliation-badge" :class="currentAffiliationInfo.organizationClass">
+          <span class="affiliation-name">{{ currentAffiliationInfo.displayName }}</span>
+          <span class="affiliation-class">{{ factionNameMap[currentAffiliationInfo.organizationClass] }}</span>
         </div>
-        
-        <!-- 身份标签 -->
-        <div v-if="playerIdentities.length > 0" class="identity-tags">
-          <span 
-            v-for="identity in playerIdentities" 
-            :key="identity"
-            class="identity-tag"
-            :class="getIdentityClass(identity)"
-          >
-            {{ getIdentityName(identity) }}
-          </span>
+        <div v-if="player.title" class="player-title">
+          称号：{{ player.title }}
         </div>
-        
-        <!-- 重要标志 -->
         <div v-if="importantFlags.length > 0" class="important-flags">
           <span 
             v-for="flag in importantFlags" 
@@ -140,6 +128,7 @@
 import { computed, ref } from 'vue';
 import { ArrowUpIcon, ArrowDownIcon, CheckIcon, XIcon } from 'lucide-vue-next';
 import type { PlayerState } from '../types/eventTypes';
+import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import {
   attributeMeaningCatalog,
   defaultSelfAwareness,
@@ -238,18 +227,6 @@ const attributeGuidanceTips = computed(() =>
     })),
 );
 
-// 门派名称映射
-const sectNameMap: Record<string, { name: string; faction: string }> = {
-  'shaolin': { name: '少林寺', faction: 'orthodox' },
-  'wudang': { name: '武当派', faction: 'orthodox' },
-  'beggars': { name: '丐帮', faction: 'neutral' },
-  'shadow_sect': { name: '幽影门', faction: 'unconventional' },
-  'youying': { name: '幽影门', faction: 'unconventional' },
-  'tangmen': { name: '唐门', faction: 'neutral' },
-  'mingjiao': { name: '明教', faction: 'unconventional' },
-  'border': { name: '边关守军', faction: 'neutral' },
-};
-
 // 阵营名称映射
 const factionNameMap: Record<string, string> = {
   'orthodox': '正道',
@@ -257,80 +234,10 @@ const factionNameMap: Record<string, string> = {
   'neutral': '中立',
 };
 
-// 获取当前门派信息
-const currentSectInfo = computed(() => {
-  const playerFlags = (props.player.flags || {}) as Record<string, any>;
-  const currentSect = playerFlags.current_sect as string | undefined;
-  if (!currentSect) return null;
-  
-  const sectInfo = sectNameMap[currentSect];
-  if (!sectInfo) {
-    return {
-      name: currentSect,
-      faction: 'neutral',
-      factionName: '未知'
-    };
-  }
-  
-  return {
-    name: sectInfo.name,
-    faction: sectInfo.faction,
-    factionName: factionNameMap[sectInfo.faction] || sectInfo.faction
-  };
+const currentAffiliationInfo = computed(() => {
+  const affiliation = props.player.affiliation;
+  return affiliation ? getAffiliationDefinition(affiliation) : null;
 });
-
-// 玩家身份列表
-const playerIdentities = computed(() => {
-  const playerFlags = (props.player.flags || {}) as Record<string, any>;
-  const identities: string[] = [];
-  
-  // 根据 flags 判断身份
-  if (playerFlags.route_beggars) identities.push('beggar');
-  if (playerFlags.route_border) identities.push('border');
-  if (playerFlags.route_demonic || playerFlags.sect_faction === 'unconventional') identities.push('outlaw');
-  if (playerFlags.route_orthodox || playerFlags.sect_shaolin || playerFlags.sect_wudang) identities.push('orthodox');
-  if (playerFlags.route_official) identities.push('official');
-  if (playerFlags.married) identities.push('married');
-  if (playerFlags.has_child) identities.push('parent');
-  if (playerFlags.retired) identities.push('retired');
-  if (playerFlags.is_sect_leader) identities.push('sect_leader');
-  
-  return identities;
-});
-
-// 身份名称映射
-const identityNameMap: Record<string, string> = {
-  'beggar': '丐帮弟子',
-  'border': '边关将士',
-  'outlaw': '绿林好汉',
-  'orthodox': '名门弟子',
-  'official': '朝廷官员',
-  'married': '已婚',
-  'parent': '为人父母',
-  'retired': '退隐江湖',
-  'sect_leader': '一派之主',
-};
-
-// 获取身份名称
-const getIdentityName = (identity: string): string => {
-  return identityNameMap[identity] || identity;
-};
-
-// 获取身份样式类
-const getIdentityClass = (identity: string): string => {
-  const classMap: Record<string, string> = {
-    'beggar': 'tag-neutral',
-    'border': 'tag-neutral',
-    'outlaw': 'tag-unconventional',
-    'orthodox': 'tag-orthodox',
-    'official': 'tag-orthodox',
-    'married': 'tag-normal',
-    'parent': 'tag-normal',
-    'retired': 'tag-normal',
-    'sect_leader': 'tag-special',
-  };
-  return classMap[identity] || 'tag-normal';
-};
 
 // 重要标志列表
 const importantFlags = computed(() => {
@@ -677,27 +584,26 @@ const allStatDetails = computed(() => {
   color: #ef4444;
 }
 
-/* 门派与身份区域 */
-.identity-section {
+/* 所属与称号区域 */
+.affiliation-section {
   margin-top: 20px;
   padding-top: 15px;
   border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.identity-section h4 {
+.affiliation-section h4 {
   margin: 0 0 12px 0;
   font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
 }
 
-.identity-content {
+.affiliation-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* 门派徽章 */
-.sect-badge {
+.affiliation-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -706,77 +612,38 @@ const allStatDetails = computed(() => {
   font-weight: 600;
 }
 
-.sect-badge.orthodox {
+.affiliation-badge.orthodox {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
   border: 2px solid rgba(59, 130, 246, 0.6);
   color: #93c5fd;
 }
 
-.sect-badge.unconventional {
+.affiliation-badge.unconventional {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(249, 115, 22, 0.3));
   border: 2px solid rgba(239, 68, 68, 0.6);
   color: #fca5a5;
 }
 
-.sect-badge.neutral {
+.affiliation-badge.neutral {
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(234, 179, 8, 0.3));
   border: 2px solid rgba(234, 179, 8, 0.6);
   color: #fde047;
 }
 
-.sect-name {
+.affiliation-name {
   font-size: 15px;
 }
 
-.sect-faction {
+.affiliation-class {
   font-size: 12px;
   padding: 2px 6px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* 身份标签 */
-.identity-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.identity-tag {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.tag-orthodox {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.4);
-}
-
-.tag-unconventional {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-}
-
-.tag-neutral {
-  background: rgba(234, 179, 8, 0.2);
-  color: #fde047;
-  border: 1px solid rgba(234, 179, 8, 0.4);
-}
-
-.tag-normal {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.tag-special {
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(249, 115, 22, 0.3));
-  color: #fde047;
-  border: 1px solid rgba(234, 179, 8, 0.5);
+ .player-title {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
 }
 
 /* 重要标志 */

@@ -12,7 +12,7 @@ function baseLateLifeState(): GameState {
       chivalry: 55,
       constitution: 50,
       comprehension: 55,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 55,
       money: 800,
@@ -85,7 +85,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
   invested.player!.money = 2000;
   invested.player!.connections = 65;
   invested.lifePath = {
-    primaryIdentity: 'martial',
     faction: 'neutral',
     lifeStage: 'legacy',
     achievements: [],
@@ -101,7 +100,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
   neglected.player!.reputation = 90;
   neglected.player!.money = 30;
   neglected.lifePath = {
-    primaryIdentity: 'martial',
     faction: 'neutral',
     lifeStage: 'legacy',
     achievements: [],
@@ -166,7 +164,6 @@ export function runInheritedBurdenComparisonSlice(): InheritedBurdenComparisonSl
   };
   withBurdenState.player!.martialHeritage = 25;
   withBurdenState.lifePath = {
-    primaryIdentity: 'none',
     faction: 'neutral',
     lifeStage: 'legacy',
     achievements: [],
@@ -202,7 +199,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
   highAchievement.player!.martialHeritage = 10;
   highAchievement.player!.money = 40;
   highAchievement.lifePath = {
-    primaryIdentity: 'hero',
     faction: 'neutral',
     lifeStage: 'legacy',
     achievements: [],
@@ -227,7 +223,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
   strongCultivation.player!.money = 2200;
   strongCultivation.player!.martialPower = 88;
   strongCultivation.lifePath = {
-    primaryIdentity: 'martial',
     faction: 'neutral',
     lifeStage: 'legacy',
     achievements: [],

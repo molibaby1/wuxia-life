@@ -3,7 +3,7 @@
  * Serializable, derived-only — not persisted as redundant game state.
  */
 
-export const LIFE_MEMORY_SCHEMA_VERSION = '2.0.0' as const;
+export const LIFE_MEMORY_SCHEMA_VERSION = '3.0.0' as const;
 
 export type LifeMemoryVisibility = 'player' | 'hidden' | 'diagnostic';
 
@@ -74,7 +74,6 @@ export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
   currentGoalLabel?: string;
-  identity?: { primary: string; all: string[] };
   habitTrajectory?: LifeMemoryHabitTrajectoryEntry[];
   keyChoices?: LifeMemoryKeyChoiceEntry[];
   relationships?: LifeMemoryRelationshipEntry[];

@@ -60,7 +60,7 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       chivalry: 60,
       constitution: 55,
       comprehension: 65,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 70,
       money: 1500,
@@ -148,7 +148,6 @@ export function assembleP19GateReport(profile: WorldProfile = getWorldProfile())
     flags: { demonic_reputation: true, blood_feud_active: true, sect_exposure: true },
     player: { flags: { demonic_reputation: true }, chivalry: -10 } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'evil',
       lifeStage: 'legacy',
       achievements: [],

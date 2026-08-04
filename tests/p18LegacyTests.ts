@@ -42,7 +42,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       chivalry: 55,
       constitution: 50,
       comprehension: 60,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 65,
       money: 1200,
@@ -89,7 +89,6 @@ function testSuccessorRolesAndChannels(): void {
       money: 2000,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'neutral',
       lifeStage: 'elderly',
       achievements: [],
@@ -104,7 +103,6 @@ function testSuccessorRolesAndChannels(): void {
       martialHeritage: 10,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'elderly',
       achievements: [],
@@ -149,7 +147,6 @@ function testCultivationPressure(): void {
       children: 2,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'elderly',
       achievements: [],
@@ -175,7 +172,6 @@ function testLegacyOutcomes(): void {
       martialHeritage: 80,
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'neutral',
       lifeStage: 'elderly',
       achievements: [],

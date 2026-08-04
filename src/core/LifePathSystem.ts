@@ -8,7 +8,7 @@
  * @since 2026-03-15
  */
 
-import type { LifePath, LifeStage, FactionType, PlayerIdentity, GameState } from '../types/eventTypes';
+import type { LifePath, LifeStage, GameState } from '../types/eventTypes';
 
 export class LifePathManager {
   /**
@@ -16,7 +16,6 @@ export class LifePathManager {
    */
   static create(): LifePath {
     return {
-      primaryIdentity: 'none',
       faction: 'neutral',
       lifeStage: 'growth',
       achievements: [],
@@ -42,59 +41,6 @@ export class LifePathManager {
       state.lifePath = this.create();
     }
     return state;
-  }
-
-  /**
-   * 设置核心身份
-   */
-  static setPrimaryIdentity(state: GameState, identity: PlayerIdentity): GameState {
-    if (!state.lifePath) {
-      state.lifePath = this.create();
-    }
-
-    const { lifePath } = state;
-
-    // 检查是否可以转换身份
-    if (!this.canChangeIdentity(lifePath, identity)) {
-      console.warn(`[LifePath] 无法转换身份：${lifePath.primaryIdentity} → ${identity}`);
-      return state;
-    }
-
-    lifePath.primaryIdentity = identity;
-
-    // 更新阵营
-    const newFaction = this.getIdentityFaction(identity);
-    if (newFaction !== 'neutral' && lifePath.faction === 'neutral') {
-      lifePath.faction = newFaction;
-    }
-
-    return state;
-  }
-
-  /**
-   * 检查身份转换是否合法
-   */
-  static canChangeIdentity(lifePath: LifePath, newIdentity: PlayerIdentity): boolean {
-    // 如果还没有确定身份，可以转换
-    if (lifePath.primaryIdentity === 'none') {
-      return true;
-    }
-
-    // 如果已有誓敌，不能转换为敌对阵营身份
-    if (lifePath.commitments.swornEnemies.includes('mojiao')) {
-      if (newIdentity === 'demon' || newIdentity === 'assassin') {
-        return false;
-      }
-    }
-
-    // 如果已有必须保护的对象，不能转换为邪恶身份
-    if (lifePath.commitments.mustProtect.includes('common_people')) {
-      if (newIdentity === 'demon' || newIdentity === 'assassin') {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -135,12 +81,10 @@ export class LifePathManager {
 
       case 'became_hero':
         lifePath.faction = 'orthodox';
-        lifePath.primaryIdentity = 'hero';
         break;
 
       case 'joined_demon_sect':
         lifePath.faction = 'demon';
-        lifePath.primaryIdentity = 'demon';
         lifePath.commitments.cannotJoin.push('zhengdao');
         break;
     }
@@ -168,14 +112,7 @@ export class LifePathManager {
       }
     }
 
-    // 2. 检查身份兼容性
-    if (requirements.identity) {
-      if (!this.isIdentityCompatible(lifePath.primaryIdentity, requirements.identity)) {
-        return false;
-      }
-    }
-
-    // 3. 检查承诺约束
+    // 2. 检查承诺约束
     if (requirements.cannotHaveCommitment) {
       if (lifePath.commitments.swornEnemies.includes(requirements.cannotHaveCommitment)) {
         return false;
@@ -192,7 +129,7 @@ export class LifePathManager {
       }
     }
 
-    // 4. 检查成就要求
+    // 3. 检查成就要求
     if (requirements.requiredAchievements) {
       for (const achievement of requirements.requiredAchievements) {
         if (!lifePath.achievements.includes(achievement)) {
@@ -201,7 +138,7 @@ export class LifePathManager {
       }
     }
 
-    // 5. 检查人生阶段
+    // 4. 检查人生阶段
     if (requirements.lifeStage) {
       if (lifePath.lifeStage !== requirements.lifeStage) {
         return false;
@@ -209,37 +146,6 @@ export class LifePathManager {
     }
 
     return true;
-  }
-
-  /**
-   * 检查身份兼容性
-   */
-  private static isIdentityCompatible(current: PlayerIdentity, required: string | string[]): boolean {
-    if (Array.isArray(required)) {
-      return required.includes(current);
-    }
-    return current === required;
-  }
-
-  /**
-   * 获取身份所属阵营
-   */
-  static getIdentityFaction(identity: PlayerIdentity): FactionType {
-    const factions: Record<PlayerIdentity, FactionType> = {
-      hero: 'orthodox',
-      sect_leader: 'orthodox',
-      doctor: 'orthodox',
-      beggar: 'orthodox',
-      demon: 'demon',
-      assassin: 'demon',
-      merchant: 'neutral',
-      scholar: 'neutral',
-      hermit: 'neutral',
-      official: 'neutral',
-      none: 'neutral'
-    };
-
-    return factions[identity] || 'neutral';
   }
 
   /**
@@ -317,7 +223,6 @@ export class LifePathManager {
   static deserialize(data: any): LifePath {
     if (!data) return this.create();
     return {
-      primaryIdentity: data.primaryIdentity || 'none',
       faction: data.faction || 'neutral',
       lifeStage: data.lifeStage || 'growth',
       achievements: data.achievements || [],

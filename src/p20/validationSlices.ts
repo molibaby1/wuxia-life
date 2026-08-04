@@ -31,7 +31,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     chivalry: 30,
     constitution: 50,
     comprehension: 40,
-    sect: null,
+    affiliation: null,
     title: null,
     reputation: 15,
     money: 200,
@@ -154,7 +154,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
     },
     player: { age: 45, martialPower: 80, martialHeritage: 50, flags: { martial_talent_acknowledged: true, joined_sect: true } },
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'orthodox',
       lifeStage: 'legacy',
       achievements: [],
@@ -177,7 +176,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       flags: { scholar_path_started: true },
     },
     lifePath: {
-      primaryIdentity: 'scholarly',
       faction: 'neutral',
       lifeStage: 'achievement',
       achievements: [],
@@ -200,7 +198,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
       businessAcumen: 60,
     },
     lifePath: {
-      primaryIdentity: 'wealth',
       faction: 'neutral',
       lifeStage: 'achievement',
       achievements: [],
@@ -219,7 +216,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
     },
     player: { age: 48, flags: { demonic_reputation: true } },
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'evil',
       lifeStage: 'legacy',
       achievements: [],
@@ -328,7 +324,6 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
         flags: { demonic_reputation: true, blood_feud_active: true, sect_exposure: true },
         player: { age: 35 },
         lifePath: {
-          primaryIdentity: 'martial',
           faction: 'evil',
           lifeStage: 'achievement',
           achievements: [],
@@ -436,7 +431,6 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
         flags: { demonic_reputation: true, blood_feud_active: true, inherited_burden: true },
         player: { age: 46 },
         lifePath: {
-          primaryIdentity: 'martial',
           faction: 'evil',
           lifeStage: 'legacy',
           achievements: [],

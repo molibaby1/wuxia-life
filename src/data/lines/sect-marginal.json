@@ -38,8 +38,7 @@
             "target": "route_demonic"
           },
           {
-            "type": "flag_set",
-            "target": "current_sect",
+            "type": "affiliation_set",
             "value": "shadow_sect"
           },
           {
@@ -994,7 +993,7 @@
           { "type": "flag_unset", "target": "route_demonic" },
           { "type": "flag_unset", "target": "demonic_trial_active" },
           { "type": "flag_set", "target": "marginal_departed" },
-          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "affiliation_clear" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -20, "operator": "add" },
           { "type": "stat_modify", "target": "martialPower", "value": -10, "operator": "add" },

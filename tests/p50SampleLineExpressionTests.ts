@@ -27,7 +27,7 @@ function makeState(age: number, flags: Record<string, unknown>): GameState {
       chivalry: 10,
       constitution: 50,
       comprehension: 30,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 10,
       money: 100,
@@ -81,10 +81,10 @@ function testOrthodoxExpression(): void {
     } as GameState['eventHistory'][0],
   ];
   const summary = deriveLifeMemorySummary(midlife);
-  assert(summary.routeStatus?.currentGoalLabel?.includes('守正'), 'orthodox midlife goal missing');
+  assert(summary.currentGoalLabel?.includes('守正'), 'orthodox midlife goal missing');
   assert(
     summary.achievements?.some((entry) => entry.label.includes('守正') || entry.label.includes('正派'))
-    || summary.routeStatus?.currentGoalLabel?.includes('代价'),
+    || summary.currentGoalLabel?.includes('代价'),
     'orthodox midlife identity signal missing',
   );
 
@@ -97,7 +97,7 @@ function testOrthodoxExpression(): void {
   assert(Boolean(identity?.includes('正派')), `orthodox age40 identity missing: ${identity}`);
 
   const screen = buildMainScreenModel(age40.player, deriveLifeMemorySummary(age40));
-  assert(!screen.routeSummary.includes('route_orthodox'), 'raw route key in main screen');
+  assert(!screen.stageTags.join(' ').includes('route_orthodox'), 'raw route key in main screen');
 }
 
 function testDemonicExpression(): void {
@@ -251,8 +251,8 @@ function testOrthodox301ResidualExpression(): void {
 
   const graySummary = deriveLifeMemorySummary(age32Gray);
   assert(
-    graySummary.routeStatus?.currentGoalLabel?.includes('灰度')
-    || graySummary.routeStatus?.currentGoalLabel?.includes('代价'),
+    graySummary.currentGoalLabel?.includes('灰度')
+    || graySummary.currentGoalLabel?.includes('代价'),
     'orthodox gray pressure missing from life-memory goal',
   );
 }

@@ -1,6 +1,5 @@
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { IdentitySystem } from '../src/core/IdentitySystem';
 
 async function run(): Promise<void> {
   const loader = EventLoader.getInstance();
@@ -30,14 +29,8 @@ async function run(): Promise<void> {
     throw new Error('merchant effects must not create removed lifecycle fields');
   }
 
-  const identityState = IdentitySystem.recordIdentity({
-    ...afterShop,
-    player: { ...afterShop.player, money: 5000, flags: { ...afterShop.player.flags, business_empire: true } },
-  }, 'merchant');
-  if (!identityState.identity?.identities.includes('merchant')) throw new Error('merchant identity should remain recordable');
-  if (identityState.player.money !== 5000 || identityState.player.reputation !== afterShop.player.reputation) {
-    throw new Error('identity recording must not conflate money and reputation');
-  }
+  if ('identity' in afterShop) throw new Error('merchant effects must not create generic identity state');
+  if (afterShop.player.affiliation !== null) throw new Error('merchant events must not infer affiliation');
   console.log('merchant explicit-effects vertical slice passed');
 }
 

@@ -41,7 +41,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       chivalry: 55,
       constitution: 50,
       comprehension: 60,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 65,
       money: 1200,
@@ -102,7 +102,6 @@ function testEndgameCategorySelection(): void {
       flags: { hero_rep_mantle: true, martial_transmission: true },
     } as GameState['player'],
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'orthodox',
       lifeStage: 'legacy',
       achievements: [],
@@ -118,7 +117,6 @@ function testEndgameCategorySelection(): void {
     player: { flags: { demonic_reputation: true }, chivalry: -15 } as GameState['player'],
     karma: { good_karma: 0, evil_karma: 120 },
     lifePath: {
-      primaryIdentity: 'martial',
       faction: 'evil',
       lifeStage: 'legacy',
       achievements: [],

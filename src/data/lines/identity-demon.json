@@ -17,11 +17,11 @@
     "triggerConditions": {
       "age": {"min": 15, "max": 25},
       "flags": {
-        "not": ["outlaw_identity_done", "current_sect", "route_orthodox"]
+        "not": ["outlaw_identity_done", "route_orthodox"]
       }
     },
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !flags.has('current_sect') && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox') && !flags.has('p8_route_wanderer') && !flags.has('p9_early_travel_focus') && !flags.has('p16_deferred_travel_upbringing')"}
+      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !player.affiliation && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox') && !flags.has('p8_route_wanderer') && !flags.has('p9_early_travel_focus') && !flags.has('p16_deferred_travel_upbringing')"}
     ],
     "content": {
       "title": "幽影门之路",
@@ -42,7 +42,7 @@
               {"type": "flag_set", "target": "outlaw_identity_done"},
               {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
-              {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
+              {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_core_disciple", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 15, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -8, "operator": "add"},
@@ -58,7 +58,7 @@
               {"type": "flag_set", "target": "outlaw_identity_done"},
               {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
-              {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
+              {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add"},
               {"type": "event_record", "target": "outlaw_join_normal"}
@@ -73,7 +73,7 @@
               {"type": "flag_set", "target": "outlaw_identity_done"},
               {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
-              {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
+              {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming外围", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -3, "operator": "add"},
@@ -96,7 +96,7 @@
               {"type": "flag_set", "target": "outlaw_identity_done"},
               {"type": "flag_set", "target": "route_demonic"},
               {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
-              {"type": "flag_set", "target": "current_sect", "value": "shadow_sect"},
+              {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_principled", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add"},

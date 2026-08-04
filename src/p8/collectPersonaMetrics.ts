@@ -213,18 +213,6 @@ export function collectCausalityMetrics(records: GameProcessRecord[]): Causality
       }
     }
 
-    const identity = record.gameState?.identity?.primary;
-    if (identity && record.age >= 20) {
-      const earlyAction = earlyRefs.find(r => r.ref.startsWith('action:') && r.age <= 8);
-      if (earlyAction && /merchant|hero|scholar|outlaw/.test(identity)) {
-        addDirect(`identity:${identity}`, {
-          age: record.age,
-          description: `identity label ${identity} follows early ${earlyAction.ref}`,
-          reference: `identity:${identity}`,
-        });
-      }
-    }
-
     if (record.progressionKind === 'active_action' && record.outcomeText) {
       const statGrowthOnly = /提升|增加|成长/.test(record.outcomeText) && !record.outcomeText.includes('因');
       if (statGrowthOnly) {

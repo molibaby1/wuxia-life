@@ -13,7 +13,7 @@
 
 import { reactive } from 'vue';
 import { EventPriority } from '../types/eventTypes';
-import type { CriticalChoices, EventDefinition, GameState, Effect, PlayerIdentity, PlayerLifeStates } from '../types/eventTypes';
+import type { CriticalChoices, EventDefinition, GameState, Effect, PlayerLifeStates } from '../types/eventTypes';
 import { eventLoader } from './EventLoader';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
@@ -115,7 +115,7 @@ export class GameEngineIntegration {
         knowledge: 10,
         businessAcumen: 10,
         influence: 0,
-        sect: null,
+        affiliation: null,
         title: null,
         martialHeritage: 0,
         scholarlyHeritage: 0,
@@ -158,11 +158,6 @@ export class GameEngineIntegration {
         totalChoices: 0,
         totalYears: 0,
       },
-      // 新增字段
-      identity: {
-        identities: [],
-        primary: 'none'
-      },
       karma: {
         good_karma: 0,
         evil_karma: 0,
@@ -188,58 +183,6 @@ export class GameEngineIntegration {
     return this.gameState;
   }
   
-  /**
-   * 添加身份（支持多身份）
-   */
-  public addIdentity(identity: PlayerIdentity): void {
-    if (!this.gameState.identity) {
-      this.gameState.identity = {
-        identities: [],
-        primary: 'none'
-      };
-    }
-    
-    if (!this.gameState.identity.identities.includes(identity)) {
-      this.gameState.identity.identities.push(identity);
-      
-      if (this.gameState.identity.primary === 'none') {
-        this.gameState.identity.primary = identity;
-      }
-    }
-  }
-  
-  /**
-   * 移除身份
-   */
-  public removeIdentity(identity: PlayerIdentity): void {
-    if (!this.gameState.identity) return;
-    
-    const index = this.gameState.identity.identities.indexOf(identity);
-    if (index > -1) {
-      this.gameState.identity.identities.splice(index, 1);
-      
-      if (this.gameState.identity.primary === identity) {
-        this.gameState.identity.primary = this.gameState.identity.identities[0] || 'none';
-      }
-    }
-  }
-  
-  /**
-   * 检查是否拥有指定身份
-   */
-  public hasIdentity(identity: PlayerIdentity): boolean {
-    if (!this.gameState.identity) return false;
-    return this.gameState.identity.identities.includes(identity);
-  }
-  
-  /**
-   * 获取所有身份
-   */
-  public getIdentities(): PlayerIdentity[] {
-    if (!this.gameState.identity) return [];
-    return this.gameState.identity.identities;
-  }
-
   /**
    * 将新状态合并到响应式对象，避免丢失响应性
    */
@@ -293,7 +236,7 @@ export class GameEngineIntegration {
         player.money = nextState.player.money;
         player.reputation = nextState.player.reputation;
         player.connections = nextState.player.connections;
-        player.sect = nextState.player.sect;
+        player.affiliation = nextState.player.affiliation;
         player.title = nextState.player.title;
         player.children = nextState.player.children;
         player.spouse = nextState.player.spouse;
@@ -332,13 +275,6 @@ export class GameEngineIntegration {
     this.gameState.relations = { ...nextState.relations };
     assignOptional('inventory', nextState.inventory ? [...nextState.inventory] : undefined);
     assignOptional('statistics', nextState.statistics ? { ...nextState.statistics } : undefined);
-    assignOptional('identity', nextState.identity
-      ? {
-          ...nextState.identity,
-          identities: [...nextState.identity.identities],
-          achievements: [...(nextState.identity.achievements || [])],
-        }
-      : undefined);
     assignOptional('lifePath', nextState.lifePath
       ? {
           ...nextState.lifePath,
@@ -665,24 +601,6 @@ export class GameEngineIntegration {
       if (exp.forbidden && exp.forbidden.length > 0) {
         const hasForbidden = exp.forbidden.some(e => triggeredEvents.has(e));
         if (hasForbidden) {
-          return false;
-        }
-      }
-    }
-    
-    // 4. 检查身份门槛
-    if (thresholds.identity) {
-      const id = thresholds.identity;
-      const currentIdentity = gameState.identity?.primary;
-      
-      if (id.required && id.required.length > 0) {
-        if (!currentIdentity || !id.required.includes(currentIdentity)) {
-          return false;
-        }
-      }
-      
-      if (id.forbidden && id.forbidden.length > 0) {
-        if (currentIdentity && id.forbidden.includes(currentIdentity)) {
           return false;
         }
       }

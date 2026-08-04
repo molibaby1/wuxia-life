@@ -34,7 +34,7 @@ function createBaseState(overrides: Partial<GameState> = {}): GameState {
     merchantNetwork: 0,
     money: 1000,
     reputation: 30,
-    sect: null,
+    affiliation: null,
     title: null,
     healthStatus: 'healthy',
     statuses: [],
@@ -176,7 +176,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   state.flags = { ...state.flags, route_orthodox: true, sect_faction: 'orthodox', orthodox_childhood_seed_done: true };
 
   const summary = deriveLifeMemorySummary(state);
-  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 2.0.0');
+  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 3.0.0');
   assert(!('routeStatus' in summary), 'route status must not be canonical Life Memory');
   assert(summary.currentGoalLabel === '门派倾向已显，尚未立誓入门', 'current goal should come from explicit origin facts');
   assert(summary.derivedAtAge === 20, 'derivedAtAge should match player age');

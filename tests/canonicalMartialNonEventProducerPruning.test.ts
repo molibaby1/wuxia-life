@@ -1,14 +1,13 @@
 import { assert } from './GameTestFramework';
 import { resolveActiveAction } from '../src/core/activePlanning/ActionResultResolver';
 import { CriticalChoiceSystem } from '../src/core/CriticalChoiceSystem';
-import { IdentitySystem } from '../src/core/IdentitySystem';
 import { traitSystem } from '../src/core/TraitSystem';
 import { activeActionCatalog } from '../src/data/activeActionCatalog';
 import { childhoodActionCatalog } from '../src/data/childhoodActionCatalog';
 import { coreTalents } from '../src/data/traits/coreTalents';
 import { weaknesses } from '../src/data/traits/weaknesses';
 import type { ActiveActionDefinition } from '../src/types/activeActionTypes';
-import type { GameState, PlayerIdentity, PlayerState } from '../src/types/eventTypes';
+import type { GameState, PlayerState } from '../src/types/eventTypes';
 
 const LEGACY_MARTIAL_FIELDS = new Set(['externalSkill', 'internalSkill', 'qinggong']);
 
@@ -29,29 +28,6 @@ function collectLegacyTraitEntries(): Array<{ id: string; kind: 'initial' | 'gro
     }
     for (const entry of trait.growthModifiers ?? []) {
       if (LEGACY_MARTIAL_FIELDS.has(entry.stat)) hits.push({ id: trait.id, kind: 'growth', stat: entry.stat });
-    }
-  }
-  return hits;
-}
-
-function collectLegacyIdentityBonuses(): Array<{ identity: PlayerIdentity; stat: string }> {
-  const identities: PlayerIdentity[] = [
-    'hero',
-    'merchant',
-    'scholar',
-    'hermit',
-    'sect_leader',
-    'assassin',
-    'doctor',
-    'beggar',
-    'official',
-    'outlaw',
-  ];
-  const hits: Array<{ identity: PlayerIdentity; stat: string }> = [];
-  for (const identity of identities) {
-    const bonuses = IdentitySystem.getIdentityEffects(identity).bonuses;
-    for (const stat of Object.keys(bonuses)) {
-      if (LEGACY_MARTIAL_FIELDS.has(stat)) hits.push({ identity, stat });
     }
   }
   return hits;
@@ -187,20 +163,6 @@ function testGreenStatic(): void {
   assert(hermitState.player.flags['retired'] === true, 'hermit must keep retired flag');
   assert(hermitState.player.martialPower === 20, 'hermit must not modify martialPower');
 
-  const identityLegacy = collectLegacyIdentityBonuses();
-  assert(identityLegacy.length === 0, `identity bonuses must have 0 legacy martial fields, got ${JSON.stringify(identityLegacy)}`);
-  assert(
-    IdentitySystem.getIdentityEffects('assassin').bonuses.martialPower === 1.4,
-    'assassin must keep martialPower ×1.4',
-  );
-  assert(
-    IdentitySystem.getIdentityEffects('hermit').bonuses.martialPower === undefined,
-    'hermit must not gain martialPower bonus',
-  );
-  assert(
-    IdentitySystem.getIdentityEffects('beggar').bonuses.martialPower === undefined,
-    'beggar must not gain martialPower bonus',
-  );
 }
 
 function testGreenBehavior(): void {

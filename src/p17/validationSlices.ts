@@ -30,7 +30,7 @@ function baseMidLifeState(): GameState {
       chivalry: 50,
       constitution: 50,
       comprehension: 50,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 50,
       money: 500,
@@ -71,7 +71,6 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
 
   const feudEnemy = baseMidLifeState();
   feudEnemy.lifePath = {
-    primaryIdentity: 'none',
     faction: 'neutral',
     lifeStage: 'growth',
     achievements: [],

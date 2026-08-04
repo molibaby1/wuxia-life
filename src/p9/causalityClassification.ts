@@ -37,10 +37,6 @@ function findImplicitSignals(records: GameProcessRecord[]): string[] {
         signals.push(`age ${r.age}: flag ${key}=${val} (implicit choice echo, not token-matched)`);
       }
     }
-    const identity = r.gameState?.identity?.primary;
-    if (identity && r.age >= 25) {
-      signals.push(`age ${r.age}: identity=${identity} (route signal not counted by gate)`);
-    }
   }
 
   return [...new Set(signals)].slice(0, 5);

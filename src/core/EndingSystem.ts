@@ -13,7 +13,7 @@
  * @since 2026-03-15
  */
 
-import type { GameState, PlayerIdentity, PlayerLifeStates, CriticalChoices } from '../types/eventTypes';
+import type { GameState, PlayerLifeStates, CriticalChoices } from '../types/eventTypes';
 import { profileHasP19Sections } from '../p19/reportBuilder';
 import { composeP19FinalSummary } from '../p19/finalSummaryComposition';
 import { buildHistoricalMemoryReport } from '../p19/historicalMemory';
@@ -55,7 +55,6 @@ export interface EndingInfo {
   description: string;
   category: 'positive' | 'neutral' | 'negative';
   requirements: {
-    identity?: PlayerIdentity[];
     chivalry?: number;
     money?: number;
     comprehension?: number;

@@ -10,7 +10,6 @@
 import type {
   CriticalChoices,
   EffectDefinition,
-  IdentityInfo,
   InventoryItem,
   KarmaSystem,
   LifePath,
@@ -21,12 +20,13 @@ import type {
   Facts,
   Investments,
   Relationship,
+  AffiliationId,
 } from '../types/eventTypes';
 import type { ActionFocusStreak, ActionHistoryEntry } from '../types/activeActionTypes';
 import type { OriginWorldviewShaping } from '../narrative/profile/types';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.12.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.13.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -45,7 +45,7 @@ export interface SnapshotCurrentTime {
 
 /**
  * Persisted player subset for snapshot payload (§6).
- * Separate from runtime `PlayerState`; core identity required, progression optional.
+ * Separate from runtime `PlayerState`; canonical player fields are explicit.
  */
 export interface SnapshotPlayerState {
   name: string;
@@ -57,7 +57,7 @@ export interface SnapshotPlayerState {
   chivalry: number;
   constitution: number;
   comprehension: number;
-  sect: string | null;
+  affiliation: AffiliationId | null;
   title: string | null;
   reputation: number;
   money: number;
@@ -119,7 +119,6 @@ export interface GameStateSnapshotState {
 
   currentTime?: SnapshotCurrentTime;
   lifePath?: LifePath;
-  identity?: IdentityInfo;
   karma?: KarmaSystem;
   criticalChoices?: CriticalChoices;
   achievements?: string[];

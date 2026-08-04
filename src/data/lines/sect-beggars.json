@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_beggars\") && !flags.has(\"current_sect\") && !flags.has(\"sect_switch_cooldown\") && (player.chivalry >= 12 || player.martialPower >= 10) && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+        "expression": "!flags.has(\"route_beggars\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\") && (player.chivalry >= 12 || player.martialPower >= 10) && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
       }
     ],
     "content": {
@@ -40,7 +40,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_beggars"},
-              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "affiliation_set", "value": "beggars"},
               {"type": "flag_set", "target": "beggars_trial_active"},
               {"type": "flag_set", "target": "beggars_rank", "value": 8},
               {"type": "stat_modify", "target": "chivalry", "value": 8, "operator": "add"},
@@ -56,7 +56,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_beggars"},
-              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "affiliation_set", "value": "beggars"},
               {"type": "flag_set", "target": "beggars_trial_active"},
               {"type": "flag_set", "target": "beggars_rank", "value": 4},
               {"type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add"},
@@ -70,7 +70,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
               {"type": "flag_set", "target": "route_beggars"},
-              {"type": "flag_set", "target": "current_sect", "value": "beggars"},
+              {"type": "affiliation_set", "value": "beggars"},
               {"type": "flag_set", "target": "beggars_trial_active"},
               {"type": "flag_set", "target": "beggars_rank", "value": 1},
               {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
@@ -1291,7 +1291,7 @@
           { "type": "flag_unset", "target": "route_beggars" },
           { "type": "flag_unset", "target": "beggars_trial_active" },
           { "type": "flag_set", "target": "beggars_departed" },
-          { "type": "flag_unset", "target": "current_sect" },
+          { "type": "affiliation_clear" },
           { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
           { "type": "stat_modify", "target": "reputation", "value": -15, "operator": "add" },
           { "type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add" },

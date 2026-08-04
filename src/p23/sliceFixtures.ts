@@ -24,7 +24,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     chivalry: 30,
     constitution: 50,
     comprehension: 40,
-    sect: null,
+    affiliation: null,
     title: null,
     reputation: 15,
     money: 200,
@@ -80,7 +80,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
       eventHistory: [],
       relations: {},
       lifePath: {
-        primaryIdentity: 'scholarly',
         faction: 'neutral',
         lifeStage: 'legacy',
         achievements: [],
@@ -98,7 +97,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
       eventHistory: [],
       relations: {},
       lifePath: {
-        primaryIdentity: 'martial',
         faction: 'evil',
         lifeStage: 'legacy',
         achievements: [],
@@ -116,7 +114,6 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
       eventHistory: [],
       relations: {},
       lifePath: {
-        primaryIdentity: 'wealth',
         faction: 'neutral',
         lifeStage: 'achievement',
         achievements: [],

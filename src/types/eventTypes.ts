@@ -62,6 +62,10 @@ export enum EffectType {
   FLAG_SET = 'flag_set',
   FLAG_UNSET = 'flag_unset',
 
+  /** Canonical organization affiliation */
+  AFFILIATION_SET = 'affiliation_set',
+  AFFILIATION_CLEAR = 'affiliation_clear',
+
   /** Canonical health/status operations */
   HEALTH_STATUS_SET = 'health_status_set',
   STATUS_ADD = 'status_add',
@@ -355,63 +359,14 @@ export interface DailyEventConfig {
   spineOriginStageFit?: string[];
 }
 
-// ========== 身份系统类型 ==========
+// ========== 组织归属类型 ==========
 
-/**
- * 玩家身份类型
- * 根据玩家行为、属性、选择自动判定
- */
-export type PlayerIdentity = string;
-
-/**
- * 玩家身份信息（支持多身份）
- */
-export interface IdentityInfo {
-  /** 当前身份列表（支持多身份） */
-  identities: PlayerIdentity[];
-  /** 主要身份（用于显示和部分判定） */
-  primary: PlayerIdentity | 'none';
-  /** 身份相关称号 */
-  title?: string;
-  /** 身份获得时间 */
-  acquiredAt?: number;
-  /** 身份成就 */
-  achievements?: string[];
-}
-
-/**
- * 身份判定条件
- */
-export interface IdentityCriteria {
-  identity: PlayerIdentity;
-  requirements: {
-    chivalry?: number;      // 侠义要求
-    money?: number;         // 财富要求
-    comprehension?: number; // 学识要求
-    reputation?: number;    // 声望要求
-    martialPower?: number;  // 武力要求
-    knowledge?: number;     // 学识要求
-    influence?: number;     // 影响力要求
-    businessAcumen?: number; // 商业头脑要求
-    good_karma?: number;    // 善业要求
-    evil_karma?: number;    // 恶业要求
-    flags?: string[];       // 必需经历
-    achievements?: string[]; // 必需成就
-  };
-  priority: number;         // 优先级（用于冲突时判定）
-}
-
-/**
- * 身份效果
- */
-export interface IdentityEffects {
-  identity: PlayerIdentity;
-  events: string[];         // 专属事件 ID 列表
-  endings: string[];        // 专属结局 ID 列表
-  bonuses: {
-    [stat: string]: number; // 属性加成倍率
-  };
-}
+export type AffiliationId =
+  | 'shaolin'
+  | 'wudang'
+  | 'beggars'
+  | 'border'
+  | 'shadow_sect';
 
 /**
  * 因果系统
@@ -580,10 +535,6 @@ export interface EffectDefinition {
   // 效果描述（用于因果记录）
   description?: string;
   
-  /** ========== 身份系统 ========== */
-  // 身份标签（用于过滤身份专属事件）
-  identity_tags?: PlayerIdentity[];
-  
   /** ========== 结局系统 ========== */
   // 结局效果（用于触发结局）
   ending_effect?: {
@@ -746,11 +697,6 @@ export interface EventDefinition {
       forbidden?: string[];    // 不能触发过的事件
       evaluation?: 'all' | 'at_least_one' | 'none';
     };
-    /** 身份门槛 - 检查当前身份 */
-    identity?: {
-      required?: string[];      // 必需的身份
-      forbidden?: string[];     // 禁止的身份
-    };
   };
   
   /** 冷却时间（年）- 防止事件重复触发 */
@@ -902,7 +848,7 @@ export interface PlayerState {
   comprehension: number;
   
   // 社会属性
-  sect: string | null;
+  affiliation: AffiliationId | null;
   title: string | null;
   reputation: number;
   money: number;
@@ -1006,10 +952,6 @@ export interface GameState {
   // 统计信息
   statistics?: GameStatistics;
   
-  // ========== 新增字段：身份系统 ==========
-  // 玩家身份（支持多身份）
-  identity?: IdentityInfo;
-  
   // ========== 新增字段：人生轨迹系统 ==========
   // 人生轨迹追踪
   lifePath?: LifePath;
@@ -1063,9 +1005,6 @@ export type FactionType = string;
  * 确保事件触发的逻辑一致性和叙事连贯性。
  */
 export interface LifePath {
-  // 核心身份（只能有一个）
-  primaryIdentity: PlayerIdentity | 'none';
-  
   // 阵营立场（二选一）
   faction: FactionType;
   

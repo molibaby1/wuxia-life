@@ -40,7 +40,7 @@ function basePlayer(
     chivalry: 35,
     constitution: 50,
     comprehension: 40,
-    sect: null,
+    affiliation: null,
     title: null,
     reputation: 20,
     money: 300,

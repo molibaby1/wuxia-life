@@ -56,8 +56,8 @@ function run(): void {
   );
 
   assert(
-    GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.12.0',
-    `schema version must be 3.12.0, got ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
+    GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.13.0',
+    `schema version must be 3.13.0, got ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
   );
 
   for (const field of LEGACY_MARTIAL_FIELDS) {
@@ -107,7 +107,7 @@ function run(): void {
       constitution: 20,
       comprehension: 20,
       money: 100,
-      sect: null,
+      affiliation: null,
       alive: true,
       currentYear: 20,
       currentMonth: 1,
@@ -119,7 +119,7 @@ function run(): void {
       businessAcumen: 20,
     },
     {
-      schemaVersion: '2.0.0',
+      schemaVersion: '3.0.0',
       derivedAtAge: 20,
       risks: [],
     } as never,
@@ -135,7 +135,7 @@ function run(): void {
   const clean = cloneSnapshot(gameStateSnapshotAge50 as GameStateSnapshot);
   assert(
     validateCanonicalSnapshot(clean).length === 0,
-    'clean 3.12.0 fixture must validate',
+    'clean 3.13.0 fixture must validate',
   );
 
   for (const field of LEGACY_MARTIAL_FIELDS) {
@@ -163,15 +163,15 @@ function run(): void {
   }
 
   const oldSchema = cloneSnapshot(clean);
-  oldSchema.metadata.schemaVersion = '3.11.0';
+  oldSchema.metadata.schemaVersion = '3.12.0';
   const oldIssues = validateCanonicalSnapshot(oldSchema);
   assert(
     oldIssues.some(
       issue =>
         issue.path === 'snapshot.metadata.schemaVersion' &&
-        issue.message.includes('3.12.0'),
+        issue.message.includes('3.13.0'),
     ),
-    '3.11.0 schemaVersion must be rejected',
+    '3.12.0 schemaVersion must be rejected',
   );
 
   console.log('canonicalLegacyMartialFieldRemoval.test.ts: ok');

@@ -86,6 +86,8 @@ const suites: Suite[] = [
   { name: 'canonicalFamilySocialLifeStateRemovalTests', entry: 'tests/canonicalFamilySocialLifeStateRemoval.test.ts' },
   { name: 'canonicalRouteLifecycleRemovalTests', entry: 'tests/canonicalRouteLifecycleRemoval.test.ts' },
   { name: 'canonicalLifePathFocusRemovalTests', entry: 'tests/canonicalLifePathFocusRemoval.test.ts' },
+  { name: 'canonicalIdentityAffiliationClosure', entry: 'tests/canonicalIdentityAffiliationClosure.test.ts' },
+  { name: 'playerRolePresentation', entry: 'tests/playerRolePresentation.test.ts' },
   { name: 'canonicalPersistenceBoundaryTests', entry: 'tests/canonicalPersistenceBoundary.test.ts' },
   { name: 'canonicalCriticalChoiceNormalizationTests', entry: 'tests/canonicalCriticalChoiceNormalization.test.ts' },
   { name: 'canonicalRuntimeLoadIsolationTests', entry: 'tests/canonicalRuntimeLoadIsolation.test.ts' },

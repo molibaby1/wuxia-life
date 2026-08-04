@@ -9,6 +9,7 @@ import {
   LIFE_STATE_KEYS,
   STATUS_ID_VALUES,
 } from '../../types/eventTypes';
+import { isAffiliationId } from '../../core/affiliationCatalog';
 
 export interface CanonicalValidationIssue {
   path: string;
@@ -49,7 +50,7 @@ const SNAPSHOT_METADATA_KEYS = new Set([
   'snapshotId', 'lifeMemorySchemaVersion', 'contentHash',
 ]);
 const SNAPSHOT_STATE_KEYS = new Set([
-  'player', 'facts', 'flags', 'relations', 'eventHistory', 'currentTime', 'lifePath', 'identity', 'karma',
+  'player', 'facts', 'flags', 'relations', 'eventHistory', 'currentTime', 'lifePath', 'karma',
   'criticalChoices', 'achievements', 'inventory', 'ending', 'saveVersion', 'lastSavedAt', 'gameTimestamp',
   'pendingStoryEventId', 'triggeredEvents', 'events', 'actionHistory', 'actionFocusStreak', 'p16TendencyShaping',
 ]);
@@ -58,7 +59,7 @@ const RUNTIME_STATE_KEYS = new Set([
 ]);
 const PLAYER_KEYS = new Set([
   'age', 'gender', 'name', 'martialPower', 'chivalry',
-  'constitution', 'comprehension', 'sect', 'title', 'reputation', 'money', 'knowledge', 'charisma',
+  'constitution', 'comprehension', 'affiliation', 'title', 'reputation', 'money', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage',
   'merchantNetwork', 'investments', 'items',
   'flags', 'events', 'children', 'spouse', 'relationships', 'alive', 'deathReason', 'timeUnit',
@@ -66,7 +67,7 @@ const PLAYER_KEYS = new Set([
 ]);
 const REQUIRED_PLAYER_KEYS = [
   'name', 'age', 'gender', 'alive', 'martialPower',
-  'chivalry', 'constitution', 'comprehension', 'sect', 'title', 'reputation', 'money', 'knowledge', 'charisma',
+  'chivalry', 'constitution', 'comprehension', 'affiliation', 'title', 'reputation', 'money', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork',
   'investments', 'flags', 'children', 'spouse', 'traits', 'healthStatus', 'statuses', 'lifeStates',
 ];
@@ -316,20 +317,11 @@ function validateRelationships(value: unknown, path: string, issues: CanonicalVa
   });
 }
 
-function validateIdentity(value: unknown, path: string, issues: CanonicalValidationIssue[]): void {
-  if (!objectAt(value, path, issues)) return;
-  exactKeys(value, path, new Set(['identities', 'primary', 'title', 'acquiredAt', 'achievements']), issues);
-  required(value, path, ['identities', 'primary'], issues); validateStringArray(value.identities, `${path}.identities`, issues); stringValue(value.primary, `${path}.primary`, issues, true);
-  if (hasOwn(value, 'title')) stringValue(value.title, `${path}.title`, issues);
-  if (hasOwn(value, 'acquiredAt')) finite(value.acquiredAt, `${path}.acquiredAt`, issues);
-  if (hasOwn(value, 'achievements')) validateStringArray(value.achievements, `${path}.achievements`, issues);
-}
-
 function validateLifePath(value: unknown, path: string, issues: CanonicalValidationIssue[]): void {
   if (!objectAt(value, path, issues)) return;
-  exactKeys(value, path, new Set(['primaryIdentity', 'faction', 'lifeStage', 'achievements', 'relationships', 'commitments']), issues);
-  required(value, path, ['primaryIdentity', 'faction', 'lifeStage', 'achievements', 'relationships', 'commitments'], issues);
-  stringValue(value.primaryIdentity, `${path}.primaryIdentity`, issues, true); stringValue(value.faction, `${path}.faction`, issues); if (!LIFE_STAGES.has(value.lifeStage as string)) addIssue(issues, `${path}.lifeStage`, 'invalid_value', 'unknown life stage'); validateStringArray(value.achievements, `${path}.achievements`, issues);
+  exactKeys(value, path, new Set(['faction', 'lifeStage', 'achievements', 'relationships', 'commitments']), issues);
+  required(value, path, ['faction', 'lifeStage', 'achievements', 'relationships', 'commitments'], issues);
+  stringValue(value.faction, `${path}.faction`, issues); if (!LIFE_STAGES.has(value.lifeStage as string)) addIssue(issues, `${path}.lifeStage`, 'invalid_value', 'unknown life stage'); validateStringArray(value.achievements, `${path}.achievements`, issues);
   for (const key of ['relationships', 'commitments'] as const) {
     const itemPath = `${path}.${key}`; const item = value[key];
     if (!objectAt(item, itemPath, issues)) continue;
@@ -392,7 +384,8 @@ function validatePlayer(value: unknown, path: string, issues: CanonicalValidatio
   if (!objectAt(value, path, issues)) return; exactKeys(value, path, PLAYER_KEYS, issues); if (!partial) required(value, path, REQUIRED_PLAYER_KEYS, issues);
   if (hasOwn(value, 'name')) stringValue(value.name, `${path}.name`, issues, true); if (hasOwn(value, 'age')) finite(value.age, `${path}.age`, issues); if (hasOwn(value, 'gender') && !['male', 'female'].includes(value.gender as string)) addIssue(issues, `${path}.gender`, 'invalid_value', 'unknown gender'); if (hasOwn(value, 'alive')) booleanValue(value.alive, `${path}.alive`, issues);
   const numericKeys = ['martialPower', 'chivalry', 'constitution', 'comprehension', 'reputation', 'money', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
-  for (const key of ['sect', 'title', 'spouse'] as const) if (hasOwn(value, key) && value[key] !== null) stringValue(value[key], `${path}.${key}`, issues);
+  if (hasOwn(value, 'affiliation') && value.affiliation !== null && !isAffiliationId(value.affiliation)) addIssue(issues, `${path}.affiliation`, 'invalid_value', 'unknown affiliation');
+  for (const key of ['title', 'spouse'] as const) if (hasOwn(value, key) && value[key] !== null) stringValue(value[key], `${path}.${key}`, issues);
   if (hasOwn(value, 'deathReason')) stringValue(value.deathReason, `${path}.deathReason`, issues); if (hasOwn(value, 'timeUnit') && !['year', 'month', 'day'].includes(value.timeUnit as string)) addIssue(issues, `${path}.timeUnit`, 'invalid_value', 'unknown time unit');
   if (hasOwn(value, 'investments')) validateInvestments(value.investments, `${path}.investments`, issues); if (hasOwn(value, 'flags')) validateFlags(value.flags, `${path}.flags`, issues); if (hasOwn(value, 'traits')) { if (!Array.isArray(value.traits)) addIssue(issues, `${path}.traits`, 'invalid_type', 'must be an array'); else value.traits.forEach((trait, index) => { if (typeof trait !== 'string' || !TRAIT_IDS.has(trait)) addIssue(issues, `${path}.traits[${index}]`, 'invalid_value', 'unknown trait'); }); }
   if (hasOwn(value, 'healthStatus') && !HEALTH_STATUS_VALUES.includes(value.healthStatus as never)) addIssue(issues, `${path}.healthStatus`, 'invalid_value', 'unknown health status'); if (hasOwn(value, 'statuses')) { if (!Array.isArray(value.statuses)) addIssue(issues, `${path}.statuses`, 'invalid_type', 'must be an array'); else { const seen = new Set<unknown>(); value.statuses.forEach((status, index) => { if (!STATUS_ID_VALUES.includes(status as never)) addIssue(issues, `${path}.statuses[${index}]`, 'invalid_value', 'unknown status'); if (seen.has(status)) addIssue(issues, `${path}.statuses[${index}]`, 'invalid_value', 'duplicate status'); seen.add(status); }); } }
@@ -404,7 +397,7 @@ function validateState(value: unknown, path: string, issues: CanonicalValidation
   if (!objectAt(value, path, issues)) return; exactKeys(value, path, snapshotShape ? SNAPSHOT_STATE_KEYS : RUNTIME_STATE_KEYS, issues); if (!partial) required(value, path, REQUIRED_STATE_KEYS, issues);
   if (hasOwn(value, 'player')) validatePlayer(value.player, `${path}.player`, issues, partial); if (hasOwn(value, 'facts')) validateFacts(value.facts, `${path}.facts`, issues); if (hasOwn(value, 'flags')) validateFlags(value.flags, `${path}.flags`, issues); if (hasOwn(value, 'relations')) validateRelations(value.relations, `${path}.relations`, issues);
   if (hasOwn(value, 'eventHistory')) { if (!Array.isArray(value.eventHistory)) addIssue(issues, `${path}.eventHistory`, 'invalid_type', 'must be an array'); else value.eventHistory.forEach((event, index) => validateEventRecord(event, `${path}.eventHistory[${index}]`, issues)); }
-  if (hasOwn(value, 'currentTime')) validateCurrentTime(value.currentTime, `${path}.currentTime`, issues); if (hasOwn(value, 'identity')) validateIdentity(value.identity, `${path}.identity`, issues); if (hasOwn(value, 'lifePath')) validateLifePath(value.lifePath, `${path}.lifePath`, issues); if (hasOwn(value, 'karma')) validateKarma(value.karma, `${path}.karma`, issues); if (hasOwn(value, 'criticalChoices')) validateCriticalChoices(value.criticalChoices, `${path}.criticalChoices`, issues);
+  if (hasOwn(value, 'currentTime')) validateCurrentTime(value.currentTime, `${path}.currentTime`, issues); if (hasOwn(value, 'lifePath')) validateLifePath(value.lifePath, `${path}.lifePath`, issues); if (hasOwn(value, 'karma')) validateKarma(value.karma, `${path}.karma`, issues); if (hasOwn(value, 'criticalChoices')) validateCriticalChoices(value.criticalChoices, `${path}.criticalChoices`, issues);
   if (hasOwn(value, 'achievements')) validateStringArray(value.achievements, `${path}.achievements`, issues); if (hasOwn(value, 'inventory')) validateInventory(value.inventory, `${path}.inventory`, issues); if (hasOwn(value, 'ending')) jsonValue(value.ending, `${path}.ending`, issues); if (hasOwn(value, 'triggeredEvents')) validateStringArray(value.triggeredEvents, `${path}.triggeredEvents`, issues); if (hasOwn(value, 'events')) { if (!Array.isArray(value.events)) addIssue(issues, `${path}.events`, 'invalid_type', 'must be an array'); else value.events.forEach((event, index) => validateEventRecord(event, `${path}.events[${index}]`, issues)); }
   if (hasOwn(value, 'statistics')) validateStatistics(value.statistics, `${path}.statistics`, issues);
   for (const key of ['lastSavedAt', 'gameTimestamp', 'selfAwareness'] as const) if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); if (hasOwn(value, 'saveVersion')) stringValue(value.saveVersion, `${path}.saveVersion`, issues); if (hasOwn(value, 'pendingStoryEventId')) stringValue(value.pendingStoryEventId, `${path}.pendingStoryEventId`, issues); if (hasOwn(value, 'playerFeedbackMessage')) stringValue(value.playerFeedbackMessage, `${path}.playerFeedbackMessage`, issues); if (hasOwn(value, 'p16RareLineLog')) validateStringArray(value.p16RareLineLog, `${path}.p16RareLineLog`, issues);

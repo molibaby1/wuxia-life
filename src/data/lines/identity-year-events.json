@@ -11,9 +11,6 @@
       { "type": "random", "value": 0.25 }
     ],
     "thresholds": {
-      "identity": {
-        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
-      }
     },
     "content": {
       "title": "耕耘收获",
@@ -51,9 +48,6 @@
       { "type": "random", "value": 0.2 }
     ],
     "thresholds": {
-      "identity": {
-        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
-      }
     },
     "content": {
       "title": "学徒生涯",
@@ -93,9 +87,6 @@
       { "type": "random", "value": 0.3 }
     ],
     "thresholds": {
-      "identity": {
-        "forbidden": ["warrior", "merchant", "official", "sect_leader", "hero"]
-      }
     },
     "content": {
       "title": "邻里人情",
@@ -135,9 +126,6 @@
       { "type": "random", "value": 0.35 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["merchant"]
-      }
     },
     "content": {
       "title": "远行贸易",
@@ -177,9 +165,6 @@
       { "type": "random", "value": 0.2 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["merchant"]
-      }
     },
     "content": {
       "title": "商业危机",
@@ -219,9 +204,6 @@
       { "type": "random", "value": 0.25 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["merchant"]
-      }
     },
     "content": {
       "title": "商会交际",
@@ -261,9 +243,6 @@
       { "type": "random", "value": 0.3 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["hero", "warrior", "sect_leader"]
-      }
     },
     "content": {
       "title": "行侠仗义",
@@ -304,9 +283,6 @@
       { "type": "random", "value": 0.35 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["hero", "warrior", "sect_leader"]
-      }
     },
     "content": {
       "title": "闭关修炼",
@@ -352,9 +328,6 @@
       { "type": "random", "value": 0.25 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["sect_leader"]
-      }
     },
     "content": {
       "title": "指点弟子",
@@ -394,9 +367,6 @@
       { "type": "random", "value": 0.35 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["scholar"]
-      }
     },
     "content": {
       "title": "苦读诗书",
@@ -435,9 +405,6 @@
       { "type": "random", "value": 0.25 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["scholar"]
-      }
     },
     "content": {
       "title": "文会交际",
@@ -477,9 +444,6 @@
       { "type": "random", "value": 0.2 }
     ],
     "thresholds": {
-      "identity": {
-        "required": ["scholar"]
-      },
       "attributes": {
         "knowledge": { "min": 30 }
       }

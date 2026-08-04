@@ -10,8 +10,8 @@
         <span class="summary-value">{{ currentGoalSummary }}</span>
       </div>
       <div class="summary-row">
-        <span class="summary-label">身份</span>
-        <span class="summary-value">{{ identitySummary }}</span>
+        <span class="summary-label">所属</span>
+        <span class="summary-value">{{ affiliationSummary }}</span>
       </div>
       <div class="summary-row">
         <span class="summary-label">经历</span>
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 defineProps<{
   currentGoalSummary: string;
-  identitySummary: string;
+  affiliationSummary: string;
   experienceSummary: string;
   riskSummary: string;
   tendencySummary: string;

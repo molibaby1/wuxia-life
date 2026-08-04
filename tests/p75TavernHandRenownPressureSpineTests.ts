@@ -31,7 +31,7 @@ function makeState(age: number, flags: Record<string, unknown>): GameState {
       chivalry: 10,
       constitution: 50,
       comprehension: 30,
-      sect: null,
+      affiliation: null,
       title: null,
       reputation: 15,
       money: 100,

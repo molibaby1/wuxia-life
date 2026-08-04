@@ -66,21 +66,10 @@ for (const token of [
 const heroLines = JSON.parse(fs.readFileSync(path.resolve('src/data/lines/identity-hero.json'), 'utf8')) as unknown;
 assert.equal(JSON.stringify(heroLines).includes('lifepath_add_focus'), false, 'hero lines must not contain lifepath_add_focus');
 
-const legacyFocusLifePath = {
-  ...LifePathManager.create(),
-  primaryIdentity: 'hero',
-  focus: { martial: 100, business: 0, academic: 0, leadership: 0 },
-} as unknown as LifePath;
-assert.equal(
-  LifePathManager.canChangeIdentity(legacyFocusLifePath, 'merchant'),
-  true,
-  'identity conversion must ignore injected legacy focus',
-);
-
-assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.12.0');
+assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.13.0');
 const converter = new DefaultSnapshotConverter();
 const snapshot = clone(gameStateSnapshotAge50);
-assert.equal(snapshot.metadata.schemaVersion, '3.12.0');
+assert.equal(snapshot.metadata.schemaVersion, '3.13.0');
 assert.equal('focus' in (snapshot.state.lifePath ?? {}), false, 'normal snapshot must not contain focus');
 
 const oldVersion = clone(snapshot);

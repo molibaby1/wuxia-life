@@ -210,7 +210,7 @@
       {"type": "random", "value": 0.12}
     ],
     "conditions": [
-      {"type": "expression", "expression": "chivalry <= -50 && !flags.has('current_sect') && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown')"}
+      {"type": "expression", "expression": "chivalry <= -50 && !player.affiliation && !flags.has('outlaw_identity_done') && !flags.has('route_demonic') && !flags.has('sect_switch_cooldown')"}
     ],
     "content": {
       "title": "幽影门邀请",
@@ -227,7 +227,7 @@
           {"type": "stat_modify", "stat": "chivalry", "value": -10},
           {"type": "stat_modify", "stat": "reputation", "value": -20},
           {"type": "flag_set", "flag": "sect_faction", "value": "unconventional"},
-          {"type": "flag_set", "flag": "current_sect", "value": "shadow_sect"}
+          {"type": "affiliation_set", "value": "shadow_sect"}
         ]
       },
       {

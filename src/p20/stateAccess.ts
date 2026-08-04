@@ -50,9 +50,6 @@ export function getActiveRouteKeys(state: GameState): string[] {
       keys.push(key.replace(/^p8_route_/, '').replace(/^route_/, ''));
     }
   }
-  if (state.lifePath?.primaryIdentity) {
-    keys.push(state.lifePath.primaryIdentity);
-  }
   if (state.lifePath?.faction) {
     keys.push(state.lifePath.faction);
   }

@@ -86,8 +86,7 @@ function testCanonicalEndings(): void {
   }
   assert(!EndingSystem.getEndingById('heavenly_immortal'), 'heavenly_immortal must not be an active Ending');
 
-  const identitySource = fs.readFileSync(path.resolve('src/core/IdentitySystem.ts'), 'utf8');
-  assert(!identitySource.includes('heavenly_immortal'), 'Identity production references must not name heavenly_immortal');
+  assert(!fs.existsSync(path.resolve('src/core/IdentitySystem.ts')), 'generic IdentitySystem must be deleted');
   const endingSource = fs.readFileSync(path.resolve('src/core/EndingSystem.ts'), 'utf8');
   assert(!endingSource.includes('heavenly_immortal'), 'Ending production references must not name heavenly_immortal');
   for (const field of LEGACY_MARTIAL_FIELDS) {

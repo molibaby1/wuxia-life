@@ -18,7 +18,6 @@ import type {
   GameState,
   IEventExecutor,
   EffectHandler,
-  PlayerIdentity,
   KarmaChange,
   EventDefinition,
   FactionType,
@@ -30,12 +29,12 @@ import {
   isPrimaryOriginFamilyFlag,
 } from '../p16/primaryOriginFlag';
 import { syncOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
-import { IdentitySystem } from './IdentitySystem';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { EndingSystem } from './EndingSystem';
 import { LifePathManager } from './LifePathSystem';
 import { traitSystem } from './TraitSystem';
+import { isAffiliationId } from './affiliationCatalog';
 
 /**
  * 事件执行器实现
@@ -75,12 +74,6 @@ export class EventExecutor implements IEventExecutor {
       newState = await handler.execute(effect, newState);
     }
     
-    // 重新判定身份（如果有变化）
-    const newIdentity = IdentitySystem.determineIdentity(newState);
-    if (newIdentity) {
-      newState = IdentitySystem.recordIdentity(newState, newIdentity);
-    }
-    
     // 处理结局效果
     for (const effect of effects) {
       if (effect.ending_effect) {
@@ -110,20 +103,6 @@ export class EventExecutor implements IEventExecutor {
     // 检查选择条件
     if (conditions.choices) {
       if (!CriticalChoiceSystem.checkChoiceRequirement(state, conditions.choices)) {
-        return false;
-      }
-    }
-    
-    // 检查身份条件
-    if (conditions.identity) {
-      if (conditions.identity.required && !state.identity) {
-        return false;
-      }
-      const identities = state.identity?.identities || [];
-      if (conditions.identity.required && !conditions.identity.required.some(identity => identities.includes(identity))) {
-        return false;
-      }
-      if (conditions.identity.forbidden && conditions.identity.forbidden.some(identity => identities.includes(identity))) {
         return false;
       }
     }
@@ -180,6 +159,8 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.TIME_ADVANCE, new TimeAdvanceHandler());
     this.handlers.set(EffectType.FLAG_SET, new FlagSetHandler());
     this.handlers.set(EffectType.FLAG_UNSET, new FlagUnsetHandler());
+    this.handlers.set(EffectType.AFFILIATION_SET, new AffiliationSetHandler());
+    this.handlers.set(EffectType.AFFILIATION_CLEAR, new AffiliationClearHandler());
     this.handlers.set(EffectType.HEALTH_STATUS_SET, new HealthStatusSetHandler());
     this.handlers.set(EffectType.STATUS_ADD, new StatusAddHandler());
     this.handlers.set(EffectType.STATUS_REMOVE, new StatusRemoveHandler());
@@ -479,6 +460,33 @@ export class FlagSetHandler implements EffectHandler {
       result = syncOriginFromPrimaryChoice(result, flagName);
     }
     return result;
+  }
+}
+
+class AffiliationSetHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isAffiliationId(effect.value)) {
+      throw new Error(`Unknown affiliation effect value: ${String(effect.value)}`);
+    }
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        affiliation: effect.value,
+      },
+    };
+  }
+}
+
+class AffiliationClearHandler implements EffectHandler {
+  execute(_effect: EffectDefinition, state: GameState): GameState {
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        affiliation: null,
+      },
+    };
   }
 }
 

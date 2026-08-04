@@ -28,7 +28,7 @@ function makeRecord(
         chivalry: 10,
         constitution: 50,
         comprehension: 12,
-        sect: null,
+        affiliation: null,
         title: null,
         reputation: age >= 18 ? 8 : 2,
         money: age >= 18 ? 180 : 80,

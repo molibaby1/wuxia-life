@@ -12,7 +12,7 @@ import {
   CHOICE_EXECUTION_RESPONSE_VERSION,
 } from '../../contracts/choiceExecution';
 import type { GameStateSnapshot } from '../../contracts/gameStateSnapshot';
-import type { EventChoice, EventCondition, EventDefinition, GameState } from '../../types/eventTypes';
+import type { EventChoice, EventCondition, EventDefinition, GameState, PlayerState } from '../../types/eventTypes';
 import { CatalogReadError } from '../catalog/EventCatalogReadService';
 import { withRandomSource, withRandomSourceSync, SeededRandomSource } from '../adapters/randomSource';
 import {
@@ -25,7 +25,10 @@ import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './Head
 import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
 import { applyStatDeltas, hasPendingForcedEvent as checkPendingForcedEventAtAge } from '../../core/activePlanning/ActivePlanningService';
 import { clampPassiveStatDeltasForAge } from '../../core/activePlanning/ageActionStatCaps';
-import { buildPeriodSummary } from '../../core/activePlanning/periodSummaryBuilder';
+import {
+  buildPeriodSummary,
+  calculatePublicStatDeltas,
+} from '../../core/activePlanning/periodSummaryBuilder';
 import {
   commitAnnualPassiveMemory,
   isAnnualPassiveMemoryAge,
@@ -77,6 +80,7 @@ function toPlayerSafeEvent(
     choices: event.choices?.map(choice => ({
       id: choice.id,
       text: choice.text ?? choice.id,
+      ...(choice.description ? { description: choice.description } : {}),
       available: availableChoiceIds.has(choice.id),
     })),
   };
@@ -167,10 +171,17 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     );
   }
 
+  private cachedSeededRandom: SeededRandomSource | null = null;
+
   private randomSourceForSession() {
-    return this.randomSeed !== undefined
-      ? new SeededRandomSource(this.randomSeed)
-      : this.dependencies.random;
+    if (this.randomSeed !== undefined) {
+      // Reuse one PRNG for the whole session so later actions/events keep advancing entropy.
+      if (!this.cachedSeededRandom) {
+        this.cachedSeededRandom = new SeededRandomSource(this.randomSeed);
+      }
+      return this.cachedSeededRandom;
+    }
+    return this.dependencies.random;
   }
 
   private runWithRandomSync<T>(fn: () => T): T {
@@ -388,17 +399,27 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       condition => this.engine.isChoiceAvailable(condition as EventCondition | undefined),
     );
     const effects = resolved?.effects ?? choice.effects ?? [];
+    const beforeSnapshot = this.serialize();
+    const beforePlayer = beforeSnapshot.state.player as unknown as PlayerState;
+    const beforeFlags = beforeSnapshot.state.flags;
 
     await this.runWithRandomAsync(async () => {
       await this.engine.executeChoiceEffects(effects, event.id, choice.id);
     });
 
+    const afterSnapshot = this.serialize();
+    const afterPlayer = afterSnapshot.state.player as unknown as PlayerState;
+    const publicStatDeltas = calculatePublicStatDeltas(beforePlayer, afterPlayer);
     const feedback = generateChoiceFeedback({
       sourceEventId: event.id,
       sourceChoiceId: choice.id,
       sourceOutcomeId: resolved?.outcomeId,
       narrativeResult: resolved?.outcomeText ?? null,
       effects,
+      beforePlayer,
+      afterPlayer,
+      beforeFlags,
+      afterFlags: afterSnapshot.state.flags,
     });
     this.volatile.lastFeedback = feedback;
     this.volatile.lastOutcomeText = resolved?.outcomeText ?? null;
@@ -413,7 +434,8 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       sourceLabel: '剧情抉择',
       headline: event.content?.title ?? '这一回',
       body: choiceBody,
-      lifeStates: this.engine.getGameState().player?.lifeStates,
+      deltas: publicStatDeltas,
+      lifeStates: afterPlayer.lifeStates,
     });
 
     const nextSnapshot = this.serialize();
@@ -739,13 +761,19 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       }
       const narrativeBody = current.content?.text ?? '';
       const narrativeTitle = current.content?.title ?? '往事一局';
+      const beforeSnapshot = this.serialize();
       await this.progressAutomatic({ maxSteps: 8 });
       await progressUntilChoiceOrTerminal(this);
+      const afterSnapshot = this.serialize();
       if (narrativeBody) {
         this.volatile.pendingPeriodSummary = buildPeriodSummary({
           sourceLabel: '剧情事件',
           headline: narrativeTitle,
           body: narrativeBody,
+          deltas: calculatePublicStatDeltas(
+            beforeSnapshot.state.player as unknown as PlayerState,
+            afterSnapshot.state.player as unknown as PlayerState,
+          ),
           lifeStates: this.engine.getGameState().player?.lifeStates,
         });
       }

@@ -32,7 +32,8 @@ function applyProgressionToEngine(
     periodSummary: SessionProgressionPayload['periodSummary'];
     passiveNarrative: SessionProgressionPayload['passiveNarrative'];
     currentEvent: SessionStartResponse['nextEvent'];
-    availableChoices: Array<{ id: string; text: string }>;
+    availableChoices: Array<{ id: string; text: string; description?: string }>;
+
     showingDisturbanceNarrative: boolean;
   },
   payload: SessionProgressionPayload,
@@ -67,7 +68,8 @@ export function useApiGameEngine() {
     passiveNarrative: null as SessionProgressionPayload['passiveNarrative'],
     showingDisturbanceNarrative: false,
     currentEvent: null as SessionStartResponse['nextEvent'],
-    availableChoices: [] as Array<{ id: string; text: string }>,
+    availableChoices: [] as Array<{ id: string; text: string; description?: string }>,
+
     lastChoiceFeedback: null as string | null,
     lastOutcomeText: null as string | null,
   });

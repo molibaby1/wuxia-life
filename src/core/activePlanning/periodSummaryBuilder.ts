@@ -1,6 +1,35 @@
 import type { PeriodSummaryDisplay } from '../../types/activeActionTypes';
 import { buildPracticePeriodGrowthLine } from '../../utils/practiceTrajectorySummary';
-import type { PlayerLifeStates } from '../../types/eventTypes';
+import { readPlayerNumeric } from '../../utils/playerStatAccess';
+import type { PlayerLifeStates, PlayerState } from '../../types/eventTypes';
+
+const PUBLIC_NUMERIC_STATS = [
+  'martialPower',
+  'chivalry',
+  'constitution',
+  'comprehension',
+  'money',
+  'reputation',
+  'connections',
+  'knowledge',
+  'businessAcumen',
+  'influence',
+  'charisma',
+] as const;
+
+export function calculatePublicStatDeltas(
+  beforePlayer: PlayerState,
+  afterPlayer: PlayerState,
+): Record<string, number> {
+  const deltas: Record<string, number> = {};
+  for (const stat of PUBLIC_NUMERIC_STATS) {
+    const delta = readPlayerNumeric(afterPlayer, stat) - readPlayerNumeric(beforePlayer, stat);
+    if (delta !== 0) {
+      deltas[stat] = delta;
+    }
+  }
+  return deltas;
+}
 
 const STAT_LABELS: Record<string, string> = {
   martialPower: '功力',
@@ -15,7 +44,6 @@ const STAT_LABELS: Record<string, string> = {
   businessAcumen: '经营',
   money: '银两',
 };
-
 export function formatStatDeltaSummary(deltas: Record<string, number>): string {
   const parts = Object.entries(deltas)
     .filter(([, value]) => value !== 0)
@@ -25,7 +53,6 @@ export function formatStatDeltaSummary(deltas: Record<string, number>): string {
     });
   return parts.length > 0 ? parts.join('，') : '本期未见明显数值变化';
 }
-
 export function buildPeriodSummary(params: {
   sourceLabel: string;
   headline: string;

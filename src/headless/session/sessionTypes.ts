@@ -43,6 +43,8 @@ export interface PlayerSafeEventPayload {
   choices?: Array<{
     id: string;
     text: string;
+    description?: string;
+
     available: boolean;
   }>;
   autoEffects?: boolean;

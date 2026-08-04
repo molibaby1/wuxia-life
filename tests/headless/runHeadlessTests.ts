@@ -15,6 +15,7 @@ import { runPeriodSummaryPlanningHandoffTests } from '../periodSummaryPlanningHa
 import { runP72ActivePlanningParityTests } from './p72ActivePlanningParity.test';
 import { runP81HeadlessPersonaToAge20Test, runP81HeadlessGatePersonasSmokeTest } from './p81HeadlessPersonaRunner.test';
 import { runP81HeadlessLocalParityTest } from './p81HeadlessLocalParity.test';
+import { runPlayerVisibleFeedbackTests } from './playerVisibleFeedback.test';
 
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -30,6 +31,7 @@ async function main(): Promise<void> {
   await runP81HeadlessPersonaToAge20Test();
   await runP81HeadlessGatePersonasSmokeTest();
   await runP81HeadlessLocalParityTest();
+  await runPlayerVisibleFeedbackTests();
   runParityHarnessTests();
   await runParitySamplesTests();
   console.log('headless test suite: ok');

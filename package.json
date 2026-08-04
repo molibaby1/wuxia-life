@@ -29,6 +29,8 @@
     "report:rhythm-metrics": "tsx scripts/reportRhythmMetrics.ts",
     "report:rhythm-baseline": "tsx scripts/generateRhythmBaselineReport.ts",
     "simulate:gameplay": "tsx scripts/runGameplaySimulation.ts",
+    "simulate:experience-trace": "tsx scripts/runExperienceTrace.ts",
+    "audit:experience-trace-choice-policy": "tsx scripts/auditExperienceTraceChoicePolicy.ts",
     "simulate:gameplay:samples": "tsx scripts/runGameplaySimulation.ts --samples --quiet",
     "simulate:golden-line": "tsx scripts/runGoldenLineSimulation.ts",
     "simulate:p3-eval": "tsx scripts/runP3EvalSimulationReport.ts --quiet",

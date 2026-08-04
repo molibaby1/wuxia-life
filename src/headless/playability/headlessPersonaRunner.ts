@@ -13,8 +13,18 @@ import {
   runActivePlanningStep,
   runActionSummaryAckStep,
   runDisturbanceAckStep,
+  runPassiveProgressionStep,
+  runPeriodSummaryStep,
 } from './runnerSteps';
 import { ensureProgressionCatchUp, progressUntilChoiceOrTerminal } from '../progressionLoop';
+import {
+
+  EXPERIENCE_TRACE_SCHEMA_VERSION,
+  EXPERIENCE_TRACE_SELECTION_POLICY,
+  cloneExperienceTraceValue,
+  experienceTracePersona,
+} from './experienceTraceTypes';
+
 
 const DEFAULT_MAX_STEPS = 2400;
 /** Phase micro-steps without calendar advance before forcing +1 year (unstick stall). */
@@ -84,13 +94,27 @@ function backfillMandatoryStoryRecords(
 
 export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Promise<HeadlessPersonaRunResult> {
   const { persona, endAge, catalogVersion, maxSteps = DEFAULT_MAX_STEPS } = config;
-  const session = createPersonaHeadlessSession(persona, catalogVersion);
+
+  const effectivePersona = config.seed === undefined ? persona : { ...persona, seed: config.seed };
+
+  const session = createPersonaHeadlessSession(effectivePersona, catalogVersion);
+
   await progressUntilChoiceOrTerminal(session);
 
   const records: HeadlessPersonaRunResult['records'] = [];
   const choiceDiagnostics: HeadlessPersonaRunResult['choiceDiagnostics'] = [];
   const activeActionSelectionReasons: HeadlessPersonaRunResult['activeActionSelectionReasons'] = [];
-  const ctx = { session, persona, records, choiceDiagnostics, activeActionSelectionReasons };
+  const experienceTraceSteps = config.experienceTrace ? [] : undefined;
+
+  const ctx = {
+    session,
+    persona: effectivePersona,
+    records,
+    choiceDiagnostics,
+    activeActionSelectionReasons,
+    experienceTraceSteps,
+  };
+
 
   let steps = 0;
   let stoppedReason: HeadlessPersonaRunResult['stoppedReason'] = 'end_age';
@@ -136,11 +160,12 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
         await runDisturbanceAckStep(ctx);
         break;
       case 'passive_progression':
-        await session.acknowledgeProgression('passive_continue');
+        await runPassiveProgressionStep(ctx);
+
         break;
       case 'period_summary':
-        await session.acknowledgeProgression('period_summary');
-        await progressUntilChoiceOrTerminal(session);
+        await runPeriodSummaryStep(ctx);
+
         break;
       default:
         await progressUntilChoiceOrTerminal(session);
@@ -178,6 +203,34 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
   backfillMandatoryStoryRecords(records, finalState);
   const choiceCount = records.filter(r => r.eventType === 'choice').length;
   const activeCount = records.filter(r => r.progressionKind === 'active_action').length;
+  const experienceTrace = experienceTraceSteps
+
+    ? {
+
+        schemaVersion: EXPERIENCE_TRACE_SCHEMA_VERSION,
+
+        generatedAt: new Date().toISOString(),
+
+        runtimePath: 'headless_server' as const,
+
+        persona: experienceTracePersona(persona),
+
+        seed: effectivePersona.seed,
+
+        endAge,
+
+        selectionPolicy: EXPERIENCE_TRACE_SELECTION_POLICY,
+
+        steps: experienceTraceSteps,
+
+        finalState: cloneExperienceTraceValue(finalState),
+
+        stoppedReason,
+
+      }
+
+    : undefined;
+
 
   return {
     personaId: persona.id,
@@ -190,9 +243,12 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
     activeActionSelectionReasons,
     totalChoices: choiceCount,
     totalActiveActions: activeCount,
-    randomSeed: persona.seed,
+    randomSeed: effectivePersona.seed,
+
     catalogVersion,
     stepsExecuted: steps,
     stoppedReason,
+    ...(experienceTrace ? { experienceTrace } : {}),
+
   };
 }

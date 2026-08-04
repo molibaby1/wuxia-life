@@ -8,6 +8,8 @@ import type { P8Persona } from '../../p8/types';
 import type { ChoiceScoreDiagnostic } from '../../p8/types';
 import { applyPersonaChoiceBias, rankChoiceScores } from '../../p8/personaChoiceBias';
 import type { HeadlessEngineSession } from '../session/HeadlessEngineSession';
+import type { ExperienceTraceChoiceCandidate, ExperienceTraceChoiceDecision } from './experienceTraceTypes';
+
 
 function collectChoiceEffects(choice: EventChoice): Array<{ type?: string; target?: string; value?: unknown; operator?: string }> {
   const effects: Array<{ type?: string; target?: string; value?: unknown; operator?: string }> = [];
@@ -63,7 +65,69 @@ function getAvailableChoices(session: HeadlessEngineSession, event: EventDefinit
 export interface PersonaChoiceSelection {
   choice: EventChoice;
   diagnostic: ChoiceScoreDiagnostic | null;
+  scoreCandidates: Array<{
+
+    choice: EventChoice;
+
+    choiceId: string;
+
+    baseScore: number;
+
+    personaAdjustedScore: number;
+
+    personaBonus: number;
+
+    directEffects: unknown[];
+
+    outcomeEffects: unknown[];
+
+    outcomeCount: number;
+
+  }>;
+
 }
+
+
+export function buildChoiceDecision(
+
+  candidates: Array<{ choiceId: string; personaAdjustedScore: number }>,
+
+  diagnostic: ChoiceScoreDiagnostic,
+
+): ExperienceTraceChoiceDecision {
+
+  const tieCount = candidates.filter(candidate => candidate.personaAdjustedScore === diagnostic.selectedScore).length;
+
+  const firstTiedIndex = candidates.findIndex(
+
+    candidate => candidate.personaAdjustedScore === diagnostic.selectedScore,
+
+  );
+
+  const selectedIndex = candidates.findIndex(candidate => candidate.choiceId === diagnostic.selectedChoiceId);
+
+  return {
+
+    selectedChoiceId: diagnostic.selectedChoiceId,
+
+    selectedScore: diagnostic.selectedScore,
+
+    runnerUpChoiceId: diagnostic.runnerUpChoiceId,
+
+    runnerUpScore: diagnostic.runnerUpScore,
+
+    scoreMargin:
+
+      diagnostic.runnerUpScore === null ? null : diagnostic.selectedScore - diagnostic.runnerUpScore,
+
+    tieCount,
+
+    tieBrokenByOrder: tieCount > 1 && selectedIndex === firstTiedIndex,
+
+  };
+
+}
+
 
 export function selectPersonaChoice(
   session: HeadlessEngineSession,
@@ -74,20 +138,50 @@ export function selectPersonaChoice(
   if (filtered.length === 0) return null;
 
   const scoreBoard: Array<{ choiceId: string; score: number }> = [];
+  const scoreCandidates: PersonaChoiceSelection['scoreCandidates'] = [];
+
   let bestChoice = filtered[0];
   let bestScore = -Infinity;
 
   for (const choice of filtered) {
-    const effects = collectChoiceEffects(choice);
-    let score = scoreByTendency(effects, persona.choiceTendency);
-    score = applyPersonaChoiceBias({
+    const directEffects = [...(choice.effects ?? [])];
+
+    const outcomeEffects = (choice.outcomes ?? []).flatMap(outcome => outcome.effects ?? []);
+
+    const effects = [...directEffects, ...outcomeEffects];
+
+    const baseScore = scoreByTendency(effects, persona.choiceTendency);
+
+    const score = applyPersonaChoiceBias({
+
       persona,
-      baseScore: score,
+      baseScore,
+
       choiceId: choice.id ?? '',
       eventId: event.id,
       effects,
     });
     scoreBoard.push({ choiceId: choice.id ?? '', score });
+    scoreCandidates.push({
+
+      choice,
+
+      choiceId: choice.id ?? '',
+
+      baseScore,
+
+      personaAdjustedScore: score,
+
+      personaBonus: score - baseScore,
+
+      directEffects,
+
+      outcomeEffects,
+
+      outcomeCount: choice.outcomes?.length ?? 0,
+
+    });
+
     if (score > bestScore) {
       bestScore = score;
       bestChoice = choice;
@@ -107,5 +201,6 @@ export function selectPersonaChoice(
     };
   }
 
-  return { choice: bestChoice, diagnostic };
+  return { choice: bestChoice, diagnostic, scoreCandidates };
+
 }

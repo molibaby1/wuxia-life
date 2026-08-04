@@ -46,7 +46,7 @@ export interface StoryEventDto {
   title: string;
   text: string;
   isAutomatic: boolean;
-  choices?: Array<{ id: string; text: string; available: boolean }>;
+  choices?: Array<{ id: string; text: string; description?: string; available: boolean }>;
 }
 
 export interface ActiveActionRequest {

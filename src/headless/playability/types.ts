@@ -6,6 +6,8 @@ import type { ChoiceScoreDiagnostic } from '../../p8/types';
 import type { P8Persona } from '../../p8/types';
 import type { GameState } from '../../types/eventTypes';
 import type { GameProcessRecord } from '../../types/simulationRecordTypes';
+import type { ExperienceTrace } from './experienceTraceTypes';
+
 
 export type HeadlessPlayabilityRuntimePath = 'headless_server' | 'local_direct';
 
@@ -14,6 +16,14 @@ export interface HeadlessPersonaRunConfig {
   endAge: number;
   catalogVersion: string;
   maxSteps?: number;
+  /** Optional deterministic seed override for trace/replay runs. */
+
+  seed?: number;
+
+  /** Disabled by default so existing P8 runs keep their current data path. */
+
+  experienceTrace?: boolean;
+
 }
 
 export interface HeadlessPersonaRunResult {
@@ -32,4 +42,6 @@ export interface HeadlessPersonaRunResult {
   catalogVersion: string;
   stepsExecuted: number;
   stoppedReason: 'end_age' | 'terminal' | 'max_steps';
+  experienceTrace?: ExperienceTrace;
+
 }

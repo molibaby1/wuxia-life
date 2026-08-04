@@ -32,6 +32,7 @@ import { syncOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { EndingSystem } from './EndingSystem';
+import { buildEndingPresentationDescription } from './endingPresentation';
 import { LifePathManager } from './LifePathSystem';
 import { traitSystem } from './TraitSystem';
 import { isAffiliationId } from './affiliationCatalog';
@@ -821,7 +822,7 @@ export class SpecialEffectHandler implements EffectHandler {
         ending: {
           id: ending.id,
           name: ending.name,
-          description: ending.description,
+          description: buildEndingPresentationDescription(state, ending),
           category: ending.category,
         },
       };

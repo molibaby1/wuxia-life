@@ -13,6 +13,8 @@ type Suite = {
 };
 
 const suites: Suite[] = [
+  { name: 'normalLongevityEndingClosure', entry: 'tests/normalLongevityEndingClosure.test.ts' },
+  { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },
   { name: 'p8PlayabilityTests', entry: 'tests/p8PlayabilityTests.ts' },
   { name: 'p9PlayabilityTests', entry: 'tests/p9PlayabilityTests.ts' },
   { name: 'p9FinalStateReplayMetricsRegression', entry: 'tests/p9FinalStateReplayMetricsRegression.test.ts' },

@@ -13,6 +13,8 @@ type Suite = {
 };
 
 const suites: Suite[] = [
+  { name: 'activeActionResultDifferentiation', entry: 'tests/activeActionResultDifferentiation.test.ts' },
+  { name: 'activeActionResultParity', entry: 'tests/activeActionResultParity.test.ts' },
   { name: 'experienceTraceTests', entry: 'tests/headless/experienceTrace.test.ts' },
   { name: 'normalLongevityEndingClosure', entry: 'tests/normalLongevityEndingClosure.test.ts' },
   { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },

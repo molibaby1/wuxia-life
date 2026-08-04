@@ -72,6 +72,10 @@ export interface ActionResultMetadata {
   rewardSummary: string;
   costSummary: string;
   riskSummary: string;
+  /** Whether the existing same-category repetition rule reduced this result. */
+
+  diminishingReturn?: boolean;
+
 }
 
 export interface ActionResult {
@@ -104,6 +108,18 @@ export interface ActiveActionSummaryDisplay {
   nextStepHint: string;
   /** Applied stat deltas this period (player-visible) */
   appliedDeltaSummary?: string;
+  /** Deterministic player-facing explanation based on the applied public delta. */
+
+  resultExplanation?: string;
+
+  /** Player-facing explanation of the existing diminishing-return signal. */
+
+  diminishingReturnNotice?: string;
+
+  /** Player-facing warning derived from the already visible current resource value. */
+
+  resourcePressureNotice?: string;
+
   /** P122: player-visible long-term shaping / echo confirmations after action */
   longTermImpactLines?: string[];
 }

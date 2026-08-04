@@ -195,12 +195,14 @@ const currentNode = computed(() => {
     }
     if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
       const summary = apiEngineState.activeActionSummary;
-      const deltaLine = summary.appliedDeltaSummary
-        ? `本期变化：${summary.appliedDeltaSummary}。`
-        : '';
+      const resultLines = [
+        summary.resultExplanation,
+        summary.diminishingReturnNotice,
+        summary.resourcePressureNotice,
+      ].filter(Boolean).join(' ');
       return {
         id: 'action_or_choice_result',
-        text: `${summary.actionName}已结束（${summary.durationLabel}）。${deltaLine}`,
+        text: resultLines || `${summary.actionName}已结束（${summary.durationLabel}）。`,
         title: '本期小结',
         choices: [],
       };
@@ -255,12 +257,14 @@ const currentNode = computed(() => {
     }
     if (gameEngineComposable.engineState.lastActiveActionSummary) {
       const summary = gameEngineComposable.engineState.lastActiveActionSummary;
-      const deltaLine = summary.appliedDeltaSummary
-        ? `本期变化：${summary.appliedDeltaSummary}。`
-        : '';
+      const resultLines = [
+        summary.resultExplanation,
+        summary.diminishingReturnNotice,
+        summary.resourcePressureNotice,
+      ].filter(Boolean).join(' ');
       return {
         id: 'action_or_choice_result',
-        text: `${summary.actionName}已结束（${summary.durationLabel}）。${deltaLine}`,
+        text: resultLines || `${summary.actionName}已结束（${summary.durationLabel}）。`,
         title: '本期小结',
         choices: [],
       };

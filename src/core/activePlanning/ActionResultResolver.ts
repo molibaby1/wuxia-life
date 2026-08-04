@@ -88,6 +88,8 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
         sameCategoryRepeat >= 3
           ? `${summaries.riskSummary}（重复投入，收益递减）`
           : summaries.riskSummary,
+      diminishingReturn: sameCategoryRepeat >= 3,
+
     },
   };
 }

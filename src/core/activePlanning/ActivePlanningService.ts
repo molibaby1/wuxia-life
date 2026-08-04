@@ -17,7 +17,10 @@ import type { EventDefinition } from '../../types/eventTypes';
 import { resolveActiveAction } from './ActionResultResolver';
 import { resolveDisturbanceAfterAction } from './DisturbanceResolver';
 import { buildActiveActionSummaryDisplay } from './activeActionSummaryBuilder';
+
 import { buildDisturbanceNarrativeDisplay } from './disturbanceNarrativeBuilder';
+import { calculatePublicStatDeltas } from './periodSummaryBuilder';
+
 import { collectPracticeImpactLines } from '../../utils/practiceTrajectorySummary';
 import { formatLongTermFlag, isPlayerVisibleFlag } from '../../utils/playerFacingLabels';
 import { applyPracticeHabitEffects } from './applyPracticeHabitEffects';
@@ -112,7 +115,13 @@ export function executeActiveActionOnState(
   });
   if (!resolved) return null;
 
+  // The Headless engine may expose a Vue reactive proxy here. A shallow snapshot
+  // is sufficient because public delta calculation reads only top-level numeric fields.
+  const beforePlayer: PlayerState = { ...state.player };
+
   applyStatDeltas(state.player, resolved.deltas);
+  const publicDelta = calculatePublicStatDeltas(beforePlayer, state.player);
+
   updateFocusStreak(state, resolved.metadata.category);
 
   const advance = durationToAdvanceUnit(resolved.duration);
@@ -193,6 +202,12 @@ export function executeActiveActionOnState(
   const activeActionSummary = buildActiveActionSummaryDisplay(resolved, {
     hasPendingDisturbance: disturbanceNarrative !== null,
     longTermImpactLines,
+    publicDelta,
+
+    currentMoney: readPlayerNumeric(state.player, 'money'),
+
+    diminishingReturn: resolved.metadata.diminishingReturn,
+
   });
   const categoryLabel =
     resolved.metadata.category === 'training'

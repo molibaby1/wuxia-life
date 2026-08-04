@@ -195,6 +195,7 @@
         :current-goal-summary="mainScreenModel.currentGoalSummary"
         :affiliation-summary="mainScreenModel.affiliationSummary"
         :experience-summary="mainScreenModel.experienceSummary"
+        :practice-summary="mainScreenModel.practiceSummary"
         :risk-summary="mainScreenModel.riskSummary"
         :tendency-summary="mainScreenModel.tendencySummary"
       />

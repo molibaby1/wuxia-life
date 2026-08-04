@@ -79,6 +79,7 @@ export interface MainScreenModel {
   affiliationSummary: string;
   titleSummary: string;
   experienceSummary: string;
+  practiceSummary: string;
   riskSummary: string;
   tendencySummary: string;
   coreStats: MainScreenStatItem[];
@@ -166,6 +167,16 @@ function buildExperienceSummary(summary: LifeMemorySummary): string {
   return achievements.length > 0
     ? achievements.slice(0, 3).map((item) => item.label).join(' / ')
     : '暂无经历';
+}
+
+function buildPracticeSummary(summary: LifeMemorySummary): string {
+  const visiblePractice = (summary.habitTrajectory ?? [])
+    .filter((entry) => entry.visibility === 'player')
+    .slice(0, 2);
+
+  return visiblePractice.length > 0
+    ? visiblePractice.map((entry) => `${entry.label} · ${entry.tierLabel}`).join(' / ')
+    : '尚未形成持续实践';
 }
 
 function buildTendencySummary(player: MainScreenPlayer): string {
@@ -289,6 +300,7 @@ export function buildMainScreenModel(
     affiliationSummary: buildAffiliationSummary(player),
     titleSummary: player.title ?? '暂无正式称号',
     experienceSummary: buildExperienceSummary(lifeMemory),
+    practiceSummary: buildPracticeSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player),
     coreStats: CORE_STATS.map((item) =>

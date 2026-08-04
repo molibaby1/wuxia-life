@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
 import type { PlayerLifeStates } from '../src/types/eventTypes';
 import type { LifeMemorySummary } from '../src/types/lifeMemory';
@@ -84,6 +86,140 @@ console.log('=== Main Screen Model Tests ===\n');
   );
   assert(model.fullStatGroups.length === 5, 'full stats should be grouped into five sections after survival split');
   console.log('✓ builds canonical goal/risk/tendency/core groups');
+}
+
+{
+  const model = buildMainScreenModel(
+    createPlayer(),
+    createLifeMemory({ habitTrajectory: [] }),
+  );
+
+  assert(model.practiceSummary === '尚未形成持续实践', 'empty player-visible practice should use explicit empty copy');
+  console.log('✓ shows an explicit empty practice summary');
+}
+
+{
+  const model = buildMainScreenModel(
+    createPlayer(),
+    createLifeMemory({
+      habitTrajectory: [
+        {
+          id: 'habit-trajectory-0',
+          visibility: 'player',
+          label: '练功实践',
+          tierLabel: '有过实质实践',
+          sortKey: 1,
+        },
+      ],
+    }),
+  );
+
+  assert(model.practiceSummary === '练功实践 · 有过实质实践', 'single practice should keep formal label and tier');
+  console.log('✓ renders a single player-visible practice');
+}
+
+{
+  const model = buildMainScreenModel(
+    createPlayer(),
+    createLifeMemory({
+      habitTrajectory: [
+        {
+          id: 'habit-trajectory-0',
+          visibility: 'player',
+          label: '营生实践',
+          tierLabel: '贯穿多个阶段',
+          sortKey: 5,
+        },
+        {
+          id: 'habit-trajectory-1',
+          visibility: 'player',
+          label: '读书实践',
+          tierLabel: '长期深入',
+          sortKey: 4,
+        },
+        {
+          id: 'habit-trajectory-hidden',
+          visibility: 'hidden',
+          label: '练功实践',
+          tierLabel: '贯穿多个阶段',
+          sortKey: 5,
+        },
+        {
+          id: 'habit-trajectory-diagnostic',
+          visibility: 'diagnostic',
+          label: '练功实践',
+          tierLabel: '贯穿多个阶段',
+          sortKey: 5,
+        },
+      ],
+    }),
+  );
+
+  assert(
+    model.practiceSummary === '营生实践 · 贯穿多个阶段 / 读书实践 · 长期深入',
+    'practice should keep existing order, filter non-player entries, and cap at two items',
+  );
+  console.log('✓ keeps ordered player-visible practice to two items');
+}
+
+{
+  const lifeMemory = createLifeMemory({
+    achievements: [{
+      id: 'achievement-1',
+      visibility: 'player',
+      label: '完成正道试炼',
+      category: 'route',
+      sortKey: 10,
+      diagnostic: { achievementId: 'achievement-1', sourceFlags: [] },
+    }],
+    habitTrajectory: [
+      {
+        id: 'habit-trajectory-0',
+        visibility: 'player',
+        label: '营生实践',
+        tierLabel: '长期深入',
+        sortKey: 4,
+      },
+    ],
+  });
+  const before = buildMainScreenModel(createPlayer(), lifeMemory);
+  const after = buildMainScreenModel(
+    createPlayer({
+      lifeStates: createLifeStates({
+        trainingHabit: 5,
+        studyHabit: 5,
+        businessHabit: 5,
+      }),
+      flags: {
+        p9_echo_training_hook: true,
+        p9_echo_study_hook: true,
+        p9_echo_business_hook: true,
+        p9_echo_social_hook: true,
+        p9_echo_travel_hook: true,
+      },
+    } as Partial<MainScreenPlayer>),
+    lifeMemory,
+  );
+
+  assert(before.practiceSummary === after.practiceSummary, 'practice display must only consume LifeMemory trajectory');
+  assert(before.tendencySummary === after.tendencySummary, 'practice must not change tendency summary');
+  assert(before.affiliationSummary === after.affiliationSummary, 'practice must not change affiliation summary');
+  assert(before.titleSummary === after.titleSummary, 'practice must not change title summary');
+  assert(before.experienceSummary === after.experienceSummary, 'practice must not change experience summary');
+  assert(before.riskSummary === after.riskSummary, 'practice must not change risk summary');
+  assert(!after.practiceSummary.includes('交游') && !after.practiceSummary.includes('游历'), 'social/travel flags must not enter practice summary');
+  console.log('✓ keeps practice separate from other summary semantics');
+}
+
+{
+  const summarySource = readFileSync(resolve(process.cwd(), 'src/components/MainScreenLifeSummary.vue'), 'utf8');
+  const gameScreenSource = readFileSync(resolve(process.cwd(), 'src/components/GameScreen.vue'), 'utf8');
+
+  assert(summarySource.includes('实践'), 'formal main-screen summary must render the practice row');
+  assert(summarySource.includes('practiceSummary'), 'practice row must consume the practiceSummary prop');
+  assert(gameScreenSource.includes(':practice-summary="mainScreenModel.practiceSummary"'), 'GameScreen must pass the shared practice summary');
+  assert(gameScreenSource.includes('buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value)'), 'Local/API must keep the shared main-screen model builder');
+  console.log('✓ keeps formal component rendering and Local/API shared builder');
 }
 
 {

@@ -18,6 +18,10 @@
         <span class="summary-value">{{ experienceSummary }}</span>
       </div>
       <div class="summary-row">
+        <span class="summary-label">实践</span>
+        <span class="summary-value">{{ practiceSummary }}</span>
+      </div>
+      <div class="summary-row">
         <span class="summary-label">风险</span>
         <span class="summary-value summary-risk">{{ riskSummary }}</span>
       </div>
@@ -34,6 +38,7 @@ defineProps<{
   currentGoalSummary: string;
   affiliationSummary: string;
   experienceSummary: string;
+  practiceSummary: string;
   riskSummary: string;
   tendencySummary: string;
 }>();

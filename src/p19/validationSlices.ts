@@ -16,7 +16,6 @@ function baseLateLifeState(): GameState {
       martialPower: 42,
       chivalry: 38,
       constitution: 50,
-      comprehension: 45,
       affiliation: null,
       title: null,
       reputation: 32,

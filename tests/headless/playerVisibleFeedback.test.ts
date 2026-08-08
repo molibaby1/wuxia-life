@@ -39,14 +39,18 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
   });
   const automaticEvent = await automaticSession.getNextEvent();
   assert(automaticEvent?.isAutomatic === true, 'automatic setup event should be available');
-  const automaticBeforeMoney = automaticSession.serialize().state.player.money;
+  const automaticBeforePlayer = automaticSession.serialize().state.player;
   await automaticSession.acknowledgeProgression('story_automatic');
-  const automaticAfterMoney = automaticSession.serialize().state.player.money;
+  const automaticAfterPlayer = automaticSession.serialize().state.player;
   const automaticSummary = automaticSession.getProgressionVolatileState().pendingPeriodSummary;
-  assert(automaticBeforeMoney !== automaticAfterMoney, 'automatic event should change the public money value');
+  const automaticDeltas = calculatePublicStatDeltas(automaticBeforePlayer, automaticAfterPlayer);
   assert(
-    automaticSummary?.statDeltaSummary !== '本期未见明显数值变化',
-    'automatic result card must show an actual public delta',
+    Object.keys(automaticDeltas).length === 0,
+    'birth automatic event should not invent a public numeric delta',
+  );
+  assert(
+    automaticSummary?.statDeltaSummary === '本期未见明显数值变化',
+    'automatic result card must accurately show the absence of a public numeric delta',
   );
 
   const originSession = HeadlessEngineSessionImpl.create({

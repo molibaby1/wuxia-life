@@ -112,7 +112,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 5},
+      {"type": "stat_modify", "stat": "knowledge", "value": 5},
       {"type": "stat_modify", "stat": "chivalry", "value": 2}
     ]
   },
@@ -160,7 +160,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 4},
+      {"type": "stat_modify", "stat": "knowledge", "value": 4},
       {"type": "stat_modify", "stat": "internalSkill", "value": 4}
     ]
   },
@@ -277,7 +277,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 10},
       {"type": "stat_modify", "stat": "charisma", "value": 6},
-      {"type": "stat_modify", "stat": "comprehension", "value": 3}
+      {"type": "stat_modify", "stat": "knowledge", "value": 3}
     ]
   },
   {
@@ -300,7 +300,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 10},
-      {"type": "stat_modify", "stat": "comprehension", "value": 6}
+      {"type": "stat_modify", "stat": "knowledge", "value": 6}
     ]
   },
   {
@@ -492,7 +492,7 @@
       {"type": "random", "value": 0.1}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 40"}
+      {"type": "expression", "expression": "knowledge >= 40"}
     ],
     "content": {
       "title": "顿悟",
@@ -501,7 +501,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "knowledge", "value": 10},
       {"type": "stat_modify", "stat": "internalSkill", "value": 12},
       {"type": "stat_modify", "stat": "martialPower", "value": 8}
     ]
@@ -615,7 +615,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 5},
+      {"type": "stat_modify", "stat": "knowledge", "value": 5},
       {"type": "stat_modify", "stat": "charisma", "value": 3}
     ]
   },
@@ -638,7 +638,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 3}
+      {"type": "stat_modify", "stat": "knowledge", "value": 3}
     ]
   },
   {
@@ -828,7 +828,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6},
       {"type": "stat_modify", "stat": "charisma", "value": 3}
     ]
   },
@@ -873,7 +873,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 3}
+      {"type": "stat_modify", "stat": "knowledge", "value": 3}
     ]
   },
   {

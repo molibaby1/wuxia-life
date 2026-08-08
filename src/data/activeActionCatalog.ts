@@ -36,11 +36,9 @@ export const activeActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '研习典籍，开阔见识',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'comprehension', min: 2, max: 4 },
-      { stat: 'knowledge', min: 2, max: 3 },
-      { stat: 'charisma', min: 0, max: 1 },
+      { stat: 'knowledge', min: 1, max: 3 },
     ],
-    costs: [{ stat: 'money', amount: 15 }],
+    costs: [{ stat: 'money', amount: 10 }],
     risk: 'low',
     metadata: { focusTag: 'scholarly' },
     habitEffects: [{ state: 'studyHabit', value: 1 }],

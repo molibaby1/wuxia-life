@@ -124,6 +124,15 @@ export interface ActiveActionSummaryDisplay {
   longTermImpactLines?: string[];
 }
 
+/** One player-visible result with a single, explicit cause. */
+export interface AutomaticStageResultDisplay {
+  id: string;
+  sourceKind: 'story_event' | 'setback';
+  title: string;
+  body?: string;
+  deltas: Record<string, number>;
+}
+
 /** Period-end narrative for passive childhood / choice / auto story */
 export interface PeriodSummaryDisplay {
   sourceLabel: string;
@@ -131,6 +140,8 @@ export interface PeriodSummaryDisplay {
   body: string;
   statDeltaSummary: string;
   narrativeText: string;
+  /** Cause-preserving breakdown for automatic story progression. */
+  stageResults?: AutomaticStageResultDisplay[];
 }
 
 export interface PassiveNarrativeDisplay {

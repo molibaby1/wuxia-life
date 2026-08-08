@@ -39,10 +39,9 @@ export const origins: OriginConfig[] = [
     flavor: '你从小听的是书卷声，学的是规矩。',
     initialStats: [
       { stat: 'knowledge', value: 5 },
-      { stat: 'comprehension', value: 3 },
     ],
     earlyEventBiases: [
-      { tag: 'comprehension', multiplier: 1.4 },
+      { tag: 'learning', multiplier: 1.4 },
       { tag: 'discipline', multiplier: 1.1 },
     ],
     startingFlags: ['origin_scholar_family'],

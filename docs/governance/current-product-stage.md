@@ -1,434 +1,338 @@
 # Wuxia-Life 当前产品阶段
 
-用途：为 ChatGPT、Codex 和人工维护者提供当前唯一工作目标。本文是滚动看板，不是长期产品规范。最后更新：2026-08-04
+用途：为 ChatGPT、Codex 和人工维护者提供当前唯一工作目标。本文是滚动看板，不是长期产品规范。
 
-1. 当前阶段
+最后更新：2026-08-07
 
-Active Action Canonical Practice Visibility Slice 已完成并关闭。
+---
 
-上一阶段 inventory 唯一推荐 B 的收窄版本已完成：
+## 1. 当前状态
 
-复用现有 canonical practice facts，在正式主界面“人生摘要”中独立展示玩家当前已经形成的练功、读书与营生实践轨迹。
+P8 Frustration Evidence Fidelity Calibration 已完成并关闭。
 
-本阶段只改善既有事实的玩家可见表达，不建立主动行动到未来事件的因果链，不承诺后续事件、阶段回响或结局。
+P9/P40 Legacy Acceptance Deauthorization 已完成并关闭。
 
-本阶段已停止，不进入 socializing/travel 长期语义、事件回调、ending、action history 或其他相邻系统。
+Life Milestone Minimal Vertical Slice engineering implementation 已完成。
 
-2. 产品语义
+Milestone Expansion Batch 1 已实现，进入实际游戏体验与内容迭代阶段。
 
-本阶段展示的是当前已经成立的实践累计事实：
+产品体验是否改善，等待独立 Player Experience Validation。
 
-trainingHabit → 练功实践
-studyHabit    → 读书实践
-businessHabit → 营生实践
+当前不启动新的验证 Phase；后续根据实际游戏体验决定保留、修改、删除或补充内容。
 
-正式 tier 继续使用既有 Life Memory 语义：
+## 2. Life Milestone Minimal Vertical Slice（工程实现已完成）
 
-1 → 有过实质实践
-2 → 开始重复
-3 → 较为稳定
-4 → 长期深入
-5 → 贯穿多个阶段
+### 2.1 阶段来源
 
-玩家可见表达示例：
+本阶段来源于实际玩家体验反馈：
 
-实践    练功实践 · 长期深入 / 读书实践 · 开始重复
+- 玩家能够看到属性和 Habit 变化，但无法判断变化的意义；
+- 重复读书、练功和营生缺少阶段性成果；
+- 玩家无法明确描述自己当前形成了什么特点；
+- 长期目标距离过远，当前缺少可感知的发展方向。
 
-没有可见 practice trajectory 时：
+### 2.2 阶段目标
 
-实践    尚未形成持续实践
+实现：
 
-该字段只陈述当前事实，不得表达或暗示：
+```text
+Existing Formal Facts
+→ Data-driven Milestone Evaluation
+→ Achieved Milestones
++ Milestone Prospects
+→ Shared Life Memory Projection
+→ Main Screen Feedback
+```
 
-玩家已经成为某种职业或身份；
+使玩家能够看到：
 
-某项实践已经成为正式人生路线；
+- 已经形成的阶段成果；
+- 当前最接近的少量发展方向；
+- 每项成果或方向对应的事实和进度。
 
-后续一定会出现某个事件或机会；
+### 2.3 正式范围
 
-某个 ending 将因此发生；
+只允许：
 
-某一次主动行动与某个未来事件存在已确认的单独因果关系。
+1. 定义 8 个透明 Milestone；
+2. 实现小型结构化条件求值器；
+3. 派生 `achievedMilestones`；
+4. 派生最多 3 个 `milestoneProspects`；
+5. 接入 Life Memory 共享派生链；
+6. 在主界面展示最多 2 个印记和 1 个当前方向；
+7. 增加对应 Contract、Local/API 和 UI 回归测试；
+8. 将 Life Memory 派生 Contract 进行 minor version 更新。
 
-3. 已确认事实
+### 2.4 八个固定样本
 
-正式主动行动仍为 training、study、socializing、business、travel。
+只允许：
 
-trainingHabit、studyHabit、businessHabit 是现有 canonical practice facts，值域为 0–5。
+- 初涉书卷；
+- 少年勤学；
+- 初试身手；
+- 初通营生；
+- 读书成习；
+- 练功成习；
+- 营生成习；
+- 文武并进。
 
-三项 facts 已持久化于 Snapshot 3.13.0，本阶段不修改 Snapshot、Schema 或 Contract。
+不得增加第 9 个 Milestone。
 
-Life Memory 3.0.0 的 deriveLifeMemorySummary() 已将三项 facts 派生为 LifeMemorySummary.habitTrajectory。
+### 2.5 条件范围
 
-habitTrajectory 已拥有正式 label、tier、排序与 visibility；它是本阶段唯一 practice presentation source。
+第一阶段只允许：
 
-GameScreen.vue 的 Local/API 路径均已将 Life Memory summary 传给 buildMainScreenModel()。
+- `habit_at_least`；
+- `action_count`；
+- `event_occurred`。
 
-MainScreenLifeSummary.vue 是当前正式挂载、非 ending、玩家持续可见的“人生摘要”consumer。
+多个条件固定为 AND。
 
-periodSummaryBuilder.ts 已有 practice trajectory consumer，不是本阶段缺失点。
+不得实现：
 
-主动行动结果卡已经负责本次 actual before/after delta 与实际 habit 增量提示，不属于本阶段修改范围。
+- 任意表达式 DSL；
+- 嵌套条件树；
+- `any`；
+- `not`；
+- stat threshold；
+- hidden milestone；
+- 自定义脚本条件。
 
-LifeMemoryPanel.vue 当前未挂载；本阶段不接入整个面板。
+### 2.6 状态边界
 
-当前 Browser ending 没有形成通用 Life Memory practice 展示；ending 不属于本阶段。
+Milestone 是只读派生反馈。
 
-socializing/travel 没有 dedicated practice habit axis；现有 flags/history 不足以支持与三项 habit 对称的长期实践表达。
+不得修改或新增：
 
-practice habits 不得定义 tendencySummary、Affiliation、Title、Occupation、identity、route 或 ending classification。
+- PlayerState；
+- GameState；
+- Snapshot state shape；
+- Snapshot schema version；
+- save migration；
+- Achievement；
+- Identity；
+- Affiliation；
+- Title；
+- Ending；
+- route；
+- event conditions；
+- event effects；
+- scheduling；
+- active-action rewards。
 
-4. 实施目标与正式数据链
+第一阶段不建设 milestone ledger。
 
-正式数据链必须保持为：
+### 2.7 独立问题边界
 
-PlayerState.lifeStates
-  → deriveLifeMemorySummary()
-  → LifeMemorySummary.habitTrajectory
-  → buildMainScreenModel()
-  → MainScreenLifeSummary.vue
+本阶段不处理：
 
-实施要求：
+- 结果页与下一事件之间的交互拖沓；
+- 重复读书、练功事件的内容差异；
+- 数值平衡；
+- 悟性是否进入 canonical player model；
+- 隐藏成就；
+- 奖励系统；
+- 任务系统；
+- Browser fixture；
+- P8/P9/P40 metric。
 
-在 MainScreenModel 中增加独立的 practice summary 字段。
+这些问题不得因本次体验反馈被顺带纳入。
 
-该字段只从 LifeMemorySummary.habitTrajectory 派生。
+### 2.8 工程完成结果
 
-只消费 visibility === 'player' 的 entries。
+已确认实现满足：
 
-保持现有 trajectory 排序，最多展示前两项。
+- 8 个 Milestone 由 JSON 数据定义；
+- 求值器不包含具体 Milestone ID 分支；
+- `achievedMilestones` 与 `milestoneProspects` 分离；
+- Life Memory 保留完整已达成集合；“最多 2 项印记”只属于主界面展示限制；
+- raw GameState 不包含 Milestone；
+- Achievement 与 Milestone 不混合；
+- Local/API 共用同一 Life Memory 链；
+- 主界面无 Milestone 时不渲染空的“印记 / 方向”行；
+- 无事件、调度、属性、奖励或存档行为变化；
+- 工程验证已完成并通过。
 
-在 MainScreenLifeSummary.vue 中新增独立“实践”行。
+### 2.9 产品验收边界
 
-“实践”不得替换、修改或参与现有“倾向”计算。
+工程绿色不等于体验问题已经解决。
 
-Local/API 继续共享同一个 buildMainScreenModel()，不得建立平行 builder。
+工程完成后必须停止，下一步只允许独立批准：
 
-不得直接从 player.lifeStates 在 UI/ViewModel 层重新实现：
+```text
+Player Experience Validation
+```
 
-tier 映射；
+至少实际游玩一条书香路线至约 20 岁，判断：
 
-practice label；
+- 是否能描述当前形成的特点；
+- 是否理解最近获得的 Milestone；
+- 是否知道当前接近什么方向；
+- 是否仍然只是机械重复读书；
+- 主界面反馈是否足够清晰；
+- 下一优先级是否应转向结果交互或内容差异。
 
-排序；
+### 2.10 结构性停止条件
 
-visibility；
+出现以下任一要求时停止实施并重新裁决：
 
-另一套 practice trajectory 选择规则。
+- 必须新增 milestone ledger；
+- 必须新增 PlayerState、GameState 或 Snapshot 字段；
+- 必须修改现有 Achievement 语义；
+- 必须依赖普通 choice 历史；
+- 必须使用悟性作为正式核心条件；
+- 必须新增事件；
+- 必须影响游戏结果才能体现价值；
+- Local/API 无法通过共享 Life Memory 链保持一致。
 
-5. 允许修改范围
+### 2.11 阶段关闭结果
 
-允许修改：
+本阶段正式状态为：
 
-src/components/mainScreenModel.ts
-src/components/MainScreenLifeSummary.vue
-src/components/GameScreen.vue
-tests/mainScreenModel.test.ts
-docs/governance/current-product-stage.md
+```text
+Life Milestone Minimal Vertical Slice engineering implementation 已完成。
+产品体验是否改善，等待独立 Player Experience Validation。
+当前没有 Authorized 下一阶段。
+```
 
-tests/runRealTestGate.ts 核对结论：该文件未出现在当前 git diff --name-only，且 git diff -- tests/runRealTestGate.ts 为空。本 Slice 未修改该文件；既有 gate 已注册并执行 mainScreenModelTests 与 gameScreenPresentationTests。本 Slice 不涉及 gate 顺序、失败处理或退出码变更。
+不得自动授权内容扩充、交互修改、高级 Milestone 或 Player Experience Validation 实施。
 
-只有现有测试文件无法验证正式组件挂载时，才允许新增一个窄范围 component/UI 测试文件。
+## 3. P8 Frustration Evidence Fidelity Calibration
 
-docs/governance/current-product-stage.md 只允许在实施完成后更新：
+P8 的正式语义为：
 
-实施状态；
+```text
+actual executed negative evidence
+→ inspect related player-visible context
+→ warned / explained / recoverable / opaque
+```
 
-实际修改文件；
+实际负面证据来自单次执行的实际 effects 或 before/after 状态差异。事件前景中的“危机、受伤、失败、死亡”等词不能单独构成 setback。
 
-验证命令与退出码；
+P8 closure 保持以下结果：
 
-closure 结论。
+- dangerous foreground 不再被误判为实际 setback；
+- recovery-only event 不再被误判为 setback；
+- Local/API/Headless choice evidence 语义保持一致；
+- 已有玩家可见解释由 classifier 正确覆盖；
+- frustration threshold `0.35` 与 blocker severity 保持有效。
 
-如果真实代码证明必须修改上述范围以外的业务文件，先按结构性 blocker 处理，不得自行扩大范围。
+### 3.1 P8 classifier 归属
 
-6. 严格禁止
+当前 worktree 还包含已经裁决的 P8 evidence-conditioned multi-domain classifier coverage 及其 p38 synthetic regression。
 
-修改主动行动定义、收益、成本、递减或结算
-修改 ActivePlanningService、ActionResultResolver 或 action result DTO
-修改主动行动结果卡语义
-修改 periodSummaryBuilder.ts
-修改事件、事件条件、EventLoader、调度或事件内容
-为 socializing/travel 新增长期实践轴或玩家可见长期身份
-修改 P9 echo flags 或其语义
-挂载或扩展 LifeMemoryPanel.vue
-修改 ending、EndingScreen、ending classification 或 ending recap
-新增 PlayerState、Snapshot、Schema、Contract 或 migration
-新增、替换或扩展 actionHistory
-新增通用 action-to-echo、因果历史或 future callback 框架
-修改 tendencySummary 算法
-由 habit 推导 identity、occupation、affiliation、title、route 或 ending
-重跑完整 60 次 late-life Browser observation
-顺带修复 P8、P9、p39、p40、event-quality 或 playability 既有问题
-无关重构、格式化、旧代码清理或文档扩张
-提交、reset、clean 或清理 dirty worktree
+它们属于 P8 frustration closure 的既有组成，不属于 P9/P40 deauthorization。Life Milestone 阶段不得修改其代码或测试。
 
-7. 验收标准
+涉及的既有实现 owner 为：
 
-7.1 ViewModel
+- `src/p8/collectPersonaMetrics.ts`：negative-domain classifier 收敛；
+- `tests/p38FrustrationRemediationTests.ts`：对应 synthetic regression。
 
-必须验证：
+### 3.2 历史 closure baseline
 
-无可见 trajectory：显示 尚未形成持续实践。
+P9/P40 deauthorization 之前的 P8 closure baseline 曾记录 `npm test：exit 1`，该记录只描述当时尚未撤销的 P9 causality 与 P40 replay similarity 历史断言。
 
-单项 trajectory：正确显示正式 label 与 tier。
+它是历史 closure baseline，不是当前验证结果，也不得与当前门禁结果并列解读。
 
-多项 trajectory：保持既有排序并最多显示两项。
+## 4. P9/P40 正式裁决
 
-diagnostic/hidden entries 不进入玩家摘要。
+- 因果连续性和人生可区分性仍是有效产品目标；
+- 当前 causality/replayability metric 仅为 legacy diagnostic；
+- causality/replayability 不产生正式 verdict 或 warning；
+- `directEchoCount >= 3`、`tooFewEchoes` 产品验收含义、replay cosine `>= 0.82`、near-duplicate pair `<= 3` 及依赖它们的历史 assertions 已退出正式验收；
+- 不授权 causality/replayability metric redesign；
+- 不授权 P9/P40 内容修改。
 
-habit 变化不改变：
+raw diagnostic payload 继续保留，用于路径、状态和内容候选问题发现，但不能直接证明真人玩家的因果感受或重玩体验。
 
-tendencySummary；
+## 5. 进入本阶段前的正式验证基线
 
-affiliationSummary；
+```text
+npm run typecheck：exit 0
+P8/P9/P40 定向测试：exit 0
+npm test：exit 0
+Headless P8 gate：PASS
+Local P8 gate：PASS
+P11 scheduling gate：exit 0
+git diff --check：exit 0
+```
 
-titleSummary；
+Headless 与 Local gate 的 frustration blocker 均为 0；两条 gate 均保留 causality raw diagnostic 与 replay raw diagnostic。
 
-experienceSummary；
+## 6. Life Milestone 工程实现与最终验证
 
-riskSummary。
+### 6.1 实现结果
 
-socializing/travel flags 或 action history 不进入 practice summary。
+当前实现形成正式共享链：
 
-至少覆盖以下样本：
+```text
+GameState
+→ deriveMilestoneProjection()
+→ LifeMemorySummary 3.1.0
+→ SessionProgressionPayload
+→ buildMainScreenModel()
+→ MainScreenLifeSummary.vue
+```
 
-training
+实现结果：
 
-study
+- 新增 8 项固定 Milestone JSON 目录；
+- 新增纯只读 Milestone 求值器；
+- Life Memory 分别携带 `achievedMilestones` 与 `milestoneProspects`；
+- 主界面最多展示 2 项“印记”和 1 项“方向”；
+- `personaRuns`、事件、调度、奖励、PlayerState、GameState、Snapshot、Achievement 与 LifePath 均未被 Milestone 写入或修改；
+- 旧 Habit 隔离测试只收敛比较范围，以排除新增的派生 Milestone projection；canonical Habit 隔离语义保持有效。
 
-business
+### 6.2 最终验证结果
 
-预期表达
+```text
+npm run typecheck：exit 0
+5 个指定定向测试（Life Memory、Milestone、Main Screen、Habit、Identity）：exit 0
+npm run test:contracts：exit 0
+npm run test:headless：exit 0
+npm run test:headless:parity：exit 0
+npm test：exit 0
+npm run build：exit 0
+npm run gate:p11-scheduling：exit 0
+git diff --check：exit 0
+```
 
-0
+### 6.3 Browser 工程证据
 
-0
+已确认：
 
-0
+- 本地新人生可以正常进入游戏；
+- 无 Milestone 时不渲染空的“印记 / 方向”行；
+- Browser Console 无 warning/error；
+- 临时开发服务与验收页面已关闭。
 
-尚未形成持续实践
+该路径尚未到达主动行动阶段，因此没有把空态验证宣称为“已获得印记”的 Browser 正向证据。Milestone 正向数据链由求值器、Life Memory 与主界面回归测试覆盖；实际玩家方向感是否改善仍需独立 Player Experience Validation。
 
-1
+## 7. Browser closure 裁决
 
-0
+目标特定 Browser DOM 证据缺失属于验收基础设施限制，不构成 P8 产品关闭 blocker。
 
-0
+现有共享正式渲染链、定向测试、effect invariance 和 Headless/Local 双 gate 足以支持关闭。
 
-练功实践 · 有过实质实践
+Life Milestone 阶段不新增 production hook、debug route、query parameter、Snapshot 字段、Browser fixture 或事件调度后门。
 
-3
+## 8. 既有关闭阶段未修改边界
 
-2
+Life Milestone 阶段不得修改：
 
-0
+- P8/P9/P40 metric、classifier、evidence producer 或 threshold；
+- 任何 P8/P9/P40 latest reports；
+- 事件、effects、conditions、weights、age 或 scheduling；
+- persona、seed 或运行次数；
+- event-quality 或其他已知非绿色项。
 
-练功实践 · 较为稳定 / 读书实践 · 开始重复
+## 9. 当前停止条件
 
-2
-
-4
-
-5
-
-营生实践 · 贯穿多个阶段 / 读书实践 · 长期深入
-
-5
-
-5
-
-5
-
-按既有稳定排序显示前两项
-
-7.2 正式 UI
-
-必须验证：
-
-MainScreenLifeSummary.vue 正式渲染“实践”行；
-
-玩家可见文案只陈述当前实践事实；
-
-页面不存在未来事件、机会、路线或 ending 承诺；
-
-原有“目标 / 所属 / 经历 / 风险 / 倾向”语义不变；
-
-主动行动结果卡与阶段摘要原有表达不变。
-
-7.3 Local/API 一致性
-
-必须验证：
-
-Local 继续由 deriveLifeMemorySummary() 产生 Life Memory；
-
-API 继续使用服务端提供的同 schema Life Memory；
-
-两条路径都进入同一个 buildMainScreenModel()；
-
-不存在 Local/API 专用 practice builder、fallback 或双重语义。
-
-7.4 Browser 证据
-
-至少完成一次正式 Browser/DOM 验收，证明：
-
-“人生摘要”中实际出现“实践”行；
-
-无 practice 与有 practice 至少各验证一个状态；
-
-页面刷新或既有 Snapshot 恢复后，practice 表达仍与 canonical facts 一致；
-
-Console 没有本 Slice 新增错误。
-
-如果现有 API Browser harness 可以定向注入 Life Memory，再补一条 API 模式证据；如果不能，使用现有 contract/ViewModel 测试证明共享数据链，并明确记录该 Browser 证据缺口，不得为此新增测试基础设施。
-
-8. 验证命令
-
-先运行与修改范围直接相关的窄测试，再运行：
-
-npm run typecheck
-npm test
-npm run validate:event-quality
-npm run gate:playability
-npm run gate:p11-scheduling
-git diff --check
-
-当前已知参考 failure fingerprint：
-
-npm test                       exit 1：既有 P8/P9/p39/p40 failure family，具体随机断言可能波动
-npm run validate:event-quality exit 1：425 events；blocker 9 / major 147 / minor 36
-npm run gate:playability      exit 1：既有 P8 playability baseline failure
-npm run gate:p11-scheduling   exit 0
-git diff --check               exit 0
-
-实施前后必须使用同一组命令记录结果，并区分：
-
-本 Slice 新增失败；
-
-既有 failure fingerprint；
-
-随机断言文本波动。
-
-不得把既有非绿色 gate 顺带修复，也不得将其错误归因于本 Slice。
-
-9. 结构性 blocker
-
-只有出现以下情况才停止实施并报告：
-
-必须新增或修改 PlayerState、Snapshot、Schema、Contract 或持久化事实；
-
-LifeMemorySummary.habitTrajectory 不能表达正式 label、tier、排序或 player visibility；
-
-Local/API 实际没有共享可复用的 Life Memory → MainScreenModel 数据链；
-
-正式主界面无法在允许文件范围内消费 practice summary；
-
-实现必须修改主动行动结算、事件、period summary、ending 或 tendency 语义；
-
-真实代码证明三项 habit 不是当前 canonical practice facts；
-
-当前权威文档之间存在会实质改变产品语义的冲突。
-
-以下不属于结构性 blocker：
-
-既有 P8/P9/p39/p40 非绿色；
-
-既有 event-quality/playability failure；
-
-无法重跑完整 60 次 Browser observation；
-
-socializing/travel 没有长期 practice axis；
-
-当前 ending 未展示通用 practice recap。
-
-10. 阶段完成定义
-
-本阶段只有同时满足以下条件才算完成：
-
-主界面“人生摘要”正式新增独立“实践”字段；
-
-该字段只来自 LifeMemorySummary.habitTrajectory；
-
-只覆盖 training、study、business 三项 canonical practice facts；
-
-无 practice、有单项 practice、有多项 practice 均有自动化证据；
-
-正式 Browser/DOM 已证明玩家能够看到该字段；
-
-Local/API 共享同一 ViewModel 语义链；
-
-tendency、identity、Affiliation、Title、route、ending 均未被 habit 重定义；
-
-没有新增 state、Snapshot、Contract、事件或 action history；
-
-修改文件全部位于批准范围内；
-
-相关窄测试通过，完整验证结果已与既有 failure fingerprint 区分；
-
-git diff --check 通过；
-
-本文件已记录实际结果与 closure。
-
-11. 阶段停止条件
-
-完成上述 closure 后立即停止。
-
-不得继续进入：
-
-socializing/travel 长期语义；
-
-主动行动到后续事件的接线；
-
-新增事件或扩大 event readers；
-
-P9 echo flag 文案治理；
-
-Life Memory 全面板接入；
-
-action history 或因果历史；
-
-ending recap；
-
-下一阶段产品优化。
-
-12. 实施状态与 closure
-
-本阶段已完成。实际修改文件：
-
-src/components/mainScreenModel.ts
-src/components/MainScreenLifeSummary.vue
-src/components/GameScreen.vue
-tests/mainScreenModel.test.ts
-docs/governance/current-product-stage.md
-
-实际数据链保持为：
-
-PlayerState.lifeStates
-  → deriveLifeMemorySummary()
-  → LifeMemorySummary.habitTrajectory
-  → buildMainScreenModel()
-  → MainScreenLifeSummary.vue
-
-MainScreenModel.practiceSummary 只过滤 visibility === 'player' 的既有 trajectory，保留既有顺序并取前两项；没有可见项时显示“尚未形成持续实践”。没有新增 practice owner、状态、Snapshot、Contract、事件、action history 或并行 Local/API builder。
-
-窄测试结果：
-
-npx tsx tests/mainScreenModel.test.ts       exit 0
-npx tsx tests/gameScreenPresentationTests.ts exit 0
-npx tsx tests/activeActionResultParity.test.ts exit 0
-npm run typecheck                           exit 0
-
-正式 Browser/DOM 结果：
-
-Local 正式主界面新人生显示“实践 · 尚未形成持续实践”；API 正式主界面新人生同样无 practice，沿既有 UI 推进后显示“实践 · 练功实践 · 贯穿多个阶段”。两条路径 Console error/warning 均为 0；未新增卡片、弹窗或 LifeMemoryPanel 挂载。无 practice、有 practice 的自动化证据以及多项上限、可见性过滤证据均已通过。
-
-完整验证结果：
-
-npm test                         exit 1：新增 mainScreenModelTests、gameScreenPresentationTests 及相关 parity suite 通过；失败仍为既有 p9PlayabilityTests（known balanced consequence 2 vs 2）、p39ContentPoolConsistencyTests（gate:playability fail）和 p40ReplayPacingPolishTests（near-duplicate pairs 8 > 3）。
-npm run validate:event-quality   exit 1：425 events；blocker 9 / major 147 / minor 36，既有 event-quality 指纹。
-npm run gate:playability         exit 1：既有 P8 headless_server 基线，events=53、choices=30、age=40、blockers=2、warnings=3。
-npm run gate:p11-scheduling      exit 0：pass。
-git diff --check                 exit 0。
-
-上述失败未涉及本 Slice 修改文件或 practice summary 语义，未扩大为 blocker。
-
-Active Action Canonical Practice Visibility Slice 已完成并停止。当前文档不授权继续修改该 Slice，也不自动授权下一个产品阶段。下一阶段必须基于新的产品裁决单独开启；不得顺势处理 socializing/travel、event echo、ending 或既有非绿色 gate。
+- Life Milestone Minimal Vertical Slice 与 Expansion Batch 1 工程实现已完成；
+- 当前不启动新的验证 Phase；
+- 不进入 Player Experience Validation，除非获得独立授权；
+- 不进入结果页交互优化；
+- 不自动扩充读书、练功或营生内容，后续以实际体验决定；
+- 不建设奖励、隐藏成就、任务系统或 milestone ledger；
+- 不处理与本阶段无关的 dirty/untracked 内容；
+- 下一阶段必须基于新的实际体验证据进行独立产品裁决。

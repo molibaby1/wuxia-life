@@ -89,7 +89,6 @@ export type StatType =
   | 'chivalry'
   | 'charisma'
   | 'constitution'
-  | 'comprehension'
   | 'reputation'
   | 'influence'
   | 'connections'

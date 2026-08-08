@@ -105,7 +105,7 @@ export const P18_CHANNEL_TECHNICAL_SKILL: InheritanceChannelPattern = {
   baseIntensity: 0.65,
   opportunityTags: [
     { tag: 'legacy', multiplier: 1.3 },
-    { tag: 'comprehension', multiplier: 1.2 },
+    { tag: 'learning', multiplier: 1.2 },
   ],
   requiredQualityForStability: 0.3,
   summarySignal: 'technical_inheritance_active',

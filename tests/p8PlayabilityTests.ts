@@ -206,6 +206,60 @@ function testMetricDefinitionsComplete(): void {
   assert(P8_METRIC_DEFINITIONS.length >= 7, 'seven core metrics defined');
   const keys = new Set(P8_METRIC_DEFINITIONS.map(d => d.key));
   assert(keys.has('agency') && keys.has('replayability'), 'expected keys present');
+  const causality = P8_METRIC_DEFINITIONS.find(d => d.key === 'causality')!;
+  const replayability = P8_METRIC_DEFINITIONS.find(d => d.key === 'replayability')!;
+  assert(causality.severity === 'info', 'causality is diagnostic-only');
+  assert(causality.nonBlocking === true, 'causality is non-blocking');
+  assert(!('thresholdMin' in causality), 'causality has no formal thresholdMin');
+  assert(replayability.severity === 'info', 'replayability is diagnostic-only');
+  assert(replayability.nonBlocking === true, 'replayability is non-blocking');
+  assert(!('thresholdMax' in replayability), 'replayability has no formal thresholdMax');
+}
+
+function testLegacyDiagnosticsDoNotProduceGateVerdicts(): void {
+  const personaRuns = [
+    {
+      personaId: 'diagnostic-only',
+      personaName: 'Diagnostic only',
+      agency: {
+        activeActionCount: 3,
+        storyEventCount: 10,
+        choiceEventCount: 4,
+        forcedEventCount: 0,
+        activeActionByCategory: { training: 2, study: 1 },
+        repeatedSameActionStreakMax: 2,
+        repeatedStreakExamples: [],
+      },
+      causality: { directEchoCount: 0, genericEchoCount: 1, strongestExamples: [], tooFewEchoes: true },
+      achievement: { goals: [], achievedCount: 1, missedCount: 1, unavailableCount: 0 },
+      frustration: { setbacks: [], opaqueCount: 0, opaqueRatio: 0, opaqueExamples: [] },
+      pacing: { longestLowImpactSpanYears: 3, lowImpactSpanStartAge: 5, lowImpactSpanEndAge: 8 },
+      narrativeMemory: {
+        earlyLife: 'test',
+        turningPoint: 'test',
+        age40Identity: 'test',
+        evidenceCitations: [{ age: 1, kind: 'choice', text: 'a' }, { age: 2, kind: 'action', text: 'b' }, { age: 3, kind: 'auto', text: 'c' }],
+        missingTurningPoint: false,
+        missingIdentity: false,
+      },
+      choiceDiagnostics: [],
+      activeActionSelectionReasons: [],
+    },
+  ];
+  const replay = { pairwiseSimilarities: [], similarityClusters: [], nearDuplicateWarnings: ['diagnostic-only ~ another-persona'] };
+  const report = assemblePlayabilityReport(personaRuns, replay, 40);
+  const formalKeys = new Set(report.verdicts.map(v => v.key));
+  const warningKeys = new Set(report.warnings.map(v => v.key));
+  assert(report.decision === 'pass', 'legacy diagnostics do not fail the gate');
+  assert(!formalKeys.has('causality'), 'causality has no formal verdict');
+  assert(!formalKeys.has('replayability'), 'replayability has no formal verdict');
+  assert(!warningKeys.has('causality'), 'causality has no formal warning');
+  assert(!warningKeys.has('replayability'), 'replayability has no formal warning');
+  assert(report.personaRuns[0].causality.directEchoCount === 0, 'causality diagnostic payload is retained');
+  assert(report.replay.nearDuplicateWarnings.length === 1, 'replay diagnostic payload is retained');
+  const markdown = renderP8MarkdownReport(report, 'test.json');
+  assert(markdown.includes('Causality (legacy diagnostic)'), 'causality report section is diagnostic-only');
+  assert(markdown.includes('Replay Similarity (legacy diagnostic)'), 'replay report section is diagnostic-only');
 }
 
 function testGateAssemblySmoke(): void {
@@ -280,6 +334,7 @@ async function runAll(): Promise<void> {
   testBalancedChoiceBias();
   testAgencyRepeatedStreak();
   testMetricDefinitionsComplete();
+  testLegacyDiagnosticsDoNotProduceGateVerdicts();
   testGateAssemblySmoke();
   await testHeadlessGateReportRuntimePath();
   await testHeadlessRunnerSmokeOnePersona();

@@ -24,7 +24,6 @@ const STAT_LABELS: Record<string, string> = {
   martialPower: '功力',
   constitution: '体魄',
   charisma: '魅力',
-  comprehension: '悟性',
   chivalry: '侠义',
   reputation: '名望',
   connections: '人脉',

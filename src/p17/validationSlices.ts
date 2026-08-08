@@ -29,7 +29,6 @@ function baseMidLifeState(): GameState {
       martialPower: 50,
       chivalry: 50,
       constitution: 50,
-      comprehension: 50,
       affiliation: null,
       title: null,
       reputation: 50,

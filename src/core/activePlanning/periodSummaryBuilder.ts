@@ -1,4 +1,4 @@
-import type { PeriodSummaryDisplay } from '../../types/activeActionTypes';
+import type { AutomaticStageResultDisplay, PeriodSummaryDisplay } from '../../types/activeActionTypes';
 import { buildPracticePeriodGrowthLine } from '../../utils/practiceTrajectorySummary';
 import { readPlayerNumeric } from '../../utils/playerStatAccess';
 import type { PlayerLifeStates, PlayerState } from '../../types/eventTypes';
@@ -7,7 +7,6 @@ const PUBLIC_NUMERIC_STATS = [
   'martialPower',
   'chivalry',
   'constitution',
-  'comprehension',
   'money',
   'reputation',
   'connections',
@@ -36,7 +35,6 @@ const STAT_LABELS: Record<string, string> = {
   chivalry: '侠义',
   charisma: '魅力',
   constitution: '体魄',
-  comprehension: '悟性',
   reputation: '名望',
   influence: '影响力',
   connections: '人脉',
@@ -60,6 +58,7 @@ export function buildPeriodSummary(params: {
   deltas?: Record<string, number>;
   deltaCause?: string;
   lifeStates?: Partial<PlayerLifeStates>;
+  stageResults?: AutomaticStageResultDisplay[];
 }): PeriodSummaryDisplay {
   const deltas = params.deltas ?? {};
   const statDeltaSummary = formatStatDeltaSummary(deltas);
@@ -76,5 +75,6 @@ export function buildPeriodSummary(params: {
     body,
     statDeltaSummary: hasDelta ? `因「${cause}」：${statDeltaSummary}` : statDeltaSummary,
     narrativeText,
+    ...(params.stageResults ? { stageResults: params.stageResults } : {}),
   };
 }

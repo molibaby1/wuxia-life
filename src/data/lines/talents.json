@@ -116,30 +116,27 @@
     "type": "learning",
     "rarity": "rare",
     "growthBonus": {
-      "knowledge": 0.5,
-      "comprehension": 0.3
+      "knowledge": 0.5
     },
     "statCapBonus": {
       "knowledge": 20
     },
     "initialBonus": {
-      "knowledge": 15,
-      "comprehension": 8
+      "knowledge": 15
     }
   },
   {
     "id": "quick_learner",
-    "name": "悟性过人",
+    "name": "学识过人",
     "description": "领悟能力强，学习武学和知识都很快",
     "type": "learning",
     "rarity": "uncommon",
     "growthBonus": {
-      "comprehension": 0.3,
       "martialPower": 0.1,
       "knowledge": 0.1
     },
     "initialBonus": {
-      "comprehension": 10
+      "knowledge": 10
     }
   },
   {
@@ -212,7 +209,7 @@
     "rarity": "rare",
     "growthBonus": {
       "martialPower": 0.3,
-      "comprehension": 0.2
+      "knowledge": 0.2
     },
     "penalties": {
       "charisma": -0.2,
@@ -263,7 +260,6 @@
     "type": "special",
     "rarity": "common",
     "growthBonus": {
-      "comprehension": 0.2,
       "knowledge": 0.2
     },
     "penalties": {
@@ -271,7 +267,7 @@
     },
     "initialBonus": {
       "constitution": -5,
-      "comprehension": 8
+      "knowledge": 8
     }
   }
 ]

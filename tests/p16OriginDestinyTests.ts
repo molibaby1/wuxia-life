@@ -74,10 +74,10 @@ function testOriginEventWeighting(): void {
   state.flags.origin_id = 'merchant_house';
   const merchantBusiness = getOriginChildhoodEventMultiplier(state, new Set(['business']));
   state.flags.origin_id = 'scholar_house';
-  const scholarComprehension = getOriginChildhoodEventMultiplier(state, new Set(['comprehension']));
+  const scholarLearning = getOriginChildhoodEventMultiplier(state, new Set(['learning']));
   assert(poorSurvival > 1, 'poor survival bias');
   assert(merchantBusiness > 1, 'merchant business bias');
-  assert(scholarComprehension > 1, 'scholar comprehension bias');
+  assert(scholarLearning > 1, 'scholar learning bias');
   const contrast = summarizeOriginResourceContrast('merchant_house', 'poor_family');
   assert(contrast.materiallyDifferent, 'material contrast');
 }
@@ -163,7 +163,7 @@ function testChildhoodAgency(): void {
 
   const infantAction = resolveActiveAction({
     state: {
-      player: { age: 0, martialPower: 0, chivalry: 0, comprehension: 10, traits: [] } as PlayerState,
+      player: { age: 0, martialPower: 0, chivalry: 0, knowledge: 10, traits: [] } as PlayerState,
       flags: {},
     } as GameState,
     actionId: 'action_childhood_training',

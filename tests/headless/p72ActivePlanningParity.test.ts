@@ -47,8 +47,8 @@ export async function runP72ActivePlanningParityTests(): Promise<void> {
       `martialPower parity for ${actionId}`,
     );
     assert(
-      coreState.player.comprehension === headlessState.player.comprehension,
-      `comprehension parity for ${actionId}`,
+      coreState.player.knowledge === headlessState.player.knowledge,
+      `knowledge parity for ${actionId}`,
     );
     assert(
       (coreState.actionHistory?.length ?? 0) === (headlessState.actionHistory?.length ?? 0),

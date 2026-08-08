@@ -45,7 +45,8 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
     { traits: [] } as PlayerState,
     ['keen_mind', 'frail', 'disciplined'],
   );
-  assert(behaviorPlayer.comprehension === 6, 'trait initial stat modifier must be preserved');
+  assert(!('comprehension' in behaviorPlayer), 'trait application must not recreate the retired stat');
+  assert(behaviorPlayer.knowledge === 4, 'existing knowledge initial modifier must remain singular');
   assert(behaviorPlayer.constitution === -8, 'weakness constitution bias must be preserved');
   assert(behaviorPlayer.traits.includes('disciplined'), 'disciplined trait must remain canonical');
   assert(
@@ -53,15 +54,15 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
     'disciplined trait must not project a discipline life state',
   );
   assert(
-    traitSystem.getGrowthMultiplier(behaviorPlayer, 'comprehension') === 1.3,
+    traitSystem.getGrowthMultiplier(behaviorPlayer, 'knowledge') === 1.2,
     'trait growth multiplier must read canonical traits',
   );
-  const comprehensionEvent = {
+  const learningEvent = {
     category: 'random_encounter',
-    metadata: { tags: ['comprehension'] },
+    metadata: { tags: ['learning'] },
   } as EventDefinition;
   assert(
-    traitSystem.getEventWeightMultiplier({ player: behaviorPlayer, flags: {} } as never, comprehensionEvent) > 1,
+    traitSystem.getEventWeightMultiplier({ player: behaviorPlayer, flags: {} } as never, learningEvent) > 1,
     'trait event weighting must read canonical traits',
   );
 
@@ -72,8 +73,8 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
   });
   assert(
     snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION &&
-      snapshot.metadata.schemaVersion === '3.13.0',
-      'canonical traits snapshot must use schema 3.13.0',
+      snapshot.metadata.schemaVersion === '3.14.0',
+      'canonical traits snapshot must use schema 3.14.0',
   );
   assertDeepEqual(snapshot.state.player.traits, traits, 'snapshot must persist traits');
   assert(!('traitProfile' in snapshot.state.player), 'snapshot must not persist traitProfile');

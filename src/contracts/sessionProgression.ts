@@ -84,7 +84,6 @@ export interface PlayerSummaryDto {
   martialPower: number;
   chivalry: number;
   constitution: number;
-  comprehension: number;
   money: number;
   reputation: number;
   connections: number;

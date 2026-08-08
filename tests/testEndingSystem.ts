@@ -14,7 +14,6 @@ function createTestState(): GameState {
     chivalry: 0,
     charisma: 50,
     constitution: 50,
-    comprehension: 50,
     money: 100,
     reputation: 30,
     connections: 20,
@@ -141,7 +140,7 @@ console.log('');
 console.log('测试 7: 得道成仙');
 state = createTestState();
 state.player.martialPower = 92;
-state.player.comprehension = 92;
+state.player.knowledge = 92;
 state.karma!.good_karma = 110;
 state.player.flags = { retired: true };
 const ending7 = EndingSystem.determineEnding(state);

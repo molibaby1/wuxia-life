@@ -152,7 +152,7 @@ export class CriticalChoiceSystem {
         } else if (option === 'merchant') {
           player.money += 500;
         } else if (option === 'scholar') {
-          player.comprehension += 5;
+          player.knowledge += 5;
         }
         break;
 

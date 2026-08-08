@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 20}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.orthodox_member == true && comprehension >= 30"}
+      {"type": "expression", "expression": "flags.orthodox_member == true && knowledge >= 30"}
     ],
     "content": {
       "title": "少林旧档",
@@ -23,7 +23,7 @@
         "text": "公开档案，揭露真相",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": -30},
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "flag_set", "flag": "revealed_orthodox_secrets", "value": true}
         ]
       },
@@ -83,7 +83,7 @@
       {"type": "age_reach", "value": 18}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && comprehension >= 25"}
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && knowledge >= 25"}
     ],
     "content": {
       "title": "幽影门的真相",
@@ -92,7 +92,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 8},
+      {"type": "stat_modify", "stat": "knowledge", "value": 8},
       {"type": "flag_set", "flag": "understood_unconventional", "value": true}
     ]
   },
@@ -170,7 +170,7 @@
       {
         "text": "保持中立，不发表意见",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5}
         ]
       }
     ]

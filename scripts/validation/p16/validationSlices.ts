@@ -16,7 +16,7 @@ export interface OriginVarianceSliceResult {
   weightSamples: Array<{
     originId: string;
     survivalTagMultiplier: number;
-    comprehensionTagMultiplier: number;
+    learningTagMultiplier: number;
   }>;
   originChangesEarlyArc: boolean;
 }
@@ -67,13 +67,13 @@ export function runOriginVarianceSlice(): OriginVarianceSliceResult {
     const state = makeStateWithOrigin(originId);
     const surface = getOriginSurfaceById(originId);
     const survival = getOriginMaterialEventMultiplier(surface, new Set(['survival']));
-    const comprehension = getOriginGuidanceEventMultiplier(surface, new Set(['comprehension']));
+    const learning = getOriginGuidanceEventMultiplier(surface, new Set(['learning']));
     const combinedSurvival = getOriginChildhoodEventMultiplier(state, new Set(['survival']));
-    const combinedComprehension = getOriginChildhoodEventMultiplier(state, new Set(['comprehension']));
+    const combinedLearning = getOriginChildhoodEventMultiplier(state, new Set(['learning']));
     return {
       originId,
       survivalTagMultiplier: combinedSurvival,
-      comprehensionTagMultiplier: combinedComprehension,
+      learningTagMultiplier: combinedLearning,
     };
   });
 

@@ -334,7 +334,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 10,
             "operator": "add"
           },
@@ -713,7 +713,7 @@
         "max": 70
       },
       "stats": {
-        "comprehension": {
+        "knowledge": {
           "min": 30
         }
       }
@@ -728,7 +728,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 10,
             "operator": "add"
           },

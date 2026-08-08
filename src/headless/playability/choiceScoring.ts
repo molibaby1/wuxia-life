@@ -35,7 +35,7 @@ function scoreByTendency(
     const normalizedValue = effect.operator === 'subtract' ? -Math.abs(rawValue) : rawValue;
     const stat = effect.target;
     if (tendency === 'martial') {
-      if (['martialPower', 'comprehension', 'constitution'].includes(stat)) {
+      if (['martialPower', 'knowledge', 'constitution'].includes(stat)) {
         score += normalizedValue * 3;
       } else {
         score += normalizedValue;

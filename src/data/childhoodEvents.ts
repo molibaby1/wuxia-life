@@ -106,7 +106,7 @@ export const birthWithPhenomenon: EventDefinition = {
     },
     {
       type: EffectType.STAT_MODIFY,
-      target: 'comprehension',
+      target: 'knowledge',
       value: 1,
       operator: 'add',
     },

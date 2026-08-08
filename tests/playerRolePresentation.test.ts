@@ -21,7 +21,6 @@ const mainModel = buildMainScreenModel(
     martialPower: 42,
     chivalry: 13,
     constitution: 18,
-    comprehension: 24,
     money: 88,
     reputation: 10,
     connections: 4,

@@ -33,7 +33,7 @@ export async function runP7ActionResolverTests(): Promise<void> {
 
   const study = resolveActiveAction({ state, actionId: 'action_study_basic', random: () => 0.5 });
   assert(study !== null, 'study action should resolve');
-  assert((study!.deltas.comprehension ?? 0) > 0, 'study should boost comprehension');
+  assert((study!.deltas.knowledge ?? 0) > 0, 'study should boost knowledge');
 
   const social = resolveActiveAction({ state, actionId: 'action_socializing_basic', random: () => 0.5 });
   assert(social !== null, 'socializing action should resolve');
@@ -63,12 +63,12 @@ export async function runP7ConditionCacheDriftTests(): Promise<void> {
   moneyState.player.money = 120;
   assertEqual(evaluator.evaluate(moneyCond, moneyState), true, 'money 120 should pass');
 
-  const compState = createP7State();
-  compState.player.comprehension = 30;
-  const compCond = { type: 'expression' as const, expression: 'comprehension >= 40' };
-  assertEqual(evaluator.evaluate(compCond, compState), false, 'comprehension 30 should fail');
-  compState.player.comprehension = 45;
-  assertEqual(evaluator.evaluate(compCond, compState), true, 'comprehension 45 should pass');
+  const knowledgeState = createP7State();
+  knowledgeState.player.knowledge = 30;
+  const knowledgeCond = { type: 'expression' as const, expression: 'knowledge >= 40' };
+  assertEqual(evaluator.evaluate(knowledgeCond, knowledgeState), false, 'knowledge 30 should fail');
+  knowledgeState.player.knowledge = 45;
+  assertEqual(evaluator.evaluate(knowledgeCond, knowledgeState), true, 'knowledge 45 should pass');
 }
 
 export async function runP7AnnualJumpRegressionCheck(): Promise<void> {

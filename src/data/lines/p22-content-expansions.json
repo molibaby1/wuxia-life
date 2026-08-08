@@ -199,7 +199,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -1015,7 +1015,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
-      { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
       { "type": "flag_set", "target": "p42_study_childhood_copybook_seen", "value": true }
     ],
     "metadata": {

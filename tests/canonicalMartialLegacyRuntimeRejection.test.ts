@@ -19,7 +19,6 @@ function createState(overrides: Partial<PlayerState> = {}): GameState {
       martialPower: 30,
       chivalry: 10,
       constitution: 80,
-      comprehension: 80,
       charisma: 20,
       knowledge: 25,
       connections: 15,
@@ -57,7 +56,6 @@ function snapshotStats(player: PlayerState): Record<string, number> {
   return {
     martialPower: player.martialPower,
     constitution: player.constitution,
-    comprehension: player.comprehension,
     knowledge: player.knowledge,
   };
 }
@@ -76,7 +74,7 @@ async function assertRejected(
   assert(JSON.stringify(after.player) === beforePlayer, `${target} ${value} must not mutate player`);
   assert(afterStats.martialPower === beforeStats.martialPower, `${target}: martialPower must stay unchanged`);
   assert(afterStats.constitution === beforeStats.constitution, `${target}: constitution must stay unchanged`);
-  assert(afterStats.comprehension === beforeStats.comprehension, `${target}: comprehension must stay unchanged`);
+  assert(afterStats.knowledge === beforeStats.knowledge, `${target}: knowledge must stay unchanged`);
 }
 
 function assertAllowlistSealed(): void {
@@ -124,7 +122,7 @@ async function run(): Promise<void> {
   const handler = new StatModifyHandler();
   const rich = createState({
     constitution: 80,
-    comprehension: 80,
+    knowledge: 80,
     martialPower: 30,
   });
 

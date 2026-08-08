@@ -26,11 +26,11 @@ export function applyRouteTrackPreparation(
   if (routeTrack === 'official') {
     if (age >= 1 && age <= 6) {
       flags.origin_scholar_family = true;
-      player.comprehension = Math.max(player.comprehension || 0, 14);
+      player.knowledge = Math.max(player.knowledge || 0, 14);
     }
     if (age >= 20 && age <= 32) {
       flags.origin_scholar_family = true;
-      player.comprehension = Math.max(player.comprehension || 0, 16);
+      player.knowledge = Math.max(player.knowledge || 0, 16);
       player.charisma = Math.max(player.charisma || 0, 10);
       player.reputation = Math.max(player.reputation || 0, 20);
     }
@@ -48,7 +48,7 @@ export function applyRouteTrackPreparation(
   }
 
   if (routeTrack === 'sect' && age >= 10 && age <= 22) {
-    player.comprehension = Math.max(player.comprehension || 0, 14);
+    player.knowledge = Math.max(player.knowledge || 0, 14);
     player.chivalry = Math.max(player.chivalry || 0, 16);
     player.martialPower = Math.max(player.martialPower || 0, 10);
   }

@@ -108,12 +108,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "设局试探（需悟性≥70）",
+        "text": "设局试探（需学识≥70）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 70"}
+          {"type": "expression", "expression": "knowledge >= 70"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "charisma", "value": 8},
           {"type": "flag_set", "flag": "loyalty_verified", "value": true}
         ]
@@ -238,7 +238,7 @@
         ],
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 8},
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "flag_set", "flag": "intelligence_gathered", "value": true}
         ]
       },
@@ -398,12 +398,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "选择最有天赋的（需悟性≥80）",
+        "text": "选择最有天赋的（需学识≥80）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 80"}
+          {"type": "expression", "expression": "knowledge >= 80"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "charisma", "value": 10},
           {"type": "flag_set", "flag": "heir_selected", "value": true}
         ]
@@ -442,7 +442,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 40},
       {"type": "stat_modify", "stat": "charisma", "value": 20},
-      {"type": "stat_modify", "stat": "comprehension", "value": 15},
+      {"type": "stat_modify", "stat": "knowledge", "value": 15},
       {"type": "flag_set", "flag": "legacy_established", "value": true}
     ]
   },

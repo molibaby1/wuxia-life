@@ -117,7 +117,6 @@ export interface ExperienceTrace {
 const TRACE_PLAYER_STAT_KEYS = [
   'martialPower',
   'constitution',
-  'comprehension',
   'charisma',
   'chivalry',
   'reputation',

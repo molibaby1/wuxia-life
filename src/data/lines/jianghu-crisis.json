@@ -19,12 +19,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "调查异象（需悟性≥60）",
+        "text": "调查异象（需学识≥60）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 60"}
+          {"type": "expression", "expression": "knowledge >= 60"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "reputation", "value": 8},
           {"type": "flag_set", "flag": "crisis_investigated", "value": true}
         ]
@@ -94,7 +94,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "chivalry", "value": 5},
-      {"type": "stat_modify", "stat": "comprehension", "value": 8}
+      {"type": "stat_modify", "stat": "knowledge", "value": 8}
     ]
   },
   {
@@ -162,12 +162,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "深入调查（需悟性≥70，声望 +15）",
+        "text": "深入调查（需学识≥70，声望 +15）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 70"}
+          {"type": "expression", "expression": "knowledge >= 70"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "knowledge", "value": 15},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "stat_modify", "stat": "martialPower", "value": 8},
           {"type": "flag_set", "flag": "crisis_truth_found", "value": true}
@@ -176,7 +176,7 @@
       {
         "text": "浅尝辄止",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5}
         ]
       }
     ]
@@ -266,12 +266,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "亲自炼制（需悟性≥80）",
+        "text": "亲自炼制（需学识≥80）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 80"}
+          {"type": "expression", "expression": "knowledge >= 80"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 20},
+          {"type": "stat_modify", "stat": "knowledge", "value": 20},
           {"type": "stat_modify", "stat": "martialPower", "value": 18},
           {"type": "flag_set", "flag": "crisis_artifact_created", "value": true}
         ]

@@ -59,7 +59,6 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       martialPower: 85,
       chivalry: 60,
       constitution: 55,
-      comprehension: 65,
       affiliation: null,
       title: null,
       reputation: 70,

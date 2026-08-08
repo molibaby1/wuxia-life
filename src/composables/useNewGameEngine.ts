@@ -36,6 +36,16 @@ import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '.
 import { applyPassiveNarrativeFlags } from '../data/originInfantPassiveChain';
 import { shouldOfferDailyPlanning, shouldPreferStoryGapPassiveBeforePlanning } from '../p16/childhoodAgency';
 import { markDisturbanceNarrativeShown } from '../core/activePlanning/disturbanceNarrativeBuilder';
+import {
+  buildActiveActionOverlayCard,
+  buildAutomaticStageOverlayCards,
+  buildChoiceFeedbackOverlayCard,
+  buildPeriodSummaryOverlayCard,
+  buildPlayerDeltaOverlayCard,
+  buildStageResultOverlayCard,
+  type ProgressionOverlayCard,
+  type ProgressionOverlayPayload,
+} from '../types/progressionOverlay';
 
 interface EventState {
   currentEvent: EventDefinition | null;
@@ -62,6 +72,8 @@ interface EventState {
   annualPassiveMemory: AnnualPassiveMemoryPlan | null;
   pendingPeriodSummary: PeriodSummaryDisplay | null;
   storyGapPassiveServed: boolean;
+  progressionOverlay: ProgressionOverlayPayload | null;
+  pendingStageResult: ProgressionOverlayCard[] | null;
 }
 
 // 单例状态
@@ -90,6 +102,8 @@ function getEngineStateInstance() {
         annualPassiveMemory: null,
         pendingPeriodSummary: null,
         storyGapPassiveServed: false,
+        progressionOverlay: null,
+        pendingStageResult: null,
       }),
       isProcessing: false,
     };
@@ -229,28 +243,23 @@ export function useNewGameEngine() {
    */
   const processAutoEvent = async (event: EventDefinition) => {
     if (!event.autoEffects || event.autoEffects.length === 0) {
+      engineState.pendingStageResult = [buildStageResultOverlayCard(
+        `event-${event.id}`,
+        event.content?.title || '上一阶段',
+      )];
       isProcessing.value = false;
       return;
     }
 
     engineState.isAutoPlaying = true;
     isProcessing.value = true;
+    const playerBeforeEvent = { ...gameEngine.getGameState().player };
 
     try {
       // 执行事件效果
-      await gameEngine.executeAutoEvent(event);
+      const execution = await gameEngine.executeAutoEvent(event);
       engineState.lastEffects = event.autoEffects;
-
-      if (
-        event.id === 'merchant_childhood_recognition_abacus_base' ||
-        event.id === 'merchant_childhood_recognition_abacus_strong' ||
-        event.id === 'merchant_childhood_recognition_customer_base' ||
-        event.id === 'merchant_childhood_recognition_customer_strong'
-      ) {
-        engineState.isAutoPlaying = false;
-        isProcessing.value = false;
-        return;
-      }
+      engineState.pendingStageResult = buildAutomaticStageOverlayCards(execution.stageResults);
 
       // 检查是否是结局事件
       if (event.eventType === 'ending') {
@@ -260,18 +269,8 @@ export function useNewGameEngine() {
         return;
       }
 
-      // 继续下一个事件
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
-      
-      // 等待下一帧，让 Vue 有时间更新 UI
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      
-      // 只有在玩家还活着的情况下才继续
-      const state = gameEngine.getGameState();
-      if (state.player?.alive) {
-        getNextEvent();
-      }
     } catch (error) {
       console.error('[NewGameEngine] 执行事件失败:', error);
       engineState.isAutoPlaying = false;
@@ -413,15 +412,25 @@ export function useNewGameEngine() {
       engineState.lastEffects = effectsToExecute;
       engineState.lastOutcomeText = feedback.player.narrativeResult;
       engineState.lastChoiceFeedback = feedback;
+      const overlayCard = buildChoiceFeedbackOverlayCard(
+        `choice-${currentEvent.id}-${selectedChoice.id}`,
+        currentEvent.content?.title || '上一阶段',
+        selectedChoice.text,
+        feedback,
+        [selectedChoice.text, selectedChoice.description],
+      );
+      if (context?.source === 'autoResolve') {
+        engineState.pendingStageResult = overlayCard ? [overlayCard] : null;
+      } else {
+        engineState.progressionOverlay = overlayCard ? { cards: [overlayCard] } : null;
+      }
       // 清空选项，防止重复点击
       engineState.availableChoices = [];
-
-      // 等待下一帧，让 Vue 有时间更新 UI
-      await new Promise(resolve => requestAnimationFrame(resolve));
-
-      // 显示结果，等待用户点击"继续"
       engineState.isAutoPlaying = false;
       isProcessing.value = false;
+      if (context?.source !== 'autoResolve') {
+        getNextEvent();
+      }
       return true;
     } catch (error) {
       console.error('[NewGameEngine] 执行选择失败:', error);
@@ -452,6 +461,9 @@ export function useNewGameEngine() {
       engineState.lastOutcomeText = result.feedbackText;
       engineState.lastChoiceFeedback = null;
       engineState.lastActiveActionSummary = result.activeActionSummary;
+      engineState.progressionOverlay = {
+        cards: [buildActiveActionOverlayCard(`active-action-${actionId}`, result.activeActionSummary)],
+      };
       engineState.pendingDisturbanceNarrative = result.disturbanceNarrative;
       engineState.showingDisturbanceNarrative = false;
       engineState.availableActiveActions = [];
@@ -464,7 +476,7 @@ export function useNewGameEngine() {
         console.warn('[NewGameEngine] Active action caused year-scale advance', actionId);
       }
 
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      continueProgressionFlow();
       return true;
     } catch (error) {
       console.error('[NewGameEngine] 执行主动行动失败:', error);
@@ -496,7 +508,7 @@ export function useNewGameEngine() {
           if (effect.operator === 'add') {
                 const value = typeof effect.value === 'number' ? effect.value : 0;
             const target = effect.stat || effect.target || '';
-            if (['martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+            if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
                   outcomeScore += value * 2;
                 } else {
                   outcomeScore += value;
@@ -525,7 +537,7 @@ export function useNewGameEngine() {
           if (effect.operator === 'add') {
             const value = typeof effect.value === 'number' ? effect.value : 0;
             const target = effect.stat || effect.target || '';
-            if (['martialPower', 'comprehension', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+            if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
               score += value * 2;
             } else {
               score += value;
@@ -553,22 +565,33 @@ export function useNewGameEngine() {
     engineState.showingDisturbanceNarrative = false;
     engineState.pendingPeriodSummary = null;
     engineState.annualPassiveMemory = null;
+    engineState.pendingStageResult = null;
   };
 
-  const executePassiveChildhoodTick = () => {
+  const clearProgressionOverlay = () => {
+    engineState.progressionOverlay = null;
+  };
+
+  const executePassiveChildhoodTick = (): PeriodSummaryDisplay => {
     const state = gameEngine.getGameState();
     const age = state.player?.age ?? 0;
     if (isAnnualPassiveMemoryAge(age)) {
       const annual = engineState.annualPassiveMemory;
       if (!annual) throw new Error('Annual passive memory must be prepared before acknowledgement');
-      commitAnnualPassiveMemory(state, annual);
+      const result = commitAnnualPassiveMemory(state, annual);
       gameEngine.advanceTime(1, 'year');
       engineState.annualPassiveMemory = null;
       engineState.passiveNarrative = null;
       engineState.isPassiveProgressionMode = false;
       engineState.storyGapPassiveServed = false;
-      getNextEvent();
-      return;
+      return buildPeriodSummary({
+        sourceLabel: '童年岁月',
+        headline: result.headline,
+        body: result.body,
+        deltas: result.deltas,
+        deltaCause: result.headline,
+        lifeStates: gameEngine.getGameState().player?.lifeStates,
+      });
     }
     const selected = selectPassiveNarrative(state);
     const deltas = clampPassiveStatDeltasForAge(age, selected.statDeltas);
@@ -586,7 +609,7 @@ export function useNewGameEngine() {
       };
       state.eventHistory.push(record);
     }
-    engineState.pendingPeriodSummary = buildPeriodSummary({
+    const summary = buildPeriodSummary({
       sourceLabel: '童年岁月',
       headline: selected.title,
       body: selected.text,
@@ -598,17 +621,25 @@ export function useNewGameEngine() {
     engineState.passiveNarrative = null;
     engineState.annualPassiveMemory = null;
     engineState.storyGapPassiveServed = true;
+    return summary;
   };
 
-  /** P7.1: two-step continue — action summary, then optional disturbance, then next event */
+  /** Complete one visible stage and enter the next visible stage in the same player action. */
   const continueProgressionFlow = () => {
-    if (engineState.pendingPeriodSummary) {
-      engineState.pendingPeriodSummary = null;
+    if (engineState.pendingStageResult) {
+      const resultCards = engineState.pendingStageResult;
+      clearProgressionPresentation();
+      engineState.progressionOverlay = { cards: resultCards };
+      engineState.storyGapPassiveServed = false;
       getNextEvent();
       return;
     }
     if (engineState.isPassiveProgressionMode && engineState.passiveNarrative) {
-      executePassiveChildhoodTick();
+      const summary = executePassiveChildhoodTick();
+      engineState.progressionOverlay = {
+        cards: [buildPeriodSummaryOverlayCard(`period-${summary.headline}`, summary)],
+      };
+      getNextEvent();
       return;
     }
     if (engineState.pendingDisturbanceNarrative && !engineState.showingDisturbanceNarrative) {
@@ -619,6 +650,19 @@ export function useNewGameEngine() {
         gameEngine.getGameState(),
         engineState.pendingDisturbanceNarrative.disturbanceId,
       );
+      return;
+    }
+    if (engineState.showingDisturbanceNarrative && engineState.pendingDisturbanceNarrative) {
+      const narrative = engineState.pendingDisturbanceNarrative;
+      const resultCard = buildStageResultOverlayCard(
+        `disturbance-${narrative.disturbanceId}`,
+        narrative.title,
+        [narrative.impactSummary],
+      );
+      clearProgressionPresentation();
+      engineState.progressionOverlay = { cards: [resultCard] };
+      engineState.storyGapPassiveServed = false;
+      getNextEvent();
       return;
     }
     clearProgressionPresentation();
@@ -638,6 +682,7 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     clearProgressionPresentation();
+    clearProgressionOverlay();
     isProcessing.value = false;
 
     // 等待下一帧再开始第一个事件，让 UI 有时间更新
@@ -658,6 +703,7 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     clearProgressionPresentation();
+    clearProgressionOverlay();
     isProcessing.value = false;
   };
 
@@ -684,6 +730,7 @@ export function useNewGameEngine() {
     engineState.isAutoPlaying = false;
     engineState.lastEffects = [];
     clearProgressionPresentation();
+    clearProgressionOverlay();
     isProcessing.value = false;
     getNextEvent();
     return true;
@@ -713,8 +760,8 @@ export function useNewGameEngine() {
             parts.push(isPositive ? '你的气质愈发出众' : '你感觉自己有些黯淡');
           } else if (statName === '体质') {
             parts.push(isPositive ? '你的身体更加健壮' : '你似乎更容易感到疲惫');
-          } else if (statName === '悟性') {
-            parts.push(isPositive ? '你对武学的理解更加深刻' : '有些道理似乎变得难以领悟');
+          } else if (statName === '学识') {
+            parts.push(isPositive ? '你的知识与理解更加深厚' : '有些道理似乎变得难以理解');
           } else if (statName === '名望') {
             parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
           } else if (statName === '学识') {
@@ -820,7 +867,6 @@ export function useNewGameEngine() {
       chivalry: '侠义',
       charisma: '魅力',
       constitution: '体质',
-      comprehension: '悟性',
       reputation: '名望',
       influence: '影响力',
       connections: '人脉',

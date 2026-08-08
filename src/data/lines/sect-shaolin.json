@@ -24,14 +24,14 @@
         "outcomes": [
           {
             "id": "great_success",
-            "text": "你跪拜佛前时，天现异象——寺中长老惊叹：\"此子与佛有缘，悟性非凡！\"方丈亲自为你剃度，赐法号\"慧明\"，你直接成为方丈亲传弟子，日夜聆听佛法妙音。",
-            "condition": {"type": "expression", "expression": "comprehension >= 18"},
+            "text": "你跪拜佛前时，天现异象——寺中长老惊叹：\"此子与佛有缘，学识非凡！\"方丈亲自为你剃度，赐法号\"慧明\"，你直接成为方丈亲传弟子，日夜聆听佛法妙音。",
+            "condition": {"type": "expression", "expression": "knowledge >= 18"},
             "effects": [
               {"type": "flag_set", "target": "route_buddhist"},
               {"type": "flag_set", "target": "buddhist_core_disciple", "value": true},
               {"type": "flag_set", "target": "buddhist_dharma_name", "value": "慧明"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
-              {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "reputation", "value": 5, "operator": "add"},
               {"type": "event_record", "target": "buddhist_entry_accept_core"}
             ]
@@ -39,12 +39,12 @@
           {
             "id": "success",
             "text": "你跪拜佛前，心诚感动寺中僧人。长老大僧为你剃度，赐你法号。你正式成为少林寺一名僧人，开始了修行生涯。",
-            "condition": {"type": "expression", "expression": "comprehension >= 10"},
+            "condition": {"type": "expression", "expression": "knowledge >= 10"},
             "effects": [
               {"type": "flag_set", "target": "route_buddhist"},
               {"type": "flag_set", "target": "buddhist_dharma_name", "value": "慧能"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
-              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add"},
               {"type": "event_record", "target": "buddhist_entry_accept"}
             ]
           },

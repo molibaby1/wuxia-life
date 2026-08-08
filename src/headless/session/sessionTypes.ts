@@ -5,6 +5,7 @@
 import type { ChoiceFeedbackModel } from '../../types/choiceFeedback';
 import type {
   ActiveActionSummaryDisplay,
+  AutomaticStageResultDisplay,
   DisturbanceNarrativeDisplay,
   PassiveNarrativeDisplay,
   PeriodSummaryDisplay,
@@ -63,6 +64,7 @@ export interface ProgressAutomaticResult {
   stoppedReason: 'choice_required' | 'terminal' | 'no_event' | 'safety_limit';
   lastEventId?: string;
   error?: HeadlessSessionError;
+  stageResults: AutomaticStageResultDisplay[];
 }
 
 export interface HeadlessTerminalState {

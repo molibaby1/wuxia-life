@@ -270,6 +270,10 @@ export class GameProcessSimulator {
         activeActionId: actionId,
         activeActionSelectionReason: selectionReason,
         gameState: stateForRecord,
+        outcomeEvidence: {
+          stateBefore: stateForRecord,
+          stateAfter: JSON.parse(JSON.stringify(stateAfterAction)),
+        },
         currentTime: stateAfterAction.currentTime,
         timestamp: new Date().toISOString(),
       };
@@ -363,6 +367,10 @@ export class GameProcessSimulator {
             this.ended = true;
           }
           record.gameState = JSON.parse(JSON.stringify(stateAfterChoice));
+          record.outcomeEvidence = {
+            stateBefore: stateForRecord,
+            stateAfter: JSON.parse(JSON.stringify(stateAfterChoice)),
+          };
           this.pushRecord(record);
           this.log(`\n   💀 死亡原因：${stateAfterChoice.player?.deathReason || '未知'}`);
           return; // 直接返回，不继续处理
@@ -391,6 +399,10 @@ export class GameProcessSimulator {
       
       // 更新状态并记录
       this.gameState = gameEngine.getGameState();
+      record.outcomeEvidence = {
+        stateBefore: stateForRecord,
+        stateAfter: JSON.parse(JSON.stringify(this.gameState)),
+      };
       record.gameState = JSON.parse(JSON.stringify(this.gameState));
       this.pushRecord(record);
     } else {
@@ -422,6 +434,11 @@ export class GameProcessSimulator {
             this.ended = true;
           }
           record.gameState = JSON.parse(JSON.stringify(stateAfterAuto));
+          record.outcomeEvidence = {
+            stateBefore: stateForRecord,
+            stateAfter: JSON.parse(JSON.stringify(stateAfterAuto)),
+            executedEffects: event.autoEffects ?? [],
+          };
           this.pushRecord(record);
           this.log(`\n   💀 死亡原因：${stateAfterAuto.player?.deathReason || '未知'}`);
           return;
@@ -429,6 +446,11 @@ export class GameProcessSimulator {
       }
 
       this.gameState = gameEngine.getGameState();
+      record.outcomeEvidence = {
+        stateBefore: stateForRecord,
+        stateAfter: JSON.parse(JSON.stringify(this.gameState)),
+        executedEffects: event.autoEffects ?? [],
+      };
       record.gameState = JSON.parse(JSON.stringify(this.gameState));
       if (!record.outcomeText) {
         const eventOutcomeNote = gameEngine.consumeLastEventOutcomeNote();
@@ -876,7 +898,7 @@ export class GameProcessSimulator {
         const stat = effect.target;
 
         if (tendency === 'martial') {
-          if (['martialPower', 'comprehension', 'constitution'].includes(stat)) {
+          if (['martialPower', 'knowledge', 'constitution'].includes(stat)) {
             score += normalizedValue * 3;
           } else if (stat === 'money') {
             score += normalizedValue * 0.8;
@@ -909,7 +931,7 @@ export class GameProcessSimulator {
         }
 
         // balanced / relationship 默认策略
-        if (['martialPower', 'chivalry', 'comprehension', 'constitution'].includes(stat)) {
+        if (['martialPower', 'chivalry', 'knowledge', 'constitution'].includes(stat)) {
           score += normalizedValue * 2;
         } else {
           score += normalizedValue;
@@ -979,8 +1001,8 @@ export class GameProcessSimulator {
           parts.push(isPositive ? '你的气质愈发出众' : '你感觉自己有些黯淡');
         } else if (statName === '体质') {
           parts.push(isPositive ? '你的身体更加健壮' : '你似乎更容易感到疲惫');
-        } else if (statName === '悟性') {
-          parts.push(isPositive ? '你对武学的理解更加深刻' : '有些道理似乎变得难以领悟');
+        } else if (statName === '学识') {
+          parts.push(isPositive ? '你的知识与理解更加深厚' : '有些道理似乎变得难以理解');
         } else if (statName === '声望') {
           parts.push(isPositive ? '江湖中越来越多的人听说了你的名字' : '关于你的传言似乎不那么美好了');
         } else if (statName === '金钱') {
@@ -1075,7 +1097,6 @@ export class GameProcessSimulator {
       chivalry: '侠义',
       charisma: '魅力',
       constitution: '体质',
-      comprehension: '悟性',
       reputation: '声望',
       influence: '影响力',
       connections: '人脉',

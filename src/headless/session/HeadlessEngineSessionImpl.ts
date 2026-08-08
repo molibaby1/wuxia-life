@@ -278,6 +278,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   async progressAutomatic(options?: { maxSteps?: number }): Promise<ProgressAutomaticResult> {
     const maxSteps = options?.maxSteps ?? DEFAULT_AUTO_LIMIT;
     let stepsExecuted = 0;
+    const stageResults = [];
 
     while (stepsExecuted < maxSteps) {
       if (this.getTerminalState()) {
@@ -285,6 +286,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           stepsExecuted,
           stoppedReason: 'terminal',
           lastEventId: this.volatile.currentEvent?.id,
+          stageResults,
         };
       }
 
@@ -292,7 +294,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       if (!current) {
         const next = await this.getNextEvent();
         if (!next) {
-          return { stepsExecuted, stoppedReason: 'no_event' };
+          return { stepsExecuted, stoppedReason: 'no_event', stageResults };
         }
         current = next.raw;
       }
@@ -302,12 +304,14 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
           stepsExecuted,
           stoppedReason: 'choice_required',
           lastEventId: current.id,
+          stageResults,
         };
       }
 
-      await this.runWithRandomAsync(async () => {
-        await this.engine.executeAutoEvent(current!);
+      const execution = await this.runWithRandomAsync(async () => {
+        return this.engine.executeAutoEvent(current!);
       });
+      stageResults.push(...execution.stageResults);
       stepsExecuted += 1;
       this.volatile.currentEvent = null;
     }
@@ -317,7 +321,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       message: `Automatic progression exceeded safety limit (${maxSteps})`,
     };
     this.lastError = error;
-    return { stepsExecuted, stoppedReason: 'safety_limit', error };
+    return { stepsExecuted, stoppedReason: 'safety_limit', error, stageResults };
   }
 
   async executeChoice(request: ChoiceExecutionRequest): Promise<ChoiceExecutionResponse> {
@@ -762,7 +766,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       const narrativeBody = current.content?.text ?? '';
       const narrativeTitle = current.content?.title ?? '往事一局';
       const beforeSnapshot = this.serialize();
-      await this.progressAutomatic({ maxSteps: 8 });
+      const automaticProgress = await this.progressAutomatic({ maxSteps: 8 });
       await progressUntilChoiceOrTerminal(this);
       const afterSnapshot = this.serialize();
       if (narrativeBody) {
@@ -775,6 +779,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
             afterSnapshot.state.player as unknown as PlayerState,
           ),
           lifeStates: this.engine.getGameState().player?.lifeStates,
+          stageResults: automaticProgress.stageResults,
         });
       }
       this.ensurePassivePresentation();

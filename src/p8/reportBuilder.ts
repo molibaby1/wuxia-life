@@ -44,7 +44,8 @@ export function renderP8MarkdownReport(report: P8PlayabilityReport, jsonPath: st
       lines.push(`- Sample selection: age ${sample.age} → ${sample.actionId} (${sample.reason})`);
     }
     lines.push('');
-    lines.push('**Causality**');
+    lines.push('**Causality (legacy diagnostic)**');
+    lines.push('- This diagnostic is not part of the formal gate verdict.');
     lines.push(`- Direct echoes: ${run.causality.directEchoCount}`);
     for (const ex of run.causality.strongestExamples.slice(0, 2)) {
       lines.push(`  - ${ex.age}岁: ${ex.description.slice(0, 60)}`);
@@ -66,7 +67,8 @@ export function renderP8MarkdownReport(report: P8PlayabilityReport, jsonPath: st
   }
 
   if (report.replay.nearDuplicateWarnings.length > 0) {
-    lines.push('## Replay Similarity');
+    lines.push('## Replay Similarity (legacy diagnostic)');
+    lines.push('This diagnostic is not part of the formal gate verdict.');
     for (const w of report.replay.nearDuplicateWarnings) {
       lines.push(`- ${w}`);
     }

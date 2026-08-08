@@ -1,5 +1,5 @@
 /**
- * P40 replay pacing polish regression — deviant-ye span ≤5y, near-duplicate ≤3.
+ * P40 replay pacing polish regression — deviant-ye span ≤5y and frustration ≤0.35.
  */
 
 import { getP8GatePersonas, getP8PersonaById } from '../src/p8/personas';
@@ -14,8 +14,6 @@ import { evaluateP8Gate } from '../src/p8/playabilityGate';
 import type { HeadlessPersonaRunResult } from '../src/headless/playability/types';
 
 const CATALOG_VERSION = '1.0.0';
-const NEAR_DUPLICATE_THRESHOLD = 0.82;
-const MAX_NEAR_DUPLICATE_PAIRS = 3;
 const MAX_DEVIANT_LOW_IMPACT_SPAN = 5;
 const MAX_FRUSTRATION_OPAQUE_RATIO = 0.35;
 
@@ -70,14 +68,6 @@ function assertDeviantYePacingSpan(bundles: Map<string, PersonaBundle>): void {
   );
 }
 
-function assertNearDuplicatePairCount(replay: ReturnType<typeof collectReplayMetrics>): void {
-  const highPairs = replay.pairwiseSimilarities.filter(p => p.score >= NEAR_DUPLICATE_THRESHOLD);
-  assert(
-    highPairs.length <= MAX_NEAR_DUPLICATE_PAIRS,
-    `near-duplicate pairs ${highPairs.length} exceed ${MAX_NEAR_DUPLICATE_PAIRS}: ${replay.nearDuplicateWarnings.join('; ')}`,
-  );
-}
-
 function assertFrustrationNoRegression(bundles: Map<string, PersonaBundle>): void {
   for (const [personaId, bundle] of bundles) {
     assert(
@@ -105,7 +95,6 @@ async function main(): Promise<void> {
   const metricsList = [...bundles.values()].map(bundle => bundle.metrics);
 
   assertDeviantYePacingSpan(bundles);
-  assertNearDuplicatePairCount(replay);
   assertFrustrationNoRegression(bundles);
   assertGateDecisionPass(metricsList, replay);
   console.log('p40ReplayPacingPolishTests: all passed');

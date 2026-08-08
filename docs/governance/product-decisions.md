@@ -112,7 +112,6 @@ FocusType
 例如：
 
 ```text
-comprehension
 charisma
 businessAcumen
 influence
@@ -130,11 +129,11 @@ Karma
 
 ## 5. Persistence 与终局
 
-### PD-020：Snapshot 当前正式版本为 `3.13.0`
+### PD-020：Snapshot 当前正式版本为 `3.14.0`
 
 正式规则：
 
-- 只接受 `3.13.0`；
+- 只接受 `3.14.0`；
 - 更早版本整体拒绝；
 - 未知未来版本拒绝；
 - 不提供 migration、fallback、compatibility layer 或 silent cleanup；
@@ -199,15 +198,18 @@ Ending presentation：解释为什么得到该结局
 
 ## 6. 玩家可见反馈
 
-### PD-030：主循环结果必须由玩家主动继续
+### PD-030：主循环每个真实阶段只需一次操作
 
 已经完成并应持续保持：
 
 - 长事件正文可完整阅读；
-- 阶段总结、主动行动总结和扰动叙事可见；
-- 不使用 1200ms 定时器自动越过正式结果阶段；
-- 玩家点击“继续”后才推进；
-- Local/API 不得重复 acknowledgment 或重复结算。
+- 每个真实剧情阶段都停留等待玩家操作，不自动跳过；
+- 决策阶段选择一次即完成结算并进入下一真实阶段；
+- 单路径阶段点击一次“继续”即完成结算并进入下一真实阶段；
+- `action_summary`、`period_summary` 等内部结算状态不得成为第二个玩家操作页；
+- 上一阶段结果与下一阶段并列显示，只保留阶段名、所选行动和实际变化，不重复刚读过的正文或选项说明；
+- 不使用定时器自动越过真实剧情阶段；
+- Local/API 不得要求重复 acknowledgment 或重复结算。
 
 ### PD-031：结果卡以 canonical before/after 状态为准
 
@@ -325,7 +327,7 @@ lifePath.primaryIdentity
 - `state.identity`、`IdentitySystem`、`lifePath.primaryIdentity` 已从正式 runtime 删除；
 - `player.sect` 与 `flags.current_sect` 已删除，当前组织归属唯一由 `player.affiliation` 持有；
 - 正式事件已使用 `affiliation_set` / `affiliation_clear`，身份门槛已迁移为显式事实条件；
-- Snapshot 已切换为 `3.13.0`，Life Memory 已切换为 `3.0.0`，旧版本和旧字段拒绝；
+- Snapshot 当前为 `3.14.0`，Life Memory 为 `3.0.0`，旧版本和旧字段拒绝；
 - Local、API、Headless、Browser 的玩家展示已分别呈现所属、称号、经历、方向和结局。
 
 **持久化边界**
@@ -379,6 +381,191 @@ DOM、布局、按钮、自动推进、Console、Local storage、刷新读档、
 ```
 
 绿色自动化测试不能替代完整玩家体验证据。
+
+### PD-052：Causality 与 Replayability 目标保留，当前自动 metric 退出正式验收
+
+**正式语义**
+
+- 因果连续性仍是有效产品目标。
+- 人生可区分性仍是有效产品目标。
+- 自动 simulation 可用于发现路径、状态和内容候选问题。
+- 当前 causality/replayability payload 只属于 legacy diagnostic。
+- 当前自动数据不能直接证明真人玩家的因果感受或重玩体验。
+
+**退出正式验收的规则**
+
+以下规则不再具有正式产品验收效力，也不得作为默认测试失败依据：
+
+- `directEchoCount >= 3`；
+- `tooFewEchoes` 的产品验收含义；
+- replay cosine `>= 0.82`；
+- near-duplicate pair `<= 3`；
+- causality/replayability gate warning；
+- 依赖这些数字的默认测试失败。
+
+**明确不做**
+
+- 不删除因果连续性或人生可区分性产品目标；
+- 不删除 diagnostic payload；
+- 不修改事件；
+- 不调整现有 threshold 数值；
+- 不重建 metric；
+- 不新增 persona、seed 或运行次数；
+- 不把自动 persona 当成真实玩家模型。
+
+**重新讨论条件**
+
+只有产品明确批准新的测量对象、证据来源和验收标准后，才允许重新建立 causality/replayability 正式 gate。
+
+
+### PD-053：人生里程碑是派生反馈，不是新的状态真相
+
+**背景**
+
+实际游玩显示，玩家能够看到学识、功力、金钱和 Habit 等数值变化，但难以判断：
+
+- 数值处于什么水平；
+- 重复实践产生了什么阶段成果；
+- 自己正在成为什么样的人；
+- 当前有哪些可以接近的发展方向。
+
+长期目标距离较远时，单纯数值反馈不足以支撑持续决策。
+
+**正式语义**
+
+引入 Life Milestone 作为独立的只读派生反馈层。
+
+正式数据流为：
+
+```text
+Existing Formal Facts
+→ Milestone Evaluation
+→ Achieved Milestones
++ Milestone Prospects
+→ Player-visible Feedback
+```
+
+Milestone 的职责是解释已有事实，而不是生产新的游戏事实。
+
+Milestone 应帮助玩家回答：
+
+1. 我已经形成了什么阶段成果；
+2. 我现在正在接近什么；
+3. 之前的选择、实践和经历对当前人生意味着什么。
+
+**与其他概念的边界**
+
+Milestone 不等于：
+
+- Achievement；
+- Identity；
+- Affiliation；
+- Title；
+- Occupation；
+- Route；
+- Ending；
+- Task。
+
+Milestone 不得写入现有 Achievement 字段，也不得被事件或路线作为条件消费。
+
+**第一阶段证据来源**
+
+第一阶段仅允许消费：
+
+- monotonic Habit；
+- active-action history；
+- event history；
+- 经审核的 durable facts；
+- canonical current facts。
+
+第一阶段不得依赖不完整的普通 choice 历史，也不得使用无法恢复历史状态的任意数值组合来证明永久成果。
+
+**透明性**
+
+第一阶段只提供透明 Milestone：
+
+- 玩家可以理解达成条件；
+- 玩家可以看到当前进度；
+- 玩家可以看到获得原因。
+
+不建设隐藏成就、谜题式条件或完整任务清单。
+
+**奖励与反向影响**
+
+第一阶段不提供：
+
+- 属性奖励；
+- 金钱奖励；
+- 成就点；
+- 事件权重；
+- 路线资格；
+- 称号装备；
+- 调度影响。
+
+Milestone 不得反向修改游戏状态。
+
+**持久化边界**
+
+第一阶段不新增：
+
+- PlayerState 字段；
+- GameState 字段；
+- Snapshot state 字段；
+- save migration；
+- milestone unlock ledger。
+
+只有未来产品明确要求可靠记录任意复合条件的首次达成年龄或永久解锁事实时，才能重新裁决是否建立 ledger。
+
+**验收边界**
+
+自动测试只能证明：
+
+- 条件求值正确；
+- 数据链正确；
+- Local/API 一致；
+- 没有污染正式状态。
+
+是否改善方向感、阶段满足感和重复行动体验，必须通过实际游玩验证。
+
+**明确不做**
+
+Life Milestone Minimal Vertical Slice 完成后，不自动授权：
+
+- 大规模扩充 Milestone；
+- 奖励系统；
+- 隐藏成就；
+- 任务系统；
+- 结果页交互修改；
+- 读书、练功事件扩充；
+- Milestone 持久化；
+- metric 或玩家模型扩展。
+
+**重新讨论条件**
+
+出现以下任一需求时，必须重新进行产品裁决：
+
+- 需要可靠记录任意复合条件的首次达成年龄；
+- 需要数值下降后仍永久保留 Milestone；
+- 需要 Milestone 反向影响事件、路线、属性或结局；
+- 需要将非 canonical 属性提升为正式条件来源；
+- 需要建设隐藏条件、奖励或任务链。
+
+### PD-054：独立悟性属性退出，学习理解统一归入学识
+
+**正式语义**
+
+- 人物只同等展示功力、体魄、学识、人脉、名望、侠义声誉六项核心属性；
+- `knowledge` 同时承载知识、理解、文化与学习能力；
+- 天生的学习禀赋由 Trait 表达，不再初始化一项独立数值；
+- 原有悟性条件或唯一成长来源迁移到学识；同一配置已有学识项时删除悟性项，不相加、不重复计数；
+- 金钱只作为资源展示，不进入核心属性；
+- Snapshot `3.14.0` 拒绝旧字段，不提供迁移、兼容、回退读取或静默清理。
+
+**明确不做**
+
+- 不在本裁决中删除魅力、经营、影响力等其他既有非核心字段；
+- 不新增潜力值、天赋数值投影或第二套学习属性；
+- 不迁移旧存档。
 
 ---
 

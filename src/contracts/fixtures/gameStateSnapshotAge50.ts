@@ -49,7 +49,6 @@ export const gameStateSnapshotAge50 = {
       martialPower: 78,
       chivalry: 85,
       constitution: 70,
-      comprehension: 55,
       affiliation: 'wudang',
       title: '武当长老',
       reputation: 420,

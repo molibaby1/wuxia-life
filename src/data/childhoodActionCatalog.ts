@@ -26,8 +26,7 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '在家人看护下活动筋骨，模仿大人练几式基本功',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'constitution', min: 0, max: 1 },
-      { stat: 'martialPower', min: 0, max: 1 },
+      { stat: 'constitution', min: 1, max: 2 },
     ],
     costs: [],
     risk: 'low',
@@ -42,7 +41,6 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '坐在堂前认字听书，由长辈或私塾先生启蒙',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'comprehension', min: 1, max: 3 },
       { stat: 'knowledge', min: 1, max: 2 },
     ],
     costs: [],

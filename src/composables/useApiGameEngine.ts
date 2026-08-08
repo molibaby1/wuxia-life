@@ -7,6 +7,16 @@ import {
   type SessionStartResponse,
 } from '../adapters/api/webApiClient';
 import { webPlatformStorage } from '../adapters/platform/webPlatformStorage';
+import {
+  buildActiveActionOverlayCard,
+  buildChoiceFeedbackOverlayCard,
+  buildPeriodSummaryOverlayCard,
+  buildPeriodSummaryOverlayCards,
+  buildPlayerDeltaOverlayCard,
+  buildStageResultOverlayCard,
+  type ProgressionOverlayPayload,
+} from '../types/progressionOverlay';
+import type { ProgressionAckKind } from '../contracts/sessionProgression';
 
 export type ApiFlowState =
   | 'idle'
@@ -72,6 +82,8 @@ export function useApiGameEngine() {
 
     lastChoiceFeedback: null as string | null,
     lastOutcomeText: null as string | null,
+    progressionOverlay: null as ProgressionOverlayPayload | null,
+    automaticAdvanceError: null as string | null,
   });
 
   const slotVersion = computed(() => activeSession.value?.slot.version ?? 0);
@@ -82,6 +94,8 @@ export function useApiGameEngine() {
     applyProgressionToEngine(engineState, response);
     engineState.lastChoiceFeedback = null;
     engineState.lastOutcomeText = null;
+    engineState.progressionOverlay = null;
+    engineState.automaticAdvanceError = null;
   }
 
   function applyProgressionResponse(payload: SessionProgressionPayload): void {
@@ -176,6 +190,23 @@ export function useApiGameEngine() {
       flowState.value = 'loading';
       const response = await apiClient.restoreSession(deviceToken.value, slotIndex);
       applySessionResponse(response);
+      if (response.sessionPhase === 'period_summary' && response.periodSummary) {
+        const resultCards = buildPeriodSummaryOverlayCards(
+          `period-${response.snapshot.id}`,
+          response.periodSummary,
+        );
+        const next = await requestProgressionAck('period_summary');
+        applyProgressionResponse(next);
+        engineState.progressionOverlay = { cards: resultCards };
+      } else if (response.sessionPhase === 'action_summary' && response.activeActionSummary) {
+        const resultCard = buildActiveActionOverlayCard(
+          `active-action-restored-${response.snapshot.id}`,
+          response.activeActionSummary,
+        );
+        const next = await requestProgressionAck('action_summary');
+        applyProgressionResponse(next);
+        engineState.progressionOverlay = { cards: [resultCard] };
+      }
       flowState.value = 'ready';
       return true;
     } catch (error) {
@@ -188,6 +219,8 @@ export function useApiGameEngine() {
     if (!apiClient || !deviceToken.value || !activeSession.value || isProcessing.value) return;
     const eventId = engineState.currentEvent?.eventId;
     if (!eventId) return;
+    const completedStageTitle = engineState.currentEvent?.title || '上一阶段';
+    const selectedChoice = engineState.currentEvent?.choices?.find(item => item.id === choice.id);
     isProcessing.value = true;
     try {
       const sessionId = webPlatformStorage.getSessionId();
@@ -203,7 +236,17 @@ export function useApiGameEngine() {
         choiceId: choice.id,
       });
       applyProgressionResponse(result);
-      engineState.lastChoiceFeedback = result.feedback?.summary ?? null;
+      engineState.lastChoiceFeedback = result.feedback?.player.narrativeResult ?? null;
+      const overlayCard = result.feedback
+          ? buildChoiceFeedbackOverlayCard(
+            `choice-${eventId}-${choice.id}`,
+            completedStageTitle,
+            selectedChoice?.text || '已选择',
+            result.feedback,
+            [selectedChoice?.text, selectedChoice?.description],
+          )
+        : null;
+      engineState.progressionOverlay = overlayCard ? { cards: [overlayCard] } : null;
     } catch (error) {
       mapApiError(error);
     } finally {
@@ -227,12 +270,50 @@ export function useApiGameEngine() {
         expectedSnapshotId: activeSession.value.snapshot.id,
         actionId,
       });
+      engineState.progressionOverlay = result.activeActionSummary
+        ? {
+            cards: [
+              buildActiveActionOverlayCard(`active-action-${actionId}`, result.activeActionSummary),
+            ],
+          }
+        : null;
       applyProgressionResponse(result);
+      engineState.automaticAdvanceError = null;
+      if (result.sessionPhase === 'action_summary') {
+        try {
+          const next = await requestProgressionAck('action_summary');
+          applyProgressionResponse(next);
+          flowState.value = 'ready';
+          flowMessage.value = '';
+        } catch (error) {
+          mapApiError(error);
+          engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
+        }
+      }
     } catch (error) {
       mapApiError(error);
     } finally {
       isProcessing.value = false;
     }
+  }
+
+  async function requestProgressionAck(ackKind: ProgressionAckKind): Promise<SessionProgressionPayload> {
+    if (!apiClient || !deviceToken.value || !activeSession.value) {
+      throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+    }
+    const sessionId = webPlatformStorage.getSessionId();
+    const sessionToken = webPlatformStorage.getSessionToken();
+    if (!sessionId || !sessionToken) {
+      throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
+    }
+    return apiClient.acknowledgeProgression({
+      deviceToken: deviceToken.value,
+      sessionId,
+      sessionToken,
+      expectedSlotVersion: activeSession.value.slot.version,
+      expectedSnapshotId: activeSession.value.snapshot.id,
+      ackKind,
+    });
   }
 
   async function handleProgressionAck(): Promise<void> {
@@ -252,22 +333,60 @@ export function useApiGameEngine() {
                 ? 'story_automatic'
                 : null;
     if (!ackKind) return;
+    const playerBeforeStage = { ...activeSession.value.player };
+    const completedStoryTitle = engineState.currentEvent?.title || '上一阶段';
+    const completedDisturbance = engineState.disturbanceNarrative;
     isProcessing.value = true;
+    engineState.automaticAdvanceError = null;
     try {
-      const sessionId = webPlatformStorage.getSessionId();
-      const sessionToken = webPlatformStorage.getSessionToken();
-      if (!sessionId || !sessionToken) throw new WebApiClientError('auth', 'UNAUTHORIZED', '会话失效', 401);
-      const result = await apiClient.acknowledgeProgression({
-        deviceToken: deviceToken.value,
-        sessionId,
-        sessionToken,
-        expectedSlotVersion: activeSession.value.slot.version,
-        expectedSnapshotId: activeSession.value.snapshot.id,
-        ackKind,
-      });
-      applyProgressionResponse(result);
+      if (ackKind === 'passive_continue') {
+        const periodResult = await requestProgressionAck('passive_continue');
+        applyProgressionResponse(periodResult);
+        if (periodResult.sessionPhase === 'period_summary' && periodResult.periodSummary) {
+          const resultCards = buildPeriodSummaryOverlayCards(
+            `period-${periodResult.snapshotId}`,
+            periodResult.periodSummary,
+          );
+          const next = await requestProgressionAck('period_summary');
+          applyProgressionResponse(next);
+          engineState.progressionOverlay = { cards: resultCards };
+        }
+      } else {
+        let resultCards = ackKind === 'period_summary' && engineState.periodSummary
+          ? buildPeriodSummaryOverlayCards(
+              `period-${activeSession.value.snapshot.id}`,
+              engineState.periodSummary,
+            )
+          : null;
+        const result = await requestProgressionAck(ackKind);
+        applyProgressionResponse(result);
+        if (ackKind === 'story_automatic') {
+          resultCards = result.periodSummary
+            ? buildPeriodSummaryOverlayCards(`event-${result.snapshotId}`, result.periodSummary)
+            : [buildPlayerDeltaOverlayCard(
+                `event-${result.snapshotId}`,
+                completedStoryTitle,
+                playerBeforeStage,
+                result.player,
+              )];
+        } else if (ackKind === 'disturbance' && completedDisturbance) {
+          resultCards = [buildStageResultOverlayCard(
+            `disturbance-${completedDisturbance.disturbanceId}`,
+            completedDisturbance.title,
+            [completedDisturbance.impactSummary],
+          )];
+        }
+        if (resultCards) {
+          engineState.progressionOverlay = { cards: resultCards };
+        }
+      }
+      flowState.value = 'ready';
+      flowMessage.value = '';
     } catch (error) {
       mapApiError(error);
+      if (ackKind === 'action_summary' || ackKind === 'passive_continue' || ackKind === 'period_summary') {
+        engineState.automaticAdvanceError = flowMessage.value || '下一阶段载入失败，请重试';
+      }
     } finally {
       isProcessing.value = false;
     }

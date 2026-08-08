@@ -15,7 +15,7 @@ import type {
   ReplaySimilarityPair,
 } from './types';
 import { getActionById } from '../data/activeActionCatalog';
-import type { GameState } from '../types/eventTypes';
+import type { EffectDefinition, GameState } from '../types/eventTypes';
 import {
   getProfileEchoHookByActionId,
   getProfileEchoHookByFlag,
@@ -350,19 +350,35 @@ export function collectFrustrationMetrics(records: GameProcessRecord[]): Frustra
   const setbacks: FrustrationSetback[] = [];
 
   for (const record of records) {
-    const text = record.outcomeText ?? record.eventText ?? '';
-    const negative = /损失|受伤|失败|降低|扣除|危机|重创|死亡/.test(text);
-
-    if (!negative) {
+    const evidence = record.outcomeEvidence;
+    if (!evidence) {
       continue;
     }
 
+    const negativeDomains = resolveNegativeDomains(
+      evidence.stateBefore,
+      evidence.stateAfter,
+      evidence.executedEffects,
+    );
+    if (negativeDomains.size === 0) {
+      continue;
+    }
+
+    const text = [
+      record.eventText,
+      record.selectedChoice?.text,
+      record.selectedChoice?.description,
+      record.outcomeText,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
     let classification: FrustrationSetback['classification'] = 'opaque';
-    if (/预警|提醒|早有|察觉/.test(text)) {
+    if (hasVisibleWarning(text, negativeDomains)) {
       classification = 'warned';
-    } else if (/因为|由于|缘故|导致/.test(text)) {
+    } else if (hasVisibleExplanation(text, negativeDomains)) {
       classification = 'explained';
-    } else if (/恢复|疗愈|补偿|可再|还有机会/.test(text)) {
+    } else if (hasVisibleRecoveryPath(text, negativeDomains)) {
       classification = 'recoverable';
     }
 
@@ -384,6 +400,193 @@ export function collectFrustrationMetrics(records: GameProcessRecord[]): Frustra
     opaqueRatio,
     opaqueExamples: opaque.slice(0, 3),
   };
+}
+
+type NegativeDomain = 'health' | 'reputation' | 'wealth' | 'connections' | 'relationship' | 'life' | 'other';
+
+const HEALTH_STATUS_RANK: Record<string, number> = {
+  healthy: 0,
+  unwell: 1,
+  seriously_ill: 2,
+  seriously_injured: 2,
+  critical: 3,
+};
+
+function resolveNegativeDomains(
+  stateBefore: GameState,
+  stateAfter: GameState,
+  executedEffects?: EffectDefinition[],
+): Set<NegativeDomain> {
+  if (executedEffects !== undefined) {
+    return resolveNegativeEffectDomains(stateBefore, executedEffects);
+  }
+
+  const beforePlayer = stateBefore.player as unknown as Record<string, unknown> | undefined;
+  const afterPlayer = stateAfter.player as unknown as Record<string, unknown> | undefined;
+  const domains = new Set<NegativeDomain>();
+  if (!beforePlayer || !afterPlayer) return domains;
+
+  for (const key of new Set([...Object.keys(beforePlayer), ...Object.keys(afterPlayer)])) {
+    const before = beforePlayer[key];
+    const after = afterPlayer[key];
+    if (typeof before === 'number' && typeof after === 'number' && after < before) {
+      if (key === 'reputation') domains.add('reputation');
+      else if (key === 'money' || key === 'wealth') domains.add('wealth');
+      else if (key === 'connections') domains.add('connections');
+      else if (key === 'age' || key === 'children') continue;
+      else domains.add('other');
+    }
+  }
+
+  const beforeHealth = beforePlayer.healthStatus;
+  const afterHealth = afterPlayer.healthStatus;
+  if (
+    typeof beforeHealth === 'string' &&
+    typeof afterHealth === 'string' &&
+    (HEALTH_STATUS_RANK[afterHealth] ?? 0) > (HEALTH_STATUS_RANK[beforeHealth] ?? 0)
+  ) {
+    domains.add('health');
+  }
+
+  const beforeStatuses = new Set(Array.isArray(beforePlayer.statuses) ? beforePlayer.statuses : []);
+  const afterStatuses = new Set(Array.isArray(afterPlayer.statuses) ? afterPlayer.statuses : []);
+  for (const status of afterStatuses) {
+    if (!beforeStatuses.has(status)) domains.add(statusDomain(status));
+  }
+
+  if (beforePlayer.alive === true && afterPlayer.alive === false) domains.add('life');
+
+  const beforeRelationships = Array.isArray(beforePlayer.relationships) ? beforePlayer.relationships : [];
+  const afterRelationships = Array.isArray(afterPlayer.relationships) ? afterPlayer.relationships : [];
+  const afterById = new Map(afterRelationships.map(relation => [String(relation?.id), relation]));
+  for (const relation of beforeRelationships) {
+    const afterRelation = afterById.get(String(relation?.id));
+    if (
+      afterRelation &&
+      typeof relation?.affinity === 'number' &&
+      typeof afterRelation.affinity === 'number' &&
+      afterRelation.affinity < relation.affinity
+    ) {
+      domains.add('relationship');
+    }
+  }
+
+  return domains;
+}
+
+function statusDomain(status: unknown): NegativeDomain {
+  return status === 'injured' || status === 'ill' ? 'health' : 'other';
+}
+
+function statDomain(stat: string | undefined): NegativeDomain {
+  if (stat === 'reputation') return 'reputation';
+  if (stat === 'money' || stat === 'wealth') return 'wealth';
+  if (stat === 'connections') return 'connections';
+  if (stat === 'martialPower' || stat === 'constitution') return 'health';
+  return 'other';
+}
+
+function isNegativeStatEffect(effect: EffectDefinition): boolean {
+  return (
+    (effect.type === 'stat_modify' && effect.operator === 'subtract' && effect.value > 0) ||
+    (effect.type === 'stat_modify' && effect.operator === 'add' && effect.value < 0)
+  );
+}
+
+function resolveNegativeEffectDomains(stateBefore: GameState, effects: EffectDefinition[]): Set<NegativeDomain> {
+  const domains = new Set<NegativeDomain>();
+  const beforePlayer = stateBefore.player as unknown as Record<string, unknown> | undefined;
+  const beforeStatuses = new Set(Array.isArray(beforePlayer?.statuses) ? beforePlayer.statuses : []);
+
+  for (const effect of effects) {
+    if (isNegativeStatEffect(effect)) {
+      domains.add(statDomain(effect.target));
+    } else if (effect.type === 'money_modify' && effect.operator === 'subtract' && effect.value > 0) {
+      domains.add('wealth');
+    } else if (effect.type === 'health_status_set') {
+      const before = beforePlayer?.healthStatus;
+      if (
+        typeof before === 'string' &&
+        (HEALTH_STATUS_RANK[effect.value] ?? 0) > (HEALTH_STATUS_RANK[before] ?? 0)
+      ) {
+        domains.add('health');
+      }
+    } else if (effect.type === 'status_add' && !beforeStatuses.has(effect.status)) {
+      domains.add(statusDomain(effect.status));
+    } else if (String(effect.type) === 'ending_set' || (effect.type === 'flag_set' && effect.target === 'player_died')) {
+      domains.add('life');
+    }
+  }
+
+  return domains;
+}
+
+function domainPattern(domain: NegativeDomain): RegExp {
+  switch (domain) {
+    case 'health':
+      return /受伤|伤势|生病|病痛|健康|体魄|功力|修炼|静养|调息|养病|伤害/;
+    case 'reputation':
+      return /名望|声望|声誉|声名|评价|脸面|旧友疏远/;
+    case 'wealth':
+      return /金钱|银两|积蓄|财富|手头|钱财|损失/;
+    case 'connections':
+      return /人脉|关系|援手|帮手|情面/;
+    case 'relationship':
+      return /关系|情感|伙伴|友谊|旧友|信任|背叛|疏远|震怒|从轻发落|可避重罚|来信|绕道/;
+    case 'life':
+      return /死亡|性命|生命/;
+    default:
+      return /负面|失败|降低|扣除|损失|受伤|死亡|声望|声誉|名望|金钱|财富|银两|银钱|人脉|关系|背叛|伤害|受损|压力|亏|底线|为敌|不该|疏远|眼花|字迹|烦躁|收获|稳住|攒|原地打转/;
+  }
+}
+
+function matchesNegativeDomain(text: string, domains: Set<NegativeDomain>): boolean {
+  return [...domains].every(domain => domainPattern(domain).test(text));
+}
+
+function hasVisibleWarning(text: string, domains: Set<NegativeDomain>): boolean {
+  return (
+    matchesNegativeDomain(text, domains) &&
+    /可能|风险|之险|代价|预警|提醒|早有|察觉|谨慎|为敌|压力|恐|折损|情面|需(?:要)?金钱|(?:财富|金钱|名望|声誉|声望|人脉)\s*[-－]\s*\d+/.test(text)
+  );
+}
+
+function hasVisibleExplanation(text: string, domains: Set<NegativeDomain>): boolean {
+  return [...domains].every(domain => {
+    if (!domainPattern(domain).test(text)) return false;
+
+    if (domain === 'relationship' && /疏远|震怒|从轻发落|可避重罚/.test(text)) {
+      return true;
+    }
+    if (domain === 'reputation' && /旧友疏远|传言.*(?:不|坏|美好)/.test(text)) {
+      return true;
+    }
+    if (domain === 'other' && /烦躁|没什么收获|白忙|原地打转|眼花|字迹渐乱/.test(text)) {
+      return true;
+    }
+
+    return /因|由于|因为|缘故|导致|不慎|遭遇|背叛|受损|受伤|不该|底线|伤害|只得|勉强|终究|没稳住/.test(text);
+  });
+}
+
+function hasVisibleRecoveryPath(text: string, domains: Set<NegativeDomain>): boolean {
+  return [...domains].every(domain => {
+    if (!domainPattern(domain).test(text)) return false;
+
+    switch (domain) {
+      case 'health':
+        return /恢复|疗愈|缓解|静养|调息|养病/.test(text);
+      case 'wealth':
+        return /补偿|补回/.test(text);
+      case 'reputation':
+        return /挽回|重建.*(?:名望|声誉|声望)|名望.*恢复|声誉.*恢复/.test(text);
+      case 'connections':
+      case 'relationship':
+        return /缓和|修复|重建.*(?:关系|人脉)|关系.*恢复|还有机会/.test(text);
+      default:
+        return /恢复|重新|可再/.test(text);
+    }
+  });
 }
 
 export function isPacingImpactRecord(record: GameProcessRecord): boolean {

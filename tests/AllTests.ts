@@ -491,7 +491,21 @@ async function runStateConsistencyRegressionCase() {
 
     const choiceHandled = await engine.handleChoice({ id: 'state_consistency_choice' } as any);
     assert(choiceHandled, '选择执行失败，无法验证状态同步链路');
-    assert(engine.engineState.lastEffects.length > 0, '选择后 UI 效果列表为空，可能是执行结果未回写到 engineState');
+    assert(
+      engine.engineState.lastChoiceFeedback?.player.narrativeResult === '用于验证选择后引擎状态与 UI 状态一致',
+      '选择结算反馈未保留到 UI 状态',
+    );
+    assert(
+      engine.engineState.progressionOverlay?.cards[0]?.title === '上一阶段' &&
+        engine.engineState.progressionOverlay.cards[0]?.metaLines?.includes(
+          '选择：执行状态同步回归选择',
+        ) === true,
+      '结果区应保留已完成阶段与选择上下文',
+    );
+    assert(
+      engine.engineState.progressionOverlay?.cards[0]?.body === undefined,
+      '结果区不应重复刚刚读过的选项描述',
+    );
     assert(
       engine.getGameState().flags.state_consistency_choice_done === true,
       '选择后引擎 flags 未更新，存在状态不同步风险',
@@ -3079,14 +3093,14 @@ const compatibilitySuite: TestSuite = {
     },
     {
       name: '兼容性测试 - Canonical Snapshot 存档',
-      description: '测试 saveGame 只写入 Canonical Snapshot 3.13.0',
+      description: '测试 saveGame 只写入 Canonical Snapshot 3.14.0',
       test: () => {
         saveManager.clearAllSaves();
         const state = new GameEngineIntegration().getGameState();
         const saveId = saveManager.saveGame(state, 'us-018-version-marker');
         const loaded = saveManager.loadGame(saveId);
         assert(loaded !== null, '当前版本存档应可正常读取');
-        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.13.0', '存档应写入 Canonical Snapshot 3.13.0');
+        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.14.0', '存档应写入 Canonical Snapshot 3.14.0');
       },
     },
     {

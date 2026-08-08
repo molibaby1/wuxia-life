@@ -1,0 +1,44 @@
+ M .gitignore
+ M docs/governance/current-product-stage.md
+ M docs/governance/product-decisions.md
+ D docs/superpowers/plans/2026-07-27-family-social-life-state-removal.md
+ D docs/superpowers/plans/2026-07-27-habit-practice-narrowing.md
+ D docs/superpowers/plans/2026-08-04-active-action-to-life-echo-inventory.md
+ D docs/superpowers/plans/2026-08-04-canonical-identity-affiliation-closure.md
+ D docs/superpowers/plans/2026-08-04-late-life-active-action-baseline.md
+ D docs/superpowers/plans/2026-08-04-late-life-active-action-result-differentiation.md
+ D docs/superpowers/specs/2026-07-27-family-social-life-state-removal-design.md
+ D docs/superpowers/specs/2026-07-27-habit-practice-narrowing-design.md
+ D docs/superpowers/specs/2026-08-04-active-action-to-life-echo-inventory-design.md
+ D docs/superpowers/specs/2026-08-04-canonical-identity-affiliation-closure-design.md
+ D docs/superpowers/specs/2026-08-04-late-life-active-action-baseline-design.md
+ D docs/superpowers/specs/2026-08-04-late-life-active-action-result-differentiation-design.md
+ D docs/test-reports/active-action-to-life-echo-semantic-inventory.md
+ D docs/test-reports/canonical-identity-affiliation-closure.md
+ D docs/test-reports/complete-life-ending-acceptance-closure.md
+ D docs/test-reports/complete-life-player-experience-baseline.md
+ D docs/test-reports/experience-trace-choice-policy-audit.md
+ D docs/test-reports/identity-affiliation-semantic-inventory.md
+ D docs/test-reports/late-life-active-action-player-experience-baseline.md
+ D docs/test-reports/late-life-active-action-result-differentiation.md
+ D docs/test-reports/player-visible-decision-experience-baseline.md
+ M src/data/lines/identity-hero.json
+ M src/data/lines/merchant.json
+ M src/data/lines/relationship.json
+ M src/headless/playability/runnerSteps.ts
+ M src/p8/collectPersonaMetrics.ts
+ M src/p8/metricDefinitions.ts
+ M src/p8/playabilityGate.ts
+ M src/p8/reportBuilder.ts
+ M src/types/simulationRecordTypes.ts
+ M tests/GameProcessSimulator.ts
+ M tests/p38FrustrationRemediationTests.ts
+ M tests/p40ReplayPacingPolishTests.ts
+ M tests/p8PlayabilityTests.ts
+ M tests/p9PlayabilityTests.ts
+?? docs/test-reports/p8-local-opaque-setback-semantic-inventory.md
+?? docs/test-reports/p8-playability-gate-latest.json
+?? docs/test-reports/p8-playability-gate-latest.md
+?? docs/test-reports/p8-playability-gate-local-latest.json
+?? docs/test-reports/p8-playability-gate-local-latest.md
+?? repository-status.txt

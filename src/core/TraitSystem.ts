@@ -212,8 +212,8 @@ export class TraitSystem {
     if (event.category === 'daily_event' || metaTags.includes('training') || event.storyLine?.includes('training')) {
       tags.add('training');
     }
-    if (metaTags.some(tag => ['scholar', 'learning', 'comprehension', 'read'].includes(tag))) {
-      tags.add('comprehension');
+    if (metaTags.some(tag => ['scholar', 'learning', 'read'].includes(tag))) {
+      tags.add('learning');
     }
     if (metaTags.some(tag => ['social', 'relationship', 'sect', 'friendship'].includes(tag))) {
       tags.add('social');

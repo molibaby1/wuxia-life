@@ -24,7 +24,6 @@ function createBaseState(overrides: Partial<GameState> = {}): GameState {
     chivalry: 10,
     charisma: 50,
     constitution: 50,
-    comprehension: 50,
     knowledge: 20,
     businessAcumen: 10,
     influence: 10,
@@ -176,7 +175,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   state.flags = { ...state.flags, route_orthodox: true, sect_faction: 'orthodox', orthodox_childhood_seed_done: true };
 
   const summary = deriveLifeMemorySummary(state);
-  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should be 3.0.0');
+  assert(summary.schemaVersion === LIFE_MEMORY_SCHEMA_VERSION, 'schema version should match the Life Memory contract');
   assert(!('routeStatus' in summary), 'route status must not be canonical Life Memory');
   assert(summary.currentGoalLabel === '门派倾向已显，尚未立誓入门', 'current goal should come from explicit origin facts');
   assert(summary.derivedAtAge === 20, 'derivedAtAge should match player age');
@@ -347,6 +346,95 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   const roundTrip = serializeLifeMemorySummary(summary);
   assert(JSON.stringify(roundTrip) === JSON.stringify(summary), 'summary should round-trip via JSON');
   console.log('✓ serializability');
+}
+
+// Life Milestone projection remains separate from formal achievements.
+{
+  const state = createBaseState({
+    player: {
+      ...createBaseState().player,
+      lifeStates: { trainingHabit: 0, studyHabit: 2, businessHabit: 0 },
+    },
+    actionHistory: [{
+      actionId: 'study-1', category: 'study', age: 18, sourceKind: 'active_action',
+      duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 18, month: 1, day: 1 },
+    }],
+  });
+  const summary = deriveLifeMemorySummary(state);
+  assert(summary.schemaVersion === '3.1.0', 'Life Memory schema should advance to 3.1.0');
+  assert(summary.achievedMilestones?.some((entry) => entry.label === '初涉书卷'));
+  assert(summary.achievedMilestones?.some((entry) => entry.label === '读书成习'));
+  assert(summary.milestoneProspects?.[0]?.label === '少年勤学');
+  assert(!summary.achievements?.some((entry) => entry.label === '初涉书卷'), 'milestones must not enter achievements');
+  assert(JSON.stringify(serializeLifeMemorySummary(summary)) === JSON.stringify(summary));
+  console.log('✓ derives serializable milestones independently from achievements');
+}
+
+// Life Memory keeps the complete achieved Milestone projection; display limits belong to the Main Screen.
+{
+  const state = createBaseState({
+    player: {
+      ...createBaseState().player,
+      lifeStates: { trainingHabit: 4, studyHabit: 2, businessHabit: 2 },
+    },
+    eventHistory: [
+      { eventId: 'setback_cultivation_deviation', age: 21 },
+      { eventId: 'p26_study_habit_midlife_callback', age: 26 },
+      { eventId: 'p42_training_habit_scholar_body_echo', age: 22 },
+      { eventId: 'p42_business_habit_youth_stall', age: 18 },
+    ],
+    actionHistory: [
+      {
+        actionId: 'study-1', category: 'study', age: 18, sourceKind: 'active_action',
+        duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 18, month: 1, day: 1 },
+      },
+      {
+        actionId: 'study-2', category: 'study', age: 19, sourceKind: 'active_action',
+        duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 19, month: 1, day: 1 },
+      },
+      {
+        actionId: 'study-3', category: 'study', age: 20, sourceKind: 'active_action',
+        duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 20, month: 1, day: 1 },
+      },
+      {
+        actionId: 'training-1', category: 'training', age: 20, sourceKind: 'active_action',
+        duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 20, month: 1, day: 1 },
+      },
+      {
+        actionId: 'business-1', category: 'business', age: 20, sourceKind: 'active_action',
+        duration: { value: 1, unit: 'year' }, deltas: {}, timestamp: { year: 20, month: 1, day: 1 },
+      },
+    ],
+  });
+  const stateBeforeDerivation = structuredClone(state);
+  const summary = deriveLifeMemorySummary(state);
+  const milestoneIds = summary.achievedMilestones?.map((entry) => entry.diagnostic.milestoneId) ?? [];
+  const expectedMilestoneIds = [
+    'study-training-balanced',
+    'business-first-stall',
+    'mixed-scholar-training-body-echo',
+    'study-old-scroll-echo',
+    'training-cultivation-deviation',
+    'study-young-diligent',
+    'training-practice-deepened',
+    'business-habit-formed',
+    'study-habit-formed',
+    'training-habit-formed',
+    'business-first-step',
+    'study-first-step',
+    'training-first-step',
+  ];
+  assert(summary.achievedMilestones !== undefined, 'complete state should produce achieved milestones');
+  assert(milestoneIds.length === 13, `Life Memory should keep all 13 achieved milestones, got ${milestoneIds.length}`);
+  assert(new Set(milestoneIds).size === 13, 'achieved milestones must not contain duplicates');
+  assert(JSON.stringify(milestoneIds) === JSON.stringify(expectedMilestoneIds), 'achieved milestones keep priority and ID order');
+  assert(
+    !summary.achievements?.some((entry) => milestoneIds.includes(entry.diagnostic.achievementId ?? '')),
+    'milestones must not enter formal achievements',
+  );
+  assert(JSON.stringify(serializeLifeMemorySummary(summary)) === JSON.stringify(summary), 'complete milestones should round-trip');
+  assert(JSON.stringify(state) === JSON.stringify(stateBeforeDerivation), 'Life Memory derivation must not mutate GameState');
+  console.log('✓ keeps the complete achieved milestone projection');
 }
 
 // Core midlife scenario regression — all categories present together

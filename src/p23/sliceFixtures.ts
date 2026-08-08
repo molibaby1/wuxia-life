@@ -23,7 +23,6 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     martialPower: 30,
     chivalry: 30,
     constitution: 50,
-    comprehension: 40,
     affiliation: null,
     title: null,
     reputation: 15,

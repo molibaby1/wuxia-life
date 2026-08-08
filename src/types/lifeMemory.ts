@@ -3,7 +3,9 @@
  * Serializable, derived-only — not persisted as redundant game state.
  */
 
-export const LIFE_MEMORY_SCHEMA_VERSION = '3.0.0' as const;
+import type { MilestoneCategory, MilestoneCondition } from './milestone';
+
+export const LIFE_MEMORY_SCHEMA_VERSION = '3.1.0' as const;
 
 export type LifeMemoryVisibility = 'player' | 'hidden' | 'diagnostic';
 
@@ -70,6 +72,29 @@ export interface LifeMemoryHabitTrajectoryEntry extends LifeMemoryEntryBase {
   tierLabel: string;
 }
 
+export interface LifeMemoryMilestoneEntry extends LifeMemoryEntryBase {
+  label: string;
+  description: string;
+  category: MilestoneCategory;
+  evidenceLabels: string[];
+  diagnostic: {
+    milestoneId: string;
+    conditionTypes: MilestoneCondition['type'][];
+  };
+}
+
+export interface LifeMemoryMilestoneProspectEntry extends LifeMemoryEntryBase {
+  label: string;
+  description: string;
+  category: MilestoneCategory;
+  progressRatio: number;
+  progressLabels: string[];
+  diagnostic: {
+    milestoneId: string;
+    conditionTypes: MilestoneCondition['type'][];
+  };
+}
+
 export interface LifeMemorySummary {
   schemaVersion: typeof LIFE_MEMORY_SCHEMA_VERSION;
   derivedAtAge: number;
@@ -80,6 +105,8 @@ export interface LifeMemorySummary {
   unresolvedDebts?: LifeMemoryDebtEntry[];
   risks?: LifeMemoryRiskEntry[];
   achievements?: LifeMemoryAchievementEntry[];
+  achievedMilestones?: LifeMemoryMilestoneEntry[];
+  milestoneProspects?: LifeMemoryMilestoneProspectEntry[];
   ordinaryOriginLifeMemory?: string;
   ordinaryOriginSummary?: string;
 }

@@ -27,7 +27,6 @@ function makeState(
       martialPower: 20,
       chivalry: 20,
       constitution: 50,
-      comprehension: 30,
       affiliation: null,
       title: null,
       reputation: 10,

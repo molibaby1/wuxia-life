@@ -35,7 +35,7 @@ export const P8_PERSONA_ROSTER: P8Persona[] = [
     gender: 'female',
     seed: 802,
     strategy: 'study',
-    strategySummary: '优先读书，提升学识与悟性',
+    strategySummary: '优先读书，提升学识',
     routePreference: 'scholarly',
     riskPreference: 'low',
     relationshipPreference: 'medium',
@@ -43,7 +43,6 @@ export const P8_PERSONA_ROSTER: P8Persona[] = [
     shortTermGoals: [
       goal('su-knowledge', '积累学识', '0-20', ['stat_threshold'], { stat: 'knowledge', statMin: 20 }),
       goal('su-study-habit', '坚持读书规划', '0-20', ['action_category_count'], { actionCategory: 'study', actionCategoryMinCount: 3 }),
-      goal('su-comprehension', '悟性提升', '20-30', ['stat_threshold'], { stat: 'comprehension', statMin: 30 }),
       goal('su-scholar-identity', '文路身份显现', '30-40', ['flag'], { flag: 'scholar_path_started' }),
     ],
   },

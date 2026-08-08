@@ -87,7 +87,7 @@ function writeSnapshotFiles(entryId: string, snapshot: GameStateSnapshot): { sna
       playTime: snapshot.state.eventHistory.length * 30,
     },
   };
-  fs.writeFileSync(browserExportPath, `${JSON.stringify({ version: '3.13.0', exportTime: 0, save }, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(browserExportPath, `${JSON.stringify({ version: '3.14.0', exportTime: 0, save }, null, 2)}\n`, 'utf8');
   return { snapshotPath, browserExportPath };
 }
 

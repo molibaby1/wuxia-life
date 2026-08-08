@@ -39,7 +39,6 @@ function basePlayer(
     martialPower: 35,
     chivalry: 35,
     constitution: 50,
-    comprehension: 40,
     affiliation: null,
     title: null,
     reputation: 20,

@@ -54,7 +54,7 @@
         ]
       },
       {
-        "text": "投资丝绸生意 (金钱 +150, 悟性 +5)",
+        "text": "投资丝绸生意 (金钱 +150, 学识 +5)",
         "effects": [
           {
             "type": "stat_modify",
@@ -64,7 +64,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 5,
             "operator": "add"
           },

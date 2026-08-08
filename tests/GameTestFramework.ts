@@ -323,7 +323,6 @@ export class GameTestFramework {
         martialPower: 20,
         chivalry: 25,
         constitution: 20,
-        comprehension: 20,
         charisma: 20,
         knowledge: 20,
         connections: 10,

@@ -17,7 +17,6 @@ function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
     martialPower: player?.martialPower ?? 0,
     chivalry: player?.chivalry ?? 0,
     constitution: player?.constitution ?? 0,
-    comprehension: player?.comprehension ?? 0,
     money: player?.money ?? 0,
     reputation: player?.reputation ?? 0,
     connections: player?.connections ?? 0,

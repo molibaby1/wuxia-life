@@ -77,9 +77,12 @@ export async function runPeriodSummaryPlanningHandoffTests(): Promise<void> {
     const age = fresh.getRuntimeState().player?.age ?? 0;
     if (age >= 5 && fresh.getSessionPhase() === 'active_planning') {
       const ids = fresh.getPlanningOptions().map(o => o.actionId);
+      const expectedBusinessAction = age <= 6
+        ? 'action_household_errand'
+        : 'action_household_apprentice';
       assert(
-        ids.includes('action_household_errand'),
-        `full path age ${age} must surface merchant errand; got ${ids.join(', ')}`,
+        ids.includes(expectedBusinessAction),
+        `full path age ${age} must surface ${expectedBusinessAction}; got ${ids.join(', ')}`,
       );
       return;
     }

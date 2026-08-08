@@ -21,7 +21,6 @@ function baselineStats(): PlayerStats {
   return {
     martialPower: 100,
     constitution: 50,
-    comprehension: 50,
     charisma: 40,
     chivalry: 40,
     reputation: 40,

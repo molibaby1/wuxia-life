@@ -13,8 +13,10 @@ type Suite = {
 };
 
 const suites: Suite[] = [
+  { name: 'activeActionAttributeBalance', entry: 'tests/activeActionAttributeBalance.test.ts' },
   { name: 'activeActionResultDifferentiation', entry: 'tests/activeActionResultDifferentiation.test.ts' },
   { name: 'activeActionResultParity', entry: 'tests/activeActionResultParity.test.ts' },
+  { name: 'stageAtomicProgression', entry: 'tests/stageAtomicProgression.test.ts' },
   { name: 'experienceTraceTests', entry: 'tests/headless/experienceTrace.test.ts' },
   { name: 'normalLongevityEndingClosure', entry: 'tests/normalLongevityEndingClosure.test.ts' },
   { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },
@@ -75,6 +77,8 @@ const suites: Suite[] = [
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },
   { name: 'testLifeMemorySummary', entry: 'tests/testLifeMemorySummary.ts' },
+  { name: 'lifeMemoryFeedback', entry: 'tests/lifeMemoryFeedback.test.ts' },
+  { name: 'lifeMilestoneSystem', entry: 'tests/lifeMilestoneSystem.test.ts' },
   { name: 'merchantStatecraftVerticalSlice', entry: 'tests/testMerchantStatecraftVerticalSlice.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },
   { name: 'canonicalPlayerStateSlice2b1Tests', entry: 'tests/canonicalPlayerStateSlice2b1.test.ts' },
@@ -101,6 +105,7 @@ const suites: Suite[] = [
   { name: 'canonicalUndefinedPropertyEliminationTests', entry: 'tests/canonicalUndefinedPropertyElimination.test.ts' },
   { name: 'canonicalMartialLegacyConsumerRemovalTests', entry: 'tests/canonicalMartialLegacyConsumerRemoval.test.ts' },
   { name: 'canonicalMartialLegacyProducerPruningTests', entry: 'tests/canonicalMartialLegacyProducerPruning.test.ts' },
+  { name: 'canonicalComprehensionRemoval', entry: 'tests/canonicalComprehensionRemoval.test.ts' },
 ];
 
 function runSuite(suite: Suite): Promise<{ status: number | null; log: string }> {

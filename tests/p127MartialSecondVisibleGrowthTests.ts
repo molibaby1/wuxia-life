@@ -91,7 +91,6 @@ function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
       martialPower: 10,
       constitution: 10,
       chivalry: 10,
-      comprehension: 10,
       reputation: 10,
       money: 50,
       affiliation: null,

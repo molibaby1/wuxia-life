@@ -58,7 +58,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 12},
       {"type": "stat_modify", "stat": "qinggong", "value": 12},
-      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6},
       {"type": "flag_set", "flag": "assassin_trained", "value": true}
     ]
   },

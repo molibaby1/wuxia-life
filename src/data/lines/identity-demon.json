@@ -100,7 +100,7 @@
               {"type": "flag_set", "target": "youming_principled", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add"},
-              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add"},
               {"type": "event_record", "target": "outlaw_join_principled"}
             ]
           },
@@ -165,11 +165,11 @@
       },
       {
         "id": "cultivate_balanced",
-        "text": "适度修炼，保持理智 (武力 +10, 悟性 +5)",
+        "text": "适度修炼，保持理智 (武力 +10, 学识 +5)",
         "description": "你适度修炼并保留理智，在力量增长与自我掌控之间找到平衡。",
         "effects": [
           {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
-          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"}
+          {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"}
         ]
       }
     ],
@@ -220,9 +220,9 @@
       },
       {
         "id": "question_mission",
-        "text": "询问任务详情，保留判断 (悟性 +5)",
+        "text": "询问任务详情，保留判断 (学识 +5)",
         "effects": [
-          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"}
+          {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"}
         ]
       }
     ],
@@ -338,7 +338,7 @@
         "id": "retire",
         "text": "退出江湖纷争",
         "effects": [
-          {"type": "stat_modify", "target": "comprehension", "value": 10, "operator": "add"}
+          {"type": "stat_modify", "target": "knowledge", "value": 10, "operator": "add"}
         ]
       }
     ],
@@ -689,7 +689,7 @@
         "text": "反利用，设局反杀",
         "description": "你将计就计，借泄密反杀外敌，代价是江湖名望再受质疑。",
         "effects": [
-          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"},
           {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "subtract"},
           {"type": "flag_set", "target": "demonic_midlife_coopt"},
           {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
@@ -759,7 +759,7 @@
         "text": "假意接触，反利用局",
         "description": "你假意接触，设局反杀，代价是江湖名望再受质疑。",
         "effects": [
-          {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"},
           {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "subtract"},
           {"type": "flag_set", "target": "demonic_midlife_coopt"},
           {"type": "flag_set", "target": "demonic_midlife_betrayal_done"},
@@ -841,7 +841,7 @@
         "text": "维持现状，既不洗名也不加码",
         "description": "你暂缓极端选择，在权力与底线之间维持平衡。",
         "effects": [
-          {"type": "stat_modify", "target": "comprehension", "value": 4, "operator": "add"},
+          {"type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add"},
           {"type": "flag_set", "target": "demonic_midlife_balanced"},
           {"type": "flag_set", "target": "demonic_midlife_fork_done"},
           {"type": "event_record", "target": "demonic_fork_balance"}

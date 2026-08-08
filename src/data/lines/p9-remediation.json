@@ -283,7 +283,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
-      { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
       { "type": "flag_set", "target": "p9_childhood_study_recital", "value": true },
       { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "scholar_childhood_recital" }
     ],
@@ -629,7 +628,6 @@
     "eventType": "auto",
     "autoEffects": [
       { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
-      { "type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add" },
       { "type": "flag_set", "target": "p9_explicit_study_echo", "value": true },
       { "type": "flag_set", "target": "p9_summary_echo_study", "value": "幼年读书的习惯延续至今" },
       { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_lecturer" }
@@ -821,7 +819,6 @@
         "text": "登台讲学",
         "effects": [
           { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
-          { "type": "stat_modify", "target": "comprehension", "value": 10, "operator": "add" },
           { "type": "flag_set", "target": "p9_scholar_academy_gate_done", "value": true },
           { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_academy_debater" },
           { "type": "flag_set", "target": "scholar_path_started", "value": true }

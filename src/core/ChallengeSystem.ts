@@ -18,7 +18,6 @@ import { difficultyManager } from './DifficultyManager';
 export const CHALLENGE_MODIFIABLE_STATS = new Set([
   'martialPower',
   'constitution',
-  'comprehension',
   'knowledge',
   'charisma',
   'businessAcumen',

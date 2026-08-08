@@ -57,7 +57,6 @@ const STAT_KEYS = new Set([
   'internalSkill',
   'qinggong',
   'constitution',
-  'comprehension',
   'charisma',
   'chivalry',
   'reputation',

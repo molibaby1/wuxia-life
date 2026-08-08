@@ -52,7 +52,7 @@
       {
         "id": "origin_scholar_family",
         "text": "书香门第",
-        "description": "你生在书香门第，家学渊源让你悟性过人，也更重仁义礼法。",
+        "description": "你生在书香门第，家学渊源让你学识过人，也更重仁义礼法。",
         "effects": [
           {
             "type": "flag_set",
@@ -60,7 +60,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 8,
             "operator": "add"
           },

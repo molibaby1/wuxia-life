@@ -279,9 +279,9 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "撰写武学秘籍（需悟性≥60）",
+        "text": "撰写武学秘籍（需学识≥60）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 60"}
+          {"type": "expression", "expression": "knowledge >= 60"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": 80},

@@ -18,10 +18,17 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     martialPower: 42,
     chivalry: 13,
     constitution: 18,
-    comprehension: 24,
+    knowledge: 24,
+    connections: 11,
+    reputation: 10,
     money: 88,
+    charisma: 0,
+    businessAcumen: 0,
+    influence: 0,
     affiliation: 'wudang',
+    title: null,
     alive: true,
+    investments: { martial: 0, statecraft: 0, official: 0, hermit: 0 },
     currentYear: 19,
     currentMonth: 6,
     currentDay: 1,
@@ -47,7 +54,7 @@ function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): Main
 
 function createLifeMemory(overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary {
   return {
-    schemaVersion: '3.0.0',
+    schemaVersion: '3.1.0',
     derivedAtAge: 19,
     risks: [
       {
@@ -75,10 +82,10 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '功力 42', 'martial-dominant tendency collapses to martialPower readout');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
-  assert(model.topResources.length === 3, 'top resources should stay capped at three');
+  assert(model.topResources.length === 1 && model.topResources[0]?.key === 'money', 'money must remain a resource, not a core attribute');
   assert(
-    model.coreStats.map((item) => item.label).join(',') === '功力,银两',
-    'core stats should keep narrowed martial readout plus money',
+    model.coreStats.map((item) => item.label).join(',') === '功力,体魄,学识,人脉,名望,侠义声誉',
+    'core stats should expose the six canonical attributes with equal priority',
   );
   assert(
     model.coreStats.find((item) => item.key === 'martialPower')?.description === '武学总读数',
@@ -217,7 +224,11 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(summarySource.includes('实践'), 'formal main-screen summary must render the practice row');
   assert(summarySource.includes('practiceSummary'), 'practice row must consume the practiceSummary prop');
+  assert(summarySource.includes('印记') && summarySource.includes('milestoneSummary'), 'milestone row must remain conditional and model-driven');
+  assert(summarySource.includes('方向') && summarySource.includes('milestoneProspectSummary'), 'prospect row must remain conditional and model-driven');
   assert(gameScreenSource.includes(':practice-summary="mainScreenModel.practiceSummary"'), 'GameScreen must pass the shared practice summary');
+  assert(gameScreenSource.includes(':milestone-summary="mainScreenModel.milestoneSummary"'), 'GameScreen must pass the shared milestone summary');
+  assert(gameScreenSource.includes(':milestone-prospect-summary="mainScreenModel.milestoneProspectSummary"'), 'GameScreen must pass the shared milestone prospect summary');
   assert(gameScreenSource.includes('buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value)'), 'Local/API must keep the shared main-screen model builder');
   console.log('✓ keeps formal component rendering and Local/API shared builder');
 }
@@ -229,11 +240,12 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(!coreLabels.includes('外功'), 'externalSkill should be downgraded from first-screen coreStats');
   assert(!coreLabels.includes('内功'), 'internalSkill should be downgraded from first-screen coreStats');
   assert(!coreLabels.includes('轻功'), 'qinggong should be downgraded from first-screen coreStats');
-  assert(!coreLabels.includes('体魄'), 'constitution should not double-amplify on first-screen coreStats');
+  assert(coreLabels.includes('体魄'), 'constitution should remain equally visible with all canonical attributes');
+  assert(coreLabels.includes('学识'), 'knowledge should be immediately visible on the first screen');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    model.topResources.find((item) => item.key === 'constitution')?.description === '生存底子',
-    'constitution in topResources should read as survival base',
+    model.topResources.every((item) => item.key === 'money'),
+    'resource row must not duplicate selected canonical attributes',
   );
   console.log('✓ keeps narrowed first-screen emphasis (P123)');
 }
@@ -243,7 +255,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createPlayer({
       martialPower: 12,
       constitution: 8,
-      comprehension: 7,
+      knowledge: 7,
       chivalry: 6,
     }),
     createLifeMemory({ risks: [] }),
@@ -259,7 +271,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createPlayer({
       martialPower: 35,
       constitution: 12,
-      comprehension: 11,
+      knowledge: 11,
       chivalry: 9,
     }),
     createLifeMemory(),
@@ -277,7 +289,6 @@ console.log('=== Main Screen Model Tests ===\n');
       connections: 22,
       charisma: 18,
       businessAcumen: 20,
-      comprehension: 16,
       constitution: 14,
       chivalry: 8,
       reputation: 12,
@@ -297,7 +308,6 @@ console.log('=== Main Screen Model Tests ===\n');
       connections: 22,
       charisma: 18,
       businessAcumen: 20,
-      comprehension: 16,
       constitution: 14,
       chivalry: 8,
       reputation: 12,
@@ -306,7 +316,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createLifeMemory(),
   );
   assert(model.tendencySummary === highHabitModel.tendencySummary, 'businessHabit must not change tendency summary');
-  console.log('✓ merchant tendency surfaces non-martial numeric signals');
+  console.log('✓ non-martial tendency surfaces canonical numeric signals');
 }
 
 {
@@ -314,7 +324,7 @@ console.log('=== Main Screen Model Tests ===\n');
     createPlayer({
       martialPower: P124_MARTIAL_DOMINANT_SAMPLE.martialPower,
       constitution: 12,
-      comprehension: 11,
+      knowledge: 11,
       chivalry: 9,
     }),
     createLifeMemory(),
@@ -347,6 +357,25 @@ console.log('=== Main Screen Model Tests ===\n');
 
   assert(!('shapingSummary' in model), 'PlayerSummaryDto practice lifeStates must not drive shaping summary');
   console.log('✓ PlayerSummaryDto practice lifeStates stay out of shaping summary');
+}
+
+{
+  const model = buildMainScreenModel(createPlayer(), createLifeMemory({
+    achievedMilestones: [
+      { id: 'milestone-1', visibility: 'player', label: '初涉书卷', description: '开始读书', category: 'study', evidenceLabels: ['主动读书 1 次'], sortKey: 80, diagnostic: { milestoneId: 'study-first-step', conditionTypes: ['action_count'] } },
+      { id: 'milestone-2', visibility: 'player', label: '读书成习', description: '读书成习', category: 'study', evidenceLabels: ['读书实践 2 级'], sortKey: 90, diagnostic: { milestoneId: 'study-habit-formed', conditionTypes: ['habit_at_least'] } },
+      { id: 'milestone-3', visibility: 'player', label: '文武并进', description: '文武并进', category: 'mixed', evidenceLabels: ['读书实践 2 级'], sortKey: 110, diagnostic: { milestoneId: 'study-training-balanced', conditionTypes: ['habit_at_least'] } },
+    ],
+    milestoneProspects: [
+      { id: 'prospect-1', visibility: 'player', label: '少年勤学', description: '少年读书', category: 'study', progressRatio: 2 / 3, progressLabels: ['20 岁前主动读书 3 次 2/3'], sortKey: 100, diagnostic: { milestoneId: 'study-young-diligent', conditionTypes: ['action_count'] } },
+      { id: 'prospect-2', visibility: 'player', label: '练功成习', description: '练功', category: 'training', progressRatio: 1 / 2, progressLabels: ['练功实践 2 级 1/2'], sortKey: 90, diagnostic: { milestoneId: 'training-habit-formed', conditionTypes: ['habit_at_least'] } },
+    ],
+  }));
+  assert(model.milestoneSummary === '文武并进、读书成习', 'milestones should be priority-ranked and capped at two');
+  assert(model.milestoneProspectSummary === '少年勤学 · 20 岁前主动读书 3 次 2/3', 'only the top prospect should be rendered');
+  const empty = buildMainScreenModel(createPlayer(), createLifeMemory());
+  assert(empty.milestoneSummary === undefined && empty.milestoneProspectSummary === undefined, 'empty milestone data should not render summaries');
+  console.log('✓ summarizes visible milestone feedback without changing existing summaries');
 }
 
 {

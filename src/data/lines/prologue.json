@@ -150,7 +150,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 10,
             "operator": "add"
           },
@@ -460,7 +460,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 25,
             "operator": "add"
           },

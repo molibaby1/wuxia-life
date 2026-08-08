@@ -496,7 +496,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 2,
         "operator": "add"
       },
@@ -614,7 +614,7 @@
           {
             "id": "great_success",
             "text": "你天资过人，被少林寺主持一眼看中！主持亲自为你摩顶受戒，赐你【易筋经】秘籍。你的武学之路从此一飞冲天！",
-            "condition": {"type": "expression", "expression": "martialPower >= 20 && comprehension >= 20 && constitution >= 18"},
+            "condition": {"type": "expression", "expression": "martialPower >= 20 && knowledge >= 20 && constitution >= 18"},
             "effects": [
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
               {"type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add"},
@@ -668,7 +668,7 @@
           {
             "id": "great_success",
             "text": "武当掌门见你资质不凡，决定亲自收你为关门弟子！他将武当九阳神功倾囊相授，你的内功修为突飞猛进！",
-            "condition": {"type": "expression", "expression": "martialPower >= 20 && comprehension >= 18"},
+            "condition": {"type": "expression", "expression": "martialPower >= 20 && knowledge >= 18"},
             "effects": [
               {"type": "flag_set", "target": "sect_trial_active"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
@@ -702,7 +702,7 @@
             "effects": [
               {"type": "flag_set", "target": "sect_trial_active"},
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
-              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add"},
               {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
               {"type": "flag_set", "target": "wudangDisciple"},
               {"type": "flag_set", "target": "sect_wudang"},
@@ -949,7 +949,7 @@
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" },
           { "type": "flag_set", "target": "trial_mind_done" },
           { "type": "event_record", "target": "sect_trial_mind" }
         ]
@@ -962,7 +962,7 @@
         "effects": [
           { "type": "flag_set", "target": "sect_trial_started" },
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 1, "operator": "add" },
           { "type": "flag_set", "target": "trial_mind_delayed" },
           { "type": "event_record", "target": "sect_trial_mind_delay" }
         ]

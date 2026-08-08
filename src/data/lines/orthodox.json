@@ -62,7 +62,7 @@
         "effects": [
           {"type": "flag_set", "flag": "sect_wudang", "value": true},
           {"type": "stat_modify", "stat": "internalSkill", "value": 8},
-          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5}
         ]
       },
       {

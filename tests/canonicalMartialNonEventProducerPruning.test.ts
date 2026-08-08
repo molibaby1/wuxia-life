@@ -53,7 +53,6 @@ function createPlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     martialPower: 20,
     chivalry: 25,
     constitution: 20,
-    comprehension: 20,
     charisma: 20,
     knowledge: 20,
     connections: 10,
@@ -105,8 +104,13 @@ function testGreenStatic(): void {
   const childhood = findAction('action_childhood_training');
   const childhoodMp = rewardRange(childhood, 'martialPower');
   assert(
-    Boolean(childhoodMp) && childhoodMp!.min === 0 && childhoodMp!.max === 1,
-    'action_childhood_training must keep martialPower 0~1',
+    !childhoodMp,
+    'action_childhood_training must not offer a martialPower reward that the childhood age gate discards',
+  );
+  const childhoodConstitution = rewardRange(childhood, 'constitution');
+  assert(
+    Boolean(childhoodConstitution) && childhoodConstitution!.min === 1 && childhoodConstitution!.max === 2,
+    'action_childhood_training must keep its age-valid constitution reward visible',
   );
 
   const yard = findAction('action_childhood_yard_play');
@@ -154,8 +158,8 @@ function testGreenStatic(): void {
     'slow_witted must not gain martialPower penalty',
   );
   assert(
-    (slowWitted!.growthModifiers ?? []).some(item => item.stat === 'comprehension'),
-    'slow_witted must keep comprehension growth modifier',
+    (slowWitted!.growthModifiers ?? []).some(item => item.stat === 'knowledge'),
+    'slow_witted must apply its learning penalty to knowledge growth',
   );
 
   const hermitState = createState({ martialPower: 20, flags: {} });
@@ -182,8 +186,9 @@ function testGreenBehavior(): void {
   assertNoLegacyKeys(age7Result!.deltas, 'age 7 childhood training');
   assert(
     (age7Result!.deltas.martialPower ?? 0) === 0,
-    'age 7 childhood training must not bypass martialPower age gate',
+    'age 7 childhood training must not produce martialPower',
   );
+  assert(age7Result!.deltas.constitution === 2, 'age 7 childhood training must produce its age-valid reward');
 
   const age8 = createState({ age: 8, martialPower: 5});
   const age8Result = resolveActiveAction({
@@ -194,9 +199,10 @@ function testGreenBehavior(): void {
   assert(Boolean(age8Result), 'age 8 childhood training must resolve');
   assertNoLegacyKeys(age8Result!.deltas, 'age 8 childhood training');
   assert(
-    (age8Result!.deltas.martialPower ?? 0) === 1,
-    'age 8 childhood training must apply martialPower 0~1 at high roll',
+    (age8Result!.deltas.martialPower ?? 0) === 0,
+    'age 8 childhood training must remain constitution-only',
   );
+  assert(age8Result!.deltas.constitution === 2, 'age 8 childhood training must keep the same visible reward');
 
   const yardState = createState({ age: 6, martialPower: 5});
   const yardResult = resolveActiveAction({

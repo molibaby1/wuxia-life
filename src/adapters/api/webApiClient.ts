@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import type { ProgressionAckKind, SessionProgressionPayload } from '../../contracts/sessionProgression';
+import type { ChoiceFeedbackModel } from '../../types/choiceFeedback';
 import { webPlatformStorage } from '../platform/webPlatformStorage';
 
 export type ApiClientErrorCategory =
@@ -64,7 +65,7 @@ export type ChoiceResponse = SessionProgressionPayload & {
   slotVersion: number;
   snapshotId: string;
   contentHash?: string;
-  feedback?: { summary?: string };
+  feedback?: ChoiceFeedbackModel;
 };
 
 export class WebApiClient {

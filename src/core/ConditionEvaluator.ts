@@ -46,7 +46,6 @@ export class ConditionEvaluator implements IConditionEvaluator {
     'martialPower',
     'constitution',
     'charisma',
-    'comprehension',
     'chivalry',
     'reputation',
     'connections',

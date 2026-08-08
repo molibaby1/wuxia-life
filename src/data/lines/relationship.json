@@ -19,9 +19,9 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "拜入名门（需悟性≥40）",
+        "text": "拜入名门（需学识≥40）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 40"}
+          {"type": "expression", "expression": "knowledge >= 40"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 20},
@@ -32,7 +32,7 @@
       {
         "text": "自学成才",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "stat_modify", "stat": "martialPower", "value": 8}
         ]
       }
@@ -99,7 +99,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 25},
-      {"type": "stat_modify", "stat": "comprehension", "value": 15},
+      {"type": "stat_modify", "stat": "knowledge", "value": 15},
       {"type": "flag_set", "flag": "master_legacy", "value": true}
     ]
   },
@@ -151,6 +151,7 @@
     "choices": [
       {
         "text": "全力相助（需武力≥70，侠义 +15）",
+        "description": "全力相助可守住侠义，却会让你的功力、体魄与名望承受损失，这是必须付出的代价。",
         "conditions": [
           {"type": "expression", "expression": "martialPower >= 70"}
         ],
@@ -264,12 +265,12 @@
         ]
       },
       {
-        "text": "智取（需悟性≥60）",
+        "text": "智取（需学识≥60）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 60"}
+          {"type": "expression", "expression": "knowledge >= 60"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "flag_set", "flag": "revenge_complete", "value": true}
         ]
@@ -342,7 +343,7 @@
       {"type": "random", "value": 0.08}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 50 && chivalry >= 50"}
+      {"type": "expression", "expression": "knowledge >= 50 && chivalry >= 50"}
     ],
     "content": {
       "title": "知遇之恩",
@@ -351,7 +352,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "knowledge", "value": 20},
       {"type": "stat_modify", "stat": "martialPower", "value": 15},
       {"type": "stat_modify", "stat": "chivalry", "value": 10},
       {"type": "stat_modify", "stat": "charisma", "value": 10},

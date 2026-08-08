@@ -24,39 +24,32 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
     visibilityTier: 'explicit',
   },
   {
-    key: 'comprehension',
-    name: '悟性',
-    purpose: '领悟速度，影响研读秘籍与自创招式',
-    examples: ['观武', '闭关顿悟'],
-    visibilityTier: 'semi_implicit',
-  },
-  {
-    key: 'charisma',
-    name: '魅力',
-    purpose: '说服与社交倾向，影响 NPC 态度',
-    examples: ['宴饮', '调解纠纷'],
-    visibilityTier: 'semi_implicit',
+    key: 'knowledge',
+    name: '学识',
+    purpose: '知识、理解、文化和学习能力，影响读书、谋划与需要见识的选择',
+    examples: ['研读典籍', '科举献策'],
+    visibilityTier: 'explicit',
   },
   {
     key: 'connections',
     name: '人脉',
     purpose: '关系网络广度，影响情报与援手',
     examples: ['引荐', '求助'],
-    visibilityTier: 'semi_implicit',
+    visibilityTier: 'explicit',
   },
   {
     key: 'reputation',
     name: '名望',
     purpose: '江湖名望，解锁高门槛事件',
     examples: ['侠名远播', '恶名昭彰'],
-    visibilityTier: 'implicit',
+    visibilityTier: 'explicit',
   },
   {
     key: 'chivalry',
-    name: '侠义',
-    purpose: '道德倾向，影响正邪分支权重',
+    name: '侠义声誉',
+    purpose: '外界对行为与品行的评价，允许正值、负值或中立',
     examples: ['锄强扶弱', '见利忘义'],
-    visibilityTier: 'implicit',
+    visibilityTier: 'explicit',
   },
   {
     key: 'money',
@@ -65,35 +58,30 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
     examples: ['购书', '宴请'],
     visibilityTier: 'explicit',
   },
-  {
-    key: 'knowledge',
-    name: '学识',
-    purpose: '文化修养，影响科举与谋略选项',
-    examples: ['科举', '献策'],
-    visibilityTier: 'semi_implicit',
-  },
 ];
 
 export const ALWAYS_VISIBLE_ATTRIBUTE_KEYS = [
   'martialPower',
   'constitution',
-  'money',
+  'knowledge',
+  'connections',
+  'reputation',
+  'chivalry',
 ];
 
 export function getAttributeMeaning(key: string): AttributeMeaningDefinition | undefined {
   return attributeMeaningCatalog.find(entry => entry.key === key);
 }
 
-export function defaultSelfAwareness(player: { comprehension?: number }): number {
-  return Math.min(100, Math.max(0, (player.comprehension ?? 0) + 20));
+export function defaultSelfAwareness(player: { knowledge?: number }): number {
+  return Math.min(100, Math.max(0, (player.knowledge ?? 0) + 20));
 }
 
 export function fuzzyLabelForStat(key: string): string {
   const map: Record<string, string> = {
     reputation: '江湖传闻中你的名字时隐时现',
     chivalry: '行事风格正邪难辨',
-    comprehension: '似有所悟，难以言表',
-    charisma: '旁人对你观感不一',
+    knowledge: '积累尚浅，许多道理还未融会贯通',
     connections: '似乎识得一些人，但关系深浅未知',
   };
   return map[key] ?? '尚不清楚';

@@ -104,7 +104,7 @@
         "id": "keep_secret",
         "text": "保守秘密，传于后人 (学识 +15)",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
           { "type": "flag_set", "target": "doctor_secret_formula", "value": true }
         ]
       }
@@ -176,7 +176,7 @@
         "id": "write_book",
         "text": "著书立说，流传后世 (学识 +25, 声望 +15)",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 25, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 25, "operator": "add" },
           { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
           { "type": "karma_change", "good": 15, "evil": 0 },
           { "type": "flag_set", "target": "doctor_legacy", "value": true }
@@ -186,7 +186,7 @@
         "id": "family_inherit",
         "text": "传给子女，家传医术 (学识 +15)",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 15, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
           { "type": "flag_set", "target": "doctor_legacy", "value": true }
         ]
       }

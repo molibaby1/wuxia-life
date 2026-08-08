@@ -149,7 +149,7 @@ const saveId = manager.saveGame(runtimeState, 'canonical-boundary');
 const save = manager.loadGame(saveId);
 assert(save, 'canonical save should load');
 assert('snapshot' in save, 'browser save must persist a canonical snapshot');
-assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.13.0');
+assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.14.0');
 const restored = defaultSnapshotConverter.fromSnapshot(save.snapshot);
 assert.deepEqual(restored.actionHistory, runtimeState.actionHistory, 'actionHistory must round-trip');
 assert.deepEqual(restored.actionFocusStreak, runtimeState.actionFocusStreak, 'actionFocusStreak must round-trip');

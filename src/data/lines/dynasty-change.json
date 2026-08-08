@@ -20,12 +20,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "关注局势（需悟性≥60）",
+        "text": "关注局势（需学识≥60）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 60"}
+          {"type": "expression", "expression": "knowledge >= 60"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "reputation", "value": 8},
           {"type": "flag_set", "flag": "dynasty_aware", "value": true}
         ]
@@ -190,12 +190,12 @@
         ]
       },
       {
-        "text": "运筹帷幄（需悟性≥80）",
+        "text": "运筹帷幄（需学识≥80）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 80"}
+          {"type": "expression", "expression": "knowledge >= 80"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 18},
+          {"type": "stat_modify", "stat": "knowledge", "value": 18},
           {"type": "stat_modify", "stat": "reputation", "value": 25},
           {"type": "flag_set", "flag": "dynasty_conqueror", "value": true}
         ]
@@ -238,7 +238,7 @@
       {
         "text": "静观其变",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 10}
+          {"type": "stat_modify", "stat": "knowledge", "value": 10}
         ]
       }
     ]
@@ -264,7 +264,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 25},
       {"type": "stat_modify", "stat": "charisma", "value": 15},
-      {"type": "stat_modify", "stat": "comprehension", "value": 10}
+      {"type": "stat_modify", "stat": "knowledge", "value": 10}
     ]
   },
   {
@@ -350,12 +350,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "急流勇退（需悟性≥80）",
+        "text": "急流勇退（需学识≥80）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 80"}
+          {"type": "expression", "expression": "knowledge >= 80"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "knowledge", "value": 15},
           {"type": "stat_modify", "stat": "money", "value": -200},
           {"type": "flag_set", "flag": "dynasty_retired", "value": true}
         ]
@@ -401,7 +401,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "charisma", "value": 15},
-      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "knowledge", "value": 20},
       {"type": "flag_set", "flag": "dynasty_wise", "value": true}
     ]
   },
@@ -427,7 +427,7 @@
       {"type": "stat_modify", "stat": "reputation", "value": 20},
       {"type": "stat_modify", "stat": "money", "value": 150},
       {"type": "stat_modify", "stat": "constitution", "value": -5},
-      {"type": "stat_modify", "stat": "comprehension", "value": 10}
+      {"type": "stat_modify", "stat": "knowledge", "value": 10}
     ]
   },
   {
@@ -501,7 +501,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 30},
-      {"type": "stat_modify", "stat": "comprehension", "value": 25},
+      {"type": "stat_modify", "stat": "knowledge", "value": 25},
       {"type": "stat_modify", "stat": "charisma", "value": 20}
     ]
   }

@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 8}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 15 && chivalry >= 15"}
+      {"type": "expression", "expression": "knowledge >= 15 && chivalry >= 15"}
     ],
     "content": {
       "title": "医术天赋",
@@ -22,7 +22,7 @@
       {
         "text": "学习医术",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "chivalry", "value": 5},
           {"type": "flag_set", "flag": "medical_talent", "value": true}
         ]
@@ -58,7 +58,6 @@
       {
         "text": "顺势钻研医理",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
           {"type": "stat_modify", "stat": "knowledge", "value": 4},
           {"type": "flag_set", "flag": "p27_study_healer_path", "value": true},
           {"type": "flag_set", "flag": "medical_pure", "value": true},
@@ -105,7 +104,6 @@
       {
         "text": "接下汇辑之责",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 6},
           {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "flag_set", "flag": "p29_study_healer_case_duty", "value": true},
           {"type": "flag_set", "flag": "medical_divine_doctor_fame", "value": true},
@@ -197,14 +195,14 @@
         "text": "拜师学艺",
         "effects": [
           {"type": "flag_set", "flag": "medical_apprentice", "value": true},
-          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "knowledge", "value": 8},
           {"type": "stat_modify", "stat": "chivalry", "value": 6}
         ]
       },
       {
         "text": "自学成才",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "flag_set", "flag": "medical_self_taught", "value": true}
         ]
       }
@@ -230,7 +228,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6},
       {"type": "stat_modify", "stat": "constitution", "value": 4},
       {"type": "flag_set", "flag": "medical_herb_master", "value": true}
     ]
@@ -257,7 +255,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "chivalry", "value": 8},
       {"type": "stat_modify", "stat": "reputation", "value": 12},
-      {"type": "stat_modify", "stat": "comprehension", "value": 5}
+      {"type": "stat_modify", "stat": "knowledge", "value": 5}
     ]
   },
   {
@@ -281,14 +279,14 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "全力救治（需悟性≥40）",
+        "text": "全力救治（需学识≥40）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 40"}
+          {"type": "expression", "expression": "knowledge >= 40"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": 20},
           {"type": "stat_modify", "stat": "reputation", "value": 30},
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "flag_set", "flag": "medical_plague_hero", "value": true}
         ]
       },
@@ -360,7 +358,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 18},
-      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "knowledge", "value": 10},
       {"type": "stat_modify", "stat": "chivalry", "value": -5}
     ]
   },
@@ -486,7 +484,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 50},
-      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "stat_modify", "stat": "knowledge", "value": 12},
       {"type": "flag_set", "flag": "medical_book_author", "value": true}
     ]
   },

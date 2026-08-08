@@ -117,7 +117,7 @@ export function isEarlyChildhoodStoryGap(age: number): boolean {
 
 const BIAS_TAG_TO_CATEGORY: Record<string, ActionCategory> = {
   training: 'training',
-  comprehension: 'study',
+  learning: 'study',
   discipline: 'study',
   social: 'socializing',
   family: 'socializing',

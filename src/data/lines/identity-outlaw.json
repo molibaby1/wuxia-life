@@ -68,7 +68,7 @@
         "text": "专注内功心法",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 6},
-          {"type": "stat_modify", "stat": "comprehension", "value": 3}
+          {"type": "stat_modify", "stat": "knowledge", "value": 3}
         ]
       }
     ]
@@ -157,7 +157,7 @@
       {"type": "age_reach", "value": 20}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && comprehension >= 40"}
+      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && knowledge >= 40"}
     ],
     "content": {
       "title": "存在的意义",
@@ -184,7 +184,7 @@
       {
         "text": "独善其身，不参与纷争",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "flag_set", "flag": "outlaw_neutral", "value": true}
         ]
       }

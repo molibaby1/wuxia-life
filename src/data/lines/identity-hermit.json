@@ -163,7 +163,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 10,
             "operator": "add"
           },
@@ -345,7 +345,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 20,
             "operator": "add"
           },

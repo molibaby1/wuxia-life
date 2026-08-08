@@ -1,0 +1,156 @@
+<style>
+  .mobile-intro { max-width: 900px; margin: 0 auto 24px; }
+  .mobile-intro h2 { margin-bottom: 8px; }
+  .mobile-rule { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(121,83,42,.12); color: #d8c2a5; font-size: 13px; line-height: 1.55; }
+  .mobile-options { display: grid; gap: 30px; max-width: 930px; margin: 0 auto; }
+  .mobile-option { border: 2px solid #3e3e42; border-radius: 24px; overflow: hidden; background: #242426; cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease; }
+  .mobile-option:hover, .mobile-option.selected { border-color: #b7824c; box-shadow: 0 0 0 4px rgba(183,130,76,.12); }
+  .phone-stage { padding: 18px; background: #171719; }
+  .phone {
+    width: min(100%, 390px);
+    height: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid #3b3b3f;
+    border-radius: 28px;
+    background: linear-gradient(180deg, #f6f0e3, #eee3d2);
+    color: #34271d;
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  }
+  .app-top { min-height: 92px; padding: 13px 14px 10px; color: #fffaf1; background: linear-gradient(135deg, #6f4b1f, #8c6330); }
+  .identity-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .identity-row strong { font-size: 18px; }
+  .identity-row span { display: block; font-size: 11px; opacity: .82; }
+  .tiny-actions { display: flex; gap: 5px; }
+  .tiny-actions i { padding: 5px 7px; border: 1px solid rgba(255,255,255,.3); border-radius: 8px; font-size: 10px; font-style: normal; }
+  .mobile-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; margin-top: 10px; }
+  .mobile-stat { display: flex; justify-content: space-between; gap: 4px; padding: 6px 7px; border: 1px solid rgba(255,255,255,.13); border-radius: 999px; font-size: 10px; }
+  .mobile-stat b { font-size: 11px; }
+  .screen-body { padding: 10px; }
+  .echo-strip { border: 1px solid rgba(66,108,54,.2); border-radius: 14px; background: #f8f3e7; padding: 10px 11px; }
+  .echo-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .echo-head span { color: #68725e; font-size: 10px; font-weight: 800; letter-spacing: .06em; }
+  .echo-head strong { color: #6b3f1e; font-size: 13px; }
+  .echo-copy { margin: 5px 0 7px; color: #4e4136; font-size: 11px; line-height: 1.45; }
+  .echo-facts { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+  .echo-chip { padding: 4px 7px; border-radius: 999px; background: #e8f0e2; color: #35612e; font-size: 10px; font-weight: 800; }
+  .echo-impact { margin-left: auto; color: #765b3e; font-size: 9px; }
+  .event-card { margin-top: 9px; border: 1px solid rgba(139,105,20,.13); border-radius: 15px; background: #fffdf7; padding: 12px; }
+  .event-kicker { margin: 0 0 4px; color: #8b6914; font-size: 10px; font-weight: 800; }
+  .event-card h4 { margin: 0 0 5px; color: #77451f; font-size: 17px; }
+  .event-card > p:not(.event-kicker) { margin: 0 0 10px; color: #4f4136; font-size: 11px; line-height: 1.45; }
+  .mobile-choices { display: grid; gap: 7px; }
+  .mobile-choice { min-height: 48px; padding: 8px 10px; border: 1.5px solid #99602e; border-radius: 10px; background: #fffaf2; color: #693c1e; font-size: 12px; font-weight: 800; }
+  .mobile-choice small { display: block; margin-top: 2px; color: #77695b; font-size: 9px; font-weight: 500; }
+  .bottom-sheet { position: absolute; left: 10px; right: 10px; bottom: 10px; border-radius: 18px; background: #fffdf7; border: 1px solid rgba(139,105,20,.24); box-shadow: 0 -12px 30px rgba(52,39,29,.22); padding: 11px 12px 12px; }
+  .sheet-handle { width: 34px; height: 4px; margin: 0 auto 8px; border-radius: 99px; background: #c8b79f; }
+  .sheet-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .sheet-grid h4 { margin: 0; color: #6b3f1e; font-size: 14px; }
+  .sheet-grid p { margin: 3px 0 0; color: #5d4c3e; font-size: 10px; line-height: 1.4; }
+  .sheet-deltas { display: flex; gap: 5px; }
+  .sheet-deltas b { padding: 5px 7px; border-radius: 8px; background: #e8f0e2; color: #35612e; font-size: 11px; }
+  .phone.relative { position: relative; }
+  .header-echo { margin-top: 7px; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.17); display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .header-echo p { margin: 0; color: rgba(255,250,241,.88); font-size: 10px; line-height: 1.35; }
+  .header-deltas { display: flex; gap: 4px; }
+  .header-deltas b { padding: 4px 6px; border-radius: 7px; background: rgba(232,240,226,.94); color: #35612e; font-size: 10px; }
+  .option-copy { display: flex; gap: 13px; padding: 18px 20px 20px; border-top: 1px solid #39393d; }
+  .option-letter { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #83572d; color: #fff; font-weight: 800; }
+  .option-copy h3 { margin: 0 0 5px; color: #f4eee6; }
+  .option-copy p { margin: 0; color: #aaa4a0; font-size: 13px; line-height: 1.55; }
+  .recommend { display: inline-flex; margin-left: 7px; padding: 2px 7px; border-radius: 999px; background: #344d31; color: #bfe0b8; font-size: 11px; vertical-align: 2px; }
+  .fold-line { position: relative; margin: 9px 0 0; border-top: 1px dashed rgba(123,87,48,.35); }
+  .fold-line::after { content: '390 × 844 首屏边界'; position: absolute; top: -8px; right: 7px; padding: 0 5px; background: #eee3d2; color: #876a49; font-size: 8px; }
+</style>
+
+<div class="mobile-intro">
+  <h2>A 方案的移动端重做</h2>
+  <p class="subtitle">不是把双栏机械堆成上下两块，而是重新安排“刚刚发生”和“下一步选择”的优先级。以下都按 390 × 844 设计，选项触控区至少 48px。</p>
+  <div class="mobile-rule">共同规则：点击一次即结算并切到下一阶段；结果不重复选项文案、不阻塞操作、不要求确认。区别只在于结果放在哪里、占多少首屏空间。</div>
+</div>
+
+<div class="mobile-options">
+  <div class="mobile-option" data-choice="mobile-a" onclick="toggleSelect(this)">
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="app-top">
+          <div class="identity-row"><div><strong>江湖客</strong><span>8岁 · 9年1月1日</span></div><div class="tiny-actions"><i>保存</i><i>读档</i></div></div>
+          <div class="mobile-stats"><div class="mobile-stat"><span>银两</span><b>50</b></div><div class="mobile-stat"><span>体魄</span><b>16</b></div><div class="mobile-stat"><span>名望</span><b>2</b></div></div>
+        </div>
+        <div class="screen-body">
+          <section class="echo-strip">
+            <div class="echo-head"><span>刚刚发生</span><strong>出身落定</strong></div>
+            <p class="echo-copy">家学熏陶让你的筋骨和拳脚根基胜过同龄人。</p>
+            <div class="echo-facts"><span class="echo-chip">功力 +5</span><span class="echo-chip">体魄 +6</span><span class="echo-impact">长期：武林世家出身</span></div>
+          </section>
+          <section class="event-card">
+            <p class="event-kicker">下一阶段 · 可立即选择</p>
+            <h4>初识家学</h4>
+            <p>到了启蒙的年纪，家中开始认真考虑你今后的教养方向。</p>
+            <div class="mobile-choices">
+              <div class="mobile-choice">随长辈习武<small>打下扎实根基，也要承受更多磨炼</small></div>
+              <div class="mobile-choice">入书房开蒙<small>增长见识，从典籍中理解世事</small></div>
+              <div class="mobile-choice">跟随家中营生<small>熟悉人情往来与买卖门道</small></div>
+            </div>
+          </section>
+          <div class="fold-line"></div>
+        </div>
+      </div>
+    </div>
+    <div class="option-copy"><div class="option-letter">A1</div><div><h3>顶部回响条 <span class="recommend">推荐</span></h3><p>完整保留 A 的结果内容，但限制为约 110px。下一阶段标题和前两个选项仍在首屏，结果在下一次选择后自然替换。</p></div></div>
+  </div>
+
+  <div class="mobile-option" data-choice="mobile-b" onclick="toggleSelect(this)">
+    <div class="phone-stage">
+      <div class="phone relative">
+        <div class="app-top">
+          <div class="identity-row"><div><strong>江湖客</strong><span>8岁 · 9年1月1日</span></div><div class="tiny-actions"><i>保存</i><i>读档</i></div></div>
+          <div class="mobile-stats"><div class="mobile-stat"><span>银两</span><b>50</b></div><div class="mobile-stat"><span>体魄</span><b>16</b></div><div class="mobile-stat"><span>名望</span><b>2</b></div></div>
+        </div>
+        <div class="screen-body">
+          <section class="event-card" style="margin-top:0;padding-bottom:150px">
+            <p class="event-kicker">当前经历</p>
+            <h4>初识家学</h4>
+            <p>到了启蒙的年纪，家中开始认真考虑你今后的教养方向。</p>
+            <div class="mobile-choices">
+              <div class="mobile-choice">随长辈习武<small>打下扎实根基，也要承受更多磨炼</small></div>
+              <div class="mobile-choice">入书房开蒙<small>增长见识，从典籍中理解世事</small></div>
+              <div class="mobile-choice">跟随家中营生<small>熟悉人情往来与买卖门道</small></div>
+            </div>
+          </section>
+        </div>
+        <section class="bottom-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-grid"><div><h4>刚刚 · 出身落定</h4><p>家学熏陶让你的筋骨和拳脚根基胜过同龄人。<br>长期：武林世家出身</p></div><div class="sheet-deltas"><b>功力 +5</b><b>体魄 +6</b></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="option-copy"><div class="option-letter">A2</div><div><h3>底部回响抽屉</h3><p>下一阶段先占据视觉焦点，结果从底部浮起并自动收成一行。情绪反馈更强，但短时间会遮挡末尾选项。</p></div></div>
+  </div>
+
+  <div class="mobile-option" data-choice="mobile-c" onclick="toggleSelect(this)">
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="app-top" style="min-height:132px">
+          <div class="identity-row"><div><strong>江湖客</strong><span>8岁 · 9年1月1日</span></div><div class="tiny-actions"><i>保存</i><i>读档</i></div></div>
+          <div class="mobile-stats"><div class="mobile-stat"><span>银两</span><b>50</b></div><div class="mobile-stat"><span>体魄</span><b>16</b></div><div class="mobile-stat"><span>名望</span><b>2</b></div></div>
+          <div class="header-echo"><p><b>刚刚：</b>筋骨与拳脚根基胜过同龄人<br>长期：武林世家出身</p><div class="header-deltas"><b>功力 +5</b><b>体魄 +6</b></div></div>
+        </div>
+        <div class="screen-body">
+          <section class="event-card" style="margin-top:0">
+            <p class="event-kicker">当前经历 · 已进入下一阶段</p>
+            <h4>初识家学</h4>
+            <p>到了启蒙的年纪，家中开始认真考虑你今后的教养方向。</p>
+            <div class="mobile-choices">
+              <div class="mobile-choice">随长辈习武<small>打下扎实根基，也要承受更多磨炼</small></div>
+              <div class="mobile-choice">入书房开蒙<small>增长见识，从典籍中理解世事</small></div>
+              <div class="mobile-choice">跟随家中营生<small>熟悉人情往来与买卖门道</small></div>
+            </div>
+          </section>
+          <div class="fold-line"></div>
+        </div>
+      </div>
+    </div>
+    <div class="option-copy"><div class="option-letter">A3</div><div><h3>状态栏内联回响</h3><p>最节省主内容空间，变化与属性位置关联最直接；但结果叙事被压缩，长期看容易让每一步显得像纯数值日志。</p></div></div>
+  </div>
+</div>

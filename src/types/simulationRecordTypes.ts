@@ -1,5 +1,5 @@
 import type { ChoiceScoreDiagnostic } from '../p8/types';
-import type { EventChoice, GameState } from './eventTypes';
+import type { EffectDefinition, EventChoice, GameState } from './eventTypes';
 import type { DeathRiskTelemetry } from './deathRiskTelemetryTypes';
 import type { RomanceFamilyArcReport } from './romanceFamilyArcTypes';
 
@@ -16,6 +16,12 @@ export interface SimulationProcessRecord {
   selectedChoice?: EventChoice;
   availableChoices?: EventChoice[];
   outcomeText?: string;
+  /** P8: non-persistent before/after evidence for the executed simulation outcome. */
+  outcomeEvidence?: {
+    stateBefore: GameState;
+    stateAfter: GameState;
+    executedEffects?: EffectDefinition[];
+  };
   gameState: GameState;
   timestamp: string;
   currentTime?: { year: number; month: number; day: number };

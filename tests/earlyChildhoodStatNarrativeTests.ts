@@ -11,7 +11,7 @@ export function runEarlyChildhoodStatNarrativeTests(): void {
     sourceLabel: '童年岁月',
     headline: '识文断字',
     body: '你在长辈面前跟读蒙学字卡。',
-    deltas: { comprehension: 1 },
+    deltas: { knowledge: 1 },
     deltaCause: '识文断字',
   });
   assert(period.statDeltaSummary.includes('因「识文断字」'), 'period summary binds cause');

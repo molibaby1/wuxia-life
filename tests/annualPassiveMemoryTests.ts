@@ -21,7 +21,6 @@ function merchantInfantState(age = 0): GameState {
     player: {
       ...base.player,
       age,
-      comprehension: 10,
       constitution: 10,
       healthStatus: 'healthy',
       statuses: [],

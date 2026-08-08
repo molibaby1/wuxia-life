@@ -9,7 +9,7 @@ export const infantPassiveNarrativeCatalog: PassiveNarrativeEntry[] = [
     originTags: ['scholar'],
     ageMin: 3,
     ageMax: 4,
-    statDeltas: { comprehension: 1 },
+    statDeltas: { knowledge: 1 },
   },
   {
     id: 'toddler_martial_watch',
@@ -52,7 +52,7 @@ export const infantPassiveNarrativeCatalog: PassiveNarrativeEntry[] = [
     originTags: ['scholar'],
     ageMin: 3,
     ageMax: 7,
-    statDeltas: { comprehension: 1 },
+    statDeltas: { knowledge: 1 },
   },
   {
     id: 'child_martial_wooden_dummy',

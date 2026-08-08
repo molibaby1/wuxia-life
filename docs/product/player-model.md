@@ -117,6 +117,157 @@
 
 Habit 可以开启一个新的路线选择机会，但不能单独证明玩家已经拥有该路线或身份。身份型内容必须使用明确路线/身份事实，并在确有必要时同时要求 Habit 门槛。
 
+### Derived Life Milestone / 派生人生里程碑
+
+Life Milestone 用于将玩家已经形成的实践、状态和经历翻译为可理解的阶段反馈。
+
+正式数据关系为：
+
+```text
+Canonical Player Facts
++ Action History
++ Event History
++ Habit Trajectory
+→ Derived Life Milestones
+→ Player-visible Progress Feedback
+```
+
+Life Milestone 回答：
+
+- 玩家已经形成了哪些阶段成果；
+- 玩家当前正在接近哪些可能性；
+- 已有数值、实践和经历对玩家而言意味着什么。
+
+#### 正式边界
+
+Life Milestone 是只读派生结果，不属于新的玩家状态真相。
+
+它不得替代或重新定义：
+
+- Identity；
+- Affiliation；
+- Title；
+- Occupation；
+- Route；
+- Achievement；
+- Ending；
+- Habit。
+
+Life Milestone 不得写入或修改：
+
+- PlayerState；
+- GameState；
+- Snapshot state；
+- save data；
+- event scheduling；
+- event conditions；
+- choice conditions；
+- active-action result；
+- route eligibility；
+- ending eligibility。
+
+移除 Milestone 派生和展示后，原有游戏状态与运行流程必须仍然成立。
+
+#### 与 Achievement 的区别
+
+Achievement 是现有正式故事事实的一部分，可能由事件写入，并可能被后续事件、LifePath 或 Ending 消费。
+
+Milestone 是对既有事实的解释性投影，不得进入现有 Achievement 字段，也不得被游戏逻辑作为条件消费。
+
+```text
+Achievement
+= formal story fact
+
+Milestone
+= derived player feedback
+```
+
+#### 与 Identity、Title 的区别
+
+Milestone 可以表达：
+
+- 某个阶段达到过的水平；
+- 某种持续实践已经形成；
+- 某段经历获得了可理解的总结。
+
+Milestone 不自动证明玩家当前正式是谁，也不授予正式社会头衔。
+
+例如：
+
+```text
+Milestone：少年勤学
+Identity：书生
+Title：翰林学士
+Habit：长期读书
+```
+
+这些概念可以同时存在，但不能互相替代。
+
+#### 可使用的证据
+
+第一阶段只允许使用可可靠解释的现有事实：
+
+- canonical Habit；
+- active-action history；
+- event history；
+- 经审核的 durable result facts；
+- canonical current facts。
+
+条件必须能够向玩家说明：
+
+- 当前已经满足了什么；
+- 尚缺少什么；
+- 为什么获得该 Milestone。
+
+#### 历史证据限制
+
+只有现有历史能够可靠证明时，Milestone 才能声明：
+
+- 曾经达成；
+- 达成年龄；
+- 达成依据。
+
+当前可变数值可以用于“正在接近”的方向提示，但不得在缺少历史快照时伪造：
+
+- 曾经达到过某个数值；
+- 首次达到某个数值的年龄；
+- 数值下降后仍应永久保留的历史成果。
+
+第一阶段不新增 Milestone unlock ledger。
+
+#### Habit 边界
+
+Habit 只证明长期实践已经形成。
+
+Milestone 可以将 Habit 翻译为阶段反馈，例如：
+
+```text
+studyHabit 达到稳定积累
+→ 读书成习
+```
+
+但不得把 Habit 或 Milestone 提升为：
+
+- personality；
+- Identity；
+- Occupation；
+- Affiliation；
+- Title；
+- Ending。
+
+#### 透明优先
+
+当前产品阶段以可理解性优先。
+
+玩家可见的 Milestone 应明确展示：
+
+- 名称；
+- 描述；
+- 达成依据；
+- 当前进度或尚缺条件。
+
+隐藏条件、模糊提示和探索型成就不属于第一阶段。
+
 ### Family / Social life-state removal
 
 `familyBond` / `socialMomentum` 已从 Canonical Player State 删除。
@@ -243,6 +394,7 @@ lifePath.primaryIdentity
 - 将 ending name 临时写入 `player.title`；
 - 使用 `player.sect` 与 `flags.current_sect` 维护两个组织归属来源；
 - 将外功、内功、轻功与功力同时作为成长值；
+- 独立的悟性（`comprehension`）成长值；学习理解统一归入学识，天生禀赋由 Trait 表达；
 - 长期精力值；
 - 通用 discipline / indulgence 玩家成长数值轴；
 - 通用 NPC 好感度系统。

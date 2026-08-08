@@ -417,10 +417,10 @@
           {
             "id": "success",
             "text": "你冷静观察形势，发现歹徒不过外强中干。你巧设计谋，不费一兵一卒便令歹徒知难而退。老者对你刮目相看：\"少侠好谋略！\"",
-            "condition": {"type": "expression", "expression": "comprehension >= 15"},
+            "condition": {"type": "expression", "expression": "knowledge >= 15"},
             "effects": [
               {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
-              {"type": "stat_modify", "target": "comprehension", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add"},
               {"type": "flag_set", "target": "orthodox_trial_service_done"},
               {"type": "flag_set", "target": "orthodox_trial_smart"},
@@ -430,10 +430,10 @@
           {
             "id": "partial",
             "text": "你冷静观察，发现自己实力不足以正面对抗。便暗中跟踪歹徒，在他们放松警惕时报官处理。虽然方法迂回，但也解了老者之围。",
-            "condition": {"type": "expression", "expression": "comprehension >= 10"},
+            "condition": {"type": "expression", "expression": "knowledge >= 10"},
             "effects": [
               {"type": "time_advance", "target": "age", "value": 18, "timeUnit": "day"},
-              {"type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add"},
+              {"type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add"},
               {"type": "stat_modify", "target": "influence", "value": 3, "operator": "add"},
               {"type": "flag_set", "target": "orthodox_trial_service_done"},
               {"type": "event_record", "target": "orthodox_trial_service_meditate_partial"}

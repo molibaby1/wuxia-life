@@ -19,7 +19,6 @@ function makeState(overrides: Partial<GameState['player']> = {}): GameState {
       martialPower: 20,
       chivalry: 20,
       constitution: 50,
-      comprehension: 20,
       affiliation: null,
       title: null,
       reputation: 40,
@@ -117,7 +116,7 @@ function testDescriptionIsDeterministicAndOtherEndingsRemainStatic(): void {
 
 function testEndingClassificationDoesNotChange(): void {
   const martial = makeState({ martialPower: 95 });
-  const scholar = makeState({ comprehension: 82, knowledge: 85 });
+  const scholar = makeState({ knowledge: 85 });
   const wealth = makeState({ businessAcumen: 75, money: 687, spouse: '发妻', children: 1 });
   const balanced = makeState({ martialPower: 61, knowledge: 59, spouse: '发妻', children: 1 });
 

@@ -94,7 +94,7 @@ export function getOriginGuidanceEventMultiplier(
   if (!surface) return 1;
   let multiplier = 1;
   const { guidanceQuality, socialCapital } = surface.immediateConditions;
-  if (eventTags.has('comprehension') || eventTags.has('discipline')) {
+  if (eventTags.has('learning') || eventTags.has('discipline')) {
     multiplier *= 0.75 + guidanceQuality * 0.5;
   }
   if (eventTags.has('social') || eventTags.has('family')) {

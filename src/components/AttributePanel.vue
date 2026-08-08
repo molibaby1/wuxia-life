@@ -158,13 +158,10 @@ const combatStatConfigs = [
 
 // 非战斗属性配置
 const nonCombatStatConfigs = [
-  { key: 'charisma', name: '魅力' },
-  { key: 'comprehension', name: '悟性' },
-  { key: 'chivalry', name: '侠义', min: -100, max: 100 },
-  { key: 'reputation', name: '名望', min: -1000, max: 1000 },
-  { key: 'connections', name: '人脉' },
   { key: 'knowledge', name: '学识' },
-  { key: 'wealth', name: '财富', max: 10000 }
+  { key: 'connections', name: '人脉' },
+  { key: 'reputation', name: '名望', min: -1000, max: 1000 },
+  { key: 'chivalry', name: '侠义声誉', min: -100, max: 100 },
 ];
 
 // 获取战斗属性

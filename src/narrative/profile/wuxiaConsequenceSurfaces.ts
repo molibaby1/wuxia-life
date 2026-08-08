@@ -30,7 +30,7 @@ export const P17_RELATIONSHIP_MENTOR_OBLIGATION: RelationshipConsequencePattern 
   baseIntensity: 0.7,
   opportunityTags: [
     { tag: 'training', multiplier: 1.2 },
-    { tag: 'comprehension', multiplier: 1.15 },
+    { tag: 'learning', multiplier: 1.15 },
   ],
   riskTags: [
     { tag: 'duty', multiplier: 1.45 },

@@ -60,7 +60,7 @@
         "id": "apprentice_hard",
         "text": "勤学苦练，争取早日出师",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
           { "type": "stat_modify", "target": "businessAcumen", "value": 2, "operator": "add" },
           { "type": "flag_set", "target": "completed_apprenticeship", "value": true }
         ]
@@ -107,7 +107,7 @@
         "id": "neighbor_observe",
         "text": "冷眼旁观，了解人性",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" },
           { "type": "stat_modify", "target": "influence", "value": 1, "operator": "add" }
         ]
       }
@@ -265,7 +265,7 @@
         "id": "patrol_cautious",
         "text": "审时度势，谨慎行事",
         "effects": [
-          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
           { "type": "stat_modify", "target": "influence", "value": 3, "operator": "add" }
         ]
       }
@@ -296,7 +296,7 @@
         "text": "专注内功修炼",
         "effects": [
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" }
         ]
       },
       {
@@ -349,7 +349,7 @@
         "text": "因材施教，耐心指导",
         "effects": [
           { "type": "stat_modify", "target": "chivalry", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" }
+          { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" }
         ]
       }
     ]
@@ -379,8 +379,7 @@
         "id": "study_classics",
         "text": "研读经典，夯实基础",
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
-          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+          { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" }
         ]
       },
       {

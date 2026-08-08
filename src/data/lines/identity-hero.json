@@ -309,7 +309,7 @@
         ]
       },
       {
-        "text": "出谋划策，指挥作战 (侠义 +15, 声望 +20, 悟性 +5)",
+        "text": "出谋划策，指挥作战 (侠义 +15, 声望 +20, 学识 +5)",
         "effects": [
           {
             "type": "stat_modify",
@@ -325,7 +325,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 5,
             "operator": "add"
           },
@@ -538,7 +538,7 @@
       {
         "id": "hero_peril_retreat",
         "text": "退避寻援",
-        "description": "你暂缓押镖，先寻援手，以保全身而退。",
+        "description": "你暂缓押镖，先寻援手，以保全身而退；此举虽可得援手，却也有名望受损的代价。",
         "effects": [
           {
             "type": "stat_modify",

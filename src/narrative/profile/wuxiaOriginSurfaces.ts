@@ -112,7 +112,7 @@ export const WUXIA_ORIGIN_SURFACES: WorldProfileOriginSurface[] = [
       socialEase: 0,
     },
     eventBiasTags: [
-      { tag: 'comprehension', multiplier: 1.35 },
+      { tag: 'learning', multiplier: 1.35 },
       { tag: 'discipline', multiplier: 1.15 },
     ],
   },
@@ -530,6 +530,6 @@ export const WUXIA_RARE_EVENT_LINES: RareEventLineConfig[] = [
     stageConditions: { minAge: 8, maxAge: 22 },
     priorChoiceFlags: ['focus_on_study'],
     unlocksFlags: ['p16_scholar_mentor'],
-    altersOpportunityTags: ['comprehension', 'discipline'],
+    altersOpportunityTags: ['learning', 'discipline'],
   },
 ];

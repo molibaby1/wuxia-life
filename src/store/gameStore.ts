@@ -14,7 +14,6 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     
     chivalry: 0,
     constitution: 0,
-    comprehension: 0,
     reputation: 0,
     knowledge: 0,
     charisma: 0,

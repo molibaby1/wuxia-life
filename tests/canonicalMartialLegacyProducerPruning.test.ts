@@ -143,7 +143,7 @@ function testNoCompensationBranches(events: EventDefinition[]): void {
 function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
   const loader = EventLoader.getInstance();
   const disciple = loader.getEventById('relationship_master_disciple');
-  const discipleChoice = disciple?.choices?.find(choice => choice.text === '拜入名门（需悟性≥40）');
+  const discipleChoice = disciple?.choices?.find(choice => choice.text === '拜入名门（需学识≥40）');
   const discipleLegacy = legacyEffects(discipleChoice?.effects);
   assert(discipleLegacy.length === 0, 'relationship_master_disciple must not write legacy martial fields');
   assert(

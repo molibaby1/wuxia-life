@@ -78,10 +78,10 @@
         ]
       },
       {
-        "text": "机智应对（轻功 +12，悟性 +5）",
+        "text": "机智应对（轻功 +12，学识 +5）",
         "effects": [
           {"type": "stat_modify", "stat": "qinggong", "value": 12},
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "flag_set", "flag": "smart_patroller", "value": true}
         ]
       }

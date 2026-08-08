@@ -40,7 +40,7 @@ export interface InfantStatSnapshot {
   chivalry: number;
   martialPower: number;
   money: number;
-  comprehension: number;
+  knowledge: number;
   constitution: number;
 }
 
@@ -125,7 +125,7 @@ function snapshotPlayerStats(player: PlayerState | undefined): InfantStatSnapsho
     chivalry: player?.chivalry ?? 0,
     martialPower: player?.martialPower ?? 0,
     money: player?.money ?? 0,
-    comprehension: player?.comprehension ?? 0,
+    knowledge: player?.knowledge ?? 0,
     constitution: player?.constitution ?? 0,
   };
 }

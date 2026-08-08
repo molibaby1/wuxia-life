@@ -641,7 +641,7 @@
         "effects": [
           { "type": "flag_set", "target": "origin_scholar_family" },
           { "type": "stat_modify", "target": "internalSkill", "value": 4, "operator": "add" },
-          { "type": "stat_modify", "target": "comprehension", "value": 8, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
           { "type": "stat_modify", "target": "chivalry", "value": 4, "operator": "add" },
           { "type": "event_record", "target": "origin_scholar_family" }
         ]

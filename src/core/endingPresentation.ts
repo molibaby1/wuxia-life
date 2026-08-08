@@ -69,7 +69,7 @@ function quietLifeAxisLines(state: GameState, axis: QuietLifeAxis): string[] {
     case 'study':
       return [
         '你曾把许多年月用在读书和见识的积累上。',
-        player.knowledge >= 50 || player.comprehension >= 50 ? '学识与思考成为你看待世界、安顿生活的底气。' : '这份积累没有化作传奇，却让你的日子多了一层自己的理解。',
+        player.knowledge >= 50 ? '学识与思考成为你看待世界、安顿生活的底气。' : '这份积累没有化作传奇，却让你的日子多了一层自己的理解。',
       ];
     case 'ordinary':
       return ['你没有把一生押在单一的传奇道路上，却也在日常选择中留下了自己的分量。'];

@@ -134,7 +134,6 @@ export const dailyEvents: DailyEventConfig[] = [
           weight: 3,
           text: '你伏案抄书，起初只是照着字形描摹，渐渐也读出了其中意味。',
           statEffects: [
-            { stat: 'comprehension', value: 1 },
             { stat: 'knowledge', value: 1 },
           ],
         },
@@ -177,7 +176,6 @@ export const dailyEvents: DailyEventConfig[] = [
           text: '你把书里的关键处都记了下来，忽然觉得许多道理在心里连成了一线。',
           statEffects: [
             { stat: 'knowledge', value: 1 },
-            { stat: 'comprehension', value: 1 },
             { stat: 'charisma', value: 1 },
           ],
         },

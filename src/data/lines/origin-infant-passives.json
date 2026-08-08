@@ -28,7 +28,7 @@
           "ageMax": 0,
           "flags": ["scholar_infant_hall_birth"],
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -41,7 +41,7 @@
           "flags": ["scholar_infant_swaddle_ink"],
           "legacyCatalogId": "infant_swaddle_scholar",
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -53,7 +53,7 @@
           "ageMax": 1,
           "flags": ["scholar_infant_grasp_brush", "p9_early_scholar_seed"],
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -160,7 +160,7 @@
           "ageMax": 0,
           "flags": ["merchant_infant_shop_birth"],
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -173,7 +173,7 @@
           "flags": ["merchant_infant_swaddle_abacus"],
           "legacyCatalogId": "infant_swaddle_merchant",
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -185,7 +185,7 @@
           "ageMax": 1,
           "flags": ["merchant_infant_grasp_scale", "p9_early_merchant_seed"],
           "statDeltas": {
-            "comprehension": 1
+            "knowledge": 1
           }
         },
         {
@@ -348,7 +348,7 @@
           "ageMin": 0,
           "ageMax": 0,
           "flags": ["apprentice_infant_shop_birth"],
-          "statDeltas": { "comprehension": 1 }
+          "statDeltas": { "knowledge": 1 }
         },
         {
           "id": "apprentice_infant_02_swaddle_shavings",
@@ -358,7 +358,7 @@
           "ageMin": 0,
           "ageMax": 0,
           "flags": ["apprentice_infant_swaddle_shavings"],
-          "statDeltas": { "comprehension": 1 }
+          "statDeltas": { "knowledge": 1 }
         },
         {
           "id": "apprentice_infant_03_grasp_chisel",
@@ -368,7 +368,7 @@
           "ageMin": 1,
           "ageMax": 1,
           "flags": ["apprentice_infant_grasp_chisel", "p9_early_apprentice_seed"],
-          "statDeltas": { "comprehension": 1 }
+          "statDeltas": { "knowledge": 1 }
         },
         {
           "id": "apprentice_infant_04_workbench_crawl",

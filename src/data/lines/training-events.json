@@ -54,7 +54,7 @@
       },
       {
         "id": "training_internal",
-        "text": "打坐修炼内功（内功 +3~5，悟性 +1）",
+        "text": "打坐修炼内功（内功 +3~5，学识 +1）",
         "effects": [
           {
             "type": "stat_modify",
@@ -67,7 +67,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 1,
             "operator": "add"
           },
@@ -286,7 +286,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 2,
         "operator": "add"
       },
@@ -507,7 +507,7 @@
       { "type": "random", "value": 0.08 }
     ],
     "conditions": [
-      { "type": "expression", "expression": "(externalSkill >= 50 || internalSkill >= 50) && comprehension >= 40" }
+      { "type": "expression", "expression": "(externalSkill >= 50 || internalSkill >= 50) && knowledge >= 40" }
     ],
     "content": {
       "title": "瓶颈突破",
@@ -544,11 +544,11 @@
       },
       {
         "id": "training_breakthrough_wait",
-        "text": "稳扎稳打，等待更好时机（悟性 +3）",
+        "text": "稳扎稳打，等待更好时机（学识 +3）",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },

@@ -14,10 +14,10 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'martial_arts_tournament',
     name: '武林大会',
     baseFailureRate: 50,
-    relevantStats: ['martialPower', 'comprehension'],
+    relevantStats: ['martialPower', 'knowledge'],
     thresholds: {
       martialPower: { qualified: 80, excellent: 150, failureRateReduction: 0.3 },
-      comprehension: { qualified: 40, excellent: 70, failureRateReduction: 0.1 }
+      knowledge: { qualified: 40, excellent: 70, failureRateReduction: 0.1 }
     },
     description: '高手云集的武林大会，挑战各路英雄'
   },
@@ -37,10 +37,9 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'imperial_exam',
     name: '科举考试',
     baseFailureRate: 40,
-    relevantStats: ['knowledge', 'comprehension', 'charisma'],
+    relevantStats: ['knowledge', 'charisma'],
     thresholds: {
       knowledge: { qualified: 60, excellent: 85, failureRateReduction: 0.25 },
-      comprehension: { qualified: 50, excellent: 75, failureRateReduction: 0.15 },
       charisma: { qualified: 40, excellent: 70, failureRateReduction: 0.1 }
     },
     description: '十年寒窗，一举成名天下知'
@@ -74,11 +73,11 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'sect_trial',
     name: '门派试炼',
     baseFailureRate: 45,
-    relevantStats: ['martialPower', 'constitution', 'comprehension'],
+    relevantStats: ['martialPower', 'constitution', 'knowledge'],
     thresholds: {
       martialPower: { qualified: 40, excellent: 80, failureRateReduction: 0.2 },
       constitution: { qualified: 40, excellent: 70, failureRateReduction: 0.15 },
-      comprehension: { qualified: 30, excellent: 60, failureRateReduction: 0.1 }
+      knowledge: { qualified: 30, excellent: 60, failureRateReduction: 0.1 }
     },
     description: '入门弟子必须通过的试炼考验'
   },
@@ -98,9 +97,9 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'cultivation_breakthrough',
     name: '闭关突破',
     baseFailureRate: 35,
-    relevantStats: ['comprehension', 'constitution'],
+    relevantStats: ['knowledge', 'constitution'],
     thresholds: {
-      comprehension: { qualified: 45, excellent: 75, failureRateReduction: 0.15 },
+      knowledge: { qualified: 45, excellent: 75, failureRateReduction: 0.15 },
       constitution: { qualified: 35, excellent: 65, failureRateReduction: 0.1 }
     },
     description: '试图突破武学瓶颈，更上一层楼'
@@ -134,9 +133,9 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'formation_challenge',
     name: '阵法破解',
     baseFailureRate: 60,
-    relevantStats: ['comprehension', 'martialPower'],
+    relevantStats: ['knowledge', 'martialPower'],
     thresholds: {
-      comprehension: { qualified: 55, excellent: 85, failureRateReduction: 0.25 },
+      knowledge: { qualified: 55, excellent: 85, failureRateReduction: 0.25 },
       martialPower: { qualified: 40, excellent: 75, failureRateReduction: 0.15 }
     },
     description: '破解高深阵法，一展聪慧'
@@ -159,11 +158,10 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'official_exam',
     name: '殿试对策',
     baseFailureRate: 55,
-    relevantStats: ['knowledge', 'charisma', 'comprehension'],
+    relevantStats: ['knowledge', 'charisma'],
     thresholds: {
       knowledge: { qualified: 70, excellent: 90, failureRateReduction: 0.3 },
       charisma: { qualified: 50, excellent: 80, failureRateReduction: 0.2 },
-      comprehension: { qualified: 55, excellent: 80, failureRateReduction: 0.15 }
     },
     description: '面见圣上，阐述治国之策'
   },
@@ -172,10 +170,9 @@ export const CHALLENGE_SCENES: Record<string, ChallengeScene> = {
     id: 'medical_challenge',
     name: '疑难杂症',
     baseFailureRate: 45,
-    relevantStats: ['knowledge', 'comprehension', 'connections'],
+    relevantStats: ['knowledge', 'connections'],
     thresholds: {
       knowledge: { qualified: 60, excellent: 85, failureRateReduction: 0.25 },
-      comprehension: { qualified: 50, excellent: 75, failureRateReduction: 0.15 },
       connections: { qualified: 30, excellent: 60, failureRateReduction: 0.1 }
     },
     description: '诊治棘手病症，妙手回春'

@@ -22,6 +22,7 @@
       {
         "id": "study_business",
         "text": "学习经商",
+        "description": "重新学习经商会让你暂时承受处世手腕和金钱上的损失，这是从头起步的代价。",
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "stat_modify", "stat": "money", "value": 20},
@@ -33,7 +34,7 @@
         "id": "focus_studying",
         "text": "专心读书",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5}
         ]
       }
     ],
@@ -135,9 +136,9 @@
       },
       {
         "id": "change_strategy",
-        "text": "改变经营策略（悟性 +5）",
+        "text": "改变经营策略（学识 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "charisma", "value": 3},
           {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
         ]

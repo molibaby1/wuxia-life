@@ -20,8 +20,15 @@ import {
   type LifeMemoryKeyChoiceEntry,
   type LifeMemoryRelationshipEntry,
   type LifeMemoryRiskEntry,
+  type LifeMemoryMilestoneEntry,
+  type LifeMemoryMilestoneProspectEntry,
   type LifeMemorySummary,
 } from '../types/lifeMemory';
+import {
+  deriveMilestoneProjection,
+  type MilestoneEvaluation,
+  type MilestoneProjection,
+} from './deriveMilestoneProjection';
 import { derivePracticeTrajectoryLines } from '../utils/practiceTrajectorySummary';
 import {
   deriveSampleLineAge40Identity,
@@ -691,6 +698,41 @@ function buildHabitTrajectory(state: GameState): LifeMemoryHabitTrajectoryEntry[
   }));
 }
 
+function milestoneDiagnostic(evaluation: MilestoneEvaluation) {
+  return {
+    milestoneId: evaluation.definition.id,
+    conditionTypes: evaluation.definition.conditions.map((condition) => condition.type),
+  };
+}
+
+function buildAchievedMilestones(projection: MilestoneProjection): LifeMemoryMilestoneEntry[] {
+  return projection.achieved.map((evaluation) => ({
+    id: `milestone-${evaluation.definition.id}`,
+    visibility: 'player',
+    sortKey: evaluation.definition.priority,
+    ...(evaluation.occurredAtAge === undefined ? {} : { occurredAtAge: evaluation.occurredAtAge }),
+    label: evaluation.definition.label,
+    description: evaluation.definition.description,
+    category: evaluation.definition.category,
+    evidenceLabels: evaluation.evidenceLabels,
+    diagnostic: milestoneDiagnostic(evaluation),
+  }));
+}
+
+function buildMilestoneProspects(projection: MilestoneProjection): LifeMemoryMilestoneProspectEntry[] {
+  return projection.prospects.slice(0, 3).map((evaluation) => ({
+    id: `milestone-prospect-${evaluation.definition.id}`,
+    visibility: 'player',
+    sortKey: evaluation.definition.priority,
+    label: evaluation.definition.label,
+    description: evaluation.definition.description,
+    category: evaluation.definition.category,
+    progressRatio: evaluation.progressRatio,
+    progressLabels: evaluation.progressLabels,
+    diagnostic: milestoneDiagnostic(evaluation),
+  }));
+}
+
 /**
  * Derive a serializable life memory summary from current game state.
  * Does not mutate state or persist redundant memory fields.
@@ -705,6 +747,9 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
     buildAchievements(state),
   );
   const habitTrajectory = buildHabitTrajectory(state);
+  const milestoneProjection = deriveMilestoneProjection(state);
+  const achievedMilestones = buildAchievedMilestones(milestoneProjection);
+  const milestoneProspects = buildMilestoneProspects(milestoneProjection);
 
   const summary: LifeMemorySummary = {
     schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
@@ -719,6 +764,8 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   const optionalRisks = omitEmpty(risks);
   const optionalAchievements = omitEmpty(achievements);
   const optionalHabitTrajectory = omitEmpty(habitTrajectory);
+  const optionalAchievedMilestones = omitEmpty(achievedMilestones);
+  const optionalMilestoneProspects = omitEmpty(milestoneProspects);
 
   if (optionalKeyChoices) summary.keyChoices = optionalKeyChoices;
   if (optionalRelationships) summary.relationships = optionalRelationships;
@@ -726,6 +773,8 @@ export function deriveLifeMemorySummary(state: GameState): LifeMemorySummary {
   if (optionalRisks) summary.risks = optionalRisks;
   if (optionalAchievements) summary.achievements = optionalAchievements;
   if (optionalHabitTrajectory) summary.habitTrajectory = optionalHabitTrajectory;
+  if (optionalAchievedMilestones) summary.achievedMilestones = optionalAchievedMilestones;
+  if (optionalMilestoneProspects) summary.milestoneProspects = optionalMilestoneProspects;
 
   const flags = state.flags ?? {};
   const ordinaryLifeMemory = deriveOrdinaryOriginLifeMemory(flags);

@@ -16,7 +16,6 @@ function makeState(flags: Record<string, unknown>): GameState {
       martialPower: 10,
       chivalry: 10,
       constitution: 10,
-      comprehension: 10,
       affiliation: null,
       title: null,
       reputation: 4,

@@ -23,13 +23,12 @@ export const weaknesses: WeaknessConfig[] = [
     summary: '很多道理总要慢几拍才懂。',
     flavor: '你不是不努力，只是很多道理总要比别人慢几拍才想得明白。',
     initialStats: [
-      { stat: 'comprehension', value: -5 },
       { stat: 'knowledge', value: -2 },
     ],
     growthModifiers: [
-      { stat: 'comprehension', multiplier: 0.82 },
+      { stat: 'knowledge', multiplier: 0.82 },
     ],
-    eventBiases: [{ tag: 'comprehension', multiplier: 0.75 }],
+    eventBiases: [{ tag: 'learning', multiplier: 0.75 }],
     removable: false,
   },
   {
@@ -93,7 +92,6 @@ export const weaknesses: WeaknessConfig[] = [
     initialStats: [
       { stat: 'connections', value: -4 },
       { stat: 'charisma', value: -2 },
-      { stat: 'comprehension', value: 1 },
     ],
     growthModifiers: [
       { stat: 'connections', multiplier: 0.8 },
@@ -102,7 +100,7 @@ export const weaknesses: WeaknessConfig[] = [
     eventBiases: [
       { tag: 'social', multiplier: 0.7 },
       { tag: 'family', multiplier: 0.85 },
-      { tag: 'comprehension', multiplier: 1.1 },
+      { tag: 'learning', multiplier: 1.1 },
     ],
     removable: false,
   },

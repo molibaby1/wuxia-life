@@ -57,7 +57,7 @@
       },
       {
         "id": "talent_choice_3",
-        "text": "过目不忘（学识成长 +50%，悟性 +30%）",
+        "text": "过目不忘（学识成长 +50%，学识 +30%）",
         "condition": {
           "type": "expression",
           "expression": "true"
@@ -173,11 +173,11 @@
       },
       {
         "id": "talent_martial_patient",
-        "text": "不急不躁，继续打磨基础（悟性 +3）",
+        "text": "不急不躁，继续打磨基础（学识 +3）",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -281,12 +281,6 @@
         "type": "stat_modify",
         "target": "knowledge",
         "value": 8,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "comprehension",
-        "value": 5,
         "operator": "add"
       },
       {

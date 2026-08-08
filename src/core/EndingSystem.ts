@@ -57,7 +57,6 @@ export interface EndingInfo {
   requirements: {
     chivalry?: number;
     money?: number;
-    comprehension?: number;
     reputation?: number;
     martialPower?: number;
     good_karma?: number;
@@ -77,7 +76,6 @@ export interface EndingInfo {
 interface EndingEvaluationData {
   chivalry: number;
   money: number;
-  comprehension: number;
   reputation: number;
   martialPower: number;
   connections: number;
@@ -175,7 +173,6 @@ export class EndingSystem {
       description: '你学识渊博，著书立说，武学理论影响后世数百年。你的著作被奉为经典，代代相传。',
       category: 'positive',
       requirements: {
-        comprehension: 82,
         knowledge: 85,
         age: 65,
       },
@@ -333,11 +330,11 @@ export class EndingSystem {
     requirements: EndingInfo['requirements']
   ): boolean {
     const numericFields: Array<
-      'money' | 'comprehension' | 'knowledge' | 'reputation' | 'martialPower'
+      'money' | 'knowledge' | 'reputation' | 'martialPower'
       | 'connections'
       | 'businessAcumen' | 'influence' | 'good_karma' | 'evil_karma' | 'age'
     > = [
-      'money', 'comprehension', 'knowledge', 'reputation', 'martialPower',
+      'money', 'knowledge', 'reputation', 'martialPower',
       'connections',
       'businessAcumen', 'influence', 'good_karma', 'evil_karma', 'age',
     ];
@@ -439,7 +436,7 @@ export class EndingSystem {
     review += `名望：${player.reputation}\n`;
     review += `财富：${player.money}\n`;
     review += `武力：${player.martialPower}\n`;
-    review += `学识：${player.comprehension}\n`;
+    review += `学识：${player.knowledge}\n`;
     
     if (karma) {
       review += `善行：${karma.good_karma}\n`;
@@ -521,7 +518,6 @@ export class EndingSystem {
     return {
       chivalry: player.chivalry,
       money: player.money,
-      comprehension: player.comprehension,
       reputation: player.reputation,
       martialPower: player.martialPower,
       connections: player.connections,

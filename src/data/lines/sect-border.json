@@ -18,7 +18,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_border\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\") && (player.martialPower >= 12 || player.comprehension >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
+        "expression": "!flags.has(\"route_border\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\") && (player.martialPower >= 12 || player.knowledge >= 12) && !flags.has(\"route_beggars\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")"
       }
     ],
     "content": {
@@ -87,7 +87,7 @@
         "description": "你决定不去边关",
         "effects": [
           {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
-          {"type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add"},
+          {"type": "stat_modify", "target": "knowledge", "value": 1, "operator": "add"},
           {"type": "event_record", "target": "border_encounter_decline"}
         ]
       }
@@ -196,7 +196,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -398,7 +398,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -474,7 +474,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 2,
         "operator": "add"
       },
@@ -689,7 +689,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 5,
             "operator": "add"
           },
@@ -842,7 +842,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -982,7 +982,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -1092,7 +1092,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 2,
         "operator": "add"
       },

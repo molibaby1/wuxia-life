@@ -27,7 +27,6 @@ function makeRecord(
         martialPower: age >= 20 ? 20 : 10,
         chivalry: 10,
         constitution: 50,
-        comprehension: 12,
         affiliation: null,
         title: null,
         reputation: age >= 18 ? 8 : 2,

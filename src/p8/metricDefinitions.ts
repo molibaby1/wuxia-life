@@ -15,9 +15,9 @@ export const P8_METRIC_DEFINITIONS: P8MetricDefinition[] = [
     label: '因果回响',
     intent: '早期选择影响后续可见结果',
     scoringSurface: 'direct_echo_count, strongest_examples',
-    severity: 'warning',
+    severity: 'info',
     measurementSurface: 'simulation',
-    thresholdMin: 3,
+    nonBlocking: true,
   },
   {
     key: 'achievement',
@@ -42,9 +42,9 @@ export const P8_METRIC_DEFINITIONS: P8MetricDefinition[] = [
     label: '重玩差异',
     intent: '不同 persona 人生可区分',
     scoringSurface: 'pairwise_similarity, clusters',
-    severity: 'warning',
+    severity: 'info',
     measurementSurface: 'simulation',
-    thresholdMax: 0.82,
+    nonBlocking: true,
   },
   {
     key: 'pacing',

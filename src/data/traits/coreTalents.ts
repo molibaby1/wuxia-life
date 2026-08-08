@@ -10,17 +10,16 @@ export const coreTalents: CoreTalentConfig[] = [
     initialStats: [
       { stat: 'constitution', value: 5 },
       { stat: 'martialPower', value: 3 },
-      { stat: 'comprehension', value: -3 },
     ],
     growthModifiers: [
       { stat: 'constitution', multiplier: 1.2 },
       { stat: 'martialPower', multiplier: 1.15 },
-      { stat: 'comprehension', multiplier: 0.9 },
+      { stat: 'knowledge', multiplier: 0.9 },
     ],
     eventBiases: [
       { tag: 'training', multiplier: 1.3 },
       { tag: 'risk', multiplier: 1.1 },
-      { tag: 'comprehension', multiplier: 0.8 },
+      { tag: 'learning', multiplier: 0.8 },
     ],
     hiddenCosts: ['不擅长精微领悟'],
   },
@@ -28,20 +27,18 @@ export const coreTalents: CoreTalentConfig[] = [
     id: 'keen_mind',
     name: '灵心慧根',
     rarity: 'rare',
-    summary: '悟性与学识成长出色，但体魄偏弱。',
+    summary: '学识成长出色，但体魄偏弱。',
     flavor: '你心思清明，最擅长从细微处见真章。',
     initialStats: [
-      { stat: 'comprehension', value: 6 },
       { stat: 'knowledge', value: 4 },
       { stat: 'constitution', value: -3 },
     ],
     growthModifiers: [
-      { stat: 'comprehension', multiplier: 1.3 },
       { stat: 'knowledge', multiplier: 1.2 },
       { stat: 'constitution', multiplier: 0.88 },
     ],
     eventBiases: [
-      { tag: 'comprehension', multiplier: 1.35 },
+      { tag: 'learning', multiplier: 1.35 },
       { tag: 'discipline', multiplier: 1.1 },
       { tag: 'training', multiplier: 0.85 },
     ],
@@ -141,12 +138,11 @@ export const coreTalents: CoreTalentConfig[] = [
     summary: '更擅长观察与规避风险，但关系升温较慢。',
     flavor: '你看事比别人更冷静，也更远。',
     initialStats: [
-      { stat: 'comprehension', value: 4 },
       { stat: 'influence', value: 2 },
       { stat: 'charisma', value: -1 },
     ],
     growthModifiers: [
-      { stat: 'comprehension', multiplier: 1.15 },
+      { stat: 'knowledge', multiplier: 1.15 },
       { stat: 'influence', multiplier: 1.1 },
       { stat: 'charisma', multiplier: 0.95 },
     ],
@@ -154,7 +150,7 @@ export const coreTalents: CoreTalentConfig[] = [
       { tag: 'risk', multiplier: 1.3 },
       { tag: 'social', multiplier: 0.95 },
       { tag: 'romance', multiplier: 0.85 },
-      { tag: 'comprehension', multiplier: 1.1 },
+      { tag: 'learning', multiplier: 1.1 },
     ],
   },
   {
@@ -165,14 +161,12 @@ export const coreTalents: CoreTalentConfig[] = [
     flavor: '你看过的、听过的，总比常人更难忘掉。',
     initialStats: [
       { stat: 'knowledge', value: 6 },
-      { stat: 'comprehension', value: 4 },
     ],
     growthModifiers: [
       { stat: 'knowledge', multiplier: 1.3 },
-      { stat: 'comprehension', multiplier: 1.2 },
     ],
     eventBiases: [
-      { tag: 'comprehension', multiplier: 1.3 },
+      { tag: 'learning', multiplier: 1.3 },
       { tag: 'discipline', multiplier: 1.05 },
       { tag: 'indulgence', multiplier: 0.9 },
     ],

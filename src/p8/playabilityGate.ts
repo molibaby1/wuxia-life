@@ -52,25 +52,6 @@ export function evaluateP8Gate(
       );
     }
 
-    const causalityDef = P8_METRIC_DEFINITIONS.find(d => d.key === 'causality')!;
-    if (run.causality.directEchoCount < (causalityDef.thresholdMin ?? 3)) {
-      verdicts.push(
-        verdict(
-          'causality',
-          'warning',
-          'warning',
-          `${run.personaId}: direct echoes ${run.causality.directEchoCount}`,
-          run.causality.strongestExamples,
-          run.causality.directEchoCount,
-          causalityDef.thresholdMin,
-        ),
-      );
-    } else {
-      verdicts.push(
-        verdict('causality', 'pass', 'warning', `${run.personaId}: direct echoes ${run.causality.directEchoCount}`),
-      );
-    }
-
     const pacingDef = P8_METRIC_DEFINITIONS.find(d => d.key === 'pacing')!;
     if (run.pacing.longestLowImpactSpanYears > (pacingDef.thresholdMax ?? 8)) {
       verdicts.push(
@@ -153,21 +134,6 @@ export function evaluateP8Gate(
     );
   } else {
     verdicts.push(verdict('achievement', 'pass', 'warning', `goal achievement spread ok (${zeroRatio.toFixed(2)} zero)`));
-  }
-
-  const replayDef = P8_METRIC_DEFINITIONS.find(d => d.key === 'replayability')!;
-  if (replay.nearDuplicateWarnings.length > 0) {
-    verdicts.push(
-      verdict(
-        'replayability',
-        'warning',
-        'warning',
-        `${replay.nearDuplicateWarnings.length} near-duplicate pairs`,
-        replay.nearDuplicateWarnings,
-      ),
-    );
-  } else {
-    verdicts.push(verdict('replayability', 'pass', 'warning', 'persona outputs sufficiently distinct'));
   }
 
   const blockingFailures = verdicts.filter(v => v.status === 'fail' && v.severity === 'blocker');

@@ -157,11 +157,10 @@ const toggleDebug = () => {
 const currentNode = computed(() => {
   if (apiMode) {
     if (apiEngineState.sessionPhase === 'period_summary' && apiEngineState.periodSummary) {
-      const summary = apiEngineState.periodSummary;
       return {
-        id: 'period_summary',
-        text: summary.narrativeText,
-        title: summary.headline,
+        id: 'automatic_advance_status',
+        text: apiEngineState.automaticAdvanceError || '阶段已经结算，正在进入下一阶段。',
+        title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
         choices: [],
       };
     }
@@ -194,16 +193,10 @@ const currentNode = computed(() => {
       };
     }
     if (apiEngineState.sessionPhase === 'action_summary' && apiEngineState.activeActionSummary) {
-      const summary = apiEngineState.activeActionSummary;
-      const resultLines = [
-        summary.resultExplanation,
-        summary.diminishingReturnNotice,
-        summary.resourcePressureNotice,
-      ].filter(Boolean).join(' ');
       return {
-        id: 'action_or_choice_result',
-        text: resultLines || `${summary.actionName}已结束（${summary.durationLabel}）。`,
-        title: '本期小结',
+        id: 'automatic_advance_status',
+        text: apiEngineState.automaticAdvanceError || '行动已经结算，正在进入下一阶段。',
+        title: apiEngineState.automaticAdvanceError ? '下一阶段暂未载入' : '正在推进',
         choices: [],
       };
     }
@@ -218,15 +211,6 @@ const currentNode = computed(() => {
   }
   const event = gameEngineComposable.engineState.currentEvent;
   if (!event) {
-    if (gameEngineComposable.engineState.pendingPeriodSummary) {
-      const summary = gameEngineComposable.engineState.pendingPeriodSummary;
-      return {
-        id: 'period_summary',
-        text: summary.narrativeText,
-        title: summary.headline,
-        choices: [],
-      };
-    }
     if (gameEngineComposable.engineState.isPassiveProgressionMode && gameEngineComposable.engineState.passiveNarrative) {
       const passive = gameEngineComposable.engineState.passiveNarrative;
       return {
@@ -252,29 +236,6 @@ const currentNode = computed(() => {
         id: 'disturbance_narrative',
         text: narrative?.bodyText ?? '江湖中泛起一丝涟漪。',
         title: narrative?.title ?? '江湖扰动',
-        choices: [],
-      };
-    }
-    if (gameEngineComposable.engineState.lastActiveActionSummary) {
-      const summary = gameEngineComposable.engineState.lastActiveActionSummary;
-      const resultLines = [
-        summary.resultExplanation,
-        summary.diminishingReturnNotice,
-        summary.resourcePressureNotice,
-      ].filter(Boolean).join(' ');
-      return {
-        id: 'action_or_choice_result',
-        text: resultLines || `${summary.actionName}已结束（${summary.durationLabel}）。`,
-        title: '本期小结',
-        choices: [],
-      };
-    }
-    const pendingOutcome = gameEngineComposable.engineState.lastOutcomeText;
-    if (pendingOutcome) {
-      return {
-        id: 'action_or_choice_result',
-        text: pendingOutcome,
-        title: '本期小结',
         choices: [],
       };
     }
@@ -320,11 +281,14 @@ const apiStoryEventAutomatic = computed(
 
 const apiNeedsProgressionAck = computed(
   () =>
-    apiEngineState.sessionPhase === 'action_summary' ||
     apiEngineState.sessionPhase === 'disturbance_narrative' ||
     apiEngineState.sessionPhase === 'period_summary' ||
     apiEngineState.sessionPhase === 'passive_progression' ||
     apiStoryEventAutomatic.value,
+);
+
+const progressionOverlay = computed(() =>
+  apiMode ? apiEngineState.progressionOverlay : gameEngineComposable.engineState.progressionOverlay,
 );
 
 const apiPlayer = computed(() => activeSession.value?.player ?? null);
@@ -428,14 +392,14 @@ const onApiManualSave = async () => {
       :current-node="currentNode"
       :available-choices="availableChoices"
       :is-auto-playing="apiMode ? apiIsProcessing : isProcessing"
-      :api-active-action-summary="apiMode ? apiEngineState.activeActionSummary : null"
       :api-disturbance-narrative="apiMode ? apiEngineState.disturbanceNarrative : null"
       :api-session-phase="apiMode ? apiEngineState.sessionPhase : null"
       :api-story-event-automatic="apiMode ? apiStoryEventAutomatic : false"
       :api-needs-progression-ack="apiMode ? apiNeedsProgressionAck : false"
-      :api-period-summary="apiMode ? apiEngineState.periodSummary : null"
       :api-player="apiMode ? apiPlayer : null"
       :api-life-memory="apiMode ? apiLifeMemory : null"
+      :progression-overlay="progressionOverlay"
+      :api-automatic-advance-error="apiMode ? apiEngineState.automaticAdvanceError : null"
       @choice="onChoice"
       @manual-save="onApiManualSave"
       @api-progression-ack="onApiProgressionAck"

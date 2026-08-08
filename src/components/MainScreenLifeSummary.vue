@@ -21,6 +21,14 @@
         <span class="summary-label">实践</span>
         <span class="summary-value">{{ practiceSummary }}</span>
       </div>
+      <div v-if="milestoneSummary" class="summary-row">
+        <span class="summary-label">印记</span>
+        <span class="summary-value">{{ milestoneSummary }}</span>
+      </div>
+      <div v-if="milestoneProspectSummary" class="summary-row">
+        <span class="summary-label">方向</span>
+        <span class="summary-value">{{ milestoneProspectSummary }}</span>
+      </div>
       <div class="summary-row">
         <span class="summary-label">风险</span>
         <span class="summary-value summary-risk">{{ riskSummary }}</span>
@@ -39,6 +47,8 @@ defineProps<{
   affiliationSummary: string;
   experienceSummary: string;
   practiceSummary: string;
+  milestoneSummary?: string;
+  milestoneProspectSummary?: string;
   riskSummary: string;
   tendencySummary: string;
 }>();

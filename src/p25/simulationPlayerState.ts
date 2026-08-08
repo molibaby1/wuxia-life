@@ -44,7 +44,6 @@ export function createSimulationPlayerState({
     martialPower,
     chivalry: 0,
     constitution: 0,
-    comprehension: 0,
     affiliation: null,
     title: null,
     reputation,

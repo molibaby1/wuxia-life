@@ -34,7 +34,6 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       martialPower: 40,
       chivalry: 50,
       constitution: 50,
-      comprehension: 50,
       affiliation: null,
       title: null,
       reputation: 40,

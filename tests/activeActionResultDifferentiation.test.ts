@@ -67,13 +67,13 @@ function testMartialNormalAndRepeatDiffer(): void {
 }
 
 function testStudyNormalAndDiminishingDiffer(): void {
-  const normal = present(makeResult('action_study_basic', 'study', { comprehension: 3, knowledge: 2 }));
+  const normal = present(makeResult('action_study_basic', 'study', { knowledge: 2 }));
   const diminishing = present(
-    makeResult('action_study_basic', 'study', { comprehension: 1 }, { diminishingReturn: true }),
+    makeResult('action_study_basic', 'study', { knowledge: 1 }, { diminishingReturn: true }),
     { diminishingReturn: true },
   );
   assert(String(normal.resultExplanation).includes('读书'), 'study result must name study');
-  assert(String(normal.resultExplanation).includes('悟性+3'), 'study result must include actual comprehension delta');
+  assert(String(normal.resultExplanation).includes('学识+2'), 'study result must include actual knowledge delta');
   assert(String(diminishing.resultExplanation).includes('读书'), 'diminishing study must keep category fact');
   assert(String(diminishing.diminishingReturnNotice).includes('收益递减'), 'study diminishing notice required');
 }

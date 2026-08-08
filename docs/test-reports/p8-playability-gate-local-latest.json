@@ -1,0 +1,3093 @@
+{
+  "schemaVersion": "p8-v1",
+  "generatedAt": "2026-08-05T13:03:17.178Z",
+  "runtimePath": "local_direct",
+  "catalogVersion": "1.0.0",
+  "engineVersion": "p8-headless-gate",
+  "decision": "pass",
+  "endAge": 40,
+  "personaRuns": [
+    {
+      "personaId": "p8-martial-lin",
+      "personaName": "林破竹",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 19,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "training": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 4,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 26,
+            "description": "summary echo: 幼年练功的习惯延续至今",
+            "reference": "p9_summary_echo_training",
+            "kind": "direct"
+          },
+          {
+            "age": 26,
+            "description": "explicit echo flag p9_explicit_training_echo",
+            "reference": "p9_explicit_training_echo",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "explicit echo flag p9_explicit_martial_proving_echo",
+            "reference": "p9_explicit_martial_proving_echo",
+            "kind": "direct"
+          },
+          {
+            "age": 26,
+            "description": "configured echo hook echo_training_basic fired at p9_training_echo_midlife",
+            "reference": "p9_echo_training_hook",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": false
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "lin-martial-base",
+            "label": "打下武功根基",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "martialPower=83 >= 25"
+            ]
+          },
+          {
+            "goalId": "lin-training-habit",
+            "label": "坚持练功规划",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "training actions=1 < 3"
+            ]
+          },
+          {
+            "goalId": "lin-sect-signal",
+            "label": "获得门派或江湖身份信号",
+            "ageBand": "20-30",
+            "status": "missed",
+            "evidence": [
+              "flag joined_sect=undefined"
+            ]
+          },
+          {
+            "goalId": "lin-power-30",
+            "label": "三十岁前功力达标",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "martialPower=83 >= 45"
+            ]
+          }
+        ],
+        "achievedCount": 2,
+        "missedCount": 2,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 11,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 19,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 23,
+            "classification": "warned",
+            "description": "你厌倦了名门正派的虚伪，决定加入幽影门。幽影门使者看着你：'所谓正邪，不过是胜者书写的历史。加入我们，你将获得强大的力量，但也将与整个「正统」江湖为敌。你准备好了吗？记住：我们的道路虽不被认可，但我们",
+            "eventId": "outlaw_identity_beginning"
+          },
+          {
+            "age": 24,
+            "classification": "opaque",
+            "description": "你遇到了一位武林高手，他对你颇为赏识，有意收你为徒。这是你武学道路上的重要契机。 拜入名门（需悟性≥40） 你的武艺似乎有些生疏。",
+            "eventId": "relationship_master_disciple"
+          },
+          {
+            "age": 27,
+            "classification": "warned",
+            "description": "你在江湖行走时，无意中得罪了某人，从此结下仇怨。江湖路远，仇家难避。 主动和解（需魅力≥50，金钱 -100） 你的积蓄少了一些。",
+            "eventId": "relationship_enemy_create"
+          },
+          {
+            "age": 31,
+            "classification": "warned",
+            "description": "幽影门总坛进入二次扩张窗口——周边势力或惧或服，门内亦有人催促你再进一步。此路有权势，也有江湖代价。 兼并周边，扩大门势 以铁腕吞并周边小派，门势大振，但江湖名望将再受重创。 你的武功有了长进。",
+            "eventId": "demonic_midlife_expansion"
+          },
+          {
+            "age": 33,
+            "classification": "explained",
+            "description": "江湖正道避你如蛇蝎，旧友疏远。明月在灯下问你：当年迎娶时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？ 关于你的传言似乎不那么美好了。",
+            "eventId": "demonic_midlife_isolation_spouse"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          }
+        ],
+        "opaqueCount": 1,
+        "opaqueRatio": 0.125,
+        "opaqueExamples": [
+          {
+            "age": 24,
+            "classification": "opaque",
+            "description": "你遇到了一位武林高手，他对你颇为赏识，有意收你为徒。这是你武学道路上的重要契机。 拜入名门（需悟性≥40） 你的武艺似乎有些生疏。",
+            "eventId": "relationship_master_disciple"
+          }
+        ]
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 4,
+        "lowImpactSpanStartAge": 10,
+        "lowImpactSpanEndAge": 14
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 武学启蒙",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：武道（martial_talent_acknowledged），幼年练功的习惯延续至今，门派：shadow_sect",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "choice",
+            "text": "幽影门之路"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "子女教育"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 172.8,
+          "runnerUpChoiceId": "origin_wuxia_family",
+          "runnerUpScore": 39,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_customers",
+          "selectedScore": 1.6,
+          "runnerUpChoiceId": "merchant_childhood_choose_abacus",
+          "runnerUpScore": 1,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "martial_arts_enlightenment",
+          "selectedChoiceId": "generic_path",
+          "selectedScore": 97.6,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "sect_choice",
+          "selectedChoiceId": "stay_home",
+          "selectedScore": 21,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 9.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 6.3,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "observe_only",
+          "selectedScore": 48,
+          "runnerUpChoiceId": "decline_invitation",
+          "runnerUpScore": 38.6,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 3460,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 1510,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "jianghu_year_patrol",
+          "selectedChoiceId": "patrol_righteous",
+          "selectedScore": 85.4,
+          "runnerUpChoiceId": "patrol_cautious",
+          "runnerUpScore": 12,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "outlaw_identity_beginning",
+          "selectedChoiceId": "join_outlaw_full",
+          "selectedScore": 43,
+          "runnerUpChoiceId": "join_outlaw_conditional",
+          "runnerUpScore": 28,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "relationship_master_disciple",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": -7,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": -15,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "relationship_enemy_create",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_internal",
+          "selectedScore": 21.6,
+          "runnerUpChoiceId": "training_qinggong",
+          "runnerUpScore": 18.6,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "demonic_midlife_expansion",
+          "selectedChoiceId": "demonic_expand_territory",
+          "selectedScore": 53.8,
+          "runnerUpChoiceId": "demonic_expand_secret_art",
+          "runnerUpScore": 27.6,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "merchant_year_trade",
+          "selectedChoiceId": "trade_risk",
+          "selectedScore": 67,
+          "runnerUpChoiceId": "trade_stable",
+          "runnerUpScore": 51,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -16,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -24,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "outlaw_rise",
+          "selectedChoiceId": "lead_aggressive",
+          "selectedScore": 100,
+          "runnerUpChoiceId": "lead_peacful",
+          "runnerUpScore": 40,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "jianghu_secret_manual",
+          "selectedChoiceId": "fight_for_manual",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "watch_manual",
+          "runnerUpScore": 0,
+          "personaId": "p8-martial-lin"
+        },
+        {
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 46,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 40,
+          "personaId": "p8-martial-lin"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_childhood_training",
+          "reason": "persona_strategy:training prefers training"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-scholar-su",
+      "personaName": "苏文澜",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 20,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "study": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 2,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 25,
+            "description": "summary echo: 幼年读书的习惯延续至今",
+            "reference": "p9_summary_echo_study",
+            "kind": "direct"
+          },
+          {
+            "age": 25,
+            "description": "explicit echo flag p9_explicit_study_echo",
+            "reference": "p9_explicit_study_echo",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": true
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "su-knowledge",
+            "label": "积累学识",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "knowledge=49 >= 20"
+            ]
+          },
+          {
+            "goalId": "su-study-habit",
+            "label": "坚持读书规划",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "study actions=1 < 3"
+            ]
+          },
+          {
+            "goalId": "su-comprehension",
+            "label": "悟性提升",
+            "ageBand": "20-30",
+            "status": "achieved",
+            "evidence": [
+              "comprehension=53 >= 30"
+            ]
+          },
+          {
+            "goalId": "su-scholar-identity",
+            "label": "文路身份显现",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "flag scholar_path_started=true"
+            ]
+          }
+        ],
+        "achievedCount": 3,
+        "missedCount": 1,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 8,
+            "classification": "explained",
+            "description": "你抄到后面已觉眼花，字迹渐乱，只得先搁下笔。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_copybook_practice_neg_1"
+          },
+          {
+            "age": 10,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 26,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 29,
+            "classification": "warned",
+            "description": "你在江湖行走时，无意中得罪了某人，从此结下仇怨。江湖路远，仇家难避。 主动和解（需魅力≥50，金钱 -100） 你的积蓄少了一些。",
+            "eventId": "relationship_enemy_create"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 38,
+            "classification": "warned",
+            "description": "你和同盟之间的往来终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。 婉拒担保，保留后手 你获得了新的体悟。",
+            "eventId": "p29_social_momentum_patron_obligation"
+          }
+        ],
+        "opaqueCount": 0,
+        "opaqueRatio": 0,
+        "opaqueExamples": []
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 5,
+        "lowImpactSpanStartAge": 9,
+        "lowImpactSpanEndAge": 14
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 自己看出的错账",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：治学名士（scholar_lecturer），幼年营商 → 商路初成，幼年读书的习惯延续至今",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "choice",
+            "text": "书院辩学"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "秘籍现世"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 208,
+          "runnerUpChoiceId": "origin_scholar_family",
+          "runnerUpScore": 24,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_abacus",
+          "selectedScore": 1,
+          "runnerUpChoiceId": "merchant_childhood_choose_customers",
+          "runnerUpScore": 1,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "sect_choice",
+          "selectedChoiceId": "stay_home",
+          "selectedScore": 10,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 406.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 404.5,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 16,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 5,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 4950,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 2620,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "refugee_sect_story",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "p9_scholar_academy_gate",
+          "selectedChoiceId": "scholar_academy_lecture",
+          "selectedScore": 35,
+          "runnerUpChoiceId": "scholar_academy_observe",
+          "runnerUpScore": 8,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "jianghu_year_patrol",
+          "selectedChoiceId": "patrol_righteous",
+          "selectedScore": 24,
+          "runnerUpChoiceId": "patrol_cautious",
+          "runnerUpScore": 9,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": 251,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": 201,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "relationship_enemy_create",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_internal",
+          "selectedScore": 12,
+          "runnerUpChoiceId": "training_qinggong",
+          "runnerUpScore": 10,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "scholar_year_study",
+          "selectedChoiceId": "study_classics",
+          "selectedScore": 11,
+          "runnerUpChoiceId": "study_new",
+          "runnerUpScore": 6,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "jianghu_year_disciple",
+          "selectedChoiceId": "disciple_kind",
+          "selectedScore": 10,
+          "runnerUpChoiceId": "disciple_strict",
+          "runnerUpScore": 8,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "career_martial_arts_conference",
+          "selectedChoiceId": "",
+          "selectedScore": 23,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 10,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -50,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -150,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "merchant_year_trade",
+          "selectedChoiceId": "trade_risk",
+          "selectedScore": 83,
+          "runnerUpChoiceId": "trade_stable",
+          "runnerUpScore": 58,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "scholar_year_write",
+          "selectedChoiceId": "write_academic",
+          "selectedScore": 25,
+          "runnerUpChoiceId": "write_poetry",
+          "runnerUpScore": 18,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "p29_social_momentum_patron_obligation",
+          "selectedChoiceId": "decline_the_petition",
+          "selectedScore": -10,
+          "runnerUpChoiceId": "back_the_petition",
+          "runnerUpScore": -118,
+          "personaId": "p8-scholar-su"
+        },
+        {
+          "eventId": "jianghu_secret_manual",
+          "selectedChoiceId": "fight_for_manual",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "watch_manual",
+          "runnerUpScore": 0,
+          "personaId": "p8-scholar-su"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_study_lite",
+          "reason": "persona_strategy:study prefers study"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-social-gu",
+      "personaName": "顾清仪",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 20,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "socializing": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 2,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 27,
+            "description": "summary echo: 幼年交游的习惯延续至今",
+            "reference": "p9_summary_echo_social",
+            "kind": "direct"
+          },
+          {
+            "age": 27,
+            "description": "explicit echo flag p9_explicit_social_echo",
+            "reference": "p9_explicit_social_echo",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": true
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "gu-connections",
+            "label": "拓展人脉",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "connections=52 >= 15"
+            ]
+          },
+          {
+            "goalId": "gu-social-habit",
+            "label": "坚持交游规划",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "socializing actions=1 < 2"
+            ]
+          },
+          {
+            "goalId": "gu-relationship",
+            "label": "建立重要关系",
+            "ageBand": "20-30",
+            "status": "achieved",
+            "evidence": [
+              "spouse=明月"
+            ]
+          },
+          {
+            "goalId": "gu-charisma",
+            "label": "魅力成长",
+            "ageBand": "30-40",
+            "status": "missed",
+            "evidence": [
+              "charisma=8 < 35"
+            ]
+          }
+        ],
+        "achievedCount": 2,
+        "missedCount": 2,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 11,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 20,
+            "classification": "warned",
+            "description": "到了成家的年纪，亲友都在为你张罗婚事。明月也在等待你的回应。 迎娶明月 (真爱，财富 -50, 婚姻质量高) 你的积蓄少了一些。",
+            "eventId": "family_marriage"
+          },
+          {
+            "age": 21,
+            "classification": "opaque",
+            "description": "你在江湖游历时，偶然接触到一些不受「正道联盟」认可的门派。这些门派不受江湖规矩约束，行事全凭己心。幽影门的使者找到你：「所谓正邪，不过是庙堂之人书写的历史。我们不求流芳百世，只求问心无愧。江湖传言我们",
+            "eventId": "outlaw_path_beginning"
+          },
+          {
+            "age": 25,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 29,
+            "classification": "warned",
+            "description": "你在江湖行走时，无意中得罪了某人，从此结下仇怨。江湖路远，仇家难避。 主动和解（需魅力≥50，金钱 -100） 你的积蓄少了一些。",
+            "eventId": "relationship_enemy_create"
+          },
+          {
+            "age": 30,
+            "classification": "explained",
+            "description": "你本想振作，可那股劲只亮了一下，终究还是没稳住。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_get_back_spirit_neg_1"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 38,
+            "classification": "warned",
+            "description": "你和同盟之间的往来终于到了要兑现的时候。有人请你为一桩大事作保，一旦答应，名声与人脉都要押上去；若推辞，也会折损几分旧日情面。 婉拒担保，保留后手 你获得了新的体悟。",
+            "eventId": "p29_social_momentum_patron_obligation"
+          }
+        ],
+        "opaqueCount": 1,
+        "opaqueRatio": 0.125,
+        "opaqueExamples": [
+          {
+            "age": 21,
+            "classification": "opaque",
+            "description": "你在江湖游历时，偶然接触到一些不受「正道联盟」认可的门派。这些门派不受江湖规矩约束，行事全凭己心。幽影门的使者找到你：「所谓正邪，不过是庙堂之人书写的历史。我们不求流芳百世，只求问心无愧。江湖传言我们",
+            "eventId": "outlaw_path_beginning"
+          }
+        ]
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 3,
+        "lowImpactSpanStartAge": 4,
+        "lowImpactSpanEndAge": 7
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 柜台前的小招呼",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：交游枢纽（social_network_hub），幼年营商 → 商路初成，幼年交游的习惯延续至今，门派：shadow_sect",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "auto",
+            "text": "雅集论交"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "商业危机"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 220,
+          "runnerUpChoiceId": "origin_scholar_family",
+          "runnerUpScore": 24,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_customers",
+          "selectedScore": 2.5,
+          "runnerUpChoiceId": "merchant_childhood_choose_abacus",
+          "runnerUpScore": 1,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "sect_path_choice",
+          "selectedChoiceId": "join_orthodox",
+          "selectedScore": 25,
+          "runnerUpChoiceId": "stay_wanderer",
+          "runnerUpScore": 4,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 417.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 412.5,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 16,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 12.5,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "scholar_year_study",
+          "selectedChoiceId": "study_classics",
+          "selectedScore": 11,
+          "runnerUpChoiceId": "study_new",
+          "runnerUpScore": 9,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 5150,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 2620,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "outlaw_path_beginning",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": 291,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": 281,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "relationship_master_disciple",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "jianghu_year_patrol",
+          "selectedChoiceId": "patrol_righteous",
+          "selectedScore": 36,
+          "runnerUpChoiceId": "patrol_cautious",
+          "runnerUpScore": 9,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "relationship_enemy_create",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "hero_road_peril",
+          "selectedChoiceId": "hero_peril_fight",
+          "selectedScore": 6,
+          "runnerUpChoiceId": "hero_peril_retreat",
+          "runnerUpScore": 2.5,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "p11_wealth_wanderer_divergence_fork",
+          "selectedChoiceId": "choose_wealth_path",
+          "selectedScore": 200,
+          "runnerUpChoiceId": "choose_wanderer_path",
+          "runnerUpScore": 15,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "career_martial_arts_conference",
+          "selectedChoiceId": "",
+          "selectedScore": 57.5,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 10,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "merchant_year_trade",
+          "selectedChoiceId": "trade_risk",
+          "selectedScore": 83,
+          "runnerUpChoiceId": "trade_stable",
+          "runnerUpScore": 65.5,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -25,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -30,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "jianghu_grudge",
+          "selectedChoiceId": "peace_grudge",
+          "selectedScore": 25,
+          "runnerUpChoiceId": "fight_grudge",
+          "runnerUpScore": 0,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "p29_social_momentum_patron_obligation",
+          "selectedChoiceId": "decline_the_petition",
+          "selectedScore": 45,
+          "runnerUpChoiceId": "back_the_petition",
+          "runnerUpScore": 42.5,
+          "personaId": "p8-social-gu"
+        },
+        {
+          "eventId": "merchant_year_crisis",
+          "selectedChoiceId": "crisis_innovate",
+          "selectedScore": 8,
+          "runnerUpChoiceId": "crisis_retreat",
+          "runnerUpScore": -29,
+          "personaId": "p8-social-gu"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_socializing_lite",
+          "reason": "persona_strategy:socializing prefers socializing"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-wealth-shen",
+      "personaName": "沈聚财",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 21,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "business": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 3,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 28,
+            "description": "summary echo: 幼年帮工营商的习惯延续至今",
+            "reference": "p9_summary_echo_business",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "explicit echo flag p9_explicit_business_echo",
+            "reference": "p9_explicit_business_echo",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "configured echo hook echo_business_basic fired at p9_merchant_midlife_caravan",
+            "reference": "p9_echo_business_hook",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": false
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "shen-money",
+            "label": "积累财富",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "money=740 >= 200"
+            ]
+          },
+          {
+            "goalId": "shen-business-habit",
+            "label": "坚持营商规划",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "business actions=1 < 2"
+            ]
+          },
+          {
+            "goalId": "shen-reputation",
+            "label": "声望起步",
+            "ageBand": "20-30",
+            "status": "missed",
+            "evidence": [
+              "reputation=5 < 10"
+            ]
+          },
+          {
+            "goalId": "shen-wealth-40",
+            "label": "四十岁前的经济基础",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "money=740 >= 500"
+            ]
+          }
+        ],
+        "achievedCount": 2,
+        "missedCount": 2,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 8,
+            "classification": "warned",
+            "description": "你从小就对金钱敏感，善于讨价还价。一次偶然的机会，你低价买入高价卖出，赚取了人生第一桶金，展现出惊人的经商天赋。 学习经商 重新学习经商会让你暂时承受处世手腕和金钱上的损失，这是从头起步的代价。 你感",
+            "eventId": "merchant_talent_discovery"
+          },
+          {
+            "age": 9,
+            "classification": "explained",
+            "description": "你勉强练完，心里却始终烦躁，没什么收获。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_morning_training_neg_1"
+          },
+          {
+            "age": 25,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 26,
+            "classification": "warned",
+            "description": "押镖途中遇伏，对方人数远超预料，前路危机四伏。 退避寻援 你暂缓押镖，先寻援手，以保全身而退；此举虽可得援手，却也有名望受损的代价。 关于你的传言似乎不那么美好了。",
+            "eventId": "hero_road_peril"
+          },
+          {
+            "age": 34,
+            "classification": "warned",
+            "description": "你的结拜兄弟/姐妹遇到了麻烦，请你帮忙。作为结义之人，你义不容辞。 全力相助（需武力≥70，侠义 +15） 全力相助可守住侠义，却会让你的功力、体魄与名望承受损失，这是必须付出的代价。 你的心中似乎多",
+            "eventId": "relationship_sworn_help"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          }
+        ],
+        "opaqueCount": 0,
+        "opaqueRatio": 0,
+        "opaqueExamples": []
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 3,
+        "lowImpactSpanStartAge": 4,
+        "lowImpactSpanEndAge": 7
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 柜台前的小招呼",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：商路之主（merchant_caravan_master），幼年帮工营商的习惯延续至今",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "choice",
+            "text": "商路押镖"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "子女教育"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 855,
+          "runnerUpChoiceId": "origin_wuxia_family",
+          "runnerUpScore": 10.7,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_customers",
+          "selectedScore": 3.6,
+          "runnerUpChoiceId": "merchant_childhood_choose_abacus",
+          "runnerUpScore": 3,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "merchant_talent_discovery",
+          "selectedChoiceId": "study_business",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "focus_studying",
+          "runnerUpScore": 0,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "sect_choice",
+          "selectedChoiceId": "stay_home",
+          "selectedScore": 3.5,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 4.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 3.3,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "observe_only",
+          "selectedScore": 6.5,
+          "runnerUpChoiceId": "decline_invitation",
+          "runnerUpScore": 5.6,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "merchant_first_shop",
+          "selectedChoiceId": "open_grocery_shop",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "open_weapon_shop",
+          "runnerUpScore": 0,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 3290,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 1507,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "p9_wealth_caravan_gate",
+          "selectedChoiceId": "wealth_caravan_expand",
+          "selectedScore": 1254.8,
+          "runnerUpChoiceId": "wealth_caravan_conservative",
+          "runnerUpScore": 554,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": -41.3,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": -83.3,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "hero_road_peril",
+          "selectedChoiceId": "hero_peril_retreat",
+          "selectedScore": 3.6,
+          "runnerUpChoiceId": "hero_peril_fight",
+          "runnerUpScore": 2.0999999999999996,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "merchant_year_crisis",
+          "selectedChoiceId": "crisis_innovate",
+          "selectedScore": 17.1,
+          "runnerUpChoiceId": "crisis_retreat",
+          "runnerUpScore": -123,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "p9_merchant_midlife_caravan",
+          "selectedChoiceId": "lead_caravan",
+          "selectedScore": 1314,
+          "runnerUpChoiceId": "hire_agent",
+          "runnerUpScore": 630,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "magnate_on_ramp",
+          "selectedChoiceId": "magnate_entry_generic",
+          "selectedScore": 0,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_qinggong",
+          "selectedScore": 4.5,
+          "runnerUpChoiceId": "training_internal",
+          "runnerUpScore": 4.199999999999999,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "merchant_midlife_debt_milestone",
+          "selectedChoiceId": "midlife_debt_generic",
+          "selectedScore": 0,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "scholar_year_study",
+          "selectedChoiceId": "study_classics",
+          "selectedScore": 5.6,
+          "runnerUpChoiceId": "study_new",
+          "runnerUpScore": 5.3999999999999995,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "relationship_sworn_help",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -36,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -126,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "magnate_midlife_pressure",
+          "selectedChoiceId": "magnate_pressure_generic",
+          "selectedScore": 0,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-wealth-shen"
+        },
+        {
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 210,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 43,
+          "personaId": "p8-wealth-shen"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_household_apprentice",
+          "reason": "persona_strategy:business prefers business"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-cautious-han",
+      "personaName": "韩守拙",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 20,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "training": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 1,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 24,
+            "description": "explicit echo flag p9_explicit_cautious_echo",
+            "reference": "p9_explicit_cautious_echo",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": true
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "han-health",
+            "label": "保持身体稳定",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "healthStatus=unwell is allowed"
+            ]
+          },
+          {
+            "goalId": "han-safe-training",
+            "label": "稳健练功",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "training actions=1 < 2"
+            ]
+          },
+          {
+            "goalId": "han-avoid-setback",
+            "label": "少遭重创",
+            "ageBand": "20-30",
+            "status": "achieved",
+            "evidence": [
+              "no flag major_injury"
+            ]
+          },
+          {
+            "goalId": "han-stable-40",
+            "label": "四十岁身体稳定",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "healthStatus=unwell is allowed"
+            ]
+          }
+        ],
+        "achievedCount": 3,
+        "missedCount": 1,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 8,
+            "classification": "explained",
+            "description": "你抄到后面已觉眼花，字迹渐乱，只得先搁下笔。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_copybook_practice_neg_1"
+          },
+          {
+            "age": 11,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 20,
+            "classification": "warned",
+            "description": "到了成家的年纪，亲友都在为你张罗婚事。明月也在等待你的回应。 迎娶明月 (真爱，财富 -50, 婚姻质量高) 你的积蓄少了一些。",
+            "eventId": "family_marriage"
+          },
+          {
+            "age": 25,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 27,
+            "classification": "opaque",
+            "description": "你遇到了一位武林高手，他对你颇为赏识，有意收你为徒。这是你武学道路上的重要契机。 拜入名门（需悟性≥40） 你的武艺似乎有些生疏。",
+            "eventId": "relationship_master_disciple"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 36,
+            "classification": "explained",
+            "description": "师门下达剿灭令，目标竟是当年你下山行善所救之人。长老以大局压你，要你瞒天过海。 拒令请罪 你当殿拒令，愿受门规惩处。清虚真人震怒，却念你昔日功绩从轻发落。【L1 可避重罚】 与某人的关系发生了微妙的变",
+            "eventId": "sect_midlife_gray_mission"
+          },
+          {
+            "age": 37,
+            "classification": "explained",
+            "description": "偷懒时固然舒服，到了夜里，你又隐隐觉得自己在原地打转。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_skip_training_neg_1"
+          }
+        ],
+        "opaqueCount": 1,
+        "opaqueRatio": 0.125,
+        "opaqueExamples": [
+          {
+            "age": 27,
+            "classification": "opaque",
+            "description": "你遇到了一位武林高手，他对你颇为赏识，有意收你为徒。这是你武学道路上的重要契机。 拜入名门（需悟性≥40） 你的武艺似乎有些生疏。",
+            "eventId": "relationship_master_disciple"
+          }
+        ]
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 3,
+        "lowImpactSpanStartAge": 4,
+        "lowImpactSpanEndAge": 7
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 自己看出的错账",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：守拙持重（cautious_steward），幼年练功 → 中段功底显现，幼年营商 → 商路初成",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "auto",
+            "text": "读书摘记"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "江湖恩怨"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 409.59999999999997,
+          "runnerUpChoiceId": "origin_wuxia_family",
+          "runnerUpScore": 18,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_abacus",
+          "selectedScore": 1.2,
+          "runnerUpChoiceId": "merchant_childhood_choose_customers",
+          "runnerUpScore": 1.2,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "sect_path_choice",
+          "selectedChoiceId": "join_orthodox",
+          "selectedScore": 14,
+          "runnerUpChoiceId": "stay_wanderer",
+          "runnerUpScore": 2.4,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 8,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 5.6,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 44.6,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 41,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "commoner_year_apprentice",
+          "selectedChoiceId": "apprentice_social",
+          "selectedScore": 8.4,
+          "runnerUpChoiceId": "apprentice_hard",
+          "runnerUpScore": 6,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 3100,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 1512,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "jianghu_year_patrol",
+          "selectedChoiceId": "patrol_righteous",
+          "selectedScore": 25.6,
+          "runnerUpChoiceId": "patrol_cautious",
+          "runnerUpScore": 7.199999999999999,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": -43.8,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": -158.8,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "hero_road_peril",
+          "selectedChoiceId": "hero_peril_fight",
+          "selectedScore": 3.5999999999999996,
+          "runnerUpChoiceId": "hero_peril_retreat",
+          "runnerUpScore": -19.2,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "relationship_master_disciple",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_qinggong",
+          "selectedScore": 7.6,
+          "runnerUpChoiceId": "training_internal",
+          "runnerUpScore": 7.199999999999999,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "scholar_year_social",
+          "selectedChoiceId": "social_poetry",
+          "selectedScore": 23.2,
+          "runnerUpChoiceId": "social_listen",
+          "runnerUpScore": 10.8,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "sect_midlife_stewardship",
+          "selectedChoiceId": "stewardship_default_path",
+          "selectedScore": 8,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "merchant_year_crisis",
+          "selectedChoiceId": "crisis_innovate",
+          "selectedScore": 9.6,
+          "runnerUpChoiceId": "crisis_retreat",
+          "runnerUpScore": -238.8,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "sect_midlife_faction_pressure",
+          "selectedChoiceId": "faction_support_elder",
+          "selectedScore": 15.2,
+          "runnerUpChoiceId": "faction_remain_neutral",
+          "runnerUpScore": 0,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "career_foundation_sect",
+          "selectedChoiceId": "delay_sect",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "create_sect",
+          "runnerUpScore": -760,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -80,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -240,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "sect_midlife_gray_mission",
+          "selectedChoiceId": "gray_refuse_order",
+          "selectedScore": 41.8,
+          "runnerUpChoiceId": "gray_leak_warning",
+          "runnerUpScore": -32.8,
+          "personaId": "p8-cautious-han"
+        },
+        {
+          "eventId": "jianghu_grudge",
+          "selectedChoiceId": "peace_grudge",
+          "selectedScore": 12,
+          "runnerUpChoiceId": "fight_grudge",
+          "runnerUpScore": 0,
+          "personaId": "p8-cautious-han"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_childhood_training",
+          "reason": "persona_strategy:training prefers training; cautious_childhood_steady"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-deviant-ye",
+      "personaName": "叶走邪",
+      "agency": {
+        "activeActionCount": 0,
+        "storyEventCount": 38,
+        "choiceEventCount": 19,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {},
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 5,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 26,
+            "description": "summary echo: 邪路练功的狠劲延续至今",
+            "reference": "p9_summary_echo_deviant",
+            "kind": "direct"
+          },
+          {
+            "age": 24,
+            "description": "explicit echo flag p9_explicit_deviant_echo",
+            "reference": "p9_explicit_deviant_echo",
+            "kind": "direct"
+          },
+          {
+            "age": 26,
+            "description": "explicit echo flag p9_explicit_deviant_training_echo",
+            "reference": "p9_explicit_deviant_training_echo",
+            "kind": "direct"
+          },
+          {
+            "age": 29,
+            "description": "explicit echo flag p9_explicit_deviant_escalation",
+            "reference": "p9_explicit_deviant_escalation",
+            "kind": "direct"
+          },
+          {
+            "age": 24,
+            "description": "configured echo hook echo_deviant_identity fired at p9_deviant_fork_temptation",
+            "reference": "p9_route_identity_deviant",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": false
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "ye-demonic-flag",
+            "label": "邪路信号出现",
+            "ageBand": "0-20",
+            "status": "achieved",
+            "evidence": [
+              "flag demonic_path_touched=true"
+            ]
+          },
+          {
+            "goalId": "ye-risk-choice",
+            "label": "做出高风险选择",
+            "ageBand": "20-30",
+            "status": "missed",
+            "evidence": [
+              "event demonic_midlife_fork not seen"
+            ]
+          },
+          {
+            "goalId": "ye-power-dark",
+            "label": "邪路功力成长",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "martialPower=61 >= 40"
+            ]
+          }
+        ],
+        "achievedCount": 2,
+        "missedCount": 1,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 11,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 13,
+            "classification": "explained",
+            "description": "为求一时之利，你做了件不该做的事。旁人未必知晓，你却清楚：底线已经松动了一寸。 你的心中似乎多了一丝动摇。",
+            "eventId": "demonic_youth_first_transgression"
+          },
+          {
+            "age": 19,
+            "classification": "explained",
+            "description": "你抄到后面已觉眼花，字迹渐乱，只得先搁下笔。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_copybook_practice_neg_1"
+          },
+          {
+            "age": 20,
+            "classification": "warned",
+            "description": "到了成家的年纪，亲友都在为你张罗婚事。明月也在等待你的回应。 迎娶明月 (真爱，财富 -50, 婚姻质量高) 你的积蓄少了一些。",
+            "eventId": "family_marriage"
+          },
+          {
+            "age": 30,
+            "classification": "warned",
+            "description": "你在江湖行走时，无意中得罪了某人，从此结下仇怨。江湖路远，仇家难避。 主动和解（需魅力≥50，金钱 -100） 你的积蓄少了一些。",
+            "eventId": "relationship_enemy_create"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 37,
+            "classification": "explained",
+            "description": "你本想振作，可那股劲只亮了一下，终究还是没稳住。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_get_back_spirit_neg_1"
+          }
+        ],
+        "opaqueCount": 0,
+        "opaqueRatio": 0,
+        "opaqueExamples": []
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 3,
+        "lowImpactSpanStartAge": 6,
+        "lowImpactSpanEndAge": 9
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 武学启蒙",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：邪路偏锋（demonic_shadow_master），幼年练功 → 中段功底显现，幼年营商 → 商路初成，幼年读书 → 学识回响，幼年交游 → 人脉回响，邪路偏锋的习惯延续至今",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "auto",
+            "text": "雅集论交"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "文会交际"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 172.8,
+          "runnerUpChoiceId": "origin_wuxia_family",
+          "runnerUpScore": 33,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_customers",
+          "selectedScore": 1.6,
+          "runnerUpChoiceId": "merchant_childhood_choose_abacus",
+          "runnerUpScore": 1,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "martial_arts_enlightenment",
+          "selectedChoiceId": "generic_path",
+          "selectedScore": 9,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "p9_deviant_youth_route_milestone",
+          "selectedChoiceId": "deviant_youth_embrace_shadow",
+          "selectedScore": 108,
+          "runnerUpChoiceId": "deviant_youth_hide_shadow",
+          "runnerUpScore": 94.8,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "sect_choice",
+          "selectedChoiceId": "stay_home",
+          "selectedScore": 15,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 9.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 6.3,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 24,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 8,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 3435,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 1510,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "scholar_year_study",
+          "selectedChoiceId": "study_classics",
+          "selectedScore": 14,
+          "runnerUpChoiceId": "study_new",
+          "runnerUpScore": 7.2,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "p9_deviant_fork_temptation",
+          "selectedChoiceId": "accept_dark_manual",
+          "selectedScore": 120,
+          "runnerUpChoiceId": "reject_dark_manual",
+          "runnerUpScore": 98,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": -12,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": -25,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "jianghu_year_patrol",
+          "selectedChoiceId": "patrol_cautious",
+          "selectedScore": 12,
+          "runnerUpChoiceId": "patrol_righteous",
+          "runnerUpScore": -113.19999999999999,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "relationship_enemy_create",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "merchant_year_crisis",
+          "selectedChoiceId": "crisis_innovate",
+          "selectedScore": 8,
+          "runnerUpChoiceId": "crisis_retreat",
+          "runnerUpScore": -38,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 46,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 40,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -21,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -39,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "career_martial_arts_conference",
+          "selectedChoiceId": "",
+          "selectedScore": 36.8,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 15,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "career_mediate_conflict",
+          "selectedChoiceId": "",
+          "selectedScore": 80,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-deviant-ye"
+        },
+        {
+          "eventId": "scholar_year_social",
+          "selectedChoiceId": "social_poetry",
+          "selectedScore": 21.2,
+          "runnerUpChoiceId": "social_listen",
+          "runnerUpScore": 12,
+          "personaId": "p8-deviant-ye"
+        }
+      ],
+      "activeActionSelectionReasons": []
+    },
+    {
+      "personaId": "p8-explorer-lu",
+      "personaName": "陆行远",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 17,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "travel": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 2,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 28,
+            "description": "summary echo: 幼年游历的习惯延续至今",
+            "reference": "p9_summary_echo_travel",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "explicit echo flag p9_explicit_travel_echo",
+            "reference": "p9_explicit_travel_echo",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": true
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "lu-travel-habit",
+            "label": "坚持游历规划",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "travel actions=1 < 2"
+            ]
+          },
+          {
+            "goalId": "lu-connections",
+            "label": "路上结识人脉",
+            "ageBand": "20-30",
+            "status": "achieved",
+            "evidence": [
+              "connections=30 >= 20"
+            ]
+          },
+          {
+            "goalId": "lu-knowledge",
+            "label": "见闻积累",
+            "ageBand": "30-40",
+            "status": "achieved",
+            "evidence": [
+              "knowledge=47 >= 25"
+            ]
+          }
+        ],
+        "achievedCount": 2,
+        "missedCount": 1,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 8,
+            "classification": "explained",
+            "description": "你勉强练完，心里却始终烦躁，没什么收获。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_morning_training_neg_1"
+          },
+          {
+            "age": 11,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 20,
+            "classification": "warned",
+            "description": "到了成家的年纪，亲友都在为你张罗婚事。明月也在等待你的回应。 迎娶明月 (真爱，财富 -50, 婚姻质量高) 你的积蓄少了一些。",
+            "eventId": "family_marriage"
+          },
+          {
+            "age": 21,
+            "classification": "recoverable",
+            "description": "一场突如其来的大病让你卧床不起，连续数日高烧不退。你不得不停下修炼的脚步，安心养病。 你似乎更容易感到疲惫。",
+            "eventId": "setback_illness"
+          },
+          {
+            "age": 25,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 36,
+            "classification": "explained",
+            "description": "师门下达剿灭令，目标竟是当年你下山行善所救之人。长老以大局压你，要你瞒天过海。 拒令请罪 你当殿拒令，愿受门规惩处。清虚真人震怒，却念你昔日功绩从轻发落。【L1 可避重罚】 与某人的关系发生了微妙的变",
+            "eventId": "sect_midlife_gray_mission"
+          }
+        ],
+        "opaqueCount": 0,
+        "opaqueRatio": 0,
+        "opaqueExamples": []
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 3,
+        "lowImpactSpanStartAge": 4,
+        "lowImpactSpanEndAge": 7
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 自己看出的错账",
+        "turningPoint": "18岁 武林大会邀请 — 你把自己带到了更大的场面里，不论胜负如何，江湖都开始认真看你一眼。",
+        "age40Identity": "出身：商户之家，路线：江湖游侠（wanderer_map_legend），幼年营商 → 商路初成，幼年游历的习惯延续至今",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "auto",
+            "text": "路上结缘"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "险路缠斗"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 208,
+          "runnerUpChoiceId": "origin_scholar_family",
+          "runnerUpScore": 24,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_abacus",
+          "selectedScore": 1,
+          "runnerUpChoiceId": "merchant_childhood_choose_customers",
+          "runnerUpScore": 1,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "sect_path_choice",
+          "selectedChoiceId": "join_orthodox",
+          "selectedScore": 21.5,
+          "runnerUpChoiceId": "stay_wanderer",
+          "runnerUpScore": 4,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 406.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 404.5,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 16,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 5,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 5125,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 2620,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": 286,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": 271,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "scholar_year_study",
+          "selectedChoiceId": "study_classics",
+          "selectedScore": 11,
+          "runnerUpChoiceId": "study_new",
+          "runnerUpScore": 6,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_internal",
+          "selectedScore": 12,
+          "runnerUpChoiceId": "training_qinggong",
+          "runnerUpScore": 10,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "p9_wanderer_midlife_discovery",
+          "selectedChoiceId": "chart_routes",
+          "selectedScore": 80,
+          "runnerUpChoiceId": "guard_caravan",
+          "runnerUpScore": 66,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "sect_midlife_stewardship",
+          "selectedChoiceId": "stewardship_default_path",
+          "selectedScore": 4.5,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "career_foundation_sect",
+          "selectedChoiceId": "delay_sect",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "create_sect",
+          "runnerUpScore": -130,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "sect_midlife_faction_pressure",
+          "selectedChoiceId": "faction_support_elder",
+          "selectedScore": 10,
+          "runnerUpChoiceId": "faction_support_reform",
+          "runnerUpScore": 7,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 50,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 30,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -15,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -45,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "sect_midlife_gray_mission",
+          "selectedChoiceId": "gray_refuse_order",
+          "selectedScore": 9.5,
+          "runnerUpChoiceId": "gray_leak_warning",
+          "runnerUpScore": 4.5,
+          "personaId": "p8-explorer-lu"
+        },
+        {
+          "eventId": "hero_road_peril",
+          "selectedChoiceId": "hero_peril_fight",
+          "selectedScore": 6,
+          "runnerUpChoiceId": "hero_peril_retreat",
+          "runnerUpScore": -0.5,
+          "personaId": "p8-explorer-lu"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_errand_nearby",
+          "reason": "persona_strategy:travel prefers travel"
+        }
+      ]
+    },
+    {
+      "personaId": "p8-balanced-wei",
+      "personaName": "卫中和",
+      "agency": {
+        "activeActionCount": 1,
+        "storyEventCount": 37,
+        "choiceEventCount": 18,
+        "forcedEventCount": 0,
+        "activeActionByCategory": {
+          "business": 1
+        },
+        "repeatedSameActionStreakMax": 0,
+        "repeatedStreakExamples": []
+      },
+      "causality": {
+        "directEchoCount": 2,
+        "genericEchoCount": 0,
+        "strongestExamples": [
+          {
+            "age": 28,
+            "description": "summary echo: 幼年读书的习惯延续至今",
+            "reference": "p9_summary_echo_study",
+            "kind": "direct"
+          },
+          {
+            "age": 28,
+            "description": "explicit echo flag p9_explicit_balanced_harmony_echo",
+            "reference": "p9_explicit_balanced_harmony_echo",
+            "kind": "direct"
+          }
+        ],
+        "tooFewEchoes": true
+      },
+      "achievement": {
+        "goals": [
+          {
+            "goalId": "wei-balanced-stats",
+            "label": "文武均衡",
+            "ageBand": "0-20",
+            "status": "missed",
+            "evidence": [
+              "martialPower=9 < 15"
+            ]
+          },
+          {
+            "goalId": "wei-mixed-actions",
+            "label": "多种主动行动并用",
+            "ageBand": "20-30",
+            "status": "missed",
+            "evidence": [
+              "study actions=0 < 1"
+            ]
+          },
+          {
+            "goalId": "wei-identity",
+            "label": "形成稳定身份标签",
+            "ageBand": "30-40",
+            "status": "missed",
+            "evidence": []
+          }
+        ],
+        "achievedCount": 0,
+        "missedCount": 3,
+        "unavailableCount": 0
+      },
+      "frustration": {
+        "setbacks": [
+          {
+            "age": 10,
+            "classification": "warned",
+            "description": "在一次练功中，因用力过猛导致你不慎受伤。暂停调息后还有恢复之机，疼痛也让你意识到江湖险恶，需要更加小心谨慎。 你似乎更容易感到疲惫。",
+            "eventId": "setback_injury"
+          },
+          {
+            "age": 16,
+            "classification": "opaque",
+            "description": "你在山间遇到一位流浪武者，对方曾是某个小门派的弟子。他告诉你，他们门派因为不愿归顺「正道联盟」，被污蔑为「魔教」分支，遭到围剿灭门。「正道？不过是谁拳头大谁就定义正义罢了。」他冷笑道。 同情他的遭遇 ",
+            "eventId": "refugee_sect_story"
+          },
+          {
+            "age": 17,
+            "classification": "explained",
+            "description": "你记了半天，越看越觉得前后矛盾，心里反倒添了几分烦躁。 你的心中泛起涟漪，但一切似乎又归于平静。",
+            "eventId": "daily_reading_notes_neg_1"
+          },
+          {
+            "age": 19,
+            "classification": "recoverable",
+            "description": "一场突如其来的大病让你卧床不起，连续数日高烧不退。你不得不停下修炼的脚步，安心养病。 你似乎更容易感到疲惫。",
+            "eventId": "setback_illness"
+          },
+          {
+            "age": 25,
+            "classification": "warned",
+            "description": "你的孩子出生了，全家都沉浸在喜悦之中。 简单庆祝，低调行事 (财富 -10) 家里添了新丁，往后的日子因此多了更实在的盼头。",
+            "eventId": "family_child_born"
+          },
+          {
+            "age": 35,
+            "classification": "warned",
+            "description": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？ 抽身自保，先守住自家日子 (声望 -10) 家里的难关终于摆到了眼前，你再也不能把它当成与己无关",
+            "eventId": "family_crisis"
+          },
+          {
+            "age": 36,
+            "classification": "explained",
+            "description": "师门下达剿灭令，目标竟是当年你下山行善所救之人。长老以大局压你，要你瞒天过海。 拒令请罪 你当殿拒令，愿受门规惩处。清虚真人震怒，却念你昔日功绩从轻发落。【L1 可避重罚】 与某人的关系发生了微妙的变",
+            "eventId": "sect_midlife_gray_mission"
+          }
+        ],
+        "opaqueCount": 1,
+        "opaqueRatio": 0.14285714285714285,
+        "opaqueExamples": [
+          {
+            "age": 16,
+            "classification": "opaque",
+            "description": "你在山间遇到一位流浪武者，对方曾是某个小门派的弟子。他告诉你，他们门派因为不愿归顺「正道联盟」，被污蔑为「魔教」分支，遭到围剿灭门。「正道？不过是谁拳头大谁就定义正义罢了。」他冷笑道。 同情他的遭遇 ",
+            "eventId": "refugee_sect_story"
+          }
+        ]
+      },
+      "pacing": {
+        "longestLowImpactSpanYears": 4,
+        "lowImpactSpanStartAge": 9,
+        "lowImpactSpanEndAge": 13
+      },
+      "narrativeMemory": {
+        "earlyLife": "0岁 降生武侠世家；1岁 出身背景；3岁 伶牙俐齿；4岁 柜台边的小主意；6岁 自己看出的错账",
+        "turningPoint": "16岁 流浪武者 — 你的心中似乎多了一丝动摇。",
+        "age40Identity": "出身：商户之家，路线：文武兼修（balanced_path），幼年营商 → 商路初成，幼年读书的习惯延续至今，幼年交游 → 人脉回响",
+        "evidenceCitations": [
+          {
+            "age": 0,
+            "kind": "auto",
+            "text": "降生武侠世家"
+          },
+          {
+            "age": 23,
+            "kind": "auto",
+            "text": "雅集论交"
+          },
+          {
+            "age": 39,
+            "kind": "choice",
+            "text": "远行贸易"
+          },
+          {
+            "age": 1,
+            "kind": "choice",
+            "text": "出身背景"
+          },
+          {
+            "age": 4,
+            "kind": "choice",
+            "text": "柜台边的小主意"
+          }
+        ],
+        "missingTurningPoint": false,
+        "missingIdentity": false
+      },
+      "choiceDiagnostics": [
+        {
+          "eventId": "origin_background",
+          "selectedChoiceId": "origin_merchant_family",
+          "selectedScore": 208,
+          "runnerUpChoiceId": "origin_scholar_family",
+          "runnerUpScore": 24,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "merchant_childhood_preference",
+          "selectedChoiceId": "merchant_childhood_choose_abacus",
+          "selectedScore": 1,
+          "runnerUpChoiceId": "merchant_childhood_choose_customers",
+          "runnerUpScore": 1,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "sect_path_choice",
+          "selectedChoiceId": "join_orthodox",
+          "selectedScore": 21.5,
+          "runnerUpChoiceId": "stay_wanderer",
+          "runnerUpScore": 4,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "love_first_meet",
+          "selectedChoiceId": "love_charm",
+          "selectedScore": 406.5,
+          "runnerUpChoiceId": "love_greet",
+          "runnerUpScore": 404.5,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "refugee_sect_story",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "martial_arts_invitation",
+          "selectedChoiceId": "decline_invitation",
+          "selectedScore": 16,
+          "runnerUpChoiceId": "observe_only",
+          "runnerUpScore": 5,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "family_marriage",
+          "selectedChoiceId": "marry_mingyue",
+          "selectedScore": 5150,
+          "runnerUpChoiceId": "marry_free_love",
+          "runnerUpScore": 2620,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "family_child_born",
+          "selectedChoiceId": "child_born_simple",
+          "selectedScore": 291,
+          "runnerUpChoiceId": "child_born_care",
+          "runnerUpScore": 281,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "jianghu_year_training",
+          "selectedChoiceId": "training_internal",
+          "selectedScore": 12,
+          "runnerUpChoiceId": "training_qinggong",
+          "runnerUpScore": 10,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "relationship_sworn_help",
+          "selectedChoiceId": "",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 0,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "career_foundation_sect",
+          "selectedChoiceId": "delay_sect",
+          "selectedScore": 0,
+          "runnerUpChoiceId": "create_sect",
+          "runnerUpScore": -80,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "sect_midlife_stewardship",
+          "selectedChoiceId": "stewardship_default_path",
+          "selectedScore": 4.5,
+          "runnerUpChoiceId": null,
+          "runnerUpScore": null,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "hero_road_peril",
+          "selectedChoiceId": "hero_peril_fight",
+          "selectedScore": 6,
+          "runnerUpChoiceId": "hero_peril_retreat",
+          "runnerUpScore": 1,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "sect_midlife_faction_pressure",
+          "selectedChoiceId": "faction_support_elder",
+          "selectedScore": 10,
+          "runnerUpChoiceId": "faction_support_reform",
+          "runnerUpScore": 8,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "family_child_education",
+          "selectedChoiceId": "",
+          "selectedScore": 50,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": 30,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "family_crisis",
+          "selectedChoiceId": "",
+          "selectedScore": -10,
+          "runnerUpChoiceId": "",
+          "runnerUpScore": -30,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "sect_midlife_gray_mission",
+          "selectedChoiceId": "gray_refuse_order",
+          "selectedScore": 9.5,
+          "runnerUpChoiceId": "gray_leak_warning",
+          "runnerUpScore": 7,
+          "personaId": "p8-balanced-wei"
+        },
+        {
+          "eventId": "merchant_year_trade",
+          "selectedChoiceId": "trade_risk",
+          "selectedScore": 83,
+          "runnerUpChoiceId": "trade_stable",
+          "runnerUpScore": 58,
+          "personaId": "p8-balanced-wei"
+        }
+      ],
+      "activeActionSelectionReasons": [
+        {
+          "age": 7,
+          "actionId": "action_household_apprentice",
+          "reason": "persona_strategy:balanced prefers business"
+        }
+      ]
+    }
+  ],
+  "replay": {
+    "pairwiseSimilarities": [
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-scholar-su",
+        "score": 0.9304843900352723
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-social-gu",
+        "score": 0.8552947275958702
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-wealth-shen",
+        "score": 0.7620385771162264
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-cautious-han",
+        "score": 0.7036934295816313
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-deviant-ye",
+        "score": 0.7194759040355834
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-explorer-lu",
+        "score": 0.7280111688195766
+      },
+      {
+        "personaA": "p8-martial-lin",
+        "personaB": "p8-balanced-wei",
+        "score": 0.6000323474255699
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-social-gu",
+        "score": 0.7463618039178015
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-wealth-shen",
+        "score": 0.8583934032482153
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-cautious-han",
+        "score": 0.5702396658123172
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-deviant-ye",
+        "score": 0.766556927983141
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-explorer-lu",
+        "score": 0.7927526789741695
+      },
+      {
+        "personaA": "p8-scholar-su",
+        "personaB": "p8-balanced-wei",
+        "score": 0.5931990506495961
+      },
+      {
+        "personaA": "p8-social-gu",
+        "personaB": "p8-wealth-shen",
+        "score": 0.6607743620671047
+      },
+      {
+        "personaA": "p8-social-gu",
+        "personaB": "p8-cautious-han",
+        "score": 0.9161473477957018
+      },
+      {
+        "personaA": "p8-social-gu",
+        "personaB": "p8-deviant-ye",
+        "score": 0.8049599608672307
+      },
+      {
+        "personaA": "p8-social-gu",
+        "personaB": "p8-explorer-lu",
+        "score": 0.7863420977455653
+      },
+      {
+        "personaA": "p8-social-gu",
+        "personaB": "p8-balanced-wei",
+        "score": 0.793213222486044
+      },
+      {
+        "personaA": "p8-wealth-shen",
+        "personaB": "p8-cautious-han",
+        "score": 0.6518137774632027
+      },
+      {
+        "personaA": "p8-wealth-shen",
+        "personaB": "p8-deviant-ye",
+        "score": 0.9258691336420131
+      },
+      {
+        "personaA": "p8-wealth-shen",
+        "personaB": "p8-explorer-lu",
+        "score": 0.9320112921000839
+      },
+      {
+        "personaA": "p8-wealth-shen",
+        "personaB": "p8-balanced-wei",
+        "score": 0.8233814471966515
+      },
+      {
+        "personaA": "p8-cautious-han",
+        "personaB": "p8-deviant-ye",
+        "score": 0.8159954490189243
+      },
+      {
+        "personaA": "p8-cautious-han",
+        "personaB": "p8-explorer-lu",
+        "score": 0.8238517676142579
+      },
+      {
+        "personaA": "p8-cautious-han",
+        "personaB": "p8-balanced-wei",
+        "score": 0.9073911023970446
+      },
+      {
+        "personaA": "p8-deviant-ye",
+        "personaB": "p8-explorer-lu",
+        "score": 0.9687339765955606
+      },
+      {
+        "personaA": "p8-deviant-ye",
+        "personaB": "p8-balanced-wei",
+        "score": 0.948437119459395
+      },
+      {
+        "personaA": "p8-explorer-lu",
+        "personaB": "p8-balanced-wei",
+        "score": 0.9401047104625204
+      }
+    ],
+    "similarityClusters": [
+      [
+        "p8-martial-lin",
+        "p8-scholar-su"
+      ],
+      [
+        "p8-martial-lin",
+        "p8-social-gu"
+      ],
+      [
+        "p8-scholar-su",
+        "p8-wealth-shen"
+      ],
+      [
+        "p8-social-gu",
+        "p8-cautious-han"
+      ],
+      [
+        "p8-wealth-shen",
+        "p8-deviant-ye"
+      ],
+      [
+        "p8-wealth-shen",
+        "p8-explorer-lu"
+      ],
+      [
+        "p8-wealth-shen",
+        "p8-balanced-wei"
+      ]
+    ],
+    "nearDuplicateWarnings": [
+      "p8-martial-lin ~ p8-scholar-su (0.93)",
+      "p8-martial-lin ~ p8-social-gu (0.86)",
+      "p8-scholar-su ~ p8-wealth-shen (0.86)",
+      "p8-social-gu ~ p8-cautious-han (0.92)",
+      "p8-wealth-shen ~ p8-deviant-ye (0.93)",
+      "p8-wealth-shen ~ p8-explorer-lu (0.93)",
+      "p8-wealth-shen ~ p8-balanced-wei (0.82)",
+      "p8-cautious-han ~ p8-explorer-lu (0.82)",
+      "p8-cautious-han ~ p8-balanced-wei (0.91)",
+      "p8-deviant-ye ~ p8-explorer-lu (0.97)",
+      "p8-deviant-ye ~ p8-balanced-wei (0.95)",
+      "p8-explorer-lu ~ p8-balanced-wei (0.94)"
+    ]
+  },
+  "verdicts": [
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-martial-lin: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-martial-lin: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-martial-lin: opaque ratio 0.13",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-martial-lin: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-scholar-su: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-scholar-su: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-scholar-su: opaque ratio 0.00",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-scholar-su: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-social-gu: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-social-gu: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-social-gu: opaque ratio 0.13",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-social-gu: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-wealth-shen: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-wealth-shen: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-wealth-shen: opaque ratio 0.00",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-wealth-shen: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-cautious-han: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-cautious-han: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-cautious-han: opaque ratio 0.13",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-cautious-han: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-deviant-ye: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-deviant-ye: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-deviant-ye: opaque ratio 0.00",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-deviant-ye: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-explorer-lu: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-explorer-lu: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-explorer-lu: opaque ratio 0.00",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-explorer-lu: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "agency",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-balanced-wei: max streak 0",
+      "evidence": [],
+      "actualValue": 0
+    },
+    {
+      "key": "pacing",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-balanced-wei: pacing ok",
+      "evidence": []
+    },
+    {
+      "key": "frustration",
+      "status": "pass",
+      "severity": "blocker",
+      "detail": "p8-balanced-wei: opaque ratio 0.14",
+      "evidence": []
+    },
+    {
+      "key": "narrative_memory",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "p8-balanced-wei: narrative ok",
+      "evidence": []
+    },
+    {
+      "key": "achievement",
+      "status": "pass",
+      "severity": "warning",
+      "detail": "goal achievement spread ok (0.13 zero)",
+      "evidence": []
+    }
+  ],
+  "blockingFailures": [],
+  "warnings": []
+}

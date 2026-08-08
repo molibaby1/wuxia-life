@@ -20,7 +20,7 @@
     "choices": [
       {
         "id": "reading_classics",
-        "text": "阅读经典（学识 +4~6，悟性 +2~3）",
+        "text": "阅读经典（学识 +4~6，学识 +2~3）",
         "effects": [
           {
             "type": "stat_modify",
@@ -30,15 +30,6 @@
             "variable": true,
             "minValue": 4,
             "maxValue": 6
-          },
-          {
-            "type": "stat_modify",
-            "target": "comprehension",
-            "value": 2,
-            "operator": "add",
-            "variable": true,
-            "minValue": 2,
-            "maxValue": 3
           },
           {
             "type": "time_advance",
@@ -550,7 +541,7 @@
         "evaluation": "at_least_one"
       },
       "attributes": {
-        "comprehension": { "min": 15 }
+        "knowledge": { "min": 15 }
       }
     },
     "conditions": [

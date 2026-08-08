@@ -6,7 +6,7 @@
  * - `topResources`: header resource row (GameScreen status bar)
  *
  * Baseline composition (pre-P123):
- * - coreStats: martialPower, constitution, money
+ * - coreStats: the six canonical player attributes
  * - topResources: money, constitution, reputation
  *
  * Out of scope for P123 (do not modify):
@@ -80,6 +80,8 @@ export interface MainScreenModel {
   titleSummary: string;
   experienceSummary: string;
   practiceSummary: string;
+  milestoneSummary?: string;
+  milestoneProspectSummary?: string;
   riskSummary: string;
   tendencySummary: string;
   coreStats: MainScreenStatItem[];
@@ -91,7 +93,6 @@ export type MainScreenPlayer = Pick<
   | 'martialPower'
   | 'constitution'
   | 'chivalry'
-  | 'comprehension'
   | 'reputation'
   | 'money'
   | 'knowledge'
@@ -115,10 +116,14 @@ const RISK_LEVEL_LABELS: Record<LifeMemoryRiskSeverity, string> = {
   high: '高',
 };
 
-/** P123 first-screen core grid — martial overall readout + life essentials only. */
+/** First-screen grid — all six canonical attributes, with equal visual priority. */
 const CORE_STATS: Array<{ key: keyof MainScreenPlayer; label: string; description?: string }> = [
   { key: 'martialPower', label: '功力', description: '武学总读数' },
-  { key: 'money', label: '银两' },
+  { key: 'constitution', label: '体魄', description: '长期身体基础、耐受与恢复能力' },
+  { key: 'knowledge', label: '学识', description: '知识、理解、文化与学习能力' },
+  { key: 'connections', label: '人脉', description: '获取信息、寻求帮助与调动社会资源的能力' },
+  { key: 'reputation', label: '名望', description: '知名程度与影响传播范围' },
+  { key: 'chivalry', label: '侠义声誉', description: '外界对行为与品行的评价' },
 ];
 
 const TENDENCY_CANDIDATES: Array<{
@@ -127,14 +132,11 @@ const TENDENCY_CANDIDATES: Array<{
   bucket: string;
   weight: number;
 }> = [
-  { key: 'comprehension', label: '悟性', bucket: 'mind', weight: 1.25 },
   { key: 'constitution', label: '体魄', bucket: 'body', weight: 1.15 },
-  { key: 'chivalry', label: '侠义', bucket: 'virtue', weight: 1.05 },
+  { key: 'chivalry', label: '侠义声誉', bucket: 'virtue', weight: 1.05 },
   { key: 'knowledge', label: '学识', bucket: 'mind', weight: 1.0 },
   { key: 'reputation', label: '名望', bucket: 'jianghu', weight: 0.9 },
   { key: 'connections', label: '人脉', bucket: 'jianghu', weight: 0.9 },
-  { key: 'charisma', label: '魅力', bucket: 'jianghu', weight: 0.88 },
-  { key: 'businessAcumen', label: '经营', bucket: 'livelihood', weight: 1.05 },
   { key: 'martialPower', label: '功力', bucket: 'martial', weight: 1.0 },
 ];
 
@@ -177,6 +179,23 @@ function buildPracticeSummary(summary: LifeMemorySummary): string {
   return visiblePractice.length > 0
     ? visiblePractice.map((entry) => `${entry.label} · ${entry.tierLabel}`).join(' / ')
     : '尚未形成持续实践';
+}
+
+function buildMilestoneSummary(summary: LifeMemorySummary): string | undefined {
+  const milestones = (summary.achievedMilestones ?? [])
+    .filter((entry) => entry.visibility === 'player')
+    .sort((left, right) => right.sortKey - left.sortKey || left.id.localeCompare(right.id))
+    .slice(0, 2);
+  return milestones.length > 0 ? milestones.map((entry) => entry.label).join('、') : undefined;
+}
+
+function buildMilestoneProspectSummary(summary: LifeMemorySummary): string | undefined {
+  const prospect = (summary.milestoneProspects ?? [])
+    .filter((entry) => entry.visibility === 'player')
+    .sort((left, right) => right.progressRatio - left.progressRatio || right.sortKey - left.sortKey || left.id.localeCompare(right.id))[0];
+  if (!prospect) return undefined;
+  const progress = prospect.progressLabels.slice(0, 2).join(' / ');
+  return progress ? `${prospect.label} · ${progress}` : prospect.label;
 }
 
 function buildTendencySummary(player: MainScreenPlayer): string {
@@ -251,19 +270,16 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
       id: 'jianghu',
       label: '江湖',
       items: [
-        createStat('chivalry', '侠义', valueOf(player, 'chivalry'), '决定你在江湖中的取向与名节。'),
+        createStat('chivalry', '侠义声誉', valueOf(player, 'chivalry'), '外界对你行为与品行的评价。'),
         createStat('reputation', '名望', valueOf(player, 'reputation'), '影响旁人对你的评价与机会。'),
         createStat('connections', '人脉', valueOf(player, 'connections'), '决定可调动的关系与支援。'),
-        createStat('charisma', '魅力', valueOf(player, 'charisma'), '影响结交、说服与情感互动。'),
       ],
     },
     {
       id: 'growth',
       label: '成长',
       items: [
-        createStat('comprehension', '悟性', valueOf(player, 'comprehension'), '影响领悟速度与高阶突破。'),
-        createStat('knowledge', '学识', valueOf(player, 'knowledge'), '影响读书、谋划与见识深度。'),
-        createStat('influence', '影响力', valueOf(player, 'influence'), '决定你能撬动多大的局面。'),
+        createStat('knowledge', '学识', valueOf(player, 'knowledge'), '知识、理解、文化与学习能力。'),
       ],
     },
     {
@@ -290,17 +306,17 @@ export function buildMainScreenModel(
 
   return {
     stageTags,
-    // P123 first-screen header row — money / survival base / social standing
+    // Money is a resource, not a player attribute.
     topResources: [
       createStat('money', '银两', valueOf(player, 'money')),
-      createStat('constitution', '体魄', valueOf(player, 'constitution'), '生存底子'),
-      createStat('reputation', '名望', valueOf(player, 'reputation'), '影响规模、压力与机会，不直接代表人生投入'),
     ],
     currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',
     affiliationSummary: buildAffiliationSummary(player),
     titleSummary: player.title ?? '暂无正式称号',
     experienceSummary: buildExperienceSummary(lifeMemory),
     practiceSummary: buildPracticeSummary(lifeMemory),
+    milestoneSummary: buildMilestoneSummary(lifeMemory),
+    milestoneProspectSummary: buildMilestoneProspectSummary(lifeMemory),
     riskSummary: buildRiskSummary(lifeMemory),
     tendencySummary: buildTendencySummary(player),
     coreStats: CORE_STATS.map((item) =>

@@ -169,6 +169,11 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         eventType: 'auto',
         progressionKind: 'story_event',
         gameState: stateBefore,
+        outcomeEvidence: {
+          stateBefore,
+          stateAfter: snapshotStateForRecord(session),
+          executedEffects: event.autoEffects ?? [],
+        },
         currentTime: after.currentTime,
         timestamp: new Date().toISOString(),
       });
@@ -191,6 +196,11 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       eventType: 'auto',
       progressionKind: 'story_event',
       gameState: stateBefore,
+      outcomeEvidence: {
+        stateBefore,
+        stateAfter: snapshotStateForRecord(session),
+        executedEffects: catalogEvent.autoEffects ?? [],
+      },
       currentTime: after.currentTime,
       timestamp: new Date().toISOString(),
     });
@@ -214,11 +224,12 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     ctx.choiceDiagnostics.push(selection.diagnostic);
   }
   const snap = session.serialize();
-  await session.executeChoice({
+  const choiceResponse = await session.executeChoice({
     requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
     snapshotRef: { snapshot: snap },
     action: { eventId: catalogEvent.id, choiceId },
   });
+  const stateAfterChoice = snapshotStateForRecord(session);
   ctx.records.push({
     age,
     eventId: catalogEvent.id,
@@ -227,6 +238,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     eventType: 'choice',
     progressionKind: 'story_event',
     selectedChoice: selection.choice,
+    outcomeText: choiceResponse.status === 'success' ? choiceResponse.feedback.player.narrativeResult : undefined,
     choiceScoreDiagnostic: selection.diagnostic
       ? {
           selectedScore: selection.diagnostic.selectedScore,
@@ -235,6 +247,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         }
       : undefined,
     gameState: stateBefore,
+    outcomeEvidence: { stateBefore, stateAfter: stateAfterChoice },
     currentTime: session.getRuntimeState().currentTime,
     timestamp: new Date().toISOString(),
   });
@@ -280,6 +293,7 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
   await session.executeActiveAction(selection.actionId);
   const actionDef = getActionById(selection.actionId);
   const summary = session.getProgressionVolatileState().pendingActionSummary;
+  const stateAfterAction = snapshotStateForRecord(session);
   const feedbackText = summary?.actionName
     ? `本期安排${summary.actionName}`
     : `本期安排${actionDef?.name ?? '主动行动'}`;
@@ -288,12 +302,20 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
     eventId: toActiveActionReplayEventId(selection.actionId),
     eventTitle: actionDef?.name ? `主动${actionDef.name}` : '主动行动',
     eventText: feedbackText,
-    outcomeText: feedbackText,
+    outcomeText: [
+      feedbackText,
+      summary?.appliedDeltaSummary,
+      summary?.resultExplanation,
+      summary?.resourcePressureNotice,
+    ]
+      .filter(Boolean)
+      .join(' '),
     eventType: 'auto',
     progressionKind: 'active_action',
     activeActionId: selection.actionId,
     activeActionSelectionReason: selection.reason,
     gameState: stateBefore,
+    outcomeEvidence: { stateBefore, stateAfter: stateAfterAction },
     currentTime: session.getRuntimeState().currentTime,
     timestamp: new Date().toISOString(),
   });

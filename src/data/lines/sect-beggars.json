@@ -227,7 +227,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 2,
             "operator": "add"
           },
@@ -368,7 +368,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 2,
         "operator": "add"
       },
@@ -497,7 +497,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 2,
             "operator": "add"
           },

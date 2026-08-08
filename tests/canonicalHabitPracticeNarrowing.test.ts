@@ -257,12 +257,14 @@ function testPracticeHabitsDoNotDefineIdentityOrTendency(): void {
 
   const lowMemory = deriveLifeMemorySummary(low);
   const highMemory = deriveLifeMemorySummary(high);
-  const stripTrajectory = (summary: ReturnType<typeof deriveLifeMemorySummary>) => {
+  const stripHabitDerivedFeedback = (summary: ReturnType<typeof deriveLifeMemorySummary>) => {
     const clone = structuredClone(summary);
     delete clone.habitTrajectory;
+    delete clone.achievedMilestones;
+    delete clone.milestoneProspects;
     return clone;
   };
-  assertDeepEqual(stripTrajectory(lowMemory), stripTrajectory(highMemory), 'Habit-only changes must not alter other memory fields');
+  assertDeepEqual(stripHabitDerivedFeedback(lowMemory), stripHabitDerivedFeedback(highMemory), 'Habit-only changes must not alter other formal memory fields');
 }
 
 function testFormalSchedulingSourceDoesNotReadPracticeHabits(): void {

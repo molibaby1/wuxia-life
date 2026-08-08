@@ -469,7 +469,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 4,
             "operator": "add"
           },
@@ -557,12 +557,12 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "player.comprehension >= 30 AND !flags.has(\"comprehension_breakthrough\")"
+        "expression": "player.knowledge >= 30 AND !flags.has(\"comprehension_breakthrough\")"
       }
     ],
     "content": {
       "text": "你在静坐参悟时忽有所悟，真气自发流转，内功瓶颈被冲破。",
-      "title": "悟性突破",
+      "title": "学识突破",
       "description": "一念通透，百脉俱开。"
     },
     "eventType": "auto",
@@ -593,7 +593,7 @@
       "author": "development_team",
       "tags": [
         "青年",
-        "悟性",
+        "学识",
         "突破",
         "once"
       ],

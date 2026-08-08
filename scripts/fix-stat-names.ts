@@ -1,6 +1,6 @@
 /**
  * 修复事件中的属性名称
- * 将 wealth -> money, knowledge -> comprehension
+ * 将 wealth -> money
  */
 
 import { readFileSync, writeFileSync } from 'fs';
@@ -16,7 +16,6 @@ const files = [
 // 属性名称映射
 const statNameMap: Record<string, string> = {
   'wealth': 'money',
-  'knowledge': 'comprehension'
 };
 
 function fixStatNames(filePath: string) {

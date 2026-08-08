@@ -376,7 +376,7 @@
       },
       {
         "type": "stat_modify",
-        "target": "comprehension",
+        "target": "knowledge",
         "value": 5,
         "operator": "add",
         "variable": true,

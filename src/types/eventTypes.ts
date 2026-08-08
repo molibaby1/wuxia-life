@@ -120,7 +120,6 @@ export enum EffectType {
 export type TraitStatKey =
   | 'martialPower'
   | 'constitution'
-  | 'comprehension'
   | 'charisma'
   | 'chivalry'
   | 'reputation'
@@ -132,7 +131,7 @@ export type TraitStatKey =
 
 export type EventBiasTag =
   | 'training'
-  | 'comprehension'
+  | 'learning'
   | 'social'
   | 'romance'
   | 'family'
@@ -810,7 +809,6 @@ export interface PlayerStats {
   
   // ========== 非战斗属性 ==========
   charisma: number;          // 魅力：0-100，个人魅力，影响社交、说服和 NPC 态度
-  comprehension: number;     // 悟性：0-100，领悟能力，影响学习速度和技能理解
   chivalry: number;          // 侠义声誉：允许负值、中立和正值，无固定上限
   reputation: number;        // 名望：非负的知名程度和影响传播范围，无固定上限
   connections: number;       // 人脉：非负的社会关系网络能力，无固定上限
@@ -845,7 +843,6 @@ export interface PlayerState {
   martialPower: number;
   chivalry: number;
   constitution: number;
-  comprehension: number;
   
   // 社会属性
   affiliation: AffiliationId | null;

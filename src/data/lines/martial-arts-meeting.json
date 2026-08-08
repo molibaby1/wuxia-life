@@ -33,9 +33,9 @@
         ]
       },
       {
-        "text": "观摩学习（悟性 +5）",
+        "text": "观摩学习（学识 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "martialPower", "value": 3},
           {"type": "flag_set", "flag": "youth_competition_done", "value": true}
         ]
@@ -117,9 +117,9 @@
         ]
       },
       {
-        "text": "寻师访友（悟性 +10）",
+        "text": "寻师访友（学识 +10）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "stat_modify", "stat": "internalSkill", "value": 8},
           {"type": "flag_set", "flag": "ready_for_adult_competition", "value": true}
         ]
@@ -433,11 +433,11 @@
           {
             "id": "success",
             "text": "你保持冷静，稳扎稳打。虽然对手攻势凌厉，但你始终不被其节奏带走。在第三局时，对手露出破绽，你果断出击，一举拿下比赛！",
-            "condition": {"type": "expression", "expression": "comprehension >= 30"},
+            "condition": {"type": "expression", "expression": "knowledge >= 30"},
             "effects": [
               {"type": "stat_modify", "stat": "martialPower", "value": 12, "operator": "add"},
               {"type": "stat_modify", "stat": "reputation", "value": 25, "operator": "add"},
-              {"type": "stat_modify", "stat": "comprehension", "value": 5, "operator": "add"},
+              {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"},
               {"type": "flag_set", "flag": "meeting_semifinal_pass", "value": true},
               {"type": "flag_set", "flag": "meeting_semi_tactical", "value": true},
               {"type": "event_record", "target": "meeting_semifinal_tactical"}
@@ -602,9 +602,9 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "关注黑马（悟性 +10）",
+        "text": "关注黑马（学识 +10）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "stat_modify", "stat": "charisma", "value": 5}
         ]
       },

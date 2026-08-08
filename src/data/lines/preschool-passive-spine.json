@@ -7,7 +7,7 @@
       "originTags": ["scholar"],
       "ageMin": 3,
       "ageMax": 3,
-      "statDeltas": { "comprehension": 1 }
+      "statDeltas": { "knowledge": 1 }
     },
     {
       "id": "preschool_scholar_library_dust",
@@ -16,7 +16,7 @@
       "originTags": ["scholar"],
       "ageMin": 5,
       "ageMax": 7,
-      "statDeltas": { "comprehension": 1 }
+      "statDeltas": { "knowledge": 1 }
     },
     {
       "id": "preschool_scholar_gate_visitor",
@@ -109,7 +109,7 @@
       "originTags": ["scholar"],
       "ageMin": 4,
       "ageMax": 5,
-      "statDeltas": { "comprehension": 1 }
+      "statDeltas": { "knowledge": 1 }
     },
     {
       "id": "preschool_scholar_rain_eaves",
@@ -176,7 +176,7 @@
       "originTags": ["scholar"],
       "ageMin": 3,
       "ageMax": 7,
-      "statDeltas": { "comprehension": 1 }
+      "statDeltas": { "knowledge": 1 }
     },
     {
       "id": "preschool_scholar_seal_imprint",
@@ -263,7 +263,7 @@
       "ageMin": 4,
       "ageMax": 5,
       "flags": ["preschool_apprentice_plane_shavings"],
-      "statDeltas": { "comprehension": 1 }
+      "statDeltas": { "knowledge": 1 }
     },
     {
       "id": "preschool_apprentice_market_errand",

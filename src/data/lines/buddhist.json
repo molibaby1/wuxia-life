@@ -11,7 +11,7 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "chivalry >= 20 && comprehension >= 15"}
+      {"type": "expression", "expression": "chivalry >= 20 && knowledge >= 15"}
     ],
     "content": {
       "title": "佛缘初现",
@@ -24,7 +24,7 @@
         "text": "向老僧请教佛法",
         "effects": [
           {"type": "stat_modify", "stat": "internalSkill", "value": 3},
-          {"type": "stat_modify", "stat": "comprehension", "value": 2},
+          {"type": "stat_modify", "stat": "knowledge", "value": 2},
           {"type": "stat_modify", "stat": "chivalry", "value": 2},
           {"type": "flag_set", "flag": "buddhist_fate", "value": true}
         ]
@@ -98,7 +98,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "internalSkill", "value": 4},
-      {"type": "stat_modify", "stat": "comprehension", "value": 3},
+      {"type": "stat_modify", "stat": "knowledge", "value": 3},
       {"type": "flag_set", "flag": "buddhist_cultivation", "value": true}
     ]
   },
@@ -125,7 +125,7 @@
       {
         "text": "专修禅宗佛法",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "knowledge", "value": 8},
           {"type": "stat_modify", "stat": "internalSkill", "value": 6},
           {"type": "flag_set", "flag": "buddhist_zen_path", "value": true}
         ]
@@ -143,7 +143,7 @@
         "effects": [
           {"type": "stat_modify", "stat": "internalSkill", "value": 4},
           {"type": "stat_modify", "stat": "externalSkill", "value": 4},
-          {"type": "stat_modify", "stat": "comprehension", "value": 4},
+          {"type": "stat_modify", "stat": "knowledge", "value": 4},
           {"type": "flag_set", "flag": "buddhist_dual_path", "value": true}
         ]
       }
@@ -170,12 +170,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "全力应对考验（需悟性≥25）",
+        "text": "全力应对考验（需学识≥25）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 25"}
+          {"type": "expression", "expression": "knowledge >= 25"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "internalSkill", "value": 5},
           {"type": "flag_set", "flag": "buddhist_trial_passed", "value": true},
           {"type": "flag_set", "flag": "elder_approval", "value": true}
@@ -184,7 +184,7 @@
       {
         "text": "尽力而为",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 2},
+          {"type": "stat_modify", "stat": "knowledge", "value": 2},
           {"type": "stat_modify", "stat": "internalSkill", "value": 2}
         ]
       }
@@ -210,7 +210,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 6},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6},
       {"type": "stat_modify", "stat": "internalSkill", "value": 8},
       {"type": "flag_set", "flag": "buddhist_yijinjing_fragment", "value": true}
     ]
@@ -380,23 +380,23 @@
       {
         "text": "盛装出席并宴请宾客（需金钱≥500，声望 +30）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 35 && money >= 500"}
+          {"type": "expression", "expression": "knowledge >= 35 && money >= 500"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -500},
-          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "knowledge", "value": 6},
           {"type": "stat_modify", "stat": "reputation", "value": 30},
           {"type": "stat_modify", "stat": "charisma", "value": 8},
           {"type": "flag_set", "flag": "buddhist_debate_winner", "value": true}
         ]
       },
       {
-        "text": "积极参与（需悟性≥35）",
+        "text": "积极参与（需学识≥35）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 35"}
+          {"type": "expression", "expression": "knowledge >= 35"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "knowledge", "value": 6},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "flag_set", "flag": "buddhist_debate_winner", "value": true}
@@ -405,7 +405,7 @@
       {
         "text": "旁观学习",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 3}
+          {"type": "stat_modify", "stat": "knowledge", "value": 3}
         ]
       }
     ]
@@ -431,7 +431,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "internalSkill", "value": 10},
-      {"type": "stat_modify", "stat": "comprehension", "value": 8},
+      {"type": "stat_modify", "stat": "knowledge", "value": 8},
       {"type": "stat_modify", "stat": "constitution", "value": 5},
       {"type": "flag_set", "flag": "buddhist_seclusion_done", "value": true}
     ]
@@ -498,7 +498,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "knowledge", "value": 10},
       {"type": "stat_modify", "stat": "internalSkill", "value": 8},
       {"type": "flag_set", "flag": "buddhist_enlightenment", "value": true}
     ]
@@ -600,14 +600,14 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "以佛法感化（需悟性≥50，侠义≥50）",
+        "text": "以佛法感化（需学识≥50，侠义≥50）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 50 && chivalry >= 50"}
+          {"type": "expression", "expression": "knowledge >= 50 && chivalry >= 50"}
         ],
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": 15},
           {"type": "stat_modify", "stat": "reputation", "value": 40},
-          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "knowledge", "value": 8},
           {"type": "flag_set", "flag": "buddhist_demon_converted", "value": true}
         ]
       },
@@ -646,7 +646,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "internalSkill", "value": 12},
-      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "stat_modify", "stat": "knowledge", "value": 12},
       {"type": "stat_modify", "stat": "martialPower", "value": 10},
       {"type": "flag_set", "flag": "buddhist_perfection", "value": true}
     ]
@@ -662,7 +662,7 @@
       {"type": "age_reach", "value": 70}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.buddhist_perfection == true && martialPower >= 150 && comprehension >= 80"}
+      {"type": "expression", "expression": "flags.buddhist_perfection == true && martialPower >= 150 && knowledge >= 80"}
     ],
     "content": {
       "title": "一代高僧",
@@ -710,7 +710,7 @@
       {"type": "age_reach", "value": 70}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.buddhist_zen_path == true && comprehension >= 90"}
+      {"type": "expression", "expression": "flags.buddhist_zen_path == true && knowledge >= 90"}
     ],
     "content": {
       "title": "佛法大师",

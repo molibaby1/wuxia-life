@@ -152,7 +152,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 5,
             "operator": "add"
           },
@@ -166,11 +166,11 @@
       },
       {
         "id": "innovate_suspend",
-        "text": "先记下心得，暂不强求突破 (悟性 +3)",
+        "text": "先记下心得，暂不强求突破 (学识 +3)",
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 3,
             "operator": "add"
           },
@@ -448,7 +448,7 @@
         ]
       },
       {
-        "text": "暂缓扩建，先整顿门规 (财富 -20, 悟性 +4)",
+        "text": "暂缓扩建，先整顿门规 (财富 -20, 学识 +4)",
         "effects": [
           {
             "type": "stat_modify",
@@ -458,7 +458,7 @@
           },
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 4,
             "operator": "add"
           },
@@ -653,7 +653,7 @@
         "max": 55
       },
       "stats": {
-        "comprehension": {
+        "knowledge": {
           "min": 40
         }
       }
@@ -668,7 +668,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 20,
             "operator": "add"
           },
@@ -690,7 +690,7 @@
         "effects": [
           {
             "type": "stat_modify",
-            "target": "comprehension",
+            "target": "knowledge",
             "value": 10,
             "operator": "add"
           }

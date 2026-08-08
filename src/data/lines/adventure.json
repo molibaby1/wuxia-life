@@ -52,7 +52,7 @@
       {"type": "random", "value": 0.1}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 35"}
+      {"type": "expression", "expression": "knowledge >= 35"}
     ],
     "content": {
       "title": "隐世高人",
@@ -62,7 +62,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 18},
-      {"type": "stat_modify", "stat": "comprehension", "value": 10},
+      {"type": "stat_modify", "stat": "knowledge", "value": 10},
       {"type": "stat_modify", "stat": "internalSkill", "value": 12}
     ]
   },
@@ -101,7 +101,7 @@
       {"type": "random", "value": 0.1}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 40"}
+      {"type": "expression", "expression": "knowledge >= 40"}
     ],
     "content": {
       "title": "阵法考验",
@@ -121,12 +121,12 @@
         ]
       },
       {
-        "text": "智取（需悟性≥50）",
+        "text": "智取（需学识≥50）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 50"}
+          {"type": "expression", "expression": "knowledge >= 50"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "internalSkill", "value": 8}
         ]
       }
@@ -192,12 +192,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "自行解毒（需悟性≥45）",
+        "text": "自行解毒（需学识≥45）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 45"}
+          {"type": "expression", "expression": "knowledge >= 45"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "constitution", "value": -3}
         ]
       },
@@ -222,7 +222,7 @@
       {"type": "random", "value": 0.08}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 50"}
+      {"type": "expression", "expression": "knowledge >= 50"}
     ],
     "content": {
       "title": "梦境奇遇",
@@ -232,7 +232,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 15},
-      {"type": "stat_modify", "stat": "comprehension", "value": 12},
+      {"type": "stat_modify", "stat": "knowledge", "value": 12},
       {"type": "stat_modify", "stat": "internalSkill", "value": 10}
     ]
   },
@@ -272,7 +272,7 @@
       {"type": "random", "value": 0.06}
     ],
     "conditions": [
-      {"type": "expression", "expression": "chivalry >= 50 && comprehension >= 45"}
+      {"type": "expression", "expression": "chivalry >= 50 && knowledge >= 45"}
     ],
     "content": {
       "title": "前辈遗愿",
@@ -285,7 +285,7 @@
         "text": "接受遗愿",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 20},
-          {"type": "stat_modify", "stat": "comprehension", "value": 15},
+          {"type": "stat_modify", "stat": "knowledge", "value": 15},
           {"type": "stat_modify", "stat": "chivalry", "value": 10}
         ]
       },
@@ -309,7 +309,7 @@
       {"type": "random", "value": 0.05}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 60"}
+      {"type": "expression", "expression": "knowledge >= 60"}
     ],
     "content": {
       "title": "前世记忆",
@@ -318,7 +318,7 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "knowledge", "value": 20},
       {"type": "stat_modify", "stat": "martialPower", "value": 25},
       {"type": "stat_modify", "stat": "internalSkill", "value": 18}
     ]
@@ -368,7 +368,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "internalSkill", "value": 15},
       {"type": "stat_modify", "stat": "martialPower", "value": 12},
-      {"type": "stat_modify", "stat": "comprehension", "value": 8}
+      {"type": "stat_modify", "stat": "knowledge", "value": 8}
     ]
   },
   {
@@ -446,7 +446,7 @@
       {"type": "random", "value": 0.03}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 70"}
+      {"type": "expression", "expression": "knowledge >= 70"}
     ],
     "content": {
       "title": "时空幻境",
@@ -456,7 +456,7 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "stat_modify", "stat": "martialPower", "value": 30},
-      {"type": "stat_modify", "stat": "comprehension", "value": 20},
+      {"type": "stat_modify", "stat": "knowledge", "value": 20},
       {"type": "stat_modify", "stat": "internalSkill", "value": 25}
     ]
   },
@@ -524,14 +524,14 @@
         ],
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 15},
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "stat_modify", "stat": "reputation", "value": 10}
         ]
       },
       {
         "text": "静观其变",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5}
+          {"type": "stat_modify", "stat": "knowledge", "value": 5}
         ]
       }
     ]

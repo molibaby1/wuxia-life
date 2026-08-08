@@ -160,12 +160,12 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "找出造谣者（需悟性≥70）",
+        "text": "找出造谣者（需学识≥70）",
         "conditions": [
-          {"type": "expression", "expression": "comprehension >= 70"}
+          {"type": "expression", "expression": "knowledge >= 70"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "stat_modify", "stat": "martialPower", "value": 8}
         ]
@@ -339,7 +339,7 @@
     "autoEffects": [
       {"type": "stat_modify", "stat": "reputation", "value": 100},
       {"type": "stat_modify", "stat": "charisma", "value": 40},
-      {"type": "stat_modify", "stat": "comprehension", "value": 20}
+      {"type": "stat_modify", "stat": "knowledge", "value": 20}
     ]
   }
 ]

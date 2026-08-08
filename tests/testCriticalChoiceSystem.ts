@@ -14,7 +14,6 @@ function createTestState(): GameState {
     chivalry: 0,
     charisma: 50,
     constitution: 50,
-    comprehension: 50,
     money: 1000,
     reputation: 30,
     connections: 20,

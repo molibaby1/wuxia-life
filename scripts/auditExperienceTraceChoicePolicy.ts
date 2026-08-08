@@ -27,7 +27,6 @@ const STAT_KEYS = [
   'reputation',
   'charisma',
   'businessAcumen',
-  'comprehension',
   'chivalry',
   'knowledge',
   'influence',
@@ -163,7 +162,7 @@ function scoreEffects(
     if (effect.type !== 'stat_modify' || !effect.target) continue;
     const delta = effectDelta(effect);
     let multiplier = 1;
-    if (tendency === 'martial' && ['martialPower', 'comprehension', 'constitution'].includes(effect.target)) {
+    if (tendency === 'martial' && ['martialPower', 'knowledge', 'constitution'].includes(effect.target)) {
       multiplier = 3;
     } else if (tendency === 'wealth' && ['money', 'businessAcumen', 'reputation', 'connections'].includes(effect.target)) {
       multiplier = 3;
@@ -626,7 +625,7 @@ function buildReport(runs: Run[]): string {
     '',
     '## Current Selection Policy Definition',
     '',
-    `\`oracle_effect_score_v1\`: hidden direct effects plus all outcome effects are scored; martial tendency gives ×3 to martialPower/comprehension/constitution; wealth tendency gives ×3 to money/businessAcumen/reputation/connections and ×0.7 to other stats; persona route/risk/relationship/goal bonuses are then added; scores are deterministic and ties are resolved by the first candidate. \`normalizedStatUnits=false\`.`,
+    `\`oracle_effect_score_v1\`: hidden direct effects plus all outcome effects are scored; martial tendency gives ×3 to martialPower/knowledge/constitution; wealth tendency gives ×3 to money/businessAcumen/reputation/connections and ×0.7 to other stats; persona route/risk/relationship/goal bonuses are then added; scores are deterministic and ties are resolved by the first candidate. \`normalizedStatUnits=false\`.`,
 
     '',
     '## 1. Event Selection Statistics',
@@ -767,7 +766,7 @@ function buildReport(runs: Run[]): string {
     '## Unresolved / Awaiting Verification',
     '',
     '- Exact outcome reachability for every choice is unresolved because the current Trace does not store full choice-pre-state snapshots or outcome IDs/conditions. The report intentionally does not convert the sensitivity upper bound into an actual affected-choice count.',
-    '- Human-visible story differentiation, comprehension of option text, perceived risk, and fun are unresolved. Automated Trace evidence cannot answer them.',
+    '- Human-visible story differentiation, understanding of option text, perceived risk, and fun are unresolved. Automated Trace evidence cannot answer them.',
     '- Final `ending` is not populated in the sampled trace payloads; this is a coverage/encoding fact, not a conclusion that no narrative ending exists elsewhere.',
     '',
     '## Decision and the Unique Next Slice',

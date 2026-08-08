@@ -30,7 +30,6 @@ function createBaselinePlayer(): PlayerState {
     martialPower: 10,
     chivalry: 0,
     constitution: 10,
-    comprehension: 10,
     charisma: 10,
     knowledge: 10,
     connections: 0,

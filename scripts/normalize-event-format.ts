@@ -35,9 +35,8 @@ function convertAddStatsToStatModify(effect: any): any[] {
       'externalSkill': 'externalSkill',
       'qinggong': 'qinggong',
       'constitution': 'constitution',
-      'comprehension': 'comprehension',
       'charisma': 'charisma',
-      'knowledge': 'comprehension'  // 学识映射到悟性
+      'knowledge': 'knowledge'
     };
     
     for (const [stat, value] of Object.entries(effect.stats)) {

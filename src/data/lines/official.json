@@ -14,12 +14,12 @@
         "evaluation": "at_least_one"
       },
       "attributes": {
-        "comprehension": { "min": 12 },
+        "knowledge": { "min": 12 },
         "charisma": { "min": 8 }
       }
     },
     "conditions": [
-      { "type": "expression", "expression": "!flags.has(\"route_official\") && player.comprehension >= 12 && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")" }
+      { "type": "expression", "expression": "!flags.has(\"route_official\") && player.knowledge >= 12 && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\")" }
     ],
     "content": {
       "text": "家族希望你参加科举，走仕途之路。",
@@ -34,7 +34,7 @@
         "effects": [
           { "type": "flag_set", "target": "route_official" },
           { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
-          { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" },
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
           { "type": "event_record", "target": "official_entry_accept" }
         ]
       },

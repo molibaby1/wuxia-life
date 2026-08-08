@@ -37,6 +37,8 @@ import {
 } from './activePlanning/ActivePlanningService';
 import { explainChoiceRequirement } from './activePlanning/ChoiceRequirementExplanation';
 import type { ActiveActionExecutionResult } from './activePlanning/ActivePlanningService';
+import type { AutomaticStageResultDisplay } from '../types/activeActionTypes';
+import { calculatePublicStatDeltas } from './activePlanning/periodSummaryBuilder';
 import { getLaterLifeConsequenceMultiplier } from '../p17/laterLifeSelection';
 import { getLaterLifeLegacyMultiplier } from '../p18/laterLifeLegacySelection';
 import { getLaterLifeEndgameRecoveryMultiplier } from '../p19/laterLifeEndgameSelection';
@@ -111,7 +113,6 @@ export class GameEngineIntegration {
         chivalry: 0,
         charisma: 10,
         constitution: 10,
-        comprehension: 10,
         knowledge: 10,
         businessAcumen: 10,
         influence: 0,
@@ -211,7 +212,6 @@ export class GameEngineIntegration {
         player.chivalry = nextState.player.chivalry;
         player.charisma = nextState.player.charisma;
         player.constitution = nextState.player.constitution;
-        player.comprehension = nextState.player.comprehension;
         player.knowledge = nextState.player.knowledge;
         player.businessAcumen = nextState.player.businessAcumen;
         player.influence = nextState.player.influence;
@@ -1397,14 +1397,28 @@ export class GameEngineIntegration {
   /**
    * 执行自动事件
    */
-  public async executeAutoEvent(event: EventDefinition): Promise<{ gameState: GameState, event: EventDefinition }> {
+  public async executeAutoEvent(event: EventDefinition): Promise<{
+    gameState: GameState;
+    event: EventDefinition;
+    stageResults: AutomaticStageResultDisplay[];
+  }> {
     const ageBeforeEvent = this.gameState.player?.age || 0;
+    const playerBeforeEvent = { ...this.gameState.player };
 
     if (!event.autoEffects || event.autoEffects.length === 0) {
       this.recordEventTrigger(event, ageBeforeEvent);
       appendFormalEventHistory(this.gameState, event.id, ageBeforeEvent);
       this.applyP16PostEventHooks(event);
-      return { gameState: this.gameState, event };
+      return {
+        gameState: this.gameState,
+        event,
+        stageResults: [{
+          id: event.id,
+          sourceKind: 'story_event',
+          title: event.content?.title || '上一阶段',
+          deltas: {},
+        }],
+      };
     }
     
     // 执行效果
@@ -1415,6 +1429,12 @@ export class GameEngineIntegration {
     this.pendingEventOutcomeNote = null;
     const adjustedState = updatedState;
     this.applyGameState(adjustedState);
+    const stageResults: AutomaticStageResultDisplay[] = [{
+      id: event.id,
+      sourceKind: 'story_event',
+      title: event.content?.title || '上一阶段',
+      deltas: calculatePublicStatDeltas(playerBeforeEvent, this.gameState.player),
+    }];
     
     // 记录事件触发（用于年度事件限制）
     this.recordEventTrigger(event, ageBeforeEvent);
@@ -1426,8 +1446,16 @@ export class GameEngineIntegration {
     });
     if (setbackResults.triggeredEvents.length > 0) {
       for (const result of setbackResults.triggeredEvents) {
+        const playerBeforeSetback = { ...this.gameState.player };
         this.gameState = applySetbackEffects(this.gameState, result.event.id);
         appendFormalEventHistory(this.gameState, result.event.id, ageBeforeEvent);
+        stageResults.push({
+          id: result.event.id,
+          sourceKind: 'setback',
+          title: result.event.name,
+          body: result.event.failureText || result.event.description,
+          deltas: calculatePublicStatDeltas(playerBeforeSetback, this.gameState.player),
+        });
       }
     }
 
@@ -1449,7 +1477,7 @@ export class GameEngineIntegration {
 
     this.applyP16PostEventHooks(event);
 
-    return { gameState: this.gameState, event };
+    return { gameState: this.gameState, event, stageResults };
   }
 
   private applyP16PostEventHooks(event: EventDefinition): void {

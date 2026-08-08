@@ -11,7 +11,7 @@
       {"type": "random", "value": 0.4}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.origin_scholar_family == true || comprehension >= 15"}
+      {"type": "expression", "expression": "flags.origin_scholar_family == true || knowledge >= 15"}
     ],
     "content": {
       "title": "读书节庆",
@@ -21,17 +21,17 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "积极参与（悟性 +5，声望 +5）",
+        "text": "积极参与（学识 +5，声望 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
           {"type": "flag_set", "flag": "scholar_festival_participated", "value": true}
         ]
       },
       {
-        "text": "旁观学习（悟性 +3）",
+        "text": "旁观学习（学识 +3）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 3},
+          {"type": "stat_modify", "stat": "knowledge", "value": 3},
           {"type": "flag_set", "flag": "scholar_festival_observed", "value": true}
         ]
       }
@@ -59,7 +59,7 @@
       {"type": "random", "value": 0.5}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 18"}
+      {"type": "expression", "expression": "knowledge >= 18"}
     ],
     "content": {
       "title": "诗词大赛",
@@ -69,17 +69,17 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "参加比赛（悟性 +8，声望 +10）",
+        "text": "参加比赛（学识 +8，声望 +10）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "knowledge", "value": 8},
           {"type": "stat_modify", "stat": "reputation", "value": 10},
           {"type": "flag_set", "flag": "poetry_winner", "value": true}
         ]
       },
       {
-        "text": "助兴表演（悟性 +4，声望 +5）",
+        "text": "助兴表演（学识 +4，声望 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 4},
+          {"type": "stat_modify", "stat": "knowledge", "value": 4},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
           {"type": "flag_set", "flag": "poetry_participant", "value": true}
         ]
@@ -107,7 +107,7 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "comprehension >= 20 && (flags.origin_scholar_family == true || reputation >= 10)"}
+      {"type": "expression", "expression": "knowledge >= 20 && (flags.origin_scholar_family == true || reputation >= 10)"}
     ],
     "content": {
       "title": "学术讲座",
@@ -117,17 +117,17 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "深入探讨（悟性 +10，侠义 +5）",
+        "text": "深入探讨（学识 +10，侠义 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 10},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10},
           {"type": "stat_modify", "stat": "chivalry", "value": 5},
           {"type": "flag_set", "flag": "academic_deeper_understanding", "value": true}
         ]
       },
       {
-        "text": "虚心请教（悟性 +6，魅力 +3）",
+        "text": "虚心请教（学识 +6，魅力 +3）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 6},
+          {"type": "stat_modify", "stat": "knowledge", "value": 6},
           {"type": "stat_modify", "stat": "charisma", "value": 3},
           {"type": "flag_set", "flag": "academic_mentorship", "value": true}
         ]
@@ -152,7 +152,7 @@
     "ageRange": {"min": 18, "max": 30},
     "triggers": [
       {"type": "age_reach", "value": 18},
-      {"type": "expression", "expression": "comprehension >= 25 && reputation >= 15"}
+      {"type": "expression", "expression": "knowledge >= 25 && reputation >= 15"}
     ],
     "conditions": [
       {"type": "expression", "expression": "flags.origin_scholar_family == true"}
@@ -165,17 +165,17 @@
     "eventType": "choice",
     "choices": [
       {
-        "text": "专心备考（悟性 +12，声望 +15）",
+        "text": "专心备考（学识 +12，声望 +15）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 12},
+          {"type": "stat_modify", "stat": "knowledge", "value": 12},
           {"type": "stat_modify", "stat": "reputation", "value": 15},
           {"type": "flag_set", "flag": "civil_service_passed", "value": true}
         ]
       },
       {
-        "text": "兼顾武艺（悟性 +8，外功 +5）",
+        "text": "兼顾武艺（学识 +8，外功 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "comprehension", "value": 8},
+          {"type": "stat_modify", "stat": "knowledge", "value": 8},
           {"type": "stat_modify", "stat": "externalSkill", "value": 5},
           {"type": "flag_set", "flag": "balanced_development", "value": true}
         ]

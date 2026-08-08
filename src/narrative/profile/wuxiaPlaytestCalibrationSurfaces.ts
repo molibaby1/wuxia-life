@@ -408,7 +408,7 @@ export const WUXIA_ALIGNMENT_INDICATOR_CONFIGS: AlignmentIndicatorConfig[] = [
     id: 'p24_ind_onboarding_clarity',
     label: 'Onboarding clarity alignment',
     dimension: 'first_run_readability',
-    interpretation: 'Internal early-clarity proxy vs playtest comprehension.',
+    interpretation: 'Internal early-clarity proxy vs playtest understanding.',
     healthyRange: { min: 0.85, max: 1.0 },
     baselineValue: 0.87,
     comparisonNotes: 'currentValue = 1 - |alignmentGap|; falling = internal overestimate of first-run clarity.',

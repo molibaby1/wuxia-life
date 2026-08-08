@@ -40,6 +40,30 @@
     </header>
 
     <div class="content-area">
+      <div class="flow-layout">
+        <aside
+          v-if="progressionEchoCards.length > 0"
+          class="progression-echo card"
+          aria-live="polite"
+          aria-label="上一阶段结果"
+        >
+          <p class="progression-echo-kicker">上一阶段结果</p>
+          <article
+            v-for="card in progressionEchoCards"
+            :key="card.id"
+            class="progression-echo-card"
+          >
+            <div class="progression-echo-heading">
+              <span v-if="card.sourceLabel">{{ card.sourceLabel }}</span>
+              <strong>{{ card.title }}</strong>
+            </div>
+            <p v-if="card.body" class="progression-echo-body">{{ card.body }}</p>
+            <ul v-if="card.metaLines?.length" class="progression-echo-meta">
+              <li v-for="line in card.metaLines" :key="line">{{ line }}</li>
+            </ul>
+          </article>
+        </aside>
+
       <section v-if="currentNode" class="story-card card">
         <div class="event-header">
           <div>
@@ -52,59 +76,6 @@
         <p v-if="!hasCanonicalProgressionCard" class="story-text">
           {{ currentNode.text }}
         </p>
-
-        <div v-if="periodSummaryDisplay" class="progression-card period-summary-card">
-          <span class="progression-source-label">{{ periodSummaryDisplay.sourceLabel }}</span>
-          <h3
-            v-if="periodSummaryDisplay.headline !== currentNode.title"
-            class="progression-card-title"
-          >
-            {{ periodSummaryDisplay.headline }}
-          </h3>
-          <p class="disturbance-body">{{ periodSummaryDisplay.body }}</p>
-          <p class="progression-meta">{{ periodSummaryDisplay.statDeltaSummary }}</p>
-          <p class="progression-hint">本期已落幕，点击继续见证下一季成长。</p>
-        </div>
-
-        <div v-if="activeActionSummaryDisplay" class="progression-card active-action-summary-card">
-          <span class="progression-source-label">{{ activeActionSummaryDisplay.sourceLabel }}</span>
-          <h3
-            v-if="activeActionSummaryDisplay.actionName !== currentNode.title"
-            class="progression-card-title"
-          >
-            {{ activeActionSummaryDisplay.actionName }}
-          </h3>
-          <dl class="progression-detail-list">
-            <div><dt>耗时</dt><dd>{{ activeActionSummaryDisplay.durationLabel }}</dd></div>
-            <div><dt>收益</dt><dd>{{ activeActionSummaryDisplay.rewardSummary }}</dd></div>
-            <div><dt>消耗</dt><dd>{{ activeActionSummaryDisplay.costSummary }}</dd></div>
-            <div><dt>风险</dt><dd>{{ activeActionSummaryDisplay.riskSummary }}</dd></div>
-          </dl>
-          <p class="progression-meta active-action-result-explanation">
-            {{ activeActionSummaryDisplay.resultExplanation || activeActionSummaryDisplay.appliedDeltaSummary }}
-          </p>
-          <p
-            v-if="activeActionSummaryDisplay.diminishingReturnNotice"
-            class="progression-meta"
-          >
-            {{ activeActionSummaryDisplay.diminishingReturnNotice }}
-          </p>
-          <p
-            v-if="activeActionSummaryDisplay.resourcePressureNotice"
-            class="progression-meta"
-          >
-            {{ activeActionSummaryDisplay.resourcePressureNotice }}
-          </p>
-          <div v-if="activeActionLongTermImpacts.length > 0" class="feedback-group active-action-long-term">
-            <p class="feedback-group-title">长期影响</p>
-            <ul class="feedback-list">
-              <li v-for="(line, index) in activeActionLongTermImpacts" :key="`active-lt-${index}`">
-                {{ line }}
-              </li>
-            </ul>
-          </div>
-          <p class="progression-hint">{{ activeActionSummaryDisplay.nextStepHint }}</p>
-        </div>
 
         <div v-if="disturbanceNarrativeDisplay" class="progression-card disturbance-narrative-card">
           <span class="progression-source-label">{{ disturbanceNarrativeDisplay.sourceLabel }}</span>
@@ -120,42 +91,6 @@
           <p class="progression-hint">{{ disturbanceNarrativeDisplay.returnToPlanHint }}</p>
         </div>
 
-        <div v-if="displayedNarrative" class="outcome-section">
-          <span v-if="storyEventSourceLabel" class="progression-source-label">{{ storyEventSourceLabel }}</span>
-          <p class="outcome-text">{{ displayedNarrative }}</p>
-          <p v-if="showNarrativeFallbackHint" class="outcome-fallback-hint">
-            反馈细节暂不完整，后续影响仍在推进。
-          </p>
-          <div v-if="hasStructuredFeedback" class="feedback-structured">
-            <div v-if="visibleStatImpacts.length > 0" class="feedback-group">
-              <p class="feedback-group-title">数值影响</p>
-              <ul class="feedback-list">
-                <li v-for="impact in visibleStatImpacts" :key="`stat-${impact.stat}`">
-                  {{ getStatName(String(impact.label || impact.stat)) }} {{ formatDelta(impact.delta) }}
-                </li>
-              </ul>
-            </div>
-            <div v-if="visibleRelationshipImpacts.length > 0" class="feedback-group">
-              <p class="feedback-group-title">关系影响</p>
-              <ul class="feedback-list">
-                <li
-                  v-for="impact in visibleRelationshipImpacts"
-                  :key="`relation-${impact.relationId}`"
-                >
-                  {{ impact.relationName || '某位关系人' }} {{ formatDelta(impact.delta) }}
-                </li>
-              </ul>
-            </div>
-            <div v-if="visibleLongTermFlags.length > 0" class="feedback-group">
-              <p class="feedback-group-title">长期影响</p>
-              <ul class="feedback-list">
-                <li v-for="flag in visibleLongTermFlags" :key="`flag-${flag.flag}`">
-                  {{ describeFlag(flag.flag, flag.value) }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
         <div v-if="!isAutoPlaying && availableChoices.length > 0" class="choices-area">
           <button
             v-for="choice in availableChoices"
@@ -175,6 +110,14 @@
           <span class="loading-dot"></span>
         </div>
         <div v-else class="event-actions">
+          <button
+            v-if="apiAutomaticAdvanceError"
+            class="continue-btn retry-advance-btn btn"
+            type="button"
+            @click="retryAutomaticAdvance"
+          >
+            重试进入下一阶段
+          </button>
           <button v-if="showContinueButton" class="continue-btn btn" @click="continueToNext">
             继续
           </button>
@@ -188,6 +131,7 @@
           </div>
         </div>
       </section>
+      </div>
 
       <MainScreenLifeSummary
         ref="summarySectionRef"
@@ -196,6 +140,8 @@
         :affiliation-summary="mainScreenModel.affiliationSummary"
         :experience-summary="mainScreenModel.experienceSummary"
         :practice-summary="mainScreenModel.practiceSummary"
+        :milestone-summary="mainScreenModel.milestoneSummary"
+        :milestone-prospect-summary="mainScreenModel.milestoneProspectSummary"
         :risk-summary="mainScreenModel.riskSummary"
         :tendency-summary="mainScreenModel.tendencySummary"
       />
@@ -211,37 +157,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { gameEngine } from '../core/GameEngineIntegration';
 import { useNewGameEngine } from '../composables/useNewGameEngine';
 import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
 import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
 import { buildMainScreenModel, type MainScreenPlayer } from './mainScreenModel';
+import {
+  buildLifeMemoryFeedbackOverlayCard,
+  collectNewLifeMemoryFeedback,
+  type LifeMemoryFeedbackItem,
+} from './lifeMemoryFeedback';
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
 import type { StoryChoice } from '../types';
-import { formatLongTermFlag } from '../utils/playerFacingLabels';
 
-import type {
-  ActiveActionSummaryDisplay,
-  DisturbanceNarrativeDisplay,
-  PeriodSummaryDisplay,
-} from '../types/activeActionTypes';
+import type { DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
 import type { SessionPhase, PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { LifeMemorySummary } from '../types/lifeMemory';
+import type {
+  ProgressionOverlayCard,
+  ProgressionOverlayPayload,
+} from '../types/progressionOverlay';
 
 const props = defineProps<{
   currentNode: any;
   availableChoices: StoryChoice[];
   isAutoPlaying: boolean;
   apiMode?: boolean;
-  apiActiveActionSummary?: ActiveActionSummaryDisplay | null;
   apiDisturbanceNarrative?: DisturbanceNarrativeDisplay | null;
   apiSessionPhase?: SessionPhase | null;
   apiStoryEventAutomatic?: boolean;
   apiNeedsProgressionAck?: boolean;
-  apiPeriodSummary?: PeriodSummaryDisplay | null;
   apiPlayer?: PlayerSummaryDto | null;
   apiLifeMemory?: LifeMemorySummary | null;
+  progressionOverlay?: ProgressionOverlayPayload | null;
+  apiAutomaticAdvanceError?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -250,65 +200,8 @@ const emit = defineEmits<{
   (e: 'api-progression-ack'): void;
 }>();
 
-// 使用 useNewGameEngine 获取 lastOutcomeText
 const { engineState, continueProgressionFlow, saveCurrentGame, loadGameFromSave, getAllSaves } =
   useNewGameEngine();
-
-const lastOutcomeText = computed(() => {
-  return engineState.lastOutcomeText;
-});
-
-const lastChoiceFeedback = computed(() => {
-  return engineState.lastChoiceFeedback;
-});
-
-const visibleStatImpacts = computed(() => {
-  return (lastChoiceFeedback.value?.player.statImpacts || []).filter(
-    impact => impact.visibility === 'player' && impact.delta !== 0,
-  );
-});
-
-const visibleRelationshipImpacts = computed(() => {
-  return (lastChoiceFeedback.value?.player.relationshipImpacts || []).filter(
-    impact => impact.visibility === 'player' && impact.delta !== 0,
-  );
-});
-
-const visibleLongTermFlags = computed(() => {
-  return (lastChoiceFeedback.value?.player.longTermFlags || []).filter(
-    flag => flag.visibility === 'player',
-  );
-});
-
-const hasStructuredFeedback = computed(() => {
-  return (
-    visibleStatImpacts.value.length > 0 ||
-    visibleRelationshipImpacts.value.length > 0 ||
-    visibleLongTermFlags.value.length > 0
-  );
-});
-
-const periodSummaryDisplay = computed(() => {
-  if (props.apiMode) {
-    if (props.apiSessionPhase !== 'period_summary') return null;
-    return props.apiPeriodSummary ?? null;
-  }
-  return engineState.pendingPeriodSummary;
-});
-
-const activeActionSummaryDisplay = computed(() => {
-  if (periodSummaryDisplay.value) return null;
-  if (props.apiMode) {
-    if (props.apiSessionPhase === 'disturbance_narrative') return null;
-    return props.apiActiveActionSummary ?? null;
-  }
-  if (engineState.showingDisturbanceNarrative) return null;
-  return engineState.lastActiveActionSummary;
-});
-
-const activeActionLongTermImpacts = computed(() => {
-  return activeActionSummaryDisplay.value?.longTermImpactLines ?? [];
-});
 
 const disturbanceNarrativeDisplay = computed(() => {
   if (props.apiMode) {
@@ -321,43 +214,8 @@ const disturbanceNarrativeDisplay = computed(() => {
 
 const hasCanonicalProgressionCard = computed(() => {
   return Boolean(
-    periodSummaryDisplay.value ||
-      activeActionSummaryDisplay.value ||
-      disturbanceNarrativeDisplay.value,
+    disturbanceNarrativeDisplay.value,
   );
-});
-
-const storyEventSourceLabel = computed(() => {
-  if (hasCanonicalProgressionCard.value) return null;
-  if (!props.currentNode?.id || props.currentNode.id.startsWith('active_')) return null;
-  if (props.currentNode.id === 'action_or_choice_result' || props.currentNode.id === 'disturbance_narrative') {
-    return null;
-  }
-  const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
-  if (!narrative) return null;
-  return '剧情事件';
-});
-
-const displayedNarrative = computed(() => {
-  if (hasCanonicalProgressionCard.value) {
-    return null;
-  }
-  const narrative = lastChoiceFeedback.value?.player.narrativeResult?.trim();
-  if (narrative) {
-    return narrative;
-  }
-  if (lastOutcomeText.value) {
-    return lastOutcomeText.value;
-  }
-  return null;
-});
-
-const showNarrativeFallbackHint = computed(() => {
-  if (!displayedNarrative.value) {
-    return false;
-  }
-  const fallbackUsed = lastChoiceFeedback.value?.diagnostic.fallbackUsed ?? false;
-  return fallbackUsed || !hasStructuredFeedback.value;
 });
 
 let continueClickLocked = false;
@@ -377,8 +235,14 @@ const continueToNext = () => {
   });
 };
 
+const retryAutomaticAdvance = () => {
+  if (props.isAutoPlaying || !props.apiAutomaticAdvanceError) return;
+  emit('api-progression-ack');
+};
+
 const showContinueButton = computed(() => {
   if (props.isAutoPlaying) return false;
+  if (props.apiAutomaticAdvanceError) return false;
   if (props.availableChoices.length > 0) return false;
   if (props.apiMode) {
     return props.apiNeedsProgressionAck === true;
@@ -386,10 +250,7 @@ const showContinueButton = computed(() => {
   if (engineState.isActiveActionMode) return false;
   return (
     engineState.isPassiveProgressionMode ||
-    !!engineState.pendingPeriodSummary ||
-    !!engineState.lastActiveActionSummary ||
     engineState.showingDisturbanceNarrative ||
-    !!engineState.lastOutcomeText ||
     !!props.currentNode
   );
 });
@@ -420,7 +281,6 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
       martialPower: p.martialPower,
       chivalry: p.chivalry,
       constitution: p.constitution,
-      comprehension: p.comprehension,
       affiliation: p.affiliation,
       title: p.title,
       reputation: p.reputation,
@@ -444,6 +304,58 @@ const lifeMemorySummary = computed(() => {
   void engineState.currentEvent;
   return deriveLifeMemorySummary(gameEngine.getGameState());
 });
+
+const lifeMemoryFeedbackItems = ref<LifeMemoryFeedbackItem[]>([]);
+const lifeMemoryFeedbackCard = ref<ProgressionOverlayCard | null>(null);
+const seenLifeMemoryFeedbackIds = new Set<string>();
+let hasLifeMemoryBaseline = false;
+let suppressNextLifeMemoryFeedback = false;
+
+const progressionEchoCards = computed(() => [
+  ...(props.progressionOverlay?.cards ?? []),
+  ...(lifeMemoryFeedbackCard.value ? [lifeMemoryFeedbackCard.value] : []),
+]);
+
+watch(
+  () => props.progressionOverlay,
+  () => {
+    lifeMemoryFeedbackItems.value = [];
+    lifeMemoryFeedbackCard.value = null;
+  },
+  { flush: 'sync' },
+);
+
+watch(
+  lifeMemorySummary,
+  (current, previous) => {
+    if (!hasLifeMemoryBaseline || suppressNextLifeMemoryFeedback) {
+      if (suppressNextLifeMemoryFeedback) {
+        seenLifeMemoryFeedbackIds.clear();
+        lifeMemoryFeedbackItems.value = [];
+        lifeMemoryFeedbackCard.value = null;
+      }
+      for (const item of collectNewLifeMemoryFeedback(null, current)) {
+        seenLifeMemoryFeedbackIds.add(item.id);
+      }
+      suppressNextLifeMemoryFeedback = false;
+      hasLifeMemoryBaseline = true;
+      return;
+    }
+
+    const freshItems = collectNewLifeMemoryFeedback(previous, current)
+      .filter(item => !seenLifeMemoryFeedbackIds.has(item.id));
+    if (freshItems.length === 0) return;
+
+    for (const item of freshItems) {
+      seenLifeMemoryFeedbackIds.add(item.id);
+    }
+    lifeMemoryFeedbackItems.value = [...lifeMemoryFeedbackItems.value, ...freshItems];
+    lifeMemoryFeedbackCard.value = buildLifeMemoryFeedbackOverlayCard(
+      lifeMemoryFeedbackItems.value,
+    );
+  },
+  { immediate: true },
+);
 
 const mainScreenModel = computed(() =>
   buildMainScreenModel(attributePanelPlayer.value, lifeMemorySummary.value),
@@ -474,32 +386,6 @@ const getCurrentDate = () => {
   const state = gameEngine.getGameState();
   const time = state.currentTime || { year: 1, month: 1, day: 1 };
   return `${time.year}年${time.month}月${time.day}日`;
-};
-
-const formatDelta = (value: number) => {
-  if (value > 0) {
-    return `+${value}`;
-  }
-  return `${value}`;
-};
-
-const describeFlag = (flag: string, value: boolean) => formatLongTermFlag(flag, value);
-
-const getStatName = (stat: string): string => {
-  const statNames: Record<string, string> = {
-    martialPower: '功力',
-    chivalry: '侠义',
-    charisma: '魅力',
-    constitution: '体魄',
-    comprehension: '悟性',
-    reputation: '名望',
-    influence: '影响力',
-    connections: '人脉',
-    knowledge: '学识',
-    businessAcumen: '经营',
-    money: '银两',
-  };
-  return statNames[stat] || stat;
 };
 
 const makeChoice = (choice: StoryChoice) => {
@@ -541,7 +427,11 @@ const loadLatestSave = () => {
     window.alert('未找到对应存档');
     return;
   }
+  suppressNextLifeMemoryFeedback = true;
   const loaded = loadGameFromSave(targetSave.id);
+  if (!loaded) {
+    suppressNextLifeMemoryFeedback = false;
+  }
   window.alert(loaded ? `已加载：${targetSave.name}` : '读取失败，存档可能不兼容');
 };
 </script>
@@ -668,6 +558,71 @@ const loadLatestSave = () => {
   gap: 12px;
 }
 
+.flow-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progression-echo {
+  box-sizing: border-box;
+  max-height: 110px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(139, 105, 20, 0.2);
+  border-left: 4px solid #8b6914;
+  border-radius: 14px;
+  background: #fff9e9;
+  scrollbar-width: thin;
+}
+
+.progression-echo-kicker {
+  margin: 0 0 6px;
+  color: #8b6914;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.progression-echo-card + .progression-echo-card {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(139, 105, 20, 0.2);
+}
+
+.progression-echo-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--primary-color);
+  font-size: 13px;
+}
+
+.progression-echo-heading span {
+  color: #8b6914;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.progression-echo-body {
+  margin: 4px 0 0;
+  color: var(--text-color);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.progression-echo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #6b5b3a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .story-card {
   position: relative;
   padding: 16px;
@@ -765,32 +720,11 @@ const loadLatestSave = () => {
   color: var(--primary-color) !important;
 }
 
-.outcome-display {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, rgba(139, 90, 43, 0.1), rgba(34, 139, 34, 0.1));
-  border-left: 4px solid var(--primary-color);
-  border-radius: 4px;
-  animation: fadeIn 0.5s ease-out;
-}
-
-.outcome-text {
-  color: var(--text-color);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0;
-}
-
 .progression-card {
   margin-top: 1rem;
   padding: 14px 16px;
   border-radius: 8px;
   animation: fadeIn 0.3s ease-out;
-}
-
-.active-action-summary-card {
-  background: linear-gradient(135deg, rgba(34, 139, 34, 0.08), rgba(139, 90, 43, 0.1));
-  border-left: 4px solid #2e7d32;
 }
 
 .disturbance-narrative-card {
@@ -813,30 +747,6 @@ const loadLatestSave = () => {
   color: var(--primary-color);
 }
 
-.progression-detail-list {
-  margin: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.progression-detail-list div {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.progression-detail-list dt {
-  margin: 0;
-  color: #8b6914;
-  font-weight: 600;
-}
-
-.progression-detail-list dd {
-  margin: 0;
-  color: var(--text-color);
-}
-
 .progression-meta,
 .disturbance-body,
 .progression-hint {
@@ -849,47 +759,6 @@ const loadLatestSave = () => {
 .progression-hint {
   color: #5c4a1a;
   font-style: italic;
-}
-
-.outcome-section {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px dashed var(--border-color);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.outcome-fallback-hint {
-  margin-top: 8px;
-  color: #8b6914;
-  font-size: 12px;
-}
-
-.feedback-structured {
-  margin-top: 12px;
-  display: grid;
-  gap: 10px;
-}
-
-.feedback-group-title {
-  margin: 0 0 6px;
-  font-size: 12px;
-  color: #8b6914;
-  font-weight: 700;
-}
-
-.feedback-list {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--text-color);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.feedback-line {
-  margin: 0;
-  color: var(--text-color);
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 .event-actions {
@@ -956,7 +825,7 @@ const loadLatestSave = () => {
   }
 
   .story-text,
-  .outcome-text {
+  .progression-echo-body {
     font-size: 15px;
   }
 
@@ -968,8 +837,31 @@ const loadLatestSave = () => {
 
 @media (min-width: 768px) {
   .game-screen {
-    max-width: 720px;
+    max-width: 1040px;
     margin: 0 auto;
+  }
+
+  .flow-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+    align-items: start;
+  }
+
+  .story-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .story-card:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .progression-echo {
+    grid-column: 2;
+    grid-row: 1;
+    max-height: none;
+    position: sticky;
+    top: 12px;
   }
 
   .choices-area {

@@ -100,7 +100,7 @@
           "label": "留在师傅身边",
           "flags": ["apprentice_midlife_craft_mastery", "apprentice_stay_master", "ordinary_apprentice_midlife_done"],
           "effects": [
-            { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" },
+            { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" },
             { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" }
           ]
         }
@@ -135,7 +135,7 @@
           "label": "婉拒合伙",
           "flags": ["apprentice_midlife_trade_network", "apprentice_decline_partnership", "ordinary_apprentice_midlife_done"],
           "effects": [
-            { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" }
+            { "type": "stat_modify", "target": "knowledge", "value": 1, "operator": "add" }
           ]
         }
       ]
@@ -169,7 +169,7 @@
           "label": "保持距离",
           "flags": ["tavern_midlife_guest_regulars", "tavern_keep_distance", "ordinary_tavern_midlife_done"],
           "effects": [
-            { "type": "stat_modify", "target": "comprehension", "value": 1, "operator": "add" }
+            { "type": "stat_modify", "target": "knowledge", "value": 1, "operator": "add" }
           ]
         }
       ]
@@ -230,7 +230,7 @@
           "effects": [
             { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
             { "type": "stat_modify", "target": "chivalry", "value": 5, "operator": "add" },
-            { "type": "stat_modify", "target": "comprehension", "value": 3, "operator": "add" }
+            { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" }
           ]
         },
         {
@@ -248,7 +248,7 @@
           "label": "留在酒肆",
           "flags": ["tavern_midlife_medical_bridge", "tavern_decline_medical", "ordinary_tavern_midlife_done"],
           "effects": [
-            { "type": "stat_modify", "target": "comprehension", "value": 2, "operator": "add" }
+            { "type": "stat_modify", "target": "knowledge", "value": 2, "operator": "add" }
           ]
         }
       ]

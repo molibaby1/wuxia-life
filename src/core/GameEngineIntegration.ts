@@ -66,7 +66,6 @@ const FORMAL_CANDIDATE_POOL_CAP = 12;
 const SECT_CHOICE_VALUE_BY_CHOICE_ID = {
   join_shaolin: 'orthodox',
   join_wudang: 'orthodox',
-  join_emei: 'orthodox',
   stay_home: 'none',
 } satisfies Record<string, NonNullable<CriticalChoices['sect_choice']>>;
 
@@ -421,22 +420,12 @@ export class GameEngineIntegration {
       return (b.priority ?? EventPriority.NORMAL) - (a.priority ?? EventPriority.NORMAL);
     });
     
-    let limitedEvents = availableEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP);
-    limitedEvents = this.injectMandatoryCandidates(availableEvents, limitedEvents);
-
-    return limitedEvents;
-  }
-
-  /** ponytail: scheduling-critical events must survive FORMAL_CANDIDATE_POOL_CAP trimming. */
-  private isSchedulingValidationEvent(event: EventDefinition): boolean {
-    const tags = (event.metadata?.tags ?? []).map(tag => tag.toLowerCase());
-    return (
-      tags.includes('p9') ||
-      tags.includes('p11') ||
-      tags.includes('hvg') ||
-      tags.includes('causality_echo') ||
-      (tags.includes('mandatory') && tags.includes('mainline'))
-    );
+    const { criticalEvents, storylineEvents, regularFormalEvents } = this.splitEventLayers(availableEvents);
+    return [
+      ...criticalEvents,
+      ...storylineEvents,
+      ...regularFormalEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP),
+    ];
   }
 
   /**
@@ -645,39 +634,6 @@ export class GameEngineIntegration {
     return true;
   }
   
-  /** Ensure scheduling-validation and exact-age mandatory events survive FORMAL_CANDIDATE_POOL_CAP. */
-  private injectMandatoryCandidates(
-    availableEvents: EventDefinition[],
-    limitedEvents: EventDefinition[],
-  ): EventDefinition[] {
-    const result = [...limitedEvents];
-    const selectedIds = new Set(result.map(event => event.id));
-    const currentAge = this.gameState.player?.age ?? 0;
-
-    for (const event of availableEvents) {
-      if (selectedIds.has(event.id) || !this.isSchedulingValidationEvent(event)) {
-        continue;
-      }
-      result.push(event);
-      selectedIds.add(event.id);
-    }
-
-    for (const event of availableEvents) {
-      if (selectedIds.has(event.id) || !this.isMandatoryEvent(event)) {
-        continue;
-      }
-      const min = event.ageRange?.min;
-      const max = event.ageRange?.max;
-      if (min !== currentAge || max !== currentAge) {
-        continue;
-      }
-      result.push(event);
-      selectedIds.add(event.id);
-    }
-
-    return result;
-  }
-
   private getExactAgeMandatoryEvents(
     events: EventDefinition[],
     currentAge: number,
@@ -1556,7 +1512,6 @@ export class GameEngineIntegration {
         const choiceValueMap: Record<string, string> = {
           'join_shaolin': 'orthodox',
           'join_wudang': 'orthodox',
-          'join_emei': 'orthodox',
           'join_beggars': 'demon',
           'join_demonic': 'demon',
           'become_official': 'official',

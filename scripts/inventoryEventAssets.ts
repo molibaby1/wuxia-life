@@ -83,7 +83,6 @@ const DEFERRED_LOADED_FILES = new Set([
   'jianghu-conflict.json',
   'elderly-legacy.json',
   'identity-merchant.json',
-  'identity-outlaw.json',
   'identity-year-events.json',
 ]);
 

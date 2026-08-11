@@ -15,6 +15,7 @@ import type {
   ReplaySimilarityPair,
 } from './types';
 import { getActionById } from '../data/activeActionCatalog';
+import { eventLoader } from '../core/EventLoader';
 import type { EffectDefinition, GameState } from '../types/eventTypes';
 import {
   getProfileEchoHookByActionId,
@@ -589,6 +590,27 @@ function hasVisibleRecoveryPath(text: string, domains: Set<NegativeDomain>): boo
   });
 }
 
+function isVisibleAutomaticMainlineTransition(record: GameProcessRecord): boolean {
+  if (
+    record.eventType !== 'auto' ||
+    record.progressionKind !== 'story_event' ||
+    !record.eventId
+  ) {
+    return false;
+  }
+  try {
+    const event = eventLoader.getEventById(record.eventId);
+    return (
+      event.eventType === 'auto' &&
+      event.category === 'main_story' &&
+      event.metadata?.tags?.includes('主线') === true &&
+      Boolean(event.content?.title || event.content?.text)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function isPacingImpactRecord(record: GameProcessRecord): boolean {
   if (
     record.eventType === 'choice' ||
@@ -606,6 +628,9 @@ export function isPacingImpactRecord(record: GameProcessRecord): boolean {
       record.eventId,
     )
   ) {
+    return true;
+  }
+  if (isVisibleAutomaticMainlineTransition(record)) {
     return true;
   }
   const text = `${record.eventTitle} ${record.outcomeText ?? ''} ${record.eventText ?? ''}`;

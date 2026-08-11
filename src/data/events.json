@@ -18,7 +18,6 @@
     "./lines/identity-hero.json",
     "./lines/identity-merchant.json",
     "./lines/identity-demon.json",
-    "./lines/identity-outlaw.json",
     "./lines/identity-year-events.json",
     "./lines/faction-revelation.json",
     "./lines/setback-events.json",

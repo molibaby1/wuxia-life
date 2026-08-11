@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-06-03T00:11:36.061Z",
+  "generatedAt": "2026-08-09T02:44:04.897Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -12,21 +12,21 @@
     ]
   },
   "summary": {
-    "runtimeLoadedFiles": 21,
-    "nonLoadedFiles": 39,
-    "totalEventsInRuntime": 234,
+    "runtimeLoadedFiles": 28,
+    "nonLoadedFiles": 40,
+    "totalEventsInRuntime": 418,
     "byStatus": {
       "active": 36,
-      "candidate": 73,
-      "broken": 41,
-      "deferred": 84,
+      "candidate": 68,
+      "broken": 60,
+      "deferred": 254,
       "dead": 0
     },
     "byFileStatus": {
       "active": 0,
       "candidate": 12,
       "broken": 0,
-      "deferred": 48,
+      "deferred": 56,
       "dead": 0
     }
   },
@@ -99,7 +99,7 @@
       "fileName": "elderly-legacy.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 12,
+      "eventCount": 14,
       "goldenLineOverlapCount": 0,
       "notes": "Primarily post-30 or non-golden-line identity module"
     },
@@ -131,8 +131,8 @@
       "fileName": "general.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 36,
-      "goldenLineOverlapCount": 23,
+      "eventCount": 35,
+      "goldenLineOverlapCount": 22,
       "notes": "Golden-line candidate pool (PXG2 selects active spine)"
     },
     {
@@ -224,14 +224,6 @@
       "notes": "Not in events.json imports; backlog asset"
     },
     {
-      "fileName": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "eventCount": 5,
-      "goldenLineOverlapCount": 5,
-      "notes": "Primarily post-30 or non-golden-line identity module"
-    },
-    {
       "fileName": "identity-scholar-specific.json",
       "runtimeLoaded": false,
       "status": "deferred",
@@ -321,19 +313,19 @@
     },
     {
       "fileName": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 17,
-      "goldenLineOverlapCount": 11,
-      "notes": "Not in events.json imports; backlog asset"
+      "eventCount": 20,
+      "goldenLineOverlapCount": 14,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
       "fileName": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 16,
-      "goldenLineOverlapCount": 10,
-      "notes": "Not in events.json imports; backlog asset"
+      "eventCount": 19,
+      "goldenLineOverlapCount": 11,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
       "fileName": "middle-age-career.json",
@@ -368,6 +360,30 @@
       "notes": "Non-priority route per scope freeze (official/beggars ≠ PRD priority routes)"
     },
     {
+      "fileName": "ordinary-origin-early-life.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 0,
+      "goldenLineOverlapCount": 0,
+      "notes": "Not in events.json imports; backlog asset"
+    },
+    {
+      "fileName": "ordinary-origin-midlife.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 0,
+      "goldenLineOverlapCount": 0,
+      "notes": "Not in events.json imports; backlog asset"
+    },
+    {
+      "fileName": "origin-infant-passives.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 0,
+      "goldenLineOverlapCount": 0,
+      "notes": "Not in events.json imports; backlog asset"
+    },
+    {
       "fileName": "origin.json",
       "runtimeLoaded": true,
       "status": "candidate",
@@ -384,6 +400,46 @@
       "notes": "Not in events.json imports; backlog asset"
     },
     {
+      "fileName": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 5,
+      "goldenLineOverlapCount": 5,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
+    },
+    {
+      "fileName": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 14,
+      "goldenLineOverlapCount": 9,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
+    },
+    {
+      "fileName": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 14,
+      "goldenLineOverlapCount": 10,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
+    },
+    {
+      "fileName": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 23,
+      "goldenLineOverlapCount": 23,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
+    },
+    {
+      "fileName": "preschool-passive-spine.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 0,
+      "goldenLineOverlapCount": 0,
+      "notes": "Not in events.json imports; backlog asset"
+    },
+    {
       "fileName": "prologue.json",
       "runtimeLoaded": false,
       "status": "deferred",
@@ -393,11 +449,11 @@
     },
     {
       "fileName": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 10,
-      "goldenLineOverlapCount": 10,
-      "notes": "Not in events.json imports; backlog asset"
+      "eventCount": 15,
+      "goldenLineOverlapCount": 13,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
       "fileName": "reputation-events.json",
@@ -422,6 +478,14 @@
       "eventCount": 10,
       "goldenLineOverlapCount": 5,
       "notes": "Not in events.json imports; backlog asset"
+    },
+    {
+      "fileName": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "eventCount": 79,
+      "goldenLineOverlapCount": 19,
+      "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
       "fileName": "sect-beggars.json",
@@ -459,8 +523,8 @@
       "fileName": "sect-wudang.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 12,
-      "goldenLineOverlapCount": 7,
+      "eventCount": 11,
+      "goldenLineOverlapCount": 6,
       "notes": "Priority route golden-line pool (PXG2 selects active spine)"
     },
     {
@@ -2362,6 +2426,28 @@
       "notes": "Outside ages 0-30 golden line"
     },
     {
+      "eventId": "elderly_faction_closure",
+      "sourceFile": "elderly-legacy.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 58,
+      "ageMax": 72,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "elderly_feud_reconciliation",
+      "sourceFile": "elderly-legacy.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 55,
+      "ageMax": 75,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
       "eventId": "discover_shaolin_dark_history",
       "sourceFile": "faction-revelation.json",
       "runtimeLoaded": true,
@@ -2428,23 +2514,23 @@
       "notes": "File classified deferred for golden line"
     },
     {
-      "eventId": "family_child_education",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 28,
-      "ageMax": 45,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
       "eventId": "family_child_born",
       "sourceFile": "family-life.json",
       "runtimeLoaded": true,
       "status": "broken",
       "ageMin": 25,
       "ageMax": 40,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "family_child_education",
+      "sourceFile": "family-life.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 28,
+      "ageMax": 45,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Failed event quality or loader validation"
@@ -2794,12 +2880,12 @@
       "eventId": "sect_choice",
       "sourceFile": "general.json",
       "runtimeLoaded": true,
-      "status": "candidate",
+      "status": "active",
       "ageMin": 14,
-      "ageMax": 14,
+      "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Golden-line spine (PXG2 active)"
     },
     {
       "eventId": "jianghu_experience",
@@ -2838,12 +2924,12 @@
       "eventId": "sect_trial_recover",
       "sourceFile": "general.json",
       "runtimeLoaded": true,
-      "status": "candidate",
+      "status": "broken",
       "ageMin": 14,
       "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "sect_trial_final",
@@ -2855,17 +2941,6 @@
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Golden-line spine (PXG2 active)"
-    },
-    {
-      "eventId": "meet_love_interest",
-      "sourceFile": "general.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
-      "ageMin": 17,
-      "ageMax": 17,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
     },
     {
       "eventId": "youth_fame",
@@ -2884,7 +2959,7 @@
       "runtimeLoaded": true,
       "status": "candidate",
       "ageMin": 18,
-      "ageMax": 18,
+      "ageMax": 22,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Awaiting golden spine selection"
@@ -2895,7 +2970,7 @@
       "runtimeLoaded": true,
       "status": "candidate",
       "ageMin": 19,
-      "ageMax": 19,
+      "ageMax": 23,
       "overlapsGoldenLine": true,
       "eventType": "auto",
       "notes": "Awaiting golden spine selection"
@@ -2906,7 +2981,7 @@
       "runtimeLoaded": true,
       "status": "candidate",
       "ageMin": 19,
-      "ageMax": 19,
+      "ageMax": 23,
       "overlapsGoldenLine": true,
       "eventType": "auto",
       "notes": "Awaiting golden spine selection"
@@ -3368,7 +3443,7 @@
       "runtimeLoaded": true,
       "status": "candidate",
       "ageMin": 15,
-      "ageMax": 25,
+      "ageMax": 20,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Awaiting golden spine selection"
@@ -3933,61 +4008,6 @@
       "overlapsGoldenLine": false,
       "eventType": "choice",
       "notes": "Source file not runtime-loaded"
-    },
-    {
-      "eventId": "outlaw_path_beginning",
-      "sourceFile": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 15,
-      "ageMax": 22,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
-      "eventId": "outlaw_training",
-      "sourceFile": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 16,
-      "ageMax": 25,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
-      "eventId": "outlaw_mentor",
-      "sourceFile": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 17,
-      "ageMax": 28,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
-      "eventId": "outlaw_mercy_choice",
-      "sourceFile": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 18,
-      "ageMax": 30,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
-    },
-    {
-      "eventId": "outlaw_legitimacy_debate",
-      "sourceFile": "identity-outlaw.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 20,
-      "ageMax": 40,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "scholar_reading_festival",
@@ -4798,7 +4818,7 @@
       "runtimeLoaded": true,
       "status": "active",
       "ageMin": 15,
-      "ageMax": 35,
+      "ageMax": 20,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Golden-line spine (PXG2 active)"
@@ -5136,365 +5156,431 @@
     {
       "eventId": "medical_talent_discovery",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 8,
       "ageMax": 16,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p27_study_habit_healer_reinforcement",
+      "sourceFile": "medical.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 18,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p29_study_habit_case_record_duty",
+      "sourceFile": "medical.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 26,
+      "ageMax": 34,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p29_social_momentum_healer_network",
+      "sourceFile": "medical.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 24,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_master_apprentice",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 15,
       "ageMax": 20,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_herb_gathering",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 16,
       "ageMax": 22,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "medical_clinic_practice",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 18,
       "ageMax": 25,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "medical_plague_outbreak",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 20,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_poison_temptation",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 22,
       "ageMax": 32,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_dual_cultivation",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 24,
       "ageMax": 35,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "medical_divine_doctor_fame",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 26,
       "ageMax": 38,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "medical_imperial_doctor",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 28,
       "ageMax": 42,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_palace_intrigue",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 30,
       "ageMax": 45,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "medical_medical_book",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 32,
       "ageMax": 48,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "medical_poison_king",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 30,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "medical_ending_divine_doctor",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "medical_ending_poison_king",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "medical_ending_imperial_doctor",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "medical_ending_folk_doctor",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "medical_ending_hermit",
       "sourceFile": "medical.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_talent_discovery",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 8,
       "ageMax": 16,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_first_shop",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 16,
       "ageMax": 22,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_shop_failure",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 17,
       "ageMax": 24,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_caravan_guard",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 18,
       "ageMax": 26,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_market_monopoly",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_official_connection",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 22,
       "ageMax": 32,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_intelligence_network",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 24,
       "ageMax": 34,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_chamber_of_commerce",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 26,
       "ageMax": 36,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_wealth_peak",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 28,
       "ageMax": 38,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_sect_investment",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 30,
       "ageMax": 40,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "merchant_business_empire",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 32,
       "ageMax": 42,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_ending_tycoon",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_ending_royal",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_ending_chamber",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_ending_bankrupt",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 65,
       "ageMax": 75,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "merchant_ending_hidden_wealth",
       "sourceFile": "merchant.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
       "overlapsGoldenLine": false,
       "eventType": "ending",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p26_business_habit_obligation",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 34,
+      "ageMax": 44,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_business_habit_youth_stall",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 21,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_business_habit_midlife_syndicate",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 38,
+      "ageMax": 46,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "career_foundation_sect",
@@ -6190,6 +6276,622 @@
       "notes": "Source file not runtime-loaded"
     },
     {
+      "eventId": "p11_relationship_shift_midlife",
+      "sourceFile": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 24,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p11_wealth_wanderer_divergence_fork",
+      "sourceFile": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 30,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p11_social_reinforcement_gathering",
+      "sourceFile": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p11_wealth_reinforcement_first_deal",
+      "sourceFile": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p11_wanderer_reinforcement_connections",
+      "sourceFile": "p11-validation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p21_scholar_route_reinforcement",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p21_study_echo_callback",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 25,
+      "ageMax": 30,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p21_martial_route_reinforcement",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 20,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p21_archetype_legacy_closure",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 35,
+      "ageMax": 40,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p26_study_habit_midlife_callback",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 24,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p26_training_habit_midlife_callback",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 34,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p27_mentor_obligation_consequence",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 30,
+      "ageMax": 38,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p27_renown_upkeep_pressure",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 40,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_training_habit_later_guardian",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 62,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_study_habit_later_chronicle",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 48,
+      "ageMax": 58,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_training_habit_martial_clan_echo",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 40,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_training_habit_scholar_body_echo",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 30,
+      "ageMax": 38,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_study_habit_scholar_academy_echo",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 36,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_study_habit_merchant_ledger_echo",
+      "sourceFile": "p21-content-samples.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 34,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_origin_frontier_orphan",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 1,
+      "ageMax": 3,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p22_childhood_street_shaping",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 6,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_childhood_poor_shaping",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 4,
+      "ageMax": 7,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_early_wealth_route_fork",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 18,
+      "ageMax": 24,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_relationship_mentor_obligation",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 38,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_faction_sect_continuation",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 30,
+      "ageMax": 42,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p22_legacy_teaching_succession",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 62,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p22_endgame_hermit_memory",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 58,
+      "ageMax": 70,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p22_wave_early_frontier_growth",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 12,
+      "ageMax": 16,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p22_wave_mid_merchant_identity",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 35,
+      "ageMax": 42,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p22_wave_late_fade_closure",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "broken",
+      "ageMin": 62,
+      "ageMax": 72,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Failed event quality or loader validation"
+    },
+    {
+      "eventId": "p22_early_martial_route_fork",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_training_habit_youth_sparring",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 14,
+      "ageMax": 18,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_study_habit_childhood_copybook",
+      "sourceFile": "p22-content-expansions.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 14,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_merchant_midlife_caravan",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_wanderer_midlife_discovery",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_sword_trial",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_dark_spark",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_steady_gate",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_balanced_posture",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_study_recital",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_social_circle",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_first_trade",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_childhood_first_journey",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 10,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_cautious_sect_steady",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 24,
+      "ageMax": 24,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_deviant_fork_temptation",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 23,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_deviant_midlife_escalation",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 29,
+      "ageMax": 29,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_training_echo_midlife",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_deviant_training_echo",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_business_echo_midlife",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 29,
+      "ageMax": 29,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_study_echo_midlife",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 25,
+      "ageMax": 25,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_martial_midlife_proving",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_balanced_midlife_harmony",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_social_echo_midlife",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 27,
+      "ageMax": 30,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_deviant_youth_route_milestone",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 12,
+      "ageMax": 13,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_scholar_academy_gate",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 24,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p9_wealth_caravan_gate",
+      "sourceFile": "p9-remediation.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 23,
+      "ageMax": 24,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
       "eventId": "prologue_divine_birth",
       "sourceFile": "prologue.json",
       "runtimeLoaded": false,
@@ -6247,112 +6949,167 @@
     {
       "eventId": "relationship_master_disciple",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 18,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_master_betrayal",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 25,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_master_legacy",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 30,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_blood_brotherhood",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 40,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_sworn_help",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_enemy_create",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 20,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_revenge",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
-      "status": "deferred",
+      "runtimeLoaded": true,
+      "status": "broken",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Source file not runtime-loaded"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_life_saving",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_debt_return",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_mentor_encounter",
       "sourceFile": "relationship.json",
-      "runtimeLoaded": false,
+      "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 30,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Source file not runtime-loaded"
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p28_social_momentum_network_fork",
+      "sourceFile": "relationship.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 24,
+      "ageMax": 30,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p28_social_reputation_reinforcement",
+      "sourceFile": "relationship.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 34,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p29_social_momentum_patron_obligation",
+      "sourceFile": "relationship.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 36,
+      "ageMax": 46,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "p42_social_momentum_youth_introduction",
+      "sourceFile": "relationship.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 17,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "p42_social_momentum_later_testimonial",
+      "sourceFile": "relationship.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 50,
+      "ageMax": 58,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "reputation_disciple_request",
@@ -6661,6 +7418,875 @@
       "overlapsGoldenLine": false,
       "eventType": "auto",
       "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "orthodox_childhood_seed_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 7,
+      "ageMax": 12,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "orthodox_age40_identity_summary",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 38,
+      "ageMax": 42,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "orthodox_age25_righteousness_cost_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 25,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "orthodox_age32_gray_pressure_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 36,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "demonic_childhood_seed_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 7,
+      "ageMax": 12,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "demonic_youth_first_transgression",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 13,
+      "ageMax": 14,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "demonic_age40_identity_summary",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 38,
+      "ageMax": 42,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_childhood_preference",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 4,
+      "ageMax": 4,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_childhood_recognition_abacus_base",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 6,
+      "ageMax": 6,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_childhood_recognition_abacus_strong",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 6,
+      "ageMax": 6,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_childhood_recognition_customer_base",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 6,
+      "ageMax": 6,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_childhood_recognition_customer_strong",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 6,
+      "ageMax": 6,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_childhood_seed_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 7,
+      "ageMax": 12,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_early_opportunity_fork",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 9,
+      "ageMax": 11,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_post_fork_confirmation",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 10,
+      "ageMax": 12,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_first_responsibility_challenge",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 13,
+      "ageMax": 15,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_post_shop_operating_rhythm",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 19,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_first_operating_pressure",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 19,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "hvg_merchant_midlife_expansion_rhythm",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 26,
+      "ageMax": 30,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "merchant_age40_identity_summary",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 38,
+      "ageMax": 42,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_midlife_debt_milestone",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 38,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "orthodox_age45_legacy_stewardship",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 44,
+      "ageMax": 48,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "demonic_age45_territory_consolidation",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 44,
+      "ageMax": 48,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_age45_expansion_fork",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 44,
+      "ageMax": 48,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_on_ramp",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "magnate_midlife_pressure",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 36,
+      "ageMax": 40,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_payoff",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 42,
+      "ageMax": 46,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_late_life",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 48,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_on_ramp",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 35,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_midlife_pressure",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 37,
+      "ageMax": 41,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_midlife_payoff",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 43,
+      "ageMax": 47,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_late_life_burnout",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_late_life_lone_wolf",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_late_life_mentor",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_endgame_echo_sigh",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_endgame_echo_distant",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "renown_endgame_echo_legacy",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_on_ramp_compassionate",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 31,
+      "ageMax": 34,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_on_ramp_pragmatic",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 31,
+      "ageMax": 34,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_pressure_compassionate",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 36,
+      "ageMax": 40,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_pressure_pragmatic",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 37,
+      "ageMax": 41,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_payoff_compassionate",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 42,
+      "ageMax": 46,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_payoff_pragmatic",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 43,
+      "ageMax": 47,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_compassionate_final",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_compassionate_peaceful",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_compassionate_legacy",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_pragmatic_fallen",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_pragmatic_wanderer",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_late_life_pragmatic_master",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_compassionate_ember",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_compassionate_peace",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_compassionate_legacy",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_pragmatic_fame_remain",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_pragmatic_wanderer_legend",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "medical_endgame_echo_pragmatic_grand_master",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_ledger_legacy",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_caravan_legacy",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_apprentice_craft",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_tavern_network",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_peasant_grain",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "magnate_endgame_echo_generic",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 58,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_bridge_entry",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 34,
+      "ageMax": 38,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_midlife_pressure",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 40,
+      "ageMax": 44,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_payoff_echo",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 48,
+      "ageMax": 52,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_late_life_covenant_bound",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_late_life_isolated_merchant",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_late_life_sustainable_covenant",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_endgame_echo_covenant_bound",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_endgame_echo_isolated_merchant",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "merchant_patron_endgame_echo_sustainable_covenant",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_bridge_entry",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 32,
+      "ageMax": 38,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_midlife_pressure",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 40,
+      "ageMax": 45,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_payoff_echo",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 48,
+      "ageMax": 52,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_late_life_rule_keeper",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_late_life_alliance_bearer",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 52,
+      "ageMax": 56,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_endgame_echo_rule_keeper",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "founding_patriarch_endgame_echo_alliance_bearer",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 60,
+      "ageMax": 65,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Outside ages 0-30 golden line"
+    },
+    {
+      "eventId": "jianghu_myth_legend_on_ramp_entry",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 17,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "jianghu_myth_legend_luck_window_echo",
+      "sourceFile": "sample-lines-spine.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 20,
+      "ageMax": 26,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "beggars_encounter",
@@ -6998,7 +8624,7 @@
       "runtimeLoaded": true,
       "status": "active",
       "ageMin": 14,
-      "ageMax": 17,
+      "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Golden-line spine (PXG2 active)"
@@ -7040,12 +8666,12 @@
       "eventId": "demonic_trial_recover",
       "sourceFile": "sect-marginal.json",
       "runtimeLoaded": true,
-      "status": "candidate",
+      "status": "broken",
       "ageMin": 14,
       "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "demonic_trial_completion",
@@ -7246,17 +8872,6 @@
       "notes": "Awaiting golden spine selection"
     },
     {
-      "eventId": "sect_path_choice",
-      "sourceFile": "sect-wudang.json",
-      "runtimeLoaded": true,
-      "status": "active",
-      "ageMin": 13,
-      "ageMax": 14,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Golden-line spine (PXG2 active)"
-    },
-    {
       "eventId": "orthodox_initiation",
       "sourceFile": "sect-wudang.json",
       "runtimeLoaded": true,
@@ -7304,12 +8919,12 @@
       "eventId": "orthodox_trial_recovery",
       "sourceFile": "sect-wudang.json",
       "runtimeLoaded": true,
-      "status": "candidate",
+      "status": "broken",
       "ageMin": 13,
       "ageMax": 18,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "orthodox_departure",
@@ -7921,8 +9536,8 @@
       "sourceFile": "training.json",
       "runtimeLoaded": true,
       "status": "active",
-      "ageMin": 17,
-      "ageMax": 17,
+      "ageMin": 16,
+      "ageMax": 20,
       "overlapsGoldenLine": true,
       "eventType": "auto",
       "notes": "Golden-line spine (PXG2 active)"

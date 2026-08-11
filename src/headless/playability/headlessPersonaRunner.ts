@@ -45,6 +45,20 @@ function isMandatoryHistoryEvent(eventId: string): boolean {
   }
 }
 
+function isVisibleAutomaticMainlineHistoryEvent(eventId: string): boolean {
+  try {
+    const event = eventLoader.getEventById(eventId);
+    return (
+      event.eventType === 'auto' &&
+      event.category === 'main_story' &&
+      event.metadata?.tags?.includes('主线') === true &&
+      Boolean(event.content?.title || event.content?.text)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function snapshotForHistoryRecord(historyRecord: GameState['eventHistory'][number], finalState: GameState): GameState {
   const snapshot = historyRecord.stateSnapshot as GameState | undefined;
   if (snapshot) {
@@ -53,7 +67,7 @@ function snapshotForHistoryRecord(historyRecord: GameState['eventHistory'][numbe
   return JSON.parse(JSON.stringify(finalState));
 }
 
-function backfillMandatoryStoryRecords(
+function backfillPacingEvidenceStoryRecords(
   records: GameProcessRecord[],
   finalState: GameState,
 ): void {
@@ -62,7 +76,10 @@ function backfillMandatoryStoryRecords(
     if (recordedIds.has(historyRecord.eventId)) {
       continue;
     }
-    if (!isMandatoryHistoryEvent(historyRecord.eventId)) {
+    if (
+      !isMandatoryHistoryEvent(historyRecord.eventId) &&
+      !isVisibleAutomaticMainlineHistoryEvent(historyRecord.eventId)
+    ) {
       continue;
     }
     let catalogEvent;
@@ -200,7 +217,7 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
   }
 
   const finalState = session.getRuntimeState();
-  backfillMandatoryStoryRecords(records, finalState);
+  backfillPacingEvidenceStoryRecords(records, finalState);
   const choiceCount = records.filter(r => r.eventType === 'choice').length;
   const activeCount = records.filter(r => r.progressionKind === 'active_action').length;
   const experienceTrace = experienceTraceSteps

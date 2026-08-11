@@ -5,9 +5,9 @@
   "keyChoiceDefinition": "A choice that writes durable state (flag, route, relationship, identity) and is tagged as spine-critical in golden-line-spine.json.",
   "payoffDefinition": "A later event that reads the durable state via trigger condition, altered availability, or player-facing text/choice change.",
   "summary": {
-    "keyChoiceCount": 11,
-    "withPayoffCount": 11,
-    "payoffRate": 1.0,
+    "keyChoiceCount": 10,
+    "withPayoffCount": 9,
+    "payoffRate": 0.9,
     "threshold": 0.7
   },
   "entries": [
@@ -37,8 +37,8 @@
         },
         {
           "eventId": "martial_improvement",
-          "ageRange": [17, 17],
-          "readMechanism": "training arc continues from focus flags",
+          "ageRange": [16, 20],
+          "readMechanism": "lifeStates.trainingHabit >= 1",
           "payoffType": "route_state"
         },
         {
@@ -46,43 +46,6 @@
           "ageRange": [15, 15],
           "readMechanism": "martial foundation affects trial outcomes",
           "payoffType": "altered_text"
-        }
-      ]
-    },
-    {
-      "keyChoiceEventId": "sect_path_choice",
-      "choiceIds": ["join_orthodox", "stay_wanderer"],
-      "durableWrites": ["route_orthodox", "route_wanderer", "orthodox_trial_active"],
-      "payoffs": [
-        {
-          "eventId": "orthodox_initiation",
-          "ageRange": [14, 16],
-          "readMechanism": "flags.has('route_orthodox')",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "jianghu_experience",
-          "ageRange": [16, 16],
-          "readMechanism": "wanderer / shared youth arc",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "demonic_encounter",
-          "ageRange": [14, 17],
-          "readMechanism": "route_wanderer or low chivalry branch",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "hero_old_case_returns",
-          "ageRange": [31, 50],
-          "readMechanism": "flags.has('route_wanderer') gates wandering hero midlife arc",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "hero_freedom_settlement",
-          "ageRange": [45, 50],
-          "readMechanism": "midlife beat flags aggregate into settlement branch",
-          "payoffType": "text_callback"
         }
       ]
     },
@@ -133,27 +96,8 @@
     {
       "keyChoiceEventId": "demonic_encounter",
       "choiceIds": ["accept_demonic"],
-      "durableWrites": ["route_demonic", "current_sect"],
-      "payoffs": [
-        {
-          "eventId": "demonic_trial",
-          "ageRange": [14, 16],
-          "readMechanism": "flags.has('route_demonic')",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "demonic_trial_shadow",
-          "ageRange": [14, 18],
-          "readMechanism": "demonic_trial_active chain",
-          "payoffType": "altered_event_availability"
-        },
-        {
-          "eventId": "understand_unconventional_truth",
-          "ageRange": [18, 40],
-          "readMechanism": "sect_faction unconventional after demonic arc",
-          "payoffType": "altered_text"
-        }
-      ]
+      "durableWrites": ["demonic_encounter_accept"],
+      "payoffs": []
     },
     {
       "keyChoiceEventId": "demonic_power_struggle",
@@ -187,8 +131,8 @@
         },
         {
           "eventId": "martial_improvement",
-          "ageRange": [17, 17],
-          "readMechanism": "post-trial martial growth",
+          "ageRange": [16, 20],
+          "readMechanism": "lifeStates.trainingHabit >= 1",
           "payoffType": "altered_event_availability"
         }
       ]

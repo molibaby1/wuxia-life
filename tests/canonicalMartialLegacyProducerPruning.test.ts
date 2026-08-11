@@ -45,8 +45,8 @@ function collectBranches(events: EventDefinition[]): Branch[] {
 }
 
 function testFinalInventory(events: EventDefinition[], branches: Branch[]): void {
-  assert(eventsIndexJson.imports.length === 29, `formal EventLoader file count must be 29, got ${eventsIndexJson.imports.length}`);
-  assert(events.length === 425, `formal EventLoader event count must be 425, got ${events.length}`);
+  assert(eventsIndexJson.imports.length === 28, `formal EventLoader file count must be 28, got ${eventsIndexJson.imports.length}`);
+  assert(events.length === 418, `formal EventLoader event count must be 418, got ${events.length}`);
   assert(branches.length === 0, `formal EventLoader must have 0 legacy producer branches, got ${branches.length}`);
   assert(branches.reduce((count, branch) => count + branch.effects.length, 0) === 0, 'formal EventLoader must have 0 legacy effects');
   assert(new Set(branches.map(branch => branch.eventId)).size === 0, 'formal EventLoader must have 0 legacy producer events');
@@ -161,25 +161,6 @@ function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
   assert(events.includes(disciple as EventDefinition) && events.includes(legacy as EventDefinition), 'relationship events must be formally loaded');
 }
 
-function testExistingCanonicalWrites(events: EventDefinition[]): void {
-  for (const [eventId, text, value] of [
-    ['outlaw_path_beginning', '加入幽影门', 5],
-    ['outlaw_training', '专注实战技巧', 8],
-    ['outlaw_training', '专注内功心法', 6],
-    ['outlaw_mentor', '拜他为师', 10],
-  ] as const) {
-    const choice = findChoice(events, eventId, text);
-    assert(
-      choice.effects?.filter(effect => (effect.target ?? effect.stat) === 'martialPower' && effect.value === value).length === 1,
-      `${eventId} / ${text} must retain exactly martialPower ${value}`,
-    );
-    assert(
-      !(choice.effects ?? []).some(effect => LEGACY_MARTIAL_FIELDS.has(effect.target ?? effect.stat ?? '')),
-      `${eventId} / ${text} must not retain legacy martial fields`,
-    );
-  }
-}
-
 const events = EventLoader.getInstance().getAllEvents();
 const branches = collectBranches(events);
 
@@ -187,5 +168,4 @@ testFinalInventory(events, branches);
 testMartialPowerMigrations(events);
 testNoCompensationBranches(events);
 testRelationshipDuplicateWrites(events);
-testExistingCanonicalWrites(events);
 console.log('canonicalMartialLegacyProducerPruning.test.ts: ok');

@@ -2,30 +2,25 @@
   {
     "id": "outlaw_identity_beginning",
     "name": "加入幽影门",
-    "description": "你决定加入幽影门，踏上与非传统门派结缘的武林之路。",
+    "description": "幽影门使者为你带来一次正式的加入邀请。",
     "version": "1.0.0",
     "category": "identity",
-    "priority": 95,
+    "priority": 1,
+    "storyLine": "shadow_sect",
     "weight": 90,
-    "ageRange": {"min": 15, "max": 25},
+    "ageRange": {"min": 15, "max": 20},
     "type": "identity",
     "eventType": "choice",
     "tags": ["outlaw", "identity", "early"],
     "triggers": [
       {"type": "age_reach", "value": 15}
     ],
-    "triggerConditions": {
-      "age": {"min": 15, "max": 25},
-      "flags": {
-        "not": ["outlaw_identity_done", "route_orthodox"]
-      }
-    },
     "conditions": [
-      {"type": "expression", "expression": "!flags.has('outlaw_identity_done') && !player.affiliation && !flags.has('sect_switch_cooldown') && !flags.has('route_orthodox') && !flags.has('p8_route_wanderer') && !flags.has('p9_early_travel_focus') && !flags.has('p16_deferred_travel_upbringing')"}
+      {"type": "expression", "expression": "events.has(\"demonic_encounter_accept\") && !player.affiliation && !events.has(\"outlaw_identity_beginning\")"}
     ],
     "content": {
       "title": "幽影门之路",
-      "text": "你厌倦了名门正派的虚伪，决定加入幽影门。幽影门使者看着你：'所谓正邪，不过是胜者书写的历史。加入我们，你将获得强大的力量，但也将与整个「正统」江湖为敌。你准备好了吗？记住：我们的道路虽不被认可，但我们有自己的底线——不杀无辜，不叛同道。'"
+      "text": "曾在山道相助的幽影门使者再度来访。他说幽影门愿意接纳你，也愿听你亲自决定是否同行。"
     },
     "choices": [
       {
@@ -38,10 +33,6 @@
             "text": "使者眼中闪过一丝赞赏：\"好！老夫等这一天很久了！\"他传授你幽影门不传秘笈——【幽冥神功】！你的实力突飞猛进，正式成为幽影门核心弟子！",
             "condition": {"type": "expression", "expression": "martialPower >= 30 && chivalry <= -10"},
             "effects": [
-              {"type": "flag_unset", "target": "route_orthodox"},
-              {"type": "flag_set", "target": "outlaw_identity_done"},
-              {"type": "flag_set", "target": "route_demonic"},
-              {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_core_disciple", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 15, "operator": "add"},
@@ -54,10 +45,6 @@
             "text": "使者点点头：\"你有此决心，很好。\"他传授你幽影门入门功法，你正式成为幽影门弟子。从此与正道分道扬镳，江湖路远。",
             "condition": {"type": "expression", "expression": "martialPower >= 20"},
             "effects": [
-              {"type": "flag_unset", "target": "route_orthodox"},
-              {"type": "flag_set", "target": "outlaw_identity_done"},
-              {"type": "flag_set", "target": "route_demonic"},
-              {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add"},
               {"type": "stat_modify", "target": "chivalry", "value": -5, "operator": "add"},
@@ -69,10 +56,6 @@
             "text": "使者上下打量你，沉吟片刻：\"根骨尚可，但心性未稳。先从外围做起吧。\"你成为幽影门的外围人员，需要证明自己的忠诚。",
             "condition": {"type": "expression", "expression": "true"},
             "effects": [
-              {"type": "flag_unset", "target": "route_orthodox"},
-              {"type": "flag_set", "target": "outlaw_identity_done"},
-              {"type": "flag_set", "target": "route_demonic"},
-              {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming外围", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
@@ -92,10 +75,6 @@
             "text": "使者微微一笑：\"保留底线？也好。我幽影门虽被视为邪道，但也自有规矩。\"你成为幽影门弟子，在正邪之间寻找自己的道路。",
             "condition": {"type": "expression", "expression": "chivalry >= 0"},
             "effects": [
-              {"type": "flag_unset", "target": "route_orthodox"},
-              {"type": "flag_set", "target": "outlaw_identity_done"},
-              {"type": "flag_set", "target": "route_demonic"},
-              {"type": "flag_set", "target": "sect_faction", "value": "unconventional"},
               {"type": "affiliation_set", "value": "shadow_sect"},
               {"type": "flag_set", "target": "youming_principled", "value": true},
               {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
@@ -114,15 +93,21 @@
             ]
           }
         ]
+      },
+      {
+        "id": "decline_outlaw",
+        "text": "明确拒绝",
+        "description": "拒绝加入幽影门，结束这次邀请。",
+        "effects": [
+          {"type": "event_record", "target": "outlaw_identity_declined"}
+        ]
       }
     ],
     "metadata": {
       "createdAt": 1773317774544,
       "updatedAt": 1773717774544,
       "author": "development_team",
-      "tags": ["幽影门", "身份", "早期", "once", "route_turn"],
-      "routeTargets": ["demonic"],
-      "routeTransition": "corruption",
+      "tags": ["幽影门", "身份", "早期", "once"],
       "enabled": true
     }
   },
@@ -142,13 +127,10 @@
       {"type": "age_reach", "value": 16}
     ],
     "triggerConditions": {
-      "age": {"min": 16, "max": 30},
-      "flags": {
-        "required": ["outlaw_identity_done"]
-      }
+      "age": {"min": 16, "max": 30}
     },
     "conditions": [
-      {"type": "expression", "expression": "flags.has('outlaw_identity_done')"}
+      {"type": "expression", "expression": "player.affiliation == 'shadow_sect'"}
     ],
     "content": {
       "title": "独特武学",
@@ -197,13 +179,10 @@
       {"type": "age_reach", "value": 18}
     ],
     "triggerConditions": {
-      "age": {"min": 18, "max": 35},
-      "flags": {
-        "required": ["outlaw_identity_done"]
-      }
+      "age": {"min": 18, "max": 35}
     },
     "conditions": [
-      {"type": "expression", "expression": "flags.has('outlaw_identity_done')"}
+      {"type": "expression", "expression": "player.affiliation == 'shadow_sect'"}
     ],
     "content": {
       "title": "门主密令",
@@ -250,13 +229,10 @@
       {"type": "age_reach", "value": 25}
     ],
     "triggerConditions": {
-      "age": {"min": 25, "max": 45},
-      "flags": {
-        "required": ["outlaw_identity_done"]
-      }
+      "age": {"min": 25, "max": 45}
     },
     "conditions": [
-      {"type": "expression", "expression": "flags.has('outlaw_identity_done')"}
+      {"type": "expression", "expression": "player.affiliation == 'shadow_sect'"}
     ],
     "content": {
       "title": "幽影门长老",
@@ -305,13 +281,10 @@
       {"type": "age_reach", "value": 35}
     ],
     "triggerConditions": {
-      "age": {"min": 35, "max": 55},
-      "flags": {
-        "required": ["outlaw_identity_done"]
-      }
+      "age": {"min": 35, "max": 55}
     },
     "conditions": [
-      {"type": "expression", "expression": "flags.has('outlaw_identity_done') && !flags.has('demonic_midlife_expansion_done')"}
+      {"type": "expression", "expression": "player.affiliation == 'shadow_sect' && !flags.has('demonic_midlife_expansion_done')"}
     ],
     "content": {
       "title": "江湖终极决战",

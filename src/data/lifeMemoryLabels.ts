@@ -5,7 +5,7 @@
 export const KEY_CHOICE_EVENT_LABELS: Record<string, string> = {
   childhood_preference: '儿时志向',
   martial_arts_enlightenment: '武学取向',
-  sect_path_choice: '人生路线抉择',
+  sect_choice: '门派机会',
   orthodox_trial_entry: '入门试炼',
   orthodox_trial_service: '试炼中',
   demonic_encounter: '魔道诱惑',
@@ -40,9 +40,10 @@ export const KEY_CHOICE_LABELS: Record<string, Record<string, string>> = {
     balanced_start: '武学取向：均衡',
     generic_path: '武学取向：均衡',
   },
-  sect_path_choice: {
-    join_orthodox: '拜入正道门派',
-    stay_wanderer: '选择行走江湖',
+  sect_choice: {
+    join_shaolin: '申请拜入少林',
+    join_wudang: '申请拜入武当',
+    stay_home: '留在家中继续生活',
   },
   demonic_encounter: {
     accept_demonic: '接受魔道诱惑',

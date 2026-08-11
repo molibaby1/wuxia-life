@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { sectChoice } from '../src/data/youthEvents';
 import { assertCanonicalGameState } from '../src/contracts/validation/canonicalGameStateValidation';
+import { EventLoader } from '../src/core/EventLoader';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
+
+const sectChoice = EventLoader.getInstance().getEventById('sect_choice');
+assert(sectChoice, 'formal sect_choice asset must exist');
+assert.deepEqual(sectChoice.choices?.map(choice => choice.id), [
+  'join_shaolin',
+  'join_wudang',
+  'stay_home',
+]);
+assert.equal(sectChoice.choices?.some(choice => choice.id === 'join_emei'), false);
 
 const stayHome = sectChoice.choices?.find(choice => choice.id === 'stay_home');
 const joinShaolin = sectChoice.choices?.find(choice => choice.id === 'join_shaolin');

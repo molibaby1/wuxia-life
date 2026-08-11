@@ -408,7 +408,7 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
 /** Pinnacle dual-gate lifetime: orthodox choice gate + hidden_master luck window → jianghu_myth_legend. */
 export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLifetimeResult {
   const loader = EventLoader.getInstance();
-  const sectChoice = loader.getEventById('sect_path_choice')!;
+  const sectChoice = loader.getEventById('sect_choice')!;
   const trialEntry = loader.getEventById('orthodox_trial_entry')!;
   const trialService = loader.getEventById('orthodox_trial_service')!;
   const trialCompletion = loader.getEventById('orthodox_trial_completion')!;
@@ -474,19 +474,19 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
     });
   }
 
-  flags = applyEventChoiceFlagSets(sectChoice, 0, flags);
+  flags = applyEventChoiceOutcomeFlagSets(sectChoice, 0, 'success', flags);
   const flagsAfterSect = activeFlags(flags);
   eventSequence.push({
-    age: 13,
-    eventId: 'sect_path_choice',
+    age: 14,
+    eventId: 'sect_choice',
     choiceIndex: 0,
-    choiceLabel: 'join_orthodox',
+    choiceLabel: 'join_shaolin',
     flagsAfter: flagsAfterSect,
   });
   ageProgression.push({
-    age: 13,
+    age: 14,
     phase: 'bridge',
-    action: 'sect_path_choice join_orthodox → orthodox_trial_active',
+    action: 'sect_choice join_shaolin success',
     trainingHabit: lifeStates.trainingHabit ?? 0,
     studyHabit: 0,
     martialPower: (martialPower += 3),

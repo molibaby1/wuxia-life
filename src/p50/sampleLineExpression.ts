@@ -2,7 +2,10 @@ import type { GameState } from '../types/eventTypes';
 
 export type SampleLineId = 'orthodox' | 'demonic' | 'merchant' | 'renown' | 'medical';
 
-export function detectSampleLine(flags: Record<string, unknown>): SampleLineId | null {
+export function detectSampleLine(
+  flags: Record<string, unknown>,
+  affiliation?: GameState['player']['affiliation'],
+): SampleLineId | null {
   if (flags.tavern_medical_bridge_crossed || flags.route_medical_committed) {
     return 'medical';
   }
@@ -47,7 +50,7 @@ export function detectSampleLine(flags: Record<string, unknown>): SampleLineId |
   if (flags.route_orthodox || flags.orthodox_trial_completed || flags.orthodox_formal_disciple) {
     return 'orthodox';
   }
-  if (flags.route_demonic || flags.outlaw_identity_done || flags.demonic_path_touched) {
+  if (flags.route_demonic || affiliation === 'shadow_sect' || flags.demonic_path_touched) {
     return 'demonic';
   }
   if (
@@ -158,7 +161,11 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
   return '习武向道，争取被正道认可';
 }
 
-function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string {
+function demonicCurrentGoal(
+  flags: Record<string, unknown>,
+  age: number,
+  affiliation?: GameState['player']['affiliation'],
+): string {
   if (flags.demonic_age45_territory_consolidated) {
     return '地盘既固，反噬与孤立加深';
   }
@@ -174,7 +181,7 @@ function demonicCurrentGoal(flags: Record<string, unknown>, age: number): string
   if (flags.outlaw_rise || flags.demonic_midlife_expansion_done || flags.demonic_leader) {
     return '力量与地盘在涨，诱惑未止';
   }
-  if (flags.demonic_youth_first_transgression || flags.outlaw_identity_done) {
+  if (flags.demonic_youth_first_transgression || affiliation === 'shadow_sect') {
     return '第一次越界之后，邪路已开';
   }
   if (flags.demonic_childhood_seed_done || flags.p9_childhood_dark_spark) {
@@ -700,7 +707,7 @@ function medicalCurrentGoal(flags: Record<string, unknown>, age: number): string
 
 export function deriveSampleLineCostLabel(state: GameState): string {
   const flags = state.flags ?? {};
-  const line = detectSampleLine(flags);
+  const line = detectSampleLine(flags, state.player?.affiliation);
   if (line === 'orthodox') {
     if (flags.founding_patriarch_endgame_echo_done) {
       if (flags.founding_patriarch_endgame_rule_echo) {
@@ -1149,7 +1156,7 @@ export function deriveSampleLineCostLabel(state: GameState): string {
 export function deriveSampleLineCurrentGoal(state: GameState): string | undefined {
   const flags = state.flags ?? {};
   const age = state.player?.age ?? 0;
-  const line = detectSampleLine(flags);
+  const line = detectSampleLine(flags, state.player?.affiliation);
   if (!line) {
     return undefined;
   }
@@ -1157,7 +1164,7 @@ export function deriveSampleLineCurrentGoal(state: GameState): string | undefine
     return orthodoxCurrentGoal(flags, age);
   }
   if (line === 'demonic') {
-    return demonicCurrentGoal(flags, age);
+    return demonicCurrentGoal(flags, age, state.player?.affiliation);
   }
   if (line === 'merchant') {
     return merchantCurrentGoal(flags, age);
@@ -1631,7 +1638,7 @@ export function deriveSampleLineAge40Identity(state: GameState): string | undefi
   if (age < 38) {
     return undefined;
   }
-  const line = detectSampleLine(flags);
+  const line = detectSampleLine(flags, state.player?.affiliation);
   if (line === 'merchant') {
     return merchantAge40Identity(flags);
   }
@@ -1668,7 +1675,7 @@ function merchantDestinySentence(flags: Record<string, unknown>): string | undef
 
 export function deriveSampleLineDestinySentence(state: GameState): string | undefined {
   const flags = state.flags ?? {};
-  const line = detectSampleLine(flags);
+  const line = detectSampleLine(flags, state.player?.affiliation);
   if (line === 'merchant') {
     return merchantDestinySentence(flags);
   }

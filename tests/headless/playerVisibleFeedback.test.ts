@@ -16,6 +16,7 @@ function age14Snapshot(martialPower: number): GameStateSnapshot {
   const snapshot = bootstrap.serialize();
   snapshot.state.player.age = 14;
   snapshot.state.player.martialPower = martialPower;
+  snapshot.state.player.lifeStates.trainingHabit = 1;
   snapshot.state.player.events = [];
   snapshot.state.player.flags = {};
   snapshot.state.eventHistory = [];
@@ -72,26 +73,13 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
   assert(originDescriptions?.some(description => description?.includes('拳脚根基')), 'martial origin direction is visible');
   assert(originDescriptions?.some(description => description?.includes('察言观色')), 'merchant origin direction is visible');
 
-  const blocked = await getSectEvent(0);
-  const blockedChoices = blocked.next.event.choices ?? [];
-  assert(
-    blockedChoices.filter(choice => choice.available).map(choice => choice.id).join(',') === 'stay_home',
-    'low martial power must leave only stay_home available',
-  );
-  assert(
-    !blocked.next.event.text.includes('少林') &&
-      !blocked.next.event.text.includes('武当') &&
-      !blocked.next.event.text.includes('峨眉'),
-    'sect text must not promise unavailable sects',
-  );
-
   const eligible = await getSectEvent(15);
   const eligibleIds = (eligible.next.event.choices ?? [])
     .filter(choice => choice.available)
     .map(choice => choice.id);
   assert(
-    ['join_shaolin', 'join_wudang', 'join_emei', 'stay_home'].every(id => eligibleIds.includes(id)),
-    'eligible martial power must preserve all sect choices',
+    eligibleIds.join(',') === 'join_shaolin,join_wudang,stay_home',
+    'trained players must only receive Shaolin, Wudang, or stay-home choices',
   );
 
   const beforeChoiceSnapshot = eligible.session.serialize();

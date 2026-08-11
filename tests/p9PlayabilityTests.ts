@@ -17,7 +17,11 @@ import {
   resolveConfiguredEchoSummaryVars,
   WUXIA_WORLD_PROFILE,
 } from '../src/narrative/NarrativeConfigLoader';
-import { collectCausalityMetrics, collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
+import {
+  collectCausalityMetrics,
+  collectReplayMetrics,
+  isPacingImpactRecord,
+} from '../src/p8/collectPersonaMetrics';
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
 import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
@@ -271,6 +275,17 @@ async function testScholarAndSocialCausalityEchoes(): Promise<void> {
   );
 }
 
+async function testYouthTransitionContributesPacingEvidence(): Promise<void> {
+  const [social] = await runPersonaSimulations(['p8-social-gu']);
+  const youthTransition = social.report.records.find(record => record.eventId === 'youth_begins');
+  if (!youthTransition) {
+    throw new Error('executed youth_begins transition must be present in persona evidence');
+  }
+  assert(youthTransition.age === 13, `youth_begins evidence age: ${youthTransition.age}`);
+  assert(youthTransition.eventType === 'auto', 'youth_begins evidence remains automatic');
+  assert(isPacingImpactRecord(youthTransition), 'youth_begins transition contributes pacing impact');
+}
+
 async function testGatePacingWarningsReduced(): Promise<void> {
   const baseline = loadP8BaselineReport();
   const baselinePacing = baseline.warnings.filter(w => w.key === 'pacing').length;
@@ -361,6 +376,7 @@ async function runP9Tests(): Promise<void> {
   testCausalityDetectsExplicitEchoFlag();
   testCausalityIgnoresGenericStatOnly();
   await testScholarAndSocialCausalityEchoes();
+  await testYouthTransitionContributesPacingEvidence();
   await testGatePacingWarningsReduced();
   await testMartialDeviantIdentityDiverged();
   await testWealthPersonaBusinessProgression();

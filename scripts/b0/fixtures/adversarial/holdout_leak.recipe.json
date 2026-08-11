@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "holdout_leak",
+  "mode": "holdout_leak",
+  "proposedPaths": ["scripts/b0/fixtures/seeds/seed-bundle.json"],
+  "operation": "leak-holdout",
+  "leakHoldoutSeed": 804
+}

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "mutate_gate_threshold",
+  "mode": "mutate_gate_threshold",
+  "proposedPaths": ["src/p8/metricDefinitions.ts"],
+  "operation": "rewrite-threshold"
+}

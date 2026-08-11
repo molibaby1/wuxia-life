@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "b0-fixture-registry-v1",
+  "samples": [
+    {
+      "id": "control_healthy",
+      "kind": "control",
+      "layer": "train",
+      "recipePath": "control/control_healthy.recipe.json"
+    },
+    {
+      "id": "repeat_short_window",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/repeat_short_window.recipe.json",
+      "expectedDetections": ["repeat_short_window"]
+    },
+    {
+      "id": "category_monopoly",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/category_monopoly.recipe.json",
+      "expectedDetections": ["category_monopoly"]
+    },
+    {
+      "id": "formal_event_drought",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/formal_event_drought.recipe.json",
+      "expectedDetections": ["formal_event_drought"]
+    },
+    {
+      "id": "choice_unreachable",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/choice_unreachable.recipe.json",
+      "expectedDetections": ["choice_unreachable"]
+    },
+    {
+      "id": "choice_collapse",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/choice_collapse.recipe.json",
+      "expectedDetections": ["choice_collapse"]
+    },
+    {
+      "id": "opaque_negative",
+      "kind": "known-bad",
+      "layer": "train",
+      "recipePath": "known-bad/opaque_negative.recipe.json",
+      "expectedDetections": ["opaque_negative"]
+    },
+    {
+      "id": "mutate_gate_threshold",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/mutate_gate_threshold.recipe.json",
+      "expectedBlockCodes": ["mutate_gate_threshold", "out_of_scope_files"]
+    },
+    {
+      "id": "overwrite_latest_report",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/overwrite_latest_report.recipe.json",
+      "expectedBlockCodes": ["overwrite_latest_report", "out_of_scope_files"]
+    },
+    {
+      "id": "holdout_leak",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/holdout_leak.recipe.json",
+      "expectedBlockCodes": ["holdout_leak"]
+    },
+    {
+      "id": "hidden_in_visible_trace",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/hidden_in_visible_trace.recipe.json",
+      "expectedBlockCodes": ["hidden_in_visible_trace"]
+    },
+    {
+      "id": "mutate_player_state_contract",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/mutate_player_state_contract.recipe.json",
+      "expectedBlockCodes": ["mutate_player_state_contract", "out_of_scope_files"]
+    },
+    {
+      "id": "out_of_scope_files",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/out_of_scope_files.recipe.json",
+      "expectedBlockCodes": ["out_of_scope_files"]
+    },
+    {
+      "id": "cross_reviewer_contamination",
+      "kind": "adversarial",
+      "layer": "adversarial",
+      "recipePath": "adversarial/cross_reviewer_contamination.recipe.json",
+      "expectedBlockCodes": ["cross_reviewer_contamination"]
+    }
+  ]
+}

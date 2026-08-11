@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "out_of_scope_files",
+  "mode": "out_of_scope_files",
+  "proposedPaths": ["src/data/events.json"],
+  "operation": "touch-formal-events"
+}

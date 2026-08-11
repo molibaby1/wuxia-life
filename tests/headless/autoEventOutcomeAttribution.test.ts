@@ -15,16 +15,16 @@ async function main(): Promise<void> {
     'love_after_greet must not declare martialPower effects',
   );
 
-  const persona = getP8PersonaById('p8-balanced-wei');
+  // ponytail: martial-lin@25 reliably hits love_after_greet on origin/dev; balanced@18 does not
+  const persona = getP8PersonaById('p8-martial-lin');
   assert.ok(persona, 'missing persona');
 
-  // endAge 18: with seed 808, love_after_greet lands around 17 after attribution fix
   const result = await runHeadlessPersona({
     persona,
-    seed: 808,
-    endAge: 18,
+    seed: persona.seed,
+    endAge: 25,
     catalogVersion: '1.0.0',
-    maxSteps: 1200,
+    maxSteps: 1500,
     experienceTrace: true,
   });
 

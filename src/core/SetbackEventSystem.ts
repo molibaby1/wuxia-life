@@ -30,6 +30,21 @@ export type SetbackCheckOptions = {
 
 const LETHAL_SETBACK_IDS = new Set(['early_death']);
 
+/**
+ * Difficulty setback ids that share player-visible meaning with a catalog formal fact.
+ * When the difficulty system fires these, both ids are written to formal event history
+ * so Condition `events.has(...)` stays aligned with the visible「意外受伤」outcome.
+ */
+export const DIFFICULTY_SETBACK_FORMAL_FACT_ALIASES: Readonly<Record<string, string>> = {
+  injury_accident: 'setback_injury',
+};
+
+/** Formal history ids to record for a difficulty setback (self + optional catalog alias). */
+export function formalFactsForDifficultySetback(setbackId: string): readonly string[] {
+  const alias = DIFFICULTY_SETBACK_FORMAL_FACT_ALIASES[setbackId];
+  return alias ? [setbackId, alias] : [setbackId];
+}
+
 /** Canonical numeric stats currently used by formal Setback configs. */
 export const SETBACK_MODIFIABLE_STATS = new Set([
   'martialPower',

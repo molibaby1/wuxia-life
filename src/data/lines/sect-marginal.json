@@ -1,5 +1,116 @@
 [
   {
+    "id": "youth_road_peril",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "storyLine": "shadow_sect",
+    "weight": 70,
+    "ageRange": {
+      "min": 12,
+      "max": 16
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 12
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!player.affiliation && lifeStates.trainingHabit >= 1 && !events.has(\"youth_road_peril\")"
+      }
+    ],
+    "content": {
+      "title": "山道遇险",
+      "text": "你离庄练习后独自返回，山道转角忽然杀出几名黑衣人。刀风贴脸而过，这一次没有师长在侧——你必须自己撑过这阵凶险。",
+      "description": "一次真正把你逼到绝境的山道伏击。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "youth_road_peril_fight",
+        "text": "硬拼求生",
+        "description": "拼着力气挡住几刀，带伤杀出包围。",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 3,
+            "operator": "subtract"
+          },
+          {
+            "type": "status_add",
+            "status": "injured"
+          },
+          {
+            "type": "health_status_set",
+            "value": "unwell"
+          },
+          {
+            "type": "event_record",
+            "target": "youth_road_peril"
+          }
+        ]
+      },
+      {
+        "id": "youth_road_peril_flee",
+        "text": "夺路而逃",
+        "description": "借熟悉的山路甩开追兵，惊魂未定。",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "target": "constitution",
+            "value": 1,
+            "operator": "subtract"
+          },
+          {
+            "type": "event_record",
+            "target": "youth_road_peril"
+          }
+        ]
+      },
+      {
+        "id": "youth_road_peril_endure",
+        "text": "忍痛躲藏",
+        "description": "你忍着伤痛藏进林涧，直到夜色掩去杀机。",
+        "effects": [
+          {
+            "type": "status_add",
+            "status": "injured"
+          },
+          {
+            "type": "health_status_set",
+            "value": "unwell"
+          },
+          {
+            "type": "event_record",
+            "target": "youth_road_peril"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1775900000000,
+      "author": "development_team",
+      "tags": [
+        "青年",
+        "幽影门",
+        "遇险",
+        "once"
+      ],
+      "enabled": true
+    }
+  },
+  {
     "id": "demonic_encounter",
     "version": "1.0.0",
     "category": "main_story",
@@ -19,13 +130,13 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!player.affiliation && player.chivalry <= 20 && !events.has(\"demonic_encounter\") && (events.has(\"setback_injury\") || events.has(\"jianghu_experience\"))"
+        "expression": "!player.affiliation && player.chivalry <= 20 && !events.has(\"demonic_encounter\") && events.has(\"youth_road_peril\")"
       }
     ],
     "content": {
-      "text": "你在山道遭遇一场黑衣人伏击，却被一位神秘强者救下。对方自称幽影门中人，愿教你绝学。",
+      "text": "此前你已在山道上独自熬过一次绝境。今日再遭黑衣人围杀时，一位神秘强者出手相救。对方自称幽影门中人，愿教你绝学。",
       "title": "幽影门奇遇",
-      "description": "一段隐秘的缘分悄然展开。"
+      "description": "险境之后的人情，悄然展开。"
     },
     "eventType": "choice",
     "choices": [
@@ -83,7 +194,7 @@
     ],
     "metadata": {
       "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
+      "updatedAt": 1775900000000,
       "author": "development_team",
       "tags": [
         "青年",

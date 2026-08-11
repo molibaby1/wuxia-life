@@ -4,6 +4,7 @@ import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSn
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { eventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { formalFactsForDifficultySetback } from '../src/core/SetbackEventSystem';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import goldenLinePayoffMap from '../src/data/golden-line-payoff-map.json';
@@ -149,7 +150,7 @@ async function main(): Promise<void> {
   ]) {
     assert(!allIds.has(removed), `${removed} must leave the formal loader`);
   }
-  assert.equal(allIds.size, 418);
+  assert.equal(allIds.size, 419);
 
   assert.equal(goldenLinePayoffMap.entries.length, 10);
   assert.equal(goldenLinePayoffMap.entries.filter(entry => entry.payoffs.length > 0).length, 9);
@@ -279,35 +280,65 @@ async function main(): Promise<void> {
     assert.equal(availableIds(rivalPath, 21).has('love_separation'), expectsSeparation, choiceId);
   }
 
-  // Shadow-sect contact needs a concrete setback or jianghu fact; acceptance only opens its invitation.
+  // Shadow-sect contact needs youth road peril; acceptance only opens its invitation.
   const shadowWithoutContact = createYouthEngine(16, { chivalry: 20 });
+  shadowWithoutContact.getGameState().player.lifeStates.trainingHabit = 1;
   const shadowContact = eventLoader.getEventById('demonic_encounter');
+  const roadPeril = eventLoader.getEventById('youth_road_peril');
   assert.equal(shadowContact?.priority, 1);
   assert.equal(shadowContact?.storyLine, 'shadow_sect');
+  assert.equal(roadPeril?.priority, 1);
+  assert.equal(roadPeril?.storyLine, 'shadow_sect');
   assert(!availableIds(shadowWithoutContact, 16).has('demonic_encounter'));
   assert(!availableIds(shadowWithoutContact, 16).has('outlaw_identity_beginning'));
+  assert(availableIds(shadowWithoutContact, 14).has('youth_road_peril'));
 
-  const shadowAfterSetback = createYouthEngine(16, { chivalry: 20 });
-  recordFact(shadowAfterSetback.getGameState(), 'setback_injury');
-  assert(availableIds(shadowAfterSetback, 16).has('demonic_encounter'));
+  const noTrainingPeril = createYouthEngine(14, { chivalry: 20 });
+  assert(!availableIds(noTrainingPeril, 14).has('youth_road_peril'));
+
+  const shadowAfterPeril = createYouthEngine(16, { chivalry: 20 });
+  shadowAfterPeril.getGameState().player.lifeStates.trainingHabit = 1;
+  recordFact(shadowAfterPeril.getGameState(), 'youth_road_peril');
+  assert(availableIds(shadowAfterPeril, 16).has('demonic_encounter'));
+  assert(!availableIds(shadowAfterPeril, 16).has('youth_road_peril'));
+
+  // Legacy injury / jianghu facts no longer open the shadow contact by themselves.
+  assert.deepEqual(formalFactsForDifficultySetback('injury_accident'), [
+    'injury_accident',
+    'setback_injury',
+  ]);
+  const afterDifficultyInjury = createYouthEngine(16, { chivalry: 20 });
+  afterDifficultyInjury.getGameState().player.lifeStates.trainingHabit = 1;
+  for (const factId of formalFactsForDifficultySetback('injury_accident')) {
+    recordFact(afterDifficultyInjury.getGameState(), factId);
+  }
+  assert(!availableIds(afterDifficultyInjury, 16).has('demonic_encounter'));
 
   const shadowAfterJianghuExperience = createYouthEngine(16, { chivalry: 20 });
+  shadowAfterJianghuExperience.getGameState().player.lifeStates.trainingHabit = 1;
   recordFact(shadowAfterJianghuExperience.getGameState(), 'jianghu_experience');
-  assert(availableIds(shadowAfterJianghuExperience, 16).has('demonic_encounter'));
+  assert(!availableIds(shadowAfterJianghuExperience, 16).has('demonic_encounter'));
 
   const acceptedContact = createYouthEngine(16, { chivalry: 20 });
-  recordFact(acceptedContact.getGameState(), 'setback_injury');
+  recordFact(acceptedContact.getGameState(), 'youth_road_peril');
   await executeChoice(acceptedContact, 'demonic_encounter', 'accept_demonic');
   assert.equal(acceptedContact.getGameState().player.affiliation, null);
   assert.equal(acceptedContact.getGameState().flags.route_demonic, undefined);
   assert(availableIds(acceptedContact, 16).has('outlaw_identity_beginning'));
 
   const declinedContact = createYouthEngine(16, { chivalry: 20 });
-  recordFact(declinedContact.getGameState(), 'setback_injury');
+  recordFact(declinedContact.getGameState(), 'youth_road_peril');
   await executeChoice(declinedContact, 'demonic_encounter', 'decline_demonic');
   assert.equal(declinedContact.getGameState().player.affiliation, null);
   assert(!availableIds(declinedContact, 16).has('outlaw_identity_beginning'));
 
+  const survivedRoadPeril = createYouthEngine(14, { chivalry: 20 });
+  survivedRoadPeril.getGameState().player.lifeStates.trainingHabit = 1;
+  await executeChoice(survivedRoadPeril, 'youth_road_peril', 'youth_road_peril_flee');
+  assert(
+    survivedRoadPeril.getGameState().eventHistory.some(record => record.eventId === 'youth_road_peril'),
+  );
+  assert(availableIds(survivedRoadPeril, 16).has('demonic_encounter'));
   const refusedOutlaw = createYouthEngine(16);
   recordFact(refusedOutlaw.getGameState(), 'demonic_encounter_accept');
   await executeChoice(refusedOutlaw, 'outlaw_identity_beginning', 'decline_outlaw');
@@ -442,6 +473,7 @@ async function main(): Promise<void> {
   const unavailableAtTwentyOne = new Set([
     'sect_choice',
     'love_first_meet',
+    'youth_road_peril',
     'demonic_encounter',
     'outlaw_identity_beginning',
     'martial_arts_invitation',

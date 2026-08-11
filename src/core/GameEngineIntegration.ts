@@ -23,7 +23,12 @@ import { difficultyManager } from './DifficultyManager';
 import { difficultyMonitor } from './DifficultyMonitor';
 import { checkReputationGate } from './ReputationGateSystem';
 import { calculateFailureProbabilityForEvent, rollForFailure } from './ChallengeSystem';
-import { checkSetbackEvents, applySetbackEffects, clearExpiredSetbacks } from './SetbackEventSystem';
+import {
+  checkSetbackEvents,
+  applySetbackEffects,
+  clearExpiredSetbacks,
+  formalFactsForDifficultySetback,
+} from './SetbackEventSystem';
 import { traitSystem } from './TraitSystem';
 import { dailyEventSystem } from './DailyEventSystem';
 import { buildNarrativeSchedulingContextFromState } from '../p11/schedulingContext';
@@ -1404,7 +1409,9 @@ export class GameEngineIntegration {
       for (const result of setbackResults.triggeredEvents) {
         const playerBeforeSetback = { ...this.gameState.player };
         this.gameState = applySetbackEffects(this.gameState, result.event.id);
-        appendFormalEventHistory(this.gameState, result.event.id, ageBeforeEvent);
+        for (const factId of formalFactsForDifficultySetback(result.event.id)) {
+          appendFormalEventHistory(this.gameState, factId, ageBeforeEvent);
+        }
         stageResults.push({
           id: result.event.id,
           sourceKind: 'setback',

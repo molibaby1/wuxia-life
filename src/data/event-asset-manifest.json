@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-09T02:44:04.897Z",
+  "generatedAt": "2026-08-11T11:12:09.723Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,10 +14,10 @@
   "summary": {
     "runtimeLoadedFiles": 28,
     "nonLoadedFiles": 40,
-    "totalEventsInRuntime": 418,
+    "totalEventsInRuntime": 419,
     "byStatus": {
       "active": 36,
-      "candidate": 68,
+      "candidate": 69,
       "broken": 60,
       "deferred": 254,
       "dead": 0
@@ -507,8 +507,8 @@
       "fileName": "sect-marginal.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 19,
-      "goldenLineOverlapCount": 19,
+      "eventCount": 20,
+      "goldenLineOverlapCount": 20,
       "notes": "Priority route golden-line pool (PXG2 selects active spine)"
     },
     {
@@ -8614,6 +8614,17 @@
       "status": "candidate",
       "ageMin": 23,
       "ageMax": 45,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "youth_road_peril",
+      "sourceFile": "sect-marginal.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 12,
+      "ageMax": 16,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Awaiting golden spine selection"

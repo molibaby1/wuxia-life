@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "mutate_player_state_contract",
+  "mode": "mutate_player_state_contract",
+  "proposedPaths": ["docs/contracts/game-state-snapshot-contract.md"],
+  "operation": "mutate-contract"
+}

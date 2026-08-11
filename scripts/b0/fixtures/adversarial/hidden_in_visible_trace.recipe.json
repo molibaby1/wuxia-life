@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "hidden_in_visible_trace",
+  "mode": "hidden_in_visible_trace",
+  "proposedPaths": ["scripts/b0/fixtures/adversarial/hidden_in_visible_trace.recipe.json"],
+  "operation": "leak-hidden",
+  "injectHiddenIntoVisible": true
+}

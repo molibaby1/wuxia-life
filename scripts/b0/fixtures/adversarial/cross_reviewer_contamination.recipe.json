@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "b0-adversarial-recipe-v1",
+  "attackId": "cross_reviewer_contamination",
+  "mode": "cross_reviewer_contamination",
+  "proposedPaths": ["scripts/b0/fixtures/adversarial/cross_reviewer_contamination.recipe.json"],
+  "operation": "contaminate-review",
+  "contaminateWithMechanicalVerdict": true
+}

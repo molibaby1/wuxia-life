@@ -2186,10 +2186,10 @@ const coreFunctionSuite: TestSuite = {
           records: [
             {
               age: 26,
-              eventId: 'sect_path_choice',
+              eventId: 'sect_choice',
               eventTitle: '门派抉择',
               eventType: 'choice',
-              selectedChoice: { id: 'choose_sect', text: '入正派', effects: [] },
+              selectedChoice: { id: 'join_shaolin', text: '申请拜入少林', effects: [] },
               gameState: framework.createTestState(),
               timestamp: new Date().toISOString(),
             },
@@ -2208,7 +2208,7 @@ const coreFunctionSuite: TestSuite = {
         const telemetry = buildDeathRiskTelemetry(deadReport);
         assertEqual(telemetry?.deathCauseId, 'engine:early_death', '英年早逝应映射 engine:early_death');
         assertEqual(telemetry?.deathEventId, 'jianghu_experience', '应记录触发窗口事件 id');
-        assert(telemetry?.recentKeyChoices.some(choice => choice.eventId === 'sect_path_choice'), '应包含近期 key choice');
+        assert(telemetry?.recentKeyChoices.some(choice => choice.eventId === 'sect_choice'), '应包含近期 key choice');
         assertEqual(telemetry?.warningSatisfied, false, 'ENG-01 默认 warning 未满足');
         assertEqual(telemetry?.mitigationAvailable, true, '体质豁免视为 mitigationAvailable');
 

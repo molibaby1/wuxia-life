@@ -9,7 +9,7 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function snapshotAtAge(age: number, overrides?: Partial<{ charisma: number }>): GameStateSnapshot {
+function snapshotAtAge(age: number, overrides?: Partial<{ charisma: number; connections: number }>): GameStateSnapshot {
   const bootstrap = HeadlessEngineSessionImpl.create({
     playerName: '测试',
     gender: 'male',
@@ -19,13 +19,21 @@ function snapshotAtAge(age: number, overrides?: Partial<{ charisma: number }>): 
   const snap = bootstrap.serialize();
   snap.state.player.age = age;
   snap.state.player.alive = true;
+  snap.state.player.connections = overrides?.connections ?? 0;
+  snap.state.player.affiliation = null;
+  snap.state.eventHistory = [];
+  snap.state.player.events = [];
   if (overrides?.charisma !== undefined) {
     snap.state.player.charisma = overrides.charisma;
   }
   return snap;
 }
 
-async function hydrateAtAge(age: number, randomSeed = 42, snapshotOverrides?: Partial<{ charisma: number }>) {
+async function hydrateAtAge(
+  age: number,
+  randomSeed = 42,
+  snapshotOverrides?: Partial<{ charisma: number; connections: number }>,
+) {
   const session = HeadlessEngineSessionImpl.create({
     playerName: '规划侠客',
     gender: 'male',
@@ -37,14 +45,11 @@ async function hydrateAtAge(age: number, randomSeed = 42, snapshotOverrides?: Pa
 }
 
 export async function runP72SessionPhaseTests(): Promise<void> {
-  const planningSession = await hydrateAtAge(16, 77);
-  // love_first_meet is CRITICAL priority and available at age 16, so session is story_event
-  assert(planningSession.getSessionPhase() === 'story_event', 'forced event available → story_event');
-
+  const planningSession = await hydrateAtAge(16, 77, { connections: 5 });
+  // Social exposure makes love_first_meet eligible; selecting a story event enters story_event.
   const next = await planningSession.getNextEvent();
-  if (next) {
-    assert(planningSession.getSessionPhase() === 'story_event', 'current event → story_event');
-  }
+  assert(next, 'eligible story event selected');
+  assert(planningSession.getSessionPhase() === 'story_event', 'current event → story_event');
 
   const optionsSession = await hydrateAtAge(16, 55);
   const localEngine = new GameEngineIntegration();
@@ -59,8 +64,8 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     assert(option.riskLevel.length > 0, 'risk populated');
   }
 
-  // Use charisma = 4 to disable love_first_meet (which requires charisma >= 5)
-  const actionSession = await hydrateAtAge(16, 12345, { charisma: 4 });
+  // With no social exposure, love_first_meet is unavailable and active planning can proceed.
+  const actionSession = await hydrateAtAge(16, 12345, { charisma: 4, connections: 0 });
   const beforeStats = { ...actionSession.getRuntimeState().player };
   await actionSession.executeActiveAction('action_training_basic');
   assert(actionSession.getSessionPhase() === 'action_summary', 'after action → action_summary');
@@ -76,8 +81,8 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     'stat delta applied',
   );
 
-  // Use charisma = 4 to disable love_first_meet
-  const loopSession = await hydrateAtAge(16, 88, { charisma: 4 });
+  // No social exposure keeps the loop out of the romance opportunity.
+  const loopSession = await hydrateAtAge(16, 88, { charisma: 4, connections: 0 });
   await loopSession.executeActiveAction('action_socializing_basic');
   await loopSession.acknowledgeProgression('action_summary');
   if (loopSession.getProgressionVolatileState().pendingDisturbanceNarrative) {

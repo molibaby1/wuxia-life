@@ -3,9 +3,9 @@
     "id": "love_first_meet",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 0,
+    "priority": 1,
     "weight": 80,
-    "ageRange": { "min": 15, "max": 35 },
+    "ageRange": { "min": 15, "max": 20 },
     "triggers": [
       {"type": "age_reach", "value": 15},
       {"type": "random", "value": 0.6}
@@ -13,7 +13,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"love_started\") && !flags.has(\"love_mature_started\") && !flags.has(\"love_elderly_started\") && !flags.has(\"hasLoveInterest\") && player.charisma >= 5"
+        "expression": "!events.has(\"love_first_meet\") && !flags.has(\"love_started\") && !flags.has(\"love_mature_started\") && !flags.has(\"love_elderly_started\") && !flags.has(\"hasLoveInterest\") && (player.connections >= 5 || events.has(\"jianghu_experience\") || player.affiliation)"
       }
     ],
     "content": {
@@ -106,7 +106,7 @@
             "text": "你试图展现魅力，却显得有些刻意。对方微微一笑，礼貌地结束了交谈。你心中暗叹：'或许她/他不是对的人...'",
             "condition": {"type": "expression", "expression": "true"},
             "effects": [
-              {"type": "flag_set", "target": "love_started"},
+              {"type": "flag_unset", "target": "love_started"},
               {"type": "flag_set", "target": "love_approach_method", "value": "charming_failed"},
               {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 5}},
               {"type": "event_record", "target": "love_first_meet_charm_failed"}
@@ -144,7 +144,7 @@
     "id": "love_after_greet",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 0,
+    "priority": 1,
     "weight": 90,
     "ageRange": { "min": 15, "max": 35 },
     "triggers": [
@@ -153,7 +153,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && !flags.has(\"love_after_greet_done\") && (!flags.has(\"route_wanderer\") || flags.has(\"jianghuTraveler\")) && (!flags.has(\"orthodox_trial_active\") || flags.has(\"orthodox_trial_completed\"))"
+        "expression": "flags.has(\"love_started\") && !events.has(\"love_after_greet\")"
       }
     ],
     "content": {
@@ -182,7 +182,7 @@
     "id": "love_shared_mission",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 0,
+    "priority": 1,
     "weight": 70,
     "ageRange": { "min": 16, "max": 25 },
     "triggers": [
@@ -192,7 +192,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && !flags.has(\"love_bonded\") && (!flags.has(\"orthodox_trial_active\") || flags.has(\"orthodox_trial_completed\"))"
+        "expression": "flags.has(\"love_started\") && !events.has(\"love_shared_mission\") && (events.has(\"jianghu_experience\") || player.affiliation)"
       }
     ],
     "content": {
@@ -221,14 +221,14 @@
     "id": "love_family_obstacle",
     "version": "1.0.0",
     "category": "side_quest",
-    "priority": 0,
+    "priority": 1,
     "weight": 65,
     "ageRange": { "min": 17, "max": 26 },
     "triggers": [{ "type": "age_reach", "value": 17 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_bonded\") && !flags.has(\"love_conflict\")"
+        "expression": "events.has(\"love_shared_mission\") && !events.has(\"love_family_obstacle\")"
       }
     ],
     "content": {
@@ -244,7 +244,6 @@
         "effects": [
           { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
           { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
-          { "type": "flag_set", "target": "love_conflict" },
           { "type": "event_record", "target": "love_family_obstacle_prove" }
         ]
       },
@@ -254,7 +253,6 @@
         "effects": [
           { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -4 } },
-          { "type": "flag_set", "target": "love_conflict" },
           { "type": "event_record", "target": "love_family_obstacle_avoid" }
         ]
       }
@@ -280,7 +278,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_conflict\") && !flags.has(\"love_rival\")"
+        "expression": "events.has(\"love_family_obstacle_avoid\") && !events.has(\"love_rival_appears\")"
       }
     ],
     "content": {
@@ -297,7 +295,6 @@
           { "type": "time_advance", "target": "age", "value": 7, "timeUnit": "day" },
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
           { "type": "status_add", "status": "anxious" },
-          { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_duel" }
         ]
       },
@@ -308,7 +305,6 @@
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -6 } },
           { "type": "status_remove", "status": "anxious" },
-          { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_withdraw" }
         ]
       },
@@ -320,11 +316,11 @@
           { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -2 } },
           { "type": "status_add", "status": "anxious" },
-          { "type": "flag_set", "target": "love_rival" },
           { "type": "event_record", "target": "love_rival_mediation" }
         ]
       }
     ],
+    "storyLine": "love_story",
     "metadata": {
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
@@ -344,7 +340,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_rival\") && !flags.has(\"love_separated\")"
+        "expression": "events.has(\"love_rival_withdraw\") && !events.has(\"love_separation\")"
       }
     ],
     "content": {
@@ -358,6 +354,7 @@
       { "type": "flag_set", "target": "love_separated" },
       { "type": "event_record", "target": "love_separation" }
     ],
+    "storyLine": "love_story",
     "metadata": {
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
@@ -771,13 +768,14 @@
     "version": "1.0.0",
     "category": "side_quest",
     "priority": 1,
+    "storyLine": "love_story",
     "weight": 22,
     "ageRange": { "min": 19, "max": 30 },
     "triggers": [{ "type": "age_reach", "value": 19 }],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"love_started\") && flags.has(\"route_unconventional\") && !flags.has(\"love_demonic_conflict\")"
+        "expression": "flags.has(\"love_started\") && player.affiliation == \"shadow_sect\" && !events.has(\"love_demonic_conflict\")"
       }
     ],
     "content": {
@@ -792,9 +790,8 @@
         "text": "为她离开幽影门",
         "effects": [
           { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-          { "type": "flag_set", "target": "unconventional_redemption_started" },
-          { "type": "flag_set", "target": "love_demonic_conflict" },
-          { "type": "event_record", "target": "love_demonic_conflict_redemption" }
+          { "type": "affiliation_clear" },
+          { "type": "event_record", "target": "love_demonic_conflict_left_shadow_sect" }
         ]
       },
       {
@@ -803,8 +800,8 @@
         "effects": [
           { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "day" },
           { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -8 } },
-          { "type": "flag_set", "target": "love_demonic_conflict" },
-          { "type": "event_record", "target": "love_demonic_conflict_demonic" }
+          { "type": "status_add", "status": "anxious" },
+          { "type": "event_record", "target": "love_demonic_conflict_stayed_shadow_sect" }
         ]
       }
     ],

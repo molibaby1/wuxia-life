@@ -99,6 +99,7 @@ const suites: Suite[] = [
   { name: 'playerRolePresentation', entry: 'tests/playerRolePresentation.test.ts' },
   { name: 'canonicalPersistenceBoundaryTests', entry: 'tests/canonicalPersistenceBoundary.test.ts' },
   { name: 'canonicalCriticalChoiceNormalizationTests', entry: 'tests/canonicalCriticalChoiceNormalization.test.ts' },
+  { name: 'youthCausalOpportunity', entry: 'tests/youthCausalOpportunity.test.ts' },
   { name: 'canonicalRuntimeLoadIsolationTests', entry: 'tests/canonicalRuntimeLoadIsolation.test.ts' },
   { name: 'canonicalRuntimeExactApplicationTests', entry: 'tests/canonicalRuntimeExactApplication.test.ts' },
   { name: 'canonicalJsonContainerBoundaryTests', entry: 'tests/canonicalJsonContainerBoundary.test.ts' },

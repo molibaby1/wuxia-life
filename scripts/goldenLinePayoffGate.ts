@@ -111,7 +111,6 @@ const PRIORITY_ROUTE_SAMPLE_IDS = new Set([
 
 /** PR-02: routeTrack fixture pre-writes route before key choice events fire. */
 const ROUTE_FIXTURE_SKIPPED_KEY_CHOICES: Record<string, string[]> = {
-  sect: ['sect_path_choice'],
   demonic: ['demonic_encounter'],
 };
 
@@ -206,12 +205,6 @@ function resolveGapId(
   if (base) {
     return base;
   }
-  if (keyChoiceEventId === 'sect_path_choice' && sampleId === 'golden-wanderer') {
-    return 'G2';
-  }
-  if (keyChoiceEventId === 'sect_path_choice' && sampleId === 'golden-neutral-baseline') {
-    return 'G3';
-  }
   if (keyChoiceEventId === 'orthodox_trial_entry' && sampleId === 'golden-neutral-baseline') {
     return 'G4';
   }
@@ -227,7 +220,6 @@ function inferBlockReason(
 ): { reason: PayoffBlockReason; detail: string; verified: boolean } {
   const keyChoiceId = entry.keyChoiceEventId;
   const track = run.sample.routeTrack;
-  const choiceId = record.choiceId ?? '';
 
   if (isFixtureExcluded(run, keyChoiceId)) {
     return {
@@ -243,28 +235,6 @@ function inferBlockReason(
       detail:
         'declared focus flags are not read by martial_improvement or sect_trial payoff conditions',
       verified: false,
-    };
-  }
-
-  if (keyChoiceId === 'sect_path_choice') {
-    if (track === 'wanderer' && choiceId.includes('wanderer')) {
-      return {
-        reason: 'simulation_strategy',
-        detail: 'wanderer track chose stay_wanderer; jianghu_experience window missed',
-        verified: true,
-      };
-    }
-    if (track === 'sect') {
-      return {
-        reason: 'route_fixture_skip',
-        detail: 'sect fixture synced route_orthodox without sect_path_choice key choice',
-        verified: false,
-      };
-    }
-    return {
-      reason: 'priority_ordering',
-      detail: 'orthodox_initiation or jianghu_experience displaced by trial or love chain',
-      verified: true,
     };
   }
 

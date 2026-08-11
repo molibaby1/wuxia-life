@@ -22,7 +22,6 @@ import trainingEventsJson from '../src/data/lines/training.json';
 import heroEventsJson from '../src/data/lines/identity-hero.json';
 import merchantEventsJson from '../src/data/lines/identity-merchant.json';
 import demonEventsJson from '../src/data/lines/identity-demon.json';
-import outlawEventsJson from '../src/data/lines/identity-outlaw.json';
 import identityYearEventsJson from '../src/data/lines/identity-year-events.json';
 import factionEventsJson from '../src/data/lines/faction-revelation.json';
 import setbackEventsJson from '../src/data/lines/setback-events.json';
@@ -259,7 +258,6 @@ function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, str
     { source: './lines/identity-hero.json', events: heroEventsJson as EventDefinition[] },
     { source: './lines/identity-merchant.json', events: merchantEventsJson as EventDefinition[] },
     { source: './lines/identity-demon.json', events: demonEventsJson as EventDefinition[] },
-    { source: './lines/identity-outlaw.json', events: outlawEventsJson as EventDefinition[] },
     { source: './lines/identity-year-events.json', events: identityYearEventsJson as EventDefinition[] },
     { source: './lines/faction-revelation.json', events: factionEventsJson as EventDefinition[] },
     { source: './lines/setback-events.json', events: setbackEventsJson as EventDefinition[] },

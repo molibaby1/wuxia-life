@@ -374,29 +374,23 @@
   {
     "id": "martial_improvement",
     "version": "1.0.0",
-    "category": "main_story",
-    "priority": 0,
+    "category": "side_quest",
+    "priority": 2,
     "weight": 50,
     "ageRange": {
-      "min": 17,
-      "max": 17
+      "min": 16,
+      "max": 20
     },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 17
-      }
-    ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"martialPathDeclared\") OR flags.has(\"agilePath\") OR flags.has(\"externalFocus\") OR flags.has(\"internalFocus\") OR (!flags.has(\"meet_love_success\") && !flags.has(\"meet_love_observe\") && !flags.has(\"p8_route_balanced\"))"
+        "expression": "lifeStates.trainingHabit >= 1 && !events.has(\"martial_improvement\")"
       }
     ],
     "content": {
-      "text": "你没有被儿女情长所困扰，而是专心致志地修炼武艺。日复一日，你的武功已经达到了一个新的高度。",
+      "text": "持续的练功开始显出成效。你对招式、呼吸与发力的理解比从前扎实了许多。",
       "title": "武艺精进",
-      "description": "专注是成功的关键。"
+      "description": "长期练功带来的阶段性反馈。"
     },
     "eventType": "auto",
     "autoEffects": [
@@ -427,8 +421,7 @@
       "tags": [
         "青年",
         "武艺",
-        "修炼",
-        "主线"
+        "修炼"
       ],
       "enabled": true
     }

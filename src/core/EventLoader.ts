@@ -31,7 +31,6 @@ import trainingEventsJson from '../data/lines/training.json';
 import heroEventsJson from '../data/lines/identity-hero.json';
 import merchantEventsJson from '../data/lines/identity-merchant.json';
 import demonEventsJson from '../data/lines/identity-demon.json';
-import outlawEventsJson from '../data/lines/identity-outlaw.json';
 
 // 身份年度剧情模块
 import identityYearEventsJson from '../data/lines/identity-year-events.json';
@@ -50,7 +49,6 @@ import relationshipEventsJson from '../data/lines/relationship.json';
 import merchantLineEventsJson from '../data/lines/merchant.json';
 import sampleLinesSpineEventsJson from '../data/lines/sample-lines-spine.json';
 
-// 路线事件（已合并到 identity-outlaw.json）
 // import pathExamplesJson from '../data/lines/path-examples.json';
 
 const generalEvents = generalEventsJson as EventDefinition[];
@@ -71,7 +69,6 @@ const trainingEvents = trainingEventsJson as EventDefinition[];
 const heroEvents = heroEventsJson as EventDefinition[];
 const merchantEvents = merchantEventsJson as EventDefinition[];
 const demonEvents = demonEventsJson as EventDefinition[];
-const outlawEvents = outlawEventsJson as EventDefinition[];
 
 // 身份年度剧情模块
 const identityYearEvents = identityYearEventsJson as EventDefinition[];
@@ -142,7 +139,6 @@ export class EventLoader {
       './lines/identity-hero.json': heroEvents,
       './lines/identity-merchant.json': merchantEvents,
       './lines/identity-demon.json': demonEvents,
-      './lines/identity-outlaw.json': outlawEvents,
       // 身份年度剧情模块
       './lines/identity-year-events.json': identityYearEvents,
       // 阵营相关事件

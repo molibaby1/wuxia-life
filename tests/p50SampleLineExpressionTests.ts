@@ -125,6 +125,13 @@ function testDemonicExpression(): void {
   assert(Boolean(identity?.includes('魔道')), `demonic age40 identity missing: ${identity}`);
 }
 
+function testCanonicalShadowSectAffiliationExpression(): void {
+  const state = makeState(25, {});
+  state.player.affiliation = 'shadow_sect';
+  const goal = deriveSampleLineCurrentGoal(state) ?? '';
+  assert(goal.includes('力量') || goal.includes('地盘') || goal.includes('邪路'), `canonical shadow-sect goal missing: ${goal}`);
+}
+
 function testMerchantExpression(): void {
   const youth = makeState(20, {
     route_merchant: true,
@@ -944,6 +951,7 @@ function testP67SuccessShapeComparisonDistinction(): void {
 function main(): void {
   testOrthodoxExpression();
   testDemonicExpression();
+  testCanonicalShadowSectAffiliationExpression();
   testMerchantExpression();
   testCrossLineAge13CostLabels();
   testMerchantLineWinsOverParallelDemonicRoute();

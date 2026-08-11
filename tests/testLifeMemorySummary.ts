@@ -102,7 +102,7 @@ function collectPlayerFacingStrings(summary: LifeMemorySummary): string {
 function assertNoRawEventIds(summary: LifeMemorySummary): void {
   const spineIds = [
     'childhood_preference',
-    'sect_path_choice',
+    'sect_choice',
     'demonic_encounter',
     'hero_first_case',
     'sect_midlife_gray_mission',
@@ -158,7 +158,7 @@ function createCoreMidlifeOrthodoxState(): GameState {
     },
     eventHistory: [
       { eventId: 'childhood_preference', age: 4, selectedChoice: 'focus_on_study' },
-      { eventId: 'sect_path_choice', age: 14, selectedChoice: 'join_orthodox' },
+      { eventId: 'sect_choice', age: 14, selectedChoice: 'join_shaolin' },
       { eventId: 'sect_midlife_gray_mission', age: 38, selectedChoice: 'execute_gray' },
     ],
     achievements: ['save_village'],
@@ -188,9 +188,9 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     flags: { route_orthodox: true, join_orthodox: true },
     eventHistory: [
       {
-        eventId: 'sect_path_choice',
+        eventId: 'sect_choice',
         age: 14,
-        selectedChoice: 'join_orthodox',
+        selectedChoice: 'join_shaolin',
       },
       {
         eventId: 'childhood_preference',
@@ -203,7 +203,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   const summary = deriveLifeMemorySummary(state);
   assert((summary.keyChoices?.length ?? 0) >= 1, 'key choices should include recorded spine choices');
   assert(
-    summary.keyChoices?.some((entry) => entry.label.includes('正道') || entry.label.includes('向学')),
+    summary.keyChoices?.some((entry) => entry.label.includes('申请拜入少林') || entry.label.includes('向学')),
     'key choice labels should be player-facing',
   );
   assert(
@@ -340,7 +340,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 {
   const state = createBaseState({
     flags: { route_wanderer: true, has_life_debt: true },
-    eventHistory: [{ eventId: 'sect_path_choice', age: 14, selectedChoice: 'stay_wanderer' }],
+    eventHistory: [{ eventId: 'sect_choice', age: 14, selectedChoice: 'stay_home' }],
   });
   const summary = deriveLifeMemorySummary(state);
   const roundTrip = serializeLifeMemorySummary(summary);

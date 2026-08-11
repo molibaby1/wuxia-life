@@ -179,7 +179,7 @@ const eventCoverageSuite: TestSuite = {
         assert(youthEvents.length >= 6, `青年事件应该有至少 6 个，实际为${youthEvents.length}个`);
         
         // 验证关键事件存在
-        const hasSectChoice = youthEvents.some(e => e.id === 'sect_choice' || e.id === 'sect_path_choice');
+        const hasSectChoice = youthEvents.some(e => e.id === 'sect_choice');
         assert(hasSectChoice, '青年事件应该包含门派选择事件');
       },
     },
@@ -262,34 +262,36 @@ const multiPathSuite: TestSuite = {
       description: '测试爱情线触发和不触发的不同路径',
       test: async () => {
         const executor = new EventExecutor();
+        const evaluator = new ConditionEvaluator();
+        const loveEvent = allEvents.find(e => e.id === 'love_first_meet');
+        assert(loveEvent, '正式事件应包含爱情线初遇');
+        assert((loveEvent.conditions?.length ?? 0) > 0, '爱情线初遇应定义正式前置条件');
+        const greetChoice = loveEvent.choices?.find(c => c.id === 'love_greet');
+        assert(greetChoice, '爱情线初遇应包含正式的礼貌搭话选项');
         
-        // 测试触发爱情线
+        // 测试有正式社会经历时可触发爱情线
         let state1 = framework.createTestState();
         state1.player.age = 17;
-        state1.player.charisma = 25;
-        const youthEvents = allEvents.filter(e => e.ageRange.min >= 13 && (e.ageRange.max ?? e.ageRange.min) <= 18);
-        const loveEvent = youthEvents.find(e => e.id === 'meet_love_interest');
-        if (loveEvent && loveEvent.conditions) {
-          const evaluator = new ConditionEvaluator();
-          const canTrigger = loveEvent.conditions.every(c => evaluator.evaluate(c, state1));
-          if (canTrigger && loveEvent.choices) {
-            const approachChoice = loveEvent.choices.find(c => c.id === 'approach');
-            if (approachChoice) {
-              state1 = await executor.executeEffects(approachChoice.effects, state1);
-              assert(state1.flags['hasLoveInterest'] === true, '应该触发爱情线');
-            }
-          }
-        }
+        state1.player.connections = 5;
+        assert(
+          loveEvent.conditions!.every(c => evaluator.evaluate(c, state1)),
+          '人脉达标时应满足爱情线初遇前置',
+        );
+        state1 = await executor.executeEffects(greetChoice.effects, state1);
+        assert(
+          state1.player.events?.some(record => record.eventId === 'love_greet_selected') === true,
+          '礼貌搭话应记录真实选项事实',
+        );
         
-        // 测试未触发爱情线（专注武艺）
-        let state2 = framework.createTestState();
+        // 测试无社会经历时不可触发爱情线
+        const state2 = framework.createTestState();
         state2.player.age = 17;
-        state2.player.charisma = 10; // 魅力较低，不触发爱情线
-        const martialEvent = youthEvents.find(e => e.id === 'martial_improvement');
-        if (martialEvent && martialEvent.autoEffects) {
-          state2 = await executor.executeEffects(martialEvent.autoEffects, state2);
-          assert(state2.flags['martialArtist'] === true, '应该专注武艺');
-        }
+        state2.player.connections = 0;
+        state2.player.affiliation = null;
+        assert(
+          !loveEvent.conditions!.every(c => evaluator.evaluate(c, state2)),
+          '无人脉、江湖经历或门派归属时不应触发爱情线初遇',
+        );
       },
     },
     {

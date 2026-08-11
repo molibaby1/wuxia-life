@@ -44,24 +44,17 @@ function testSectChoiceAndSetbackConditions(): void {
   assert(Boolean(sectChoice), 'sect_choice must be in the formal event pool');
 
   const choices = new Map((sectChoice?.choices ?? []).map(choice => [choice.id, choice]));
-  for (const [choiceId, field] of [
-    ['join_shaolin', 'externalSkill'],
-    ['join_wudang', 'internalSkill'],
-    ['join_emei', 'qinggong'],
-  ] as const) {
+  for (const choiceId of ['join_shaolin', 'join_wudang'] as const) {
     const choice = choices.get(choiceId);
     assert(Boolean(choice), `sect_choice must contain ${choiceId}`);
     assertNoLegacyConditionFields(choice?.condition, `sect_choice.${choiceId}.condition`);
     for (const outcome of choice?.outcomes ?? []) {
       assertNoLegacyConditionFields(outcome.condition, `sect_choice.${choiceId}.${outcome.id}.condition`);
     }
-    if (choiceId !== 'join_emei') {
-      assert(
-        ['great_success', 'success', 'partial'].every(id => choice?.outcomes?.some(outcome => outcome.id === id)),
-        `${choiceId} must retain all outcome branches`,
-      );
-    }
-    assert(field.length > 0, 'sect choice fixture must name its legacy field');
+    assert(
+      ['great_success', 'success', 'partial'].every(id => choice?.outcomes?.some(outcome => outcome.id === id)),
+      `${choiceId} must retain all outcome branches`,
+    );
   }
 
   const setback = loader.getEventById('setback_cultivation_deviation');

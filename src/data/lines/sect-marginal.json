@@ -4,10 +4,11 @@
     "version": "1.0.0",
     "category": "main_story",
     "priority": 1,
+    "storyLine": "shadow_sect",
     "weight": 60,
     "ageRange": {
       "min": 14,
-      "max": 17
+      "max": 18
     },
     "triggers": [
       {
@@ -18,7 +19,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "NOT flags.has(\"route_orthodox\") AND !flags.has(\"route_beggars\") AND !flags.has(\"route_border\") AND !flags.has(\"route_buddhist\") AND !flags.has(\"route_demonic\") AND !flags.has(\"route_official\") AND !flags.has(\"sect_shaolin\") AND !flags.has(\"sect_wudang\") AND !flags.has(\"sect_emei\") AND !flags.has(\"p8_route_martial\") AND !flags.has(\"p8_route_conservative\") AND (player.chivalry <= 30 OR flags.has(\"route_wanderer\"))"
+        "expression": "!player.affiliation && player.chivalry <= 20 && !events.has(\"demonic_encounter\") && (events.has(\"setback_injury\") || events.has(\"jianghu_experience\"))"
       }
     ],
     "content": {
@@ -31,16 +32,8 @@
       {
         "id": "accept_demonic",
         "text": "接受幽影门传授",
-        "description": "你接受幽冥尊者传功，正式踏上幽影门之路，江湖也将视你为异类。",
+        "description": "接受幽冥尊者的一次有限传授，留下日后是否同行的可能。",
         "effects": [
-          {
-            "type": "flag_set",
-            "target": "route_demonic"
-          },
-          {
-            "type": "affiliation_set",
-            "value": "shadow_sect"
-          },
           {
             "type": "stat_modify",
             "target": "chivalry",
@@ -95,9 +88,9 @@
       "tags": [
         "青年",
         "幽影门",
-        "奇遇"
+        "奇遇",
+        "once"
       ],
-      "routeTargets": ["demonic"],
       "enabled": true
     }
   },

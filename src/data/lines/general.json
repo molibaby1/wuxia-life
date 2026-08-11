@@ -574,31 +574,22 @@
     "id": "sect_choice",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 0,
+    "priority": 1,
     "weight": 80,
     "ageRange": {
       "min": 14,
-      "max": 14
+      "max": 18
     },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 14
-      }
-    ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has(\"route_wanderer\") && !flags.has(\"route_beggars\") && !flags.has(\"route_border\") && !flags.has(\"route_buddhist\") && !flags.has(\"route_demonic\") && !flags.has(\"route_orthodox\") && !flags.has(\"route_official\") && !flags.has(\"sect_shaolin\") && !flags.has(\"sect_wudang\") && !flags.has(\"sect_emei\") && !flags.has(\"familyDisciple\") && !player.affiliation && !flags.has(\"sect_switch_cooldown\")"
+        "expression": "!player.affiliation && !events.has(\"sect_choice\") && (lifeStates.trainingHabit >= 1 || player.martialPower >= 15 || events.has(\"training_focus\") || events.has(\"preteen_training\"))"
       }
     ],
-    "requirements": {
-      "notFlag": ["has_sect"]
-    },
     "content": {
-      "text": "到了离家闯荡的年纪。家族长辈询问你的意愿，你需要决定接下来如何继续修炼。",
+      "text": "家族长辈和授业师长看见你持续练功，愿意为你引荐少林或武当。是否递上申请，由你自己决定。",
       "title": "门派选择",
-      "description": "选择将影响你的武学道路。"
+      "description": "家族与师长提供的门派申请机会。"
     },
     "eventType": "choice",
     "choices": [
@@ -606,10 +597,6 @@
         "id": "join_shaolin",
         "text": "拜入少林派",
         "description": "学习刚猛外功",
-        "condition": {
-          "type": "expression",
-          "expression": "player.martialPower >= 15"
-        },
         "outcomes": [
           {
             "id": "great_success",
@@ -619,6 +606,7 @@
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
               {"type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add"},
               {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
+              {"type": "flag_set", "target": "sect_trial_active"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
               {"type": "affiliation_set", "value": "shaolin"},
@@ -633,6 +621,7 @@
             "effects": [
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
               {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
+              {"type": "flag_set", "target": "sect_trial_active"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
               {"type": "affiliation_set", "value": "shaolin"},
@@ -647,6 +636,7 @@
               {"type": "time_advance", "target": "age", "value": 1, "timeUnit": "month"},
               {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
               {"type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add"},
+              {"type": "flag_set", "target": "sect_trial_active"},
               {"type": "flag_set", "target": "shaolinDisciple"},
               {"type": "flag_set", "target": "sect_shaolin"},
               {"type": "affiliation_set", "value": "shaolin"},
@@ -660,10 +650,6 @@
         "id": "join_wudang",
         "text": "拜入武当派",
         "description": "学习柔韧内功",
-        "condition": {
-          "type": "expression",
-          "expression": "player.martialPower >= 15"
-        },
         "outcomes": [
           {
             "id": "great_success",
@@ -714,44 +700,6 @@
         ]
       },
       {
-        "id": "join_emei",
-        "text": "拜入峨眉派（轻灵身法）",
-        "condition": {
-          "type": "expression",
-          "expression": "player.martialPower >= 15"
-        },
-        "effects": [
-          {
-            "type": "flag_set",
-            "target": "sect_trial_active"
-          },
-          {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1,
-            "timeUnit": "month"
-          },
-          {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "flag_set",
-            "target": "emeiDisciple"
-          },
-          {
-            "type": "flag_set",
-            "target": "sect_emei"
-          },
-          {
-            "type": "event_record",
-            "target": "join_emei"
-          }
-        ]
-      },
-      {
         "id": "stay_home",
         "text": "留在家族继续修炼",
         "effects": [
@@ -778,6 +726,7 @@
         ]
       }
     ],
+    "storyLine": "sect_opportunity",
     "metadata": {
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
@@ -785,8 +734,7 @@
       "tags": [
         "青年",
         "门派",
-        "选择",
-        "主线"
+        "选择"
       ],
       "enabled": true
     }
@@ -889,6 +837,7 @@
       "description": "门派试炼正式开始。"
     },
     "eventType": "choice",
+    "storyLine": "sect_opportunity",
     "choices": [
       {
         "id": "trial_basic",
@@ -1140,124 +1089,6 @@
     }
   },
   {
-    "id": "meet_love_interest",
-    "version": "1.0.0",
-    "category": "side_quest",
-    "priority": 1,
-    "weight": 25,
-    "ageRange": {
-      "min": 17,
-      "max": 17
-    },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 17
-      }
-    ],
-    "conditions": [
-      {
-        "type": "expression",
-        "expression": "!flags.has(\"hasLoveInterest\") && !flags.has(\"love_started\")"
-      }
-    ],
-    "content": {
-      "text": "在一次江湖游历中，你偶然遇到了一位令人心动的女子/男子。她/他气质不凡，谈吐优雅，让你印象深刻。",
-      "title": "初遇意中人",
-      "description": "情窦初开，心动时刻。"
-    },
-    "eventType": "choice",
-    "choices": [
-      {
-        "id": "approach",
-        "text": "主动上前搭话",
-        "condition": {
-          "type": "expression",
-          "expression": "player.charisma >= 20"
-        },
-        "effects": [
-          {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1
-          },
-          {
-            "type": "stat_modify",
-            "target": "charisma",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "flag_set",
-            "target": "hasLoveInterest"
-          },
-          {
-            "type": "flag_set",
-            "target": "romanticApproach"
-          },
-          {
-            "type": "event_record",
-            "target": "meet_love_success"
-          }
-        ]
-      },
-      {
-        "id": "observe",
-        "text": "默默观察",
-        "effects": [
-          {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1
-          },
-          {
-            "type": "flag_set",
-            "target": "hasLoveInterest"
-          },
-          {
-            "type": "flag_set",
-            "target": "romanticObserver"
-          },
-          {
-            "type": "event_record",
-            "target": "meet_love_observe"
-          }
-        ]
-      },
-      {
-        "id": "ignore",
-        "text": "继续赶路",
-        "effects": [
-          {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1
-          },
-          {
-            "type": "flag_set",
-            "target": "focusedOnMartialArt"
-          },
-          {
-            "type": "event_record",
-            "target": "meet_love_ignore"
-          }
-        ]
-      }
-    ],
-    "metadata": {
-      "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
-      "author": "development_team",
-      "tags": [
-        "青年",
-        "爱情",
-        "选择",
-        "支线"
-      ],
-      "enabled": true
-    }
-  },
-  {
     "id": "youth_fame",
     "version": "1.0.0",
     "category": "main_story",
@@ -1329,16 +1160,17 @@
     "id": "martial_arts_invitation",
     "version": "1.0.0",
     "category": "main_story",
-    "priority": 0,
+    "priority": 1,
     "weight": 90,
     "ageRange": {
       "min": 18,
-      "max": 18
+      "max": 22
     },
-    "triggers": [
+    "storyLine": "martial_arts_meeting",
+    "conditions": [
       {
-        "type": "age_reach",
-        "value": 18
+        "type": "expression",
+        "expression": "player.martialPower >= 15 && (player.affiliation || player.reputation >= 10 || player.connections >= 10) && !events.has(\"martial_arts_invitation\")"
       }
     ],
     "content": {
@@ -1351,10 +1183,6 @@
       {
         "id": "accept_invitation",
         "text": "接受邀请，参加武林大会",
-        "condition": {
-          "type": "expression",
-          "expression": "player.martialPower >= 60"
-        },
         "effects": [
           {
             "type": "time_advance",
@@ -1447,18 +1275,13 @@
     "weight": 80,
     "ageRange": {
       "min": 19,
-      "max": 19
+      "max": 23
     },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 19
-      }
-    ],
+    "storyLine": "martial_arts_meeting",
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"willAttendMartialArtsMeeting\")"
+        "expression": "flags.has(\"willAttendMartialArtsMeeting\") && !events.has(\"martial_arts_beginner\")"
       }
     ],
     "content": {
@@ -1508,18 +1331,13 @@
     "weight": 60,
     "ageRange": {
       "min": 19,
-      "max": 19
+      "max": 23
     },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 19
-      }
-    ],
+    "storyLine": "martial_arts_meeting",
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"willObserveMartialArtsMeeting\")"
+        "expression": "flags.has(\"willObserveMartialArtsMeeting\") && !events.has(\"martial_arts_observer\")"
       }
     ],
     "content": {

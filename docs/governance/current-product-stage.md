@@ -2,11 +2,44 @@
 
 用途：为 ChatGPT、Codex 和人工维护者提供当前唯一工作目标。本文是滚动看板，不是长期产品规范。
 
-最后更新：2026-08-07
+最后更新：2026-08-11
 
 ---
 
-## 1. 当前状态
+## 0. 当前状态：受约束自动进化 B0 护栏校准（Authorized Slice）
+
+本 Slice 只校准自动优化护栏：known-bad 可检出、Control 不误杀、manifest/hash 可复现、角色信息隔离、red-team veto、人工最终裁决。
+
+### 0.1 目标与非目标
+
+- 目标：在隔离目录 `scripts/b0/` 与 `tests/b0/` 内落地 B0 管线；artifact 只写 `.tmp/b0/<runId>/`。
+- 非目标：不进入 B1；不优化或合入正式事件配置；不证明游戏好玩；不取消真人体验校准。
+- Overlay 语义：不修改 `EventLoader` / `GameEngineIntegration`；candidate 对照使用 sealed fixture Trace，而非引擎调度注入。
+
+### 0.2 Global Constraints
+
+- 不修改 `src/data/events.json`、正式 lines、PlayerState、Snapshot、Contract、Schema。
+- 不修改正式 gate 阈值、测试逻辑或 tracked latest 报告；不调用会写 latest 的 gate CLI。
+- 不 reset、clean、`git add .` 或覆盖无关既有改动。
+- 默认不 commit / merge / 发布。
+
+### 0.3 Owner
+
+- 工具与编排：`scripts/b0/**`
+- 专项测试：`tests/b0/**`
+- 设计：`docs/superpowers/specs/2026-08-11-constrained-auto-evolution-b0-design.md`
+- 计划：`docs/superpowers/plans/2026-08-11-constrained-auto-evolution-b0.md`
+
+### 0.4 停止条件
+
+- 必须修改核心运行逻辑、正式事件目录、PlayerState、Snapshot、Contract、Schema 或正式 gate 才能完成 → structural blocker。
+- B0 `passed` 不授权 B1 或正式配置修改。
+
+---
+
+---
+
+## 1. 历史阶段（B0 之前）
 
 P8 Frustration Evidence Fidelity Calibration 已完成并关闭。
 

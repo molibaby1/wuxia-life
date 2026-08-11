@@ -128,7 +128,8 @@ function detectOpaqueNegative(records: Array<Record<string, unknown>>): Mechanic
       typeof before?.martialPower === 'number' &&
       typeof after?.martialPower === 'number' &&
       after.martialPower < before.martialPower;
-    if (!healthWorsened && !powerDrop && !(evidence.executedEffects?.length)) continue;
+    // ponytail: money/flag-only executedEffects (e.g. birth spend) are not B0 opaque setbacks
+    if (!healthWorsened && !powerDrop) continue;
 
     const text = `${r.eventText ?? ''} ${r.outcomeText ?? ''} ${r.eventTitle ?? ''}`;
     const warned = /受伤|危险|损失|衰减|重伤|预警/.test(text);
@@ -144,16 +145,30 @@ function detectOpaqueNegative(records: Array<Record<string, unknown>>): Mechanic
   return out;
 }
 
-export function auditRawTrace(raw: B0RawTrace): MechanicalAuditResult {
+export type AuditProfile = 'fixture' | 'real-control';
+
+/**
+ * fixture: full known-bad matrix detectors.
+ * real-control: hard-kill only structural repeats; opaque_negative is soft diagnostic
+ * (content-true setbacks without copy). Skips drought/monopoly/choice-fixture heuristics.
+ */
+export function auditRawTrace(
+  raw: B0RawTrace,
+  profile: AuditProfile = 'fixture',
+): MechanicalAuditResult {
   const records = asRecords(raw);
-  const detections = [
-    ...detectRepeat(records),
-    ...detectMonopoly(records),
-    ...detectDrought(records),
-    ...detectChoiceIssues(records),
-    ...detectOpaqueNegative(records),
-  ];
-  // dedupe by code
+  const detections =
+    profile === 'real-control'
+      ? [...detectRepeat(records), ...detectOpaqueNegative(records)].map(d =>
+          d.code === 'opaque_negative' ? { ...d, severity: 'soft' as const } : d,
+        )
+      : [
+          ...detectRepeat(records),
+          ...detectMonopoly(records),
+          ...detectDrought(records),
+          ...detectChoiceIssues(records),
+          ...detectOpaqueNegative(records),
+        ];
   const seen = new Set<string>();
   const unique = detections.filter(d => {
     if (seen.has(d.code)) return false;

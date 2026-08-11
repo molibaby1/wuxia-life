@@ -102,6 +102,7 @@ const suites: Suite[] = [
   { name: 'b0GuardrailCalibration', entry: 'tests/b0/b0GuardrailCalibration.test.ts' },
   { name: 'b0IsolationAndHash', entry: 'tests/b0/b0IsolationAndHash.test.ts' },
   { name: 'b0PatchScopeAndBlocked', entry: 'tests/b0/b0PatchScopeAndBlocked.test.ts' },
+  { name: 'b0RealControlHeadless', entry: 'tests/b0/b0RealControlHeadless.test.ts' },
   { name: 'canonicalRuntimeLoadIsolationTests', entry: 'tests/canonicalRuntimeLoadIsolation.test.ts' },
   { name: 'canonicalRuntimeExactApplicationTests', entry: 'tests/canonicalRuntimeExactApplication.test.ts' },
   { name: 'canonicalJsonContainerBoundaryTests', entry: 'tests/canonicalJsonContainerBoundary.test.ts' },

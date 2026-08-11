@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "b0-control-meta-v1",
+  "personaId": "p8-balanced-wei",
+  "seed": 808,
+  "endAge": 20,
+  "mode": "synthetic_healthy_fixture",
+  "notes": "B0 Control uses sealed healthy fixture Trace; not engine EventLoader overlay."
+}

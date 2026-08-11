@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "b0-seed-bundle-v1",
+  "layers": {
+    "train": [
+      { "personaId": "p8-martial-lin", "seed": 801 },
+      { "personaId": "p8-scholar-su", "seed": 802 },
+      { "personaId": "p8-balanced-wei", "seed": 808 }
+    ],
+    "holdout": [
+      { "personaId": "p8-wealth-shen", "seed": 804 },
+      { "personaId": "p8-explorer-lu", "seed": 807 }
+    ],
+    "adversarial": [
+      { "personaId": "p8-cautious-han", "seed": 805 },
+      { "personaId": "p8-deviant-ye", "seed": 806 }
+    ]
+  }
+}

@@ -25,6 +25,9 @@ import type {
   ExperienceTraceStep,
 } from './experienceTraceTypes';
 
+import type { AutomaticStageResultDisplay } from '../../types/activeActionTypes';
+import type { ProgressAutomaticResult } from '../session/sessionTypes';
+
 export interface RunnerStepContext {
   session: HeadlessEngineSession;
   persona: P8Persona;
@@ -35,6 +38,30 @@ export interface RunnerStepContext {
 }
 function snapshotStateForRecord(session: HeadlessEngineSession): ReturnType<HeadlessEngineSession['getRuntimeState']> {
   return JSON.parse(JSON.stringify(session.getRuntimeState()));
+}
+
+/** Setback stage copy must stay player-visible on the auto-event record (P8/B0 evidence). */
+function visibleSetbackExplanation(stageResults: AutomaticStageResultDisplay[] | undefined): string {
+  if (!stageResults?.length) return '';
+  return stageResults
+    .filter(result => result.sourceKind === 'setback')
+    .map(result => [result.title, result.body].filter(Boolean).join('：'))
+    .filter(Boolean)
+    .join('；');
+}
+
+function autoStoryOutcomeText(
+  eventText: string,
+  progress: ProgressAutomaticResult,
+): { eventText: string; outcomeText?: string } {
+  const setbackText = visibleSetbackExplanation(progress.stageResults);
+  if (!setbackText) {
+    return { eventText };
+  }
+  return {
+    eventText: `${eventText}\n${setbackText}`,
+    outcomeText: setbackText,
+  };
 }
 
 type TracePayload = Partial<Pick<ExperienceTraceStep, 'event' | 'choiceCandidates' | 'choiceDecision' | 'activeAction' | 'presentation' | 'acknowledgement'>>;
@@ -159,13 +186,17 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     if (!next.requiresChoice) {
       const age = session.getRuntimeState().player?.age ?? 0;
       const stateBefore = snapshotStateForRecord(session);
-      await session.progressAutomatic({ maxSteps: 8 });
+      // ponytail: one auto event per record; maxSteps:8 conflated later events into this evidence
+      const progress = await session.progressAutomatic({ maxSteps: 1 });
       const after = session.getRuntimeState();
+      const baseText = event.content?.text ?? '';
+      const visible = autoStoryOutcomeText(baseText, progress);
       ctx.records.push({
         age,
         eventId: event.id,
         eventTitle: event.content?.title ?? event.id,
-        eventText: event.content?.text ?? '',
+        eventText: visible.eventText,
+        outcomeText: visible.outcomeText,
         eventType: 'auto',
         progressionKind: 'story_event',
         gameState: stateBefore,
@@ -177,7 +208,12 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         currentTime: after.currentTime,
         timestamp: new Date().toISOString(),
       });
-      recordExperienceTrace(ctx, stateBefore, 'story_event', { event: traceEvent(event) });
+      recordExperienceTrace(ctx, stateBefore, 'story_event', {
+        event: {
+          ...traceEvent(event),
+          text: visible.eventText,
+        },
+      });
       await afterStoryProgression(ctx);
       return;
     }
@@ -186,13 +222,17 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   if (!eventRequiresChoice(catalogEvent)) {
     const age = session.getRuntimeState().player?.age ?? 0;
     const stateBefore = snapshotStateForRecord(session);
-    await session.progressAutomatic({ maxSteps: 8 });
+    // ponytail: one auto event per record; maxSteps:8 conflated later events into this evidence
+    const progress = await session.progressAutomatic({ maxSteps: 1 });
     const after = session.getRuntimeState();
+    const baseText = catalogEvent.content?.text ?? '';
+    const visible = autoStoryOutcomeText(baseText, progress);
     ctx.records.push({
       age,
       eventId: catalogEvent.id,
       eventTitle: catalogEvent.content?.title ?? catalogEvent.id,
-      eventText: catalogEvent.content?.text ?? '',
+      eventText: visible.eventText,
+      outcomeText: visible.outcomeText,
       eventType: 'auto',
       progressionKind: 'story_event',
       gameState: stateBefore,
@@ -204,7 +244,12 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       currentTime: after.currentTime,
       timestamp: new Date().toISOString(),
     });
-    recordExperienceTrace(ctx, stateBefore, 'story_event', { event: traceEvent(catalogEvent) });
+    recordExperienceTrace(ctx, stateBefore, 'story_event', {
+      event: {
+        ...traceEvent(catalogEvent),
+        text: visible.eventText,
+      },
+    });
     await afterStoryProgression(ctx);
     return;
   }

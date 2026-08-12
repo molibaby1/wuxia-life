@@ -50,6 +50,13 @@
       "expectedDetections": ["opaque_negative"]
     },
     {
+      "id": "holdout_repeat_short_window",
+      "kind": "known-bad",
+      "layer": "holdout",
+      "recipePath": "known-bad/holdout_repeat_short_window.recipe.json",
+      "expectedDetections": ["repeat_short_window"]
+    },
+    {
       "id": "mutate_gate_threshold",
       "kind": "adversarial",
       "layer": "adversarial",

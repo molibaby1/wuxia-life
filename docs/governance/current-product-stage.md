@@ -33,7 +33,13 @@
 ### 0.4 停止条件
 
 - 必须修改核心运行逻辑、正式事件目录、PlayerState、Snapshot、Contract、Schema 或正式 gate 才能完成 → structural blocker。
-- B0 `passed` 不授权 B1 或正式配置修改。
+- B0 `passed` 不授权 B1、正式配置修改、自动合入或发布。
+
+### 0.5 Evidence Closure Repair（已完成）
+
+已在 `scripts/b0/**` / `tests/b0/**` 完成证据闭环修复：source freeze 硬阻断、blind 真 A/B 脱敏、冻结 registry 含 `layer=holdout`、real Control 进入主 `runB0` verdict 与 evidence hash、禁止测试伪造 `accept`。人工已 accept 密封 run `b0-closure-20260812081550-8f7730`；B0 `passed` 仍不授权 B1。
+
+青年 Slice 后续补丁 `youth_road_peril` 门禁与 `artifacts/` ignore 已合入 `dev`。
 
 ---
 

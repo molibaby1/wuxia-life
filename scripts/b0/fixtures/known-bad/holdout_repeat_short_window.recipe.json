@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "b0-known-bad-recipe-v1",
+  "badId": "holdout_repeat_short_window",
+  "mode": "repeat_short_window",
+  "personaId": "p8-wealth-shen",
+  "seed": 804
+}

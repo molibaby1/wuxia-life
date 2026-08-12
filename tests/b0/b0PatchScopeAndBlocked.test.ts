@@ -19,18 +19,18 @@ function main(): void {
     },
     visibleTraces: [
       {
-        schemaVersion: 'b0-player-visible-trace-v1',
-        sampleId: 'leak',
-        arm: 'candidate',
-        seed: 1,
-        personaId: 'p8-balanced-wei',
-        steps: [{ directEffects: [{ x: 1 }] }],
+        label: 'leak',
+        visible: {
+          schemaVersion: 'b0-player-visible-trace-v1',
+          steps: [{ directEffects: [{ x: 1 }] }],
+        },
       },
     ],
     seedsExposedToBlind: [804],
     holdoutSeeds: [804, 807],
     foreignReviewPayloads: [{ mechanicalVerdict: { hardKill: true } }],
     projectionFailures: [],
+    blindPackageText: JSON.stringify({ sampleId: 'oops', seed: 1 }),
   });
   assert.equal(red.veto, true);
   const codes = new Set(red.findings.map(f => f.code));
@@ -40,7 +40,6 @@ function main(): void {
   assert.ok(codes.has('holdout_leak'));
   assert.ok(codes.has('cross_reviewer_contamination'));
 
-  // Human cannot accept a failed automatic suggestion
   const evidence: EvidenceIndex = {
     sourceFingerprintHash: 'x',
     manifestHash: 'x',
@@ -51,18 +50,36 @@ function main(): void {
     mechanicalAuditHash: 'x',
     blindReviewHash: 'x',
     redTeamHash: 'x',
+    realControlSummaryHash: 'x',
+    automaticVerdictHash: 'x',
+    humanDecisionHash: null,
     chainOk: true,
     breakReasons: [],
   };
-  const registry: FixtureRegistry = { schemaVersion: 'b0-fixture-registry-v1', samples: [] };
+  const registry: FixtureRegistry = {
+    schemaVersion: 'b0-fixture-registry-v1',
+    samples: [
+      {
+        id: 'holdout_repeat_short_window',
+        kind: 'known-bad',
+        layer: 'holdout',
+        recipePath: 'known-bad/holdout_repeat_short_window.recipe.json',
+        expectedDetections: ['repeat_short_window'],
+      },
+    ],
+  };
   const mechanical: MechanicalAuditResult[] = [];
+
   const autoFail = evaluateAutomaticTerminal({
     labels: {},
     mechanical,
     redTeam: { findings: [], veto: false },
     evidence,
     controlHardKilled: true,
+    realControlHardKilled: false,
+    realControlBlocked: false,
     knownBadMissed: [],
+    holdoutMissing: false,
     registry,
   });
   assert.equal(autoFail.suggested, 'failed');
@@ -70,13 +87,30 @@ function main(): void {
   assert.equal(refused.decision, 'reject');
   assert.equal(refused.terminalVerdict, 'failed');
 
+  const realFail = evaluateAutomaticTerminal({
+    labels: {},
+    mechanical,
+    redTeam: { findings: [], veto: false },
+    evidence,
+    controlHardKilled: false,
+    realControlHardKilled: true,
+    realControlBlocked: false,
+    knownBadMissed: [],
+    holdoutMissing: false,
+    registry,
+  });
+  assert.equal(realFail.suggested, 'failed');
+
   const broken = evaluateAutomaticTerminal({
     labels: {},
     mechanical,
     redTeam: { findings: [], veto: false },
     evidence: { ...evidence, chainOk: false, breakReasons: ['hash break'] },
     controlHardKilled: false,
+    realControlHardKilled: false,
+    realControlBlocked: false,
     knownBadMissed: [],
+    holdoutMissing: false,
     registry,
   });
   assert.equal(broken.suggested, 'blocked');

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "b0-source-freeze-v1",
+  "expectedBranch": "dev",
+  "expectedHeadSha": "ec70acac9794e8d96bfc154c018863e0e67ec2b5",
+  "allowedPathGlobs": [
+    "scripts/b0/**",
+    "tests/b0/**",
+    "tests/runRealTestGate.ts",
+    "docs/governance/current-product-stage.md",
+    "docs/superpowers/plans/**",
+    "docs/superpowers/specs/**"
+  ]
+}

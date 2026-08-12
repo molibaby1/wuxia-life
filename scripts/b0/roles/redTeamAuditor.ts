@@ -3,13 +3,15 @@ import type { B0PlayerVisibleTrace, RedTeamFinding, RedTeamResult } from '../typ
 
 export type RedTeamInput = {
   proposedPathsBySample: Record<string, string[]>;
-  visibleTraces: B0PlayerVisibleTrace[];
-  /** Seeds that were included in blind packages (must not include holdout). */
+  visibleTraces: Array<{ label: string; visible: B0PlayerVisibleTrace }>;
+  /** Seeds incorrectly exposed to blind (attack simulation only). */
   seedsExposedToBlind: number[];
   holdoutSeeds: number[];
-  /** If blind/red packages contain other reviewers' verdicts. */
   foreignReviewPayloads: unknown[];
   projectionFailures: string[];
+  /** Serialized blind package text for identity-leak scanning. */
+  blindPackageText?: string;
+  knownSampleIds?: string[];
 };
 
 const HIDDEN_KEYS = [
@@ -19,6 +21,10 @@ const HIDDEN_KEYS = [
   'hiddenEffects',
   'finalState',
   'mechanicalVerdict',
+  'sampleId',
+  'personaId',
+  'knownBadLabel',
+  'expectedDetections',
 ];
 
 function scanHidden(value: unknown, hits: string[]): void {
@@ -41,7 +47,7 @@ export function auditRedTeam(input: RedTeamInput): RedTeamResult {
     const scope = validateProposedPaths(paths);
     if (!scope.ok) {
       findings.push({
-        code: scope.code === 'forbidden_path' ? 'out_of_scope_files' : 'out_of_scope_files',
+        code: 'out_of_scope_files',
         detail: `${sampleId}: ${scope.detail} (${scope.path})`,
       });
       if (paths.some(p => /metricDefinitions|playabilityGate|threshold/i.test(p))) {
@@ -71,13 +77,13 @@ export function auditRedTeam(input: RedTeamInput): RedTeamResult {
     }
   }
 
-  for (const visible of input.visibleTraces) {
+  for (const { label, visible } of input.visibleTraces) {
     const hits: string[] = [];
     scanHidden(visible, hits);
     if (hits.length > 0) {
       findings.push({
         code: 'hidden_in_visible_trace',
-        detail: `${visible.sampleId}: leaked ${[...new Set(hits)].join(',')}`,
+        detail: `${label}: leaked ${[...new Set(hits)].join(',')}`,
       });
     }
   }
@@ -92,6 +98,26 @@ export function auditRedTeam(input: RedTeamInput): RedTeamResult {
         code: 'cross_reviewer_contamination',
         detail: 'review package contained foreign reviewer payload',
       });
+    }
+  }
+
+  if (input.blindPackageText) {
+    for (const key of [
+      '"sampleId"',
+      '"personaId"',
+      '"seed"',
+      '"arm"',
+      '"knownBadLabel"',
+      '"expectedDetections"',
+      '"hardKill"',
+      '"mechanicalVerdict"',
+    ]) {
+      if (input.blindPackageText.includes(key)) {
+        findings.push({
+          code: 'hidden_in_visible_trace',
+          detail: `blind package leaked token ${key}`,
+        });
+      }
     }
   }
 

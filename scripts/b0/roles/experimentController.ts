@@ -5,14 +5,23 @@ import {
   type B0Manifest,
   type SeedBundle,
 } from '../types';
-import { stableJsonHash } from '../hash';
-import { captureSourceFingerprint } from '../sourceFingerprint';
+import { sha256Hex, stableJsonHash } from '../hash';
+import { captureSourceFingerprint, type SourceFingerprint } from '../sourceFingerprint';
 import { fixtureSetFingerprint, loadSeedBundle } from './fixtureBuilder';
 import { transition, type B0State } from '../stateMachine';
 
+export type AbPairMapping = {
+  sampleId: string;
+  pairKey: string;
+  /** Which real arm is exposed as anonymous A. */
+  armA: 'baseline' | 'candidate';
+  armB: 'baseline' | 'candidate';
+};
+
 export type ControllerPrivateStore = {
   labels: Record<string, unknown>;
-  abMap: Record<string, { sampleId: string; arm: 'baseline' | 'candidate' }>;
+  /** pairKey -> true identity. Never sent to blind reviewer. */
+  abMap: Record<string, AbPairMapping>;
 };
 
 export type SealedExperiment = {
@@ -23,16 +32,41 @@ export type SealedExperiment = {
 };
 
 function catalogFingerprintStub(): string {
-  // B0 does not mutate formal catalog; fingerprint is a frozen marker of "formal untouched".
   return createHash('sha256').update('formal-catalog-readonly-b0').digest('hex');
+}
+
+/** Deterministic anonymous A/B orientation for a sample within a run. */
+export function anonymousArmOrder(
+  runId: string,
+  sampleId: string,
+): ['baseline', 'candidate'] | ['candidate', 'baseline'] {
+  const h = sha256Hex(`${runId}:${sampleId}:ab`);
+  return parseInt(h.slice(0, 8), 16) % 2 === 0
+    ? ['baseline', 'candidate']
+    : ['candidate', 'baseline'];
+}
+
+export function buildPrivateAbMap(
+  runId: string,
+  sampleIds: string[],
+): ControllerPrivateStore['abMap'] {
+  const abMap: ControllerPrivateStore['abMap'] = {};
+  let i = 0;
+  for (const sampleId of sampleIds) {
+    const pairKey = `P${i}`;
+    const [armA, armB] = anonymousArmOrder(runId, sampleId);
+    abMap[pairKey] = { sampleId, pairKey, armA, armB };
+    i += 1;
+  }
+  return abMap;
 }
 
 export function sealExperiment(options?: {
   runId?: string;
   labels?: Record<string, unknown>;
-  baselineDir?: string;
+  fingerprint?: SourceFingerprint;
 }): SealedExperiment {
-  const fingerprint = captureSourceFingerprint(options?.baselineDir);
+  const fingerprint = options?.fingerprint ?? captureSourceFingerprint();
   const seedBundle = loadSeedBundle();
   const fixtureHash = fixtureSetFingerprint();
   const runId = options?.runId ?? `b0-${Date.now()}-${randomBytes(3).toString('hex')}`;
@@ -57,14 +91,8 @@ export function sealExperiment(options?: {
     abMapSealed: true,
   };
 
-  // Anonymous A/B map — true identity stays private
-  const abMap: ControllerPrivateStore['abMap'] = {};
-  let i = 0;
-  for (const sampleId of Object.keys(options?.labels ?? {})) {
-    abMap[`A${i}`] = { sampleId, arm: 'candidate' };
-    abMap[`B${i}`] = { sampleId, arm: 'baseline' };
-    i += 1;
-  }
+  const sampleIds = Object.keys(options?.labels ?? {});
+  const abMap = buildPrivateAbMap(runId, sampleIds);
 
   return {
     state: transition('draft', 'sealed'),

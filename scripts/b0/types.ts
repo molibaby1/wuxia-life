@@ -113,13 +113,26 @@ export type B0RawTrace = {
   hiddenEffects?: unknown[];
 };
 
+/** Player-visible / archived visible trace: no sample identity or arm labels. */
 export type B0PlayerVisibleTrace = {
   schemaVersion: 'b0-player-visible-trace-v1';
-  sampleId: string;
-  arm: 'baseline' | 'candidate';
-  seed: number;
-  personaId: string;
   steps: Array<Record<string, unknown>>;
+};
+
+export type BlindArmTrace = {
+  schemaVersion: 'b0-blind-arm-v1';
+  anonymousKey: string;
+  steps: Array<Record<string, unknown>>;
+};
+
+export type BlindPair = {
+  pairKey: string;
+  arms: [BlindArmTrace, BlindArmTrace];
+};
+
+export type BlindPackage = {
+  schemaVersion: 'b0-blind-package-v1';
+  pairs: BlindPair[];
 };
 
 export type MechanicalDetection = {
@@ -136,7 +149,7 @@ export type MechanicalAuditResult = {
 };
 
 export type BlindObservation = {
-  sampleKey: string;
+  pairKey: string;
   observations: string[];
   evidenceRefs: string[];
 };
@@ -161,6 +174,9 @@ export type EvidenceIndex = {
   mechanicalAuditHash: string;
   blindReviewHash: string;
   redTeamHash: string;
+  realControlSummaryHash: string | null;
+  automaticVerdictHash: string | null;
+  humanDecisionHash: string | null;
   chainOk: boolean;
   breakReasons: string[];
 };

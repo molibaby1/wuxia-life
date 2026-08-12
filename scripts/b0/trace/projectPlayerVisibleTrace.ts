@@ -11,11 +11,15 @@ const FORBIDDEN_VISIBLE_KEYS = new Set([
   'abIdentity',
   'knownBadLabel',
   'expectedDetections',
+  'sampleId',
+  'arm',
+  'seed',
+  'personaId',
 ]);
 
-function stripForbidden(value: unknown, path: string[] = []): unknown {
+function stripForbidden(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map((item, i) => stripForbidden(item, [...path, String(i)]));
+    return value.map(item => stripForbidden(item));
   }
   if (value && typeof value === 'object') {
     const obj = value as Record<string, unknown>;
@@ -24,7 +28,7 @@ function stripForbidden(value: unknown, path: string[] = []): unknown {
       if (FORBIDDEN_VISIBLE_KEYS.has(key)) {
         continue;
       }
-      out[key] = stripForbidden(child, [...path, key]);
+      out[key] = stripForbidden(child);
     }
     return out;
   }
@@ -62,10 +66,6 @@ export function projectPlayerVisibleTrace(raw: B0RawTrace): ProjectionResult {
 
   const visible: B0PlayerVisibleTrace = {
     schemaVersion: 'b0-player-visible-trace-v1',
-    sampleId: raw.sampleId,
-    arm: raw.arm,
-    seed: raw.seed,
-    personaId: raw.personaId,
     steps,
   };
 
@@ -73,10 +73,15 @@ export function projectPlayerVisibleTrace(raw: B0RawTrace): ProjectionResult {
   if (leakedKeys.length > 0) {
     return {
       ok: false,
-      reason: 'player-visible Trace still contains hidden keys',
+      reason: 'player-visible Trace still contains hidden or identity keys',
       leakedKeys: [...new Set(leakedKeys)],
     };
   }
 
   return { ok: true, visible };
+}
+
+/** Strip identity keys from an already-built visible object (archive/blind hardening). */
+export function assertBlindSafeVisible(visible: unknown): string[] {
+  return [...new Set(containsForbiddenKeys(visible))];
 }

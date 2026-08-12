@@ -17,16 +17,18 @@ export type DecisionInput = {
   redTeam: RedTeamResult;
   evidence: EvidenceIndex;
   controlHardKilled: boolean;
+  realControlHardKilled: boolean;
+  realControlBlocked: boolean;
   knownBadMissed: string[];
+  holdoutMissing: boolean;
   registry: FixtureRegistry;
 };
 
 /**
  * B0 calibration verdict:
  * - Adversarial fixtures are expected to trigger red-team veto/findings.
- * - Calibration passes when detectors catch every known-bad and every adversarial attack,
- *   Control is not hard-killed, and the evidence chain is intact.
- * - A polluted production candidate (outside this fixture matrix) would still be blocked by veto.
+ * - Holdout known-bad must be mechanically caught and must not enter blind review.
+ * - Real Control hard-kill fails the main verdict; soft diagnostics do not.
  */
 export function evaluateAutomaticTerminal(input: DecisionInput): {
   suggested: B0TerminalVerdict;
@@ -39,13 +41,28 @@ export function evaluateAutomaticTerminal(input: DecisionInput): {
     return { suggested: 'blocked', reasons };
   }
 
+  if (input.realControlBlocked) {
+    reasons.push('real control blocked (projection/leak/missing summary)');
+    return { suggested: 'blocked', reasons };
+  }
+
+  if (input.holdoutMissing) {
+    reasons.push('registry missing frozen layer=holdout samples');
+    return { suggested: 'blocked', reasons };
+  }
+
   if (input.controlHardKilled) {
-    reasons.push('control hard-killed by mechanical auditor');
+    reasons.push('synthetic control hard-killed by mechanical auditor');
+    return { suggested: 'failed', reasons };
+  }
+
+  if (input.realControlHardKilled) {
+    reasons.push('real Headless control hard-killed');
     return { suggested: 'failed', reasons };
   }
 
   if (input.knownBadMissed.length > 0) {
-    reasons.push(`known-bad missed: ${input.knownBadMissed.join(',')}`);
+    reasons.push(`known-bad/holdout missed: ${input.knownBadMissed.join(',')}`);
     return { suggested: 'failed', reasons };
   }
 
@@ -59,7 +76,6 @@ export function evaluateAutomaticTerminal(input: DecisionInput): {
     }
   }
 
-  // Calibration matrix includes intentional attacks; veto must fire for them.
   const hasAdversarial = input.registry.samples.some(s => s.kind === 'adversarial');
   if (hasAdversarial && !input.redTeam.veto) {
     reasons.push('adversarial fixtures present but red-team did not veto');
@@ -67,7 +83,7 @@ export function evaluateAutomaticTerminal(input: DecisionInput): {
   }
 
   reasons.push(
-    'calibration matrix covered: known-bad detected, control alive, adversarial vetoed, evidence chain ok',
+    'calibration matrix covered: known-bad+holdout detected, synthetic+real control alive, adversarial vetoed, evidence chain ok',
   );
   return { suggested: 'passed', reasons };
 }

@@ -60,3 +60,4 @@ public/reports/*.json
 progress.txt
 agent_docs/
 .worktrees/
+artifacts/

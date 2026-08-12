@@ -2,13 +2,18 @@
 
 用途：为 ChatGPT、Codex 和人工维护者提供当前唯一工作目标。本文是滚动看板，不是长期产品规范。
 
-最后更新：2026-08-11
+最后更新：2026-08-12
 
 ---
 
-## 0. 当前状态：受约束自动进化 B0 护栏校准（Authorized Slice）
+## 0. 当前状态：受约束自动进化 B0 护栏校准（已完成并关闭）
 
-本 Slice 只校准自动优化护栏：known-bad 可检出、Control 不误杀、manifest/hash 可复现、角色信息隔离、red-team veto、人工最终裁决。
+本 Slice 只校准自动优化护栏：known-bad 可检出、Control 不误杀、manifest/hash 可复现、角色信息隔离、red-team veto、人工最终裁决。B0 护栏校准已在 HEAD `e6e9118` 上由人工 accept 关闭。
+
+**最终依据 run（唯一）：** `.tmp/b0/b0-status-20260812085143/`
+**废止：** `b0-closure-20260812081550-8f7730` 绑定修复前提交，不得作为当前最终依据。
+
+B0 `passed` **不授权** B1、正式配置修改、自动合入或发布。当前 **没有** Authorized successor stage；禁止进入 B1，除非另行独立产品裁决。
 
 ### 0.1 目标与非目标
 
@@ -20,8 +25,8 @@
 
 - 不修改 `src/data/events.json`、正式 lines、PlayerState、Snapshot、Contract、Schema。
 - 不修改正式 gate 阈值、测试逻辑或 tracked latest 报告；不调用会写 latest 的 gate CLI。
-- 完整保留青年重大机会 Slice 的既有 dirty/untracked 改动；不 reset、clean、`git add .` 或覆盖无关文件。
-- 默认不 commit / merge / 发布。
+- 不 reset、clean、`git add .` 或覆盖无关既有改动。
+- 默认不 commit / merge / 发布（本收口仅文档与既有 artifact 裁决写入）。
 
 ### 0.3 Owner
 
@@ -35,9 +40,14 @@
 - 必须修改核心运行逻辑、正式事件目录、PlayerState、Snapshot、Contract、Schema 或正式 gate 才能完成 → structural blocker。
 - B0 `passed` 不授权 B1、正式配置修改、自动合入或发布。
 
-### 0.5 Evidence Closure Repair（已完成）
+### 0.5 Evidence Closure 与人工裁决（已完成）
 
-已在 `scripts/b0/**` / `tests/b0/**` 完成证据闭环修复：source freeze 硬阻断、blind 真 A/B 脱敏、冻结 registry 含 `layer=holdout`、real Control 进入主 `runB0` verdict 与 evidence hash、禁止测试伪造 `accept`。人工已 accept 密封 run `b0-closure-20260812081550-8f7730`；B0 `passed` 仍不授权 B1。
+证据闭环修复（source freeze 硬阻断、blind 真 A/B 脱敏、冻结 `layer=holdout`、real Control 进入主 verdict 与 evidence hash、禁止测试伪造 accept）已合入 `dev` @ `e6e9118`。
+
+人工裁决（2026-08-12）：accept run `b0-status-20260812085143`
+- automatic suggested: passed；chainOk: true；real Control: passed
+- known-bad/holdout detected；blind pairs: 14；red-team veto 仅来自预置 adversarial fixture
+- terminal: passed；`humanDecisionHash` 已写入 evidence-index
 
 青年 Slice 后续补丁 `youth_road_peril` 门禁与 `artifacts/` ignore 已合入 `dev`。
 

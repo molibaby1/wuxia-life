@@ -4,6 +4,8 @@
 
 **Goal:** 在不修改正式事件配置、PlayerState/Snapshot/Contract/Schema、正式 gate 阈值/latest report，以及不覆盖青年重大机会 Slice dirty worktree 的前提下，落地可复现的 B0 护栏校准管线，证明 known-bad 可检出、Control 不误杀、证据链完整，并由人工 accept/reject。
 
+**Status:** 已完成并关闭（2026-08-12）。最终人工 accept：run `b0-status-20260812085143` @ HEAD `e6e9118`。旧 run `b0-closure-20260812081550-8f7730` 废止为最终依据。B0 `passed` 不授权 B1、正式配置修改、自动合入或发布。
+
 **Architecture:** B0 全部新增代码隔离在 `scripts/b0/` 与 `tests/b0/`。运行 artifact 只写 `.tmp/b0/<runId>/`（已被 `.gitignore` 忽略的 `.tmp/`）。六类角色实现为输入隔离的纯模块，禁止多数投票。因 `GameEngineIntegration` 硬编码 `eventLoader` 单例，B0 **不**把候选事件 overlay 注入正式调度；改为 sealed candidate overlay（内存/临时 JSON）+ 同 seed 的 baseline/candidate Trace 配对（Control 可跑真实 Headless；known-bad/adversarial 用确定性 fixture synthesizer 生成 sealed raw Trace）。若产品坚持要求引擎级 overlay 调度，立即 `blocked` 并停止。
 
 **Tech Stack:** TypeScript + `tsx`；现有 `runHeadlessPersona` / `ExperienceTrace` / `collectPacingMetrics` / `collectFrustrationMetrics`；Node `crypto` SHA-256；仓库现有 `tests/runRealTestGate.ts` 注册风格。
@@ -480,8 +482,8 @@ Artifact 布局：
 
 - [ ] **Step 2: humanDecision**
 
-`accept` 仅当：无 red veto、无 blocked、机械/红队覆盖所有严重 known-bad、Control 未被硬误杀、可复现检查通过。  
-`reject` → `failed`。  
+`accept` 仅当：无 red veto、无 blocked、机械/红队覆盖所有严重 known-bad、Control 未被硬误杀、可复现检查通过。
+`reject` → `failed`。
 缺证据 → 拒绝写成 `passed`。
 
 - [ ] **Step 3: CLI**
@@ -502,14 +504,14 @@ Artifact 布局：
 
 - [ ] **Step 1: 写 failing tests（先红）覆盖**
 
-1. 每个体验 known-bad 被 mechanical 或 red-team 检出  
-2. Control 不被硬误杀  
-3. 同 manifest+seed 两次 run：raw/mechanical deterministic hash 一致  
-4. evidence chain 完整  
-5. holdout 不出现在 blind 输入  
-6. visible projection 不含 hidden effects 键  
-7. red-team veto 阻止 passed  
-8. patch-scope 检出越权  
+1. 每个体验 known-bad 被 mechanical 或 red-team 检出
+2. Control 不被硬误杀
+3. 同 manifest+seed 两次 run：raw/mechanical deterministic hash 一致
+4. evidence chain 完整
+5. holdout 不出现在 blind 输入
+6. visible projection 不含 hidden effects 键
+7. red-team veto 阻止 passed
+8. patch-scope 检出越权
 9. 运行后 `git diff` 相对 B0 开始时：正式配置 / tracked latest / 青年 dirty 文件内容不变（允许新增 `scripts/b0|tests/b0` 与 stage 文档追加）
 
 - [ ] **Step 2: 跑定向测试**
@@ -601,27 +603,36 @@ git diff --check
 
 ---
 
-## 7. 完成报告模板（实施后填写，不预写）
+## 7. 完成报告（已填写）
 
-1. 实际修改文件  
-2. 未修改但检查过的关键边界  
-3. 测试和验证命令  
-4. 每项结果：passed / failed / blocked  
-5. artifact、manifest 和 hash 位置  
-6. 与设计文档的偏差  
-7. 剩余风险  
-8. 是否具备重新评估 B1 的证据（即使 B0 passed，也不等于授权 B1）
+1. **实际修改文件（收口轮次）**
+   - 仅文档：`docs/governance/current-product-stage.md`、本计划、对应 design spec
+   - 仅既有 artifact 裁决写入：`.tmp/b0/b0-status-20260812085143/{human-decision,evidence-index,run-summary}.json`
+   - 未新增 tracked 代码/测试/正式配置
+2. **未修改但检查过的关键边界**
+   - `src/data/events.json`、正式 lines、PlayerState/Snapshot/Contract/Schema、正式 gate/latest report
+   - 旧 artifact `b0-closure-20260812081550-8f7730` 未覆盖
+3. **验证依据**
+   - HEAD `e6e9118`；run `b0-status-20260812085143`
+   - automatic suggested passed；chainOk true；real Control passed；holdout detected；blind 14 pairs；adversarial veto 全覆盖
+4. **结果**
+   - 人工 accept → terminal `passed`
+   - `humanDecisionHash` 已写入并与 `human-decision.json` 重算一致
+5. **artifact 位置**
+   - `.tmp/b0/b0-status-20260812085143/`
+6. **与设计偏差**
+   - candidate overlay 仍为 sealed fixture Trace（非引擎调度注入）；已批准保留
+7. **剩余风险**
+   - 无 Authorized successor；误把 B0 passed 当 B1 授权是主要流程风险
+8. **B1**
+   - **不具备授权。** B0 passed 不授权 B1；须独立产品阶段重新裁决
 
 ---
 
-## 8. 执行闸门
+## 8. 执行闸门（已关闭）
 
-本计划已写入 `docs/superpowers/plans/2026-08-11-constrained-auto-evolution-b0.md`。
+实施与人工裁决已完成。最终 run：`b0-status-20260812085143` @ `e6e9118`。
 
-**现在停止。** 未收到你明确回复「批准执行」前，不创建 `scripts/b0/`、不改测试注册、不改 `current-product-stage.md`、不跑会改状态的实施步骤。
+已确认：在不修改 `EventLoader`/`GameEngineIntegration` 的前提下，用 sealed fixture Trace 承担 candidate overlay 对照模拟。
 
-审批时请一并确认下面唯一产品/结构问题：
-
-> **是否接受 B0 在不修改 `EventLoader`/`GameEngineIntegration` 的前提下，用 sealed fixture Trace 承担 candidate overlay 对照模拟？**  
-> - 接受 → 按本计划实施  
-> - 拒绝 → 报告 structural blocker，等待是否授权最小 DI 注入（那会越出当前“不改核心运行逻辑”边界）
+**停止进入 B1。**

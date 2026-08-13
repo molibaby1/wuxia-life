@@ -21,6 +21,7 @@ import {
 } from '../dependencies/HeadlessSessionDependencies';
 import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCatalogAdapter';
+import { createDefaultRuntimeEventCatalog } from '../../core/EventLoaderRuntimeCatalog';
 import type { HeadlessEngineSession, HeadlessSessionCreateOptions } from './HeadlessEngineSession';
 import { markDisturbanceNarrativeShown } from '../../core/activePlanning/disturbanceNarrativeBuilder';
 import { applyStatDeltas, hasPendingForcedEvent as checkPendingForcedEventAtAge } from '../../core/activePlanning/ActivePlanningService';
@@ -124,10 +125,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     options: HeadlessSessionCreateOptions | { snapshot: GameStateSnapshot },
     partialDeps?: Partial<HeadlessSessionDependencies>,
   ): HeadlessEngineSessionImpl {
-    const catalog = partialDeps?.catalog ?? createDefaultInMemoryCatalogAdapter();
+    const runtimeCatalog = partialDeps?.runtimeCatalog ?? createDefaultRuntimeEventCatalog();
+    const catalog = partialDeps?.catalog ?? createDefaultInMemoryCatalogAdapter(runtimeCatalog);
     const snapshot = partialDeps?.snapshot ?? defaultSnapshotConverter;
-    const deps = resolveHeadlessDependencies({ ...partialDeps, catalog, snapshot });
-    const engine = new GameEngineIntegration();
+    const deps = resolveHeadlessDependencies({ ...partialDeps, catalog, runtimeCatalog, snapshot });
+    const engine = new GameEngineIntegration(deps.runtimeCatalog);
     const sessionId = `headless-${deps.time.now()}-${Math.floor(deps.random.next() * 1e6)}`;
 
     if ('snapshot' in options) {
@@ -156,10 +158,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     options: Pick<HeadlessSessionCreateOptions, 'randomSeed' | 'catalogVersion'>,
     partialDeps?: Partial<HeadlessSessionDependencies>,
   ): HeadlessEngineSessionImpl {
-    const catalog = partialDeps?.catalog ?? createDefaultInMemoryCatalogAdapter();
+    const runtimeCatalog = partialDeps?.runtimeCatalog ?? createDefaultRuntimeEventCatalog();
+    const catalog = partialDeps?.catalog ?? createDefaultInMemoryCatalogAdapter(runtimeCatalog);
     const snapshot = partialDeps?.snapshot ?? defaultSnapshotConverter;
-    const deps = resolveHeadlessDependencies({ ...partialDeps, catalog, snapshot });
-    const engine = new GameEngineIntegration();
+    const deps = resolveHeadlessDependencies({ ...partialDeps, catalog, runtimeCatalog, snapshot });
+    const engine = new GameEngineIntegration(deps.runtimeCatalog);
     const sessionId = `headless-replay-${deps.time.now()}`;
     const catalogVersion = options.catalogVersion ?? DEFAULT_CATALOG_VERSION;
     return new HeadlessEngineSessionImpl(
@@ -490,7 +493,7 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
       storyGapPassiveServed: false,
     };
     this.lastError = null;
-    this.engine = new GameEngineIntegration();
+    this.engine = new GameEngineIntegration(this.dependencies.runtimeCatalog);
     await this.runWithRandomAsync(async () => {
       this.engine.startNewGame(options.playerName, options.gender);
     });

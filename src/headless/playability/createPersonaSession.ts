@@ -8,6 +8,8 @@ import { createDefaultInMemoryCatalogAdapter } from '../catalog/InMemoryEventCat
 import { defaultSnapshotConverter } from '../snapshot/SnapshotConverter';
 import { SeededRandomSource } from '../adapters/randomSource';
 import { noopLogger } from '../dependencies/HeadlessSessionDependencies';
+import { createDefaultRuntimeEventCatalog } from '../../core/EventLoaderRuntimeCatalog';
+import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
 import type { P8Persona } from '../../p8/types';
 import { resolvePersonaYouthRouteSeeds } from '../../p8/personaYouthRouteSeeds';
 import { PERSONA_ROUTE_MAP } from '../../p11/schedulingContext';
@@ -30,6 +32,7 @@ export function applyPersonaBootstrapFlags(session: HeadlessEngineSession, perso
 export function createPersonaHeadlessSession(
   persona: P8Persona,
   catalogVersion = DEFAULT_CATALOG_VERSION,
+  runtimeCatalog: RuntimeEventCatalog = createDefaultRuntimeEventCatalog(),
 ): HeadlessEngineSession {
   const session = HeadlessEngineSessionImpl.create(
     {
@@ -39,7 +42,8 @@ export function createPersonaHeadlessSession(
       randomSeed: persona.seed,
     },
     {
-      catalog: createDefaultInMemoryCatalogAdapter(),
+      catalog: createDefaultInMemoryCatalogAdapter(runtimeCatalog),
+      runtimeCatalog,
       snapshot: defaultSnapshotConverter,
       logger: noopLogger,
       random: new SeededRandomSource(persona.seed),

@@ -1,5 +1,6 @@
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../src/contracts/choiceExecution';
 import { buildPeriodSummary, calculatePublicStatDeltas } from '../../src/core/activePlanning/periodSummaryBuilder';
+import { SeededRandomSource } from '../../src/headless/adapters/randomSource';
 import { HeadlessEngineSessionImpl } from '../../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameStateSnapshot } from '../../src/contracts/gameStateSnapshot';
 
@@ -25,7 +26,10 @@ function age14Snapshot(martialPower: number): GameStateSnapshot {
 }
 
 async function getSectEvent(martialPower: number) {
-  const session = HeadlessEngineSessionImpl.create({ snapshot: age14Snapshot(martialPower) });
+  const session = HeadlessEngineSessionImpl.create(
+    { snapshot: age14Snapshot(martialPower) },
+    { random: new SeededRandomSource(1) },
+  );
   const next = await session.getNextEvent();
   assert(next?.eventId === 'sect_choice', `expected sect_choice, got ${next?.eventId ?? 'none'}`);
   return { session, next };

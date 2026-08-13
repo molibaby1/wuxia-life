@@ -7,6 +7,7 @@ import type { P8Persona } from '../../p8/types';
 import type { GameState } from '../../types/eventTypes';
 import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import type { ExperienceTrace } from './experienceTraceTypes';
+import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
 
 
 export type HeadlessPlayabilityRuntimePath = 'headless_server' | 'local_direct';
@@ -15,6 +16,8 @@ export interface HeadlessPersonaRunConfig {
   persona: P8Persona;
   endAge: number;
   catalogVersion: string;
+  /** Optional isolated event source for this persona run. */
+  runtimeCatalog?: RuntimeEventCatalog;
   maxSteps?: number;
   /** Optional deterministic seed override for trace/replay runs. */
 

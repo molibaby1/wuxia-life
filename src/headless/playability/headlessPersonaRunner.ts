@@ -5,7 +5,7 @@
 import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import type { GameState } from '../../types/eventTypes';
 import { EventPriority } from '../../types/eventTypes';
-import { eventLoader } from '../../core/EventLoader';
+import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
 import type { HeadlessPersonaRunConfig, HeadlessPersonaRunResult } from './types';
 import { createPersonaHeadlessSession, applyPersonaYouthRouteSeedsAtAge } from './createPersonaSession';
 import {
@@ -30,33 +30,26 @@ const DEFAULT_MAX_STEPS = 2400;
 /** Phase micro-steps without calendar advance before forcing +1 year (unstick stall). */
 const STALL_STEPS_BEFORE_YEAR_NUDGE = 16;
 
-function isMandatoryHistoryEvent(eventId: string): boolean {
-  try {
-    const event = eventLoader.getEventById(eventId);
-    const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
-    return (
-      event.priority === EventPriority.CRITICAL ||
-      tags.includes('critical') ||
-      tags.includes('mandatory') ||
-      tags.includes('mainline')
-    );
-  } catch {
-    return false;
-  }
+function isMandatoryHistoryEvent(eventId: string, runtimeCatalog: RuntimeEventCatalog): boolean {
+  const event = runtimeCatalog.getEventById(eventId);
+  if (!event) return false;
+  const tags = (event.metadata?.tags || []).map(tag => tag.toLowerCase());
+  return (
+    event.priority === EventPriority.CRITICAL ||
+    tags.includes('critical') ||
+    tags.includes('mandatory') ||
+    tags.includes('mainline')
+  );
 }
 
-function isVisibleAutomaticMainlineHistoryEvent(eventId: string): boolean {
-  try {
-    const event = eventLoader.getEventById(eventId);
-    return (
-      event.eventType === 'auto' &&
-      event.category === 'main_story' &&
-      event.metadata?.tags?.includes('主线') === true &&
-      Boolean(event.content?.title || event.content?.text)
-    );
-  } catch {
-    return false;
-  }
+function isVisibleAutomaticMainlineHistoryEvent(eventId: string, runtimeCatalog: RuntimeEventCatalog): boolean {
+  const event = runtimeCatalog.getEventById(eventId);
+  return Boolean(
+    event?.eventType === 'auto' &&
+    event.category === 'main_story' &&
+    event.metadata?.tags?.includes('主线') === true &&
+    (event.content?.title || event.content?.text),
+  );
 }
 
 function snapshotForHistoryRecord(historyRecord: GameState['eventHistory'][number], finalState: GameState): GameState {
@@ -70,6 +63,7 @@ function snapshotForHistoryRecord(historyRecord: GameState['eventHistory'][numbe
 function backfillPacingEvidenceStoryRecords(
   records: GameProcessRecord[],
   finalState: GameState,
+  runtimeCatalog: RuntimeEventCatalog,
 ): void {
   const recordedIds = new Set(records.map(record => record.eventId));
   for (const historyRecord of finalState.eventHistory ?? []) {
@@ -77,17 +71,13 @@ function backfillPacingEvidenceStoryRecords(
       continue;
     }
     if (
-      !isMandatoryHistoryEvent(historyRecord.eventId) &&
-      !isVisibleAutomaticMainlineHistoryEvent(historyRecord.eventId)
+      !isMandatoryHistoryEvent(historyRecord.eventId, runtimeCatalog) &&
+      !isVisibleAutomaticMainlineHistoryEvent(historyRecord.eventId, runtimeCatalog)
     ) {
       continue;
     }
-    let catalogEvent;
-    try {
-      catalogEvent = eventLoader.getEventById(historyRecord.eventId);
-    } catch {
-      continue;
-    }
+    const catalogEvent = runtimeCatalog.getEventById(historyRecord.eventId);
+    if (!catalogEvent) continue;
     records.push({
       age: historyRecord.age ?? finalState.player?.age ?? 0,
       eventId: historyRecord.eventId,
@@ -110,11 +100,11 @@ function backfillPacingEvidenceStoryRecords(
 }
 
 export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Promise<HeadlessPersonaRunResult> {
-  const { persona, endAge, catalogVersion, maxSteps = DEFAULT_MAX_STEPS } = config;
+  const { persona, endAge, catalogVersion, maxSteps = DEFAULT_MAX_STEPS, runtimeCatalog } = config;
 
   const effectivePersona = config.seed === undefined ? persona : { ...persona, seed: config.seed };
 
-  const session = createPersonaHeadlessSession(effectivePersona, catalogVersion);
+  const session = createPersonaHeadlessSession(effectivePersona, catalogVersion, runtimeCatalog);
 
   await progressUntilChoiceOrTerminal(session);
 
@@ -217,7 +207,7 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
   }
 
   const finalState = session.getRuntimeState();
-  backfillPacingEvidenceStoryRecords(records, finalState);
+  backfillPacingEvidenceStoryRecords(records, finalState, session.dependencies.runtimeCatalog);
   const choiceCount = records.filter(r => r.eventType === 'choice').length;
   const activeCount = records.filter(r => r.progressionKind === 'active_action').length;
   const experienceTrace = experienceTraceSteps

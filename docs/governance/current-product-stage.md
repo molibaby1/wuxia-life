@@ -2,18 +2,18 @@
 
 用途：为 ChatGPT、Codex 和人工维护者提供当前唯一工作目标。本文是滚动看板，不是长期产品规范。
 
-最后更新：2026-08-12
+最后更新：2026-08-13
 
 ---
 
-## 0. 当前状态：受约束自动进化 B0 护栏校准（已完成并关闭）
+## 0. B0 护栏校准（已完成并关闭）
 
 本 Slice 只校准自动优化护栏：known-bad 可检出、Control 不误杀、manifest/hash 可复现、角色信息隔离、red-team veto、人工最终裁决。B0 护栏校准已在 HEAD `e6e9118` 上由人工 accept 关闭。
 
 **最终依据 run（唯一）：** `.tmp/b0/b0-status-20260812085143/`
 **废止：** `b0-closure-20260812081550-8f7730` 绑定修复前提交，不得作为当前最终依据。
 
-B0 `passed` **不授权** B1、正式配置修改、自动合入或发布。当前 **没有** Authorized successor stage；禁止进入 B1，除非另行独立产品裁决。
+B0 `passed` **本身不授权** B1、正式配置修改、自动合入或发布。B1 只能在独立产品裁决后进入；本看板下文记录的 B1.0 是已获批准的独立 Slice。
 
 ### 0.1 目标与非目标
 
@@ -50,6 +50,59 @@ B0 `passed` **不授权** B1、正式配置修改、自动合入或发布。当�
 - terminal: passed；`humanDecisionHash` 已写入 evidence-index
 
 青年 Slice 后续补丁 `youth_road_peril` 门禁与 `artifacts/` ignore 已合入 `dev`。
+
+### 0.6 B1.0 Experiment Boundary Prototype（已完成并关闭）
+
+B1.0 已完成并关闭。其长期定位是 **Experiment Boundary Prototype**：证明 Headless 可以在不污染正式配置的情况下接收实例级 candidate catalog，并在冻结 persona、seed、policy、endAge 和 source 条件下进行可复现实验。
+
+B1.0 继承的有效资产包括：
+
+- `RuntimeEventCatalog` 实例级注入；
+- 默认 formal catalog parity；
+- immutable overlay；
+- deterministic scope validation；
+- same-seed Headless baseline/candidate；
+- artifact 路径隔离与基本 provenance；
+- candidate 不自动写回正式配置。
+
+B1.0 **不证明** candidate 更好、Reviewer 可靠、population 结论成立，也不构成完整的未来 evidence trust root。
+
+### 0.7 B1.0 收口证据（2026-08-12，历史记录保留）
+
+B1.0 已完成人工 `accepted` 收口。唯一依据 artifact：`.tmp/b1/b1-review-20260812-4/`。
+
+- `npm run test:headless`、`npm run test:headless:parity`、`npm run test:contracts`、`npm run typecheck`、B1 专项测试和 `git diff --check` 的通过记录来自 B1.0 历史 handoff；本次治理收敛未重跑这些命令。
+- baseline/candidate 使用同一 persona、seed、endAge；candidate 只改变既有 `toddler_exploration` 的顶层 `weight`（80 → 96），未写入正式事件目录。
+- `human-decision.json`：`decision=accepted`，但明确不接受该候选、不授权正式配置修改或发布。
+
+该 `accepted` 只关闭 B1.0 注入边界。
+
+### 0.8 当前自动进化状态：无实施授权
+
+原 B1.1（Task 9～14）已被新的 LLM-driven auto-evolution proposal **superseded**，不得直接续跑。
+
+当前下一候选 Slice 为：
+
+> **Player-Observable Transcript & Reviewer Calibration（Phase 0/1）**
+
+但截至本看板更新时：
+
+- 只允许 proposal / successor design 文档收敛；
+- **尚未授权编码**；
+- Phase 0 与 Phase 1 可以共用一份 successor design，但必须保留 Phase 0 独立 stop gate；
+- Phase 0 未 accepted 前不得自动进入 Reviewer calibration；
+- 不授权 Planner、Blind Pair、Population、完整飞轮或正式配置 promotion；
+- 不授权原 B1.1 Task 9～14。
+
+权威候选方案：
+
+```text
+docs/superpowers/proposals/2026-08-12-llm-driven-auto-evolution/README.md
+docs/superpowers/proposals/2026-08-12-llm-driven-auto-evolution/01-vision-and-principles.md
+docs/superpowers/proposals/2026-08-12-llm-driven-auto-evolution/02-architecture-and-flywheel.md
+docs/superpowers/proposals/2026-08-12-llm-driven-auto-evolution/03-phased-implementation-roadmap.md
+docs/superpowers/specs/2026-08-13-player-observable-transcript-reviewer-calibration-design.md
+```
 
 ---
 

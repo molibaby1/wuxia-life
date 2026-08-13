@@ -14,7 +14,8 @@
 import { reactive } from 'vue';
 import { EventPriority } from '../types/eventTypes';
 import type { CriticalChoices, EventDefinition, GameState, Effect, PlayerLifeStates } from '../types/eventTypes';
-import { eventLoader } from './EventLoader';
+import { createDefaultRuntimeEventCatalog } from './EventLoaderRuntimeCatalog';
+import type { RuntimeEventCatalog } from './RuntimeEventCatalog';
 import { EventExecutor } from './EventExecutor';
 import { ConditionEvaluator, type Condition } from './ConditionEvaluator';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
@@ -83,6 +84,7 @@ function engineDiagnosticsEnabled(): boolean {
  * 游戏引擎集成器类
  */
 export class GameEngineIntegration {
+  private readonly catalog: RuntimeEventCatalog;
   private eventExecutor: EventExecutor;
   private conditionEvaluator: ConditionEvaluator;
   private gameState: GameState;
@@ -95,7 +97,8 @@ export class GameEngineIntegration {
   private pendingEventOutcomeNote: string | null = null;
   private suppressLethalSetbacks = false;
 
-  constructor() {
+  constructor(catalog: RuntimeEventCatalog = createDefaultRuntimeEventCatalog()) {
+    this.catalog = catalog;
     this.eventExecutor = new EventExecutor();
     this.conditionEvaluator = new ConditionEvaluator();
     // 先创建普通对象
@@ -360,7 +363,7 @@ export class GameEngineIntegration {
    * 根据年龄获取可用事件（加权随机选择）
    */
   public getAvailableEvents(age: number): EventDefinition[] {
-    const events = eventLoader.getEventsByAge(age);
+    const events = this.catalog.getEventsByAge(age);
     
     // 初始化人生轨迹
     if (!this.gameState.lifePath) {
@@ -909,7 +912,7 @@ export class GameEngineIntegration {
     const narrativeContext = buildNarrativeSchedulingContextFromState(this.gameState);
 
     const totalWeight = events.reduce((sum, event) => {
-      const baseWeight = eventLoader.getWeightForAge(event, currentAge);
+      const baseWeight = this.catalog.getWeightForAge(event, currentAge);
       const traitAdjusted = baseWeight * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
@@ -932,7 +935,7 @@ export class GameEngineIntegration {
     let random = Math.random() * totalWeight;
 
     for (const event of events) {
-      const traitAdjusted = eventLoader.getWeightForAge(event, currentAge) * traitSystem.getEventWeightMultiplier(this.gameState, event);
+      const traitAdjusted = this.catalog.getWeightForAge(event, currentAge) * traitSystem.getEventWeightMultiplier(this.gameState, event);
       const originAdjusted =
         traitAdjusted *
         getOriginChildhoodEventMultiplier(
@@ -964,7 +967,7 @@ export class GameEngineIntegration {
   }
 
   private getHistoryRecordSuppressionClass(eventId: string): 'injury' | 'illness' | 'economy' | null {
-    const historicalEvent = eventLoader.getEventById(eventId);
+    const historicalEvent = this.catalog.getEventById(eventId);
     if (historicalEvent) {
       return this.detectSuppressionClass(historicalEvent);
     }
@@ -1079,7 +1082,7 @@ export class GameEngineIntegration {
         continue;
       }
 
-      const historicalEvent = eventLoader.getEventById(record.eventId);
+      const historicalEvent = this.catalog.getEventById(record.eventId);
       const recordClass = historicalEvent
         ? this.isDailyEvent(historicalEvent)
           ? this.getHistoryRecordSuppressionClass(record.eventId)
@@ -1140,7 +1143,7 @@ export class GameEngineIntegration {
   private static readonly REGULAR_FORMAL_DAILY_CADENCE_WINDOW = 6;
 
   private isDailyHistoryRecord(eventId: string): boolean {
-    const historicalEvent = eventLoader.getEventById(eventId);
+    const historicalEvent = this.catalog.getEventById(eventId);
     if (historicalEvent) {
       return this.isDailyEvent(historicalEvent);
     }
@@ -1556,8 +1559,7 @@ export class GameEngineIntegration {
   private getImmediateFeedbackEvents(): EventDefinition[] {
     const currentAge = this.gameState.player?.age || 0;
     
-    // 使用 eventLoader 获取所有事件
-    const allEvents: EventDefinition[] = eventLoader.getAllEvents() || [];
+    const allEvents = this.catalog.getAllEvents();
     
     // 过滤出由 flag_set 触发的事件，并且满足条件
     const immediateEvents = allEvents.filter(event => {
@@ -1725,7 +1727,7 @@ export class GameEngineIntegration {
     if (!eventId) {
       return undefined;
     }
-    return eventLoader.getEventById(eventId);
+    return this.catalog.getEventById(eventId);
   }
 
   public consumeLastEventOutcomeNote(): string | null {

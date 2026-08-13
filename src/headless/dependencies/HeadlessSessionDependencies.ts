@@ -6,6 +6,8 @@
 
 import type { EventCatalogReadService } from '../catalog/EventCatalogReadService';
 import type { SnapshotConverter } from '../snapshot/SnapshotConverter';
+import { createDefaultRuntimeEventCatalog } from '../../core/EventLoaderRuntimeCatalog';
+import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
 import { createDefaultRandomSource, type RandomSource } from '../adapters/randomSource';
 import { createDefaultTimeSource, type TimeSource } from '../adapters/timeSource';
 
@@ -24,6 +26,8 @@ export const noopLogger: HeadlessLogger = {
 export interface HeadlessSessionDependencies {
   /** Required: versioned event catalog reads. */
   catalog: EventCatalogReadService;
+  /** Runtime event source used by this session's engine and runner. */
+  runtimeCatalog: RuntimeEventCatalog;
   /** Required: deterministic or runtime randomness. */
   random: RandomSource;
   /** Required: snapshot timestamps and metadata. */
@@ -39,6 +43,7 @@ export function resolveHeadlessDependencies(
 ): HeadlessSessionDependencies {
   return {
     catalog: partial.catalog,
+    runtimeCatalog: partial.runtimeCatalog ?? createDefaultRuntimeEventCatalog(),
     snapshot: partial.snapshot,
     random: partial.random ?? createDefaultRandomSource(),
     time: partial.time ?? createDefaultTimeSource(),

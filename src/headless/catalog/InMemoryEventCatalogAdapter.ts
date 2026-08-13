@@ -3,7 +3,10 @@
  * Does not modify EventLoader runtime behavior.
  */
 
-import { eventLoader } from '../../core/EventLoader';
+import {
+  createDefaultRuntimeEventCatalog,
+} from '../../core/EventLoaderRuntimeCatalog';
+import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
 import type { EventDefinition } from '../../types/eventTypes';
 import {
   EVENT_CATALOG_CONTRACT_VERSION,
@@ -57,13 +60,15 @@ function toSummary(event: EventDefinition): EventCatalogEntrySummary {
 }
 
 export class InMemoryEventCatalogAdapter implements EventCatalogReadService {
+  constructor(private readonly runtimeCatalog: RuntimeEventCatalog = createDefaultRuntimeEventCatalog()) {}
+
   resolveVersion(catalogVersion?: string): string {
     return catalogVersion ?? DEFAULT_CATALOG_VERSION;
   }
 
   getMetadata(catalogVersion?: string): EventCatalogMetadata {
     const version = this.resolveVersion(catalogVersion);
-    const all = eventLoader.getAllEvents();
+    const all = this.runtimeCatalog.getAllEvents();
     const activeCount = all.filter(e => inferStatus(e) === 'active').length;
     const deferredCount = all.filter(e => inferStatus(e) === 'deferred').length;
     return {
@@ -78,7 +83,7 @@ export class InMemoryEventCatalogAdapter implements EventCatalogReadService {
 
   getEventBundle(request: EventBundleRequest = {}): EventBundleResponse {
     const version = this.resolveVersion(request.catalogVersion);
-    const filtered = eventLoader.getAllEvents().filter(e => matchesQuery(e, request));
+    const filtered = this.runtimeCatalog.getAllEvents().filter(e => matchesQuery(e, request));
     return {
       metadata: this.getMetadata(version),
       events: filtered.map(toSummary),
@@ -87,7 +92,7 @@ export class InMemoryEventCatalogAdapter implements EventCatalogReadService {
 
   getEventById(eventId: string, catalogVersion?: string): EventDefinition {
     this.resolveVersion(catalogVersion);
-    const event = eventLoader.getEventById(eventId);
+    const event = this.runtimeCatalog.getEventById(eventId);
     if (!event) {
       throw new CatalogReadError('EVENT_NOT_FOUND', `Event not found: ${eventId}`, { eventId });
     }
@@ -95,6 +100,8 @@ export class InMemoryEventCatalogAdapter implements EventCatalogReadService {
   }
 }
 
-export function createDefaultInMemoryCatalogAdapter(): InMemoryEventCatalogAdapter {
-  return new InMemoryEventCatalogAdapter();
+export function createDefaultInMemoryCatalogAdapter(
+  runtimeCatalog: RuntimeEventCatalog = createDefaultRuntimeEventCatalog(),
+): InMemoryEventCatalogAdapter {
+  return new InMemoryEventCatalogAdapter(runtimeCatalog);
 }

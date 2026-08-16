@@ -1,4 +1,6 @@
-# P7.2 Session Progression API — Locked Decisions (US-005)
+# Session Progression API
+
+锁定决策摘要（服务端权威主动规划 / progression-ack）。
 
 ## Single progression-ack endpoint
 
@@ -34,4 +36,4 @@ When no story event and no planning actions (mirrors local `useNewGameEngine`):
 ## Related contracts
 
 - Types: `src/contracts/sessionProgression.ts`
-- PRD: `docs/PRD/p7-2-server-authoritative-active-planning.md`
+- Related ops: `docs/local-api-dev.md`

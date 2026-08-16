@@ -3,7 +3,7 @@
 用途：滚动看板——回答「现在做到哪、允许做什么、禁止做什么」。
 不是长期产品规范，不是实施流水账。
 
-最后更新：2026-08-14（Auto Evolution improvement-hypothesis successor：deterministic implementation complete）
+最后更新：2026-08-16（Skeleton 001–007 = CLOSED / Human accepted；Second-Problem Transfer Experiment = CLOSED / Human accepted；Modification Work Uncertainty Preservation Experiment = CLOSED / Human accepted；Fresh-Problem Candidate Transfer Experiment = CLOSED / Human accepted；Longitudinal Investigation Evidence Experiment = CLOSED / Human accepted；Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending；Candidate C = experimental baseline only；origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED）
 
 ---
 
@@ -11,7 +11,132 @@
 
 做一款能被玩家认真过完一生的武侠人生游戏。
 
-当前治理重点：保持产品模型收敛；improvement-hypothesis successor 的 **deterministic implementation 已完成并通过验证**，但 **real external participant smoke 未跑**，**Human implementation review 仍 PENDING**，**implementation acceptance 未授予**。下一步只能由 Human 决定是否授权一次 real hypothesis-participant smoke。
+Auto Evolution 当前属于高不确定性的探索型研发。Human 已明确将当前研发优先级从“继续细化下一角色”切换为：
+
+> **先验证完整飞轮最关键的工程骨架，再逐步替换 Mock。**
+
+Skeleton 001–007 已 **CLOSED / Human accepted**。
+
+**Second-Problem Transfer Experiment** 已 **CLOSED / Human accepted**。
+
+**Modification Work Uncertainty Preservation Experiment** 已 **CLOSED / Human accepted**。
+
+证明（本固定实验）：
+
+```text
+Investigation epistemic handoff v2 = proven on this fixed case
+Human review = UNCERTAINTY_PRESERVED
+confirmed basis remained distinguishable from unresolved dependencies
+participant-added unverified premises exposed as assumptions
+proposal quality = NOT accepted or evaluated
+no Product Decision on the proposal
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay = unchanged
+single fixed case does NOT prove generalization to future Modification Work
+```
+
+Evidence（sealed，immutable）：
+
+- `.tmp/evolution/second-problem-transfer/`
+- `.tmp/evolution/modification-work-uncertainty-preservation/`
+
+Fresh-Problem Candidate Transfer Experiment 已 **CLOSED / Human accepted**；当前没有 active evolution design / plan，下一项 evolution 工作仍 **尚未授权**。
+
+**Cross-Run Cohort Investigation Evidence Experiment** 已由 Human 直接授权，当前为 **ACTIVE / Human final review pending**。真实 Investigation 已完成（exactly 1 call）；不得进入 Modification Work、生成 Candidate、修改 gameplay，或开启 successor experiment。
+
+## 1.1 Fresh-Problem Candidate Transfer Experiment（CLOSED）
+
+```text
+Human Review = UNCERTAINTY_PRESERVED
+Experiment = ACCEPTED / CLOSED
+gameplay baseline = Candidate C experimental baseline
+fresh persona = p8-scholar-su
+seed = 101
+real external calls = exactly 4
+Improvement Hypothesis count = 2
+selection rule = first_hypothesis_in_participant_order
+selected hypothesis = hypothesis-000001
+Investigation = completed with bounded current-product evidence
+Modification Work v2 = no_proposal
+Product Decision = NOT APPLICABLE
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay / origin = unchanged
+MW v2 fresh-case epistemic generalization = supported on one fresh case
+generalization to arbitrary future cases = NOT proven
+origin promotion = NOT AUTHORIZED
+production retain = NOT AUTHORIZED
+autonomous loop = NOT AUTHORIZED
+next evolution work = NOT AUTHORIZED
+```
+
+Evidence（sealed，immutable）：`.tmp/evolution/fresh-problem-candidate-transfer/`
+
+## 1.2 Longitudinal Investigation Evidence Experiment（CLOSED）
+
+```text
+Longitudinal Investigation Evidence Experiment = CLOSED / Human accepted
+Human review:
+RETRIEVAL_ADEQUATE
+INVESTIGATION_USED
+UNCERTAINTY_PRESERVED
+longitudinal-v1 bounded same-run retrieval = proven on this fixed case
+same formal action longitudinal retrieval = proven
+same explicit active-action resource relation = proven as bounded retrieval
+Investigation used the newly supplied longitudinal evidence
+genuine remaining uncertainty:
+cross-run prevalence = NOT proven
+resource income / full resource dynamics = NOT established
+systemic balance problem = NOT proven
+real calls = exactly 1
+retry = 0
+fixed run = ae-fresh-problem-transfer-001
+fixed hypothesis = hypothesis-000001
+Modification Work = NOT run
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay = unchanged
+origin promotion / production retain / autonomous loop = NOT AUTHORIZED
+next evolution work = NOT AUTHORIZED
+```
+
+Evidence：`.tmp/evolution/longitudinal-investigation-evidence/`（preserved，immutable）。
+当前 STOP：本实验已闭合。不得重跑 Investigation、进入 Modification Work、生成 Candidate 或修改 gameplay。
+
+本阶段只验证同一个 sealed run 内，Investigation 是否能沿正式 active-action identity 与显式 positive resource cost 关系补齐 bounded longitudinal player-observable evidence。不得修改 gameplay、Investigation participant prompt/response contract、旧 Fresh-Problem artifacts 或进入后续 evolution。
+
+## 1.3 Cross-Run Cohort Investigation Evidence Experiment（ACTIVE — Human final review pending）
+
+```text
+Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending
+baseline = Candidate C experimental baseline only
+cohort = exactly 8 preregistered P8 runs
+anchor p8-scholar-su / seed 101 = excluded from cohort
+endAge = 80
+catalogVersion = 1.0.0
+signal = exact player-observable pressure lines only
+evidenceMode = cohort-v1
+real Investigation calls = exactly 1
+retry = 0
+provider = deepseek
+model = deepseek-v4-flash
+investigationInvocationRef = ae-fresh-problem-transfer-001-hypothesis-000001-deepseek-hypothesis-investigation-cohort-001
+Modification Work = NOT authorized / NOT run
+Candidate = NOT authorized / NOT generated
+gameplay = unchanged
+Human final review = pending
+```
+
+Evidence（create-only）：`.tmp/evolution/cross-run-cohort-investigation-evidence/`
+
+Human must independently decide:
+
+1. `COHORT_RETRIEVAL_ADEQUATE` / `COHORT_RETRIEVAL_NOT_ADEQUATE`
+2. `INVESTIGATION_USED_COHORT` / `INVESTIGATION_DID_NOT_USE_COHORT`
+3. `UNCERTAINTY_PRESERVED` / `UNCERTAINTY_NOT_PRESERVED`
+
+Descriptive cohort counts (including 8/8) are not population prevalence.
 
 ---
 
@@ -19,193 +144,205 @@
 
 | 层级 | 文档 |
 | --- | --- |
-| 第一层产品规范 | `docs/product/player-model.md` |
-| 第一层产品规范 | `docs/product/auto-evolution-model.md` |
-| 长期决策 | `docs/governance/product-decisions.md`（含 PD-055） |
-| 协作规则 | `docs/governance/ai-collaboration-workflow.md` |
-| 收敛原则 | `docs/governance/project-convergence.md` |
-| 文档入口 | `docs/README.md` |
-
-方向转折压缩记录：`docs/history/2026-08-auto-evolution-direction-reset.md`
+| 第一层产品规范 | `docs/product/player-model.md` / `docs/product/auto-evolution-model.md` |
+| 治理 | `docs/governance/*` |
+| Skeleton 001–007 | CLOSED 历史证据 |
+| Second-Problem Transfer Experiment | CLOSED 历史证据 |
+| Modification Work Uncertainty Preservation Experiment | CLOSED 历史证据 |
 
 ---
 
-## 3. 已完成且仍然有效的基础能力（压缩）
+## 3. 能力状态
 
-| 能力 | 状态 | 含义 |
-| --- | --- | --- |
-| Snapshot / 存档契约 | 有效 | Snapshot `3.14.0`；无迁移；Local/API/Headless 共用正式语义 |
-| B0 护栏校准 | 已关闭 | 隔离实验护栏可复现；**不**授权正式配置修改或自动合入 |
-| B1.0 实验边界 | 已关闭 | 实例级 candidate catalog 可不污染正式配置做对照实验 |
-| Phase 0 player-observable boundary | **有效** | 可生成 deterministic、只含玩家可见信息的材料；继续作为外部参与边界的通用基础；不是 Reviewer 产品 |
-| Minimal External Feedback Loop | **CLOSED / Human accepted** | 第一次把真实游戏体验交给外部参与者并完整收回对方自己的体验反馈；见 §3.1 |
-| Improvement Hypothesis Successor | **implementation complete / deterministic verification passed** | 可从已完成 MEF source 形成 0..N 待 Human 审阅的改善假设；real smoke 未跑；见 §3.2 |
-| Reviewer Calibration / qualification / gold-answer | **已退休并清理** | 实现已从仓库移除；不得复活 |
-| 青年重大机会因果化 | 已关闭 | 门派/爱情/幽影门/武林大会由事实开启、可永久错过 |
-| Life Milestone 最小切片 | 工程完成 | 体验是否改善待独立 Player Experience Validation |
-| P8 frustration 语义 | 有效 | 实际负面证据口径；P9/P40 自动分不构成正式验收 |
-
-细节与历史 run ID 见 Git history；本看板不复述完整验收命令。
-
-### 3.1 Minimal External Feedback Loop（CLOSED）
-
-**产品能力（白话）：** Wuxia-Life 第一次能够把一次真实游戏体验交给游戏外部的参与者，并把对方自己的体验反馈完整收回来。
-
-**历史授权路径：**
-
-```text
-Human implementation authorization
-→ 实施完成
-→ 真实 external participant smoke
-→ Human Review ACCEPTED
-→ CLOSED
-```
-
-**已发生的客观链路：**
-
-```text
-真实 Wuxia-Life run
-→ sealed player-observable material
-→ 真实外部参与者调用
-→ 完整 raw participant response 保存
-→ structured feedback
-→ Human 同时查看游戏经历与对应反馈
-→ Human accepted
-```
-
-**Accepted evidence（runtime artifact，不要求入库）：**
-
-| 字段 | 值 |
+| 能力 | 状态 |
 | --- | --- |
-| runRef | `minimal-external-feedback-smoke-001` |
-| invocationRef | `minimal-external-feedback-smoke-001-deepseek-player-feedback-001` |
-| experimentRootHash | `0236b0686cad25bf80957e6d8f1bcb0233c8c040ed5bc39467589caf8181d43f` |
-| observablePayloadHash | `6faeff5761af69877f1a89674b4f5a551e93970183c90a34bf07fb0afa3f6758` |
-| provider（实现层） | `deepseek` |
-| modelRequested / modelReturned（实现层） | `deepseek-v4-flash` |
-| status | `completed` |
-| Human report | `artifacts/reports/evolution/minimal-external-feedback/feedback-runs/minimal-external-feedback-smoke-001/human-review.md` |
+| Skeleton 001–007 | **CLOSED / Human accepted** |
+| Second-Problem Transfer Experiment | **CLOSED / Human accepted** |
+| Modification Work Uncertainty Preservation Experiment | **CLOSED / Human accepted** |
+| Fresh-Problem Candidate Transfer Experiment | **CLOSED / Human accepted** |
+| Longitudinal Investigation Evidence Experiment | **CLOSED / Human accepted** |
+| longitudinal-v1 bounded same-run retrieval | **proven on this fixed case** |
+| same formal action longitudinal retrieval | **proven** |
+| same explicit active-action resource relation | **proven as bounded retrieval** |
+| Investigation used newly supplied longitudinal evidence | **proven on this fixed case** |
+| longitudinal genuine remaining uncertainty | **cross-run prevalence NOT proven；resource income / full resource dynamics NOT established；systemic balance problem NOT proven** |
+| Investigation epistemic handoff v2（本固定实验） | **proven** |
+| MW v2 fresh-case epistemic generalization | **supported on one fresh case** |
+| proposal product acceptance | **NOT evaluated** |
+| Product Decision for Fresh-Problem proposal | **NOT APPLICABLE** |
+| Candidate C | **experimental baseline only** |
+| Candidate | **NOT generated**（本实验） |
+| Candidate transfer | **NOT proven** |
+| origin promotion | **NOT AUTHORIZED** |
+| production retain | **NOT AUTHORIZED** |
+| autonomous loop | **NOT AUTHORIZED** |
+| next evolution work | **NOT AUTHORIZED** |
 
-**产品语义边界：**
+---
 
-- 角色是工作；参与者是完成工作的人或外部系统。
-- DeepSeek / `deepseek-v4-flash` / Chat Completions 只是第一版具体接入，**不是**产品层永久模型；换成真人或其他外部系统，核心流程仍成立。
-- Implementation plan 曾写 OpenAI Responses API + `gpt-5`；最终实现为 DeepSeek Chat Completions + `deepseek-v4-flash`。这是 **implementation deviation**，不是产品语义变更（仍是单一具体外部 LLM、无 generic participant framework）。
+## 4–9. Skeleton 001–006 历史
 
-**Human acceptance 判定的是通信与可追溯性，不是主观意见对错：**
-
-- player-observable boundary 成立；
-- 真实 external invocation 发生；
-- raw feedback 完整保存；
-- run / invocation / observable 可追溯；
-- Human 能同时看到参与者当时看到的体验与其原始回答。
-
-继续：`纠正通信，不纠正思想。`（PD-055）
-
-本阶段**没有**恢复 gold answer、Reviewer qualification、participant score、precision/recall、severity/confidence taxonomy、experience/subjective correctness、Freeze Checkpoint。
-
-### 3.2 Improvement Hypothesis Successor（deterministic implementation）
-
-**产品能力（白话）：** Wuxia-Life 第一次能够从一次真实外部体验反馈中形成 0..N 条待 Human 审阅的改善假设，并明确区分观察、推断和仍未知的信息。
-
-**当前状态（必须准确）：**
+保持 immutable。006 corrective Candidate C：
 
 ```text
-Auto Evolution improvement-hypothesis successor:
-implementation complete
-deterministic verification passed
-real external participant smoke: NOT RUN
-Human implementation review: PENDING
-implementation acceptance: NOT GRANTED
-next action: STOP and ask Human whether to authorize one real hypothesis-participant smoke
+family-life: 3ef049dcf0ef77d47a0d2d6c1156488e678b8c4e54ead3c8e0b59dee794eb6c6
 ```
 
-**已实现链路（mocked provider only）：**
+---
+
+## 10. Skeleton 007 CLOSED 摘要
 
 ```text
-completed MEF source (game-runs + feedback-runs)
-→ read-only source validation (Phase 0 seal / hashes / feedback identity)
-→ Hypothesis Formation participant (injected/mocked in tests)
-→ 0..N improvement hypotheses
-→ Human review artifact
-→ STOP
+human-decision.sha256: 9a1ce9cb1ab22774a36a5057f7446d3c7866eb6c6b55ad24e546eabf976196bd
+Human Decision: ACCEPT_CANDIDATE
+scope: experimental_next_baseline_only
+selectedBaselineCommitSha: 74fb4fb3179f3ddeec78e3a43232ece0fc6e420f
+runRef: ae-skeleton-007-next-baseline
+post-run source == selected baseline == Candidate C
+origin unchanged: true
 ```
 
-**未发生：** 真实 DeepSeek / 其他 external hypothesis-participant 调用；Human 对 implementation 的接受；modification / candidate / Verifier。
-
-**未授权：**
-
-- 未授权 modification proposal
-- 未授权 candidate generation
-- 未授权 Verifier
-- 未授权 promotion
-- 未授权 Phase 2
-
-DeepSeek 仍是第一版具体接入细节，不是产品 authority。
+Evidence：`.tmp/evolution/skeleton-007/phase-b/`
 
 ---
 
-## 4. 当前授权
+## 11. Second-Problem Transfer CLOSED 摘要
 
-**Minimal External Feedback Loop：已授权 → 已实施 → real smoke → Human accepted → CLOSED。**
+```text
+runRef: minimal-external-feedback-smoke-001
+hypothesisId: hypothesis-000001
+Human Product Decision: REJECT_PROPOSAL
+Candidate: NOT generated
+Candidate transfer: NOT proven
+origin gameplay behavior: unchanged
+```
 
-**Auto Evolution successor 产品设计：Human Review ACCEPTED。**
-
-已接受设计：
-
-- `docs/superpowers/specs/2026-08-14-auto-evolution-improvement-hypothesis-successor-design.md`
-- 产品终点：`participant feedback → 0..N improvement hypotheses → Human Review → STOP`
-
-**Planning：已由 Human 于 2026-08-14 明确授权并 ACCEPTED。**
-
-- `docs/superpowers/plans/2026-08-14-auto-evolution-improvement-hypothesis-successor.md`
-
-**Implementation：已由 Human 明确授权；deterministic implementation 已完成并通过验证。**
-
-**仍未授权 / 仍未发生：**
-
-- real external hypothesis-participant smoke；
-- Human implementation review / acceptance；
-- modification proposal、candidate、Verifier、promotion、Phase 2。
-
-允许在当前阶段内：文档治理、工程收敛、已关闭能力范围内的普通 bugfix / 回归。
+Evidence：`.tmp/evolution/second-problem-transfer/`
 
 ---
 
-## 5. 当前 STOP / 禁止
+## 12. Modification Work Uncertainty Preservation CLOSED 摘要
 
-- **STOP：deterministic implementation complete；等待 Human Review / 是否授权 real smoke。**
-- 不得在未获 Human 另行授权时真实调用 hypothesis participant；
-- 不得进入 modification proposal、candidate、Verifier、promotion 或下一 successor；
-- 不得开始 ExternalParticipant framework、provider registry、多模型平台、Planner、Blind Verifier、population、自动进化闭环；
-- 不得把已关闭的最小反馈闭环扩展成完整 Auto Evolution loop；
-- 不得重建 Reviewer Calibration / qualification / gold-answer；
-- 不得把 candidate 自动写回正式事件配置或自动发布；
-- 不得因 sunk cost 把已完成实现抬成产品主线；
-- 不得把 `docs/superpowers/**` 的 spec/plan 当作第一层产品 authority。
+```text
+runRef: minimal-external-feedback-smoke-001
+hypothesisId: hypothesis-000001
+contractVersion: v2
+real calls: exactly 1
+resultKind: proposal
+Human review: UNCERTAINTY_PRESERVED
+epistemic handoff on the fixed case: proven
+proposal product acceptance: NOT evaluated
+Candidate: NOT generated
+Candidate transfer: NOT proven
+gameplay: unchanged
+generalization to future Modification Work: NOT proven
+```
 
----
-
-## 6. Candidate next work（≠ 授权）
-
-当前候选（**不是授权**）：
-
-1. Human 审阅 deterministic implementation；
-2. Human 决定是否授权一次 real hypothesis-participant smoke；
-3. 仅在 Human 另行授权后，才可能进入下一产品决策。
-
-当前不得预先设计或实施 modification proposal / candidate / Verifier / Phase 2。
+Evidence（sealed，immutable）：`.tmp/evolution/modification-work-uncertainty-preservation/`
 
 ---
 
-## 7. 给新 Agent 的一分钟检查单
+## 13. 当前授权 / 禁止（Human locked 2026-08-16）
 
-1. 第一层产品规范是什么？→ `player-model` + `auto-evolution-model`
-2. Reviewer Calibration？→ 退休且代码已删
-3. Phase 0？→ 边界能力仍有效，不是 Reviewer 台阶
-4. Minimal External Feedback Loop？→ **CLOSED / Human accepted**
-5. Improvement Hypothesis Successor？→ **implementation complete / deterministic verification passed；real smoke NOT RUN；Human review PENDING；acceptance NOT GRANTED**
-6. 现在能真实调用 DeepSeek 做 hypothesis smoke 吗？→ **不能，等待 Human 另行授权**
-7. 现在能做 modification / candidate / Verifier 吗？→ **不能**
-8. Phase 2？→ **未授权**
-9. 当前 STOP 在哪里？→ **deterministic implementation complete；等待 Human Review / 是否授权 real smoke**
+```text
+Candidate C:
+experimental baseline only
+
+Second-Problem Transfer Experiment:
+CLOSED / Human accepted
+
+Modification Work Uncertainty Preservation Experiment:
+CLOSED / Human accepted
+Human review = UNCERTAINTY_PRESERVED
+epistemic handoff on the fixed case = proven
+proposal product acceptance = NOT evaluated
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay = unchanged
+
+Fresh-Problem Candidate Transfer Experiment:
+CLOSED / Human accepted
+Human review = UNCERTAINTY_PRESERVED
+real external calls = exactly 4
+Improvement Hypothesis count = 2
+selection rule = first_hypothesis_in_participant_order
+selected hypothesis = hypothesis-000001
+Investigation = completed with bounded current-product evidence
+Modification Work v2 = no_proposal
+Product Decision = NOT APPLICABLE
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay / origin = unchanged
+MW v2 fresh-case epistemic generalization = supported on one fresh case
+generalization to arbitrary future cases = NOT proven
+
+origin promotion:
+NOT AUTHORIZED
+
+production retain:
+NOT AUTHORIZED
+
+autonomous loop:
+NOT AUTHORIZED
+
+next evolution work:
+NOT AUTHORIZED
+```
+
+---
+
+## 14. STOP
+
+```text
+Skeleton 001–007 = CLOSED / Human accepted
+Second-Problem Transfer Experiment = CLOSED / Human accepted
+Modification Work Uncertainty Preservation Experiment = CLOSED / Human accepted
+Fresh-Problem Candidate Transfer Experiment = CLOSED / Human accepted
+Human review = UNCERTAINTY_PRESERVED
+epistemic handoff on the fixed case = proven
+MW v2 fresh-case epistemic generalization = supported on one fresh case
+generalization to arbitrary future cases = NOT proven
+proposal product acceptance = NOT evaluated
+Fresh-Problem Product Decision = NOT APPLICABLE
+Candidate C = experimental baseline only
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay = unchanged
+origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED
+
+Longitudinal Investigation Evidence Experiment = CLOSED / Human accepted
+Human review = RETRIEVAL_ADEQUATE / INVESTIGATION_USED / UNCERTAINTY_PRESERVED
+longitudinal-v1 bounded same-run retrieval = proven on this fixed case
+same formal action longitudinal retrieval = proven
+same explicit active-action resource relation = proven as bounded retrieval
+Investigation used the newly supplied longitudinal evidence
+genuine remaining uncertainty:
+cross-run prevalence = NOT proven
+resource income / full resource dynamics = NOT established
+systemic balance problem = NOT proven
+real Investigation calls = exactly 1
+retry = 0
+Modification Work = NOT run
+Candidate = NOT generated
+Candidate transfer = NOT proven
+gameplay = unchanged
+origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED
+
+Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending
+cohort plan / eight Phase0 runs / cohort-v1 evidence = GENERATED
+real Investigation = completed (exactly 1 call, retry = 0)
+Human final review = pending
+Modification Work / Candidate / gameplay modification = NOT AUTHORIZED
+do not rerun Investigation, add seeds/personas, inspect resource dynamics, or start a successor experiment
+```
+
+## 15. 一分钟检查单
+
+1. 001–007？→ CLOSED
+2. Second-Problem Transfer？→ CLOSED / Human accepted；REJECT_PROPOSAL；Candidate transfer NOT proven
+3. Uncertainty Preservation？→ CLOSED / Human accepted；UNCERTAINTY_PRESERVED；handoff proven on fixed case；proposal NOT evaluated；Candidate NOT generated
+4. Fresh-Problem Candidate Transfer？→ CLOSED / Human accepted；4 calls；2 hypotheses；hypothesis-000001；no_proposal；Candidate NOT generated
+5. Longitudinal Investigation Evidence？→ CLOSED / Human accepted；RETRIEVAL_ADEQUATE；INVESTIGATION_USED；UNCERTAINTY_PRESERVED；1 call；Candidate NOT generated
+6. Cross-Run Cohort Investigation Evidence？→ ACTIVE / Human final review pending；cohort-v1；1 call；Candidate NOT generated
+7. Candidate C？→ experimental baseline only
+8. origin promotion / production retain / autonomous loop / next evolution？→ **NOT AUTHORIZED**

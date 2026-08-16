@@ -1,6 +1,6 @@
-# P8.1 Headless Playability Gate — Design Decisions
+# Headless Playability Gate
 
-生成时间：2026-06-12
+设计决策摘要（`gate:playability`）。
 
 ## 1. 默认 gate 模式
 
@@ -38,12 +38,13 @@ Persona 策略：`selectPersonaActiveAction`, `applyPersonaChoiceBias`, `resolve
 
 ## 4. 报告输出路径
 
-| mode | JSON | Markdown |
-| --- | --- | --- |
-| `headless_server`（默认） | `p8-playability-gate-latest.json` | `p8-playability-gate-latest.md` |
-| `local_direct` | `p8-playability-gate-local-latest.json` | `p8-playability-gate-local-latest.md` |
+| 用途 | 路径 |
+| --- | --- |
+| Tracked P8 baseline（P9 / 回归读取） | `tests/fixtures/gates/p8-playability-gate-latest.json` |
+| Gate 运行输出（不提交） | `artifacts/gates/p8-playability-gate-latest.{json,md}` |
+| `local_direct` 运行输出（不提交） | `artifacts/gates/p8-playability-gate-local-latest.{json,md}` |
 
-P9 baseline 只读取 `p8-playability-gate-latest.json`；`local_direct` 不得覆盖 canonical latest。
+P9 baseline 只读取 fixture；`local_direct` 不得覆盖 canonical fixture。Gate 脚本写入 `artifacts/gates/`。
 
 ## 5. P8 报告 JSON 元数据
 
@@ -59,7 +60,7 @@ interface P8PlayabilityReportMeta {
 
 `assemblePlayabilityReport(..., { runtimePath, catalogVersion, engineVersion })` 写入 report 根级字段；`renderP8MarkdownReport` 在 header 展示 `runtimePath`。
 
-## 6. 开放问题收口
+## 6. 备注
 
-- P8 PRD §9「API mode excluded from human testing」→ 由 P8.1 真人切片 API 栈解决（见 `p8-1-api-human-test-script.md`）
-- local 默认废弃：保留 `--mode local_direct` 一个版本窗口后文档标记 deprecated
+- 真人 API 栈验收走 `docs/local-api-dev.md` 的双终端联调，不依赖已删除的临时 test script 文档。
+- `local_direct` 仅作开发对比；默认 gate 保持 `headless_server`。

@@ -241,7 +241,7 @@ npm run dev
 npm run dev:all
 ```
 
-更详细的本地联调说明见 [`docs/p6b-local-dev.md`](docs/p6b-local-dev.md)。
+更详细的本地联调说明见 [`docs/local-api-dev.md`](docs/local-api-dev.md)。
 
 ---
 

@@ -1,0 +1,26 @@
+{
+  "project": "Wuxia-Life",
+  "branchName": "ralph/ae-skeleton-001",
+  "description": "Execution-to-Experience Skeleton 001: prove that one Human-authored executable change can alter Wuxia-Life and flow into a new sealed player-observable Phase 0 run.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Drive one source modification into a new player-observable run",
+      "description": "As the Auto Evolution exploration owner, I want one tiny Human-authored Wuxia-Life source change to be consumed by the engineering Runtime and appear in a new sealed player-observable run, so that the execution-to-experience skeleton is proven before automating upstream intelligence. See the paired PRD for the exact target, provenance rules, non-goals, and STOP boundary.",
+      "acceptanceCriteria": [
+        "Modify only src/data/lines/general.json event birth_wuxia_family content.text by appending the exact marker AE-SKELETON-001; do not change any other event field or game behavior",
+        "npm run typecheck passes",
+        "npx tsx tests/evolution/runPhase0Tests.ts passes",
+        "Execute exactly one Phase 0 run with runRef ae-skeleton-001, persona p8-martial-lin, seed 801, endAge 1, and catalogVersion 1.0.0",
+        "The sealed inputs/catalog.json for ae-skeleton-001 contains AE-SKELETON-001 in birth_wuxia_family.content.text",
+        "The sealed reviewer-input/observable-payload.json for ae-skeleton-001 contains a story_event titled 降生武侠世家 whose body contains AE-SKELETON-001",
+        "The sealed provenance/source-fingerprint.json objectively binds the run to a src/data/lines/general.json version whose bytes contain AE-SKELETON-001, using the exact provenance rule in the paired PRD",
+        "Do not invoke any external participant, feedback, hypothesis, investigation, candidate, promotion, or second Phase 0 run",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PASS evidence: typecheck PASS; runPhase0Tests PASS; exactly one Phase 0 runRef=ae-skeleton-001; catalog birth_wuxia_family.content.text contains AE-SKELETON-001; observable entryId=entry-000001 title=降生武侠世家 markerCount=1; observablePayloadHash=e1d3590fe130eea0af64b6f9e59ee2faca6015edc04d3ef7ba0db358ecac8de4; experimentRootHash=bc2d237bc558b80c6cdb8797b0aaf4b2725453467f6a9d8bbd638f3cce0ce948; provenanceMode=dirty_worktree path=src/data/lines/general.json status=' M' sha256=89597ebf45208a00434543e5378cbfcc5d4c2a62e52db665be67479d29a42baa equals actual file SHA-256 and bytes contain marker; headSha=f55ff758436eebcebabc529c390be586b4ad5d52. No external participant / feedback / hypothesis / investigation / candidate / promotion / second run. Closure: Human accepted PASS/CLOSED; temporary product-visible marker removed from current src/data/lines/general.json after closure; historical sealed run artifacts left immutable."
+    }
+  ]
+}

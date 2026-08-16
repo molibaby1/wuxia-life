@@ -1,8 +1,7 @@
 /**
- * P7.2 session progression contract — server-authoritative active planning.
+ * Session progression contract — server-authoritative active planning.
  *
- * @see docs/designs/p7-2-session-progression-api.md
- * @see docs/PRD/p7-2-server-authoritative-active-planning.md
+ * @see docs/designs/session-progression-api.md
  */
 
 import type {

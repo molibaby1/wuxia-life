@@ -163,7 +163,7 @@ export function validateLaunchReadinessSemantics(
   violations.push(...validateProfileDimensionAlignment(profile));
   violations.push(
     ...validateAlignmentIndicatorDoc(
-      readDocContent('docs/test-reports/v1-0-alignment-indicators.md', rootDir, docContents),
+      readDocContent('docs/designs/v1-0-alignment-indicators.md', rootDir, docContents),
       profile,
     ),
   );

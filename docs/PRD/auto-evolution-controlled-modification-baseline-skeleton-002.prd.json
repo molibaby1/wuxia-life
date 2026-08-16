@@ -1,0 +1,28 @@
+{
+  "project": "Wuxia-Life",
+  "branchName": "experiment/ae-skeleton-002-synthetic-baseline",
+  "description": "Skeleton 002: prove that exactly one declared Wuxia-Life source modification can execute from an exact sealed source baseline and enter a new Phase 0 player-observable run as the only non-ignored source delta.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Run one isolated modification from an exact sealed baseline",
+      "description": "As the Auto Evolution exploration owner, I want the Runtime to snapshot the actual current source into an isolated synthetic baseline, apply exactly one declared player-visible modification, and prove the resulting Phase 0 run used baseline plus only that modification.",
+      "acceptanceCriteria": [
+        "Seal a deterministic manifest of the origin repository's actual tracked plus non-ignored untracked source bytes at experiment start, including origin headSha, branch, dirty status identity, sorted file entries, and SHA-256 values",
+        "Copy the sealed baseline into .tmp/evolution/skeleton-002/workspace and prove the pre-modification isolated source entries exactly match the origin baseline manifest",
+        "Initialize a synthetic Git repository only inside the isolated workspace, commit the copied baseline, and verify its non-ignored worktree is clean before modification",
+        "Modify only isolated workspace src/data/lines/general.json event birth_wuxia_family content.text by appending exact marker AE-SKELETON-002; origin src/data/lines/general.json must never contain the marker",
+        "After modification, after deterministic tests, and after the Phase 0 run, synthetic Git status has exactly one non-ignored dirty entry: ' M src/data/lines/general.json'",
+        "npm run typecheck passes in the isolated workspace",
+        "npx tsx tests/evolution/runPhase0Tests.ts passes in the isolated workspace",
+        "Execute exactly one Phase 0 runRef ae-skeleton-002 with persona p8-martial-lin, seed 802, endAge 1, catalogVersion 1.0.0, from the isolated workspace",
+        "The Phase 0 source fingerprint headSha equals the synthetic baseline commit and worktreeEntries contains exactly one entry for src/data/lines/general.json with status ' M' and the exact modified file SHA-256",
+        "The sealed catalog contains AE-SKELETON-002 in birth_wuxia_family.content.text and the sealed observable payload contains a story_event titled 降生武侠世家 whose body contains AE-SKELETON-002",
+        "The experiment root and anchor validate, no second run is executed, and no feedback, hypothesis, investigation, candidate, promotion, external participant, origin commit/stash/reset, or isolation framework is started"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "PASS evidence: originBaselineManifestSha256=f52fee39b6cd00a9cb2a468f2c25f180caba871e033eb90fca109af4b9f4d188; originHeadSha=f55ff758436eebcebabc529c390be586b4ad5d52; originBranch=dev; originDirtyRecordCount=254; originStatusSha256=274f2eb985e34898c61d8a27224f36e636acec274aeca290a5cb538218d37b1e; workspace pre-mod entries exact-match; syntheticBaselineCommitSha=376939e0acf5c70ed1fc6762c0cd25d01084ebca branch=ae-skeleton-002-baseline clean-before-mod; isolated exact delta always ' M src/data/lines/general.json' (count=1); targetSha256=cab625535203ba4b29386ea74a1133c22c422d9c066940462621a630b048101e; typecheck PASS; runPhase0Tests PASS; runRef=ae-skeleton-002; observablePayloadHash=473a904362f2777ea867cb4736c20b692545b2a6621d49e74e411d73626983e1; experimentRootHash=78a0926dd0d66dfe107c676ef2220da6f0269b3cbaaa8d64b9f1578e19a4fbc6; fingerprint headSha=synthetic baseline, worktreeEntries.length=1 exact-one-entry path=src/data/lines/general.json status=' M' sha match; catalog+observable marker AE-SKELETON-002 once (entryId=entry-000001); origin target marker count=0 throughout. No second run / feedback / hypothesis / investigation / candidate / promotion / external participant / origin git mutation / isolation framework. Closure: Human ACCEPTED/CLOSED; temporary AE-SKELETON-002 removed from isolated workspace only; origin product source never contained marker; sealed runtime artifacts left immutable."
+    }
+  ]
+}

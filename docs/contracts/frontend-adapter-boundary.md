@@ -36,4 +36,5 @@ Separation between UI adapters and pure engine contracts before service extracti
 
 ## 5. References
 
-- `docs/test-reports/p4-engine-boundary-baseline.md`
+- Related contracts in `docs/contracts/`
+- Headless boundary: `docs/contracts/web-runtime-adapter-boundary.md`

@@ -8,8 +8,8 @@ export const V10_REQUIRED_DESIGN_DOCS = [
 ] as const;
 
 export const V10_REQUIRED_REPORT_DOCS = [
-  'docs/test-reports/v1-0-launch-surfaces-audit.md',
-  'docs/test-reports/v1-0-alignment-indicators.md',
+  'docs/designs/v1-0-launch-surfaces-audit.md',
+  'docs/designs/v1-0-alignment-indicators.md',
 ] as const;
 
 export const V10_ALL_LAUNCH_DOC_PATHS = [
@@ -94,7 +94,7 @@ export const V10_LAUNCH_DOC_RULES: readonly V10LaunchDocRule[] = [
   },
   {
     docId: 'launch-surfaces-audit',
-    path: 'docs/test-reports/v1-0-launch-surfaces-audit.md',
+    path: 'docs/designs/v1-0-launch-surfaces-audit.md',
     requiredSections: ['## Classification legend', '## Surface inventory', '## Main launch risks'],
     requiredTokens: [
       ...V10_REQUIRED_AUDIT_STATUSES,
@@ -106,7 +106,7 @@ export const V10_LAUNCH_DOC_RULES: readonly V10LaunchDocRule[] = [
   },
   {
     docId: 'alignment-indicators',
-    path: 'docs/test-reports/v1-0-alignment-indicators.md',
+    path: 'docs/designs/v1-0-alignment-indicators.md',
     requiredSections: ['## Indicators', '## Decision mapping'],
     requiredTokens: ['Overestimate bias', 'healthyRange', 'alignmentGap'],
   },

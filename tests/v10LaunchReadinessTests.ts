@@ -46,7 +46,7 @@ function loadRepoLaunchDocContents(): Record<string, string> {
 
 function testAlignmentIndicatorDocMustReferenceProfileIds(): void {
   const docContents = loadRepoLaunchDocContents();
-  docContents['docs/test-reports/v1-0-alignment-indicators.md'] =
+  docContents['docs/designs/v1-0-alignment-indicators.md'] =
     '# Indicators\n## Indicators\n## Decision mapping\nOverestimate bias healthyRange alignmentGap\n';
   const rules = validateLaunchReadinessSemantics({
     profile: WUXIA_WORLD_PROFILE,

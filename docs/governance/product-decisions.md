@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-08-04
+> 最后更新：2026-08-14
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -21,7 +21,9 @@
 
 从高到低：
 
-1. `docs/product/player-model.md`
+1. 第一层产品规范：
+   - `docs/product/player-model.md`（人物模型）
+   - `docs/product/auto-evolution-model.md`（Auto Evolution 产品模型）
 2. `docs/governance/project-convergence.md`
 3. `docs/governance/product-decisions.md`
 4. `AGENTS.md`
@@ -29,7 +31,7 @@
 6. 当前有效 Contract / Schema
 7. 当前代码与测试
 
-历史 PRD、Phase、Pxx、report、proof、closure、实施计划和旧交接总结默认不具有当前产品规范效力。
+历史 PRD、Phase、Pxx、report、proof、closure、实施计划和旧交接总结默认不具有当前产品规范效力。Auto Evolution 旧方案与 Reviewer Calibration 历史文档不得覆盖 `docs/product/auto-evolution-model.md`。
 
 ---
 
@@ -566,6 +568,43 @@ Life Milestone Minimal Vertical Slice 完成后，不自动授权：
 - 不在本裁决中删除魅力、经营、影响力等其他既有非核心字段；
 - 不新增潜力值、天赋数值投影或第二套学习属性；
 - 不迁移旧存档。
+
+### PD-055：外部参与者的主观判断不是金标准考题
+
+**正式语义**
+
+Wuxia-Life 要改进的是游戏。若大模型、真人或其它外部系统被用来观察游戏体验，他们是外部参与者，不是本产品要优化的对象。
+
+- 外部参与者的主观体验或判断，不存在由 Wuxia-Life 提供的标准正确答案。
+- 系统可以验证协议、结构、来源和可观察事实。例如：回复是否符合约定字段、材料是否只含玩家可见信息、这次问了谁、给了什么、收回什么是否可追溯。
+- 系统不得把“与 gold answer 一致”定义为外部参与者主观判断的正确性。
+- 不得用查准/查全、资格考试或 Freeze Checkpoint 证明某个观察者“应该怎样感觉才算正确”。
+
+完整 Auto Evolution 产品模型见 `docs/product/auto-evolution-model.md`。本条不另建第二套规则。
+
+**与 PD-050 / PD-051 / PD-052 的关系**
+
+这三条是警告性原则：自动模拟策略不是真人玩家，自动 Trace 不能替代玩家体验证据，当前因果/重玩自动分数不能证明真人感受。它们针对程序分数和自动日志，**没有明确禁止 Reviewer Calibration**。本条才把“外部参与者主观判断不得用金标准定义正确性”写成产品规则。
+
+**对已有 Auto Evolution 工作的含义**
+
+- Phase 0 的 player-observable information boundary 仍然有效。
+- Phase 1 Reviewer Calibration harness 曾经实现，这一历史事实可以保留；实现已于 2026-08-14 独立授权清理后从仓库移除，不表示必须进入未来产品架构。
+- 未来仍可能需要某种调用记录、结构化意见或原文保存能力。那不等于保留或重建现有 Phase 1 calibration / qualification / gold-answer 实现。
+- gold labels、qualification、precision/recall、sealed-qualification 和 Freeze Checkpoint 退出产品主线。本条裁决当时将其标为待清理且不执行删除；清理已另获独立授权并完成。
+- 2026-08-14 起，Auto Evolution 产品方向以 `docs/product/auto-evolution-model.md` 为准；本条继续约束“不得金标准考试主观判断”。
+
+**明确不做**
+
+- 不在本裁决中设计或授权 participant framework、真人接口、新的 Agent 框架、Planner 或 Phase 2；
+- 不把本条解释为禁止向外部参与者收集意见；
+- 不把“未来仍可能需要某种协议能力”写成“必须保留或重建 Phase 1 文件”；
+- 不把产品模型文档的存在解释为新的 implementation authorization。
+
+**重新讨论条件**
+
+- 产品明确要把某个外部任务定义成有客观对错的协议检查，且该任务不是主观体验判断；
+- 产品明确批准新的体验意见来源和用法，且不把 gold-answer 一致性当作主观正确性。
 
 ---
 

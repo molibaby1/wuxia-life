@@ -8,6 +8,7 @@ import type { GameState } from '../../types/eventTypes';
 import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import type { ExperienceTrace } from './experienceTraceTypes';
 import type { RuntimeEventCatalog } from '../../core/RuntimeEventCatalog';
+import type { HeadlessApiPlayerSurfaceTrace } from './playerSurfaceCapture';
 
 
 export type HeadlessPlayabilityRuntimePath = 'headless_server' | 'local_direct';
@@ -26,6 +27,9 @@ export interface HeadlessPersonaRunConfig {
   /** Disabled by default so existing P8 runs keep their current data path. */
 
   experienceTrace?: boolean;
+
+  /** Disabled by default; captures only the approved Headless/API player-facing surface. */
+  playerSurfaceTrace?: boolean;
 
 }
 
@@ -46,5 +50,6 @@ export interface HeadlessPersonaRunResult {
   stepsExecuted: number;
   stoppedReason: 'end_age' | 'terminal' | 'max_steps';
   experienceTrace?: ExperienceTrace;
+  playerSurfaceTrace?: HeadlessApiPlayerSurfaceTrace;
 
 }

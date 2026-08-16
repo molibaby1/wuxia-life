@@ -24,6 +24,15 @@ import type {
   ExperienceTraceChoiceCandidate,
   ExperienceTraceStep,
 } from './experienceTraceTypes';
+import {
+  buildActiveActionSurfacePresentation,
+  buildChoiceSurfacePresentation,
+  buildDisturbanceSurfacePresentation,
+  buildPassiveSurfacePresentation,
+  buildPeriodSummarySurfacePresentations,
+  capturePlayerSafeStoryEvent,
+  type HeadlessApiPlayerSurfaceStep,
+} from './playerSurfaceCapture';
 
 export interface RunnerStepContext {
   session: HeadlessEngineSession;
@@ -32,6 +41,7 @@ export interface RunnerStepContext {
   choiceDiagnostics: ChoiceScoreDiagnostic[];
   activeActionSelectionReasons: Array<{ age: number; actionId: string; reason: string }>;
   experienceTraceSteps?: ExperienceTraceStep[];
+  playerSurfaceSteps?: HeadlessApiPlayerSurfaceStep[];
 }
 function snapshotStateForRecord(session: HeadlessEngineSession): ReturnType<HeadlessEngineSession['getRuntimeState']> {
   return JSON.parse(JSON.stringify(session.getRuntimeState()));
@@ -74,6 +84,21 @@ function recordExperienceTrace(
     ...payload,
     stateDelta: createExperienceStateDelta(stateBefore, stateAfter),
   });
+}
+
+function recordPlayerSurfaceStep(
+  ctx: RunnerStepContext,
+  step: Omit<HeadlessApiPlayerSurfaceStep, 'sequence'>,
+): void {
+  if (!ctx.playerSurfaceSteps) return;
+  ctx.playerSurfaceSteps.push({
+    sequence: ctx.playerSurfaceSteps.length + 1,
+    ...step,
+  });
+}
+
+function playerSurfaceCaptureEnabled(ctx: RunnerStepContext): boolean {
+  return ctx.playerSurfaceSteps !== undefined;
 }
 
 function traceEvent(event: EventDefinition): ExperienceTraceStep['event'] {
@@ -159,6 +184,13 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     if (!next.requiresChoice) {
       const age = session.getRuntimeState().player?.age ?? 0;
       const stateBefore = snapshotStateForRecord(session);
+      if (playerSurfaceCaptureEnabled(ctx)) {
+        recordPlayerSurfaceStep(ctx, {
+          kind: 'story_event',
+          age,
+          storyEvent: capturePlayerSafeStoryEvent(next),
+        });
+      }
       await session.progressAutomatic({ maxSteps: 8 });
       const after = session.getRuntimeState();
       ctx.records.push({
@@ -186,6 +218,16 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   if (!eventRequiresChoice(catalogEvent)) {
     const age = session.getRuntimeState().player?.age ?? 0;
     const stateBefore = snapshotStateForRecord(session);
+    if (playerSurfaceCaptureEnabled(ctx)) {
+      const pending = session.describePendingEvent();
+      if (pending) {
+        recordPlayerSurfaceStep(ctx, {
+          kind: 'story_event',
+          age,
+          storyEvent: capturePlayerSafeStoryEvent(pending),
+        });
+      }
+    }
     await session.progressAutomatic({ maxSteps: 8 });
     const after = session.getRuntimeState();
     ctx.records.push({
@@ -210,6 +252,11 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   }
   const age = session.getRuntimeState().player?.age ?? 0;
   const stateBefore = snapshotStateForRecord(session);
+  let playerSafeStory: ReturnType<typeof capturePlayerSafeStoryEvent> | null = null;
+  if (playerSurfaceCaptureEnabled(ctx)) {
+    const pending = session.describePendingEvent();
+    playerSafeStory = pending ? capturePlayerSafeStoryEvent(pending) : null;
+  }
   const selection = selectPersonaChoice(session, catalogEvent, persona);
   if (!selection?.choice?.id) {
     await afterStoryProgression(ctx);
@@ -230,6 +277,18 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     action: { eventId: catalogEvent.id, choiceId },
   });
   const stateAfterChoice = snapshotStateForRecord(session);
+  if (playerSafeStory) {
+    const presentation = choiceResponse.status === 'success'
+      ? buildChoiceSurfacePresentation(playerSafeStory, choiceId, choiceResponse.feedback)
+      : null;
+    recordPlayerSurfaceStep(ctx, {
+      kind: 'story_event',
+      age,
+      storyEvent: playerSafeStory,
+      ...(choiceResponse.status === 'success' ? { selectedChoiceId: choiceId } : {}),
+      ...(presentation ? { presentationCards: [presentation] } : {}),
+    });
+  }
   ctx.records.push({
     age,
     eventId: catalogEvent.id,
@@ -297,6 +356,14 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
   const feedbackText = summary?.actionName
     ? `本期安排${summary.actionName}`
     : `本期安排${actionDef?.name ?? '主动行动'}`;
+  if (summary && playerSurfaceCaptureEnabled(ctx)) {
+    recordPlayerSurfaceStep(ctx, {
+      kind: 'active_action_result',
+      age,
+      actionId: selection.actionId,
+      presentationCards: [buildActiveActionSurfacePresentation(summary)],
+    });
+  }
   ctx.records.push({
     age,
     eventId: toActiveActionReplayEventId(selection.actionId),
@@ -345,6 +412,16 @@ export async function runDisturbanceAckStep(ctx: RunnerStepContext): Promise<voi
   if (ctx.session.getTerminalState()) return;
   const stateBefore = snapshotStateForRecord(ctx.session);
   const disturbance = ctx.session.getProgressionVolatileState().pendingDisturbanceNarrative;
+  if (disturbance && playerSurfaceCaptureEnabled(ctx)) {
+    recordPlayerSurfaceStep(ctx, {
+      kind: 'disturbance',
+      age: stateBefore.player?.age ?? 0,
+      presentationCards: [
+        { title: disturbance.title, body: disturbance.bodyText },
+        buildDisturbanceSurfacePresentation(disturbance),
+      ],
+    });
+  }
   await ctx.session.acknowledgeProgression('disturbance');
   recordExperienceTrace(ctx, stateBefore, 'disturbance_narrative', {
     ...(disturbance ? { presentation: { disturbanceNarrative: cloneExperienceTraceValue(disturbance) } } : {}),
@@ -357,6 +434,13 @@ export async function runPassiveProgressionStep(ctx: RunnerStepContext): Promise
   if (ctx.session.getTerminalState()) return;
   const stateBefore = snapshotStateForRecord(ctx.session);
   const passive = ctx.session.getProgressionVolatileState().passiveNarrative;
+  if (passive && playerSurfaceCaptureEnabled(ctx)) {
+    recordPlayerSurfaceStep(ctx, {
+      kind: 'passive_narrative',
+      age: stateBefore.player?.age ?? 0,
+      presentationCards: [buildPassiveSurfacePresentation(passive)],
+    });
+  }
   await ctx.session.acknowledgeProgression('passive_continue');
   recordExperienceTrace(ctx, stateBefore, 'passive_progression', {
     ...(passive ? { presentation: { passiveNarrative: cloneExperienceTraceValue(passive) } } : {}),
@@ -368,6 +452,13 @@ export async function runPeriodSummaryStep(ctx: RunnerStepContext): Promise<void
   if (ctx.session.getTerminalState()) return;
   const stateBefore = snapshotStateForRecord(ctx.session);
   const periodSummary = ctx.session.getProgressionVolatileState().pendingPeriodSummary;
+  if (periodSummary && playerSurfaceCaptureEnabled(ctx)) {
+    recordPlayerSurfaceStep(ctx, {
+      kind: 'period_summary',
+      age: stateBefore.player?.age ?? 0,
+      presentationCards: buildPeriodSummarySurfacePresentations(periodSummary),
+    });
+  }
   await ctx.session.acknowledgeProgression('period_summary');
   recordExperienceTrace(ctx, stateBefore, 'period_summary', {
     ...(periodSummary ? { presentation: { periodSummary: cloneExperienceTraceValue(periodSummary) } } : {}),

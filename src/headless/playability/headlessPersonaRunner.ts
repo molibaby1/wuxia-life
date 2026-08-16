@@ -24,6 +24,10 @@ import {
   cloneExperienceTraceValue,
   experienceTracePersona,
 } from './experienceTraceTypes';
+import {
+  HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
+  type HeadlessApiPlayerSurfaceTrace,
+} from './playerSurfaceCapture';
 
 
 const DEFAULT_MAX_STEPS = 2400;
@@ -112,6 +116,8 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
   const choiceDiagnostics: HeadlessPersonaRunResult['choiceDiagnostics'] = [];
   const activeActionSelectionReasons: HeadlessPersonaRunResult['activeActionSelectionReasons'] = [];
   const experienceTraceSteps = config.experienceTrace ? [] : undefined;
+  const playerSurfaceSteps: HeadlessApiPlayerSurfaceTrace['steps'] | undefined =
+    config.playerSurfaceTrace ? [] : undefined;
 
   const ctx = {
     session,
@@ -120,6 +126,7 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
     choiceDiagnostics,
     activeActionSelectionReasons,
     experienceTraceSteps,
+    playerSurfaceSteps,
   };
 
 
@@ -239,6 +246,13 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
     : undefined;
 
 
+  const playerSurfaceTrace: HeadlessApiPlayerSurfaceTrace | undefined = playerSurfaceSteps
+    ? {
+        schemaVersion: HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
+        steps: playerSurfaceSteps,
+      }
+    : undefined;
+
   return {
     personaId: persona.id,
     finalAge: finalState.player?.age ?? 0,
@@ -256,6 +270,7 @@ export async function runHeadlessPersona(config: HeadlessPersonaRunConfig): Prom
     stepsExecuted: steps,
     stoppedReason,
     ...(experienceTrace ? { experienceTrace } : {}),
+    ...(playerSurfaceTrace ? { playerSurfaceTrace } : {}),
 
   };
 }

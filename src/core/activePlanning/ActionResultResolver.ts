@@ -16,6 +16,28 @@ export interface ActionResolverInput {
   random?: () => number;
 }
 
+/** Authoritative same-category repeat diminishing rule — consumed by resolveActiveAction. */
+export const SAME_CATEGORY_REPEAT_DIMINISHING_THRESHOLD = 3 as const;
+export const SAME_CATEGORY_REPEAT_REWARD_MULTIPLIER = 0.7 as const;
+
+/**
+ * Structured repeat-mechanism facts for Investigation evidence.
+ * Must stay derived from the same constants resolveActiveAction consumes.
+ */
+export function activeActionRepeatMechanismFacts(): {
+  sameCategoryRepeatThreshold: typeof SAME_CATEGORY_REPEAT_DIMINISHING_THRESHOLD;
+  rewardMultiplierWhenRepeated: typeof SAME_CATEGORY_REPEAT_REWARD_MULTIPLIER;
+  riskEscalatesWhenRepeated: true;
+  diminishingReturnFlagWhenRepeated: true;
+} {
+  return {
+    sameCategoryRepeatThreshold: SAME_CATEGORY_REPEAT_DIMINISHING_THRESHOLD,
+    rewardMultiplierWhenRepeated: SAME_CATEGORY_REPEAT_REWARD_MULTIPLIER,
+    riskEscalatesWhenRepeated: true,
+    diminishingReturnFlagWhenRepeated: true,
+  };
+}
+
 function rollBetween(min: number, max: number, random: () => number): number {
   if (max <= min) return min;
   return min + Math.floor(random() * (max - min + 1));
@@ -44,8 +66,9 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
   const random = input.random ?? Math.random;
   const streak = input.focusStreak ?? { category: null, count: 0 };
   const sameCategoryRepeat = streak.category === action.category ? streak.count + 1 : 1;
-  const rewardMultiplier = sameCategoryRepeat >= 3 ? 0.7 : 1;
-  const effectiveRisk = sameCategoryRepeat >= 3 ? escalateRisk(action.risk) : action.risk;
+  const diminished = sameCategoryRepeat >= SAME_CATEGORY_REPEAT_DIMINISHING_THRESHOLD;
+  const rewardMultiplier = diminished ? SAME_CATEGORY_REPEAT_REWARD_MULTIPLIER : 1;
+  const effectiveRisk = diminished ? escalateRisk(action.risk) : action.risk;
 
   const deltas: Record<string, number> = {};
   for (const reward of action.rewards) {
@@ -85,10 +108,10 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
           ? appliedDeltaSummary
           : summaries.rewardSummary,
       riskSummary:
-        sameCategoryRepeat >= 3
+        diminished
           ? `${summaries.riskSummary}（重复投入，收益递减）`
           : summaries.riskSummary,
-      diminishingReturn: sameCategoryRepeat >= 3,
+      diminishingReturn: diminished,
 
     },
   };

@@ -11,7 +11,7 @@ import {
   formatRouteBaselineMarkdown,
 } from '../src/p11/reportBuilder';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 async function main(): Promise<void> {
   const bundles = await runAllPersonaSimulations();
@@ -41,8 +41,8 @@ async function main(): Promise<void> {
     'utf8',
   );
 
-  console.log('Wrote docs/test-reports/p11-stage-baseline-latest.md');
-  console.log('Wrote docs/test-reports/p11-route-baseline-latest.md');
+  console.log('Wrote artifacts/reports/p11-stage-baseline-latest.md');
+  console.log('Wrote artifacts/reports/p11-route-baseline-latest.md');
 }
 
 main().catch(error => {

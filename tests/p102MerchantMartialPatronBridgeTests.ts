@@ -254,7 +254,7 @@ function writeChainProof(): void {
     '- Ordinary-origin patron expression',
     '- Full Wave 3 mixed-achievement graph',
   ];
-  const outPath = join(process.cwd(), 'docs/test-reports/p102-merchant-martial-patron-bridge-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p102-merchant-martial-patron-bridge-chain-proof.md');
   writeFileSync(outPath, lines.join('\n') + '\n', 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);
 }

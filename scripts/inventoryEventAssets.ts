@@ -357,7 +357,7 @@ function main(): void {
   const manifestPath = resolve('src/data/event-asset-manifest.json');
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 
-  const reportDir = resolve('docs/test-reports');
+  const reportDir = resolve('artifacts/reports');
   mkdirSync(reportDir, { recursive: true });
   const reportPath = join(reportDir, 'product-experience-governance-event-asset-audit.md');
   writeFileSync(reportPath, `${buildMarkdownReport(manifest)}\n`, 'utf8');

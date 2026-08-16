@@ -377,7 +377,7 @@ export async function runP100MerchantMagnateNativeEndgameTests(): Promise<void> 
   testMagnateChainReachableThroughEndgame();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p100-merchant-magnate-native-endgame-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p100-merchant-magnate-native-endgame-chain-proof.md');
   writeFileSync(outPath, proof, 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);
 }

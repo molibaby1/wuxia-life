@@ -6,7 +6,7 @@ import { WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
 import { assembleP17GateReport, formatP17GateMarkdown } from '../src/p17/reportBuilder';
 import { runMidLateLifeValidationSlice } from '../src/p17/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
@@ -36,8 +36,8 @@ function main(): void {
   );
 
   console.log(`P17 gate decision: ${report.decision}`);
-  console.log('Wrote docs/test-reports/p17-gate-latest.{json,md}');
-  console.log('Wrote docs/test-reports/p17-mid-late-life-slice.json');
+  console.log('Wrote artifacts/reports/p17-gate-latest.{json,md}');
+  console.log('Wrote artifacts/reports/p17-mid-late-life-slice.json');
 
   if (report.decision === 'fail') {
     process.exit(1);

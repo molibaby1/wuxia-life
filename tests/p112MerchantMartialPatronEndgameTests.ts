@@ -345,7 +345,7 @@ function writeTargetedProof(): void {
     '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
-    join(process.cwd(), 'docs/test-reports/p112-merchant-martial-patron-endgame-targeted-proof.md'),
+    join(process.cwd(), 'artifacts/reports/p112-merchant-martial-patron-endgame-targeted-proof.md'),
     lines.join('\n') + '\n',
   );
 }
@@ -380,5 +380,5 @@ for (const [name, fn] of tests) {
 }
 
 writeTargetedProof();
-console.log('\nWrote docs/test-reports/p112-merchant-martial-patron-endgame-targeted-proof.md');
+console.log('\nWrote artifacts/reports/p112-merchant-martial-patron-endgame-targeted-proof.md');
 console.log(`\n${passed}/${passed} tests passed`);

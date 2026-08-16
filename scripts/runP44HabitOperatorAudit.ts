@@ -10,7 +10,7 @@ import {
   runP44HabitOperatorAudit,
 } from '../src/p44/habitOperatorAudit';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   const writeArtifacts = process.argv.includes('--write');

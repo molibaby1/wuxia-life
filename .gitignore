@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.env
 .env.p6b
 dist
 dist-ssr
@@ -37,16 +38,6 @@ scripts/life-simulator/reports/*.json
 !scripts/life-simulator/reports/manifest.json
 tests/reports/*.html
 tests/reports/*.json
-# Generated local gate/test reports; formal docs in docs/test-reports remain trackable.
-docs/test-reports/experience-traces/*.json
-docs/test-reports/daily-fallback-origin-gate-stage7.md
-docs/test-reports/neutral-passive-dedup-stage7.md
-docs/test-reports/p11-scheduling-gate-latest.json
-docs/test-reports/p11-scheduling-gate-latest.md
-docs/test-reports/preschool-origin-isolation-stage5.md
-docs/test-reports/spine-origin-isolation-stage6.md
-docs/test-reports/spine-origin-isolation-stage7-extended-band.md
-docs/test-reports/trait-line-spine-eligibility-stage7.md
 
 # Test report markdown files
 tests/*.md

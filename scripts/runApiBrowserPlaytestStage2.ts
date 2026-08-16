@@ -1,6 +1,6 @@
 /**
  * US-003: Preschool agency API playtest (HTTP API driver + browser report).
- * Drives the same P6B API the browser uses; outputs docs/test-reports/api-browser-playtest-stage2.md
+ * Drives the same P6B API the browser uses; outputs artifacts/reports/api-browser-playtest-stage2.md
  */
 
 import fs from 'node:fs';
@@ -9,10 +9,10 @@ import { eventLoader } from '../src/core/EventLoader';
 import { isForeignExclusiveSpineEvent } from '../src/p16/spineOriginIsolation';
 
 const API_BASE = process.env.P6B_API_URL ?? 'http://localhost:8787';
-const REPORT_PATH = path.join(process.cwd(), 'docs/test-reports/api-browser-playtest-stage2.md');
+const REPORT_PATH = path.join(process.cwd(), 'artifacts/reports/api-browser-playtest-stage2.md');
 const SPINE_ISOLATION_REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/api-browser-playtest-stage6-spine-isolation.md',
+  'artifacts/reports/api-browser-playtest-stage6-spine-isolation.md',
 );
 const SCHOLAR_PRIMARY = 'origin_scholar_family' as const;
 const MAX_STEPS = 35;

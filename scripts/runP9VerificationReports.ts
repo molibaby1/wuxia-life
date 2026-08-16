@@ -9,7 +9,7 @@ import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { collectReplayMetrics } from '../src/p8/collectPersonaMetrics';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function writeMd(name: string, content: string): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
@@ -206,11 +206,11 @@ Generated: ${new Date().toISOString()}
 
 ## Verification evidence
 
-- docs/test-reports/p9-warning-triage-baseline.md
-- docs/test-reports/p9-route-divergence-verification.md
-- docs/test-reports/p9-midlife-milestone-verification.md
-- docs/test-reports/p9-echo-callback-verification.md
-- docs/test-reports/p9-regression-gate-comparison.md
+- artifacts/reports/p9-warning-triage-baseline.md
+- artifacts/reports/p9-route-divergence-verification.md
+- artifacts/reports/p9-midlife-milestone-verification.md
+- artifacts/reports/p9-echo-callback-verification.md
+- artifacts/reports/p9-regression-gate-comparison.md
 - tests/p9PlayabilityTests.ts
 `,
   );

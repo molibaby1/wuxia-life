@@ -12,7 +12,7 @@ import {
 } from '../src/p45/trajectoryReplay';
 import { getP8PersonaById } from '../src/p8/personas';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 const JSON_PATH = path.join(REPORTS_DIR, 'p45-trajectory-replay-latest.json');
 const MD_PATH = path.join(REPORTS_DIR, 'p45-trajectory-replay-latest.md');
 

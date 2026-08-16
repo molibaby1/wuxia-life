@@ -6,7 +6,7 @@ import { WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
 import { validateWorldProfileForGate } from '../src/p12/profileVerification';
 import { assembleP12ProfileGateReport, formatP12GateMarkdown } from '../src/p12/reportBuilder';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   const smoke = validateWorldProfileForGate(WUXIA_WORLD_PROFILE);
@@ -30,8 +30,8 @@ function main(): void {
   );
 
   console.log(`P12 profile gate decision: ${report.decision}`);
-  console.log('Wrote docs/test-reports/p12-profile-gate-latest.{json,md}');
-  console.log('Wrote docs/test-reports/p12-profile-smoke-latest.json');
+  console.log('Wrote artifacts/reports/p12-profile-gate-latest.{json,md}');
+  console.log('Wrote artifacts/reports/p12-profile-smoke-latest.json');
 
   if (report.decision === 'fail') {
     process.exit(1);

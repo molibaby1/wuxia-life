@@ -53,7 +53,7 @@ async function main(): Promise<void> {
 
   const experienceGate = evaluateExperienceHealthGate(reports, []);
 
-  const outputDir = path.join(process.cwd(), 'docs/test-reports');
+  const outputDir = path.join(process.cwd(), 'artifacts/reports');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -140,8 +140,8 @@ async function main(): Promise<void> {
     '',
     '## 7. PXG5 UI / 文档交付',
     '',
-    '- 最小布局要求：`docs/test-reports/product-experience-governance-minimum-playable-layout.md`',
-    '- Debug 策略：`docs/test-reports/product-experience-governance-player-debug-policy.md`',
+    '- 最小布局要求：`artifacts/reports/product-experience-governance-minimum-playable-layout.md`',
+    '- Debug 策略：`artifacts/reports/product-experience-governance-player-debug-policy.md`',
     '- 项目总览更新：`docs/PROJECT_OVERVIEW.md`（0–30 黄金线 scope）',
     '- Debug 入口：`src/utils/debugAccess.ts`（dev + `?debug=1` / localStorage）',
     '- 玩家向标签：`src/utils/playerFacingLabels.ts`',
@@ -189,7 +189,7 @@ async function main(): Promise<void> {
     '',
     '本文件已由 PXG5 收口报告取代。请阅读：',
     '',
-    '- `docs/test-reports/product-experience-governance-closure.md`',
+    '- `artifacts/reports/product-experience-governance-closure.md`',
     '',
     `生成时间：${new Date().toISOString()}`,
     '',

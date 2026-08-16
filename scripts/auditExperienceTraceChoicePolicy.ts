@@ -17,8 +17,8 @@ import type {
 
 process.env.WUXIA_ENGINE_QUIET = '1';
 
-const DEFAULT_TRACE_DIR = path.join(process.cwd(), 'docs/test-reports/experience-traces');
-const DEFAULT_OUTPUT = path.join(process.cwd(), 'docs/test-reports/experience-trace-choice-policy-audit.md');
+const DEFAULT_TRACE_DIR = path.join(process.cwd(), 'artifacts/reports/experience-traces');
+const DEFAULT_OUTPUT = path.join(process.cwd(), 'artifacts/reports/experience-trace-choice-policy-audit.md');
 const STAT_KEYS = [
   'money',
   'martialPower',

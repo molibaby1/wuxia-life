@@ -320,7 +320,7 @@ export async function runP95MerchantOperatingChainTests(): Promise<void> {
   testCostLabelSurvivesToCheckpoint();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p95-merchant-16-25-operating-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p95-merchant-16-25-operating-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

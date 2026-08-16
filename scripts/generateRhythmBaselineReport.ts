@@ -9,7 +9,7 @@ interface AgeBand {
 
 const DEFAULT_SEED = Number(process.env.RHYTHM_BASELINE_SEED || '1');
 const DEFAULT_MAX_AGE = Number(process.env.RHYTHM_BASELINE_MAX_AGE || '80');
-const OUTPUT_PATH = process.env.RHYTHM_BASELINE_OUTPUT || 'docs/test-reports/us-004-rhythm-baseline.md';
+const OUTPUT_PATH = process.env.RHYTHM_BASELINE_OUTPUT || 'artifacts/reports/us-004-rhythm-baseline.md';
 
 const AGE_BANDS: AgeBand[] = [
   { label: 'childhood', min: 0, max: 12 },
@@ -97,7 +97,7 @@ async function main() {
     ageBandSummary,
   });
 
-  await mkdir('docs/test-reports', { recursive: true });
+  await mkdir('artifacts/reports', { recursive: true });
   await writeFile(OUTPUT_PATH, report, 'utf-8');
 
   console.log('[US-004] baseline report generated');

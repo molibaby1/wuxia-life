@@ -10,7 +10,7 @@ import {
 } from '../src/p22/reportBuilder';
 import { gateChildEnv } from '../tests/qualityGatePolicy';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function runGateCommand(command: string, args: string[]): { ok: boolean; detail: string } {
   const result = spawnSync(command, args, {
@@ -105,7 +105,7 @@ function main(): void {
       '',
       '## Content library coverage',
       '- Before: fragmented audits per phase; no machine-readable baseline pool matrix.',
-      '- After: five baseline pools, coverage expectations, validation matrix under docs/test-reports/p22-coverage-matrix-latest.json.',
+      '- After: five baseline pools, coverage expectations, validation matrix under artifacts/reports/p22-coverage-matrix-latest.json.',
       '',
       '## Weak archetype support',
       '- Before: wealth merchant, hermit withdrawal, frontier/streetborn origins weakly supported.',

@@ -2,6 +2,6 @@
   "schemaVersion": "b0-adversarial-recipe-v1",
   "attackId": "overwrite_latest_report",
   "mode": "overwrite_latest_report",
-  "proposedPaths": ["docs/test-reports/p8-playability-gate-latest.md"],
+  "proposedPaths": ["tests/fixtures/gates/p8-playability-gate-latest.json"],
   "operation": "overwrite-latest"
 }

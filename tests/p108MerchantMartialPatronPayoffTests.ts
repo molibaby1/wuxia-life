@@ -261,7 +261,7 @@ function writeTargetedProof(): void {
     '',
     '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
-  const outPath = join(process.cwd(), 'docs/test-reports/p108-merchant-martial-patron-payoff-targeted-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p108-merchant-martial-patron-payoff-targeted-proof.md');
   writeFileSync(outPath, lines.join('\n') + '\n', 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);
 }

@@ -601,7 +601,7 @@ function testWealthTargetEffectInvariance(): void {
 }
 
 function testBlockerPersonaThresholdFromGateReport(): void {
-  const gatePath = path.join(process.cwd(), 'docs/test-reports/p8-playability-gate-latest.json');
+  const gatePath = path.join(process.cwd(), 'tests/fixtures/gates/p8-playability-gate-latest.json');
   if (!fs.existsSync(gatePath)) {
     console.log('p38FrustrationRemediationTests: skipping gate report assert (run gate:playability first)');
     return;

@@ -18,7 +18,7 @@ import type { EventDefinition } from '../src/types/eventTypes';
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/api-browser-playtest-stage5-origin-isolation.md',
+  'artifacts/reports/api-browser-playtest-stage5-origin-isolation.md',
 );
 const MAX_STEPS = 35;
 const PLAYER_ORIGIN_TAG = 'scholar' as const;

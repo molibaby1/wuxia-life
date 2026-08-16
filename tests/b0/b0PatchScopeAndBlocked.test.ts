@@ -10,7 +10,7 @@ function main(): void {
   assert.equal(validateProposedPaths(['src/data/events.json']).ok, false);
   assert.equal(validateProposedPaths(['src/p8/metricDefinitions.ts']).ok, false);
   assert.equal(validateProposedPaths(['docs/contracts/game-state-snapshot-contract.md']).ok, false);
-  assert.equal(validateProposedPaths(['docs/test-reports/p8-playability-gate-latest.md']).ok, false);
+  assert.equal(validateProposedPaths(['tests/fixtures/gates/p8-playability-gate-latest.json']).ok, false);
 
   const red = auditRedTeam({
     proposedPathsBySample: {

@@ -49,8 +49,8 @@ function testConsistencySlice(result: P39ConsistencySliceResult): void {
 }
 
 function testPlayabilityGateCarryForward(): void {
-  const gatePath = path.join(process.cwd(), 'docs/test-reports/p8-playability-gate-latest.json');
-  assert(fs.existsSync(gatePath), 'p8-playability-gate-latest.json must exist (run gate:playability)');
+  const gatePath = path.join(process.cwd(), 'tests/fixtures/gates/p8-playability-gate-latest.json');
+  assert(fs.existsSync(gatePath), 'p8-playability-gate-latest.json must exist under tests/fixtures/gates');
   const gate = JSON.parse(fs.readFileSync(gatePath, 'utf8')) as { decision?: string };
   const decision = gate.decision?.toUpperCase();
   assert(decision === 'PASS', `gate:playability must remain PASS, got ${gate.decision}`);

@@ -153,7 +153,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     .then(markdown => {
       const outPath = join(
         process.cwd(),
-        'docs/test-reports/p127-martial-second-visible-growth-sample-proof.md',
+        'artifacts/reports/p127-martial-second-visible-growth-sample-proof.md',
       );
       writeFileSync(outPath, `${markdown}\n`, 'utf8');
       console.log(`Wrote ${outPath}`);

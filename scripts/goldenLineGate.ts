@@ -340,7 +340,7 @@ export async function runGoldenLineExperienceGates(options?: {
 }
 
 export function writeGoldenLineGateReport(result: GoldenLineGateResult): string {
-  const reportDir = resolve('docs/test-reports');
+  const reportDir = resolve('artifacts/reports');
   const reportPath = resolve(reportDir, 'product-experience-governance-golden-line-gates.md');
   const lines = [
     '# Product Experience Governance — Golden Line Gates (PXG4)',

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const API_BASE = process.env.P6B_API_URL ?? 'http://localhost:8787';
-const REPORT_PATH = path.join(process.cwd(), 'docs/test-reports/early-childhood-preschool-density-stage4.md');
+const REPORT_PATH = path.join(process.cwd(), 'artifacts/reports/early-childhood-preschool-density-stage4.md');
 const MAX_STEPS = 35;
 const ADULT_PLACEHOLDER = '本期暂无强求的江湖变故';
 

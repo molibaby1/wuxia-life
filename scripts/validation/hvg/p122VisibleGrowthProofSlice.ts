@@ -119,7 +119,7 @@ export async function renderP122TargetedProofMarkdown(): Promise<string> {
 if (import.meta.url === `file://${process.argv[1]}`) {
   renderP122TargetedProofMarkdown()
     .then(markdown => {
-      const outPath = join(process.cwd(), 'docs/test-reports/p122-early-visible-growth-feedback-targeted-proof.md');
+      const outPath = join(process.cwd(), 'artifacts/reports/p122-early-visible-growth-feedback-targeted-proof.md');
       writeFileSync(outPath, `${markdown}\n`, 'utf8');
       console.log(`Wrote ${outPath}`);
     })

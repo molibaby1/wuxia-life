@@ -1,6 +1,6 @@
 /**
  * Frozen P3 trust thresholds (US-002 §3, US-029 enforcement).
- * Source of truth: docs/test-reports/p3-midlife-trust-targets.md
+ * Source of truth: constants in this module (historical markdown report removed from docs/).
  */
 
 export const P3_EVAL_END_AGE_TARGET = 50;

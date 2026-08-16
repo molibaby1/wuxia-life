@@ -402,7 +402,7 @@ export async function runP98MerchantMagnateNativeMidlateTests(): Promise<void> {
   testMagnateChainReachable();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p98-merchant-magnate-native-midlate-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p98-merchant-magnate-native-midlate-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

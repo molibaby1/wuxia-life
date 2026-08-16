@@ -326,7 +326,7 @@ export async function runP99MerchantMagnateNativeLateLifeTests(): Promise<void> 
   testMagnateChainReachableThroughLateLife();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p99-merchant-magnate-native-late-life-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p99-merchant-magnate-native-late-life-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

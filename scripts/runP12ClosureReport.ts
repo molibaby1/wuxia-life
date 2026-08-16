@@ -7,7 +7,7 @@ import { WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
 import { assembleP12ProfileGateReport } from '../src/p12/reportBuilder';
 import { PROFILE_READER_REGISTRY } from '../src/p12/readerRegistry';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   console.log('Running gate:playability...');
@@ -63,7 +63,7 @@ function main(): void {
 
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
   fs.writeFileSync(path.join(REPORTS_DIR, 'p12-closure-report.md'), lines.join('\n'), 'utf8');
-  console.log('Wrote docs/test-reports/p12-closure-report.md');
+  console.log('Wrote artifacts/reports/p12-closure-report.md');
 }
 
 main();

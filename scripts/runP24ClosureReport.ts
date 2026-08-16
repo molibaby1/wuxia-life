@@ -10,7 +10,7 @@ import {
 } from '../src/p24/reportBuilder';
 import { gateChildEnv } from '../tests/qualityGatePolicy';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function runGateCommand(command: string, args: string[]): { ok: boolean; detail: string } {
   const result = spawnSync(command, args, {

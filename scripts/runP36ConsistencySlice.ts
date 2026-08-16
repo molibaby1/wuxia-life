@@ -7,7 +7,7 @@ import {
   runP36ExtendedConsequenceConsistencySlice,
 } from '../src/p25/p36ConsequenceConsistencySlice';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });

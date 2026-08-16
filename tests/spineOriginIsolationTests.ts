@@ -16,11 +16,11 @@ import {
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/spine-origin-isolation-stage6.md',
+  'artifacts/gates/spine-origin-isolation-stage6.md',
 );
 const EXTENDED_BAND_REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/spine-origin-isolation-stage7-extended-band.md',
+  'artifacts/gates/spine-origin-isolation-stage7-extended-band.md',
 );
 
 const ORIGIN_CASES: Array<{ label: string; flag: PrimaryOriginFamilyFlag }> = [

@@ -140,7 +140,7 @@ function writeProof(): void {
     '- Goals keep both `门规传承` and `盟约续责` while remaining branch-distinct',
   ];
   writeFileSync(
-    join(process.cwd(), 'docs/test-reports/p115-founding-patriarch-midlife-pressure-targeted-proof.md'),
+    join(process.cwd(), 'artifacts/reports/p115-founding-patriarch-midlife-pressure-targeted-proof.md'),
     lines.join('\n') + '\n',
     'utf8',
   );

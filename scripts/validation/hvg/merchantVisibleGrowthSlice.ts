@@ -274,7 +274,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   runMerchantVisibleGrowthSlice()
     .then(result => {
       const markdown = renderMerchantVisibleGrowthProofMarkdown(result);
-      const outPath = join(process.cwd(), 'docs/test-reports/hvg-merchant-visible-growth-proof.md');
+      const outPath = join(process.cwd(), 'artifacts/reports/hvg-merchant-visible-growth-proof.md');
       writeFileSync(outPath, `${markdown}\n`, 'utf8');
       console.log(markdown);
       console.log(`\nWrote ${outPath}`);

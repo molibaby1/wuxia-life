@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { assembleP20ClosurePayload, formatP20GateMarkdown } from '../src/p20/reportBuilder';
 import { gateChildEnv } from '../tests/qualityGatePolicy';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function runGateCommand(command: string, args: string[]): { ok: boolean; detail: string } {
   const result = spawnSync(command, args, {
@@ -110,7 +110,7 @@ function main(): void {
   );
 
   console.log(`P20 closure gate decision: ${gate.decision}`);
-  console.log('Wrote docs/test-reports/p20-closure-report.{json,md}');
+  console.log('Wrote artifacts/reports/p20-closure-report.{json,md}');
 }
 
 main();

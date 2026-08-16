@@ -11,7 +11,7 @@ import { selectOrderedOriginInfantPassive } from '../src/data/originInfantPassiv
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/neutral-passive-dedup-stage7.md',
+  'artifacts/gates/neutral-passive-dedup-stage7.md',
 );
 
 function assert(condition: boolean, message: string): void {

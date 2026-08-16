@@ -6,7 +6,7 @@ import { inferEventExclusivePrimaryFlag } from '../src/p16/spineOriginIsolation'
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/daily-fallback-origin-gate-stage7.md',
+  'artifacts/gates/daily-fallback-origin-gate-stage7.md',
 );
 
 function assert(condition: boolean, message: string): void {

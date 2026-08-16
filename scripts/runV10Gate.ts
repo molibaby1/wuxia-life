@@ -7,7 +7,7 @@ import { assembleV10GateReport, formatV10GateMarkdown } from '../src/v10/reportB
 import { buildPlaytestCalibrationMatrix } from '../src/p24/validationMatrix';
 import { runBoundedRcCalibrationWave } from '../src/p24/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });

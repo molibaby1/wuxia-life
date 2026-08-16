@@ -10,7 +10,7 @@ import {
   buildRouteBaseline,
 } from '../src/p11/reportBuilder';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function readJsonIfExists<T>(filename: string): T | null {
   const fullPath = path.join(REPORTS_DIR, filename);
@@ -95,7 +95,7 @@ async function main(): Promise<void> {
 
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
   fs.writeFileSync(path.join(REPORTS_DIR, 'p11-closure-report.md'), lines.join('\n'), 'utf8');
-  console.log('Wrote docs/test-reports/p11-closure-report.md');
+  console.log('Wrote artifacts/reports/p11-closure-report.md');
 }
 
 main().catch(error => {

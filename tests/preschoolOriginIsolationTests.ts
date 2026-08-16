@@ -13,7 +13,7 @@ import {
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/preschool-origin-isolation-stage5.md',
+  'artifacts/gates/preschool-origin-isolation-stage5.md',
 );
 
 const ORIGIN_CASES: Array<{

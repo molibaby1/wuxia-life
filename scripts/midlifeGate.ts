@@ -202,7 +202,7 @@ export function formatMidlifeGateFailure(finding: MidlifeGateFinding): string {
 }
 
 export function writeMidlifeGateReport(result: MidlifeGateResult): string {
-  const reportDir = resolve('docs/test-reports');
+  const reportDir = resolve('artifacts/reports');
   const reportPath = resolve(reportDir, 'p3-midlife-gate.md');
   const lines = [
     '# P3 Midlife Gate (US-024)',

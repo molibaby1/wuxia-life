@@ -10,7 +10,7 @@ import { buildCausalityRootCauseReport, renderCausalityRootCauseMarkdown } from 
 import { buildRootCauseRankingReport, renderRootCauseRankingMarkdown } from '../src/p9/rootCauseRanking';
 import { runAllPersonaSimulations } from '../src/p9/simulationRunner';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function writeReport(baseName: string, json: unknown, markdown: string): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
   writeReport('p9-root-cause-ranking', ranking, renderRootCauseRankingMarkdown(ranking));
 
   if (!quiet) {
-    console.log('\nP9 triage reports written to docs/test-reports/');
+    console.log('\nP9 triage reports written to artifacts/reports/');
     console.log(`  warnings: ${triage.totalWarnings}`);
     console.log(`  pacing spans: ${pacing.spans.length}`);
     console.log(`  replay pairs: ${replay.pairs.length}`);

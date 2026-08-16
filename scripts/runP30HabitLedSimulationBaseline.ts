@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { runP30HabitLedSimulationBaseline } from '../src/p25/p30HabitLedSimulationBaselines';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });

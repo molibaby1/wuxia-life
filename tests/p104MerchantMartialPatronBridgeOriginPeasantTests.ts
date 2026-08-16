@@ -238,7 +238,7 @@ function writeChainProof(): void {
   ];
   const outPath = join(
     process.cwd(),
-    'docs/test-reports/p104-merchant-martial-patron-bridge-origin-peasant-chain-proof.md',
+    'artifacts/reports/p104-merchant-martial-patron-bridge-origin-peasant-chain-proof.md',
   );
   writeFileSync(outPath, lines.join('\n') + '\n', 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);

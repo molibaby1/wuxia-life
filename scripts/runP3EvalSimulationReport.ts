@@ -95,7 +95,7 @@ async function main(): Promise<void> {
   };
   fs.writeFileSync(jsonPath, JSON.stringify(payload, null, 2), 'utf-8');
 
-  const mdPath = path.join(process.cwd(), 'docs/test-reports/p3-midlife-simulation-segments.md');
+  const mdPath = path.join(process.cwd(), 'artifacts/reports/p3-midlife-simulation-segments.md');
   fs.writeFileSync(mdPath, formatMarkdownReport(segmentReports), 'utf-8');
 
   console.log('\n=== P3-EVAL Simulation (0–50, segmented) ===\n');

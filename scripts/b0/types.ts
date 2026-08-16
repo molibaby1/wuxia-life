@@ -35,6 +35,7 @@ export const B0_FORBIDDEN_PATH_GLOBS = [
   'src/core/EventLoader.ts',
   'src/core/GameEngineIntegration.ts',
   'docs/contracts/**',
+  'tests/fixtures/gates/**',
   'docs/test-reports/**',
   'scripts/runP8PlayabilityGate.ts',
   'scripts/runExperienceHealthGate.ts',

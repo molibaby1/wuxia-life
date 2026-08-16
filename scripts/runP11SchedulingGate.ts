@@ -8,7 +8,7 @@ import {
   formatP11GateMarkdown,
 } from '../src/p11/reportBuilder';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/gates');
 
 async function main(): Promise<void> {
   const bundles = await runAllPersonaSimulations();
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
   );
 
   console.log(`P11 scheduling gate decision: ${report.decision}`);
-  console.log('Wrote docs/test-reports/p11-scheduling-gate-latest.{json,md}');
+  console.log('Wrote artifacts/gates/p11-scheduling-gate-latest.{json,md}');
 
   if (report.decision === 'fail') {
     process.exit(1);

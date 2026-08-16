@@ -11,7 +11,7 @@ import type { PrimaryOriginFamilyFlag } from '../src/p16/primaryOriginFlag';
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/trait-line-spine-eligibility-stage7.md',
+  'artifacts/gates/trait-line-spine-eligibility-stage7.md',
 );
 
 function assert(condition: boolean, message: string): void {

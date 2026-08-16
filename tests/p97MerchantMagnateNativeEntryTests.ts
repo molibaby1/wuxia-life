@@ -366,7 +366,7 @@ export async function runP97MerchantMagnateNativeEntryTests(): Promise<void> {
   testAge40NativeMagnateIdentity();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p97-merchant-magnate-native-entry-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p97-merchant-magnate-native-entry-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

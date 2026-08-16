@@ -1,6 +1,6 @@
 /**
  * Stage-1～7 套件总验收：四出身 × 35 步 headless 驱动（与 P6B API 同引擎）。
- * 输出 docs/test-reports/early-childhood-opening-experience-final-playtest.md
+ * 输出 artifacts/reports/early-childhood-opening-experience-final-playtest.md
  */
 
 import fs from 'node:fs';
@@ -26,7 +26,7 @@ import type { EventDefinition } from '../src/types/eventTypes';
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/early-childhood-opening-experience-final-playtest.md',
+  'artifacts/reports/early-childhood-opening-experience-final-playtest.md',
 );
 const MAX_STEPS = 35;
 const PLANNING_PLACEHOLDER = '本期暂无强求的江湖变故';

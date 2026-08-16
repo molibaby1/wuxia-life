@@ -95,7 +95,7 @@ function buildMarkdownReport(issues: FeedbackIssue[]): string {
 
 function main(): void {
   const issues = scanGoldenLineFeedback();
-  const reportDir = resolve('docs/test-reports');
+  const reportDir = resolve('artifacts/reports');
   mkdirSync(reportDir, { recursive: true });
   const reportPath = join(reportDir, 'product-experience-governance-golden-line-feedback-scan.md');
   writeFileSync(reportPath, `${buildMarkdownReport(issues)}\n`, 'utf8');

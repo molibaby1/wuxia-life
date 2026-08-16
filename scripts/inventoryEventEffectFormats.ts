@@ -534,7 +534,7 @@ function main(): void {
     reportLines.push('');
   }
 
-  const markdownPath = resolve(process.cwd(), 'docs/test-reports/us-012-event-effect-format-inventory.md');
+  const markdownPath = resolve(process.cwd(), 'artifacts/reports/us-012-event-effect-format-inventory.md');
   writeFileSync(markdownPath, `${reportLines.join('\n')}\n`, 'utf8');
   console.log(JSON.stringify(output, null, 2));
 }

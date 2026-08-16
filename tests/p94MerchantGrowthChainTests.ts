@@ -291,7 +291,7 @@ export async function runP94MerchantGrowthChainTests(): Promise<void> {
   testCostLabelSurvivesToCheckpoint();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p94-merchant-10-15-growth-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p94-merchant-10-15-growth-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

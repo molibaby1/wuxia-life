@@ -7,7 +7,7 @@ import { assembleP23GateReport, formatP23GateMarkdown } from '../src/p23/reportB
 import { buildExperienceAcceptanceMatrix, formatAcceptanceMatrixMarkdown } from '../src/p23/validationMatrix';
 import { runBoundedFullLifeOperation } from '../src/p23/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });

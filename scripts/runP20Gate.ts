@@ -12,7 +12,7 @@ import {
   runRepetitionOverlapSlice,
 } from '../src/p20/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
@@ -60,8 +60,8 @@ function main(): void {
   );
 
   console.log(`P20 gate decision: ${report.decision}`);
-  console.log('Wrote docs/test-reports/p20-gate-latest.{json,md}');
-  console.log('Wrote docs/test-reports/p20-*-comparison-slice.json');
+  console.log('Wrote artifacts/reports/p20-gate-latest.{json,md}');
+  console.log('Wrote artifacts/reports/p20-*-comparison-slice.json');
 
   if (report.decision === 'fail') {
     process.exit(1);

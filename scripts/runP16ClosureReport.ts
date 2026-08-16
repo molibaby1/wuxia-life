@@ -5,7 +5,7 @@ import * as path from 'path';
 import { assembleP16GateReport, formatP16GateMarkdown } from '../src/p16/reportBuilder';
 import { runOriginChoiceLuckSlice, runOriginVarianceSlice } from './validation/p16/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   const gate = assembleP16GateReport();
@@ -77,7 +77,7 @@ function main(): void {
   ].join('\n');
 
   fs.writeFileSync(path.join(REPORTS_DIR, 'p16-closure-report.md'), md, 'utf8');
-  console.log('Wrote docs/test-reports/p16-closure-report.{json,md}');
+  console.log('Wrote artifacts/reports/p16-closure-report.{json,md}');
 }
 
 main();

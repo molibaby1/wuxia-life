@@ -306,7 +306,7 @@ function writeTargetedProof(): void {
     '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
-    join(process.cwd(), 'docs/test-reports/p110-merchant-martial-patron-late-life-targeted-proof.md'),
+    join(process.cwd(), 'artifacts/reports/p110-merchant-martial-patron-late-life-targeted-proof.md'),
     `${lines.join('\n')}\n`,
   );
 }
@@ -357,7 +357,7 @@ function writeClosureReport(): void {
     '- Patron endgame echo implementation (P111+)',
   ];
   writeFileSync(
-    join(process.cwd(), 'docs/test-reports/p110-merchant-martial-patron-late-life-closure-report.md'),
+    join(process.cwd(), 'artifacts/reports/p110-merchant-martial-patron-late-life-closure-report.md'),
     `${lines.join('\n')}\n`,
   );
 }

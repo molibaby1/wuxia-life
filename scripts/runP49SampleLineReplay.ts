@@ -13,7 +13,7 @@ import {
   type P49SampleLineReplayReport,
 } from '../src/p49/sampleLineReplay';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 const JSON_PATH = path.join(REPORTS_DIR, 'p49-sample-lines-replay-latest.json');
 const MD_PATH = path.join(REPORTS_DIR, 'p49-sample-lines-replay-latest.md');
 const CROSS_LINE_PATH = path.join(REPORTS_DIR, 'p49-sample-lines-cross-line-comparison-latest.md');

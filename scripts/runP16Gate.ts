@@ -6,7 +6,7 @@ import { WUXIA_WORLD_PROFILE } from '../src/narrative/worldProfile';
 import { assembleP16GateReport, formatP16GateMarkdown } from '../src/p16/reportBuilder';
 import { runOriginChoiceLuckSlice, runOriginVarianceSlice } from './validation/p16/validationSlices';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function main(): void {
   fs.mkdirSync(REPORTS_DIR, { recursive: true });
@@ -43,9 +43,9 @@ function main(): void {
   );
 
   console.log(`P16 gate decision: ${report.decision}`);
-  console.log('Wrote docs/test-reports/p16-gate-latest.{json,md}');
-  console.log('Wrote docs/test-reports/p16-origin-variance-slice.json');
-  console.log('Wrote docs/test-reports/p16-origin-choice-luck-slice.json');
+  console.log('Wrote artifacts/reports/p16-gate-latest.{json,md}');
+  console.log('Wrote artifacts/reports/p16-origin-variance-slice.json');
+  console.log('Wrote artifacts/reports/p16-origin-choice-luck-slice.json');
 
   if (report.decision === 'fail') {
     process.exit(1);

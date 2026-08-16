@@ -6,7 +6,7 @@ import { GameProcessSimulator } from '../tests/GameProcessSimulator';
 import { getP8PersonaById } from '../src/p8/personas';
 import { formatWealthEarlyAuditMarkdown, summarizeWealthEarlyAudit } from '../src/p45/wealthEarlyAudit';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 const MD_PATH = path.join(REPORTS_DIR, 'p45-wealth-early-audit.md');
 const JSON_PATH = path.join(REPORTS_DIR, 'p45-wealth-early-audit.json');
 

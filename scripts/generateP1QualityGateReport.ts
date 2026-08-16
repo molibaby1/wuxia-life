@@ -6,7 +6,7 @@ import { validateEventQuality } from './validateEventQuality';
 
 const DEFAULT_SEED = Number(process.env.P1_QUALITY_SEED || '1');
 const DEFAULT_MAX_AGE = Number(process.env.P1_QUALITY_MAX_AGE || '80');
-const OUTPUT_PATH = process.env.P1_QUALITY_OUTPUT || 'docs/test-reports/us-021-p1-quality-gate-report.md';
+const OUTPUT_PATH = process.env.P1_QUALITY_OUTPUT || 'artifacts/reports/us-021-p1-quality-gate-report.md';
 
 function runConditionExpressionChecks() {
   const evaluator = new ConditionEvaluator();
@@ -219,7 +219,7 @@ async function main() {
     conditionChecks,
   });
 
-  await mkdir('docs/test-reports', { recursive: true });
+  await mkdir('artifacts/reports', { recursive: true });
   await writeFile(OUTPUT_PATH, report, 'utf-8');
 
   console.log('[US-021] P1 quality gate report generated');

@@ -321,7 +321,7 @@ function writeTargetedProof(): void {
     '- `npm run test:sample-lines-routes` — flat patron/magnate/founding chain + baseline guard',
   ];
   writeFileSync(
-    join(process.cwd(), 'docs/test-reports/p117-founding-patriarch-late-life-targeted-proof.md'),
+    join(process.cwd(), 'artifacts/reports/p117-founding-patriarch-late-life-targeted-proof.md'),
     lines.join('\n') + '\n',
     'utf8',
   );

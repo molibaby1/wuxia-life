@@ -11,7 +11,7 @@ import {
 } from '../src/p18/validationSlices';
 import { gateChildEnv } from '../tests/qualityGatePolicy';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function runGateCommand(command: string, args: string[]): { ok: boolean; detail: string } {
   const result = spawnSync(command, args, {
@@ -116,7 +116,7 @@ function main(): void {
 
   fs.writeFileSync(path.join(REPORTS_DIR, 'p18-closure-report.md'), md, 'utf8');
 
-  console.log('Wrote docs/test-reports/p18-closure-report.{json,md}');
+  console.log('Wrote artifacts/reports/p18-closure-report.{json,md}');
   console.log(`P18 gate decision: ${gate.decision}`);
 
   if (gate.decision === 'fail' || !playability.ok || !p12.ok || !p17.ok) {

@@ -53,7 +53,7 @@ export function auditRedTeam(input: RedTeamInput): RedTeamResult {
       if (paths.some(p => /metricDefinitions|playabilityGate|threshold/i.test(p))) {
         findings.push({ code: 'mutate_gate_threshold', detail: `${sampleId} proposes gate mutation` });
       }
-      if (paths.some(p => /latest\.(md|json)|docs\/test-reports/i.test(p))) {
+      if (paths.some(p => /latest\.(md|json)|docs\/test-reports|tests\/fixtures\/gates/i.test(p))) {
         findings.push({
           code: 'overwrite_latest_report',
           detail: `${sampleId} proposes latest/report overwrite`,

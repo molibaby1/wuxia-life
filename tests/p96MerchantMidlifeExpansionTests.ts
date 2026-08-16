@@ -343,7 +343,7 @@ export async function runP96MerchantMidlifeExpansionTests(): Promise<void> {
   testCostLabelMidlife();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p96-merchant-26-40-midlife-expansion-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p96-merchant-26-40-midlife-expansion-chain-proof.md');
   writeFileSync(outPath, `${proof}\n`, 'utf8');
 }
 

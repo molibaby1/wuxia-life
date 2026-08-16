@@ -369,7 +369,7 @@ function writeChainProof(): void {
     '- Full North Star §8 Wave 2 pinnacle content wave',
     '- Midlife pressure chain between entry and payoff',
   ];
-  const outPath = join(process.cwd(), 'docs/test-reports/p113-founding-patriarch-bridge-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p113-founding-patriarch-bridge-chain-proof.md');
   writeFileSync(outPath, lines.join('\n') + '\n', 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);
 }

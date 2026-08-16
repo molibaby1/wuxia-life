@@ -1,6 +1,6 @@
 /**
  * US-004: Four-origin early childhood divergence audit (ages 0–7, headless).
- * Read-only validation — writes docs/test-reports/early-childhood-origin-divergence-stage2.md
+ * Read-only validation — writes artifacts/reports/early-childhood-origin-divergence-stage2.md
  */
 
 import fs from 'node:fs';
@@ -13,7 +13,7 @@ import type { EventDefinition } from '../src/types/eventTypes';
 
 const REPORT_PATH = path.join(
   process.cwd(),
-  'docs/test-reports/early-childhood-origin-divergence-stage2.md',
+  'artifacts/reports/early-childhood-origin-divergence-stage2.md',
 );
 
 const ORIGIN_TARGETS = [

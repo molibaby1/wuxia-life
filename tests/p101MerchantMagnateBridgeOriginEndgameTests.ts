@@ -293,7 +293,7 @@ export async function runP101MerchantMagnateBridgeOriginEndgameTests(): Promise<
   testBridgeChainReachableThroughEndgame();
 
   const proof = renderProofMarkdown();
-  const outPath = join(process.cwd(), 'docs/test-reports/p101-merchant-magnate-bridge-origin-endgame-chain-proof.md');
+  const outPath = join(process.cwd(), 'artifacts/reports/p101-merchant-magnate-bridge-origin-endgame-chain-proof.md');
   writeFileSync(outPath, proof, 'utf8');
   console.log(`Wrote proof artifact: ${outPath}`);
 }

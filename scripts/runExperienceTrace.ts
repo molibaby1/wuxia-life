@@ -10,7 +10,7 @@ import type { SessionPhase } from '../src/headless/session/sessionTypes';
 
 process.env.WUXIA_ENGINE_QUIET = '1';
 
-const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), 'docs/test-reports/experience-traces');
+const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), 'artifacts/reports/experience-traces');
 const PHASES: SessionPhase[] = [
   'story_event',
   'active_planning',

@@ -12,7 +12,7 @@ import { runHeadlessPersona } from '../src/headless/playability/headlessPersonaR
 import { adaptHeadlessRunToGameProcessReport } from '../src/headless/playability/adaptToGameProcessReport';
 import type { P8PlayabilityRuntimePath } from '../src/p8/types';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/gates');
 const DEFAULT_CATALOG_VERSION = '1.0.0';
 const ENGINE_VERSION = 'p8-headless-gate';
 

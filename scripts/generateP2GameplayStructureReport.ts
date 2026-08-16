@@ -5,7 +5,7 @@ import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 import { evaluateSimulationGate } from './gameplaySimulationGate';
 import { formatDiagnosticsMarkdownSection } from './gameplaySimulationDiagnostics';
 
-const OUTPUT_PATH = process.env.P2_GAMEPLAY_STRUCTURE_OUTPUT || 'docs/test-reports/us-023-p2-gameplay-structure-report.md';
+const OUTPUT_PATH = process.env.P2_GAMEPLAY_STRUCTURE_OUTPUT || 'artifacts/reports/us-023-p2-gameplay-structure-report.md';
 
 type CoverageCheck = {
   key: string;
@@ -222,7 +222,7 @@ async function main() {
     sampleReports,
   });
 
-  await mkdir('docs/test-reports', { recursive: true });
+  await mkdir('artifacts/reports', { recursive: true });
   await writeFile(OUTPUT_PATH, reportContent, 'utf-8');
 
   console.log('[US-023] P2 gameplay structure report generated');

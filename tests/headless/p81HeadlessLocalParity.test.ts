@@ -3,7 +3,7 @@ import { runHeadlessPersona } from '../../src/headless/playability/headlessPerso
 import { adaptHeadlessRunToGameProcessReport } from '../../src/headless/playability/adaptToGameProcessReport';
 import { getP8PersonaById } from '../../src/p8/personas';
 
-/** Parity tolerance per docs/designs/p8-1-headless-playability-gate.md */
+/** Parity tolerance per docs/designs/headless-playability-gate.md */
 const AGE_TOLERANCE = 2;
 /** Headless phase loop yields more micro-steps per calendar year than local_direct annual model. */
 const COUNT_RATIO_MAX = 8;

@@ -7,7 +7,7 @@ import { assembleP17GateReport, formatP17GateMarkdown } from '../src/p17/reportB
 import { runMidLateLifeValidationSlice } from '../src/p17/validationSlices';
 import { gateChildEnv } from '../tests/qualityGatePolicy';
 
-const REPORTS_DIR = path.join(process.cwd(), 'docs/test-reports');
+const REPORTS_DIR = path.join(process.cwd(), 'artifacts/reports');
 
 function runGateCommand(command: string, args: string[]): { ok: boolean; detail: string } {
   const result = spawnSync(command, args, {
@@ -121,8 +121,8 @@ function main(): void {
     'utf8',
   );
 
-  console.log('Wrote docs/test-reports/p17-closure-report.{json,md}');
-  console.log('Wrote docs/test-reports/p17-before-after-findings.md');
+  console.log('Wrote artifacts/reports/p17-closure-report.{json,md}');
+  console.log('Wrote artifacts/reports/p17-before-after-findings.md');
 }
 
 main();

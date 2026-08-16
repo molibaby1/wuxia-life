@@ -55,6 +55,7 @@ export function runPlayerObservableTranscriptTests(): void {
     steps: [{
       sequence: 1,
       kind: 'story_event',
+      age: 16,
       storyEvent: {
         eventId: 'internal-sect-choice',
         title: '山门抉择',
@@ -73,6 +74,7 @@ export function runPlayerObservableTranscriptTests(): void {
     }, {
       sequence: 2,
       kind: 'active_action_result',
+      age: 17,
       presentationCards: [{
         title: '练功',
         body: '你练了一季。',
@@ -85,6 +87,10 @@ export function runPlayerObservableTranscriptTests(): void {
   const projectedBytes = serializeObservablePayload(projected);
   assert.equal(projected.transcriptId, 'transcript-0001');
   assert.equal(projected.entries[0]?.entryId, 'entry-000001');
+  assert.equal(projected.entries[0]?.age, 16);
+  assert.equal(projected.entries[1]?.age, 17);
+  assert.equal(projectedBytes.includes('"age":16'), true);
+  assert.equal(projectedBytes.includes('"age":17'), true);
   assert.deepEqual(projected.entries[0]?.visibleChoices, [
     { choiceRef: 'choice-000001-01', label: '拜入山门', description: '从此潜心习武。' },
     { choiceRef: 'choice-000001-02', label: '转身离去' },
@@ -109,6 +115,22 @@ export function runPlayerObservableTranscriptTests(): void {
   assert.equal(
     serializeObservablePayload(projectHeadlessApiPlayerObservablePayload(source)),
     serializeObservablePayload(projectHeadlessApiPlayerObservablePayload(source)),
+  );
+
+  assert.throws(
+    () => serializeObservablePayload({
+      ...payload,
+      entries: [{ ...payload.entries[0]!, kind: 'not-a-kind' as ObservablePayload['entries'][number]['kind'] }],
+    }),
+    /ObservableEntryKind/i,
+  );
+
+  assert.throws(
+    () => serializeObservablePayload({
+      ...payload,
+      entries: [{ ...payload.entries[0]!, entryId: '' }],
+    }),
+    /entryId must be a non-empty string/i,
   );
 
   assert.throws(

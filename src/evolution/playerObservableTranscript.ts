@@ -9,6 +9,15 @@ export type ObservableEntryKind =
   | 'acknowledgement'
   | 'other';
 
+const OBSERVABLE_ENTRY_KINDS = new Set<ObservableEntryKind>([
+  'story_event',
+  'choice',
+  'active_action',
+  'summary',
+  'acknowledgement',
+  'other',
+]);
+
 export interface ObservableChoice {
   choiceRef: string;
   label: string;
@@ -82,9 +91,24 @@ function assertNoNull(value: unknown, path: string): void {
   }
 }
 
+function assertNonEmptyString(value: unknown, path: string): asserts value is string {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(`${path} must be a non-empty string`);
+  }
+}
+
+function assertOptionalString(value: unknown, path: string): asserts value is string | undefined {
+  if (value !== undefined && (typeof value !== 'string' || value.length === 0)) {
+    throw new Error(`${path} must be a non-empty string when present`);
+  }
+}
+
 function serializeChoice(choice: ObservableChoice, path: string): Record<string, unknown> {
   assertObject(choice, path);
   assertExactKeys(choice, CHOICE_KEYS, path);
+  assertNonEmptyString(choice.choiceRef, `${path}.choiceRef`);
+  assertNonEmptyString(choice.label, `${path}.label`);
+  assertOptionalString(choice.description, `${path}.description`);
   const serialized: Record<string, unknown> = {
     choiceRef: choice.choiceRef,
     label: choice.label,
@@ -97,6 +121,27 @@ function serializeEntry(entry: ObservableEntry, index: number): Record<string, u
   const path = `payload.entries[${index}]`;
   assertObject(entry, path);
   assertExactKeys(entry, ENTRY_KEYS, path);
+  assertNonEmptyString(entry.entryId, `${path}.entryId`);
+  if (typeof entry.kind !== 'string' || !OBSERVABLE_ENTRY_KINDS.has(entry.kind as ObservableEntryKind)) {
+    throw new Error(`${path}.kind must be a known ObservableEntryKind`);
+  }
+  if (entry.age !== undefined && (typeof entry.age !== 'number' || !Number.isFinite(entry.age))) {
+    throw new Error(`${path}.age must be a finite number when present`);
+  }
+  assertOptionalString(entry.title, `${path}.title`);
+  assertOptionalString(entry.body, `${path}.body`);
+  assertOptionalString(entry.selectedChoiceRef, `${path}.selectedChoiceRef`);
+  assertOptionalString(entry.visibleOutcome, `${path}.visibleOutcome`);
+  if (entry.visibleFeedbackLines !== undefined) {
+    if (!Array.isArray(entry.visibleFeedbackLines)) {
+      throw new Error(`${path}.visibleFeedbackLines must be an array`);
+    }
+    entry.visibleFeedbackLines.forEach((line, lineIndex) => {
+      if (typeof line !== 'string') {
+        throw new Error(`${path}.visibleFeedbackLines[${lineIndex}] must be a string`);
+      }
+    });
+  }
 
   const serialized: Record<string, unknown> = {
     entryId: entry.entryId,
@@ -106,6 +151,9 @@ function serializeEntry(entry: ObservableEntry, index: number): Record<string, u
   if (entry.title !== undefined) serialized.title = entry.title;
   if (entry.body !== undefined) serialized.body = entry.body;
   if (entry.visibleChoices !== undefined) {
+    if (!Array.isArray(entry.visibleChoices)) {
+      throw new Error(`${path}.visibleChoices must be an array`);
+    }
     serialized.visibleChoices = entry.visibleChoices.map((choice, choiceIndex) =>
       serializeChoice(choice, `${path}.visibleChoices[${choiceIndex}]`));
   }
@@ -128,6 +176,7 @@ export function serializeObservablePayload(payload: ObservablePayload): string {
   if (payload.surfaceId !== HEADLESS_API_PLAYER_SURFACE_ID) {
     throw new Error(`unsupported surfaceId: ${String(payload.surfaceId)}`);
   }
+  assertNonEmptyString(payload.transcriptId, 'payload.transcriptId');
   if (!Array.isArray(payload.entries)) {
     throw new Error('payload.entries must be an array');
   }

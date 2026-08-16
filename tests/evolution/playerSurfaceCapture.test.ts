@@ -86,6 +86,11 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
   assert.equal(JSON.stringify(actual).includes('secret-risk'), false);
   assert.equal(JSON.stringify(actual).includes('-99'), false);
 
+  assert.throws(
+    () => buildChoiceSurfacePresentation(story, 'missing-choice', feedback),
+    /not present in the player-visible choice set/i,
+  );
+
   const persona = P8_PERSONA_ROSTER[0];
   const capturedRun = await runHeadlessPersona({
     persona,
@@ -97,6 +102,14 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
   });
   assert.equal(capturedRun.playerSurfaceTrace?.schemaVersion, 'headless-api-player-surface-source-v1');
   assert.ok((capturedRun.playerSurfaceTrace?.steps.length ?? 0) > 0);
+  const capturedBytes = JSON.stringify(capturedRun.playerSurfaceTrace);
+  assert.equal(capturedBytes.includes('lockReason'), false);
+  assert.equal(capturedBytes.includes('"available":false'), false);
+  assert.equal(capturedBytes.includes('riskHints'), false);
+  assert.ok(
+    capturedRun.playerSurfaceTrace?.steps.some(step => typeof step.age === 'number'),
+    'captured surface should preserve age on at least one step',
+  );
 
   const ordinaryRun = await runHeadlessPersona({
     persona,

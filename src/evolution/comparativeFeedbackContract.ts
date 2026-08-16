@@ -44,8 +44,8 @@ function assertStringArray(value: unknown, path: string): asserts value is strin
     throw new Error(`${path} must be an array`);
   }
   value.forEach((item, index) => {
-    if (typeof item !== 'string') {
-      throw new Error(`${path}[${index}] must be a string`);
+    if (typeof item !== 'string' || item.length === 0) {
+      throw new Error(`${path}[${index}] must be a non-empty string`);
     }
   });
 }

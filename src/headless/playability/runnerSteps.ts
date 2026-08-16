@@ -220,13 +220,14 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     const stateBefore = snapshotStateForRecord(session);
     if (playerSurfaceCaptureEnabled(ctx)) {
       const pending = session.describePendingEvent();
-      if (pending) {
-        recordPlayerSurfaceStep(ctx, {
-          kind: 'story_event',
-          age,
-          storyEvent: capturePlayerSafeStoryEvent(pending),
-        });
+      if (!pending) {
+        throw new Error('player surface capture enabled but pending story event is missing');
       }
+      recordPlayerSurfaceStep(ctx, {
+        kind: 'story_event',
+        age,
+        storyEvent: capturePlayerSafeStoryEvent(pending),
+      });
     }
     await session.progressAutomatic({ maxSteps: 8 });
     const after = session.getRuntimeState();
@@ -255,15 +256,32 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
   let playerSafeStory: ReturnType<typeof capturePlayerSafeStoryEvent> | null = null;
   if (playerSurfaceCaptureEnabled(ctx)) {
     const pending = session.describePendingEvent();
-    playerSafeStory = pending ? capturePlayerSafeStoryEvent(pending) : null;
+    if (!pending) {
+      throw new Error('player surface capture enabled but pending story event is missing');
+    }
+    playerSafeStory = capturePlayerSafeStoryEvent(pending);
   }
   const selection = selectPersonaChoice(session, catalogEvent, persona);
   if (!selection?.choice?.id) {
+    if (playerSafeStory) {
+      recordPlayerSurfaceStep(ctx, {
+        kind: 'story_event',
+        age,
+        storyEvent: playerSafeStory,
+      });
+    }
     await afterStoryProgression(ctx);
     return;
   }
   const choiceId = selection.choice.id;
   if (!catalogEvent.choices?.some(c => c.id === choiceId)) {
+    if (playerSafeStory) {
+      recordPlayerSurfaceStep(ctx, {
+        kind: 'story_event',
+        age,
+        storyEvent: playerSafeStory,
+      });
+    }
     await afterStoryProgression(ctx);
     return;
   }

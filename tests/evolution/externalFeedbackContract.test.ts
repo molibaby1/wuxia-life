@@ -99,6 +99,14 @@ export function runExternalFeedbackContractTests(): void {
     /feedback/i,
   );
 
+  assert.throws(
+    () => parseExternalFeedback(JSON.stringify({
+      overallImpression: '印象。',
+      observations: [{ feedback: '观察。', evidenceRefs: [''] }],
+    })),
+    /evidenceRefs\[0\] must be a non-empty string/i,
+  );
+
   const subjectiveText = '这十年非常无聊，完全不值得玩。';
   const subjective = parseExternalFeedback(JSON.stringify({
     overallImpression: subjectiveText,

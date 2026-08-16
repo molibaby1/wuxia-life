@@ -419,7 +419,7 @@ async function testNoOpenEndedAccess(): Promise<void> {
   const refs = investigationEvidenceRefs(pack);
   assert.ok(refs.has('feedback:observations[3]'));
   assert.ok(refs.has('source-catalog:family_marriage'));
-  assert.ok(refs.has('catalog-comparison:love_story') || refs.size > 0);
+  assert.ok(refs.has('catalog-comparison:love_story'));
 }
 
 function trainingSurface(input?: {

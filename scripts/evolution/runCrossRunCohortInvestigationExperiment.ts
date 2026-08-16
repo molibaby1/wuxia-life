@@ -1,5 +1,5 @@
 import { open, lstat, mkdir, readFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   buildCohortEvidenceBundle,
@@ -13,7 +13,8 @@ import {
 import { prepareCohortRuntimeWorkspace } from './crossRunCohortInvestigation/prepareRuntimeWorkspace';
 import { runCohortPhase0Batch } from './crossRunCohortInvestigation/runCohortPhase0';
 import { runHypothesisInvestigation } from './runHypothesisInvestigation';
-import { canonicalJson, sha256Hex } from './phase0/provenance';
+import { canonicalJson, sha256Hex, validatePhase0RunSeal } from './phase0/provenance';
+import { serializeObservablePayload } from '../../src/evolution/playerObservableTranscript';
 
 const EXPERIMENT_ROOT = '.tmp/evolution/cross-run-cohort-investigation-evidence';
 const SEALED_ANCHOR_OBSERVABLE =
@@ -117,18 +118,37 @@ export async function prepareCohortExperimentMaterials(repositoryRoot = process.
   return { planPath, compositionPath, mappingPath, phase0OutRoot };
 }
 
+function assertChildPathUnderRoot(root: string, candidate: string, label: string): string {
+  const resolvedRoot = resolve(root);
+  const resolvedCandidate = resolve(candidate);
+  const rel = relative(resolvedRoot, resolvedCandidate);
+  if (!rel || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
+    throw new Error(`${label} escapes required root: ${candidate}`);
+  }
+  return resolvedCandidate;
+}
+
 export async function assembleCohortEvidenceForInvestigation(input: {
   repositoryRoot?: string;
   mappingPath: string;
+  phase0OutRoot?: string;
 }): Promise<{
   items: ReturnType<typeof cohortEvidenceItems>;
   bundleHash: string;
   sealedLongitudinalHash: string;
 }> {
   const root = resolve(input.repositoryRoot ?? process.cwd());
+  const phase0OutRoot = resolve(
+    input.phase0OutRoot ?? join(root, EXPERIMENT_ROOT, 'phase0'),
+  );
   const mapping = JSON.parse(await readFile(input.mappingPath, 'utf8')) as {
     plan: Parameters<typeof buildCohortEvidenceBundle>[0]['plan'];
-    runs: Array<{ cohortRunId: string; outDir: string }>;
+    runs: Array<{
+      cohortRunId: string;
+      outDir: string;
+      experimentRootHash?: string;
+      observablePayloadHash?: string;
+    }>;
   };
   if (mapping.runs.length !== 8) {
     throw new Error('cohort run mapping must contain exactly 8 runs');
@@ -136,7 +156,26 @@ export async function assembleCohortEvidenceForInvestigation(input: {
 
   const runs = [];
   for (const run of mapping.runs) {
-    const artifacts = await loadCohortRunArtifacts({ gameRunPath: run.outDir });
+    if (typeof run.experimentRootHash !== 'string' || run.experimentRootHash.length === 0) {
+      throw new Error(`cohort run ${run.cohortRunId} is missing experimentRootHash`);
+    }
+    const outDir = assertChildPathUnderRoot(
+      phase0OutRoot,
+      run.outDir,
+      `cohort run ${run.cohortRunId} outDir`,
+    );
+    await validatePhase0RunSeal(outDir, run.experimentRootHash);
+    const artifacts = await loadCohortRunArtifacts({ gameRunPath: outDir });
+    if (typeof run.observablePayloadHash === 'string' && run.observablePayloadHash.length > 0) {
+      const serializedHash = sha256Hex(
+        Buffer.from(serializeObservablePayload(artifacts.payload), 'utf8'),
+      );
+      if (serializedHash !== run.observablePayloadHash) {
+        throw new Error(
+          `cohort run ${run.cohortRunId} observablePayloadHash mismatch: expected ${run.observablePayloadHash}, got ${serializedHash}`,
+        );
+      }
+    }
     runs.push({
       cohortRunId: run.cohortRunId,
       payload: artifacts.payload,
@@ -147,10 +186,6 @@ export async function assembleCohortEvidenceForInvestigation(input: {
   const items = cohortEvidenceItems(bundle);
 
   const sealedBytes = await readFile(join(root, SEALED_LONGITUDINAL_EVIDENCE), 'utf8');
-  const sealedHash = sha256Hex(sealedBytes.includes('\n')
-    ? canonicalJson(JSON.parse(sealedBytes))
-    : sealedBytes);
-  // Sealed file may already be canonical JSON text; prefer parsing then re-canonicalizing.
   const sealedCanonicalHash = sha256Hex(canonicalJson(JSON.parse(sealedBytes)));
   if (sealedCanonicalHash !== SEALED_LONGITUDINAL_HASH) {
     throw new Error(
@@ -161,9 +196,7 @@ export async function assembleCohortEvidenceForInvestigation(input: {
   return {
     items,
     bundleHash: sha256Hex(canonicalJson(bundle)),
-    sealedLongitudinalHash: sealedHash === SEALED_LONGITUDINAL_HASH
-      ? sealedHash
-      : sealedCanonicalHash,
+    sealedLongitudinalHash: sealedCanonicalHash,
   };
 }
 
@@ -248,6 +281,7 @@ export async function runCrossRunCohortInvestigationExperiment(input: {
   const assembled = await assembleCohortEvidenceForInvestigation({
     repositoryRoot: root,
     mappingPath,
+    phase0OutRoot: join(root, EXPERIMENT_ROOT, 'phase0'),
   });
 
   const apiKey = process.env.DEEPSEEK_API_KEY;

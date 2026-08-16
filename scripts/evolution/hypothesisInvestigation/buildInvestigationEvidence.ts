@@ -450,7 +450,11 @@ export async function buildInvestigationEvidence(input: {
 
   for (const entryId of selected.evidenceRefs) {
     const mapped = entryToStep.get(entryId);
-    if (!mapped) continue;
+    if (!mapped) {
+      throw new Error(
+        `selected evidenceRef ${entryId} has no mapped player-surface source step`,
+      );
+    }
     const { step } = mapped;
 
     if (step.kind === 'story_event' && step.storyEvent?.eventId) {

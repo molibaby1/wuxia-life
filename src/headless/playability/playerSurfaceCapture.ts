@@ -91,9 +91,13 @@ export function buildChoiceSurfacePresentation(
   story: HeadlessApiSurfaceStoryEvent,
   selectedChoiceId: string,
   feedback: ChoiceFeedbackModel,
-): HeadlessApiSurfacePresentationCard | null {
+): HeadlessApiSurfacePresentationCard {
   const selectedChoice = story.choices?.find(choice => choice.id === selectedChoiceId);
-  if (!selectedChoice) return null;
+  if (!selectedChoice) {
+    throw new Error(
+      `selected choice ${selectedChoiceId} is not present in the player-visible choice set`,
+    );
+  }
 
   const card = buildChoiceFeedbackOverlayCard(
     'surface-choice-result',
@@ -102,7 +106,11 @@ export function buildChoiceSurfacePresentation(
     feedback,
     [selectedChoice.text, selectedChoice.description],
   );
-  return captureProgressionOverlayCard(card);
+  const presentation = captureProgressionOverlayCard(card);
+  if (!presentation) {
+    throw new Error(`failed to build player-visible presentation for choice ${selectedChoiceId}`);
+  }
+  return presentation;
 }
 
 export function buildActiveActionSurfacePresentation(

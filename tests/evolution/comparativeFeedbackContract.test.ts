@@ -173,7 +173,19 @@ export function runComparativeFeedbackContractTests(): void {
         experienceBRefs: [],
       }],
     })),
-    /experienceARefs\[0\] must be a string/i,
+    /experienceARefs\[0\] must be a non-empty string/i,
+  );
+
+  assert.throws(
+    () => parseComparativeFeedback(JSON.stringify({
+      overallComparison: '比较。',
+      observations: [{
+        comparison: '观察。',
+        experienceARefs: [''],
+        experienceBRefs: ['entry-000002'],
+      }],
+    })),
+    /experienceARefs\[0\] must be a non-empty string/i,
   );
 
   const subjectiveText = '我更喜欢 Experience B，但这只是我的主观偏好。';

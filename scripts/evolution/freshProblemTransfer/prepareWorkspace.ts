@@ -9,7 +9,7 @@ import {
   readlink,
   symlink,
 } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { sha256Hex } from '../phase0/provenance';
 
 export const SELECTED_BASELINE_COMMIT_SHA =
@@ -178,6 +178,14 @@ export async function validateCandidateManifest(
     if (entry.objectKind === 'symlink' && !stat.isSymbolicLink()) {
       throw new Error(`Candidate manifest entry is not a symlink: ${entry.path}`);
     }
+    if (entry.objectKind === 'symlink') {
+      await assertSafeRelativeSymlink(
+        options.sourceWorkspace,
+        sourcePath,
+        await readlink(sourcePath),
+        'Candidate manifest',
+      );
+    }
     const actual = await hashManifestObject(sourcePath, entry.objectKind);
     if (actual !== entry.sha256) {
       throw new Error(`Candidate manifest hash mismatch: ${entry.path}`);
@@ -228,10 +236,36 @@ export function validateRuntimeDelta(candidateWorkspace: string, repositoryRoot:
   }
 }
 
-async function copyCreateOnly(source: string, target: string, objectKind: CandidateManifestEntry['objectKind']): Promise<void> {
+async function assertSafeRelativeSymlink(
+  workspaceRoot: string,
+  linkPath: string,
+  linkText: string,
+  label: string,
+): Promise<void> {
+  if (isAbsolute(linkText)) {
+    throw new Error(`${label} refuses absolute symlink target: ${linkPath}`);
+  }
+  const resolvedTarget = resolve(dirname(linkPath), linkText);
+  const escaped = relative(resolve(workspaceRoot), resolvedTarget);
+  if (!escaped || escaped === '..' || escaped.startsWith(`..${sep}`) || isAbsolute(escaped)) {
+    throw new Error(`${label} symlink escapes workspace: ${linkPath} -> ${linkText}`);
+  }
+}
+
+async function copyCreateOnly(
+  sourceRoot: string,
+  destinationRoot: string,
+  relativePath: string,
+  objectKind: CandidateManifestEntry['objectKind'],
+): Promise<void> {
+  const source = pathFor(sourceRoot, relativePath);
+  const target = pathFor(destinationRoot, relativePath);
   await mkdir(dirname(target), { recursive: true });
   if (objectKind === 'symlink') {
-    await symlink(await readlink(source), target);
+    const linkText = await readlink(source);
+    await assertSafeRelativeSymlink(sourceRoot, source, linkText, 'source');
+    await assertSafeRelativeSymlink(destinationRoot, target, linkText, 'destination');
+    await symlink(linkText, target);
     return;
   }
   await copyFile(source, target, fsConstants.COPYFILE_EXCL);
@@ -299,8 +333,9 @@ export async function prepareFreshProblemWorkspace(
   for (const entry of verification.manifest.entries) {
     if (OVERLAY_SET.has(entry.path) && entry.path !== FAMILY_LIFE_PATH) continue;
     await copyCreateOnly(
-      pathFor(sourceCandidateWorkspace, entry.path),
-      pathFor(destinationWorkspace, entry.path),
+      sourceCandidateWorkspace,
+      destinationWorkspace,
+      entry.path,
       entry.objectKind,
     );
   }
@@ -308,7 +343,7 @@ export async function prepareFreshProblemWorkspace(
     const source = pathFor(repositoryRoot, overlayPath);
     const stat = await lstat(source);
     if (!stat.isFile()) throw new Error(`overlay must be a regular file: ${overlayPath}`);
-    await copyCreateOnly(source, pathFor(destinationWorkspace, overlayPath), 'regular_file');
+    await copyCreateOnly(repositoryRoot, destinationWorkspace, overlayPath, 'regular_file');
   }
 
   const familyTarget = pathFor(destinationWorkspace, FAMILY_LIFE_PATH);

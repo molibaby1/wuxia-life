@@ -3,7 +3,7 @@
 用途：滚动看板——回答「现在做到哪、允许做什么、禁止做什么」。
 不是长期产品规范，不是实施流水账。
 
-最后更新：2026-08-16（Skeleton 001–007 = CLOSED / Human accepted；Second-Problem Transfer Experiment = CLOSED / Human accepted；Modification Work Uncertainty Preservation Experiment = CLOSED / Human accepted；Fresh-Problem Candidate Transfer Experiment = CLOSED / Human accepted；Longitudinal Investigation Evidence Experiment = CLOSED / Human accepted；Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending；Candidate C = experimental baseline only；origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED）
+最后更新：2026-08-16（Skeleton 001–007 = CLOSED / Human accepted；Second-Problem Transfer Experiment = CLOSED / Human accepted；Modification Work Uncertainty Preservation Experiment = CLOSED / Human accepted；Fresh-Problem Candidate Transfer Experiment = CLOSED / Human accepted；Longitudinal Investigation Evidence Experiment = CLOSED / Human accepted；Cross-Run Cohort Investigation Evidence Experiment = CLOSED / Human accepted；Candidate C = experimental baseline only；origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED）
 
 ---
 
@@ -43,7 +43,7 @@ Evidence（sealed，immutable）：
 
 Fresh-Problem Candidate Transfer Experiment 已 **CLOSED / Human accepted**；当前没有 active evolution design / plan，下一项 evolution 工作仍 **尚未授权**。
 
-**Cross-Run Cohort Investigation Evidence Experiment** 已由 Human 直接授权，当前为 **ACTIVE / Human final review pending**。真实 Investigation 已完成（exactly 1 call）；不得进入 Modification Work、生成 Candidate、修改 gameplay，或开启 successor experiment。
+**Cross-Run Cohort Investigation Evidence Experiment** 已 **CLOSED / Human accepted**。真实 Investigation 已完成（exactly 1 call）；不得进入 Modification Work、生成 Candidate、修改 gameplay，或开启 successor experiment。
 
 ## 1.1 Fresh-Problem Candidate Transfer Experiment（CLOSED）
 
@@ -106,10 +106,14 @@ Evidence：`.tmp/evolution/longitudinal-investigation-evidence/`（preserved，i
 
 本阶段只验证同一个 sealed run 内，Investigation 是否能沿正式 active-action identity 与显式 positive resource cost 关系补齐 bounded longitudinal player-observable evidence。不得修改 gameplay、Investigation participant prompt/response contract、旧 Fresh-Problem artifacts 或进入后续 evolution。
 
-## 1.3 Cross-Run Cohort Investigation Evidence Experiment（ACTIVE — Human final review pending）
+## 1.3 Cross-Run Cohort Investigation Evidence Experiment（CLOSED — Human accepted）
 
 ```text
-Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending
+Cross-Run Cohort Investigation Evidence Experiment = CLOSED / Human accepted
+Human review:
+COHORT_RETRIEVAL_ADEQUATE
+INVESTIGATION_USED_COHORT
+UNCERTAINTY_PRESERVED
 baseline = Candidate C experimental baseline only
 cohort = exactly 8 preregistered P8 runs
 anchor p8-scholar-su / seed 101 = excluded from cohort
@@ -119,22 +123,31 @@ signal = exact player-observable pressure lines only
 evidenceMode = cohort-v1
 real Investigation calls = exactly 1
 retry = 0
-provider = deepseek
+provider = DeepSeek
 model = deepseek-v4-flash
 investigationInvocationRef = ae-fresh-problem-transfer-001-hypothesis-000001-deepseek-hypothesis-investigation-cohort-001
+descriptive result = 8 / 8 cohort runs contained the preregistered player-visible money-pressure signal
+sealed participant evidence contained = all 8 cohort runs; all matched pressure entries; per-run pressure counts
+Human deterministic read-only reconstruction = total pressure occurrences = 201
+cross-run bounded cohort evidence = proven on this fixed pre-registered P8 cohort
+population prevalence = NOT proven
+root cause = NOT proven
+resource income / full resource dynamics = NOT established
+systemic balance problem = NOT proven
+known experiment-control deviation = all 38 longitudinal-v1 evidence items were preserved, but cohort-v1 sorted all items by evidenceId; cohort items preceded longitudinal items rather than preserving strict longitudinal-prefix + appended-cohort ordering
+strict append-only input-order isolation = NOT claimed
+post-call deterministic fields = totalOccurrences / runsWithoutPressure / age-range summary fields were added after the real call and were not part of sealed Participant input
+sealed Human review package / Investigation artifacts = preserved; not rewritten
 Modification Work = NOT authorized / NOT run
 Candidate = NOT authorized / NOT generated
 gameplay = unchanged
-Human final review = pending
+Candidate transfer = NOT proven
+gameplay / origin = unchanged
+origin promotion / production retain / autonomous loop = NOT AUTHORIZED
+next evolution work = NOT AUTHORIZED
 ```
 
 Evidence（create-only）：`.tmp/evolution/cross-run-cohort-investigation-evidence/`
-
-Human must independently decide:
-
-1. `COHORT_RETRIEVAL_ADEQUATE` / `COHORT_RETRIEVAL_NOT_ADEQUATE`
-2. `INVESTIGATION_USED_COHORT` / `INVESTIGATION_DID_NOT_USE_COHORT`
-3. `UNCERTAINTY_PRESERVED` / `UNCERTAINTY_NOT_PRESERVED`
 
 Descriptive cohort counts (including 8/8) are not population prevalence.
 
@@ -166,6 +179,11 @@ Descriptive cohort counts (including 8/8) are not population prevalence.
 | same explicit active-action resource relation | **proven as bounded retrieval** |
 | Investigation used newly supplied longitudinal evidence | **proven on this fixed case** |
 | longitudinal genuine remaining uncertainty | **cross-run prevalence NOT proven；resource income / full resource dynamics NOT established；systemic balance problem NOT proven** |
+| cross-run bounded cohort evidence | **proven on this fixed pre-registered P8 cohort** |
+| population prevalence | **NOT proven** |
+| root cause | **NOT proven** |
+| resource income / full resource dynamics | **NOT established** |
+| systemic balance problem | **NOT proven** |
 | Investigation epistemic handoff v2（本固定实验） | **proven** |
 | MW v2 fresh-case epistemic generalization | **supported on one fresh case** |
 | proposal product acceptance | **NOT evaluated** |
@@ -328,12 +346,27 @@ Candidate transfer = NOT proven
 gameplay = unchanged
 origin promotion / production retain / autonomous loop / next evolution = NOT AUTHORIZED
 
-Cross-Run Cohort Investigation Evidence Experiment = ACTIVE / Human final review pending
+Cross-Run Cohort Investigation Evidence Experiment = CLOSED / Human accepted
 cohort plan / eight Phase0 runs / cohort-v1 evidence = GENERATED
 real Investigation = completed (exactly 1 call, retry = 0)
-Human final review = pending
+Human review = COHORT_RETRIEVAL_ADEQUATE / INVESTIGATION_USED_COHORT / UNCERTAINTY_PRESERVED
+cohort = exactly 8 preregistered P8 runs
+descriptive result = 8 / 8 cohort runs contained the preregistered player-visible money-pressure signal
+sealed participant evidence = all 8 cohort runs; all matched pressure entries; per-run pressure counts
+Human deterministic read-only reconstruction = total pressure occurrences = 201
+cross-run bounded cohort evidence = proven on this fixed pre-registered P8 cohort
+population prevalence = NOT proven
+root cause = NOT proven
+resource income / full resource dynamics = NOT established
+systemic balance problem = NOT proven
+known limitation = cohort-v1 sorted all items by evidenceId; strict longitudinal-prefix + appended-cohort ordering is not claimed
+post-call deterministic fields = not part of sealed Participant input; sealed artifacts remain unchanged
 Modification Work / Candidate / gameplay modification = NOT AUTHORIZED
-do not rerun Investigation, add seeds/personas, inspect resource dynamics, or start a successor experiment
+Candidate transfer = NOT proven
+gameplay / origin = unchanged
+origin promotion / production retain / autonomous loop = NOT AUTHORIZED
+next evolution work = NOT AUTHORIZED
+do not rerun Investigation, rewrite real-call artifacts or Human review package, call Modification Work, generate Candidate, add personas/seeds, begin resource-dynamics work, or start a successor experiment
 ```
 
 ## 15. 一分钟检查单
@@ -343,6 +376,6 @@ do not rerun Investigation, add seeds/personas, inspect resource dynamics, or st
 3. Uncertainty Preservation？→ CLOSED / Human accepted；UNCERTAINTY_PRESERVED；handoff proven on fixed case；proposal NOT evaluated；Candidate NOT generated
 4. Fresh-Problem Candidate Transfer？→ CLOSED / Human accepted；4 calls；2 hypotheses；hypothesis-000001；no_proposal；Candidate NOT generated
 5. Longitudinal Investigation Evidence？→ CLOSED / Human accepted；RETRIEVAL_ADEQUATE；INVESTIGATION_USED；UNCERTAINTY_PRESERVED；1 call；Candidate NOT generated
-6. Cross-Run Cohort Investigation Evidence？→ ACTIVE / Human final review pending；cohort-v1；1 call；Candidate NOT generated
+6. Cross-Run Cohort Investigation Evidence？→ CLOSED / Human accepted；COHORT_RETRIEVAL_ADEQUATE；INVESTIGATION_USED_COHORT；UNCERTAINTY_PRESERVED；cohort-v1；1 call；Candidate NOT generated
 7. Candidate C？→ experimental baseline only
 8. origin promotion / production retain / autonomous loop / next evolution？→ **NOT AUTHORIZED**

@@ -514,7 +514,7 @@ function resolveNegativeEffectDomains(stateBefore: GameState, effects: EffectDef
       }
     } else if (effect.type === 'status_add' && !beforeStatuses.has(effect.status)) {
       domains.add(statusDomain(effect.status));
-    } else if (String(effect.type) === 'ending_set' || (effect.type === 'flag_set' && effect.target === 'player_died')) {
+    } else if (String(effect.type) === 'ending_set' || (effect.type === 'special' && effect.target === 'end_life')) {
       domains.add('life');
     }
   }

@@ -777,7 +777,7 @@ export class CompositeEffectHandler implements EffectHandler {
 }
 
 /**
- * 特殊效果处理器（处理 end_game 等特殊效果）
+ * 特殊效果处理器（处理 end_game、end_life 等特殊效果）
  */
 export class SpecialEffectHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
@@ -793,6 +793,24 @@ export class SpecialEffectHandler implements EffectHandler {
         player: {
           ...state.player,
           spouse: spouseName,
+        },
+      };
+    }
+
+    if (target === 'end_life') {
+      if (typeof effect.value !== 'string' || effect.value.trim().length === 0) {
+        throw new Error('end_life requires a non-empty death reason');
+      }
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          alive: false,
+          deathReason: effect.value,
+        },
+        flags: {
+          ...state.flags,
+          gameEnded: true,
         },
       };
     }

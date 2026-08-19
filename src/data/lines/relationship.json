@@ -150,6 +150,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "sworn_help_full",
         "text": "全力相助（需武力≥70，侠义 +15）",
         "description": "全力相助可守住侠义，却会让你的功力、体魄与名望承受损失，这是必须付出的代价。",
         "conditions": [
@@ -163,6 +164,7 @@
         ]
       },
       {
+        "id": "sworn_help_financial",
         "text": "提供资金支持（金钱 -200）",
         "conditions": [
           {"type": "expression", "expression": "money >= 200"}
@@ -174,6 +176,7 @@
         ]
       },
       {
+        "id": "sworn_help_stand_aside",
         "text": "袖手旁观（侠义 -20）",
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": -20},

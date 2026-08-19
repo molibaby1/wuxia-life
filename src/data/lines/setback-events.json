@@ -174,13 +174,8 @@
         "operator": "add"
       },
       {
-        "type": "flag_set",
-        "target": "player_died",
-        "value": true
-      },
-      {
-        "type": "flag_set",
-        "target": "death_reason",
+        "type": "special",
+        "target": "end_life",
         "value": "英年早逝"
       }
     ],

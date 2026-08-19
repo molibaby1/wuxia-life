@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-11T11:12:09.723Z",
+  "generatedAt": "2026-08-18T13:06:14.787Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -18,8 +18,8 @@
     "byStatus": {
       "active": 36,
       "candidate": 69,
-      "broken": 60,
-      "deferred": 254,
+      "broken": 58,
+      "deferred": 256,
       "dead": 0
     },
     "byFileStatus": {
@@ -2528,12 +2528,12 @@
       "eventId": "family_child_education",
       "sourceFile": "family-life.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 28,
       "ageMax": 45,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "family_crisis",
@@ -6994,12 +6994,12 @@
       "eventId": "relationship_sworn_help",
       "sourceFile": "relationship.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "File classified deferred for golden line"
     },
     {
       "eventId": "relationship_enemy_create",

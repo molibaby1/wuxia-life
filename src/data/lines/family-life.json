@@ -320,6 +320,7 @@
     },
     "choices": [
       {
+        "id": "child_education_martial",
         "text": "习武：传承你的武学",
         "effects": [
           {
@@ -330,6 +331,7 @@
         ]
       },
       {
+        "id": "child_education_scholar",
         "text": "读书：考取功名 (学识 +10, 人脉 +10)",
         "effects": [
           {
@@ -352,6 +354,7 @@
         ]
       },
       {
+        "id": "child_education_merchant",
         "text": "从商：继承家业 (财富 +50)",
         "effects": [
           {

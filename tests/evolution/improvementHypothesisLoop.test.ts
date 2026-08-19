@@ -11,6 +11,7 @@ import {
 import { DEEPSEEK_PLAYER_EXPERIENCE_MODEL } from '../../scripts/evolution/externalFeedback/deepseekPlayerExperienceFeedback';
 import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalExternalFeedback';
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
+import { proveLegacyParticipantFailure } from '../../scripts/evolution/problemAgnosticSolution/participantFailureRouting';
 
 const API_KEY = 'sk-test-key-not-real';
 const FORBIDDEN_PROVIDER_INPUT_MARKERS = [
@@ -159,6 +160,7 @@ export async function runImprovementHypothesisLoopTests(): Promise<void> {
   await testZeroHypothesesCompletedSuccess();
   await testMultipleHypothesesIndependentIds();
   await testInvalidReferenceFails();
+  await testContractFailurePersistsSchemaForProof();
   await testProviderFailure();
   await testNoReplaceBeforeInvoke();
 }
@@ -370,6 +372,45 @@ async function testInvalidReferenceFails(): Promise<void> {
   assert.match(report, new RegExp(source.feedbackInvocationRef));
   assert.match(report, /failed/);
   assert.doesNotMatch(report, /participant wrong|participant 错误/i);
+}
+
+async function testContractFailurePersistsSchemaForProof(): Promise<void> {
+  const sourceRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-src-contract-'));
+  const outRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-out-contract-'));
+  const runRef = 'hyp-loop-contract-fail';
+  await createSource(sourceRoot, runRef);
+  const participantJson = JSON.stringify({
+    hypotheses: [{
+      hypothesis: 'Potential issue.',
+      observedBasis: 'Observed basis.',
+      feedbackRefs: ['overallImpression'],
+      evidenceRefs: [],
+      unknowns: ['Unknown.'],
+    }],
+  });
+
+  await assert.rejects(
+    () => runImprovementHypothesis(
+      { runRef, sourceRoot, outRoot, apiKey: API_KEY },
+      { invoke: successInvoke(participantJson, { callCount: 0 }) },
+    ),
+    /productSignificance/,
+  );
+
+  const invocation = JSON.parse(
+    await readFile(join(outRoot, 'hypothesis-runs', runRef, 'invocation.json'), 'utf8'),
+  ) as Record<string, unknown>;
+  assert.equal(invocation.hypothesisInvocationRef, `${runRef}-deepseek-improvement-hypothesis-001`);
+  assert.equal('invocationRef' in invocation, false);
+  assert.equal(invocation.status, 'failed');
+  assert.equal(invocation.errorKind, 'parse');
+
+  const proved = await proveLegacyParticipantFailure({
+    experimentRoot: outRoot,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef,
+  });
+  assert.equal(proved?.participantErrorKind, 'parse');
 }
 
 async function testProviderFailure(): Promise<void> {

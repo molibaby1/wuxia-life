@@ -59,6 +59,7 @@ async function loadDotEnvIfPresent(path = DOTENV_PATH): Promise<void> {
 
 export interface RunMinimalExternalFeedbackOptions {
   runRef: string;
+  sourceRunPath?: string;
   persona: P8Persona;
   seed: number;
   endAge: number;
@@ -266,6 +267,22 @@ async function saveRawResponses(
   }
 }
 
+async function loadSealedPhase0Source(
+  outDir: string,
+  runRef: string,
+): Promise<{ outDir: string; experimentRootHash: string; observablePayloadHash: string }> {
+  const expectedRootHash = (await readFile(join(outDir, 'experiment-root.sha256'), 'utf8')).trim();
+  await validatePhase0RunSeal(outDir, expectedRootHash);
+  const manifest = JSON.parse(await readFile(join(outDir, 'experiment-root.json'), 'utf8')) as { runRef?: string };
+  if (manifest.runRef !== runRef) throw new Error(`sealed Phase 0 source runRef mismatch: expected ${runRef}`);
+  const observablePayloadBytes = await readFile(join(outDir, ALLOWED_OBSERVABLE_REL), 'utf8');
+  return {
+    outDir,
+    experimentRootHash: expectedRootHash,
+    observablePayloadHash: sha256Hex(observablePayloadBytes),
+  };
+}
+
 export async function runMinimalExternalFeedback(
   options: RunMinimalExternalFeedbackOptions,
   testHooks: RunMinimalExternalFeedbackTestHooks = {},
@@ -285,16 +302,18 @@ export async function runMinimalExternalFeedback(
   await assertTargetAbsent(anchorPath, 'Phase 0 anchor target');
   await assertTargetAbsent(feedbackDir, 'feedback run target');
 
-  const phase0 = await runPhase0({
-    runRef,
-    persona: options.persona,
-    seed: options.seed,
-    endAge: options.endAge,
-    catalogVersion: options.catalogVersion,
-    ...(options.maxSteps !== undefined ? { maxSteps: options.maxSteps } : {}),
-    outRoot: gameRunsRoot,
-    anchorRoot,
-  });
+  const phase0 = options.sourceRunPath
+    ? await loadSealedPhase0Source(resolve(options.sourceRunPath), runRef)
+    : await runPhase0({
+      runRef,
+      persona: options.persona,
+      seed: options.seed,
+      endAge: options.endAge,
+      catalogVersion: options.catalogVersion,
+      ...(options.maxSteps !== undefined ? { maxSteps: options.maxSteps } : {}),
+      outRoot: gameRunsRoot,
+      anchorRoot,
+    });
 
   await validatePhase0RunSeal(phase0.outDir, phase0.experimentRootHash);
 

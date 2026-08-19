@@ -1,0 +1,179 @@
+import assert from 'node:assert/strict';
+import {
+  parseProblemPackage,
+  type ProblemPackageV1,
+} from '../../src/evolution/problemPackageContract';
+import {
+  parseSolutionWork,
+  type SolutionWorkV1,
+} from '../../src/evolution/solutionWorkContract';
+import {
+  parseSolutionReview,
+  type SolutionReviewV1,
+} from '../../src/evolution/solutionReviewContract';
+import {
+  parseSolutionDecision,
+  type SolutionDecisionV1,
+} from '../../src/evolution/solutionDecisionContract';
+
+const problemPackage: ProblemPackageV1 = {
+  schemaVersion: 'problem-package-v1',
+  problemId: 'problem-000001',
+  source: {
+    runRef: 'cohort-run-000001',
+    observablePayloadRef: 'source/observable-payload.json',
+    externalFeedbackRef: 'feedback/feedback.json',
+    improvementHypothesisRef: 'hypothesis/hypotheses.json',
+  },
+  problem: {
+    hypothesisId: 'hypothesis-000001',
+    statement: 'A fresh product problem.',
+    observedBasis: 'Observed basis.',
+    feedbackRefs: ['observations[0]'],
+    evidenceRefs: ['entry-000001'],
+    unknowns: ['Unknown.'],
+    productSignificance: 'Significance.',
+  },
+  authorityRefs: ['docs/product/auto-evolution-model.md'],
+  productSourceFingerprintSha256: 'a'.repeat(64),
+  permissions: {
+    authoritativeProductWrite: false,
+    sandboxWrite: true,
+    productExecution: false,
+    codeExecution: false,
+  },
+};
+
+const solutionWork: SolutionWorkV1 = {
+  schemaVersion: 'solution-work-v1',
+  status: 'OPTIONS',
+  problemId: problemPackage.problemId,
+  options: [{
+    optionId: 'option-000001',
+    proposedChange: 'Change one authorized setting.',
+    rationale: 'It addresses the observed issue.',
+    repoRefs: ['src/example.ts'],
+    artifactRefs: ['source/observable-payload.json'],
+    changeScope: 'configuration',
+    expectedPlayerObservableDifference: 'The next run differs visibly.',
+    risks: [],
+    unknowns: ['Whether the setting is sufficient.'],
+  }],
+  recommendedOptionId: 'option-000001',
+  summary: 'One option.',
+  repoRefs: ['src/example.ts'],
+  artifactRefs: ['source/observable-payload.json'],
+};
+
+const solutionReview: SolutionReviewV1 = {
+  schemaVersion: 'solution-review-v1',
+  problemId: problemPackage.problemId,
+  decision: 'ACCEPT_OPTION',
+  acceptedOptionId: 'option-000001',
+  scopeAssessment: 'config_only',
+  assessment: 'The option is bounded.',
+  repoRefs: ['src/example.ts'],
+  artifactRefs: ['source/observable-payload.json'],
+  concerns: [],
+};
+
+const solutionDecision: SolutionDecisionV1 = {
+  schemaVersion: 'solution-decision-v1',
+  problemId: problemPackage.problemId,
+  route: 'READY_FOR_CONFIG_EXECUTION',
+  reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE',
+  inputs: {
+    solutionStatus: 'OPTIONS',
+    reviewerDecision: 'ACCEPT_OPTION',
+    solutionScope: 'configuration',
+    reviewScope: 'config_only',
+    permissions: {
+      authoritativeProductWrite: false,
+      sandboxWrite: true,
+      productExecution: false,
+      codeExecution: false,
+    },
+    budget: {
+      actualParticipantJobs: 4,
+      maxParticipantJobs: 4,
+      retryCount: 0,
+    },
+  },
+};
+
+export function runProblemAgnosticSolutionContractTests(): void {
+  assert.deepEqual(parseProblemPackage(JSON.stringify(problemPackage)), problemPackage);
+  assert.deepEqual(parseSolutionWork(JSON.stringify(solutionWork)), solutionWork);
+  assert.deepEqual(parseSolutionReview(JSON.stringify(solutionReview)), solutionReview);
+  assert.deepEqual(parseSolutionDecision(JSON.stringify(solutionDecision)), solutionDecision);
+
+  for (const forbidden of [
+    'problemType',
+    'domain',
+    'resourceStat',
+    'mechanismType',
+    'investigationMode',
+    'allowedMechanismRefs',
+  ]) {
+    assert.throws(
+      () => parseProblemPackage(JSON.stringify({ ...problemPackage, [forbidden]: 'forbidden' })),
+      new RegExp(`unknown field.*${forbidden}`),
+    );
+  }
+
+  assert.throws(
+    () => parseSolutionWork(JSON.stringify({ ...solutionWork, unexpected: true })),
+    /unknown field.*unexpected/,
+  );
+  assert.throws(
+    () => parseSolutionReview(JSON.stringify({ ...solutionReview, unexpected: true })),
+    /unknown field.*unexpected/,
+  );
+  assert.throws(
+    () => parseSolutionDecision(JSON.stringify({ ...solutionDecision, unexpected: true })),
+    /unknown field.*unexpected/,
+  );
+
+  assert.throws(
+    () => parseSolutionWork(JSON.stringify({
+      ...solutionWork,
+      options: [
+        ...solutionWork.options,
+        { ...solutionWork.options[0], optionId: 'option-000004' },
+        { ...solutionWork.options[0], optionId: 'option-000005' },
+      ],
+    })),
+    /at most three|option/i,
+  );
+  assert.throws(
+    () => parseSolutionWork(JSON.stringify({
+      ...solutionWork,
+      options: [{ ...solutionWork.options[0], optionId: 'option-000002' }],
+    })),
+    /participant order|option-000001/i,
+  );
+  assert.throws(
+    () => parseSolutionReview(JSON.stringify({
+      ...solutionReview,
+      acceptedOptionId: 'bad-option',
+    })),
+    /acceptedOptionId/i,
+  );
+  assert.throws(
+    () => parseSolutionDecision(JSON.stringify({
+      ...solutionDecision,
+      inputs: {
+        ...solutionDecision.inputs,
+        solutionScope: 'program',
+        reviewScope: 'config_only',
+      },
+      route: 'READY_FOR_CONFIG_EXECUTION',
+    })),
+    /configuration|scope|route/i,
+  );
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runProblemAgnosticSolutionContractTests();
+  console.log('problemAgnosticSolutionContracts.test.ts: ok');
+}

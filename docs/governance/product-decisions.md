@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-08-14
+> 最后更新：2026-08-17
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -639,6 +639,89 @@ Codex 可以在当前阶段目标和边界内自主闭环普通工程问题。
 Codex 达成当前阶段目标后必须停止，不得顺带进入相邻系统。
 
 ---
+
+
+### PD-062：Auto Evolution 采用 problem-agnostic Agent Workflow Orchestrator
+
+**正式语义**
+
+Auto Evolution 的核心框架定位为：
+
+> **面向 Wuxia-Life 产品演化的 Agent Workflow Orchestrator。Orchestrator owns workflow; Agents own reasoning.**
+
+Orchestrator 长期负责跨问题的流程责任：
+
+- Role / Participant 调度；
+- context / evidence references；
+- read / write permissions；
+- provenance；
+- output contract；
+- workflow state；
+- call / retry budget；
+- `CONTINUE / SKIP / DEFER / ESCALATE / STOP`。
+
+具体产品问题的理解、源码阅读、调查、根因假设、方案形成和 trade-off 判断由承担相应 Role 的 Agent / Participant 完成。
+
+因此：
+
+- 框架原则上不需要知道问题属于 money、marriage、combat、achievement 等领域；
+- 新问题出现后，不默认为 Orchestrator 增加该问题专用 analyzer / observer / evidence pipeline；
+- Agent 在一次工作中使用的临时脚本或调查方法不自动成为 shared infrastructure；
+- 只有某项能力在多个独立问题中反复证明跨领域、稳定且值得长期维护，才重新裁决是否升级为 shared capability。
+
+当前自动执行的 scale 目标优先限制在**配置层修改**。如果 Agent 判断必须修改程序、Runtime、Framework、正式 Contract / Schema 等更高风险范围：
+
+```text
+ESCALATE TO HUMAN
+```
+
+单次 Human 授权代码级工作不自动扩大未来所有飞轮的长期写权限。
+
+Auto Evolution 也明确允许无解和失败：
+
+```text
+NO_PROPOSAL
+INSUFFICIENT_EVIDENCE
+REVIEW_REJECTED
+SKIP
+DEFER
+ESCALATE
+```
+
+都可以是正常 workflow outcome。系统不为了保证每个问题都有满意答案而持续增加领域专用框架能力。
+
+**对已有 Auto Evolution 工作的含义**
+
+继续有效：
+
+- PD-055；
+- Role / Participant；
+- player-observable boundary；
+- provenance / sealed artifacts；
+- experiment / Candidate isolation；
+- execution → real rerun → new evidence；
+- Human Gate / fail-closed STOP。
+
+Bounded Resource Dynamics experiment 在 deterministic continuity blocker 处停止，真实 Investigation 调用为 0。该 blocker 不授权 money-specific observability corrective；Human 明确选择本条新的 orchestration 方向。
+
+**明确不做**
+
+本条不：
+
+- 定义 Problem Package 的最终 schema；
+- 固定 Investigation / Reviewer prompt；
+- 建设 generic Agent SDK / provider registry；
+- 授权新的 Auto Evolution 代码实现；
+- 授权 Money Dynamics corrective；
+- 授权 autonomous code modification；
+- 要求删除历史 sealed evidence。
+
+**重新讨论条件**
+
+- 多个独立问题反复需要同一项跨领域能力，且 Agent 临时完成产生明显重复成本；
+- 产品明确希望扩大自动写权限到程序 / Runtime / Framework；
+- 实际 workflow 证明 Problem Package / Role / Reviewer 边界不足以支持未知问题处理；
+- 需要改变当前 `SKIP / DEFER / ESCALATE` 的容错语义。
 
 ## 10. 更新模板
 

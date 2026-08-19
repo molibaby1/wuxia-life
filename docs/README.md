@@ -7,16 +7,16 @@
 ### 产品规范（第一层）
 
 - [玩家模型](product/player-model.md)：江湖世界玩家状态的当前权威规范。
-- [Auto Evolution 产品模型](product/auto-evolution-model.md)：借助外部参与者改进游戏的当前权威产品规范。
+- [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator 的当前权威产品规范。
 
-二者同属第一层产品规范，职责分离：`player-model` 负责人物模型；`auto-evolution-model` 负责 Auto Evolution 产品模型。互不替代。
+二者同属第一层产品规范，职责分离：`player-model` 负责人物模型；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Agent 帮助 Wuxia-Life 改进自己。互不替代。
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions（含 PD-055）。
-- [当前产品阶段](governance/current-product-stage.md)：滚动看板；当前授权与停止边界。
-- [项目收敛](governance/project-convergence.md)：长期收敛原则。
-- [AI 协作流程](governance/ai-collaboration-workflow.md)：ChatGPT / Codex / 人工协作协议。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向见 PD-055、PD-062。
+- [当前产品阶段](governance/current-product-stage.md)：滚动看板；当前授权、STOP 与下一项允许工作。
+- [项目收敛](governance/project-convergence.md)：长期收敛原则，包含 problem-agnostic orchestration 的复杂度约束。
+- [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作、Auto Evolution Role/Participant 分工、权限与升级边界。
 
 ### 契约
 
@@ -26,33 +26,53 @@
 
 ### 架构与运行
 
-- [本地 API 联调](local-api-dev.md)：PostgreSQL + API + Vite；含环境变量与部署摘要
-- [Release Validation](release-validation-contract.md)、[Stability Gate](stability-gate.md)、测试环境与输出约定
-- [Artifact 约定](artifact-output-convention.md)：`artifacts/gates/`、`artifacts/reports/` 与 tracked fixtures
-- `designs/`：当前仍需长期理解的技术设计（含 v1.0 launch 规则）
-- Headless / Web 边界：见 `contracts/headless-snapshot-conversion-boundary.md`、`contracts/web-runtime-adapter-boundary.md`
+- [本地 API 联调](local-api-dev.md)：PostgreSQL + API + Vite；含环境变量与部署摘要。
+- [Release Validation](release-validation-contract.md)、[Stability Gate](stability-gate.md)、测试环境与输出约定。
+- [Artifact 约定](artifact-output-convention.md)：`artifacts/gates/`、`artifacts/reports/` 与 tracked fixtures。
+- `designs/`：当前仍需长期理解的技术设计（含 v1.0 launch 规则）。
+- Headless / Web 边界：见 `contracts/headless-snapshot-conversion-boundary.md`、`contracts/web-runtime-adapter-boundary.md`。
 
 ### 历史（极少）
 
-- [Auto Evolution 方向重置（2026-08）](history/2026-08-auto-evolution-direction-reset.md)：Reviewer Calibration 退出与 PD-055 / 新产品模型接替的压缩记录。
+- [Auto Evolution 方向重置：Reviewer Calibration 退出（2026-08）](history/2026-08-auto-evolution-direction-reset.md)：PD-055 与第一版外部 Participant 产品模型的压缩历史。
+- [Auto Evolution 方向校准：Agent Workflow Orchestrator（2026-08）](history/2026-08-auto-evolution-agent-workflow-reset.md)：从领域专用 evidence / analyzer 扩展转向 problem-agnostic Agent orchestration 的压缩历史。
+
+## 当前 Auto Evolution 工作入口
+
+当前 Auto Evolution 不以新的 money / marriage / combat 等领域专用 analyzer 作为默认推进方式。
+
+当前方向是：
+
+```text
+真实体验 / 问题
+→ 轻量 Problem Package
+→ Agent 自主调查 / 提案
+→ 独立 Agent Review
+→ 配置层执行，或 SKIP / DEFER / ESCALATE
+→ 新的真实运行与观察
+```
+
+Orchestrator 负责工作流、上下文引用、权限、provenance、状态与 STOP；具体问题如何理解和解决由承担 Role 的 Agent 完成。
+
+当前允许的下一项工作见 `governance/current-product-stage.md`。不要从历史实验名或旧 Superpowers plan 推断下一阶段。
 
 ## 权威层级
 
-1. 本文件明确列出的产品规范；
-2. 本文件明确列出的当前架构和接口契约；
-3. 当前任务明确指定的已批准设计文档；
+1. 本文件明确列出的第一层产品规范；
+2. 本文件明确列出的当前治理、架构和接口契约；
+3. 当前任务明确指定且仍 active 的 accepted design；
 4. 其他未分类文档不具有产品规则权威性。
 
-`docs/superpowers/**` 属于第 4 类工作区材料（见下），**不是**第一层产品 authority。
-Human acceptance of a spec / plan **不会**自动把它升级为永久产品语义。
+`docs/superpowers/**` 是临时工作区材料，**不是**第一层产品 authority。Human acceptance of a spec / plan 不会自动把它升级为永久产品语义。
 
 ## 冲突处理规则
 
 - 发现冲突时不得自行综合不同方案；
 - 以更高层级的文档为准；
-- 无法判断层级或适用范围时，停止并向用户报告；
+- 无法判断层级或适用范围时，停止并向 Human 报告；
 - 测试存在不代表旧产品行为必须保留；
-- 已实现代码、测试通过、某次 Human Gate acceptance，都不能自动覆盖本文件列出的产品规范；不得用 sunk cost 反向提升其产品权威。
+- 已实现代码、测试通过、某次 Human Gate acceptance，都不能自动覆盖第一层产品规范；
+- 临时 Agent 调查方法也不能仅因一次工作有效就升级成长期 framework capability。
 
 ## 文档生命周期
 
@@ -66,51 +86,31 @@ designs/          # 已形成且仍需长期维护的技术设计
 history/          # 极少；仅重大方向转折压缩记录
 ```
 
-以及本文件索引的操作手册（如 `local-api-dev.md`）。
+以及本文件索引的操作手册。
 
 ### 当前工作区（临时）
 
 ```text
-docs/superpowers/specs/   # 当前活跃、经 Human Review 的设计 spec
-docs/superpowers/plans/   # 当前活跃、经批准的 implementation plan
+docs/superpowers/specs/
+docs/superpowers/plans/
 ```
 
 - 目录按需存在；空目录不提交。
-- 只放**正在推进**且后续实施会依赖的文档。
-- 任务完成 / 退休 / 被替代后必须清场：过程性内容 DELETE（靠 Git）；长期语义精炼进入 `product/` / `governance/` / `contracts/` / `designs/` / 极少数 `history/`。
+- 只放**正在推进**且后续实施会依赖的设计 / plan。
+- 任务完成、退休或被新产品方向替代后必须清场：过程性内容 DELETE（依靠 Git history）；长期语义精炼进入 `product/`、`governance/`、`contracts/`、`designs/` 或极少数 `history/`。
 - 不重建 `handoffs/`、`session-prompts/` 作为长期目录。
 
-### `designs/` vs `superpowers/specs/`
+当前 Bounded Resource Dynamics experiment 已在 deterministic blocker 处停止，并被新的 Agent Workflow 方向取代；其 active Superpowers spec / plan 不应继续留在当前工作区。
 
-| 位置 | 含义 |
-| --- | --- |
-| `superpowers/specs/` | 当前正在设计 / 准备实施的活跃工作规范 |
-| `designs/` | 已经形成、现在仍需要长期理解和维护的技术设计 |
+## 新会话读取顺序
 
-Spec 写得好也不自动进入 `designs/`。问：实施完成后，未来维护者是否仍需把它当当前系统设计读？否 → DELETE。
+默认读取：
 
-### 可以进入 docs
+1. `AGENTS.md`
+2. `docs/README.md`
+3. 与任务相关的第一层产品规范
+4. `governance/product-decisions.md`
+5. `governance/current-product-stage.md`
+6. 与任务直接相关的 Contract / 当前 active design
 
-- 正式产品规范、长期 Product Decision、当前治理状态
-- 稳定 Contract、当前真实架构说明、当前操作手册
-- 极少数重大历史转折（压缩记录）
-- 当前活跃 superpowers spec/plan（临时）
-
-### 默认不进入 docs
-
-- 临时分析、Codex handoff、session prompt
-- 任务完成报告、进度总结、一次性 implementation report
-- 测试运行结果 / gate latest（写入 `artifacts/` 或 `.tmp/`）
-- 普通 bugfix 过程、自动生成报告
-
-### 删除原则
-
-已完成、已替代、已失效且无持续参考价值的文档应从 worktree 删除。
-不要因为“以前重要”“曾经 Human accepted”“花了很多时间”“以后也许有用”而保留。
-
-### 生成输出
-
-- Gate / 阶段 proof：`artifacts/gates/`
-- 其他脚本与测试运行报告：`artifacts/reports/`
-- Tracked P8 baseline：`tests/fixtures/gates/`
-- **禁止**把运行结果默认写回 `docs/test-reports/`
+不要遍历全部历史 PRD、实验 closure 或 `.tmp` 来推断产品方向。

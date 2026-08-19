@@ -1,16 +1,9 @@
 # Wuxia-Life Auto Evolution 产品模型
 
-> 状态：当前权威规范
->
-> 日期：2026-08-14 Human Review 接受
->
-> 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Auto Evolution 方案、Phase 路线图、Reviewer Calibration design / plan / handoff 不得指导新实现。
->
+> 状态：当前权威规范  
+> 日期：2026-08-17 Human Direction Reset  
+> 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Phase、实验 spec / plan、领域专用 investigation 路线不得覆盖本文件。  
 > 与 `docs/product/player-model.md` 同属第一层产品规范：player-model 负责人物模型；本文件负责 Auto Evolution 产品模型。
->
-> 适用范围：Wuxia-Life 中所有借助真人、LLM 或其他外部系统获取体验反馈、设计建议、比较意见，并据此改进游戏的能力。
->
-> 本规范定义产品方向，不授权任何具体实现、Phase 2、participant framework、Planner、Verifier 或正式配置修改。
 
 ---
 
@@ -18,433 +11,438 @@
 
 Wuxia-Life 的目标是改进游戏本身。
 
-自动演化系统的基本做法是：让一个或多个外部参与者接触游戏产生的信息，请他们从指定角度体验、观察或思考，然后把他们返回的意见作为改进游戏的输入。
+Auto Evolution 的长期探索目标是：
 
-最上层关系是：
+> **把 Human 反复执行的“观察游戏 → 把问题交给 AI → AI 读源码和证据 → 提出方案 → 审核 → 执行 → 再观察”的工作方式，抽成一套轻量、可重复、可审计、允许失败的 Agent workflow。**
 
-```text
-Wuxia-Life 产生一次游戏体验
-        ↓
-把参与者应该看到的信息交给外部参与者
-        ↓
-外部参与者以某个角色完成一项工作
-        ↓
-返回自己的观察、判断或建议
-        ↓
-Wuxia-Life 决定如何利用这些反馈
-        ↓
-只修改 Wuxia-Life 自己
-        ↓
-重新运行游戏，再获得新的外部反馈
-```
+核心系统不是一个预先知道所有游戏问题如何解决的专家系统。
 
-系统的优化对象始终是 Wuxia-Life 自己，而不是外部参与者。
+它是：
+
+> **面向 Wuxia-Life 产品演化的 Agent Workflow Orchestrator。**
+
+长期原则：
+
+> **Orchestrator owns workflow. Agents own reasoning.**
 
 ---
 
-## 2. 核心概念
+## 2. 核心抽象
 
-### 2.1 外部参与者（External Participant）
+### 2.1 Orchestrator
 
-外部参与者是接收 Wuxia-Life 提供的信息并返回结果的外部实体。
+Orchestrator 负责流程控制，不负责替 Agent 解决具体产品问题。
 
-它可以是：
+它主要拥有：
 
-- 一个 LLM；
-- 一个真人；
-- 一个由多人组成的评审者；
-- 一个其他外部系统。
+- Role 调度；
+- Participant / Agent 调用；
+- 输入引用与上下文边界；
+- read / write 权限；
+- provenance 与 artifact identity；
+- output contract；
+- 状态转换；
+- retry / budget policy；
+- `CONTINUE / SKIP / DEFER / ESCALATE / STOP`。
 
-Wuxia-Life 核心产品语义不依赖参与者的内部实现。
+Orchestrator 原则上不需要知道问题属于银两、婚姻、战斗、剧情、成就、节奏或任何未来尚未出现的领域。
 
-核心系统不需要知道参与者：
+如果实现开始依赖：
 
-- 使用哪个模型；
-- 使用什么内部 prompt；
-- 如何推理；
-- 是真人还是机器；
-- 为什么形成某个主观判断。
+```text
+if problemType === money
+if problemType === marriage
+if problemType === combat
+```
 
-这些都属于参与者内部。
+应首先检查 Product Direction Drift。
 
-### 2.2 角色（Role）
+### 2.2 Role
 
-角色表示“希望参与者完成什么工作”，而不是“某一种 AI”。
+Role 表示“需要完成什么工作”。
 
 例如：
 
-- 体验一段人生并描述哪里有趣、无聊、奇怪或难以理解；
-- 阅读若干体验反馈并提出游戏修改建议；
-- 比较两个游戏版本并说明自己更偏好哪一个以及原因。
+- 体验并描述问题；
+- 调查一个问题并形成可能方案；
+- 独立审核方案；
+- 执行已接受的修改；
+- 验证修改后的真实运行。
 
-同一个参与者可以承担不同角色；不同参与者也可以承担同一个角色。
+Role 不是某种固定模型，也不是必须永久对应一个独立 Agent 实例。
 
-因此：
+### 2.3 Participant / Agent
 
-```text
-角色 = 工作
-参与者 = 完成这项工作的外部实体
-```
+Participant 是完成 Role 的外部实体，可以是 LLM、真人、Agent Runtime 或其他系统。
 
-Reviewer、Planner、Verifier 等词如果未来继续使用，只能表示一种工作职责或任务语义，不得天然升级为需要认证、训练或优化的特殊 AI 类型。
-
-### 2.3 输入材料（Participant Input）
-
-输入材料是 Wuxia-Life 主动提供给外部参与者的信息。
-
-系统必须决定：
-
-- 参与者应该看到什么；
-- 哪些信息不得看到；
-- 信息是否来自真实、允许的产品表面；
-- 是否包含实验身份、隐藏状态或 oracle 信息。
-
-Phase 0 已建立的 player-observable information boundary 属于这一层的有效基础能力。
-
-### 2.4 参与者回答（Participant Response）
-
-参与者回答是外部参与者返回的结果。
-
-结果可能包含：
-
-- 主观体验；
-- 观察；
-- 偏好；
-- 问题描述；
-- 修改建议；
-- 比较结论；
-- 拒绝回答或表示信息不足。
-
-参与者的主观回答首先表示“这个参与者就是这样认为的”。
-
-Wuxia-Life 不为这种主观体验提供 gold answer。
-
-### 2.5 产品决策（Product Decision）
-
-参与者回答不是自动修改命令。
-
-Wuxia-Life 可以：
-
-- 接受某条建议；
-- 拒绝某条建议；
-- 综合多条意见；
-- 只把它作为探索线索；
-- 暂时不采取行动。
-
-因此：
+核心关系继续保持：
 
 ```text
-参与者反馈
-≠ 标准答案
-≠ 自动修改命令
+Role = 工作
+Participant = 完成工作的人或外部系统
 ```
 
-最终允许改变什么，由 Wuxia-Life 自己的产品边界、实验边界和修改权限决定。
+Participant 可以根据 Role 获得被授权的 repository、source、规范、runtime artifacts、player-observable evidence 和工具权限。
+
+**如何调查具体问题属于 Participant 的工作。**
+
+Agent 可以：
+
+- 搜索源码；
+- 阅读相关实现；
+- 检查 artifacts；
+- 运行允许的命令；
+- 编写临时调查脚本；
+- 比较多个方案；
+- 返回 `NO_PROPOSAL` 或 `INSUFFICIENT_EVIDENCE`。
+
+一次 Agent 工作中使用的临时方法，不自动成为 Auto Evolution 的长期 framework capability。
+
+### 2.4 Problem Package
+
+Problem Package 是轻量的信息与权限包，不是领域模型。
+
+它只需要表达类似：
+
+- 当前待处理问题 / improvement candidate；
+- 问题从哪里观察到；
+- 可读取的 evidence / artifact / repository authority 引用；
+- 允许使用的工具；
+- 当前 read / write 权限；
+- 当前 STOP / escalation boundary。
+
+长期原则：
+
+> **Problem Package references evidence. Agent interprets evidence.**
+
+Orchestrator 不应在交给 Agent 之前先完成问题分类、根因建模或解决方案选择。
 
 ---
 
-## 3. 黑盒边界
+## 3. 最小 Agent-driven evolution loop
 
-外部参与者在产品模型中按黑盒处理。
-
-Wuxia-Life 负责：
-
-1. 定义任务；
-2. 准备允许的输入；
-3. 将输入交给参与者；
-4. 接收回答；
-5. 验证通信和行为边界；
-6. 保存必要的来源与结果；
-7. 决定如何使用反馈；
-8. 只修改自身允许修改的部分。
-
-Wuxia-Life 不负责：
-
-- 让参与者变得更聪明；
-- 训练第三方模型；
-- 证明参与者具有“正确审美”；
-- 调整参与者直到其意见符合 Wuxia-Life 预设答案；
-- 建立一个统一标准判断参与者应该如何感受。
-
-如果更换参与者后得到不同意见，这首先是外部反馈发生了变化，不自动意味着系统故障。
-
----
-
-## 4. 可以验证什么
-
-Wuxia-Life 可以确定性验证可由自身合同定义的事实。
-
-例如：
-
-- 返回格式是否符合约定；
-- 必填字段是否存在；
-- 引用的 transcript / event / record 是否真实存在；
-- 输入是否泄漏了不允许的信息；
-- 参与者是否请求了超出当前修改范围的操作；
-- 输出是否违反明确的协议或安全边界。
-
-这些属于通信、来源和操作合法性。
-
-如果参与者对输入材料提出可核对的事实断言，例如“记录里发生过 X”，Wuxia-Life 也可以检查这项事实是否真的存在。这里验证的是事实一致性，不是参与者由这些事实产生的感受是否正确。
-
----
-
-## 5. 不验证什么
-
-Wuxia-Life 不对参与者的主观体验建立正确答案。
-
-例如下面的回答本身不存在由 Wuxia-Life 判定的正确或错误：
-
-> “这一段很无聊。”
->
-> “我没理解为什么会发生这件事。”
->
-> “我更喜欢版本 A。”
->
-> “这个选择让我感觉没有意义。”
-
-Wuxia-Life 可以验证回答引用的客观事实是否存在，但不得因为主观结论不符合预设标签，就把参与者判定为“不合格”。
-
-长期原则是：
-
-> **验证协议、来源和可观察事实；不考试参与者的主观感受。**
-
-本条与 `docs/governance/product-decisions.md` 的 PD-055 一致；PD-055 是已完成裁决的决策账本条目，本文件是完整产品模型。
-
----
-
-## 6. 反馈真实性与产品采纳是两回事
-
-“不判断参与者感受对错”不意味着“参与者说什么就照做”。
-
-例如：
-
-> “我讨厌所有随机事件。”
-
-这是一份合法的参与者反馈。
-
-Wuxia-Life 可以仍然决定保留随机事件，因为产品还需要考虑其他反馈、产品目标、游戏规则和人工判断。
-
-所以系统必须保持两层独立：
+当前目标飞轮是：
 
 ```text
-第一层：参与者表达自己的体验
-第二层：Wuxia-Life 决定怎样使用这个体验
+真实 Wuxia-Life 运行
+↓
+player-observable evidence
+↓
+问题 / 改善机会形成
+↓
+Problem Package
+↓
+Investigation / Solution Participant
+  - 读取允许的源码与 evidence
+  - 自主调查
+  - 形成 0..N 个方案
+  - 可选择推荐方案
+↓
+Independent Reviewer Participant
+  - 审核问题-方案匹配
+  - 审核依据、风险和权限边界
+↓
+Decision
+├─ 没有可接受方案 → SKIP / DEFER
+├─ 需要程序级修改 → ESCALATE TO HUMAN
+└─ 接受的配置层修改
+       ↓
+    Execution Participant / Runtime
+       ↓
+    verification
+       ↓
+    修改后的 Wuxia-Life 真实运行
+       ↓
+    新的 player-observable evidence
+       ↓
+    下一轮入口
 ```
 
-不得把第二层的产品选择反向包装成“第一层参与者的感觉是错误的”。
+关键不是每个问题都有解，而是不同未知问题可以复用同一套 orchestration。
 
 ---
 
-## 7. 优化边界
+## 4. Agent Owns Problem Solving
 
-Wuxia-Life 自动演化可以改变的对象，只能来自 Wuxia-Life 自己拥有并明确授权修改的范围。
+Auto Evolution 不以“框架把每种问题分析得越来越完整”为产品目标。
 
-例如未来可能包括：
+面对未知问题，默认方向是：
 
-- 游戏配置；
-- 内容；
-- 调度参数；
-- 文案；
-- 某些明确允许的规则。
+```text
+提供正确 authority / source / evidence / 权限
+↓
+让承担 Investigation / Solution Role 的 Agent 自己处理
+```
 
-具体允许范围必须由独立阶段授权定义。
+而不是：
 
-外部参与者不属于优化对象。
+```text
+发现 money 问题
+↓
+框架增加 money-specific analyzer
+↓
+发现 marriage 问题
+↓
+框架增加 marriage-specific analyzer
+```
 
-因此下面的方向不属于产品主线：
+只有当某项能力在多个独立问题中反复证明：
 
-- 优化 Reviewer 本身；
-- 用 gold labels 训练 Reviewer 更符合预设意见；
-- 把 Reviewer qualification 作为自动演化前置产品阶段；
-- 把不同模型的主观一致率当作游戏正确性的证明。
+- 跨领域；
+- 稳定；
+- 明显减少重复工作；
+- 不迫使 Orchestrator 理解具体领域；
+- 长期维护价值高于 Agent 临时完成；
 
----
-
-## 8. 继续有效的既有能力
-
-### 8.1 Player-observable information boundary
-
-Phase 0 中已经建立的玩家可见信息边界继续有效。
-
-它解决的问题是：
-
-> 如果一个外部参与者被要求以玩家视角评价一次体验，他应该只看到真实玩家能够看到的材料。
-
-即使外部参与者换成真人，这一能力仍成立。
-
-因此它属于通用产品基础，而不是 Reviewer Calibration 的专属前置步骤。
-
-### 8.2 Experiment isolation
-
-实验配置与正式游戏配置必须隔离。
-
-实验可以在独立实例中运行，但不得因为外部参与者提出建议，就自动污染或写回正式产品配置。
-
-B1.0 已证明的实例级 candidate catalog / overlay 隔离能力继续作为有效工程基础存在。
-
-### 8.3 Modification boundary
-
-外部建议必须经过 Wuxia-Life 自己的允许范围。
-
-参与者可以提出范围外建议，但系统不得因此自动扩大修改权限。
-
-这里验证的是“这个操作是否被授权”，不是“这个建议是否聪明”。
+才单独考虑升级为 shared tooling / infrastructure。
 
 ---
 
-## 9. 明确退休的旧方向
+## 5. 外部意见与 Reviewer 边界
 
-以下机制不属于当前 Auto Evolution 产品模型：
+PD-055 继续完整有效。
 
-- 为参与者主观判断建立 gold answer；
-- 用 precision / recall 衡量参与者是否和 gold answer 一致；
-- 用 evidence-to-gold matching 判断体验意见正确性；
-- 用重复调用一致性作为参与者是否有资格发表体验意见的前置考试；
-- development / sealed-qualification 生命周期；
-- Freeze Checkpoint；
-- Reviewer qualification gate；
-- 通过调 prompt / context 让参与者越来越接近预设主观答案；
-- 证明某个模型像“正确玩家”一样思考。
+Participant feedback、Investigation、Solution Proposal 和 Review 都是外部工作结果。
 
-这些内容可以保留在 Git 历史和已标记 retired 的历史文档中，但不得继续指导当前实现。
+它们不是：
+
+- gold answer；
+- 产品真理；
+- 必然正确的因果结论；
+- 自动修改命令；
+- Participant qualification。
+
+Reviewer 也是一个独立 Participant，不是 gold-answer checker。
+
+Reviewer 的职责是基于当前问题、方案、证据和权限做独立判断，例如：
+
+```text
+ACCEPT
+REJECT
+REQUEST_MORE_WORK
+DEFER
+ESCALATE
+```
+
+Reviewer 可以判断错。系统不试图通过框架穷举所有错误并保证 Reviewer 永远正确。
 
 ---
 
-## 10. 暂时不设计的内容
+## 6. Fault Tolerance Is Normal
 
-本规范故意不回答：
+Auto Evolution 不要求每一个问题必须得到解决。
 
-- 使用 GPT、Claude 还是其他模型；
-- 一次使用几个参与者；
-- 是否需要真人参与；
-- 如何聚合多个参与者的意见；
-- 是否需要 Blind A/B；
-- Planner 的具体实现；
-- 自动修改哪些正式配置；
-- candidate promotion；
-- population evaluation；
-- 通用 Participant SDK；
+以下都是正常 workflow outcome：
+
+```text
+PROPOSAL
+NO_PROPOSAL
+INSUFFICIENT_EVIDENCE
+REVIEW_ACCEPTED
+REVIEW_REJECTED
+SKIP
+DEFER
+ESCALATE
+STOP
+```
+
+一个问题没有满意方案，不等于整条飞轮失败。
+
+系统应保存必要的 problem context、Agent output、review result 和 provenance，让问题可以：
+
+- 被跳过；
+- 延后；
+- 未来交给更强模型；
+- 交给不同 Participant；
+- 升级给 Human。
+
+不要为了让飞轮“每轮都成功”而不断把具体问题解决逻辑固化进框架。
+
+---
+
+## 7. Player-observable 与内部 authority
+
+Phase 0 建立的 player-observable boundary 继续有效。
+
+当 Role 是“以玩家体验为依据评价游戏”时，输入必须保持玩家实际可见。
+
+但 Investigation / Solution Agent 可以在授权范围内读取 repository、source code 和内部工程 artifacts，因为它承担的是工程 / 产品调查工作，而不是模拟玩家。
+
+Orchestrator 必须明确区分：
+
+- player-observable evidence；
+- repository / runtime authority；
+- Agent 的推断；
+- Reviewer 的意见。
+
+内部工程事实不得被重新标记成 player-observable fact。
+
+---
+
+## 8. Configuration / Code Boundary
+
+当前阶段优先 scale 的自动写入范围是：
+
+> **已授权的配置层修改。**
+
+在方案被 Reviewer 接受且没有越权时，配置层工作可以进入自动执行、验证和重新运行。
+
+如果 Agent 判断真正解决问题必须修改：
+
+- 程序代码；
+- Runtime；
+- Framework；
+- 正式 Contract / Schema；
+- 其他超出当前写权限的基础能力；
+
+默认：
+
+```text
+ESCALATE TO HUMAN
+```
+
+Human 可以针对该具体问题授权代码级工作，但单次授权不自动扩大未来所有飞轮的长期权限。
+
+这个边界的目的不是禁止程序演化，而是让高频、低风险的配置迭代与低频、高风险的代码变更拥有不同控制面。
+
+---
+
+## 9. Orchestrator 应该强在哪里
+
+框架应优先增强这些跨问题能力：
+
+- 谁承担哪个 Role；
+- Agent 收到哪些材料；
+- 输入输出是否可追溯；
+- 权限是否正确；
+- 是否超过调用预算；
+- 是否写入允许范围；
+- 当前 run 处在哪个 workflow state；
+- Agent / Reviewer 返回何种 outcome；
+- 如何 SKIP / DEFER / ESCALATE；
+- 如何让 accepted work 进入真实游戏 rerun；
+- 如何保存可审计 artifacts。
+
+框架默认不应增强：
+
+- 某一游戏资源的专用分析逻辑；
+- 某一种剧情问题的专用因果模型；
+- 某一种玩法问题的专用解决器。
+
+简单说：
+
+> **弱领域智能，强流程控制。**
+
+---
+
+## 10. 运行可观察性与 Human Control Surface
+
+长期希望飞轮不是黑盒。
+
+但可观察性应建立在已经存在的 workflow artifacts 上，而不是反过来定义流程。
+
+未来可以逐步提供：
+
+### Operational Observability
+
+- 当前 flywheel run 到哪一步；
+- 每个 Agent 收到哪些输入；
+- 返回了什么；
+- 哪个方案被接受 / 拒绝；
+- 为什么 SKIP / DEFER / ESCALATE；
+- 使用了哪些 artifacts / provenance；
+- 修改和验证结果是什么。
+
+### Human Control Surface
+
+后续再考虑：
+
+- run history；
+- input/output inspection；
+- pause / retry / skip；
+- override；
+- rollback；
+- escalation handling。
+
+当前不因为这个长期目标提前建设完整 UI 平台。
+
+---
+
+## 11. 继续有效的既有能力
+
+这次方向校准不否定已经证明的基础能力。
+
+继续有效的包括：
+
+- repository authority；
+- Role / Participant 模型；
+- player-observable boundary；
+- provenance / sealed artifacts；
+- experiment / Candidate isolation；
+- modified runtime → real rerun → new observable evidence；
+- uncertainty preservation；
+- fail-closed external-call budgets；
+- Human Gate / STOP boundary；
+- configuration / modification authorization。
+
+这些能力以后服务于新的轻量 Agent workflow，而不是要求继续沿历史实验路线逐项加深。
+
+---
+
+## 12. 退休的默认研发方向
+
+以下模式不再作为默认方向：
+
+```text
+具体问题暴露新的信息缺口
+↓
+Auto Evolution 核心框架为该问题增加专用 evidence / analyzer / observer
+↓
+继续该问题
+```
+
+例如，资源问题本身不能自动授权长期 `money-specific dynamics observability` 成为框架能力。
+
+Agent 可以为了一次 Investigation 临时写脚本、读源码、执行诊断；这是 Agent 完成工作的方式。
+
+是否把其中某种方法升级为长期 shared infrastructure，需要新的、独立的跨问题证据和产品决策。
+
+---
+
+## 13. 暂时不设计的内容
+
+本规范故意不固定：
+
+- Problem Package 的最终 JSON schema；
+- Investigation / Solution prompt；
+- Reviewer prompt；
+- 一个 Role 是否由一个或多个 Agent 完成；
 - provider registry；
-- generic agent framework。
+- 通用 Agent SDK；
+- 自动 retry 策略的最终形式；
+- UI；
+- code-level autonomous modification；
+- rollback system；
+- population evaluation。
 
-这些都只能在真实下一阶段需要时单独裁决。
-
-不得因为本规范提出“外部参与者”概念，就立即建设一个通用 ExternalParticipant Framework。
-
-本规范本身也不授权任何新的 Auto Evolution 实现。
-
----
-
-## 11. 下一阶段的最小产品问题
-
-旧 Reviewer Calibration 清理完成以后，下一阶段如果获得授权，应从一个最小闭环开始，而不是恢复完整自动演化路线图。
-
-最小问题是：
-
-> **Wuxia-Life 能否把一次真实的 player-observable 游戏体验交给一个外部参与者，保存这个参与者自己的反馈，并让这份反馈成为后续产品决策可使用的输入？**
-
-这一步只需要证明：
-
-```text
-真实体验材料
-→ 一个外部参与者
-→ 一份参与者回答
-→ 保存为可追溯的外部反馈
-```
-
-它不要求：
-
-- 证明参与者可靠；
-- 自动改游戏；
-- Planner；
-- 多模型投票；
-- 自动 promotion；
-- 完整飞轮。
-
-后续是否进入“根据反馈提出修改建议”，必须再次独立裁决。
-
-本节描述的是若获授权时的候选最小问题，不是当前 implementation authorization。
+这些只在真实流程需要时单独设计。
 
 ---
 
-## 12. 与旧 Auto Evolution 文档的迁移关系
+## 14. 当前下一步
 
-本规范生效后，旧 Auto Evolution 文档中的历史事实可以保留，但以下当前语义必须迁移。
+本规范生效后的下一项产品工作不是继续解决上一轮 money 问题。
 
-### 12.1 必须替换的产品假设
+下一步是一次**只读 workflow audit**：
 
-旧语义：
+> 对当前 Auto Evolution 实现逐环节判断：哪些代码在做 Orchestrator 应做的通用编排，哪些代码已经开始替 Agent 处理具体领域问题。
 
-```text
-先证明 Reviewer 足够可靠
-→ Reviewer 才能进入 Planner / candidate / verifier 飞轮
-```
+Audit 只形成现状图和迁移建议，不授权代码修改。
 
-新语义：
-
-```text
-外部参与者直接提供自己的反馈
-→ Wuxia-Life 决定如何使用反馈
-```
-
-参与者协议可以验证；参与者主观观点不进行资格考试。
-
-### 12.2 Reviewer / Planner / Verifier 的解释
-
-旧文档如果继续保留这些词，只能作为历史角色名称。
-
-未来若重新使用，应解释为：
-
-```text
-Reviewer = 一类体验/观察任务
-Planner = 一类提出改变建议的任务
-Verifier = 一类比较或检查任务
-```
-
-它们不是必须分别由独立 AI Agent 实例承担的产品实体。
-
-### 12.3 历史 Phase 0
-
-Phase 0 的历史 accepted evidence 保留。
-
-其长期意义只解释为：
-
-> player-observable information boundary 已经存在且可复现。
-
-不得再描述为“Reviewer Calibration 的必要前置资格”。
-
-### 12.4 历史 Phase 1
-
-Reviewer Calibration Phase 1 保留为 retired historical direction。
-
-它已经实施又被清理这一事实可以记录，但：
-
-- 不构成未来架构必须继承的资产；
-- 不构成下一阶段继续 qualification 的授权；
-- 不得从历史 plan 复活 calibration harness。
+之后才设计新的最小 problem-agnostic Agent loop。
 
 ---
 
-## 13. 权威关系
+## 15. 一句话原则
 
-- 本文件是 Auto Evolution 的当前权威产品规范。
-- 人物模型权威仍是 `docs/product/player-model.md`。
-- PD-055 记录“主观判断不是金标准考题”的已完成裁决；不另建第二套规则。
-- 当前工作授权以 `docs/governance/current-product-stage.md` 为准；本文件不自动授权实现。
-- 旧 phased roadmap、Reviewer Calibration design / plan / handoff 已从 worktree 删除；转折说明见 `docs/history/2026-08-auto-evolution-direction-reset.md`。
-
----
-
-## 14. 一句话原则
-
-> **Wuxia-Life 通过让外部参与者体验、观察和思考游戏，收集他们各自的反馈和建议，再在受控范围内改变游戏自身，并通过新的体验反馈持续改进游戏。**
-
-以及四条最小边界：
-
-```text
-角色 = 工作
-参与者 = 完成工作的人或外部系统
-参与者的主观反馈 = 该参与者给出的意见，不存在 Wuxia-Life 的标准答案
-Wuxia-Life = 只决定怎样使用意见、怎样改变自己
-```
+> **Wuxia-Life Auto Evolution 不试图预先学会解决所有游戏问题；它把未知问题和正确上下文交给合适的 Agent，让 Agent 自己调查、提案和审核，而 Orchestrator 只保证流程、权限、证据与停止边界可靠。**

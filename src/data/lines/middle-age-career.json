@@ -231,6 +231,7 @@
     },
     "choices": [
       {
+        "id": "career_recruit_disciples_choice_1",
         "text": "严格筛选，只收天才弟子 (声望 +10)",
         "effects": [
           {
@@ -247,6 +248,7 @@
         ]
       },
       {
+        "id": "career_recruit_disciples_choice_2",
         "text": "有教无类，广收门徒 (财富 +50)",
         "effects": [
           {
@@ -310,6 +312,7 @@
     },
     "choices": [
       {
+        "id": "career_martial_arts_conference_choice_1",
         "text": "参加比武，争夺盟主 (武力检定)",
         "effects": [
           {
@@ -334,6 +337,7 @@
         ]
       },
       {
+        "id": "career_martial_arts_conference_choice_2",
         "text": "作为观众，观摩学习 (功力 +5)",
         "effects": [
           {
@@ -345,6 +349,7 @@
         ]
       },
       {
+        "id": "career_martial_arts_conference_choice_3",
         "text": "借机结交同道 (人脉 +15, 声望 +8)",
         "effects": [
           {
@@ -410,6 +415,7 @@
     },
     "choices": [
       {
+        "id": "career_sect_expansion_choice_1",
         "text": "大规模扩建 (财富 -200, 声望 +30)",
         "effects": [
           {
@@ -431,6 +437,7 @@
         ]
       },
       {
+        "id": "career_sect_expansion_choice_2",
         "text": "稳步发展，量力而行 (财富 -50, 声望 +10)",
         "effects": [
           {
@@ -448,6 +455,7 @@
         ]
       },
       {
+        "id": "career_sect_expansion_choice_3",
         "text": "暂缓扩建，先整顿门规 (财富 -20, 学识 +4)",
         "effects": [
           {
@@ -516,6 +524,7 @@
     },
     "choices": [
       {
+        "id": "career_martial_exchange_choice_1",
         "text": "倾囊相授，友好交流 (人脉 +20)",
         "effects": [
           {
@@ -527,6 +536,7 @@
         ]
       },
       {
+        "id": "career_martial_exchange_choice_2",
         "text": "保留绝学，只作表面交流 (声望 -5)",
         "effects": [
           {
@@ -538,6 +548,7 @@
         ]
       },
       {
+        "id": "career_martial_exchange_choice_3",
         "text": "点到即止，彼此试探 (人脉 +8)",
         "effects": [
           {
@@ -596,6 +607,7 @@
     },
     "choices": [
       {
+        "id": "career_mediate_conflict_choice_1",
         "text": "出面调解，化解恩怨 (声望 +30, 人脉 +20)",
         "effects": [
           {
@@ -613,6 +625,7 @@
         ]
       },
       {
+        "id": "career_mediate_conflict_choice_2",
         "text": "拒绝介入，明哲保身",
         "effects": []
       }
@@ -664,6 +677,7 @@
     },
     "choices": [
       {
+        "id": "career_write_book_choice_1",
         "text": "撰写武学秘籍 (学识 +20, 声望 +30)",
         "effects": [
           {
@@ -686,6 +700,7 @@
         ]
       },
       {
+        "id": "career_write_book_choice_2",
         "text": "撰写回忆录 (学识 +10)",
         "effects": [
           {
@@ -752,6 +767,7 @@
     },
     "choices": [
       {
+        "id": "career_sect_leader_choice_1",
         "text": "接受推举，领导武林 (声望 +50, 人脉 +50)",
         "effects": [
           {
@@ -774,6 +790,7 @@
         ]
       },
       {
+        "id": "career_sect_leader_choice_2",
         "text": "婉拒，专心门派事务",
         "effects": []
       }
@@ -820,6 +837,7 @@
     },
     "choices": [
       {
+        "id": "career_good_evil_war_choice_1",
         "text": "亲征敌营，誓死一战 (武力检定)",
         "effects": [
           {
@@ -840,10 +858,12 @@
         ]
       },
       {
+        "id": "career_good_evil_war_choice_2",
         "text": "尝试调和双方",
         "effects": []
       },
       {
+        "id": "career_good_evil_war_choice_3",
         "text": "宣布退出，置身事外",
         "effects": []
       }
@@ -895,6 +915,7 @@
     },
     "choices": [
       {
+        "id": "career_business_empire_choice_1",
         "text": "投资商队，开拓商路 (财富 +150)",
         "effects": [
           {
@@ -906,6 +927,7 @@
         ]
       },
       {
+        "id": "career_business_empire_choice_2",
         "text": "开设武馆，传授武艺 (财富 +50, 声望 +10)",
         "effects": [
           {

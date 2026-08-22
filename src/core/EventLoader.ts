@@ -93,6 +93,36 @@ const eventsIndex = eventsIndexJson as {
   notes?: string;
 };
 
+export function collectChoiceIdValidationErrors(events: EventDefinition[]): string[] {
+  const errors: string[] = [];
+
+  for (const event of events) {
+    if (event.eventType !== 'choice' || !Array.isArray(event.choices)) {
+      continue;
+    }
+
+    const firstChoiceIndexById = new Map<string, number>();
+    event.choices.forEach((choice, index) => {
+      if (typeof choice.id !== 'string' || choice.id.trim().length === 0) {
+        errors.push(`事件 ${event.id} 的第 ${index} 个选择缺少有效 ID`);
+        return;
+      }
+
+      const firstChoiceIndex = firstChoiceIndexById.get(choice.id);
+      if (firstChoiceIndex !== undefined) {
+        errors.push(
+          `choice.id "${choice.id}" 重复：事件 ${event.id} 的第 ${firstChoiceIndex} 个选择与第 ${index} 个选择重复`,
+        );
+        return;
+      }
+
+      firstChoiceIndexById.set(choice.id, index);
+    });
+  }
+
+  return errors;
+}
+
 /**
  * 事件加载器类
  */
@@ -266,6 +296,7 @@ export class EventLoader {
    */
   public validateEvents(): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
+    errors.push(...collectChoiceIdValidationErrors(this.allEvents));
     
     for (const event of this.allEvents) {
       // 验证必需字段
@@ -302,9 +333,6 @@ export class EventLoader {
           errors.push(`选择事件 ${event.id} 缺少 choices`);
         } else {
           event.choices.forEach((choice, index) => {
-            if (!choice.id) {
-              errors.push(`事件 ${event.id} 的第 ${index} 个选择缺少 ID`);
-            }
             if (!choice.text) {
               errors.push(`事件 ${event.id} 的第 ${index} 个选择缺少文本`);
             }

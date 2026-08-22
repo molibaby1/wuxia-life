@@ -204,6 +204,7 @@
     },
     "choices": [
       {
+        "id": "family_child_born_choice_1",
         "text": "大摆宴席，普天同庆 (财富 -50, 人脉 +10)",
         "effects": [
           {
@@ -409,6 +410,7 @@
     },
     "choices": [
       {
+        "id": "family_crisis_full_support",
         "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20)",
         "effects": [
           {
@@ -430,6 +432,7 @@
         ]
       },
       {
+        "id": "family_crisis_limited_support",
         "text": "尽力而为，量力而行 (财富 -30)",
         "effects": [
           {
@@ -445,6 +448,7 @@
         ]
       },
       {
+        "id": "family_crisis_self_preserve",
         "text": "抽身自保，先守住自家日子 (声望 -10)",
         "effects": [
           {
@@ -498,6 +502,7 @@
     },
     "choices": [
       {
+        "id": "family_child_marriage_choice_1",
         "text": "操办婚事，风光大嫁 (财富 -100, 人脉 +20)",
         "effects": [
           {
@@ -520,6 +525,7 @@
         ]
       },
       {
+        "id": "family_child_marriage_choice_2",
         "text": "简办婚事，尊重子女",
         "effects": [
           {
@@ -677,10 +683,12 @@
     },
     "choices": [
       {
+        "id": "family_teach_grandchild_choice_1",
         "text": "悉心教导，倾囊相授",
         "effects": []
       },
       {
+        "id": "family_teach_grandchild_choice_2",
         "text": "顺其自然，快乐成长",
         "effects": []
       }
@@ -727,6 +735,7 @@
     },
     "choices": [
       {
+        "id": "family_family_precepts_choice_1",
         "text": "撰写家训，流传后世 (学识 +10, 声望 +10)",
         "effects": [
           {
@@ -744,6 +753,7 @@
         ]
       },
       {
+        "id": "family_family_precepts_choice_2",
         "text": "口传心授，言传身教 (侠义 +10)",
         "effects": [
           {

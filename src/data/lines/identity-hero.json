@@ -276,6 +276,7 @@
     },
     "choices": [
       {
+        "id": "hero_fight_evil_choice_1",
         "text": "带头冲锋，维护传统 (侠义 +30, 声望 +25, 武力 +10)",
         "effects": [
           {
@@ -309,6 +310,7 @@
         ]
       },
       {
+        "id": "hero_fight_evil_choice_2",
         "text": "出谋划策，指挥作战 (侠义 +15, 声望 +20, 学识 +5)",
         "effects": [
           {
@@ -441,6 +443,7 @@
     },
     "choices": [
       {
+        "id": "hero_teach_disciples_choice_1",
         "text": "悉心教导，传授武艺和侠义 (侠义 +10, 声望 +15)",
         "effects": [
           {
@@ -463,6 +466,7 @@
         ]
       },
       {
+        "id": "hero_teach_disciples_choice_2",
         "text": "只传武艺，不传侠义 (武力 +5)",
         "effects": [
           {

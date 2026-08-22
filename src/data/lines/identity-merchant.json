@@ -32,6 +32,7 @@
     },
     "choices": [
       {
+        "id": "merchant_first_trade_choice_1",
         "text": "投资皮毛生意 (金钱 +200, 人脉 +5)",
         "effects": [
           {
@@ -54,6 +55,7 @@
         ]
       },
       {
+        "id": "merchant_first_trade_choice_2",
         "text": "投资丝绸生意 (金钱 +150, 学识 +5)",
         "effects": [
           {
@@ -113,6 +115,7 @@
     },
     "choices": [
       {
+        "id": "merchant_expand_business_choice_1",
         "text": "开设分号，遍布全国 (金钱 +500, 人脉 +20)",
         "effects": [
           {
@@ -135,6 +138,7 @@
         ]
       },
       {
+        "id": "merchant_expand_business_choice_2",
         "text": "投资钱庄，涉足金融 (金钱 +300, 声望 +10)",
         "effects": [
           {
@@ -194,6 +198,7 @@
     },
     "choices": [
       {
+        "id": "merchant_crisis_choice_1",
         "text": "变卖资产，度过危机 (金钱 -200, 保住基业)",
         "effects": [
           {
@@ -210,6 +215,7 @@
         ]
       },
       {
+        "id": "merchant_crisis_choice_2",
         "text": "冒险投资，博取转机 (50% 几率金钱 +1000 或 -500)",
         "effects": [
           {
@@ -332,6 +338,7 @@
     },
     "choices": [
       {
+        "id": "merchant_mentor_choice_1",
         "text": "培养子女继承家业 (人脉 +10)",
         "effects": [
           {
@@ -348,6 +355,7 @@
         ]
       },
       {
+        "id": "merchant_mentor_choice_2",
         "text": "从伙计中挑选人才 (声望 +10)",
         "effects": [
           {

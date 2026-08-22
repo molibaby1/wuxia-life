@@ -19,6 +19,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "relationship_master_disciple_choice_1",
         "text": "拜入名门（需学识≥40）",
         "conditions": [
           {"type": "expression", "expression": "knowledge >= 40"}
@@ -30,6 +31,7 @@
         ]
       },
       {
+        "id": "relationship_master_disciple_choice_2",
         "text": "自学成才",
         "effects": [
           {"type": "stat_modify", "stat": "knowledge", "value": 10},
@@ -60,6 +62,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "relationship_master_betrayal_choice_1",
         "text": "背叛师门（侠义 -30，武力 +15）",
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": -30},
@@ -69,6 +72,7 @@
         ]
       },
       {
+        "id": "relationship_master_betrayal_choice_2",
         "text": "道歉认错（侠义 +10）",
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": 10},
@@ -205,6 +209,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "relationship_enemy_create_choice_1",
         "text": "主动和解（需魅力≥50，金钱 -100）",
         "conditions": [
           {"type": "expression", "expression": "charisma >= 50 && money >= 100"}
@@ -216,6 +221,7 @@
         ]
       },
       {
+        "id": "relationship_enemy_create_choice_2",
         "text": "武力解决（需武力≥60）",
         "conditions": [
           {"type": "expression", "expression": "martialPower >= 60"}
@@ -227,6 +233,7 @@
         ]
       },
       {
+        "id": "relationship_enemy_create_choice_3",
         "text": "置之不理",
         "effects": [
           {"type": "stat_modify", "stat": "luck", "value": -5}
@@ -256,6 +263,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "relationship_revenge_choice_1",
         "text": "正面决战（需武力≥80）",
         "conditions": [
           {"type": "expression", "expression": "martialPower >= 80"}
@@ -268,6 +276,7 @@
         ]
       },
       {
+        "id": "relationship_revenge_choice_2",
         "text": "智取（需学识≥60）",
         "conditions": [
           {"type": "expression", "expression": "knowledge >= 60"}

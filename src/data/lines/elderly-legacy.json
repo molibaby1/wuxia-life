@@ -36,6 +36,7 @@
     },
     "choices": [
       {
+        "id": "elderly_organize_martial_choice_1",
         "text": "系统整理，著书立说 (学识 +20, 声望 +20)",
         "effects": [
           {
@@ -53,6 +54,7 @@
         ]
       },
       {
+        "id": "elderly_organize_martial_choice_2",
         "text": "口传心授，传给弟子",
         "effects": [
           {
@@ -124,6 +126,7 @@
     },
     "choices": [
       {
+        "id": "elderly_legend_begins_choice_1",
         "text": "淡然处之，不以为意 (声望 +10)",
         "effects": [
           {
@@ -135,6 +138,7 @@
         ]
       },
       {
+        "id": "elderly_legend_begins_choice_2",
         "text": "出面澄清，还原真相 (侠义 +5, 声望 +5)",
         "effects": [
           {
@@ -194,6 +198,7 @@
     },
     "choices": [
       {
+        "id": "elderly_choose_successor_choice_1",
         "text": "传给最有天赋的弟子",
         "effects": [
           {
@@ -219,6 +224,7 @@
         ]
       },
       {
+        "id": "elderly_choose_successor_choice_2",
         "text": "传给最孝顺的弟子 (侠义 +10)",
         "effects": [
           {
@@ -235,6 +241,7 @@
         ]
       },
       {
+        "id": "elderly_choose_successor_choice_3",
         "text": "传给子女",
         "effects": [
           {
@@ -282,6 +289,7 @@
     },
     "choices": [
       {
+        "id": "elderly_retirement_choice_1",
         "text": "归隐山林，不问世事 (体魄 +10)",
         "effects": [
           {
@@ -298,6 +306,7 @@
         ]
       },
       {
+        "id": "elderly_retirement_choice_2",
         "text": "移居小镇，安度晚年",
         "effects": [
           {
@@ -351,6 +360,7 @@
     },
     "choices": [
       {
+        "id": "elderly_reunion_choice_1",
         "text": "把酒言欢，畅谈往事 (人脉 +10)",
         "effects": [
           {
@@ -362,6 +372,7 @@
         ]
       },
       {
+        "id": "elderly_reunion_choice_2",
         "text": "感慨万千，珍惜当下",
         "effects": []
       }
@@ -409,6 +420,7 @@
     },
     "choices": [
       {
+        "id": "elderly_write_memoirs_choice_1",
         "text": "详实记录，流传后世 (学识 +15, 声望 +15)",
         "effects": [
           {
@@ -431,6 +443,7 @@
         ]
       },
       {
+        "id": "elderly_write_memoirs_choice_2",
         "text": "简单记录，留给子女",
         "effects": [
           {
@@ -479,6 +492,7 @@
     },
     "choices": [
       {
+        "id": "elderly_final_wish_choice_1",
         "text": "重游故地，缅怀往昔",
         "effects": [
           {
@@ -489,6 +503,7 @@
         ]
       },
       {
+        "id": "elderly_final_wish_choice_2",
         "text": "了却恩怨，放下一切 (侠义 +10)",
         "effects": [
           {
@@ -548,6 +563,7 @@
     },
     "choices": [
       {
+        "id": "elderly_succession_choice_1",
         "text": "举行传承仪式 (声望 +30)",
         "effects": [
           {
@@ -564,6 +580,7 @@
         ]
       },
       {
+        "id": "elderly_succession_choice_2",
         "text": "简单传授，顺其自然",
         "effects": [
           {
@@ -612,6 +629,7 @@
     },
     "choices": [
       {
+        "id": "elderly_entrustment_choice_1",
         "text": "嘱咐后人，和睦相处 (人脉 +20)",
         "effects": [
           {
@@ -628,6 +646,7 @@
         ]
       },
       {
+        "id": "elderly_entrustment_choice_2",
         "text": "留下遗训，激励后人 (声望 +20)",
         "effects": [
           {
@@ -682,6 +701,7 @@
     },
     "choices": [
       {
+        "id": "elderly_life_review_choice_1",
         "text": "无怨无悔，心满意足 (圆满结局)",
         "effects": [
           {
@@ -692,6 +712,7 @@
         ]
       },
       {
+        "id": "elderly_life_review_choice_2",
         "text": "仍有遗憾，希望来生",
         "effects": []
       }
@@ -734,6 +755,7 @@
     },
     "choices": [
       {
+        "id": "elderly_final_ending_choice_1",
         "text": "【游戏结束】",
         "effects": [
           {
@@ -839,6 +861,7 @@
     },
     "choices": [
       {
+        "id": "elderly_faction_closure_choice_1",
         "text": "借门派荫庇，安度晚年",
         "effects": [
           {
@@ -854,6 +877,7 @@
         ]
       },
       {
+        "id": "elderly_faction_closure_choice_2",
         "text": "门户牵连曝光，独自承担",
         "effects": [
           {
@@ -908,6 +932,7 @@
     },
     "choices": [
       {
+        "id": "elderly_feud_reconciliation_choice_1",
         "text": "与旧识言和，释去心结",
         "effects": [
           {
@@ -923,6 +948,7 @@
         ]
       },
       {
+        "id": "elderly_feud_reconciliation_choice_2",
         "text": "血债血偿，彻底了结",
         "effects": [
           {

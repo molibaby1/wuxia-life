@@ -16,6 +16,11 @@ const EXPECTED_CHOICE_IDS = {
     'child_education_scholar',
     'child_education_merchant',
   ],
+  family_crisis: [
+    'family_crisis_full_support',
+    'family_crisis_limited_support',
+    'family_crisis_self_preserve',
+  ],
   relationship_sworn_help: [
     'sworn_help_full',
     'sworn_help_financial',
@@ -73,6 +78,62 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
           { type: 'stat_modify', target: 'money', value: 50, operator: 'add' },
           { type: 'flag_set', flag: 'child_merchant', value: true },
         ],
+        outcomes: null,
+      },
+    ],
+  },
+  family_crisis: {
+    name: '家族危机',
+    description: '家族遭遇困难，需要你出面解决。',
+    version: '1.0.0',
+    category: 'family',
+    priority: 70,
+    weight: 60,
+    ageRange: { min: 35, max: 50 },
+    type: 'family',
+    eventType: 'choice',
+    tags: ['family', 'crisis'],
+    storyLine: 'love_story',
+    triggers: [{ type: 'age_reach', value: 35 }],
+    triggerConditions: { age: { min: 35, max: 50 } },
+    conditions: null,
+    content: {
+      title: '家族危机',
+      text: '家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？',
+    },
+    maxTriggers: null,
+    metadata: null,
+    difficulty: null,
+    choices: [
+      {
+        text: '倾尽家财，帮助家族 (财富 -100, 声望 +20)',
+        description: null,
+        condition: null,
+        conditions: null,
+        effects: [
+          { type: 'stat_modify', target: 'money', value: -100, operator: 'add' },
+          { type: 'stat_modify', target: 'reputation', value: 20, operator: 'add' },
+          { type: 'status_add', status: 'anxious' },
+        ],
+        outcomes: null,
+      },
+      {
+        text: '尽力而为，量力而行 (财富 -30)',
+        description: null,
+        condition: null,
+        conditions: null,
+        effects: [
+          { type: 'stat_modify', target: 'money', value: -30, operator: 'add' },
+          { type: 'status_add', status: 'anxious' },
+        ],
+        outcomes: null,
+      },
+      {
+        text: '抽身自保，先守住自家日子 (声望 -10)',
+        description: null,
+        condition: null,
+        conditions: null,
+        effects: [{ type: 'stat_modify', target: 'reputation', value: -10, operator: 'add' }],
         outcomes: null,
       },
     ],
@@ -146,6 +207,7 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
 
 const SOURCE_EVENTS: Record<string, JsonRecord[]> = {
   family_child_education: familyLifeEvents as JsonRecord[],
+  family_crisis: familyLifeEvents as JsonRecord[],
   relationship_sworn_help: relationshipEvents as JsonRecord[],
 };
 
@@ -211,7 +273,12 @@ function collectContractFailures(loader: EventLoader): string[] {
 
   const targetErrors = loader
     .validateEvents()
-    .errors.filter(error => error.includes('family_child_education') || error.includes('relationship_sworn_help'));
+    .errors.filter(
+      error =>
+        error.includes('family_child_education') ||
+        error.includes('family_crisis') ||
+        error.includes('relationship_sworn_help'),
+    );
   if (targetErrors.length > 0) {
     failures.push(`target EventLoader validation errors remain:\n${targetErrors.join('\n')}`);
   }
@@ -274,6 +341,7 @@ async function main(): Promise<void> {
   }
 
   await assertHeadlessChoiceExecution('family_child_education', { has_child: true });
+  await assertHeadlessChoiceExecution('family_crisis', {});
   await assertHeadlessChoiceExecution('relationship_sworn_help', { has_sworn_siblings: true });
 
   // Keep the request contract explicit at the same boundary used by production execution.

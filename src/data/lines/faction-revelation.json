@@ -20,6 +20,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "discover_shaolin_dark_history_choice_1",
         "text": "公开档案，揭露真相",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": -30},
@@ -28,6 +29,7 @@
         ]
       },
       {
+        "id": "discover_shaolin_dark_history_choice_2",
         "text": "保持沉默",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": 10},
@@ -57,6 +59,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "discover_wudang_internal_struggle_choice_1",
         "text": "暗中调查，收集证据",
         "effects": [
           {"type": "stat_modify", "stat": "connections", "value": 15},
@@ -65,6 +68,7 @@
         ]
       },
       {
+        "id": "discover_wudang_internal_struggle_choice_2",
         "text": "假装不知，继续修炼",
         "effects": [
           {"type": "stat_modify", "stat": "martialPower", "value": 5}
@@ -117,6 +121,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "court_politics_revealed_choice_1",
         "text": "将真相公之于众",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": -50},
@@ -125,6 +130,7 @@
         ]
       },
       {
+        "id": "court_politics_revealed_choice_2",
         "text": "利用这个秘密",
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": 15},
@@ -133,6 +139,7 @@
         ]
       },
       {
+        "id": "court_politics_revealed_choice_3",
         "text": "保持沉默，远离纷争",
         "effects": [
           {"type": "flag_set", "flag": "ignored_court_plot", "value": true}
@@ -160,6 +167,7 @@
     "eventType": "choice",
     "choices": [
       {
+        "id": "refugee_sect_story_choice_1",
         "text": "同情他的遭遇",
         "effects": [
           {"type": "stat_modify", "stat": "chivalry", "value": 5},
@@ -168,6 +176,7 @@
         ]
       },
       {
+        "id": "refugee_sect_story_choice_2",
         "text": "保持中立，不发表意见",
         "effects": [
           {"type": "stat_modify", "stat": "knowledge", "value": 5}

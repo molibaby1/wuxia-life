@@ -1,22 +1,22 @@
 # 项目文档索引
 
-`docs/` 是**当前知识库**，不是历史档案馆。只登记现在仍值得维护、值得被 Agent 主动读取的文档。
+`docs/` 是**当前知识库**，不是历史档案馆。只登记现在仍值得维护、值得 Agent 主动读取的文档。
 
 ## 当前权威文档
 
 ### 产品规范（第一层）
 
-- [玩家模型](product/player-model.md)：江湖世界玩家状态的当前权威规范。
-- [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator 的当前权威产品规范。
+- [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范。
+- [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与模块边界的当前权威产品规范。
 
-二者同属第一层产品规范，职责分离：`player-model` 负责人物模型；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Agent 帮助 Wuxia-Life 改进自己。互不替代。
+二者同属第一层产品规范：`player-model` 负责游戏人物模型；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向见 PD-055、PD-062。
-- [当前产品阶段](governance/current-product-stage.md)：滚动看板；当前授权、STOP 与下一项允许工作。
-- [项目收敛](governance/project-convergence.md)：长期收敛原则，包含 problem-agnostic orchestration 的复杂度约束。
-- [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作、Auto Evolution Role/Participant 分工、权限与升级边界。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063。
+- [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
+- [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
+- [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。
 
 ### 契约
 
@@ -29,50 +29,81 @@
 - [本地 API 联调](local-api-dev.md)：PostgreSQL + API + Vite；含环境变量与部署摘要。
 - [Release Validation](release-validation-contract.md)、[Stability Gate](stability-gate.md)、测试环境与输出约定。
 - [Artifact 约定](artifact-output-convention.md)：`artifacts/gates/`、`artifacts/reports/` 与 tracked fixtures。
-- `designs/`：当前仍需长期理解的技术设计（含 v1.0 launch 规则）。
+- `designs/`：当前仍需长期理解的技术设计。
 - Headless / Web 边界：见 `contracts/headless-snapshot-conversion-boundary.md`、`contracts/web-runtime-adapter-boundary.md`。
 
 ### 历史（极少）
 
-- [Auto Evolution 方向重置：Reviewer Calibration 退出（2026-08）](history/2026-08-auto-evolution-direction-reset.md)：PD-055 与第一版外部 Participant 产品模型的压缩历史。
-- [Auto Evolution 方向校准：Agent Workflow Orchestrator（2026-08）](history/2026-08-auto-evolution-agent-workflow-reset.md)：从领域专用 evidence / analyzer 扩展转向 problem-agnostic Agent orchestration 的压缩历史。
+- [Reviewer Calibration 退出（2026-08）](history/2026-08-auto-evolution-direction-reset.md)：PD-055 与旧主观 gold-answer 路线退出历史。
+- [Agent Workflow Orchestrator 方向校准（2026-08）](history/2026-08-auto-evolution-agent-workflow-reset.md)：从领域专用 evidence / analyzer 扩展转向 problem-agnostic orchestration 的压缩历史。
 
 ## 当前 Auto Evolution 工作入口
 
-当前 Auto Evolution 不以新的 money / marriage / combat 等领域专用 analyzer 作为默认推进方式。
+核心 workflow 已经进入**早期可运行 / 工程化阶段**，当前不再把主要工作定义为“继续证明 Agent workflow 能不能成立”。
 
-当前方向是：
+已确认的工作形态：
 
 ```text
 真实体验 / 问题
-→ 轻量 Problem Package
+→ Problem Package
 → Agent 自主调查 / 提案
 → 独立 Agent Review
 → 配置层执行，或 SKIP / DEFER / ESCALATE
-→ 新的真实运行与观察
+→ verification / modified runtime rerun
+→ 新一轮入口
 ```
 
-Orchestrator 负责工作流、上下文引用、权限、provenance、状态与 STOP；具体问题如何理解和解决由承担 Role 的 Agent 完成。
+第一 Skill `repository-grounded-investigation` v1 已完成 Solution / Reviewer 的真实 Skill-mode 使用验证，当前视为可用的重复工作方法封装。
 
-当前允许的下一项工作见 `governance/current-product-stage.md`。不要从历史实验名或旧 Superpowers plan 推断下一阶段。
+当前**不**以 Skill-off / Skill-on behavioral A/B 作为下一阶段前置。Skill 是否需要优化，由后续真实运行暴露的具体问题驱动。
+
+下一阶段产品优先顺序以 `governance/current-product-stage.md` 为准，当前方向是：
+
+```text
+Sidecar Run Report
+→ Multi-round Execution Validation
+→ Participant Communication Contract Consolidation
+```
+
+其中 Report 只是旁路输出，不是主流程依赖；Report Analysis 是未来独立消费者，不在当前阶段建设。
+
+## 模块边界
+
+当前应保持以下能力低耦合：
+
+```text
+Game / Product Runtime
+Auto Evolution Orchestrator
+Skills
+Run Report Producer
+Future Report Analysis Consumer
+```
+
+同 repository 不等于同产品语义。
+
+Game 是被改进对象；Auto Evolution 是演化工作流；Skill 是 Participant 的工作方法；Report 是旁路运行事实；Report Analysis 未来只消费报告。
+
+实际的物理拆分、世界观替换或跨产品迁移能力尚未验证，不能从设计意图直接推断已经成立。
 
 ## 权威层级
 
 1. 本文件明确列出的第一层产品规范；
-2. 本文件明确列出的当前治理、架构和接口契约；
+2. 当前 Product Decisions 与治理文档；
 3. 当前任务明确指定且仍 active 的 accepted design；
-4. 其他未分类文档不具有产品规则权威性。
+4. 当前真实实现与对应测试；
+5. 其他未分类文档。
 
-`docs/superpowers/**` 是临时工作区材料，**不是**第一层产品 authority。Human acceptance of a spec / plan 不会自动把它升级为永久产品语义。
+`docs/superpowers/**` 是临时工作区材料，不是第一层 authority。
+
+历史 PRD 只说明当时的计划与实现背景。尤其 `docs/PRD/auto-evolution-first-skill-behavioral-validation.md` 已退出当前优先路线，不得把它解释为当前必须执行的下一阶段。
 
 ## 冲突处理规则
 
-- 发现冲突时不得自行综合不同方案；
-- 以更高层级的文档为准；
-- 无法判断层级或适用范围时，停止并向 Human 报告；
-- 测试存在不代表旧产品行为必须保留；
-- 已实现代码、测试通过、某次 Human Gate acceptance，都不能自动覆盖第一层产品规范；
-- 临时 Agent 调查方法也不能仅因一次工作有效就升级成长期 framework capability。
+- 发现冲突时不得自行综合多套旧方案；
+- 以更高层级 authority 为准；
+- 已实现代码、测试通过、某次 Human Gate acceptance 都不能自动覆盖第一层产品规范；
+- Skill、Report、Contract 等能力只在真实运行需要时演进，不因已有实现自动升级产品地位；
+- 无法判断时 STOP 并向 Human 报告。
 
 ## 文档生命周期
 
@@ -82,11 +113,9 @@ Orchestrator 负责工作流、上下文引用、权限、provenance、状态与
 product/
 governance/
 contracts/
-designs/          # 已形成且仍需长期维护的技术设计
-history/          # 极少；仅重大方向转折压缩记录
+designs/
+history/          # 极少，只保存重大方向转折
 ```
-
-以及本文件索引的操作手册。
 
 ### 当前工作区（临时）
 
@@ -95,12 +124,9 @@ docs/superpowers/specs/
 docs/superpowers/plans/
 ```
 
-- 目录按需存在；空目录不提交。
-- 只放**正在推进**且后续实施会依赖的设计 / plan。
-- 任务完成、退休或被新产品方向替代后必须清场：过程性内容 DELETE（依靠 Git history）；长期语义精炼进入 `product/`、`governance/`、`contracts/`、`designs/` 或极少数 `history/`。
-- 不重建 `handoffs/`、`session-prompts/` 作为长期目录。
+完成、退休或被新方向替代后，应删除临时过程文档；有长期价值的结论精炼进入长期知识库。
 
-当前 Bounded Resource Dynamics experiment 已在 deterministic blocker 处停止，并被新的 Agent Workflow 方向取代；其 active Superpowers spec / plan 不应继续留在当前工作区。
+`current-product-stage.md` 不保存每轮 Participant 的执行流水。真实运行详情应进入独立 runtime artifacts / report。
 
 ## 新会话读取顺序
 

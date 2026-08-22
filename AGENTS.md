@@ -211,6 +211,25 @@ Human Gate 除完成度与验证外，必须额外回答：
 
 ***
 
+## 当前 Auto Evolution 成熟度与默认推进顺序
+
+截至 2026-08-20，Auto Evolution 核心 Agent workflow 已进入早期可运行 / 工程化阶段。不要再默认把“证明 workflow / Participant / Skill 是否主观更好”作为下一阶段。
+
+当前默认顺序以 `docs/governance/current-product-stage.md` 为准：
+
+```text
+Sidecar Run Report
+→ Multi-round Execution Validation
+→ Participant Communication Contract Consolidation
+```
+
+额外守则：
+
+- `repository-grounded-investigation` v1 当前视为可用 Skill；除非真实运行暴露具体问题，不主动做 Skill behavioral A/B；
+- Run Report 是旁路输出，不得让主流程依赖 Report 或未来 Report Analysis；
+- Communication Contract 固定通信语义 / provenance / outcome / permission，不规定 Agent 主观结论，也不预先绑定 MCP；
+- Game / Auto Evolution / Skill / Report / Analysis 保持低耦合；设计意图不等于已证明物理解耦。
+
 ## Current governance documents
 
 Before analysis or implementation, read:

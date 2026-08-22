@@ -740,3 +740,79 @@ Bounded Resource Dynamics experiment 在 deterministic continuity blocker 处停
 
 ...
 ```
+
+---
+
+### PD-063：Auto Evolution 进入早期可运行阶段，采用 Run-First / Sidecar-Observability 演进顺序
+
+**正式语义**
+
+截至 2026-08-20，Auto Evolution 的核心 problem-agnostic Agent workflow、独立 Reviewer、受控配置执行、modified-runtime rerun，以及第一 Skill 的 Solution / Reviewer 真实使用，已经提供足够 evidence 将系统从“核心可行性纯探索”调整为：
+
+> **早期可运行 / 工程化阶段。**
+
+后续默认研发方式为：
+
+```text
+真实运行
+→ 旁路观察
+→ 修复真实暴露的问题
+→ 沉淀重复出现的方法
+```
+
+而不是在尚未出现实际问题时，优先穷举 Participant 智能质量、Skill behavioral uplift 或所有潜在异常。
+
+**Skill**
+
+Skill 定位为 Participant 的可复用 working method package。
+
+第一 Skill `repository-grounded-investigation` v1 已在 Solution 与 Reviewer 的真实 workflow 中使用，当前可作为可用能力继续复用。
+
+当前不要求 Skill-off / Skill-on behavioral A/B 作为继续使用该 Skill 的前置条件。
+
+Skill 优化由真实运行中暴露的具体问题驱动。
+
+**下一阶段顺序**
+
+```text
+P1 Sidecar Run Report / Operational Observability Minimal Slice
+P2 Multi-round Execution Validation
+P3 Participant Communication Contract Consolidation
+```
+
+P1 Report 只输出运行事实，不分析、不干预，不成为主流程依赖。
+
+Report Analysis 是未来独立 consumer，不与 Report Producer 强耦合。
+
+P3 Communication Contract 固定 schema、字段语义、authority / provenance / reference、outcome、failure 与 permission / STOP；继续遵守“纠正通信，不纠正思想”。MCP 不是当前预选的产品协议。
+
+**模块化边界**
+
+Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低耦合。
+
+同 repository 不等于已证明可以物理拆分。世界观替换、跨产品迁移和完全解耦能力必须未来通过真实验证后才能宣称成立。
+
+**明确不做**
+
+本条不自动授权：
+
+- Report 工程实现；
+- multi-round autonomous loop；
+- Communication Contract 最终 schema；
+- MCP 平台；
+- Report Analysis；
+- Human Control UI；
+- second Skill / Skill ecosystem；
+- autonomous code modification；
+- 大规模世界观抽象 / 拆仓工程。
+
+这些工作仍以 `current-product-stage.md` 和后续 Human 指令为准。
+
+**重新讨论条件**
+
+- sidecar report 的最小信息不足以理解运行；
+- 多轮执行暴露新的结构性 workflow blocker；
+- Participant 间重复出现明确通信误解，需要提升 Contract；
+- Skill 在真实运行中重复产生同一类具体问题；
+- Report 积累后出现明确系统化分析需求；
+- 实际产品迁移要求验证 Game / Auto Evolution 物理解耦或世界观替换能力。

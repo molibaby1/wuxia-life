@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { buildSolutionAgentPrompt, runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
+import { runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
+import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 
 const problemPackage: ProblemPackageV1 = {
@@ -56,31 +58,22 @@ const solutionResult = {
 };
 
 export async function runSolutionAgentLoopTests(): Promise<void> {
-  const prompt = buildSolutionAgentPrompt(problemPackage);
-  assert.match(prompt, /own investigation and solution reasoning/i);
-  assert.match(prompt, /disposable workspace/i);
-  assert.match(prompt, /zero to three options/i);
-  assert.match(prompt, /execution permission is separate/i);
-  assert.match(prompt, /Reference format requirements:/i);
-  assert.match(prompt, /repoRefs must reference repository-relative regular files/i);
-  assert.match(prompt, /path:line/i);
-  assert.match(prompt, /path:start-end/i);
-  assert.match(prompt, /Do not use # fragments/i);
-  assert.match(prompt, /artifactRefs must be relative regular-file paths only/i);
-  assert.match(prompt, /relative file paths/i);
-  assert.match(prompt, /Do not use line locators, # fragments/i);
-  assert.doesNotMatch(prompt, /money|marriage|combat|family crisis/i);
-
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
   const workspaceRoot = join(root, 'workspace');
   const artifactRoot = join(root, 'artifacts');
+  const canonicalSkillPath = 'skills/repository-grounded-investigation/SKILL.md';
+  const canonicalSkillContent = await readFile(join(process.cwd(), canonicalSkillPath), 'utf8');
+  const canonicalSkillSha256 = createHash('sha256').update(canonicalSkillContent).digest('hex');
   await mkdir(join(workspaceRoot, 'src'), { recursive: true });
+  await mkdir(join(workspaceRoot, 'skills/repository-grounded-investigation'), { recursive: true });
   await mkdir(join(artifactRoot, 'source'), { recursive: true });
   await writeFile(join(workspaceRoot, 'src/example.ts'), 'export const example = true;');
+  await writeFile(join(workspaceRoot, canonicalSkillPath), canonicalSkillContent);
   await writeFile(join(artifactRoot, 'source/observable-payload.json'), '{}');
   const packagePath = join(root, 'problem-package.json');
   await writeFile(packagePath, JSON.stringify(problemPackage));
 
+  let deliveredPrompt = '';
   const run = await runSolutionAgent({
     problemPackage,
     problemPackagePath: packagePath,
@@ -90,16 +83,58 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     invocationRef: 'solution-000001',
     jobNumber: 3,
     destinationRoot: join(root, 'solution-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: {
       executable: process.execPath,
-      buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`],
+      buildArgs: input => {
+        deliveredPrompt = input.prompt;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`];
+      },
     },
   });
   assert.equal(run.ok, true);
   assert.equal(run.result?.status, 'OPTIONS');
+  assert.match(deliveredPrompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);
+  assert.match(deliveredPrompt, /repository-grounded-investigation/);
+  assert.match(deliveredPrompt, new RegExp(canonicalSkillSha256));
+  assert.match(deliveredPrompt, /own investigation and solution reasoning/i);
+  assert.match(deliveredPrompt, /disposable workspace/i);
+  assert.match(deliveredPrompt, /zero to three options/i);
+  assert.match(deliveredPrompt, /execution permission is separate/i);
+  assert.match(deliveredPrompt, /Reference format requirements:/i);
+  assert.match(deliveredPrompt, /repoRefs must reference repository-relative regular files/i);
+  assert.match(deliveredPrompt, /path:line/i);
+  assert.match(deliveredPrompt, /path:start-end/i);
+  assert.match(deliveredPrompt, /Do not use # fragments/i);
+  assert.match(deliveredPrompt, /artifactRefs must be relative regular-file paths only/i);
+  assert.match(deliveredPrompt, /relative file paths/i);
+  assert.match(deliveredPrompt, /Do not use line locators, # fragments/i);
+  assert.doesNotMatch(deliveredPrompt, /Read the repository and referenced artifacts yourself\./i);
+  assert.equal(deliveredPrompt.split('Treat input assumptions as claims to examine, not established causes.').length - 1, 1);
+  assert.doesNotMatch(deliveredPrompt, /money|marriage|combat|family crisis/i);
   assert.equal(await readFile(join(root, 'solution-agent/raw-output.txt'), 'utf8'), JSON.stringify(solutionResult));
+  const solutionTrace = JSON.parse(await readFile(join(root, 'solution-agent/execution-trace.json'), 'utf8'));
+  assert.equal(solutionTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(solutionTrace.terminal.outcome, 'completed');
+  assert.equal(solutionTrace.events[0].type, 'process_start');
+  assert.equal(solutionTrace.events.at(-1).type, 'process_close');
   assert.equal(JSON.parse(await readFile(join(root, 'solution-agent/result.json'), 'utf8')).problemId, problemPackage.problemId);
-  assert.equal(JSON.parse(await readFile(join(root, 'solution-agent/invocation.json'), 'utf8')).jobNumber, 3);
+  const invocation = JSON.parse(await readFile(join(root, 'solution-agent/invocation.json'), 'utf8'));
+  assert.equal(invocation.schemaVersion, 'solution-agent-invocation-v2');
+  assert.equal(invocation.jobNumber, 3);
+  assert.deepEqual(invocation.skillAssignments, [{
+    identity: 'repository-grounded-investigation',
+    version: '1',
+    canonicalPath: canonicalSkillPath,
+    expectedContentSha256: canonicalSkillSha256,
+  }]);
+  assert.deepEqual(invocation.deliveredSkills, [{
+    identity: 'repository-grounded-investigation',
+    version: '1',
+    canonicalPath: canonicalSkillPath,
+    expectedContentSha256: canonicalSkillSha256,
+    contentSha256: canonicalSkillSha256,
+  }]);
 
   const locatorSolutionResult = {
     ...solutionResult,
@@ -115,6 +150,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     invocationRef: 'solution-000001-locator',
     jobNumber: 3,
     destinationRoot: join(root, 'locator-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: {
       executable: process.execPath,
       buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(locatorSolutionResult))})`],
@@ -146,6 +182,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
       invocationRef: `solution-000001-invalid-${index}`,
       jobNumber: 3,
       destinationRoot: join(root, `invalid-locator-${index}`),
+      skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
       participant: {
         executable: process.execPath,
         buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, repoRefs: [repoRef] }))})`],
@@ -164,6 +201,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     invocationRef: 'solution-000001-artifact-locator',
     jobNumber: 3,
     destinationRoot: join(root, 'artifact-locator-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: {
       executable: process.execPath,
       buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, artifactRefs: ['source/observable-payload.json:10'] }))})`],
@@ -181,6 +219,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     invocationRef: 'solution-000001-artifact-fragment',
     jobNumber: 3,
     destinationRoot: join(root, 'artifact-fragment-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: {
       executable: process.execPath,
       buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify({ ...solutionResult, artifactRefs: ['source/observable-payload.json#entry-1'] }))})`],
@@ -198,6 +237,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     invocationRef: 'solution-000002',
     jobNumber: 3,
     destinationRoot: join(root, 'invalid-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant: {
       executable: process.execPath,
       buildArgs: () => ['-e', 'process.stdout.write("not-json")'],
@@ -206,6 +246,37 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(invalid.ok, false);
   assert.equal(invalid.ok ? undefined : invalid.errorKind, 'invalid_output');
   assert.equal(JSON.parse(await readFile(join(root, 'invalid-agent/invocation.json'), 'utf8')).status, 'failed');
+
+  const workspaceWithoutSkill = join(root, 'workspace-without-skill');
+  await mkdir(workspaceWithoutSkill, { recursive: true });
+  let runtimeCalls = 0;
+  const deliveryFailure = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot: workspaceWithoutSkill,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-000003',
+    jobNumber: 3,
+    destinationRoot: join(root, 'skill-delivery-failure'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => {
+        runtimeCalls += 1;
+        return ['-e', 'process.exit(1)'];
+      },
+    },
+  });
+  assert.equal(deliveryFailure.ok, false);
+  assert.equal(deliveryFailure.ok ? undefined : deliveryFailure.errorKind, 'process');
+  assert.equal(runtimeCalls, 0);
+  const deliveryFailureInvocation = JSON.parse(
+    await readFile(join(root, 'skill-delivery-failure/invocation.json'), 'utf8'),
+  );
+  assert.equal(deliveryFailureInvocation.status, 'failed');
+  assert.deepEqual(deliveryFailureInvocation.skillAssignments, invocation.skillAssignments);
+  assert.deepEqual(deliveryFailureInvocation.deliveredSkills, []);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

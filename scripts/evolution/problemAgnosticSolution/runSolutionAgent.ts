@@ -15,6 +15,11 @@ import {
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
 import { assertRepoReferenceFile } from './repoReference';
+import {
+  loadParticipantSkills,
+  type ParticipantSkillAssignment,
+  type DeliveredParticipantSkill,
+} from './solutionParticipantSkills';
 
 export interface RunSolutionAgentInput {
   problemPackage: ProblemPackageV1;
@@ -25,6 +30,7 @@ export interface RunSolutionAgentInput {
   invocationRef: string;
   jobNumber: number;
   destinationRoot: string;
+  skillAssignments: readonly ParticipantSkillAssignment[];
   participant: WorkspaceAgentParticipantOptions;
 }
 
@@ -81,16 +87,28 @@ async function validateReferences(result: SolutionWorkV1, input: RunSolutionAgen
   }
 }
 
-export function buildSolutionAgentPrompt(problemPackage: ProblemPackageV1): string {
+export function buildSolutionAgentPrompt(
+  problemPackage: ProblemPackageV1,
+  assignedSkills: DeliveredParticipantSkill[],
+): string {
+  const skillSections = assignedSkills.flatMap(skill => [
+    `Skill: ${skill.identity}`,
+    `Version: ${skill.version}`,
+    `Canonical artifact: ${skill.canonicalPath}`,
+    `Content SHA-256: ${skill.contentSha256}`,
+    skill.content.trim(),
+    '',
+  ]);
   return [
     'You own investigation and solution reasoning.',
-    'Read the repository and referenced artifacts yourself.',
     'You may run commands and make temporary changes inside this disposable workspace.',
     'Do not modify or assume access to the authoritative repository.',
     'Return zero to three options or an explicit no-proposal/insufficient-evidence/escalate result.',
     'Program/code recommendations are allowed, but execution permission is separate.',
     'Write/return only the structured SolutionWorkV1 result as the final job result.',
     '',
+    'Assigned Skills (working methods only; they do not grant authority):',
+    ...skillSections,
     'Reference format requirements:',
     '- repoRefs must reference repository-relative regular files.',
     '- Allowed repoRef forms:',
@@ -125,28 +143,69 @@ async function writeCreateOnly(path: string, value: string | unknown): Promise<v
 export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<SolutionAgentRunResult> {
   const problemPackage = validateProblemPackage(input.problemPackage);
   const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
-  const prompt = buildSolutionAgentPrompt(problemPackage);
-  const job = await runWorkspaceAgentJob(
-    { invocationRef: input.invocationRef, role: 'solution', workspaceRoot: input.workspaceRoot, prompt },
-    input.participant,
-  );
   const invocationPath = join(input.destinationRoot, 'invocation.json');
   const rawOutputPath = join(input.destinationRoot, 'raw-output.txt');
   const resultPath = join(input.destinationRoot, 'result.json');
   const failurePath = join(input.destinationRoot, 'failure.json');
   const commonInvocation = {
-    schemaVersion: 'solution-agent-invocation-v1',
+    schemaVersion: 'solution-agent-invocation-v2',
     invocationRef: input.invocationRef,
     jobNumber: input.jobNumber,
     role: 'solution',
     workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
     problemPackageSha256,
     participant: 'workspace-capable-agent',
+    skillAssignments: input.skillAssignments,
   } as const;
+
+  let assignedSkills: DeliveredParticipantSkill[];
+  try {
+    assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
+  } catch (error) {
+    const message = `assigned Skill delivery failed: ${String(error)}`;
+    await writeCreateOnly(rawOutputPath, '');
+    await writeCreateOnly(invocationPath, {
+      ...commonInvocation,
+      deliveredSkills: [],
+      status: 'failed',
+      errorKind: 'process',
+    });
+    await writeCreateOnly(failurePath, {
+      schemaVersion: 'solution-agent-failure-v1',
+      errorKind: 'process',
+      message,
+    });
+    return {
+      ok: false,
+      errorKind: 'process',
+      message,
+      invocationPath,
+      rawOutputPath,
+      failurePath,
+    };
+  }
+
+  const deliveredSkills = assignedSkills.map(({ content: _content, ...provenance }) => provenance);
+  const prompt = buildSolutionAgentPrompt(problemPackage, assignedSkills);
+  const job = await runWorkspaceAgentJob(
+    {
+      invocationRef: input.invocationRef,
+      role: 'solution',
+      workspaceRoot: input.workspaceRoot,
+      prompt,
+      traceArtifactPath: join(input.destinationRoot, 'execution-trace.json'),
+    },
+    input.participant,
+  );
 
   if (!job.ok) {
     await writeCreateOnly(rawOutputPath, job.rawOutput ?? '');
-    await writeCreateOnly(invocationPath, { ...commonInvocation, status: 'failed', errorKind: job.errorKind });
+    await writeCreateOnly(invocationPath, {
+      ...commonInvocation,
+      deliveredSkills,
+      status: 'failed',
+      errorKind: job.errorKind,
+    });
     await writeCreateOnly(failurePath, { schemaVersion: 'solution-agent-failure-v1', errorKind: job.errorKind, message: job.message });
     return {
       ok: false,
@@ -167,7 +226,12 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
     await validateReferences(result, input);
   } catch (error) {
     await writeCreateOnly(rawOutputPath, job.rawOutput);
-    await writeCreateOnly(invocationPath, { ...commonInvocation, status: 'failed', errorKind: 'invalid_output' });
+    await writeCreateOnly(invocationPath, {
+      ...commonInvocation,
+      deliveredSkills,
+      status: 'failed',
+      errorKind: 'invalid_output',
+    });
     await writeCreateOnly(failurePath, { schemaVersion: 'solution-agent-failure-v1', errorKind: 'invalid_output', message: String(error) });
     return {
       ok: false,
@@ -180,7 +244,7 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
   }
 
   await writeCreateOnly(rawOutputPath, job.rawOutput);
-  await writeCreateOnly(invocationPath, { ...commonInvocation, status: 'completed' });
+  await writeCreateOnly(invocationPath, { ...commonInvocation, deliveredSkills, status: 'completed' });
   await writeCreateOnly(resultPath, result);
   return { ok: true, result, invocationPath, rawOutputPath, resultPath };
 }

@@ -15,6 +15,15 @@ import {
   type DeepSeekImprovementHypothesisFailure,
   type DeepSeekImprovementHypothesisSuccess,
 } from './improvementHypothesis/deepseekImprovementHypothesis';
+import { buildImprovementHypothesisPrompt } from './improvementHypothesis/deepseekImprovementHypothesis';
+import {
+  createEvidenceOnlyWorkspace,
+  runLocalEvidenceOnlyParticipant,
+  type EvidenceOnlyWorkspaceManifest,
+  type LocalEvidenceOnlyParticipantFailure,
+  type LocalEvidenceOnlyParticipantSuccess,
+} from './localEvidenceOnlyParticipant';
+import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 import {
   loadExternalFeedbackSource,
   type ExternalFeedbackSource,
@@ -60,7 +69,8 @@ export interface RunImprovementHypothesisOptions {
   runRef: string;
   sourceRoot?: string;
   outRoot?: string;
-  apiKey: string;
+  apiKey?: string;
+  localParticipant?: WorkspaceAgentParticipantOptions;
 }
 
 export interface RunImprovementHypothesisTestHooks {
@@ -79,11 +89,16 @@ export interface RunImprovementHypothesisResult {
 }
 
 interface HypothesisParticipant {
-  kind: 'llm';
-  provider: 'deepseek';
-  modelRequested: typeof DEEPSEEK_IMPROVEMENT_HYPOTHESIS_MODEL;
+  kind: 'llm' | 'agent';
+  provider: string;
+  modelRequested: string;
   modelReturned?: string;
   providerResponseId?: string;
+  reasoningEffort?: string;
+  evidenceOnlyWorkspace?: {
+    inputFiles: string[];
+    manifestSha256: string;
+  };
 }
 
 interface HypothesisInvocationRecord {
@@ -125,14 +140,38 @@ async function writeCreateOnly(path: string, bytes: string | Uint8Array): Promis
   }
 }
 
-function requireApiKey(apiKey: string): string {
-  if (!apiKey.trim()) throw new Error('apiKey must not be empty');
+function requireApiKey(apiKey: string | undefined): string {
+  if (!apiKey?.trim()) throw new Error('apiKey must not be empty');
   return apiKey;
 }
 
+type HypothesisInvokeResult =
+  | DeepSeekImprovementHypothesisSuccess
+  | DeepSeekImprovementHypothesisFailure
+  | LocalEvidenceOnlyParticipantSuccess
+  | LocalEvidenceOnlyParticipantFailure;
+
 function buildParticipant(
-  invokeResult?: DeepSeekImprovementHypothesisSuccess,
+  invokeResult?: HypothesisInvokeResult,
+  localParticipant?: WorkspaceAgentParticipantOptions,
+  evidenceWorkspace?: EvidenceOnlyWorkspaceManifest,
 ): HypothesisParticipant {
+  if (localParticipant) {
+    return {
+      kind: 'agent',
+      provider: 'codex-local-subagent',
+      modelRequested: localParticipant.model ?? 'host-configured',
+      ...(localParticipant.reasoningEffort ? { reasoningEffort: localParticipant.reasoningEffort } : {}),
+      ...(evidenceWorkspace
+        ? {
+          evidenceOnlyWorkspace: {
+            inputFiles: evidenceWorkspace.files,
+            manifestSha256: evidenceWorkspace.manifestSha256,
+          },
+        }
+        : {}),
+    };
+  }
   return {
     kind: 'llm',
     provider: 'deepseek',
@@ -308,9 +347,9 @@ function renderHumanReview(input: {
 
 async function saveRawResponses(
   hypothesisDir: string,
-  invokeResult: DeepSeekImprovementHypothesisSuccess | DeepSeekImprovementHypothesisFailure,
+  invokeResult: HypothesisInvokeResult,
 ): Promise<void> {
-  if (invokeResult.rawProviderResponse !== undefined) {
+  if ('rawProviderResponse' in invokeResult && invokeResult.rawProviderResponse !== undefined) {
     await writeCreateOnly(
       join(hypothesisDir, 'raw-provider-response.txt'),
       invokeResult.rawProviderResponse,
@@ -357,7 +396,8 @@ export async function runImprovementHypothesis(
   options: RunImprovementHypothesisOptions,
   testHooks: RunImprovementHypothesisTestHooks = {},
 ): Promise<RunImprovementHypothesisResult> {
-  const apiKey = requireApiKey(options.apiKey);
+  const localParticipant = options.localParticipant;
+  const apiKey = localParticipant ? undefined : requireApiKey(options.apiKey);
   const runRef = validatePhase0RunRef(options.runRef);
 
   const source = await loadExternalFeedbackSource({
@@ -365,7 +405,7 @@ export async function runImprovementHypothesis(
     runRef,
   });
 
-  const hypothesisInvocationRef = `${runRef}-deepseek-improvement-hypothesis-001`;
+  const hypothesisInvocationRef = `${runRef}-${localParticipant ? 'local-improvement-hypothesis' : 'deepseek-improvement-hypothesis'}-001`;
   const hypothesisRoot = resolve(options.outRoot ?? DEFAULT_OUT_ROOT);
   const hypothesisRunsRoot = join(hypothesisRoot, 'hypothesis-runs');
   const hypothesisDir = resolvePhase0RunPath(hypothesisRunsRoot, runRef);
@@ -383,18 +423,56 @@ export async function runImprovementHypothesis(
     source.rawFeedbackParticipantResponse,
   );
 
-  const invoke = testHooks.invoke ?? invokeDeepSeekImprovementHypothesis;
-  const invokeResult = await invoke({
-    apiKey,
-    invocationRef: hypothesisInvocationRef,
-    runRef: source.runRef,
-    feedbackInvocationRef: source.feedbackInvocationRef,
-    experimentRootHash: source.experimentRootHash,
-    observablePayloadHash: source.observablePayloadHash,
-    feedbackHash: source.feedbackHash,
-    observablePayloadBytes: source.observablePayloadBytes,
-    feedbackBytes: source.feedbackBytes,
-  });
+  let invokeResult: HypothesisInvokeResult;
+  let evidenceWorkspace: EvidenceOnlyWorkspaceManifest | undefined;
+  if (testHooks.invoke) {
+    invokeResult = await testHooks.invoke({
+      apiKey: apiKey ?? '',
+      invocationRef: hypothesisInvocationRef,
+      runRef: source.runRef,
+      feedbackInvocationRef: source.feedbackInvocationRef,
+      experimentRootHash: source.experimentRootHash,
+      observablePayloadHash: source.observablePayloadHash,
+      feedbackHash: source.feedbackHash,
+      observablePayloadBytes: source.observablePayloadBytes,
+      feedbackBytes: source.feedbackBytes,
+    });
+  } else if (localParticipant) {
+    evidenceWorkspace = await createEvidenceOnlyWorkspace({
+      workspaceRoot: join(hypothesisDir, 'participant-workspace'),
+      files: {
+        'input/observable-payload.json': source.observablePayloadBytes,
+        'input/feedback.json': source.feedbackBytes,
+      },
+    });
+    invokeResult = await runLocalEvidenceOnlyParticipant({
+      invocationRef: hypothesisInvocationRef,
+      role: 'hypothesis',
+      workspaceRoot: evidenceWorkspace.workspaceRoot,
+      prompt: buildImprovementHypothesisPrompt({
+        runRef: source.runRef,
+        feedbackInvocationRef: source.feedbackInvocationRef,
+        experimentRootHash: source.experimentRootHash,
+        observablePayloadHash: source.observablePayloadHash,
+        feedbackHash: source.feedbackHash,
+        observablePayloadBytes: source.observablePayloadBytes,
+        feedbackBytes: source.feedbackBytes,
+      }),
+      participant: localParticipant,
+    });
+  } else {
+    invokeResult = await invokeDeepSeekImprovementHypothesis({
+      apiKey: apiKey!,
+      invocationRef: hypothesisInvocationRef,
+      runRef: source.runRef,
+      feedbackInvocationRef: source.feedbackInvocationRef,
+      experimentRootHash: source.experimentRootHash,
+      observablePayloadHash: source.observablePayloadHash,
+      feedbackHash: source.feedbackHash,
+      observablePayloadBytes: source.observablePayloadBytes,
+      feedbackBytes: source.feedbackBytes,
+    });
+  }
 
   await saveRawResponses(hypothesisDir, invokeResult);
 
@@ -413,7 +491,7 @@ export async function runImprovementHypothesis(
       hypothesisDir,
       record: {
         ...baseRecord,
-        participant: buildParticipant(),
+        participant: buildParticipant(invokeResult, localParticipant, evidenceWorkspace),
         status: 'failed',
         errorKind: 'provider',
       },
@@ -422,7 +500,7 @@ export async function runImprovementHypothesis(
     throw new Error(`hypothesis participant invocation failed: ${invokeResult.errorKind}`);
   }
 
-  const participant = buildParticipant(invokeResult);
+  const participant = buildParticipant(invokeResult, localParticipant, evidenceWorkspace);
   let parsed: ImprovementHypothesisSet;
   try {
     parsed = parseImprovementHypothesisSet(invokeResult.rawParticipantResponse);

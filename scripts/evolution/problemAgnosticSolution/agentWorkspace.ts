@@ -18,7 +18,7 @@ const EXPERIMENT_ROOT = '.tmp/evolution/problem-agnostic-agent-solution-loop';
 export interface PrepareAgentWorkspaceInput {
   authoritativeRoot: string;
   destinationRoot: string;
-  jobKind: 'solution' | 'reviewer';
+  jobKind: 'solution' | 'reviewer' | 'evolution';
   artifactSourceRoot?: string;
   artifactRelativePaths?: string[];
 }
@@ -51,6 +51,8 @@ function normalized(relativePath: string): string {
 function isExcluded(relativePath: string): boolean {
   const path = normalized(relativePath);
   if (!path) return false;
+  if (path === '.agent-workspace-manifest.json') return true;
+  if (path.toLowerCase().endsWith('.zip')) return true;
   if (path === EXPERIMENT_ROOT || path.startsWith(`${EXPERIMENT_ROOT}/`)) return true;
   if (
     path.startsWith('public/reports/')

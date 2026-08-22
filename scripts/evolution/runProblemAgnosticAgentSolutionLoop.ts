@@ -31,6 +31,7 @@ import {
   type PreparedAgentWorkspace,
 } from './problemAgnosticSolution/agentWorkspace';
 import { buildProblemPackage } from './problemAgnosticSolution/buildProblemPackage';
+import { assertRepoReferenceFile } from './problemAgnosticSolution/repoReference';
 import {
   runSolutionAgent,
   type RunSolutionAgentInput,
@@ -51,6 +52,10 @@ import {
 import type { ParticipantFailureOutcomeV1, ParticipantFailureStage } from '../../src/evolution/participantFailureOutcomeContract';
 import { pathToFileURL } from 'node:url';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import {
+  REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+  SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+} from './problemAgnosticSolution/solutionParticipantSkills';
 
 export const DEFAULT_EXPERIMENT_ROOT = '.tmp/evolution/problem-agnostic-agent-solution-loop';
 
@@ -74,7 +79,8 @@ export interface RunProblemAgnosticAgentSolutionLoopOptions {
   repositoryRoot?: string;
   fixedSourceRoot: string;
   experimentRoot?: string;
-  apiKey: string;
+  apiKey?: string;
+  participantMode?: 'deepseek' | 'local-subagent';
   workspaceAgentParticipant?: WorkspaceAgentParticipantOptions;
   authorityRefs?: string[];
   dependencies?: ProblemAgnosticLoopDependencies;
@@ -246,6 +252,9 @@ export async function runProblemAgnosticAgentSolutionLoop(
   if (!participant) {
     throw new Error('workspaceAgentParticipant must be explicitly provided by the execution host');
   }
+  if (options.participantMode !== 'local-subagent' && !options.apiKey?.trim()) {
+    throw new Error('apiKey is required unless participantMode is local-subagent');
+  }
   const repositoryRoot = resolve(options.repositoryRoot ?? process.cwd());
   const fixedSourceRoot = resolve(options.fixedSourceRoot);
   const experimentRoot = resolve(options.experimentRoot ?? join(repositoryRoot, DEFAULT_EXPERIMENT_ROOT));
@@ -271,6 +280,7 @@ export async function runProblemAgnosticAgentSolutionLoop(
       catalogVersion: 'sealed-cohort-source',
       outRoot: experimentRoot,
       apiKey: options.apiKey,
+      ...(options.participantMode === 'local-subagent' ? { localParticipant: participant } : {}),
     });
   } catch (error) {
     const provenFailure = await proveLegacyParticipantFailure({
@@ -297,6 +307,7 @@ export async function runProblemAgnosticAgentSolutionLoop(
       sourceRoot: experimentRoot,
       outRoot: experimentRoot,
       apiKey: options.apiKey,
+      ...(options.participantMode === 'local-subagent' ? { localParticipant: participant } : {}),
     });
   } catch (error) {
     const provenFailure = await proveLegacyParticipantFailure({
@@ -379,6 +390,14 @@ export async function runProblemAgnosticAgentSolutionLoop(
     };
   }
 
+  for (const authorityRef of authorityRefs) {
+    try {
+      await assertRepoReferenceFile(repositoryRoot, authorityRef, 'authorityRef');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`invalid authorityRef: ${authorityRef}: ${message}`);
+    }
+  }
   const authoritativeFingerprint = await captureAuthoritativeFingerprint(repositoryRoot);
   const problemPackagePath = join(experimentRoot, 'problem-package.json');
   const problemPackage = await buildProblemPackage({
@@ -412,6 +431,7 @@ export async function runProblemAgnosticAgentSolutionLoop(
     invocationRef: 'solution-agent-000001',
     jobNumber: 3,
     destinationRoot: join(experimentRoot, 'solution-agent'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
     participant,
   });
   await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);
@@ -450,6 +470,7 @@ export async function runProblemAgnosticAgentSolutionLoop(
       invocationRef: 'solution-reviewer-000001',
       jobNumber: 4,
       destinationRoot: join(experimentRoot, 'reviewer-agent'),
+      skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
       participant,
     });
     await assertAuthoritativeFingerprintUnchanged(repositoryRoot, authoritativeFingerprint);

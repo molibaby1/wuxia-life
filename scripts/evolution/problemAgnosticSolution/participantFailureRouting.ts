@@ -72,9 +72,7 @@ function isRecord(value: unknown): value is RecordValue {
 export async function buildParticipantFailureOutcome(
   input: BuildParticipantFailureInput,
 ): Promise<ParticipantFailureOutcomeV1> {
-  const repositoryRoot = resolve(input.repositoryRoot);
   const experimentRoot = resolve(input.experimentRoot);
-  assertInside(repositoryRoot, experimentRoot, 'experimentRoot');
   const failureArtifactRefs: string[] = [];
   for (const reference of input.failureArtifactRefs) {
     const resolved = resolveArtifactReference(experimentRoot, reference);

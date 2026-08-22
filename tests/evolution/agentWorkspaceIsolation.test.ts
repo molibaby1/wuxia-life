@@ -24,6 +24,7 @@ async function fixture(): Promise<string> {
   await mkdir(join(root, 'src'), { recursive: true });
   await mkdir(join(root, 'public/reports'), { recursive: true });
   await mkdir(join(root, 'docs'), { recursive: true });
+  await mkdir(join(root, 'skills/repository-grounded-investigation'), { recursive: true });
   await mkdir(join(root, '.git'), { recursive: true });
   await mkdir(join(root, 'node_modules/pkg'), { recursive: true });
   await mkdir(join(root, 'dist'), { recursive: true });
@@ -34,6 +35,11 @@ async function fixture(): Promise<string> {
   await writeFile(join(root, 'public/reports/generated-report.html'), '<html>generated</html>');
   await writeFile(join(root, 'public/reports/manifest.json'), '{"reports":[]}');
   await writeFile(join(root, 'docs/authority.md'), 'authority');
+  await writeFile(
+    join(root, 'skills/repository-grounded-investigation/SKILL.md'),
+    'repository-grounded investigation method',
+  );
+  await writeFile(join(root, 'project.zip'), 'human handoff zip bytes v1');
   await writeFile(join(root, 'package.json'), '{}');
   await writeFile(join(root, '.env'), 'SECRET=one');
   await writeFile(join(root, '.env.local'), 'SECRET=two');
@@ -59,6 +65,11 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
   assert.equal(await pathExists(join(solution.workspaceRoot, 'public/reports/generated-report.html')), false);
   assert.equal(await pathExists(join(solution.workspaceRoot, 'public/reports/manifest.json')), true);
   assert.equal(await pathExists(join(solution.workspaceRoot, 'docs/authority.md')), true);
+  assert.equal(
+    await pathExists(join(solution.workspaceRoot, 'skills/repository-grounded-investigation/SKILL.md')),
+    true,
+  );
+  assert.equal(await pathExists(join(solution.workspaceRoot, 'project.zip')), false);
   assert.equal(await pathExists(join(solution.workspaceRoot, '.env')), false);
   assert.equal(await pathExists(join(solution.workspaceRoot, '.env.local')), false);
   assert.equal(await pathExists(join(solution.workspaceRoot, '.git/config')), false);
@@ -71,11 +82,19 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
   assert.equal(manifest.entries.some(entry => entry.path === 'public/reports/generated-report.json'), false);
   assert.equal(manifest.entries.some(entry => entry.path === 'public/reports/generated-report.html'), false);
   assert.equal(manifest.entries.some(entry => entry.path === 'public/real-static-asset.ext'), true);
+  assert.equal(
+    manifest.entries.some(entry => entry.path === 'skills/repository-grounded-investigation/SKILL.md'),
+    true,
+  );
+  assert.equal(manifest.entries.some(entry => entry.path === 'project.zip'), false);
   await writeFile(join(root, 'public/reports/generated-report.json'), '{"generated":false,"changed":true}');
   assert.equal(await captureAuthoritativeFingerprint(root), initialFingerprint);
   await assertAuthoritativeFingerprintUnchanged(root, solution.authoritativeFingerprintSha256);
   await writeFile(join(root, 'public/reports/generated-report.html'), '<html>changed</html>');
   assert.equal(await captureAuthoritativeFingerprint(root), initialFingerprint);
+  await writeFile(join(root, 'project.zip'), 'human handoff zip bytes v2');
+  assert.equal(await captureAuthoritativeFingerprint(root), initialFingerprint);
+  await assertAuthoritativeFingerprintUnchanged(root, solution.authoritativeFingerprintSha256);
   await writeFile(join(root, 'public/reports/manifest.json'), '{"reports":["changed"]}');
   assert.notEqual(await captureAuthoritativeFingerprint(root), initialFingerprint);
   await writeFile(join(root, 'public/reports/manifest.json'), '{"reports":[]}');
@@ -94,8 +113,43 @@ export async function runAgentWorkspaceIsolationTests(): Promise<void> {
   assert.notEqual(await readFile(join(reviewer.workspaceRoot, 'src/app.ts'), 'utf8'), 'sandbox-only-change');
 }
 
+export async function runNestedAgentWorkspaceMaterializationTest(): Promise<void> {
+  const authoritativeRoot = await fixture();
+  const evolution = await prepareAgentWorkspace({
+    authoritativeRoot,
+    destinationRoot: join(authoritativeRoot, '.tmp/nested-evolution'),
+    jobKind: 'evolution',
+  });
+  const evolutionManifest = JSON.parse(await readFile(evolution.manifestPath, 'utf8')) as {
+    jobKind: string;
+    entries: Array<{ path: string }>;
+  };
+  const evolutionFingerprint = await captureAuthoritativeFingerprint(evolution.workspaceRoot);
+  evolutionManifest.jobKind = 'evolution-with-parent-metadata';
+  await writeFile(evolution.manifestPath, `${JSON.stringify(evolutionManifest)}\n`);
+  assert.equal(await captureAuthoritativeFingerprint(evolution.workspaceRoot), evolutionFingerprint);
+
+  const solution = await prepareAgentWorkspace({
+    authoritativeRoot: evolution.workspaceRoot,
+    destinationRoot: join(authoritativeRoot, '.tmp/nested-solution'),
+    jobKind: 'solution',
+  });
+  const solutionManifestText = await readFile(solution.manifestPath, 'utf8');
+  const solutionManifest = JSON.parse(solutionManifestText) as {
+    jobKind: string;
+    entries: Array<{ path: string }>;
+  };
+  assert.equal(await pathExists(solution.manifestPath), true);
+  assert.equal(solutionManifest.jobKind, 'solution');
+  assert.notEqual(solutionManifestText, await readFile(evolution.manifestPath, 'utf8'));
+  assert.equal(await pathExists(join(solution.workspaceRoot, 'src/app.ts')), true);
+  assert.equal(solutionManifest.entries.some(entry => entry.path === '.agent-workspace-manifest.json'), false);
+  assert.equal(solution.authoritativeFingerprintSha256, evolutionFingerprint);
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   runAgentWorkspaceIsolationTests()
+    .then(() => runNestedAgentWorkspaceMaterializationTest())
     .then(() => console.log('agentWorkspaceIsolation.test.ts: ok'))
     .catch(error => {
       console.error(error);

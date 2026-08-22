@@ -21,6 +21,23 @@ const fakeWorkspaceAgentParticipant: WorkspaceAgentParticipantOptions = {
   buildArgs: () => [],
 };
 
+const DEFAULT_TEST_AUTHORITY_REFS = [
+  'docs/product/player-model.md',
+  'docs/product/auto-evolution-model.md',
+  'docs/governance/project-convergence.md',
+  'docs/governance/product-decisions.md',
+  'docs/governance/current-product-stage.md',
+  'docs/governance/ai-collaboration-workflow.md',
+];
+
+async function writeAuthorityRefFixtures(root: string): Promise<void> {
+  for (const reference of DEFAULT_TEST_AUTHORITY_REFS) {
+    const path = join(root, reference);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, `authority fixture: ${reference}\n`);
+  }
+}
+
 async function pathExists(path: string): Promise<boolean> {
   try {
     await lstat(path);
@@ -38,6 +55,7 @@ async function createPreflightFixture(): Promise<{
   preflight: FixedSourcePreflight;
 }> {
   const root = await mkdtemp(join(tmpdir(), 'problem-agnostic-failure-loop-'));
+  await writeAuthorityRefFixtures(root);
   const sourceRoot = join(root, 'sealed-source');
   const experimentRoot = join(root, '.tmp/evolution/problem-agnostic-agent-solution-loop');
   await mkdir(join(sourceRoot, 'reviewer-input'), { recursive: true });
@@ -149,6 +167,7 @@ export async function runMissingFixedSourceBindingTests(): Promise<void> {
 
 export async function runManifestAuthoritativeSourceBindingTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'problem-agnostic-authoritative-source-'));
+  await writeAuthorityRefFixtures(root);
   const sourceRunRef = 'authoritative-run-ref';
   const directoryName = 'some-directory-name';
   const sealed = await createSealedSourceFixture({ root, directoryName, runRef: sourceRunRef });
@@ -261,6 +280,7 @@ export async function runMissingWorkspaceAgentBindingTests(): Promise<void> {
 
 export async function runProblemAgnosticAgentSolutionLoopTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'problem-agnostic-loop-'));
+  await writeAuthorityRefFixtures(root);
   const sourceRoot = join(root, 'sealed-source');
   const experimentRoot = join(root, 'experiment');
   await mkdir(join(sourceRoot, 'reviewer-input'), { recursive: true });
@@ -279,6 +299,7 @@ export async function runProblemAgnosticAgentSolutionLoopTests(): Promise<void> 
     experimentRoot,
     apiKey: 'test-key',
     workspaceAgentParticipant: fakeWorkspaceAgentParticipant,
+    authorityRefs: ['docs/product/missing-authority.md'],
     fixedSourceRoot: sourceRoot,
     dependencies: {
       preflightFixedSource: async () => preflight,
@@ -426,6 +447,151 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
   assert.equal(result.decision.route, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(result.actualParticipantJobs, 4);
   assert.equal(reviewerCalls, 1);
+}
+
+export async function runAuthorityRefPreflightTests(): Promise<void> {
+  async function runCase(input: {
+    authorityRefs: string[];
+    expectedError: RegExp;
+  }): Promise<void> {
+    const fixture = await createPreflightFixture();
+    const authoritySnapshot = await readFile(join(fixture.root, DEFAULT_TEST_AUTHORITY_REFS[0]!), 'utf8');
+    let solutionCalls = 0;
+    let reviewerCalls = 0;
+    const resultPromise = runProblemAgnosticAgentSolutionLoop({
+      repositoryRoot: fixture.root,
+      experimentRoot: fixture.experimentRoot,
+      fixedSourceRoot: fixture.sourceRoot,
+      apiKey: 'test-key',
+      workspaceAgentParticipant: fakeWorkspaceAgentParticipant,
+      authorityRefs: input.authorityRefs,
+      dependencies: {
+        preflightFixedSource: async () => fixture.preflight,
+        runExternalFeedback: async options => ({
+          runRef: options.runRef,
+          invocationRef: 'feedback-000001',
+          phase0RunPath: fixture.sourceRoot,
+          feedbackDir: join(options.outRoot!, 'feedback-runs/cohort-run-000001'),
+          humanReportPath: join(options.outRoot!, 'feedback-runs/cohort-run-000001/human-review.md'),
+          observablePayloadHash: fixture.preflight.observablePayloadHash,
+          experimentRootHash: fixture.preflight.experimentRootHash,
+        }),
+        runImprovementHypothesis: async options => {
+          const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+          return {
+            runRef: options.runRef,
+            feedbackInvocationRef: 'feedback-000001',
+            hypothesisInvocationRef: 'hypothesis-000001',
+            hypothesisDir,
+            humanReportPath: join(hypothesisDir, 'human-review.md'),
+            experimentRootHash: fixture.preflight.experimentRootHash,
+            observablePayloadHash: fixture.preflight.observablePayloadHash,
+            feedbackHash: 'feedback-hash',
+          };
+        },
+        runSolutionAgent: async () => {
+          solutionCalls += 1;
+          throw new Error('Solution must not run before authority preflight');
+        },
+        runSolutionReviewer: async () => {
+          reviewerCalls += 1;
+          throw new Error('Reviewer must not run in authority preflight test');
+        },
+      },
+    });
+
+    await assert.rejects(resultPromise, input.expectedError);
+    assert.equal(solutionCalls, 0);
+    assert.equal(reviewerCalls, 0);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'problem-package.json')), false);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'solution-agent')), false);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'reviewer-agent')), false);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'decision.json')), false);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'workflow-outcome.json')), false);
+    assert.equal(await pathExists(join(fixture.experimentRoot, 'human-review-package.md')), false);
+    assert.equal(await readFile(join(fixture.root, DEFAULT_TEST_AUTHORITY_REFS[0]!), 'utf8'), authoritySnapshot);
+  }
+
+  await runCase({
+    authorityRefs: [...DEFAULT_TEST_AUTHORITY_REFS, 'docs/product/missing-authority.md'],
+    expectedError: /invalid authorityRef: docs\/product\/missing-authority\.md: .*ENOENT/i,
+  });
+  await runCase({
+    authorityRefs: ['../authority-outside-repository.md'],
+    expectedError: /invalid authorityRef: \.\.\/authority-outside-repository\.md: authorityRef escapes its allowed root/i,
+  });
+}
+
+export async function runLocalParticipantModeInsufficientEvidenceTests(): Promise<void> {
+  const fixture = await createPreflightFixture();
+  const problemId = 'problem-hypothesis-000001';
+  let localParticipantPasses = 0;
+  let reviewerCalls = 0;
+  const result = await runProblemAgnosticAgentSolutionLoop({
+    repositoryRoot: fixture.root,
+    experimentRoot: fixture.experimentRoot,
+    fixedSourceRoot: fixture.sourceRoot,
+    participantMode: 'local-subagent',
+    workspaceAgentParticipant: fakeWorkspaceAgentParticipant,
+    dependencies: {
+      preflightFixedSource: async () => fixture.preflight,
+      runExternalFeedback: async options => {
+        assert.equal(options.localParticipant, fakeWorkspaceAgentParticipant);
+        localParticipantPasses += 1;
+        return {
+          runRef: options.runRef,
+          invocationRef: 'local-feedback-000001',
+          phase0RunPath: fixture.sourceRoot,
+          feedbackDir: join(options.outRoot!, 'feedback-runs/cohort-run-000001'),
+          humanReportPath: join(options.outRoot!, 'feedback-runs/cohort-run-000001/human-review.md'),
+          observablePayloadHash: fixture.preflight.observablePayloadHash,
+          experimentRootHash: fixture.preflight.experimentRootHash,
+        };
+      },
+      runImprovementHypothesis: async options => {
+        assert.equal(options.localParticipant, fakeWorkspaceAgentParticipant);
+        localParticipantPasses += 1;
+        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        return {
+          runRef: options.runRef,
+          feedbackInvocationRef: 'local-feedback-000001',
+          hypothesisInvocationRef: 'local-hypothesis-000001',
+          hypothesisDir,
+          humanReportPath: join(hypothesisDir, 'human-review.md'),
+          experimentRootHash: fixture.preflight.experimentRootHash,
+          observablePayloadHash: fixture.preflight.observablePayloadHash,
+          feedbackHash: 'feedback-hash',
+        };
+      },
+      runSolutionAgent: async input => ({
+        ok: true,
+        result: {
+          schemaVersion: 'solution-work-v1',
+          problemId,
+          status: 'INSUFFICIENT_EVIDENCE',
+          options: [],
+          summary: 'The evidence is insufficient for a safe proposal.',
+          repoRefs: [],
+          artifactRefs: [],
+        },
+        invocationPath: join(input.destinationRoot, 'invocation.json'),
+        rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+        resultPath: join(input.destinationRoot, 'result.json'),
+      }),
+      runSolutionReviewer: async () => {
+        reviewerCalls += 1;
+        throw new Error('Reviewer must not run after local Solution insufficiency');
+      },
+    },
+  });
+
+  assert.equal(localParticipantPasses, 2);
+  assert.equal(result.status, 'completed');
+  assert.equal(result.actualParticipantJobs, 3);
+  assert.equal(result.decision.route, 'DEFER');
+  assert.equal(result.decision.reasonCode, 'INSUFFICIENT_EVIDENCE');
+  assert.equal(reviewerCalls, 0);
+  assert.equal(result.configGameplayExecutionCount, 0);
 }
 
 export async function runInsufficientEvidenceDoesNotMaterializeReviewerWorkspaceTests(): Promise<void> {
@@ -714,6 +880,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     runManifestAuthoritativeSourceBindingTests(),
     runProblemAgnosticAgentSolutionLoopTests(),
     runSuccessfulOptionsReviewerOrchestrationTests(),
+    runAuthorityRefPreflightTests(),
+    runLocalParticipantModeInsufficientEvidenceTests(),
     runInsufficientEvidenceDoesNotMaterializeReviewerWorkspaceTests(),
     runParticipantFailureOrchestrationTests(),
     runSolutionAndReviewerFailureOrchestrationTests(),

@@ -26,6 +26,7 @@ import {
   validatePhase0RunRef,
   validatePhase0RunSeal,
   writePhase0RunAnchor,
+  type Phase0SourceFingerprint,
 } from './provenance';
 
 const DEFAULT_PHASE0_OUT_ROOT = '.tmp/evolution/phase0';
@@ -45,6 +46,7 @@ export interface RunPhase0Options {
   catalogVersion: string;
   maxSteps?: number;
   runtimeCatalog?: RuntimeEventCatalog;
+  sourceFingerprint?: Phase0SourceFingerprint;
 }
 
 /** Test-only orchestration barriers for deterministic failure-path coverage. */
@@ -171,7 +173,7 @@ export async function runPhase0(
   const stagingDir = await mkdtemp(join(stagingRoot, `${runRef}-`));
 
   const runtimeCatalog = options.runtimeCatalog ?? createDefaultRuntimeEventCatalog();
-  const sourceFingerprint = await captureWorktreeSourceFingerprint(process.cwd());
+  const sourceFingerprint = options.sourceFingerprint ?? await captureWorktreeSourceFingerprint(process.cwd());
   const catalogInput = captureCatalogInput(runtimeCatalog);
   const personaInput = cloneJson(options.persona);
   const runInput: Phase0RunInputV1 = {

@@ -142,6 +142,22 @@ export async function runParticipantFailureRoutingTests(): Promise<void> {
   assert.equal(built.participantJobNumber, 3);
   assert.deepEqual(built.failureArtifactRefs, ['solution-agent/failure.json']);
 
+  const isolatedWorkspaceFixture = await fixtureRoot();
+  const isolatedWorkspaceRoot = join(isolatedWorkspaceFixture.repositoryRoot, 'isolated-workspace');
+  const p2ArtifactRoot = join(isolatedWorkspaceFixture.repositoryRoot, 'p2-artifacts');
+  await mkdir(isolatedWorkspaceRoot, { recursive: true });
+  await mkdir(join(p2ArtifactRoot, 'solution-agent'), { recursive: true });
+  await writeFile(join(p2ArtifactRoot, 'solution-agent/failure.json'), '{}');
+  const isolatedBuilt = await buildParticipantFailureOutcome({
+    repositoryRoot: isolatedWorkspaceRoot,
+    experimentRoot: p2ArtifactRoot,
+    stage: 'SOLUTION',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: [join(p2ArtifactRoot, 'solution-agent/failure.json')],
+  });
+  assert.equal(isolatedBuilt.failedStage, 'SOLUTION');
+  assert.deepEqual(isolatedBuilt.failureArtifactRefs, ['solution-agent/failure.json']);
+
   await assert.rejects(() => buildParticipantFailureOutcome({
     ...buildFixture,
     stage: 'SOLUTION',

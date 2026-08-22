@@ -15,6 +15,15 @@ import {
   type DeepSeekPlayerExperienceFailure,
   type DeepSeekPlayerExperienceSuccess,
 } from './externalFeedback/deepseekPlayerExperienceFeedback';
+import { buildPlayerExperienceFeedbackPrompt } from './externalFeedback/deepseekPlayerExperienceFeedback';
+import {
+  createEvidenceOnlyWorkspace,
+  runLocalEvidenceOnlyParticipant,
+  type EvidenceOnlyWorkspaceManifest,
+  type LocalEvidenceOnlyParticipantFailure,
+  type LocalEvidenceOnlyParticipantSuccess,
+} from './localEvidenceOnlyParticipant';
+import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 import {
   canonicalJson,
   resolvePhase0AnchorPath,
@@ -66,7 +75,8 @@ export interface RunMinimalExternalFeedbackOptions {
   catalogVersion: string;
   maxSteps?: number;
   outRoot?: string;
-  apiKey: string;
+  apiKey?: string;
+  localParticipant?: WorkspaceAgentParticipantOptions;
 }
 
 export interface RunMinimalExternalFeedbackTestHooks {
@@ -84,11 +94,16 @@ export interface RunMinimalExternalFeedbackResult {
 }
 
 interface InvocationParticipant {
-  kind: 'llm';
-  provider: 'deepseek';
-  modelRequested: typeof DEEPSEEK_PLAYER_EXPERIENCE_MODEL;
+  kind: 'llm' | 'agent';
+  provider: string;
+  modelRequested: string;
   modelReturned?: string;
   providerResponseId?: string;
+  reasoningEffort?: string;
+  evidenceOnlyWorkspace?: {
+    inputFiles: string[];
+    manifestSha256: string;
+  };
 }
 
 interface InvocationRecord {
@@ -128,12 +143,38 @@ async function writeCreateOnly(path: string, bytes: string | Uint8Array): Promis
   }
 }
 
-function requireApiKey(apiKey: string): string {
-  if (!apiKey.trim()) throw new Error('apiKey must not be empty');
+function requireApiKey(apiKey: string | undefined): string {
+  if (!apiKey?.trim()) throw new Error('apiKey must not be empty');
   return apiKey;
 }
 
-function buildParticipant(invokeResult?: DeepSeekPlayerExperienceSuccess): InvocationParticipant {
+type FeedbackInvokeResult =
+  | DeepSeekPlayerExperienceSuccess
+  | DeepSeekPlayerExperienceFailure
+  | LocalEvidenceOnlyParticipantSuccess
+  | LocalEvidenceOnlyParticipantFailure;
+
+function buildParticipant(
+  invokeResult?: FeedbackInvokeResult,
+  localParticipant?: WorkspaceAgentParticipantOptions,
+  evidenceWorkspace?: EvidenceOnlyWorkspaceManifest,
+): InvocationParticipant {
+  if (localParticipant) {
+    return {
+      kind: 'agent',
+      provider: 'codex-local-subagent',
+      modelRequested: localParticipant.model ?? 'host-configured',
+      ...(localParticipant.reasoningEffort ? { reasoningEffort: localParticipant.reasoningEffort } : {}),
+      ...(evidenceWorkspace
+        ? {
+          evidenceOnlyWorkspace: {
+            inputFiles: evidenceWorkspace.files,
+            manifestSha256: evidenceWorkspace.manifestSha256,
+          },
+        }
+        : {}),
+    };
+  }
   return {
     kind: 'llm',
     provider: 'deepseek',
@@ -251,9 +292,9 @@ async function persistFailure(input: {
 
 async function saveRawResponses(
   feedbackDir: string,
-  invokeResult: DeepSeekPlayerExperienceSuccess | DeepSeekPlayerExperienceFailure,
+  invokeResult: FeedbackInvokeResult,
 ): Promise<void> {
-  if (invokeResult.rawProviderResponse !== undefined) {
+  if ('rawProviderResponse' in invokeResult && invokeResult.rawProviderResponse !== undefined) {
     await writeCreateOnly(
       join(feedbackDir, 'raw-provider-response.txt'),
       invokeResult.rawProviderResponse,
@@ -287,9 +328,10 @@ export async function runMinimalExternalFeedback(
   options: RunMinimalExternalFeedbackOptions,
   testHooks: RunMinimalExternalFeedbackTestHooks = {},
 ): Promise<RunMinimalExternalFeedbackResult> {
-  const apiKey = requireApiKey(options.apiKey);
+  const localParticipant = options.localParticipant;
+  const apiKey = localParticipant ? undefined : requireApiKey(options.apiKey);
   const runRef = validatePhase0RunRef(options.runRef);
-  const invocationRef = `${runRef}-deepseek-player-feedback-001`;
+  const invocationRef = `${runRef}-${localParticipant ? 'local-player-feedback' : 'deepseek-player-feedback'}-001`;
   const outRoot = resolve(options.outRoot ?? DEFAULT_OUT_ROOT);
   const gameRunsRoot = join(outRoot, 'game-runs');
   const anchorRoot = join(outRoot, 'game-run-anchors');
@@ -338,12 +380,33 @@ export async function runMinimalExternalFeedback(
   }
   await writeCreateOnly(join(feedbackDir, 'observable-payload.json'), observablePayloadBytes);
 
-  const invoke = testHooks.invoke ?? invokeDeepSeekPlayerExperienceFeedback;
-  const invokeResult = await invoke({
-    apiKey,
-    invocationRef,
-    observablePayloadBytes,
-  });
+  let invokeResult: FeedbackInvokeResult;
+  let evidenceWorkspace: EvidenceOnlyWorkspaceManifest | undefined;
+  if (testHooks.invoke) {
+    invokeResult = await testHooks.invoke({
+      apiKey: apiKey ?? '',
+      invocationRef,
+      observablePayloadBytes,
+    });
+  } else if (localParticipant) {
+    evidenceWorkspace = await createEvidenceOnlyWorkspace({
+      workspaceRoot: join(feedbackDir, 'participant-workspace'),
+      files: { 'input/observable-payload.json': observablePayloadBytes },
+    });
+    invokeResult = await runLocalEvidenceOnlyParticipant({
+      invocationRef,
+      role: 'feedback',
+      workspaceRoot: evidenceWorkspace.workspaceRoot,
+      prompt: buildPlayerExperienceFeedbackPrompt(observablePayloadBytes),
+      participant: localParticipant,
+    });
+  } else {
+    invokeResult = await invokeDeepSeekPlayerExperienceFeedback({
+      apiKey: apiKey!,
+      invocationRef,
+      observablePayloadBytes,
+    });
+  }
 
   await saveRawResponses(feedbackDir, invokeResult);
 
@@ -360,7 +423,7 @@ export async function runMinimalExternalFeedback(
       feedbackDir,
       record: {
         ...baseRecord,
-        participant: buildParticipant(),
+        participant: buildParticipant(invokeResult, localParticipant, evidenceWorkspace),
         status: 'failed',
         errorKind: invokeResult.errorKind,
       },
@@ -369,7 +432,7 @@ export async function runMinimalExternalFeedback(
     throw new Error(`external participant invocation failed: ${invokeResult.errorKind}`);
   }
 
-  const participant = buildParticipant(invokeResult);
+  const participant = buildParticipant(invokeResult, localParticipant, evidenceWorkspace);
   let parsed: ExternalFeedback;
   try {
     parsed = parseExternalFeedback(invokeResult.rawParticipantResponse);

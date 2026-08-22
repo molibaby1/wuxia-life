@@ -22,6 +22,7 @@
     "validate:event-quality": "tsx scripts/validateEventQuality.ts",
     "report:event-format-inventory": "tsx scripts/inventoryEventEffectFormats.ts",
     "report:event-asset-inventory": "tsx scripts/inventoryEventAssets.ts",
+    "report:evolution-run": "tsx scripts/evolution/reporting/buildOperationalRunReport.ts",
     "report:golden-line-feedback": "tsx scripts/reportGoldenLineFeedback.ts",
     "report:p1-quality-gate": "tsx scripts/generateP1QualityGateReport.ts",
     "report:p2-gameplay-structure": "tsx scripts/generateP2GameplayStructureReport.ts",

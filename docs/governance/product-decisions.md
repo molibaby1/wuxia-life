@@ -883,3 +883,19 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 真实玩法需要超出 facts-backed binary ownership 的数量、价值、收益、位置、转让或多实例语义；
 - 需要改变 Snapshot/save compatibility，或需要从 legacy flags 自动推导 ownership；
 - 需要将本阶段之外的 merchant flags 或其他经济事实升级为 Asset。
+
+### PD-067：Merchant shop vertical 从 legacy money 迁移到 Wealth Capacity + Asset
+
+**实施决策（Human accepted：2026-08-23）**
+
+- 新增单调事件效果 `wealth_capacity_raise_to`：将 `player.wealthCapacity` 提升至不低于指定 canonical minimum，不得降级。
+- `merchant_talent_discovery` 不再读写 `money`；`study_business` 使用 `wealth_capacity_raise_to: modest_savings`。
+- `merchant_first_shop` 要求 `merchant_talent` 且 `wealth_capacity_at_least modest_savings`；三条开店路径与 `invest_more` / `close_shop` 不再精确修改 `money`。
+- 开店、追加投资、关店不自动降低 Wealth Capacity；Phase 1B `merchant_shop` Asset contract 不变。
+- `merchant_caravan_guard` 及其他 merchant money consumer、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17、全局 money 退役仍属 deferred debt。
+- Snapshot 保持 `3.15.0`；无新 persisted 字段或 save migration。
+
+**重新讨论条件**
+
+- 需要将 merchant 路线其余 `money` threshold/effect 一并迁移；
+- 需要为 shop open/invest/close 引入 Wealth Capacity 自动降级或通用 ordered-enum economy framework。

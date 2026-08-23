@@ -7,15 +7,30 @@ import {
   deriveSampleLineCurrentGoal,
   isPlayerVisibleSampleLineText,
 } from '../src/p50/sampleLineExpression';
-import type { GameState, PlayerState } from '../src/types/eventTypes';
+import { addAsset } from '../src/core/assetOwnership';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
 function merchantState(overrides: Partial<GameState> = {}): GameState {
+  const flags = {
+    origin_merchant_family: true,
+    route_merchant: true,
+    merchant_childhood_seed_done: true,
+    hvg_merchant_early_fork_done: true,
+    hvg_merchant_post_fork_confirmation_done: true,
+    hvg_merchant_first_challenge_done: true,
+    merchant_shop_grocery: true,
+    ...(overrides.flags ?? {}),
+  };
+  const facts =
+    overrides.facts
+    ?? (flags.merchant_shop_grocery ? addAsset({}, 'merchant_shop') : {});
+
   return {
     ...overrides,
+    facts,
     player: {
       age: 18,
       charisma: 10,
@@ -25,16 +40,7 @@ function merchantState(overrides: Partial<GameState> = {}): GameState {
       reputation: 8,
       ...overrides.player,
     } as PlayerState,
-    flags: {
-      origin_merchant_family: true,
-      route_merchant: true,
-      merchant_childhood_seed_done: true,
-      hvg_merchant_early_fork_done: true,
-      hvg_merchant_post_fork_confirmation_done: true,
-      hvg_merchant_first_challenge_done: true,
-      merchant_shop_grocery: true,
-      ...(overrides.flags ?? {}),
-    },
+    flags,
   } as GameState;
 }
 
@@ -149,7 +155,7 @@ function testDownstreamContinuity(): void {
     player: { age: 20 } as PlayerState,
   });
   assert(
-    !evaluator.evaluate(shopFailure.conditions![0], ledgerSteadyNoPressure),
+    !evaluator.evaluate(shopFailure.conditions![1], ledgerSteadyNoPressure),
     'ledger steady: shop_failure gated until P95 chain progresses',
   );
 
@@ -161,12 +167,16 @@ function testDownstreamContinuity(): void {
     player: { age: 22 } as PlayerState,
   });
   assert(
-    evaluator.evaluate(shopFailure.conditions![0], ledgerAfterPressure),
+    evaluator.evaluate(shopFailure.conditions![1], ledgerAfterPressure),
     'shop_failure opens after operating pressure for ledger track',
   );
 
   const caravanNoPressure = merchantState({
-    flags: { hvg_merchant_caravan_track: true },
+    facts: {},
+    flags: {
+      hvg_merchant_caravan_track: true,
+      merchant_shop_grocery: false,
+    },
     player: { age: 20 } as PlayerState,
   });
   assert(

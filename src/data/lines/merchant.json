@@ -10,7 +10,7 @@
       {"type": "age_reach", "value": 8}
     ],
     "conditions": [
-      {"type": "expression", "expression": "(charisma >= 12 || money >= 50 || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
+      {"type": "expression", "expression": "(charisma >= 12 || flags.origin_merchant_family == true || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)"}
     ],
     "content": {
       "title": "经商天赋",
@@ -22,10 +22,10 @@
       {
         "id": "study_business",
         "text": "学习经商",
-        "description": "重新学习经商会让你暂时承受处世手腕和金钱上的损失，这是从头起步的代价。",
+        "description": "从头学习经商，系统磨炼经营与待人接物的本领。",
         "effects": [
           {"type": "stat_modify", "stat": "charisma", "value": 5},
-          {"type": "stat_modify", "stat": "money", "value": 20},
+          {"type": "wealth_capacity_raise_to", "minimum": "modest_savings"},
           {"type": "flag_set", "flag": "merchant_talent", "value": true},
           {"type": "flag_set", "flag": "route_merchant", "value": true}
         ]
@@ -59,7 +59,8 @@
       {"type": "age_reach", "value": 16}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_talent == true && (money >= 50 || flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true)"}
+      {"type": "expression", "expression": "flags.merchant_talent == true"},
+      {"type": "wealth_capacity_at_least", "minimum": "modest_savings"}
     ],
     "content": {
       "title": "开设店铺",
@@ -72,7 +73,6 @@
         "id": "open_grocery_shop",
         "text": "开设杂货铺（稳健）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
           {"type": "event_record", "target": "merchant_first_shop_grocery"},
@@ -83,7 +83,6 @@
         "id": "open_weapon_shop",
         "text": "开设武器铺（高风险）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "flag_set", "flag": "merchant_shop_weapon", "value": true},
           {"type": "stat_modify", "stat": "martialPower", "value": 5},
           {"type": "asset_add", "asset": "merchant_shop"}
@@ -93,7 +92,6 @@
         "id": "open_herb_shop",
         "text": "开设药铺（中庸）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -40},
           {"type": "flag_set", "flag": "merchant_shop_herb", "value": true},
           {"type": "stat_modify", "stat": "chivalry", "value": 5},
           {"type": "asset_add", "asset": "merchant_shop"}
@@ -134,7 +132,6 @@
           "minimum": "modest_savings"
         },
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "stat_modify", "stat": "charisma", "value": 5},
           {"type": "flag_set", "flag": "merchant_shop_success", "value": true}
         ]
@@ -150,9 +147,8 @@
       },
       {
         "id": "close_shop",
-        "text": "关门大吉（金钱 -20，声望 -5）",
+        "text": "关店止损（声望 -5）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -20},
           {"type": "stat_modify", "stat": "reputation", "value": -5},
           {"type": "flag_set", "flag": "merchant_shop_failed", "value": true},
           {"type": "asset_remove", "asset": "merchant_shop"}

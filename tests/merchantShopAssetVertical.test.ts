@@ -52,8 +52,10 @@ async function run(): Promise<void> {
 
   const engine = new GameEngineIntegration();
   engine.startNewGame('Merchant Shop Asset Vertical', 'male');
+  const moneyBeforeOpen = engine.getGameState().player.money;
   await engine.executeChoiceEffects(grocery.effects ?? [], shop.id, grocery.id);
   const acquired = engine.getGameState();
+  assert.equal(acquired.player.money, moneyBeforeOpen, 'shop opening must not mutate legacy money');
   assert.equal(hasAsset(acquired.facts, 'merchant_shop'), true);
   assert.equal(acquired.player.flags.merchant_shop_grocery, true);
 
@@ -107,6 +109,7 @@ async function run(): Promise<void> {
 
   await engine.executeChoiceEffects(closeShop.effects ?? [], failure.id, closeShop.id);
   const closed = engine.getGameState();
+  assert.equal(closed.player.money, moneyBeforeOpen, 'shop closing must not mutate legacy money');
   assert.equal(hasAsset(closed.facts, 'merchant_shop'), false);
   assert.equal(closed.player.flags.merchant_shop_grocery, true);
   assert.equal(closed.player.flags.merchant_shop_failed, true);

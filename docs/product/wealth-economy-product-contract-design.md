@@ -441,7 +441,7 @@ Auto Evolution 不应自行：
 
 | 入口 | 当前行为 | 分类意义 |
 | --- | --- | --- |
-| `src/core/ConditionEvaluator.ts:73-75` / `src/core/EventExecutor.ts:520` | `wealth_capacity_at_least` 与 `wealth_capacity_set` 已进入正式 requirement / effect 处理链路；`stat_modify` 仍只适用于 legacy numeric fields | Wealth Capacity canonical surface |
+| `src/core/ConditionEvaluator.ts:73-75` / `src/core/EventExecutor.ts` | `wealth_capacity_at_least`、`wealth_capacity_set`、`wealth_capacity_raise_to` 已进入正式 requirement / effect 处理链路；`stat_modify` 仍只适用于 legacy numeric fields | Wealth Capacity canonical surface |
 | `src/core/EffectExecutor.ts:73-80` | `MONEY_MODIFY` 仍直接读写 `money`，减法下限为 `0` | legacy balance mutation；不是 Wealth Capacity transition |
 | `src/core/EventExecutor.ts:193-310` | `StatModifyHandler` 仍允许 `money` 与 `wealth` 作为可修改字段；`wealthCapacity` 不是通用 stat target | legacy numeric mutation surface，Phase 1B 之外仍保留 |
 | `src/core/GameEngineIntegration.ts:503-590` | `thresholds.attributes` 按玩家字段进行 `min/max` 检查，并另行检查 background / experience | 可复用 Requirement mechanism；不能把 numeric threshold 自动当 Capacity level |
@@ -488,11 +488,11 @@ Auto Evolution 不应自行：
 
 ### 6.2 代表性 event / action 语义
 
-`merchant_shop_failure` 的 `invest_more` 现在使用 `wealth_capacity_at_least`，而不是数值阈值；`merchant_wealth_peak` 现在使用 `wealth_capacity_set: regional_magnate`。这两条是当前已迁移的一个 requirement / 一个 transition。
+`merchant_shop_failure` 的 `invest_more` 使用 `wealth_capacity_at_least modest_savings` 且不再消费 legacy `money`；`merchant_wealth_peak` 使用 `wealth_capacity_set: regional_magnate`。`merchant_talent_discovery` 的 `study_business` 使用 `wealth_capacity_raise_to modest_savings`，事件条件不再读取 `money >= 50`。`merchant_first_shop` 使用 `merchant_talent` + `wealth_capacity_at_least modest_savings`，三条开店路径与 `close_shop` 不再精确修改 `money`。
 
 `origin_merchant_family` 已显式设置 `wealth_capacity_set: comfortable_means`，并保留 legacy `money +200`。`merchant_wealth_peak` 也保留 legacy `money +200`，以兼容仍在读取余额的历史消费者。
 
-`merchant.json` 的其他正式商户事件仍有大量 legacy 数值语义，例如开店、护送、垄断、失败、关系支持等仍在使用 `money` 作为条件或效果；这些都是 Phase 1B 之前的迁移债务，不应在 Part B 中误写成已完成抽象。
+`merchant.json` 的 merchant talent → first shop → shop-failure 竖切已不再在该路径上使用精确 `money` 条件或效果；`merchant_caravan_guard`、`merchant_market_monopoly` 等其余正式商户事件仍保留 legacy 数值语义。
 
 ### 6.3 UI / presentation
 
@@ -522,9 +522,9 @@ Auto Evolution 不应自行：
 | --- | --- | --- |
 | `DAILY_ABSTRACTED` | `activeActionCatalog.ts` 的 `action_training_basic`、`action_study_basic`、`action_socializing_basic`、`action_business_basic`、`action_travel_basic`；`childhoodActionCatalog.ts` 的 `action_household_errand` / `action_household_apprentice`；`dailyEvents.ts` 的 `daily_take_odd_job`、`daily_small_trade` 等日常 livelihood 变体 | 这些 ordinary cash-flow producers 已不再直接改写核心经济状态；accepted contract 仍禁止把它们退化成 hidden score 或 Capacity XP |
 | `NARRATIVE_ONLY` | `src/p8/personas.ts` 的“积累财富”目标；`p9-remediation.json` / `p11-validation.json` 的 `pathAffinity.wealth`；UI 的“银两”标签与商人文本 | 这些标签、目标、路径权重或展示语义不能单独创建 Wealth state。若同一内容还含 effect/condition，应拆分并按对应行重新分类 |
-| `WEALTH_REQUIREMENT` | `merchant.json` 的 `wealth_capacity_at_least`（`invest_more`）；其余仍未迁移的 `money` threshold（如 `merchant_caravan_guard`、`merchant_market_monopoly`、`identity-merchant.json`、`relationship.json`） | 当前已有 canonical Capacity requirement，但余额阈值 consumer 仍大量存在；不能把旧阈值数字当新枚举值 |
-| `WEALTH_TRANSITION` | `origin.json` 的 `wealth_capacity_set: comfortable_means`；`merchant.json` 的 `wealth_capacity_set: regional_magnate`；同时保留 legacy money delta | 这些是已迁移的 Capacity transition 样本。它们证明 transition 不等于余额加减，但 legacy money 仍与之并存 |
-| `ASSET_TRANSITION` | `merchant.json` 的三条首次开店路径通过 `asset_add` 建立 `merchant_shop`，`close_shop` 通过 `asset_remove` 移除；`merchant_shop_grocery/weapon/herb` 与其他 merchant flags 仍保留 | `merchant_shop` 已有最小正式 Asset identity、binary ownership、persistence、read 和 removal 语义；其他 flags 仍是故事事实或候选，不在本轮升级 |
+| `WEALTH_REQUIREMENT` | `merchant.json` 的 `wealth_capacity_at_least`（`merchant_first_shop`、`invest_more`）；其余仍未迁移的 `money` threshold（如 `merchant_caravan_guard`、`merchant_market_monopoly`、`identity-merchant.json`、`relationship.json`） | merchant shop 入口竖切已迁移；余额阈值 consumer 仍大量存在 |
+| `WEALTH_TRANSITION` | `origin.json` 的 `wealth_capacity_set: comfortable_means`；`merchant.json` 的 `wealth_capacity_raise_to modest_savings`（`study_business`）与 `wealth_capacity_set: regional_magnate`；legacy money delta 仍在 origin/peak | transition 不等于余额加减；merchant shop 竖切证明 raise_to 与 set 并存 |
+| `ASSET_TRANSITION` | `merchant.json` 的三条首次开店路径通过 `asset_add` 建立 `merchant_shop`，`close_shop` 通过 `asset_remove` 移除；开店/投资/关店不再伴随 wallet mutation | `merchant_shop` 已有最小正式 Asset identity；shop lifecycle wallet 已从该竖切退役 |
 | `UNRESOLVED` | legacy `money` / numeric optional `wealth`；P17 的 `money + wealth` 派生；`merchant_*` 以外仍未迁移的 merchant money consumers；`childhoodEvents.json` 的 legacy `money +200` producer；Phase 1B 之外的 merchant flags 是否升级为 Asset；旧 `src/data/storyData.ts` money path 是否仍有任何正式消费者 | 这些问题无法由当前 authority 安全推导。必须保留为迁移前决策，不通过 alias、fallback 或兼容层“折中”；`merchant_shop` 的 Phase 1B ownership 不属于 unresolved |
 
 ### 8. 可复用的现有能力
@@ -590,7 +590,7 @@ Asset-specific 延期：dedicated Asset entity/collection、数量、价值、�
 | 未来候选修改 | 性质 | 当前边界 |
 | --- | --- | --- |
 | 调整正式 loaded event 的普通 action/event effects、文本和余额 requirement | configuration-level | 仍需明确 slice、验证和 Human 授权；不得借此引入新 state source |
-| 修改 `PlayerState`、initialization、Effect/Condition handlers、active planning、UI 或 runtime conversion | code/runtime-level | 当前阶段 `ESCALATE TO HUMAN`；本任务未授权 |
+| Phase 1A canonical `wealthCapacity` + Snapshot `3.15.0` | code/runtime + formal Contract/Schema-level | 已依据 PD-065 获 Human authorization 并实施；该授权不自动覆盖未来修改 |
 | 进一步修改 canonical Wealth / Snapshot / Asset Contract，或改变 `PlayerState`、initialization、Effect/Condition handlers、active planning、UI、runtime conversion、save policy 或 migration | code/runtime + formal Contract/Schema-level | 仍需相应 Human 裁决并单独形成 implementation plan；不因 Phase 1B closure 自动授权 |
 | 修改 Auto Evolution permissions、framework、provider 或 workflow | workflow/framework-level | 不属于本任务；按当前 Auto Evolution stage 保持 STOP/ESCALATE |
 

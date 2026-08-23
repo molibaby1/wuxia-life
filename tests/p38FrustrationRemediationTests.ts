@@ -372,16 +372,6 @@ function testInventoryAFalsePositiveControls(): void {
       '你的武艺似乎有些生疏。',
     ),
   ]);
-  const merchant = collectFrustrationMetrics([
-    record(
-      'merchant_talent_discovery',
-      '你从小就对金钱敏感，善于讨价还价。一次偶然的机会，你低价买入高价卖出，赚取了人生第一桶金，展现出惊人的经商天赋。',
-      state({ charisma: 18, money: 305 }),
-      state({ charisma: 5, money: 20 }),
-      { id: 'study_business', text: '学习经商' },
-      '你感觉自己有些黯淡。',
-    ),
-  ]);
   const retreat = collectFrustrationMetrics([
     record(
       'hero_road_peril',
@@ -416,7 +406,6 @@ function testInventoryAFalsePositiveControls(): void {
   for (const [name, result] of [
     ['relationship_master_disciple', master],
     ['outlaw_path_beginning', outlaw],
-    ['merchant_talent_discovery', merchant],
     ['hero_peril_retreat', retreat],
     ['relationship_sworn_help', swornHelp],
     ['refugee_sect_story', refugee],
@@ -476,25 +465,6 @@ function testInventoryAFalsePositiveControls(): void {
 }
 
 function testWealthOpaquePresentationTargets(): void {
-  const merchantEvent = EventLoader.getInstance().getEventById('merchant_talent_discovery');
-  const merchantChoice = merchantEvent?.choices?.find(choice => choice.id === 'study_business');
-  assert(merchantEvent && merchantChoice, 'merchant_talent_discovery study_business must load');
-  const merchantResult = collectFrustrationMetrics([
-    record(
-      merchantEvent.id,
-      merchantEvent.content?.text ?? '',
-      state({ charisma: 18, money: 305 }),
-      state({ charisma: 5, money: 20 }),
-      merchantChoice as GameProcessRecord['selectedChoice'],
-      '你感觉自己有些黯淡。',
-    ),
-  ]);
-  assert(merchantResult.setbacks.length === 1, 'merchant talent must retain its actual charisma and money setback');
-  assert(
-    merchantResult.setbacks[0]?.classification === 'warned',
-    'merchant talent choice must warn about the deterministic capability and money cost',
-  );
-
   const perilEvent = EventLoader.getInstance().getEventById('hero_road_peril');
   const retreatChoice = perilEvent?.choices?.find(choice => choice.id === 'hero_peril_retreat');
   assert(perilEvent && retreatChoice, 'hero_road_peril hero_peril_retreat must load');
@@ -541,7 +511,7 @@ function testWealthTargetEffectInvariance(): void {
     JSON.stringify(merchantChoice?.effects) ===
       JSON.stringify([
         { type: 'stat_modify', stat: 'charisma', value: 5 },
-        { type: 'stat_modify', stat: 'money', value: 20 },
+        { type: 'wealth_capacity_raise_to', minimum: 'modest_savings' },
         { type: 'flag_set', flag: 'merchant_talent', value: true },
         { type: 'flag_set', flag: 'route_merchant', value: true },
       ]),
@@ -556,7 +526,7 @@ function testWealthTargetEffectInvariance(): void {
         {
           type: 'expression',
           expression:
-            '(charisma >= 12 || money >= 50 || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)',
+            '(charisma >= 12 || flags.origin_merchant_family == true || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)',
         },
       ]),
     'merchant conditions must remain unchanged',

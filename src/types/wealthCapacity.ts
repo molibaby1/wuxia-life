@@ -27,3 +27,10 @@ export function isWealthCapacity(value: unknown): value is WealthCapacity {
 export function meetsWealthCapacity(current: WealthCapacity, minimum: WealthCapacity): boolean {
   return (rank.get(current) ?? -1) >= (rank.get(minimum) ?? Number.POSITIVE_INFINITY);
 }
+
+export function raiseWealthCapacityTo(
+  current: WealthCapacity,
+  minimum: WealthCapacity,
+): WealthCapacity {
+  return meetsWealthCapacity(current, minimum) ? current : minimum;
+}

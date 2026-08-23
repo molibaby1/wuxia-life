@@ -1,3 +1,4 @@
+import nodeAssert from 'node:assert/strict';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventExecutor, StatModifyHandler } from '../src/core/EventExecutor';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
@@ -127,6 +128,54 @@ function testWealthCapacityChoiceExplanation(): void {
   );
 }
 
+async function testWealthCapacityRaiseToEffect(): Promise<void> {
+  const engine = new GameEngineIntegration();
+  engine.startNewGame('Wealth Capacity Semantics', 'male');
+  const noSurplus = engine.getGameState();
+  noSurplus.player.wealthCapacity = 'no_surplus';
+  noSurplus.player.money = 1234;
+  noSurplus.player.wealth = 42;
+  const moneyBefore = noSurplus.player.money;
+  const wealthBefore = noSurplus.player.wealth;
+  const factsBefore = JSON.parse(JSON.stringify(noSurplus.facts ?? {}));
+
+  const raised = await engine.executeChoiceEffects([
+    { type: 'wealth_capacity_raise_to', minimum: 'modest_savings' } as never,
+  ], 'wealth_raise_probe', 'raise');
+  nodeAssert.equal(raised.gameState.player.wealthCapacity, 'modest_savings');
+
+  engine.startNewGame('Wealth Capacity Semantics', 'male');
+  const comfortable = engine.getGameState();
+  comfortable.player.wealthCapacity = 'comfortable_means';
+  comfortable.player.money = 1234;
+  comfortable.player.wealth = 42;
+  const comfortableMoneyBefore = comfortable.player.money;
+  const comfortableWealthBefore = comfortable.player.wealth;
+  const comfortableFactsBefore = JSON.parse(JSON.stringify(comfortable.facts ?? {}));
+
+  const unchanged = await engine.executeChoiceEffects([
+    { type: 'wealth_capacity_raise_to', minimum: 'modest_savings' } as never,
+  ], 'wealth_raise_probe', 'raise');
+  nodeAssert.equal(unchanged.gameState.player.wealthCapacity, 'comfortable_means');
+  nodeAssert.equal(unchanged.gameState.player.money, comfortableMoneyBefore);
+  nodeAssert.equal(unchanged.gameState.player.wealth, comfortableWealthBefore);
+  nodeAssert.deepEqual(unchanged.gameState.facts ?? {}, comfortableFactsBefore);
+
+  nodeAssert.equal(raised.gameState.player.money, moneyBefore);
+  nodeAssert.equal(raised.gameState.player.wealth, wealthBefore);
+  nodeAssert.deepEqual(raised.gameState.facts ?? {}, factsBefore);
+
+  const executor = new EventExecutor();
+  const state = makeState();
+  await assertRejects(
+    () => executor.executeEffects([
+      { type: 'wealth_capacity_raise_to' as never, minimum: 'mythic' as never },
+    ] as never, state),
+    /invalid wealth capacity minimum/i,
+    'invalid wealth_capacity_raise_to minimum must throw',
+  );
+}
+
 async function testStatModifyCannotTouchWealthCapacity(): Promise<void> {
   const handler = new StatModifyHandler();
   const state = makeState();
@@ -162,6 +211,7 @@ async function run(): Promise<void> {
   await runCase('wealth capacity condition semantics', testWealthCapacityConditionSemantics, failures);
   await runCase('wealth capacity set effect', testWealthCapacitySetEffect, failures);
   await runCase('wealth capacity choice explanation', testWealthCapacityChoiceExplanation, failures);
+  await runCase('wealth capacity raise to effect', testWealthCapacityRaiseToEffect, failures);
   await runCase('stat modify cannot touch wealthCapacity', testStatModifyCannotTouchWealthCapacity, failures);
 
   if (failures.length > 0) {

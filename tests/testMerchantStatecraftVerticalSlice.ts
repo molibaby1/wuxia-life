@@ -1,5 +1,6 @@
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { hasAsset } from '../src/core/assetOwnership';
 
 async function run(): Promise<void> {
   const loader = EventLoader.getInstance();
@@ -12,18 +13,33 @@ async function run(): Promise<void> {
   const engine = new GameEngineIntegration();
   engine.startNewGame('经世测试', 'male');
   const initial = engine.getGameState();
+  const initialMoney = initial.player.money;
   initial.player.age = 16;
-  initial.player.money = 100;
   await engine.executeChoiceEffects(studyBusiness.effects ?? [], talent.id, studyBusiness.id);
   const afterTalent = engine.getGameState();
-  if (afterTalent.player.flags?.merchant_talent !== true || afterTalent.player.money !== 20) {
-    throw new Error('merchant talent must write its explicit flag and money effect');
+  if (afterTalent.player.flags?.merchant_talent !== true) {
+    throw new Error('merchant talent must write its explicit flag');
+  }
+  if (afterTalent.player.wealthCapacity !== 'modest_savings') {
+    throw new Error('merchant talent must raise wealth capacity to modest_savings');
+  }
+  if (afterTalent.player.money !== initialMoney) {
+    throw new Error('merchant talent must not mutate legacy money');
   }
 
   await engine.executeChoiceEffects(openGrocery.effects ?? [], shop.id, openGrocery.id);
   const afterShop = engine.getGameState();
-  if (afterShop.player.flags?.merchant_shop_grocery !== true || afterShop.player.money !== 0 || afterShop.player.reputation !== 5) {
-    throw new Error('merchant shop must apply explicit flag, money, and reputation effects');
+  if (afterShop.player.flags?.merchant_shop_grocery !== true) {
+    throw new Error('merchant shop must apply explicit grocery flag');
+  }
+  if (afterShop.player.money !== initialMoney) {
+    throw new Error('merchant shop opening must not mutate legacy money');
+  }
+  if (!hasAsset(afterShop.facts, 'merchant_shop')) {
+    throw new Error('merchant shop opening must own merchant_shop Asset');
+  }
+  if (afterShop.player.reputation !== 5) {
+    throw new Error('merchant shop must apply explicit reputation effect');
   }
   if (Object.keys(afterShop).some(key => ['route' + 'States', 'route' + 'History', 'road' + 'Commitments'].includes(key))) {
     throw new Error('merchant effects must not create removed lifecycle fields');

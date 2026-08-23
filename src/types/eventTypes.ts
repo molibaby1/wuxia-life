@@ -82,6 +82,9 @@ export enum EffectType {
   /** 财富容量设置 */
   WEALTH_CAPACITY_SET = 'wealth_capacity_set',
 
+  /** 财富容量单调提升至下限 */
+  WEALTH_CAPACITY_RAISE_TO = 'wealth_capacity_raise_to',
+
   /** Canonical asset ownership operations */
   ASSET_ADD = 'asset_add',
   ASSET_REMOVE = 'asset_remove',
@@ -522,6 +525,9 @@ export interface EffectDefinition {
 
   /** Canonical asset identifier for asset_add/asset_remove effects. */
   asset?: AssetId;
+
+  /** Minimum canonical Wealth Capacity for wealth_capacity_raise_to. */
+  minimum?: WealthCapacity;
   
   /** 操作符 */
   operator?: EffectOperator;

@@ -12,7 +12,7 @@
 
 import { EffectType } from '../types/eventTypes';
 import { isHealthStatus, isStatusId } from '../types/eventTypes';
-import { isWealthCapacity } from '../types/wealthCapacity';
+import { isWealthCapacity, raiseWealthCapacityTo } from '../types/wealthCapacity';
 import { isAssetId } from '../types/asset';
 import { addAsset, removeAsset } from './assetOwnership';
 import type {
@@ -173,6 +173,7 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
     this.handlers.set(EffectType.SPECIAL, new SpecialEffectHandler());
     this.handlers.set(EffectType.WEALTH_CAPACITY_SET, new WealthCapacitySetHandler());
+    this.handlers.set(EffectType.WEALTH_CAPACITY_RAISE_TO, new WealthCapacityRaiseToHandler());
     this.handlers.set(EffectType.ASSET_ADD, new AssetAddHandler());
     this.handlers.set(EffectType.ASSET_REMOVE, new AssetRemoveHandler());
     // 新增：因果变化处理器
@@ -540,6 +541,25 @@ export class WealthCapacitySetHandler implements EffectHandler {
       player: {
         ...state.player,
         wealthCapacity: effect.value,
+      },
+    };
+  }
+}
+
+export class WealthCapacityRaiseToHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isWealthCapacity(effect.minimum)) {
+      throw new Error(`Invalid wealth capacity minimum: ${String(effect.minimum)}`);
+    }
+
+    return {
+      ...state,
+      player: {
+        ...state.player,
+        wealthCapacity: raiseWealthCapacityTo(
+          state.player.wealthCapacity,
+          effect.minimum,
+        ),
       },
     };
   }

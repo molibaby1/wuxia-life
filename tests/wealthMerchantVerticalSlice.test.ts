@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import type { GameState } from '../src/types/eventTypes';
+import type { EventChoice, GameState } from '../src/types/eventTypes';
+
+function hasMoneyEffect(choice: EventChoice): boolean {
+  return (choice.effects ?? []).some(
+    effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money',
+  );
+}
 
 function makeState(): GameState {
   const engine = new GameEngineIntegration();
@@ -44,13 +50,7 @@ async function run(): Promise<void> {
     undefined,
     'invest_more must not keep the plural conditions field',
   );
-  // The retained money -50 is legacy migration debt; it must not be read as Wealth Capacity consumption.
-  assert(
-    investMore.effects.some(
-      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money' && effect.value === -50,
-    ),
-    'invest_more must retain legacy money -50 during Phase 1A',
-  );
+  assert.equal(hasMoneyEffect(investMore), false);
 
   const peak = loader.getEventById('merchant_wealth_peak')!;
   assert(

@@ -75,7 +75,8 @@
           {"type": "stat_modify", "stat": "money", "value": -30},
           {"type": "flag_set", "flag": "merchant_shop_grocery", "value": true},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
-          {"type": "event_record", "target": "merchant_first_shop_grocery"}
+          {"type": "event_record", "target": "merchant_first_shop_grocery"},
+          {"type": "asset_add", "asset": "merchant_shop"}
         ]
       },
       {
@@ -84,7 +85,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "flag_set", "flag": "merchant_shop_weapon", "value": true},
-          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "asset_add", "asset": "merchant_shop"}
         ]
       },
       {
@@ -93,7 +95,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -40},
           {"type": "flag_set", "flag": "merchant_shop_herb", "value": true},
-          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "asset_add", "asset": "merchant_shop"}
         ]
       }
     ],
@@ -113,7 +116,8 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && !flags.merchant_shop_success && (flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_ledger_rhythm_expand == true || flags.hvg_merchant_ledger_pressure_stockout == true)"}
+      {"type": "asset_owned", "asset": "merchant_shop"},
+      {"type": "expression", "expression": "!flags.merchant_shop_success && (flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_ledger_rhythm_expand == true || flags.hvg_merchant_ledger_pressure_stockout == true)"}
     ],
     "content": {
       "title": "经营困境",
@@ -150,7 +154,8 @@
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -20},
           {"type": "stat_modify", "stat": "reputation", "value": -5},
-          {"type": "flag_set", "flag": "merchant_shop_failed", "value": true}
+          {"type": "flag_set", "flag": "merchant_shop_failed", "value": true},
+          {"type": "asset_remove", "asset": "merchant_shop"}
         ]
       }
     ]
@@ -166,7 +171,8 @@
       {"type": "age_reach", "value": 18}
     ],
     "conditions": [
-      {"type": "expression", "expression": "(flags.merchant_shop_grocery == true || flags.merchant_shop_weapon == true || flags.merchant_shop_herb == true) && (!flags.hvg_merchant_caravan_track || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_caravan_rhythm_fast == true || flags.hvg_merchant_caravan_rhythm_market == true)"}
+      {"type": "asset_owned", "asset": "merchant_shop"},
+      {"type": "expression", "expression": "!flags.hvg_merchant_caravan_track || flags.hvg_merchant_operating_pressure_done == true || flags.hvg_merchant_caravan_rhythm_fast == true || flags.hvg_merchant_caravan_rhythm_market == true"}
     ],
     "content": {
       "title": "商队护送",

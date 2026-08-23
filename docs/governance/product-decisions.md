@@ -929,3 +929,21 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 
 - 需要迁移 `merchant_official_connection`、`merchant_chamber_of_commerce` 或其他 merchant money consumer；
 - 需要为市场支配引入独立 Asset 或 market-position schema。
+
+### PD-070：Merchant Official–Intelligence–Chamber continuity migrated from legacy wallet semantics
+
+**实施决策（Human accepted：2026-08-23）**
+
+- `heavy_bribe` 使用 `wealth_capacity_at_least wealthy` 作为更强的 Wealth-gated Alternative Path；不消费或降低 Wealth Capacity。
+- `moderate_bribe` 退役小额 wallet cost，继续产生 `merchant_official_friend`，无 Wealth 要求。
+- `merchant_intelligence_network` 退役 legacy wallet producer，保留 `merchant_intelligence` 作为 durable milestone。
+- `merchant_chamber_of_commerce` 要求 `merchant_intelligence` + `wealth_capacity_at_least comfortable_means`，建立商会领导地位时将 Wealth Capacity 提升至至少 `wealthy`。
+- 本竖切涉及事件的保留非经济 stat delta 均为显式 additive effects。
+- 无新 Asset、runtime primitive、persisted 字段、Snapshot migration 或下游 merchant wallet migration。
+
+**重新讨论条件**
+
+- 需要迁移 `merchant_wealth_peak` legacy `money +200`；
+- 需要迁移 `merchant_sect_investment`、`merchant_business_empire` 或其他 merchant money consumer；
+- 需要迁移 `merchant_ending_tycoon` / `merchant_ending_bankrupt` 或其他 merchant endings；
+- 需要迁移 `identity-merchant.json` 平行 wallet 语义。

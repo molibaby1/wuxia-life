@@ -273,25 +273,23 @@
     "choices": [
       {
         "id": "heavy_bribe",
-        "text": "重孝换取特权（需金钱≥500，声望 +25）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 500"}
-        ],
+        "text": "重孝换取特权（需财力：豪富，声望 +25）",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "wealthy"
+        },
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -500},
-          {"type": "stat_modify", "stat": "reputation", "value": 25},
-          {"type": "stat_modify", "stat": "charisma", "value": 12},
-          {"type": "stat_modify", "stat": "money", "value": 150},
+          {"type": "stat_modify", "stat": "reputation", "value": 25, "operator": "add"},
+          {"type": "stat_modify", "stat": "charisma", "value": 12, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_official_friend", "value": true}
         ]
       },
       {
         "id": "moderate_bribe",
-        "text": "适度贿赂（金钱 -30，声望 +15）",
+        "text": "适度孝敬（声望 +15）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -30},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "stat_modify", "stat": "charisma", "value": 8},
+          {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"},
+          {"type": "stat_modify", "stat": "charisma", "value": 8, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_official_friend", "value": true}
         ]
       },
@@ -299,8 +297,8 @@
         "id": "refuse_bribe",
         "text": "拒绝，保持清白",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": -5}
+          {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": -5, "operator": "add"}
         ]
       }
     ]
@@ -325,9 +323,8 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "money", "value": 60},
-      {"type": "stat_modify", "stat": "charisma", "value": 8},
-      {"type": "stat_modify", "stat": "reputation", "value": -5},
+      {"type": "stat_modify", "stat": "charisma", "value": 8, "operator": "add"},
+      {"type": "stat_modify", "stat": "reputation", "value": -5, "operator": "add"},
       {"type": "flag_set", "flag": "merchant_intelligence", "value": true}
     ]
   },
@@ -342,7 +339,8 @@
       {"type": "age_reach", "value": 26}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_intelligence == true && money >= 300"}
+      {"type": "expression", "expression": "flags.merchant_intelligence == true"},
+      {"type": "wealth_capacity_at_least", "minimum": "comfortable_means"}
     ],
     "content": {
       "title": "商会会长",
@@ -351,9 +349,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "reputation", "value": 30},
-      {"type": "stat_modify", "stat": "charisma", "value": 12},
-      {"type": "stat_modify", "stat": "money", "value": 50},
+      {"type": "wealth_capacity_raise_to", "minimum": "wealthy"},
+      {"type": "stat_modify", "stat": "reputation", "value": 30, "operator": "add"},
+      {"type": "stat_modify", "stat": "charisma", "value": 12, "operator": "add"},
       {"type": "flag_set", "flag": "merchant_chamber_head", "value": true}
     ]
   },

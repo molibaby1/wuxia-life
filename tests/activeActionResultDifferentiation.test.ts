@@ -14,7 +14,6 @@ function assert(condition: boolean, message: string): void {
 }
 
 type PresentationOptions = {
-  currentMoney?: number;
   diminishingReturn?: boolean;
   publicDelta?: Record<string, number>;
 };
@@ -79,24 +78,23 @@ function testStudyNormalAndDiminishingDiffer(): void {
 }
 
 function testBusinessPositiveZeroNegativeAndRepeat(): void {
-  const positive = present(makeResult('action_business_basic', 'business', { money: 10, businessAcumen: 2 }));
+  const positive = present(makeResult('action_business_basic', 'business', { businessAcumen: 2, reputation: 1 }));
   const zero = present(makeResult('action_business_basic', 'business', {}, { diminishingReturn: true }), {
-    currentMoney: 0,
     diminishingReturn: true,
   });
-  const negative = present(makeResult('action_business_basic', 'business', { money: -25 }), { currentMoney: -25 });
+  const negative = present(makeResult('action_business_basic', 'business', { businessAcumen: -1, reputation: -1 }));
   assert(String(positive.resultExplanation).includes('营生'), 'business result must name business');
-  assert(String(positive.resultExplanation).includes('银两+10'), 'business result must use positive actual delta');
+  assert(String(positive.resultExplanation).includes('经营+2'), 'business result must use positive actual delta');
   assert(String(zero.resultExplanation).includes('没有带来可见数值变化'), 'zero result must not claim success');
-  assert(String(zero.resourcePressureNotice).includes('用尽'), 'zero-money pressure must be visible');
-  assert(String(negative.resultExplanation).includes('银两-25'), 'negative result must remain visible');
+  assert(!('resourcePressureNotice' in zero), 'zero result must not expose resource pressure');
+  assert(String(negative.resultExplanation).includes('经营-1'), 'negative result must remain visible');
   assert(String(negative.resultExplanation).includes('代价'), 'negative result must explain the cost direction');
 }
 
 function testCategorySwitchesRemainDistinct(): void {
   const martial = present(makeResult('action_training_basic', 'training', { martialPower: 1 }));
   const study = present(makeResult('action_study_basic', 'study', { knowledge: 1 }));
-  const business = present(makeResult('action_business_basic', 'business', { money: 1 }));
+  const business = present(makeResult('action_business_basic', 'business', { businessAcumen: 1 }));
   const travel = present(makeResult('action_travel_basic', 'travel', { connections: 1 }));
   assert(martial.resultExplanation !== study.resultExplanation, 'martial to study must differ');
   assert(study.resultExplanation !== business.resultExplanation, 'study to business must differ');

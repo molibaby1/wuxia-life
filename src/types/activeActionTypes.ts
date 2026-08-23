@@ -113,12 +113,7 @@ export interface ActiveActionSummaryDisplay {
   resultExplanation?: string;
 
   /** Player-facing explanation of the existing diminishing-return signal. */
-
   diminishingReturnNotice?: string;
-
-  /** Player-facing warning derived from the already visible current resource value. */
-
-  resourcePressureNotice?: string;
 
   /** P122: player-visible long-term shaping / echo confirmations after action */
   longTermImpactLines?: string[];

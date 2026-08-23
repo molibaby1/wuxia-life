@@ -16,7 +16,7 @@ function makeSummary(): ActiveActionSummaryDisplay {
   return buildActiveActionSummaryDisplay(
     {
       actionId: 'action_business_basic',
-      deltas: { money: -5 },
+      deltas: { businessAcumen: 2, reputation: 1 },
       duration: { value: 1, unit: 'quarter' },
       metadata: {
         actionId: 'action_business_basic',
@@ -24,12 +24,12 @@ function makeSummary(): ActiveActionSummaryDisplay {
         duration: { value: 1, unit: 'quarter' },
         risk: 'medium',
         sourceKind: 'active_action',
-        rewardSummary: '银两-5',
-        costSummary: '银两-25',
+        rewardSummary: '经营+2，名望+1',
+        costSummary: '时间投入',
         riskSummary: '偶有变数',
       },
     },
-    { publicDelta: { money: -5 }, currentMoney: 0 },
+    { publicDelta: { businessAcumen: 2, reputation: 1 } },
   );
 }
 
@@ -59,7 +59,7 @@ function testApiMapperPreservesSharedSemantics(): void {
   );
   assert(payload.activeActionSummary === summary, 'API mapper must preserve the shared summary object');
   assert(payload.activeActionSummary?.resultExplanation === summary.resultExplanation, 'API must preserve result explanation');
-  assert(payload.activeActionSummary?.resourcePressureNotice === summary.resourcePressureNotice, 'API must preserve resource notice');
+  assert(!('resourcePressureNotice' in summary), 'API must not expose resource notice');
 }
 
 async function testHeadlessConsumesSharedBuilder(): Promise<void> {

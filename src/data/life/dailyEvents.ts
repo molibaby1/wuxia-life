@@ -216,7 +216,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_take_odd_job_pos_1',
           weight: 3,
           text: '你忙活了一天，虽然辛苦，好歹把眼下的日子稳住了。',
-          statEffects: [{ stat: 'money', value: 25 }],
         },
       ],
       neutral: [
@@ -224,7 +223,6 @@ export const dailyEvents: DailyEventConfig[] = [
           id: 'daily_take_odd_job_neu_1',
           weight: 2,
           text: '你接了点零活，只能算勉强糊口。',
-          statEffects: [{ stat: 'money', value: 10 }],
         },
       ],
       negative: [
@@ -255,8 +253,7 @@ export const dailyEvents: DailyEventConfig[] = [
         {
           id: 'daily_small_trade_pos_1',
           weight: 2,
-          text: '你试着周转了一笔小买卖，赚得不算多，却让手头松快了些。',
-          statEffects: [{ stat: 'money', value: 35 }],
+          text: '你试着周转了一笔小买卖，虽不算大成，却也把眼前的摊子撑住了些。',
         },
       ],
       neutral: [

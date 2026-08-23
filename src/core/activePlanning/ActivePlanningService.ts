@@ -203,9 +203,6 @@ export function executeActiveActionOnState(
     hasPendingDisturbance: disturbanceNarrative !== null,
     longTermImpactLines,
     publicDelta,
-
-    currentMoney: readPlayerNumeric(state.player, 'money'),
-
     diminishingReturn: resolved.metadata.diminishingReturn,
 
   });

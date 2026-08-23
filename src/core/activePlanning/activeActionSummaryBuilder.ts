@@ -6,7 +6,6 @@ export interface ActiveActionResultPresentationOptions {
   hasPendingDisturbance?: boolean;
   longTermImpactLines?: string[];
   publicDelta?: Record<string, number>;
-  currentMoney?: number;
   diminishingReturn?: boolean;
 }
 
@@ -57,7 +56,6 @@ export function buildActiveActionSummaryDisplay(
     diminishingReturnNotice: diminishingReturn
       ? '同类连续投入已触发正式收益递减，本次变化按实际结果展示。'
       : undefined,
-    resourcePressureNotice: buildResourcePressureNotice(options?.currentMoney),
     nextStepHint,
     longTermImpactLines: options?.longTermImpactLines?.length
       ? options.longTermImpactLines
@@ -98,11 +96,4 @@ function buildResultExplanation(
       ? '并承担了可见代价'
       : '并产生了可见变化';
   return `你完成了${categoryLabel}，${direction}：${deltaSummary}。`;
-}
-
-function buildResourcePressureNotice(currentMoney: number | undefined): string | undefined {
-  if (currentMoney === undefined) return undefined;
-  if (currentMoney < 0) return '银两已透支，当前可见资源压力较高。';
-  if (currentMoney === 0) return '银两已用尽，当前可见资源压力较高。';
-  return undefined;
 }

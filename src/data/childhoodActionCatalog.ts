@@ -71,7 +71,6 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '替家里记小账、送小件、认摊认货，先学最基础的营生分寸',
     duration: { value: 1, unit: 'month' },
     rewards: [
-      { stat: 'money', min: 1, max: 6 },
       { stat: 'businessAcumen', min: 1, max: 1 },
       { stat: 'knowledge', min: 0, max: 1 },
     ],
@@ -87,7 +86,6 @@ export const childhoodActionCatalog: ActiveActionDefinition[] = [
     playerIntent: '帮长辈记账、看摊、跑腿收摊，学着分辨货价与柴米油盐',
     duration: { value: 1, unit: 'quarter' },
     rewards: [
-      { stat: 'money', min: 3, max: 10 },
       { stat: 'businessAcumen', min: 1, max: 2 },
     ],
     costs: [],

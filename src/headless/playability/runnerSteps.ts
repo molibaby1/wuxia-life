@@ -391,7 +391,6 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
       feedbackText,
       summary?.appliedDeltaSummary,
       summary?.resultExplanation,
-      summary?.resourcePressureNotice,
     ]
       .filter(Boolean)
       .join(' '),

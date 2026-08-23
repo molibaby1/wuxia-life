@@ -185,7 +185,6 @@ export function buildActiveActionOverlayCard(
     metaLines: compactOverlayMetaLines(
       summary.appliedDeltaSummary,
       summary.diminishingReturnNotice,
-      summary.resourcePressureNotice,
       ...(summary.longTermImpactLines ?? []),
     ),
   };

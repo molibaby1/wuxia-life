@@ -76,6 +76,7 @@ const INITIAL_PLAYER_STATE_KEYS = [
   'statuses',
   'title',
   'traits',
+  'wealthCapacity',
 ];
 
 function createYouthEngine(age: number, player: Partial<PlayerState> = {}): GameEngineIntegration {

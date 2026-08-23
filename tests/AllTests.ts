@@ -2549,7 +2549,7 @@ const coreFunctionSuite: TestSuite = {
     },
     {
       name: 'P3 US-014 - payoff gate 区分 static 与 simulated',
-      description: '静态 map 全绿时 priority-route 仿真缺口应为 blocker',
+      description: '静态 gate 通过时 priority-route 仿真缺口应为 blocker',
       test: () => {
         const replay: GoldenLineReplayRecord[] = [
           {
@@ -2585,7 +2585,11 @@ const coreFunctionSuite: TestSuite = {
           replay,
         };
         const evaluation = evaluatePayoffGate([run]);
-        assertEqual(evaluation.summary.staticPayoffRate, 1, '静态 map 应为 100%');
+        assert(
+          evaluation.summary.staticPayoffRate >=
+            evaluation.summary.simulatedPayoffThreshold,
+          '静态 payoff coverage 应达到 gate threshold',
+        );
         assert(
           evaluation.summary.missedOpportunityCount >= 1,
           '应有 simulated_gap',

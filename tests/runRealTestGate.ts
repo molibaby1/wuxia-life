@@ -96,6 +96,7 @@ const suites: Suite[] = [
   { name: 'merchantShopAssetVertical', entry: 'tests/merchantShopAssetVertical.test.ts' },
   { name: 'merchantShopLegacyMoneyMigration', entry: 'tests/merchantShopLegacyMoneyMigration.test.ts' },
   { name: 'merchantCaravanLegacyMoneyMigration', entry: 'tests/merchantCaravanLegacyMoneyMigration.test.ts' },
+  { name: 'merchantMarketMonopolyLegacyMoneyMigration', entry: 'tests/merchantMarketMonopolyLegacyMoneyMigration.test.ts' },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

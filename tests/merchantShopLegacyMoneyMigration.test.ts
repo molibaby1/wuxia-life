@@ -117,10 +117,9 @@ function testAuthoringSemantics(): void {
   assert.equal(caravan.choices!.some(choice => hasMoneyEffect(choice)), false);
 
   const market = getEvent('merchant_market_monopoly');
-  assert(
-    market.choices!.some(choice => hasMoneyEffect(choice)),
-    'market choice money rewards remain deferred after caravan migration',
-  );
+  for (const choice of market.choices ?? []) {
+    assert.equal(hasMoneyEffect(choice), false);
+  }
 }
 
 function testTalentEligibilityRuntime(): void {

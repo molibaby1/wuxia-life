@@ -91,13 +91,7 @@ function testAuthoringSemantics(): void {
   ]);
 
   for (const choice of market.choices ?? []) {
-    assert(
-      choice.effects?.some(
-        effect => effect.type === 'stat_modify'
-          && (effect.target ?? effect.stat) === 'money',
-      ),
-      `${choice.id} market money reward is intentionally deferred`,
-    );
+    assert.equal(hasMoneyEffect(choice), false);
   }
 }
 

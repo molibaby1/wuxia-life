@@ -492,7 +492,7 @@ Auto Evolution 不应自行：
 
 `origin_merchant_family` 已显式设置 `wealth_capacity_set: comfortable_means`，并保留 legacy `money +200`。`merchant_wealth_peak` 也保留 legacy `money +200`，以兼容仍在读取余额的历史消费者。
 
-`merchant.json` 的 merchant talent → first shop → shop-failure 竖切已不再在该路径上使用精确 `money` 条件或效果。`merchant_caravan_guard` 已不再读写精确 `money`：`hire_elite_guards` 使用 singular `wealth_capacity_at_least comfortable_means`；`escort_personally` 保留武力门槛并以 `wealth_capacity_raise_to comfortable_means` 表达自营扩张后的经济身份提升；`hire_normal_guards` 不再产生普通现金奖励。`merchant_market_monopoly` 入口改为 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`，不再以 `money >= 150` 作为门槛；其 `monopoly_trade` / `fair_competition` 的 `money +80/+40` 仍为 deferred debt。其余 merchant money consumer、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17 与全局 money 退役仍属 deferred debt。
+`merchant.json` 的 merchant talent → first shop → shop-failure 竖切已不再在该路径上使用精确 `money` 条件或效果。`merchant_caravan_guard` 已不再读写精确 `money`：`hire_elite_guards` 使用 singular `wealth_capacity_at_least comfortable_means`；`escort_personally` 保留武力门槛并以 `wealth_capacity_raise_to comfortable_means` 表达自营扩张后的经济身份提升；`hire_normal_guards` 不再产生普通现金奖励。`merchant_market_monopoly` 入口使用 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`；`monopoly_trade` 不再读写 `money`，以 `wealth_capacity_raise_to wealthy` 表达市场支配后的经济身份跃迁；`fair_competition` 不再读写 `money` 且不改变 Wealth Capacity。其余 merchant money consumer（`merchant_official_connection`、`merchant_chamber_of_commerce` 等）、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17 与全局 money 退役仍属 deferred debt。
 
 ### 6.3 UI / presentation
 
@@ -584,8 +584,15 @@ Phase 1A 与 Phase 1B 的仓库实现均已完成其批准边界。Phase 1A focu
 
 1. `merchant_caravan_guard` 不再读写精确 `money`；精英路径使用 `wealth_capacity_at_least comfortable_means`；亲自护送保留武力门槛并以 `wealth_capacity_raise_to comfortable_means` 承接自营扩张；普通保镖不再产生现金奖励且不设置 `merchant_caravan_success`。
 2. `merchant_market_monopoly` 入口使用 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`；高 legacy `money` 单独不再解锁市场阶段。
-3. `merchant_market_monopoly` 的 `monopoly_trade` / `fair_competition` 仍保留 `money +80/+40` 作为 deferred debt。
-4. 未新增 caravan Asset；`merchant_shop` 仍是唯一 AssetId；Snapshot 保持 `3.15.0`。
+3. 未新增 caravan Asset；`merchant_shop` 仍是唯一 AssetId；Snapshot 保持 `3.15.0`。
+
+#### Merchant Market Monopoly Legacy Money Migration
+
+1. `merchant_market_monopoly` 两 choice 不再读写精确 `money`。
+2. `monopoly_trade` 使用 `wealth_capacity_raise_to wealthy` 表达市场支配后的经济身份跃迁，并保留 `reputation -10`（additive）与 `merchant_monopoly` flag。
+3. `fair_competition` 不改变 Wealth Capacity，保留 `reputation +10`（additive）与 `merchant_fair_trade` flag。
+4. `merchant_official_connection` 与 `merchant_ending_hidden_wealth` 继续通过 route flags 消费，不依赖已退役的 `+80/+40` wallet padding。
+5. 未新增 Asset 或 market-position schema；`merchant_shop` 仍是唯一 AssetId；Snapshot 保持 `3.15.0`。
 
 Asset-specific 延期：dedicated Asset entity/collection、数量、价值、地点、收益、维护、转让和多实例。
 

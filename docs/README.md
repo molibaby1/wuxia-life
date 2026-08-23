@@ -16,7 +16,8 @@
 - [Wealth / Economy Product Contract v1](product/wealth-economy-product-contract-design.md)：完整 Human-accepted 财力/资产产品语义，以及 2026-08-22 当前 silver/money 实现的只读 inventory；产品 Contract 与 implementation reality 在同一文档中分区记录。
 - [Phase 1B Minimal Asset Semantics Design](product/wealth-economy-phase-1b-minimal-asset-semantics-design.md)：Human-accepted 的 `merchant_shop` 最小 Asset identity、ownership、persistence 与 presentation implementation boundary。
 - [Merchant Shop Legacy Money Migration Design](product/wealth-economy-merchant-shop-legacy-money-migration-design.md)：Human-accepted 的 merchant talent → first shop → shop-failure 竖切，从 legacy `money` 迁移到 Wealth Capacity + `merchant_shop` Asset（已交付）。
-- [Merchant Caravan Legacy Money Migration Design](product/wealth-economy-merchant-caravan-legacy-money-migration-design.md)：Human-accepted 的 `merchant_caravan_guard` + `merchant_market_monopoly` 入口竖切，从 legacy `money` 迁移到 Wealth Capacity（已交付）；市场事件内部 `money +80/+40` 仍为 deferred debt。
+- [Merchant Caravan Legacy Money Migration Design](product/wealth-economy-merchant-caravan-legacy-money-migration-design.md)：Human-accepted 的 `merchant_caravan_guard` + `merchant_market_monopoly` 入口竖切，从 legacy `money` 迁移到 Wealth Capacity（已交付）。
+- [Merchant Market Monopoly Legacy Money Migration Design](product/wealth-economy-merchant-market-monopoly-legacy-money-migration-design.md)：Human-accepted 的 `merchant_market_monopoly` 选择奖励竖切，垄断路径迁移到 `wealth_capacity_raise_to wealthy`，公平竞争路径保持 Wealth 不变（已交付）。
 
 ### 治理
 

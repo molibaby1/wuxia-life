@@ -914,3 +914,18 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 
 - 需要迁移 `merchant_market_monopoly` 选择奖励或其他 merchant money consumer；
 - 需要为 caravan 成功引入独立 Asset 或 Wealth 算术/downgrade 框架。
+
+### PD-069：Merchant market monopoly legacy wallet rewards retired
+
+**实施决策（Human accepted：2026-08-23）**
+
+- Market Monopoly legacy wallet rewards retired.
+- Monopoly path represents an economic identity transition to at least `wealthy` via `wealth_capacity_raise_to`; fair path retains Wealth while gaining reputation and fair-trade identity.
+- `merchant_market_monopoly` 两 choice 不再读写精确 `money`；`monopoly_trade` 使用 `wealth_capacity_raise_to wealthy` + additive `reputation -10` + `merchant_monopoly`；`fair_competition` 不改变 Wealth Capacity，保留 additive `reputation +10` + `merchant_fair_trade`。
+- No new Asset is introduced. No downstream merchant wallet consumer is migrated.
+- `merchant_shop` 仍是唯一 AssetId；Snapshot 保持 `3.15.0`；无新 persisted 字段或 save migration。
+
+**重新讨论条件**
+
+- 需要迁移 `merchant_official_connection`、`merchant_chamber_of_commerce` 或其他 merchant money consumer；
+- 需要为市场支配引入独立 Asset 或 market-position schema。

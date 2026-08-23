@@ -234,19 +234,18 @@
     "choices": [
       {
         "id": "monopoly_trade",
-        "text": "垄断经营（金钱 +80，声望 -10）",
+        "text": "垄断经营（财力跃升，声望受损）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 80},
-          {"type": "stat_modify", "stat": "reputation", "value": -10},
+          {"type": "wealth_capacity_raise_to", "minimum": "wealthy"},
+          {"type": "stat_modify", "stat": "reputation", "value": -10, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_monopoly", "value": true}
         ]
       },
       {
         "id": "fair_competition",
-        "text": "公平竞争",
+        "text": "公平竞争（保持财力，声望提升）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 40},
-          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_fair_trade", "value": true}
         ]
       }

@@ -1,6 +1,7 @@
 import type { EventCondition, GameState } from '../../types/eventTypes';
 import { ConditionEvaluator } from '../ConditionEvaluator';
 import { readPlayerNumeric } from '../../utils/playerStatAccess';
+import { isWealthCapacity, meetsWealthCapacity, WEALTH_CAPACITY_LABELS } from '../../types/wealthCapacity';
 
 export type RequirementGapKind = 'exact' | 'fuzzy' | 'unsupported';
 
@@ -50,6 +51,30 @@ export function explainChoiceRequirement(
       available: true,
       explanations: [],
       summary: '可自由选择',
+    };
+  }
+
+  if (condition.type === 'wealth_capacity_at_least') {
+    const minimumLabel = isWealthCapacity(condition.minimum)
+      ? WEALTH_CAPACITY_LABELS[condition.minimum]
+      : String(condition.minimum);
+    const available = isWealthCapacity(condition.minimum)
+      && meetsWealthCapacity(state.player.wealthCapacity, condition.minimum);
+    const playerMessage = available
+      ? `财力已达「${minimumLabel}」`
+      : `财力需达到「${minimumLabel}」`;
+
+    return {
+      choiceId,
+      available,
+      explanations: [{
+        requirementId: 'wealth_capacity_at_least',
+        label: '财力',
+        met: available,
+        gapKind: 'unsupported',
+        playerMessage,
+      }],
+      summary: playerMessage,
     };
   }
 

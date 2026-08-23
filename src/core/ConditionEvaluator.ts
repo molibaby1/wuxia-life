@@ -17,6 +17,7 @@ import type {
   PlayerLifeStates,
 } from '../types/eventTypes';
 import { isStatusId } from '../types/eventTypes';
+import { isWealthCapacity, meetsWealthCapacity } from '../types/wealthCapacity';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
 
 export type Condition = EventCondition;
@@ -68,6 +69,10 @@ export class ConditionEvaluator implements IConditionEvaluator {
   evaluate(condition: EventCondition, state: GameState): boolean {
     if (condition.type === 'status_has') {
       return isStatusId(condition.status) && state.player.statuses.includes(condition.status);
+    }
+    if (condition.type === 'wealth_capacity_at_least') {
+      return isWealthCapacity(condition.minimum)
+        && meetsWealthCapacity(state.player.wealthCapacity, condition.minimum);
     }
     if (condition.type === 'expression') {
       return this.evaluateExpression(condition.expression, state);

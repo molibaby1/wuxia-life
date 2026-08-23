@@ -77,6 +77,9 @@ export enum EffectType {
 
   /** 金钱变动（兼容旧数据） */
   MONEY_MODIFY = 'money_modify',
+
+  /** 财富容量设置 */
+  WEALTH_CAPACITY_SET = 'wealth_capacity_set',
   
   /** 物品操作 */
   ITEM_ADD = 'item_add',
@@ -475,6 +478,10 @@ export type EventCondition =
   | {
       type: 'status_has';
       status: StatusId;
+    }
+  | {
+      type: 'wealth_capacity_at_least';
+      minimum: WealthCapacity;
     };
 
 /**

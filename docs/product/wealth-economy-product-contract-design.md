@@ -492,7 +492,7 @@ Auto Evolution 不应自行：
 
 `origin_merchant_family` 已显式设置 `wealth_capacity_set: comfortable_means`，并保留 legacy `money +200`。`merchant_wealth_peak` 也保留 legacy `money +200`，以兼容仍在读取余额的历史消费者。
 
-`merchant.json` 的 merchant talent → first shop → shop-failure 竖切已不再在该路径上使用精确 `money` 条件或效果；`merchant_caravan_guard`、`merchant_market_monopoly` 等其余正式商户事件仍保留 legacy 数值语义。
+`merchant.json` 的 merchant talent → first shop → shop-failure 竖切已不再在该路径上使用精确 `money` 条件或效果。`merchant_caravan_guard` 已不再读写精确 `money`：`hire_elite_guards` 使用 singular `wealth_capacity_at_least comfortable_means`；`escort_personally` 保留武力门槛并以 `wealth_capacity_raise_to comfortable_means` 表达自营扩张后的经济身份提升；`hire_normal_guards` 不再产生普通现金奖励。`merchant_market_monopoly` 入口改为 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`，不再以 `money >= 150` 作为门槛；其 `monopoly_trade` / `fair_competition` 的 `money +80/+40` 仍为 deferred debt。其余 merchant money consumer、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17 与全局 money 退役仍属 deferred debt。
 
 ### 6.3 UI / presentation
 
@@ -522,8 +522,8 @@ Auto Evolution 不应自行：
 | --- | --- | --- |
 | `DAILY_ABSTRACTED` | `activeActionCatalog.ts` 的 `action_training_basic`、`action_study_basic`、`action_socializing_basic`、`action_business_basic`、`action_travel_basic`；`childhoodActionCatalog.ts` 的 `action_household_errand` / `action_household_apprentice`；`dailyEvents.ts` 的 `daily_take_odd_job`、`daily_small_trade` 等日常 livelihood 变体 | 这些 ordinary cash-flow producers 已不再直接改写核心经济状态；accepted contract 仍禁止把它们退化成 hidden score 或 Capacity XP |
 | `NARRATIVE_ONLY` | `src/p8/personas.ts` 的“积累财富”目标；`p9-remediation.json` / `p11-validation.json` 的 `pathAffinity.wealth`；UI 的“银两”标签与商人文本 | 这些标签、目标、路径权重或展示语义不能单独创建 Wealth state。若同一内容还含 effect/condition，应拆分并按对应行重新分类 |
-| `WEALTH_REQUIREMENT` | `merchant.json` 的 `wealth_capacity_at_least`（`merchant_first_shop`、`invest_more`）；其余仍未迁移的 `money` threshold（如 `merchant_caravan_guard`、`merchant_market_monopoly`、`identity-merchant.json`、`relationship.json`） | merchant shop 入口竖切已迁移；余额阈值 consumer 仍大量存在 |
-| `WEALTH_TRANSITION` | `origin.json` 的 `wealth_capacity_set: comfortable_means`；`merchant.json` 的 `wealth_capacity_raise_to modest_savings`（`study_business`）与 `wealth_capacity_set: regional_magnate`；legacy money delta 仍在 origin/peak | transition 不等于余额加减；merchant shop 竖切证明 raise_to 与 set 并存 |
+| `WEALTH_REQUIREMENT` | `merchant.json` 的 `wealth_capacity_at_least`（`merchant_first_shop`、`invest_more`、`hire_elite_guards`、`merchant_market_monopoly` 入口）；其余仍未迁移的 `money` threshold（如 `merchant_official_connection`、`identity-merchant.json`、`relationship.json`） | merchant shop 与 caravan/market 入口竖切已迁移；余额阈值 consumer 仍大量存在 |
+| `WEALTH_TRANSITION` | `origin.json` 的 `wealth_capacity_set: comfortable_means`；`merchant.json` 的 `wealth_capacity_raise_to modest_savings`（`study_business`）、`wealth_capacity_raise_to comfortable_means`（`escort_personally`）与 `wealth_capacity_set: regional_magnate`；legacy money delta 仍在 origin/peak | transition 不等于余额加减；merchant shop 与 caravan 竖切证明 raise_to 与 set 并存 |
 | `ASSET_TRANSITION` | `merchant.json` 的三条首次开店路径通过 `asset_add` 建立 `merchant_shop`，`close_shop` 通过 `asset_remove` 移除；开店/投资/关店不再伴随 wallet mutation | `merchant_shop` 已有最小正式 Asset identity；shop lifecycle wallet 已从该竖切退役 |
 | `UNRESOLVED` | legacy `money` / numeric optional `wealth`；P17 的 `money + wealth` 派生；`merchant_*` 以外仍未迁移的 merchant money consumers；`childhoodEvents.json` 的 legacy `money +200` producer；Phase 1B 之外的 merchant flags 是否升级为 Asset；旧 `src/data/storyData.ts` money path 是否仍有任何正式消费者 | 这些问题无法由当前 authority 安全推导。必须保留为迁移前决策，不通过 alias、fallback 或兼容层“折中”；`merchant_shop` 的 Phase 1B ownership 不属于 unresolved |
 
@@ -579,6 +579,13 @@ Phase 1A 与 Phase 1B 的仓库实现均已完成其批准边界。Phase 1A focu
 4. Asset ownership 通过现有 Snapshot facts path round-trip 持久化，Snapshot 仍为 `3.15.0`；不存在 load-time legacy flag derivation。
 5. API 与主屏通过 derived `ownedAssets` / `assetSummary` 展示 ownership；没有新增 PlayerState、Snapshot 或 Asset management UI。
 6. `asset_add` / `asset_remove` 不自动修改 money、Wealth Capacity 或其他经济状态。
+
+#### Merchant Caravan Legacy Money Migration
+
+1. `merchant_caravan_guard` 不再读写精确 `money`；精英路径使用 `wealth_capacity_at_least comfortable_means`；亲自护送保留武力门槛并以 `wealth_capacity_raise_to comfortable_means` 承接自营扩张；普通保镖不再产生现金奖励且不设置 `merchant_caravan_success`。
+2. `merchant_market_monopoly` 入口使用 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`；高 legacy `money` 单独不再解锁市场阶段。
+3. `merchant_market_monopoly` 的 `monopoly_trade` / `fair_competition` 仍保留 `money +80/+40` 作为 deferred debt。
+4. 未新增 caravan Asset；`merchant_shop` 仍是唯一 AssetId；Snapshot 保持 `3.15.0`。
 
 Asset-specific 延期：dedicated Asset entity/collection、数量、价值、地点、收益、维护、转让和多实例。
 

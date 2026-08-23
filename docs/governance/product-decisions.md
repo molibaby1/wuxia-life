@@ -892,10 +892,25 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - `merchant_talent_discovery` 不再读写 `money`；`study_business` 使用 `wealth_capacity_raise_to: modest_savings`。
 - `merchant_first_shop` 要求 `merchant_talent` 且 `wealth_capacity_at_least modest_savings`；三条开店路径与 `invest_more` / `close_shop` 不再精确修改 `money`。
 - 开店、追加投资、关店不自动降低 Wealth Capacity；Phase 1B `merchant_shop` Asset contract 不变。
-- `merchant_caravan_guard` 及其他 merchant money consumer、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17、全局 money 退役仍属 deferred debt。
+- `merchant_caravan_guard` 及其他 merchant money consumer（`merchant_market_monopoly` 选择奖励除外）、`origin` / `merchant_wealth_peak` 的 legacy `money +200`、P17、全局 money 退役仍属 deferred debt。
 - Snapshot 保持 `3.15.0`；无新 persisted 字段或 save migration。
 
 **重新讨论条件**
 
 - 需要将 merchant 路线其余 `money` threshold/effect 一并迁移；
 - 需要为 shop open/invest/close 引入 Wealth Capacity 自动降级或通用 ordered-enum economy framework。
+
+### PD-068：Merchant caravan vertical 从 legacy money 迁移到 Wealth Capacity
+
+**实施决策（Human accepted：2026-08-23）**
+
+- `merchant_caravan_guard` 不再读写精确 `money`；`hire_elite_guards` 使用 singular `condition: wealth_capacity_at_least comfortable_means`；`escort_personally` 保留 `martialPower >= 30` 并以 `wealth_capacity_raise_to comfortable_means` 表达自营扩张后的经济身份提升；`hire_normal_guards` 不再产生普通现金奖励且不设置 `merchant_caravan_success`。
+- `merchant_market_monopoly` 入口改为 `merchant_caravan_success` + `wealth_capacity_at_least comfortable_means`；高 legacy `money` 单独不再解锁市场阶段。
+- `merchant_market_monopoly` 的 `monopoly_trade` / `fair_competition` 仍保留 `money +80/+40` 作为 deferred debt；本 slice 不迁移市场选择奖励语义。
+- 不新增 caravan Asset；`merchant_shop` 仍是唯一 AssetId；`merchant_caravan_success` 仍为里程碑 flag。
+- Snapshot 保持 `3.15.0`；无新 persisted 字段或 save migration。
+
+**重新讨论条件**
+
+- 需要迁移 `merchant_market_monopoly` 选择奖励或其他 merchant money consumer；
+- 需要为 caravan 成功引入独立 Asset 或 Wealth 算术/downgrade 框架。

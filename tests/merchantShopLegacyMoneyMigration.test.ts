@@ -114,11 +114,12 @@ function testAuthoringSemantics(): void {
   assert.equal(closeShop.text.includes('金钱'), false);
 
   const caravan = getEvent('merchant_caravan_guard');
-  assert(caravan.choices!.some(choice => hasMoneyEffect(choice)));
+  assert.equal(caravan.choices!.some(choice => hasMoneyEffect(choice)), false);
+
+  const market = getEvent('merchant_market_monopoly');
   assert(
-    caravan.choices!.some(choice =>
-      JSON.stringify((choice as EventChoice).conditions ?? []).includes('money >= 150'),
-    ),
+    market.choices!.some(choice => hasMoneyEffect(choice)),
+    'market choice money rewards remain deferred after caravan migration',
   );
 }
 

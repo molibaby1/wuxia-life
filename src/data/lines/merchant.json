@@ -179,26 +179,26 @@
     "choices": [
       {
         "id": "hire_elite_guards",
-        "text": "雇佣精锐保镖团队（需金钱≥150，安全率最高）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 150"}
-        ],
+        "text": "雇佣精锐保镖团队（需财力达到家资殷实，安全率最高）",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -150},
-          {"type": "stat_modify", "stat": "money", "value": 100},
-          {"type": "stat_modify", "stat": "reputation", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
         ]
       },
       {
         "id": "escort_personally",
         "text": "亲自护送（需武力≥30）",
-        "conditions": [
-          {"type": "expression", "expression": "martialPower >= 30"}
-        ],
+        "condition": {
+          "type": "expression",
+          "expression": "martialPower >= 30"
+        },
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 60},
-          {"type": "stat_modify", "stat": "martialPower", "value": 5},
+          {"type": "stat_modify", "stat": "martialPower", "value": 5, "operator": "add"},
+          {"type": "wealth_capacity_raise_to", "minimum": "comfortable_means"},
           {"type": "flag_set", "flag": "merchant_caravan_success", "value": true}
         ]
       },
@@ -206,8 +206,7 @@
         "id": "hire_normal_guards",
         "text": "雇佣普通保镖",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 30},
-          {"type": "stat_modify", "stat": "charisma", "value": 3}
+          {"type": "stat_modify", "stat": "charisma", "value": 3, "operator": "add"}
         ]
       }
     ]
@@ -223,7 +222,8 @@
       {"type": "age_reach", "value": 20}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_caravan_success == true && money >= 150"}
+      {"type": "expression", "expression": "flags.merchant_caravan_success == true"},
+      {"type": "wealth_capacity_at_least", "minimum": "comfortable_means"}
     ],
     "content": {
       "title": "垄断市场",

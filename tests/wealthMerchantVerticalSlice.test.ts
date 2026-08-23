@@ -69,6 +69,9 @@ async function run(): Promise<void> {
   const engine = new GameEngineIntegration();
   engine.startNewGame('商贾竖切', 'male');
   assert.equal(engine.getGameState().player.wealthCapacity, 'no_surplus', 'new game starts at no_surplus');
+  const moneyBeforeOrigin = engine.getGameState().player.money;
+  // Neutralize random trait growth multipliers so this slice checks the legacy cash delta itself.
+  engine.getGameState().player.traits = [];
 
   await engine.executeChoiceEffects(
     merchantOrigin.effects,
@@ -83,7 +86,7 @@ async function run(): Promise<void> {
   );
   assert.equal(
     afterOrigin.player.money,
-    300,
+    moneyBeforeOrigin + 200,
     'merchant origin must keep legacy money +200 alongside Capacity seeding',
   );
 
@@ -105,6 +108,7 @@ async function run(): Promise<void> {
     'modest_savings player must be able to choose invest_more regardless of legacy money',
   );
 
+  const moneyBeforePeak = afterOrigin.player.money;
   const afterPeak = await engine.executeChoiceEffects(
     peak.autoEffects ?? [],
     peak.id,
@@ -116,7 +120,7 @@ async function run(): Promise<void> {
   );
   assert.equal(
     afterPeak.gameState.player.money,
-    500,
+    moneyBeforePeak + 200,
     'merchant_wealth_peak must keep legacy money +200 alongside Capacity seeding',
   );
 }

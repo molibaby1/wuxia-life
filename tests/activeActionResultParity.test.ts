@@ -48,7 +48,7 @@ function testApiMapperPreservesSharedSemantics(): void {
       pendingStoryEventId: null,
       pendingEphemeralStoryEvent: null,
     }),
-    getRuntimeState: () => ({ player: { name: 'parity', age: 45, alive: true } }),
+    getRuntimeState: () => ({ player: { name: 'parity', age: 45, alive: true }, facts: {} }),
   };
   const payload = mapSessionProgression(
     fakeSession as never,

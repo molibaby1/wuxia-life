@@ -31,6 +31,7 @@ function createPlayerSummary(overrides: Partial<PlayerSummaryWithCapacity> = {})
     currentMonth: 6,
     currentDay: 1,
     wealthCapacity: 'comfortable_means',
+    ownedAssets: [],
     ...overrides,
   };
 }
@@ -79,6 +80,7 @@ assertCase('api mapper carries canonical wealth capacity', () => {
     }),
     getRuntimeState: () => ({
       player,
+      facts: {},
       currentTime: { year: 19, month: 6, day: 1 },
     }),
   };

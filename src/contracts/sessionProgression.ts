@@ -14,6 +14,7 @@ import type { LifeMemorySummary } from '../types/lifeMemory';
 import type { AffiliationId } from '../types/eventTypes';
 import type { Investments, PlayerLifeStates } from '../types/eventTypes';
 import type { WealthCapacity } from '../types/wealthCapacity';
+import type { AssetId } from '../types/asset';
 
 /**
  * Authoritative session phase for client UI routing.
@@ -85,6 +86,7 @@ export interface PlayerSummaryDto {
   chivalry: number;
   constitution: number;
   wealthCapacity: WealthCapacity;
+  ownedAssets: AssetId[];
   money: number;
   reputation: number;
   connections: number;

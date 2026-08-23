@@ -138,6 +138,7 @@
         class="summary-section"
         :current-goal-summary="mainScreenModel.currentGoalSummary"
         :affiliation-summary="mainScreenModel.affiliationSummary"
+        :asset-summary="mainScreenModel.assetSummary"
         :experience-summary="mainScreenModel.experienceSummary"
         :practice-summary="mainScreenModel.practiceSummary"
         :milestone-summary="mainScreenModel.milestoneSummary"
@@ -169,6 +170,7 @@ import {
   type LifeMemoryFeedbackItem,
 } from './lifeMemoryFeedback';
 import { deriveLifeMemorySummary } from '../core/deriveLifeMemorySummary';
+import { getOwnedAssets } from '../core/assetOwnership';
 import type { StoryChoice } from '../types';
 
 import type { DisturbanceNarrativeDisplay } from '../types/activeActionTypes';
@@ -291,10 +293,15 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
       businessAcumen: p.businessAcumen,
       influence: p.influence,
       connections: p.connections,
+      ownedAssets: p.ownedAssets,
       lifeStates: p.lifeStates,
     };
   }
-  return gameEngine.getGameState().player;
+  const state = gameEngine.getGameState();
+  return {
+    ...state.player,
+    ownedAssets: getOwnedAssets(state.facts),
+  };
 });
 
 const lifeMemorySummary = computed(() => {

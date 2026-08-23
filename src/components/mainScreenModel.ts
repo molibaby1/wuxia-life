@@ -59,6 +59,7 @@ import type { PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
 import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import { WEALTH_CAPACITY_LABELS } from '../types/wealthCapacity';
+import { ASSET_LABELS, ASSET_VALUES, type AssetId } from '../types/asset';
 
 export interface MainScreenStatItem {
   key: string;
@@ -79,6 +80,7 @@ export interface MainScreenModel {
   currentGoalSummary: string;
   affiliationSummary: string;
   titleSummary: string;
+  assetSummary: string;
   experienceSummary: string;
   practiceSummary: string;
   milestoneSummary?: string;
@@ -104,7 +106,9 @@ export type MainScreenPlayer = Pick<
   | 'affiliation'
   | 'title'
 > &
-  Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>>;
+  Partial<Pick<PlayerState, 'businessAcumen' | 'lifeStates'>> & {
+    ownedAssets?: AssetId[];
+  };
 
 const MARTIAL_DOMINANT_MIN_TOP = 30;
 /** P124 locked martial-dominant verification sample. */
@@ -164,6 +168,14 @@ function buildAffiliationSummary(player: MainScreenPlayer): string {
   return player.affiliation
     ? getAffiliationDefinition(player.affiliation).displayName
     : '无固定所属';
+}
+
+function buildAssetSummary(ownedAssets: AssetId[] | undefined): string {
+  const owned = new Set(ownedAssets ?? []);
+  const labels = ASSET_VALUES
+    .filter((assetId) => owned.has(assetId))
+    .map((assetId) => ASSET_LABELS[assetId]);
+  return labels.length > 0 ? labels.join('、') : '暂无资产';
 }
 
 function buildExperienceSummary(summary: LifeMemorySummary): string {
@@ -322,6 +334,7 @@ export function buildMainScreenModel(
     currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',
     affiliationSummary: buildAffiliationSummary(player),
     titleSummary: player.title ?? '暂无正式称号',
+    assetSummary: buildAssetSummary(player.ownedAssets),
     experienceSummary: buildExperienceSummary(lifeMemory),
     practiceSummary: buildPracticeSummary(lifeMemory),
     milestoneSummary: buildMilestoneSummary(lifeMemory),

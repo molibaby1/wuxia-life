@@ -14,6 +14,10 @@
         <span class="summary-value">{{ affiliationSummary }}</span>
       </div>
       <div class="summary-row">
+        <span class="summary-label">资产</span>
+        <span class="summary-value">{{ assetSummary }}</span>
+      </div>
+      <div class="summary-row">
         <span class="summary-label">经历</span>
         <span class="summary-value">{{ experienceSummary }}</span>
       </div>
@@ -45,6 +49,7 @@
 defineProps<{
   currentGoalSummary: string;
   affiliationSummary: string;
+  assetSummary: string;
   experienceSummary: string;
   practiceSummary: string;
   milestoneSummary?: string;

@@ -23,6 +23,7 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     reputation: 10,
     money: 88,
     wealthCapacity: 'no_surplus',
+    ownedAssets: [],
     charisma: 0,
     businessAcumen: 0,
     influence: 0,
@@ -88,6 +89,7 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.topResources[0]?.label === '财力', 'wealth capacity should render the player-facing 财力 label');
   assert(model.topResources[0]?.value === '无余财', 'default wealth capacity should use the canonical label value');
   assert(model.topResources[1]?.key === 'money' && model.topResources[1]?.label === '银两', 'legacy silver must remain visible during Phase 1A');
+  assert(model.assetSummary === '暂无资产', 'empty canonical asset ownership should use explicit empty copy');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,体魄,学识,人脉,名望,侠义声誉',
     'core stats should expose the six canonical attributes with equal priority',

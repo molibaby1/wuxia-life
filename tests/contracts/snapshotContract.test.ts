@@ -46,6 +46,7 @@ const REQUIRED_PLAYER_KEYS = [
   'healthStatus',
   'statuses',
   'lifeStates',
+  'wealthCapacity',
 ] as const;
 
 /** Derived or volatile keys that must not be required for a valid persisted snapshot. */
@@ -166,6 +167,7 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         constitution: 0,
         reputation: 0,
         money: 0,
+        wealthCapacity: 'no_surplus',
         knowledge: 0,
         charisma: 0,
         businessAcumen: 0,
@@ -320,7 +322,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.14\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.15\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

@@ -6,7 +6,7 @@ Policy for the current strict save contract. This repository does not implement 
 
 | Field | Format | Example |
 | --- | --- | --- |
-| `schemaVersion` | Semver (snapshot contract) | `3.14.0` |
+| `schemaVersion` | Semver (snapshot contract) | `3.15.0` |
 | `saveVersion` | Optional state provenance tag | Current runtime value only; it does not widen the accepted schema |
 | `engineVersion` | Package/engine semver | `0.0.0` |
 | `eventCatalogVersion` | Catalog bundle semver | `1.0.0` |
@@ -22,8 +22,8 @@ Policy for the current strict save contract. This repository does not implement 
 
 ## 3. Supported Range (Initial)
 
-- Snapshot schema `3.14.0` is the only accepted contract line. Every other version is rejected. `lifePath.focus` and `player.comprehension` are forbidden unknown fields at both top-level and nested `stateSnapshot` boundaries. `player.lifeStates` contains exactly `trainingHabit`, `studyHabit`, and `businessHabit`; `familyBond` and `socialMomentum` are forbidden unknown keys. There is no migration, compatibility, fallback, cleaning, conversion, or history reconstruction.
-- Browser and Headless persistence now use only Snapshot schema `3.14.0`. The old P2 raw `GameState` save shape is not readable and is not migrated.
+- Snapshot schema `3.15.0` is the only accepted contract line. Every other version is rejected. `lifePath.focus` and `player.comprehension` are forbidden unknown fields at both top-level and nested `stateSnapshot` boundaries. `player.wealthCapacity` is required and categorical; `player.lifeStates` contains exactly `trainingHabit`, `studyHabit`, and `businessHabit`; `familyBond` and `socialMomentum` are forbidden unknown keys. There is no migration, compatibility, fallback, cleaning, conversion, or history reconstruction.
+- Browser and Headless persistence now use only Snapshot schema `3.15.0`. The old P2 raw `GameState` save shape is not readable and is not migrated.
 - Catalog version mismatch: reject execution, allow read-only inspection when safe.
 
 ## 4. Reject Instead of Migrate

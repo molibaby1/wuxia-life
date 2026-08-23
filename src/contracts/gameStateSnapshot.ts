@@ -22,11 +22,12 @@ import type {
   Relationship,
   AffiliationId,
 } from '../types/eventTypes';
+import type { WealthCapacity } from '../types/wealthCapacity';
 import type { ActionFocusStreak, ActionHistoryEntry } from '../types/activeActionTypes';
 import type { OriginWorldviewShaping } from '../narrative/profile/types';
 
 /** Snapshot contract schema version (§2). */
-export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.14.0' as const;
+export const GAME_STATE_SNAPSHOT_SCHEMA_VERSION = '3.15.0' as const;
 
 /** Origin platform identifier for snapshot provenance (§3.2). */
 export type SourcePlatform =
@@ -60,6 +61,7 @@ export interface SnapshotPlayerState {
   title: string | null;
   reputation: number;
   money: number;
+  wealthCapacity: WealthCapacity;
   knowledge: number;
   charisma: number;
   businessAcumen: number;

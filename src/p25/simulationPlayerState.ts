@@ -48,6 +48,7 @@ export function createSimulationPlayerState({
     title: null,
     reputation,
     money,
+    wealthCapacity: 'no_surplus',
     knowledge: 0,
     charisma: 0,
     businessAcumen: 0,

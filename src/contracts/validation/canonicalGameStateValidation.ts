@@ -9,6 +9,7 @@ import {
   LIFE_STATE_KEYS,
   STATUS_ID_VALUES,
 } from '../../types/eventTypes';
+import { isWealthCapacity } from '../../types/wealthCapacity';
 import { isAffiliationId } from '../../core/affiliationCatalog';
 
 export interface CanonicalValidationIssue {
@@ -59,7 +60,7 @@ const RUNTIME_STATE_KEYS = new Set([
 ]);
 const PLAYER_KEYS = new Set([
   'age', 'gender', 'name', 'martialPower', 'chivalry',
-  'constitution', 'affiliation', 'title', 'reputation', 'money', 'knowledge', 'charisma',
+  'constitution', 'affiliation', 'title', 'reputation', 'money', 'wealthCapacity', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage',
   'merchantNetwork', 'investments', 'items',
   'flags', 'events', 'children', 'spouse', 'relationships', 'alive', 'deathReason', 'timeUnit',
@@ -67,7 +68,7 @@ const PLAYER_KEYS = new Set([
 ]);
 const REQUIRED_PLAYER_KEYS = [
   'name', 'age', 'gender', 'alive', 'martialPower',
-  'chivalry', 'constitution', 'affiliation', 'title', 'reputation', 'money', 'knowledge', 'charisma',
+  'chivalry', 'constitution', 'affiliation', 'title', 'reputation', 'money', 'wealthCapacity', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork',
   'investments', 'flags', 'children', 'spouse', 'traits', 'healthStatus', 'statuses', 'lifeStates',
 ];
@@ -385,6 +386,7 @@ function validatePlayer(value: unknown, path: string, issues: CanonicalValidatio
   if (hasOwn(value, 'name')) stringValue(value.name, `${path}.name`, issues, true); if (hasOwn(value, 'age')) finite(value.age, `${path}.age`, issues); if (hasOwn(value, 'gender') && !['male', 'female'].includes(value.gender as string)) addIssue(issues, `${path}.gender`, 'invalid_value', 'unknown gender'); if (hasOwn(value, 'alive')) booleanValue(value.alive, `${path}.alive`, issues);
   const numericKeys = ['martialPower', 'chivalry', 'constitution', 'reputation', 'money', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
   if (hasOwn(value, 'affiliation') && value.affiliation !== null && !isAffiliationId(value.affiliation)) addIssue(issues, `${path}.affiliation`, 'invalid_value', 'unknown affiliation');
+  if (hasOwn(value, 'wealthCapacity') && !isWealthCapacity(value.wealthCapacity)) addIssue(issues, `${path}.wealthCapacity`, 'invalid_value', 'unknown wealth capacity');
   for (const key of ['title', 'spouse'] as const) if (hasOwn(value, key) && value[key] !== null) stringValue(value[key], `${path}.${key}`, issues);
   if (hasOwn(value, 'deathReason')) stringValue(value.deathReason, `${path}.deathReason`, issues); if (hasOwn(value, 'timeUnit') && !['year', 'month', 'day'].includes(value.timeUnit as string)) addIssue(issues, `${path}.timeUnit`, 'invalid_value', 'unknown time unit');
   if (hasOwn(value, 'investments')) validateInvestments(value.investments, `${path}.investments`, issues); if (hasOwn(value, 'flags')) validateFlags(value.flags, `${path}.flags`, issues); if (hasOwn(value, 'traits')) { if (!Array.isArray(value.traits)) addIssue(issues, `${path}.traits`, 'invalid_type', 'must be an array'); else value.traits.forEach((trait, index) => { if (typeof trait !== 'string' || !TRAIT_IDS.has(trait)) addIssue(issues, `${path}.traits[${index}]`, 'invalid_value', 'unknown trait'); }); }

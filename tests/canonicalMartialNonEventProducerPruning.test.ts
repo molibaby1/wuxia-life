@@ -58,6 +58,7 @@ function createPlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     connections: 10,
     reputation: 50,
     money: 100,
+    wealthCapacity: 'no_surplus',
     flags: {},
     events: [],
     relationships: [],

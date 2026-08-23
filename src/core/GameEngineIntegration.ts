@@ -135,6 +135,7 @@ export class GameEngineIntegration {
           hermit: 0,
         },
         money: 100,
+        wealthCapacity: 'no_surplus',
         reputation: 0,
         connections: 0,
         children: 0,
@@ -241,6 +242,7 @@ export class GameEngineIntegration {
         player.merchantNetwork = nextState.player.merchantNetwork;
         player.investments = { ...nextState.player.investments };
         player.money = nextState.player.money;
+        player.wealthCapacity = nextState.player.wealthCapacity;
         player.reputation = nextState.player.reputation;
         player.connections = nextState.player.connections;
         player.affiliation = nextState.player.affiliation;

@@ -15,6 +15,7 @@ function createTestState(): GameState {
     charisma: 50,
     constitution: 50,
     money: 100,
+    wealthCapacity: 'no_surplus',
     reputation: 30,
     connections: 20,
     healthStatus: 'healthy',

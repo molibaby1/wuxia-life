@@ -1,6 +1,6 @@
 # Headless Snapshot Conversion Boundary
 
-`DefaultSnapshotConverter` converts between runtime `GameState` and the `3.14.0` `GameStateSnapshot` contract.
+`DefaultSnapshotConverter` converts between runtime `GameState` and the `3.15.0` `GameStateSnapshot` contract.
 
 ## Persisted data
 
@@ -12,7 +12,7 @@ Route flags are persisted as ordinary content flags. No route lifecycle containe
 
 The converter rejects:
 
-- every snapshot version other than `3.14.0`;
+- every snapshot version other than `3.15.0`;
 - the retired `player.comprehension` field;
 - removed route lifecycle fields (`routeStates`, `routeHistory`, `roadCommitments`);
 - missing required player state or invalid `lifeStates`.

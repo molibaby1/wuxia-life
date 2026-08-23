@@ -35,6 +35,7 @@ function fixtureToPlayer(path: LifePathFixture): PlayerState {
     name: 'p31-sim',
     age: path.player.age ?? 35,
     traits: ['keen_mind', 'lazy', 'competitive'],
+    wealthCapacity: 'no_surplus',
     ...path.player,
   } as PlayerState;
 }

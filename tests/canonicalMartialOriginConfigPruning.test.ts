@@ -35,6 +35,7 @@ function createBaselinePlayer(): PlayerState {
     connections: 0,
     reputation: 0,
     money: 0,
+    wealthCapacity: 'no_surplus',
     flags: {},
     events: [],
     relationships: [],

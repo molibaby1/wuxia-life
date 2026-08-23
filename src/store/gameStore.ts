@@ -30,6 +30,7 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     },
     connections: 0,
     money: 0,
+    wealthCapacity: 'no_surplus',
     
     flags: {},
     traits: [],

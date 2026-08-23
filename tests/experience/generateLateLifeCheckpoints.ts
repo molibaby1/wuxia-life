@@ -16,6 +16,7 @@ import {
 } from '../../src/headless/playability/runnerSteps';
 import { defaultSnapshotConverter } from '../../src/headless/snapshot/SnapshotConverter';
 import { validateGameStateSnapshot } from '../../src/contracts/validation/contractValidation';
+import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../../src/contracts/gameStateSnapshot';
 import { createDefaultTimeSource } from '../../src/headless/adapters/timeSource';
 import type { GameStateSnapshot } from '../../src/contracts/gameStateSnapshot';
 import type { GameState } from '../../src/types/eventTypes';
@@ -87,7 +88,7 @@ function writeSnapshotFiles(entryId: string, snapshot: GameStateSnapshot): { sna
       playTime: snapshot.state.eventHistory.length * 30,
     },
   };
-  fs.writeFileSync(browserExportPath, `${JSON.stringify({ version: '3.14.0', exportTime: 0, save }, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(browserExportPath, `${JSON.stringify({ version: GAME_STATE_SNAPSHOT_SCHEMA_VERSION, exportTime: 0, save }, null, 2)}\n`, 'utf8');
   return { snapshotPath, browserExportPath };
 }
 

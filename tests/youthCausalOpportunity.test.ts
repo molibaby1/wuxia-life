@@ -525,7 +525,7 @@ async function main(): Promise<void> {
     time: { now: () => 0 },
   });
   assert.equal(snapshot.metadata.schemaVersion, GAME_STATE_SNAPSHOT_SCHEMA_VERSION);
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.14.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
 
   console.log('youthCausalOpportunity.test.ts: ok');
 }

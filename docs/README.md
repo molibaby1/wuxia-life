@@ -9,7 +9,11 @@
 - [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范。
 - [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与模块边界的当前权威产品规范。
 
-二者同属第一层产品规范：`player-model` 负责游戏人物模型；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
+`player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Contract v1` 是在玩家模型之下登记的当前 accepted product contract，不替代第一层规范。`player-model` 明确把经济能力语义委托给该 Contract；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
+
+### 已接受的产品契约
+
+- [Wealth / Economy Product Contract v1](product/wealth-economy-product-contract-design.md)：完整 Human-accepted 财力/资产产品语义，以及 2026-08-22 当前 silver/money 实现的只读 inventory；产品 Contract 与 implementation reality 在同一文档中分区记录。
 
 ### 治理
 
@@ -20,7 +24,7 @@
 
 ### 契约
 
-- [Snapshot Contract](contracts/game-state-snapshot-contract.md)：Snapshot 3.14.0、统一持久化校验与严格拒绝规则。
+- [Snapshot Contract](contracts/game-state-snapshot-contract.md)：Snapshot 3.15.0、统一持久化校验与严格拒绝规则。
 - [Save Schema Policy](contracts/save-schema-versioning-policy.md)：浏览器与 Headless 存档版本边界及无迁移策略。
 - 其余 `contracts/`：仍有效的传输 / 适配 / 服务边界说明。
 

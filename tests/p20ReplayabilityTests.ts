@@ -54,6 +54,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     title: null,
     reputation: 20,
     money: 300,
+    wealthCapacity: 'no_surplus',
     knowledge: 30,
     charisma: 32,
     businessAcumen: 25,

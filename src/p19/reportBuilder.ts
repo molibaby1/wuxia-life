@@ -63,6 +63,7 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       title: null,
       reputation: 70,
       money: 1500,
+      wealthCapacity: 'no_surplus',
       knowledge: 50,
       charisma: 55,
       businessAcumen: 40,

@@ -20,6 +20,7 @@ function baseLateLifeState(): GameState {
       title: null,
       reputation: 32,
       money: 400,
+      wealthCapacity: 'no_surplus',
       knowledge: 40,
       charisma: 38,
       businessAcumen: 30,

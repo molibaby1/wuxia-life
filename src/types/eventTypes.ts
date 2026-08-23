@@ -1,5 +1,6 @@
 import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
+import type { WealthCapacity } from './wealthCapacity';
 
 /**
  * 事件系统类型定义
@@ -849,6 +850,7 @@ export interface PlayerState {
   title: string | null;
   reputation: number;
   money: number;
+  wealthCapacity: WealthCapacity;
   
   // ========== 扩展社会属性 ==========
   /** 学识 - 影响科举、仕途、学术活动 */

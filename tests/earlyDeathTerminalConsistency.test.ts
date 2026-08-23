@@ -20,6 +20,7 @@ function createState(): GameState {
     constitution: 50,
     knowledge: 0,
     money: 100,
+    wealthCapacity: 'no_surplus',
     reputation: 0,
     connections: 0,
     healthStatus: 'healthy',

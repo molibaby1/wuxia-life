@@ -30,7 +30,7 @@ engine.startNewGame('悟性退役', 'male');
 const player = engine.getGameState().player as unknown as Record<string, unknown>;
 assert.equal('comprehension' in player, false, 'new runtime player must not contain comprehension');
 
-assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.14.0', 'hard removal must advance Snapshot schema');
+assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0', 'hard removal must advance Snapshot schema');
 assert.equal(
   'comprehension' in (gameStateSnapshotAge50.state.player as unknown as Record<string, unknown>),
   false,

@@ -131,11 +131,11 @@ Karma
 
 ## 5. Persistence 与终局
 
-### PD-020：Snapshot 当前正式版本为 `3.14.0`
+### PD-020：Snapshot 当前正式版本为 `3.15.0`
 
 正式规则：
 
-- 只接受 `3.14.0`；
+- 只接受 `3.15.0`；
 - 更早版本整体拒绝；
 - 未知未来版本拒绝；
 - 不提供 migration、fallback、compatibility layer 或 silent cleanup；
@@ -329,7 +329,7 @@ lifePath.primaryIdentity
 - `state.identity`、`IdentitySystem`、`lifePath.primaryIdentity` 已从正式 runtime 删除；
 - `player.sect` 与 `flags.current_sect` 已删除，当前组织归属唯一由 `player.affiliation` 持有；
 - 正式事件已使用 `affiliation_set` / `affiliation_clear`，身份门槛已迁移为显式事实条件；
-- Snapshot 当前为 `3.14.0`，Life Memory 为 `3.0.0`，旧版本和旧字段拒绝；
+- Snapshot 当前为 `3.15.0`，Life Memory 为 `3.0.0`，旧版本和旧字段拒绝；
 - Local、API、Headless、Browser 的玩家展示已分别呈现所属、称号、经历、方向和结局。
 
 **持久化边界**
@@ -561,7 +561,7 @@ Life Milestone Minimal Vertical Slice 完成后，不自动授权：
 - 天生的学习禀赋由 Trait 表达，不再初始化一项独立数值；
 - 原有悟性条件或唯一成长来源迁移到学识；同一配置已有学识项时删除悟性项，不相加、不重复计数；
 - 金钱只作为资源展示，不进入核心属性；
-- Snapshot `3.14.0` 拒绝旧字段，不提供迁移、兼容、回退读取或静默清理。
+- Snapshot `3.15.0` 拒绝旧字段，不提供迁移、兼容、回退读取或静默清理。
 
 **明确不做**
 
@@ -816,3 +816,54 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - Skill 在真实运行中重复产生同一类具体问题；
 - Report 积累后出现明确系统化分析需求；
 - 实际产品迁移要求验证 Game / Auto Evolution 物理解耦或世界观替换能力。
+
+### PD-064：Wealth / Economy Contract v1 采用财力容量与持久资产语义
+
+**正式语义**
+
+- 完整 Human-accepted Wealth / Economy Product Contract v1 记录于 [`docs/product/wealth-economy-product-contract-design.md`](../product/wealth-economy-product-contract-design.md) 的 Part A；同文件 Part B 只记录 repository-grounded implementation inventory，不反向定义产品语义。
+- Wuxia-Life 不模拟日常现金流。日常银两余额退出核心人物成长资源语义；银两仍可作为世界观与事件叙事语言存在。
+- 财力（Wealth Capacity）是粗粒度战略经济能力，不是余额、隐藏 score、XP 或通用成长燃料。暂定经济身份语义为：无余财、略有积蓄、家资殷实、豪富、富甲一方；“无余财”不表示无法维持正常生活。
+- 财力只由足以持续改变未来经济选择空间的重大事件显式迁移；普通收入、普通消费、时间流逝、自动维护费和自动衰减都不得默认改变财力。
+- 资产（Asset）是具名、持久、可影响未来玩法的世界状态；资产不得按价格机械换算财力，也不得仅作为另一种财富分数。
+- 普通练功、读书、生活等非经济行为不得把财富继续作为通用成长税。财力只在 Requirement、Alternative Path、Major Commitment、Economic Development 等合法经济语义中参与玩法。
+- 财富不得成为非经济问题的万能解；富裕出身可以改变可用机会，但不得成为武学、学识、人际等所有成长方向的通用倍率。
+- 不要求不同人生路线具有对称的经济交互频率；经营路线可以更频繁地接触财力与资产。
+- 现有 silver / money / wealth 读写在迁移前必须先按 `DAILY_ABSTRACTED`、`NARRATIVE_ONLY`、`WEALTH_REQUIREMENT`、`WEALTH_TRANSITION`、`ASSET_TRANSITION` 分类，禁止机械 `+X/-X` 替换。
+- 当前 `PlayerState.money`、可选 `wealth`、旧配置与旧测试仍属于 implementation reality / migration evidence，不自动成为 Capacity 或 Asset，也不能覆盖本 Contract。
+
+**第一阶段边界**
+
+- Accepted 第一阶段原则上包含 Wealth Capacity core 与满足最小需求的 Asset semantics。
+- 工程 sequencing 可以拆成 `Phase 1A — Wealth Capacity Core` 与 `Phase 1B — Minimal Asset Semantics`；1A 可以先实施，但不得据此把 Asset 永久移出第一阶段产品范围。
+- 第一阶段不建设完整产业经营模拟、自动资产收益、资产折旧、周期财务结算、生活费/维护费、继承、家族财富、完整经济 UI、generic economy framework 或 Auto Evolution workflow 改造。
+
+**明确不做 / 不自动授权**
+
+- 本决策不直接授权删除或改造 `money` / `wealth`；
+- 不直接授权新增 Wealth enum/field、Asset schema、Snapshot 字段、save migration 或 runtime compatibility layer；
+- 不授权把现有 silver `+X/-X` 批量转换为 Wealth `+X/-X`；
+- 不授权修改 Auto Evolution workflow 或扩大其 code/runtime/formal Contract 写权限；
+- accepted product design 不等于 implementation permission，代码级与正式 Contract/Schema 级变更仍按当前治理边界单独裁决。
+
+**重新讨论条件**
+
+- implementation planning 发现当前正式第一层产品规范与本 Contract 存在真实不可调和冲突；
+- repository reality 证明粗粒度 Wealth Capacity + minimal Asset 无法在合理最小切片内表达既定产品语义；
+- 需要改变当前 Snapshot/save compatibility 或处理 legacy balance 时；
+- 真实运行暴露本 Contract 无法承载的正式产品冲突；
+- 任何提案试图恢复日常余额、隐藏 wealth score、通用成长财力税或万能财富路径时，必须升级 Human，而不是作为普通优化处理。
+
+### PD-065：Snapshot 3.15.0 采用必需 `player.wealthCapacity`
+
+**正式语义**
+
+- Phase 1A uses required canonical `player.wealthCapacity`.
+- Snapshot `3.15.0` 是唯一接受的当前版本。
+- `3.14.0` 被拒绝；不存在 migration、fallback 或 derivation。
+- 旧的 `money` 和可选 `wealth` 仍然是过渡期 implementation reality，但不定义 Wealth Capacity。
+
+**重新讨论条件**
+
+- 只要当前产品仍需要 canonical 财富分档，`player.wealthCapacity` 就保持必需；
+- 若未来正式经济语义需要更细分的能力或资产层级，再单独裁决。

@@ -67,6 +67,7 @@ function testOriginEventWeighting(): void {
     name: 't',
     age: 8,
     traits: ['keen_mind', 'frail', 'disciplined'],
+    wealthCapacity: 'no_surplus',
     flags: {},
   } as PlayerState;
   const state = { player, flags: { origin_id: 'poor_family' } } as GameState;
@@ -276,7 +277,7 @@ function testTendencyShaping(): void {
 function testCompositeDestiny(): void {
   const outcomes = WUXIA_WORLD_PROFILE.compositeDestinyOutcomes ?? [];
   assert(outcomes.length >= 3, 'three composite outcomes');
-  const player = { martialPower: 95, connections: 20, money: 10, reputation: 10 } as PlayerState;
+  const player = { martialPower: 95, connections: 20, money: 10, wealthCapacity: 'no_surplus', reputation: 10 } as PlayerState;
   const lone = outcomes.find(o => o.id === 'lone_sword_legend')!;
   const withRare = evaluateCompositeDestinyOutcome(lone, player, { p16_rare_master_encounter: true });
   const withoutRare = evaluateCompositeDestinyOutcome(lone, player, { p16_alliance_brokered: false });

@@ -18,6 +18,8 @@ import type {
 } from '../types/eventTypes';
 import { isStatusId } from '../types/eventTypes';
 import { isWealthCapacity, meetsWealthCapacity } from '../types/wealthCapacity';
+import { isAssetId } from '../types/asset';
+import { hasAsset } from './assetOwnership';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
 
 export type Condition = EventCondition;
@@ -73,6 +75,9 @@ export class ConditionEvaluator implements IConditionEvaluator {
     if (condition.type === 'wealth_capacity_at_least') {
       return isWealthCapacity(condition.minimum)
         && meetsWealthCapacity(state.player.wealthCapacity, condition.minimum);
+    }
+    if (condition.type === 'asset_owned') {
+      return isAssetId(condition.asset) && hasAsset(state.facts, condition.asset);
     }
     if (condition.type === 'expression') {
       return this.evaluateExpression(condition.expression, state);

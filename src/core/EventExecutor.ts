@@ -13,6 +13,8 @@
 import { EffectType } from '../types/eventTypes';
 import { isHealthStatus, isStatusId } from '../types/eventTypes';
 import { isWealthCapacity } from '../types/wealthCapacity';
+import { isAssetId } from '../types/asset';
+import { addAsset, removeAsset } from './assetOwnership';
 import type {
   EffectDefinition,
   EffectOperator,
@@ -171,6 +173,8 @@ export class EventExecutor implements IEventExecutor {
     this.handlers.set(EffectType.RANDOM, new RandomEffectHandler());
     this.handlers.set(EffectType.SPECIAL, new SpecialEffectHandler());
     this.handlers.set(EffectType.WEALTH_CAPACITY_SET, new WealthCapacitySetHandler());
+    this.handlers.set(EffectType.ASSET_ADD, new AssetAddHandler());
+    this.handlers.set(EffectType.ASSET_REMOVE, new AssetRemoveHandler());
     // 新增：因果变化处理器
     this.handlers.set(EffectType.KARMA_CHANGE, new KarmaChangeHandler());
     
@@ -476,6 +480,24 @@ class AffiliationSetHandler implements EffectHandler {
         affiliation: effect.value,
       },
     };
+  }
+}
+
+class AssetAddHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isAssetId(effect.asset)) {
+      throw new Error(`Invalid asset effect value: ${String(effect.asset)}`);
+    }
+    return { ...state, facts: addAsset(state.facts, effect.asset) };
+  }
+}
+
+class AssetRemoveHandler implements EffectHandler {
+  execute(effect: EffectDefinition, state: GameState): GameState {
+    if (!isAssetId(effect.asset)) {
+      throw new Error(`Invalid asset effect value: ${String(effect.asset)}`);
+    }
+    return { ...state, facts: removeAsset(state.facts, effect.asset) };
   }
 }
 

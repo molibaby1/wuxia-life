@@ -1,6 +1,7 @@
 import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
 import type { WealthCapacity } from './wealthCapacity';
+import type { AssetId } from './asset';
 
 /**
  * 事件系统类型定义
@@ -80,6 +81,10 @@ export enum EffectType {
 
   /** 财富容量设置 */
   WEALTH_CAPACITY_SET = 'wealth_capacity_set',
+
+  /** Canonical asset ownership operations */
+  ASSET_ADD = 'asset_add',
+  ASSET_REMOVE = 'asset_remove',
   
   /** 物品操作 */
   ITEM_ADD = 'item_add',
@@ -482,6 +487,10 @@ export type EventCondition =
   | {
       type: 'wealth_capacity_at_least';
       minimum: WealthCapacity;
+    }
+  | {
+      type: 'asset_owned';
+      asset: AssetId;
     };
 
 /**
@@ -510,6 +519,9 @@ export interface EffectDefinition {
 
   /** Canonical status identifier for status_add/status_remove effects. */
   status?: StatusId;
+
+  /** Canonical asset identifier for asset_add/asset_remove effects. */
+  asset?: AssetId;
   
   /** 操作符 */
   operator?: EffectOperator;

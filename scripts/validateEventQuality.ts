@@ -1,5 +1,12 @@
 import { eventLoader } from '../src/core/EventLoader';
-import type { EffectDefinition, EventCondition, EventDefinition } from '../src/types/eventTypes';
+import {
+  isStatusId,
+  type EffectDefinition,
+  type EventCondition,
+  type EventDefinition,
+} from '../src/types/eventTypes';
+import { isWealthCapacity } from '../src/types/wealthCapacity';
+import { isAssetId } from '../src/types/asset';
 import {
   EVENT_QUALITY_RULES,
   type EventQualityIssueType,
@@ -94,13 +101,31 @@ function isBlank(value: unknown): boolean {
   return typeof value !== 'string' || value.trim().length === 0;
 }
 
-function isExpressionCondition(condition: unknown): condition is EventCondition {
+function isSupportedCondition(condition: unknown): condition is EventCondition {
   if (!condition || typeof condition !== 'object') {
     return false;
   }
 
-  const candidate = condition as EventCondition;
-  return candidate.type === 'expression' && typeof candidate.expression === 'string' && candidate.expression.trim().length > 0;
+  const candidate = condition as {
+    type?: unknown;
+    expression?: unknown;
+    status?: unknown;
+    minimum?: unknown;
+    asset?: unknown;
+  };
+
+  switch (candidate.type) {
+    case 'expression':
+      return typeof candidate.expression === 'string' && candidate.expression.trim().length > 0;
+    case 'status_has':
+      return isStatusId(candidate.status);
+    case 'wealth_capacity_at_least':
+      return isWealthCapacity(candidate.minimum);
+    case 'asset_owned':
+      return isAssetId(candidate.asset);
+    default:
+      return false;
+  }
 }
 
 function collectEffects(event: EventDefinition): EffectDefinition[] {
@@ -138,9 +163,9 @@ function classifyEventFormat(event: EventDefinition): EventFormatClassification 
     canonicalSignals.push('top-level autoEffects');
   }
 
-  const hasModernConditions = (event.conditions || []).some((condition) => isExpressionCondition(condition));
+  const hasModernConditions = (event.conditions || []).some((condition) => isSupportedCondition(condition));
   if (hasModernConditions) {
-    canonicalSignals.push('expression-based conditions');
+    canonicalSignals.push('supported EventCondition grammar');
   }
 
   if (event.thresholds && typeof event.thresholds === 'object') {
@@ -368,15 +393,15 @@ export function validateEventQuality(events: EventDefinition[]): ValidationResul
     }
 
     for (const condition of event.conditions || []) {
-      if (!isExpressionCondition(condition)) {
+      if (!isSupportedCondition(condition)) {
         issues.push(
-          createIssue(event.id, source, 'invalid_condition', 'Event-level condition is not a supported expression payload.')
+          createIssue(event.id, source, 'invalid_condition', 'Event-level condition does not conform to supported EventCondition grammar.')
         );
       }
     }
 
     for (const choice of event.choices || []) {
-      if (choice.condition && !isExpressionCondition(choice.condition)) {
+      if (choice.condition && !isSupportedCondition(choice.condition)) {
         issues.push(
           createIssue(
             event.id,
@@ -387,7 +412,7 @@ export function validateEventQuality(events: EventDefinition[]): ValidationResul
         );
       }
       for (const outcome of choice.outcomes || []) {
-        if (!isExpressionCondition(outcome.condition)) {
+        if (!isSupportedCondition(outcome.condition)) {
           issues.push(
             createIssue(
               event.id,

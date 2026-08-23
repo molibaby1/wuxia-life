@@ -86,6 +86,10 @@
             "target": "origin_merchant_family"
           },
           {
+            "type": "wealth_capacity_set",
+            "value": "comfortable_means"
+          },
+          {
             "type": "stat_modify",
             "target": "money",
             "value": 200,

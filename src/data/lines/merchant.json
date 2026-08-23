@@ -124,10 +124,11 @@
     "choices": [
       {
         "id": "invest_more",
-        "text": "追加投资（需金钱≥50，扭转局面）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 50"}
-        ],
+        "text": "追加投资（需略有积蓄，扭转局面）",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "modest_savings"
+        },
         "effects": [
           {"type": "stat_modify", "stat": "money", "value": -50},
           {"type": "stat_modify", "stat": "charisma", "value": 5},
@@ -375,7 +376,8 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "money", "value": 200},
+      {"type": "wealth_capacity_set", "value": "regional_magnate"},
+      {"type": "stat_modify", "stat": "money", "value": 200, "operator": "add"},
       {"type": "stat_modify", "stat": "reputation", "value": 25},
       {"type": "stat_modify", "stat": "charisma", "value": 10},
       {"type": "flag_set", "flag": "merchant_wealthy", "value": true}

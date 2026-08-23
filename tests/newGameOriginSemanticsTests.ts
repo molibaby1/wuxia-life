@@ -71,6 +71,10 @@ async function testOriginBackgroundMerchantSyncsTraitAndOpensGate(): Promise<voi
     'origin_id must sync from origin_background choice',
   );
   assert(state.flags?.origin_id === 'merchant_house', 'origin_id must mirror trait origin');
+  assert(
+    state.player.wealthCapacity === 'comfortable_means',
+    'merchant origin must seed comfortable_means in direct engine path',
+  );
 
   const palette = resolveChildhoodActionPalette({
     age: 6,
@@ -117,6 +121,10 @@ async function testHeadlessExecuteOriginBackgroundSyncsTrait(): Promise<void> {
   assert(
     state.flags?.origin_id === 'merchant_house',
     'headless executeChoice must sync origin_id after origin_background',
+  );
+  assert(
+    state.player.wealthCapacity === 'comfortable_means',
+    'headless executeChoice must seed comfortable_means in the merchant origin path',
   );
 }
 

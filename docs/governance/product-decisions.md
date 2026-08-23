@@ -867,3 +867,19 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 
 - 只要当前产品仍需要 canonical 财富分档，`player.wealthCapacity` 就保持必需；
 - 若未来正式经济语义需要更细分的能力或资产层级，再单独裁决。
+
+### PD-066：Phase 1B 采用 facts-backed typed binary Asset ownership
+
+**实施决策（Human accepted：2026-08-23）**
+
+- Phase 1B 只注册一个 `AssetId`：`merchant_shop`；Asset v1 使用 typed Asset semantic API 表达二值 ownership。
+- ownership 以 canonical `GameState.facts` 为 storage substrate，并由 Asset module 封装 backing fact key；事件、业务代码和 presentation 不直接依赖该 key。
+- 本阶段不新增 `GameState.assets`、`PlayerState.assets`、Snapshot 字段或 Snapshot 版本；当前 Snapshot 仍为 `3.15.0`，不存在 legacy flag load-time derivation。
+- `merchant_shop` 的三条首次开店路径建立 ownership，`close_shop` 移除 ownership；既有 shop variant flags 仅保留为 legacy variant/history compatibility。
+- `asset_add` / `asset_remove` 不自动修改 money 或 Wealth Capacity；dedicated Asset collection/entity schema、数量、价值、收益、维护和其他 Asset 仍需独立决策。
+
+**重新讨论条件**
+
+- 真实玩法需要超出 facts-backed binary ownership 的数量、价值、收益、位置、转让或多实例语义；
+- 需要改变 Snapshot/save compatibility，或需要从 legacy flags 自动推导 ownership；
+- 需要将本阶段之外的 merchant flags 或其他经济事实升级为 Asset。

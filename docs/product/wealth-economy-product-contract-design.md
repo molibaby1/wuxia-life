@@ -524,14 +524,15 @@ Auto Evolution 不应自行：
 | `NARRATIVE_ONLY` | `src/p8/personas.ts` 的“积累财富”目标；`p9-remediation.json` / `p11-validation.json` 的 `pathAffinity.wealth`；UI 的“银两”标签与商人文本 | 这些标签、目标、路径权重或展示语义不能单独创建 Wealth state。若同一内容还含 effect/condition，应拆分并按对应行重新分类 |
 | `WEALTH_REQUIREMENT` | `merchant.json` 的 `wealth_capacity_at_least`（`invest_more`）；其余仍未迁移的 `money` threshold（如 `merchant_caravan_guard`、`merchant_market_monopoly`、`identity-merchant.json`、`relationship.json`） | 当前已有 canonical Capacity requirement，但余额阈值 consumer 仍大量存在；不能把旧阈值数字当新枚举值 |
 | `WEALTH_TRANSITION` | `origin.json` 的 `wealth_capacity_set: comfortable_means`；`merchant.json` 的 `wealth_capacity_set: regional_magnate`；同时保留 legacy money delta | 这些是已迁移的 Capacity transition 样本。它们证明 transition 不等于余额加减，但 legacy money 仍与之并存 |
-| `ASSET_TRANSITION` | `merchant.json` 开店时的 `merchant_shop_grocery/weapon/herb`，以及后续 `merchant_chamber_head`、`merchant_wealthy` 等持久 flags | flags 可以是故事事实，但当前没有正式 Asset identity、ownership、holding、transfer 或 lifecycle。它们是 Asset 候选，不应在本轮直接宣称已经是 Asset |
-| `UNRESOLVED` | legacy `money` / numeric optional `wealth`；P17 的 `money + wealth` 派生；`merchant_*` 以外仍未迁移的 merchant money consumers；`childhoodEvents.json` 的 legacy `money +200` producer；`merchant_*` flags 是否等同 Asset；旧 `src/data/storyData.ts` money path 是否仍有任何正式消费者 | 这些问题无法由当前 authority 安全推导。必须保留为迁移前决策，不通过 alias、fallback 或兼容层“折中” |
+| `ASSET_TRANSITION` | `merchant.json` 的三条首次开店路径通过 `asset_add` 建立 `merchant_shop`，`close_shop` 通过 `asset_remove` 移除；`merchant_shop_grocery/weapon/herb` 与其他 merchant flags 仍保留 | `merchant_shop` 已有最小正式 Asset identity、binary ownership、persistence、read 和 removal 语义；其他 flags 仍是故事事实或候选，不在本轮升级 |
+| `UNRESOLVED` | legacy `money` / numeric optional `wealth`；P17 的 `money + wealth` 派生；`merchant_*` 以外仍未迁移的 merchant money consumers；`childhoodEvents.json` 的 legacy `money +200` producer；Phase 1B 之外的 merchant flags 是否升级为 Asset；旧 `src/data/storyData.ts` money path 是否仍有任何正式消费者 | 这些问题无法由当前 authority 安全推导。必须保留为迁移前决策，不通过 alias、fallback 或兼容层“折中”；`merchant_shop` 的 Phase 1B ownership 不属于 unresolved |
 
 ### 8. 可复用的现有能力
 
 | 目标 | 已有机制 | 是否足够直接承载新语义 |
 | --- | --- | --- |
 | Wealth Capacity 的离散表达 | `wealthCapacity` enum + labels + `isWealthCapacity` / `meetsWealthCapacity`，并已进入 runtime、snapshot、UI 和 validation | 已经足够承载 Phase 1A 的 canonical Capacity contract，但仍不是 Asset contract |
+| Phase 1B Asset identity / ownership | `src/types/asset.ts` 与 `src/core/assetOwnership.ts`；`asset_owned` / `asset_add` / `asset_remove` 通过 typed API 使用 canonical `facts` | 足够承载唯一 `merchant_shop` 的二值持有语义；不表达通用 Asset entity、数量、价值、位置或收益 |
 | Requirement | `ConditionEvaluator` 的受控 expression，`GameEngineIntegration.checkThresholds()` 的 attributes/background/experience checks | 足以承载 requirement 评估基础；需要新语义映射时不能复用旧 numeric balance 作为最终模型 |
 | State transition | `EffectDefinition`、`EventExecutor`、flags、event history、active action history | 足以承载显式事件转换与 provenance；不需要先建 generic economy framework |
 | Persistent world facts | `facts`、`flags`、`eventHistory`、`achievements`、`affiliation`、relationships | 可承载叙事事实和组织/关系信号，但不等于经济 Asset ownership |
@@ -539,14 +540,15 @@ Auto Evolution 不应自行：
 
 ### 9. Asset 承载能力判断
 
-当前没有能够完整表达“角色拥有某个持久经济世界存在”的正式模型：
+当前仍没有通用 Asset entity/collection，但 Phase 1B 已通过最小 typed semantic layer 表达唯一 `merchant_shop` 的正式 ownership：
 
-- `InventoryItem` 只有 `id/name/quantity`，更接近物品堆叠，不表达商铺/产业/组织的 owner、状态、地点、收益、转让或终止；
-- `flags` 和 `eventHistory` 能记录 `merchant_shop_*` 等故事事实，但没有 Asset contract；
-- `affiliation` / relationships 可以表达组织与关系事实，但不是 holding/ownership 模型；
-- snapshot 能持久化 `inventory`、flags、facts、event history，却没有 Asset entity/collection。
+- `InventoryItem` 只有 `id/name/quantity`，仍更接近物品堆叠，不承担商铺/产业/组织的 owner、状态、地点、收益、转让或终止；
+- `src/types/asset.ts` 注册唯一 `merchant_shop`；`src/core/assetOwnership.ts` 将其映射到 canonical `facts`，并封装 backing fact key；
+- `flags` 和 `eventHistory` 仍可记录 `merchant_shop_*` 等历史/故事事实，但不再作为 canonical ownership source；
+- `affiliation` / relationships 仍表达组织与关系事实，不是 holding/ownership 模型；
+- snapshot 继续持久化 `facts`，Asset ownership 通过现有 facts round-trip 保留，不新增 Asset entity/collection 或 Snapshot 字段。
 
-因此，Asset 最小切片如果被正式纳入，影响的不只是配置，而是至少包含正式 schema/Contract、runtime state application、persistence validation 和对应 UI/fixture/test 边界。当前不创建 Asset schema。第一 implementation slice 可以先做 Capacity-only 的重大经济 requirement/transition，并把商铺 flag 保留为未升级的故事事实；是否把它提升为 Asset 另行裁决。
+因此 Phase 1B 只完成 binary ownership、event lifecycle、persistence 和 derived presentation 边界；数量、价值、地点、收益、维护、转让、多实例和通用 Asset schema 仍未实现。
 
 ### 10. Compatibility / technical constraints
 
@@ -559,7 +561,7 @@ Auto Evolution 不应自行：
 
 ### 11. Current implementation status
 
-Phase 1A 的仓库实现已完成；当前五个 Phase 1A focused tests、contracts、headless/parity、typecheck 与 build 已通过，但 sample-lines、event-quality 与 repository real gate 仍有未解决的既有/范围外 blocker。Phase 1B 仍待单独收敛。
+Phase 1A 与 Phase 1B 的仓库实现均已完成其批准边界。Phase 1A focused tests、Phase 1B focused tests、contracts、headless/parity、typecheck 与 build 已通过；sample-lines、event-quality broad inventory 与 repository real gate 中的既有/范围外 blocker 仍按基线单独记录，不构成 Asset slice 的新 blocker。
 
 #### Phase 1A — Wealth Capacity Core
 
@@ -571,14 +573,14 @@ Phase 1A 的仓库实现已完成；当前五个 Phase 1A focused tests、contra
 
 #### Phase 1B — Minimal Asset Semantics
 
-在 1A 闭环后仍属于 accepted 第一阶段产品范围，但作为独立 implementation slice 处理：
+1. 唯一注册 AssetId 为 `merchant_shop`，ownership 由 typed Asset API backed by canonical `GameState.facts` 表达，raw backing key 不泄漏到业务边界。
+2. `open_grocery_shop`、`open_weapon_shop`、`open_herb_shop` 均建立 canonical ownership；shop variant flags 保留为 legacy variant/history compatibility。
+3. `merchant_shop_failure` 与 `merchant_caravan_guard` 使用 `asset_owned` 作为 shop ownership gate；`close_shop` 移除 ownership，而不自动清理历史 flags。
+4. Asset ownership 通过现有 Snapshot facts path round-trip 持久化，Snapshot 仍为 `3.15.0`；不存在 load-time legacy flag derivation。
+5. API 与主屏通过 derived `ownedAssets` / `assetSummary` 展示 ownership；没有新增 PlayerState、Snapshot 或 Asset management UI。
+6. `asset_add` / `asset_remove` 不自动修改 money、Wealth Capacity 或其他经济状态。
 
-1. 裁决 `merchant_shop_*` 等现有持久事实中，哪些确实需要升级为正式 Asset；
-2. 只建立满足第一阶段所需的最小 Asset identity / ownership / persistence 语义；
-3. 至少迁移一个 `ASSET_TRANSITION`，使资产能够作为后续世界事实被读取，而不是另一种财富分数；
-4. 只有资产或重大经济事实确实改变角色经济行动能力时，才联动 Wealth Capacity transition。
-
-Phase 1A 已实施，但这不表示 Asset 被移出 accepted 第一阶段范围。Phase 1B 的具体技术边界仍需在后续 repository reality 上收敛。
+Asset-specific 延期：dedicated Asset entity/collection、数量、价值、地点、收益、维护、转让和多实例。
 
 明确延期：完整产业经营模拟、自动收益/维护费/衰减、全量 event 批量迁移、完整经济 UI、save migration、generic economy framework，以及 Auto Evolution workflow 改造。
 
@@ -589,7 +591,7 @@ Phase 1A 已实施，但这不表示 Asset 被移出 accepted 第一阶段范围
 | --- | --- | --- |
 | 调整正式 loaded event 的普通 action/event effects、文本和余额 requirement | configuration-level | 仍需明确 slice、验证和 Human 授权；不得借此引入新 state source |
 | 修改 `PlayerState`、initialization、Effect/Condition handlers、active planning、UI 或 runtime conversion | code/runtime-level | 当前阶段 `ESCALATE TO HUMAN`；本任务未授权 |
-| 新增 Wealth Capacity enum/field、Asset schema、Snapshot shape、validator、save policy 或 migration | formal Contract/Schema-level | 必须 Human 裁决并单独形成 implementation plan；本任务明确禁止 |
+| 进一步修改 canonical Wealth / Snapshot / Asset Contract，或改变 `PlayerState`、initialization、Effect/Condition handlers、active planning、UI、runtime conversion、save policy 或 migration | code/runtime + formal Contract/Schema-level | 仍需相应 Human 裁决并单独形成 implementation plan；不因 Phase 1B closure 自动授权 |
 | 修改 Auto Evolution permissions、framework、provider 或 workflow | workflow/framework-level | 不属于本任务；按当前 Auto Evolution stage 保持 STOP/ESCALATE |
 
 accepted product design 不等于对上述 code、runtime、schema 或 migration 的自动授权。
@@ -601,7 +603,7 @@ accepted product design 不等于对上述 code、runtime、schema 或 migration
 1. `money` 与可选 `wealth` 的最终处理：删除、阶段性 legacy 保留、外部重建存档，或其他明确的一次性迁移政策。
 2. P17 的 `money + wealth` 派生读取何时退休，以及如何保证迁移后只有一个正式 Wealth Capacity source of truth。
 3. `childhoodEvents.json` 的 legacy `money +200` producer 是否继续保留、冻结为 evidence，还是在后续迁移里收敛。
-4. `merchant_shop_*`、`merchant_chamber_head`、`merchant_wealthy` 等 flags 中哪些属于正式 Asset 候选；若升级，Phase 1B 的最小 identity / ownership / lifecycle / persistence 边界是什么。
+4. Phase 1B 之外的 `merchant_shop_*`、`merchant_chamber_head`、`merchant_wealthy` 等 flags 是否需要升级为其他正式 Asset；本阶段只确认 `merchant_shop` 的 binary ownership，不把其他 flags 自动迁移。
 5. 未加载的 `money-events.json`、`economy.json`、`shop.json` 等 backlog 内容是继续延期、删除，还是在未来重新纳入正式 catalog。
 6. 如果 Phase 1B 需要改变 Snapshot shape / save compatibility，应按现有 formal Contract / Schema boundary 单独 Human 裁决，不得借 accepted product design 自动扩大权限。
 

@@ -559,7 +559,7 @@ Auto Evolution 不应自行：
 
 ### 11. Current implementation status
 
-Phase 1A 的仓库实现已完成并通过当前验证闭环；Phase 1B 仍待单独收敛。
+Phase 1A 的仓库实现已完成；当前五个 Phase 1A focused tests、contracts、headless/parity、typecheck 与 build 已通过，但 sample-lines、event-quality 与 repository real gate 仍有未解决的既有/范围外 blocker。Phase 1B 仍待单独收敛。
 
 #### Phase 1A — Wealth Capacity Core
 

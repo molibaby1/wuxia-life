@@ -22,6 +22,7 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     connections: 11,
     reputation: 10,
     money: 88,
+    wealthCapacity: 'no_surplus',
     charisma: 0,
     businessAcumen: 0,
     influence: 0,
@@ -82,11 +83,16 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '功力 42', 'martial-dominant tendency collapses to martialPower readout');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
-  assert(model.topResources.length === 1 && model.topResources[0]?.key === 'money', 'money must remain a resource, not a core attribute');
+  assert(model.topResources.length === 2, 'main screen should show canonical wealth capacity and legacy silver');
+  assert(model.topResources[0]?.key === 'wealthCapacity', 'wealth capacity must be the primary economic resource');
+  assert(model.topResources[0]?.label === '财力', 'wealth capacity should render the player-facing 财力 label');
+  assert(model.topResources[0]?.value === '无余财', 'default wealth capacity should use the canonical label value');
+  assert(model.topResources[1]?.key === 'money' && model.topResources[1]?.label === '银两', 'legacy silver must remain visible during Phase 1A');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,体魄,学识,人脉,名望,侠义声誉',
     'core stats should expose the six canonical attributes with equal priority',
   );
+  assert(!model.coreStats.some((item) => item.key === 'wealthCapacity'), 'wealth capacity must stay out of the six core attributes');
   assert(
     model.coreStats.find((item) => item.key === 'martialPower')?.description === '武学总读数',
     'martialPower should read as overall martial readout on first screen',
@@ -244,8 +250,8 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(coreLabels.includes('学识'), 'knowledge should be immediately visible on the first screen');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    model.topResources.every((item) => item.key === 'money'),
-    'resource row must not duplicate selected canonical attributes',
+    model.topResources.map((item) => item.key).join(',') === 'wealthCapacity,money',
+    'resource row must present wealth capacity first and retain legacy silver second',
   );
   console.log('✓ keeps narrowed first-screen emphasis (P123)');
 }

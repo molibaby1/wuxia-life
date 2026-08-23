@@ -281,6 +281,7 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
       martialPower: p.martialPower,
       chivalry: p.chivalry,
       constitution: p.constitution,
+      wealthCapacity: p.wealthCapacity,
       affiliation: p.affiliation,
       title: p.title,
       reputation: p.reputation,

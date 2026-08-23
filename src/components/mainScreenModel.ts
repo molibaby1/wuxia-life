@@ -7,7 +7,7 @@
  *
  * Baseline composition (pre-P123):
  * - coreStats: the six canonical player attributes
- * - topResources: money, constitution, reputation
+ * - topResources: wealthCapacity, money
  *
  * Out of scope for P123 (do not modify):
  * - `fullStatGroups` structure and descriptions (owned by P125)
@@ -58,11 +58,12 @@ import type { PlayerSummaryDto } from '../contracts/sessionProgression';
 import type { PlayerState } from '../types/eventTypes';
 import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMemory';
 import { getAffiliationDefinition } from '../core/affiliationCatalog';
+import { WEALTH_CAPACITY_LABELS } from '../types/wealthCapacity';
 
 export interface MainScreenStatItem {
   key: string;
   label: string;
-  value: number;
+  value: number | string;
   description?: string;
 }
 
@@ -93,6 +94,7 @@ export type MainScreenPlayer = Pick<
   | 'martialPower'
   | 'constitution'
   | 'chivalry'
+  | 'wealthCapacity'
   | 'reputation'
   | 'money'
   | 'knowledge'
@@ -236,7 +238,7 @@ function buildTendencySummary(player: MainScreenPlayer): string {
   return picks.map((item) => `${item.label} ${item.value}`).join(' / ');
 }
 
-function createStat(key: string, label: string, value: number, description?: string): MainScreenStatItem {
+function createStat(key: string, label: string, value: number | string, description?: string): MainScreenStatItem {
   return { key, label, value, description };
 }
 
@@ -286,7 +288,13 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
       id: 'resource',
       label: '资源',
       items: [
-        createStat('money', '银两', valueOf(player, 'money'), '影响置办、出行与周转空间。'),
+        createStat(
+          'wealthCapacity',
+          '财力',
+          WEALTH_CAPACITY_LABELS[player.wealthCapacity],
+          '家资与可支配余裕的综合读数。',
+        ),
+        createStat('money', '银两', valueOf(player, 'money'), '阶段性周转余额，供未迁移内容继续使用。'),
       ],
     },
   ];
@@ -306,8 +314,9 @@ export function buildMainScreenModel(
 
   return {
     stageTags,
-    // Money is a resource, not a player attribute.
+    // 财力是核心资源，银两是阶段性周转余额。
     topResources: [
+      createStat('wealthCapacity', '财力', WEALTH_CAPACITY_LABELS[player.wealthCapacity]),
       createStat('money', '银两', valueOf(player, 'money')),
     ],
     currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',

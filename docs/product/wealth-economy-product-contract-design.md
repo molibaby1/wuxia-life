@@ -1,0 +1,627 @@
+# Wealth / Economy Product Contract v1 与 Repository Inventory
+
+> 状态：Accepted product contract；repository-grounded read-only inventory
+>
+> Accepted：2026-08-22
+>
+> 本文是 Wuxia-Life 当前正式经济产品契约及其 implementation inventory。Part A 定义产品语义；Part B 记录当前仓库事实、迁移影响面与后续技术边界。当前 `money` / `wealth` 实现、旧配置和旧测试均属于 migration evidence，不能覆盖 Part A。
+
+## Part A — Accepted Product Contract v1
+
+## 1. 背景与问题定义
+
+当前银两同时承担了日常生计、非经济成长成本和战略财富三种职责，导致两个相反的问题：
+
+1. 武学、学识等非经济路线被迫持续处理现金流，经济资源变成通用成长税；
+2. 经营路线虽然能够大量获得银两，但财富主要表现为余额累积，缺乏长期世界意义。
+
+本设计不通过调整银两产出/消耗数值解决该问题，而是重新定义经济资源身份。
+
+## 2. 核心产品决定
+
+Wuxia-Life 不模拟角色的日常现金流。
+
+经济系统只描述：
+
+1. 角色能够调动的战略经济能力；
+2. 角色已经在世界中建立的持久经济基础。
+
+核心经济状态由以下两个概念承担：
+
+- **财力（Wealth Capacity）**：角色当前能够调动的战略经济能力；
+- **资产（Asset）**：角色在世界中形成的、可持续影响未来事件的具名持久状态。
+
+银两可以继续作为世界观和事件叙事语言出现，但不再默认等价于核心玩家资源余额。
+
+## 3. 财力 Contract
+
+### 3.1 定义
+
+财力表示角色的经济行动能力，而不是：
+
+- 钱包余额；
+- 日常收入；
+- 日常支出；
+- 通用行动点；
+- 通用成长燃料；
+- 隐藏财富经验值。
+
+### 3.2 粗粒度经济身份
+
+当前产品语义采用粗粒度离散等级。暂定语义名称：
+
+1. 无余财；
+2. 略有积蓄；
+3. 家资殷实；
+4. 豪富；
+5. 富甲一方。
+
+具体枚举名、显示名和等级数量可在 repository-grounded implementation design 中根据现有数据结构确认，但不得改变“粗粒度经济身份而非余额”的产品语义。
+
+**关键定义：**“无余财”不表示无法维持正常生活，只表示没有足以投入重大经济事项的额外经济能力。
+
+### 3.3 非累计原则
+
+财力采用关键事件驱动的状态迁移。
+
+禁止将以下机制作为财力的默认实现：
+
+- wealth XP / wealth score；
+- 隐藏银两余额；
+- 每次普通事件小额加减；
+- 阈值累计升级；
+- 周期性收入/支出结算；
+- 自动衰减；
+- 自动维护费。
+
+绝大多数事件不改变财力。
+
+### 3.4 财力迁移判据
+
+只有事件足以持续扩大或缩小角色未来的经济选择空间时，才允许改变财力等级。
+
+统一语义测试：
+
+> 事件发生后，我们是否还会使用原来的经济身份描述这个角色？
+
+如果答案是“是”，财力保持不变。
+
+## 4. 资产 Contract
+
+资产首先是世界事实，其次才具有经济意义。
+
+典型资产可以包括：
+
+- 商号；
+- 田庄；
+- 商队；
+- 商路；
+- 镖局；
+- 山庄；
+- 其他长期产业、组织性经济基础或具有持续经济作用的世界存在。
+
+资产必须能够对后续玩法产生具体作用，而不只是另一种财富计分方式。
+
+例如，“镇远镖局”可以成为未来事件的条件、关系网络、人员调度来源或冲突来源，而不应只表达成固定财富值。
+
+禁止将资产机械换算成财力：
+
+- 不定义“商号 = X 财力”；
+- 不通过资产价格求和计算财力等级；
+- 不要求所有资产都直接提升财力。
+
+正确关系是：
+
+> 资产 / 重大经济事实 → 改变未来经济行动能力 → 必要时触发财力迁移。
+
+## 5. 日常经济抽象原则
+
+以下内容默认不进入核心经济状态：
+
+- 普通收入；
+- 普通消费；
+- 基本吃住；
+- 普通交通；
+- 日常练功成本；
+- 普通读书成本；
+- 普通社交支出；
+- 一般医疗与生活用品；
+- 日常家庭开销。
+
+该原则必须对收入和支出对称适用。
+
+世界叙事仍可描述“花了几两银子”“得到一笔酬劳”，但除非达到正式经济状态迁移条件，否则不修改财力。
+
+## 6. 经济资源事件边界
+
+只有满足以下任一条件的事件才有资格读取或修改核心经济状态：
+
+1. 经济能力本身是该选择成立的关键条件；
+2. 事件结果足以持续改变角色未来的经济行动能力；
+3. 事件形成、失去或改变了持久资产。
+
+带有金钱叙事不等于必须触碰财力。
+
+## 7. 财力的四种合法玩法用途
+
+### 7.1 资格（Requirement）
+
+财力可以作为某种经济规模行为的资格条件。
+
+例如：举办大型宴会、组织大型活动、购买极其稀有的物品、承担重大经济计划。
+
+满足资格通常不导致财力下降。
+
+### 7.2 替代解决路径（Alternative Path）
+
+财力可以为一个问题提供经济型解决路径，但不得天然成为最佳路径。
+
+例如获取珍贵秘籍可以存在：
+
+- 师门路径；
+- 人脉路径；
+- 冒险路径；
+- 财力购买路径。
+
+不同路径可以产生不同后续关系、风险和世界结果。
+
+### 7.3 重大投入（Major Commitment）
+
+只有真正足以改变经济身份的重大投入才允许降低财力。
+
+重大财力下降原则上必须换取持久世界结果，例如山庄、产业、组织或其他长期能力。
+
+### 7.4 经济建设（Economic Development）
+
+经营、投资或其他人生事件可以形成资产、经济网络或其他长期经济基础。
+
+当这些事实足以使角色经济行动能力发生质变时，可以提升财力。
+
+## 8. 非经济成长硬约束
+
+不得仅为了以下目的给非经济行为附加财力成本：
+
+- 平衡收益；
+- 提高难度；
+- 制造通用 trade-off；
+- 降低行为频率。
+
+因此，普通练功、普通读书等基础成长不得把财力作为通用成长税。
+
+如果非经济路线需要约束，应优先从该领域自身寻找约束，例如：
+
+- 时间；
+- 机会；
+- 风险；
+- 师承；
+- 人生阶段；
+- 路线竞争；
+- 关系；
+- 领域条件。
+
+## 9. 反万能财力原则
+
+财力是一种解决问题的能力，不是选择质量的等级。
+
+对于非经济问题，财力原则上不得单独替代该领域的核心能力。
+
+例如：
+
+- 富甲一方不等于自动成为武林盟主；
+- 富甲一方不等于自动成为绝顶高手；
+- 富甲一方不等于自动获得真正的人际关系。
+
+财力可以提供资源、场合、机会和组织能力，但领域核心条件仍必须成立。
+
+该原则对称适用：非经济能力也不能完全绕过经济问题本身所需的真实经济基础。
+
+## 10. 路线非对称原则
+
+不同人生路线与财力系统的交互频率可以天然不对称。
+
+经营路线可以频繁涉及：
+
+- 财力迁移；
+- 资产形成；
+- 投资决策；
+- 商业关系。
+
+武学、学识或其他非经济路线可以长期完全不触碰财力。
+
+产品需要平衡的是不同人生方向的价值和可行性，而不是经济交互次数。
+
+## 11. 出生背景原则
+
+富裕出身应改变角色可用的人生路径和机会，但不得成为所有成长方向的通用倍率。
+
+富裕角色可以更早获得：
+
+- 投资机会；
+- 稀有资源购买路径；
+- 大型组织活动资格；
+- 特殊教育或师承机会。
+
+贫寒角色仍必须能够通过非经济路径正常发展武学、学识、人际等核心能力。
+
+## 12. Silver / 财富 Migration Classification
+
+现有任何 silver / 财富读写在迁移前必须先进行语义分类，禁止直接从“+X/-X”调整成另一组数值。
+
+### 12.1 DAILY_ABSTRACTED
+
+日常收入或日常消费。
+
+处理：删除核心经济状态变化；必要时保留叙事。
+
+典型：普通练功成本、普通读书成本、普通生活支出、普通劳动收入。
+
+### 12.2 NARRATIVE_ONLY
+
+钱只是世界叙事的一部分，不构成经济身份变化。
+
+处理：保留文本，不修改财力。
+
+### 12.3 WEALTH_REQUIREMENT
+
+事件实际表达的是角色是否具备足够经济行动能力。
+
+处理：改为财力门槛，默认不消耗财力。
+
+### 12.4 WEALTH_TRANSITION
+
+事件足以长期改变角色经济身份。
+
+处理：改为财力等级迁移。
+
+### 12.5 ASSET_TRANSITION
+
+事件形成、改变或失去持久经济基础。
+
+处理：改为资产状态变化；如果同时改变经济身份，再联动 WEALTH_TRANSITION。
+
+## 13. 典型迁移语义
+
+### 普通练功 / 普通读书
+
+现状语义：行为成长 + 银两消耗。
+
+目标分类：`DAILY_ABSTRACTED`。
+
+目标：删除经济状态变化。
+
+### 普通护镖 / 普通劳动报酬
+
+如果只是正常报酬：`NARRATIVE_ONLY` 或 `DAILY_ABSTRACTED`。
+
+只有足以改变人物经济身份时才是 `WEALTH_TRANSITION`。
+
+### 大型宴会
+
+通常属于 `WEALTH_REQUIREMENT`。
+
+财力表示能够举办这种规模活动的能力，而不是活动结束后必然经济降级。
+
+### 开宗立派 / 建立山庄
+
+通常可能同时涉及：
+
+- `WEALTH_REQUIREMENT`；
+- `ASSET_TRANSITION`；
+- 可选的 `WEALTH_TRANSITION`。
+
+是否降低财力取决于投入是否足以改变人物经济身份，而不是固定成本。
+
+### 远行贸易
+
+普通成功不应机械提升财力。
+
+根据实际结果可能是：
+
+- 经营能力成长，财力不变；
+- 形成稳定商路 → `ASSET_TRANSITION`；
+- 经济基础完成质变 → `ASSET_TRANSITION + WEALTH_TRANSITION`。
+
+## 14. 对 Auto Evolution 的产品边界
+
+本 Contract 进入 repository authority 后，Auto Evolution 可以在 Contract 内识别和修复具体经济语义问题，例如：
+
+- 普通练功仍错误扣除财力；
+- 重大经济投入没有产生持久结果；
+- 普通收入错误提升财力；
+- 资产存在但无法参与任何后续世界状态。
+
+Auto Evolution 不应自行：
+
+- 恢复普通成长的财力成本；
+- 把财力重新定义为余额；
+- 新增隐藏 wealth score；
+- 将财力改为通用难度资源；
+- 推翻本 Contract 的产品层决定。
+
+上述变化属于正式产品方向变更，应升级至 Human authority。
+
+## 15. 第一阶段实施范围
+
+正式 implementation planning 前必须先进行 repository-grounded inventory。
+
+在确认真实结构后，第一阶段目标原则上只包含：
+
+- 建立财力的正式产品状态语义；
+- 支持财力 requirement；
+- 支持财力 transition；
+- 支持满足最小需求的 asset state；
+- 对现有 silver / 财富读写进行分类；
+- 移除日常非经济成长的银两依赖；
+- 迁移必要的关键事件；
+- 更新对应产品规范和测试。
+
+## 16. 明确不在第一阶段实施
+
+- 完整产业经营模拟；
+- 商号经营平台；
+- 自动资产收益；
+- 资产折旧；
+- 每年财务结算；
+- 自动生活费；
+- 自动维护费；
+- 继承系统；
+- 家族财富体系；
+- 复杂价格系统；
+- 通货膨胀；
+- 完整经济 UI；
+- 为所有路线重写大量事件；
+- 为未来可能需求建立经济 framework；
+- 修改 Auto Evolution workflow 本身。
+
+## 17. Repository-grounded Inventory 必须回答的问题
+
+在进入 implementation plan 前，只读检查真实 repository，并明确回答：
+
+1. 当前 silver / 财富的 authoritative schema / state 定义在哪里；
+2. 当前所有核心读写入口有哪些；
+3. 哪些事件、出生设定、行为、测试和 UI 直接依赖该字段；
+4. 是否已有可复用的离散状态 / requirement / persistent entity 机制；
+5. 当前是否已有可承担 Asset 语义的正式模型；
+6. 哪些现有银两行为属于五类 migration classification；
+7. 哪些迁移需要代码级能力，哪些只是配置层修改；
+8. 是否存在 save/state compatibility 或历史 fixture 约束；
+9. 最小可运行迁移切片是什么；
+10. 哪些问题仍必须升级给 Human 决策。
+
+在 inventory 完成之前，不预设新的 schema、枚举名称、资产框架或具体修改文件。
+
+## 18. 验收语义
+
+第一阶段完成后至少应满足：
+
+1. 普通武学、学识等非经济成长不再依赖日常银两成本；
+2. 普通收入/消费不再构成需要玩家持续维护的现金流循环；
+3. 财力表现为粗粒度战略经济能力，而非余额或隐藏累计分；
+4. 重大经济机会可以读取财力资格；
+5. 只有经济身份质变才改变财力；
+6. 至少能表达实施范围内所需的持久资产变化；
+7. 经营路线仍然拥有明确的经济发展空间，而不是失去核心玩法；
+8. 财富不能成为非经济路线的万能成长燃料或万能解；
+9. 现有关键经济事件的迁移符合五类 classification；
+10. Auto Evolution 可以依据 repository authority 判断具体事件是否违反该 Contract。
+
+## 19. Authority / Governance
+
+本设计是产品语义层 Contract。
+
+实施时仍以当前 repository authority、正式产品规范、governance、真实实现和测试为最终事实来源。
+
+如果 repository 现状与本设计存在实现冲突，应先区分：
+
+- 历史实现尚未迁移；
+- 当前正式产品规范与本设计存在冲突；
+- 技术结构导致本设计无法按预期最小落地。
+
+不得因为旧代码或旧测试当前如此运行，就自动覆盖已接受的产品语义；但也不得在没有 repository-grounded inventory 的情况下猜测实现方式。
+
+## Part B — Repository-grounded Inventory（2026-08-22）
+
+> 本部分来自当前 repository 的只读调查。它不新增产品语义，也不授权 production/config/schema/test 修改。
+
+### 4. 当前经济状态模型
+
+| 问题 | 当前事实 | 证据 |
+| --- | --- | --- |
+| authoritative runtime balance | `PlayerState.money: number` 是主运行时的必需字段；没有单独的 `silver` 字段 | `src/types/eventTypes.ts:836-862` |
+| optional parallel field | `PlayerState.wealth?: number` 是可选字段，未定义正式取值、写入或迁移语义 | `src/types/eventTypes.ts:853-864` |
+| primary default | `GameEngineIntegration.createInitialState()` 将 `money` 初始化为 `100` | `src/core/GameEngineIntegration.ts:113-176`，尤其 `:137` |
+| new-game path | `startNewGame()` 生成并应用 traits；没有在该入口直接应用 origin config | `src/core/GameEngineIntegration.ts:1632-1647` |
+| deprecated path | `useGameStore()` 已标记 deprecated，默认 `money: 0, wealth: 0`；主流程使用 `gameEngine.gameState` | `src/store/gameStore.ts:6-65` |
+| persisted player shape | Snapshot 要求 `money`，允许可选 `wealth`；两者都仍是 numeric fields | `src/contracts/gameStateSnapshot.ts:46-92` |
+| derived ambiguity | P17 的 `resources` 维度把 `money + wealth` 作为同一资源比例；这不是 accepted Wealth Capacity 定义 | `src/p17/stateAccess.ts:65-85` |
+
+结论：当前仓库存在一个主余额、一个可选平行数值和一个把两者相加的 diagnostic/maintenance 派生读取，尚未形成单一的 Wealth Capacity source of truth。
+
+### 5. 核心读写与约束入口
+
+### 5.1 Runtime mutation / requirement
+
+| 入口 | 当前行为 | 分类意义 |
+| --- | --- | --- |
+| `src/core/EffectExecutor.ts:73-80` | `MONEY_MODIFY` 直接读写 `money`，减法下限为 `0` | 余额 mutation；不是 Wealth Capacity transition |
+| `src/core/EventExecutor.ts:193-310` | `StatModifyHandler` 将 `money` 与 `wealth` 都列为可修改字段；`money` 有非负/最大值边界，`wealth` 没有同等正式边界 | 平行 mutation surface，需后续收敛 |
+| `src/core/ConditionEvaluator.ts:41-57` | 表达式可直接读取 `money` 与 `wealth` | 旧 numeric requirement surface |
+| `src/core/GameEngineIntegration.ts:503-590` | `thresholds.attributes` 按玩家字段进行 `min/max` 检查，并另行检查 background / experience | 可复用 Requirement mechanism；不能把 numeric threshold 自动当 Capacity level |
+| `src/core/GameEngineIntegration.ts:1480-1515` | 选择事件通过 `EventExecutor` 应用 effects，再写入 event history | 可复用 transition / provenance 链路 |
+
+### 5.2 Active actions 与日常内容
+
+`src/data/activeActionCatalog.ts:15-96` 当前将下列成本绑定到主动行为：
+
+- 练功：`money -10`；
+- 读书：`money -10`；
+- 交游：`money -20`；
+- 营商：`money -25`，同时奖励 `money +15..35`；
+- 游历：`money -15`。
+
+`src/core/activePlanning/ActivePlanningService.ts:105-207` 会执行这些 delta、推进时间、写入 action history 并生成玩家可见 summary。因此训练/读书等成本不是只存在于文本，而是主行动结算的一部分。
+
+日常 livelihood / market 内容也直接修改 `money`，例如零活 `+25/+10` 与小本生意 `+35`（`src/data/life/dailyEvents.ts:205-275`）。这些行为按 accepted contract 应首先归入 `DAILY_ABSTRACTED`，不能机械迁移为 Wealth Capacity 的增减。
+
+### 5.3 正式加载的经济相关事件资产
+
+正式入口由 `src/data/events.json:3-31` 和 `src/core/EventLoader.ts:152-185` 共同决定。当前实际加载、且会影响经济 inventory 的代表性资产包括：
+
+- `origin.json`；
+- `identity-merchant.json`；
+- `merchant.json`；
+- `family-life.json`；
+- `relationship.json`；
+- `middle-age-career.json`；
+- `sect-border.json`；
+- `medical.json`；
+- `setback-events.json`；
+- `p9-remediation.json`、`p11-validation.json`、`p21-content-samples.json`、`p22-content-expansions.json`。
+
+这不是所有出现 `money` 文本的文件清单，而是当前正式 EventLoader path 中会进入 runtime catalog 的主要来源。
+
+另一方面，`src/data/event-asset-manifest.json:75-96`、`:339-344` 将 `daily.json`、`economy.json`、`money-events.json` 标为未进入 `events.json` 的 deferred/backlog asset；`shop.json` 也在 manifest 中作为非 runtime-loaded 内容。它们是历史/候选配置证据，不是当前正式 runtime source，不能直接作为迁移范围。
+
+### 6. 出身、事件、UI、fixture 与 persistence
+
+### 6.1 出身初始化存在重复路径
+
+当前可见的商户出身 money 来源至少有三条：
+
+- trait/origin config：`merchant_house` 的 `initialStats.money = 150`（`src/data/traits/origins.ts:20-33`）；
+- 正式 `origin.json` 选择：`origin_merchant_family` 写入 `money +200`（`src/data/lines/origin.json:80-109`）；
+- 另一份 childhood config 也写入 `money +200`（`src/data/childhoodEvents.json:650-657`）。
+
+`startNewGame()` 只直接执行 traits apply；origin event 是否随后执行由正式事件调度决定。因此不能把上述数值简单相加或认定为同一 canonical initialization。重复 producer 是 `UNRESOLVED`，后续迁移必须先确定唯一来源。
+
+### 6.2 代表性 event / action 语义
+
+- `merchant.json` 的开设店铺要求 `money >= 50`，并在开店时 `money -30/-50/-40`、写入 `merchant_shop_*` flag（`src/data/lines/merchant.json:52-99`）。
+- 商铺经营失败可以要求 `money >= 50` 并继续扣除 `money`（`src/data/lines/merchant.json:120-154`）；商队护送另有 `money >= 150` 的门槛（`src/data/lines/merchant.json:158-188`）。
+- `identity-merchant.json` 的富可敌国 identity threshold 使用 `money >= 500`（`src/data/lines/identity-merchant.json:261-290`）。
+- 关系事件将资金支持作为 `money >= 200` 与 `money -200` 的选择（`src/data/lines/relationship.json:171-180`）。
+- 家庭事件把婚礼、生子庆祝等普通生活选择写成 `money` 成本/收益（`src/data/lines/family-life.json:40-105`、`:200-275`）。这类普通生活成本不是天然的 Wealth Transition，应先按 `DAILY_ABSTRACTED` 审核。
+- setback 的 `business_failure` 写入 `money -300` 与 `businessAcumen -5`（`src/data/setbackEvents.ts:230-247`）；这是重大经营失败的 `WEALTH_TRANSITION` 候选，而不是普通行动税。
+
+### 6.3 UI / presentation
+
+当前 presentation 仍然展示余额：
+
+- 主界面把 `money` 作为 `resource` 的 `银两` 展示（`src/components/mainScreenModel.ts:286-312`）；
+- GameScreen 的 player surface 传出 `money`（`src/components/GameScreen.vue:282-292`）；
+- EndingScreen 在终局统计显示 `银两`（`src/components/EndingScreen.vue:25-40`）；
+- Wuxia profile 只声明 `money` / `银两` resource（`src/narrative/profile/wuxiaResources.ts:1-6`）。
+
+这些是当前展示事实，不表示 UI 已经支持 Wealth Capacity 或 Asset。
+
+### 6.4 Persistence、fixture 与 tests
+
+- Snapshot schema 当前为 `3.15.0`；`money` 必需、`wealth` 可选，且结构校验为 closed allowlist（`src/contracts/gameStateSnapshot.ts:15-92`、`docs/contracts/game-state-snapshot-contract.md:3-9`）。
+- `SaveManager` 保存前后都通过 canonical validation，旧形状不会被 fallback 或 silent migration 接受（`src/core/SaveManager.ts:49-77`、`:93-163`；`docs/contracts/game-state-snapshot-contract.md:49-71`）。
+- `inventory` 只是可选的 `InventoryItem[]`，每项只有 `id/name/quantity`（`src/types/eventTypes.ts:1054-1061`）；fixture 中的 `item_silver`（`src/contracts/fixtures/gameStateSnapshotAge50.ts:310-314`）不构成正式 Asset/ownership/holding 模型。
+- 既有 tests 与 gate fixtures 仍大量断言旧 money 数值、行动成本和 wealth persona，例如 `tests/contracts/snapshotContract.test.ts`、`tests/testMerchantStatecraftVerticalSlice.ts`、`tests/fixtures/gates/p8-playability-gate-latest.json`。它们是迁移影响面与历史 evidence，不覆盖 accepted Contract authority。
+
+未来如果删除 `money`、改变其语义、把 `wealth` 变为正式字段，至少会影响 runtime `PlayerState`、Event/Condition handlers、Snapshot types/validator、converter、SaveManager、fixtures、tests、UI 和外部历史存档重建。当前 save policy 明确“外部重建 current snapshot，runtime 不做 migration”，因此本轮不尝试兼容或重写历史 evidence。
+
+### 7. Five-way migration inventory
+
+下表覆盖能够实际修改或约束玩家经济状态的 authoritative path，以及会影响后续迁移设计的代表性内容。它不是对所有文本中“银子/财富”字样的穷举。
+
+| 分类 | 当前代表性实现 | 当前判断与后续约束 |
+| --- | --- | --- |
+| `DAILY_ABSTRACTED` | `activeActionCatalog.ts` 的练功、读书、交游、游历成本；`dailyEvents.ts` 的零活/小本生意收入；`family-life.json` 的婚礼、生子庆祝成本 | 这些是普通行动或普通生活的余额 delta。accepted contract 禁止把它们直接转换成 hidden score 或 Capacity XP；普通经济流需另行抽象 |
+| `NARRATIVE_ONLY` | `src/p8/personas.ts` 的“积累财富”目标；`p9-remediation.json` / `p11-validation.json` 的 `pathAffinity.wealth`；UI 的“银两”标签与商人文本 | 这些标签、目标、路径权重或展示语义不能单独创建 Wealth state。若同一内容还含 effect/condition，应拆分并按对应行重新分类 |
+| `WEALTH_REQUIREMENT` | `merchant.json` 的 `money >= 50/150/500`；`identity-merchant.json` 的 `money` threshold；`relationship.json` 的 `money >= 200` | 当前以余额阈值作为 requirement。未来应明确映射到 Capacity level/requirement；不能把旧阈值数字当新枚举值 |
+| `WEALTH_TRANSITION` | `merchant.json` 的开店投资、商队投资和收益；`setbackEvents.ts` 的 `business_failure`；正式 p11/p21/p22 商业事件中的重大 money effect | 这些具有重大经营、投资或损失语义，是 Capacity transition 候选。需要明确事件边界后才能迁移，不能全仓做 `money +/- → wealth +/-` |
+| `ASSET_TRANSITION` | `merchant.json` 开店时的 `merchant_shop_grocery/weapon/herb`，以及后续 `merchant_chamber_head`、`merchant_wealthy` 等持久 flags | flags 可以是故事事实，但当前没有正式 Asset identity、ownership、holding、transfer 或 lifecycle。它们是 Asset 候选，不应在本轮直接宣称已经是 Asset |
+| `UNRESOLVED` | `PlayerState.wealth?`；P17 的 `money + wealth` 派生；三条 merchant origin producer；未加载的 `economy.json` / `shop.json` / `money-events.json`；`merchant_*` flags 是否等同 Asset；旧 `src/data/storyData.ts` money path 是否仍有任何正式消费者 | 这些问题无法由当前 authority 安全推导。必须保留为迁移前决策，不通过 alias、fallback 或兼容层“折中” |
+
+### 8. 可复用的现有能力
+
+| 目标 | 已有机制 | 是否足够直接承载新语义 |
+| --- | --- | --- |
+| Wealth Capacity 的离散表达 | `healthStatus`、`statuses`、`affiliation`、flags、facts、achievements 等离散/事实机制 | 有可参考的 categorical / fact 载体，但没有现成 Wealth Capacity contract；新增正式 Capacity state 仍是 code/schema 级工作 |
+| Requirement | `ConditionEvaluator` 的受控 expression，`GameEngineIntegration.checkThresholds()` 的 attributes/background/experience checks | 足以承载 requirement 评估基础；需要新语义映射时不能复用旧 numeric balance 作为最终模型 |
+| State transition | `EffectDefinition`、`EventExecutor`、flags、event history、active action history | 足以承载显式事件转换与 provenance；不需要先建 generic economy framework |
+| Persistent world facts | `facts`、`flags`、`eventHistory`、`achievements`、`affiliation`、relationships | 可承载叙事事实和组织/关系信号，但不等于经济 Asset ownership |
+| UI feedback | 主界面 resource model、action summary、event outcome、ending stats | 可复用展示边界；当前只展示 money，不支持 Capacity/Asset 的正式展示 |
+
+### 9. Asset 承载能力判断
+
+当前没有能够完整表达“角色拥有某个持久经济世界存在”的正式模型：
+
+- `InventoryItem` 只有 `id/name/quantity`，更接近物品堆叠，不表达商铺/产业/组织的 owner、状态、地点、收益、转让或终止；
+- `flags` 和 `eventHistory` 能记录 `merchant_shop_*` 等故事事实，但没有 Asset contract；
+- `affiliation` / relationships 可以表达组织与关系事实，但不是 holding/ownership 模型；
+- snapshot 能持久化 `inventory`、flags、facts、event history，却没有 Asset entity/collection。
+
+因此，Asset 最小切片如果被正式纳入，影响的不只是配置，而是至少包含正式 schema/Contract、runtime state application、persistence validation 和对应 UI/fixture/test 边界。当前不创建 Asset schema。第一 implementation slice 可以先做 Capacity-only 的重大经济 requirement/transition，并把商铺 flag 保留为未升级的故事事实；是否把它提升为 Asset 另行裁决。
+
+### 10. Compatibility / technical constraints
+
+1. 当前 Snapshot 只接受 `3.15.0`；缺失必需字段、未知字段、旧版本和非 canonical shape 都会被拒绝。没有 runtime migration/fallback。
+2. `money` 已经同时进入 runtime state、conditions、effects、UI、action history delta、fixtures 和 tests；删除或改名不是配置级替换。
+3. `wealth` 已经出现在 runtime type、Snapshot optional field、condition/effect allowlist 与 P17 派生读取中，但没有统一初始化和正式产品含义；保留它也会继续产生第二状态来源风险。
+4. `events.json` / EventLoader 与 event-asset-manifest 对 runtime-loaded/backlog assets 的定义不同于“仓库中存在文件”；迁移必须绑定正式 loaded source，不能批量扫描所有 JSON。
+5. 历史 gate fixture、旧 tests 和 diagnostic persona 可能继续记录余额语义。它们需要在未来迁移计划中分类为更新、冻结 evidence 或外部重建，不能在本轮静默改写。
+
+### 11. Recommended implementation sequencing（只定义 scope）
+
+基于当前 inventory，第一阶段产品范围保持 accepted Contract 的目标，但工程上拆成两个连续的最小切片，避免一次引入尚未存在的 Asset schema：
+
+#### Phase 1A — Wealth Capacity Core
+
+1. 移除普通练功、读书等非经济行动的通用 `money` tax；同一切片中审查与其等价的普通生活成本，避免只修一个入口而保留同类税。
+2. 建立一个明确、离散、玩家可理解的 Wealth Capacity runtime contract。产品语义沿用 Part A 的粗粒度经济身份；具体 enum / field / display mapping 在 implementation design 中结合现有状态模型确认，不得退化为隐藏余额、XP 或累计 score。
+3. 迁移一个正式 merchant/economic requirement，使其从余额阈值改为 Capacity requirement，并保留至少一个不依赖财富万能解的 Alternative Path。
+4. 迁移一个重大经济事件，使其产生一次明确的 Wealth Capacity transition，验证“经济身份质变才迁移”的语义。
+5. 保证 Snapshot、Headless、Browser、fixture 与 tests 对同一 Capacity source of truth 一致。
+
+#### Phase 1B — Minimal Asset Semantics
+
+在 1A 闭环后，仍属于 accepted 第一阶段产品范围，但作为独立 implementation slice 处理：
+
+1. 裁决 `merchant_shop_*` 等现有持久事实中，哪些确实需要升级为正式 Asset；
+2. 只建立满足第一阶段所需的最小 Asset identity / ownership / persistence 语义；
+3. 至少迁移一个 `ASSET_TRANSITION`，使资产能够作为后续世界事实被读取，而不是另一种财富分数；
+4. 只有资产或重大经济事实确实改变角色经济行动能力时，才联动 Wealth Capacity transition。
+
+Phase 1A 可以先实施，但这不表示 Asset 被移出 accepted 第一阶段范围。Phase 1B 的具体技术边界应在 1A implementation planning / verification 后依据 repository reality 收敛。
+
+明确延期：完整产业经营模拟、自动收益/维护费/衰减、全量 event 批量迁移、完整经济 UI、save migration、generic economy framework，以及 Auto Evolution workflow 改造。
+
+
+### 12. Permission boundary
+
+| 未来候选修改 | 性质 | 当前边界 |
+| --- | --- | --- |
+| 调整正式 loaded event 的普通 action/event effects、文本和余额 requirement | configuration-level | 仍需明确 slice、验证和 Human 授权；不得借此引入新 state source |
+| 修改 `PlayerState`、initialization、Effect/Condition handlers、active planning、UI 或 runtime conversion | code/runtime-level | 当前阶段 `ESCALATE TO HUMAN`；本任务未授权 |
+| 新增 Wealth Capacity enum/field、Asset schema、Snapshot shape、validator、save policy 或 migration | formal Contract/Schema-level | 必须 Human 裁决并单独形成 implementation plan；本任务明确禁止 |
+| 修改 Auto Evolution permissions、framework、provider 或 workflow | workflow/framework-level | 不属于本任务；按当前 Auto Evolution stage 保持 STOP/ESCALATE |
+
+accepted product design 不等于对上述 code、runtime、schema 或 migration 的自动授权。
+
+### 13. Implementation / Human decisions still required
+
+完整 accepted product semantics 已在 Part A 落库。当前剩余的是 repository-grounded implementation 决策，而不是重新选择经济资源模型：
+
+1. Wealth Capacity 的正式 runtime 表达：field / enum / display mapping、初始状态映射，以及旧 `money` 人物如何映射到粗粒度经济身份。必须保持 Part A 的“粗粒度经济身份、非余额、非累计”语义。
+2. `money` 与可选 `wealth` 的最终处理：删除、阶段性 legacy 保留、外部重建存档，或其他明确的一次性迁移政策。
+3. P17 的 `money + wealth` 派生读取何时退休，以及如何保证迁移后只有一个正式 Wealth Capacity source of truth。
+4. 三条 merchant origin producer 哪一条是 canonical；重复 producer 是否为历史配置、测试入口或需要迁移。
+5. `merchant_shop_*`、`merchant_chamber_head`、`merchant_wealthy` 等 flags 中哪些属于正式 Asset 候选；若升级，Phase 1B 的最小 identity / ownership / lifecycle / persistence 边界是什么。
+6. 未加载的 `money-events.json`、`economy.json`、`shop.json` 等 backlog 内容是继续延期、删除，还是在未来重新纳入正式 catalog。
+7. 如果 Phase 1A 需要改变 Snapshot shape / save compatibility，应按现有 formal Contract / Schema boundary 单独 Human 裁决，不得借 accepted product design 自动扩大权限。
+
+
+### 14. Inventory conclusion
+
+Repository-grounded inventory 已完成，且本次 authority corrective 不要求重做。当前实现事实与 accepted product semantics 的主要冲突已经被标记为 migration classification、compatibility 与 implementation decisions，而不是通过 numeric alias、fallback 或批量替换掩盖。
+
+本文件现在同时承载：
+
+- **Part A：完整 Human-accepted Product Contract**；
+- **Part B：基于 2026-08-22 repository snapshot 的只读 implementation inventory**。
+
+两者 authority 身份必须保持区分：Part A 定义产品语义；Part B 记录当前实现事实与迁移证据。实现事实不能反向覆盖 Part A。

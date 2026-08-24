@@ -324,11 +324,7 @@ function testPeakRemainsDeferred(): void {
     effect => effect.type === 'wealth_capacity_set'
       && effect.value === 'regional_magnate',
   ));
-  assert(peak.autoEffects?.some(
-    effect => effect.type === 'stat_modify'
-      && (effect.target ?? effect.stat) === 'money'
-      && effect.value === 200,
-  ));
+  assert.equal(hasMoneyEffect(peak.autoEffects), false);
 }
 
 async function run(): Promise<void> {

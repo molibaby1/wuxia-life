@@ -943,7 +943,21 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 
 **重新讨论条件**
 
-- 需要迁移 `merchant_wealth_peak` legacy `money +200`；
-- 需要迁移 `merchant_sect_investment`、`merchant_business_empire` 或其他 merchant money consumer；
-- 需要迁移 `merchant_ending_tycoon` / `merchant_ending_bankrupt` 或其他 merchant endings；
+- 需要迁移 `merchant_ending_bankrupt` 或其他尚未完成的 merchant endings；
 - 需要迁移 `identity-merchant.json` 平行 wallet 语义。
+
+### PD-071：Merchant late economic progression retires legacy wallet semantics
+
+**实施决策（Human accepted：2026-08-23）**
+
+- `merchant_wealth_peak` 退役 legacy `money +200`，保留 `wealth_capacity_set: regional_magnate`、additive `reputation +25`、additive `charisma +10` 与 `merchant_wealthy`。
+- `merchant_sect_investment` Heavy choice 使用 `wealth_capacity_at_least regional_magnate`，并刻意将 Wealth 设为 `wealthy`；标准 righteous、evil、both-side choice 不改变 Wealth 或 money，只保留 additive stat delta 与 route flags。
+- `merchant_business_empire` 使用 `wealth_capacity_raise_to regional_magnate`，保留 `merchant_empire`，且不再写入 money。
+- `merchant_ending_tycoon` 只要求 `merchant_empire` + `wealth_capacity_at_least regional_magnate`；legacy `money >=500` 退役。
+- 这次迁移只收敛 late progression 的 wallet semantics，不授权 generic Wealth arithmetic、第二个 Asset、新 Wealth level、bankruptcy migration 或其他 later identity-merchant/global wallet work。
+
+**重新讨论条件**
+
+- 需要迁移 `merchant_ending_bankrupt`，或将 `identity-merchant.json` / `origin` / `P17` / global money retirement 纳入同一 slice；
+- 需要引入 generic Wealth spending arithmetic、第二个 Asset 或新的 Wealth level；
+- 需要调整其他 merchant endings 或后续未列出的 wallet consumer。

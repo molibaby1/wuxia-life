@@ -376,9 +376,8 @@
     "eventType": "auto",
     "autoEffects": [
       {"type": "wealth_capacity_set", "value": "regional_magnate"},
-      {"type": "stat_modify", "stat": "money", "value": 200, "operator": "add"},
-      {"type": "stat_modify", "stat": "reputation", "value": 25},
-      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": 25, "operator": "add"},
+      {"type": "stat_modify", "stat": "charisma", "value": 10, "operator": "add"},
       {"type": "flag_set", "flag": "merchant_wealthy", "value": true}
     ]
   },
@@ -404,15 +403,16 @@
     "choices": [
       {
         "id": "invest_righteous_heavy",
-        "text": "巨额投资正道（需金钱≥500，侠义 +20）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 500"}
-        ],
+        "text": "倾力扶持正道（重大投入：财力降至豪富，侠义提升）",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "regional_magnate"
+        },
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -500},
-          {"type": "stat_modify", "stat": "chivalry", "value": 20},
-          {"type": "stat_modify", "stat": "reputation", "value": 30},
-          {"type": "stat_modify", "stat": "martialPower", "value": 10},
+          {"type": "wealth_capacity_set", "value": "wealthy"},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 30, "operator": "add"},
+          {"type": "stat_modify", "stat": "martialPower", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_invest_good", "value": true}
         ]
       },
@@ -420,9 +420,8 @@
         "id": "invest_righteous",
         "text": "投资正道门派（侠义 +10）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -100},
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_invest_good", "value": true}
         ]
       },
@@ -430,9 +429,8 @@
         "id": "invest_evil",
         "text": "投资魔教（武力 +15）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -100},
-          {"type": "stat_modify", "stat": "martialPower", "value": 15},
-          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_invest_evil", "value": true}
         ]
       },
@@ -440,8 +438,7 @@
         "id": "invest_both",
         "text": "多方下注",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -150},
-          {"type": "stat_modify", "stat": "charisma", "value": 12},
+          {"type": "stat_modify", "stat": "charisma", "value": 12, "operator": "add"},
           {"type": "flag_set", "flag": "merchant_invest_both", "value": true}
         ]
       }
@@ -467,9 +464,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "money", "value": 150},
-      {"type": "stat_modify", "stat": "reputation", "value": 20},
-      {"type": "stat_modify", "stat": "charisma", "value": 10},
+      {"type": "wealth_capacity_raise_to", "minimum": "regional_magnate"},
+      {"type": "stat_modify", "stat": "reputation", "value": 20, "operator": "add"},
+      {"type": "stat_modify", "stat": "charisma", "value": 10, "operator": "add"},
       {"type": "flag_set", "flag": "merchant_empire", "value": true}
     ]
   },
@@ -484,7 +481,8 @@
       {"type": "age_reach", "value": 70}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.merchant_empire == true && money >= 500"}
+      {"type": "expression", "expression": "flags.merchant_empire == true"},
+      {"type": "wealth_capacity_at_least", "minimum": "regional_magnate"}
     ],
     "content": {
       "title": "首富",

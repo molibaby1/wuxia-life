@@ -59,11 +59,12 @@ async function run(): Promise<void> {
     ),
     'merchant_wealth_peak must explicitly seed regional_magnate',
   );
-  assert(
+  assert.equal(
     peak.autoEffects?.some(
-      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money' && effect.value === 200,
+      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money',
     ),
-    'merchant_wealth_peak must retain legacy money +200 for downstream consumers',
+    false,
+    'merchant_wealth_peak must be wallet-neutral after late progression migration',
   );
 
   const engine = new GameEngineIntegration();
@@ -120,8 +121,8 @@ async function run(): Promise<void> {
   );
   assert.equal(
     afterPeak.gameState.player.money,
-    moneyBeforePeak + 200,
-    'merchant_wealth_peak must keep legacy money +200 alongside Capacity seeding',
+    moneyBeforePeak,
+    'merchant_wealth_peak must be wallet-neutral after late progression migration',
   );
 }
 

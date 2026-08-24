@@ -600,7 +600,7 @@ Phase 1A 与 Phase 1B 的仓库实现均已完成其批准边界。Phase 1A focu
 2. `merchant_sect_investment` Heavy choice 要求 `wealth_capacity_at_least regional_magnate`，并刻意将 Wealth 设为 `wealthy`；标准 righteous、evil、both-side choice 不改变 Wealth 或 money，只保留 additive stat delta 与 route flags。
 3. `merchant_business_empire` 使用 `wealth_capacity_raise_to regional_magnate`，保留 `merchant_empire`，且不再写入 money。
 4. `merchant_ending_tycoon` 只要求 `merchant_empire` + `wealth_capacity_at_least regional_magnate`，legacy `money >=500` 已退役。
-5. `merchant_ending_bankrupt`、`identity-merchant`、P26/P42、`origin` legacy money、P17 与 global money retirement 仍按各自的 deferred boundary 处理。
+5. `merchant_ending_bankrupt` 已从 active catalog 暂时退役；legacy `money <= 50` consumer 已移除，但尚未引入 replacement bankruptcy semantics。`identity-merchant`、P26/P42、`origin` legacy money、P17 与 global money retirement 仍按各自的 deferred boundary 处理。
 6. 本 slice 不引入新的 Asset、财富等级或通用 Wealth arithmetic framework。
 
 Asset-specific 延期：dedicated Asset entity/collection、数量、价值、地点、收益、维护、转让和多实例。

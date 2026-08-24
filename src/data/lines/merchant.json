@@ -544,30 +544,6 @@
     ]
   },
   {
-    "id": "merchant_ending_bankrupt",
-    "version": "1.0",
-    "category": "merchant",
-    "priority": 85,
-    "weight": 70,
-    "ageRange": {"min": 65, "max": 75},
-    "triggers": [
-      {"type": "age_reach", "value": 65}
-    ],
-    "conditions": [
-      {"type": "expression", "expression": "flags.merchant_talent == true && money <= 50"}
-    ],
-    "content": {
-      "title": "破产",
-      "text": "由于经营不善或遭遇变故，你的商业帝国崩塌，最终破产。晚年生活凄惨，令人唏嘘。",
-      "description": "破产"
-    },
-    "eventType": "ending",
-    "endingType": "merchant_bankrupt",
-    "autoEffects": [
-      {"type": "flag_set", "flag": "ending_merchant_bankrupt", "value": true}
-    ]
-  },
-  {
     "id": "merchant_ending_hidden_wealth",
     "version": "1.0",
     "category": "merchant",

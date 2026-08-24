@@ -20,6 +20,7 @@
 - [Merchant Market Monopoly Legacy Money Migration Design](product/wealth-economy-merchant-market-monopoly-legacy-money-migration-design.md)：Human-accepted 的 `merchant_market_monopoly` 选择奖励竖切，垄断路径迁移到 `wealth_capacity_raise_to wealthy`，公平竞争路径保持 Wealth 不变（已交付）。
 - [Merchant Official–Intelligence–Chamber Continuity Migration Design](product/wealth-economy-merchant-official-intelligence-chamber-continuity-migration-design.md)：Human-accepted 的 `merchant_official_connection` → `merchant_intelligence_network` → `merchant_chamber_of_commerce` 竖切，从 legacy wallet 迁移到 Wealth Capacity continuity（已交付）。
 - [Merchant Late Economic Progression Legacy Money Migration Design](product/wealth-economy-merchant-late-economic-progression-legacy-money-migration-design.md)：Human-accepted 的 `merchant_wealth_peak` → `merchant_sect_investment` → `merchant_business_empire` → `merchant_ending_tycoon` 竖切，从 legacy wallet 迁移到 late-game Wealth Capacity 语义（已交付）。
+- [Merchant Bankrupt Ending Temporary Retirement Design](product/wealth-economy-merchant-bankrupt-ending-temporary-retirement-design.md)：Human-accepted 的 `merchant_ending_bankrupt` 临时退役决策；移除无效 legacy wallet bankruptcy consumer，不引入替代破产语义（已交付）。
 
 ### 治理
 

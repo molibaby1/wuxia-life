@@ -961,3 +961,20 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要迁移 `merchant_ending_bankrupt`，或将 `identity-merchant.json` / `origin` / `P17` / global money retirement 纳入同一 slice；
 - 需要引入 generic Wealth spending arithmetic、第二个 Asset 或新的 Wealth level；
 - 需要调整其他 merchant endings 或后续未列出的 wallet consumer。
+
+### PD-072：Merchant bankrupt ending temporarily retired pending real failure semantics
+
+**实施决策（Human accepted：2026-08-24）**
+
+- `merchant_ending_bankrupt` is removed from the active event catalog because legacy `money <= 50` is no longer valid bankruptcy evidence after the merchant Wealth migration.
+- No replacement Wealth condition, bankruptcy flag/fact, Asset rule, or ending precedence rule is introduced in this slice.
+- `no_surplus`, `merchant_shop_failed`, and loss of `merchant_shop` ownership are explicitly not redefined as bankruptcy.
+- Tycoon/Royal/Chamber/Hidden-Wealth endings and the formal-event scheduler remain unchanged.
+- Bankruptcy may return only after concrete persistent business-failure gameplay and its ending interaction are Human-approved.
+
+**重新讨论条件**
+
+- 需要设计并实现 late-game business collapse / insolvency gameplay；
+- 需要重新引入 Merchant bankruptcy ending；
+- 需要修改 merchant ending arbitration/precedence；
+- 需要引入新的 persistent failure state、Asset semantics 或 Wealth post-failure transition。

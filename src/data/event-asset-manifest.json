@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-18T13:06:14.787Z",
+  "generatedAt": "2026-08-24T03:16:46.883Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,12 +14,12 @@
   "summary": {
     "runtimeLoadedFiles": 28,
     "nonLoadedFiles": 40,
-    "totalEventsInRuntime": 419,
+    "totalEventsInRuntime": 418,
     "byStatus": {
       "active": 36,
       "candidate": 69,
       "broken": 58,
-      "deferred": 256,
+      "deferred": 255,
       "dead": 0
     },
     "byFileStatus": {
@@ -323,7 +323,7 @@
       "fileName": "merchant.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 19,
+      "eventCount": 18,
       "goldenLineOverlapCount": 11,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
@@ -5523,17 +5523,6 @@
       "status": "deferred",
       "ageMin": 70,
       "ageMax": 80,
-      "overlapsGoldenLine": false,
-      "eventType": "ending",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
-      "eventId": "merchant_ending_bankrupt",
-      "sourceFile": "merchant.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 65,
-      "ageMax": 75,
       "overlapsGoldenLine": false,
       "eventType": "ending",
       "notes": "Outside ages 0-30 golden line"

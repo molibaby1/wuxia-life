@@ -5,15 +5,17 @@ import {
   type ProblemPackageV1,
 } from '../../../src/evolution/problemPackageContract';
 import {
-  parseSolutionWork,
+  validateSolutionWork,
   type SolutionWorkV1,
 } from '../../../src/evolution/solutionWorkContract';
+import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
-  runWorkspaceAgentJob,
   type WorkspaceAgentJobFailure,
   type WorkspaceAgentParticipantOptions,
 } from './agentParticipant';
+import { isEnvelopeRetransmissionEnabledForRole } from './envelopeRetransmission';
+import { runStructuredParticipantExecution } from './runStructuredParticipantExecution';
 import { assertRepoReferenceFile } from './repoReference';
 import {
   loadParticipantSkills,
@@ -105,7 +107,18 @@ export function buildSolutionAgentPrompt(
     'Do not modify or assume access to the authoritative repository.',
     'Return zero to three options or an explicit no-proposal/insufficient-evidence/escalate result.',
     'Program/code recommendations are allowed, but execution permission is separate.',
-    'Write/return only the structured SolutionWorkV1 result as the final job result.',
+    renderStructuredFinalOutputContractV1({
+      roleSchemaName: 'SolutionWorkV1',
+    }),
+    '',
+    'Convergence discipline (Solution work only):',
+    '- Investigate only far enough to form a small set of plausible, repository-grounded explanations; do not treat the task as an exhaustive repository audit.',
+    '- Once you have plausible candidates, stop broad exploration. Further investigation should verify, distinguish, or materially update those candidates or resolve a named blocking unknown.',
+    '- Prefer targeted symbol/path searches and focused reads. Avoid repeated broad searches, repeated full-file reads, and large recursive output unless they answer a new specific question.',
+    '- If verification undermines all candidates, you may perform one bounded re-grounding pass and form a new candidate set; do not repeatedly return to broad exploration.',
+    '- As soon as the evidence supports a reviewable option, synthesize and return it rather than continuing only to increase confidence.',
+    '- Use INSUFFICIENT_EVIDENCE only after grounded investigation and candidate verification leave a material unknown that the available evidence cannot resolve. Use NO_PROPOSAL only when the evidence supports that no change should be proposed. Neither is a time-budget escape hatch.',
+    '- Produce a repository-grounded result that Reviewer can independently assess; do not perform an exhaustive second-pass review yourself.',
     '',
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,
@@ -187,64 +200,50 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
 
   const deliveredSkills = assignedSkills.map(({ content: _content, ...provenance }) => provenance);
   const prompt = buildSolutionAgentPrompt(problemPackage, assignedSkills);
-  const job = await runWorkspaceAgentJob(
-    {
-      invocationRef: input.invocationRef,
-      role: 'solution',
-      workspaceRoot: input.workspaceRoot,
-      prompt,
-      traceArtifactPath: join(input.destinationRoot, 'execution-trace.json'),
+  const execution = await runStructuredParticipantExecution<SolutionWorkV1>({
+    invocationRef: input.invocationRef,
+    role: 'solution',
+    workspaceRoot: input.workspaceRoot,
+    destinationRoot: input.destinationRoot,
+    initialPrompt: prompt,
+    expectedRoleSchemaName: 'SolutionWorkV1',
+    participant: input.participant,
+    retransmissionEnabled: isEnvelopeRetransmissionEnabledForRole('solution'),
+    validateSchema: validateSolutionWork,
+    validateAcceptedResult: async result => {
+      if (result.problemId !== problemPackage.problemId) {
+        throw new Error('SolutionWork problemId does not match ProblemPackage');
+      }
+      await validateReferences(result, input);
     },
-    input.participant,
-  );
+  });
+  await writeCreateOnly(join(input.destinationRoot, 'execution-trace.json'), execution.executionTrace);
 
-  if (!job.ok) {
-    await writeCreateOnly(rawOutputPath, job.rawOutput ?? '');
+  if (!execution.ok) {
+    await writeCreateOnly(rawOutputPath, execution.rawOutput ?? '');
     await writeCreateOnly(invocationPath, {
       ...commonInvocation,
       deliveredSkills,
       status: 'failed',
-      errorKind: job.errorKind,
+      errorKind: execution.errorKind,
     });
-    await writeCreateOnly(failurePath, { schemaVersion: 'solution-agent-failure-v1', errorKind: job.errorKind, message: job.message });
+    await writeCreateOnly(failurePath, {
+      schemaVersion: 'solution-agent-failure-v1',
+      errorKind: execution.errorKind,
+      message: execution.message,
+    });
     return {
       ok: false,
-      errorKind: job.errorKind,
-      message: job.message,
+      errorKind: execution.errorKind,
+      message: execution.message,
       invocationPath,
       rawOutputPath,
       failurePath,
     };
   }
 
-  let result: SolutionWorkV1;
-  try {
-    result = parseSolutionWork(job.rawOutput.trim());
-    if (result.problemId !== problemPackage.problemId) {
-      throw new Error('SolutionWork problemId does not match ProblemPackage');
-    }
-    await validateReferences(result, input);
-  } catch (error) {
-    await writeCreateOnly(rawOutputPath, job.rawOutput);
-    await writeCreateOnly(invocationPath, {
-      ...commonInvocation,
-      deliveredSkills,
-      status: 'failed',
-      errorKind: 'invalid_output',
-    });
-    await writeCreateOnly(failurePath, { schemaVersion: 'solution-agent-failure-v1', errorKind: 'invalid_output', message: String(error) });
-    return {
-      ok: false,
-      errorKind: 'invalid_output',
-      message: String(error),
-      invocationPath,
-      rawOutputPath,
-      failurePath,
-    };
-  }
-
-  await writeCreateOnly(rawOutputPath, job.rawOutput);
+  await writeCreateOnly(rawOutputPath, execution.rawOutput);
   await writeCreateOnly(invocationPath, { ...commonInvocation, deliveredSkills, status: 'completed' });
-  await writeCreateOnly(resultPath, result);
-  return { ok: true, result, invocationPath, rawOutputPath, resultPath };
+  await writeCreateOnly(resultPath, execution.value);
+  return { ok: true, result: execution.value, invocationPath, rawOutputPath, resultPath };
 }

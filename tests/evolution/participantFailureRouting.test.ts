@@ -21,9 +21,13 @@ async function writeLegacyFailure(input: {
   runRef: string;
   status?: 'failed' | 'completed';
   errorKind?: string;
+  participantProvider?: string;
+  invocationRefFlavor?: 'deepseek' | 'local';
 }): Promise<void> {
   const directory = input.stage === 'EXTERNAL_FEEDBACK' ? 'feedback-runs' : 'hypothesis-runs';
   const runDirectory = join(input.experimentRoot, directory, input.runRef);
+  const invocationRefFlavor = input.invocationRefFlavor ?? 'deepseek';
+  const invocationPrefix = invocationRefFlavor === 'local' ? 'local' : 'deepseek';
   await mkdir(runDirectory, { recursive: true });
   await writeFile(join(runDirectory, 'invocation.json'), JSON.stringify({
     schemaVersion: input.stage === 'EXTERNAL_FEEDBACK'
@@ -31,11 +35,14 @@ async function writeLegacyFailure(input: {
       : 'improvement-hypothesis-invocation-v1',
     runRef: input.runRef,
     ...(input.stage === 'EXTERNAL_FEEDBACK'
-      ? { invocationRef: `${input.runRef}-deepseek-player-feedback-001` }
+      ? { invocationRef: `${input.runRef}-${invocationPrefix}-player-feedback-001` }
       : {
-        feedbackInvocationRef: `${input.runRef}-deepseek-player-feedback-001`,
-        hypothesisInvocationRef: `${input.runRef}-deepseek-improvement-hypothesis-001`,
+        feedbackInvocationRef: `${input.runRef}-${invocationPrefix}-player-feedback-001`,
+        hypothesisInvocationRef: `${input.runRef}-${invocationPrefix}-improvement-hypothesis-001`,
       }),
+    ...(input.participantProvider === undefined
+      ? {}
+      : { participant: { provider: input.participantProvider } }),
     status: input.status ?? 'failed',
     ...(input.errorKind === undefined ? {} : { errorKind: input.errorKind }),
   }));
@@ -74,6 +81,96 @@ export async function runParticipantFailureRoutingTests(): Promise<void> {
     runRef: 'cohort-run-000001',
   });
   assert.equal(hypothesisFailure?.participantErrorKind, 'parse');
+
+  const localFeedbackFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...localFeedbackFixture,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'local-feedback-000001',
+    errorKind: 'timeout',
+    participantProvider: 'codex-local-subagent',
+    invocationRefFlavor: 'local',
+  });
+  const localFeedbackFailure = await proveLegacyParticipantFailure({
+    experimentRoot: localFeedbackFixture.experimentRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'local-feedback-000001',
+  });
+  assert.equal(localFeedbackFailure?.participantErrorKind, 'timeout');
+
+  const localHypothesisFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...localHypothesisFixture,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef: 'local-hypothesis-000001',
+    errorKind: 'provider',
+    participantProvider: 'codex-local-subagent',
+    invocationRefFlavor: 'local',
+  });
+  const localHypothesisFailure = await proveLegacyParticipantFailure({
+    experimentRoot: localHypothesisFixture.experimentRoot,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef: 'local-hypothesis-000001',
+  });
+  assert.equal(localHypothesisFailure?.participantErrorKind, 'provider');
+
+  const deepSeekProviderFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...deepSeekProviderFixture,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'deepseek-provider-000001',
+    errorKind: 'provider',
+    participantProvider: 'deepseek',
+  });
+  const deepSeekProviderFailure = await proveLegacyParticipantFailure({
+    experimentRoot: deepSeekProviderFixture.experimentRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'deepseek-provider-000001',
+  });
+  assert.equal(deepSeekProviderFailure?.participantErrorKind, 'provider');
+
+  const localProviderDeepSeekRefFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...localProviderDeepSeekRefFixture,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'mismatched-local-provider-000001',
+    errorKind: 'provider',
+    participantProvider: 'codex-local-subagent',
+  });
+  assert.equal(await proveLegacyParticipantFailure({
+    experimentRoot: localProviderDeepSeekRefFixture.experimentRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'mismatched-local-provider-000001',
+  }), null);
+
+  const deepSeekProviderLocalRefFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...deepSeekProviderLocalRefFixture,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef: 'mismatched-deepseek-provider-000001',
+    errorKind: 'provider',
+    participantProvider: 'deepseek',
+    invocationRefFlavor: 'local',
+  });
+  assert.equal(await proveLegacyParticipantFailure({
+    experimentRoot: deepSeekProviderLocalRefFixture.experimentRoot,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef: 'mismatched-deepseek-provider-000001',
+  }), null);
+
+  const unknownProviderFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...unknownProviderFixture,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'unknown-provider-000001',
+    errorKind: 'provider',
+    participantProvider: 'unknown-provider',
+  });
+  assert.equal(await proveLegacyParticipantFailure({
+    experimentRoot: unknownProviderFixture.experimentRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'unknown-provider-000001',
+  }), null);
 
   const wrongHypothesisFixture = await fixtureRoot();
   const wrongHypothesisDirectory = join(

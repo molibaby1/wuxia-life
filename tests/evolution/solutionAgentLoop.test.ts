@@ -1,12 +1,58 @@
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import {
+  type WorkspaceAgentJobInput,
+  type WorkspaceAgentParticipantOptions,
+} from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+
+function countingSpawn(counter: { count: number }): typeof spawn {
+  return ((...args: Parameters<typeof spawn>) => {
+    counter.count += 1;
+    return spawn(...args);
+  }) as typeof spawn;
+}
+
+function createContinuationCapableParticipant(
+  outputs: { initial: string; continuation: string },
+  options?: {
+    threadRef?: { provider: string; opaqueId: string };
+    spawnProcess?: typeof spawn;
+    omitContinuation?: boolean;
+    onContinuationBuildArgs?: (job: WorkspaceAgentJobInput) => void;
+  },
+): WorkspaceAgentParticipantOptions {
+  const threadRef = options?.threadRef ?? { provider: 'test-provider', opaqueId: 'thread-000001' };
+  const participant: WorkspaceAgentParticipantOptions = {
+    executable: process.execPath,
+    buildArgs: () => ['-e', 'process.stdout.write(process.argv[1]);', outputs.initial],
+    interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
+      ok: true as const,
+      rawOutput: stdout,
+      threadRef: expectedThreadRef ?? threadRef,
+    }),
+    spawnProcess: options?.spawnProcess,
+  };
+
+  if (!options?.omitContinuation) {
+    participant.sameThreadContinuation = {
+      provider: threadRef.provider,
+      buildArgs: job => {
+        options?.onContinuationBuildArgs?.(job);
+        return ['-e', 'process.stdout.write(process.argv[1]);', outputs.continuation];
+      },
+    };
+  }
+
+  return participant;
+}
 
 const problemPackage: ProblemPackageV1 = {
   schemaVersion: 'problem-package-v1',
@@ -101,6 +147,11 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /disposable workspace/i);
   assert.match(deliveredPrompt, /zero to three options/i);
   assert.match(deliveredPrompt, /execution permission is separate/i);
+  assert.match(deliveredPrompt, /stop broad exploration/i);
+  assert.match(deliveredPrompt, /one bounded re-grounding/i);
+  assert.match(deliveredPrompt, /time-budget escape hatch/i);
+  assert.match(deliveredPrompt, /Reviewer can independently assess/i);
+  assert.match(deliveredPrompt, /verify, distinguish, or materially update/i);
   assert.match(deliveredPrompt, /Reference format requirements:/i);
   assert.match(deliveredPrompt, /repoRefs must reference repository-relative regular files/i);
   assert.match(deliveredPrompt, /path:line/i);
@@ -112,12 +163,40 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.doesNotMatch(deliveredPrompt, /Read the repository and referenced artifacts yourself\./i);
   assert.equal(deliveredPrompt.split('Treat input assumptions as claims to examine, not established causes.').length - 1, 1);
   assert.doesNotMatch(deliveredPrompt, /money|marriage|combat|family crisis/i);
+  assert.match(deliveredPrompt, /Structured Final Output Contract V1/);
+  assert.match(deliveredPrompt, /exactly one valid JSON object/i);
+  assert.match(deliveredPrompt, /SolutionWorkV1/);
+  assert.match(deliveredPrompt, /bare JSON only/i);
+  assert.match(deliveredPrompt, /Markdown\/code fences/i);
+  assert.match(deliveredPrompt, /before or after the JSON object/i);
+  assert.match(deliveredPrompt, /reject invalid output/i);
+  assert.match(deliveredPrompt, /extract, normalize, or repair/i);
+  assert.doesNotMatch(
+    deliveredPrompt,
+    /Write\/return only the structured SolutionWorkV1 result as the final job result\./i,
+  );
   assert.equal(await readFile(join(root, 'solution-agent/raw-output.txt'), 'utf8'), JSON.stringify(solutionResult));
+  assert.equal(
+    await readFile(join(root, 'solution-agent/terminal-attempt-0.txt'), 'utf8'),
+    JSON.stringify(solutionResult),
+  );
+  await assert.rejects(
+    () => readFile(join(root, 'solution-agent/terminal-attempt-1.txt'), 'utf8'),
+    /ENOENT/,
+  );
   const solutionTrace = JSON.parse(await readFile(join(root, 'solution-agent/execution-trace.json'), 'utf8'));
   assert.equal(solutionTrace.schemaVersion, 'participant-execution-trace-v1');
   assert.equal(solutionTrace.terminal.outcome, 'completed');
   assert.equal(solutionTrace.events[0].type, 'process_start');
-  assert.equal(solutionTrace.events.at(-1).type, 'process_close');
+  assert.equal(solutionTrace.events.at(-1).type, 'participant_terminal_validation');
+  const terminalValidations = solutionTrace.events.filter(
+    (event: { type: string }) => event.type === 'participant_terminal_validation',
+  );
+  assert.equal(terminalValidations.length, 1);
+  assert.equal(terminalValidations[0].attempt, 0);
+  assert.equal(terminalValidations[0].envelopeValid, true);
+  assert.equal(terminalValidations[0].schemaValid, true);
+  assert.equal(terminalValidations[0].accepted, true);
   assert.equal(JSON.parse(await readFile(join(root, 'solution-agent/result.json'), 'utf8')).problemId, problemPackage.problemId);
   const invocation = JSON.parse(await readFile(join(root, 'solution-agent/invocation.json'), 'utf8'));
   assert.equal(invocation.schemaVersion, 'solution-agent-invocation-v2');
@@ -277,6 +356,176 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(deliveryFailureInvocation.status, 'failed');
   assert.deepEqual(deliveryFailureInvocation.skillAssignments, invocation.skillAssignments);
   assert.deepEqual(deliveryFailureInvocation.deliveredSkills, []);
+
+  const recoveryRoot = join(root, 'recovery-agent');
+  const attempt0Raw = `Here is the result:\n${JSON.stringify(solutionResult)}`;
+  const attempt1Raw = JSON.stringify(solutionResult);
+  const recoveryCounter = { count: 0 };
+  let continuationPrompt = '';
+  const recoveryRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-recovery-000001',
+    jobNumber: 3,
+    destinationRoot: recoveryRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: createContinuationCapableParticipant(
+      { initial: attempt0Raw, continuation: attempt1Raw },
+      {
+        spawnProcess: countingSpawn(recoveryCounter),
+        onContinuationBuildArgs: job => {
+          continuationPrompt = job.prompt;
+        },
+      },
+    ),
+  });
+  assert.equal(recoveryRun.ok, true);
+  assert.equal(recoveryCounter.count, 2);
+  assert.equal(await readFile(join(recoveryRoot, 'raw-output.txt'), 'utf8'), attempt1Raw);
+  assert.equal(await readFile(join(recoveryRoot, 'terminal-attempt-0.txt'), 'utf8'), attempt0Raw);
+  assert.equal(await readFile(join(recoveryRoot, 'terminal-attempt-1.txt'), 'utf8'), attempt1Raw);
+  assert.equal(JSON.parse(await readFile(join(recoveryRoot, 'result.json'), 'utf8')).problemId, problemPackage.problemId);
+  assert.match(continuationPrompt, /ENVELOPE_FAILURE/);
+  assert.match(continuationPrompt, /Re-emit the same Role result only/i);
+  assert.match(continuationPrompt, /SolutionWorkV1/);
+  assert.doesNotMatch(continuationPrompt, new RegExp(problemPackage.problem.statement));
+  assert.doesNotMatch(continuationPrompt, /Here is the result:/);
+  const recoveryTrace = JSON.parse(await readFile(join(recoveryRoot, 'execution-trace.json'), 'utf8'));
+  const recoveryValidations = recoveryTrace.events.filter(
+    (event: { type: string }) => event.type === 'participant_terminal_validation',
+  );
+  assert.equal(recoveryValidations.length, 2);
+  assert.equal(recoveryValidations[0].attempt, 0);
+  assert.equal(recoveryValidations[0].envelopeValid, false);
+  assert.equal(recoveryValidations[1].attempt, 1);
+  assert.equal(recoveryValidations[1].envelopeValid, true);
+  assert.equal(recoveryValidations[1].schemaValid, true);
+  assert.equal(recoveryValidations[1].accepted, true);
+  assert.equal(
+    recoveryTrace.events.filter((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested').length,
+    1,
+  );
+  assert.equal(
+    recoveryTrace.events.filter((event: { type: string }) => event.type === 'participant_envelope_retransmission_completed').length,
+    1,
+  );
+  assert.equal(recoveryTrace.events.filter((event: { type: string }) => event.type === 'participant_envelope_retransmission_completed')[0].runtimeOutcome, 'COMPLETED');
+
+  const schemaFailureRoot = join(root, 'schema-failure-agent');
+  const schemaFailureCounter = { count: 0 };
+  const schemaInvalidPayload = JSON.stringify({
+    schemaVersion: 'solution-work-v1',
+    status: 'OPTIONS',
+    problemId: problemPackage.problemId,
+    unknownField: 'not-in-contract',
+  });
+  const schemaFailureRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-schema-failure-000001',
+    jobNumber: 3,
+    destinationRoot: schemaFailureRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: createContinuationCapableParticipant(
+      { initial: schemaInvalidPayload, continuation: attempt1Raw },
+      { spawnProcess: countingSpawn(schemaFailureCounter) },
+    ),
+  });
+  assert.equal(schemaFailureRun.ok, false);
+  assert.equal(schemaFailureRun.ok ? undefined : schemaFailureRun.errorKind, 'invalid_output');
+  assert.equal(schemaFailureCounter.count, 1);
+  await assert.rejects(
+    () => readFile(join(schemaFailureRoot, 'terminal-attempt-1.txt'), 'utf8'),
+    /ENOENT/,
+  );
+  const schemaFailureTrace = JSON.parse(await readFile(join(schemaFailureRoot, 'execution-trace.json'), 'utf8'));
+  assert.equal(
+    schemaFailureTrace.events.some((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
+
+  const doubleEnvelopeRoot = join(root, 'double-envelope-agent');
+  const doubleEnvelopeCounter = { count: 0 };
+  const doubleEnvelopeRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-double-envelope-000001',
+    jobNumber: 3,
+    destinationRoot: doubleEnvelopeRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: createContinuationCapableParticipant(
+      { initial: attempt0Raw, continuation: attempt0Raw },
+      { spawnProcess: countingSpawn(doubleEnvelopeCounter) },
+    ),
+  });
+  assert.equal(doubleEnvelopeRun.ok, false);
+  assert.equal(doubleEnvelopeRun.ok ? undefined : doubleEnvelopeRun.errorKind, 'invalid_output');
+  assert.equal(doubleEnvelopeCounter.count, 2);
+  await assert.rejects(
+    () => readFile(join(doubleEnvelopeRoot, 'terminal-attempt-2.txt'), 'utf8'),
+    /ENOENT/,
+  );
+
+  const attempt1SchemaInvalidRoot = join(root, 'attempt1-schema-invalid-agent');
+  const attempt1SchemaInvalidCounter = { count: 0 };
+  const attempt1SchemaInvalidRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-attempt1-schema-invalid-000001',
+    jobNumber: 3,
+    destinationRoot: attempt1SchemaInvalidRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: createContinuationCapableParticipant(
+      { initial: attempt0Raw, continuation: '{"schemaVersion":"wrong-v1"}' },
+      { spawnProcess: countingSpawn(attempt1SchemaInvalidCounter) },
+    ),
+  });
+  assert.equal(attempt1SchemaInvalidRun.ok, false);
+  assert.equal(attempt1SchemaInvalidRun.ok ? undefined : attempt1SchemaInvalidRun.errorKind, 'invalid_output');
+  assert.equal(attempt1SchemaInvalidCounter.count, 2);
+  await assert.rejects(
+    () => readFile(join(attempt1SchemaInvalidRoot, 'terminal-attempt-2.txt'), 'utf8'),
+    /ENOENT/,
+  );
+
+  const noCapabilityRoot = join(root, 'no-capability-agent');
+  const noCapabilityCounter = { count: 0 };
+  const noCapabilityRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-no-capability-000001',
+    jobNumber: 3,
+    destinationRoot: noCapabilityRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write(process.argv[1]);', attempt0Raw],
+      spawnProcess: countingSpawn(noCapabilityCounter),
+    },
+  });
+  assert.equal(noCapabilityRun.ok, false);
+  assert.equal(noCapabilityRun.ok ? undefined : noCapabilityRun.errorKind, 'invalid_output');
+  assert.equal(noCapabilityCounter.count, 1);
+  const noCapabilityTrace = JSON.parse(await readFile(join(noCapabilityRoot, 'execution-trace.json'), 'utf8'));
+  assert.equal(
+    noCapabilityTrace.events.some((event: { type: string }) => event.type === 'participant_envelope_retransmission_requested'),
+    false,
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

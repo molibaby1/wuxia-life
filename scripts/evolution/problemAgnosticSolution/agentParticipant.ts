@@ -3,14 +3,20 @@ import { mkdir, open } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { canonicalJson } from '../phase0/provenance';
+import type { StructuredTerminalEnvelopeFailureReason } from '../../../src/evolution/structuredTerminalEnvelope';
 
 const OUTPUT_ACTIVITY_WINDOW_MS = 100;
+
+export const DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 240_000;
 
 export type ParticipantExecutionTraceEventType =
   | 'process_start'
   | 'output_activity'
   | 'process_close'
-  | 'timeout';
+  | 'timeout'
+  | 'participant_terminal_validation'
+  | 'participant_envelope_retransmission_requested'
+  | 'participant_envelope_retransmission_completed';
 
 export interface ParticipantExecutionTraceEventV1 {
   seq: number;
@@ -20,6 +26,20 @@ export interface ParticipantExecutionTraceEventV1 {
   bytes?: number;
   activityKind?: string;
   detail?: string;
+  attempt?: 0 | 1;
+  envelopeValid?: boolean;
+  envelopeFailureReason?: StructuredTerminalEnvelopeFailureReason;
+  schemaValidationAttempted?: boolean;
+  schemaValid?: boolean;
+  accepted?: boolean;
+  retransmissionAttempt?: 1;
+  failureClass?: 'ENVELOPE_FAILURE';
+  sameThread?: boolean;
+  timeoutMs?: number;
+  participantCapability?: 'SAME_THREAD_CONTINUATION';
+  runtimeOutcome?: 'COMPLETED' | 'TIMEOUT' | 'CONTINUATION_FAILURE' | 'RUNTIME_FAILURE';
+  retransmissionEligible?: boolean;
+  retransmissionNotAttemptedReason?: 'CAPABILITY_UNAVAILABLE' | 'POLICY_DISABLED';
 }
 
 export interface ParticipantExecutionTraceV1 {
@@ -44,18 +64,53 @@ export interface WorkspaceAgentJobInput {
   traceArtifactPath?: string;
 }
 
+export interface ParticipantThreadRef {
+  provider: string;
+  opaqueId: string;
+}
+
+export type WorkspaceAgentOutputInterpretation =
+  | {
+      ok: true;
+      rawOutput: string;
+      threadRef?: ParticipantThreadRef;
+    }
+  | {
+      ok: false;
+      errorKind: 'invalid_output' | 'continuation';
+      message: string;
+    };
+
+export interface WorkspaceAgentSameThreadContinuation {
+  provider: string;
+  buildArgs: (
+    input: WorkspaceAgentJobInput,
+    threadRef: ParticipantThreadRef,
+  ) => string[];
+}
+
+export interface WorkspaceAgentCompletedOutputInput {
+  job: WorkspaceAgentJobInput;
+  stdout: string;
+  stderr: string;
+  expectedThreadRef?: ParticipantThreadRef;
+}
+
 export interface WorkspaceAgentJobSuccess {
   ok: true;
   rawOutput: string;
   exitCode: 0;
+  threadRef?: ParticipantThreadRef;
+  executionTrace: ParticipantExecutionTraceV1;
 }
 
 export interface WorkspaceAgentJobFailure {
   ok: false;
-  errorKind: 'runtime_unavailable' | 'process' | 'timeout' | 'invalid_output';
+  errorKind: 'runtime_unavailable' | 'process' | 'timeout' | 'invalid_output' | 'continuation';
   message: string;
   rawOutput?: string;
   exitCode?: number;
+  executionTrace: ParticipantExecutionTraceV1;
 }
 
 export type WorkspaceAgentJobResult = WorkspaceAgentJobSuccess | WorkspaceAgentJobFailure;
@@ -68,6 +123,10 @@ export interface WorkspaceAgentParticipantOptions {
   spawnProcess?: typeof spawn;
   timeoutMs?: number;
   env?: NodeJS.ProcessEnv;
+  interpretCompletedOutput?: (
+    input: WorkspaceAgentCompletedOutputInput,
+  ) => WorkspaceAgentOutputInterpretation;
+  sameThreadContinuation?: WorkspaceAgentSameThreadContinuation;
 }
 
 function combinedOutput(stdout: string, stderr: string): string {
@@ -90,12 +149,17 @@ function chunkByteLength(chunk: unknown): number {
   return Buffer.byteLength(String(chunk));
 }
 
-export async function runWorkspaceAgentJob(
+async function runWorkspaceAgentProcess(
   input: WorkspaceAgentJobInput,
   options: WorkspaceAgentParticipantOptions,
+  execution: {
+    timeoutMs: number;
+    buildArgs: () => string[];
+    expectedThreadRef?: ParticipantThreadRef;
+  },
 ): Promise<WorkspaceAgentJobResult> {
   const spawnProcess = options.spawnProcess ?? spawn;
-  const timeoutMs = options.timeoutMs ?? 120_000;
+  const { timeoutMs, buildArgs, expectedThreadRef } = execution;
 
   return new Promise(resolveResult => {
     const startedAt = performance.now();
@@ -189,15 +253,15 @@ export async function runWorkspaceAgentJob(
     let args: string[];
     let settled = false;
     let timeoutTimer: NodeJS.Timeout | undefined;
-    const finish = async (result: WorkspaceAgentJobResult, outcome: ParticipantExecutionTraceV1['terminal']['outcome']): Promise<void> => {
+    const finish = async (result: Omit<WorkspaceAgentJobResult, 'executionTrace'>, outcome: ParticipantExecutionTraceV1['terminal']['outcome']): Promise<void> => {
       if (settled) return;
       settled = true;
       if (timeoutTimer !== undefined) clearTimeout(timeoutTimer);
       await persistTrace(outcome);
-      resolveResult(result);
+      resolveResult({ ...result, executionTrace: trace } as WorkspaceAgentJobResult);
     };
     try {
-      args = options.buildArgs(input);
+      args = buildArgs();
       child = spawnProcess(options.executable, args, {
         cwd: input.workspaceRoot,
         env: { ...process.env, ...options.env },
@@ -256,7 +320,31 @@ export async function runWorkspaceAgentJob(
       const closeElapsedMs = elapsedMs();
       if (processStarted) record({ type: 'process_close', elapsedMs: closeElapsedMs });
       if (code === 0) {
-        void finish({ ok: true, rawOutput: stdout, exitCode: 0 }, 'completed');
+        if (options.interpretCompletedOutput === undefined) {
+          void finish({ ok: true, rawOutput: stdout, exitCode: 0 }, 'completed');
+          return;
+        }
+        const interpretation = options.interpretCompletedOutput({
+          job: input,
+          stdout,
+          stderr,
+          expectedThreadRef,
+        });
+        if (!interpretation.ok) {
+          void finish({
+            ok: false,
+            errorKind: interpretation.errorKind,
+            message: interpretation.message,
+            rawOutput: stdout,
+          }, 'completed');
+          return;
+        }
+        void finish({
+          ok: true,
+          rawOutput: interpretation.rawOutput,
+          exitCode: 0,
+          ...(interpretation.threadRef === undefined ? {} : { threadRef: interpretation.threadRef }),
+        }, 'completed');
         return;
       }
       const rawOutput = combinedOutput(stdout, stderr);
@@ -268,5 +356,50 @@ export async function runWorkspaceAgentJob(
         ...(typeof code === 'number' ? { exitCode: code } : {}),
       }, 'process_error');
     });
+  });
+}
+
+export async function runWorkspaceAgentJob(
+  input: WorkspaceAgentJobInput,
+  options: WorkspaceAgentParticipantOptions,
+): Promise<WorkspaceAgentJobResult> {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS;
+  return runWorkspaceAgentProcess(input, options, {
+    timeoutMs,
+    buildArgs: () => options.buildArgs(input),
+  });
+}
+
+export async function runWorkspaceAgentContinuation(
+  input: WorkspaceAgentJobInput,
+  options: WorkspaceAgentParticipantOptions,
+  threadRef: ParticipantThreadRef,
+  timeoutMs: number,
+): Promise<WorkspaceAgentJobResult> {
+  const continuation = options.sameThreadContinuation;
+  if (continuation === undefined || continuation.provider !== threadRef.provider) {
+    const trace: ParticipantExecutionTraceV1 = {
+      schemaVersion: 'participant-execution-trace-v1',
+      invocation: {
+        startedAt: new Date().toISOString(),
+        timeoutMs,
+      },
+      events: [],
+      terminal: {
+        outcome: 'process_error',
+        elapsedMs: 0,
+      },
+    };
+    return {
+      ok: false,
+      errorKind: 'continuation',
+      message: `workspace Agent continuation provider mismatch for ${input.invocationRef}`,
+      executionTrace: trace,
+    };
+  }
+  return runWorkspaceAgentProcess(input, options, {
+    timeoutMs,
+    buildArgs: () => continuation.buildArgs(input, threadRef),
+    expectedThreadRef: threadRef,
   });
 }

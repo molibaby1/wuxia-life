@@ -14,12 +14,51 @@ import {
   sealPhase0Run,
   sha256Hex,
 } from '../../scripts/evolution/phase0/provenance';
-import type { WorkspaceAgentParticipantOptions } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import {
+  type WorkspaceAgentJobInput,
+  type WorkspaceAgentParticipantOptions,
+} from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
+import { runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 
 const fakeWorkspaceAgentParticipant: WorkspaceAgentParticipantOptions = {
   executable: 'fake-workspace-agent',
   buildArgs: () => [],
 };
+
+function createRecoveryCapableSolutionParticipant(
+  solutionPayload: Record<string, unknown>,
+): WorkspaceAgentParticipantOptions {
+  const attempt0Raw = `Here is the result:\n${JSON.stringify(solutionPayload)}`;
+  const attempt1Raw = JSON.stringify(solutionPayload);
+  const threadRef = { provider: 'test-provider', opaqueId: 'thread-000001' };
+  return {
+    executable: process.execPath,
+    buildArgs: () => ['-e', 'process.stdout.write(process.argv[1]);', attempt0Raw],
+    interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
+      ok: true as const,
+      rawOutput: stdout,
+      threadRef: expectedThreadRef ?? threadRef,
+    }),
+    sameThreadContinuation: {
+      provider: threadRef.provider,
+      buildArgs: (_job: WorkspaceAgentJobInput) => [
+        '-e',
+        'process.stdout.write(process.argv[1]);',
+        attempt1Raw,
+      ],
+    },
+  };
+}
+
+async function writeRecoveryWorkflowFixtures(root: string): Promise<void> {
+  await writeAuthorityRefFixtures(root);
+  const canonicalSkillPath = 'skills/repository-grounded-investigation/SKILL.md';
+  const canonicalSkillContent = await readFile(join(process.cwd(), canonicalSkillPath), 'utf8');
+  await mkdir(join(root, 'skills/repository-grounded-investigation'), { recursive: true });
+  await mkdir(join(root, 'src'), { recursive: true });
+  await writeFile(join(root, canonicalSkillPath), canonicalSkillContent);
+  await writeFile(join(root, 'src/example.ts'), 'export const example = true;');
+}
 
 const DEFAULT_TEST_AUTHORITY_REFS = [
   'docs/product/player-model.md',
@@ -78,9 +117,13 @@ async function writeLegacyFailureArtifact(input: {
   experimentRoot: string;
   stage: 'EXTERNAL_FEEDBACK' | 'IMPROVEMENT_HYPOTHESIS';
   errorKind: string;
+  participantProvider?: string;
+  invocationRefFlavor?: 'deepseek' | 'local';
 }): Promise<void> {
   const directory = input.stage === 'EXTERNAL_FEEDBACK' ? 'feedback-runs' : 'hypothesis-runs';
   const runDirectory = join(input.experimentRoot, directory, 'cohort-run-000001');
+  const invocationRefFlavor = input.invocationRefFlavor ?? 'deepseek';
+  const invocationPrefix = invocationRefFlavor === 'local' ? 'local' : 'deepseek';
   await mkdir(runDirectory, { recursive: true });
   await writeFile(join(runDirectory, 'invocation.json'), JSON.stringify({
     schemaVersion: input.stage === 'EXTERNAL_FEEDBACK'
@@ -88,11 +131,14 @@ async function writeLegacyFailureArtifact(input: {
       : 'improvement-hypothesis-invocation-v1',
     runRef: 'cohort-run-000001',
     ...(input.stage === 'EXTERNAL_FEEDBACK'
-      ? { invocationRef: 'cohort-run-000001-deepseek-player-feedback-001' }
+      ? { invocationRef: `cohort-run-000001-${invocationPrefix}-player-feedback-001` }
       : {
-        feedbackInvocationRef: 'cohort-run-000001-deepseek-player-feedback-001',
-        hypothesisInvocationRef: 'cohort-run-000001-deepseek-improvement-hypothesis-001',
+        feedbackInvocationRef: `cohort-run-000001-${invocationPrefix}-player-feedback-001`,
+        hypothesisInvocationRef: `cohort-run-000001-${invocationPrefix}-improvement-hypothesis-001`,
       }),
+    ...(input.participantProvider === undefined
+      ? {}
+      : { participant: { provider: input.participantProvider } }),
     status: 'failed',
     errorKind: input.errorKind,
   }));
@@ -668,12 +714,19 @@ export async function runParticipantFailureOrchestrationTests(): Promise<void> {
     repositoryRoot: feedbackFixture.root,
     experimentRoot: feedbackFixture.experimentRoot,
     fixedSourceRoot: feedbackFixture.sourceRoot,
-    apiKey: 'test-key',
+    participantMode: 'local-subagent',
     workspaceAgentParticipant: fakeWorkspaceAgentParticipant,
     dependencies: {
       preflightFixedSource: async () => feedbackFixture.preflight,
       runExternalFeedback: async options => {
-        await writeLegacyFailureArtifact({ experimentRoot: options.outRoot!, stage: 'EXTERNAL_FEEDBACK', errorKind: 'provider' });
+        assert.ok(options.localParticipant);
+        await writeLegacyFailureArtifact({
+          experimentRoot: options.outRoot!,
+          stage: 'EXTERNAL_FEEDBACK',
+          errorKind: 'timeout',
+          participantProvider: 'codex-local-subagent',
+          invocationRefFlavor: 'local',
+        });
         throw new Error('legacy feedback runner failure');
       },
       runImprovementHypothesis: async () => {
@@ -693,9 +746,11 @@ export async function runParticipantFailureOrchestrationTests(): Promise<void> {
   assert.equal(feedbackResult.status, 'participant_failure');
   assert.equal(feedbackResult.outcome.failedStage, 'EXTERNAL_FEEDBACK');
   assert.equal(feedbackResult.outcome.route, 'DEFER');
+  assert.equal(feedbackResult.outcome.participantErrorKind, 'timeout');
   assert.equal(feedbackResult.actualParticipantJobs, 1);
   assert.equal(feedbackResult.decisionPath, null);
   assert.equal(feedbackResult.problemPackagePath, null);
+  assert.equal(feedbackResult.outcome.outcome, 'PARTICIPANT_FAILURE');
   assert.equal(hypothesisCalls, 0);
   assert.equal(solutionCalls, 0);
   assert.equal(reviewerCalls, 0);
@@ -709,7 +764,7 @@ export async function runParticipantFailureOrchestrationTests(): Promise<void> {
     repositoryRoot: hypothesisFixture.root,
     experimentRoot: hypothesisFixture.experimentRoot,
     fixedSourceRoot: hypothesisFixture.sourceRoot,
-    apiKey: 'test-key',
+    participantMode: 'local-subagent',
     workspaceAgentParticipant: fakeWorkspaceAgentParticipant,
     dependencies: {
       preflightFixedSource: async () => hypothesisFixture.preflight,
@@ -723,7 +778,14 @@ export async function runParticipantFailureOrchestrationTests(): Promise<void> {
         experimentRootHash: hypothesisFixture.preflight.experimentRootHash,
       }),
       runImprovementHypothesis: async options => {
-        await writeLegacyFailureArtifact({ experimentRoot: options.outRoot!, stage: 'IMPROVEMENT_HYPOTHESIS', errorKind: 'parse' });
+        assert.ok(options.localParticipant);
+        await writeLegacyFailureArtifact({
+          experimentRoot: options.outRoot!,
+          stage: 'IMPROVEMENT_HYPOTHESIS',
+          errorKind: 'parse',
+          participantProvider: 'codex-local-subagent',
+          invocationRefFlavor: 'local',
+        });
         throw new Error('legacy hypothesis runner failure');
       },
       runSolutionAgent: async () => {
@@ -739,6 +801,7 @@ export async function runParticipantFailureOrchestrationTests(): Promise<void> {
   assert.equal(hypothesisResult.status, 'participant_failure');
   assert.equal(hypothesisResult.outcome.failedStage, 'IMPROVEMENT_HYPOTHESIS');
   assert.equal(hypothesisResult.actualParticipantJobs, 2);
+  assert.equal(hypothesisResult.outcome.outcome, 'PARTICIPANT_FAILURE');
   assert.equal(hypothesisResult.problemPackagePath, null);
   assert.equal(solutionCalls, 0);
   assert.equal(reviewerCalls, 0);
@@ -873,6 +936,95 @@ export async function runSolutionAndReviewerFailureOrchestrationTests(): Promise
   }
 }
 
+export async function runSolutionRecoveryParticipantJobAccountingTests(): Promise<void> {
+  const fixture = await createPreflightFixture();
+  await writeRecoveryWorkflowFixtures(fixture.root);
+  const problemId = 'problem-hypothesis-000001';
+  const solutionPayload = {
+    schemaVersion: 'solution-work-v1',
+    status: 'OPTIONS',
+    problemId,
+    options: [{
+      optionId: 'option-000001',
+      proposedChange: 'A bounded configuration change.',
+      rationale: 'It may address the observed problem.',
+      repoRefs: ['src/example.ts'],
+      artifactRefs: ['source/observable-payload.json'],
+      changeScope: 'configuration',
+      expectedPlayerObservableDifference: 'A visible difference.',
+      risks: [],
+      unknowns: [],
+    }],
+    recommendedOptionId: 'option-000001',
+    summary: 'One option.',
+    repoRefs: ['src/example.ts'],
+    artifactRefs: ['source/observable-payload.json'],
+  };
+  let reviewerCalls = 0;
+  const result = await runProblemAgnosticAgentSolutionLoop({
+    repositoryRoot: fixture.root,
+    experimentRoot: fixture.experimentRoot,
+    fixedSourceRoot: fixture.sourceRoot,
+    apiKey: 'test-key',
+    workspaceAgentParticipant: createRecoveryCapableSolutionParticipant(solutionPayload),
+    dependencies: {
+      preflightFixedSource: async () => fixture.preflight,
+      runExternalFeedback: async options => ({
+        runRef: options.runRef,
+        invocationRef: 'feedback-000001',
+        phase0RunPath: fixture.sourceRoot,
+        feedbackDir: join(options.outRoot!, 'feedback-runs/cohort-run-000001'),
+        humanReportPath: join(options.outRoot!, 'feedback-runs/cohort-run-000001/human-review.md'),
+        observablePayloadHash: fixture.preflight.observablePayloadHash,
+        experimentRootHash: fixture.preflight.experimentRootHash,
+      }),
+      runImprovementHypothesis: async options => {
+        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        return {
+          runRef: options.runRef,
+          feedbackInvocationRef: 'feedback-000001',
+          hypothesisInvocationRef: 'hypothesis-000001',
+          hypothesisDir,
+          humanReportPath: join(hypothesisDir, 'human-review.md'),
+          experimentRootHash: fixture.preflight.experimentRootHash,
+          observablePayloadHash: fixture.preflight.observablePayloadHash,
+          feedbackHash: 'feedback-hash',
+        };
+      },
+      runSolutionAgent,
+      runSolutionReviewer: async input => {
+        reviewerCalls += 1;
+        return {
+          ok: true,
+          review: {
+            schemaVersion: 'solution-review-v1',
+            problemId,
+            decision: 'ACCEPT_OPTION',
+            acceptedOptionId: 'option-000001',
+            scopeAssessment: 'config_only',
+            assessment: 'The option fits the bounded configuration boundary.',
+            repoRefs: [],
+            artifactRefs: [],
+            concerns: [],
+          },
+          invocationPath: join(input.destinationRoot, 'invocation.json'),
+          rawOutputPath: join(input.destinationRoot, 'raw-output.txt'),
+          reviewPath: join(input.destinationRoot, 'review.json'),
+        };
+      },
+    },
+  });
+  assert.equal(result.status, 'completed');
+  assert.equal(result.actualParticipantJobs, 4);
+  assert.equal(reviewerCalls, 1);
+  const decision = JSON.parse(await readFile(result.decisionPath!, 'utf8'));
+  assert.equal(decision.inputs.budget.actualParticipantJobs, 4);
+  assert.equal(decision.inputs.budget.retryCount, 0);
+  const solutionInvocation = JSON.parse(await readFile(join(fixture.experimentRoot, 'solution-agent/invocation.json'), 'utf8'));
+  assert.equal(solutionInvocation.jobNumber, 3);
+  assert.equal(await readFile(join(fixture.experimentRoot, 'solution-agent/terminal-attempt-1.txt'), 'utf8'), JSON.stringify(solutionPayload));
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   Promise.all([
     runMissingFixedSourceBindingTests(),
@@ -885,6 +1037,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     runInsufficientEvidenceDoesNotMaterializeReviewerWorkspaceTests(),
     runParticipantFailureOrchestrationTests(),
     runSolutionAndReviewerFailureOrchestrationTests(),
+    runSolutionRecoveryParticipantJobAccountingTests(),
   ])
     .then(() => console.log('problemAgnosticAgentSolutionLoop.test.ts: ok'))
     .catch(error => {

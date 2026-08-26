@@ -47,21 +47,30 @@ function expectedInvocation(input: { stage: LegacyParticipantFailureStage; runRe
   directory: 'feedback-runs' | 'hypothesis-runs';
   schemaVersion: 'minimal-external-feedback-invocation-v1' | 'improvement-hypothesis-invocation-v1';
   invocationRefField: 'invocationRef' | 'hypothesisInvocationRef';
-  invocationRef: string;
+  invocationRefs: {
+    deepseek: string;
+    local: string;
+  };
 } {
   if (input.stage === 'EXTERNAL_FEEDBACK') {
     return {
       directory: 'feedback-runs',
       schemaVersion: 'minimal-external-feedback-invocation-v1',
       invocationRefField: 'invocationRef',
-      invocationRef: `${input.runRef}-deepseek-player-feedback-001`,
+      invocationRefs: {
+        deepseek: `${input.runRef}-deepseek-player-feedback-001`,
+        local: `${input.runRef}-local-player-feedback-001`,
+      },
     };
   }
   return {
     directory: 'hypothesis-runs',
     schemaVersion: 'improvement-hypothesis-invocation-v1',
     invocationRefField: 'hypothesisInvocationRef',
-    invocationRef: `${input.runRef}-deepseek-improvement-hypothesis-001`,
+    invocationRefs: {
+      deepseek: `${input.runRef}-deepseek-improvement-hypothesis-001`,
+      local: `${input.runRef}-local-improvement-hypothesis-001`,
+    },
   };
 }
 
@@ -124,7 +133,14 @@ export async function proveLegacyParticipantFailure(input: {
     if (!isRecord(parsed)) return null;
     if (parsed.schemaVersion !== expected.schemaVersion) return null;
     if (parsed.runRef !== input.runRef) return null;
-    if (parsed[expected.invocationRefField] !== expected.invocationRef) return null;
+    const participant = parsed.participant;
+    if (participant !== undefined && !isRecord(participant)) return null;
+    const provider = isRecord(participant) ? participant.provider : undefined;
+    if (provider !== undefined && provider !== 'deepseek' && provider !== 'codex-local-subagent') return null;
+    const expectedInvocationRef = provider === 'codex-local-subagent'
+      ? expected.invocationRefs.local
+      : expected.invocationRefs.deepseek;
+    if (parsed[expected.invocationRefField] !== expectedInvocationRef) return null;
     if (parsed.status !== 'failed') return null;
     if (typeof parsed.errorKind !== 'string' || parsed.errorKind.length === 0) return null;
 

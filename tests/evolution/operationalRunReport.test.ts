@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { buildOperationalRunReport } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 
 async function writeJson(path: string, value: unknown): Promise<void> {
@@ -30,6 +30,152 @@ async function createProblemPackage(root: string): Promise<void> {
   });
 }
 
+function createExecutionTrace(events: Record<string, unknown>[]): Record<string, unknown> {
+  return {
+    schemaVersion: 'participant-execution-trace-v1',
+    invocation: {
+      startedAt: '2026-08-24T00:00:00.000Z',
+      timeoutMs: 120_000,
+    },
+    events: events.map((event, index) => ({ seq: index, ...event })),
+    terminal: {
+      outcome: 'completed',
+      elapsedMs: 1000,
+    },
+  };
+}
+
+function recoveredExecutionTrace(): Record<string, unknown> {
+  return createExecutionTrace([
+    { type: 'process_start', elapsedMs: 0, attempt: 0 },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 100,
+      attempt: 0,
+      envelopeValid: false,
+      schemaValidationAttempted: false,
+      accepted: false,
+      envelopeFailureReason: 'INVALID_JSON',
+    },
+    {
+      type: 'participant_envelope_retransmission_requested',
+      elapsedMs: 101,
+      retransmissionAttempt: 1,
+      failureClass: 'ENVELOPE_FAILURE',
+      sameThread: true,
+      timeoutMs: 60_000,
+      participantCapability: 'SAME_THREAD_CONTINUATION',
+    },
+    {
+      type: 'participant_envelope_retransmission_completed',
+      elapsedMs: 500,
+      retransmissionAttempt: 1,
+      runtimeOutcome: 'COMPLETED',
+    },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 501,
+      attempt: 1,
+      envelopeValid: true,
+      schemaValidationAttempted: true,
+      schemaValid: true,
+      accepted: true,
+    },
+  ]);
+}
+
+function failClosedExecutionTrace(): Record<string, unknown> {
+  return createExecutionTrace([
+    { type: 'process_start', elapsedMs: 0, attempt: 0 },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 100,
+      attempt: 0,
+      envelopeValid: false,
+      schemaValidationAttempted: false,
+      accepted: false,
+      envelopeFailureReason: 'INVALID_JSON',
+    },
+    {
+      type: 'participant_envelope_retransmission_requested',
+      elapsedMs: 101,
+      retransmissionAttempt: 1,
+      failureClass: 'ENVELOPE_FAILURE',
+      sameThread: true,
+      timeoutMs: 60_000,
+      participantCapability: 'SAME_THREAD_CONTINUATION',
+    },
+    {
+      type: 'participant_envelope_retransmission_completed',
+      elapsedMs: 500,
+      retransmissionAttempt: 1,
+      runtimeOutcome: 'COMPLETED',
+    },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 501,
+      attempt: 1,
+      envelopeValid: true,
+      schemaValidationAttempted: true,
+      schemaValid: false,
+      accepted: false,
+    },
+  ]);
+}
+
+function firstPassSuccessExecutionTrace(): Record<string, unknown> {
+  return createExecutionTrace([
+    { type: 'process_start', elapsedMs: 0, attempt: 0 },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 100,
+      attempt: 0,
+      envelopeValid: true,
+      schemaValidationAttempted: true,
+      schemaValid: true,
+      accepted: true,
+    },
+  ]);
+}
+
+async function createEarlyParticipantFailureWorkflow(input: {
+  root: string;
+  stage: 'EXTERNAL_FEEDBACK' | 'IMPROVEMENT_HYPOTHESIS';
+  runRef: string;
+  invocationRef: string;
+}): Promise<void> {
+  const directory = input.stage === 'EXTERNAL_FEEDBACK' ? 'feedback-runs' : 'hypothesis-runs';
+  const invocationPath = join(directory, input.runRef, 'invocation.json');
+  await writeJson(join(input.root, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(input.root, invocationPath), {
+    schemaVersion: input.stage === 'EXTERNAL_FEEDBACK'
+      ? 'minimal-external-feedback-invocation-v1'
+      : 'improvement-hypothesis-invocation-v1',
+    runRef: input.runRef,
+    ...(input.stage === 'EXTERNAL_FEEDBACK'
+      ? { invocationRef: input.invocationRef }
+      : {
+        feedbackInvocationRef: `${input.runRef}-feedback-001`,
+        hypothesisInvocationRef: input.invocationRef,
+      }),
+    status: 'failed',
+  });
+  await writeJson(join(input.root, 'workflow-outcome.json'), {
+    schemaVersion: 'participant-failure-outcome-v1',
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: input.stage,
+    participantJobNumber: input.stage === 'EXTERNAL_FEEDBACK' ? 1 : 2,
+    route: 'DEFER',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: [invocationPath],
+    budget: {
+      actualParticipantJobs: input.stage === 'EXTERNAL_FEEDBACK' ? 1 : 2,
+      maxParticipantJobs: 4,
+      retryCount: 0,
+    },
+  });
+}
+
 export async function runOperationalRunReportTests(): Promise<void> {
   await testReadyForConfigExecution();
   await testNestedRoundOne();
@@ -39,8 +185,16 @@ export async function runOperationalRunReportTests(): Promise<void> {
   await testIncompleteNestedWorkflow();
   await testFalsePositiveDirectories();
   await testParticipantFailure();
+  await testEarlyFeedbackParticipantFailure();
+  await testEarlyHypothesisParticipantFailure();
+  await testMalformedOrMissingFailureInvocation();
+  await testUnsafeFailureArtifactReference();
   await testIncompleteHistoricalAttempt();
   await testWorkflowRecursionStopsAtRoot();
+  await testRecoveredStructuredTerminalDelivery();
+  await testFailClosedStructuredTerminalDelivery();
+  await testRetransmissionSucceededDespiteAcceptanceRejection();
+  await testStructuredTerminalDeliveryAggregates();
 }
 
 async function testReadyForConfigExecution(): Promise<void> {
@@ -100,6 +254,123 @@ async function testParticipantFailure(): Promise<void> {
   assert.match(report, /Failed stage: SOLUTION/);
   assert.match(report, /Participant error kind: invalid_output/);
   assert.match(report, /Authoritative modification in this workflow: NO/);
+}
+
+async function testEarlyFeedbackParticipantFailure(): Promise<void> {
+  const scanRoot = await createRoot();
+  const runRoot = join(scanRoot, 'round-1');
+  await createEarlyParticipantFailureWorkflow({
+    root: runRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'early-feedback-run-000001',
+    invocationRef: 'early-feedback-run-000001-deepseek-player-feedback-001',
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
+
+  assert.match(report, /Status: PARTICIPANT_FAILURE/);
+  assert.match(report, /Source run ref: early-feedback-run-000001/);
+  assert.match(report, /Terminal route \/ workflow outcome: DEFER/);
+  assert.match(report, /Failed stage: EXTERNAL_FEEDBACK/);
+  assert.match(report, /Participant error kind: timeout/);
+  assert.match(report, /Authoritative modification in this workflow: NO/);
+}
+
+async function testEarlyHypothesisParticipantFailure(): Promise<void> {
+  const scanRoot = await createRoot();
+  const runRoot = join(scanRoot, 'round-1');
+  await createEarlyParticipantFailureWorkflow({
+    root: runRoot,
+    stage: 'IMPROVEMENT_HYPOTHESIS',
+    runRef: 'early-hypothesis-run-000001',
+    invocationRef: 'early-hypothesis-run-000001-deepseek-improvement-hypothesis-001',
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
+
+  assert.match(report, /Status: PARTICIPANT_FAILURE/);
+  assert.match(report, /Source run ref: early-hypothesis-run-000001/);
+  assert.match(report, /Terminal route \/ workflow outcome: DEFER/);
+  assert.match(report, /Failed stage: IMPROVEMENT_HYPOTHESIS/);
+  assert.match(report, /Participant error kind: timeout/);
+  assert.match(report, /Authoritative modification in this workflow: NO/);
+}
+
+async function testMalformedOrMissingFailureInvocation(): Promise<void> {
+  const scanRoot = await createRoot();
+  const malformedRoot = join(scanRoot, 'malformed');
+  const missingRoot = join(scanRoot, 'missing');
+  await writeJson(join(malformedRoot, 'source/observable-payload.json'), { entries: [] });
+  await mkdir(join(malformedRoot, 'feedback-runs', 'malformed-run-000001'), { recursive: true });
+  await writeFile(
+    join(malformedRoot, 'feedback-runs', 'malformed-run-000001', 'invocation.json'),
+    '{not-json',
+    'utf8',
+  );
+  await writeJson(join(malformedRoot, 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'EXTERNAL_FEEDBACK',
+    route: 'DEFER',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: ['feedback-runs/malformed-run-000001/invocation.json'],
+  });
+  await writeJson(join(missingRoot, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(missingRoot, 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'IMPROVEMENT_HYPOTHESIS',
+    route: 'DEFER',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: ['hypothesis-runs/missing-run-000001/invocation.json'],
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const result = await buildOperationalRunReport({ root: scanRoot, outputPath });
+  const report = await readFile(result.reportPath, 'utf8');
+
+  assert.equal(result.workflowCount, 2);
+  assert.doesNotMatch(report, /Source run ref:/);
+  assert.match(report, /Authoritative modification in this workflow: NO/g);
+}
+
+async function testUnsafeFailureArtifactReference(): Promise<void> {
+  const scanRoot = await createRoot();
+  const outsideRoot = await createRoot();
+  const outsideInvocation = join(outsideRoot, 'invocation.json');
+  await writeJson(outsideInvocation, {
+    runRef: 'unsafe-source-run-000001',
+    status: 'failed',
+  });
+
+  const parentReferenceRoot = join(scanRoot, 'parent-reference');
+  await writeJson(join(parentReferenceRoot, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(parentReferenceRoot, 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'EXTERNAL_FEEDBACK',
+    route: 'DEFER',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: [relative(parentReferenceRoot, outsideInvocation)],
+  });
+
+  const absoluteReferenceRoot = join(scanRoot, 'absolute-reference');
+  await writeJson(join(absoluteReferenceRoot, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(absoluteReferenceRoot, 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'EXTERNAL_FEEDBACK',
+    route: 'DEFER',
+    participantErrorKind: 'timeout',
+    failureArtifactRefs: [outsideInvocation],
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const result = await buildOperationalRunReport({ root: scanRoot, outputPath });
+  const report = await readFile(result.reportPath, 'utf8');
+
+  assert.equal(result.workflowCount, 2);
+  assert.doesNotMatch(report, /Source run ref:/);
+  assert.doesNotMatch(report, /unsafe-source-run-000001/);
+  assert.match(report, /Authoritative modification in this workflow: NO/g);
 }
 
 async function testNestedRoundOne(): Promise<void> {
@@ -227,6 +498,149 @@ async function testWorkflowRecursionStopsAtRoot(): Promise<void> {
   assert.equal(result.workflowCount, 1);
   assert.match(report, /## 1\. p2-run\/round-1/);
   assert.doesNotMatch(report, /p2-run\/round-1\/child/);
+}
+
+async function createStructuredTerminalWorkflow(input: {
+  scanRoot: string;
+  identity: string;
+  executionTrace: Record<string, unknown>;
+  includeResult?: boolean;
+}): Promise<void> {
+  const runRoot = join(input.scanRoot, input.identity);
+  await createProblemPackage(runRoot);
+  await writeJson(join(runRoot, 'source/observable-payload.json'), { entries: [] });
+  if (input.includeResult !== false) {
+    await writeJson(join(runRoot, 'solution-agent/result.json'), { status: 'OPTIONS' });
+  }
+  await writeJson(join(runRoot, 'solution-agent/execution-trace.json'), input.executionTrace);
+}
+
+async function testRecoveredStructuredTerminalDelivery(): Promise<void> {
+  const scanRoot = await createRoot();
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'recovered-run',
+    executionTrace: recoveredExecutionTrace(),
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
+
+  assert.match(report, /Structured terminal delivery/);
+  assert.match(report, /First attempt: ENVELOPE_FAILURE/);
+  assert.match(report, /Bounded retransmission: SUCCEEDED/);
+  assert.match(report, /Final structured output: VALID/);
+  assert.match(report, /solution-agent\/execution-trace\.json/);
+  assert.doesNotMatch(report, /terminal-attempt-/);
+}
+
+async function testFailClosedStructuredTerminalDelivery(): Promise<void> {
+  const scanRoot = await createRoot();
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'fail-closed-run',
+    executionTrace: failClosedExecutionTrace(),
+    includeResult: false,
+  });
+  await writeJson(join(scanRoot, 'fail-closed-run', 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'SOLUTION',
+    route: 'DEFER',
+    participantErrorKind: 'invalid_output',
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
+
+  assert.match(report, /First attempt: ENVELOPE_FAILURE/);
+  assert.match(report, /Bounded retransmission: SCHEMA_FAILURE/);
+  assert.match(report, /Final structured output: FAILED/);
+}
+
+function acceptanceRejectedAfterRetransmissionTrace(): Record<string, unknown> {
+  return createExecutionTrace([
+    { type: 'process_start', elapsedMs: 0, attempt: 0 },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 100,
+      attempt: 0,
+      envelopeValid: false,
+      schemaValidationAttempted: false,
+      accepted: false,
+      envelopeFailureReason: 'INVALID_JSON',
+    },
+    {
+      type: 'participant_envelope_retransmission_requested',
+      elapsedMs: 101,
+      retransmissionAttempt: 1,
+      failureClass: 'ENVELOPE_FAILURE',
+      sameThread: true,
+      timeoutMs: 60_000,
+      participantCapability: 'SAME_THREAD_CONTINUATION',
+    },
+    {
+      type: 'participant_envelope_retransmission_completed',
+      elapsedMs: 500,
+      retransmissionAttempt: 1,
+      runtimeOutcome: 'COMPLETED',
+    },
+    {
+      type: 'participant_terminal_validation',
+      elapsedMs: 501,
+      attempt: 1,
+      envelopeValid: true,
+      schemaValidationAttempted: true,
+      schemaValid: true,
+      accepted: false,
+    },
+  ]);
+}
+
+async function testRetransmissionSucceededDespiteAcceptanceRejection(): Promise<void> {
+  const scanRoot = await createRoot();
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'acceptance-rejected-run',
+    executionTrace: acceptanceRejectedAfterRetransmissionTrace(),
+    includeResult: false,
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
+
+  assert.match(report, /Bounded retransmission: SUCCEEDED/);
+  assert.match(report, /Final structured output: FAILED/);
+}
+
+async function testStructuredTerminalDeliveryAggregates(): Promise<void> {
+  const scanRoot = await createRoot();
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'first-pass-success',
+    executionTrace: firstPassSuccessExecutionTrace(),
+  });
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'recovered-success',
+    executionTrace: recoveredExecutionTrace(),
+  });
+  await createStructuredTerminalWorkflow({
+    scanRoot,
+    identity: 'fail-closed-schema',
+    executionTrace: failClosedExecutionTrace(),
+    includeResult: false,
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const result = await buildOperationalRunReport({ root: scanRoot, outputPath });
+  const report = await readFile(result.reportPath, 'utf8');
+
+  assert.equal(result.workflowCount, 3);
+  assert.match(report, /First-pass structured-output successes: 1/);
+  assert.match(report, /First-pass envelope failures: 2/);
+  assert.match(report, /Retransmissions attempted: 2/);
+  assert.match(report, /Retransmissions succeeded: 1/);
+  assert.match(report, /Final structured-output successes: 2/);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

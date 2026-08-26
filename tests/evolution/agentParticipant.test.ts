@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import {
+  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   runWorkspaceAgentJob,
+  runWorkspaceAgentContinuation,
   type WorkspaceAgentJobInput,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { parseSolutionWork } from '../../src/evolution/solutionWorkContract';
@@ -43,10 +45,13 @@ export async function runAgentParticipantTests(): Promise<void> {
     },
   );
   assert.equal(success.ok, true);
+  assert.equal(success.executionTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(success.executionTrace.terminal.outcome, 'completed');
   assert.equal(invocations, 1);
   assert.match(success.ok ? success.rawOutput : '', new RegExp(workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   const completedTrace = JSON.parse(await readFile(traceInput(input.invocationRef).traceArtifactPath, 'utf8'));
   assert.equal(completedTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(completedTrace.invocation.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
   assert.deepEqual(completedTrace.events.map((event: { seq: number }) => event.seq), [0, 1, 2]);
   assert.deepEqual(completedTrace.events.map((event: { type: string }) => event.type), [
     'process_start',
@@ -59,6 +64,21 @@ export async function runAgentParticipantTests(): Promise<void> {
   assert.ok(completedTrace.events.every((event: { elapsedMs: number }, index: number, events: Array<{ elapsedMs: number }>) => (
     index === 0 || event.elapsedMs >= events[index - 1]!.elapsedMs
   )));
+
+  const explicitTimeoutMs = 5_000;
+  const explicitTimeout = await runWorkspaceAgentJob(
+    traceInput('solution-explicit-timeout'),
+    {
+      executable: process.execPath,
+      timeoutMs: explicitTimeoutMs,
+      buildArgs: () => ['-e', 'process.stdout.write("ok");'],
+    },
+  );
+  assert.equal(explicitTimeout.ok, true);
+  const explicitTimeoutTrace = JSON.parse(
+    await readFile(traceInput('solution-explicit-timeout').traceArtifactPath, 'utf8'),
+  );
+  assert.equal(explicitTimeoutTrace.invocation.timeoutMs, explicitTimeoutMs);
 
   const noOutput = await runWorkspaceAgentJob(
     traceInput('solution-no-output'),
@@ -222,6 +242,130 @@ export async function runAgentParticipantTests(): Promise<void> {
     largeOutputTrace.terminal.lastObservableActivityElapsedMs,
     largeOutputEvents.at(-1)?.elapsedMs,
   );
+
+  const interpreted = await runWorkspaceAgentJob(
+    traceInput('solution-interpreted'),
+    {
+      executable: process.execPath,
+      buildArgs: () => [
+        '-e',
+        'process.stdout.write("transport-envelope");',
+      ],
+      interpretCompletedOutput: ({ stdout }) => ({
+        ok: true,
+        rawOutput: `terminal:${stdout}`,
+        threadRef: {
+          provider: 'test-provider',
+          opaqueId: 'thread-000001',
+        },
+      }),
+    },
+  );
+
+  assert.equal(interpreted.ok, true);
+  if (interpreted.ok) {
+    assert.equal(interpreted.rawOutput, 'terminal:transport-envelope');
+    assert.deepEqual(interpreted.threadRef, {
+      provider: 'test-provider',
+      opaqueId: 'thread-000001',
+    });
+  }
+
+  const rejectedInterpretation = await runWorkspaceAgentJob(
+    traceInput('solution-interpreter-reject'),
+    {
+      executable: process.execPath,
+      buildArgs: () => ['-e', 'process.stdout.write("bad-transport");'],
+      interpretCompletedOutput: () => ({
+        ok: false,
+        errorKind: 'invalid_output',
+        message: 'terminal result missing',
+      }),
+    },
+  );
+
+  assert.equal(rejectedInterpretation.ok, false);
+  assert.equal(
+    rejectedInterpretation.ok ? undefined : rejectedInterpretation.errorKind,
+    'invalid_output',
+  );
+
+  const continuationParticipant = {
+    executable: process.execPath,
+    buildArgs: () => ['-e', 'process.stdout.write("initial")'],
+    interpretCompletedOutput: ({
+      stdout,
+      expectedThreadRef,
+    }: {
+      stdout: string;
+      expectedThreadRef?: { provider: string; opaqueId: string };
+    }) => ({
+      ok: true as const,
+      rawOutput: stdout,
+      threadRef: expectedThreadRef ?? {
+        provider: 'test-provider',
+        opaqueId: 'thread-000001',
+      },
+    }),
+    sameThreadContinuation: {
+      provider: 'test-provider',
+      buildArgs: (
+        _job: WorkspaceAgentJobInput,
+        threadRef: { provider: string; opaqueId: string },
+      ) => [
+        '-e',
+        'process.stdout.write(process.argv[1]);',
+        `continued:${threadRef.opaqueId}`,
+      ],
+    },
+  };
+
+  const continued = await runWorkspaceAgentContinuation(
+    {
+      ...input,
+      invocationRef: 'solution-continuation',
+      workspaceRoot,
+      prompt: 'Re-emit only.',
+    },
+    continuationParticipant,
+    {
+      provider: 'test-provider',
+      opaqueId: 'thread-000001',
+    },
+    60_000,
+  );
+
+  assert.equal(continued.ok, true);
+  assert.equal(
+    continued.ok ? continued.rawOutput : undefined,
+    'continued:thread-000001',
+  );
+
+  let mismatchSpawnCount = 0;
+  const mismatch = await runWorkspaceAgentContinuation(
+    {
+      ...input,
+      invocationRef: 'solution-continuation-mismatch',
+      workspaceRoot,
+      prompt: 'Re-emit only.',
+    },
+    {
+      ...continuationParticipant,
+      spawnProcess: ((...args: Parameters<typeof spawn>) => {
+        mismatchSpawnCount += 1;
+        return spawn(...args);
+      }) as typeof spawn,
+    },
+    {
+      provider: 'other-provider',
+      opaqueId: 'thread-000001',
+    },
+    60_000,
+  );
+
+  assert.equal(mismatch.ok, false);
+  assert.equal(mismatch.ok ? undefined : mismatch.errorKind, 'continuation');
+  assert.equal(mismatchSpawnCount, 0);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

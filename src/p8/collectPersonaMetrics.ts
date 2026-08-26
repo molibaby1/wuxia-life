@@ -403,7 +403,7 @@ export function collectFrustrationMetrics(records: GameProcessRecord[]): Frustra
   };
 }
 
-type NegativeDomain = 'health' | 'reputation' | 'wealth' | 'connections' | 'relationship' | 'life' | 'other';
+type NegativeDomain = 'health' | 'reputation' | 'connections' | 'relationship' | 'life' | 'other';
 
 const HEALTH_STATUS_RANK: Record<string, number> = {
   healthy: 0,
@@ -432,8 +432,8 @@ function resolveNegativeDomains(
     const after = afterPlayer[key];
     if (typeof before === 'number' && typeof after === 'number' && after < before) {
       if (key === 'reputation') domains.add('reputation');
-      else if (key === 'money' || key === 'wealth') domains.add('wealth');
       else if (key === 'connections') domains.add('connections');
+      else if (key === 'money' || key === 'wealth') continue;
       else if (key === 'age' || key === 'children') continue;
       else domains.add('other');
     }
@@ -481,7 +481,6 @@ function statusDomain(status: unknown): NegativeDomain {
 
 function statDomain(stat: string | undefined): NegativeDomain {
   if (stat === 'reputation') return 'reputation';
-  if (stat === 'money' || stat === 'wealth') return 'wealth';
   if (stat === 'connections') return 'connections';
   if (stat === 'martialPower' || stat === 'constitution') return 'health';
   return 'other';
@@ -501,9 +500,9 @@ function resolveNegativeEffectDomains(stateBefore: GameState, effects: EffectDef
 
   for (const effect of effects) {
     if (isNegativeStatEffect(effect)) {
-      domains.add(statDomain(effect.target));
-    } else if (effect.type === 'money_modify' && effect.operator === 'subtract' && effect.value > 0) {
-      domains.add('wealth');
+      if (effect.target !== 'money' && effect.target !== 'wealth') {
+        domains.add(statDomain(effect.target));
+      }
     } else if (effect.type === 'health_status_set') {
       const before = beforePlayer?.healthStatus;
       if (
@@ -528,8 +527,6 @@ function domainPattern(domain: NegativeDomain): RegExp {
       return /受伤|伤势|生病|病痛|健康|体魄|功力|修炼|静养|调息|养病|伤害/;
     case 'reputation':
       return /名望|声望|声誉|声名|评价|脸面|旧友疏远/;
-    case 'wealth':
-      return /金钱|银两|积蓄|财富|手头|钱财|损失/;
     case 'connections':
       return /人脉|关系|援手|帮手|情面/;
     case 'relationship':
@@ -577,8 +574,6 @@ function hasVisibleRecoveryPath(text: string, domains: Set<NegativeDomain>): boo
     switch (domain) {
       case 'health':
         return /恢复|疗愈|缓解|静养|调息|养病/.test(text);
-      case 'wealth':
-        return /补偿|补回/.test(text);
       case 'reputation':
         return /挽回|重建.*(?:名望|声誉|声望)|名望.*恢复|声誉.*恢复/.test(text);
       case 'connections':
@@ -788,7 +783,6 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
   const choices = report.totalChoices;
   const finalState = report.finalGameState ?? report.records[report.records.length - 1]?.gameState;
   const martial = finalState?.player?.martialPower ?? 0;
-  const money = finalState?.player?.money ?? 0;
   const flags = finalState?.flags ?? {};
   const persona = getP8PersonaById(personaId);
   const routeIdentity = getRouteIdentityFromFlags(flags, persona?.routePreference) ?? '';
@@ -807,14 +801,11 @@ function signatureVector(report: GameProcessReport, personaId: string): number[]
     .sort();
   const p9RouteSignal = p9EventSignature(p9EventIds);
   const [training, study, business, travel, socializing] = actionCategoryCounts(report.records);
-  // ponytail: end-game money clusters 500–1200 and collapses cosine; log keeps route/action mix visible.
   const martialSignal = Math.log(Math.max(1, martial));
-  const moneySignal = Math.log(Math.max(1, Math.abs(money) + 1));
   return [
     actions,
     choices,
     martialSignal,
-    moneySignal,
     stats.children ?? 0,
     routeSignal * 2,
     routePrefSignal * 2,

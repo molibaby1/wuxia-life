@@ -27,7 +27,6 @@ export type EndingType =
   | 'legendary_hero'       // 传奇英雄 - 侠义 > 80, 声望 > 80
   | 'martial_god'          // 武学之神 - 功力 >= 95 且年龄 >= 68
   | 'sect_founder'         // 开宗立派 - 建立门派，弟子 > 100
-  | 'richest_man'          // 首富 - 财富 > 10000
   | 'beloved_saint'        // 在世活佛 - 善行 > 100, 救人 > 500
   | 'great_scholar'        // 一代宗师 - 学识 > 90, 著作流传
   | 'official_minister'
@@ -56,7 +55,6 @@ export interface EndingInfo {
   category: 'positive' | 'neutral' | 'negative';
   requirements: {
     chivalry?: number;
-    money?: number;
     reputation?: number;
     martialPower?: number;
     good_karma?: number;
@@ -75,7 +73,6 @@ export interface EndingInfo {
 
 interface EndingEvaluationData {
   chivalry: number;
-  money: number;
   reputation: number;
   martialPower: number;
   connections: number;
@@ -141,19 +138,6 @@ export class EndingSystem {
         age: 65,
       },
       priority: 90,
-    },
-    {
-      id: 'richest_man',
-      name: '首富',
-      description: '你凭借过人的商业头脑，积累了富可敌国的财富。你的商号遍布大江南北，影响武林经济命脉。',
-      category: 'positive',
-      requirements: {
-        money: 1500,
-        businessAcumen: 70,
-        flags: ['business_empire'],
-        age: 60,
-      },
-      priority: 85,
     },
     {
       id: 'beloved_saint',
@@ -330,11 +314,11 @@ export class EndingSystem {
     requirements: EndingInfo['requirements']
   ): boolean {
     const numericFields: Array<
-      'money' | 'knowledge' | 'reputation' | 'martialPower'
+      'knowledge' | 'reputation' | 'martialPower'
       | 'connections'
       | 'businessAcumen' | 'influence' | 'good_karma' | 'evil_karma' | 'age'
     > = [
-      'money', 'knowledge', 'reputation', 'martialPower',
+      'knowledge', 'reputation', 'martialPower',
       'connections',
       'businessAcumen', 'influence', 'good_karma', 'evil_karma', 'age',
     ];
@@ -517,7 +501,6 @@ export class EndingSystem {
     const { player, karma, criticalChoices, achievements } = state;
     return {
       chivalry: player.chivalry,
-      money: player.money,
       reputation: player.reputation,
       martialPower: player.martialPower,
       connections: player.connections,
@@ -553,8 +536,6 @@ export class EndingSystem {
         return data.martialPower >= 95;
       case 'sect_founder':
         return data.reputation >= 80 && data.influence >= 35;
-      case 'richest_man':
-        return true;
       case 'beloved_saint':
         return data.good_karma >= 110;
       case 'great_scholar':
@@ -568,12 +549,10 @@ export class EndingSystem {
     const hasFamilyAnchor = Boolean(data.spouse) || data.children > 0;
     const hasModerateAchievement =
       data.martialPower >= 55 ||
-      data.money >= 400 ||
       data.reputation >= 45 ||
       data.knowledge >= 60;
     const highAchievement =
       data.martialPower >= 75 ||
-      data.money >= 1000 ||
       data.reputation >= 70 ||
       data.knowledge >= 75;
 
@@ -584,17 +563,9 @@ export class EndingSystem {
     if (
       hasFamilyAnchor &&
       !highAchievement &&
-      data.reputation < 70 &&
-      data.money < 900
+      data.reputation < 70
     ) {
       return this.ENDINGS.find(e => e.id === 'quiet_family_life')!;
-    }
-
-    if (
-      highAchievement &&
-      data.money < 0
-    ) {
-      return this.ENDINGS.find(e => e.id === 'bittersweet_success')!;
     }
 
     if (

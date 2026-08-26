@@ -179,12 +179,11 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
         outcomes: null,
       },
       {
-        text: '提供资金支持（金钱 -200）',
+        text: '提供资金支持（侠义 +8，魅力 +5）',
         description: null,
         condition: null,
-        conditions: [{ type: 'expression', expression: 'money >= 200' }],
+        conditions: null,
         effects: [
-          { type: 'stat_modify', stat: 'money', value: -200 },
           { type: 'stat_modify', stat: 'chivalry', value: 8 },
           { type: 'stat_modify', stat: 'charisma', value: 5 },
         ],

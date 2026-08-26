@@ -76,10 +76,10 @@ export const P8_PERSONA_ROSTER: P8Persona[] = [
     relationshipPreference: 'low',
     choiceTendency: 'wealth',
     shortTermGoals: [
-      goal('shen-money', '积累财富', '0-20', ['stat_threshold'], { stat: 'money', statMin: 200 }),
+      goal('shen-merchant-route', '踏入商路', '0-20', ['flag'], { flag: 'route_merchant' }),
       goal('shen-business-habit', '坚持营商规划', '0-20', ['action_category_count'], { actionCategory: 'business', actionCategoryMinCount: 2 }),
       goal('shen-reputation', '声望起步', '20-30', ['stat_threshold'], { stat: 'reputation', statMin: 10 }),
-      goal('shen-wealth-40', '四十岁前的经济基础', '30-40', ['stat_threshold'], { stat: 'money', statMin: 500 }),
+      goal('shen-first-shop', '建立第一份商业基础', '30-40', ['event_id'], { eventId: 'merchant_first_shop' }),
     ],
   },
   {

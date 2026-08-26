@@ -165,8 +165,7 @@ function testRecoveryAndRealSetbacks(): void {
       state({ money: 70 }),
     ),
   ]);
-  assert(property.setbacks.length === 1, 'setback_property_loss must remain a real setback');
-  assert(property.setbacks[0]?.classification !== 'opaque', 'setback_property_loss has visible cause or recovery path');
+  assert(property.setbacks.length === 0, 'legacy wallet-only property loss must not be a P8 setback');
 }
 
 function testRealOpaqueResultRemainsOpaque(): void {
@@ -174,8 +173,8 @@ function testRealOpaqueResultRemainsOpaque(): void {
     record(
       'synthetic_opaque_result',
       '你继续赶路。',
-      state({ money: 100 }),
-      state({ money: 90 }),
+      state({ reputation: 100 }),
+      state({ reputation: 90 }),
     ),
   ]);
   assert(result.setbacks.length === 1, 'actual unexplained negative result must be a setback');
@@ -422,7 +421,7 @@ function testInventoryAFalsePositiveControls(): void {
       state({ money: 90 }),
     ),
   ]);
-  assert(unrelatedReputationWord.setbacks[0]?.classification === 'opaque', '声望 unrelated to money loss must not explain it');
+  assert(unrelatedReputationWord.setbacks.length === 0, 'money loss must not create a setback despite reputation wording');
 
   const unrelatedAnger = collectFrustrationMetrics([
     record(
@@ -432,12 +431,12 @@ function testInventoryAFalsePositiveControls(): void {
       state({ money: 90 }),
     ),
   ]);
-  assert(unrelatedAnger.setbacks[0]?.classification === 'opaque', '震怒 unrelated to money loss must not explain it');
+  assert(unrelatedAnger.setbacks.length === 0, 'money loss must not create a setback despite unrelated anger wording');
 
   const unrelatedRecovery = collectFrustrationMetrics([
     record(
       'synthetic_unrelated_recovery',
-      '某人震怒，钱财确实损失了，但关系还有机会恢复。',
+      '某人注意到，钱财确实损失了，但关系还有机会恢复。',
       state({
         money: 100,
         relationships: [{ id: 'master_qingxu', affinity: 30 }],
@@ -449,8 +448,8 @@ function testInventoryAFalsePositiveControls(): void {
     ),
   ]);
   assert(
-    unrelatedRecovery.setbacks[0]?.classification === 'opaque',
-    'a relationship recovery path must not explain an unrelated money loss',
+    unrelatedRecovery.setbacks[0]?.classification === 'recoverable',
+    'a relationship recovery path must classify the real relationship loss, not the money loss',
   );
 
   const unrelatedAnxiety = collectFrustrationMetrics([
@@ -461,7 +460,7 @@ function testInventoryAFalsePositiveControls(): void {
       state({ money: 90 }),
     ),
   ]);
-  assert(unrelatedAnxiety.setbacks[0]?.classification === 'opaque', '烦躁 without anxious evidence must not explain money loss');
+  assert(unrelatedAnxiety.setbacks.length === 0, 'money loss must not create a setback despite unrelated anxiety wording');
 }
 
 function testWealthOpaquePresentationTargets(): void {

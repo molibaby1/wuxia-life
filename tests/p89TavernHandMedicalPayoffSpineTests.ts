@@ -319,7 +319,7 @@ function testPragmaticHolderFlagsStatsCostGoal(): void {
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'reputation' && e.value === 4), 'holder: rep+4');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'connections' && e.value === 3), 'holder: connections+3');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'chivalry' && e.value === -2), 'holder: chivalry-2');
-  assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money' && e.value === 60), 'holder: money+60');
+  assert(!effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money'), 'holder: no money write');
   console.log('  ✓ pragmatic A (holder): flags + stats + cost label + current goal');
 }
 
@@ -356,7 +356,7 @@ function testPragmaticMasterFlagsStatsCostGoal(): void {
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'reputation' && e.value === 2), 'master: rep+2');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'connections' && e.value === 1), 'master: connections+1');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'charisma' && e.value === 4), 'master: charisma+4');
-  assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money' && e.value === 30), 'master: money+30');
+  assert(!effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money'), 'master: no money write');
   console.log('  ✓ pragmatic C (master): flags + stats + cost label + current goal');
 }
 

@@ -29,10 +29,10 @@ async function run(): Promise<void> {
     'merchant origin must explicitly seed comfortable_means',
   );
   assert(
-    merchantOrigin.effects.some(
-      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money' && effect.value === 200,
+    !merchantOrigin.effects.some(
+      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money',
     ),
-    'merchant origin must retain legacy money +200 for migrated and legacy consumers',
+    'merchant origin must retire legacy money +200',
   );
 
   const failure = loader.getEventById('merchant_shop_failure')!;
@@ -87,8 +87,8 @@ async function run(): Promise<void> {
   );
   assert.equal(
     afterOrigin.player.money,
-    moneyBeforeOrigin + 200,
-    'merchant origin must keep legacy money +200 alongside Capacity seeding',
+    moneyBeforeOrigin,
+    'merchant origin must not change wallet balance alongside Capacity seeding',
   );
 
   const noSurplusState = makeState();

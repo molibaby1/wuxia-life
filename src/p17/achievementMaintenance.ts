@@ -4,7 +4,12 @@ import type {
   UnmetMaintenancePressure,
 } from '../narrative/profile/types';
 import type { GameState } from '../types/eventTypes';
-import { flagIsActive, inferMaintenanceDimensionLevel, readMergedFlags } from './stateAccess';
+import {
+  flagIsActive,
+  inferMaintenanceDimensionLevel,
+  readMergedFlags,
+  type P17MaintenanceDimension,
+} from './stateAccess';
 
 export interface ActiveAchievementMaintenance {
   pattern: AchievementMaintenancePattern;
@@ -28,7 +33,10 @@ export function resolveActiveAchievementMaintenance(
 
     const unmet: UnmetMaintenancePressure[] = [];
     for (const dimension of pattern.dimensions) {
-      const currentLevel = inferMaintenanceDimensionLevel(state, dimension.dimension);
+      const currentLevel = inferMaintenanceDimensionLevel(
+        state,
+        dimension.dimension as P17MaintenanceDimension,
+      );
       const pressure = Math.max(0, dimension.requiredLevel - currentLevel);
       if (pressure > 0.05) {
         unmet.push({

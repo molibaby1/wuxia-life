@@ -1,5 +1,4 @@
 import type { GameState } from '../types/eventTypes';
-import type { MaintenanceDimension } from '../narrative/profile/types';
 
 export function readMergedFlags(state: GameState): Record<string, unknown> {
   return {
@@ -47,10 +46,16 @@ export function lifePathSignalActive(
   }
 }
 
-const DIMENSION_CEILINGS: Record<MaintenanceDimension, number> = {
+export type P17MaintenanceDimension =
+  | 'reputation'
+  | 'followers'
+  | 'alliances'
+  | 'internal_stability'
+  | 'external_threat';
+
+const DIMENSION_CEILINGS: Record<P17MaintenanceDimension, number> = {
   reputation: 100,
   followers: 80,
-  resources: 5000,
   alliances: 80,
   internal_stability: 100,
   external_threat: 100,
@@ -58,7 +63,7 @@ const DIMENSION_CEILINGS: Record<MaintenanceDimension, number> = {
 
 export function inferMaintenanceDimensionLevel(
   state: GameState,
-  dimension: MaintenanceDimension,
+  dimension: P17MaintenanceDimension,
 ): number {
   const player = state.player;
   if (!player) {
@@ -72,11 +77,6 @@ export function inferMaintenanceDimensionLevel(
         1,
         ((player.connections ?? 0) + (state.lifePath?.relationships?.disciples?.length ?? 0) * 10) /
           DIMENSION_CEILINGS.followers,
-      );
-    case 'resources':
-      return Math.min(
-        1,
-        ((player.money ?? 0) + (player.wealth ?? 0)) / DIMENSION_CEILINGS.resources,
       );
     case 'alliances':
       return Math.min(

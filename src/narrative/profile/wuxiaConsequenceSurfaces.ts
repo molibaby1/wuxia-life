@@ -228,18 +228,12 @@ export const WUXIA_FACTION_IDENTITY_CONSEQUENCE_PATTERNS: FactionIdentityConsequ
   P17_ROUTE_DEMONIC_RISK,
 ];
 
-/** Sect leadership resource and stability upkeep. */
+/** Sect leadership stability upkeep. */
 export const P17_MAINTENANCE_SECT_LEADERSHIP: AchievementMaintenancePattern = {
   id: 'p17_sect_leadership_upkeep',
   label: '掌门之位',
   achievementFlags: ['sect_master', 'sect_elder'],
   dimensions: [
-    {
-      dimension: 'resources',
-      requiredLevel: 0.55,
-      neglectRiskMultiplier: 1.5,
-      satisfactionSignals: ['player.money', 'player.wealth'],
-    },
     {
       dimension: 'internal_stability',
       requiredLevel: 0.5,

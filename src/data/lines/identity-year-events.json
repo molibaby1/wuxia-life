@@ -23,8 +23,7 @@
         "id": "farming_diligent",
         "text": "勤勉耕作，精耕细作",
         "effects": [
-          { "type": "stat_modify", "target": "constitution", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" }
+          { "type": "stat_modify", "target": "constitution", "value": 3, "operator": "add" }
         ]
       },
       {
@@ -138,7 +137,6 @@
         "id": "trade_risk",
         "text": "冒险走小路，缩短行程",
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
           { "type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add" }
         ]
       },
@@ -146,7 +144,6 @@
         "id": "trade_stable",
         "text": "走官道，安全第一",
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" },
           { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
           { "type": "stat_modify", "target": "merchantNetwork", "value": 3, "operator": "add" }
         ]
@@ -186,7 +183,6 @@
         "id": "crisis_retreat",
         "text": "收缩战线，保本为先",
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": -30, "operator": "add" },
           { "type": "stat_modify", "target": "businessAcumen", "value": 1, "operator": "add" }
         ]
       }

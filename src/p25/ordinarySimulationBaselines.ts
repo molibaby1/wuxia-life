@@ -71,7 +71,7 @@ export const P25_ORDINARY_LIFE_PATHS: LifePathFixture[] = [
     player: { age: 46, martialPower: 38, reputation: 52, connections: 58, money: 62 },
     flags: {
       route_wealth_committed: true,
-      business_empire: true,
+      merchant_empire: true,
       apprentice_trade_curiosity: true,
       ordinary_apprentice_midlife_seed: true,
     },

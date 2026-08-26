@@ -2043,7 +2043,6 @@
       { "type": "flag_set", "target": "tavern_medical_on_ramp_pragmatic" },
       { "type": "event_record", "target": "medical_on_ramp" },
       { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
-      { "type": "stat_modify", "target": "money", "value": 80, "operator": "add" },
       { "type": "stat_modify", "target": "connections", "value": 4, "operator": "add" },
       { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" }
     ],
@@ -2117,8 +2116,7 @@
       { "type": "event_record", "target": "medical_pressure" },
       { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
       { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
-      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
-      { "type": "stat_modify", "target": "money", "value": 50, "operator": "add" }
+      { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
     ],
     "metadata": {
       "enabled": true,
@@ -2232,8 +2230,7 @@
           { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_holder" },
           { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
           { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": 60, "operator": "add" }
+          { "type": "stat_modify", "target": "chivalry", "value": -2, "operator": "add" }
         ]
       },
       {
@@ -2257,8 +2254,7 @@
           { "type": "flag_set", "target": "tavern_medical_payoff_pragmatic_master" },
           { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
           { "type": "stat_modify", "target": "connections", "value": 1, "operator": "add" },
-          { "type": "stat_modify", "target": "charisma", "value": 4, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": 30, "operator": "add" }
+          { "type": "stat_modify", "target": "charisma", "value": 4, "operator": "add" }
         ]
       }
     ],
@@ -2411,7 +2407,6 @@
       { "type": "event_record", "target": "medical_late_life" },
       { "type": "stat_modify", "target": "reputation", "value": -3, "operator": "add" },
       { "type": "stat_modify", "target": "connections", "value": -4, "operator": "add" },
-      { "type": "stat_modify", "target": "money", "value": -2, "operator": "add" },
       { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
       { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
     ],
@@ -2489,7 +2484,6 @@
       { "type": "stat_modify", "target": "reputation", "value": 4, "operator": "add" },
       { "type": "stat_modify", "target": "connections", "value": 3, "operator": "add" },
       { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
-      { "type": "stat_modify", "target": "money", "value": 2, "operator": "add" },
       { "type": "stat_modify", "target": "constitution", "value": 1, "operator": "add" }
     ],
     "metadata": {

@@ -111,19 +111,6 @@ console.log('分类:', EndingSystem.getEndingCategory(ending4));
 console.log('预期：开宗立派（正面）');
 console.log('');
 
-// 测试 5: 首富
-console.log('测试 5: 首富');
-state = createTestState();
-state.player.money = 12000;
-state.player.businessAcumen = 70;
-state.player.flags = { business_empire: true };
-const ending5 = EndingSystem.determineEnding(state);
-assert(ending5.id === 'richest_man', 'business facts should unlock richest_man without road data');
-console.log('结局:', ending5.name);
-console.log('分类:', EndingSystem.getEndingCategory(ending5));
-console.log('预期：首富（正面）');
-console.log('');
-
 // 测试 6: 在世活佛
 console.log('测试 6: 在世活佛');
 state = createTestState();

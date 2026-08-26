@@ -211,12 +211,6 @@
         "value": 0.10
       }
     ],
-    "conditions": [
-      {
-        "type": "expression",
-        "expression": "money > 50"
-      }
-    ],
     "content": {
       "title": "财产损失",
       "text": "由于遭遇盗匪，你损失了部分积蓄；此事导致你短期内手头紧拙，但慢慢经营还有机会补回。江湖上的风险总是防不胜防。",
@@ -224,12 +218,6 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {
-        "type": "stat_modify",
-        "target": "money",
-        "value": -100,
-        "operator": "add"
-      },
       {
         "type": "flag_set",
         "target": "setback_property_loss_active",

@@ -505,10 +505,13 @@ export function useNewGameEngine() {
           let outcomeScore = 0;
           if (outcome.effects) {
             for (const effect of outcome.effects) {
-          if (effect.operator === 'add') {
+              const target = effect.stat || effect.target || '';
+              if (target === 'money') {
+                continue;
+              }
+              if (effect.operator === 'add') {
                 const value = typeof effect.value === 'number' ? effect.value : 0;
-            const target = effect.stat || effect.target || '';
-            if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+                if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'reputation'].includes(target)) {
                   outcomeScore += value * 2;
                 } else {
                   outcomeScore += value;
@@ -534,10 +537,13 @@ export function useNewGameEngine() {
       } else if (choice.effects) {
         // 无多结果分支，评估原有效果
         for (const effect of choice.effects) {
+          const target = effect.stat || effect.target || '';
+          if (target === 'money') {
+            continue;
+          }
           if (effect.operator === 'add') {
             const value = typeof effect.value === 'number' ? effect.value : 0;
-            const target = effect.stat || effect.target || '';
-            if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'money', 'reputation'].includes(target)) {
+            if (['martialPower', 'knowledge', 'constitution', 'chivalry', 'charisma', 'reputation'].includes(target)) {
               score += value * 2;
             } else {
               score += value;

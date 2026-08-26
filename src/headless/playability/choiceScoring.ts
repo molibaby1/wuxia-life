@@ -41,7 +41,7 @@ function scoreByTendency(
         score += normalizedValue;
       }
     } else if (tendency === 'wealth') {
-      if (['money', 'businessAcumen', 'reputation', 'connections'].includes(stat)) {
+      if (['businessAcumen', 'reputation', 'connections'].includes(stat)) {
         score += normalizedValue * 3;
       } else {
         score += normalizedValue * 0.7;

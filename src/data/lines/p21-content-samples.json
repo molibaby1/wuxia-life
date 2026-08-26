@@ -328,7 +328,6 @@
         "text": "收下门徒，担起传承之责",
         "effects": [
           { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": -20, "operator": "add" },
           { "type": "flag_set", "target": "p27_mentor_obligation_taken", "value": true }
         ]
       },
@@ -382,7 +381,6 @@
         "text": "继续出面评议，维持清名",
         "effects": [
           { "type": "stat_modify", "target": "reputation", "value": 6, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": -15, "operator": "add" },
           { "type": "flag_set", "target": "p27_renown_upkeep_accepted", "value": true }
         ]
       },
@@ -643,7 +641,6 @@
         "text": "梳理旧账，定新规矩",
         "effects": [
           { "type": "stat_modify", "target": "businessAcumen", "value": 8, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": 90, "operator": "add" },
           { "type": "flag_set", "target": "p42_merchant_ledger_echo_taken", "value": true }
         ]
       },
@@ -652,7 +649,6 @@
         "text": "只做顾问，不常驻账房",
         "effects": [
           { "type": "stat_modify", "target": "businessAcumen", "value": 4, "operator": "add" },
-          { "type": "stat_modify", "target": "money", "value": 40, "operator": "add" },
           { "type": "flag_set", "target": "p42_merchant_ledger_echo_consult", "value": true }
         ]
       }

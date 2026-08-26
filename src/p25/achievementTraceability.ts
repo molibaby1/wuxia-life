@@ -65,7 +65,7 @@ export const P25_PINNACLE_ACHIEVEMENT_TRACEABILITY: Record<string, AchievementTr
 /** P25 Wave 3: mixed cross-track traceability links. */
 export const P25_MIXED_ACHIEVEMENT_TRACEABILITY: Record<string, AchievementTraceLink> = {
   merchant_magnate: {
-    choiceFlags: ['route_wealth_committed', 'p22_wealth_route_forked', 'business_empire', 'merchant_empire', 'merchant_wealthy'],
+    choiceFlags: ['route_wealth_committed', 'p22_wealth_route_forked', 'merchant_empire', 'merchant_wealthy'],
     midLifeConsequenceSurfaces: ['p22_early_wealth_route_fork', 'merchant_empire', 'merchant_business_empire'],
   },
   healer_swordsman: {

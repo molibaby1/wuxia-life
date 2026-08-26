@@ -190,12 +190,6 @@
           },
           {
             "type": "stat_modify",
-            "target": "money",
-            "value": 10,
-            "operator": "subtract"
-          },
-          {
-            "type": "stat_modify",
             "target": "chivalry",
             "value": 2,
             "operator": "add"
@@ -705,12 +699,6 @@
             "timeUnit": "day"
           },
           {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 20,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "beggars_assembly_done"
           },
@@ -1177,12 +1165,6 @@
         "type": "stat_modify",
         "target": "reputation",
         "value": 5,
-        "operator": "add"
-      },
-      {
-        "type": "stat_modify",
-        "target": "money",
-        "value": 10,
         "operator": "add"
       },
       {

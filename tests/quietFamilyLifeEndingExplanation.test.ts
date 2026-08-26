@@ -126,6 +126,49 @@ function testEndingClassificationDoesNotChange(): void {
   assert(EndingSystem.determineEnding(balanced).id === 'quiet_family_life', 'balanced classification changed');
 }
 
+function testQuietFamilyClassificationRetiresMoneyVeto(): void {
+  const moneyValues = [0, 899, 900, 1000, 9999];
+
+  for (const money of moneyValues) {
+    const ending = EndingSystem.determineEnding(makeState({
+      money,
+      spouse: '发妻',
+      martialPower: 20,
+      knowledge: 20,
+      reputation: 40,
+    }));
+    assert(
+      ending.id === 'quiet_family_life',
+      `quiet_family_life classification must not vary with money=${money}`,
+    );
+  }
+
+  const noFamilyAnchor = EndingSystem.determineEnding(makeState({
+    money: 9999,
+    martialPower: 20,
+    knowledge: 20,
+    reputation: 40,
+  }));
+  assert(
+    noFamilyAnchor.id !== 'quiet_family_life',
+    'family anchor must remain necessary for quiet_family_life',
+  );
+
+  for (const money of moneyValues) {
+    const highAchievement = EndingSystem.determineEnding(makeState({
+      money,
+      spouse: '发妻',
+      martialPower: 75,
+      knowledge: 20,
+      reputation: 40,
+    }));
+    assert(
+      highAchievement.id !== 'quiet_family_life',
+      `high non-money achievement must block quiet_family_life at money=${money}`,
+    );
+  }
+}
+
 async function testRuntimeAndSnapshotUseTheSameDescription(): Promise<void> {
   const event = eventLoader.getEventById('ordinary_life');
   assert(Boolean(event), 'ordinary_life must be available');
@@ -179,6 +222,7 @@ async function main(): Promise<void> {
   testNoFamilyDescriptionIsNotFabricated();
   testDescriptionIsDeterministicAndOtherEndingsRemainStatic();
   testEndingClassificationDoesNotChange();
+  testQuietFamilyClassificationRetiresMoneyVeto();
   await testRuntimeAndSnapshotUseTheSameDescription();
   console.log('quietFamilyLifeEndingExplanation.test.ts: ok');
 }

@@ -99,8 +99,8 @@ function testMedicalOnRampEventEffects(): void {
     'pragmatic gives +4 reputation',
   );
   assert(
-    pragEffects.some((e: any) => e.type === 'stat_modify' && e.target === 'money' && e.value === 80),
-    'pragmatic gives +80 money',
+    !pragEffects.some((e: any) => e.type === 'stat_modify' && e.target === 'money'),
+    'pragmatic on-ramp must not write money',
   );
   assert(
     pragEffects.some((e: any) => e.type === 'stat_modify' && e.target === 'connections' && e.value === 4),

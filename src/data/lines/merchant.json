@@ -591,7 +591,6 @@
         "id": "take_long_term_ledger",
         "text": "接下账路，换取更稳更深的商脉",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 120},
           {"type": "stat_modify", "stat": "reputation", "value": 5},
           {"type": "flag_set", "flag": "p26_business_obligation_taken", "value": true}
         ]
@@ -600,7 +599,6 @@
         "id": "stay_small_scale",
         "text": "维持小盘周转，不再扩张",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": 30},
           {"type": "flag_set", "flag": "p26_business_obligation_declined", "value": true}
         ]
       }
@@ -630,7 +628,6 @@
         "id": "expand_with_kin",
         "text": "借亲族名义，快速铺开货路",
         "effects": [
-          {"type": "stat_modify", "target": "money", "value": 80, "operator": "add"},
           {"type": "stat_modify", "target": "merchantNetwork", "value": 5, "operator": "add"},
           {"type": "flag_set", "flag": "p42_business_youth_kin_stall", "value": true}
         ]
@@ -639,7 +636,6 @@
         "id": "solo_stall",
         "text": "单打独斗，把信誉攒在自己名下",
         "effects": [
-          {"type": "stat_modify", "target": "money", "value": 50, "operator": "add"},
           {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
           {"type": "flag_set", "flag": "p42_business_youth_solo_stall", "value": true}
         ]
@@ -670,7 +666,6 @@
         "id": "join_syndicate",
         "text": "入联号，共担盈亏换更大货路",
         "effects": [
-          {"type": "stat_modify", "target": "money", "value": 200, "operator": "add"},
           {"type": "stat_modify", "target": "merchantNetwork", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "p42_business_syndicate_joined", "value": true}
         ]
@@ -679,7 +674,6 @@
         "id": "decline_syndicate",
         "text": "拒入联号，维持独立周转",
         "effects": [
-          {"type": "stat_modify", "target": "money", "value": 60, "operator": "add"},
           {"type": "flag_set", "flag": "p42_business_syndicate_declined", "value": true}
         ]
       }

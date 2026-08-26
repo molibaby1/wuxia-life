@@ -169,12 +169,8 @@
       },
       {
         "id": "sworn_help_financial",
-        "text": "提供资金支持（金钱 -200）",
-        "conditions": [
-          {"type": "expression", "expression": "money >= 200"}
-        ],
+        "text": "提供资金支持（侠义 +8，魅力 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -200},
           {"type": "stat_modify", "stat": "chivalry", "value": 8},
           {"type": "stat_modify", "stat": "charisma", "value": 5}
         ]
@@ -210,12 +206,11 @@
     "choices": [
       {
         "id": "relationship_enemy_create_choice_1",
-        "text": "主动和解（需魅力≥50，金钱 -100）",
+        "text": "主动和解（需魅力≥50）",
         "conditions": [
-          {"type": "expression", "expression": "charisma >= 50 && money >= 100"}
+          {"type": "expression", "expression": "charisma >= 50"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "money", "value": -100},
           {"type": "stat_modify", "stat": "charisma", "value": 8},
           {"type": "stat_modify", "stat": "chivalry", "value": 5}
         ]

@@ -337,7 +337,7 @@ function testPragmaticFallenFlagsStatsCostGoal(): void {
   const effects = pragFallenEvent?.autoEffects || [];
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'reputation' && e.value === -3), 'fallen: rep-3');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'connections' && e.value === -4), 'fallen: connections-4');
-  assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money' && e.value === -2), 'fallen: money-2');
+  assert(!effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money'), 'fallen: no money write');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'charisma' && e.value === 2), 'fallen: cha+2');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'constitution' && e.value === 1), 'fallen: con+1');
   console.log('  ✓ pragmatic A (fallen): flags + stats + cost label + current goal');
@@ -373,7 +373,7 @@ function testPragmaticMasterFlagsStatsCostGoal(): void {
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'reputation' && e.value === 4), 'master: rep+4');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'connections' && e.value === 3), 'master: connections+3');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'charisma' && e.value === 3), 'master: cha+3');
-  assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money' && e.value === 2), 'master: money+2');
+  assert(!effects.some((e: any) => e.type === 'stat_modify' && e.target === 'money'), 'master: no money write');
   assert(effects.some((e: any) => e.type === 'stat_modify' && e.target === 'constitution' && e.value === 1), 'master: con+1');
   console.log('  ✓ pragmatic C (master): flags + stats + cost label + current goal');
 }

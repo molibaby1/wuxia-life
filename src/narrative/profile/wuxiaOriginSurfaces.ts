@@ -452,7 +452,7 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
       { dimension: 'key_choices', anyOfFlags: ['route_wealth_committed', 'p22_wealth_route_forked'] },
       {
         dimension: 'key_choices',
-        anyOfFlags: ['business_empire', 'merchant_empire', 'merchant_wealthy'],
+        anyOfFlags: ['merchant_empire', 'merchant_wealthy'],
       },
     ],
     crossTrackGroups: [

@@ -75,9 +75,7 @@ export function inferCultivationCostSatisfaction(
       const key = signal.slice('player.'.length) as keyof typeof player;
       const raw = player[key];
       if (typeof raw === 'number') {
-        if (key === 'money') {
-          total += Math.min(1, raw / 2000);
-        } else if (key === 'connections' || key === 'influence') {
+        if (key === 'connections' || key === 'influence') {
           total += Math.min(1, raw / 80);
         } else if (key === 'martialPower') {
           total += Math.min(1, raw / 100);

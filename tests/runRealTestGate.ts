@@ -100,6 +100,45 @@ const suites: Suite[] = [
   { name: 'merchantOfficialIntelligenceChamberLegacyMoneyMigration', entry: 'tests/merchantOfficialIntelligenceChamberLegacyMoneyMigration.test.ts' },
   { name: 'merchantLateEconomicProgressionLegacyMoneyMigration', entry: 'tests/merchantLateEconomicProgressionLegacyMoneyMigration.test.ts' },
   { name: 'merchantBankruptEndingTemporaryRetirement', entry: 'tests/merchantBankruptEndingTemporaryRetirement.test.ts' },
+  { name: 'parallelIdentityMerchantProgressionRetirement', entry: 'tests/parallelIdentityMerchantProgressionRetirement.test.ts' },
+  { name: 'genericRichestManLegacyAliasRetirement', entry: 'tests/genericRichestManLegacyAliasRetirement.test.ts' },
+  { name: 'globalMoneyRelationshipSetbackRetirement', entry: 'tests/globalMoneyRelationshipSetbackRetirement.test.ts' },
+  { name: 'globalMoneyEndingAchievementRetirement', entry: 'tests/globalMoneyEndingAchievementRetirement.test.ts' },
+  { name: 'globalMoneyBittersweetEndingRetirement', entry: 'tests/globalMoneyBittersweetEndingRetirement.test.ts' },
+  { name: 'globalMoneyP17ResourceRetirement', entry: 'tests/globalMoneyP17ResourceRetirement.test.ts' },
+  { name: 'globalMoneyP18ResourceRetirement', entry: 'tests/globalMoneyP18ResourceRetirement.test.ts' },
+  {
+    name: 'globalMoneyP8HeadlessEvaluationRetirement',
+    entry: 'tests/globalMoneyP8HeadlessEvaluationRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyEarlyLifeBootstrapRetirement',
+    entry: 'tests/globalMoneyEarlyLifeBootstrapRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyBusinessHabitRewardRetirement',
+    entry: 'tests/globalMoneyBusinessHabitRewardRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyMedicalRouteRewardRetirement',
+    entry: 'tests/globalMoneyMedicalRouteRewardRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyIdentityYearWalletFlowRetirement',
+    entry: 'tests/globalMoneyIdentityYearWalletFlowRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyHabitConsequenceWalletRetirement',
+    entry: 'tests/globalMoneyHabitConsequenceWalletRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyLocalAutoResolveScoringRetirement',
+    entry: 'tests/globalMoneyLocalAutoResolveScoringRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyBeggarsRouteWalletRetirement',
+    entry: 'tests/globalMoneyBeggarsRouteWalletRetirement.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

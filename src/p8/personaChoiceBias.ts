@@ -114,9 +114,6 @@ export function applyPersonaChoiceBias(ctx: PersonaChoiceBiasContext): number {
     if (persona.routePreference === 'demonic' && effect.target === 'chivalry' && delta < 0) {
       bonus += Math.abs(delta) * 0.8;
     }
-    if (persona.routePreference === 'wealth' && effect.target === 'money') {
-      bonus += delta * 1.2;
-    }
     if (persona.routePreference === 'martial' && effect.target === 'martialPower') {
       bonus += delta * 1.2;
     }

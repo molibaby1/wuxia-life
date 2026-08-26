@@ -73,13 +73,11 @@ export const coreTalents: CoreTalentConfig[] = [
     summary: '更会算账与经营，但更少被纯理想驱动。',
     flavor: '你对得失看得很清，钱财与门路总比别人看得更早一些。',
     initialStats: [
-      { stat: 'money', value: 200 },
       { stat: 'businessAcumen', value: 6 },
       { stat: 'connections', value: 2 },
       { stat: 'chivalry', value: -2 },
     ],
     growthModifiers: [
-      { stat: 'money', multiplier: 1.35 },
       { stat: 'businessAcumen', multiplier: 1.3 },
       { stat: 'connections', multiplier: 1.1 },
       { stat: 'chivalry', multiplier: 0.9 },
@@ -118,12 +116,10 @@ export const coreTalents: CoreTalentConfig[] = [
     initialStats: [
       { stat: 'chivalry', value: 8 },
       { stat: 'reputation', value: 2 },
-      { stat: 'money', value: -50 },
     ],
     growthModifiers: [
       { stat: 'chivalry', multiplier: 1.3 },
       { stat: 'reputation', multiplier: 1.15 },
-      { stat: 'money', multiplier: 0.95 },
     ],
     eventBiases: [
       { tag: 'family', multiplier: 1.1 },

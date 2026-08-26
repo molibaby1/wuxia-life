@@ -209,7 +209,7 @@ export const WUXIA_INHERITANCE_CHANNEL_PATTERNS: InheritanceChannelPattern[] = [
   P18_CHANNEL_RESPONSIBILITY,
 ];
 
-/** Disciple cultivation cost — time, attention, resources. */
+/** Disciple cultivation cost — time and attention. */
 export const P18_COST_DISCIPLE_CULTIVATION: SuccessorCultivationCostPattern = {
   id: 'p18_cost_disciple_cultivation',
   label: '弟子培养',
@@ -226,12 +226,6 @@ export const P18_COST_DISCIPLE_CULTIVATION: SuccessorCultivationCostPattern = {
       requiredLevel: 0.4,
       underinvestmentRiskMultiplier: 1.4,
       satisfactionSignals: ['has_disciples', 'player.connections'],
-    },
-    {
-      dimension: 'resources',
-      requiredLevel: 0.35,
-      underinvestmentRiskMultiplier: 1.35,
-      satisfactionSignals: ['player.money', 'martialHeritage'],
     },
   ],
   neglectRiskTags: [

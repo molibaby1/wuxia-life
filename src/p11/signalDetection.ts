@@ -330,7 +330,6 @@ function detectAchievement(records: GameProcessRecord[], finalState: SignalDetec
   const statAchievement =
     stats &&
     ((stats.martialPower ?? 0) >= 40 ||
-      (stats.money ?? 0) >= 400 ||
       (stats.knowledge ?? 0) >= 30);
   if (hits.length === 0 && !statAchievement) {
     return null;

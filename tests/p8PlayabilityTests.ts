@@ -144,13 +144,19 @@ function testChoiceDiagnosticsRanking(): void {
 
 function testPersonaChoiceBias(): void {
   const persona = getP8PersonaById('p8-wealth-shen')!;
-  const biased = applyPersonaChoiceBias({
+  const moneyScore = applyPersonaChoiceBias({
     persona,
     baseScore: 5,
     choiceId: 'earn_money',
     effects: [{ type: 'stat_modify', target: 'money', value: 20 }],
   });
-  assert(biased > 5, 'wealth persona should boost money choices');
+  const neutralScore = applyPersonaChoiceBias({
+    persona,
+    baseScore: 5,
+    choiceId: 'learn_knowledge',
+    effects: [{ type: 'stat_modify', target: 'knowledge', value: 20 }],
+  });
+  assert(moneyScore === neutralScore, 'wealth persona should not boost money choices');
 }
 
 function testBalancedChoiceBias(): void {

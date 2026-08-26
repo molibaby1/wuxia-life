@@ -54,6 +54,47 @@ function makeRecord(age: number, eventId: string, flags: Record<string, unknown>
   };
 }
 
+function makeAchievementState(overrides: {
+  money?: number;
+  martialPower?: number;
+  knowledge?: number;
+} = {}): GameState {
+  return {
+    player: {
+      age: 35,
+      money: overrides.money ?? 0,
+      martialPower: overrides.martialPower ?? 0,
+      knowledge: overrides.knowledge ?? 0,
+      flags: {},
+    },
+    flags: {},
+    eventHistory: [],
+  } as GameState;
+}
+
+function achievementDetected(finalState: GameState, records: GameProcessRecord[] = []): boolean {
+  return detectStageSignalsForStage('stage_30_40', { records, finalState }).some(
+    signal => signal.key === 'achievement',
+  );
+}
+
+function withAchievementEventFixture<T>(callback: () => T): T {
+  const fixtureEvent = {
+    id: 'p11_test_declared_achievement',
+    metadata: {
+      narrativeScheduling: { stageSignals: ['achievement'] },
+    },
+  } as NonNullable<ReturnType<typeof eventLoader.getEventById>>;
+  const originalGetEventById = eventLoader.getEventById.bind(eventLoader);
+  eventLoader.getEventById = eventId =>
+    eventId === fixtureEvent.id ? fixtureEvent : originalGetEventById(eventId);
+  try {
+    return callback();
+  } finally {
+    eventLoader.getEventById = originalGetEventById;
+  }
+}
+
 function testSignalVocabulary(): void {
   assert(STAGE_SIGNAL_KEYS.length >= 10, 'stage signal vocabulary populated');
   assert(isStageSignalKey('relationship_shift'), 'relationship_shift is valid');
@@ -91,6 +132,52 @@ function testSchedulingContext(): void {
   assert(context.stageId === 'stage_20_30', 'stage 20-30 resolved');
   assert(context.expectedStageSignals.includes('relationship_shift'), 'relationship_shift expected');
   assert(Array.isArray(context.missingStageSignals), 'missing signals computed');
+}
+
+function testAchievementMoneyInvariance(): void {
+  const moneyValues = [0, 399, 400, 9999];
+  const detected = moneyValues.map(money => achievementDetected(makeAchievementState({ money })));
+  assert(
+    detected.every(value => !value),
+    `money alone must not detect achievement (results: ${detected.join(', ')})`,
+  );
+
+  const contexts = moneyValues.map(money =>
+    buildNarrativeSchedulingContext([], makeAchievementState({ money })),
+  );
+  const baselineMissing = JSON.stringify(contexts[0]?.missingStageSignals);
+  assert(
+    contexts.every(context => JSON.stringify(context.missingStageSignals) === baselineMissing),
+    'money alone must not change P11 scheduling context',
+  );
+}
+
+function testAchievementMartialFallbackRemains(): void {
+  for (const money of [0, 400, 9999]) {
+    assert(
+      achievementDetected(makeAchievementState({ money, martialPower: 40 })),
+      `martialPower=40 must detect achievement with money=${money}`,
+    );
+  }
+}
+
+function testAchievementKnowledgeFallbackRemains(): void {
+  for (const money of [0, 400, 9999]) {
+    assert(
+      achievementDetected(makeAchievementState({ money, knowledge: 30 })),
+      `knowledge=30 must detect achievement with money=${money}`,
+    );
+  }
+}
+
+function testAchievementEventEvidenceRemains(): void {
+  withAchievementEventFixture(() => {
+    const record = makeRecord(35, 'p11_test_declared_achievement');
+    assert(
+      achievementDetected(makeAchievementState(), [record]),
+      'declared achievement stage signal must detect achievement with low stats',
+    );
+  });
 }
 
 function testStageSchedulingMultiplier(): void {
@@ -242,6 +329,10 @@ export async function runP11SchedulingTests(): Promise<void> {
   testSignalDetectionHelpers();
   testGapClassification();
   testSchedulingContext();
+  testAchievementMoneyInvariance();
+  testAchievementMartialFallbackRemains();
+  testAchievementKnowledgeFallbackRemains();
+  testAchievementEventEvidenceRemains();
   testStageSchedulingMultiplier();
   testWealthReinforcementAcceptsDeferredUpbringing();
   testSchedulerWiringDiagnostics();

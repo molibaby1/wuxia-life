@@ -428,7 +428,6 @@
         "effects": [
           {"type": "stat_modify", "stat": "reputation", "value": 30},
           {"type": "stat_modify", "stat": "charisma", "value": 10},
-          {"type": "stat_modify", "stat": "money", "value": 100},
           {"type": "flag_set", "flag": "medical_imperial", "value": true}
         ]
       },
@@ -475,8 +474,7 @@
         "id": "medical_palace_intrigue_choice_2",
         "text": "支持太子",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "stat_modify", "stat": "money", "value": 50}
+          {"type": "stat_modify", "stat": "reputation", "value": 15}
         ]
       }
     ]

@@ -978,3 +978,238 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要重新引入 Merchant bankruptcy ending；
 - 需要修改 merchant ending arbitration/precedence；
 - 需要引入新的 persistent failure state、Asset semantics 或 Wealth post-failure transition。
+
+### PD-073：Global Money Retirement supersedes quiet-family legacy wallet veto
+
+**实施决策（Human accepted：2026-08-24）**
+
+- Global Money Retirement 仅 supersede PD-023 中 `quiet_family_life` 的 legacy `money < 900` 分类条件；`quiet_family_life` 不再读取 legacy money 作为获得该 ending 的 veto。
+- `quiet_family_life` 的 ending ID、title、判定顺序、family-anchor semantics、non-money achievement semantics 与 dynamic presentation contract 保持不变。
+- 本决策不宣布 PD-023 整体失效，也不改变 `endingPresentation` 的 player-facing explanation consumer 或其他 ending 的 money consumer。
+- Snapshot 版本继续保持 `3.15.0`；本 slice 不引入 Wealth replacement、numeric wealth、PlayerState、UI/API 或 schema 变化。
+
+**重新讨论条件**
+
+- 需要改变 `quiet_family_life` 的 family anchor、non-money achievement blocker、ending precedence 或 dynamic presentation contract；
+- 需要为经营压力、经济代价或其他 player-facing explanation 定义新的正式状态；
+- 需要将其他 ending、ending review 或其他 deferred legacy money consumer 纳入同一 slice。
+
+### PD-074：Global Money Retirement retires the bittersweet legacy wallet classifier
+
+**实施决策（Human accepted：2026-08-24）**
+
+- Global Money Retirement 退役 `bittersweet_success` 的 legacy automatic classifier `highAchievement && money < 0`。
+- `bittersweet_success` 作为 ending concept、type、catalog definition、title、description 与 metadata 保留；本 slice 不删除该 ending。
+- 当前不引入 replacement classifier；`wealthCapacity`、numeric wealth、hidden cost/loss score、family/relationship、health、setback/failure flag、Asset loss 或 merchant-specific state 均不是替代语义。
+- 只有未来出现正式、持久、可验证的重大人生代价 gameplay evidence 后，才重新评估 `bittersweet_success` 的 automatic classification；本 decision 不自动改变其它 ending semantics。
+- Snapshot 版本继续保持 `3.15.0`；本 slice 不修改 presentation、review、PlayerState、UI/API、schema、Wealth Capacity 或 money producers。
+
+**重新讨论条件**
+
+- gameplay 建立了正式、持久且可验证的 achievement-cost / major-life-cost state；
+- 需要重新启用或重新定义 `bittersweet_success` automatic classification；
+- 需要改变其它 ending、player-facing presentation、ending review 或 deferred legacy money consumer。
+
+### PD-075：Canonical Merchant spine is the sole strategic Merchant economic progression authority
+
+**实施决策（Human accepted：2026-08-24）**
+
+- Canonical Merchant spine is the sole strategic Merchant economic progression authority.
+- Parallel `identity-merchant` strategic progression does not migrate to Wealth; `merchant_first_trade`、`merchant_expand_business` 与 identity `merchant_empire` 从 formal active gameplay progression 退休。
+- Canonical `merchant_business_empire`、canonical `merchant_empire` flag semantics 与 `merchant_ending_tycoon` 保持不变；本 slice 不创建 canonical replacement event。
+- `merchant_crisis` 保留原样，deferred pending legitimate business-loss semantics；`merchant_mentor` 保留原样，deferred for independent content/reachability review。
+- Generic `richest_man` consumer deferred to the immediately following B2 retirement. B1 closure fact: `business_empire consumer remains deferred to B2`; identity producer retirement may therefore leave this legacy dependency temporarily producerless。
+- 本 slice 不新增 Asset、Wealth level、bankruptcy system、Wealth replacement transition 或其它 identity-merchant producer。
+
+**重新讨论条件**
+
+- 需要为 `merchant_crisis` 定义并实现 legitimate persistent business-loss semantics；
+- 需要重新启用 identity-merchant strategic progression，或改变 canonical Merchant spine 的唯一 authority；
+- 需要实施 B2 的 generic `richest_man` retirement，或为 `business_empire` 引入新的正式 producer/consumer；
+- 需要新增 Asset、Wealth level、bankruptcy system 或 canonical replacement event。
+
+### PD-076：Generic richest_man ending and business_empire legacy alias retired
+
+**实施决策（Human accepted：2026-08-25）**
+
+- Generic `richest_man` 从 `EndingType`、EndingSystem catalog 与 generic classifier 中正式退役；不迁移为 Wealth-based duplicate ending，也不新增 replacement generic ending。
+- EndingSystem 不再支持 wallet-based ending requirements；`PlayerState.money` 与 `generateEndingReview()` 的既有财富展示保留，当前不做 generic runtime money retirement。
+- `business_empire` 不再作为 EndingSystem、P25 achievement trace、Merchant magnate profile 或 P25 baseline 的 canonical merchant alias；不新增 producer 或 replacement flag。
+- Canonical `merchant_business_empire` → `merchant_empire` → `merchant_ending_tycoon` 是唯一正式 Merchant empire / tycoon authority。`merchant_ending_tycoon` 继续要求 `merchant_empire` 与 `wealthCapacity >= regional_magnate`，且不受 `money` 影响。
+- `merchant_crisis` 与 `merchant_mentor` 继续 defer；`career_business_empire` 不因名字相似纳入本决策。
+- B2 完成后，Phase B strategic progression consolidation 关闭；后续 Merchant crisis / mentor 等事项按各自独立语义重新评估。
+- 本决策不修改 `PlayerState.money`、numeric wealth、Snapshot/schema、Asset、bankruptcy、UI/API、ending presentation、ending review 的 money display、P17 或 P18。
+- Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要重新引入 generic richest ending，或为 Merchant spine 增加第二套 empire / tycoon authority；
+- 需要为 `merchant_crisis` 定义 legitimate persistent business-loss semantics，或重新启用 `merchant_mentor` / `career_business_empire`；
+- 需要新增 Asset、Wealth level、bankruptcy system、Snapshot/schema、UI/API 或 player-facing ending presentation 语义。
+
+### PD-077：P17 掌门维护的 legacy resources 维度退役
+
+**实施决策（Human accepted：2026-08-25）**
+
+- `P17_MAINTENANCE_SECT_LEADERSHIP` 删除整个 `resources` maintenance dimension；掌门维护不再由 legacy `money` 或 numeric `wealth` 驱动。
+- 不引入 Wealth Capacity、numeric wealth、hidden score、synthetic influence/connections/followers score 或其它替代资源维度。
+- `internal_stability` 维度及其现有 `influence` / `connections` signals、threshold 和 maintenance semantics 保持不变。
+- `PlayerState.money`、numeric `PlayerState.wealth`、shared `MaintenanceDimension`、`WorldProfile.resources`、P18、UI/API、Snapshot schema 均不在本决策范围；numeric `wealth` 仅在 P17 maintenance 中变为 gameplay-inert，字段物理退休另行处理。
+- Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要重新引入 P17 掌门资源维护，或为掌门维护定义新的正式经济/资产语义；
+- 需要物理删除 `PlayerState.wealth`、修改 shared profile/resources contract、P18、UI/API 或 Snapshot/schema；
+- 需要扩大到其它 P17 maintenance patterns、全局 money consumer 或新的 Wealth arithmetic framework。
+
+### PD-078：P18 弟子培养的 legacy resources 维度退役
+
+**实施决策（Human accepted：2026-08-25）**
+
+- `P18_COST_DISCIPLE_CULTIVATION` 删除整个 `resources` cultivation-cost dimension；弟子培养只保留现有 `time` 与 `attention` 维度及其 threshold、signals 和 pressure semantics。
+- 弟子培养不再读取 legacy `money` 作为 generic resources satisfaction signal；不引入 Wealth Capacity、numeric wealth、hidden score 或 synthetic training-resource score 作为替代。
+- `martialHeritage` 保留其既有 successor quality、inheritance 与 legacy 语义，但不再被包装为弟子培养的 generic `resources` maintenance signal。
+- shared `CultivationCostDimension`、`WorldProfile.resources`、`WUXIA_PROFILE_RESOURCES`、`PlayerState.money`、`PlayerState.wealth`、UI/API 与 Snapshot schema 均不在本决策范围；Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为弟子培养定义新的正式经济、资产或训练资源语义；
+- 需要修改 shared cultivation/profile/resources contract、PlayerState、UI/API 或 Snapshot/schema；
+- 需要扩大到其它 P18 cultivation patterns、全局 money consumer 或新的 Wealth arithmetic framework。
+
+### PD-079：P8 / Headless evaluation 的 legacy wallet 语义退役
+
+**实施决策（Human accepted：2026-08-25）**
+
+- P8 wealth persona 不再使用 legacy `money` stat-threshold goals；early goal 使用 canonical `route_merchant`，economic-foundation goal 使用 canonical `merchant_first_shop`。
+- P8 wealth persona choice bias 不再为 `money` effect 提供专属 bonus；Headless wealth tendency 不再对 `money` 特殊加权，既有 `businessAcumen`、`reputation` 与 `connections` weighting 保持不变。
+- P8 frustration evaluation 不再把 legacy `money`、numeric `wealth`、negative `stat_modify money` 或 `money_modify subtract` 识别为 Wealth setback；其它真实 negative domains 保持现有语义。
+- P8 replay similarity 不再读取 final `money`；不引入 Wealth Capacity ordinal、numeric wealth 或 hidden economy score 作为替代信号。
+- ExperienceTrace、GameProcessReport、`moneyGrowth`、PlayerState 与 Snapshot 的 observation / compatibility fields 保持不变；Snapshot 版本继续为 `3.15.0`。
+- 本决策不修改 gameplay producers/configs、shared schema、UI/API、PlayerState、Snapshot、P17、P18 或 canonical Merchant progression。
+
+**重新讨论条件**
+
+- 需要为 P8 / Headless evaluation 定义新的正式经济证据或替代 replay / frustration semantics；
+- 需要修改 observation / compatibility contract、PlayerState、UI/API 或 Snapshot/schema；
+- 需要扩大到 gameplay producer cleanup、其它 evaluation consumers、P17/P18 或新的 Wealth arithmetic framework。
+
+### PD-080：Early-life wallet bootstrap producer retirement
+
+**实施决策（Human accepted：2026-08-25）**
+
+- `origin_merchant_family` 保留 `wealth_capacity_set: comfortable_means`、出身 flag、connections、charisma 与 event record，退役 legacy wallet `money +200`。
+- `iron_abacus` 保留 businessAcumen、connections、chivalry 的 initial effects 与 growth modifiers，退役 initial money 与 money growth modifier。
+- `heroic_heart` 保留 chivalry、reputation 的 initial effects 与 growth modifiers，退役 initial money 与 money growth modifier。
+- 不为上述 talent wallet 语义新增 Wealth Capacity、numeric wealth、Wealth ordinal、Asset 或其它 replacement score；Merchant origin 仅保留其原有 canonical Wealth Capacity effect。
+- `src/data/traits/origins.ts` 不在本决策范围；当前 runtime 不通过该 origin config 将这些 initialStats 应用到 PlayerState。
+- new-game `PlayerState.money = 100` 继续作为 compatibility seed；PlayerState、Snapshot/schema 与 Snapshot `3.15.0` 不变。
+- 其它 active money producers、P17/P18、P8/Headless evaluation、canonical Merchant progression、UI/API 与 generic effect support 不在本决策范围。
+
+**重新讨论条件**
+
+- 需要物理退休 PlayerState money、compatibility seed 或 Snapshot/schema；
+- 需要为其它 active money producer 定义独立正式经济语义；
+- 需要为 talent 或 origin 引入新的 Wealth、Asset 或 persistent economic state；
+- 需要扩大到 `src/data/traits/origins.ts` 或其它 origin/event producer。
+
+### PD-081：P26/P42 Business Habit legacy wallet rewards retired
+
+**实施决策（Human accepted：2026-08-25）**
+
+- `p26_business_habit_obligation` 保留 Business Habit eligibility、event/choice identity、原有 reputation effect 与 taken/declined flags，退役两个 legacy wallet rewards：`money +120` 与 `money +30`。
+- `p42_business_habit_youth_stall` 保留 Business Habit eligibility、event/choice identity、merchantNetwork/reputation effects、choice flags 与 `business-first-stall` milestone evidence，退役 `money +80` 与 `money +50`。
+- `p42_business_habit_midlife_syndicate` 保留 Business Habit eligibility、event/choice identity、merchantNetwork effect 与 choice flags，退役 `money +200` 与 `money +60`。
+- 上述三个事件的 wallet rewards 直接 `REMOVE / ABSTRACT`，不迁移为 Wealth Capacity、numeric wealth、Wealth ordinal、opportunity-cost state、hidden score 或任何其他 economic replacement。
+- Canonical Merchant strategic progression、其它 active money producers、PlayerState、Snapshot/schema、UI/API、generic effect support、P17/P18/P8 与 milestone catalog 均不在本决策范围；Snapshot 继续保持 `3.15.0`。
+- 其它 Business Habit 或 legacy money producers deferred，不能由本决策推导出下一组迁移授权。
+
+**重新讨论条件**
+
+- 需要为 Business Habit 定义新的正式经济、Asset、Wealth 或 opportunity-cost semantics；
+- 需要改变上述事件的 eligibility、event/choice identity、trajectory、milestone 或 canonical Merchant authority；
+- 需要扩大到其它 Business Habit events、其它 active money producers、PlayerState、Snapshot/schema、UI/API 或 generic effect support。
+
+### PD-082：Medical-route legacy wallet flow retired
+
+**实施决策（Human accepted：2026-08-26）**
+
+- `medical_imperial_doctor` 的 legacy wallet reward 与 `medical_palace_intrigue` 的 legacy wallet reward 直接退役；御医身份、声誉、医者/宫廷立场及既有 choice identity 保持不变。
+- `medical_on_ramp_pragmatic`、`medical_pressure_pragmatic`、`medical_payoff_pragmatic` 两个 pragmatic payoff 分支，以及 `medical_late_life_pragmatic_fallen` / `medical_late_life_pragmatic_master` 的 legacy wallet writes 直接 `REMOVE / ABSTRACT`。
+- Medical route 的 event/choice IDs、eligibility、scheduling、route checkpoints、variant flags、reputation、connections、charisma、chivalry、constitution、medical identity 与 downstream expression evidence 保持不变。
+- 本决策不把普通医疗报酬、压力或 `±2` narrative wallet noise 转换为 Wealth Capacity、numeric wealth、Wealth ordinal、synthetic economic score、Asset 或其它 replacement。
+- compassionate branches 不因本决策调整；其它 Medical money producers、其它 active money producers、PlayerState、Snapshot/schema、UI/API、P17/P18/P8 与 generic effect support 均 deferred。
+- Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为 Medical route 定义新的正式长期经济身份、Asset 或 Wealth transition；
+- 需要改变 Medical route 的 identity、checkpoint、variant、eligibility、scheduling 或 player-facing expression semantics；
+- 需要扩大到 compassionate branch、其它 Medical money producers、PlayerState、Snapshot/schema、UI/API 或其它 deferred global money producers。
+
+### PD-083：Identity-Year annual wallet flows are abstracted
+
+**实施决策（Human accepted：2026-08-26）**
+
+- `commoner_year_farming` 的 `farming_diligent` 退役 legacy wallet `money +30`；constitution `+3` 与 `farming_leisure` 的 constitution `+1` 保持不变。
+- `merchant_year_trade` 退役 `trade_risk` 的 `money +80` 与 `trade_stable` 的 `money +50`；businessAcumen、connections 与 merchantNetwork effects 保持不变。
+- `merchant_year_crisis` 退役 `crisis_retreat` 的 `money -30`；businessAcumen `+1` 与 `crisis_innovate` 的 businessAcumen、influence、`overcome_crisis` 保持不变。
+- 上述年度 wallet flows 直接 `REMOVE / ABSTRACT`，不迁移为 Wealth Capacity、numeric wealth、Wealth ordinal、synthetic economic score、Asset 或其它 replacement。
+- 三个 event 的 event/choice IDs、eligibility、age range、triggers 与 scheduling metadata 保持不变；canonical Merchant Wealth spine、deferred `merchant_crisis`、其它 money producers、PlayerState、Snapshot/schema、UI/API 均不在本决策范围。
+- Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为 Identity-Year 年度经营行为定义新的正式经济、Asset 或 Wealth semantics；
+- 需要改变上述事件的 identity、eligibility、scheduling、路线语义或 canonical Merchant authority；
+- 需要扩大到 `merchant_crisis`、family/sect/career 或其它 deferred money producers。
+
+### PD-084：Habit consequence events abstract legacy wallet flow
+
+**实施决策（Human accepted：2026-08-26）**
+
+- `p27_mentor_obligation_consequence` 的 `accept_disciples` 退役 legacy wallet `money -20`；reputation、mentor obligation taken flag 与 `decline_disciples` 的 martialPower、declined flag 保持不变。
+- `p27_renown_upkeep_pressure` 的 `maintain_public_reputation` 退役 legacy wallet `money -15`；reputation、accepted flag 与 `withdraw_from_public` 的 knowledge、declined flag 保持不变。
+- `p42_study_habit_merchant_ledger_echo` 退役 `reform_ledgers` 的 `money +90` 与 `consult_only` 的 `money +40`；businessAcumen effects 与各自 choice flags 保持不变。
+- 上述四项 wallet flow 直接 `REMOVE / ABSTRACT`，不迁移为 Wealth Capacity、numeric wealth、Wealth ordinal、synthetic upkeep/income score、Asset 或其它 replacement。
+- 三个 event 的 event/choice IDs、habit eligibility、age range、trigger 与 scheduling metadata 保持不变；三个 branch pairs 仍分别由 reputation/martialPower、reputation/knowledge 与 businessAcumen 差异表达。
+- P22 early wealth fork、family、ransom、sect/border、canonical Merchant spine、其它 active money producers、P17/P18/P8、Medical、Identity-Year、Business Habit、PlayerState、Snapshot/schema、UI/API 与 generic effect support 均不在本决策范围；Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为 mentor obligation、renown upkeep 或 study-habit merchant echo 定义新的正式经济、Asset 或 Wealth semantics；
+- 需要改变上述事件的 identity、eligibility、scheduling、habit trajectory 或 branch distinction；
+- 需要扩大到 P22、family、ransom、sect/border、canonical Merchant 或其它 deferred money producers。
+
+### PD-085：Local auto-resolve choice scoring retires legacy wallet utility
+
+**实施决策（Human accepted：2026-08-26）**
+
+- `pickAutoChoice` 不再把 legacy `money` effects 当作自动选择 utility；direct `choice.effects` 与可用 `outcome.effects` 中的正、负 money effect 均不贡献评分。
+- `money` 不得通过 weighted-stat 分支或 generic stat fallback 继续贡献评分；现有 martialPower、knowledge、constitution、chivalry、charisma、reputation 等非钱包评分保持不变。
+- 本决策只退休 local auto-resolve choice scoring consumer；不修改 formal money producers、generic effect execution、`PlayerState.money`、`PlayerState.wealth`、Wealth Capacity、Asset、UI/API、Snapshot/schema 或任何 producer inventory。
+- 不以 Wealth Capacity、numeric wealth、ordinal wealth 或 synthetic economic utility score 替换 legacy wallet utility；Snapshot 版本继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要重新定义 auto-resolve 的 choice utility、人格偏好或经济决策语义；
+- 需要把 Wealth Capacity、numeric wealth、Asset 或其它经济模型纳入自动选择评分；
+- 需要扩大到 formal producer cleanup、generic effect support、PlayerState、UI/API 或 Snapshot/schema。
+
+### PD-086：Beggars-route incidental wallet flow is abstracted
+
+**实施决策（Human accepted：2026-08-26）**
+
+- Beggars-route trial、assembly 与 official-ending 事件保留既有 chivalry、route、reputation、identity 与 event-history 语义，同时抽象掉附带钱包流水。
+- 明确退休：`beggars_trial_share` 的 `money -10`、`beggars_assembly_trade` 的 `money +20`、`beggars_ending_official` 的 `money +10`。
+- `beggars_trial_shared`、`beggars_path_trade`、`beggars_assembly_done`、official ending flag / reputation、choice IDs、eligibility / scheduling / `autoResolve` metadata 保持不变。
+- D6 local auto-resolve wallet scoring retirement 仍权威；本决策不反向修改 auto-resolve scorer。
+- 不以 Wealth Capacity、numeric wealth、synthetic Beggars economy score 或其它经济资源池替换上述 wallet flow。
+- Border、ransom、family、P22、`merchant_crisis`、canonical Merchant spine、generic money capability、PlayerState、UI/API、Snapshot/schema 均不在本决策范围；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为丐帮路线引入战略 Wealth Capacity 或独立经济资源语义；
+- 需要把 Border / ransom / family / P22 / `merchant_crisis` 一并纳入同一 retirement slice；
+- 需要修改 PlayerState、generic effect handlers、UI/API 或 Snapshot/schema。

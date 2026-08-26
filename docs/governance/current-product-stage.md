@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-21（P2 Engineering Closure / Run-Observe Entry）。
+> 最后更新：2026-08-25（Run-Observe / P3 Minimal Slice #2 Runtime Conformance Verified）。
 
 ---
 
@@ -34,6 +34,16 @@ Auto Evolution 当前处于：
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；
 - P2 不修改 authoritative product state，也不包含 repository promotion / commit / merge。
+- **P3 Minimal Slice #1 — Structured Final Output Contract V1：HUMAN-AUTHORIZED / ENGINEERING DELIVERED；**
+- 该 Slice 根据真实 Participant 通信 evidence 局部激活，只统一 terminal structured output envelope；当前 Pilot 为 Solution / Reviewer / Configuration Execution；
+- shared contract 要求 bare JSON / no wrapper prose / no Markdown fence / strict validate-or-reject，并保持 Host 不做 semantic repair；
+- runtime contract conformance 尚未验证，后续需通过独立 Contract Conformance Matrix 获取 evidence。
+- **P3 Minimal Slice #2 — Envelope Failure Bounded Retransmission：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED；**
+- 已验证产品边界：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；Initial Participant timeout = unchanged production default 240000ms；
+- `SCHEMA_FAILURE` fail closed；Host repair / extraction / normalization forbidden；semantic correction forbidden；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
+- runtime conformance 由 clean corrective 3-trial Cursor batch 确认：3/3 均 one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；second retransmissions = 0；schema-failure retries = 0；aggregate Trace causal ordering verified；protected production hashes 在 runtime observation 期间不变；
+- Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
+- 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
 
 这些结果支持当前系统进入真实使用 / 观察阶段。
 
@@ -47,6 +57,8 @@ Auto Evolution 当前处于：
 - 多轮真实运行在长期使用中的稳定性；
 - 每个真实 run 都能或都应该进入下一轮；
 - Participant Communication Contract 的最终形态；
+- Structured Final Output Contract V1 的跨 harness / model runtime conformance 尚未证明；
+- Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；
 - 世界观 / 产品内容可无成本替换；
@@ -95,25 +107,76 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 
 ### P3 — Participant Communication Contract Consolidation
 
-**DEFERRED / NOT CURRENTLY ACTIVE。**
+**FULL CONSOLIDATION: DEFERRED / NOT CURRENTLY ACTIVE。**
 
-P3 应在真实多轮运行提供足够通信 evidence 后归纳。
+完整 P3 仍应继续从真实运行与多轮 evidence 中逐步归纳，不启动协议平台化建设。
 
-未来重点固化：
+但 Run / Observe 已暴露足够具体的 terminal-output communication variance，且 Human 已重新排序并授权一个 bounded corrective：
 
-- 输入 / 输出 schema；
-- 字段语义；
-- authority / provenance / reference；
-- fact / evidence / inference / opinion / unknown；
-- workflow outcome；
-- participant failure；
-- permission / STOP boundary。
+**Minimal Slice #1 — Structured Final Output Contract V1：
+ENGINEERING DELIVERED / RUNTIME CONFORMANCE UNVERIFIED。**
+
+**Minimal Slice #2 — Envelope Failure Bounded Retransmission：
+ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED。**
+
+Minimal Slice #2 已验证边界：
+
+- Role：Solution only；
+- Trigger：terminal `ENVELOPE_FAILURE` only；
+- Recovery：exactly one same-thread retransmission；
+- Retransmission ceiling：60000ms；
+- Initial Participant timeout：unchanged production default 240000ms；
+- `SCHEMA_FAILURE`：fail closed；
+- Host repair / extraction / normalization：forbidden；
+- semantic correction：forbidden；
+- Participant 必须支持 reliable same-thread continuation；
+- first-pass failure provenance 保持可观察；
+- runtime conformance 由 clean corrective 3-trial Cursor batch 确认；
+- 3/3 trials：one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；
+- second retransmissions = 0；schema-failure retries = 0；
+- aggregate Trace causal ordering verified；
+- protected production hashes 在 runtime observation 期间不变。
+
+Sidecar Run Report 现已可区分 first-pass success、envelope failure、retransmission outcome 与 final structured-output success，但不读取 `terminal-attempt-*.txt` payload，也不影响 workflow outcome。
+
+Minimal Slice #1 只固定：
+
+- terminal Role payload 必须是 exactly one bare JSON object；
+- 不允许 wrapper prose / Markdown code fence；
+- 必须匹配 Role-specific schema；
+- Host validate-or-reject，不 extract / normalize / repair。
+
+Pilot 范围（Slice #1）：
+
+- Solution；
+- Reviewer；
+- Configuration Execution。
+
+它不代表完整 P3 启动，也不授权：
+
+- `SCHEMA_FAILURE` recovery；
+- second retransmission；
+- Reviewer rollout（Slice #2）；
+- Configuration Execution rollout（Slice #2）；
+- generic retry subsystem；
+- fresh-session fallback；
+- provider switching；
+- semantic correction；
+- Host JSON repair / extraction；
+- tool enforcement；
+- Contract registry / platform；
+- provider abstraction redesign；
+- failure taxonomy migration；
+- broader Participant rollout；
+- MCP；
+- model routing；
+- transport redesign。
+
+Slice #1 下一步 evidence：独立 Contract Conformance Matrix。
 
 继续遵守：
 
 > **纠正通信，不纠正思想。**
-
-不预先绑定 MCP，不在缺少真实多轮 evidence 时先建设协议平台。
 
 ## 5. 当前 STOP / 非优先项
 
@@ -174,9 +237,11 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 6. P2 real Participant product hypothesis 已验证？→ **NO / UNVERIFIED**
 7. 当前阶段？→ **RUN / OBSERVE**
 8. 当前应该继续加 P2 代码？→ **NO**
-9. P3 Communication Contract 当前启动？→ **NO / wait for real multi-round evidence**
-10. Report 是否主流程依赖？→ **NO**
-11. Report Analysis 是否当前建设？→ **NO**
-12. MCP 是否已选定？→ **NO**
-13. code-level autonomous modification？→ **NOT AUTHORIZED**
-14. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
+9. P3 full Communication Contract Consolidation 当前启动？→ **NO / DEFERRED**
+10. Structured Final Output Contract V1 Minimal Slice？→ **ENGINEERING DELIVERED / RUNTIME CONFORMANCE UNVERIFIED**
+11. Envelope Failure Bounded Retransmission Minimal Slice？→ **ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED**
+12. Report 是否主流程依赖？→ **NO**
+13. Report Analysis 是否当前建设？→ **NO**
+14. MCP 是否已选定？→ **NO**
+15. code-level autonomous modification？→ **NOT AUTHORIZED**
+16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**

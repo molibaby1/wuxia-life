@@ -15,6 +15,10 @@ import {
   parseSolutionDecision,
   type SolutionDecisionV1,
 } from '../../src/evolution/solutionDecisionContract';
+import {
+  STRUCTURED_FINAL_OUTPUT_CONTRACT_V1,
+  renderStructuredFinalOutputContractV1,
+} from '../../src/evolution/participantStructuredOutputContract';
 
 const problemPackage: ProblemPackageV1 = {
   schemaVersion: 'problem-package-v1',
@@ -106,6 +110,57 @@ export function runProblemAgnosticSolutionContractTests(): void {
   assert.deepEqual(parseSolutionWork(JSON.stringify(solutionWork)), solutionWork);
   assert.deepEqual(parseSolutionReview(JSON.stringify(solutionReview)), solutionReview);
   assert.deepEqual(parseSolutionDecision(JSON.stringify(solutionDecision)), solutionDecision);
+
+  const invalidEnvelopes = (json: string): string[] => [
+    `Here is the result:\n${json}`,
+    `\`\`\`json\n${json}\n\`\`\``,
+    `${json}\nAdditional explanation`,
+    `${json}\n${json}`,
+  ];
+
+  for (const raw of invalidEnvelopes(JSON.stringify(solutionWork))) {
+    assert.throws(() => parseSolutionWork(raw), /valid JSON/i);
+  }
+
+  for (const raw of invalidEnvelopes(JSON.stringify(solutionReview))) {
+    assert.throws(() => parseSolutionReview(raw), /valid JSON/i);
+  }
+
+  assert.equal(
+    STRUCTURED_FINAL_OUTPUT_CONTRACT_V1,
+    'Structured Final Output Contract V1',
+  );
+
+  const solutionOutputContract = renderStructuredFinalOutputContractV1({
+    roleSchemaName: 'SolutionWorkV1',
+  });
+  assert.match(solutionOutputContract, /Structured Final Output Contract V1/);
+  assert.match(solutionOutputContract, /exactly one valid JSON object/i);
+  assert.match(solutionOutputContract, /SolutionWorkV1/);
+  assert.match(solutionOutputContract, /bare JSON only/i);
+  assert.match(solutionOutputContract, /Markdown\/code fences/i);
+  assert.match(solutionOutputContract, /before or after the JSON object/i);
+  assert.match(solutionOutputContract, /strictly/i);
+  assert.match(solutionOutputContract, /reject invalid output/i);
+  assert.match(solutionOutputContract, /extract, normalize, or repair/i);
+  assert.match(solutionOutputContract, /negative or non-actionable outcome/i);
+  assert.match(solutionOutputContract, /free-form prose/i);
+
+  const reviewerOutputContract = renderStructuredFinalOutputContractV1({
+    roleSchemaName: 'SolutionReviewV1',
+  });
+  const executionOutputContract = renderStructuredFinalOutputContractV1({
+    roleSchemaName: 'configuration-execution-result-v1',
+  });
+
+  assert.equal(
+    solutionOutputContract.replaceAll('SolutionWorkV1', '<ROLE_SCHEMA>'),
+    reviewerOutputContract.replaceAll('SolutionReviewV1', '<ROLE_SCHEMA>'),
+  );
+  assert.equal(
+    solutionOutputContract.replaceAll('SolutionWorkV1', '<ROLE_SCHEMA>'),
+    executionOutputContract.replaceAll('configuration-execution-result-v1', '<ROLE_SCHEMA>'),
+  );
 
   for (const forbidden of [
     'problemType',

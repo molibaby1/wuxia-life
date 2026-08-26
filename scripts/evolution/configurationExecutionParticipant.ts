@@ -1,5 +1,6 @@
 import { mkdir, open, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { renderStructuredFinalOutputContractV1 } from '../../src/evolution/participantStructuredOutputContract';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
@@ -107,7 +108,9 @@ export function buildConfigurationExecutionPrompt(input: ConfigurationExecutionI
     'Do not modify program code, Runtime, Framework, Contract, Schema, governance, docs, or the authoritative repository.',
     'Read the workspace and the accepted evidence yourself. Make the concrete configuration edit; do not merely describe a patch.',
     'Run only the verification needed for this accepted configuration work.',
-    'Return only configuration-execution-result-v1 JSON.',
+    renderStructuredFinalOutputContractV1({
+      roleSchemaName: 'configuration-execution-result-v1',
+    }),
     '',
     `Allowed write paths: ${canonicalJson(input.allowedWritePaths)}`,
     `Authority references: ${canonicalJson(input.authorityRefs)}`,

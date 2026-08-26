@@ -9,6 +9,7 @@ import {
   type SolutionReviewV1,
 } from '../../../src/evolution/solutionReviewContract';
 import type { SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
+import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
   runWorkspaceAgentJob,
@@ -100,7 +101,9 @@ export function buildSolutionReviewerPrompt(
     'You are a fresh Reviewer Participant in a separate disposable workspace.',
     'You may reject all options. Do not assume the Solution Participant is correct.',
     'Assess problem-solution fit, evidence, risks, and permission/scope boundaries.',
-    'Return only the structured SolutionReviewV1 result as the final job result.',
+    renderStructuredFinalOutputContractV1({
+      roleSchemaName: 'SolutionReviewV1',
+    }),
     '',
     'Assigned Skills (working methods only; they do not grant authority):',
     ...skillSections,

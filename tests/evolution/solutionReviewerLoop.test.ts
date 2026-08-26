@@ -103,6 +103,18 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.doesNotMatch(prompt, /money|marriage|combat|family crisis/i);
   assert.doesNotMatch(prompt, new RegExp(solutionWorkspacePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.doesNotMatch(prompt, /scratch|raw command transcript|hidden reasoning/i);
+  assert.match(prompt, /Structured Final Output Contract V1/);
+  assert.match(prompt, /exactly one valid JSON object/i);
+  assert.match(prompt, /SolutionReviewV1/);
+  assert.match(prompt, /bare JSON only/i);
+  assert.match(prompt, /Markdown\/code fences/i);
+  assert.match(prompt, /before or after the JSON object/i);
+  assert.match(prompt, /reject invalid output/i);
+  assert.match(prompt, /extract, normalize, or repair/i);
+  assert.doesNotMatch(
+    prompt,
+    /Return only the structured SolutionReviewV1 result as the final job result\./i,
+  );
 
   const root = await mkdtemp(join(tmpdir(), 'solution-reviewer-loop-'));
   const workspaceRoot = join(root, 'reviewer-workspace');
@@ -141,6 +153,14 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.equal(JSON.parse(await readFile(join(root, 'reviewer-agent/review.json'), 'utf8')).acceptedOptionId, 'option-000001');
   assert.match(deliveredPrompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);
   assert.match(deliveredPrompt, new RegExp(canonicalSkillSha256));
+  assert.match(deliveredPrompt, /Structured Final Output Contract V1/);
+  assert.match(deliveredPrompt, /SolutionReviewV1/);
+  assert.match(deliveredPrompt, /bare JSON only/i);
+  assert.match(deliveredPrompt, /reject invalid output/i);
+  assert.doesNotMatch(
+    deliveredPrompt,
+    /Return only the structured SolutionReviewV1 result as the final job result\./i,
+  );
   const invocation = JSON.parse(await readFile(join(root, 'reviewer-agent/invocation.json'), 'utf8'));
   assert.equal(invocation.schemaVersion, 'solution-reviewer-invocation-v2');
   assert.deepEqual(invocation.skillAssignments, [

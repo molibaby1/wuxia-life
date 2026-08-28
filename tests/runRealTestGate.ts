@@ -167,6 +167,10 @@ const suites: Suite[] = [
     name: 'globalMoneyDifficultySetbackWalletMutationRetirement',
     entry: 'tests/globalMoneyDifficultySetbackWalletMutationRetirement.test.ts',
   },
+  {
+    name: 'globalMoneyPlayerFacingPresentationRetirement',
+    entry: 'tests/globalMoneyPlayerFacingPresentationRetirement.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

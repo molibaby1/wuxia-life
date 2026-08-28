@@ -89,7 +89,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §9. Guard live presentation surfaces only; do not require repository-wide money-string zero."
     },
     {

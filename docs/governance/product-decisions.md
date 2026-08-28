@@ -1328,3 +1328,17 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要为日常破财定义正式经济状态、Wealth downgrade 或 Asset 损失；
 - 需要改变 setback 触发概率、豁免、constitution 门槛或系统本身；
 - 需要进入 Phase E2 UI / E3 generic runtime / E4 PlayerState·Snapshot 物理删除。
+
+### PD-094：Player-facing wallet presentation is retired
+
+**实施决策（Human accepted：2026-08-28）**
+
+- 因为正常 gameplay 已无 money producer / consumer，主界面、结局、progression / period delta、以及 session `PlayerSummaryDto` 不再把 `money` / 银两作为玩家可见资源或展示字段。
+- 兼容层仍保留：`PlayerState.money`、新局 `money: 100`、Snapshot `3.15.0` 的 money 字段与兼容拷贝路径。
+- 当前引擎的 money authoring / runtime capability 退役（EventExecutor / ConditionEvaluator / active-planning fallback / CriticalChoice / origin authoring / `money_modify` 等）留待 E3；物理删除字段与 Snapshot bump 留待 E4 / Phase F。
+
+**重新讨论条件**
+
+- 需要把 wallet 重新做成玩家可见资源；
+- 需要进入 E3 current-runtime capability retirement 或 E4 / Phase F 字段删除；
+- 需要修改 Snapshot schema / PlayerState 物理形状。

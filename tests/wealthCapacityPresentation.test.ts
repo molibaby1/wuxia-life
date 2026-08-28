@@ -61,7 +61,8 @@ assertCase('main screen shows canonical wealth capacity first', () => {
   assert.equal(model.topResources[0]?.key, 'wealthCapacity');
   assert.equal(model.topResources[0]?.label, '财力');
   assert.equal(model.topResources[0]?.value, '家资殷实');
-  assert(model.topResources.some((item) => item.key === 'money' && item.label === '银两'));
+  assert.equal(model.topResources.length, 1);
+  assert(!model.topResources.some((item) => item.key === 'money' || item.label === '银两'));
 }, failures);
 
 assertCase('api mapper carries canonical wealth capacity', () => {

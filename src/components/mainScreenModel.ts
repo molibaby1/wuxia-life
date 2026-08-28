@@ -5,9 +5,9 @@
  * - `coreStats`: first-screen core attribute grid (MainScreenStatsPanel)
  * - `topResources`: header resource row (GameScreen status bar)
  *
- * Baseline composition (pre-P123):
+ * Baseline composition (post-E2 US-001):
  * - coreStats: the six canonical player attributes
- * - topResources: wealthCapacity, money
+ * - topResources: wealthCapacity only (legacy wallet presentation retired)
  *
  * Out of scope for P123 (do not modify):
  * - `fullStatGroups` structure and descriptions (owned by P125)
@@ -98,7 +98,6 @@ export type MainScreenPlayer = Pick<
   | 'chivalry'
   | 'wealthCapacity'
   | 'reputation'
-  | 'money'
   | 'knowledge'
   | 'charisma'
   | 'connections'
@@ -306,7 +305,6 @@ function buildFullStatGroups(player: MainScreenPlayer): MainScreenStatGroup[] {
           WEALTH_CAPACITY_LABELS[player.wealthCapacity],
           '家资与可支配余裕的综合读数。',
         ),
-        createStat('money', '银两', valueOf(player, 'money'), '阶段性周转余额，供未迁移内容继续使用。'),
       ],
     },
   ];
@@ -326,10 +324,8 @@ export function buildMainScreenModel(
 
   return {
     stageTags,
-    // 财力是核心资源，银两是阶段性周转余额。
     topResources: [
       createStat('wealthCapacity', '财力', WEALTH_CAPACITY_LABELS[player.wealthCapacity]),
-      createStat('money', '银两', valueOf(player, 'money')),
     ],
     currentGoalSummary: lifeMemory.currentGoalLabel ?? '暂无明确目标',
     affiliationSummary: buildAffiliationSummary(player),

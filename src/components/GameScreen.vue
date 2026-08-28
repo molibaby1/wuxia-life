@@ -287,7 +287,6 @@ const attributePanelPlayer = computed((): MainScreenPlayer => {
       affiliation: p.affiliation,
       title: p.title,
       reputation: p.reputation,
-      money: p.money,
       knowledge: p.knowledge,
       charisma: p.charisma,
       businessAcumen: p.businessAcumen,

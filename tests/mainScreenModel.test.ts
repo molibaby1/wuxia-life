@@ -84,11 +84,15 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(model.riskSummary === '中 · 身子正虚', 'risk summary should map severity to Chinese level');
   assert(model.tendencySummary === '功力 42', 'martial-dominant tendency collapses to martialPower readout');
   assert(!('shapingSummary' in model), 'main screen should not expose shapingSummary');
-  assert(model.topResources.length === 2, 'main screen should show canonical wealth capacity and legacy silver');
+  assert(model.topResources.length === 1, 'main screen should show only canonical wealth capacity');
   assert(model.topResources[0]?.key === 'wealthCapacity', 'wealth capacity must be the primary economic resource');
   assert(model.topResources[0]?.label === '财力', 'wealth capacity should render the player-facing 财力 label');
   assert(model.topResources[0]?.value === '无余财', 'default wealth capacity should use the canonical label value');
-  assert(model.topResources[1]?.key === 'money' && model.topResources[1]?.label === '银两', 'legacy silver must remain visible during Phase 1A');
+  assert(!model.topResources.some((item) => item.key === 'money' || item.label === '银两'), 'retired wallet must not appear in top resources');
+  assert(
+    !model.fullStatGroups.find((group) => group.id === 'resource')?.items.some((item) => item.key === 'money' || item.label === '银两'),
+    'retired wallet must not appear in expanded resource group',
+  );
   assert(model.assetSummary === '暂无资产', 'empty canonical asset ownership should use explicit empty copy');
   assert(
     model.coreStats.map((item) => item.label).join(',') === '功力,体魄,学识,人脉,名望,侠义声誉',
@@ -252,8 +256,8 @@ console.log('=== Main Screen Model Tests ===\n');
   assert(coreLabels.includes('学识'), 'knowledge should be immediately visible on the first screen');
   assert(coreLabels.includes('功力'), 'martialPower should remain first-screen visible');
   assert(
-    model.topResources.map((item) => item.key).join(',') === 'wealthCapacity,money',
-    'resource row must present wealth capacity first and retain legacy silver second',
+    model.topResources.map((item) => item.key).join(',') === 'wealthCapacity',
+    'resource row must present wealth capacity only',
   );
   console.log('✓ keeps narrowed first-screen emphasis (P123)');
 }

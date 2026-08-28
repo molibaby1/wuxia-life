@@ -122,7 +122,7 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §12; never alias exact money expressions to wealthCapacity."
     },
     {
@@ -140,7 +140,7 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §13; preserve action rewards, risk, repetition, duration, and habit semantics."
     },
     {
@@ -157,7 +157,7 @@
         "Tests pass"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §14; do not redesign CriticalChoice reachability."
     },
     {
@@ -174,7 +174,7 @@
         "Tests pass"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §15; do not invent Wealth Capacity downgrades for poor/street legacy origin metadata."
     },
     {
@@ -191,7 +191,7 @@
         "Tests pass"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §16 and §19.2; do not use this story as a repository-wide legacy purge."
     },
     {

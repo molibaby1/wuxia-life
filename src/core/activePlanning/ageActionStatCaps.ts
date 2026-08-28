@@ -24,10 +24,6 @@ export function clampActionDeltasForAge(
 
   for (const [stat, value] of Object.entries(deltas)) {
     if (EARLY_FORBIDDEN_STATS.has(stat)) continue;
-    if (stat === 'money' && Math.abs(value) > 5) {
-      result[stat] = Math.sign(value) * Math.min(Math.abs(value), 5);
-      continue;
-    }
     if (value !== 0) result[stat] = value;
   }
   return result;

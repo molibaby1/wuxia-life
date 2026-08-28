@@ -79,7 +79,7 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
     }
   }
   for (const cost of action.costs) {
-    const key = cost.stat ?? 'money';
+    const key = cost.stat;
     deltas[key] = (deltas[key] ?? 0) - cost.amount;
   }
 

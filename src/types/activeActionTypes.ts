@@ -34,7 +34,7 @@ export interface ActionRewardChannel {
 }
 
 export interface ActionCostChannel {
-  stat?: string;
+  stat: string;
   amount: number;
 }
 

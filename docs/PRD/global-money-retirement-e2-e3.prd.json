@@ -1,0 +1,233 @@
+{
+  "project": "Wuxia-Life",
+  "branchName": "ralph/global-money-retirement-e2-e3",
+  "description": "Retire player-facing legacy money presentation and current-engine money authoring/runtime capability while preserving PlayerState/Snapshot compatibility for a later Human-gated phase.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Retire the live main-screen silver resource",
+      "description": "As a player, I want the main screen to show only the canonical strategic economy state so that a dead wallet is not presented as an active resource. See PRD §5 and global invariants §3.",
+      "acceptanceCriteria": [
+        "Main-screen topResources contains wealthCapacity and no money entry",
+        "Expanded resource group contains wealthCapacity and no money entry",
+        "MainScreenPlayer presentation type no longer requires money and API-mode mapping no longer copies p.money for the main-screen model",
+        "PlayerState.money, Snapshot 3.15.0, and PlayerSummaryDto.money are not removed in this story",
+        "Focused main-screen tests pass",
+        "Tests pass",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "See PRD §5; preserve §3 invariants and §19 non-goals."
+    },
+    {
+      "id": "US-002",
+      "title": "Retire ending money presentation",
+      "description": "As a player finishing a life, I want endings to summarize meaningful outcomes rather than display or narratively branch on a retired wallet. See PRD §6.",
+      "acceptanceCriteria": [
+        "EndingScreen has no silver/money stat row and its presentation prop shape has no money field",
+        "API-mode ending presentation no longer constructs money solely for EndingScreen",
+        "EndingSystem review no longer prints player.money as wealth",
+        "quiet_family_life presentation no longer branches on player.money",
+        "Ending classification is unchanged for states that differ only in money",
+        "Focused ending and quiet-family tests pass",
+        "Tests pass",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "See PRD §6; do not change ending eligibility/classification semantics."
+    },
+    {
+      "id": "US-003",
+      "title": "Retire money from progression delta presentation",
+      "description": "As a player, I want progression overlays and period summaries to report only live gameplay stats so that compatibility-only money never appears as a delta. See PRD §7.",
+      "acceptanceCriteria": [
+        "periodSummaryBuilder PUBLIC_NUMERIC_STATS and labels contain no money entry",
+        "progressionOverlay PLAYER_RESULT_STATS and display labels contain no money entry",
+        "A before/after state difference only in money produces no player-facing delta line/card",
+        "Non-money delta ordering and labels remain unchanged",
+        "Focused progression and active-planning tests pass",
+        "Tests pass",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See PRD §7; active-action reward/cost semantics are deferred to E3 story US-008."
+    },
+    {
+      "id": "US-004",
+      "title": "Remove money from session progression presentation DTO",
+      "description": "As an API/UI consumer, I want session progression payloads to expose only live player-facing state so that the retired wallet is no longer transported for presentation. See PRD §8.",
+      "acceptanceCriteria": [
+        "PlayerSummaryDto has no money field",
+        "server sessionProgressionMapper does not emit money in the player summary",
+        "API/UI consumers no longer expect money in PlayerSummaryDto",
+        "Snapshot and PlayerState compatibility money fields remain unchanged",
+        "Session progression contract/mapping tests pass",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See PRD §8; this is presentation transport only, not E4 persistence removal."
+    },
+    {
+      "id": "US-005",
+      "title": "Establish E2 presentation-zero guard and governance",
+      "description": "As a maintainer, I want a regression guard and Product Decision for E2 so that compatibility money cannot silently reappear in live player-facing surfaces. See PRD §9.",
+      "acceptanceCriteria": [
+        "Add and register a focused E2 regression covering main-screen, ending, progression, and PlayerSummaryDto money absence",
+        "The E2 guard preserves PlayerState.money, new-game money:100, and Snapshot schema 3.15.0",
+        "Formal EventLoader money writes remain zero and normal gameplay money mutation remains zero",
+        "Record one narrow E2 Product Decision using the actual next free PD number after PD-093",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "See PRD §9. Guard live presentation surfaces only; do not require repository-wide money-string zero."
+    },
+    {
+      "id": "US-006",
+      "title": "Retire stat_modify money from current EventExecutor",
+      "description": "As a content maintainer, I want the current formal event executor to stop supporting money as a stat target so that new formal content cannot revive wallet mutation. See PRD §11.",
+      "acceptanceCriteria": [
+        "StatModifyHandler MODIFIABLE_PLAYER_STATS no longer includes money",
+        "EventExecutor has no money-specific stat clamp/range branch",
+        "A stat_modify effect targeting money cannot change player.money through the current EventExecutor",
+        "Supported non-money stat_modify and Wealth Capacity effects remain unchanged",
+        "Formal EventLoader money writes remain zero",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "See PRD §11; PlayerState.money and Snapshot compatibility remain deferred."
+    },
+    {
+      "id": "US-007",
+      "title": "Retire money expression access from current ConditionEvaluator",
+      "description": "As a content maintainer, I want exact-wallet conditions to fail closed so that future formal content cannot revive balance-gated gameplay. See PRD §12.",
+      "acceptanceCriteria": [
+        "ConditionEvaluator DIRECT_PLAYER_PROPERTIES no longer includes money",
+        "player.money or direct money expressions fail closed in the current ConditionEvaluator",
+        "wealth_capacity_at_least and supported non-money expressions continue to work",
+        "Formal loaded catalog has zero money conditions",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "See PRD §12; never alias exact money expressions to wealthCapacity."
+    },
+    {
+      "id": "US-008",
+      "title": "Retire dormant active-planning wallet fallback",
+      "description": "As a maintainer, I want active-planning cost channels to be explicit so that a missing stat cannot silently default to the retired wallet. See PRD §13.",
+      "acceptanceCriteria": [
+        "ActiveAction cost channels require an explicit stat rather than using an implicit money default",
+        "ActionResultResolver contains no cost.stat ?? money fallback",
+        "ageActionStatCaps contains no money-specific cap branch",
+        "Current activeActionCatalog and childhoodActionCatalog results remain unchanged",
+        "No Wealth Capacity spending mechanism is introduced",
+        "Focused active-planning tests pass",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "See PRD §13; preserve action rewards, risk, repetition, duration, and habit semantics."
+    },
+    {
+      "id": "US-009",
+      "title": "Retire unreachable CriticalChoice wallet consequences",
+      "description": "As a maintainer, I want dormant CriticalChoice wallet rewards removed so that future catalog changes cannot revive hidden money mutations. See PRD §14.",
+      "acceptanceCriteria": [
+        "CriticalChoiceSystem has no direct player.money mutation in life_goal or marriage_choice consequences",
+        "Existing non-money consequences in those branches are preserved",
+        "Reachable sect_choice behavior remains unchanged",
+        "No Wealth Capacity replacement is added",
+        "CriticalChoice focused tests pass",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "See PRD §14; do not redesign CriticalChoice reachability."
+    },
+    {
+      "id": "US-010",
+      "title": "Retire legacy origin and trait wallet authoring",
+      "description": "As a maintainer, I want origin/trait metadata to stop advertising money as a canonical stat dimension so that parallel origin data cannot reintroduce wallet initialization. See PRD §15.",
+      "acceptanceCriteria": [
+        "Legacy origin trait metadata contains no initialStats money entries",
+        "TraitStatKey no longer includes money",
+        "All non-money origin metadata and biases are preserved",
+        "Canonical origin.json Wealth Capacity initialization remains unchanged",
+        "Normal new-game origin/trait tests remain money-independent",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "See PRD §15; do not invent Wealth Capacity downgrades for poor/street legacy origin metadata."
+    },
+    {
+      "id": "US-011",
+      "title": "Retire current money-specific effect vocabulary and examples",
+      "description": "As a content author, I want current event types and examples to stop teaching wallet effects so that new content follows canonical Wealth semantics. See PRD §16.",
+      "acceptanceCriteria": [
+        "Current EffectType no longer exposes MONEY_MODIFY/money_modify",
+        "Current authoring examples contain no money condition or money stat-modify example",
+        "Current composable/presentation code has no active money_modify special case tied to the retired vocabulary",
+        "Canonical Wealth Capacity condition/effect support remains available",
+        "Excluded old-engine files are not bulk-deleted in this story",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "See PRD §16 and §19.2; do not use this story as a repository-wide legacy purge."
+    },
+    {
+      "id": "US-012",
+      "title": "Establish formal authoring guard against wallet re-import",
+      "description": "As a maintainer, I want formal content validation to fail when wallet authoring is reintroduced so that deferred legacy files cannot silently become live. See PRD §17.",
+      "acceptanceCriteria": [
+        "Formal EventLoader/import guard rejects stat_modify targeting money",
+        "Formal EventLoader/import guard rejects money_modify effects",
+        "Formal EventLoader/import guard rejects exact-money expression/condition authoring",
+        "Guard derives formal scope from events.json/EventLoader authority rather than stale event-asset-manifest counts",
+        "Current formal catalog passes with zero money writes and zero money conditions",
+        "Deferred unloaded wallet JSON is not bulk-modified",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "See PRD §17; the guard is the anti-resurrection boundary for deferred wallet backlog."
+    },
+    {
+      "id": "US-013",
+      "title": "Close E3 current-runtime capability retirement",
+      "description": "As the Human owner, I want one closure guard and Product Decision proving current gameplay, presentation, authoring, and runtime no longer own money while compatibility remains intact. See PRD §18 and §22.",
+      "acceptanceCriteria": [
+        "Add and register a focused E3 closure regression covering the capability-zero contract in PRD §18",
+        "E3 closure proves formal writes/conditions, setback mutations, live presentation, EventExecutor money mutation, ConditionEvaluator money access, planning fallback, CriticalChoice mutations, origin/trait authoring, and money_modify vocabulary are retired",
+        "E3 closure explicitly proves PlayerState.money, new-game money:100, and Snapshot schema 3.15.0 still remain",
+        "E1, D16, E2, and relevant D14-D10 regressions pass",
+        "Record one narrow E3 Product Decision using the actual next free PD number after the E2 decision",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "See PRD §18–§22. Stop after this story; E4/Phase F requires a new Human-approved PRD."
+    }
+  ]
+}

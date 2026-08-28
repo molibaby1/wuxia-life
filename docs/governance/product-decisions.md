@@ -1213,3 +1213,118 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要为丐帮路线引入战略 Wealth Capacity 或独立经济资源语义；
 - 需要把 Border / ransom / family / P22 / `merchant_crisis` 一并纳入同一 retirement slice；
 - 需要修改 PlayerState、generic effect handlers、UI/API 或 Snapshot/schema。
+
+### PD-087：Legacy Wealth flags are bridge/history signals only
+
+**实施决策（Human accepted：2026-08-27）**
+
+- Canonical Merchant route identity owner：`route_merchant`；canonical strategic economic state：`wealthCapacity`。
+- `p8_route_wealth` 仅作 P8/headless 兼容桥与 early-commercial history evidence；不得 hard-gate 正常 gameplay 的 canonical Merchant progression，不得单独拥有 strategic Merchant identity 或 Wealth tier。
+- `route_wealth_committed` 仅作 historical commercial commitment / patron bridge evidence；不得单独拥有 composite economic destiny 或 Merchant route owner authority。
+- `p11_route_divergence_wealth` 保留为 P11 validation/history signal；不得提升为独立 strategic Wealth route owner。
+- `WUXIA_ROUTE_DEFINITIONS.route_wealth` 保留为 narrative/validation configuration alias，不得代表独立 strategic economy progression owner。
+- P9 retained-expression hard-gates（`p9_childhood_first_trade`、`p9_business_echo_midlife`、`p9_merchant_midlife_caravan`）迁向 canonical Merchant / early-commercial evidence；`p9_wealth_caravan_gate` 保持 isolated，待 D11 physical retirement。
+- 本决策不删除 legacy flags、不删除 money producers、不修改 P22 choices、不修改 `career_business_empire` / `merchant_crisis`、不引入 Wealth transition；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要 physical deletion of `p9_wealth_caravan_gate`、`p9_route_identity_wealth`、`career_business_empire` 或 wallet producers（D11+ scope）；
+- 需要 P22 choice integrity redesign（D12 scope）；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-088：Dead or parallel economic content is retired rather than converted
+
+**实施决策（Human accepted：2026-08-27）**
+
+- `p9_wealth_caravan_gate` 与 `p9_route_identity_wealth`（含 `wealth_caravan_magnate` / `wealth_steady_trader`）从 formal catalog 物理退休；不得 remap 为 `wealthCapacity` 或 canonical Merchant gate。
+- `career_business_empire` 从 formal catalog 物理退休；canonical `merchant_business_empire` / `merchant_empire` / `merchant_ending_tycoon` / `wealthCapacity` progression 保持不变。
+- `merchant_crisis` 从 formal catalog 物理退休；其 executable `money -200` 与 broken `random target:money` declaration 随 event 一并移除；不做 bankruptcy redesign。
+- `business_expansion` reachability 仍为 producer=0；`survived_crisis` 无其它 legitimate producer/consumer，随 `merchant_crisis` 退休。
+- 本决策不新增 Wealth transition、不引入 numeric wealth、不修改 P22、不修改 generic EventExecutor/RandomEffectHandler、不退休 `merchant_mentor`；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要为 `merchant_crisis` 或 `career_business_empire` 重新设计 legitimate gameplay semantics；
+- 需要 P22 choice integrity redesign 或 Class A bulk money retirement；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-089：P22 early commercial commitment choices use durable strategy identity, not wallet reward
+
+**实施决策（Human accepted：2026-08-27）**
+
+- `p22_early_wealth_route_fork` 的 expand / consolidate choices 以 durable branch strategy flags 区分商业策略取向，不再以 wallet reward 掩盖 choice integrity 缺口。
+- `route_wealth_committed` 与 `p22_wealth_route_forked` 继续作为 shared historical commercial commitment bridge evidence；不得删除或升格为 Wealth tier / canonical Merchant owner。
+- expand branch：`p22_wealth_route_expansion` = expansion strategy evidence；consolidate branch：`p22_wealth_route_consolidation` = consolidation strategy evidence；两 marker 正常 choice execution 下互斥，不表示 Wealth tier，不替代 `route_merchant`。
+- `expand_trade_route` 的 legacy `money +50` 退休；不得以 `wealth_capacity_*`、numeric wealth 或 synthetic economic score 替代。
+- consolidate branch 保留既有 `reputation +3`；不得为数值对称给 expand branch 补 stat reward。
+- 本决策不新增 downstream consumer redesign、不修改 eligibility/scheduling、不修改 PlayerState / wealthCapacity schema；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要 strategy flags 升格为 canonical Merchant / Wealth authority；
+- 需要 Class A bulk money retirement 或 Wealth Contract C1/C2/C3；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-090：Family child-birth choices use durable parenting strategy identity, not wallet cost
+
+**实施决策（Human accepted：2026-08-28）**
+
+- `family_child_born` 的 grand celebration / simple celebration / personal care 三条 choice 以 durable family/parenting strategy identity flags 区分人生取向，不再以 wallet cost 维持 choice integrity。
+- grand celebration branch：`family_child_born_grand_banquet` = social / ceremonial family strategy evidence；simple celebration branch：`family_child_born_simple_celebration` = restrained / modest family strategy evidence；personal care branch：`family_child_born_personal_care` = hands-on parenting strategy evidence；三 marker 正常 choice execution 下互斥，不表示 Wealth tier，不替代 canonical family milestone authority。
+- shared child semantics 保持：`children +1`、`has_child = true`、event record / scheduling / eligibility 不变；grand banquet 既有 `connections +10` 保留，不得为数值对称给另外两条 branch 补 connections。
+- legacy wallet costs `money -50` / `money -10` / `money -20` 全部退休；不得以 `wealth_capacity_*`、numeric wealth 或 synthetic family score 替代。
+- 本决策不处理 `family_crisis`、`family_child_marriage`、Class A family money producers；不修改 PlayerState / wealthCapacity schema；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要 strategy flags 升格为 canonical family / Wealth authority；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-091：Classified ordinary wallet producers are abstracted in one bounded batch
+
+**实施决策（Human accepted：2026-08-28）**
+
+- D8 已归类为 `DAILY_ABSTRACTED / NARRATIVE_ONLY` 的 37 个 ordinary wallet producers 在本 slice 一次性退休；正式处理为 `money delta → removed`，保留既有 non-wallet durable semantics。
+- 本 batch 覆盖 Border ordinary flow（4）、Family ordinary lifecycle（3）、Social/relationship incidental（3）、Career incidental（1）、`career_sect_expansion` minor tiers（2）、P9/P11 expression wallet（6）、HVG Merchant operating rhythm（14）、Magnate expression incidental（4）；不得以 `wealth_capacity_*`、numeric wealth 或 synthetic economic score 替代。
+- `career_sect_expansion` mixed-event invariant：`career_sect_expansion_choice_1` 的 strategic `money -200` 保留；choice 2/3 ordinary writes 退休。
+- D14 完成后 formal executable money producers 仅剩 strategic Wealth Contract candidates：`border_crisis`、`family_crisis`、`family_child_marriage`、`jianghu_demon_sect`、`hero_ally_pays_price`、`career_foundation_sect`、`career_sect_expansion`（choice 1 only）、`border_ending_merchant`（共 10 writes / 8 events）。
+- 本决策不进入 C1/C2/C3 implementation；不修改 PlayerState / wealthCapacity schema / generic runtime / UI/API；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要 C1 Wealth Requirement / alternative path implementation；
+- 需要 C2 Major Commitment 或 C3 Wealth Transition redesign；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-092：Final strategic event money producers migrate to Wealth Capacity qualification or transition
+
+**实施决策（Human accepted：2026-08-28）**
+
+- 剩余全部 formal event-level money producers（10 writes / 8 events）迁移完成；formal executable money writes = 0，formal money-writing events = 0。
+- 8 writes → `wealth_capacity_at_least` Requirement（默认不消费 Capacity）：`border_crisis_ransom`、`fund_expedition`、`family_child_marriage_choice_1`、`ally_pay_ransom`、`family_crisis_full_support`（`comfortable_means`）、`family_crisis_limited_support`（`modest_savings`）、`create_sect`、`career_sect_expansion_choice_1`。
+- 1 write → network qualification only：`ally_pay_ransom_supported` 保持 `connections >= 20`，不挂 Wealth Requirement；与 direct path 可同时可见。
+- 1 write → Wealth Transition：`border_ending_merchant` 使用 `wealth_capacity_raise_to regional_magnate`（禁止 `set` / downgrade）。
+- `family_crisis` 不再使用「倾尽家财」措辞；`career_sect_major_expansion` 记录大规模扩建世界事实；无 Wealth Capacity downgrade、无 hidden numeric wealth。
+- 本决策不删除 PlayerState.money、不清理 generic money runtime / UI/API（Phase E）；不扩 choice multi-condition / expression `wealthCapacity`；Snapshot 继续保持 `3.15.0`。
+
+**重新讨论条件**
+
+- 需要 Phase E generic money runtime / PlayerState / UI cleanup；
+- 需要 Wealth Capacity downgrade primitive 或 hero dual-AND runtime；
+- 需要修改 PlayerState、wealthCapacity schema 或 Snapshot/schema。
+
+### PD-093：Difficulty setbacks no longer mutate the retired wallet
+
+**实施决策（Human accepted：2026-08-28）**
+
+- Difficulty Setback 的 4 处活钱包写入全部退役：`property_loss` / `robbery` / `business_failure` / `natural_disaster` 不再含 `statChanges.money`。
+- `robbery` 保留 `constitution -3`；`business_failure` 保留既有 `businessAcumen -5`；`natural_disaster` 保留既有 `constitution -10` 与 `reputation -15`；`property_loss` 允许成为 narrative-only setback。
+- `SETBACK_MODIFIABLE_STATS` 移除 `money`。Difficulty Setback subsystem 不再拥有 wallet mutation authority。
+- 普通挫折损失保持叙事或既有非 money 后果；不引入 Wealth Capacity replacement、downgrade、`wealth_capacity_lower_to` 或任何新 numeric economy。
+- 正常 gameplay 的经济 money mutation = 0。`createInitialState money: 100`、PlayerState.money、UI/DTO、generic EventExecutor money capability、Snapshot `3.15.0` 均不在本决策范围。
+
+**重新讨论条件**
+
+- 需要为日常破财定义正式经济状态、Wealth downgrade 或 Asset 损失；
+- 需要改变 setback 触发概率、豁免、constitution 门槛或系统本身；
+- 需要进入 Phase E2 UI / E3 generic runtime / E4 PlayerState·Snapshot 物理删除。

@@ -22,7 +22,6 @@ export const origins: OriginConfig[] = [
     summary: '资源宽裕，也更早懂得钱与人情。',
     flavor: '你从小就知道柴米油盐的分量。',
     initialStats: [
-      { stat: 'money', value: 150 },
       { stat: 'businessAcumen', value: 4 },
       { stat: 'connections', value: 2 },
     ],
@@ -67,7 +66,6 @@ export const origins: OriginConfig[] = [
     summary: '资源更少，但上升意愿更强。',
     flavor: '一切向上的机会，对你来说都格外沉重。',
     initialStats: [
-      { stat: 'money', value: -50 },
       { stat: 'constitution', value: 1 },
     ],
     earlyEventBiases: [
@@ -85,7 +83,6 @@ export const origins: OriginConfig[] = [
     initialStats: [
       { stat: 'connections', value: 2 },
       { stat: 'charisma', value: 2 },
-      { stat: 'money', value: -20 },
     ],
     earlyEventBiases: [
       { tag: 'social', multiplier: 1.2 },

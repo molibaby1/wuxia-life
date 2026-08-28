@@ -76,9 +76,6 @@ export enum EffectType {
   /** Event 记录 */
   EVENT_RECORD = 'event_record',
 
-  /** 金钱变动（兼容旧数据） */
-  MONEY_MODIFY = 'money_modify',
-
   /** 财富容量设置 */
   WEALTH_CAPACITY_SET = 'wealth_capacity_set',
 
@@ -138,8 +135,7 @@ export type TraitStatKey =
   | 'connections'
   | 'knowledge'
   | 'businessAcumen'
-  | 'influence'
-  | 'money';
+  | 'influence';
 
 export type EventBiasTag =
   | 'training'

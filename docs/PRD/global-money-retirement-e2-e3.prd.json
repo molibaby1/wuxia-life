@@ -18,7 +18,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §5; preserve §3 invariants and §19 non-goals."
     },
     {
@@ -37,7 +37,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §6; do not change ending eligibility/classification semantics."
     },
     {

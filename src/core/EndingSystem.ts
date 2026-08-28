@@ -418,7 +418,6 @@ export class EndingSystem {
     review += `寿命：${player.age} 岁\n`;
     review += `侠义值：${player.chivalry}\n`;
     review += `名望：${player.reputation}\n`;
-    review += `财富：${player.money}\n`;
     review += `武力：${player.martialPower}\n`;
     review += `学识：${player.knowledge}\n`;
     

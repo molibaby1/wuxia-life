@@ -82,8 +82,9 @@ function testWealthAndBalancedExplanationsDiffer(): void {
   assert(wealthText.includes('经营能力'), 'wealth explanation should name the achieved capability');
   assert(wealthText.includes('家人'), 'wealth explanation should retain the family anchor');
   assert(balancedText.includes('练武、读书与营生'), 'balanced explanation should name the mixed axis');
-  assert(balancedText.includes('压力'), 'balanced explanation should acknowledge the cost without exposing thresholds');
+  assert(balancedText.includes('守住已有的生活'), 'balanced explanation should use the non-wallet life-axis close');
   assert(balancedText.includes('家人'), 'balanced explanation should retain the family anchor');
+  assert(!balancedText.includes('财富') && !/银两|\d+\s*两/.test(balancedText), 'balanced explanation must not narrate retired wallet state');
 }
 
 function testNoFamilyDescriptionIsNotFabricated(): void {

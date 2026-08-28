@@ -308,7 +308,6 @@ const endingPlayer = computed(() => {
         affiliation: player?.affiliation ?? null,
         martialPower: player?.martialPower ?? 0,
         chivalry: player?.chivalry ?? 0,
-        money: player?.money ?? 0,
       };
     }
     return null;

@@ -33,10 +33,6 @@
               <span class="label">侠义值</span>
               <span class="value">{{ player?.chivalry }}</span>
             </div>
-            <div class="stat">
-              <span class="label">银两</span>
-              <span class="value">{{ player?.money }}</span>
-            </div>
           </div>
         </div>
         
@@ -86,7 +82,6 @@ const props = defineProps<{
     deathReason?: string;
     martialPower?: number;
     chivalry?: number;
-    money?: number;
   } | null;
   hasLatestSave?: boolean;
   latestSaveLabel?: string;

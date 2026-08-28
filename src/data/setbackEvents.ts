@@ -84,9 +84,6 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     baseProbability: 10,
     conditions: {},
     effects: {
-      statChanges: {
-        money: -100
-      },
       duration: 0
     },
     exemption: {
@@ -170,7 +167,6 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     conditions: {},
     effects: {
       statChanges: {
-        money: -150,
         constitution: -3
       },
       duration: 30
@@ -234,7 +230,6 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     conditions: {},
     effects: {
       statChanges: {
-        money: -300,
         businessAcumen: -5
       },
       duration: 180
@@ -254,7 +249,6 @@ export const SETBACK_EVENTS: SetbackEventConfig[] = [
     conditions: {},
     effects: {
       statChanges: {
-        money: -500,
         constitution: -10,
         reputation: -15
       },

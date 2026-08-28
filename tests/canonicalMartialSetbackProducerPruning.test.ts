@@ -87,7 +87,7 @@ function run(): void {
   );
   assert(clamped.martialPower === 0, 'martialPower setback must clamp at 0');
   assert(clamped.constitution === 0, 'constitution setback must clamp at 0');
-  assert(clamped.money === 0, 'money setback must clamp at 0');
+  assert(clamped.money === 50, 'retired wallet key must not be mutated by setback apply');
 
   assert(
     applySetbackStatChanges(createState({ reputation: 30 }).player, { reputation: -25 }).reputation === 5,

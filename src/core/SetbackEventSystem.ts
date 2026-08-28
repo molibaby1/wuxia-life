@@ -49,7 +49,6 @@ export function formalFactsForDifficultySetback(setbackId: string): readonly str
 export const SETBACK_MODIFIABLE_STATS = new Set([
   'martialPower',
   'constitution',
-  'money',
   'chivalry',
   'connections',
   'reputation',

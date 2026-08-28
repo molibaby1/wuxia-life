@@ -26,6 +26,7 @@ export type StructuredParticipantExecutionResult<T> =
       ok: true;
       value: T;
       rawOutput: string;
+      stderr: string;
       acceptedAttempt: 0 | 1;
       recovery: EnvelopeRetransmissionObservation;
       executionTrace: ParticipantExecutionTraceV1;
@@ -295,6 +296,7 @@ export async function runStructuredParticipantExecution<T>(input: {
       ok: true,
       value: parsedValue,
       rawOutput: attempt0Raw,
+      stderr: attempt0Job.stderr,
       acceptedAttempt: 0,
       recovery: notAttemptedRecovery(),
       executionTrace: composeExecutionTrace({
@@ -482,6 +484,7 @@ export async function runStructuredParticipantExecution<T>(input: {
     ok: true,
     value: parsedValue,
     rawOutput: attempt1Raw,
+    stderr: attempt1Job.stderr,
     acceptedAttempt: 1,
     recovery,
     executionTrace: composeExecutionTrace(attempt1TraceInput),

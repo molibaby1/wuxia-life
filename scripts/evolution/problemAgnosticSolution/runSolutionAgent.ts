@@ -243,6 +243,11 @@ export async function runSolutionAgent(input: RunSolutionAgentInput): Promise<So
   }
 
   await writeCreateOnly(rawOutputPath, execution.rawOutput);
+  try {
+    await writeCreateOnly(join(input.destinationRoot, 'stderr.txt'), execution.stderr);
+  } catch {
+    // stderr is forensic sidecar evidence; preserve the accepted Solution outcome if it cannot be written.
+  }
   await writeCreateOnly(invocationPath, { ...commonInvocation, deliveredSkills, status: 'completed' });
   await writeCreateOnly(resultPath, execution.value);
   return { ok: true, result: execution.value, invocationPath, rawOutputPath, resultPath };

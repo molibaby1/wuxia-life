@@ -26,13 +26,18 @@ function createContinuationCapableParticipant(
     threadRef?: { provider: string; opaqueId: string };
     spawnProcess?: typeof spawn;
     omitContinuation?: boolean;
+    diagnostics?: { initial: string; continuation: string };
     onContinuationBuildArgs?: (job: WorkspaceAgentJobInput) => void;
   },
 ): WorkspaceAgentParticipantOptions {
   const threadRef = options?.threadRef ?? { provider: 'test-provider', opaqueId: 'thread-000001' };
   const participant: WorkspaceAgentParticipantOptions = {
     executable: process.execPath,
-    buildArgs: () => ['-e', 'process.stdout.write(process.argv[1]);', outputs.initial],
+    buildArgs: () => [
+      '-e',
+      `process.stdout.write(process.argv[1]);${options?.diagnostics === undefined ? '' : ` process.stderr.write(${JSON.stringify(options.diagnostics.initial)})`}`,
+      outputs.initial,
+    ],
     interpretCompletedOutput: ({ stdout, expectedThreadRef }) => ({
       ok: true as const,
       rawOutput: stdout,
@@ -46,7 +51,11 @@ function createContinuationCapableParticipant(
       provider: threadRef.provider,
       buildArgs: job => {
         options?.onContinuationBuildArgs?.(job);
-        return ['-e', 'process.stdout.write(process.argv[1]);', outputs.continuation];
+        return [
+          '-e',
+          `process.stdout.write(process.argv[1]);${options?.diagnostics === undefined ? '' : ` process.stderr.write(${JSON.stringify(options.diagnostics.continuation)})`}`,
+          outputs.continuation,
+        ];
       },
     };
   }
@@ -119,6 +128,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   const packagePath = join(root, 'problem-package.json');
   await writeFile(packagePath, JSON.stringify(problemPackage));
 
+  const capturedStderr = 'successful child diagnostic/tool output\n';
   let deliveredPrompt = '';
   const run = await runSolutionAgent({
     problemPackage,
@@ -134,7 +144,10 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
       executable: process.execPath,
       buildArgs: input => {
         deliveredPrompt = input.prompt;
-        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`];
+        return [
+          '-e',
+          `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))}); process.stderr.write(${JSON.stringify(capturedStderr)})`,
+        ];
       },
     },
   });
@@ -176,6 +189,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     /Write\/return only the structured SolutionWorkV1 result as the final job result\./i,
   );
   assert.equal(await readFile(join(root, 'solution-agent/raw-output.txt'), 'utf8'), JSON.stringify(solutionResult));
+  assert.equal(await readFile(join(root, 'solution-agent/stderr.txt'), 'utf8'), capturedStderr);
   assert.equal(
     await readFile(join(root, 'solution-agent/terminal-attempt-0.txt'), 'utf8'),
     JSON.stringify(solutionResult),
@@ -189,6 +203,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(solutionTrace.terminal.outcome, 'completed');
   assert.equal(solutionTrace.events[0].type, 'process_start');
   assert.equal(solutionTrace.events.at(-1).type, 'participant_terminal_validation');
+  assert.doesNotMatch(JSON.stringify(solutionTrace), new RegExp(capturedStderr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   const terminalValidations = solutionTrace.events.filter(
     (event: { type: string }) => event.type === 'participant_terminal_validation',
   );
@@ -197,7 +212,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.equal(terminalValidations[0].envelopeValid, true);
   assert.equal(terminalValidations[0].schemaValid, true);
   assert.equal(terminalValidations[0].accepted, true);
-  assert.equal(JSON.parse(await readFile(join(root, 'solution-agent/result.json'), 'utf8')).problemId, problemPackage.problemId);
+  assert.deepEqual(JSON.parse(await readFile(join(root, 'solution-agent/result.json'), 'utf8')), solutionResult);
   const invocation = JSON.parse(await readFile(join(root, 'solution-agent/invocation.json'), 'utf8'));
   assert.equal(invocation.schemaVersion, 'solution-agent-invocation-v2');
   assert.equal(invocation.jobNumber, 3);
@@ -214,6 +229,34 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     expectedContentSha256: canonicalSkillSha256,
     contentSha256: canonicalSkillSha256,
   }]);
+
+  const sidecarFailureRoot = join(root, 'sidecar-write-failure-agent');
+  await mkdir(sidecarFailureRoot, { recursive: true });
+  await mkdir(join(sidecarFailureRoot, 'stderr.txt'));
+  const sidecarFailureRun = await runSolutionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-sidecar-write-failure-000001',
+    jobNumber: 3,
+    destinationRoot: sidecarFailureRoot,
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: () => [
+        '-e',
+        `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))}); process.stderr.write(${JSON.stringify(capturedStderr)})`,
+      ],
+    },
+  });
+  assert.equal(sidecarFailureRun.ok, true);
+  if (sidecarFailureRun.ok) assert.deepEqual(sidecarFailureRun.result, solutionResult);
+  assert.equal(await readFile(join(sidecarFailureRoot, 'raw-output.txt'), 'utf8'), JSON.stringify(solutionResult));
+  assert.deepEqual(JSON.parse(await readFile(join(sidecarFailureRoot, 'result.json'), 'utf8')), solutionResult);
+  assert.equal(JSON.parse(await readFile(join(sidecarFailureRoot, 'invocation.json'), 'utf8')).status, 'completed');
+  assert.equal(JSON.parse(await readFile(join(sidecarFailureRoot, 'execution-trace.json'), 'utf8')).schemaVersion, 'participant-execution-trace-v1');
 
   const locatorSolutionResult = {
     ...solutionResult,
@@ -360,6 +403,10 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   const recoveryRoot = join(root, 'recovery-agent');
   const attempt0Raw = `Here is the result:\n${JSON.stringify(solutionResult)}`;
   const attempt1Raw = JSON.stringify(solutionResult);
+  const recoveryStderr = {
+    initial: 'discarded initial diagnostic',
+    continuation: 'accepted continuation diagnostic',
+  };
   const recoveryCounter = { count: 0 };
   let continuationPrompt = '';
   const recoveryRun = await runSolutionAgent({
@@ -376,6 +423,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
       { initial: attempt0Raw, continuation: attempt1Raw },
       {
         spawnProcess: countingSpawn(recoveryCounter),
+        diagnostics: recoveryStderr,
         onContinuationBuildArgs: job => {
           continuationPrompt = job.prompt;
         },
@@ -384,6 +432,7 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   });
   assert.equal(recoveryRun.ok, true);
   assert.equal(recoveryCounter.count, 2);
+  assert.equal(await readFile(join(recoveryRoot, 'stderr.txt'), 'utf8'), recoveryStderr.continuation);
   assert.equal(await readFile(join(recoveryRoot, 'raw-output.txt'), 'utf8'), attempt1Raw);
   assert.equal(await readFile(join(recoveryRoot, 'terminal-attempt-0.txt'), 'utf8'), attempt0Raw);
   assert.equal(await readFile(join(recoveryRoot, 'terminal-attempt-1.txt'), 'utf8'), attempt1Raw);

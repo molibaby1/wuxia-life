@@ -99,6 +99,7 @@ export interface WorkspaceAgentCompletedOutputInput {
 export interface WorkspaceAgentJobSuccess {
   ok: true;
   rawOutput: string;
+  stderr: string;
   exitCode: 0;
   threadRef?: ParticipantThreadRef;
   executionTrace: ParticipantExecutionTraceV1;
@@ -321,7 +322,7 @@ async function runWorkspaceAgentProcess(
       if (processStarted) record({ type: 'process_close', elapsedMs: closeElapsedMs });
       if (code === 0) {
         if (options.interpretCompletedOutput === undefined) {
-          void finish({ ok: true, rawOutput: stdout, exitCode: 0 }, 'completed');
+          void finish({ ok: true, rawOutput: stdout, stderr, exitCode: 0 }, 'completed');
           return;
         }
         const interpretation = options.interpretCompletedOutput({
@@ -342,6 +343,7 @@ async function runWorkspaceAgentProcess(
         void finish({
           ok: true,
           rawOutput: interpretation.rawOutput,
+          stderr,
           exitCode: 0,
           ...(interpretation.threadRef === undefined ? {} : { threadRef: interpretation.threadRef }),
         }, 'completed');

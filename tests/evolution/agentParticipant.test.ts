@@ -159,6 +159,7 @@ export async function runAgentParticipantTests(): Promise<void> {
   );
   assert.equal(solutionWithDiagnostics.ok, true);
   assert.equal(solutionWithDiagnostics.ok ? solutionWithDiagnostics.rawOutput : undefined, solutionOutput);
+  assert.equal(solutionWithDiagnostics.ok ? solutionWithDiagnostics.stderr : undefined, 'success diagnostic');
   assert.deepEqual(solutionWithDiagnostics.ok ? parseSolutionWork(solutionWithDiagnostics.rawOutput) : undefined, solutionWork);
 
   const solutionReview = {

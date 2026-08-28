@@ -1342,3 +1342,17 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要把 wallet 重新做成玩家可见资源；
 - 需要进入 E3 current-runtime capability retirement 或 E4 / Phase F 字段删除；
 - 需要修改 Snapshot schema / PlayerState 物理形状。
+
+### PD-095：Current gameplay/presentation/authoring/runtime no longer owns money
+
+**实施决策（Human accepted：2026-08-28）**
+
+- 当前正式 gameplay / 玩家可见展示 / 正式 authoring / 当前引擎 runtime 不再拥有 `money`：formal EventLoader 无 money write/condition；Difficulty Setback 无 money mutation；主界面/结局/progression/session DTO 无 money 展示；EventExecutor 不可 `stat_modify money`；ConditionEvaluator 不可读 money 表达式；active planning 无隐式 money fallback/cap；CriticalChoice 无直接 money 后果；origin/trait 无 money 初始属性；`EffectType` 无 `money_modify`；正式 wallet re-import guard 已激活。
+- 剩余 money 所有权仅限兼容残留 + 未加载/排除的 legacy 内容 + fixtures/历史分析代码。
+- E4 / Phase F（删除 `PlayerState.money`、新局 seed、Snapshot money 字段并 bump schema）需要单独 Human 授权，本决策明确 **未启动**。
+
+**重新讨论条件**
+
+- 需要重新把 money 做成 live gameplay / presentation / authoring capability；
+- 需要进入 E4 / Phase F 物理删除兼容字段或 Snapshot bump；
+- 需要修改 Wealth Capacity 语义或引入新的普通现金流模拟。

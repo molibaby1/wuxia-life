@@ -175,6 +175,10 @@ const suites: Suite[] = [
     name: 'globalMoneyFormalWalletAuthoringGuard',
     entry: 'tests/globalMoneyFormalWalletAuthoringGuard.test.ts',
   },
+  {
+    name: 'globalMoneyCurrentRuntimeCapabilityRetirement',
+    entry: 'tests/globalMoneyCurrentRuntimeCapabilityRetirement.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

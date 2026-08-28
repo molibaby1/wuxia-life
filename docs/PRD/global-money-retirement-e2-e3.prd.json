@@ -226,7 +226,7 @@
         "Tests pass"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §18–§22. Stop after this story; E4/Phase F requires a new Human-approved PRD."
     }
   ]

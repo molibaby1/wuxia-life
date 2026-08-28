@@ -287,10 +287,9 @@
         "text": "押注新商路，博一把远途之利",
         "effects": [
           {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
+            "type": "flag_set",
+            "target": "p22_wealth_route_expansion",
+            "value": true
           },
           {
             "type": "flag_set",
@@ -313,6 +312,11 @@
             "target": "reputation",
             "value": 3,
             "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p22_wealth_route_consolidation",
+            "value": true
           },
           {
             "type": "flag_set",

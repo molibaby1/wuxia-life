@@ -790,15 +790,6 @@ export function useNewGameEngine() {
           }
           break;
         }
-        case 'money_modify': {
-          const value = typeof effect.value === 'number' ? effect.value : 0;
-          if (value > 0) {
-            parts.push('你的钱袋鼓了起来');
-          } else if (value < 0) {
-            parts.push('你的积蓄少了一些');
-          }
-          break;
-        }
         case 'relation_change': {
           relationChanges.push('与某人的关系发生了微妙的变化');
           break;

@@ -325,7 +325,7 @@ export const bullyEncounterExample: EventDefinition = {
       text: '报官处理',
       condition: {
         type: 'expression',
-        expression: 'player.money >= 10',
+        expression: 'player.reputation >= 10',
       },
       effects: [
         {
@@ -335,8 +335,8 @@ export const bullyEncounterExample: EventDefinition = {
         },
         {
           type: EffectType.STAT_MODIFY,
-          target: 'money',
-          value: -10,
+          target: 'reputation',
+          value: -2,
           operator: 'add',
         },
         {
@@ -431,8 +431,8 @@ export const sectMissionExample: EventDefinition = {
         },
         {
           type: EffectType.STAT_MODIFY,
-          target: 'money',
-          value: 50,
+          target: 'reputation',
+          value: 5,
           operator: 'add',
         },
         {

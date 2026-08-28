@@ -87,7 +87,6 @@ export interface PlayerSummaryDto {
   constitution: number;
   wealthCapacity: WealthCapacity;
   ownedAssets: AssetId[];
-  money: number;
   reputation: number;
   connections: number;
   knowledge: number;

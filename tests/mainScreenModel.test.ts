@@ -21,7 +21,6 @@ function createPlayer(overrides: Partial<PlayerSummaryDto> = {}): PlayerSummaryD
     knowledge: 24,
     connections: 11,
     reputation: 10,
-    money: 88,
     wealthCapacity: 'no_surplus',
     ownedAssets: [],
     charisma: 0,
@@ -49,7 +48,19 @@ function createLifeStates(overrides: Partial<PlayerLifeStates> = {}): PlayerLife
 
 function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): MainScreenPlayer {
   return {
-    ...createPlayer(),
+    martialPower: 42,
+    chivalry: 13,
+    constitution: 18,
+    knowledge: 24,
+    connections: 11,
+    reputation: 10,
+    wealthCapacity: 'no_surplus',
+    ownedAssets: [],
+    charisma: 0,
+    businessAcumen: 0,
+    influence: 0,
+    affiliation: 'wudang',
+    title: null,
     ...overrides,
   };
 }

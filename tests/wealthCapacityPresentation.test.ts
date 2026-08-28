@@ -16,7 +16,6 @@ function createPlayerSummary(overrides: Partial<PlayerSummaryWithCapacity> = {})
     martialPower: 42,
     chivalry: 13,
     constitution: 18,
-    money: 200,
     reputation: 10,
     connections: 11,
     knowledge: 24,
@@ -89,7 +88,7 @@ assertCase('api mapper carries canonical wealth capacity', () => {
   const payload = mapSessionProgression(session as never, 7, 'snapshot-7', null, createLifeMemory());
 
   assert.equal(payload.player.wealthCapacity, 'comfortable_means');
-  assert.equal(payload.player.money, 200);
+  assert.equal('money' in payload.player, false);
 }, failures);
 
 if (failures.length > 0) {

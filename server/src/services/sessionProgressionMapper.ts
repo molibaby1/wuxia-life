@@ -20,7 +20,6 @@ function mapPlayerSummary(session: HeadlessEngineSession): PlayerSummaryDto {
     constitution: player?.constitution ?? 0,
     wealthCapacity: player.wealthCapacity,
     ownedAssets: getOwnedAssets(state.facts),
-    money: player?.money ?? 0,
     reputation: player?.reputation ?? 0,
     connections: player?.connections ?? 0,
     knowledge: player?.knowledge ?? 0,

@@ -44,17 +44,14 @@
     "choices": [
       {
         "id": "marry_mingyue",
-        "text": "迎娶明月 (真爱，财富 -50, 婚姻质量高)",
+        "text": "迎娶明月 (真爱，婚姻质量高)",
         "conditions": [
-          {"type": "expression", "expression": "flags.love_started == true || flags.mingyue_fiancee == true"}
+          {
+            "type": "expression",
+            "expression": "flags.love_started == true || flags.mingyue_fiancee == true"
+          }
         ],
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -50,
-            "operator": "add"
-          },
           {
             "type": "special",
             "target": "set_spouse",
@@ -84,14 +81,8 @@
       },
       {
         "id": "marry_arranged",
-        "text": "接受安排，门当户对 (财富 +50, 人脉 +20, 婚姻质量一般)",
+        "text": "接受安排，门当户对 (人脉 +20, 婚姻质量一般)",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "connections",
@@ -205,14 +196,8 @@
     "choices": [
       {
         "id": "family_child_born_choice_1",
-        "text": "大摆宴席，普天同庆 (财富 -50, 人脉 +10)",
+        "text": "大摆宴席，普天同庆 (人脉 +10)",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -50,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "connections",
@@ -229,19 +214,18 @@
             "type": "flag_set",
             "flag": "has_child",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "family_child_born_grand_banquet",
+            "value": true
           }
         ]
       },
       {
         "id": "child_born_simple",
-        "text": "简单庆祝，低调行事 (财富 -10)",
+        "text": "简单庆祝，低调行事",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -10,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "children",
@@ -252,19 +236,18 @@
             "type": "flag_set",
             "flag": "has_child",
             "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "family_child_born_simple_celebration",
+            "value": true
           }
         ]
       },
       {
         "id": "child_born_care",
-        "text": "亲自照料，暂缓外务 (财富 -20)",
+        "text": "亲自照料，暂缓外务",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -20,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "children",
@@ -274,6 +257,11 @@
           {
             "type": "flag_set",
             "flag": "has_child",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "family_child_born_personal_care",
             "value": true
           }
         ]
@@ -356,14 +344,8 @@
       },
       {
         "id": "child_education_merchant",
-        "text": "从商：继承家业 (财富 +50)",
+        "text": "从商：继承家业",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
-          },
           {
             "type": "flag_set",
             "flag": "child_merchant",
@@ -406,19 +388,17 @@
     },
     "content": {
       "title": "家族危机",
-      "text": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？"
+      "text": "家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是全力支援家族，还是量力而行？"
     },
     "choices": [
       {
         "id": "family_crisis_full_support",
-        "text": "倾尽家财，帮助家族 (财富 -100, 声望 +20)",
+        "text": "全力支援家族 (声望 +20)",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -100,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "reputation",
@@ -433,14 +413,12 @@
       },
       {
         "id": "family_crisis_limited_support",
-        "text": "尽力而为，量力而行 (财富 -30)",
+        "text": "尽力而为，量力而行",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "modest_savings"
+        },
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -30,
-            "operator": "add"
-          },
           {
             "type": "status_add",
             "status": "anxious"
@@ -503,14 +481,12 @@
     "choices": [
       {
         "id": "family_child_marriage_choice_1",
-        "text": "操办婚事，风光大嫁 (财富 -100, 人脉 +20)",
+        "text": "操办婚事，风光大嫁 (人脉 +20)",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -100,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "connections",

@@ -139,6 +139,34 @@ const suites: Suite[] = [
     name: 'globalMoneyBeggarsRouteWalletRetirement',
     entry: 'tests/globalMoneyBeggarsRouteWalletRetirement.test.ts',
   },
+  {
+    name: 'globalMoneyLegacyWealthAuthorityConsumerMigration',
+    entry: 'tests/globalMoneyLegacyWealthAuthorityConsumerMigration.test.ts',
+  },
+  {
+    name: 'globalMoneyDeadParallelContentRetirement',
+    entry: 'tests/globalMoneyDeadParallelContentRetirement.test.ts',
+  },
+  {
+    name: 'globalMoneyP22CommercialCommitmentChoiceRedesign',
+    entry: 'tests/globalMoneyP22CommercialCommitmentChoiceRedesign.test.ts',
+  },
+  {
+    name: 'globalMoneyFamilyChildBornChoiceIntegrityRedesign',
+    entry: 'tests/globalMoneyFamilyChildBornChoiceIntegrityRedesign.test.ts',
+  },
+  {
+    name: 'globalMoneyClassifiedOrdinaryWalletAbstraction',
+    entry: 'tests/globalMoneyClassifiedOrdinaryWalletAbstraction.test.ts',
+  },
+  {
+    name: 'globalMoneyFinalStrategicProducerMigration',
+    entry: 'tests/globalMoneyFinalStrategicProducerMigration.test.ts',
+  },
+  {
+    name: 'globalMoneyDifficultySetbackWalletMutationRetirement',
+    entry: 'tests/globalMoneyDifficultySetbackWalletMutationRetirement.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

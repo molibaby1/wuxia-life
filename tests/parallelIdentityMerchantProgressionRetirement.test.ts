@@ -9,6 +9,7 @@ const RETIRED_IDENTITY_EVENTS = [
   'merchant_first_trade',
   'merchant_expand_business',
   'merchant_empire',
+  'merchant_crisis',
 ] as const;
 
 type Manifest = {
@@ -54,22 +55,13 @@ function testRetiredIdentityEventsLeaveFormalCatalog(): void {
 }
 
 function testDeferredIdentityEventsRemainLoadedAndUnchanged(): void {
-  const crisis = getEvent('merchant_crisis');
   const mentor = getEvent('merchant_mentor');
   const manifest = readJson<Manifest>('src/data/event-asset-manifest.json');
 
-  for (const id of ['merchant_crisis', 'merchant_mentor']) {
-    const manifestEntry = manifest.events.find(event => event.eventId === id);
-    assert(manifestEntry, `${id} must remain represented in the manifest`);
-    assert.equal(manifestEntry.runtimeLoaded, true, `${id} must remain formally runtime-loaded`);
-  }
+  const manifestEntry = manifest.events.find(event => event.eventId === 'merchant_mentor');
+  assert(manifestEntry, 'merchant_mentor must remain represented in the manifest');
+  assert.equal(manifestEntry.runtimeLoaded, true, 'merchant_mentor must remain formally runtime-loaded');
 
-  assert((crisis.choices ?? []).some(choice =>
-    (choice.effects ?? []).some(effect => isMoneyEffect(effect) && effect.value === -200),
-  ), 'merchant_crisis legacy money-loss semantics must remain deferred and unchanged');
-  assert((crisis.choices ?? []).some(choice =>
-    (choice.effects ?? []).some(effect => effect.type === 'random' && effectTarget(effect) === 'money'),
-  ), 'merchant_crisis random money semantics must remain deferred and unchanged');
   assert((mentor.choices ?? []).every(choice =>
     (choice.effects ?? []).some(effect =>
       effectFlag(effect) === 'merchant_heir' && effect.value === true,
@@ -95,7 +87,7 @@ async function testCanonicalMerchantSpineRemainsFormalAndWritesCanonicalFlag(): 
   assert(tycoon.conditions?.some(condition =>
     condition.type === 'expression' && condition.expression === 'flags.merchant_empire == true',
   ), 'merchant_ending_tycoon must retain the canonical merchant_empire consumer');
-  assert(identitySource.includes('merchant_crisis'), 'identity merchant crisis must remain in source');
+  assert.equal(identitySource.includes('merchant_crisis'), false, 'merchant_crisis must be retired from identity source');
   assert(identitySource.includes('merchant_mentor'), 'identity merchant mentor must remain in source');
   assert.equal(identitySource.includes('wealth_capacity'), false, 'retirement must not add Wealth replacement semantics');
   assert.equal(identitySource.includes('asset_'), false, 'retirement must not add Asset replacement semantics');

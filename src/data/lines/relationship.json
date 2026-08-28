@@ -5,10 +5,19 @@
     "category": "relationship",
     "priority": 80,
     "weight": 65,
-    "ageRange": {"min": 18, "max": 30},
+    "ageRange": {
+      "min": 18,
+      "max": 30
+    },
     "triggers": [
-      {"type": "age_reach", "value": 18},
-      {"type": "expression", "expression": "martialPower >= 30"}
+      {
+        "type": "age_reach",
+        "value": 18
+      },
+      {
+        "type": "expression",
+        "expression": "martialPower >= 30"
+      }
     ],
     "conditions": [],
     "content": {
@@ -22,20 +31,43 @@
         "id": "relationship_master_disciple_choice_1",
         "text": "拜入名门（需学识≥40）",
         "conditions": [
-          {"type": "expression", "expression": "knowledge >= 40"}
+          {
+            "type": "expression",
+            "expression": "knowledge >= 40"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "martialPower", "value": 20},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "flag_set", "flag": "has_master", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_master",
+            "value": true
+          }
         ]
       },
       {
         "id": "relationship_master_disciple_choice_2",
         "text": "自学成才",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 10},
-          {"type": "stat_modify", "stat": "martialPower", "value": 8}
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 8
+          }
         ]
       }
     ]
@@ -46,13 +78,25 @@
     "category": "relationship",
     "priority": 75,
     "weight": 45,
-    "ageRange": {"min": 25, "max": 50},
+    "ageRange": {
+      "min": 25,
+      "max": 50
+    },
     "triggers": [
-      {"type": "age_reach", "value": 25},
-      {"type": "random", "value": 0.08}
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.has_master == true && chivalry <= 30"}
+      {
+        "type": "expression",
+        "expression": "flags.has_master == true && chivalry <= 30"
+      }
     ],
     "content": {
       "title": "师徒反目",
@@ -65,18 +109,42 @@
         "id": "relationship_master_betrayal_choice_1",
         "text": "背叛师门（侠义 -30，武力 +15）",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": -30},
-          {"type": "stat_modify", "stat": "martialPower", "value": 15},
-          {"type": "stat_modify", "stat": "reputation", "value": -20},
-          {"type": "flag_unset", "flag": "has_master", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -30
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -20
+          },
+          {
+            "type": "flag_unset",
+            "flag": "has_master",
+            "value": true
+          }
         ]
       },
       {
         "id": "relationship_master_betrayal_choice_2",
         "text": "道歉认错（侠义 +10）",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 5}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 5
+          }
         ]
       }
     ]
@@ -87,13 +155,25 @@
     "category": "relationship",
     "priority": 85,
     "weight": 50,
-    "ageRange": {"min": 30, "max": 55},
+    "ageRange": {
+      "min": 30,
+      "max": 55
+    },
     "triggers": [
-      {"type": "age_reach", "value": 30},
-      {"type": "random", "value": 0.1}
+      {
+        "type": "age_reach",
+        "value": 30
+      },
+      {
+        "type": "random",
+        "value": 0.1
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.has_master == true && chivalry >= 60"}
+      {
+        "type": "expression",
+        "expression": "flags.has_master == true && chivalry >= 60"
+      }
     ],
     "content": {
       "title": "师父传功",
@@ -102,9 +182,21 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "martialPower", "value": 25},
-      {"type": "stat_modify", "stat": "knowledge", "value": 15},
-      {"type": "flag_set", "flag": "master_legacy", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "martialPower",
+        "value": 25
+      },
+      {
+        "type": "stat_modify",
+        "stat": "knowledge",
+        "value": 15
+      },
+      {
+        "type": "flag_set",
+        "flag": "master_legacy",
+        "value": true
+      }
     ]
   },
   {
@@ -113,10 +205,19 @@
     "category": "relationship",
     "priority": 78,
     "weight": 60,
-    "ageRange": {"min": 20, "max": 40},
+    "ageRange": {
+      "min": 20,
+      "max": 40
+    },
     "triggers": [
-      {"type": "age_reach", "value": 20},
-      {"type": "expression", "expression": "charisma >= 40 && chivalry >= 40"}
+      {
+        "type": "age_reach",
+        "value": 20
+      },
+      {
+        "type": "expression",
+        "expression": "charisma >= 40 && chivalry >= 40"
+      }
     ],
     "conditions": [],
     "content": {
@@ -126,10 +227,26 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "charisma", "value": 15},
-      {"type": "stat_modify", "stat": "chivalry", "value": 10},
-      {"type": "stat_modify", "stat": "reputation", "value": 10},
-      {"type": "flag_set", "flag": "has_sworn_siblings", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "chivalry",
+        "value": 10
+      },
+      {
+        "type": "stat_modify",
+        "stat": "reputation",
+        "value": 10
+      },
+      {
+        "type": "flag_set",
+        "flag": "has_sworn_siblings",
+        "value": true
+      }
     ]
   },
   {
@@ -138,13 +255,25 @@
     "category": "relationship",
     "priority": 72,
     "weight": 55,
-    "ageRange": {"min": 25, "max": 55},
+    "ageRange": {
+      "min": 25,
+      "max": 55
+    },
     "triggers": [
-      {"type": "age_reach", "value": 25},
-      {"type": "random", "value": 0.12}
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.12
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.has_sworn_siblings == true"}
+      {
+        "type": "expression",
+        "expression": "flags.has_sworn_siblings == true"
+      }
     ],
     "content": {
       "title": "生死与共",
@@ -158,29 +287,64 @@
         "text": "全力相助（需武力≥70，侠义 +15）",
         "description": "全力相助可守住侠义，却会让你的功力、体魄与名望承受损失，这是必须付出的代价。",
         "conditions": [
-          {"type": "expression", "expression": "martialPower >= 70"}
+          {
+            "type": "expression",
+            "expression": "martialPower >= 70"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 15},
-          {"type": "stat_modify", "stat": "martialPower", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "stat_modify", "stat": "constitution", "value": -5}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "constitution",
+            "value": -5
+          }
         ]
       },
       {
         "id": "sworn_help_financial",
         "text": "提供资金支持（侠义 +8，魅力 +5）",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 8},
-          {"type": "stat_modify", "stat": "charisma", "value": 5}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "charisma",
+            "value": 5
+          }
         ]
       },
       {
         "id": "sworn_help_stand_aside",
         "text": "袖手旁观（侠义 -20）",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": -20},
-          {"type": "stat_modify", "stat": "reputation", "value": -10}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -10
+          }
         ]
       }
     ]
@@ -191,10 +355,19 @@
     "category": "relationship",
     "priority": 70,
     "weight": 50,
-    "ageRange": {"min": 20, "max": 50},
+    "ageRange": {
+      "min": 20,
+      "max": 50
+    },
     "triggers": [
-      {"type": "age_reach", "value": 20},
-      {"type": "random", "value": 0.1}
+      {
+        "type": "age_reach",
+        "value": 20
+      },
+      {
+        "type": "random",
+        "value": 0.1
+      }
     ],
     "conditions": [],
     "content": {
@@ -208,30 +381,60 @@
         "id": "relationship_enemy_create_choice_1",
         "text": "主动和解（需魅力≥50）",
         "conditions": [
-          {"type": "expression", "expression": "charisma >= 50"}
+          {
+            "type": "expression",
+            "expression": "charisma >= 50"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "charisma", "value": 8},
-          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+          {
+            "type": "stat_modify",
+            "stat": "charisma",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 5
+          }
         ]
       },
       {
         "id": "relationship_enemy_create_choice_2",
         "text": "武力解决（需武力≥60）",
         "conditions": [
-          {"type": "expression", "expression": "martialPower >= 60"}
+          {
+            "type": "expression",
+            "expression": "martialPower >= 60"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "martialPower", "value": 8},
-          {"type": "stat_modify", "stat": "reputation", "value": 5},
-          {"type": "stat_modify", "stat": "chivalry", "value": -5}
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 5
+          },
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -5
+          }
         ]
       },
       {
         "id": "relationship_enemy_create_choice_3",
         "text": "置之不理",
         "effects": [
-          {"type": "stat_modify", "stat": "luck", "value": -5}
+          {
+            "type": "stat_modify",
+            "stat": "luck",
+            "value": -5
+          }
         ]
       }
     ]
@@ -242,13 +445,25 @@
     "category": "relationship",
     "priority": 82,
     "weight": 45,
-    "ageRange": {"min": 25, "max": 55},
+    "ageRange": {
+      "min": 25,
+      "max": 55
+    },
     "triggers": [
-      {"type": "age_reach", "value": 25},
-      {"type": "random", "value": 0.08}
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "martialPower >= 80"}
+      {
+        "type": "expression",
+        "expression": "martialPower >= 80"
+      }
     ],
     "content": {
       "title": "复仇之战",
@@ -261,25 +476,59 @@
         "id": "relationship_revenge_choice_1",
         "text": "正面决战（需武力≥80）",
         "conditions": [
-          {"type": "expression", "expression": "martialPower >= 80"}
+          {
+            "type": "expression",
+            "expression": "martialPower >= 80"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "martialPower", "value": 15},
-          {"type": "stat_modify", "stat": "reputation", "value": 20},
-          {"type": "stat_modify", "stat": "constitution", "value": -10},
-          {"type": "flag_set", "flag": "revenge_complete", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "constitution",
+            "value": -10
+          },
+          {
+            "type": "flag_set",
+            "flag": "revenge_complete",
+            "value": true
+          }
         ]
       },
       {
         "id": "relationship_revenge_choice_2",
         "text": "智取（需学识≥60）",
         "conditions": [
-          {"type": "expression", "expression": "knowledge >= 60"}
+          {
+            "type": "expression",
+            "expression": "knowledge >= 60"
+          }
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 12},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "flag_set", "flag": "revenge_complete", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 12
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "flag_set",
+            "flag": "revenge_complete",
+            "value": true
+          }
         ]
       }
     ]
@@ -290,13 +539,25 @@
     "category": "relationship",
     "priority": 76,
     "weight": 55,
-    "ageRange": {"min": 20, "max": 50},
+    "ageRange": {
+      "min": 20,
+      "max": 50
+    },
     "triggers": [
-      {"type": "age_reach", "value": 20},
-      {"type": "random", "value": 0.12}
+      {
+        "type": "age_reach",
+        "value": 20
+      },
+      {
+        "type": "random",
+        "value": 0.12
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "chivalry >= 40 && martialPower >= 50"}
+      {
+        "type": "expression",
+        "expression": "chivalry >= 40 && martialPower >= 50"
+      }
     ],
     "content": {
       "title": "救命之恩",
@@ -305,10 +566,26 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "chivalry", "value": 15},
-      {"type": "stat_modify", "stat": "reputation", "value": 12},
-      {"type": "stat_modify", "stat": "charisma", "value": 8},
-      {"type": "flag_set", "flag": "has_life_debt", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "chivalry",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "reputation",
+        "value": 12
+      },
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 8
+      },
+      {
+        "type": "flag_set",
+        "flag": "has_life_debt",
+        "value": true
+      }
     ]
   },
   {
@@ -317,13 +594,25 @@
     "category": "relationship",
     "priority": 74,
     "weight": 50,
-    "ageRange": {"min": 25, "max": 55},
+    "ageRange": {
+      "min": 25,
+      "max": 55
+    },
     "triggers": [
-      {"type": "age_reach", "value": 25},
-      {"type": "random", "value": 0.1}
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.1
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.has_life_debt == true"}
+      {
+        "type": "expression",
+        "expression": "flags.has_life_debt == true"
+      }
     ],
     "content": {
       "title": "恩情回报",
@@ -332,10 +621,21 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "money", "value": 200},
-      {"type": "stat_modify", "stat": "reputation", "value": 15},
-      {"type": "stat_modify", "stat": "charisma", "value": 8},
-      {"type": "flag_unset", "flag": "has_life_debt", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "reputation",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 8
+      },
+      {
+        "type": "flag_unset",
+        "flag": "has_life_debt",
+        "value": true
+      }
     ]
   },
   {
@@ -344,13 +644,25 @@
     "category": "relationship",
     "priority": 80,
     "weight": 45,
-    "ageRange": {"min": 30, "max": 55},
+    "ageRange": {
+      "min": 30,
+      "max": 55
+    },
     "triggers": [
-      {"type": "age_reach", "value": 30},
-      {"type": "random", "value": 0.08}
+      {
+        "type": "age_reach",
+        "value": 30
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "knowledge >= 50 && chivalry >= 50"}
+      {
+        "type": "expression",
+        "expression": "knowledge >= 50 && chivalry >= 50"
+      }
     ],
     "content": {
       "title": "知遇之恩",
@@ -359,12 +671,36 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "knowledge", "value": 20},
-      {"type": "stat_modify", "stat": "martialPower", "value": 15},
-      {"type": "stat_modify", "stat": "chivalry", "value": 10},
-      {"type": "stat_modify", "stat": "charisma", "value": 10},
-      {"type": "flag_set", "flag": "has_mentor", "value": true},
-      {"type": "flag_set", "flag": "mentor_bond", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "knowledge",
+        "value": 20
+      },
+      {
+        "type": "stat_modify",
+        "stat": "martialPower",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "chivalry",
+        "value": 10
+      },
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 10
+      },
+      {
+        "type": "flag_set",
+        "flag": "has_mentor",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "flag": "mentor_bond",
+        "value": true
+      }
     ]
   },
   {
@@ -373,12 +709,21 @@
     "category": "relationship",
     "priority": 76,
     "weight": 58,
-    "ageRange": {"min": 24, "max": 30},
+    "ageRange": {
+      "min": 24,
+      "max": 30
+    },
     "triggers": [
-      {"type": "age_reach", "value": 24}
+      {
+        "type": "age_reach",
+        "value": 24
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "connections >= 10 || flags.p42_social_youth_intro_accepted == true"}
+      {
+        "type": "expression",
+        "expression": "connections >= 10 || flags.p42_social_youth_intro_accepted == true"
+      }
     ],
     "content": {
       "title": "人脉成线",
@@ -391,16 +736,34 @@
         "id": "enter_private_circle",
         "text": "接下邀约，试着进入更深的人脉圈层",
         "effects": [
-          {"type": "stat_modify", "target": "connections", "value": 6, "operator": "add"},
-          {"type": "flag_set", "flag": "p28_social_network_opened", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_social_network_opened",
+            "value": true
+          }
         ]
       },
       {
         "id": "stay_local_contacts",
         "text": "维持眼下往来，不急着再往上走",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 3, "operator": "add"},
-          {"type": "flag_set", "flag": "p28_social_network_deferred", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_social_network_deferred",
+            "value": true
+          }
         ]
       }
     ]
@@ -411,12 +774,21 @@
     "category": "relationship",
     "priority": 78,
     "weight": 60,
-    "ageRange": {"min": 26, "max": 34},
+    "ageRange": {
+      "min": 26,
+      "max": 34
+    },
     "triggers": [
-      {"type": "age_reach", "value": 26}
+      {
+        "type": "age_reach",
+        "value": 26
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.p28_social_network_opened == true"}
+      {
+        "type": "expression",
+        "expression": "flags.p28_social_network_opened == true"
+      }
     ],
     "content": {
       "title": "席间扬名",
@@ -429,18 +801,45 @@
         "id": "attend_banquet",
         "text": "出面赴宴，借机整合同道",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 8, "operator": "add"},
-          {"type": "stat_modify", "target": "connections", "value": 6, "operator": "add"},
-          {"type": "flag_set", "flag": "p28_social_reputation_reinforced", "value": true},
-          {"type": "flag_set", "flag": "ally_network", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_social_reputation_reinforced",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "flag": "ally_network",
+            "value": true
+          }
         ]
       },
       {
         "id": "send_representative",
         "text": "遣人代赴，留三分余地",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 4, "operator": "add"},
-          {"type": "flag_set", "flag": "p28_social_reputation_partial", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p28_social_reputation_partial",
+            "value": true
+          }
         ]
       }
     ]
@@ -451,12 +850,21 @@
     "category": "relationship",
     "priority": 74,
     "weight": 54,
-    "ageRange": {"min": 36, "max": 46},
+    "ageRange": {
+      "min": 36,
+      "max": 46
+    },
     "triggers": [
-      {"type": "age_reach", "value": 36}
+      {
+        "type": "age_reach",
+        "value": 36
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.ally_network == true"}
+      {
+        "type": "expression",
+        "expression": "flags.ally_network == true"
+      }
     ],
     "content": {
       "title": "人情担保",
@@ -469,17 +877,34 @@
         "id": "back_the_petition",
         "text": "出面担保，把人情兑现到底",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 7, "operator": "add"},
-          {"type": "stat_modify", "target": "money", "value": -25, "operator": "add"},
-          {"type": "flag_set", "flag": "p29_social_patron_obligation_taken", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 7,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p29_social_patron_obligation_taken",
+            "value": true
+          }
         ]
       },
       {
         "id": "decline_the_petition",
         "text": "婉拒担保，保留后手",
         "effects": [
-          {"type": "stat_modify", "target": "connections", "value": -2, "operator": "add"},
-          {"type": "flag_set", "flag": "p29_social_patron_obligation_declined", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": -2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p29_social_patron_obligation_declined",
+            "value": true
+          }
         ]
       }
     ]
@@ -490,12 +915,21 @@
     "category": "relationship",
     "priority": 72,
     "weight": 52,
-    "ageRange": {"min": 17, "max": 22},
+    "ageRange": {
+      "min": 17,
+      "max": 22
+    },
     "triggers": [
-      {"type": "age_reach", "value": 17}
+      {
+        "type": "age_reach",
+        "value": 17
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)"}
+      {
+        "type": "expression",
+        "expression": "(flags.p8_route_social == true || flags.p16_deferred_social_upbringing == true) && (connections >= 5 || reputation >= 10)"
+      }
     ],
     "content": {
       "title": "初识引见",
@@ -508,17 +942,40 @@
         "id": "accept_introduction",
         "text": "接下引见，试着进入更高圈层",
         "effects": [
-          {"type": "stat_modify", "target": "connections", "value": 5, "operator": "add"},
-          {"type": "stat_modify", "target": "charisma", "value": 3, "operator": "add"},
-          {"type": "flag_set", "flag": "p42_social_youth_intro_accepted", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_social_youth_intro_accepted",
+            "value": true
+          }
         ]
       },
       {
         "id": "defer_introduction",
         "text": "谢过好意，先把眼前关系稳住",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 2, "operator": "add"},
-          {"type": "flag_set", "flag": "p42_social_youth_intro_deferred", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_social_youth_intro_deferred",
+            "value": true
+          }
         ]
       }
     ]
@@ -529,12 +986,21 @@
     "category": "relationship",
     "priority": 70,
     "weight": 50,
-    "ageRange": {"min": 50, "max": 58},
+    "ageRange": {
+      "min": 50,
+      "max": 58
+    },
     "triggers": [
-      {"type": "age_reach", "value": 50}
+      {
+        "type": "age_reach",
+        "value": 50
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "reputation >= 20 && (flags.p28_social_reputation_reinforced == true || flags.p29_social_patron_obligation_taken == true)"}
+      {
+        "type": "expression",
+        "expression": "reputation >= 20 && (flags.p28_social_reputation_reinforced == true || flags.p29_social_patron_obligation_taken == true)"
+      }
     ],
     "content": {
       "title": "晚岁证名",
@@ -547,17 +1013,40 @@
         "id": "give_testimonial",
         "text": "出面证名，为旧友后辈作保",
         "effects": [
-          {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
-          {"type": "stat_modify", "target": "connections", "value": 4, "operator": "add"},
-          {"type": "flag_set", "flag": "p42_social_later_testimonial_given", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 4,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_social_later_testimonial_given",
+            "value": true
+          }
         ]
       },
       {
         "id": "stay_quiet",
         "text": "少涉外事，把情面留给至亲",
         "effects": [
-          {"type": "stat_modify", "target": "charisma", "value": 2, "operator": "add"},
-          {"type": "flag_set", "flag": "p42_social_later_testimonial_declined", "value": true}
+          {
+            "type": "stat_modify",
+            "target": "charisma",
+            "value": 2,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "p42_social_later_testimonial_declined",
+            "value": true
+          }
         ]
       }
     ]

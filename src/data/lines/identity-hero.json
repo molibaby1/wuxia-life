@@ -843,14 +843,13 @@
       },
       {
         "id": "ally_pay_ransom_supported",
-        "text": "江湖朋友凑份子营救 (银两 -10)",
-        "description": "旧日江湖朋友闻讯凑份子——你不必独自倾囊，也能换他们平安。",
+        "text": "江湖朋友凑份子营救",
+        "description": "旧日江湖朋友闻讯凑份子——你不必独自承担，也能换他们平安。",
         "condition": {
           "type": "expression",
           "expression": "player.connections >= 20"
         },
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 10, "operator": "subtract" },
           { "type": "flag_set", "target": "hero_ally_ransomed", "value": true },
           { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
           { "type": "event_record", "target": "ally_pay_ransom" }
@@ -858,14 +857,13 @@
       },
       {
         "id": "ally_pay_ransom",
-        "text": "倾囊涉险营救（银两 -20）",
-        "description": "你倾囊或涉险营救——可能身负重伤，但可换他们脱困。",
+        "text": "以自身财力直接承担营救",
+        "description": "你自筹资源、直接承担赎金——可能涉险，但可换他们脱困。",
         "condition": {
-          "type": "expression",
-          "expression": "player.connections < 20"
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
         },
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 20, "operator": "subtract" },
           { "type": "flag_set", "target": "hero_ally_ransomed", "value": true },
           { "type": "flag_set", "target": "hero_midlife_beat_ally", "value": true },
           { "type": "event_record", "target": "ally_pay_ransom" }

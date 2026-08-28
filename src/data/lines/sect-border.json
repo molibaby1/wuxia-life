@@ -36,47 +36,154 @@
           {
             "id": "great_success",
             "text": "你武艺超群，在商队遭遇突袭时单枪匹马击退数倍敌人！领队惊叹道：\"真英雄也！\"边关守将亲自设宴款待，你被破格提拔为校尉，直接进入军官序列！",
-            "condition": {"type": "expression", "expression": "martialPower >= 30 && constitution >= 20"},
+            "condition": {
+              "type": "expression",
+              "expression": "martialPower >= 30 && constitution >= 20"
+            },
             "effects": [
-              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
-              {"type": "flag_set", "target": "route_border"},
-              {"type": "affiliation_set", "value": "border"},
-              {"type": "flag_set", "target": "border_trial_active"},
-              {"type": "flag_set", "target": "border_rank", "value": "officer"},
-              {"type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add"},
-              {"type": "stat_modify", "target": "reputation", "value": 10, "operator": "add"},
-              {"type": "stat_modify", "target": "influence", "value": 5, "operator": "add"},
-              {"type": "event_record", "target": "border_join_officer"}
+              {
+                "type": "time_advance",
+                "target": "age",
+                "value": 15,
+                "timeUnit": "day"
+              },
+              {
+                "type": "flag_set",
+                "target": "route_border"
+              },
+              {
+                "type": "affiliation_set",
+                "value": "border"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_trial_active"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_rank",
+                "value": "officer"
+              },
+              {
+                "type": "stat_modify",
+                "target": "martialPower",
+                "value": 8,
+                "operator": "add"
+              },
+              {
+                "type": "stat_modify",
+                "target": "reputation",
+                "value": 10,
+                "operator": "add"
+              },
+              {
+                "type": "stat_modify",
+                "target": "influence",
+                "value": 5,
+                "operator": "add"
+              },
+              {
+                "type": "event_record",
+                "target": "border_join_officer"
+              }
             ]
           },
           {
             "id": "success",
             "text": "你身手不凡，随商队抵达边关后被守将看中，编入精锐部队。边关将士对你寄予厚望，你的军旅生涯就此开始。",
-            "condition": {"type": "expression", "expression": "constitution >= 15 || martialPower >= 20"},
+            "condition": {
+              "type": "expression",
+              "expression": "constitution >= 15 || martialPower >= 20"
+            },
             "effects": [
-              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
-              {"type": "flag_set", "target": "route_border"},
-              {"type": "affiliation_set", "value": "border"},
-              {"type": "flag_set", "target": "border_trial_active"},
-              {"type": "flag_set", "target": "border_rank", "value": "soldier"},
-              {"type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add"},
-              {"type": "stat_modify", "target": "constitution", "value": 3, "operator": "add"},
-              {"type": "event_record", "target": "border_join_soldier"}
+              {
+                "type": "time_advance",
+                "target": "age",
+                "value": 15,
+                "timeUnit": "day"
+              },
+              {
+                "type": "flag_set",
+                "target": "route_border"
+              },
+              {
+                "type": "affiliation_set",
+                "value": "border"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_trial_active"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_rank",
+                "value": "soldier"
+              },
+              {
+                "type": "stat_modify",
+                "target": "martialPower",
+                "value": 5,
+                "operator": "add"
+              },
+              {
+                "type": "stat_modify",
+                "target": "constitution",
+                "value": 3,
+                "operator": "add"
+              },
+              {
+                "type": "event_record",
+                "target": "border_join_soldier"
+              }
             ]
           },
           {
             "id": "partial",
             "text": "你随商队抵达边关，但守将见你体格一般，便将你编入辎重营。虽非一线作战，但边关生活也让你学会了坚强。",
-            "condition": {"type": "expression", "expression": "true"},
+            "condition": {
+              "type": "expression",
+              "expression": "true"
+            },
             "effects": [
-              {"type": "time_advance", "target": "age", "value": 15, "timeUnit": "day"},
-              {"type": "flag_set", "target": "route_border"},
-              {"type": "affiliation_set", "value": "border"},
-              {"type": "flag_set", "target": "border_trial_active"},
-              {"type": "flag_set", "target": "border_rank", "value": "support"},
-              {"type": "stat_modify", "target": "constitution", "value": 5, "operator": "add"},
-              {"type": "stat_modify", "target": "businessAcumen", "value": 3, "operator": "add"},
-              {"type": "event_record", "target": "border_join_support"}
+              {
+                "type": "time_advance",
+                "target": "age",
+                "value": 15,
+                "timeUnit": "day"
+              },
+              {
+                "type": "flag_set",
+                "target": "route_border"
+              },
+              {
+                "type": "affiliation_set",
+                "value": "border"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_trial_active"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_rank",
+                "value": "support"
+              },
+              {
+                "type": "stat_modify",
+                "target": "constitution",
+                "value": 5,
+                "operator": "add"
+              },
+              {
+                "type": "stat_modify",
+                "target": "businessAcumen",
+                "value": 3,
+                "operator": "add"
+              },
+              {
+                "type": "event_record",
+                "target": "border_join_support"
+              }
             ]
           }
         ]
@@ -86,9 +193,22 @@
         "text": "谢绝邀请",
         "description": "你决定不去边关",
         "effects": [
-          {"type": "time_advance", "target": "age", "value": 10, "timeUnit": "day"},
-          {"type": "stat_modify", "target": "knowledge", "value": 1, "operator": "add"},
-          {"type": "event_record", "target": "border_encounter_decline"}
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 10,
+            "timeUnit": "day"
+          },
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 1,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "border_encounter_decline"
+          }
         ]
       }
     ],
@@ -366,12 +486,6 @@
             "timeUnit": "day"
           },
           {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 15,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "border_conflict_done"
           },
@@ -577,12 +691,6 @@
             "operator": "add"
           },
           {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 15,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "border_trade_route"
           },
@@ -709,7 +817,7 @@
       },
       {
         "id": "border_career_trade",
-        "text": "管理贸易（金钱 +50）",
+        "text": "管理贸易",
         "weight": 1,
         "effects": [
           {
@@ -717,12 +825,6 @@
             "target": "age",
             "value": 1,
             "timeUnit": "month"
-          },
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
           },
           {
             "type": "stat_modify",
@@ -847,12 +949,6 @@
             "operator": "add"
           },
           {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 20,
-            "operator": "add"
-          },
-          {
             "type": "flag_set",
             "target": "border_alliance"
           },
@@ -957,8 +1053,14 @@
             "value": 5,
             "operator": "add"
           },
-          { "type": "health_status_set", "value": "unwell" },
-          { "type": "status_add", "status": "injured" },
+          {
+            "type": "health_status_set",
+            "value": "unwell"
+          },
+          {
+            "type": "status_add",
+            "status": "injured"
+          },
           {
             "type": "flag_set",
             "target": "border_crisis"
@@ -1006,18 +1108,16 @@
         "id": "border_crisis_ransom",
         "text": "赎回商路",
         "weight": 1,
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
           {
             "type": "time_advance",
             "target": "age",
             "value": 15,
             "timeUnit": "day"
-          },
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 30,
-            "operator": "subtract"
           },
           {
             "type": "stat_modify",
@@ -1215,10 +1315,8 @@
         "timeUnit": "year"
       },
       {
-        "type": "stat_modify",
-        "target": "money",
-        "value": 40,
-        "operator": "add"
+        "type": "wealth_capacity_raise_to",
+        "minimum": "regional_magnate"
       },
       {
         "type": "stat_modify",
@@ -1383,8 +1481,16 @@
     "category": "special_event",
     "priority": 2,
     "weight": 14,
-    "ageRange": { "min": 23, "max": 45 },
-    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "ageRange": {
+      "min": 23,
+      "max": 45
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 23
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -1402,23 +1508,64 @@
         "id": "border_leave",
         "text": "离开边地",
         "effects": [
-          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
-          { "type": "flag_unset", "target": "route_border" },
-          { "type": "flag_unset", "target": "border_trial_active" },
-          { "type": "flag_set", "target": "border_departed" },
-          { "type": "affiliation_clear" },
-          { "type": "flag_set", "target": "sect_switch_cooldown", "value": 3 },
-          { "type": "stat_modify", "target": "reputation", "value": -10, "operator": "add" },
-          { "type": "stat_modify", "target": "connections", "value": -5, "operator": "add" },
-          { "type": "event_record", "target": "border_departure_leave" }
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 1,
+            "timeUnit": "month"
+          },
+          {
+            "type": "flag_unset",
+            "target": "route_border"
+          },
+          {
+            "type": "flag_unset",
+            "target": "border_trial_active"
+          },
+          {
+            "type": "flag_set",
+            "target": "border_departed"
+          },
+          {
+            "type": "affiliation_clear"
+          },
+          {
+            "type": "flag_set",
+            "target": "sect_switch_cooldown",
+            "value": 3
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": -10,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": -5,
+            "operator": "add"
+          },
+          {
+            "type": "event_record",
+            "target": "border_departure_leave"
+          }
         ]
       },
       {
         "id": "border_stay",
         "text": "继续留在边地",
         "effects": [
-          { "type": "time_advance", "target": "age", "value": 15, "timeUnit": "day" },
-          { "type": "event_record", "target": "border_departure_stay" }
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "event_record",
+            "target": "border_departure_stay"
+          }
         ]
       }
     ],
@@ -1426,7 +1573,11 @@
       "createdAt": 1773317774544,
       "updatedAt": 1773317774544,
       "author": "development_team",
-      "tags": ["边地", "退派", "once"],
+      "tags": [
+        "边地",
+        "退派",
+        "once"
+      ],
       "enabled": true
     }
   }

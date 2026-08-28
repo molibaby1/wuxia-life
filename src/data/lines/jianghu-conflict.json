@@ -272,14 +272,12 @@
       },
       {
         "id": "fund_expedition",
-        "text": "提供资金支持 (财富 -100)",
+        "text": "提供资金支持，出资远征",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -100,
-            "operator": "add"
-          },
           {
             "type": "karma_change",
             "good": 10,

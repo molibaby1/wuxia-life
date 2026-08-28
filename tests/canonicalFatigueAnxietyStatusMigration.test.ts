@@ -226,7 +226,7 @@ function assertFormalStatusEffects(): void {
   for (const [text, status] of [
     ['参加比武，争夺盟主', 'fatigued'],
     ['大规模扩建', 'anxious'],
-    ['倾尽家财', 'anxious'],
+    ['全力支援家族', 'anxious'],
     ['尽力而为，量力而行', 'anxious'],
     ['正面对决', 'anxious'],
     ['设法缓和局面', 'anxious'],

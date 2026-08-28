@@ -5,8 +5,16 @@
     "category": "main_story",
     "priority": 1,
     "weight": 85,
-    "ageRange": { "min": 24, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "ageRange": {
+      "min": 24,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 24
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -24,25 +32,52 @@
         "id": "deepen_bond",
         "text": "加深情谊，共担风险",
         "effects": [
-          { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
-          { "type": "flag_set", "target": "p11_relationship_shift_seen", "value": true }
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p11_relationship_shift_seen",
+            "value": true
+          }
         ]
       },
       {
         "id": "keep_distance",
         "text": "保持距离，各自前行",
         "effects": [
-          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
-          { "type": "flag_set", "target": "p11_relationship_shift_seen", "value": true }
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p11_relationship_shift_seen",
+            "value": true
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "stage_feedback", "relationship", "social"],
-      "pathAffinity": { "social": 1.0 },
+      "tags": [
+        "p11",
+        "stage_feedback",
+        "relationship",
+        "social"
+      ],
+      "pathAffinity": {
+        "social": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["relationship_shift"],
+        "stageSignals": [
+          "relationship_shift"
+        ],
         "routePoints": []
       }
     }
@@ -53,8 +88,16 @@
     "category": "main_story",
     "priority": 1,
     "weight": 90,
-    "ageRange": { "min": 30, "max": 32 },
-    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "ageRange": {
+      "min": 30,
+      "max": 32
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -78,8 +121,11 @@
           }
         ],
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 200, "operator": "add" },
-          { "type": "flag_set", "target": "p11_route_divergence_wealth", "value": true }
+          {
+            "type": "flag_set",
+            "target": "p11_route_divergence_wealth",
+            "value": true
+          }
         ]
       },
       {
@@ -92,16 +138,32 @@
           }
         ],
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
-          { "type": "flag_set", "target": "p11_route_divergence_wanderer", "value": true }
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p11_route_divergence_wanderer",
+            "value": true
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "route_divergence", "wealth", "wanderer"],
+      "tags": [
+        "p11",
+        "route_divergence",
+        "wealth",
+        "wanderer"
+      ],
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence"],
+        "stageSignals": [
+          "route_divergence"
+        ],
         "routePoints": [
           {
             "routeId": "route_wealth",
@@ -127,8 +189,16 @@
     "category": "main_story",
     "priority": 100,
     "weight": 90,
-    "ageRange": { "min": 22, "max": 26 },
-    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "ageRange": {
+      "min": 22,
+      "max": 26
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -142,14 +212,32 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
-      { "type": "flag_set", "target": "p11_social_reinforcement_seen", "value": true }
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p11_social_reinforcement_seen",
+        "value": true
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "route_reinforcement", "social", "mandatory", "mainline", "once"],
+      "tags": [
+        "p11",
+        "route_reinforcement",
+        "social",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
       "narrativeScheduling": {
-        "stageSignals": ["route_reinforcement"],
+        "stageSignals": [
+          "route_reinforcement"
+        ],
         "routePoints": [
           {
             "routeId": "route_social",
@@ -168,8 +256,16 @@
     "category": "main_story",
     "priority": 100,
     "weight": 95,
-    "ageRange": { "min": 22, "max": 22 },
-    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "ageRange": {
+      "min": 22,
+      "max": 22
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -183,16 +279,35 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p11_wealth_reinforcement_seen", "value": true }
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p11_wealth_reinforcement_seen",
+        "value": true
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "route_reinforcement", "wealth", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wealth": 1.0 },
+      "tags": [
+        "p11",
+        "route_reinforcement",
+        "wealth",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "wealth": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_reinforcement"],
+        "stageSignals": [
+          "route_reinforcement"
+        ],
         "routePoints": [
           {
             "routeId": "route_wealth",
@@ -211,8 +326,16 @@
     "category": "main_story",
     "priority": 100,
     "weight": 95,
-    "ageRange": { "min": 22, "max": 26 },
-    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "ageRange": {
+      "min": 22,
+      "max": 26
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -226,16 +349,41 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "connections", "value": 12, "operator": "add" },
-      { "type": "stat_modify", "target": "knowledge", "value": 6, "operator": "add" },
-      { "type": "flag_set", "target": "p11_wanderer_reinforcement_seen", "value": true }
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 12,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p11_wanderer_reinforcement_seen",
+        "value": true
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p11", "route_reinforcement", "wanderer", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wanderer": 1.0 },
+      "tags": [
+        "p11",
+        "route_reinforcement",
+        "wanderer",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "wanderer": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_reinforcement"],
+        "stageSignals": [
+          "route_reinforcement"
+        ],
         "routePoints": [
           {
             "routeId": "route_wanderer",

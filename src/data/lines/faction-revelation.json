@@ -5,12 +5,21 @@
     "category": "special_event",
     "priority": 60,
     "weight": 30,
-    "ageRange": {"min": 20, "max": 50},
+    "ageRange": {
+      "min": 20,
+      "max": 50
+    },
     "triggers": [
-      {"type": "age_reach", "value": 20}
+      {
+        "type": "age_reach",
+        "value": 20
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.orthodox_member == true && knowledge >= 30"}
+      {
+        "type": "expression",
+        "expression": "flags.orthodox_member == true && knowledge >= 30"
+      }
     ],
     "content": {
       "title": "少林旧档",
@@ -23,17 +32,37 @@
         "id": "discover_shaolin_dark_history_choice_1",
         "text": "公开档案，揭露真相",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": -30},
-          {"type": "stat_modify", "stat": "knowledge", "value": 10},
-          {"type": "flag_set", "flag": "revealed_orthodox_secrets", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -30
+          },
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 10
+          },
+          {
+            "type": "flag_set",
+            "flag": "revealed_orthodox_secrets",
+            "value": true
+          }
         ]
       },
       {
         "id": "discover_shaolin_dark_history_choice_2",
         "text": "保持沉默",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 10},
-          {"type": "flag_set", "flag": "kept_orthodox_secrets", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 10
+          },
+          {
+            "type": "flag_set",
+            "flag": "kept_orthodox_secrets",
+            "value": true
+          }
         ]
       }
     ]
@@ -44,12 +73,21 @@
     "category": "special_event",
     "priority": 58,
     "weight": 25,
-    "ageRange": {"min": 22, "max": 45},
+    "ageRange": {
+      "min": 22,
+      "max": 45
+    },
     "triggers": [
-      {"type": "age_reach", "value": 22}
+      {
+        "type": "age_reach",
+        "value": 22
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.orthodox_member == true && connections >= 40"}
+      {
+        "type": "expression",
+        "expression": "flags.orthodox_member == true && connections >= 40"
+      }
     ],
     "content": {
       "title": "武当内斗",
@@ -62,16 +100,32 @@
         "id": "discover_wudang_internal_struggle_choice_1",
         "text": "暗中调查，收集证据",
         "effects": [
-          {"type": "stat_modify", "stat": "connections", "value": 15},
-          {"type": "stat_modify", "stat": "reputation", "value": -10},
-          {"type": "flag_set", "flag": "wudang_insider", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "connections",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -10
+          },
+          {
+            "type": "flag_set",
+            "flag": "wudang_insider",
+            "value": true
+          }
         ]
       },
       {
         "id": "discover_wudang_internal_struggle_choice_2",
         "text": "假装不知，继续修炼",
         "effects": [
-          {"type": "stat_modify", "stat": "martialPower", "value": 5}
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 5
+          }
         ]
       }
     ]
@@ -82,12 +136,21 @@
     "category": "special_event",
     "priority": 55,
     "weight": 35,
-    "ageRange": {"min": 18, "max": 40},
+    "ageRange": {
+      "min": 18,
+      "max": 40
+    },
     "triggers": [
-      {"type": "age_reach", "value": 18}
+      {
+        "type": "age_reach",
+        "value": 18
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.sect_faction == 'unconventional' && knowledge >= 25"}
+      {
+        "type": "expression",
+        "expression": "flags.sect_faction == 'unconventional' && knowledge >= 25"
+      }
     ],
     "content": {
       "title": "幽影门的真相",
@@ -96,8 +159,16 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "knowledge", "value": 8},
-      {"type": "flag_set", "flag": "understood_unconventional", "value": true}
+      {
+        "type": "stat_modify",
+        "stat": "knowledge",
+        "value": 8
+      },
+      {
+        "type": "flag_set",
+        "flag": "understood_unconventional",
+        "value": true
+      }
     ]
   },
   {
@@ -106,12 +177,21 @@
     "category": "special_event",
     "priority": 65,
     "weight": 25,
-    "ageRange": {"min": 25, "max": 50},
+    "ageRange": {
+      "min": 25,
+      "max": 50
+    },
     "triggers": [
-      {"type": "age_reach", "value": 25}
+      {
+        "type": "age_reach",
+        "value": 25
+      }
     ],
     "conditions": [
-      {"type": "expression", "expression": "reputation >= 100 || flags.official_faction == true"}
+      {
+        "type": "expression",
+        "expression": "reputation >= 100 || flags.official_faction == true"
+      }
     ],
     "content": {
       "title": "朝廷的棋局",
@@ -124,25 +204,48 @@
         "id": "court_politics_revealed_choice_1",
         "text": "将真相公之于众",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": -50},
-          {"type": "stat_modify", "stat": "connections", "value": 20},
-          {"type": "flag_set", "flag": "exposed_court_plot", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -50
+          },
+          {
+            "type": "stat_modify",
+            "stat": "connections",
+            "value": 20
+          },
+          {
+            "type": "flag_set",
+            "flag": "exposed_court_plot",
+            "value": true
+          }
         ]
       },
       {
         "id": "court_politics_revealed_choice_2",
         "text": "利用这个秘密",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
-          {"type": "stat_modify", "stat": "money", "value": 500},
-          {"type": "flag_set", "flag": "exploited_court_plot", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "flag_set",
+            "flag": "exploited_court_plot",
+            "value": true
+          }
         ]
       },
       {
         "id": "court_politics_revealed_choice_3",
         "text": "保持沉默，远离纷争",
         "effects": [
-          {"type": "flag_set", "flag": "ignored_court_plot", "value": true}
+          {
+            "type": "flag_set",
+            "flag": "ignored_court_plot",
+            "value": true
+          }
         ]
       }
     ]
@@ -153,10 +256,19 @@
     "category": "special_event",
     "priority": 50,
     "weight": 40,
-    "ageRange": {"min": 16, "max": 35},
+    "ageRange": {
+      "min": 16,
+      "max": 35
+    },
     "triggers": [
-      {"type": "age_reach", "value": 16},
-      {"type": "random", "value": 0.2}
+      {
+        "type": "age_reach",
+        "value": 16
+      },
+      {
+        "type": "random",
+        "value": 0.2
+      }
     ],
     "conditions": [],
     "content": {
@@ -170,16 +282,32 @@
         "id": "refugee_sect_story_choice_1",
         "text": "同情他的遭遇",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 5},
-          {"type": "stat_modify", "stat": "connections", "value": 10},
-          {"type": "flag_set", "flag": "sympathized_refugee", "value": true}
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 5
+          },
+          {
+            "type": "stat_modify",
+            "stat": "connections",
+            "value": 10
+          },
+          {
+            "type": "flag_set",
+            "flag": "sympathized_refugee",
+            "value": true
+          }
         ]
       },
       {
         "id": "refugee_sect_story_choice_2",
         "text": "保持中立，不发表意见",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 5}
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 5
+          }
         ]
       }
     ]

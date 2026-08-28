@@ -24,7 +24,6 @@ export const KEY_CHOICE_EVENT_LABELS: Record<string, string> = {
   demonic_midlife_consequence: '魔道中年收束',
   merchant_first_shop: '开设店铺',
   merchant_shop_failure: '经营失利',
-  merchant_crisis: '财富危机',
 };
 
 export const KEY_CHOICE_LABELS: Record<string, Record<string, string>> = {
@@ -114,7 +113,6 @@ export const DEBT_FLAG_LABELS: Record<string, string> = {
   demonic_usurp_failed: '夺位失败后清算阴影',
   merchant_shop_failed: '初次经营失利，本钱受损',
   merchant_midlife_debt: '人情债未清，周转吃紧',
-  merchant_crisis_loyalty: '财富与义气难以两全',
 };
 
 export const RISK_SIGNAL_LABELS = {
@@ -126,7 +124,6 @@ export const RISK_SIGNAL_LABELS = {
   badReputation: '声名狼藉，行事多阻',
   demonicChivalry: '魔念渐深，正道难容',
   demonicIsolation: '扩张之后，旧友渐远',
-  merchantCrisis: '财富与义气难以两全',
   highAnxiety: '心事重重',
   highFatigue: '身心俱疲',
 } as const;

@@ -3900,17 +3900,6 @@
       "notes": "Source file not runtime-loaded"
     },
     {
-      "eventId": "merchant_crisis",
-      "sourceFile": "identity-merchant.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 40,
-      "ageMax": 55,
-      "overlapsGoldenLine": false,
-      "eventType": "choice",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
       "eventId": "merchant_mentor",
       "sourceFile": "identity-merchant.json",
       "runtimeLoaded": true,
@@ -5649,17 +5638,6 @@
       "notes": "Failed event quality or loader validation"
     },
     {
-      "eventId": "career_business_empire",
-      "sourceFile": "middle-age-career.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 35,
-      "ageMax": 50,
-      "overlapsGoldenLine": false,
-      "eventType": "choice",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
       "eventId": "career_jianghu_legend",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
@@ -6831,17 +6809,6 @@
       "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 22,
-      "ageMax": 24,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "File classified deferred for golden line"
-    },
-    {
-      "eventId": "p9_wealth_caravan_gate",
-      "sourceFile": "p9-remediation.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 23,
       "ageMax": 24,
       "overlapsGoldenLine": true,
       "eventType": "choice",

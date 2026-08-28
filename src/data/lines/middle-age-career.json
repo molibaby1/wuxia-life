@@ -47,18 +47,16 @@
     "choices": [
       {
         "id": "create_sect",
-        "text": "创建门派 (财富 -100, 声望 +20)",
+        "text": "创建门派 (声望 +20)",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
           {
             "type": "stat_modify",
             "target": "reputation",
             "value": 20,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -100,
             "operator": "add"
           },
           {
@@ -249,14 +247,8 @@
       },
       {
         "id": "career_recruit_disciples_choice_2",
-        "text": "有教无类，广收门徒 (财富 +50)",
+        "text": "有教无类，广收门徒",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
-          },
           {
             "type": "flag_set",
             "flag": "has_disciples",
@@ -416,19 +408,22 @@
     "choices": [
       {
         "id": "career_sect_expansion_choice_1",
-        "text": "大规模扩建 (财富 -200, 声望 +30)",
+        "text": "大规模扩建 (声望 +30)",
+        "condition": {
+          "type": "wealth_capacity_at_least",
+          "minimum": "comfortable_means"
+        },
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -200,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "reputation",
             "value": 30,
             "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "flag": "career_sect_major_expansion",
+            "value": true
           },
           {
             "type": "status_add",
@@ -438,14 +433,8 @@
       },
       {
         "id": "career_sect_expansion_choice_2",
-        "text": "稳步发展，量力而行 (财富 -50, 声望 +10)",
+        "text": "稳步发展，量力而行 (声望 +10)",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -50,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "reputation",
@@ -456,14 +445,8 @@
       },
       {
         "id": "career_sect_expansion_choice_3",
-        "text": "暂缓扩建，先整顿门规 (财富 -20, 学识 +4)",
+        "text": "暂缓扩建，先整顿门规 (学识 +4)",
         "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": -20,
-            "operator": "add"
-          },
           {
             "type": "stat_modify",
             "target": "knowledge",
@@ -871,83 +854,6 @@
     "help": {
       "title": "江湖终极决战",
       "text": "这是你人生中最大的挑战。选择如何结束这场战争，将定义你的传奇。"
-    }
-  },
-  {
-    "id": "career_business_empire",
-    "name": "商业帝国",
-    "description": "你发现经商也是壮大门派的好方法，决定发展商业。",
-    "version": "1.0.0",
-    "category": "career",
-    "priority": 65,
-    "weight": 55,
-    "ageRange": {
-      "min": 35,
-      "max": 50
-    },
-    "type": "career",
-    "eventType": "choice",
-    "tags": [
-      "career",
-      "business",
-      "wealth"
-    ],
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 35
-      }
-    ],
-    "triggerConditions": {
-      "age": {
-        "min": 35,
-        "max": 50
-      },
-      "flags": {
-        "required": [
-          "has_own_sect"
-        ]
-      }
-    },
-    "content": {
-      "title": "商业帝国",
-      "text": "你发现经商也是壮大门派的好方法，决定发展商业。"
-    },
-    "choices": [
-      {
-        "id": "career_business_empire_choice_1",
-        "text": "投资商队，开拓商路 (财富 +150)",
-        "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 150,
-            "operator": "add"
-          }
-        ]
-      },
-      {
-        "id": "career_business_empire_choice_2",
-        "text": "开设武馆，传授武艺 (财富 +50, 声望 +10)",
-        "effects": [
-          {
-            "type": "stat_modify",
-            "target": "money",
-            "value": 50,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "reputation",
-            "value": 10,
-            "operator": "add"
-          }
-        ]
-      }
-    ],
-    "help": {
-      "title": "商业发展",
-      "text": "经商可以快速积累财富，为门派提供资金支持。"
     }
   },
   {

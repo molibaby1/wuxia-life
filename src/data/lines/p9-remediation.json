@@ -5,12 +5,20 @@
     "category": "main_story",
     "priority": 0,
     "weight": 100,
-    "ageRange": { "min": 28, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "ageRange": {
+      "min": 28,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p8_route_wealth\") && (flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\"))"
+        "expression": "(flags.has(\"route_merchant\") || flags.has(\"p8_route_wealth\")) && (flags.has(\"p9_early_business_focus\") || flags.has(\"p16_deferred_business_upbringing\"))"
       }
     ],
     "content": {
@@ -24,32 +32,79 @@
         "id": "lead_caravan",
         "text": "亲自带队，成商路之主",
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 300, "operator": "add" },
-          { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
-          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_caravan_master" },
-          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
-          { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_merchant_midlife_path",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_merchant_master",
+            "value": "merchant_caravan_master"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_explicit_business_echo",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_summary_echo_business",
+            "value": "幼年帮工营商的习惯延续至今"
+          }
         ]
       },
       {
         "id": "hire_agent",
         "text": "雇人代行，坐收利钱",
         "effects": [
-          { "type": "stat_modify", "target": "money", "value": 150, "operator": "add" },
-          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_merchant_master", "value": "merchant_investor" },
-          { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
-          { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
+          {
+            "type": "flag_set",
+            "target": "p9_merchant_midlife_path",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_merchant_master",
+            "value": "merchant_investor"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_explicit_business_echo",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_summary_echo_business",
+            "value": "幼年帮工营商的习惯延续至今"
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "wealth", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wealth": 1.0 },
+      "tags": [
+        "p9",
+        "route_divergence",
+        "wealth",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "wealth": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence", "age40_identity"],
+        "stageSignals": [
+          "route_divergence",
+          "age40_identity"
+        ],
         "routePoints": [
           {
             "routeId": "route_wealth",
@@ -68,8 +123,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 100,
-    "ageRange": { "min": 28, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "ageRange": {
+      "min": 28,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -87,32 +150,91 @@
         "id": "chart_routes",
         "text": "绘制险道，成江湖活地图",
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 20, "operator": "add" },
-          { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
-          { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_map_legend" },
-          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true },
-          { "type": "flag_set", "target": "p9_summary_echo_travel", "value": "幼年游历的习惯延续至今" }
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 20,
+            "operator": "add"
+          },
+          {
+            "type": "stat_modify",
+            "target": "connections",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_wanderer_midlife_path",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_wanderer",
+            "value": "wanderer_map_legend"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_explicit_travel_echo",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_summary_echo_travel",
+            "value": "幼年游历的习惯延续至今"
+          }
         ]
       },
       {
         "id": "guard_caravan",
         "text": "护送商队，以武养游",
         "effects": [
-          { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
-          { "type": "flag_set", "target": "p9_wanderer_midlife_path", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_wanderer", "value": "wanderer_guardian" },
-          { "type": "flag_set", "target": "p9_explicit_travel_echo", "value": true },
-          { "type": "flag_set", "target": "p9_summary_echo_travel", "value": "幼年游历的习惯延续至今" }
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_wanderer_midlife_path",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_wanderer",
+            "value": "wanderer_guardian"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_explicit_travel_echo",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_summary_echo_travel",
+            "value": "幼年游历的习惯延续至今"
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "wanderer", "mandatory", "mainline", "once"],
-      "pathAffinity": { "wanderer": 1.0 },
+      "tags": [
+        "p9",
+        "route_divergence",
+        "wanderer",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "wanderer": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence", "age40_identity"],
+        "stageSignals": [
+          "route_divergence",
+          "age40_identity"
+        ],
         "routePoints": [
           {
             "routeId": "route_wanderer",
@@ -131,8 +253,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 95,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -146,16 +276,41 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 5, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_sword_trial", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "martial_talent_acknowledged" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_sword_trial",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "martial_talent_acknowledged"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"],
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ],
       "narrativeScheduling": {
-        "stageSignals": ["training_milestone"],
+        "stageSignals": [
+          "training_milestone"
+        ],
         "routePoints": [
           {
             "routeId": "route_martial",
@@ -174,8 +329,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 97,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -189,15 +352,42 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": -2, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_dark_spark", "value": true },
-      { "type": "flag_set", "target": "p9_explicit_deviant_childhood_echo", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "demonic_childhood_spark" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": -2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_dark_spark",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_deviant_childhood_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "demonic_childhood_spark"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -206,8 +396,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 95,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -221,13 +419,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_steady_gate", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "cautious_steady_foundation" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_steady_gate",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "cautious_steady_foundation"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -236,8 +452,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 95,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -251,14 +475,37 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 4, "operator": "add" },
-      { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_balanced_posture", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "balanced_martial_base" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_balanced_posture",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "balanced_martial_base"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -267,8 +514,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 94,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -282,13 +537,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_study_recital", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "scholar_childhood_recital" }
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_study_recital",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "scholar_childhood_recital"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -297,8 +570,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 94,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -312,14 +593,37 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "connections", "value": 5, "operator": "add" },
-      { "type": "stat_modify", "target": "charisma", "value": 3, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_social_circle", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "social_childhood_circle" }
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 5,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "charisma",
+        "value": 3,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_social_circle",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "social_childhood_circle"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -328,12 +632,20 @@
     "category": "main_story",
     "priority": 0,
     "weight": 94,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_early_business_focus\")"
+        "expression": "flags.has(\"p9_early_business_focus\") && (flags.has(\"route_merchant\") || flags.has(\"p8_route_wealth\"))"
       }
     ],
     "content": {
@@ -343,14 +655,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "money", "value": 40, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": 2, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_first_trade", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "merchant_childhood_first_trade" }
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_first_trade",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "merchant_childhood_first_trade"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -359,8 +688,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 94,
-    "ageRange": { "min": 10, "max": 10 },
-    "triggers": [{ "type": "age_reach", "value": 10 }],
+    "ageRange": {
+      "min": 10,
+      "max": 10
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 10
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -374,14 +711,37 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
-      { "type": "stat_modify", "target": "connections", "value": 2, "operator": "add" },
-      { "type": "flag_set", "target": "p9_childhood_first_journey", "value": true },
-      { "type": "flag_set", "target": "p9_milestone_route_signal", "value": "wanderer_childhood_first_journey" }
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 4,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 2,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_childhood_first_journey",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_milestone_route_signal",
+        "value": "wanderer_childhood_first_journey"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -390,8 +750,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 88,
-    "ageRange": { "min": 24, "max": 24 },
-    "triggers": [{ "type": "age_reach", "value": 24 }],
+    "ageRange": {
+      "min": 24,
+      "max": 24
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 24
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -405,13 +773,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_cautious_echo", "value": true },
-      { "type": "flag_set", "target": "p9_route_identity_cautious", "value": "cautious_steward" }
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_cautious_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_cautious",
+        "value": "cautious_steward"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "route_divergence",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -420,8 +806,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 120,
-    "ageRange": { "min": 23, "max": 26 },
-    "triggers": [{ "type": "age_reach", "value": 23 }],
+    "ageRange": {
+      "min": 23,
+      "max": 26
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 23
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -439,27 +833,66 @@
         "id": "accept_dark_manual",
         "text": "收下偏门心法",
         "effects": [
-          { "type": "stat_modify", "target": "martialPower", "value": 10, "operator": "add" },
-          { "type": "flag_set", "target": "demonic_path_touched", "value": true },
-          { "type": "flag_set", "target": "p9_explicit_deviant_echo", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_fork_chosen" }
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 10,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "demonic_path_touched",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_explicit_deviant_echo",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_deviant",
+            "value": "demonic_fork_chosen"
+          }
         ]
       },
       {
         "id": "reject_dark_manual",
         "text": "拒而不受",
         "effects": [
-          { "type": "stat_modify", "target": "reputation", "value": 5, "operator": "add" },
-          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_fork_refused" }
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_deviant",
+            "value": "demonic_fork_refused"
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "demonic", "mandatory", "mainline", "once"],
-      "pathAffinity": { "demonic": 1.0, "deviant": 1.0 },
+      "tags": [
+        "p9",
+        "route_divergence",
+        "demonic",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "demonic": 1,
+        "deviant": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence", "age40_identity"],
+        "stageSignals": [
+          "route_divergence",
+          "age40_identity"
+        ],
         "routePoints": [
           {
             "routeId": "route_deviant",
@@ -478,8 +911,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 92,
-    "ageRange": { "min": 29, "max": 29 },
-    "triggers": [{ "type": "age_reach", "value": 29 }],
+    "ageRange": {
+      "min": 29,
+      "max": 29
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 29
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -493,17 +934,47 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 12, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_deviant_escalation", "value": true },
-      { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_shadow_master" },
-      { "type": "flag_set", "target": "p9_summary_echo_deviant", "value": "邪路偏锋的习惯延续至今" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 12,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_deviant_escalation",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_deviant",
+        "value": "demonic_shadow_master"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_deviant",
+        "value": "邪路偏锋的习惯延续至今"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "demonic", "mandatory", "mainline", "once"],
-      "pathAffinity": { "demonic": 1.0, "deviant": 1.0 },
+      "tags": [
+        "p9",
+        "route_divergence",
+        "demonic",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "demonic": 1,
+        "deviant": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence", "age40_identity"],
+        "stageSignals": [
+          "route_divergence",
+          "age40_identity"
+        ],
         "routePoints": [
           {
             "routeId": "route_deviant",
@@ -522,8 +993,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 90,
-    "ageRange": { "min": 26, "max": 26 },
-    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "ageRange": {
+      "min": 26,
+      "max": 26
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -537,13 +1016,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_training_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_training", "value": "幼年练功的习惯延续至今" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_training_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_training",
+        "value": "幼年练功的习惯延续至今"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "causality_echo", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "causality_echo",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -552,8 +1049,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 91,
-    "ageRange": { "min": 26, "max": 26 },
-    "triggers": [{ "type": "age_reach", "value": 26 }],
+    "ageRange": {
+      "min": 26,
+      "max": 26
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 26
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -567,13 +1072,31 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_deviant_training_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_deviant", "value": "邪路练功的狠劲延续至今" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_deviant_training_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_deviant",
+        "value": "邪路练功的狠劲延续至今"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "causality_echo", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "causality_echo",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -582,12 +1105,20 @@
     "category": "main_story",
     "priority": 0,
     "weight": 88,
-    "ageRange": { "min": 29, "max": 29 },
-    "triggers": [{ "type": "age_reach", "value": 29 }],
+    "ageRange": {
+      "min": 29,
+      "max": 29
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 29
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_merchant_midlife_path\")"
+        "expression": "(flags.has(\"route_merchant\") || flags.has(\"p8_route_wealth\")) && flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_merchant_midlife_path\")"
       }
     ],
     "content": {
@@ -597,13 +1128,25 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "money", "value": 100, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_business_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_business", "value": "幼年帮工营商的习惯延续至今" }
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_business_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_business",
+        "value": "幼年帮工营商的习惯延续至今"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "causality_echo", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "causality_echo",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -612,8 +1155,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 90,
-    "ageRange": { "min": 25, "max": 25 },
-    "triggers": [{ "type": "age_reach", "value": 25 }],
+    "ageRange": {
+      "min": 25,
+      "max": 25
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -627,14 +1178,36 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_study_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_study", "value": "幼年读书的习惯延续至今" },
-      { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_lecturer" }
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_study_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_study",
+        "value": "幼年读书的习惯延续至今"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_scholar",
+        "value": "scholar_lecturer"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "causality_echo", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "causality_echo",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -643,8 +1216,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 93,
-    "ageRange": { "min": 28, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "ageRange": {
+      "min": 28,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -658,18 +1239,53 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "martialPower", "value": 28, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": 15, "operator": "add" },
-      { "type": "stat_modify", "target": "chivalry", "value": 12, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_martial_proving_echo", "value": true },
-      { "type": "flag_set", "target": "p9_route_identity_martial", "value": "martial_proven_champion" }
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 28,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 15,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "chivalry",
+        "value": 12,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_martial_proving_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_martial",
+        "value": "martial_proven_champion"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "martial", "mandatory", "mainline", "once"],
-      "pathAffinity": { "martial": 1.0 },
+      "tags": [
+        "p9",
+        "route_divergence",
+        "martial",
+        "mandatory",
+        "mainline",
+        "once"
+      ],
+      "pathAffinity": {
+        "martial": 1
+      },
       "narrativeScheduling": {
-        "stageSignals": ["route_divergence", "age40_identity"],
+        "stageSignals": [
+          "route_divergence",
+          "age40_identity"
+        ],
         "routePoints": [
           {
             "routeId": "route_martial",
@@ -688,8 +1304,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 91,
-    "ageRange": { "min": 28, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 28 }],
+    "ageRange": {
+      "min": 28,
+      "max": 28
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -703,16 +1327,48 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "knowledge", "value": 10, "operator": "add" },
-      { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
-      { "type": "stat_modify", "target": "connections", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_balanced_harmony_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_study", "value": "幼年读书的习惯延续至今" },
-      { "type": "flag_set", "target": "p9_route_identity_balanced", "value": "balanced_harmony_steward" }
+      {
+        "type": "stat_modify",
+        "target": "knowledge",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "martialPower",
+        "value": 6,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_balanced_harmony_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_study",
+        "value": "幼年读书的习惯延续至今"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_balanced",
+        "value": "balanced_harmony_steward"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "route_divergence",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -721,8 +1377,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 88,
-    "ageRange": { "min": 27, "max": 30 },
-    "triggers": [{ "type": "age_reach", "value": 27 }],
+    "ageRange": {
+      "min": 27,
+      "max": 30
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 27
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -736,15 +1400,42 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      { "type": "stat_modify", "target": "connections", "value": 10, "operator": "add" },
-      { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
-      { "type": "flag_set", "target": "p9_explicit_social_echo", "value": true },
-      { "type": "flag_set", "target": "p9_summary_echo_social", "value": "幼年交游的习惯延续至今" },
-      { "type": "flag_set", "target": "p9_route_identity_social", "value": "social_network_hub" }
+      {
+        "type": "stat_modify",
+        "target": "connections",
+        "value": 10,
+        "operator": "add"
+      },
+      {
+        "type": "stat_modify",
+        "target": "reputation",
+        "value": 8,
+        "operator": "add"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_explicit_social_echo",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_summary_echo_social",
+        "value": "幼年交游的习惯延续至今"
+      },
+      {
+        "type": "flag_set",
+        "target": "p9_route_identity_social",
+        "value": "social_network_hub"
+      }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "causality_echo", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "causality_echo",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -753,8 +1444,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 130,
-    "ageRange": { "min": 12, "max": 13 },
-    "triggers": [{ "type": "age_reach", "value": 12 }],
+    "ageRange": {
+      "min": 12,
+      "max": 13
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 12
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -772,25 +1471,61 @@
         "id": "deviant_youth_embrace_shadow",
         "text": "承认偏门劲路",
         "effects": [
-          { "type": "stat_modify", "target": "martialPower", "value": 6, "operator": "add" },
-          { "type": "flag_set", "target": "p9_deviant_youth_route_milestone_done", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_youth_acknowledged" },
-          { "type": "flag_set", "target": "demonic_path_touched", "value": true }
+          {
+            "type": "stat_modify",
+            "target": "martialPower",
+            "value": 6,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_deviant_youth_route_milestone_done",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_deviant",
+            "value": "demonic_youth_acknowledged"
+          },
+          {
+            "type": "flag_set",
+            "target": "demonic_path_touched",
+            "value": true
+          }
         ]
       },
       {
         "id": "deviant_youth_hide_shadow",
         "text": "暂避锋芒",
         "effects": [
-          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
-          { "type": "flag_set", "target": "p9_deviant_youth_route_milestone_done", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_deviant", "value": "demonic_youth_concealed" }
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 3,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_deviant_youth_route_milestone_done",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_deviant",
+            "value": "demonic_youth_concealed"
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "pacing_milestone", "demonic", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "pacing_milestone",
+        "demonic",
+        "mandatory",
+        "once"
+      ]
     }
   },
   {
@@ -799,8 +1534,16 @@
     "category": "main_story",
     "priority": 0,
     "weight": 105,
-    "ageRange": { "min": 22, "max": 24 },
-    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "ageRange": {
+      "min": 22,
+      "max": 24
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
     "conditions": [
       {
         "type": "expression",
@@ -818,72 +1561,61 @@
         "id": "scholar_academy_lecture",
         "text": "登台讲学",
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 15, "operator": "add" },
-          { "type": "flag_set", "target": "p9_scholar_academy_gate_done", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_academy_debater" },
-          { "type": "flag_set", "target": "scholar_path_started", "value": true }
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 15,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_scholar_academy_gate_done",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_scholar",
+            "value": "scholar_academy_debater"
+          },
+          {
+            "type": "flag_set",
+            "target": "scholar_path_started",
+            "value": true
+          }
         ]
       },
       {
         "id": "scholar_academy_observe",
         "text": "旁听记录",
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 8, "operator": "add" },
-          { "type": "flag_set", "target": "p9_scholar_academy_gate_done", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_scholar", "value": "scholar_academy_scribe" }
+          {
+            "type": "stat_modify",
+            "target": "knowledge",
+            "value": 8,
+            "operator": "add"
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_scholar_academy_gate_done",
+            "value": true
+          },
+          {
+            "type": "flag_set",
+            "target": "p9_route_identity_scholar",
+            "value": "scholar_academy_scribe"
+          }
         ]
       }
     ],
     "metadata": {
       "enabled": true,
-      "tags": ["p9", "route_divergence", "scholarly", "mandatory", "once"]
-    }
-  },
-  {
-    "id": "p9_wealth_caravan_gate",
-    "version": "1.0.0",
-    "category": "main_story",
-    "priority": 0,
-    "weight": 105,
-    "ageRange": { "min": 23, "max": 24 },
-    "triggers": [{ "type": "age_reach", "value": 23 }],
-    "conditions": [
-      {
-        "type": "expression",
-        "expression": "flags.has(\"p8_route_wealth\") && flags.has(\"p9_echo_business_hook\") && !flags.has(\"p9_wealth_caravan_gate_done\")"
-      }
-    ],
-    "content": {
-      "title": "商路押镖",
-      "text": "你亲自押送一票贵重货物穿越州界，途中设局反杀劫匪并反手赚下翻倍利润——营商路线在此刻与文路彻底分化，银两与商路身份同时立住。",
-      "description": "财富 replay differentiation"
-    },
-    "eventType": "choice",
-    "choices": [
-      {
-        "id": "wealth_caravan_expand",
-        "text": "扩张商路",
-        "effects": [
-          { "type": "stat_modify", "target": "money", "value": 280, "operator": "add" },
-          { "type": "stat_modify", "target": "reputation", "value": 8, "operator": "add" },
-          { "type": "flag_set", "target": "p9_wealth_caravan_gate_done", "value": true },
-          { "type": "flag_set", "target": "p9_merchant_midlife_path", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_wealth", "value": "wealth_caravan_magnate" }
-        ]
-      },
-      {
-        "id": "wealth_caravan_conservative",
-        "text": "稳守本业",
-        "effects": [
-          { "type": "stat_modify", "target": "money", "value": 120, "operator": "add" },
-          { "type": "flag_set", "target": "p9_wealth_caravan_gate_done", "value": true },
-          { "type": "flag_set", "target": "p9_route_identity_wealth", "value": "wealth_steady_trader" }
-        ]
-      }
-    ],
-    "metadata": {
-      "enabled": true,
-      "tags": ["p9", "route_divergence", "wealth", "mandatory", "once"]
+      "tags": [
+        "p9",
+        "route_divergence",
+        "scholarly",
+        "mandatory",
+        "once"
+      ]
     }
   }
 ]

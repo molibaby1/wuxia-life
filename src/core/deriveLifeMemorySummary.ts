@@ -53,7 +53,6 @@ const MIDLIFE_KEY_CHOICE_EVENT_IDS = [
   'demonic_midlife_consequence',
   'merchant_first_shop',
   'merchant_shop_failure',
-  'merchant_crisis',
 ] as const;
 
 const PAYOFF_MAP_BY_EVENT = new Map(
@@ -157,9 +156,6 @@ function resolveKeyChoiceConsequence(
   }
   if (eventId === 'merchant_shop_failure' && flags.merchant_shop_failed) {
     return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_shop_failed;
-  }
-  if (eventId === 'merchant_crisis' && flags.merchant_crisis_loyalty) {
-    return KEY_CHOICE_OUTCOME_CONSEQUENCES.merchant_crisis_loyalty;
   }
   if (flags.hero_old_case_truth) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_truth;
   if (flags.hero_old_case_silence) return KEY_CHOICE_OUTCOME_CONSEQUENCES.hero_old_case_silence;
@@ -508,17 +504,6 @@ function buildRisks(state: GameState): LifeMemoryRiskEntry[] {
       'medium',
       'L1',
       ['demonic_midlife_isolation_done'],
-      [],
-    );
-  }
-
-  if (flags.merchant_crisis_pending === true || flags.merchant_crisis_loyalty === true) {
-    pushRisk(
-      'risk-merchant-crisis',
-      RISK_SIGNAL_LABELS.merchantCrisis,
-      'medium',
-      'L1',
-      ['merchant_crisis_pending', 'merchant_crisis_loyalty'],
       [],
     );
   }

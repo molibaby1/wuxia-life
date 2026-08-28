@@ -210,7 +210,6 @@ export class StatModifyHandler implements EffectHandler {
     'reputation',
     'knowledge',
     'connections',
-    'money',
     'businessAcumen',
     'influence',
     'martialHeritage',
@@ -307,7 +306,6 @@ export class StatModifyHandler implements EffectHandler {
     // Canonical 属性不在这里设置固定上限；其余保留既有运行时边界。
     const ranges: Record<string, [number, number]> = {
       charisma: [0, 100],
-      money: [0, Number.MAX_SAFE_INTEGER],
     };
     
     const range = ranges[statName];

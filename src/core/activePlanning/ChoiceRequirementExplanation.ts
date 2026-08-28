@@ -29,9 +29,10 @@ const STAT_LABELS: Record<string, string> = {
   reputation: '名望',
   connections: '人脉',
   knowledge: '学识',
-  money: '银两',
   wealth: '财富',
 };
+
+const RETIRED_WALLET_REQUIREMENT_STATS = new Set(['money']);
 
 function parseStatThreshold(expression: string): { stat: string; op: string; value: number } | null {
   const match = expression.match(/(?:player\.)?([a-zA-Z]+)\s*(>=|>|<=|<|==)\s*(\d+)/);
@@ -107,6 +108,21 @@ export function explainChoiceRequirement(
         playerMessage: available ? '条件已满足' : '尚有未明条件未达成',
       }],
       summary: available ? '条件已满足' : '尚有未明条件未达成',
+    };
+  }
+
+  if (RETIRED_WALLET_REQUIREMENT_STATS.has(parsed.stat)) {
+    return {
+      choiceId,
+      available: false,
+      explanations: [{
+        requirementId: parsed.stat,
+        label: '条件',
+        met: false,
+        gapKind: 'unsupported',
+        playerMessage: '尚有未明条件未达成',
+      }],
+      summary: '尚有未明条件未达成',
     };
   }
 

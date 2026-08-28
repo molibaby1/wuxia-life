@@ -162,7 +162,8 @@ export interface RareEventLineConfig {
  * Executable world pack contract for a single theme.
  *
  * Playable profile requirements (all required for gate pass):
- * - stats, resources, identityTracks, actionFamilies, summarySignals (non-empty)
+ * - stats, identityTracks, actionFamilies, summarySignals (non-empty)
+ * - resources may be empty after spendable wallet retirement (array still declared)
  * - stageConfig, routeDefinitions, echoHooks, summaryTemplates (non-empty narrative sections)
  *
  * Optional descriptive metadata: label only at top level.

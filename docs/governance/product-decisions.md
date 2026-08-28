@@ -1356,3 +1356,18 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要重新把 money 做成 live gameplay / presentation / authoring capability；
 - 需要进入 E4 / Phase F 物理删除兼容字段或 Snapshot bump；
 - 需要修改 Wealth Capacity 语义或引入新的普通现金流模拟。
+
+### PD-096：E2–E3 post-run closure removes final live-current money residues
+
+**实施决策（Human accepted：2026-08-29）**
+
+- Post-run discovery 清理了 Ralph E2–E3 Stories 未覆盖的 live-current money 残留：`useNewGameEngine` wallet presentation label / outcome prose、`ChoiceRequirementExplanation` 的 `money→银两` requirement 解释、Wuxia World Profile 的 money stat/resource authority、以及 `GameEngineIntegration` 的银两 diagnostic log。
+- D6 deny/fail-closed guards（如 auto-choice 忽略 `target === 'money'`）保留为 anti-reintroduction，不视为 ownership。
+- P12 旧 heuristic「至少 2 个 scheduling-relevant stats」退役为「必须存在已声明的 scheduling authority」；不以替换方式发明第二个 scheduling-relevant stat。`resources` 段允许空数组（不再要求 spendable wallet resource）。
+- 剩余 money 所有权仅为：compatibility field（`PlayerState.money` / seed / Snapshot 3.15.0）、anti-reintroduction guards、excluded/history。E4 / Phase F **未启动**。
+
+**重新讨论条件**
+
+- 需要把 money 重新做成 live presentation / profile resource / scheduling authority；
+- 需要进入 E4 / Phase F 物理删除兼容字段或 Snapshot bump；
+- 需要为 profile 重新引入 spendable resource 维度或额外 scheduling-relevant stats。

@@ -34,7 +34,10 @@ function testFormalProfileSchema(): void {
   assert(WUXIA_WORLD_PROFILE.id === 'wuxia', 'profile id');
   for (const key of PLAYABLE_PROFILE_SECTION_KEYS) {
     const section = WUXIA_WORLD_PROFILE[key];
-    assert(Array.isArray(section) && section.length > 0, `profile section ${key} populated`);
+    assert(Array.isArray(section), `profile section ${key} must be an array`);
+    if (key !== 'resources') {
+      assert(section.length > 0, `profile section ${key} populated`);
+    }
   }
   assert(WUXIA_WORLD_PROFILE.stats.every(s => s.id && s.label && s.role), 'stat entries complete');
   assert(WUXIA_WORLD_PROFILE.resources.every(r => r.id && r.label && r.role), 'resource entries complete');
@@ -47,8 +50,9 @@ function testFormalProfileSchema(): void {
 function testProfileSmokeSupply(): void {
   const profile = getWorldProfile();
   assert(profile.stats.some(s => s.role === 'scheduling_relevant'), 'scheduling stats');
-  assert(profile.resources.length >= 1, 'resources');
-  assert(profile.resources.some(resource => resource.id === 'money'), 'money resource');
+  assert(Array.isArray(profile.resources), 'resources array declared');
+  assert(!profile.resources.some(resource => resource.id === 'money'), 'retired wallet must not be a profile resource');
+  assert(!profile.stats.some(stat => stat.id === 'money'), 'retired wallet must not be a profile stat');
   assert(profile.identityTracks.length >= 8, 'identity tracks');
   assert(profile.actionFamilies.length >= 5, 'action families');
   assert(profile.summarySignals.some(s => s.variableName === 'echo_suffix'), 'echo summary signal');

@@ -204,7 +204,6 @@ export class GameEngineIntegration {
 
     // 记录更新前的属性值
     const oldMartialPower = this.gameState.player?.martialPower;
-    const oldMoney = this.gameState.player?.money;
     
     // 逐个属性更新，确保触发响应式
     if (nextState.player) {
@@ -324,11 +323,10 @@ export class GameEngineIntegration {
     
     // 记录更新后的属性值，确认数据确实在变化
     const newMartialPower = this.gameState.player?.martialPower;
-    const newMoney = this.gameState.player?.money;
     
-    if (oldMartialPower !== newMartialPower || oldMoney !== newMoney) {
+    if (oldMartialPower !== newMartialPower) {
       if (engineDiagnosticsEnabled()) {
-        console.log(`[GameEngine] 属性更新：功力 ${oldMartialPower}→${newMartialPower}, 银两 ${oldMoney}→${newMoney}`);
+        console.log(`[GameEngine] 属性更新：功力 ${oldMartialPower}→${newMartialPower}`);
       }
     }
   }

@@ -163,9 +163,10 @@ function testConfiguredIdentityResolver(): void {
 
 function testWorldProfileAssembly(): void {
   assert(WUXIA_WORLD_PROFILE.id === 'wuxia', 'world profile id');
-  assert(WUXIA_WORLD_PROFILE.stats.length >= 10, 'world profile carries stats metadata');
-  assert(WUXIA_WORLD_PROFILE.resources.length >= 1, 'world profile carries resources metadata');
-  assert(WUXIA_WORLD_PROFILE.resources.some(resource => resource.id === 'money'), 'money resource metadata');
+  assert(WUXIA_WORLD_PROFILE.stats.length >= 9, 'world profile carries stats metadata');
+  assert(Array.isArray(WUXIA_WORLD_PROFILE.resources), 'world profile declares resources array');
+  assert(!WUXIA_WORLD_PROFILE.resources.some(resource => resource.id === 'money'), 'retired wallet must not be profile resource');
+  assert(!WUXIA_WORLD_PROFILE.stats.some(stat => stat.id === 'money'), 'retired wallet must not be profile stat');
   assert(WUXIA_WORLD_PROFILE.actionFamilies.length >= 5, 'world profile carries action families');
   assert(WUXIA_WORLD_PROFILE.routeDefinitions.length >= 6, 'world profile carries route definitions');
   assert(WUXIA_WORLD_PROFILE.echoHooks.some(h => h.summaryContribution?.enabled), 'world profile carries summary contributions');

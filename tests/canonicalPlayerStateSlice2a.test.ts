@@ -56,7 +56,8 @@ export async function runCanonicalPlayerStateSlice2aTests(): Promise<void> {
   assert(state.player.chivalry === -5, 'chivalry must allow signed values');
 
   const resourceIds = WUXIA_PROFILE_RESOURCES.map(resource => resource.id);
-  assert(resourceIds.length === 1 && resourceIds[0] === 'money', 'money is the only Wuxia resource');
+  assert(resourceIds.length === 0, 'live Wuxia profile declares no spendable wallet resources');
+  assert(!resourceIds.includes('money'), 'money is not a live profile resource');
   assert(!resourceIds.includes('energy'), 'energy is not a canonical resource');
   assert(!resourceIds.includes('connections'), 'connections is not a canonical resource');
 }

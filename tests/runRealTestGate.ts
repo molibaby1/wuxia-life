@@ -179,6 +179,10 @@ const suites: Suite[] = [
     name: 'globalMoneyCurrentRuntimeCapabilityRetirement',
     entry: 'tests/globalMoneyCurrentRuntimeCapabilityRetirement.test.ts',
   },
+  {
+    name: 'globalMoneyE2E3PostRunClosureCorrection',
+    entry: 'tests/globalMoneyE2E3PostRunClosureCorrection.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

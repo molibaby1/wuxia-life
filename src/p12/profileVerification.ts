@@ -18,6 +18,9 @@ function sectionCount(profile: WorldProfile, key: PlayableProfileSectionKey): nu
   return Array.isArray(value) ? value.length : 0;
 }
 
+/** Sections that may be declared empty after wallet resource retirement. */
+const SECTIONS_ALLOWING_EMPTY: ReadonlySet<PlayableProfileSectionKey> = new Set(['resources']);
+
 export function validateWorldProfileCrossReferences(profile: WorldProfile): string[] {
   const issues: string[] = [];
   const catalogActionIds = new Set(activeActionCatalog.map(action => action.id));
@@ -61,12 +64,16 @@ export function validateWorldProfileCrossReferences(profile: WorldProfile): stri
 }
 
 export function validateWorldProfileSections(profile: WorldProfile): ProfileValidationResult {
-  const sections: ProfileSectionValidation[] = PLAYABLE_PROFILE_SECTION_KEYS.map(key => ({
-    key,
-    present: sectionCount(profile, key) > 0,
-    count: sectionCount(profile, key),
-    required: true,
-  }));
+  const sections: ProfileSectionValidation[] = PLAYABLE_PROFILE_SECTION_KEYS.map(key => {
+    const count = sectionCount(profile, key);
+    const allowsEmpty = SECTIONS_ALLOWING_EMPTY.has(key);
+    return {
+      key,
+      present: allowsEmpty ? true : count > 0,
+      count,
+      required: !allowsEmpty,
+    };
+  });
 
   const missingRequired = sections
     .filter(section => section.required && !section.present)
@@ -74,7 +81,7 @@ export function validateWorldProfileSections(profile: WorldProfile): ProfileVali
 
   const messages: string[] = [];
   for (const section of sections) {
-    if (!section.present) {
+    if (section.required && !section.present) {
       messages.push(`Missing required section: ${section.key}`);
     }
   }
@@ -99,8 +106,9 @@ export function validateWorldProfileForGate(profile: WorldProfile): ProfileValid
   const failures = [...base.messages, ...validateWorldProfileCrossReferences(profile)];
   const warnings: string[] = [];
 
-  if (profile.stats.filter(stat => stat.role === 'scheduling_relevant').length < 2) {
-    warnings.push('Fewer than 2 scheduling-relevant stats declared');
+  // Validate declared scheduling authority exists; do not require an arbitrary minimum count.
+  if (!profile.stats.some(stat => stat.role === 'scheduling_relevant')) {
+    warnings.push('No scheduling-relevant stats declared');
   }
   if (profile.actionFamilies.some(family => family.actionIds.length === 0)) {
     warnings.push('Action family with empty actionIds');

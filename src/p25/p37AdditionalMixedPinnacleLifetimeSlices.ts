@@ -202,12 +202,13 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   }
 
   flags = applyEventChoiceFlagSets(wealthFork, 0, flags);
+  flags.route_merchant = true;
   money += 50;
   const flagsAfterWealth = activeFlags(flags);
   ageProgression.push({
     age: 18,
     phase: 'bridge',
-    action: 'p22_early_wealth_route_fork → route_wealth_committed',
+    action: 'p22_early_wealth_route_fork → route_wealth_committed + route_merchant',
     trainingHabit: lifeStates.trainingHabit ?? 0,
     studyHabit: lifeStates.studyHabit ?? 0,
     martialPower: (martialPower += 3),
@@ -295,7 +296,7 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
       unlocked: report.unlocked,
       crossTrackGroupsSatisfied: satisfiedGroups.length,
     },
-    resolvedBridgeFlags: ['route_wealth_committed', 'merchant_invest_good'].filter(f => flags[f] === true),
+    resolvedBridgeFlags: ['route_merchant', 'route_wealth_committed', 'merchant_invest_good'].filter(f => flags[f] === true),
     crossTrackSignals: satisfiedGroups.map(g => `${g.trackId}:ok`),
     usedStaticResolver: false,
   };

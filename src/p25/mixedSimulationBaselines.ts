@@ -36,7 +36,7 @@ export const P25_MIXED_LIFE_PATHS: LifePathFixture[] = [
     label: '巨贾行商·商路齐',
     originId: 'merchant_house',
     player: { age: 48, martialPower: 40, reputation: 55, connections: 65, money: 70 },
-    flags: { route_wealth_committed: true, merchant_empire: true },
+    flags: { route_merchant: true, route_wealth_committed: true, merchant_empire: true },
     summarySignals: ['商路', '富甲'],
   },
   {
@@ -52,7 +52,7 @@ export const P25_MIXED_LIFE_PATHS: LifePathFixture[] = [
     label: '商武一体·投资齐',
     originId: 'merchant_house',
     player: { age: 44, martialPower: 55, reputation: 50, connections: 50, money: 60 },
-    flags: { route_wealth_committed: true, merchant_invest_good: true },
+    flags: { route_merchant: true, route_wealth_committed: true, merchant_invest_good: true },
     summarySignals: ['商贾', '武学'],
   },
   {

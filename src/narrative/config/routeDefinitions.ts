@@ -35,6 +35,7 @@ export interface RouteDefinition {
 
 export const WUXIA_ROUTE_DEFINITIONS: RouteDefinition[] = [
   {
+    // ponytail: D10/PD-087 — narrative & P11 validation alias only; strategic Merchant identity owner is route_merchant.
     id: 'route_wealth',
     label: '营商致富',
     entrySignals: [

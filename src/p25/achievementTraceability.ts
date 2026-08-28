@@ -65,7 +65,7 @@ export const P25_PINNACLE_ACHIEVEMENT_TRACEABILITY: Record<string, AchievementTr
 /** P25 Wave 3: mixed cross-track traceability links. */
 export const P25_MIXED_ACHIEVEMENT_TRACEABILITY: Record<string, AchievementTraceLink> = {
   merchant_magnate: {
-    choiceFlags: ['route_wealth_committed', 'p22_wealth_route_forked', 'merchant_empire', 'merchant_wealthy'],
+    choiceFlags: ['route_merchant', 'route_wealth_committed', 'p22_wealth_route_forked', 'merchant_empire', 'merchant_wealthy'],
     midLifeConsequenceSurfaces: ['p22_early_wealth_route_fork', 'merchant_empire', 'merchant_business_empire'],
   },
   healer_swordsman: {
@@ -73,7 +73,7 @@ export const P25_MIXED_ACHIEVEMENT_TRACEABILITY: Record<string, AchievementTrace
     midLifeConsequenceSurfaces: ['medical_divine_doctor_fame', 'orthodox_trial_completion'],
   },
   merchant_martial_patron: {
-    choiceFlags: ['route_wealth_committed', 'p22_wealth_route_forked', 'merchant_invest_good', 'merchant_invest_both', 'merchant_invest_evil'],
+    choiceFlags: ['route_merchant', 'route_wealth_committed', 'p22_wealth_route_forked', 'merchant_invest_good', 'merchant_invest_both', 'merchant_invest_evil'],
     midLifeConsequenceSurfaces: ['p22_early_wealth_route_fork', 'merchant_sect_investment'],
   },
 };

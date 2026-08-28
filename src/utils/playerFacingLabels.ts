@@ -133,15 +133,33 @@ export function readRawRouteKeyFromFlags(flags: Record<string, unknown> | undefi
   if (flags.route_official) {
     return 'official';
   }
+  if (flags.route_merchant) {
+    return 'merchant';
+  }
+  if (flags.p9_merchant_midlife_path) {
+    return 'merchant';
+  }
   if (
-    flags.route_merchant
-    || flags.route_wealth_committed
-    || flags.p22_wealth_route_forked
-    || flags.p9_merchant_midlife_path
-    || flags.p9_wealth_caravan_gate_done
-    || (
-      flags.p8_route_wealth
-      && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+    flags.p8_route_wealth
+    && (flags.p9_early_business_focus || flags.p16_deferred_business_upbringing || flags.p9_echo_business_hook)
+  ) {
+    return 'merchant';
+  }
+  if (
+    (flags.route_wealth_committed || flags.p22_wealth_route_forked)
+    && (
+      flags.merchant_talent
+      || flags.merchant_childhood_seed_done
+      || flags.merchant_shop_grocery
+      || flags.merchant_shop_weapon
+      || flags.merchant_shop_herb
+      || flags.merchant_caravan_success
+      || flags.merchant_chamber_head
+      || flags.merchant_empire
+      || flags.merchant_wealthy
+      || flags.apprentice_merchant_bridge_crossed
+      || flags.tavern_merchant_bridge_crossed
+      || flags.peasant_merchant_bridge_crossed
     )
   ) {
     return 'merchant';

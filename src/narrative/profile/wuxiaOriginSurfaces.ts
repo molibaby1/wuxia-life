@@ -449,7 +449,16 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     requirements: [
       { dimension: 'resources', minValue: 55 },
       { dimension: 'social_capital', minValue: 55 },
-      { dimension: 'key_choices', anyOfFlags: ['route_wealth_committed', 'p22_wealth_route_forked'] },
+      {
+        dimension: 'key_choices',
+        anyOfFlags: [
+          'route_merchant',
+          'merchant_talent',
+          'merchant_childhood_seed_done',
+          'merchant_caravan_success',
+          'merchant_chamber_head',
+        ],
+      },
       {
         dimension: 'key_choices',
         anyOfFlags: ['merchant_empire', 'merchant_wealthy'],
@@ -493,7 +502,15 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
         dimension: 'key_choices',
         anyOfFlags: ['merchant_invest_good', 'merchant_invest_both', 'merchant_invest_evil'],
       },
-      { dimension: 'key_choices', anyOfFlags: ['route_wealth_committed', 'p22_wealth_route_forked'] },
+      {
+        dimension: 'key_choices',
+        anyOfFlags: [
+          'route_merchant',
+          'apprentice_merchant_bridge_crossed',
+          'tavern_merchant_bridge_crossed',
+          'peasant_merchant_bridge_crossed',
+        ],
+      },
     ],
     crossTrackGroups: [
       { trackId: 'merchant_track', trackLabel: '商贾投资', requirementIndices: [2, 3] },

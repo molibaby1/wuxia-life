@@ -57,7 +57,10 @@ export function detectSampleLine(
     flags.route_merchant
     || flags.merchant_talent
     || flags.merchant_childhood_seed_done
-    || flags.p8_route_wealth
+    || (
+      flags.p8_route_wealth
+      && (flags.p9_early_business_focus || flags.p9_echo_business_hook || flags.p16_deferred_business_upbringing)
+    )
     // P63: Bridge-origin merchant entry flags
     || flags.apprentice_merchant_bridge_crossed
     || flags.tavern_merchant_bridge_crossed

@@ -11,7 +11,7 @@
  */
 
 import { EventCategory, EventPriority } from '../types/eventTypes';
-import type { EventDefinition } from '../types/eventTypes';
+import type { EffectDefinition, EventCondition, EventDefinition } from '../types/eventTypes';
 import eventsIndexJson from '../data/events.json';
 import generalEventsJson from '../data/lines/general.json';
 import originEventsJson from '../data/lines/origin.json';
@@ -118,6 +118,111 @@ export function collectChoiceIdValidationErrors(events: EventDefinition[]): stri
 
       firstChoiceIndexById.set(choice.id, index);
     });
+  }
+
+  return errors;
+}
+
+const MONEY_EXPRESSION_PATTERN = /(?:player\s*\.\s*money|\bmoney\b)/i;
+
+function describeWalletAuthoringLocation(eventId: string, path: string): string {
+  return path ? `事件 ${eventId} @ ${path}` : `事件 ${eventId}`;
+}
+
+function collectMoneyExpressionHits(expression: string, eventId: string, path: string, errors: string[]): void {
+  if (!MONEY_EXPRESSION_PATTERN.test(expression)) {
+    return;
+  }
+  errors.push(
+    `${describeWalletAuthoringLocation(eventId, path)}: formal wallet expression/condition authoring is retired (${expression})`,
+  );
+}
+
+function collectWalletEffectErrors(
+  effect: EffectDefinition,
+  eventId: string,
+  path: string,
+  errors: string[],
+): void {
+  const effectType = String(effect.type ?? '');
+  if (effectType === 'money_modify' || effectType === 'MONEY_MODIFY') {
+    errors.push(
+      `${describeWalletAuthoringLocation(eventId, path)}: money_modify effect authoring is retired`,
+    );
+  }
+
+  const target = effect.target ?? (effect as { stat?: string }).stat;
+  if (effectType === 'stat_modify' && target === 'money') {
+    errors.push(
+      `${describeWalletAuthoringLocation(eventId, path)}: stat_modify targeting money is retired`,
+    );
+  }
+
+  for (const [index, nested] of (effect.effects ?? []).entries()) {
+    collectWalletEffectErrors(nested, eventId, `${path}.effects[${index}]`, errors);
+  }
+}
+
+function collectWalletConditionErrors(
+  condition: EventCondition | EventCondition[] | null | undefined,
+  eventId: string,
+  path: string,
+  errors: string[],
+): void {
+  if (!condition) {
+    return;
+  }
+  if (Array.isArray(condition)) {
+    condition.forEach((entry, index) => {
+      collectWalletConditionErrors(entry, eventId, `${path}[${index}]`, errors);
+    });
+    return;
+  }
+  if (condition.type === 'expression' && typeof condition.expression === 'string') {
+    collectMoneyExpressionHits(condition.expression, eventId, path, errors);
+  }
+}
+
+/**
+ * Formal EventLoader wallet authoring guard.
+ * Rejects money stat_modify / money_modify / exact-money expression conditions
+ * in the formal loaded catalog only (events.json → EventLoader), not deferred line files.
+ */
+export function collectFormalWalletAuthoringErrors(events: EventDefinition[]): string[] {
+  const errors: string[] = [];
+
+  for (const event of events) {
+    collectWalletConditionErrors(event.conditions ?? null, event.id, 'conditions', errors);
+    collectWalletConditionErrors(
+      (event as { triggerConditions?: EventCondition[] | null }).triggerConditions ?? null,
+      event.id,
+      'triggerConditions',
+      errors,
+    );
+
+    for (const [index, effect] of (event.autoEffects ?? []).entries()) {
+      collectWalletEffectErrors(effect, event.id, `autoEffects[${index}]`, errors);
+    }
+
+    for (const [choiceIndex, choice] of (event.choices ?? []).entries()) {
+      const choicePath = `choices[${choiceIndex}]`;
+      collectWalletConditionErrors(choice.condition, event.id, `${choicePath}.condition`, errors);
+      for (const [effectIndex, effect] of (choice.effects ?? []).entries()) {
+        collectWalletEffectErrors(effect, event.id, `${choicePath}.effects[${effectIndex}]`, errors);
+      }
+      for (const [outcomeIndex, outcome] of (choice.outcomes ?? []).entries()) {
+        const outcomePath = `${choicePath}.outcomes[${outcomeIndex}]`;
+        collectWalletConditionErrors(
+          (outcome as { condition?: EventCondition }).condition,
+          event.id,
+          `${outcomePath}.condition`,
+          errors,
+        );
+        for (const [effectIndex, effect] of (outcome.effects ?? []).entries()) {
+          collectWalletEffectErrors(effect, event.id, `${outcomePath}.effects[${effectIndex}]`, errors);
+        }
+      }
+    }
   }
 
   return errors;

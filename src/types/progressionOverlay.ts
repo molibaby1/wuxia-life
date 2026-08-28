@@ -51,7 +51,6 @@ function getStatName(stat: string): string {
     connections: '人脉',
     knowledge: '学识',
     businessAcumen: '经营',
-    money: '银两',
   };
   return statNames[stat] || stat;
 }
@@ -66,7 +65,6 @@ const PLAYER_RESULT_STATS = [
   'connections',
   'knowledge',
   'businessAcumen',
-  'money',
 ] as const;
 
 function buildDeltaMetaLines(deltas: Record<string, number>): string[] {

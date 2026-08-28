@@ -118,8 +118,15 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
   const afterPlayer = structuredClone(beforePlayer);
   afterPlayer.money += 3;
   afterPlayer.connections -= 1;
-  const multipleDeltas = calculatePublicStatDeltas(beforePlayer, afterPlayer);
-  assert(multipleDeltas.money === 3 && multipleDeltas.connections === -1, 'multiple public deltas must be calculated');
+  const mixedDeltas = calculatePublicStatDeltas(beforePlayer, afterPlayer);
+  assert(mixedDeltas.money === undefined, 'retired wallet deltas must not appear as public period deltas');
+  assert(mixedDeltas.connections === -1, 'non-money public deltas must still be calculated');
+
+  const moneyOnlyAfter = structuredClone(beforePlayer);
+  moneyOnlyAfter.money += 9;
+  const moneyOnlyDeltas = calculatePublicStatDeltas(beforePlayer, moneyOnlyAfter);
+  assert(Object.keys(moneyOnlyDeltas).length === 0, 'money-only before/after must produce no public delta');
+
   const noChangeSummary = buildPeriodSummary({
     sourceLabel: '测试',
     headline: '无变化',

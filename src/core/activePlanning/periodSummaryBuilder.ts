@@ -7,7 +7,6 @@ const PUBLIC_NUMERIC_STATS = [
   'martialPower',
   'chivalry',
   'constitution',
-  'money',
   'reputation',
   'connections',
   'knowledge',
@@ -40,7 +39,6 @@ const STAT_LABELS: Record<string, string> = {
   connections: '人脉',
   knowledge: '学识',
   businessAcumen: '经营',
-  money: '银两',
 };
 export function formatStatDeltaSummary(deltas: Record<string, number>): string {
   const parts = Object.entries(deltas)

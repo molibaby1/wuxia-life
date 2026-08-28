@@ -149,8 +149,6 @@ export class CriticalChoiceSystem {
         // 人生目标影响
         if (option === 'hero') {
           player.chivalry += 5;
-        } else if (option === 'merchant') {
-          player.money += 500;
         } else if (option === 'scholar') {
           player.knowledge += 5;
         }
@@ -160,7 +158,6 @@ export class CriticalChoiceSystem {
         // 婚姻选择影响
         if (option === 'arranged') {
           player.connections += 20;
-          player.money += 200;
         } else if (option === 'love') {
           player.charisma += 5;
           player.chivalry += 5;

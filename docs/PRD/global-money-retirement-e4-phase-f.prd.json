@@ -177,7 +177,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §14. Preserve negative guard fixtures/history; do not chase repository-wide string zero."
     },
     {

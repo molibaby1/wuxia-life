@@ -22,7 +22,6 @@ export interface P34LifetimeAgeStep {
   declaredHabitEffect?: PracticeHabitEffect;
   studyHabit: number;
   reputation: number;
-  money: number;
 }
 
 export interface P34LifetimeEventStep {
@@ -59,7 +58,7 @@ const TERMINAL_AGE = 72;
 function buildPlayer(
   age: number,
   lifeStates: PlayerLifeStates,
-  stats: { reputation: number; money: number; martialPower: number; connections: number },
+  stats: { reputation: number; martialPower: number; connections: number },
 ) {
   return createSimulationPlayerState({
     name: 'p34-lifetime',
@@ -68,7 +67,6 @@ function buildPlayer(
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
-    money: stats.money,
     alive: age < TERMINAL_AGE,
     lifeStates: {
       studyHabit: lifeStates.studyHabit ?? 0,
@@ -90,7 +88,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     businessHabit: 0,
   };
   let reputation = 12;
-  let money = 8;
   const martialPower = 30;
   const connections = 25;
 
@@ -101,20 +98,18 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
       action: 'born poor_family; studyHabit=0; no bridge flags',
       studyHabit: 0,
       reputation,
-      money,
     },
   ];
 
   const onRampTicks = [
-    { age: 16, actionId: 'action_study_lite', simulatedStatDelta: { knowledge: 5, reputation: 8, money: 6 } },
-    { age: 18, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8, money: 6 } },
-    { age: 24, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8, money: 6 } },
+    { age: 16, actionId: 'action_study_lite', simulatedStatDelta: { knowledge: 5, reputation: 8 } },
+    { age: 18, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8 } },
+    { age: 24, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 8 } },
   ];
 
   for (const tick of onRampTicks) {
     lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
     reputation += tick.simulatedStatDelta.reputation!;
-    money += tick.simulatedStatDelta.money!;
     const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
@@ -125,7 +120,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
       declaredHabitEffect: action.habitEffects?.[0],
       studyHabit: lifeStates.studyHabit ?? 0,
       reputation,
-      money,
     });
   }
 
@@ -135,7 +129,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     action: 'reputation from healer rounds before bridge events',
     studyHabit: lifeStates.studyHabit ?? 0,
     reputation: (reputation = 62),
-    money: (money = 48),
   });
 
   let flags = applyEventChoiceFlagSets(p27Event, 0, {});
@@ -147,7 +140,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     action: `p27_study_habit_healer_reinforcement → flags [${flagsAfterP27.join(', ')}]`,
     studyHabit: lifeStates.studyHabit ?? 0,
     reputation,
-    money,
   });
 
   flags = applyEventChoiceFlagSets(p29Event, 0, flags);
@@ -159,7 +151,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     action: `p29_study_habit_case_record_duty → flags include medical_divine_doctor_fame`,
     studyHabit: lifeStates.studyHabit ?? 0,
     reputation: (reputation = 65),
-    money: (money = 50),
   });
 
   const eventSequence: P34LifetimeEventStep[] = [
@@ -181,7 +172,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
 
   const terminalPlayer = buildPlayer(TERMINAL_AGE, lifeStates, {
     reputation,
-    money,
     martialPower,
     connections,
   });
@@ -199,7 +189,6 @@ export function runP34MedicalLifetimeBirthToDeathSlice(): P34LifetimeBirthToDeat
     action: `end-of-life composite eval → unlocked=${report.unlocked}`,
     studyHabit: lifeStates.studyHabit ?? 0,
     reputation,
-    money,
   });
 
   return {
@@ -237,7 +226,7 @@ export function formatP34LifetimeBirthToDeathMarkdown(result: P34LifetimeBirthTo
     '',
     ...result.ageProgression.map(
       s =>
-        `- Age **${s.age}** (${s.phase}): ${s.action} [studyHabit=${s.studyHabit}, rep=${s.reputation}, money=${s.money}]`,
+        `- Age **${s.age}** (${s.phase}): ${s.action} [studyHabit=${s.studyHabit}, rep=${s.reputation}]`,
     ),
     '',
     '## Event sequence (JSON flag_set path, no static resolver)',

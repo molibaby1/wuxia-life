@@ -112,6 +112,10 @@ const suites: Suite[] = [
     entry: 'tests/globalMoneyP16P23LegacyBalanceDecouple.test.ts',
   },
   {
+    name: 'globalMoneyP25WalletBookkeepingRetirement',
+    entry: 'tests/globalMoneyP25WalletBookkeepingRetirement.test.ts',
+  },
+  {
     name: 'globalMoneyP8HeadlessEvaluationRetirement',
     entry: 'tests/globalMoneyP8HeadlessEvaluationRetirement.test.ts',
   },

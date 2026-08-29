@@ -48,7 +48,6 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         martialPower: 30,
         reputation: p34Terminal.reputation,
         connections: 25,
-        money: p34Terminal.money,
         lifeStates: createDefaultPlayerLifeStates({
           studyHabit: p34Terminal.studyHabit,
         }),
@@ -65,7 +64,6 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         martialPower: mixedTerminal.martialPower,
         reputation: mixedTerminal.reputation,
         connections: 30,
-        money: 42,
         lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: mixedTerminal.trainingHabit,
           studyHabit: mixedTerminal.studyHabit,
@@ -83,7 +81,6 @@ export function buildP34P35LifetimeTraceFixtures(): LifePathFixture[] {
         martialPower: pinTerminal.martialPower,
         reputation: pinTerminal.reputation,
         connections: 28,
-        money: 35,
         lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: pinTerminal.trainingHabit,
           studyHabit: pinTerminal.studyHabit,

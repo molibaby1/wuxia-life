@@ -18,7 +18,6 @@ interface SimulationPlayerStateOptions {
   martialPower: number;
   reputation: number;
   connections: number;
-  money: number;
   alive: boolean;
   lifeStates?: Partial<PlayerLifeStates>;
 }
@@ -33,7 +32,6 @@ export function createSimulationPlayerState({
   martialPower,
   reputation,
   connections,
-  money,
   alive,
   lifeStates = {},
 }: SimulationPlayerStateOptions): PlayerState {
@@ -47,7 +45,7 @@ export function createSimulationPlayerState({
     affiliation: null,
     title: null,
     reputation,
-    money,
+    money: 0, // ponytail: compat only until US-008 removes PlayerState.money
     wealthCapacity: 'no_surplus',
     knowledge: 0,
     charisma: 0,

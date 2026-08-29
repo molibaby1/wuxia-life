@@ -36,7 +36,6 @@ export function buildP113P119FoundingPatriarchSpineFixtures(): LifePathFixture[]
     martialPower: 52,
     reputation: 48,
     connections: 50,
-    money: 90,
     lifeStates: createDefaultPlayerLifeStates({ trainingHabit: 2 }),
   };
 

@@ -27,7 +27,7 @@ export interface P32ShortChainSliceResult {
   seed: {
     originId: string;
     lifeStates: PlayerLifeStates;
-    statSnapshot: { martialPower: number; reputation: number; connections: number; money: number };
+    statSnapshot: { martialPower: number; reputation: number; connections: number };
   };
   eventSequence: P32ShortChainStep[];
   unlocked: boolean;
@@ -41,7 +41,6 @@ const RENOWN_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
   martialPower: 50,
   reputation: 70,
   connections: 60,
-  money: 35,
   lifeStates: createDefaultPlayerLifeStates(),
 };
 
@@ -50,7 +49,6 @@ const MEDICAL_SHORT_CHAIN_PLAYER: Partial<PlayerState> = {
   martialPower: 30,
   reputation: 60,
   connections: 25,
-  money: 45,
   lifeStates: createDefaultPlayerLifeStates({
     studyHabit: 3,
   }),
@@ -87,7 +85,6 @@ export function runP32RenownShortChainSlice(): P32ShortChainSliceResult {
         martialPower: RENOWN_SHORT_CHAIN_PLAYER.martialPower!,
         reputation: RENOWN_SHORT_CHAIN_PLAYER.reputation!,
         connections: RENOWN_SHORT_CHAIN_PLAYER.connections!,
-        money: RENOWN_SHORT_CHAIN_PLAYER.money!,
       },
     },
     eventSequence: [
@@ -141,7 +138,6 @@ export function runP33MedicalShortChainSlice(): P32ShortChainSliceResult {
         martialPower: MEDICAL_SHORT_CHAIN_PLAYER.martialPower!,
         reputation: MEDICAL_SHORT_CHAIN_PLAYER.reputation!,
         connections: MEDICAL_SHORT_CHAIN_PLAYER.connections!,
-        money: MEDICAL_SHORT_CHAIN_PLAYER.money!,
       },
     },
     eventSequence: [

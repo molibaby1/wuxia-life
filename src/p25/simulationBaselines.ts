@@ -36,7 +36,6 @@ function seededPlayer(seed: number): { player: PlayerState; flags: Record<string
     martialPower: (path.player.martialPower ?? 50) + variance * 2,
     reputation: (path.player.reputation ?? 50) + variance,
     connections: (path.player.connections ?? 40) + variance,
-    money: (path.player.money ?? 40) + variance,
   } as PlayerState;
   return { player, flags: { ...path.flags, sim_seed: seed } };
 }

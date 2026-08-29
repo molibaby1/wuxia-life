@@ -28,7 +28,7 @@ export const P39_CONTENT_POOL_SAMPLE_PATHS: LifePathFixture[] = [
     id: 'p39_setback_pool_injury_property_path',
     label: 'Setback pool — injury + property loss recovery',
     originId: 'martial_family',
-    player: { age: 32, martialPower: 48, reputation: 30, connections: 18, money: 40 },
+    player: { age: 32, martialPower: 48, reputation: 30, connections: 18 },
     flags: {
       setback_injury_active: true,
       setback_property_loss_active: true,
@@ -39,7 +39,7 @@ export const P39_CONTENT_POOL_SAMPLE_PATHS: LifePathFixture[] = [
     id: 'p39_love_pool_secret_help_chain_path',
     label: 'Love pool — misunderstood → secret help chain',
     originId: 'scholar_house',
-    player: { age: 24, martialPower: 35, reputation: 28, connections: 22, money: 25 },
+    player: { age: 24, martialPower: 35, reputation: 28, connections: 22 },
     flags: {
       love_misunderstood: true,
       love_secret_help: true,
@@ -55,7 +55,6 @@ export const P39_CONTENT_POOL_SAMPLE_PATHS: LifePathFixture[] = [
       martialPower: 28,
       reputation: 55,
       connections: 20,
-      money: 35,
       lifeStates: createDefaultPlayerLifeStates({
         studyHabit: 3,
       }),
@@ -98,7 +97,6 @@ export function buildP37LifetimeTraceFixtures(): LifePathFixture[] {
         martialPower: merchantTerminal.martialPower,
         reputation: merchantTerminal.reputation,
         connections: 28,
-        money: 65,
         lifeStates: createDefaultPlayerLifeStates({
           trainingHabit: merchantTerminal.trainingHabit,
           studyHabit: merchantTerminal.studyHabit ?? 0,
@@ -117,7 +115,6 @@ export function buildP37LifetimeTraceFixtures(): LifePathFixture[] {
         martialPower: patriarchTerminal.martialPower,
         reputation: patriarchTerminal.reputation,
         connections: 72,
-        money: 56,
       lifeStates: createDefaultPlayerLifeStates({
         trainingHabit: patriarchTerminal.trainingHabit,
       }),

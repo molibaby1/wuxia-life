@@ -83,7 +83,7 @@ function activeFlags(flags: Record<string, unknown>): string[] {
 function buildMixedMerchantPlayer(
   age: number,
   lifeStates: PlayerLifeStates,
-  stats: { martialPower: number; reputation: number; money: number; connections: number },
+  stats: { martialPower: number; reputation: number; connections: number },
 ) {
   return createSimulationPlayerState({
     name: 'p37-mixed-merchant-patron',
@@ -92,7 +92,6 @@ function buildMixedMerchantPlayer(
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
-    money: stats.money,
     alive: age < MIXED_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
@@ -105,7 +104,7 @@ function buildMixedMerchantPlayer(
 function buildPinnaclePatriarchPlayer(
   age: number,
   lifeStates: PlayerLifeStates,
-  stats: { martialPower: number; reputation: number; money: number; connections: number },
+  stats: { martialPower: number; reputation: number; connections: number },
 ) {
   return createSimulationPlayerState({
     name: 'p37-pinnacle-founding-patriarch',
@@ -114,7 +113,6 @@ function buildPinnaclePatriarchPlayer(
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
-    money: stats.money,
     alive: age < PINNACLE_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
@@ -138,7 +136,6 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   };
   let martialPower = 24;
   let reputation = 12;
-  let money = 8;
   const connections = 28;
 
   const ageProgression: P35LifetimeAgeStep[] = [
@@ -156,13 +153,12 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   let flags: Record<string, unknown> = { origin_merchant_family: true, origin_id: 'merchant_house' };
 
   const businessRamp = [
-    { age: 10, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 3, money: 40 } },
-    { age: 14, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 2, money: 80 } },
-    { age: 16, actionId: 'action_business_basic', simulatedStatDelta: { businessAcumen: 3, money: 120 } },
+    { age: 10, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 3 } },
+    { age: 14, actionId: 'action_household_apprentice', simulatedStatDelta: { businessAcumen: 2 } },
+    { age: 16, actionId: 'action_business_basic', simulatedStatDelta: { businessAcumen: 3 } },
   ];
   for (const tick of businessRamp) {
     lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
-    money += tick.simulatedStatDelta.money!;
     reputation += 3;
     const action = getActionById(tick.actionId)!;
     ageProgression.push({
@@ -203,7 +199,6 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
 
   flags = applyEventChoiceFlagSets(wealthFork, 0, flags);
   flags.route_merchant = true;
-  money += 50;
   const flagsAfterWealth = activeFlags(flags);
   ageProgression.push({
     age: 18,
@@ -216,14 +211,12 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   });
 
   martialPower = 52;
-  money = 165;
   reputation = 48;
 
   flags = applyEventChoiceFlagSets(sectInvest, 1, flags);
   const flagsAfterInvest = activeFlags(flags);
   martialPower += 10;
   reputation += 15;
-  money -= 100;
   ageProgression.push({
     age: 32,
     phase: 'bridge',
@@ -254,7 +247,6 @@ export function runP37MixedMerchantPatronLifetimeSlice(): P37MixedMerchantPatron
   const terminalPlayer = buildMixedMerchantPlayer(MIXED_TERMINAL_AGE, lifeStates, {
     martialPower,
     reputation,
-    money,
     connections,
   });
   terminalPlayer.alive = false;
@@ -315,7 +307,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   };
   let martialPower = 26;
   let reputation = 14;
-  let money = 10;
   let connections = 18;
 
   const ageProgression: P35LifetimeAgeStep[] = [
@@ -397,7 +388,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   const luckPlayer = buildPinnaclePatriarchPlayer(luckAge, lifeStates, {
     martialPower: (martialPower = 48),
     reputation: (reputation = 28),
-    money,
     connections: (connections = 42),
   });
   const rareRolls: RareLineRollResult[] = rollRareEventLines(luckPlayer, flags, () => 0.01);
@@ -435,14 +425,13 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   });
 
   const midlifeTicks = [
-    { age: 45, mp: 78, rep: 62, conn: 76, mon: 52 },
-    { age: 60, mp: 80, rep: 65, conn: 78, mon: 54 },
+    { age: 45, mp: 78, rep: 62, conn: 76 },
+    { age: 60, mp: 80, rep: 65, conn: 78 },
   ];
   for (const tick of midlifeTicks) {
     martialPower = tick.mp;
     reputation = tick.rep;
     connections = tick.conn;
-    money = tick.mon;
     ageProgression.push({
       age: tick.age,
       phase: 'midlife',
@@ -457,7 +446,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   const terminalPlayer = buildPinnaclePatriarchPlayer(PINNACLE_TERMINAL_AGE, lifeStates, {
     martialPower: 74,
     reputation: 58,
-    money: 56,
     connections: 72,
   });
   terminalPlayer.alive = false;
@@ -467,7 +455,6 @@ export function runP37PinnacleFoundingPatriarchLifetimeSlice(): P37PinnacleFound
   const grindPlayer = buildPinnaclePatriarchPlayer(PINNACLE_TERMINAL_AGE, lifeStates, {
     martialPower: 80,
     reputation: 68,
-    money: 60,
     connections: 78,
   });
   const grindOnly = evaluatePinnacleDestinies(grindPlayer, {

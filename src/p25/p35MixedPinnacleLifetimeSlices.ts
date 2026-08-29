@@ -150,7 +150,7 @@ function childhoodTrainingFlags(): Record<string, unknown> {
 function buildMixedPlayer(
   age: number,
   lifeStates: PlayerLifeStates,
-  stats: { martialPower: number; reputation: number; money: number; connections: number },
+  stats: { martialPower: number; reputation: number; connections: number },
 ) {
   return createSimulationPlayerState({
     name: 'p35-mixed-lifetime',
@@ -159,7 +159,6 @@ function buildMixedPlayer(
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
-    money: stats.money,
     alive: age < MIXED_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
@@ -171,7 +170,7 @@ function buildMixedPlayer(
 function buildPinnaclePlayer(
   age: number,
   lifeStates: PlayerLifeStates,
-  stats: { martialPower: number; reputation: number; money: number; connections: number },
+  stats: { martialPower: number; reputation: number; connections: number },
 ) {
   return createSimulationPlayerState({
     name: 'p35-pinnacle-lifetime',
@@ -180,7 +179,6 @@ function buildPinnaclePlayer(
     martialPower: stats.martialPower,
     reputation: stats.reputation,
     connections: stats.connections,
-    money: stats.money,
     alive: age < PINNACLE_TERMINAL_AGE,
     lifeStates: {
       trainingHabit: lifeStates.trainingHabit ?? 0,
@@ -210,7 +208,6 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
   };
   let martialPower = 28;
   let reputation = 14;
-  let money = 10;
   const connections = 30;
 
   lifeStates = applyDeclaredActionHabitEffects(lifeStates, 'action_childhood_training');
@@ -264,14 +261,13 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
   }
 
   const studyRamp = [
-    { age: 18, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 5, reputation: 6, money: 5 } },
-    { age: 20, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 6, money: 5 } },
-    { age: 22, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 6, money: 5 } },
+    { age: 18, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 5, reputation: 6 } },
+    { age: 20, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 6 } },
+    { age: 22, actionId: 'action_study_basic', simulatedStatDelta: { knowledge: 4, reputation: 6 } },
   ];
   for (const tick of studyRamp) {
     lifeStates = applyDeclaredActionHabitEffects(lifeStates, tick.actionId);
     reputation += tick.simulatedStatDelta.reputation!;
-    money += tick.simulatedStatDelta.money!;
     const action = getActionById(tick.actionId)!;
     ageProgression.push({
       age: tick.age,
@@ -302,7 +298,6 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
 
   martialPower = 58;
   reputation = 54;
-  money = 38;
 
   flags = applyEventChoiceFlagSets(p27Event, 0, flags);
   const flagsAfterP27 = activeFlags(flags);
@@ -319,7 +314,6 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
   flags = applyEventChoiceFlagSets(p29Event, 0, flags);
   const flagsAfterP29 = activeFlags(flags);
   reputation = 58;
-  money = 42;
   ageProgression.push({
     age: 38,
     phase: 'bridge',
@@ -357,7 +351,6 @@ export function runP35MixedHealerSwordsmanLifetimeSlice(): P35MixedHealerSwordsm
   const terminalPlayer = buildMixedPlayer(MIXED_TERMINAL_AGE, lifeStates, {
     martialPower,
     reputation,
-    money,
     connections,
   });
   terminalPlayer.alive = false;
@@ -420,7 +413,6 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
   };
   let martialPower = 32;
   let reputation = 18;
-  let money = 12;
   const connections = 22;
 
   lifeStates = applyDeclaredActionHabitEffects(lifeStates, 'action_childhood_training');
@@ -557,7 +549,6 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
   const luckPlayer = buildPinnaclePlayer(luckAge, lifeStates, {
     martialPower: (martialPower = 72),
     reputation: (reputation = 52),
-    money,
     connections,
   });
   const rareRolls: RareLineRollResult[] = rollRareEventLines(luckPlayer, flags, () => 0.01);
@@ -595,7 +586,6 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
   const terminalPlayer = buildPinnaclePlayer(PINNACLE_TERMINAL_AGE, lifeStates, {
     martialPower: 97,
     reputation: 78,
-    money: 35,
     connections: 28,
   });
   terminalPlayer.alive = false;
@@ -605,7 +595,6 @@ export function runP35PinnacleMythLegendLifetimeSlice(): P35PinnacleMythLegendLi
   const grindPlayer = buildPinnaclePlayer(PINNACLE_TERMINAL_AGE, lifeStates, {
     martialPower: 99,
     reputation: 80,
-    money: 40,
     connections: 30,
   });
   const grindOnly = evaluatePinnacleDestinies(grindPlayer, {

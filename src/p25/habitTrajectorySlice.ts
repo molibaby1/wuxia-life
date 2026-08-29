@@ -36,7 +36,6 @@ function basePlayer(
     gender: 'male',
     martialPower: 30,
     reputation: 15,
-    money: 200,
     knowledge: 25,
     alive: true,
     lifeStates: createDefaultPlayerLifeStates(lifeStatesOverride),

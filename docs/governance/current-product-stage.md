@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-29（fresh real-run observe batch = NO_CROSS_ROUND_TRANSITION_OBSERVED；hard-timeout v1=1800000ms；Slice #1 PROMISING_WITH_CAVEATS）。
+> 最后更新：2026-08-29（PRD C synthesis = `NO_BOUNDED_P3_SLICE_JUSTIFIED`；fresh real-run observe batch = NO_CROSS_ROUND_TRANSITION_OBSERVED；hard-timeout v1=1800000ms；Slice #1 PROMISING_WITH_CAVEATS）。
 
 ---
 
@@ -110,6 +110,11 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 ### P3 — Participant Communication Contract Consolidation
 
 **FULL CONSOLIDATION: DEFERRED / NOT CURRENTLY ACTIVE。**
+
+**Run/Observe → Bounded P3 Program（PRD A/B/C）terminal decision：`NO_BOUNDED_P3_SLICE_JUSTIFIED`。**  
+证据索引：`.tmp/evolution/communication-evidence-synthesis-20260829/decision.json`（不把 run-by-run transcript 写入本文件）。  
+含义：当前不提出下一个 bounded P3 communication slice；不授权任何 P3 implementation PRD；继续 ordinary RUN / OBSERVE。  
+未改变：Slice #1 matrix 状态、Slice #2 已验证边界、P2 real cross-round = `UNVERIFIED`。
 
 完整 P3 仍应继续从真实运行与多轮 evidence 中逐步归纳，不启动协议平台化建设。
 
@@ -240,6 +245,7 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 7. 当前阶段？→ **RUN / OBSERVE**
 8. 当前应该继续加 P2 代码？→ **NO**
 9. P3 full Communication Contract Consolidation 当前启动？→ **NO / DEFERRED**
+9b. 下一 bounded P3 communication slice 是否由 PRD C 提出？→ **NO / `NO_BOUNDED_P3_SLICE_JUSTIFIED`（STOP → HUMAN GATE）**
 10. Structured Final Output Contract V1 Minimal Slice？→ **ENGINEERING DELIVERED / first matrix `CONTRACT_CONFORMANCE_PROMISING`（Human acceptance: PROMISING_WITH_CAVEATS；contract-only；full runtime communication仍 UNVERIFIED；full P3 DEFERRED；Cursor concrete model = `CURSOR_MODEL_BINDING_NOT_OBSERVABLE`）**
 11. Envelope Failure Bounded Retransmission Minimal Slice？→ **ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED**
 12. Report 是否主流程依赖？→ **NO**

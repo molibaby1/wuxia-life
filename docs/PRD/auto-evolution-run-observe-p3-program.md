@@ -1,6 +1,6 @@
 # Auto Evolution Run/Observe → Bounded P3 Program
 
-> Status: **PROGRAM ACTIVE — PRD A CLOSED / PRD B CLOSED / GATE C PASSED / PRD C HUMAN-APPROVED**
+> Status: **PROGRAM SYNTHESIS COMPLETE — PRD A CLOSED / PRD B CLOSED / PRD C EXECUTED / terminal = `NO_BOUNDED_P3_SLICE_JUSTIFIED` / STOP → HUMAN GATE D**
 >
 > Program goal: use real runtime evidence to close the two currently explicit evidence gaps—Structured Final Output Contract V1 runtime conformance and real Participant-driven P2 cross-round observation—then decide whether any *bounded* next P3 communication slice is justified.
 >
@@ -127,7 +127,13 @@ BOUNDED_P3_SLICE_CANDIDATE
 
 A candidate is a proposal only; it does not authorize implementation.
 
-PRD C has **passed Gate C delta review** and is **Human-approved for Ralph execution**. Its synthesis must directly open and attribute the required PRD A / PRD B raw evidence; missing evidence forces `OBSERVATION_INSUFFICIENT` rather than reconstruction from summaries.
+PRD C has **executed**. Required PRD A / PRD B raw evidence was directly openable and attributable. Terminal decision:
+
+```text
+NO_BOUNDED_P3_SLICE_JUSTIFIED
+```
+
+Evidence: `.tmp/evolution/communication-evidence-synthesis-20260829/decision.json`. No bounded P3 implementation was authorized or performed. Full P3 remains **DEFERRED**.
 
 ## 4. Four program phases
 
@@ -234,12 +240,15 @@ Delta review result:
 
 PRD C is separately **Human-approved for Ralph execution**. No bounded P3 implementation is authorized by this approval.
 
-### Gate D — after PRD C
+### Gate D — after PRD C — **PENDING HUMAN REVIEW**
 
-Human decides:
+Ralph synthesis produced:
 
-- `NO_BOUNDED_P3_SLICE_JUSTIFIED` → remain RUN / OBSERVE.
-- `BOUNDED_P3_SLICE_CANDIDATE` → separately review and generate one new paired implementation PRD.
+```text
+NO_BOUNDED_P3_SLICE_JUSTIFIED
+```
+
+Human Gate D should confirm remain RUN / OBSERVE (expected path) or override only with new authority.
 
 No future P3 implementation is pre-approved by this roadmap.
 

@@ -1180,7 +1180,6 @@ export class GameProcessSimulator {
       age: String(state.player?.age ?? 0),
       alive: String(Boolean(state.player?.alive)),
       martialPower: String(state.player?.martialPower ?? 0),
-      money: String(state.player?.money ?? 0),
       eventHistoryCount: String(state.eventHistory?.length ?? 0),
       year: String(state.currentTime?.year ?? 0),
       month: String(state.currentTime?.month ?? 0),
@@ -1730,7 +1729,7 @@ export class GameProcessSimulator {
             <th>事件文案</th>
             <th>类型</th>
             <th>武力</th>
-            <th>金钱</th>
+            <th>财力</th>
             <th>时间</th>
           </tr>
         </thead>
@@ -1743,7 +1742,7 @@ export class GameProcessSimulator {
               <td>${record.eventText || ''}</td>
               <td>${record.eventType}</td>
               <td>${record.gameState.player?.martialPower}</td>
-              <td>${record.gameState.player?.money}</td>
+              <td>${record.gameState.player?.wealthCapacity ?? ''}</td>
               <td>${new Date(record.timestamp).toLocaleTimeString('zh-CN')}</td>
             </tr>
           `).join('')}

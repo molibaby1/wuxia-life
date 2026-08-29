@@ -45,7 +45,6 @@ export function createSimulationPlayerState({
     affiliation: null,
     title: null,
     reputation,
-    money: 0, // ponytail: compat only until US-008 removes PlayerState.money
     wealthCapacity: 'no_surplus',
     knowledge: 0,
     charisma: 0,

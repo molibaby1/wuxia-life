@@ -52,7 +52,6 @@ export const gameStateSnapshotAge50 = {
       affiliation: 'wudang',
       title: '武当长老',
       reputation: 420,
-      money: 3200,
       wealthCapacity: 'no_surplus',
       knowledge: 48,
       charisma: 62,

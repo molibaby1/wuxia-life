@@ -52,7 +52,6 @@ function testChoiceRequirementExplanationHasNoMoneyVocabulary(): void {
 
   const state = {
     player: {
-      money: 0,
       wealthCapacity: 'no_surplus',
       martialPower: 0,
       flags: {},
@@ -110,15 +109,28 @@ function testGameEngineDiagnosticHasNoMoneyLog(): void {
   assert.equal(/银两 \$\{oldMoney\}→\$\{newMoney\}/.test(source) || /银两 \$\{/.test(source), false);
   assert.equal(/\boldMoney\b/.test(source), false);
   assert.equal(/\bnewMoney\b/.test(source), false);
-  assert.equal(/player\.money\s*=\s*nextState\.player\.money/.test(source), true,
-    'compatibility money copy must remain');
+  assert.equal(/player\.money\s*=\s*nextState\.player\.money/.test(source), false,
+    'compatibility money copy must be removed after Phase F');
 }
 
-function testCompatibilityBoundaryPreserved(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+function testPhaseFPhysicalRemovalBoundary(): void {
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+
+  const validation = read('src/contracts/validation/canonicalGameStateValidation.ts');
+  assert.equal(/PLAYER_KEYS[\s\S]*'money'/.test(validation), false);
+  assert.equal(/REQUIRED_PLAYER_KEYS[\s\S]*'money'/.test(validation), false);
+  assert.equal(/numericKeys[\s\S]*'wealth'/.test(validation), false);
+
   const engine = new GameEngineIntegration();
   engine.startNewGame('post-run', 'male');
-  assert.equal(engine.getGameState().player.money, 100);
+  const player = engine.getGameState().player as unknown as Record<string, unknown>;
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
+  assert.equal(player.wealthCapacity, 'no_surplus');
 }
 
 testUseNewGameEngineHasNoWalletPresentation();
@@ -127,6 +139,6 @@ testChoiceRequirementExplanationHasNoMoneyVocabulary();
 testWorldProfileHasNoMoneyAuthority();
 testP12AllowsSingleSchedulingRelevantStat();
 testGameEngineDiagnosticHasNoMoneyLog();
-testCompatibilityBoundaryPreserved();
+testPhaseFPhysicalRemovalBoundary();
 
 console.log('globalMoneyE2E3PostRunClosureCorrection.test.ts: ok');

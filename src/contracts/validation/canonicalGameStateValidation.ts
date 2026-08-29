@@ -60,15 +60,15 @@ const RUNTIME_STATE_KEYS = new Set([
 ]);
 const PLAYER_KEYS = new Set([
   'age', 'gender', 'name', 'martialPower', 'chivalry',
-  'constitution', 'affiliation', 'title', 'reputation', 'money', 'wealthCapacity', 'knowledge', 'charisma',
-  'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage',
+  'constitution', 'affiliation', 'title', 'reputation', 'wealthCapacity', 'knowledge', 'charisma',
+  'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage',
   'merchantNetwork', 'investments', 'items',
   'flags', 'events', 'children', 'spouse', 'relationships', 'alive', 'deathReason', 'timeUnit',
   'monthProgress', 'dayProgress', 'traits', 'healthStatus', 'statuses', 'lifeStates',
 ]);
 const REQUIRED_PLAYER_KEYS = [
   'name', 'age', 'gender', 'alive', 'martialPower',
-  'chivalry', 'constitution', 'affiliation', 'title', 'reputation', 'money', 'wealthCapacity', 'knowledge', 'charisma',
+  'chivalry', 'constitution', 'affiliation', 'title', 'reputation', 'wealthCapacity', 'knowledge', 'charisma',
   'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork',
   'investments', 'flags', 'children', 'spouse', 'traits', 'healthStatus', 'statuses', 'lifeStates',
 ];
@@ -384,7 +384,7 @@ function validateEventRecord(value: unknown, path: string, issues: CanonicalVali
 function validatePlayer(value: unknown, path: string, issues: CanonicalValidationIssue[], partial: boolean): void {
   if (!objectAt(value, path, issues)) return; exactKeys(value, path, PLAYER_KEYS, issues); if (!partial) required(value, path, REQUIRED_PLAYER_KEYS, issues);
   if (hasOwn(value, 'name')) stringValue(value.name, `${path}.name`, issues, true); if (hasOwn(value, 'age')) finite(value.age, `${path}.age`, issues); if (hasOwn(value, 'gender') && !['male', 'female'].includes(value.gender as string)) addIssue(issues, `${path}.gender`, 'invalid_value', 'unknown gender'); if (hasOwn(value, 'alive')) booleanValue(value.alive, `${path}.alive`, issues);
-  const numericKeys = ['martialPower', 'chivalry', 'constitution', 'reputation', 'money', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'wealth', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
+  const numericKeys = ['martialPower', 'chivalry', 'constitution', 'reputation', 'knowledge', 'charisma', 'businessAcumen', 'influence', 'connections', 'martialHeritage', 'scholarlyHeritage', 'merchantNetwork', 'children', 'monthProgress', 'dayProgress']; numericKeys.forEach(key => { if (hasOwn(value, key)) finite(value[key], `${path}.${key}`, issues); });
   if (hasOwn(value, 'affiliation') && value.affiliation !== null && !isAffiliationId(value.affiliation)) addIssue(issues, `${path}.affiliation`, 'invalid_value', 'unknown affiliation');
   if (hasOwn(value, 'wealthCapacity') && !isWealthCapacity(value.wealthCapacity)) addIssue(issues, `${path}.wealthCapacity`, 'invalid_value', 'unknown wealth capacity');
   for (const key of ['title', 'spouse'] as const) if (hasOwn(value, key) && value[key] !== null) stringValue(value[key], `${path}.${key}`, issues);

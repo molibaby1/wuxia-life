@@ -73,8 +73,8 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
   });
   assert(
     snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION &&
-      snapshot.metadata.schemaVersion === '3.15.0',
-      'canonical traits snapshot must use schema 3.15.0',
+      snapshot.metadata.schemaVersion === '3.16.0',
+      'canonical traits snapshot must use schema 3.16.0',
   );
   assertDeepEqual(snapshot.state.player.traits, traits, 'snapshot must persist traits');
   assert(!('traitProfile' in snapshot.state.player), 'snapshot must not persist traitProfile');
@@ -133,7 +133,7 @@ export function runCanonicalPlayerStateSlice2b2Tests(): void {
       eventType: 'auto',
       gameState: {
         flags: {},
-        player: { age: 40, martialPower: 20, money: 100, children: 0 },
+        player: { age: 40, martialPower: 20, children: 0 },
       } as GameState,
       timestamp: '',
     }],

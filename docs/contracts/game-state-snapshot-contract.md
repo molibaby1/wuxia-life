@@ -2,7 +2,7 @@
 
 ## Current version
 
-The current snapshot schema is `3.15.0`. All other versions are rejected.
+The current snapshot schema is `3.16.0`. All other versions are rejected.
 
 `GameStateSnapshot` is the JSON transport shape. Its exact envelope is `{ metadata, state }`; both objects are closed allowlists. The browser `SaveData` wrapper is separately `{ id, name, timestamp, snapshot, metadata }`, where wrapper metadata is exactly `{ playerAge, playerName, eventCount, playTime }`.
 
@@ -20,7 +20,7 @@ The following top-level state fields are required:
 - `actionHistory`
 - `actionFocusStreak`
 
-`player.wealthCapacity` is required and categorical. `player.lifeStates` is required and must contain exactly `trainingHabit`, `studyHabit`, and `businessHabit`. Each value is a finite number in the inclusive range `0..5`.
+`player.wealthCapacity` is required and categorical. Exact `player.money` and numeric `player.wealth` are not part of the canonical player shape and are rejected as unknown fields at both top-level and nested `eventHistory[*].stateSnapshot.player` boundaries. `player.lifeStates` is required and must contain exactly `trainingHabit`, `studyHabit`, and `businessHabit`. Each value is a finite number in the inclusive range `0..5`.
 
 The complete top-level `state` requires the five fields above and validates every present nested object. `eventHistory[*].stateSnapshot` is a different shape: it is an explicitly partial state, so keys may be omitted, but every present key and nested value still follows the same closed allowlists and primitive rules. A partial nested snapshot is never treated as a complete top-level state.
 
@@ -42,13 +42,13 @@ Snapshots reject the removed route lifecycle fields:
 
 They are rejected at validation, conversion, runtime load, save, autosave, and import boundaries. No default containers, fallback, normalization, or migration is applied.
 
-The same validation applies recursively to `eventHistory[*].stateSnapshot`. Retired `comprehension`, legacy `energy`, `health`, old `lifeStates` keys, and legacy habit flags are rejected by structure, not by matching arbitrary event text.
+The same validation applies recursively to `eventHistory[*].stateSnapshot`. Retired exact economic balance fields (`player.money`, numeric `player.wealth`), retired `comprehension`, legacy `energy`, `health`, old `lifeStates` keys, and legacy habit flags are rejected by structure, not by matching arbitrary event text.
 
 Investments must contain exactly `martial`, `statecraft`, `official`, and `hermit`; each value is a finite non-negative number. `statuses` and `traits` must contain only current IDs, and statuses cannot repeat.
 
 ## Converter behavior
 
-`toSnapshot()` serializes the current canonical state with fully isolated nested copies and throws when a removed field is dynamically present. `fromSnapshot()` accepts only version `3.15.0` snapshots without removed fields and does not synthesize them. `lifePath.focus` and `player.comprehension` are unknown fields and are rejected in both top-level and nested `stateSnapshot` values; there is no migration, compatibility, fallback, or silent cleanup.
+`toSnapshot()` serializes the current canonical state with fully isolated nested copies and throws when a removed field is dynamically present. `fromSnapshot()` accepts only version `3.16.0` snapshots without removed fields and does not synthesize them. `lifePath.focus` and `player.comprehension` are unknown fields and are rejected in both top-level and nested `stateSnapshot` values; there is no migration, compatibility, fallback, or silent cleanup.
 
 `loadGameState()` applies the hydrated state exactly: required fields overwrite the engine state, optional persisted fields are copied when present and deleted when absent, and existing engine values are never retained as fallback. Valid falsy values such as `0`, `false`, empty strings, and empty arrays are applied. Runtime application remains detached from source objects.
 
@@ -66,6 +66,6 @@ Investments must contain exactly `martial`, `statecraft`, `official`, and `hermi
 
 ## Compatibility policy
 
-This is a contract retirement, not a compatibility bridge. Old snapshots must be explicitly re-created under the current contract by an external product migration process; the runtime does not perform that migration.
+This is a contract retirement, not a compatibility bridge. Old snapshots — including schema `3.15.0` and any snapshot carrying `player.money` or numeric `player.wealth` — must be explicitly re-created under `3.16.0` by an external product migration process; the runtime does not perform that migration, infer Wealth Capacity from old balances, or inject default money/wealth values.
 
-Browser saves persist the strict `SaveData` wrapper above. Export files additionally require `{ version: "3.15.0", exportTime, save }`. Old P2 raw `GameState` saves are rejected; there is no migration, adapter, silent cleanup, or fallback read.
+Browser saves persist the strict `SaveData` wrapper above. Export files additionally require `{ version: "3.16.0", exportTime, save }`. Old P2 raw `GameState` saves are rejected; there is no migration, adapter, silent cleanup, or fallback read.

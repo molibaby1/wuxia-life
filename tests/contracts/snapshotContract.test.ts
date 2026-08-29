@@ -166,7 +166,6 @@ function createMinimalValidSnapshot(): GameStateSnapshot {
         chivalry: 0,
         constitution: 0,
         reputation: 0,
-        money: 0,
         wealthCapacity: 'no_surplus',
         knowledge: 0,
         charisma: 0,
@@ -322,7 +321,7 @@ console.log('=== P4 US-006: Snapshot Contract Tests ===\n');
   try {
     defaultSnapshotConverter.fromSnapshot(oldSnapshot);
   } catch (error) {
-    rejected = error instanceof Error && /3\.15\.0/.test(error.message);
+    rejected = error instanceof Error && /3\.16\.0/.test(error.message);
   }
   assert(rejected, '3.4.0 snapshot must be rejected without migration');
 

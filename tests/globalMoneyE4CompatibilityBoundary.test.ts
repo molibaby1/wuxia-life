@@ -49,17 +49,6 @@ function relSrc(absPath: string): string {
   return path.relative(root, absPath).replace(/\\/g, '/');
 }
 
-/** Explicit core compatibility ownership allowed until Phase F (US-008). */
-const ALLOWED_CORE_OWNERSHIP = new Set([
-  'src/types/eventTypes.ts',
-  'src/contracts/gameStateSnapshot.ts',
-  'src/core/GameEngineIntegration.ts',
-  'src/contracts/validation/canonicalGameStateValidation.ts',
-  'src/contracts/fixtures/gameStateSnapshotAge50.ts',
-  'src/store/gameStore.ts',
-  'src/p25/simulationPlayerState.ts',
-]);
-
 /** Deny guards, anti-reintroduction, and identifier-only references — not ownership. */
 const ALLOWED_NON_OWNERSHIP = new Set([
   'src/core/EventLoader.ts',
@@ -98,7 +87,7 @@ function isExactNumericWealthCondition(condition: { type?: string; expression?: 
   return /(?:player\s*\.\s*wealth\b|\bwealth\b)/i.test(condition.expression);
 }
 
-function createMinimalState(money = 317, wealth = 777): GameState {
+function createMinimalState(): GameState {
   const player: PlayerState = {
     name: 'E4边界',
     gender: 'male',
@@ -114,8 +103,6 @@ function createMinimalState(money = 317, wealth = 777): GameState {
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money,
-    wealth,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     affiliation: null,
@@ -201,7 +188,7 @@ async function testRuntimeCannotAuthorOrReadExactBalances(): Promise<void> {
   assert.equal(ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has('money'), false);
   assert.equal(ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has('wealth'), false);
 
-  const before = createMinimalState(317, 777);
+  const before = createMinimalState();
   const afterMoney = await new EventExecutor().executeEffects(
     [{ type: 'stat_modify', target: 'money', value: 50, operator: 'add' }],
     before,
@@ -210,8 +197,8 @@ async function testRuntimeCannotAuthorOrReadExactBalances(): Promise<void> {
     [{ type: 'stat_modify', target: 'wealth', value: 50, operator: 'add' }],
     afterMoney,
   );
-  assert.equal(afterWealth.player.money, 317);
-  assert.equal(afterWealth.player.wealth, 777);
+  assert.equal('money' in afterWealth.player, false);
+  assert.equal('wealth' in afterWealth.player, false);
 
   const evaluator = new ConditionEvaluator();
   assert.equal(evaluator.evaluate({ type: 'expression', expression: 'player.money >= 1' }, before), false);
@@ -221,11 +208,11 @@ async function testRuntimeCannotAuthorOrReadExactBalances(): Promise<void> {
 function testGenericNumericWriterCannotCreateRetiredBalances(): void {
   assert.equal(isCanonicalPlayerNumericStat('money'), false);
   assert.equal(isCanonicalPlayerNumericStat('wealth'), false);
-  const player = createMinimalState(100, 50).player;
+  const player = createMinimalState().player;
   writePlayerNumeric(player, 'money', 9999);
   writePlayerNumeric(player, 'wealth', 8888);
-  assert.equal(player.money, 100);
-  assert.equal(player.wealth, 50);
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
   assert.equal(readPlayerNumeric(player, 'money'), 0);
   assert.equal(readPlayerNumeric(player, 'wealth'), 0);
 }
@@ -240,7 +227,7 @@ function testCompositeDestinyResourcesNoLongerReadsBalances(): void {
   assert.equal(/case\s+'resources'/.test(fn!), false);
   assert.equal(/player\.money|player\.wealth/.test(fn!), false);
 
-  const player = { martialPower: 10, connections: 20, reputation: 30, money: 999, wealth: 888 } as PlayerState;
+  const player = { martialPower: 10, connections: 20, reputation: 30 } as PlayerState;
   assert.equal(readDimensionValueForDestiny(player, {}, 'resources'), 0);
 }
 
@@ -287,8 +274,8 @@ function testObservabilityAndP16P25NoStructuralBalanceDependency(): void {
   engine.startNewGame('E4-trace', 'male');
   const before = engine.getGameState();
   const after = engine.getGameState();
-  after.player.money = (before.player.money ?? 0) + 99;
-  after.player.wealth = 77;
+  (after.player as unknown as Record<string, unknown>).money = 99;
+  (after.player as unknown as Record<string, unknown>).wealth = 77;
   const delta = createExperienceStateDelta(before, after);
   assert.equal('money' in delta.playerStats, false);
   assert.equal('wealth' in delta.playerStats, false);
@@ -345,11 +332,10 @@ function testE2E3PlayerFacingClosureRemains(): void {
   assert.equal(model.topResources.some((item) => item.key === 'money'), false);
 }
 
-function testOnlyAllowedCompiledCompatibilityOwnership(): void {
+function testNoCompiledMoneyWealthOwnership(): void {
   const violations: string[] = [];
   for (const file of listTsFiles(path.join(root, 'src'))) {
     const rel = relSrc(file);
-    if (ALLOWED_CORE_OWNERSHIP.has(rel)) continue;
     if (ALLOWED_NON_OWNERSHIP.has(rel)) continue;
     if (EXCLUDED_UNLOADED_LEGACY.has(rel)) continue;
     if (rel.startsWith('src/narrative/')) continue;
@@ -362,31 +348,26 @@ function testOnlyAllowedCompiledCompatibilityOwnership(): void {
   assert.deepEqual(
     violations,
     [],
-    `compiled money/numeric-wealth ownership outside E4 core boundary:\n${violations.join('\n')}`,
+    `compiled money/numeric-wealth ownership must be zero after Phase F:\n${violations.join('\n')}`,
   );
-
-  assert(ALLOWED_CORE_OWNERSHIP.has('src/types/eventTypes.ts'));
-  assert(ALLOWED_CORE_OWNERSHIP.has('src/core/GameEngineIntegration.ts'));
-  assert(ALLOWED_CORE_OWNERSHIP.has('src/contracts/fixtures/gameStateSnapshotAge50.ts'));
 }
 
-function testCompatibilityFieldsPreservedForPhaseF(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
-  assert.match(read('src/types/eventTypes.ts'), /\bmoney:\s*number\b/);
-  assert.match(read('src/types/eventTypes.ts'), /\bwealth\?:\s*number\b/);
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bmoney:\s*number\b/);
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bwealth\?:\s*number\b/);
-
-  const validation = read('src/contracts/validation/canonicalGameStateValidation.ts');
-  assert.match(validation, /'money'/);
-  assert.match(validation, /'wealth'/);
-
-  assert.equal(typeof gameStateSnapshotAge50.state.player.money, 'number');
+function testPhaseFPhysicalRemovalComplete(): void {
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+  assert.equal('money' in gameStateSnapshotAge50.state.player, false);
+  assert.equal('wealth' in gameStateSnapshotAge50.state.player, false);
 
   const engine = new GameEngineIntegration();
-  engine.startNewGame('E4-compat', 'male');
-  assert.equal(engine.getGameState().player.money, 100);
-  assert.match(read('src/core/GameEngineIntegration.ts'), /player\.money\s*=\s*nextState\.player\.money/);
+  engine.startNewGame('E4-phase-f', 'male');
+  const player = engine.getGameState().player as unknown as Record<string, unknown>;
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
+  assert.equal(player.wealthCapacity, 'no_surplus');
+  assert.equal(/player\.money\s*=\s*nextState\.player\.money/.test(read('src/core/GameEngineIntegration.ts')), false);
 }
 
 async function main(): Promise<void> {
@@ -396,8 +377,8 @@ async function main(): Promise<void> {
   testCompositeDestinyResourcesNoLongerReadsBalances();
   testObservabilityAndP16P25NoStructuralBalanceDependency();
   testE2E3PlayerFacingClosureRemains();
-  testOnlyAllowedCompiledCompatibilityOwnership();
-  testCompatibilityFieldsPreservedForPhaseF();
+  testNoCompiledMoneyWealthOwnership();
+  testPhaseFPhysicalRemovalComplete();
   console.log('globalMoneyE4CompatibilityBoundary.test.ts: ok');
 }
 

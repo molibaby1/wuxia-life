@@ -29,7 +29,6 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
       hermit: 0,
     },
     connections: 0,
-    money: 0,
     wealthCapacity: 'no_surplus',
     
     flags: {},
@@ -38,7 +37,6 @@ function createInitialState(name: string, gender: 'male' | 'female'): PlayerStat
     statuses: [],
     lifeStates: createDefaultPlayerLifeStates(),
     events: [],
-    wealth: 0,
     children: 0,
     spouse: null,
     

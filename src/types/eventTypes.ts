@@ -869,7 +869,6 @@ export interface PlayerState {
   affiliation: AffiliationId | null;
   title: string | null;
   reputation: number;
-  money: number;
   wealthCapacity: WealthCapacity;
   
   // ========== 扩展社会属性 ==========
@@ -881,7 +880,6 @@ export interface PlayerState {
   businessAcumen: number;
   /** 影响力 - 江湖地位、社会影响力 */
   influence: number;
-  wealth?: number;
 
   /** 人脉值 */
   connections: number;

@@ -31,7 +31,7 @@
 
 ### 契约
 
-- [Snapshot Contract](contracts/game-state-snapshot-contract.md)：Snapshot 3.15.0、统一持久化校验与严格拒绝规则。
+- [Snapshot Contract](contracts/game-state-snapshot-contract.md)：Snapshot 3.16.0、统一持久化校验与严格拒绝规则。
 - [Save Schema Policy](contracts/save-schema-versioning-policy.md)：浏览器与 Headless 存档版本边界及无迁移策略。
 - 其余 `contracts/`：仍有效的传输 / 适配 / 服务边界说明。
 

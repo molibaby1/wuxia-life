@@ -134,7 +134,6 @@ export class GameEngineIntegration {
           official: 0,
           hermit: 0,
         },
-        money: 100,
         wealthCapacity: 'no_surplus',
         reputation: 0,
         connections: 0,
@@ -222,7 +221,7 @@ export class GameEngineIntegration {
         player.knowledge = nextState.player.knowledge;
         player.businessAcumen = nextState.player.businessAcumen;
         player.influence = nextState.player.influence;
-        const replaceOptionalPlayerField = (key: 'wealth' | 'deathReason' | 'timeUnit' | 'monthProgress' | 'dayProgress'): void => {
+        const replaceOptionalPlayerField = (key: 'deathReason' | 'timeUnit' | 'monthProgress' | 'dayProgress'): void => {
           const source = nextState.player as unknown as Record<string, unknown>;
           const target = player as unknown as Record<string, unknown>;
           if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) {
@@ -231,7 +230,6 @@ export class GameEngineIntegration {
             delete target[key];
           }
         };
-        replaceOptionalPlayerField('wealth');
         replaceOptionalPlayerField('deathReason');
         replaceOptionalPlayerField('timeUnit');
         replaceOptionalPlayerField('monthProgress');
@@ -240,7 +238,6 @@ export class GameEngineIntegration {
         player.scholarlyHeritage = nextState.player.scholarlyHeritage;
         player.merchantNetwork = nextState.player.merchantNetwork;
         player.investments = { ...nextState.player.investments };
-        player.money = nextState.player.money;
         player.wealthCapacity = nextState.player.wealthCapacity;
         player.reputation = nextState.player.reputation;
         player.connections = nextState.player.connections;

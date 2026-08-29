@@ -1,0 +1,82 @@
+{
+  "project": "Auto Evolution Structured Output Contract Conformance",
+  "branchName": "ralph/auto-evolution-structured-output-conformance",
+  "description": "Run the independent Structured Final Output Contract V1 conformance matrix without changing reasoning workload, retry scope, or full P3 authority.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Establish conformance preflight and evidence shape",
+      "description": "As the product owner, I want a minimal attributable conformance experiment boundary so that runtime communication evidence can be collected without redesigning production communication infrastructure. See PRD §5.",
+      "acceptanceCriteria": [
+        "Current Structured Final Output Contract V1 renderer/validator behavior is identified from repository source",
+        "Exact trivial participant-contract-conformance-v1 payload and the five allowed trial classifications are fixed",
+        "No repository reasoning workload is part of the experiment",
+        "No Host semantic repair, retry-policy change, Role-schema change, provider-routing change, or production-timeout change is introduced",
+        "Evidence output path/shape is attributable and remains experiment evidence rather than workflow authority",
+        "Any experiment helper added is minimal and focused",
+        "Focused preflight test or dry-run passes if a helper is added",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "See PRD §5 and global constraints §3/§9. Experiment helper added under scripts/evolution/contractConformance/; production Contract V1 / retry / Role schemas / timeouts unchanged. Preflight test + dry-run READY."
+    },
+    {
+      "id": "US-002",
+      "title": "Run three Codex current-binding conformance trials",
+      "description": "As the product owner, I want three fresh Codex contract-only trials so that terminal-envelope reliability is observed independently of reasoning quality. See PRD §6.",
+      "acceptanceCriteria": [
+        "Exactly three valid attributable Codex current-binding trials are recorded",
+        "Every trial is classified as PASS, ENVELOPE_FAILURE, ROLE_SCHEMA_FAILURE, RUNTIME_FAILURE, or TIMEOUT",
+        "Each trial records terminal payload reference and elapsed/runtime evidence when observable",
+        "Participant output is not semantically repaired or JSON-extracted from prose",
+        "A failed valid trial is retained as evidence rather than rerun merely to obtain PASS",
+        "No real repository reasoning workload is introduced",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "See PRD §6. Evidence-only / NO_SOURCE_CHANGE is a valid Story outcome."
+    },
+    {
+      "id": "US-003",
+      "title": "Run three Cursor Auto conformance trials",
+      "description": "As the product owner, I want three fresh Cursor Auto contract-only trials so that provider-native transport behavior and terminal Contract V1 conformance are observed without inventing model identity claims. See PRD §7.",
+      "acceptanceCriteria": [
+        "Exactly three valid attributable Cursor Auto trials are recorded",
+        "Every trial uses one of the five accepted classifications",
+        "Provider-native terminal-field extraction, if used, is deterministic transport extraction only",
+        "No JSON-looking block is extracted from Participant prose as repair",
+        "No unverified resolved model name is claimed",
+        "No provider fallback, retry expansion, or production-timeout change is introduced",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See PRD §7. Do not add fixed-model bindings unless binding can be reliably requested and observed."
+    },
+    {
+      "id": "US-004",
+      "title": "Produce the Contract Conformance Matrix verdict",
+      "description": "As the product owner, I want one evidence-level matrix verdict so that Contract V1 runtime status can be updated without conflating communication reliability with reasoning quality. See PRD §8.",
+      "acceptanceCriteria": [
+        "Matrix includes all six required valid trials",
+        "Per-trial classification is traceable to evidence",
+        "Codex current binding and Cursor Auto observations remain separate",
+        "Contract reliability is explicitly separated from real Solution reasoning quality",
+        "Verdict is exactly CONTRACT_CONFORMANCE_PROMISING, CONTRACT_CONFORMANCE_UNSTABLE, CONTRACT_CONFORMANCE_REGRESSION, or OBSERVATION_INSUFFICIENT",
+        "Fixed-model binding uncertainty is recorded without fabricated A/B evidence",
+        "Current-stage/governance is updated only if an explicit evidence status actually changes",
+        "Full P3 remains DEFERRED and Slice #2 boundaries remain unchanged",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See PRD §8. Stop after matrix closure and return to Human delta review."
+    }
+  ]
+}

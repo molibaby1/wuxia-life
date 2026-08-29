@@ -58,7 +58,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §7. This is a narrow anti-reintroduction boundary, not a general stat-system redesign."
     },
     {
@@ -77,7 +77,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §8. Remove compatibility-only observation, not historical artifact text or narrative wealth labels."
     },
     {

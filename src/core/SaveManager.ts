@@ -1,9 +1,9 @@
 /**
  * Canonical browser persistence boundary.
  *
- * Browser and headless saves persist the same Snapshot 3.12.0 shape. Legacy
- * raw GameState/P2 saves are rejected; no migration or compatibility read is
- * provided.
+ * Browser and headless saves persist the canonical current Snapshot shape.
+ * Legacy raw GameState/P2 saves and non-current snapshot versions are rejected;
+ * no migration or compatibility read is provided.
  */
 
 import type { GameStateSnapshot } from '../contracts/gameStateSnapshot';

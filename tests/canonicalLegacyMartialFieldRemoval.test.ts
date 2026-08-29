@@ -161,6 +161,8 @@ function run(): void {
     );
   }
 
+  const expectedSchemaMessage = `must be ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`;
+
   const oldSchema = cloneSnapshot(clean);
   oldSchema.metadata.schemaVersion = '3.12.0';
   const oldIssues = validateCanonicalSnapshot(oldSchema);
@@ -168,9 +170,21 @@ function run(): void {
     oldIssues.some(
       issue =>
         issue.path === 'snapshot.metadata.schemaVersion' &&
-        issue.message.includes('3.15.0'),
+        issue.message.includes(expectedSchemaMessage),
     ),
-    '3.12.0 schemaVersion must be rejected',
+    `3.12.0 schemaVersion must be rejected against ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
+  );
+
+  const priorSchema = cloneSnapshot(clean);
+  priorSchema.metadata.schemaVersion = '3.15.0';
+  const priorIssues = validateCanonicalSnapshot(priorSchema);
+  assert(
+    priorIssues.some(
+      issue =>
+        issue.path === 'snapshot.metadata.schemaVersion' &&
+        issue.message.includes(expectedSchemaMessage),
+    ),
+    `3.15.0 schemaVersion must be hard-rejected against ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
   );
 
   console.log('canonicalLegacyMartialFieldRemoval.test.ts: ok');

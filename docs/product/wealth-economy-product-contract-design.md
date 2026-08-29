@@ -1,10 +1,10 @@
 # Wealth / Economy Product Contract v1 与 Repository Inventory
 
-> 状态：Accepted product contract；repository-grounded read-only inventory
+> 状态：Accepted product contract；historical repository inventory + current closure status
 >
-> Accepted：2026-08-22
+> Part A Accepted：2026-08-22
 >
-> 本文是 Wuxia-Life 当前正式经济产品契约及其 implementation inventory。Part A 定义产品语义；Part B 记录当前仓库事实、迁移影响面与后续技术边界。当前 `money` / `wealth` 实现、旧配置和旧测试均属于 migration evidence，不能覆盖 Part A。
+> 本文是 Wuxia-Life 正式经济产品契约。Part A 定义产品语义；Part B 是 **2026-08-22 Historical Repository Inventory Snapshot**（迁移证据，**不是** current implementation authority）；**当前正式实现状态**见文末 §15 / `docs/governance/product-decisions.md` PD-098（Snapshot `3.16.0`，`wealthCapacity`-only）。
 
 ## Part A — Accepted Product Contract v1
 
@@ -419,9 +419,15 @@ Auto Evolution 不应自行：
 
 不得因为旧代码或旧测试当前如此运行，就自动覆盖已接受的产品语义；但也不得在没有 repository-grounded inventory 的情况下猜测实现方式。
 
-## Part B — Repository-grounded Inventory（2026-08-22）
+## Part B — Historical Repository Inventory Snapshot（Observed on 2026-08-22）
 
-> 本部分来自当前 repository 的只读调查。它不新增产品语义，也不授权 production/config/schema/test 修改。
+> **NOT CURRENT IMPLEMENTATION AUTHORITY.**
+>
+> 本部分是 2026-08-22 的只读仓库调查快照，保留为迁移证据。它不新增产品语义，也不描述 PD-098 / Snapshot `3.16.0` 之后的 current runtime。
+>
+> Part B 正文中的「当前 / 现在 / 仍保留 / 当前仓库」等措辞，**仅指 2026-08-22 当时仓库**，不得解读为今日实现事实。
+>
+> **Current authority：** §15（Current implementation status，2026-08-29）与 PD-098。若 Part B 与 §15 / PD-098 冲突，以 §15 / PD-098 为准。
 
 ### 4. 当前经济状态模型
 
@@ -639,9 +645,10 @@ Repository-grounded inventory 已完成，且本次 authority corrective 不要�
 本文件现在同时承载：
 
 - **Part A：完整 Human-accepted Product Contract**；
-- **Part B：基于 2026-08-22 repository snapshot 的只读 implementation inventory**。
+- **Part B：2026-08-22 Historical Repository Inventory Snapshot**（迁移证据，非 current authority）；
+- **§15：2026-08-29 current implementation status（PD-098）**。
 
-两者 authority 身份必须保持区分：Part A 定义产品语义；Part B 记录当前实现事实与迁移证据。实现事实不能反向覆盖 Part A。
+三者身份必须保持区分：Part A 定义产品语义；Part B 是 dated historical evidence；§15 / PD-098 是 current-only implementation authority。历史 inventory 与旧实现事实不能反向覆盖 Part A 或 §15。
 
 ### 15. Current implementation status（2026-08-29，PD-098）
 

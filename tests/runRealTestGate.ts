@@ -215,6 +215,10 @@ const suites: Suite[] = [
     name: 'globalMoneyPhysicalRemovalClosure',
     entry: 'tests/globalMoneyPhysicalRemovalClosure.test.ts',
   },
+  {
+    name: 'globalMoneyFinalAuthorityPersistenceClosure',
+    entry: 'tests/globalMoneyFinalAuthorityPersistenceClosure.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

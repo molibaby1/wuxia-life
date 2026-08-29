@@ -21,12 +21,45 @@ const nestedForbiddenCases: Array<[string, (snapshot: ReturnType<typeof cloneSna
   ['nested routeStates', snapshot => { snapshot.state.eventHistory = [{ eventId: 'nested', stateSnapshot: { routeStates: {} } }]; }],
   ['nested routeHistory', snapshot => { snapshot.state.eventHistory = [{ eventId: 'nested', stateSnapshot: { routeHistory: [] } }]; }],
   ['nested roadCommitments', snapshot => { snapshot.state.eventHistory = [{ eventId: 'nested', stateSnapshot: { roadCommitments: [] } }]; }],
+  // Phase F exact-balance fields: nested stateSnapshot must reject the same as top-level player.
+  ['nested money', snapshot => {
+    const nestedPlayer = structuredClone(snapshot.state.player) as Record<string, unknown>;
+    nestedPlayer.money = 100;
+    snapshot.state.eventHistory = [{ eventId: 'nested-money', stateSnapshot: { player: nestedPlayer as never } }];
+  }],
+  ['nested numeric wealth', snapshot => {
+    const nestedPlayer = structuredClone(snapshot.state.player) as Record<string, unknown>;
+    nestedPlayer.wealth = 50;
+    snapshot.state.eventHistory = [{ eventId: 'nested-wealth', stateSnapshot: { player: nestedPlayer as never } }];
+  }],
 ];
 
 for (const [label, mutate] of nestedForbiddenCases) {
   const snapshot = cloneSnapshot();
   mutate(snapshot);
   assertRejected(snapshot, label);
+}
+
+// Legal nested wealthCapacity (not numeric wealth) must remain accept path when player shape is canonical.
+{
+  const snapshot = cloneSnapshot();
+  const nestedPlayer = structuredClone(snapshot.state.player);
+  assert.equal('money' in (nestedPlayer as object), false);
+  assert.equal('wealth' in (nestedPlayer as object), false);
+  assert.equal(typeof nestedPlayer.wealthCapacity, 'string');
+  snapshot.state.eventHistory = [{
+    eventId: 'nested-wealth-capacity-ok',
+    stateSnapshot: { player: nestedPlayer },
+  }];
+  assert.equal(
+    validateGameStateSnapshot(snapshot).ok,
+    true,
+    'nested stateSnapshot.player.wealthCapacity with canonical player must be accepted',
+  );
+  assert.doesNotThrow(
+    () => defaultSnapshotConverter.fromSnapshot(snapshot),
+    'nested legal wealthCapacity snapshot must hydrate',
+  );
 }
 
 for (const [label, mutate] of [

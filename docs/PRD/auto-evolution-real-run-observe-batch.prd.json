@@ -1,0 +1,106 @@
+{
+  "project": "Auto Evolution Real Run Observe Batch",
+  "branchName": "ralph/auto-evolution-real-run-observe-batch",
+  "description": "Run three fresh normal real Auto Evolution workflows from the latest integrated authority, observe Sidecar Report sufficiency, and record a natural P2 cross-round transition only if it actually occurs.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Preflight the real-run evidence boundary",
+      "description": "As the product owner, I want the real-run entry point, Sidecar Report path, and P2 handoff confirmed before execution so that the batch observes the existing product rather than a deterministic test path. See PRD §4.",
+      "acceptanceCriteria": [
+        "PRD A first matrix is accepted as CONTRACT_CONFORMANCE_PROMISING with Human qualifier PROMISING_WITH_CAVEATS, and Gate B delta review permits ordinary RUN / OBSERVE to continue",
+        "Execution branch is based on the latest clean authoritative tip",
+        "Active authority contains participant/model hard-timeout policy v1 with default hard boundary 1800000ms, or an explicit newer Human-approved successor; stale 240000ms authority blocks execution",
+        "Three fresh run slots are defined without pre-selecting desired outcomes",
+        "Actual real workflow entry point is identified and is not deterministic P2 test scaffolding",
+        "Sidecar Run Report generation remains sidecar-only",
+        "P2 handoff occurs only on actual READY_FOR_CONFIG_EXECUTION",
+        "No source modification is required merely to start observation",
+        "Current hard-timeout, retry, retransmission, Structured Output Contract, and permission policies remain unchanged",
+        "Requested route/binding provenance is defined; concrete model identity is recorded only if transport directly exposes it",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "See PRD §2–§4. Gate clear on tip 7bd1a24 (PD-099 1800000ms). Preflight evidence: .tmp/evolution/real-run-observe-batch-20260829/preflight.json; host ready; three slots DEFINED with no desired outcomes; NO_PRODUCT_SOURCE_CHANGE for observation start."
+    },
+    {
+      "id": "US-002",
+      "title": "Execute fresh real run 1",
+      "description": "As the product owner, I want one fresh normal real run recorded exactly as it unfolds so that operational evidence is not biased toward a desired route. See PRD §5.",
+      "acceptanceCriteria": [
+        "Exactly one fresh attributable real run is executed",
+        "Problem selection does not guarantee or steer READY_FOR_CONFIG_EXECUTION",
+        "Role sequence, structured outcome, Reviewer decision, final route, and Sidecar report are recorded",
+        "Requested execution route/binding is recorded; resolved concrete model identity is recorded only if directly exposed by transport evidence",
+        "Slice #2 retransmission is observed only if its existing Solution ENVELOPE_FAILURE trigger legitimately occurs",
+        "If READY_FOR_CONFIG_EXECUTION naturally occurs, only the already-authorized P2 path may continue",
+        "If READY_FOR_CONFIG_EXECUTION does not occur, the actual outcome closes the run without replacement",
+        "No unauthorized Runtime, Framework, Contract, or product-source change is made",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "See PRD §5. DEFER/NO_PROPOSAL/rejection/failure/escalation are valid evidence outcomes."
+    },
+    {
+      "id": "US-003",
+      "title": "Execute fresh real run 2",
+      "description": "As the product owner, I want a second independent fresh normal real run so that observation is not selected to compensate for run 1. See PRD §6.",
+      "acceptanceCriteria": [
+        "Exactly one additional fresh attributable real run is executed",
+        "Problem selection is independent of US-002 desired outcome",
+        "Actual workflow outcome is preserved without route steering",
+        "Requested execution route/binding is recorded; resolved concrete model identity is recorded only if directly exposed by transport evidence",
+        "Sidecar report and structured/provenance evidence are attributable",
+        "Any P2 transition is natural and uses existing authority only",
+        "No forced retry or forced Round 2 occurs",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See PRD §6. Evidence-only / NO_SOURCE_CHANGE is valid."
+    },
+    {
+      "id": "US-004",
+      "title": "Execute fresh real run 3",
+      "description": "As the product owner, I want a third independent fresh normal real run so that the batch reaches the planned small sample without manufacturing success. See PRD §7.",
+      "acceptanceCriteria": [
+        "Exactly one additional fresh attributable real run is executed",
+        "Total valid fresh batch size is three",
+        "Actual workflow outcome is preserved regardless of actionability",
+        "Requested execution route/binding is recorded; resolved concrete model identity is recorded only if directly exposed by transport evidence",
+        "Sidecar report is attributable",
+        "Any P2 transition is natural and no Round 2 is forced",
+        "No unauthorized source/framework change occurs",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See PRD §7. Do not replace a valid non-actionable run merely to obtain READY."
+    },
+    {
+      "id": "US-005",
+      "title": "Synthesize real-run and Sidecar Report evidence",
+      "description": "As the product owner, I want the three-run batch summarized into P2 observation and report-sufficiency conclusions so that the next decision is based on real workflow evidence. See PRD §8.",
+      "acceptanceCriteria": [
+        "All three run outcomes are summarized without subjective Participant quality scoring",
+        "P2 conclusion is exactly CROSS_ROUND_TRANSITION_OBSERVED, NO_CROSS_ROUND_TRANSITION_OBSERVED, or OBSERVATION_INSUFFICIENT",
+        "Absence of a natural cross-round transition is not treated as an implementation defect",
+        "Sidecar report sufficiency is assessed per run for identity, roles, structured outcomes, Reviewer decision, execution, and terminal reason",
+        "If reports are sufficient, result records NO_REPORT_CHANGE",
+        "Any report correction is minimal, objective, sidecar-only, and does not introduce Report Analysis",
+        "Current-product-stage is updated only if real evidence changes an explicit status",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "See PRD §8. Stop after synthesis and return to Human delta review."
+    }
+  ]
+}

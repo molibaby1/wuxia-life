@@ -108,6 +108,10 @@ const suites: Suite[] = [
   { name: 'globalMoneyP17ResourceRetirement', entry: 'tests/globalMoneyP17ResourceRetirement.test.ts' },
   { name: 'globalMoneyP18ResourceRetirement', entry: 'tests/globalMoneyP18ResourceRetirement.test.ts' },
   {
+    name: 'globalMoneyP16P23LegacyBalanceDecouple',
+    entry: 'tests/globalMoneyP16P23LegacyBalanceDecouple.test.ts',
+  },
+  {
     name: 'globalMoneyP8HeadlessEvaluationRetirement',
     entry: 'tests/globalMoneyP8HeadlessEvaluationRetirement.test.ts',
   },

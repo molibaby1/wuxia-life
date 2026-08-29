@@ -48,7 +48,6 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       affiliation: null,
       title: null,
       reputation: 30,
-      money: 100,
       knowledge: 30,
       charisma: 40,
       businessAcumen: 30,
@@ -124,7 +123,6 @@ export function assembleP17GateReport(
       flags: { orthodox_member: true, sect_master: true },
       reputation: 60,
       influence: 55,
-      money: 800,
     } as GameState['player'],
   });
   const neglectedHeroState = makeSampleState({

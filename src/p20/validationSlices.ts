@@ -33,7 +33,6 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     affiliation: null,
     title: null,
     reputation: 15,
-    money: 200,
     wealthCapacity: 'no_surplus',
     knowledge: 25,
     charisma: 30,
@@ -53,7 +52,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     alive: true,
     ...rest,
     flags: { ...(overrideFlags ?? {}) },
-  };
+  } as PlayerState;
 }
 
 type GameStateFixtureInput = Omit<Partial<GameState>, 'player'> & {
@@ -193,9 +192,8 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
     },
     player: {
       age: 38,
-      money: 2500,
-      merchantNetwork: 45,
-      businessAcumen: 60,
+      merchantNetwork: 55,
+      businessAcumen: 65,
     },
     lifePath: {
       faction: 'neutral',
@@ -413,7 +411,7 @@ export function runArchetypeRegressionMatrix(): ArchetypeRegressionMatrixResult 
       label: P20_WEALTH_MERCHANT.label,
       state: baseState({
         flags: { origin_id: 'merchant_house', wealth_milestone: true, family_heir: true },
-        player: { age: 44, money: 1800 },
+        player: { age: 44, merchantNetwork: 50, businessAcumen: 55 },
       }),
     },
     {

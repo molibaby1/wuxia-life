@@ -42,7 +42,6 @@ function basePlayer(
     affiliation: null,
     title: null,
     reputation: 20,
-    money: 300,
     knowledge: 30,
     charisma: 32,
     businessAcumen: 25,

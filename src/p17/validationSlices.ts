@@ -32,7 +32,6 @@ function baseMidLifeState(): GameState {
       affiliation: null,
       title: null,
       reputation: 50,
-      money: 500,
       knowledge: 40,
       charisma: 45,
       businessAcumen: 35,

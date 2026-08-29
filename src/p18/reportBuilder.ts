@@ -48,7 +48,6 @@ function makeSampleState(partial: Partial<GameState>): GameState {
       affiliation: null,
       title: null,
       reputation: 70,
-      money: 1500,
       knowledge: 50,
       charisma: 55,
       businessAcumen: 40,
@@ -119,7 +118,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
       },
       martialHeritage: 80,
       martialPower: 90,
-      money: 2500,
       connections: 70,
     } as GameState['player'],
     lifePath: {
@@ -161,7 +159,6 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
     player: {
       flags: { has_disciples: true, has_child: true },
       martialHeritage: 5,
-      money: 50,
       connections: 10,
       martialPower: 90,
       children: 2,

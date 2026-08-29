@@ -26,7 +26,6 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     affiliation: null,
     title: null,
     reputation: 15,
-    money: 200,
     wealthCapacity: 'no_surplus',
     knowledge: 25,
     charisma: 30,
@@ -46,7 +45,7 @@ function basePlayer(overrides: Partial<PlayerState> = {}): PlayerState {
     alive: true,
     ...rest,
     flags: { ...(overrideFlags ?? {}) },
-  };
+  } as PlayerState;
 }
 
 export function buildSliceState(sliceId: string): GameState {
@@ -107,7 +106,7 @@ function buildStateForSlice(slice: ReplaySliceConfig): GameState {
   }
   if (family === P20_WEALTH_MERCHANT.id) {
     return {
-      player: basePlayer({ age: 35, money: 1800, merchantNetwork: 40, flags: seedFlags }),
+      player: basePlayer({ age: 35, merchantNetwork: 50, businessAcumen: 55, flags: seedFlags }),
       facts: {},
       flags: { origin_id: 'merchant_house', ...seedFlags },
       achievements: [],

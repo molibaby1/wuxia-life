@@ -14,7 +14,6 @@ function baseLateLifeState(): GameState {
       affiliation: null,
       title: null,
       reputation: 55,
-      money: 800,
       knowledge: 45,
       charisma: 50,
       businessAcumen: 35,
@@ -81,7 +80,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
   };
   invested.player!.flags = { ...invested.flags };
   invested.player!.martialHeritage = 75;
-  invested.player!.money = 2000;
   invested.player!.connections = 65;
   invested.lifePath = {
     faction: 'neutral',
@@ -97,7 +95,6 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
   neglected.player!.flags = { has_disciples: true, has_child: true };
   neglected.player!.martialPower = 95;
   neglected.player!.reputation = 90;
-  neglected.player!.money = 30;
   neglected.lifePath = {
     faction: 'neutral',
     lifeStage: 'legacy',
@@ -196,7 +193,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
   highAchievement.player!.martialPower = 95;
   highAchievement.player!.reputation = 92;
   highAchievement.player!.martialHeritage = 10;
-  highAchievement.player!.money = 40;
   highAchievement.lifePath = {
     faction: 'neutral',
     lifeStage: 'legacy',
@@ -219,7 +215,6 @@ export function runUnderinvestmentComparisonSlice(): UnderinvestmentComparisonSl
   };
   strongCultivation.player!.flags = { ...strongCultivation.flags };
   strongCultivation.player!.martialHeritage = 80;
-  strongCultivation.player!.money = 2200;
   strongCultivation.player!.martialPower = 88;
   strongCultivation.lifePath = {
     faction: 'neutral',

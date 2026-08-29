@@ -215,7 +215,6 @@ export class StatModifyHandler implements EffectHandler {
     'martialHeritage',
     'scholarlyHeritage',
     'merchantNetwork',
-    'wealth',
   ]);
 
   private static readonly NON_NEGATIVE_CANONICAL_STATS = new Set([

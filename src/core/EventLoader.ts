@@ -124,6 +124,8 @@ export function collectChoiceIdValidationErrors(events: EventDefinition[]): stri
 }
 
 const MONEY_EXPRESSION_PATTERN = /(?:player\s*\.\s*money|\bmoney\b)/i;
+/** Exact numeric wealth only; `\bwealth\b` does not match `wealthCapacity`. */
+const NUMERIC_WEALTH_EXPRESSION_PATTERN = /(?:player\s*\.\s*wealth\b|\bwealth\b)/i;
 
 function describeWalletAuthoringLocation(eventId: string, path: string): string {
   return path ? `事件 ${eventId} @ ${path}` : `事件 ${eventId}`;
@@ -135,6 +137,20 @@ function collectMoneyExpressionHits(expression: string, eventId: string, path: s
   }
   errors.push(
     `${describeWalletAuthoringLocation(eventId, path)}: formal wallet expression/condition authoring is retired (${expression})`,
+  );
+}
+
+function collectNumericWealthExpressionHits(
+  expression: string,
+  eventId: string,
+  path: string,
+  errors: string[],
+): void {
+  if (!NUMERIC_WEALTH_EXPRESSION_PATTERN.test(expression)) {
+    return;
+  }
+  errors.push(
+    `${describeWalletAuthoringLocation(eventId, path)}: formal numeric-wealth expression/condition authoring is retired (${expression})`,
   );
 }
 
@@ -155,6 +171,11 @@ function collectWalletEffectErrors(
   if (effectType === 'stat_modify' && target === 'money') {
     errors.push(
       `${describeWalletAuthoringLocation(eventId, path)}: stat_modify targeting money is retired`,
+    );
+  }
+  if (effectType === 'stat_modify' && target === 'wealth') {
+    errors.push(
+      `${describeWalletAuthoringLocation(eventId, path)}: stat_modify targeting exact numeric wealth is retired`,
     );
   }
 
@@ -180,13 +201,15 @@ function collectWalletConditionErrors(
   }
   if (condition.type === 'expression' && typeof condition.expression === 'string') {
     collectMoneyExpressionHits(condition.expression, eventId, path, errors);
+    collectNumericWealthExpressionHits(condition.expression, eventId, path, errors);
   }
 }
 
 /**
  * Formal EventLoader wallet authoring guard.
- * Rejects money stat_modify / money_modify / exact-money expression conditions
- * in the formal loaded catalog only (events.json → EventLoader), not deferred line files.
+ * Rejects money / exact numeric wealth stat_modify, money_modify, and exact-balance
+ * expression conditions in the formal loaded catalog only (events.json → EventLoader),
+ * not deferred line files. Wealth Capacity conditions/effects remain allowed.
  */
 export function collectFormalWalletAuthoringErrors(events: EventDefinition[]): string[] {
   const errors: string[] = [];

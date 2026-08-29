@@ -116,6 +116,54 @@ function testSyntheticMoneyConditionFailsGuard(): void {
   );
 }
 
+function testSyntheticNumericWealthStatModifyFailsGuard(): void {
+  const errors = collectFormalWalletAuthoringErrors([
+    fixtureEvent({
+      id: 'probe_stat_modify_wealth',
+      autoEffects: [{ type: 'stat_modify', target: 'wealth', value: 10, operator: 'add' }],
+    }),
+  ]);
+  assert.equal(
+    errors.some((error) => error.includes('stat_modify targeting exact numeric wealth')),
+    true,
+    errors.join(' | '),
+  );
+}
+
+function testSyntheticNumericWealthConditionFailsGuard(): void {
+  const expressionErrors = collectFormalWalletAuthoringErrors([
+    fixtureEvent({
+      id: 'probe_player_wealth_expression',
+      conditions: [{ type: 'expression', expression: 'player.wealth >= 100' }],
+    }),
+  ]);
+  assert.equal(
+    expressionErrors.some((error) => error.includes('numeric-wealth expression/condition')),
+    true,
+    expressionErrors.join(' | '),
+  );
+
+  const directErrors = collectFormalWalletAuthoringErrors([
+    fixtureEvent({
+      id: 'probe_direct_wealth_expression',
+      conditions: [{ type: 'expression', expression: 'wealth >= 50' }],
+    }),
+  ]);
+  assert.equal(
+    directErrors.some((error) => error.includes('numeric-wealth expression/condition')),
+    true,
+    directErrors.join(' | '),
+  );
+
+  const capacityAllowed = collectFormalWalletAuthoringErrors([
+    fixtureEvent({
+      id: 'probe_wealth_capacity_ok',
+      conditions: [{ type: 'wealth_capacity_at_least', minimum: 'modest_savings' }],
+    }),
+  ]);
+  assert.deepEqual(capacityAllowed, []);
+}
+
 function testDeferredWalletBacklogNotBulkModified(): void {
   // Deferred unloaded identity-official still contains wallet writes; guard must not rewrite it.
   const eventsIndex = readJson<{ imports: string[] }>('src/data/events.json');
@@ -129,6 +177,8 @@ export function runGlobalMoneyFormalWalletAuthoringGuardTests(): void {
   testSyntheticMoneyStatModifyFailsGuard();
   testSyntheticMoneyModifyFailsGuard();
   testSyntheticMoneyConditionFailsGuard();
+  testSyntheticNumericWealthStatModifyFailsGuard();
+  testSyntheticNumericWealthConditionFailsGuard();
   testDeferredWalletBacklogNotBulkModified();
 }
 

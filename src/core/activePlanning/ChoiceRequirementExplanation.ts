@@ -29,10 +29,9 @@ const STAT_LABELS: Record<string, string> = {
   reputation: '名望',
   connections: '人脉',
   knowledge: '学识',
-  wealth: '财富',
 };
 
-const RETIRED_WALLET_REQUIREMENT_STATS = new Set(['money']);
+const RETIRED_WALLET_REQUIREMENT_STATS = new Set(['money', 'wealth']);
 
 function parseStatThreshold(expression: string): { stat: string; op: string; value: number } | null {
   const match = expression.match(/(?:player\.)?([a-zA-Z]+)\s*(>=|>|<=|<|==)\s*(\d+)/);

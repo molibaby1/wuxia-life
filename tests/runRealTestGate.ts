@@ -180,6 +180,10 @@ const suites: Suite[] = [
     entry: 'tests/globalMoneyCurrentRuntimeCapabilityRetirement.test.ts',
   },
   {
+    name: 'globalMoneyNumericWealthRuntimeRetirement',
+    entry: 'tests/globalMoneyNumericWealthRuntimeRetirement.test.ts',
+  },
+  {
     name: 'globalMoneyE2E3PostRunClosureCorrection',
     entry: 'tests/globalMoneyE2E3PostRunClosureCorrection.test.ts',
   },

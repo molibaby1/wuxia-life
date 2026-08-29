@@ -55,7 +55,6 @@ export class ConditionEvaluator implements IConditionEvaluator {
     'knowledge',
     'businessAcumen',
     'influence',
-    'wealth',
   ]);
   
   constructor() {
@@ -531,6 +530,9 @@ class ConditionExpressionParser {
     this.assertSafeProperty(property, position);
     if (property === 'money') {
       throw this.error('Unsupported property "money"', position);
+    }
+    if (property === 'wealth') {
+      throw this.error('Unsupported property "wealth"', position);
     }
     const playerRecord = this.state.player as unknown as Record<string, unknown>;
     return playerRecord[property];

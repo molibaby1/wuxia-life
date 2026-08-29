@@ -835,7 +835,6 @@ export interface PlayerStats {
   reputation: number;        // 名望：非负的知名程度和影响传播范围，无固定上限
   connections: number;       // 人脉：非负的社会关系网络能力，无固定上限
   knowledge: number;         // 学识：非负的知识、理解和文化积累，无固定上限
-  wealth?: number;           // 财富：0-10000，经济状况，影响购买力和资源获取
   
   // ========== 隐藏属性（通过天赋影响） ==========
   martialPotential?: number; // 武学潜力：0-100，影响战斗属性成长速度（天赋决定）

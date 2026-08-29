@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-25（Run-Observe / P3 Minimal Slice #2 Runtime Conformance Verified）。
+> 最后更新：2026-08-29（Run-Observe / P3 Slice #1 Contract Conformance Matrix = PROMISING）。
 
 ---
 
@@ -34,10 +34,10 @@ Auto Evolution 当前处于：
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；
 - P2 不修改 authoritative product state，也不包含 repository promotion / commit / merge。
-- **P3 Minimal Slice #1 — Structured Final Output Contract V1：HUMAN-AUTHORIZED / ENGINEERING DELIVERED；**
+- **P3 Minimal Slice #1 — Structured Final Output Contract V1：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / FIRST CONTRACT CONFORMANCE MATRIX = `CONTRACT_CONFORMANCE_PROMISING`；**
 - 该 Slice 根据真实 Participant 通信 evidence 局部激活，只统一 terminal structured output envelope；当前 Pilot 为 Solution / Reviewer / Configuration Execution；
 - shared contract 要求 bare JSON / no wrapper prose / no Markdown fence / strict validate-or-reject，并保持 Host 不做 semantic repair；
-- runtime contract conformance 尚未验证，后续需通过独立 Contract Conformance Matrix 获取 evidence。
+- 独立 Contract Conformance Matrix（trivial contract-only；Codex current binding ×3 + Cursor Auto ×3）全部 `PASS`；证据在实验目录，不构成主流程 authority；不证明 fixed Cursor model A/B，也不证明真实 Solution reasoning quality。
 - **P3 Minimal Slice #2 — Envelope Failure Bounded Retransmission：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED；**
 - 已验证产品边界：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；Initial Participant timeout = unchanged production default 240000ms；
 - `SCHEMA_FAILURE` fail closed；Host repair / extraction / normalization forbidden；semantic correction forbidden；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
@@ -57,7 +57,7 @@ Auto Evolution 当前处于：
 - 多轮真实运行在长期使用中的稳定性；
 - 每个真实 run 都能或都应该进入下一轮；
 - Participant Communication Contract 的最终形态；
-- Structured Final Output Contract V1 的跨 harness / model runtime conformance 尚未证明；
+- Structured Final Output Contract V1 的 first harness matrix 仅为 `CONTRACT_CONFORMANCE_PROMISING`（小样本、contract-only）；fixed Cursor model matrix 与真实 Solution workload matrix 尚未证明；
 - Envelope Failure Bounded Retransmission 超出已验证边界的扩展（第二重传、`SCHEMA_FAILURE` recovery、Reviewer / Configuration Execution rollout、跨 harness / model 推广）尚未证明；
 - report analysis / automatic intervention；
 - Game 与 Auto Evolution 已经物理解耦；
@@ -114,7 +114,7 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 但 Run / Observe 已暴露足够具体的 terminal-output communication variance，且 Human 已重新排序并授权一个 bounded corrective：
 
 **Minimal Slice #1 — Structured Final Output Contract V1：
-ENGINEERING DELIVERED / RUNTIME CONFORMANCE UNVERIFIED。**
+ENGINEERING DELIVERED / FIRST CONTRACT CONFORMANCE MATRIX = `CONTRACT_CONFORMANCE_PROMISING`。**
 
 **Minimal Slice #2 — Envelope Failure Bounded Retransmission：
 ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED。**
@@ -172,7 +172,7 @@ Pilot 范围（Slice #1）：
 - model routing；
 - transport redesign。
 
-Slice #1 下一步 evidence：独立 Contract Conformance Matrix。
+Slice #1 first Contract Conformance Matrix 已完成：`CONTRACT_CONFORMANCE_PROMISING`（Codex current ×3 PASS；Cursor Auto ×3 PASS；`CURSOR_MODEL_BINDING_NOT_OBSERVABLE`；不打开 full P3）。STOP → Human delta review 再决定是否授权后续 PRD。
 
 继续遵守：
 

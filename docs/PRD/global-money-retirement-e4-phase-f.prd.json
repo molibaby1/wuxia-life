@@ -114,7 +114,7 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §10. Do not bulk-edit historical artifacts/reports; this Story targets current compiled P25 scaffolding."
     },
     {

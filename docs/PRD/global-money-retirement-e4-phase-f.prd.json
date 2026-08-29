@@ -135,7 +135,7 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §11. Expected governance number is PD-097 but repository authority decides. This Story closes E4 only; no physical removal yet."
     },
     {

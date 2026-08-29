@@ -207,6 +207,10 @@ const suites: Suite[] = [
     name: 'globalMoneyE2E3PostRunClosureCorrection',
     entry: 'tests/globalMoneyE2E3PostRunClosureCorrection.test.ts',
   },
+  {
+    name: 'globalMoneyE4CompatibilityBoundary',
+    entry: 'tests/globalMoneyE4CompatibilityBoundary.test.ts',
+  },
   { name: 'assetPersistence', entry: 'tests/assetPersistence.test.ts' },
   { name: 'assetPresentation', entry: 'tests/assetPresentation.test.ts' },
   { name: 'canonicalPlayerStateSlice2aTests', entry: 'tests/canonicalPlayerStateSlice2a.test.ts' },

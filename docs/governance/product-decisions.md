@@ -1371,3 +1371,19 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要把 money 重新做成 live presentation / profile resource / scheduling authority；
 - 需要进入 E4 / Phase F 物理删除兼容字段或 Snapshot bump；
 - 需要为 profile 重新引入 spendable resource 维度或额外 scheduling-relevant stats。
+
+### PD-097：E4 reduces exact money/numeric wealth to compatibility-only core ownership
+
+**实施决策（Human accepted：2026-08-29）**
+
+- E4 compatibility dependency closure 已完成：formal loaded catalog（412 events）无 money / exact numeric-wealth write/condition；EventExecutor / ConditionEvaluator / generic numeric writer 不可 author/read exact money 或 numeric wealth；Composite Destiny 不再将 generic `resources` 解析为 legacy balance；当前 observability / report / P16–P25 compiled paths 不再结构性依赖 exact balance；E2/E3 player-facing/runtime closure 保持为真。
+- 当前 compiled exact money / numeric wealth 所有权仅限窄兼容核心：`PlayerState.money` / `PlayerState.wealth?`、`GameEngineIntegration` 新局 seed 与兼容拷贝、SnapshotPlayerState 对应字段、canonical player/snapshot validation key lists、canonical snapshot fixture(s)，以及 `simulationPlayerState` factory compat `money: 0`。
+- EventLoader / ConditionEvaluator / choice-explanation deny guards、D6 auto-choice ignore guards、route/persona/pathAffinity `wealth` identifiers、unloaded/excluded legacy、negative tests 为 allowed non-ownership，不视为 live capability。
+- 本决策 **授权** 已在 Human-approved PRD `global-money-retirement-e4-phase-f` 中批准的 Phase F 物理/schema 删除（`PlayerState.money`、numeric `PlayerState.wealth?`、新局 seed、Snapshot 3.15.0→3.16.0 一次 bump）；**尚未执行** 物理删除。
+- Snapshot 仍为 exactly `3.15.0`；`PlayerState.money` / numeric `wealth?` 字段仍物理存在。
+
+**重新讨论条件**
+
+- 需要重新把 exact money / numeric wealth 做成 live gameplay / authoring / analytical capability；
+- 需要取消或推迟 Phase F 物理删除；
+- 需要在 Phase F 之外提前 bump Snapshot schema 或引入 hidden numeric economic replacement。

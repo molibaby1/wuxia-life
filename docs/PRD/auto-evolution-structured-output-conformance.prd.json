@@ -37,8 +37,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "See PRD §6. Evidence-only / NO_SOURCE_CHANGE is a valid Story outcome."
+      "passes": true,
+      "notes": "See PRD §6. Three fresh Codex current-binding trials recorded under .tmp/evolution/structured-output-contract-conformance/trials/codex-current-0{1,2,3}/ — all PASS; no semantic repair; no product source change."
     },
     {
       "id": "US-003",

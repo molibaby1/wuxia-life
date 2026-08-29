@@ -42,8 +42,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "See PRD §5. DEFER/NO_PROPOSAL/rejection/failure/escalation are valid evidence outcomes."
+      "passes": true,
+      "notes": "See PRD §5. Slot 1 executed: outcome NO_CROSS_ROUND_TRANSITION_OBSERVED / ROUND_1_TERMINAL_NOT_READY; workflow PARTICIPANT_FAILURE at IMPROVEMENT_HYPOTHESIS (parse) route DEFER; sidecar report written; no READY steering; evidence under .tmp/evolution/real-run-observe-batch-20260829/slots/slot-01/."
     },
     {
       "id": "US-003",

@@ -38,7 +38,6 @@ function patronState(overrides: Partial<GameState> = {}): GameState {
     player: {
       age: 54,
       charisma: 10,
-      money: 200,
       martialPower: 40,
       reputation: 30,
       businessAcumen: 35,

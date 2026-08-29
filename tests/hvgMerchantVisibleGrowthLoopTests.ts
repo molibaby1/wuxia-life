@@ -141,7 +141,6 @@ function testTalentDiscoveryAcceptsHvgTracks(): void {
     player: {
       age: 10,
       charisma: 8,
-      money: 10,
     } as PlayerState,
   });
   assert(
@@ -158,7 +157,6 @@ function testTalentDiscoveryAcceptsHvgTracks(): void {
     player: {
       age: 10,
       charisma: 8,
-      money: 10,
     } as PlayerState,
   });
   assert(

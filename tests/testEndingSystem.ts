@@ -14,7 +14,6 @@ function createTestState(): GameState {
     chivalry: 0,
     charisma: 50,
     constitution: 50,
-    money: 100,
     wealthCapacity: 'no_surplus',
     reputation: 30,
     connections: 20,
@@ -185,7 +184,6 @@ state = createTestState();
 state.player.chivalry = 85;
 state.player.reputation = 85;
 state.player.martialPower = 70;
-state.player.money = 5000;
 state.karma!.good_karma = 120;
 state.karma!.evil_karma = 10;
 state.achievements = ['save_village', 'defeat_bandits'];

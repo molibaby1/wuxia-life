@@ -18,7 +18,6 @@ function makeHighAchievementState(money: number): GameState {
   state.player.businessAcumen = 0;
   state.player.influence = 0;
   state.player.chivalry = 0;
-  state.player.money = money;
   state.player.spouse = null;
   state.player.children = 0;
   state.player.flags = {};

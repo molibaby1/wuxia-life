@@ -294,7 +294,6 @@ function createTargetSnapshot(eventId: string, flags: Record<string, boolean>) {
   const snapshot = bootstrap.serialize();
   snapshot.state.player.age = 35;
   snapshot.state.player.martialPower = 100;
-  snapshot.state.player.money = 500;
   snapshot.state.player.alive = true;
   snapshot.state.flags = { ...snapshot.state.flags, ...flags };
   snapshot.state.player.flags = { ...snapshot.state.player.flags, ...flags };

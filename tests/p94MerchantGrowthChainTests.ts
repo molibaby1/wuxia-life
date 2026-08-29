@@ -19,7 +19,6 @@ function merchantState(overrides: Partial<GameState> = {}): GameState {
     player: {
       age: 11,
       charisma: 10,
-      money: 20,
       businessAcumen: 8,
       connections: 5,
       reputation: 5,
@@ -192,7 +191,7 @@ function testTalentDiscoveryAcceptsChallengeFlag(): void {
       hvg_merchant_post_fork_confirmation_done: true,
       hvg_merchant_first_challenge_done: true,
     },
-    player: { age: 14, charisma: 8, money: 10 } as PlayerState,
+    player: { age: 14, charisma: 8, wealthCapacity: 'no_surplus' } as PlayerState,
   });
   assert(
     evaluator.evaluate(talent.conditions![0], afterChallenge),

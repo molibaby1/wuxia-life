@@ -19,7 +19,6 @@ function makeState(flags: Record<string, unknown>): GameState {
       affiliation: null,
       title: null,
       reputation: 4,
-      money: 100,
       knowledge: 10,
       charisma: 10,
       businessAcumen: 10,

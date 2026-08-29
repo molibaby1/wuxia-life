@@ -171,7 +171,6 @@ function makeGameState(flags: Record<string, boolean>, age = 30): GameState {
       affiliation: null,
       title: null,
       reputation: 10,
-      money: 100,
       knowledge: 15,
       charisma: 10,
       businessAcumen: 10,

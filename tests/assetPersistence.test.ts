@@ -15,7 +15,7 @@ const snapshot = defaultSnapshotConverter.toSnapshot(state, {
   time: new FixedTimeSource(Date.parse('2026-08-23T00:00:00.000Z')),
 });
 
-assert.equal(snapshot.metadata.schemaVersion, '3.15.0');
+assert.equal(snapshot.metadata.schemaVersion, '3.16.0');
 
 const serialized = JSON.parse(JSON.stringify(snapshot)) as typeof snapshot;
 assert.equal(Object.prototype.hasOwnProperty.call(serialized, 'assets'), false);

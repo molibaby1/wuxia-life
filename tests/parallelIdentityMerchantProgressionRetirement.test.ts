@@ -97,14 +97,13 @@ async function testCanonicalMerchantSpineRemainsFormalAndWritesCanonicalFlag(): 
   engine.startNewGame('Parallel Identity Merchant Retirement', 'male');
   const state = engine.getGameState();
   state.player.traits = [];
-  state.player.money = 37;
   state.player.wealthCapacity = 'wealthy';
   state.flags.merchant_invest_good = true;
   state.player.flags.merchant_invest_good = true;
 
   await engine.executeChoiceEffects(canonicalEffects, canonicalEmpire.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, 37, 'canonical merchant spine must leave legacy money unchanged');
+  assert.equal('money' in after.player, false, 'canonical merchant spine must leave legacy money unchanged');
   assert.equal(after.player.wealthCapacity, 'regional_magnate');
   assert.equal(after.flags.merchant_empire, true);
 }

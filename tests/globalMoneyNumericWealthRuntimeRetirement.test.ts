@@ -82,7 +82,7 @@ function collectFormalNumericWealthConditions(): Array<{ eventId: string }> {
   return hits;
 }
 
-function createMinimalState(wealth = 777): GameState {
+function createMinimalState(): GameState {
   const player: PlayerState = {
     name: 'E4-US001',
     gender: 'male',
@@ -98,8 +98,6 @@ function createMinimalState(wealth = 777): GameState {
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money: 100,
-    wealth,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     affiliation: null,
@@ -162,25 +160,26 @@ function testPlayerStatsHasNoNumericWealth(): void {
   )?.[0];
   assert(playerStatsBlock);
   assert.equal(/\bwealth\s*\?:/.test(playerStatsBlock!), false);
-  assert.match(read('src/types/eventTypes.ts'), /\bwealth\?:\s*number\b/);
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bwealth\?:\s*number\b/);
+  assert.equal(/\bmoney\s*\?:/.test(playerStatsBlock!), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
 }
 
 async function testEventExecutorCannotMutateNumericWealth(): Promise<void> {
   assert.equal(read('src/core/EventExecutor.ts').includes("'wealth'"), false);
-  const before = createMinimalState(777);
+  const before = createMinimalState();
   const after = await new EventExecutor().executeEffects(
     [{ type: 'stat_modify', target: 'wealth', value: 50, operator: 'add' }],
     before,
   );
-  assert.equal(after.player.wealth, 777);
+  assert.equal('wealth' in after.player, false);
 }
 
 function testConditionEvaluatorFailsClosedForNumericWealth(): void {
   assert.equal(ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has('wealth'), false);
   assert.equal(ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has('money'), false);
   const evaluator = new ConditionEvaluator();
-  const state = createMinimalState(999);
+  const state = createMinimalState();
   assert.equal(evaluator.evaluate({ type: 'expression', expression: 'player.wealth >= 1' }, state), false);
   assert.equal(evaluator.evaluate({ type: 'expression', expression: 'wealth >= 1' }, state), false);
   assert.equal(
@@ -192,7 +191,7 @@ function testConditionEvaluatorFailsClosedForNumericWealth(): void {
 function testChoiceRequirementExplanationDoesNotExposeNumericWealth(): void {
   const source = read('src/core/activePlanning/ChoiceRequirementExplanation.ts');
   assert.equal(/\bwealth\s*:\s*'财富'/.test(source), false);
-  const state = createMinimalState(50);
+  const state = createMinimalState();
   const evaluator = new ConditionEvaluator();
   const result = explainChoiceRequirement(
     'wealth_gate',
@@ -246,11 +245,11 @@ function testFormalCatalogNumericWealthZeroAndGuardRejects(): void {
 }
 
 function testCompatibilityBoundaryPreserved(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
-  assert.match(read('src/types/eventTypes.ts'), /\bmoney:\s*number\b/);
-  assert.match(read('src/types/eventTypes.ts'), /PlayerState[\s\S]*?\bwealth\?:\s*number\b/);
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bmoney:\s*number\b/);
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bwealth\?:\s*number\b/);
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
 }
 
 async function main(): Promise<void> {

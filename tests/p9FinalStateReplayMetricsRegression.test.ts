@@ -11,7 +11,6 @@ function state(flags: Record<string, unknown>): GameState {
       gender: 'male',
       alive: true,
       martialPower: 10,
-      money: 100,
       flags: {},
       lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0 },
     },

@@ -22,11 +22,10 @@ function hasWealthReplacementModifier(modifier: { stat?: unknown }): boolean {
   return String(modifier.stat ?? '').startsWith('wealth');
 }
 
-function makePlayer(money: number) {
+function makePlayer() {
   const engine = new GameEngineIntegration();
   engine.startNewGame('D1 semantic probe', 'male');
   const player = engine.getGameState().player;
-  player.money = money;
   player.businessAcumen = 0;
   player.connections = 0;
   player.chivalry = 0;
@@ -36,7 +35,7 @@ function makePlayer(money: number) {
   return player;
 }
 
-async function applyMerchantOrigin(money: number) {
+async function applyMerchantOrigin() {
   const event = eventLoader.getEventById('origin_background');
   assert(event, 'origin_background must exist');
   const choice = event.choices?.find(item => item.id === 'origin_merchant_family');
@@ -45,11 +44,13 @@ async function applyMerchantOrigin(money: number) {
   const engine = new GameEngineIntegration();
   engine.startNewGame('D1 merchant origin probe', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.traits = [];
-  const before = state.player;
+  state.player.connections = 0;
+  state.player.charisma = 0;
+  const connectionsBefore = 0;
+  const charismaBefore = 0;
   const after = await new EventExecutor().executeEffects(choice.effects ?? [], state);
-  return { choice, before, after };
+  return { choice, before: { connections: connectionsBefore, charisma: charismaBefore }, after };
 }
 
 async function testMerchantOriginAuthoringAndRuntime(): Promise<void> {
@@ -71,9 +72,9 @@ async function testMerchantOriginAuthoringAndRuntime(): Promise<void> {
   assert(choice.effects?.some(effect => effect.type === 'stat_modify' && effect.target === 'charisma' && effect.value === 6));
   assert(choice.effects?.some(effect => effect.type === 'event_record' && effect.target === 'origin_merchant_family'));
 
-  for (const money of MONEY_SENTINELS) {
-    const { before, after } = await applyMerchantOrigin(money);
-    assert.equal(after.player.money, money, `merchant origin must preserve money sentinel ${money}`);
+  for (const _sentinel of MONEY_SENTINELS) {
+    const { before, after } = await applyMerchantOrigin();
+    assert.equal('money' in after.player, false, 'merchant origin must not create legacy money');
     assert.equal(after.player.wealthCapacity, 'comfortable_means');
     assert.equal(after.player.connections, before.connections + 2);
     assert.equal(after.player.charisma, before.charisma + 6);
@@ -93,8 +94,8 @@ function testCoreTalentWalletRetirement(): void {
     assert.equal(talent.growthModifiers?.some(hasWealthReplacementModifier), false);
   }
 
-  const ironPlayer = traitSystem.applyTraits(makePlayer(317), ['iron_abacus'] as TraitId[]);
-  assert.equal(ironPlayer.money, 317);
+  const ironPlayer = traitSystem.applyTraits(makePlayer(), ['iron_abacus'] as TraitId[]);
+  assert.equal('money' in ironPlayer, false);
   assert.equal(ironPlayer.businessAcumen, 6);
   assert.equal(ironPlayer.connections, 2);
   assert.equal(ironPlayer.chivalry, -2);
@@ -103,8 +104,8 @@ function testCoreTalentWalletRetirement(): void {
   assert.equal(traitSystem.getGrowthMultiplier(ironPlayer, 'connections'), 1.1);
   assert.equal(traitSystem.getGrowthMultiplier(ironPlayer, 'chivalry'), 0.9);
 
-  const heroicPlayer = traitSystem.applyTraits(makePlayer(317), ['heroic_heart'] as TraitId[]);
-  assert.equal(heroicPlayer.money, 317);
+  const heroicPlayer = traitSystem.applyTraits(makePlayer(), ['heroic_heart'] as TraitId[]);
+  assert.equal('money' in heroicPlayer, false);
   assert.equal(heroicPlayer.chivalry, 8);
   assert.equal(heroicPlayer.reputation, 2);
   assert.equal(traitSystem.getGrowthMultiplier(heroicPlayer, 'money'), 1);

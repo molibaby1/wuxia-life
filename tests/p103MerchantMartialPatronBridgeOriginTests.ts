@@ -33,7 +33,6 @@ function bridgePatronState(
     player: {
       age: 36,
       charisma: 10,
-      money: 120,
       martialPower: 30,
       reputation: 20,
       businessAcumen: 8,
@@ -55,7 +54,6 @@ function nativePatronState(overrides: Partial<GameState> = {}): GameState {
     player: {
       age: 36,
       charisma: 10,
-      money: 200,
       martialPower: 40,
       reputation: 30,
       ...(overrides.player ?? {}),

@@ -43,7 +43,7 @@ assert(
 );
 assert(
   source.includes('v-if="!hasCanonicalProgressionCard"') &&
-    source.includes('let continueClickLocked = false') &&
+    source.includes('let continueClickLocked = false;') &&
     source.includes('if (continueClickLocked || props.isAutoPlaying) return;'),
   'local continuation must suppress duplicate clicks and duplicate base result text',
 );

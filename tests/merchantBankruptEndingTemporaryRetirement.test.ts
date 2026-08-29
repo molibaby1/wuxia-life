@@ -50,7 +50,6 @@ function testBankruptEventRemovedFromManifest(): void {
 function testLowWalletAloneCannotProduceBankruptcyEnding(): void {
   const { engine, state } = startState('Merchant Bankruptcy Retirement Low Wallet');
   state.player.age = 65;
-  state.player.money = 0;
   state.flags.merchant_talent = true;
   state.player.flags.merchant_talent = true;
 
@@ -61,7 +60,6 @@ function testLowWalletAloneCannotProduceBankruptcyEnding(): void {
 function testTycoonRemainsEligibleWithoutBankruptCompetition(): void {
   const { engine, state } = startState('Merchant Bankruptcy Retirement Tycoon');
   state.player.age = 70;
-  state.player.money = 0;
   state.player.wealthCapacity = 'regional_magnate';
   state.flags.merchant_talent = true;
   state.player.flags.merchant_talent = true;

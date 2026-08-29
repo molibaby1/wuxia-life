@@ -184,7 +184,7 @@ function testP18OnlyStaticBoundaryAndSnapshotVersion(): void {
   assert.equal(surfaceSource.includes("dimension: 'resources'"), false);
   assert.equal(surfaceSource.includes('wealthCapacity'), false);
   assert.equal(surfaceSource.includes('wealth_capacity_at_least'), false);
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 }
 
 testOldMoneyThresholdRedEvidenceAndInvariance();

@@ -14,8 +14,6 @@ function makeState(): GameState {
   const engine = new GameEngineIntegration();
   engine.startNewGame('Wealth Capacity Semantics', 'male');
   const state = engine.getGameState();
-  state.player.money = 1234;
-  state.player.wealth = 42;
   state.player.wealthCapacity = 'no_surplus';
   return state;
 }
@@ -91,8 +89,8 @@ async function testWealthCapacitySetEffect(): Promise<void> {
   ] as never, state);
 
   assert(next.player.wealthCapacity === 'regional_magnate', 'wealth_capacity_set must update player.wealthCapacity');
-  assert(next.player.money === state.player.money, 'wealth_capacity_set must not change money');
-  assert(next.player.wealth === state.player.wealth, 'wealth_capacity_set must not change wealth');
+  nodeAssert.equal('money' in next.player, false, 'wealth_capacity_set must not create money');
+  nodeAssert.equal('wealth' in next.player, false, 'wealth_capacity_set must not create numeric wealth');
 }
 
 function testWealthCapacityChoiceExplanation(): void {
@@ -133,10 +131,6 @@ async function testWealthCapacityRaiseToEffect(): Promise<void> {
   engine.startNewGame('Wealth Capacity Semantics', 'male');
   const noSurplus = engine.getGameState();
   noSurplus.player.wealthCapacity = 'no_surplus';
-  noSurplus.player.money = 1234;
-  noSurplus.player.wealth = 42;
-  const moneyBefore = noSurplus.player.money;
-  const wealthBefore = noSurplus.player.wealth;
   const factsBefore = JSON.parse(JSON.stringify(noSurplus.facts ?? {}));
 
   const raised = await engine.executeChoiceEffects([
@@ -147,22 +141,18 @@ async function testWealthCapacityRaiseToEffect(): Promise<void> {
   engine.startNewGame('Wealth Capacity Semantics', 'male');
   const comfortable = engine.getGameState();
   comfortable.player.wealthCapacity = 'comfortable_means';
-  comfortable.player.money = 1234;
-  comfortable.player.wealth = 42;
-  const comfortableMoneyBefore = comfortable.player.money;
-  const comfortableWealthBefore = comfortable.player.wealth;
   const comfortableFactsBefore = JSON.parse(JSON.stringify(comfortable.facts ?? {}));
 
   const unchanged = await engine.executeChoiceEffects([
     { type: 'wealth_capacity_raise_to', minimum: 'modest_savings' } as never,
   ], 'wealth_raise_probe', 'raise');
   nodeAssert.equal(unchanged.gameState.player.wealthCapacity, 'comfortable_means');
-  nodeAssert.equal(unchanged.gameState.player.money, comfortableMoneyBefore);
-  nodeAssert.equal(unchanged.gameState.player.wealth, comfortableWealthBefore);
+  nodeAssert.equal('money' in unchanged.gameState.player, false);
+  nodeAssert.equal('wealth' in unchanged.gameState.player, false);
   nodeAssert.deepEqual(unchanged.gameState.facts ?? {}, comfortableFactsBefore);
 
-  nodeAssert.equal(raised.gameState.player.money, moneyBefore);
-  nodeAssert.equal(raised.gameState.player.wealth, wealthBefore);
+  nodeAssert.equal('money' in raised.gameState.player, false);
+  nodeAssert.equal('wealth' in raised.gameState.player, false);
   nodeAssert.deepEqual(raised.gameState.facts ?? {}, factsBefore);
 
   const executor = new EventExecutor();

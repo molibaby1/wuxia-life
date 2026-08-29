@@ -1081,7 +1081,7 @@ const coreFunctionSuite: TestSuite = {
         };
 
         const result = evaluator.evaluate(condition, state);
-        assert(result === false, '不满足条件应被判定为 false');
+        assert(result === false, '不满足条件应被判定为 false, ');
       },
     },
     {
@@ -1149,7 +1149,7 @@ const coreFunctionSuite: TestSuite = {
       test: () => {
         const evaluator = new ConditionEvaluator();
         const state = framework.createTestState();
-        const expression = 'player.martialPower >= 20 ? true : false';
+        const expression = 'player.martialPower >= 20 ? true : false, ';
 
         const originalWarn = console.warn;
         const warnLogs: string[] = [];
@@ -1165,7 +1165,7 @@ const coreFunctionSuite: TestSuite = {
             },
             state,
           );
-          assert(result === false, '非法表达式应 fail-close 返回 false');
+          assert(result === false, '非法表达式应 fail-close 返回 false, ');
           assert(
             warnLogs.some(log => log.includes(expression)),
             '错误日志应包含原始表达式',
@@ -1189,23 +1189,23 @@ const coreFunctionSuite: TestSuite = {
         const invalidCases = [
           {
             expression: 'player.constructor == true',
-            reason: '非法 player 字段访问应返回 false',
+            reason: '非法 player 字段访问应返回 false, ',
           },
           {
             expression: 'player.__proto__ == true',
-            reason: '原型链字段访问应返回 false',
+            reason: '原型链字段访问应返回 false, ',
           },
           {
             expression: 'luck >= 10',
-            reason: '未白名单顶层字段应返回 false',
+            reason: '未白名单顶层字段应返回 false, ',
           },
           {
             expression: 'flags.has(testFlag)',
-            reason: 'flags.has 非字符串参数应返回 false',
+            reason: 'flags.has 非字符串参数应返回 false, ',
           },
           {
             expression: '(player.age >= 18',
-            reason: '括号不配对应返回 false',
+            reason: '括号不配对应返回 false, ',
           },
         ];
 
@@ -3094,14 +3094,14 @@ const compatibilitySuite: TestSuite = {
     },
     {
       name: '兼容性测试 - Canonical Snapshot 存档',
-      description: '测试 saveGame 只写入 Canonical Snapshot 3.15.0',
+      description: '测试 saveGame 只写入 Canonical Snapshot 3.16.0',
       test: () => {
         saveManager.clearAllSaves();
         const state = new GameEngineIntegration().getGameState();
         const saveId = saveManager.saveGame(state, 'us-018-version-marker');
         const loaded = saveManager.loadGame(saveId);
         assert(loaded !== null, '当前版本存档应可正常读取');
-        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.15.0', '存档应写入 Canonical Snapshot 3.15.0');
+        assertEqual(loaded!.snapshot.metadata.schemaVersion, '3.16.0', '存档应写入 Canonical Snapshot 3.16.0');
       },
     },
     {

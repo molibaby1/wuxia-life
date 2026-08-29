@@ -108,7 +108,6 @@ function createScenario(money: number, habit: number): { engine: GameEngineInteg
   const engine = new GameEngineIntegration();
   engine.startNewGame('Business Habit Wallet Retirement', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.reputation = 10;
   state.player.merchantNetwork = 10;
   state.player.traits = [];
@@ -150,7 +149,7 @@ function testEligibilityAndWalletInvariance(): Promise<void> {
           await engine.executeChoiceEffects(choice.effects ?? [], event.id, choice.id);
           const after = engine.getGameState();
 
-          assert.equal(after.player.money, money, `${event.id}/${choice.id} must preserve money=${money}`);
+          assert.equal('money' in after.player, false, `${event.id}/${choice.id} must preserve money=${money}`);
           assert.equal(
             after.player.reputation,
             choiceExpectation.reputationValue ?? beforeReputation + (choiceExpectation.reputationDelta ?? 0),
@@ -182,7 +181,7 @@ async function main(): Promise<void> {
   testAuthoringAndScheduleContracts();
   await testEligibilityAndWalletInvariance();
   testYouthStallMilestoneEvidence();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyBusinessHabitRewardRetirement.test.ts: ok');
 }
 

@@ -86,20 +86,18 @@ async function testOfficialRuntime(): Promise<void> {
   lowEngine.startNewGame('Official Heavy Low Wealth', 'male');
   const low = lowEngine.getGameState();
   low.player.wealthCapacity = 'comfortable_means';
-  low.player.money = 999;
   assert.equal(evaluator.evaluate(heavy.condition!, low), false);
 
   const heavyEngine = new GameEngineIntegration();
   heavyEngine.startNewGame('Official Heavy Wealthy', 'male');
   const heavyState = heavyEngine.getGameState();
   heavyState.player.wealthCapacity = 'wealthy';
-  heavyState.player.money = MONEY_SENTINEL;
   heavyState.player.reputation = 20;
   heavyState.player.charisma = 20;
   heavyState.player.traits = [];
   await heavyEngine.executeChoiceEffects(heavy.effects, official.id, heavy.id);
   const heavyAfter = heavyEngine.getGameState();
-  assert.equal(heavyAfter.player.money, MONEY_SENTINEL);
+  assert.equal('money' in heavyAfter.player, false);
   assert.equal(heavyAfter.player.wealthCapacity, 'wealthy');
   assert.equal(heavyAfter.player.reputation, 45);
   assert.equal(heavyAfter.player.charisma, 32);
@@ -109,13 +107,12 @@ async function testOfficialRuntime(): Promise<void> {
   moderateEngine.startNewGame('Official Moderate', 'male');
   const moderateState = moderateEngine.getGameState();
   moderateState.player.wealthCapacity = 'comfortable_means';
-  moderateState.player.money = MONEY_SENTINEL;
   moderateState.player.reputation = 20;
   moderateState.player.charisma = 20;
   moderateState.player.traits = [];
   await moderateEngine.executeChoiceEffects(moderate.effects, official.id, moderate.id);
   const moderateAfter = moderateEngine.getGameState();
-  assert.equal(moderateAfter.player.money, MONEY_SENTINEL);
+  assert.equal('money' in moderateAfter.player, false);
   assert.equal(moderateAfter.player.wealthCapacity, 'comfortable_means');
   assert.equal(moderateAfter.player.reputation, 35);
   assert.equal(moderateAfter.player.charisma, 28);
@@ -147,7 +144,6 @@ async function testIntelligenceRuntime(): Promise<void> {
   engine.startNewGame('Merchant Intelligence Wallet Neutral', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'comfortable_means';
-  state.player.money = MONEY_SENTINEL;
   state.player.charisma = 20;
   state.player.reputation = 20;
   state.player.traits = [];
@@ -156,7 +152,7 @@ async function testIntelligenceRuntime(): Promise<void> {
 
   await engine.executeChoiceEffects(intelligence.autoEffects ?? [], intelligence.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'comfortable_means');
   assert.equal(after.player.charisma, 28);
   assert.equal(after.player.reputation, 15);
@@ -201,7 +197,6 @@ function testChamberEligibilityRuntime(): void {
   low.flags.merchant_intelligence = true;
   low.player.flags.merchant_intelligence = true;
   low.player.wealthCapacity = 'modest_savings';
-  low.player.money = 999;
   assert.equal(evaluator.evaluate(chamber.conditions![0], low), true);
   assert.equal(evaluator.evaluate(chamber.conditions![1], low), false);
 
@@ -211,7 +206,6 @@ function testChamberEligibilityRuntime(): void {
   comfortable.flags.merchant_intelligence = true;
   comfortable.player.flags.merchant_intelligence = true;
   comfortable.player.wealthCapacity = 'comfortable_means';
-  comfortable.player.money = 0;
   assert.equal(evaluator.evaluate(chamber.conditions![0], comfortable), true);
   assert.equal(evaluator.evaluate(chamber.conditions![1], comfortable), true);
 }
@@ -225,14 +219,13 @@ async function assertChamberTransition(
   engine.startNewGame(`Chamber ${beforeWealth}`, 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = beforeWealth;
-  state.player.money = MONEY_SENTINEL;
   state.player.reputation = 20;
   state.player.charisma = 20;
   state.player.traits = [];
 
   await engine.executeChoiceEffects(chamber.autoEffects ?? [], chamber.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, expectedWealth);
   assert.equal(after.player.reputation, 50);
   assert.equal(after.player.charisma, 32);
@@ -261,7 +254,6 @@ async function testFairModerateToChamberContinuity(): Promise<void> {
   engine.startNewGame('Fair Moderate Chamber Continuity', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'comfortable_means';
-  state.player.money = MONEY_SENTINEL;
   state.player.reputation = 40;
   state.player.charisma = 20;
   state.player.traits = [];
@@ -270,16 +262,16 @@ async function testFairModerateToChamberContinuity(): Promise<void> {
 
   assert.equal(eventConditionsPass(official, engine), true);
   await engine.executeChoiceEffects(moderate.effects, official.id, moderate.id);
-  assert.equal(engine.getGameState().player.money, MONEY_SENTINEL);
+  assert.equal('money' in engine.getGameState().player, false);
   assert.equal(eventConditionsPass(intelligence, engine), true);
 
   await engine.executeChoiceEffects(intelligence.autoEffects ?? [], intelligence.id);
-  assert.equal(engine.getGameState().player.money, MONEY_SENTINEL);
+  assert.equal('money' in engine.getGameState().player, false);
   assert.equal(eventConditionsPass(chamber, engine), true);
 
   await engine.executeChoiceEffects(chamber.autoEffects ?? [], chamber.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'wealthy');
   assert.equal(after.flags.merchant_chamber_head, true);
   assert.equal(eventConditionsPass(getEvent('merchant_wealth_peak'), engine), true);
@@ -296,7 +288,6 @@ async function testMonopolyHeavyToChamberContinuity(): Promise<void> {
   engine.startNewGame('Monopoly Heavy Chamber Continuity', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'wealthy';
-  state.player.money = 0;
   state.player.reputation = 40;
   state.player.charisma = 20;
   state.player.traits = [];
@@ -306,16 +297,16 @@ async function testMonopolyHeavyToChamberContinuity(): Promise<void> {
   assert.equal(eventConditionsPass(official, engine), true);
   assert.equal(evaluator.evaluate(heavy.condition!, engine.getGameState()), true);
   await engine.executeChoiceEffects(heavy.effects, official.id, heavy.id);
-  assert.equal(engine.getGameState().player.money, 0);
+  assert.equal('money' in engine.getGameState().player, false);
 
   assert.equal(eventConditionsPass(intelligence, engine), true);
   await engine.executeChoiceEffects(intelligence.autoEffects ?? [], intelligence.id);
-  assert.equal(engine.getGameState().player.money, 0);
+  assert.equal('money' in engine.getGameState().player, false);
 
   assert.equal(eventConditionsPass(chamber, engine), true);
   await engine.executeChoiceEffects(chamber.autoEffects ?? [], chamber.id);
   assert.equal(engine.getGameState().player.wealthCapacity, 'wealthy');
-  assert.equal(engine.getGameState().player.money, 0);
+  assert.equal('money' in engine.getGameState().player, false);
 }
 
 function testPeakRemainsDeferred(): void {

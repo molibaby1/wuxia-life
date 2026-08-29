@@ -24,7 +24,6 @@ function testWealthEarlyAuditOmitsWalletBalance(): void {
         player: {
           age: 10,
           businessAcumen: 3,
-          money: 500,
           lifeStates: { trainingHabit: 0, studyHabit: 1, businessHabit: 1 },
         },
         flags: { p8_persona_id: 'p8-wealth-shen' },
@@ -47,7 +46,6 @@ function testExperienceTraceIgnoresRetiredWalletStats(): void {
   engine.startNewGame('US-004', 'male');
   const before = engine.getGameState();
   const after = engine.getGameState();
-  after.player.money = (before.player.money ?? 0) + 99;
   after.player.wealth = 77;
 
   const delta = createExperienceStateDelta(before, after);

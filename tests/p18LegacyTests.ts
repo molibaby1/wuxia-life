@@ -44,7 +44,6 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       affiliation: null,
       title: null,
       reputation: 65,
-      money: 1200,
       knowledge: 45,
       charisma: 50,
       businessAcumen: 35,
@@ -85,7 +84,6 @@ function testSuccessorRolesAndChannels(): void {
     player: {
       flags: { martial_transmission: true, has_disciples: true, disciple_training_active: true },
       martialHeritage: 70,
-      money: 2000,
     } as GameState['player'],
     lifePath: {
       faction: 'neutral',
@@ -130,7 +128,6 @@ function testCultivationPressure(): void {
     flags: { has_disciples: true, disciple_training_active: true, martial_transmission: true },
     player: {
       flags: { has_disciples: true, disciple_training_active: true, martial_transmission: true },
-      money: 2500,
       martialHeritage: 75,
       connections: 70,
     } as GameState['player'],
@@ -139,7 +136,6 @@ function testCultivationPressure(): void {
     flags: { has_disciples: true, has_child: true },
     player: {
       flags: { has_disciples: true, has_child: true },
-      money: 30,
       martialHeritage: 5,
       connections: 8,
       martialPower: 95,

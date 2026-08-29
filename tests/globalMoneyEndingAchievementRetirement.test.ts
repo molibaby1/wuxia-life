@@ -19,7 +19,6 @@ function makeState(overrides: Partial<GameState['player']> = {}): GameState {
   state.player.businessAcumen = 0;
   state.player.influence = 0;
   state.player.chivalry = 0;
-  state.player.money = 0;
   state.player.spouse = null;
   state.player.children = 0;
   state.player.flags = {};
@@ -94,7 +93,7 @@ function main(): void {
   testModerateNonMoneyEvidenceRemainsEffective();
   testHighNonMoneyEvidenceRemainsEffective();
   testNeutralAchievementBlockHasNoReplacementProxy();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyEndingAchievementRetirement.test.ts: ok');
 }
 

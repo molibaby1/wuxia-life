@@ -13,7 +13,6 @@ async function run(): Promise<void> {
   const engine = new GameEngineIntegration();
   engine.startNewGame('经世测试', 'male');
   const initial = engine.getGameState();
-  const initialMoney = initial.player.money;
   initial.player.age = 16;
   await engine.executeChoiceEffects(studyBusiness.effects ?? [], talent.id, studyBusiness.id);
   const afterTalent = engine.getGameState();
@@ -23,8 +22,8 @@ async function run(): Promise<void> {
   if (afterTalent.player.wealthCapacity !== 'modest_savings') {
     throw new Error('merchant talent must raise wealth capacity to modest_savings');
   }
-  if (afterTalent.player.money !== initialMoney) {
-    throw new Error('merchant talent must not mutate legacy money');
+  if ('money' in afterTalent.player) {
+    throw new Error('merchant talent must not create legacy money');
   }
 
   await engine.executeChoiceEffects(openGrocery.effects ?? [], shop.id, openGrocery.id);
@@ -32,8 +31,8 @@ async function run(): Promise<void> {
   if (afterShop.player.flags?.merchant_shop_grocery !== true) {
     throw new Error('merchant shop must apply explicit grocery flag');
   }
-  if (afterShop.player.money !== initialMoney) {
-    throw new Error('merchant shop opening must not mutate legacy money');
+  if ('money' in afterShop.player) {
+    throw new Error('merchant shop opening must not create legacy money');
   }
   if (!hasAsset(afterShop.facts, 'merchant_shop')) {
     throw new Error('merchant shop opening must own merchant_shop Asset');

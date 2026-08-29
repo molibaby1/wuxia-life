@@ -22,7 +22,6 @@ function makeState(
   overrides: { wealth?: number; flags?: Record<string, unknown>; reputation?: number } = {},
 ): GameState {
   const state = new GameEngineIntegration().getGameState();
-  state.player.money = money;
   if (overrides.wealth === undefined) {
     delete state.player.wealth;
   } else {
@@ -295,7 +294,7 @@ async function main(): Promise<void> {
   await testHeadlessMoneyScoringRetired();
   testWalletFrustrationRetired();
   testReplayMoneyInvariance();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyP8HeadlessEvaluationRetirement.test.ts: ok');
 }
 

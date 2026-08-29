@@ -48,7 +48,7 @@ function collectFormalMoneyWrites(): Array<{ eventId: string }> {
   return writes;
 }
 
-function createMinimalState(money = 317): GameState {
+function createMinimalState(): GameState {
   const player: PlayerState = {
     name: 'E3守卫',
     gender: 'male',
@@ -64,7 +64,6 @@ function createMinimalState(money = 317): GameState {
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     affiliation: null,
@@ -157,25 +156,24 @@ function testLivePresentationSurfacesHaveNoMoney(): void {
     businessAcumen: 0,
     influence: 0,
     charisma: 0,
-    money: 10,
   } as never;
   assert.deepEqual(calculatePublicStatDeltas(before, { ...before, money: 99 }), {});
 }
 
 async function testEventExecutorCannotStatModifyMoney(): Promise<void> {
   assert.equal(read('src/core/EventExecutor.ts').includes("'money'"), false);
-  const before = createMinimalState(317);
+  const before = createMinimalState();
   const after = await new EventExecutor().executeEffects(
     [{ type: 'stat_modify', target: 'money', value: 50, operator: 'add' }],
     before,
   );
-  assert.equal(after.player.money, 317);
+  assert.equal('money' in after.player, false);
 }
 
 function testConditionEvaluatorCannotReadMoney(): void {
   assert.equal(ConditionEvaluator.DIRECT_PLAYER_PROPERTIES.has('money'), false);
   const evaluator = new ConditionEvaluator();
-  const state = createMinimalState(999);
+  const state = createMinimalState();
   // Fail closed: rejected money expressions evaluate to false (never unlock gameplay).
   assert.equal(evaluator.evaluate({ type: 'expression', expression: 'player.money >= 1' }, state), false);
   assert.equal(evaluator.evaluate({ type: 'expression', expression: 'money >= 1' }, state), false);
@@ -234,13 +232,17 @@ function testFormalAuthoringGuardActive(): void {
 }
 
 function testCompatibilityBoundaryPreserved(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
-  assert.match(read('src/contracts/gameStateSnapshot.ts'), /\bmoney:\s*number\b/);
-  assert.match(read('src/types/eventTypes.ts'), /\bmoney:\s*number\b/);
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
+  assert.equal(/\bwealth\?:\s*number\b/.test(read('src/types/eventTypes.ts')), false);
 
   const engine = new GameEngineIntegration();
   engine.startNewGame('E3兼容', 'male');
-  assert.equal(engine.getGameState().player.money, 100);
+  const player = engine.getGameState().player as unknown as Record<string, unknown>;
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
+  assert.equal(player.wealthCapacity, 'no_surplus');
 }
 
 async function main(): Promise<void> {

@@ -56,8 +56,8 @@ function run(): void {
   );
 
   assert(
-    GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.15.0',
-    `schema version must be 3.15.0, got ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
+    GAME_STATE_SNAPSHOT_SCHEMA_VERSION === '3.16.0',
+    `schema version must be 3.16.0, got ${GAME_STATE_SNAPSHOT_SCHEMA_VERSION}`,
   );
 
   for (const field of LEGACY_MARTIAL_FIELDS) {
@@ -105,7 +105,6 @@ function run(): void {
       martialPower: 20,
       chivalry: 20,
       constitution: 20,
-      money: 100,
       wealthCapacity: 'no_surplus',
       affiliation: null,
       alive: true,
@@ -135,7 +134,7 @@ function run(): void {
   const clean = cloneSnapshot(gameStateSnapshotAge50 as GameStateSnapshot);
   assert(
     validateCanonicalSnapshot(clean).length === 0,
-    'clean 3.15.0 fixture must validate',
+    'clean 3.16.0 fixture must validate',
   );
 
   for (const field of LEGACY_MARTIAL_FIELDS) {

@@ -5,7 +5,7 @@ function createState(): GameState {
   const player: PlayerState = {
     name: '结局测试', gender: 'male', age: 70, martialPower: 0,
     chivalry: 0,
-    charisma: 0, constitution: 50, money: 100, wealthCapacity: 'no_surplus',
+    charisma: 0, constitution: 50, wealthCapacity: 'no_surplus',
     reputation: 0, connections: 10, healthStatus: 'healthy', statuses: [], alive: true,
     items: [], flags: {}, events: [], relationships: [], businessAcumen: 0, influence: 0,
   };

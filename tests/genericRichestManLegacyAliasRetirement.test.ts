@@ -11,7 +11,6 @@ function createState(): GameState {
     chivalry: 0,
     charisma: 0,
     constitution: 50,
-    money: 999999,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     connections: 10,

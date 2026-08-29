@@ -95,7 +95,6 @@ function createMinimalPlayer(overrides: Partial<PlayerState> = {}): PlayerState 
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money: 0,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     affiliation: null,
@@ -195,8 +194,8 @@ function testRetiredP9ContentStillAbsent(): void {
   assert.equal(loader.getEventById('p9_route_identity_wealth'), undefined);
 }
 
-async function executeEffects(eventId: string, effects: EffectDefinition[], money: number): Promise<GameState> {
-  const state = createMinimalState({ player: createMinimalPlayer({ money }) });
+async function executeEffects(eventId: string, effects: EffectDefinition[], _money: number): Promise<GameState> {
+  const state = createMinimalState();
   return new EventExecutor().executeEffects(effects, state);
 }
 
@@ -204,7 +203,6 @@ async function executeChoice(eventId: string, choiceId: string, money: number): 
   const engine = new GameEngineIntegration();
   engine.startNewGame('Classified Ordinary Wallet Abstraction', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.wealthCapacity = 'no_surplus';
   const event = getEvent(eventId);
   const choice = event.choices?.find(candidate => candidate.id === choiceId);
@@ -212,7 +210,7 @@ async function executeChoice(eventId: string, choiceId: string, money: number): 
   const beforeWealthCapacity = state.player.wealthCapacity;
   await engine.executeChoiceEffects(choice.effects ?? [], event.id, choice.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, money, `${eventId}/${choiceId} must not alter money`);
+  assert.equal('money' in after.player, false, `${eventId}/${choiceId} must not alter money`);
   assert.equal(after.player.wealthCapacity, beforeWealthCapacity, `${eventId}/${choiceId} must not alter Wealth Capacity`);
   return after;
 }
@@ -245,7 +243,7 @@ async function testRepresentativeMoneySentinelInvariance(): Promise<void> {
       const event = getEvent(testCase.eventId);
       const before = money;
       const state = await executeEffects(testCase.eventId, event.autoEffects ?? [], before);
-      assert.equal(state.player.money, before, `${testCase.eventId} auto must not alter money`);
+      assert.equal('money' in state.player, false, `${testCase.eventId} auto must not alter money`);
       testCase.assert?.(state);
     }
   }
@@ -258,14 +256,14 @@ async function testSetMoneyRetirements(): Promise<void> {
       getEvent('relationship_debt_return').autoEffects ?? [],
       money,
     );
-    assert.equal(debtState.player.money, money, 'relationship_debt_return must not set money');
+    assert.equal('money' in debtState.player, false, 'relationship_debt_return must not set money');
 
     const courtState = await executeChoice(
       'court_politics_revealed',
       'court_politics_revealed_choice_2',
       money,
     );
-    assert.equal(courtState.player.money, money, 'court_politics_revealed choice 2 must not set money');
+    assert.equal('money' in courtState.player, false, 'court_politics_revealed choice 2 must not set money');
     assert.equal(courtState.flags.exploited_court_plot, true);
   }
 }
@@ -348,7 +346,7 @@ async function main(): Promise<void> {
   testStrategicSectExpansionChoice1Migrated();
   await testRepresentativeMoneySentinelInvariance();
   await testSetMoneyRetirements();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyClassifiedOrdinaryWalletAbstraction.test.ts: all passed');
 }
 

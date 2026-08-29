@@ -31,7 +31,6 @@ function statEffects(effects: JsonRecord[] | undefined): JsonRecord[] {
 function makeState(money: number): { engine: GameEngineIntegration; state: GameState } {
   const engine = new GameEngineIntegration();
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.charisma = 50;
   state.player.traits = [];
   state.flags.has_sworn_siblings = true;
@@ -159,7 +158,7 @@ async function testRuntimeMoneyInvariance(): Promise<void> {
         financialHelp.id,
       );
       const afterFinancialHelp = swornHelpScenario.engine.getGameState();
-      assert.equal(afterFinancialHelp.player.money, money);
+      assert.equal('money' in afterFinancialHelp.player, false);
       financialHelpOutcomes.push(stateWithoutMoney(afterFinancialHelp));
 
       const reconciliationScenario = makeState(money);
@@ -170,14 +169,14 @@ async function testRuntimeMoneyInvariance(): Promise<void> {
         reconciliation.id,
       );
       const afterReconciliation = reconciliationScenario.engine.getGameState();
-      assert.equal(afterReconciliation.player.money, money);
+      assert.equal('money' in afterReconciliation.player, false);
       reconciliationOutcomes.push(stateWithoutMoney(afterReconciliation));
 
       const propertyLossScenario = makeState(money);
       assert.equal(isEligible(propertyLoss.conditions, propertyLossScenario.state), true);
       await propertyLossScenario.engine.executeAutoEvent(propertyLossRuntime);
       const afterPropertyLoss = propertyLossScenario.engine.getGameState();
-      assert.equal(afterPropertyLoss.player.money, money);
+      assert.equal('money' in afterPropertyLoss.player, false);
       assert.equal(afterPropertyLoss.flags.setback_property_loss_active, true);
       propertyLossOutcomes.push(stateWithoutMoney(afterPropertyLoss));
     }
@@ -197,7 +196,7 @@ async function testRuntimeMoneyInvariance(): Promise<void> {
 async function main(): Promise<void> {
   testAuthoringSemantics();
   await testRuntimeMoneyInvariance();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyRelationshipSetbackRetirement.test.ts: ok');
 }
 

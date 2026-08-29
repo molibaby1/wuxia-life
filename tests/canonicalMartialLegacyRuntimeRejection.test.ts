@@ -23,7 +23,6 @@ function createState(overrides: Partial<PlayerState> = {}): GameState {
       knowledge: 25,
       connections: 15,
       reputation: 20,
-      money: 100,
       flags: {},
       events: [],
       relationships: [],

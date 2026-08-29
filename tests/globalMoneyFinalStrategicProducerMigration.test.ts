@@ -76,7 +76,6 @@ function createMinimalPlayer(overrides: Partial<PlayerState> = {}): PlayerState 
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money: 0,
     wealthCapacity: 'no_surplus',
     reputation: 10,
     affiliation: null,
@@ -327,7 +326,6 @@ async function testRequirementNonConsumptionAndMoneySentinels(): Promise<void> {
       const engine = new GameEngineIntegration();
       engine.startNewGame('D16 sentinel', 'male');
       const state = engine.getGameState();
-      state.player.money = money;
       state.player.wealthCapacity = sample.wealth;
       state.player.connections = sample.choiceId === 'ally_pay_ransom_supported' ? 20 : 10;
       state.player.reputation = 10;
@@ -338,7 +336,7 @@ async function testRequirementNonConsumptionAndMoneySentinels(): Promise<void> {
         sample.choiceId,
       );
       const after = engine.getGameState();
-      assert.equal(after.player.money, money, `${sample.eventId}/${sample.choiceId} money sentinel`);
+      assert.equal('money' in after.player, false, `${sample.eventId}/${sample.choiceId} money sentinel`);
       assert.equal(after.player.wealthCapacity, beforeWealth, `${sample.eventId}/${sample.choiceId} must not consume Wealth`);
     }
   }
@@ -348,7 +346,6 @@ async function testRequirementNonConsumptionAndMoneySentinels(): Promise<void> {
     engine.startNewGame('D16 non-consumption', 'male');
     const state = engine.getGameState();
     state.player.wealthCapacity = wealth;
-    state.player.money = 317;
     await engine.executeChoiceEffects(
       getChoice('career_foundation_sect', 'create_sect').effects ?? [],
       'career_foundation_sect',
@@ -357,7 +354,7 @@ async function testRequirementNonConsumptionAndMoneySentinels(): Promise<void> {
     const after = engine.getGameState();
     assert.equal(after.player.wealthCapacity, wealth);
     assert.equal(after.flags.has_own_sect ?? after.player.flags?.has_own_sect, true);
-    assert.equal(after.player.money, 317);
+    assert.equal('money' in after.player, false);
   }
 }
 
@@ -388,15 +385,15 @@ async function testSectExpansionFlagRuntime(): Promise<void> {
 
 async function testBorderEndingTransitionMatrix(): Promise<void> {
   for (const wealth of WEALTH_TIERS) {
-    for (const money of MONEY_SENTINELS) {
+    for (const _money of MONEY_SENTINELS) {
       const before = createMinimalState({
-        player: createMinimalPlayer({ money, wealthCapacity: wealth }),
+        player: createMinimalPlayer({ wealthCapacity: wealth }),
       });
       const after = await new EventExecutor().executeEffects(
         getEvent('border_ending_merchant').autoEffects ?? [],
         before,
       );
-      assert.equal(after.player.money, money);
+      assert.equal('money' in after.player, false);
       assert.equal(after.player.wealthCapacity, 'regional_magnate');
       assert.equal(after.flags.border_ending_merchant, true);
     }
@@ -414,7 +411,7 @@ async function main(): Promise<void> {
   await testRequirementNonConsumptionAndMoneySentinels();
   await testSectExpansionFlagRuntime();
   await testBorderEndingTransitionMatrix();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyFinalStrategicProducerMigration.test.ts: all passed');
 }
 

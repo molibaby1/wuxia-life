@@ -55,10 +55,11 @@ function testCompiledP25OmitLegacyBalanceFixtures(): void {
   );
 }
 
-function testSimulationFactoryUsesCompatZeroOnly(): void {
+function testSimulationFactoryOmitsLegacyWalletField(): void {
   const source = fs.readFileSync(COMPAT_FACTORY, 'utf8');
   assert(!/\bmoney\s*:\s*number\b/.test(source), 'factory options must not accept money input');
-  assert.match(source, /\bmoney:\s*0\b/, 'factory keeps internal compat zero only');
+  assert(!/\bmoney:\s*0\b/.test(source), 'factory must not seed legacy money');
+  assert(source.includes("wealthCapacity: 'no_surplus'"), 'factory must seed canonical wealthCapacity');
 }
 
 function testLifetimeSimulationsStillUnlock(): void {
@@ -86,11 +87,13 @@ function testCreateSimulationPlayerStateOmitsMoneyInput(): void {
     connections: 20,
     alive: true,
   });
-  assert.equal(player.money, 0, 'simulation factory seeds compat zero only');
+  assert.equal('money' in player, false, 'simulation factory must not create legacy money');
+  assert.equal('wealth' in player, false, 'simulation factory must not create numeric wealth');
+  assert.equal(player.wealthCapacity, 'no_surplus');
 }
 
 testCompiledP25OmitLegacyBalanceFixtures();
-testSimulationFactoryUsesCompatZeroOnly();
+testSimulationFactoryOmitsLegacyWalletField();
 testLifetimeSimulationsStillUnlock();
 testConsistencyAndHabitSlicesRemainGreen();
 testCreateSimulationPlayerStateOmitsMoneyInput();

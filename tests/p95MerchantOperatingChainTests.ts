@@ -34,7 +34,6 @@ function merchantState(overrides: Partial<GameState> = {}): GameState {
     player: {
       age: 18,
       charisma: 10,
-      money: 80,
       businessAcumen: 10,
       connections: 8,
       reputation: 8,

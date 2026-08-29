@@ -104,7 +104,6 @@ function createScenario(money: number, flags: Record<string, boolean>): { engine
   engine.startNewGame('Medical Wallet Retirement', 'male');
   engine.setSuppressLethalSetbacks(true);
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.traits = [];
   state.player.reputation = 10;
   state.player.connections = 10;
@@ -136,7 +135,7 @@ async function assertMoneyInvariant(
   const outcomes: Record<string, unknown>[] = [];
   for (const money of MONEY_SENTINELS) {
     const state = await run(money);
-    assert.equal(state.player.money, money, `${label} must preserve money=${money}`);
+    assert.equal('money' in state.player, false, `${label} must preserve money=${money}`);
     outcomes.push(meaningfulState(state, flags));
   }
   assert.deepEqual(outcomes[0], outcomes[1], `${label} meaning must not depend on money=317`);
@@ -263,7 +262,7 @@ async function testRuntimeWalletInvariance(): Promise<void> {
 async function main(): Promise<void> {
   testAuthoringAndScheduleContracts();
   await testRuntimeWalletInvariance();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyMedicalRouteRewardRetirement.test.ts: ok');
 }
 

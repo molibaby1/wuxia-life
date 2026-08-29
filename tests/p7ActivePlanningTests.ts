@@ -56,12 +56,11 @@ export async function runP7ConditionCacheDriftTests(): Promise<void> {
   base.player.charisma = 60;
   assertEqual(evaluator.evaluate(charismaCond, base), true, 'charisma 60 should pass after drift');
 
-  const moneyState = createP7State();
-  moneyState.player.money = 50;
-  const moneyCond = { type: 'expression' as const, expression: 'money >= 100' };
-  assertEqual(evaluator.evaluate(moneyCond, moneyState), false, 'money 50 should fail');
-  moneyState.player.money = 120;
-  assertEqual(evaluator.evaluate(moneyCond, moneyState), true, 'money 120 should pass');
+  const reputationState = createP7State();
+  const reputationCond = { type: 'expression' as const, expression: 'reputation >= 100' };
+  assertEqual(evaluator.evaluate(reputationCond, reputationState), false, 'reputation baseline should fail');
+  reputationState.player.reputation = 120;
+  assertEqual(evaluator.evaluate(reputationCond, reputationState), true, 'reputation 120 should pass after drift');
 
   const knowledgeState = createP7State();
   knowledgeState.player.knowledge = 30;

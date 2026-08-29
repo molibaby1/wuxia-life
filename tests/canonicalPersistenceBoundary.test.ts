@@ -35,7 +35,7 @@ for (const [label, mutate] of [
   ['invalid gender enum', snapshot => { snapshot.state.player.gender = 'unknown' as never; }],
   ['invalid alive primitive', snapshot => { snapshot.state.player.alive = 'yes' as never; }],
   ['missing martialPower', snapshot => { delete (snapshot.state.player as Record<string, unknown>).martialPower; }],
-  ['invalid money', snapshot => { snapshot.state.player.money = Number.NaN; }],
+  ['forbidden money field', snapshot => { snapshot.state.player.money = 100; }],
   ['invalid fact object', snapshot => { (snapshot.state.facts as Record<string, unknown>).bad = {}; }],
   ['invalid relation string', snapshot => { (snapshot.state.relations as Record<string, unknown>).someone = 'high'; }],
   ['empty event id', snapshot => { snapshot.state.eventHistory = [{ eventId: '' }]; }],
@@ -149,7 +149,7 @@ const saveId = manager.saveGame(runtimeState, 'canonical-boundary');
 const save = manager.loadGame(saveId);
 assert(save, 'canonical save should load');
 assert('snapshot' in save, 'browser save must persist a canonical snapshot');
-assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.15.0');
+assert.equal((save as { snapshot: { metadata: { schemaVersion: string } } }).snapshot.metadata.schemaVersion, '3.16.0');
 const restored = defaultSnapshotConverter.fromSnapshot(save.snapshot);
 assert.equal(restored.player.wealthCapacity, runtimeState.player.wealthCapacity, 'wealthCapacity must round-trip');
 assert.deepEqual(restored.actionHistory, runtimeState.actionHistory, 'actionHistory must round-trip');

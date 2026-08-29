@@ -163,7 +163,7 @@ function testWealthInvariance(): void {
 }
 
 function testSnapshotAndNoWealthReplacement(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 }
 
 function assertStrategicOnlyMoneyInventory(): void {

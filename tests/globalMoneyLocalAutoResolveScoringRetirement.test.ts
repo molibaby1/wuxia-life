@@ -36,8 +36,6 @@ async function runAutoResolveCase(options: {
 }): Promise<AutoResolveResult> {
   const engine = useNewGameEngine();
   const state = gameEngine.getGameState();
-  state.player.money = options.money;
-
   const originalGetGameState = gameEngine.getGameState;
   const originalIsChoiceAvailable = gameEngine.isChoiceAvailable;
   const originalExecuteChoiceEffects = gameEngine.executeChoiceEffects;
@@ -87,7 +85,6 @@ async function runAutoResolveCase(options: {
 
 async function testDirectPositiveMoneyIsInert(): Promise<void> {
   const result = await runAutoResolveCase({
-    money: 317,
     choices: [
       {
         id: 'wallet-reward',
@@ -110,7 +107,6 @@ async function testDirectPositiveMoneyIsInert(): Promise<void> {
 
 async function testDirectNegativeMoneyDoesNotPenalizeNonMoneyUtility(): Promise<void> {
   const result = await runAutoResolveCase({
-    money: 317,
     choices: [
       {
         id: 'reputation-with-cost',
@@ -132,7 +128,6 @@ async function testDirectNegativeMoneyDoesNotPenalizeNonMoneyUtility(): Promise<
 
 async function testOutcomeMoneyIsInertForPositiveAndNegativeFlows(): Promise<void> {
   const positive = await runAutoResolveCase({
-    money: 317,
     choices: [
       {
         id: 'outcome-wallet-reward',
@@ -151,7 +146,6 @@ async function testOutcomeMoneyIsInertForPositiveAndNegativeFlows(): Promise<voi
   assert.equal(positive.selectedChoiceId, 'outcome-normal-choice');
 
   const negative = await runAutoResolveCase({
-    money: 317,
     choices: [
       {
         id: 'outcome-reputation-with-cost',
@@ -176,7 +170,6 @@ async function testOutcomeMoneyIsInertForPositiveAndNegativeFlows(): Promise<voi
 
 async function testNonMoneyWeightedStatAndAutoResolveExecutionRemain(): Promise<void> {
   const result = await runAutoResolveCase({
-    money: 317,
     choices: [
       {
         id: 'reputation-choice',
@@ -267,6 +260,6 @@ await testOutcomeMoneyIsInertForPositiveAndNegativeFlows();
 await testNonMoneyWeightedStatAndAutoResolveExecutionRemain();
 await testMoneyBalanceDoesNotChangeSelectedChoice();
 await testManualChoiceStillExecutesNormally();
-assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 
 console.log('globalMoneyLocalAutoResolveScoringRetirement.test.ts: ok');

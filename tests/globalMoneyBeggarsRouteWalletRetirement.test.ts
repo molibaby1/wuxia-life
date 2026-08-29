@@ -100,7 +100,6 @@ function createScenario(money: number, flags: Record<string, boolean>): {
   engine.startNewGame('Beggars Route Wallet Retirement', 'male');
   engine.setSuppressLethalSetbacks(true);
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.chivalry = 10;
   state.player.reputation = 10;
   state.player.knowledge = 10;
@@ -291,7 +290,7 @@ async function testTrialShareRuntime(): Promise<void> {
     const beforeChivalry = state.player.chivalry;
     await engine.executeChoiceEffects(share.effects ?? [], trial.id, share.id);
     const after = engine.getGameState();
-    assert.equal(after.player.money, money, `beggars_trial_share must preserve money=${money}`);
+    assert.equal('money' in after.player, false, `beggars_trial_share must preserve money=${money}`);
     assert.equal(after.player.chivalry, beforeChivalry + 2);
     assert.equal(after.flags.beggars_trial_shared, true);
     assert.equal(after.flags.beggars_trial_started, true);
@@ -314,7 +313,7 @@ async function testAssemblyTradeRuntime(): Promise<void> {
     });
     await engine.executeChoiceEffects(trade.effects ?? [], assembly.id, trade.id);
     const after = engine.getGameState();
-    assert.equal(after.player.money, money, `beggars_assembly_trade must preserve money=${money}`);
+    assert.equal('money' in after.player, false, `beggars_assembly_trade must preserve money=${money}`);
     assert.equal(after.flags.beggars_path_trade, true);
     assert.equal(after.flags.beggars_assembly_done, true);
     outcomes.push(meaningfulAssemblyTrade(after));
@@ -335,7 +334,7 @@ async function testEndingOfficialRuntime(): Promise<void> {
     });
     const beforeReputation = state.player.reputation;
     const after = await new EventExecutor().executeEffects(ending.autoEffects ?? [], engine.getGameState());
-    assert.equal(after.player.money, money, `beggars_ending_official must preserve money=${money}`);
+    assert.equal('money' in after.player, false, `beggars_ending_official must preserve money=${money}`);
     assert.equal(after.player.reputation, beforeReputation + 5);
     assert.equal(after.flags.beggars_ending_official, true);
     outcomes.push(meaningfulEndingOfficial(after));
@@ -351,7 +350,7 @@ async function main(): Promise<void> {
   await testTrialShareRuntime();
   await testAssemblyTradeRuntime();
   await testEndingOfficialRuntime();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyBeggarsRouteWalletRetirement.test.ts: ok');
 }
 

@@ -31,7 +31,6 @@ function createBaseState(overrides: Partial<GameState> = {}): GameState {
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money: 1000,
     wealthCapacity: 'no_surplus',
     reputation: 30,
     affiliation: null,

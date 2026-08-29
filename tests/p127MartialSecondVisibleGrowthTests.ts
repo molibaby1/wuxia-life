@@ -92,7 +92,6 @@ function testLegacyShapingIsRemovedWithoutLosingPracticeFeedback(): void {
       constitution: 10,
       chivalry: 10,
       reputation: 10,
-      money: 50,
       affiliation: null,
       lifeStates: state.player.lifeStates,
     },

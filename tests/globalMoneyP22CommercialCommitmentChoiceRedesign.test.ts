@@ -75,7 +75,6 @@ function createScenario(money: number): { engine: GameEngineIntegration; state: 
   const engine = new GameEngineIntegration();
   engine.startNewGame('P22 Commercial Commitment Choice Redesign', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.reputation = 10;
   state.player.traits = [];
   state.player.lifeStates = { ...state.player.lifeStates, businessHabit: 2 };
@@ -179,7 +178,7 @@ async function testRuntimeExpandBranch(): Promise<void> {
       route_wealth_committed: true,
       p22_wealth_route_forked: true,
     });
-    assert.equal(state.player.money, money);
+    assert.equal('money' in state.player, false);
   }
 }
 
@@ -194,7 +193,7 @@ async function testRuntimeConsolidateBranch(): Promise<void> {
       p22_wealth_route_forked: true,
     });
     assert.equal(state.player.reputation, beforeReputation + 3);
-    assert.equal(state.player.money, money);
+    assert.equal('money' in state.player, false);
   }
 }
 
@@ -278,7 +277,7 @@ async function main(): Promise<void> {
   await testRuntimeConsolidateBranch();
   await testMutualExclusivityAndMoneyInvariance();
   testMoneyProducerInventory();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyP22CommercialCommitmentChoiceRedesign.test.ts: all passed');
 }
 

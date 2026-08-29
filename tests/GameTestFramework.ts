@@ -329,7 +329,6 @@ export class GameTestFramework {
         affiliation: 'wudang',
         title: null,
         reputation: 50,
-        money: 100,
         flags: {},
         events: [],
         relationships: [],

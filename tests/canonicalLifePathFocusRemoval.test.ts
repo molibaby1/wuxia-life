@@ -66,10 +66,10 @@ for (const token of [
 const heroLines = JSON.parse(fs.readFileSync(path.resolve('src/data/lines/identity-hero.json'), 'utf8')) as unknown;
 assert.equal(JSON.stringify(heroLines).includes('lifepath_add_focus'), false, 'hero lines must not contain lifepath_add_focus');
 
-assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 const converter = new DefaultSnapshotConverter();
 const snapshot = clone(gameStateSnapshotAge50);
-assert.equal(snapshot.metadata.schemaVersion, '3.15.0');
+assert.equal(snapshot.metadata.schemaVersion, '3.16.0');
 assert.equal('focus' in (snapshot.state.lifePath ?? {}), false, 'normal snapshot must not contain focus');
 
 const oldVersion = clone(snapshot);

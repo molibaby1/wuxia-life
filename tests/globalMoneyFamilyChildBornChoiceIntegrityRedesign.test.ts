@@ -77,7 +77,6 @@ function createScenario(money: number): { engine: GameEngineIntegration; state: 
   const engine = new GameEngineIntegration();
   engine.startNewGame('Family Child Born Choice Integrity Redesign', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.connections = 5;
   state.player.children = 0;
   state.flags = { married: true };
@@ -110,7 +109,6 @@ function createMinimalPlayer(overrides: Partial<PlayerState> = {}): PlayerState 
     martialHeritage: 0,
     scholarlyHeritage: 0,
     merchantNetwork: 0,
-    money: 0,
     wealthCapacity: 'no_surplus',
     reputation: 0,
     affiliation: null,
@@ -212,14 +210,13 @@ function testSimpleAndCareAreNotWalletOnlyDistinction(): void {
   );
 }
 
-async function executeChoice(choiceId: string, money: number): Promise<GameState> {
-  const { engine } = createScenario(money);
+async function executeChoice(choiceId: string): Promise<GameState> {
+  const { engine } = createScenario(0);
   const event = getEvent();
-  const beforeMoney = engine.getGameState().player.money;
   const beforeWealthCapacity = engine.getGameState().player.wealthCapacity;
   await engine.executeChoiceEffects(getChoice(event, choiceId).effects ?? [], event.id, choiceId);
   const after = engine.getGameState();
-  assert.equal(after.player.money, beforeMoney, `${choiceId} must not alter money`);
+  assert.equal('money' in after.player, false, `${choiceId} must not alter money`);
   assert.equal(after.player.wealthCapacity, beforeWealthCapacity, `${choiceId} must not alter Wealth Capacity`);
   return after;
 }
@@ -361,7 +358,7 @@ async function main(): Promise<void> {
   await testRuntimePersonalCareBranch();
   await testMutualExclusivityAndMoneyInvariance();
   testMoneyProducerInventory();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyFamilyChildBornChoiceIntegrityRedesign.test.ts: all passed');
 }
 

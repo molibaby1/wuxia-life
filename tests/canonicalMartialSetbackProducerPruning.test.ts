@@ -26,7 +26,6 @@ function createState(overrides: Partial<PlayerState> = {}): GameState {
       knowledge: 25,
       connections: 15,
       reputation: 30,
-      money: 200,
       businessAcumen: 10,
       flags: {},
       events: [],
@@ -82,12 +81,12 @@ function run(): void {
 
   // C: formal canonical keys keep clamp-at-zero semantics.
   const clamped = applySetbackStatChanges(
-    createState({ martialPower: 3, constitution: 2, money: 50 }).player,
+    createState({ martialPower: 3, constitution: 2 }).player,
     { martialPower: -10, constitution: -5, money: -100 },
   );
   assert(clamped.martialPower === 0, 'martialPower setback must clamp at 0');
   assert(clamped.constitution === 0, 'constitution setback must clamp at 0');
-  assert(clamped.money === 50, 'retired wallet key must not be mutated by setback apply');
+  assert(!Object.prototype.hasOwnProperty.call(clamped, 'money'), 'retired wallet key must not be mutated by setback apply');
 
   assert(
     applySetbackStatChanges(createState({ reputation: 30 }).player, { reputation: -25 }).reputation === 5,

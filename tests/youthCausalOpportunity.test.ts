@@ -67,7 +67,6 @@ const INITIAL_PLAYER_STATE_KEYS = [
   'martialHeritage',
   'martialPower',
   'merchantNetwork',
-  'money',
   'name',
   'relationships',
   'reputation',
@@ -526,7 +525,7 @@ async function main(): Promise<void> {
     time: { now: () => 0 },
   });
   assert.equal(snapshot.metadata.schemaVersion, GAME_STATE_SNAPSHOT_SCHEMA_VERSION);
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 
   console.log('youthCausalOpportunity.test.ts: ok');
 }

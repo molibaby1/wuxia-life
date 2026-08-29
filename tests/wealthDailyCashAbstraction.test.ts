@@ -39,11 +39,10 @@ function testAdultBasicActionsDoNotChangeMoneyOrExposePressure(): void {
 
   for (const id of ids) {
     const state = createState();
-    const before = state.player.money;
     const result = executeActiveActionOnState(state, id, { random: () => 0.5, includeDisturbance: false });
 
     assert(result, `${id} must execute`);
-    assert.equal(state.player.money, before, `${id} must not alter ordinary cash balance`);
+    assert.equal('money' in state.player, false, `${id} must not alter ordinary cash balance`);
     assert.equal('resourcePressureNotice' in result.activeActionSummary, false, `${id} must not surface money pressure notice`);
     assertNoMoneyChannel(findAction(id));
   }

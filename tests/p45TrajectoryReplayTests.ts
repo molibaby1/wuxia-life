@@ -30,7 +30,6 @@ function makeState(
       affiliation: null,
       title: null,
       reputation: 10,
-      money: 100,
       knowledge: 15,
       charisma: 10,
       businessAcumen: 10,
@@ -213,7 +212,6 @@ function testMerchantRouteSignal(): void {
       studyHabit: 0,
       businessHabit: 3,
     },
-    money: 260,
     businessAcumen: 18,
   }, { p8_persona_id: 'p8-wealth-shen', route_wealth_committed: true, p22_wealth_route_forked: true });
 

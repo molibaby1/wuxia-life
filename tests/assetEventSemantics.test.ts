@@ -10,7 +10,6 @@ function makeState(): GameState {
   engine.startNewGame('Asset Event Semantics', 'male');
   const state = engine.getGameState();
   state.facts = { unrelated_fact: 7 };
-  state.player.money = 321;
   state.player.wealthCapacity = 'comfortable_means';
   return state;
 }
@@ -38,7 +37,7 @@ async function run(): Promise<void> {
     true,
   );
   assert.equal(hasAsset(acquired.facts, 'merchant_shop'), true);
-  assert.equal(acquired.player.money, 321);
+  assert.equal('money' in acquired.player, false);
   assert.equal(acquired.player.wealthCapacity, 'comfortable_means');
   assert.equal(acquired.facts.unrelated_fact, 7);
   assert.notEqual(acquired.facts, state.facts);

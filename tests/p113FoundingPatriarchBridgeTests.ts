@@ -26,7 +26,6 @@ function patriarchBaseState(overrides: Partial<GameState> = {}): GameState {
     player: {
       age: 34,
       charisma: 10,
-      money: 80,
       martialPower: 50,
       reputation: 40,
       connections: 45,

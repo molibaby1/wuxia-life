@@ -22,7 +22,6 @@ function makeState(overrides: Partial<GameState['player']> = {}): GameState {
       affiliation: null,
       title: null,
       reputation: 40,
-      money: 100,
       knowledge: 20,
       charisma: 40,
       businessAcumen: 20,
@@ -59,7 +58,6 @@ function testWealthAndBalancedExplanationsDiffer(): void {
   const ending = quietEnding();
   const wealth = makeState({
     businessAcumen: 75,
-    money: 687,
     spouse: '发妻',
     children: 1,
     lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 5 },
@@ -68,7 +66,6 @@ function testWealthAndBalancedExplanationsDiffer(): void {
     martialPower: 61,
     knowledge: 59,
     businessAcumen: 32,
-    money: -293,
     spouse: '发妻',
     children: 1,
     lifeStates: { trainingHabit: 5, studyHabit: 5, businessHabit: 5 },
@@ -118,7 +115,7 @@ function testDescriptionIsDeterministicAndOtherEndingsRemainStatic(): void {
 function testEndingClassificationDoesNotChange(): void {
   const martial = makeState({ martialPower: 95 });
   const scholar = makeState({ knowledge: 85 });
-  const wealth = makeState({ businessAcumen: 75, money: 687, spouse: '发妻', children: 1 });
+  const wealth = makeState({ businessAcumen: 75, spouse: '发妻', children: 1 });
   const balanced = makeState({ martialPower: 61, knowledge: 59, spouse: '发妻', children: 1 });
 
   assert(EndingSystem.determineEnding(martial).id === 'martial_god', 'martial classification changed');
@@ -128,11 +125,8 @@ function testEndingClassificationDoesNotChange(): void {
 }
 
 function testQuietFamilyClassificationRetiresMoneyVeto(): void {
-  const moneyValues = [0, 899, 900, 1000, 9999];
-
-  for (const money of moneyValues) {
+  for (const _legacyMoney of [0, 899, 900, 1000, 9999]) {
     const ending = EndingSystem.determineEnding(makeState({
-      money,
       spouse: '发妻',
       martialPower: 20,
       knowledge: 20,
@@ -140,12 +134,11 @@ function testQuietFamilyClassificationRetiresMoneyVeto(): void {
     }));
     assert(
       ending.id === 'quiet_family_life',
-      `quiet_family_life classification must not vary with money=${money}`,
+      'quiet_family_life classification must not depend on removed money field',
     );
   }
 
   const noFamilyAnchor = EndingSystem.determineEnding(makeState({
-    money: 9999,
     martialPower: 20,
     knowledge: 20,
     reputation: 40,
@@ -155,9 +148,8 @@ function testQuietFamilyClassificationRetiresMoneyVeto(): void {
     'family anchor must remain necessary for quiet_family_life',
   );
 
-  for (const money of moneyValues) {
+  for (const _legacyMoney of [0, 899, 900, 1000, 9999]) {
     const highAchievement = EndingSystem.determineEnding(makeState({
-      money,
       spouse: '发妻',
       martialPower: 75,
       knowledge: 20,
@@ -165,7 +157,7 @@ function testQuietFamilyClassificationRetiresMoneyVeto(): void {
     }));
     assert(
       highAchievement.id !== 'quiet_family_life',
-      `high non-money achievement must block quiet_family_life at money=${money}`,
+      'high non-money achievement must block quiet_family_life',
     );
   }
 }
@@ -178,7 +170,6 @@ async function testRuntimeAndSnapshotUseTheSameDescription(): Promise<void> {
   engine.startNewGame('寿终说明测试', 'male');
   const engineState = engine.getGameState();
   engineState.player.age = 80;
-  engineState.player.money = 687;
   engineState.player.businessAcumen = 75;
   engineState.player.spouse = '发妻';
   engineState.player.children = 1;
@@ -197,7 +188,6 @@ async function testRuntimeAndSnapshotUseTheSameDescription(): Promise<void> {
   });
   const runtime = session.getRuntimeState();
   runtime.player!.age = 80;
-  runtime.player!.money = 687;
   runtime.player!.businessAcumen = 75;
   runtime.player!.spouse = '发妻';
   runtime.player!.children = 1;

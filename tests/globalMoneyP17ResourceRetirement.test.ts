@@ -27,7 +27,6 @@ function makeCanonicalSectMasterState(money: number, wealth?: number): GameState
   state.player.age = 35;
   state.player.influence = 80;
   state.player.connections = 40;
-  state.player.money = money;
   state.player.flags = { sect_master: true };
   state.flags = { sect_master: true };
   if (wealth === undefined) {
@@ -154,7 +153,7 @@ function main(): void {
   testInternalStabilityRemainsEffective();
   testOtherP17MaintenancePatternsRemain();
   testNoSyntheticOrWealthReplacement();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyP17ResourceRetirement.test.ts: ok');
 }
 

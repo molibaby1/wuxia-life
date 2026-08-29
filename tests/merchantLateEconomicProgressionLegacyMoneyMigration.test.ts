@@ -27,7 +27,6 @@ function startState(name: string): { engine: GameEngineIntegration; state: GameS
   const engine = new GameEngineIntegration();
   engine.startNewGame(name, 'male');
   const state = engine.getGameState();
-  state.player.money = MONEY_SENTINEL;
   state.player.traits = [];
   return { engine, state };
 }
@@ -130,7 +129,7 @@ async function testPeakRuntime(): Promise<void> {
   await engine.executeChoiceEffects(peak.autoEffects ?? [], peak.id);
   const after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'regional_magnate');
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.reputation, 65);
   assert.equal(after.player.charisma, 30);
   assert.equal(after.flags.merchant_wealthy, true);
@@ -143,12 +142,10 @@ function testHeavyAvailabilityRuntime(): void {
 
   const regionalMagnateWithNoMoney = startState('Merchant Heavy Availability Regional').state;
   regionalMagnateWithNoMoney.player.wealthCapacity = 'regional_magnate';
-  regionalMagnateWithNoMoney.player.money = 0;
   assert.equal(evaluator.evaluate(heavy.condition!, regionalMagnateWithNoMoney), true);
 
   const wealthyWithCash = startState('Merchant Heavy Availability Wealthy').state;
   wealthyWithCash.player.wealthCapacity = 'wealthy';
-  wealthyWithCash.player.money = 999;
   assert.equal(evaluator.evaluate(heavy.condition!, wealthyWithCash), false);
 }
 
@@ -164,7 +161,7 @@ async function testHeavyRuntime(): Promise<void> {
   await engine.executeChoiceEffects(heavy.effects ?? [], sect.id, heavy.id);
   const after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'wealthy');
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.chivalry, 50);
   assert.equal(after.player.reputation, 70);
   assert.equal(after.player.martialPower, 60);
@@ -221,7 +218,7 @@ async function testStandardChoiceRuntimeMatrix(): Promise<void> {
     const after = engine.getGameState();
 
     assert.equal(after.player.wealthCapacity, 'regional_magnate');
-    assert.equal(after.player.money, MONEY_SENTINEL);
+    assert.equal('money' in after.player, false);
     assertStatDelta(before, after.player, testCase.stat, testCase.delta);
     if (testCase.secondaryStat) {
       assertStatDelta(before, after.player, testCase.secondaryStat, testCase.secondaryDelta ?? 0);
@@ -260,7 +257,7 @@ async function testBusinessEmpireRuntimeRecoveryAndNoOp(): Promise<void> {
   await recovery.engine.executeChoiceEffects(empire.autoEffects ?? [], empire.id);
   const recoveryAfter = recovery.engine.getGameState();
   assert.equal(recoveryAfter.player.wealthCapacity, 'regional_magnate');
-  assert.equal(recoveryAfter.player.money, MONEY_SENTINEL);
+  assert.equal('money' in recoveryAfter.player, false);
   assert.equal(recoveryAfter.player.reputation, 60);
   assert.equal(recoveryAfter.player.charisma, 30);
   assert.equal(recoveryAfter.flags.merchant_empire, true);
@@ -273,7 +270,7 @@ async function testBusinessEmpireRuntimeRecoveryAndNoOp(): Promise<void> {
   await noOp.engine.executeChoiceEffects(empire.autoEffects ?? [], empire.id);
   const noOpAfter = noOp.engine.getGameState();
   assert.equal(noOpAfter.player.wealthCapacity, 'regional_magnate');
-  assert.equal(noOpAfter.player.money, MONEY_SENTINEL);
+  assert.equal('money' in noOpAfter.player, false);
   assert.equal(noOpAfter.flags.merchant_empire, true);
 }
 
@@ -303,21 +300,18 @@ function testTycoonEligibilityMatrix(): void {
 
   const eligible = startState('Merchant Tycoon Eligible').state;
   eligible.player.wealthCapacity = 'regional_magnate';
-  eligible.player.money = 0;
   eligible.flags.merchant_empire = true;
   eligible.player.flags.merchant_empire = true;
   assert.equal(eventConditionsPass(tycoon, eligible), true);
 
   const wealthy = startState('Merchant Tycoon Wealthy').state;
   wealthy.player.wealthCapacity = 'wealthy';
-  wealthy.player.money = 999;
   wealthy.flags.merchant_empire = true;
   wealthy.player.flags.merchant_empire = true;
   assert.equal(eventConditionsPass(tycoon, wealthy), false);
 
   const missingEmpire = startState('Merchant Tycoon Missing Empire').state;
   missingEmpire.player.wealthCapacity = 'regional_magnate';
-  missingEmpire.player.money = 999;
   assert.equal(eventConditionsPass(tycoon, missingEmpire), false);
 }
 
@@ -336,19 +330,19 @@ async function testHeavyLateSpineRuntime(): Promise<void> {
   await engine.executeChoiceEffects(peak.autoEffects ?? [], peak.id);
   let after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'regional_magnate');
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.flags.merchant_wealthy, true);
 
   await engine.executeChoiceEffects(heavy.effects ?? [], sect.id, heavy.id);
   after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'wealthy');
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.flags.merchant_invest_good, true);
 
   await engine.executeChoiceEffects(empire.autoEffects ?? [], empire.id);
   after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'regional_magnate');
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.flags.merchant_empire, true);
   assert.equal(eventConditionsPass(tycoon, after), true);
 }

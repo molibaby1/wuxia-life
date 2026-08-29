@@ -103,7 +103,6 @@ function createScenario(money: number, eventId: string): { engine: GameEngineInt
   const engine = new GameEngineIntegration();
   engine.startNewGame('Habit Consequence Wallet Retirement', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.reputation = 10;
   state.player.martialPower = 10;
   state.player.knowledge = 10;
@@ -207,7 +206,7 @@ async function testRuntimeWalletInvariance(): Promise<void> {
         const beforeStat = state.player[choiceExpectation.statTarget as keyof typeof state.player];
         await engine.executeChoiceEffects(getChoice(event, choiceExpectation.id).effects ?? [], event.id, choiceExpectation.id);
         const after = engine.getGameState();
-        assert.equal(after.player.money, money, `${event.id}/${choiceExpectation.id} must preserve money=${money}`);
+        assert.equal('money' in after.player, false, `${event.id}/${choiceExpectation.id} must preserve money=${money}`);
         assert.equal(
           after.player[choiceExpectation.statTarget as keyof typeof after.player],
           (beforeStat as number) + choiceExpectation.statDelta,
@@ -227,7 +226,7 @@ async function main(): Promise<void> {
   testAuthoringContracts();
   testEligibilityIsMoneyIndependent();
   await testRuntimeWalletInvariance();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyHabitConsequenceWalletRetirement.test.ts: ok');
 }
 

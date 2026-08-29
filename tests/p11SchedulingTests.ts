@@ -62,7 +62,6 @@ function makeAchievementState(overrides: {
   return {
     player: {
       age: 35,
-      money: overrides.money ?? 0,
       martialPower: overrides.martialPower ?? 0,
       knowledge: overrides.knowledge ?? 0,
       flags: {},

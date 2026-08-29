@@ -31,7 +31,7 @@ function run(): void {
     sourcePlatform: 'node-headless',
     time: new FixedTimeSource(1717200000000),
   });
-  assert(snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION, 'snapshot must use current schema 3.15.0');
+  assert(snapshot.metadata.schemaVersion === GAME_STATE_SNAPSHOT_SCHEMA_VERSION, 'snapshot must use current schema 3.16.0');
   assert(!('health' in snapshot.state.player), 'snapshot must not contain legacy health');
   assert('healthStatus' in snapshot.state.player, 'snapshot must contain healthStatus');
   assert('statuses' in snapshot.state.player, 'snapshot must contain statuses');

@@ -161,8 +161,8 @@ function testRecoveryAndRealSetbacks(): void {
     record(
       'setback_property_loss',
       propertyText,
-      state({ money: 100 }),
-      state({ money: 70 }),
+      state({}),
+      state({}),
     ),
   ]);
   assert(property.setbacks.length === 0, 'legacy wallet-only property loss must not be a P8 setback');
@@ -234,8 +234,8 @@ function testAutomaticEventUsesItsOwnExecutedEffects(): void {
     record(
       'synthetic_empty_auto',
       '你继续赶路。',
-      state({ money: 100 }),
-      state({ money: 90 }),
+      state({ businessAcumen: 50 }),
+      state({ businessAcumen: 50 }),
       undefined,
       undefined,
       [],
@@ -417,8 +417,8 @@ function testInventoryAFalsePositiveControls(): void {
     record(
       'synthetic_unrelated_reputation_word',
       '你的声望一向很好，但这次钱袋少了一些。',
-      state({ money: 100 }),
-      state({ money: 90 }),
+      state({ businessAcumen: 50 }),
+      state({ businessAcumen: 50 }),
     ),
   ]);
   assert(unrelatedReputationWord.setbacks.length === 0, 'money loss must not create a setback despite reputation wording');
@@ -427,8 +427,8 @@ function testInventoryAFalsePositiveControls(): void {
     record(
       'synthetic_unrelated_anger',
       '某人震怒，但这次钱财确实损失了。',
-      state({ money: 100 }),
-      state({ money: 90 }),
+      state({ businessAcumen: 50 }),
+      state({ businessAcumen: 50 }),
     ),
   ]);
   assert(unrelatedAnger.setbacks.length === 0, 'money loss must not create a setback despite unrelated anger wording');
@@ -438,11 +438,9 @@ function testInventoryAFalsePositiveControls(): void {
       'synthetic_unrelated_recovery',
       '某人注意到，钱财确实损失了，但关系还有机会恢复。',
       state({
-        money: 100,
         relationships: [{ id: 'master_qingxu', affinity: 30 }],
       }),
       state({
-        money: 90,
         relationships: [{ id: 'master_qingxu', affinity: 20 }],
       }),
     ),
@@ -456,8 +454,8 @@ function testInventoryAFalsePositiveControls(): void {
     record(
       'synthetic_unrelated_anxiety',
       '你有些烦躁。',
-      state({ money: 100 }),
-      state({ money: 90 }),
+      state({ businessAcumen: 50 }),
+      state({ businessAcumen: 50 }),
     ),
   ]);
   assert(unrelatedAnxiety.setbacks.length === 0, 'money loss must not create a setback despite unrelated anxiety wording');

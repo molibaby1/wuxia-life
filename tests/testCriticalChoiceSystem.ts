@@ -14,7 +14,6 @@ function createTestState(): GameState {
     chivalry: 0,
     charisma: 50,
     constitution: 50,
-    money: 1000,
     wealthCapacity: 'no_surplus',
     reputation: 30,
     connections: 20,
@@ -93,7 +92,7 @@ const req2 = CriticalChoiceSystem.checkChoiceRequirement(state, {
   required: ['sect_choice:demon'],
 });
 console.log('要求：sect_choice=demon, 结果:', req2);
-console.log('预期：false');
+console.log('预期：false, ');
 console.log('');
 
 // 测试 5: 检查选择条件（禁止）
@@ -108,7 +107,7 @@ const req4 = CriticalChoiceSystem.checkChoiceRequirement(state, {
   forbidden: ['life_goal:hero'],
 });
 console.log('禁止：life_goal=hero, 结果:', req4);
-console.log('预期：false');
+console.log('预期：false, ');
 console.log('');
 
 // 测试 6: 记录婚姻选择

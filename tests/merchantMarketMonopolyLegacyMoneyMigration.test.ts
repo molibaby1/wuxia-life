@@ -93,14 +93,13 @@ async function testMonopolyRuntime(
   engine.startNewGame(`Market Monopoly ${wealthCapacity}`, 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = wealthCapacity;
-  state.player.money = MONEY_SENTINEL;
   state.player.reputation = 20;
   state.player.traits = [];
   const reputationBefore = engine.getGameState().player.reputation;
 
   await engine.executeChoiceEffects(monopoly.effects ?? [], market.id, monopoly.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, expectedWealth);
   assert.equal(after.player.reputation, reputationBefore - 10);
   assert.equal(after.flags.merchant_monopoly, true);
@@ -120,14 +119,13 @@ async function testFairRuntime(): Promise<void> {
   engine.startNewGame('Market Fair Competition', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'comfortable_means';
-  state.player.money = MONEY_SENTINEL;
   state.player.reputation = 5;
   state.player.traits = [];
   const reputationBefore = engine.getGameState().player.reputation;
 
   await engine.executeChoiceEffects(fair.effects ?? [], market.id, fair.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'comfortable_means');
   assert.equal(after.player.reputation, reputationBefore + 10);
   assert.equal(after.flags.merchant_fair_trade, true);

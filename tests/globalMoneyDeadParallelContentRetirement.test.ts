@@ -217,7 +217,7 @@ function testMoneyProducerInventorySanity(): void {
 }
 
 function testSnapshotUnchanged(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 }
 
 function main(): void {

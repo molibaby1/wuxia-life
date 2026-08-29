@@ -35,11 +35,10 @@ function requireSetback(id: (typeof WALLET_SETBACK_IDS)[number]) {
   return event;
 }
 
-function makeEngineState(money: number): GameState {
+function makeEngineState(): GameState {
   const engine = new GameEngineIntegration();
   engine.startNewGame('E1挫折', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.constitution = 20;
   state.player.businessAcumen = 10;
   state.player.reputation = 30;
@@ -117,26 +116,26 @@ function testSourceGuards(): void {
 }
 
 function testRuntimeSentinelsAndRobberyConstitution(): void {
-  for (const money of MONEY_SENTINELS) {
+  for (const _money of MONEY_SENTINELS) {
     for (const id of WALLET_SETBACK_IDS) {
-      const before = makeEngineState(money);
+      const before = makeEngineState();
       const after = applySetbackEffects(before, id);
-      assert.equal(after.player.money, money, `${id} must leave money=${money} unchanged`);
+      assert.equal('money' in after.player, false, `${id} must not create legacy money`);
       assert.equal(after.player.wealthCapacity, before.player.wealthCapacity);
     }
 
-    const robbed = applySetbackEffects(makeEngineState(money), 'robbery');
+    const robbed = applySetbackEffects(makeEngineState(), 'robbery');
     assert.equal(robbed.player.constitution, 17, 'robbery must keep constitution -3');
-    assert.equal(robbed.player.money, money);
+    assert.equal('money' in robbed.player, false);
 
-    const failed = applySetbackEffects(makeEngineState(money), 'business_failure');
+    const failed = applySetbackEffects(makeEngineState(), 'business_failure');
     assert.equal(failed.player.businessAcumen, 5, 'business_failure must keep businessAcumen -5');
 
-    const disaster = applySetbackEffects(makeEngineState(money), 'natural_disaster');
+    const disaster = applySetbackEffects(makeEngineState(), 'natural_disaster');
     assert.equal(disaster.player.constitution, 10);
     assert.equal(disaster.player.reputation, 15);
 
-    const loss = applySetbackEffects(makeEngineState(money), 'property_loss');
+    const loss = applySetbackEffects(makeEngineState(), 'property_loss');
     assert.equal(loss.player.constitution, 20);
     assert.equal(loss.player.businessAcumen, 10);
     assert.equal(loss.player.reputation, 30);
@@ -149,9 +148,6 @@ async function testExecuteAutoEventStillAppliesSetbacksWithoutMoney(): Promise<v
   const state = engine.getGameState();
   state.player.age = 1;
   state.player.constitution = 10;
-  state.player.money = 317;
-  const seedMoney = state.player.money;
-
   const random = Math.random;
   let calls = 0;
   Math.random = () => {
@@ -163,7 +159,7 @@ async function testExecuteAutoEventStillAppliesSetbacksWithoutMoney(): Promise<v
     const setbacks = result.stageResults.filter(stage => stage.sourceKind === 'setback');
     assert.equal(setbacks.length > 0, true, 'executeAutoEvent must still be able to apply a difficulty setback');
     assert.equal(setbacks.some(stage => stage.id === 'property_loss'), true, 'forced probe must surface property_loss');
-    assert.equal(engine.getGameState().player.money, seedMoney, 'headless/runtime auto path must not mutate money');
+    assert.equal('money' in engine.getGameState().player, false, 'headless/runtime auto path must not mutate money');
   } finally {
     Math.random = random;
   }
@@ -172,8 +168,8 @@ async function testExecuteAutoEventStillAppliesSetbacksWithoutMoney(): Promise<v
 function testCompatibilitySeedAndSnapshotUntouched(): void {
   const engine = new GameEngineIntegration();
   engine.startNewGame('E1种子', 'female');
-  assert.equal(engine.getGameState().player.money, 100, 'new-game money:100 compatibility seed must remain');
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal('money' in engine.getGameState().player, false, 'new-game player must not expose legacy money');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
 }
 
 async function main(): Promise<void> {

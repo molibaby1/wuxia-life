@@ -30,7 +30,6 @@ function makeRecord(
         affiliation: null,
         title: null,
         reputation: age >= 18 ? 8 : 2,
-        money: age >= 18 ? 180 : 80,
         knowledge: 12,
         charisma: 10,
         businessAcumen: age >= 18 ? 8 : 2,

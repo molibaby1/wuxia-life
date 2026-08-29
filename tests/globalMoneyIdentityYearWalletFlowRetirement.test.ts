@@ -99,7 +99,6 @@ function createScenario(money: number): { engine: GameEngineIntegration; state: 
   const engine = new GameEngineIntegration();
   engine.startNewGame('Identity-Year Wallet Retirement', 'male');
   const state = engine.getGameState();
-  state.player.money = money;
   state.player.traits = [];
   state.player.constitution = 10;
   state.player.businessAcumen = 10;
@@ -192,7 +191,7 @@ async function testChoiceSemanticsAndMoneyInvariance(): Promise<void> {
     const outcomes: Array<Record<string, unknown>> = [];
     for (const money of MONEY_SENTINELS) {
       const state = await executeChoice(assertion.eventId, assertion.choiceId, money);
-      assert.equal(state.player.money, money, `${assertion.eventId}/${assertion.choiceId} must preserve money=${money}`);
+      assert.equal('money' in state.player, false, `${assertion.eventId}/${assertion.choiceId} must preserve money=${money}`);
       assertion.expected(state);
       outcomes.push({
         constitution: state.player.constitution,
@@ -212,7 +211,7 @@ async function testChoiceSemanticsAndMoneyInvariance(): Promise<void> {
 async function main(): Promise<void> {
   testAuthoringAndSchedulingContracts();
   await testChoiceSemanticsAndMoneyInvariance();
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyIdentityYearWalletFlowRetirement.test.ts: ok');
 }
 

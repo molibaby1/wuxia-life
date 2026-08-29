@@ -27,7 +27,6 @@ function mythBaseState(overrides: Partial<GameState> = {}): GameState {
       martialPower: 60,
       reputation: 45,
       connections: 30,
-      money: 20,
       traits: [],
       ...(overrides.player ?? {}),
     } as PlayerState,

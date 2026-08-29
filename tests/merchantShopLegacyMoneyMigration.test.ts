@@ -127,14 +127,12 @@ function testTalentEligibilityRuntime(): void {
   const talent = getEvent('merchant_talent_discovery');
 
   const richButUnqualified = baseState();
-  richButUnqualified.player.money = 999;
   richButUnqualified.player.charisma = 1;
   richButUnqualified.flags = { route_merchant: true };
   richButUnqualified.player.flags = { route_merchant: true };
   assert.equal(evaluator.evaluate(talent.conditions![0], richButUnqualified), false);
 
   const merchantOrigin = baseState();
-  merchantOrigin.player.money = 0;
   merchantOrigin.player.charisma = 1;
   merchantOrigin.flags = {
     origin_merchant_family: true,
@@ -147,7 +145,6 @@ function testTalentEligibilityRuntime(): void {
   assert.equal(evaluator.evaluate(talent.conditions![0], merchantOrigin), true);
 
   const hvgState = baseState();
-  hvgState.player.money = 0;
   hvgState.player.charisma = 1;
   hvgState.flags = {
     route_merchant: true,
@@ -166,7 +163,6 @@ function testFirstShopEligibilityNoFallback(): void {
 
   const blocked = baseState();
   blocked.player.wealthCapacity = 'no_surplus';
-  blocked.player.money = 999;
   blocked.flags = { merchant_talent: true };
   blocked.player.flags = { merchant_talent: true };
   assert.equal(evaluator.evaluate(shop.conditions![0], blocked), true);
@@ -174,7 +170,6 @@ function testFirstShopEligibilityNoFallback(): void {
 
   const eligible = baseState();
   eligible.player.wealthCapacity = 'modest_savings';
-  eligible.player.money = 0;
   eligible.flags = { merchant_talent: true };
   eligible.player.flags = { merchant_talent: true };
   assert.equal(evaluator.evaluate(shop.conditions![0], eligible), true);
@@ -194,7 +189,6 @@ async function testFullRuntimeVertical(): Promise<void> {
   engine.startNewGame('Merchant Shop Legacy Money Migration', 'male');
   const initial = engine.getGameState();
   initial.player.wealthCapacity = 'no_surplus';
-  initial.player.money = MONEY_SENTINEL;
   initial.flags = {
     route_merchant: true,
     hvg_merchant_first_challenge_done: true,
@@ -207,7 +201,7 @@ async function testFullRuntimeVertical(): Promise<void> {
   await engine.executeChoiceEffects(studyBusiness.effects ?? [], talent.id, studyBusiness.id);
   const afterTalent = engine.getGameState();
   assert.equal(afterTalent.player.wealthCapacity, 'modest_savings');
-  assert.equal(afterTalent.player.money, MONEY_SENTINEL);
+  assert.equal('money' in afterTalent.player, false);
 
   const evaluator = new ConditionEvaluator();
   assert.equal(evaluator.evaluate(shop.conditions![1], afterTalent), true);
@@ -215,7 +209,7 @@ async function testFullRuntimeVertical(): Promise<void> {
   await engine.executeChoiceEffects(openGrocery.effects ?? [], shop.id, openGrocery.id);
   const afterOpen = engine.getGameState();
   assert.equal(hasAsset(afterOpen.facts, 'merchant_shop'), true);
-  assert.equal(afterOpen.player.money, MONEY_SENTINEL);
+  assert.equal('money' in afterOpen.player, false);
 
   afterOpen.flags = {
     ...afterOpen.flags,
@@ -229,19 +223,18 @@ async function testFullRuntimeVertical(): Promise<void> {
 
   await engine.executeChoiceEffects(investMore.effects ?? [], failure.id, investMore.id);
   const afterInvest = engine.getGameState();
-  assert.equal(afterInvest.player.money, MONEY_SENTINEL);
+  assert.equal('money' in afterInvest.player, false);
   assert.equal(afterInvest.player.wealthCapacity, 'modest_savings');
 
   const closeEngine = new GameEngineIntegration();
   closeEngine.startNewGame('Merchant Shop Legacy Money Migration Close', 'male');
   const closeInitial = closeEngine.getGameState();
   closeInitial.player.wealthCapacity = 'modest_savings';
-  closeInitial.player.money = MONEY_SENTINEL;
   await closeEngine.executeChoiceEffects(openGrocery.effects ?? [], shop.id, openGrocery.id);
   await closeEngine.executeChoiceEffects(closeShop.effects ?? [], failure.id, closeShop.id);
   const afterClose = closeEngine.getGameState();
   assert.equal(hasAsset(afterClose.facts, 'merchant_shop'), false);
-  assert.equal(afterClose.player.money, MONEY_SENTINEL);
+  assert.equal('money' in afterClose.player, false);
   assert.equal(afterClose.player.wealthCapacity, 'modest_savings');
 }
 

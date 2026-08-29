@@ -27,7 +27,6 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       affiliation: null,
       title: null,
       reputation: 55,
-      money: 800,
       knowledge: 40,
       charisma: 45,
       businessAcumen: 30,

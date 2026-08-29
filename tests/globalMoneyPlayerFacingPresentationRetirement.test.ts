@@ -126,7 +126,6 @@ function testProgressionSurfacesHaveNoMoney(): void {
     businessAcumen: 0,
     influence: 0,
     charisma: 0,
-    money: 10,
   } as never;
   const after = { ...before, money: 60 };
   assert.deepEqual(calculatePublicStatDeltas(before, after), {});
@@ -145,15 +144,15 @@ function testPlayerSummaryDtoHasNoMoney(): void {
 }
 
 function testCompatibilityBoundaryPreserved(): void {
-  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.15.0');
-  const snapshotSource = read('src/contracts/gameStateSnapshot.ts');
-  assert.match(snapshotSource, /\bmoney:\s*number\b/);
+  assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
+  assert.equal(/\bmoney:\s*number\b/.test(read('src/contracts/gameStateSnapshot.ts')), false);
 
   const engine = new GameEngineIntegration();
   engine.startNewGame('E2兼容', 'male');
-  const player = engine.getGameState().player;
-  assert.equal(typeof player.money, 'number');
-  assert.equal(player.money, 100);
+  const player = engine.getGameState().player as unknown as Record<string, unknown>;
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
+  assert.equal(player.wealthCapacity, 'no_surplus');
 }
 
 function testFormalMoneyWritesRemainZero(): void {

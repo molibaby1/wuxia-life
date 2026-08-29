@@ -13,7 +13,7 @@ function createState(overrides: Partial<GameState> = {}): GameState {
     name: '测试侠客', gender: 'male', age: 20, martialPower: 0, chivalry: 0,
     charisma: 0, constitution: 0, knowledge: 0,
     businessAcumen: 0, influence: 0, connections: 0, martialHeritage: 0,
-    scholarlyHeritage: 0, merchantNetwork: 0, money: 0, wealthCapacity: 'no_surplus', reputation: 0,
+    scholarlyHeritage: 0, merchantNetwork: 0, wealthCapacity: 'no_surplus', reputation: 0,
     affiliation: null, title: null, healthStatus: 'healthy', statuses: [], alive: true,
     items: [], flags: {}, events: [], relationships: [], children: 0, spouse: null,
     lifeStates: { trainingHabit: 0, studyHabit: 0, businessHabit: 0 },

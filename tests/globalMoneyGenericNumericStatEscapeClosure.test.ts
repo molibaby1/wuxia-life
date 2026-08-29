@@ -30,13 +30,11 @@ function testAllowlistExcludesRetiredAndCapacity(): void {
 
 function testGenericWriteCannotCreateOrMutateRetiredBalances(): void {
   const player = basePlayer();
-  const beforeMoney = player.money;
-  const beforeWealth = player.wealth;
   writePlayerNumeric(player, 'money', 9999);
   writePlayerNumeric(player, 'wealth', 8888);
   writePlayerNumeric(player, 'wealthCapacity', 7);
-  assert.equal(player.money, beforeMoney);
-  assert.equal(player.wealth, beforeWealth);
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
   assert.equal(typeof player.wealthCapacity, 'string');
   assert.equal(Object.prototype.hasOwnProperty.call(player, 'fakeStat'), false);
   writePlayerNumeric(player, 'fakeStat', 42);
@@ -47,12 +45,10 @@ function testGenericWriteCannotCreateOrMutateRetiredBalances(): void {
 
 function testApplyStatDeltasFailClosed(): void {
   const player = basePlayer();
-  const beforeMoney = player.money;
-  const beforeWealth = player.wealth;
   const beforeMartial = player.martialPower;
   applyStatDeltas(player, { money: 50, wealth: 40, martialPower: 3, wealthCapacity: 1 });
-  assert.equal(player.money, beforeMoney);
-  assert.equal(player.wealth, beforeWealth);
+  assert.equal('money' in player, false);
+  assert.equal('wealth' in player, false);
   assert.equal(player.martialPower, beforeMartial + 3);
 }
 

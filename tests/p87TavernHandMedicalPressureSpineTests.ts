@@ -33,7 +33,6 @@ function makeState(age: number, flags: Record<string, unknown>): GameState {
       affiliation: null,
       title: null,
       reputation: 15,
-      money: 100,
       knowledge: 15,
       charisma: 12,
       businessAcumen: 10,

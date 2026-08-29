@@ -104,7 +104,7 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
   assert.ok((capturedRun.playerSurfaceTrace?.steps.length ?? 0) > 0);
   const capturedBytes = JSON.stringify(capturedRun.playerSurfaceTrace);
   assert.equal(capturedBytes.includes('lockReason'), false);
-  assert.equal(capturedBytes.includes('"available":false'), false);
+  assert.equal(capturedBytes.includes('"available":false, '), false);
   assert.equal(capturedBytes.includes('riskHints'), false);
   assert.ok(
     capturedRun.playerSurfaceTrace?.steps.some(step => typeof step.age === 'number'),

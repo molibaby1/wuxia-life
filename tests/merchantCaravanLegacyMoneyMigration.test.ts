@@ -103,12 +103,10 @@ function testEligibilityRuntime(): void {
 
   const richButLowWealth = baseState();
   richButLowWealth.player.wealthCapacity = 'modest_savings';
-  richButLowWealth.player.money = 999;
   assert.equal(evaluator.evaluate(elite.condition!, richButLowWealth), false);
 
   const comfortableNoMoney = baseState();
   comfortableNoMoney.player.wealthCapacity = 'comfortable_means';
-  comfortableNoMoney.player.money = 0;
   assert.equal(evaluator.evaluate(elite.condition!, comfortableNoMoney), true);
 
   const lowMartial = baseState();
@@ -128,13 +126,12 @@ async function testEliteEffectsRuntime(): Promise<void> {
   engine.startNewGame('Merchant Caravan Elite', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'comfortable_means';
-  state.player.money = MONEY_SENTINEL;
   state.player.traits = [];
   const reputationBefore = engine.getGameState().player.reputation;
 
   await engine.executeChoiceEffects(elite.effects ?? [], caravan.id, elite.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'comfortable_means');
   assert.equal(after.player.reputation, reputationBefore + 10);
   assert.equal(after.flags.merchant_caravan_success, true);
@@ -149,13 +146,12 @@ async function testPersonalEffectsFromModestSavings(): Promise<void> {
   const state = engine.getGameState();
   state.player.wealthCapacity = 'modest_savings';
   state.player.martialPower = 30;
-  state.player.money = MONEY_SENTINEL;
   state.player.traits = [];
   const martialBefore = engine.getGameState().player.martialPower;
 
   await engine.executeChoiceEffects(personal.effects ?? [], caravan.id, personal.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'comfortable_means');
   assert.equal(after.player.martialPower, martialBefore + 5);
   assert.equal(after.flags.merchant_caravan_success, true);
@@ -170,8 +166,6 @@ async function testPersonalEffectsFromWealthy(): Promise<void> {
   const state = engine.getGameState();
   state.player.wealthCapacity = 'wealthy';
   state.player.martialPower = 30;
-  state.player.money = MONEY_SENTINEL;
-
   await engine.executeChoiceEffects(personal.effects ?? [], caravan.id, personal.id);
   const after = engine.getGameState();
   assert.equal(after.player.wealthCapacity, 'wealthy');
@@ -185,13 +179,12 @@ async function testNormalEffectsRuntime(): Promise<void> {
   engine.startNewGame('Merchant Caravan Normal', 'male');
   const state = engine.getGameState();
   state.player.wealthCapacity = 'modest_savings';
-  state.player.money = MONEY_SENTINEL;
   state.player.traits = [];
   const charismaBefore = engine.getGameState().player.charisma;
 
   await engine.executeChoiceEffects(normal.effects ?? [], caravan.id, normal.id);
   const after = engine.getGameState();
-  assert.equal(after.player.money, MONEY_SENTINEL);
+  assert.equal('money' in after.player, false);
   assert.equal(after.player.wealthCapacity, 'modest_savings');
   assert.equal(after.player.charisma, charismaBefore + 3);
   assert.notEqual(after.flags.merchant_caravan_success, true);
@@ -205,7 +198,6 @@ function testDownstreamContinuityRuntime(): void {
   successButLowWealth.flags = { merchant_caravan_success: true };
   successButLowWealth.player.flags = { merchant_caravan_success: true };
   successButLowWealth.player.wealthCapacity = 'modest_savings';
-  successButLowWealth.player.money = 999;
   assert.equal(evaluator.evaluate(market.conditions![0], successButLowWealth), true);
   assert.equal(evaluator.evaluate(market.conditions![1], successButLowWealth), false);
 
@@ -213,7 +205,6 @@ function testDownstreamContinuityRuntime(): void {
   successAndComfortable.flags = { merchant_caravan_success: true };
   successAndComfortable.player.flags = { merchant_caravan_success: true };
   successAndComfortable.player.wealthCapacity = 'comfortable_means';
-  successAndComfortable.player.money = 0;
   assert.equal(evaluator.evaluate(market.conditions![0], successAndComfortable), true);
   assert.equal(evaluator.evaluate(market.conditions![1], successAndComfortable), true);
 }

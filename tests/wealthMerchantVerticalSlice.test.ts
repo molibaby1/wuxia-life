@@ -70,7 +70,6 @@ async function run(): Promise<void> {
   const engine = new GameEngineIntegration();
   engine.startNewGame('商贾竖切', 'male');
   assert.equal(engine.getGameState().player.wealthCapacity, 'no_surplus', 'new game starts at no_surplus');
-  const moneyBeforeOrigin = engine.getGameState().player.money;
   // Neutralize random trait growth multipliers so this slice checks the legacy cash delta itself.
   engine.getGameState().player.traits = [];
 
@@ -86,14 +85,13 @@ async function run(): Promise<void> {
     'merchant origin must change no_surplus to comfortable_means',
   );
   assert.equal(
-    afterOrigin.player.money,
-    moneyBeforeOrigin,
-    'merchant origin must not change wallet balance alongside Capacity seeding',
+    'money' in afterOrigin.player,
+    false,
+    'merchant origin must not create a legacy wallet field alongside Capacity seeding',
   );
 
   const noSurplusState = makeState();
   noSurplusState.player.wealthCapacity = 'no_surplus';
-  noSurplusState.player.money = 999;
   assert.equal(
     evaluator.evaluate(investMore.condition!, noSurplusState),
     false,
@@ -102,14 +100,11 @@ async function run(): Promise<void> {
 
   const modestSavingsState = makeState();
   modestSavingsState.player.wealthCapacity = 'modest_savings';
-  modestSavingsState.player.money = 0;
   assert.equal(
     evaluator.evaluate(investMore.condition!, modestSavingsState),
     true,
     'modest_savings player must be able to choose invest_more regardless of legacy money',
   );
-
-  const moneyBeforePeak = afterOrigin.player.money;
   const afterPeak = await engine.executeChoiceEffects(
     peak.autoEffects ?? [],
     peak.id,
@@ -120,9 +115,9 @@ async function run(): Promise<void> {
     'merchant_wealth_peak must set regional_magnate',
   );
   assert.equal(
-    afterPeak.gameState.player.money,
-    moneyBeforePeak,
-    'merchant_wealth_peak must be wallet-neutral after late progression migration',
+    'money' in afterPeak.gameState.player,
+    false,
+    'merchant_wealth_peak must not create a legacy wallet field after late progression migration',
   );
 }
 

@@ -356,7 +356,6 @@ export const WUXIA_COMPOSITE_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     requirements: [
       { dimension: 'skill_growth', minValue: 55 },
       { dimension: 'social_capital', minValue: 60 },
-      { dimension: 'resources', minValue: 40 },
       { dimension: 'key_choices', requiredFlags: ['p16_alliance_brokered'] },
     ],
   },
@@ -387,7 +386,6 @@ export const WUXIA_COMPOSITE_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     requireAll: true,
     requirements: [
       { dimension: 'reputation', minValue: 55 },
-      { dimension: 'resources', minValue: 30 },
       { dimension: 'key_choices', anyOfFlags: ['medical_divine_doctor_fame', 'medical_imperial'] },
       {
         dimension: 'key_choices',
@@ -426,7 +424,6 @@ export const WUXIA_PINNACLE_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     requirements: [
       { dimension: 'skill_growth', minValue: 70 },
       { dimension: 'social_capital', minValue: 70 },
-      { dimension: 'resources', minValue: 55 },
       { dimension: 'key_choices', requiredFlags: ['p16_alliance_brokered'], gateKind: 'choice' },
       {
         dimension: 'special_event',
@@ -447,7 +444,6 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     mutexWith: ['lone_sword_legend'],
     requireAll: true,
     requirements: [
-      { dimension: 'resources', minValue: 55 },
       { dimension: 'social_capital', minValue: 55 },
       {
         dimension: 'key_choices',
@@ -465,8 +461,8 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
       },
     ],
     crossTrackGroups: [
-      { trackId: 'merchant_route', trackLabel: '商路轨道', requirementIndices: [2, 3] },
-      { trackId: 'wealth_capital', trackLabel: '资财人脉', requirementIndices: [0, 1] },
+      { trackId: 'merchant_route', trackLabel: '商路轨道', requirementIndices: [1, 2] },
+      { trackId: 'social_capital', trackLabel: '人脉根基', requirementIndices: [0] },
     ],
   },
   {
@@ -497,7 +493,6 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
     requireAll: true,
     requirements: [
       { dimension: 'skill_growth', minValue: 50 },
-      { dimension: 'resources', minValue: 50 },
       {
         dimension: 'key_choices',
         anyOfFlags: ['merchant_invest_good', 'merchant_invest_both', 'merchant_invest_evil'],
@@ -513,7 +508,7 @@ export const WUXIA_MIXED_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
       },
     ],
     crossTrackGroups: [
-      { trackId: 'merchant_track', trackLabel: '商贾投资', requirementIndices: [2, 3] },
+      { trackId: 'merchant_track', trackLabel: '商贾投资', requirementIndices: [1, 2] },
       { trackId: 'martial_track', trackLabel: '武学根基', requirementIndices: [0] },
     ],
   },

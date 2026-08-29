@@ -163,8 +163,6 @@ export function readDimensionValueForDestiny(
       return readPlayerNumeric(player, 'martialPower');
     case 'social_capital':
       return readPlayerNumeric(player, 'connections');
-    case 'resources':
-      return readPlayerNumeric(player, 'money');
     case 'reputation':
       return readPlayerNumeric(player, 'reputation');
     default:

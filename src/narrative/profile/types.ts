@@ -80,7 +80,6 @@ export interface WorldProfileOriginSurface {
 export type DestinyDimension =
   | 'skill_growth'
   | 'social_capital'
-  | 'resources'
   | 'reputation'
   | 'key_choices'
   | 'special_event';

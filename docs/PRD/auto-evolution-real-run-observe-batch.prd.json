@@ -80,8 +80,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "See PRD §7. Do not replace a valid non-actionable run merely to obtain READY."
+      "passes": true,
+      "notes": "See PRD §7. Slot 3: NO_CROSS_ROUND_TRANSITION_OBSERVED; 4 jobs completed; decision ESCALATE_HUMAN/EXPLICIT_ESCALATION; sidecar written; batch size 3 valid."
     },
     {
       "id": "US-005",

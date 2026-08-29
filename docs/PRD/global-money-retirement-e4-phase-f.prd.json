@@ -39,7 +39,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §6. Remove only the exact-balance Composite Destiny resources semantic; Wealth Capacity is not a universal replacement gate."
     },
     {

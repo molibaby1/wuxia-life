@@ -1,0 +1,206 @@
+{
+  "project": "Wuxia-Life",
+  "branchName": "ralph/global-money-retirement-e4-phase-f",
+  "description": "Close Global Money Retirement by first reducing exact money/numeric wealth to compatibility-only dependencies, then atomically removing both legacy numeric economic fields from PlayerState/Snapshot with a single strict schema bump from 3.15.0 to 3.16.0. Markdown PRD is product truth; execution requires separate Human approval.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Retire numeric wealth alias from current runtime and authoring",
+      "description": "As the product owner, I want optional numeric wealth to stop being a current runtime/authoring capability so that wealthCapacity remains the sole formal economic authority before physical field removal. See PRD §5.",
+      "acceptanceCriteria": [
+        "EventExecutor cannot mutate exact numeric wealth",
+        "ConditionEvaluator fails closed for exact wealth/player.wealth expressions without affecting wealthCapacity",
+        "ChoiceRequirementExplanation does not expose exact numeric wealth as a supported requirement stat",
+        "Formal EventLoader guard rejects stat_modify wealth and exact numeric wealth expressions while preserving Wealth Capacity authoring",
+        "Formal loaded catalog has zero exact numeric-wealth writes and zero exact numeric-wealth conditions",
+        "PlayerState.wealth and Snapshot wealth compatibility fields remain physically present in this Story",
+        "Existing E2/E3 money guards remain green",
+        "Focused numeric-wealth retirement tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "See PRD §5. Numeric wealth state only; preserve route/persona/pathAffinity uses of the word wealth and never alias exact wealth to wealthCapacity."
+    },
+    {
+      "id": "US-002",
+      "title": "Retire composite destiny resources balance semantics",
+      "description": "As the product owner, I want generic composite-destiny resources thresholds to stop reading exact wallet balance so final field removal does not turn Wealth Capacity into a universal route key or preserve a hidden numeric economy. See PRD §6.",
+      "acceptanceCriteria": [
+        "Composite Destiny exact-balance resources dimension is removed from current Wuxia destiny requirements",
+        "readDimensionValueForDestiny no longer reads player.money or numeric player.wealth",
+        "No removed resources threshold is replaced by wealthCapacity, numeric wealth, a synthetic score, or an arbitrary stat",
+        "Remaining martial, reputation, social, key-choice, and luck gates are preserved",
+        "Cross-track requirement indices remain valid after requirement deletion",
+        "Unrelated meanings of resources such as origin material exposure or narrative tags are not globally removed",
+        "Focused P16/P25 composite destiny tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "See PRD §6. Remove only the exact-balance Composite Destiny resources semantic; Wealth Capacity is not a universal replacement gate."
+    },
+    {
+      "id": "US-003",
+      "title": "Close generic numeric player stat escape paths",
+      "description": "As a maintainer, I want generic numeric player-stat utilities to accept only current canonical numeric stats so removed economic fields cannot be recreated dynamically after Phase F. See PRD §7.",
+      "acceptanceCriteria": [
+        "Generic current player numeric read/write boundary has an explicit supported stat set or equivalent validation",
+        "money, exact numeric wealth, and categorical wealthCapacity are excluded from generic numeric mutation",
+        "Active-planning unsupported stat keys fail closed rather than creating arbitrary player properties",
+        "Valid current active-action and childhood-action stat deltas remain unchanged",
+        "Passing money or exact numeric wealth through current generic write paths cannot create or mutate those fields",
+        "No new generic stat framework or numeric Wealth mechanism is introduced",
+        "Focused active-planning/player-stat-access tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See PRD §7. This is a narrow anti-reintroduction boundary, not a general stat-system redesign."
+    },
+    {
+      "id": "US-004",
+      "title": "Retire legacy balance observability and report surfaces",
+      "description": "As a maintainer, I want current diagnostics, headless traces, audit reports, and simulation summaries to stop transporting dead exact balances so observability does not keep compatibility state alive. See PRD §8.",
+      "acceptanceCriteria": [
+        "Headless experience trace does not track exact money or numeric wealth as player stats",
+        "Current simulation summary/report types and adapters have no moneyGrowth field",
+        "P45 wealth early audit no longer serializes or renders a wallet balance column",
+        "Infant/passive verification and current attribute metadata do not expose legacy exact balance stats",
+        "Current browser/experience acceptance tooling does not expect a visible 银两 field",
+        "Route/persona/theme uses of wealth are preserved when they are not numeric state",
+        "Focused report/headless/audit tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See PRD §8. Remove compatibility-only observation, not historical artifact text or narrative wealth labels."
+    },
+    {
+      "id": "US-005",
+      "title": "Decouple P16 to P23 compiled slices from legacy balances",
+      "description": "As a maintainer, I want current compiled validation/report slices outside P25 to stop constructing or mutating PlayerState money/numeric wealth so Phase F can remove the fields without preserving obsolete simulation semantics. See PRD §9.",
+      "acceptanceCriteria": [
+        "Current compiled P16-P23 validation/report source no longer requires PlayerState.money or numeric PlayerState.wealth",
+        "Legacy sentinel-balance proofs are replaced by assertions on the actual surviving semantic inputs/outputs where needed",
+        "Martial, reputation, connections, habits, flags, family, and legacy scenario distinctions are preserved",
+        "No removed balance is replaced with Wealth Capacity unless that exact current scenario already has accepted Wealth Capacity semantics",
+        "Normal gameplay scheduling and route semantics are unchanged",
+        "Focused P16-P23 tests/gates pass on surviving dimensions",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "See PRD §9. Use current source reachability; do not keep fake balances solely for historical invariance tests."
+    },
+    {
+      "id": "US-006",
+      "title": "Retire P25 wallet bookkeeping from current simulations",
+      "description": "As a maintainer, I want current P25 simulation models to stop carrying synthetic wallet bookkeeping so historical simulation scaffolding cannot force the canonical player model to retain a dead numeric economy. See PRD §10.",
+      "acceptanceCriteria": [
+        "Current compiled src/p25 source no longer depends on exact PlayerState.money or numeric PlayerState.wealth",
+        "P25 simulation player constructors and Partial<PlayerState> fixtures do not carry legacy exact balance fields",
+        "P34-P37 and related current lifetime simulations do not maintain hidden local wallet bookkeeping solely for retired thresholds",
+        "Synthetic simulatedStatDelta money values are removed where they are not live declared gameplay semantics",
+        "Study/training/business habits, martial/reputation/connections/businessAcumen, bridge flags, choice/luck gates, and terminal checks are preserved",
+        "No P25 balance is reinterpreted as Wealth Capacity",
+        "Focused P25 simulation/parity/consistency tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "See PRD §10. Do not bulk-edit historical artifacts/reports; this Story targets current compiled P25 scaffolding."
+    },
+    {
+      "id": "US-007",
+      "title": "Establish E4 compatibility only boundary",
+      "description": "As the Human owner, I want a deterministic pre-removal guard proving exact money/numeric wealth are now compatibility-only so Phase F can perform one atomic physical/schema deletion. See PRD §11.",
+      "acceptanceCriteria": [
+        "Add and register a focused E4 compatibility-boundary regression",
+        "Guard proves formal loaded money and exact numeric-wealth writes/conditions are zero and rejected",
+        "Guard proves generic numeric write paths and Composite Destiny cannot recreate/read exact balances",
+        "Guard proves current observability and P16-P25 compiled paths no longer structurally depend on exact balances",
+        "Only the explicit core PlayerState/GameEngine/Snapshot/validation/fixture compatibility ownership remains before Phase F",
+        "Anti-reintroduction guards, narrative route wealth identifiers, unloaded legacy content, and negative tests are not misclassified as live ownership",
+        "Snapshot remains exactly 3.15.0 and PlayerState money/numeric wealth fields still exist after this Story",
+        "Record the next narrow E4 Product Decision using the actual next free PD number",
+        "E1, D16, E2, and E3 protections remain green",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "See PRD §11. Expected governance number is PD-097 but repository authority decides. This Story closes E4 only; no physical removal yet."
+    },
+    {
+      "id": "US-008",
+      "title": "Atomically remove legacy economic fields and bump Snapshot",
+      "description": "As the product owner, I want canonical runtime and persistence to contain only Wealth Capacity so retired exact balance implementations no longer exist physically. See PRD §13 and §16.",
+      "acceptanceCriteria": [
+        "PlayerState has no money field and no numeric wealth field",
+        "Fresh engine state creates neither money nor numeric wealth and GameEngine compatibility copy paths are removed",
+        "SnapshotPlayerState and canonical player key/numeric/required allowlists contain neither money nor numeric wealth",
+        "GAME_STATE_SNAPSHOT_SCHEMA_VERSION changes exactly once from 3.15.0 to 3.16.0",
+        "Runtime and snapshot validators reject dynamically injected money/numeric wealth including nested eventHistory stateSnapshot player fields",
+        "Old 3.15.0 snapshots are rejected with no migration, fallback, normalization, default injection, or Wealth Capacity inference",
+        "Browser/headless toSnapshot/fromSnapshot round-trip wealthCapacity under strict 3.16.0",
+        "Canonical snapshot fixture and current persistence contract docs are updated to 3.16.0",
+        "Focused runtime/snapshot/save/headless contract tests pass",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "See PRD §13 and §16. This is the only Story allowed to bump Snapshot; if baseline is not exactly 3.15.0, STOP and replan."
+    },
+    {
+      "id": "US-009",
+      "title": "Migrate executable regressions to the money free player shape",
+      "description": "As a maintainer, I want current executable tests and fixtures to assert the new canonical shape directly so old sentinel balances do not masquerade as active compatibility requirements. See PRD §14.",
+      "acceptanceCriteria": [
+        "Current executable tests no longer require PlayerState.money or numeric PlayerState.wealth to exist",
+        "Money-invariance sentinel assertions are replaced by no-field-creation or direct surviving-semantic assertions where appropriate",
+        "Negative anti-reintroduction tests intentionally containing money/numeric wealth remain meaningful",
+        "Current snapshot/save contract tests assert exact schema version 3.16.0 and retain strict old-version rejection",
+        "Wealth Capacity tests prove no legacy balance field is created rather than preserving a sentinel balance",
+        "E1 through E4 regression guards remain green under the money-free state",
+        "npm run test:contracts passes",
+        "npm run test:headless has no newly attributable legacy-field failure",
+        "npm test has no newly attributable legacy-field failure",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "See PRD §14. Preserve negative guard fixtures/history; do not chase repository-wide string zero."
+    },
+    {
+      "id": "US-010",
+      "title": "Close Global Money Retirement authority",
+      "description": "As the Human owner, I want one final repository guard and authority update proving canonical economic state has converged on Wealth Capacity so the migration can close without ambiguity. See PRD §15 and §21.",
+      "acceptanceCriteria": [
+        "Add and register a final physical-removal closure regression covering runtime, Snapshot 3.16.0, old-version rejection, authoring guards, observability, Composite Destiny, and wealthCapacity round-trip",
+        "Final guard distinguishes anti-reintroduction/history/narrative wealth strings from live numeric economic ownership",
+        "docs/product/player-model.md states canonical economic player state has wealthCapacity and no exact money/numeric wealth field",
+        "Wealth/Economy Product Contract current decision/status is updated without rewriting its explicitly dated historical inventory as current fact",
+        "Current persistence docs and docs/README agree on Snapshot 3.16.0",
+        "Record the final Global Money Retirement Product Decision using the actual next free PD number",
+        "Final decision freezes no runtime migration, compatibility fallback, hidden numeric economy, or universal Wealth Capacity replacement",
+        "E1, D16, E2, E3, E4, Wealth Capacity, contract, and headless focused protections remain green",
+        "git diff --check passes",
+        "npm run validate:event-quality is run and any failure is attributed",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "See PRD §15 and §21. Expected final governance number is PD-098 but repository authority decides. Stop after closure and run post-run discovery; Ralph completion is not final Human acceptance."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # PRD — Auto Evolution Real Run / Observe Batch
 
-> Status: **HUMAN APPROVED / GATE CLEAR — EXECUTING ON TIP WITH PD-099 (1800000ms)**
+> Status: **CLOSED — NO_CROSS_ROUND_TRANSITION_OBSERVED; sidecar NO_REPORT_CHANGE; STOP for Human delta review**
 >
 > Pair: `auto-evolution-real-run-observe-batch.prd.json`
 >
@@ -9,6 +9,8 @@
 > This PRD performs a small batch of fresh normal real runs. It must observe the workflow that exists; it must not manufacture a desired cross-round outcome.
 >
 > Entry gate (2026-08-29): PRD A matrix accepted (`CONTRACT_CONFORMANCE_PROMISING` + Human `PROMISING_WITH_CAVEATS`); hard-timeout policy v1 integrated (`DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 1800000`, PD-099); `240000ms` retained only as Slice #2 historical baseline, not current hard-timeout authority.
+>
+> Batch result: three fresh runs; 0/3 `READY_FOR_CONFIG_EXECUTION`; Q1=`NO_CROSS_ROUND_TRANSITION_OBSERVED`; Q2=`NO_REPORT_CHANGE`.
 
 ## 1. Goal
 

@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-29（Participant hard-timeout policy v1 = 1800000ms abnormal-safety；Slice #1 matrix ACCEPTED PROMISING_WITH_CAVEATS）。
+> 最后更新：2026-08-29（fresh real-run observe batch = NO_CROSS_ROUND_TRANSITION_OBSERVED；hard-timeout v1=1800000ms；Slice #1 PROMISING_WITH_CAVEATS）。
 
 ---
 
@@ -55,6 +55,7 @@ Auto Evolution 当前处于：
 以下内容不要因 deterministic engineering validation 或设计意图而写成已成立：
 
 - **真实 Participant 驱动的一次 cross-round product transition 尚未被观察到；P2 real product hypothesis = `UNVERIFIED`；**
+- 2026-08-29 fresh real-run observe batch（3 normal Codex current-binding runs）：`NO_CROSS_ROUND_TRANSITION_OBSERVED`（0/3 `READY_FOR_CONFIG_EXECUTION`；sidecar `NO_REPORT_CHANGE`）；
 - 多轮真实运行在长期使用中的稳定性；
 - 每个真实 run 都能或都应该进入下一轮；
 - Participant Communication Contract 的最终形态；

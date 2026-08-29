@@ -156,7 +156,7 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §13 and §16. This is the only Story allowed to bump Snapshot; if baseline is not exactly 3.15.0, STOP and replan."
     },
     {

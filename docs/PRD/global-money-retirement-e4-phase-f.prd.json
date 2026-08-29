@@ -95,7 +95,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "See PRD §9. Use current source reachability; do not keep fake balances solely for historical invariance tests."
     },
     {

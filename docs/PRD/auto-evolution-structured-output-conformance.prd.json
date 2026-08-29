@@ -55,8 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "See PRD §7. Do not add fixed-model bindings unless binding can be reliably requested and observed."
+      "passes": true,
+      "notes": "See PRD §7. Three fresh Cursor Auto trials under .tmp/.../trials/cursor-auto-0{1,2,3}/ — all PASS via provider-native result extraction; resolved model CURSOR_MODEL_BINDING_NOT_OBSERVABLE; no fallback/retry/timeout product changes."
     },
     {
       "id": "US-004",

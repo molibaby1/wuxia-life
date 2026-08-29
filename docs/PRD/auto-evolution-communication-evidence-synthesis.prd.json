@@ -1,0 +1,86 @@
+{
+  "project": "Auto Evolution Communication Evidence Synthesis",
+  "branchName": "ralph/auto-evolution-communication-evidence-synthesis",
+  "description": "Synthesize contract-conformance and real-run evidence to decide whether one bounded next P3 communication slice is justified, without implementing it.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Assemble an attributable communication evidence corpus",
+      "description": "As the product owner, I want the relevant conformance, real-run, report, Contract, and Role evidence assembled by reference so that synthesis does not rely on memory or copied transcripts. See PRD §4.",
+      "acceptanceCriteria": [
+        "PRD A matrix/verdict and PRD B three-run evidence are referenced",
+        "Required PRD A and PRD B raw evidence is directly openable in the execution workspace before synthesis",
+        "If required raw evidence is missing or unattributable, stop with OBSERVATION_INSUFFICIENT rather than relying on summaries, notes, memory, or prior chat",
+        "Relevant structured-output/retransmission traces and Sidecar reports are attributable",
+        "Current Role schema and Contract authority is included",
+        "Historical evidence is dated/labeled and not confused with current runtime evidence",
+        "Full raw Participant conversations are not copied into governance",
+        "No product source change is required",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "See PRD §4. Evidence corpus assembled under .tmp/evolution/communication-evidence-synthesis-20260829/corpus.{json,md}; required PRD A/B raw evidence openable and attribution verified; no product source change; no raw conversations copied into governance."
+    },
+    {
+      "id": "US-002",
+      "title": "Classify observed communication variance",
+      "description": "As the product owner, I want each material observation classified as one-off, repeated Contract problem, provider/runtime issue, already-handled invariant, or insufficient evidence so that communication defects are not confused with thought quality. See PRD §5.",
+      "acceptanceCriteria": [
+        "PRD B Slot 1 IMPROVEMENT_HYPOTHESIS parse failure is classified independently from Slice #1 Pilot conformance unless independent evidence demonstrates the same structural Contract problem",
+        "0/3 READY_FOR_CONFIG_EXECUTION is treated as a batch observation only and is not generalized into workflow route frequency or dominance",
+        "Bare-JSON/wrapper/fence variance is evaluated separately from reasoning quality",
+        "Role-schema variance is separated from provider/runtime failure",
+        "Slice #2 ENVELOPE_FAILURE recovery evidence is evaluated without broadening its authority",
+        "SCHEMA_FAILURE remains fail-closed",
+        "Provenance/reference and permission/STOP ambiguity are evaluated when evidenced",
+        "One-off Participant behavior is not promoted to shared Contract by default",
+        "No new runtime failure taxonomy is introduced merely for the synthesis",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "See PRD §2–§5. Correct communication, not thoughts. Human-approved for execution; all evidence provenance and STOP conditions remain binding."
+    },
+    {
+      "id": "US-003",
+      "title": "Decide whether a bounded P3 slice is justified",
+      "description": "As the product owner, I want one explicit evidence-grounded terminal decision so that P3 only expands when repeated structural communication evidence warrants it. See PRD §6.",
+      "acceptanceCriteria": [
+        "Decision is exactly NO_BOUNDED_P3_SLICE_JUSTIFIED, BOUNDED_P3_SLICE_CANDIDATE, or OBSERVATION_INSUFFICIENT",
+        "A candidate requires repeated evidence across independent runs, Roles, bindings, or equivalent independent evidence",
+        "A single isolated Participant mistake is insufficient absent existing unresolved authority",
+        "Absence of READY_FOR_CONFIG_EXECUTION in the three-run batch is not used as evidence that DEFER/ESCALATE is normal, dominant, or statistically more likely",
+        "Any candidate states observed problem, evidence refs, minimum affected Roles, smallest Contract change, non-goals, stop behavior, and falsification condition",
+        "A candidate explains why a local Role fix is insufficient",
+        "No next P3 implementation is performed in this Story",
+        "No full P3 platform is proposed",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "See PRD §3 and §6. A candidate is a proposal, not implementation authority. Human-approved for execution; all evidence provenance and STOP conditions remain binding."
+    },
+    {
+      "id": "US-004",
+      "title": "Close the program evidence status",
+      "description": "As the product owner, I want current repository authority to reflect only evidence that actually changed so that future work can resume without replaying the whole investigation. See PRD §7.",
+      "acceptanceCriteria": [
+        "Current-product-stage is updated only for statuses actually changed by PRD A/B/C evidence",
+        "Run-by-run transcripts remain in evidence artifacts rather than current-product-stage",
+        "Product decisions are added only for genuine product decisions rather than numbering",
+        "Full P3 remains DEFERRED unless Human separately authorizes it",
+        "No candidate P3 implementation PRD is silently executed",
+        "The program terminal decision is easy to locate from current authority",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "See PRD §7–§9. Stop at the Human Gate. Human-approved for execution; all evidence provenance and STOP conditions remain binding."
+    }
+  ]
+}

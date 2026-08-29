@@ -7,6 +7,7 @@ import {
   type ConformanceMatrixEvidenceV1,
   type ConformanceTrialEvidenceV1,
   type MatrixVerdict,
+  type TrialClassification,
 } from './contractConformanceExperiment';
 import { runContractConformanceTrial } from './runContractConformanceTrial';
 
@@ -64,8 +65,16 @@ async function readExistingTrials(evidenceRoot: string): Promise<ConformanceTria
   return trials;
 }
 
-async function main(): Promise<void> {
-  const [command, ...rest] = process.argv.slice(2);
+function hasNonPassTrial(trials: readonly { classification: TrialClassification }[]): boolean {
+  return trials.some(trial => trial.classification !== 'PASS');
+}
+
+/**
+ * Contract-conformance experiment CLI handler.
+ * Returns process exit code; callers must persist artifacts before non-zero returns.
+ */
+export async function runContractConformanceCli(argv: string[]): Promise<number> {
+  const [command, ...rest] = argv;
   if (command === undefined) usage();
   const args = parseArgs(rest);
   const evidenceRoot = args['evidence-root'] ?? DEFAULT_EVIDENCE_ROOT;
@@ -85,7 +94,7 @@ async function main(): Promise<void> {
     const { writeJsonCreateOnly } = await import('./contractConformanceExperiment');
     await writeJsonCreateOnly(join(evidenceRoot, 'preflight.json'), marker);
     console.log(JSON.stringify(marker, null, 2));
-    return;
+    return 0;
   }
 
   if (command === 'matrix-init') {
@@ -101,7 +110,7 @@ async function main(): Promise<void> {
     };
     const path = await writeMatrixEvidence(evidenceRoot, matrix);
     console.log(path);
-    return;
+    return 0;
   }
 
   if (command === 'trial') {
@@ -119,7 +128,7 @@ async function main(): Promise<void> {
       timeoutMs,
     });
     console.log(JSON.stringify(evidence, null, 2));
-    return;
+    return evidence.classification === 'PASS' ? 0 : 1;
   }
 
   if (command === 'matrix-verdict') {
@@ -140,13 +149,19 @@ async function main(): Promise<void> {
     const path = await writeMatrixEvidence(evidenceRoot, matrix);
     console.log(path);
     console.log(JSON.stringify(matrix, null, 2));
-    return;
+    return hasNonPassTrial(trials) ? 1 : 0;
   }
 
   usage();
 }
 
-main().catch(error => {
-  console.error(error);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runContractConformanceCli(process.argv.slice(2))
+    .then(code => {
+      process.exit(code);
+    })
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
+}

@@ -1214,10 +1214,6 @@ export class GameProcessSimulator {
     const initialMartialPower = initialState?.player?.martialPower || 0;
     const martialPowerGrowth = finalMartialPower - initialMartialPower;
 
-    const finalMoney = finalState?.player?.money || 0;
-    const initialMoney = initialState?.player?.money || 0;
-    const moneyGrowth = finalMoney - initialMoney;
-
     // 提取门派和感情信息
     const flags = finalState?.flags || {};
     
@@ -1281,7 +1277,6 @@ export class GameProcessSimulator {
         autoEvents,
         choiceEvents,
         martialPowerGrowth,
-        moneyGrowth,
         sectJoined,
         sectStatus,
         spouse,
@@ -1667,10 +1662,6 @@ export class GameProcessSimulator {
         <div class="stat-item">
           <div class="stat-label">武力成长</div>
           <div class="stat-value">+${statistics.martialPowerGrowth}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">金钱成长</div>
-          <div class="stat-value">+${statistics.moneyGrowth}</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">加入门派</div>

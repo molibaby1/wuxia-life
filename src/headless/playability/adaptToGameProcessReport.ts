@@ -79,7 +79,6 @@ export function adaptHeadlessRunToGameProcessReport(
       autoEvents,
       choiceEvents,
       martialPowerGrowth: 0,
-      moneyGrowth: 0,
       sectJoined: null,
       sectStatus: null,
       spouse: null,

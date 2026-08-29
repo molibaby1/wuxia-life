@@ -119,7 +119,6 @@ export interface GameProcessReport {
     autoEvents: number;
     choiceEvents: number;
     martialPowerGrowth: number;
-    moneyGrowth: number;
     sectJoined: string | null;
     sectStatus?: string;
     spouse?: string;

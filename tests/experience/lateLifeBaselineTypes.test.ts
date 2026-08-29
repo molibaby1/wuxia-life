@@ -9,7 +9,7 @@ const sample: DecisionObservation = {
   age: 30,
   source: 'browser-local',
   preChoice: {
-    age: 30, money: 1, martialPower: 2, knowledge: 3, businessAcumen: 4, connections: 5,
+    age: 30, martialPower: 2, knowledge: 3, businessAcumen: 4, connections: 5,
     reputation: 6, healthStatus: 'healthy', affiliation: null, title: null, alive: true, endingId: null,
   },
   candidates: [
@@ -18,7 +18,7 @@ const sample: DecisionObservation = {
   ],
   selectedActionId: 'b',
   publicReason: '公开信息显示当前更需要补足学识。',
-  result: { postChoice: { age: 30, money: 1, martialPower: 2, knowledge: 4, businessAcumen: 4, connections: 5, reputation: 6, healthStatus: 'healthy', affiliation: null, title: null, alive: true, endingId: null }, actionSummary: null, disturbanceNarrative: null, periodSummary: null, continuationEventIds: [] },
+  result: { postChoice: { age: 30, martialPower: 2, knowledge: 4, businessAcumen: 4, connections: 5, reputation: 6, healthStatus: 'healthy', affiliation: null, title: null, alive: true, endingId: null }, actionSummary: null, disturbanceNarrative: null, periodSummary: null, continuationEventIds: [] },
   presentation: { readable: 'CLEAR', repetition: 'UNIQUE', longTermEcho: 'STATE_ECHO', note: '' },
 };
 

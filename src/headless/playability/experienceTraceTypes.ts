@@ -124,8 +124,6 @@ const TRACE_PLAYER_STAT_KEYS = [
   'knowledge',
   'businessAcumen',
   'influence',
-  'money',
-  'wealth',
 ] as const;
 
 function jsonValue<T>(value: T): T {

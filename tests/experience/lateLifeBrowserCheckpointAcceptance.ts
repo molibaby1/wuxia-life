@@ -13,13 +13,11 @@ function readJson<T>(file: string): T {
 
 function visibleCheckpointFields(dom: string): Partial<PublicStateFingerprint> {
   const age = dom.match(/generic: (\d+)岁 ·/)?.[1];
-  const money = dom.match(/generic: 银两\s+generic: "(-?\d+)"/)?.[1];
   const reputation = dom.match(/generic: 名望·[\s\S]{0,100}?generic: "(-?\d+)"/)?.[1];
   const martial = dom.match(/generic: 功力\s+generic: "(-?\d+)"/)?.[1];
   const constitution = dom.match(/generic: 体魄·[\s\S]{0,100}?generic: "(-?\d+)"/)?.[1];
   return {
     ...(age ? { age: Number(age) } : {}),
-    ...(money ? { money: Number(money) } : {}),
     ...(reputation ? { reputation: Number(reputation) } : {}),
     ...(martial ? { martialPower: Number(martial) } : {}),
     ...(constitution ? { constitution: Number(constitution) } : {}),
@@ -67,7 +65,7 @@ const output = {
   driftCount,
   parity,
   evidenceBoundary: {
-    browserVisibleFields: ['age', 'money', 'martialPower', 'reputation', 'constitution'],
+    browserVisibleFields: ['age', 'martialPower', 'reputation', 'constitution'],
     mobile390: 'not available through the connected in-app Browser surface',
     applicationConsoleErrors: 'No application errors were observed in the DOM-driven run; browser tool Statsig timeout was external to the app.',
   },

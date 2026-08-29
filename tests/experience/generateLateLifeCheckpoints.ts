@@ -41,7 +41,6 @@ export function publicFingerprint(state: GameState): PublicStateFingerprint {
     : null;
   return {
     age: state.player.age,
-    money: state.player.money,
     martialPower: state.player.martialPower,
     constitution: state.player.constitution,
     knowledge: state.player.knowledge,

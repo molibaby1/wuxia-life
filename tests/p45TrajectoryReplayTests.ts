@@ -148,7 +148,6 @@ function buildFixtureReport(): GameProcessReport {
       autoEvents: 4,
       choiceEvents: 0,
       martialPowerGrowth: 50,
-      moneyGrowth: 0,
       sectJoined: '少林派',
       lifeStates: { ...age40.player.lifeStates },
       growthBiasSummary: ['training'],

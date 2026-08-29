@@ -10,7 +10,6 @@ export type ResultRepetition = 'UNIQUE' | 'EXACT_REPEAT' | 'TEMPLATE_REPEAT' | '
 
 export interface PublicStateFingerprint {
   age: number;
-  money: number;
   martialPower: number;
   constitution?: number;
   knowledge: number;

@@ -51,13 +51,6 @@ export const attributeMeaningCatalog: AttributeMeaningDefinition[] = [
     examples: ['锄强扶弱', '见利忘义'],
     visibilityTier: 'explicit',
   },
-  {
-    key: 'money',
-    name: '银两',
-    purpose: '当前可用钱财，支撑行动与消费',
-    examples: ['购书', '宴请'],
-    visibilityTier: 'explicit',
-  },
 ];
 
 export const ALWAYS_VISIBLE_ATTRIBUTE_KEYS = [

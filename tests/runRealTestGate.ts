@@ -192,6 +192,10 @@ const suites: Suite[] = [
     entry: 'tests/globalMoneyGenericNumericStatEscapeClosure.test.ts',
   },
   {
+    name: 'globalMoneyObservabilityReportRetirement',
+    entry: 'tests/globalMoneyObservabilityReportRetirement.test.ts',
+  },
+  {
     name: 'globalMoneyE2E3PostRunClosureCorrection',
     entry: 'tests/globalMoneyE2E3PostRunClosureCorrection.test.ts',
   },

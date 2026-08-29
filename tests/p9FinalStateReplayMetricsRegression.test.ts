@@ -59,7 +59,6 @@ function report(personaId: string, finalGameState: GameState): GameProcessReport
       autoEvents: 1,
       choiceEvents: 0,
       martialPowerGrowth: 0,
-      moneyGrowth: 0,
       sectJoined: null,
       children: 0,
     },

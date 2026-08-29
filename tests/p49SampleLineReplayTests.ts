@@ -138,7 +138,6 @@ function testDeterministicExport(): void {
       autoEvents: 5,
       choiceEvents: 0,
       martialPowerGrowth: 10,
-      moneyGrowth: 0,
       sectJoined: null,
       lifeStates: createDefaultPlayerLifeStates(),
       growthBiasSummary: ['training'],

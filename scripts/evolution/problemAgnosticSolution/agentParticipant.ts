@@ -7,7 +7,13 @@ import type { StructuredTerminalEnvelopeFailureReason } from '../../../src/evolu
 
 const OUTPUT_ACTIVITY_WINDOW_MS = 100;
 
-export const DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 240_000;
+/**
+ * Participant / model hard-timeout policy v1.
+ * Abnormal-safety hard boundary only — not an ordinary execution budget.
+ * Retransmission / retry / other workflow ceilings remain independent
+ * (e.g. ENVELOPE_RETRANSMISSION_TIMEOUT_MS = 60000).
+ */
+export const DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS = 1_800_000;
 
 export type ParticipantExecutionTraceEventType =
   | 'process_start'

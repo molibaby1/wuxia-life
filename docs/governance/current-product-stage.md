@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-29（Run-Observe / Slice #1 first matrix ACCEPTED PROMISING_WITH_CAVEATS；harness FAQ+CLI exit closure）。
+> 最后更新：2026-08-29（Participant hard-timeout policy v1 = 1800000ms abnormal-safety；Slice #1 matrix ACCEPTED PROMISING_WITH_CAVEATS）。
 
 ---
 
@@ -39,11 +39,12 @@ Auto Evolution 当前处于：
 - shared contract 要求 bare JSON / no wrapper prose / no Markdown fence / strict validate-or-reject，并保持 Host 不做 semantic repair；
 - 独立 Contract Conformance Matrix（trivial contract-only；Codex current binding ×3 + Cursor Auto ×3）全部 `PASS`；证据在实验目录，不构成主流程 authority；不证明 fixed Cursor model A/B，也不证明真实 Solution reasoning quality；不宣称 full runtime communication verified。
 - **P3 Minimal Slice #2 — Envelope Failure Bounded Retransmission：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / RUNTIME CONFORMANCE VERIFIED；**
-- 已验证产品边界：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；Initial Participant timeout = unchanged production default 240000ms；
+- 已验证产品边界：Role = Solution only；Trigger = terminal `ENVELOPE_FAILURE` only；Recovery = exactly one same-thread retransmission；Retransmission ceiling = 60000ms；当时 Initial Participant timeout 为 production default `240000ms`（历史验证基线，不是当前 hard-timeout authority）；
 - `SCHEMA_FAILURE` fail closed；Host repair / extraction / normalization forbidden；semantic correction forbidden；Participant 必须支持 reliable same-thread continuation；first-pass failure provenance 保持可观察；
 - runtime conformance 由 clean corrective 3-trial Cursor batch 确认：3/3 均 one retransmission、`sameThread=true`、`timeoutMs=60000`、final `SUCCEEDED`；second retransmissions = 0；schema-failure retries = 0；aggregate Trace causal ordering verified；protected production hashes 在 runtime observation 期间不变；
 - Sidecar Run Report 现已可从 `solution-agent/execution-trace.json` 观察 first-pass / retransmission / final structured-output 指标，但不影响 runtime outcome；
 - 不代表完整 P3 启动或 broader Participant Communication Contract 激活。
+- **Participant / model hard-timeout policy v1（PD-099）：默认 hard boundary = `1800000ms`；abnormal-safety only，不是 ordinary execution budget；retransmission / retry ceilings 保持独立（Slice #2 retransmission ceiling 仍为 `60000ms`）。**
 
 这些结果支持当前系统进入真实使用 / 观察阶段。
 
@@ -125,7 +126,7 @@ Minimal Slice #2 已验证边界：
 - Trigger：terminal `ENVELOPE_FAILURE` only；
 - Recovery：exactly one same-thread retransmission；
 - Retransmission ceiling：60000ms；
-- Initial Participant timeout：unchanged production default 240000ms；
+- Initial Participant timeout（Slice #2 验证时的 historical baseline）：`240000ms`；当前 Participant hard-timeout authority 见 PD-099 / `1800000ms`，与 retransmission ceiling 独立；
 - `SCHEMA_FAILURE`：fail closed；
 - Host repair / extraction / normalization：forbidden；
 - semantic correction：forbidden；
@@ -245,3 +246,4 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 14. MCP 是否已选定？→ **NO**
 15. code-level autonomous modification？→ **NOT AUTHORIZED**
 16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
+17. Participant hard-timeout authority？→ **`1800000ms` abnormal-safety hard boundary（PD-099）；不是 ordinary budget；retransmission ceiling 仍独立为 `60000ms`**

@@ -1407,3 +1407,20 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要 runtime migration 或接受 `3.15.0` snapshot；
 - 需要 bulk-migrate unloaded legacy wallet backlog 为 current authority；
 - 需要修改 Wealth Capacity 语义或引入 hidden numeric economic replacement。
+
+### PD-099：Participant / model hard-timeout policy v1（1800000ms abnormal-safety）
+
+**实施决策（Human authorized：2026-08-29）**
+
+- Participant / model 默认 hard-timeout = `1800000ms`（`DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS`）。
+- 该边界是 **abnormal-safety hard boundary**，不是 ordinary execution budget，也不是“任务应当在此时长内完成”的质量目标。
+- Envelope Failure Bounded Retransmission ceiling 保持独立：`ENVELOPE_RETRANSMISSION_TIMEOUT_MS = 60000`；不得因 hard-timeout 变更而被改写或合并。
+- 其他 retry / workflow budgets 同样独立于该 hard boundary。
+- Slice #2 runtime conformance 在当时 production default `240000ms` 下验证的历史事实保留；不得把该历史基线继续写成当前 hard-timeout authority。
+- 不改变 Structured Final Output Contract V1、Host no-repair、full P3 DEFERRED、或 Slice #2 产品边界。
+
+**重新讨论条件**
+
+- 需要更改默认 hard boundary 数值或语义（例如把它改回 ordinary budget）；
+- 需要把 retransmission / retry ceiling 与 hard-timeout 合并；
+- 需要按 Role / provider 引入不同 hard-timeout defaults。

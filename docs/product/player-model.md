@@ -79,7 +79,7 @@
 ## 4. 非核心属性
 
 - 日常银两余额不属于正式核心人物成长资源。角色的经济能力与持久经济基础由 [Wealth / Economy Product Contract v1](wealth-economy-product-contract-design.md) 定义：Wealth Capacity 表达粗粒度战略经济能力，Asset 表达具名、持久、可影响未来玩法的世界事实。
-- 银两仍可作为世界观与事件叙事语言出现，但普通收入、普通消费以及练功、读书等非经济成长不得把银两余额作为通用成长税。当前 `PlayerState.money` 与可选 `wealth` 字段属于待迁移 implementation reality，不等同于正式 Wealth Capacity，也不得覆盖该 Contract；现有物品、flags 或余额数值也不得自动推导为 Asset。
+- 银两仍可作为世界观与事件叙事语言出现，但普通收入、普通消费以及练功、读书等非经济成长不得把银两余额作为通用成长税。正式 canonical 经济状态仅为 `wealthCapacity`；`PlayerState` 与 Snapshot 不再包含精确钱包余额或 numeric wealth 字段（Snapshot `3.16.0`）。现有物品、flags 或历史余额数值也不得自动推导为 Asset。
 - 健康使用离散状态，例如康健、抱恙、重病、重伤、濒危。
 - 具体疾病、伤势和长期影响使用附加状态。
 - 精力作为长期数值删除。

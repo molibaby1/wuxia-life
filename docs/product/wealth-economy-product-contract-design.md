@@ -621,15 +621,16 @@ accepted product design 不等于对上述 code、runtime、schema 或 migration
 
 ### 13. Implementation / Human decisions still required
 
-完整 accepted product semantics 已在 Part A 落库。当前剩余的是 repository-grounded implementation 决策，而不是重新选择经济资源模型：
+> **2026-08-29 closure（PD-098）：** 本节 §13 所列 open items 1–6 已由 Global Money Retirement E4 + Phase F 关闭。当前 authoritative 状态见 §15；Part B 保留 2026-08-22 历史 inventory 作为 dated evidence，不得改写为“当时即为 false”。
 
-1. `money` 与可选 `wealth` 的最终处理：删除、阶段性 legacy 保留、外部重建存档，或其他明确的一次性迁移政策。
-2. P17 的 `money + wealth` 派生读取何时退休，以及如何保证迁移后只有一个正式 Wealth Capacity source of truth。
-3. `childhoodEvents.json` 的 legacy `money +200` producer 是否继续保留、冻结为 evidence，还是在后续迁移里收敛。
-4. Phase 1B 之外的 `merchant_shop_*`、`merchant_chamber_head`、`merchant_wealthy` 等 flags 是否需要升级为其他正式 Asset；本阶段只确认 `merchant_shop` 的 binary ownership，不把其他 flags 自动迁移。
-5. 未加载的 `money-events.json`、`economy.json`、`shop.json` 等 backlog 内容是继续延期、删除，还是在未来重新纳入正式 catalog。
-6. 如果 Phase 1B 需要改变 Snapshot shape / save compatibility，应按现有 formal Contract / Schema boundary 单独 Human 裁决，不得借 accepted product design 自动扩大权限。
+完整 accepted product semantics 已在 Part A 落库。以下条目在 PD-098 前为 repository-grounded implementation 决策记录；**现已关闭**：
 
+1. ~~`money` 与可选 `wealth` 的最终处理~~ → **已删除**；canonical player economic state = `wealthCapacity` only；Snapshot `3.16.0`；无 runtime migration。
+2. ~~P17 的 `money + wealth` 派生读取~~ → **已退休**；Composite Destiny 不再使用 exact balance `resources` 维度。
+3. ~~`childhoodEvents.json` legacy `money +200` producer~~ → 随 Phase F 物理删除与 formal catalog guard 收敛；未加载 backlog 不 bulk-migrate。
+4. Phase 1B 之外的 merchant flags 升级 → 仍不在本 PRD scope；`merchant_shop` binary ownership 不变。
+5. ~~未加载 `money-events.json`、`economy.json`、`shop.json` 等 backlog~~ → **保持 excluded**；非 current gameplay authority；re-import 须过 formal guard 且需新 Human 决策。
+6. Snapshot shape → **3.15.0 → 3.16.0 一次 bump 已完成**；旧 snapshot 拒绝，外部重建。
 
 ### 14. Inventory conclusion
 
@@ -641,3 +642,22 @@ Repository-grounded inventory 已完成，且本次 authority corrective 不要�
 - **Part B：基于 2026-08-22 repository snapshot 的只读 implementation inventory**。
 
 两者 authority 身份必须保持区分：Part A 定义产品语义；Part B 记录当前实现事实与迁移证据。实现事实不能反向覆盖 Part A。
+
+### 15. Current implementation status（2026-08-29，PD-098）
+
+**Authority：** 本节描述 PD-098 关闭后的 current-only 状态。Part B 中 2026-08-22 的 dated observations 仍为历史 evidence；若与下文冲突，以本节与 PD-098 为准。
+
+| 主题 | 当前决策 |
+| --- | --- |
+| Canonical player economic state | `wealthCapacity` only |
+| `PlayerState.money` / numeric `PlayerState.wealth` | 不是 PlayerState / Snapshot 字段；已从 canonical shape 物理删除 |
+| Snapshot schema | exactly `3.16.0`；strict current-only |
+| Runtime migration / fallback | 无；`3.15.0` 及携带 `player.money` / numeric `player.wealth` 的 snapshot 一律拒绝 |
+| Formal EventLoader authoring | money / exact numeric-wealth write & condition = 0；guard 拒绝 reintroduction |
+| Difficulty Setback | money mutation = 0 |
+| Unloaded legacy wallet backlog | `money-events.json`、`economy.json`、`shop.json` 等未 wired 入 `events.json`；非 current gameplay authority；不 bulk-migrate |
+| Anti-reintroduction guards |  intentionally 保留 literal `money` / numeric `wealth` 字符串（deny / rejection / history） |
+| Route / narrative `wealth` token | 非 numeric wealth state（如 `choiceTendency: 'wealth'`、`pathAffinity.wealth`） |
+| Reopening exact wallet / numeric wealth gameplay | 须新 Human product decision |
+
+**Reopen 条件：** 见 `docs/governance/product-decisions.md` PD-098「重新讨论条件」。

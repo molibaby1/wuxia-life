@@ -1387,3 +1387,23 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要重新把 exact money / numeric wealth 做成 live gameplay / authoring / analytical capability；
 - 需要取消或推迟 Phase F 物理删除；
 - 需要在 Phase F 之外提前 bump Snapshot schema 或引入 hidden numeric economic replacement。
+
+### PD-098：Phase F 物理删除 legacy 经济字段并关闭 Global Money Retirement
+
+**实施决策（Human accepted：2026-08-29）**
+
+- Global Money Retirement E4 + Phase F 完成物理 closure：canonical player economic state = `wealthCapacity` only。
+- `money` 与 numeric `wealth` 不是 `PlayerState` / Snapshot 字段；已从 runtime types、新局 seed、canonical validation key lists 与 canonical fixtures 物理删除。
+- Snapshot schema exactly `3.16.0`；strict current-only；无 runtime migration / fallback / default injection / aliasing / silent cleanup。
+- `3.15.0` 及携带 `player.money` 或 numeric `player.wealth` 的 snapshot 一律拒绝；外部须按 `3.16.0` 重建。
+- Anti-reintroduction guards（EventLoader / ConditionEvaluator / choice-explanation deny、D6 auto-choice ignore、formal wallet authoring guard、negative tests）** intentionally 保留** literal `money` / numeric `wealth` 字符串，不视为 live ownership。
+- Unloaded legacy wallet content（`money-events.json`、`economy.json`、`shop.json`、deferred identity lines 等）不是 current gameplay authority，本 PRD 不 bulk-migrate；wired 入 formal catalog 须过 guard 且需新 Human 决策。
+- Route preference / narrative / persona 中 token `wealth`（如 `choiceTendency: 'wealth'`、`pathAffinity.wealth`）不是 numeric wealth state。
+- Final regression：`tests/globalMoneyPhysicalRemovalClosure.test.ts` 注册于 `tests/runRealTestGate.ts`。
+
+**重新讨论条件**
+
+- 需要重新把 exact wallet / numeric wealth 做成 live gameplay / presentation / authoring / analytical capability；
+- 需要 runtime migration 或接受 `3.15.0` snapshot；
+- 需要 bulk-migrate unloaded legacy wallet backlog 为 current authority；
+- 需要修改 Wealth Capacity 语义或引入 hidden numeric economic replacement。

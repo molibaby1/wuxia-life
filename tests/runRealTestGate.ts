@@ -188,6 +188,10 @@ const suites: Suite[] = [
     entry: 'tests/globalMoneyCompositeDestinyResourcesRetirement.test.ts',
   },
   {
+    name: 'globalMoneyGenericNumericStatEscapeClosure',
+    entry: 'tests/globalMoneyGenericNumericStatEscapeClosure.test.ts',
+  },
+  {
     name: 'globalMoneyE2E3PostRunClosureCorrection',
     entry: 'tests/globalMoneyE2E3PostRunClosureCorrection.test.ts',
   },

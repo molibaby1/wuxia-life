@@ -1,6 +1,6 @@
 import type { EventCondition, GameState } from '../../types/eventTypes';
 import { ConditionEvaluator } from '../ConditionEvaluator';
-import { readPlayerNumeric } from '../../utils/playerStatAccess';
+import { isCanonicalPlayerNumericStat, readPlayerNumeric } from '../../utils/playerStatAccess';
 import { isWealthCapacity, meetsWealthCapacity, WEALTH_CAPACITY_LABELS } from '../../types/wealthCapacity';
 
 export type RequirementGapKind = 'exact' | 'fuzzy' | 'unsupported';
@@ -110,7 +110,7 @@ export function explainChoiceRequirement(
     };
   }
 
-  if (RETIRED_WALLET_REQUIREMENT_STATS.has(parsed.stat)) {
+  if (RETIRED_WALLET_REQUIREMENT_STATS.has(parsed.stat) || !isCanonicalPlayerNumericStat(parsed.stat)) {
     return {
       choiceId,
       available: false,

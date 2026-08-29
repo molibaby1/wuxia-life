@@ -6,6 +6,7 @@ import type {
   RiskLevel,
 } from '../../types/activeActionTypes';
 import type { GameState } from '../../types/eventTypes';
+import { isCanonicalPlayerNumericStat } from '../../utils/playerStatAccess';
 import { clampActionDeltasForAge } from './ageActionStatCaps';
 import { formatStatDeltaSummary } from './periodSummaryBuilder';
 
@@ -72,6 +73,9 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
 
   const deltas: Record<string, number> = {};
   for (const reward of action.rewards) {
+    if (!isCanonicalPlayerNumericStat(reward.stat)) {
+      continue;
+    }
     const raw = rollBetween(reward.min, reward.max, random);
     const value = Math.max(0, Math.round(raw * rewardMultiplier));
     if (value !== 0) {
@@ -80,6 +84,9 @@ export function resolveActiveAction(input: ActionResolverInput): ActionResult | 
   }
   for (const cost of action.costs) {
     const key = cost.stat;
+    if (!isCanonicalPlayerNumericStat(key)) {
+      continue;
+    }
     deltas[key] = (deltas[key] ?? 0) - cost.amount;
   }
 

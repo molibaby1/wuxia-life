@@ -11,7 +11,11 @@ import type {
 } from '../../types/activeActionTypes';
 import { durationToMonths } from '../../types/activeActionTypes';
 import type { GameState, PlayerState } from '../../types/eventTypes';
-import { readPlayerNumeric, writePlayerNumeric } from '../../utils/playerStatAccess';
+import {
+  isCanonicalPlayerNumericStat,
+  readPlayerNumeric,
+  writePlayerNumeric,
+} from '../../utils/playerStatAccess';
 import { EventPriority } from '../../types/eventTypes';
 import type { EventDefinition } from '../../types/eventTypes';
 import { resolveActiveAction } from './ActionResultResolver';
@@ -48,6 +52,9 @@ function durationToAdvanceUnit(duration: ActionDuration): { value: number; unit:
 
 export function applyStatDeltas(player: PlayerState, deltas: Record<string, number>): void {
   for (const [key, delta] of Object.entries(deltas)) {
+    if (!isCanonicalPlayerNumericStat(key)) {
+      continue;
+    }
     writePlayerNumeric(player, key, readPlayerNumeric(player, key) + delta);
   }
 }

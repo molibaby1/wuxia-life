@@ -110,8 +110,10 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
     'one choice must apply the public martial delta exactly once',
   );
   assert(
-    response.feedback.player.statImpacts.some(impact => impact.stat === 'martialPower' && impact.delta === 8),
-    'choice feedback must retain the visible martial impact',
+    response.feedback.player.statImpacts.some(
+      impact => impact.stat === 'martialPower' && impact.delta === actualDeltas.martialPower,
+    ),
+    'choice feedback must show the actual public martial delta',
   );
 
   const beforePlayer = structuredClone(response.nextSnapshot.state.player);

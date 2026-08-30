@@ -1469,3 +1469,36 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要把 Human backlog 变成主循环同步 gate、建立新的 authority system，或把 `READY_FOR_FORMAL_TASK` 改写为自动 implementation authorization；
 - 需要建设 UI、database、semantic dedupe、priority scoring、Report Analysis 或其他超出本条轻量 workflow closure 的能力；
 - 需要修改 full P3、Communication Contract、代码 / Runtime / Framework / formal Contract 权限边界。
+
+### PD-101：Character / Relationship Product Contract v1 与明月人物纵切治理边界
+
+**产品决策（Human accepted：2026-08-30；本条为 authority closure）**
+
+- `docs/product/character-relationship-product-contract-design.md` 成为 `player-model` 之下的 accepted Character / Relationship product contract；第一层 `player-model` 继续拥有更高 authority。
+- 人物首先是世界中的具体人物，不是恋爱候选槽位、配偶候选或攻略对象。人物可以形成友情、合作、冲突、暧昧、恋爱、分离、婚姻等由具体内容支持的关系；没有发展爱情不等于人物内容失败。
+- 人物进入玩家人生必须有合理来源，但不要求所有人物绑定具体路线。允许市集 / 地域生活 / 公共事务等普适型入口，也允许商路 / 门派 / 仕途 / 江湖 / 家庭等路径关联型入口；不得为了保证某个 NPC 每局出现而补齐无关入口。
+- 相遇、认识、关系深化、恋爱、婚姻、家庭是不同产品语义。初遇不得自动宣布爱情、真爱、婚姻候选或 relationship progression。
+- 关系采用 fact-first / state-minimal 模型：优先读取具体历史、共同经历、重要选择、冲突、承诺与必要 durable Facts；继续禁止通用 affinity / trust / closeness / romance progress / relationship XP / marriage quality 等关系数值轴。
+- 多个 boolean / event facts 不得机械组合成隐藏攻略分数。过去事实用于建立叙事前提和路径差异，不用于累计“正确选择”门槛。
+- 系统不得预先替玩家宣布某人是真爱、未选择某人是一生遗憾，或把 spouse / children 当作私人生活 achievement。单身、未婚、错过、分离、无子女等均可以是完整人生。
+- 恋爱与婚姻分离。恋爱不自动收束为婚姻；家族介绍 / 安排婚姻可以存在，但首先意味着认识一个具体人物并面对婚姻选择，不得预先被评价为次等婚姻。
+- Person Definition Contract v1 是 authoring Contract，不是 Runtime Schema。重要人物原则上只定义 `Identity / Access / Character Anchors / Core Concern / Event Responsibilities / Durable Facts / Relationship Possibilities / Long-term Hooks`，且只定义当前内容真正需要的信息。
+- 共享人物设计 Contract 与最小运行原语，不共享统一剧情流程。人物专属事件与人物专属 facts 属于正常内容边界；只有两个以上独立人物或另一个独立产品域真实需要同一稳定语义时，才考虑最小 canonical promotion。
+- 固定人物和运行时实例化人物对 Character / Relationship consumer 正交：两者都只需提供稳定 identity 的 concrete person。人物实例化不是本决策的组成部分；本条不建设 generator、prototype runtime schema、姓名/性别生成或 generic NPC framework。
+- 人物 / 人物原型可以拥有自己的专属事件；不得为了实例化建设万能初遇、万能关系冲突、万能恋爱事件或 procedural romance generator。
+- 明月人物纵切 v1 是第一验证样板，不是新的标准恋爱攻略模板。明月可以保持固定人物与市集普适入口；市集相遇本身不退休，退休的是“初遇直接进入爱情”的旧语义。
+- 明月 v1 只验证：初识、再次交集、人物塑造 / 共同经历、一次有后果的价值冲突或重要选择、具备真实前史后的关系性质选择，以及至少一次后续人生回响；发展爱情与不发展爱情都必须成立。第一纵切不要求同时实现婚姻、子女、中晚年完整剧情、完整家族史或全部旧明月事件迁移。
+- 明月 v1 初期允许使用人物专属 durable fact 表达“玩家与明月明确建立感情关系”，不因此提前建立 shared canonical romantic relationship schema。只有第二个独立人物或婚姻等独立消费者真实需要统一读取该语义时，才重新判断 promotion。
+- 以下 current semantics 正式降级为 **legacy product semantics pending migration**：`love_started` 统一爱情总开关、初遇直接进入爱情、固定 `lover_mingyue` 作为所有玩家默认恋爱对象、affinity 驱动关系推进、当前 `family_marriage` 的真爱/家族安排/自由恋爱价值排序、`marry_mingyue` preferred romance choice、spouse/children romance achievement、`marriage_quality_*` 统一评分、恋爱状态自动推动固定年龄婚姻收束、明月作为 canonical 唯一真爱路线。
+- Legacy retirement 是 authority 变化，不代表本条已修改 Runtime、event、schema、tests 或 telemetry；现有实现只能说明 implementation reality，后续需独立 migration decomposition。
+- 本决策不重做完整 Family Domain，不建设 NPC simulation / NPC AI / relationship stage machine / 性取向数值系统 / generic romance generator，也不授权本次 authority closure 修改任何运行逻辑。
+
+**重新讨论条件**
+
+- 需要新增 shared Person / Relationship Runtime Schema 或统一 relationship stage / score；
+- 第二个独立人物或婚姻 / 家庭等独立产品域证明存在必须 canonicalize 的共享 relationship semantic；
+- 需要建设人物实例化 generator、通用 NPC framework 或自主 NPC simulation；
+- 需要重新引入 affinity、trust、relationship progression、marriage quality 等数值语义；
+- 需要改变当前恋爱 / 婚姻分离、人物可达性、Person Definition Contract 或 shared-vs-character-specific boundary；
+- 明月真实纵切证明当前 Person Definition / fact-first 模型无法支撑可玩的连续人物内容。
+

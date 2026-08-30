@@ -9,11 +9,12 @@
 - [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范。
 - [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与模块边界的当前权威产品规范。
 
-`player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Contract v1` 是在玩家模型之下登记的当前 accepted product contract，不替代第一层规范。`player-model` 明确把经济能力语义委托给该 Contract；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
+`player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Product Contract v1` 与 `Character / Relationship Product Contract v1` 是在玩家模型之下登记的当前 accepted product contracts，不替代第一层规范。`player-model` 分别把经济能力语义、重要人物与人物关系语义委托给对应 Contract；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
 
 ### 已接受的产品契约
 
 - [Wealth / Economy Product Contract v1](product/wealth-economy-product-contract-design.md)：完整 Human-accepted 财力/资产产品语义；含 2026-08-22 historical repository inventory（非 current authority）；当前 implementation closure 见该文档最新 status section / PD-098（Snapshot `3.16.0`，`wealthCapacity`-only）。
+- [Character / Relationship Product Contract v1](product/character-relationship-product-contract-design.md)：Human-accepted 的重要人物与人物关系产品语义；person-first、fact-driven relationship、恋爱/婚姻分离、no generic affinity；包含 Person Definition Contract v1、shared-vs-character-specific promotion boundary 与明月人物纵切 v1 验证边界。人物实例化仍是独立、尚未设计的产品能力。
 - [Phase 1B Minimal Asset Semantics Design](product/wealth-economy-phase-1b-minimal-asset-semantics-design.md)：Human-accepted 的 `merchant_shop` 最小 Asset identity、ownership、persistence 与 presentation implementation boundary。
 - [Merchant Shop Legacy Money Migration Design](product/wealth-economy-merchant-shop-legacy-money-migration-design.md)：Human-accepted 的 merchant talent → first shop → shop-failure 竖切，从 legacy `money` 迁移到 Wealth Capacity + `merchant_shop` Asset（已交付）。
 - [Merchant Caravan Legacy Money Migration Design](product/wealth-economy-merchant-caravan-legacy-money-migration-design.md)：Human-accepted 的 `merchant_caravan_guard` + `merchant_market_monopoly` 入口竖切，从 legacy `money` 迁移到 Wealth Capacity（已交付）。
@@ -24,7 +25,7 @@
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship current authority closure 见 PD-101。
 - [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
 - [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
 - [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。

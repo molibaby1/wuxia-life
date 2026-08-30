@@ -96,7 +96,9 @@
 
 故事事实记录会影响未来内容的重要经历，例如加入门派、担任官职、救过某人、持有信物。仅用于回顾的内容进入历史记录，不创建新状态字段。
 
-现阶段不建设通用 NPC 好感度或关系数值系统。
+重要人物与人物关系的正式产品语义由 [Character / Relationship Product Contract v1](character-relationship-product-contract-design.md) 定义。该 Contract 位于本规范之下，不得覆盖本文件定义的玩家模型边界。
+
+现阶段不建设通用 NPC 好感度或关系数值系统；人物关系优先由具体历史、具体 relationship 与后续确实需要消费的事件专属 Fact 表达。
 
 ### Discipline 与 Indulgence
 
@@ -275,6 +277,7 @@ studyHabit 达到稳定积累
 
 家庭语义由 Trait、spouse、children、具体 relationship 与事件专属 Fact 承载。
 社交语义由 connections、reputation、具体 relationship 与事件专属 Fact 承载。
+重要人物及其关系的具体设计、事实最小化和 shared-vs-character-specific 边界遵循 [Character / Relationship Product Contract v1](character-relationship-product-contract-design.md)。
 
 不得建立替代的家庭／社交通用数值轴；不得从 Trait、tag、收益、echo flag、时间或成功失败自动推导。
 上述语义不得作为全局事件权重、人物原型、身份判断或 Ending 隐藏轴。
@@ -417,7 +420,7 @@ lifePath.primaryIdentity
 
 - 事件调度；
 - 剧情连续性；
-- NPC 关系系统；
+- 通用 NPC 关系 Runtime / 模拟系统；重要人物与人物关系的产品语义已委托给 [Character / Relationship Product Contract v1](character-relationship-product-contract-design.md)；
 - 数值平衡；
 - UI 全面改版；
 - 多世界观实现；

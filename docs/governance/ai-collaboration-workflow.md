@@ -140,7 +140,7 @@ Sidecar Run Report 已是当前可用的旁路 observability capability。
 
 > **没有 Report Analysis，主流程照样运行；Report Producer 也不应成为 Skill 的依赖。**
 
-当前下一 bounded workflow work 由 `docs/governance/current-product-stage.md` 决定，目前是 Human Follow-up Loop v1 implementation planning / minimal slice。
+当前 bounded Human Follow-up scope 由 `docs/governance/current-product-stage.md` 决定：`retain + review + list` minimal runtime 已可用，implementation review 已 ACCEPTED，real-use pilot completed (`HFL_REAL_USE_VALIDATED`)；Human 可异步 review retained items，workflow first / productization later 不变；automatic Review Trigger analysis 尚未引入。
 
 ## 5. Future Report Analysis
 
@@ -278,11 +278,11 @@ Human follow-up lifecycle 不改变上述授权继承规则。work-item state �
 
 真实 flywheel 运行详情进入独立 artifacts / sidecar report。
 
-Human follow-up work-item state 属于 operational state，应与 retained provenance 一起由后续 runtime 设计承载；governance documents 仍不是 backlog database。以后如果出现 Human Control Surface，它读取运行 artifacts / operational state，而不是把 governance 文档当数据库。
+Human follow-up work-item state 属于 operational state，由已有 retain / review / list runtime 与 retained provenance 承载；governance documents 仍不是 backlog database。以后如果出现 Human Control Surface，它读取运行 artifacts / operational state，而不是把 governance 文档当数据库。
 
 ## 12. 当前阶段引用
 
-具体阶段顺序以 `docs/governance/current-product-stage.md` 为准。当前仍处于 RUN / OBSERVE；下一 bounded workflow work 是 Human Follow-up Loop v1 implementation planning / minimal slice。Full P3 remains `DEFERRED`，当前 `NO_BOUNDED_P3_SLICE_JUSTIFIED` 不变。
+具体阶段顺序以 `docs/governance/current-product-stage.md` 为准。当前仍处于 RUN / OBSERVE；Human Follow-up minimal runtime 已 available，real-use pilot completed (`HFL_REAL_USE_VALIDATED`)。Full P3 remains `DEFERRED`，当前 `NO_BOUNDED_P3_SLICE_JUSTIFIED` 不变。
 
 当前非优先：
 

@@ -439,12 +439,12 @@ P1 Sidecar Run Report / Operational Observability Minimal Slice
 ↓
 P2 Multi-round Execution Validation
 ↓
-RUN / OBSERVE + Human Follow-up Loop v1 implementation planning / minimal slice
+RUN / OBSERVE + Human Follow-up Loop v1 retain + review + list (real-use pilot completed / `HFL_REAL_USE_VALIDATED`)
 ↓
 P3 Participant Communication Contract Consolidation (DEFERRED)
 ```
 
-P1 与 P2 已有当前阶段记录的 delivered / closed 状态；Human Follow-up Loop v1 的 authority 已记录，但本产品规范不定义其 runtime implementation。Full P3 remains `DEFERRED`，不能因为 Human follow-up lifecycle 的定义而重新打开。
+P1 与 P2 已有当前阶段记录的 delivered / closed 状态；Human Follow-up Loop v1 的 authority 已记录，minimal runtime 已可在 RUN / OBSERVE 中使用，但本产品规范不定义其 runtime implementation 细节。Full P3 remains `DEFERRED`，不能因为 Human follow-up lifecycle 的定义而重新打开。
 
 ### P1
 

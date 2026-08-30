@@ -90,7 +90,7 @@ P2 Multi-round engineering path — closed
 ↓
 RUN / OBSERVE
 +
-Human Follow-up Loop v1 implementation planning / minimal slice
+Human Follow-up Loop v1 — retain + review + list; engineering delivered / implementation review accepted / real-use pilot completed (`HFL_REAL_USE_VALIDATED`)
 ↓
 full P3 remains `DEFERRED`
 ```

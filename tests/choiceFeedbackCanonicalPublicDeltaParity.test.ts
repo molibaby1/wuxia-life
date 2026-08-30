@@ -278,7 +278,7 @@ console.log('=== Choice Feedback Canonical Public Delta Parity ===\n');
     impactDelta(headlessLike, 'connections'),
     'Browser/Headless connections parity',
   );
-  console.log('✓ Browser/Headless parity regression');
+  console.log('✓ canonical generator consistency regression');
 }
 
 {

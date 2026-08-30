@@ -34,7 +34,8 @@ Auto Evolution 当前处于：
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；
 - P2 不修改 authoritative product state，也不包含 repository promotion / commit / merge。
-- **Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy：HUMAN ACCEPTED / AUTHORITY RECORDED；本任务未执行 runtime implementation；**
+- **Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy：HUMAN ACCEPTED / AUTHORITY RECORDED；**
+- **Human Follow-up Loop v1 minimal runtime：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / `HFL_REAL_USE_VALIDATED`；**
 - 该 loop 采用 workflow-first、productization-later 边界：正式 `ESCALATE_HUMAN` 后保留可异步复核的 operational work-item state，但普通 unresolved item 不阻塞 RUN / OBSERVE。
 - **P3 Minimal Slice #1 — Structured Final Output Contract V1：HUMAN-AUTHORIZED / ENGINEERING DELIVERED / FIRST CONTRACT CONFORMANCE MATRIX = `CONTRACT_CONFORMANCE_PROMISING`（Human acceptance: `PROMISING_WITH_CAVEATS`）；**
 - 该 Slice 根据真实 Participant 通信 evidence 局部激活，只统一 terminal structured output envelope；当前 Pilot 为 Solution / Reviewer / Configuration Execution；
@@ -108,19 +109,20 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 - 等待一次自然产生、已授权的真实 P2 cross-round evidence；
 - 真实运行暴露具体问题时再修正对应模块；
 - 不为了“完成验证”人为制造 READY、反复 retry 或预选保证可修改的问题。
-- 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 的既有 authority 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
-- 下一 bounded workflow work 是 Human Follow-up Loop v1 implementation planning / minimal slice；不是为了观察继续无界增加 run 数量。
+- 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
 
 ### Human Follow-up Loop v1
 
-Human 已接受 Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy，相关 authority 已记录于 PD-100 与 Auto Evolution 产品模型。本阶段只记录稳定语义和当前顺序，不在本任务执行 work-item runtime、schema、UI、database 或真实 Human item 创建。
+Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy 的 authority 已记录于 PD-100 与 Auto Evolution 产品模型（HUMAN ACCEPTED / AUTHORITY RECORDED）。v1 minimal runtime 已 ENGINEERING DELIVERED，implementation review 已 ACCEPTED，real-use pilot completed (`HFL_REAL_USE_VALIDATED`)。
 
-后续 implementation planning 应保持：
+当前已有范围保持 `retain + review + list`：
 
-- 正式 `decision.route == ESCALATE_HUMAN` 才是 v1 自动创建入口；普通 `DEFER`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 不自动转为 Human item；
-- unresolved item 不阻塞主 RUN / OBSERVE loop；Human 可以异步集中 review；
+- 正式 `decision.route == ESCALATE_HUMAN` 才自动创建 retained operational work-item state；普通 `DEFER`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 不自动转为 Human item；
+- Human lifecycle 与可重建 Inbox 已存在；ordinary unresolved items 不阻塞主 RUN / OBSERVE loop；
 - `READY_FOR_FORMAL_TASK` 不是 implementation authorization；正式改进仍走现有 Human Gate / accepted-design / implementation authorization 流程；
-- retained operational state 不成为 product / governance authority，也不把 governance 文档当 backlog database。
+- retained operational state 不成为 product / governance authority，也不把 governance 文档当 backlog database；
+- automatic Review Trigger detection 有意未实现；UI / database / semantic dedupe / priority / productization 仍 out of scope；
+- real-use pilot 已完成并验证 workflow usability / provenance / noise / disposition-to-formal-work closure，不要求人为制造 Human escalations。
 
 PD-100 中的 2-run recurrence、3 active items、5 fresh normal runs 仅是可复议的 v1 pilot parameters；不改变 full P3、`NO_BOUNDED_P3_SLICE_JUSTIFIED` 或当前 permission boundary。
 
@@ -271,6 +273,7 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 15. code-level autonomous modification？→ **NOT AUTHORIZED**
 16. repository promotion / commit / merge 是否属于当前自动能力？→ **NO**
 17. Participant hard-timeout authority？→ **`1800000ms` abnormal-safety hard boundary（PD-099）；不是 ordinary budget；retransmission ceiling 仍独立为 `60000ms`**
-18. Human Follow-up Loop v1 authority？→ **HUMAN ACCEPTED / AUTHORITY RECORDED（PD-100）；本任务未执行 runtime implementation**
+18. Human Follow-up Loop v1 authority？→ **HUMAN ACCEPTED / AUTHORITY RECORDED（PD-100）**
+18b. Human Follow-up Loop v1 minimal runtime？→ **ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED；real-use pilot completed / HFL_REAL_USE_VALIDATED**
 19. Ordinary unresolved Human work item 是否阻塞 RUN / OBSERVE？→ **NO**
-20. 下一 bounded workflow work？→ **Human Follow-up Loop v1 implementation planning / minimal slice；不是无界增加 run 数量**
+20. 当前 Human Follow-up bounded scope？→ **retain + review + list；继续 RUN / OBSERVE，不启动 full P3**

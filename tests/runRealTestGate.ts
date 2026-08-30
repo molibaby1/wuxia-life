@@ -62,6 +62,10 @@ const suites: Suite[] = [
   { name: 'gameScreenPresentationTests', entry: 'tests/gameScreenPresentationTests.ts' },
   { name: 'hvgMerchantVisibleGrowthLoopTests', entry: 'tests/hvgMerchantVisibleGrowthLoopTests.ts' },
   { name: 'p41ChoiceFeedbackValidationTests', entry: 'tests/p41ChoiceFeedbackValidationTests.ts' },
+  {
+    name: 'choiceFeedbackCanonicalPublicDeltaParity',
+    entry: 'tests/choiceFeedbackCanonicalPublicDeltaParity.test.ts',
+  },
   { name: 'p42ContentDensityTests', entry: 'tests/p42ContentDensityTests.ts' },
   { name: 'p43ArchetypeRecapEndingTests', entry: 'tests/p43ArchetypeRecapEndingTests.ts' },
   { name: 'p44HabitAuditTests', entry: 'tests/p44HabitAuditTests.ts' },

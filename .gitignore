@@ -25,7 +25,6 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
-package-project.sh
 .tmp/
 
 # Game saves and temporary files

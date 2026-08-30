@@ -5,6 +5,7 @@ import {
   isPlayerVisibleFlag,
   readRawRouteKeyFromFlags,
 } from '../utils/playerFacingLabels';
+import { calculatePublicStatDeltas } from './activePlanning/periodSummaryBuilder';
 
 interface GenerateChoiceFeedbackInput {
   narrativeResult?: string | null;
@@ -27,8 +28,14 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
     rawEffects: input.effects,
   });
 
+  const useActualPublicDelta = input.beforePlayer != null && input.afterPlayer != null;
+
   for (const effect of input.effects) {
     if (effect.type === 'stat_modify') {
+      if (useActualPublicDelta) {
+        // Actual-delta mode: player-visible public stats come from after-before only.
+        continue;
+      }
       const target = effect.stat || effect.target;
       if (!target) {
         continue;
@@ -85,6 +92,17 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
         visibility: 'player',
       });
       continue;
+    }
+  }
+
+  if (useActualPublicDelta) {
+    const deltas = calculatePublicStatDeltas(input.beforePlayer!, input.afterPlayer!);
+    for (const [stat, delta] of Object.entries(deltas)) {
+      baseFeedback.player.statImpacts.push({
+        stat,
+        delta,
+        visibility: 'player',
+      });
     }
   }
 

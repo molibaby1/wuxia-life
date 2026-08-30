@@ -13,6 +13,7 @@ import { gameEngine } from '../core/GameEngineIntegration';
 import { saveManager } from '../core/SaveManager';
 import { defaultSnapshotConverter } from '../headless/snapshot/SnapshotConverter';
 import { generateChoiceFeedback } from '../core/ChoiceFeedbackGenerator';
+import { cloneCanonicalGameState } from '../contracts/validation/canonicalGameStateValidation';
 import { eventLoader } from '../core/EventLoader';
 import type { EventDefinition, Effect } from '../types/eventTypes';
 import type { StoryChoice, ChoiceOutcomeUI } from '../types';
@@ -392,12 +393,13 @@ export function useNewGameEngine() {
 
     isProcessing.value = true;
     engineState.isAutoPlaying = true;
-    const stateBeforeChoice = gameEngine.getGameState();
+    // Detached snapshot: getGameState() returns the live reactive reference.
+    const stateBeforeChoice = cloneCanonicalGameState(gameEngine.getGameState());
 
     try {
       // 执行选择的效果
       await gameEngine.executeChoiceEffects(effectsToExecute, currentEvent.id, selectedChoice.id);
-      const stateAfterChoice = gameEngine.getGameState();
+      const stateAfterChoice = cloneCanonicalGameState(gameEngine.getGameState());
       const feedback = generateChoiceFeedback({
         narrativeResult: outcomeText,
         effects: effectsToExecute,

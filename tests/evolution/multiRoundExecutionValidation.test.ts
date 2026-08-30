@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
-import { lstat, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { validateProblemPackage } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
-import type { ProblemAgnosticAgentSolutionLoopResult } from '../../scripts/evolution/runProblemAgnosticAgentSolutionLoop';
+import { validateSolutionWork } from '../../src/evolution/solutionWorkContract';
+import {
+  runProblemAgnosticAgentSolutionLoop,
+  type ProblemAgnosticAgentSolutionLoopResult,
+} from '../../scripts/evolution/runProblemAgnosticAgentSolutionLoop';
 import {
   deriveAllowedWritePaths,
   snapshotWorkspace,
@@ -16,7 +20,10 @@ import {
   type MultiRoundExecutionValidationDependencies,
   type MultiRoundLoopInput,
 } from '../../scripts/evolution/multiRoundExecutionValidation';
-import { prepareAgentWorkspace } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
+import {
+  captureAuthoritativeFingerprint,
+  prepareAgentWorkspace,
+} from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
 
 const READY_PROBLEM_ID = 'problem-hypothesis-000001';
 const CONFIG_PATH = 'src/data/lines/family-life.json';
@@ -176,6 +183,159 @@ async function createWorkspace(): Promise<string> {
   await writeFile(join(root, CONFIG_PATH), '{"choices":[{"id":"old"}]}\n');
   await writeFile(join(root, 'src/core/runtime.ts'), 'export const runtime = true;\n');
   return root;
+}
+
+async function writeJson(path: string, value: unknown): Promise<void> {
+  await mkdir(join(path, '..'), { recursive: true });
+  await writeFile(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await lstat(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+async function runHumanFollowupPersistenceRegression(): Promise<void> {
+  const authoritativeRoot = await createWorkspace();
+  const evolutionWorkspaceRoot = await createWorkspace();
+  const initialSourceRoot = await mkdtemp(join(tmpdir(), 'p2-human-followup-source-'));
+  await writeJson(join(initialSourceRoot, 'reviewer-input/observable-payload.json'), { observed: true });
+  const outerRoot = await mkdtemp(join(tmpdir(), 'p2-human-followup-run-'));
+  const multiRoundRunRef = 'p2-human-followup-000001';
+  const calls: string[] = [];
+  const authoritativeFingerprintBefore = await captureAuthoritativeFingerprint(authoritativeRoot);
+
+  const result = await runMultiRoundExecutionValidation({
+    multiRoundRunRef,
+    authoritativeRoot,
+    initialSourceRoot,
+    experimentRoot: join(outerRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    participantMode: 'local-subagent',
+    dependencies: {
+      preflightInitialSource: async () => ({
+        sourceRunRef: 'initial-run-000001',
+        sourceRoot: initialSourceRoot,
+        experimentRootHash: 'a'.repeat(64),
+        observablePayloadHash: 'b'.repeat(64),
+        sourceFingerprintSha256: 'c'.repeat(64),
+      }),
+      materializeEvolutionWorkspace: async () => ({
+        workspaceRoot: evolutionWorkspaceRoot,
+        workspaceBaselineFingerprintSha256: 'evolution-baseline',
+        manifestPath: join(evolutionWorkspaceRoot, '.agent-workspace-manifest.json'),
+      }),
+      runSingleRound: async round => {
+        calls.push(`round-${round.round}`);
+        return runProblemAgnosticAgentSolutionLoop({
+          repositoryRoot: round.repositoryRoot,
+          humanFollowupRoot: round.humanFollowupRoot,
+          workflowInstanceRef: round.workflowInstanceRef,
+          fixedSourceRoot: round.fixedSourceRoot,
+          experimentRoot: round.experimentRoot,
+          workspaceAgentParticipant: round.participant,
+          participantMode: round.participantMode,
+          authorityRefs: [],
+          dependencies: {
+            preflightFixedSource: async () => ({
+              sourceRunRef: 'initial-run-000001',
+              sourceRoot: initialSourceRoot,
+              experimentRootHash: 'a'.repeat(64),
+              observablePayloadHash: 'b'.repeat(64),
+              sourceFingerprintSha256: 'c'.repeat(64),
+            }),
+            runExternalFeedback: async options => {
+              await writeJson(join(options.outRoot!, 'feedback-runs/initial-run-000001/feedback.json'), { observed: true });
+              return {
+                runRef: options.runRef,
+                invocationRef: 'feedback-000001',
+                phase0RunPath: initialSourceRoot,
+                feedbackDir: join(options.outRoot!, 'feedback-runs/initial-run-000001'),
+                humanReportPath: join(options.outRoot!, 'feedback-runs/initial-run-000001/human-review.md'),
+                observablePayloadHash: 'b'.repeat(64),
+                experimentRootHash: 'a'.repeat(64),
+              };
+            },
+            runImprovementHypothesis: async options => {
+              await writeJson(join(options.outRoot!, 'hypothesis-runs/initial-run-000001/hypotheses.json'), {
+                hypotheses: [{
+                  hypothesis: 'A bounded observed problem.',
+                  observedBasis: 'Observed in the fixed source.',
+                  feedbackRefs: ['overallImpression'],
+                  evidenceRefs: [],
+                  unknowns: ['Cause remains unknown.'],
+                  productSignificance: 'Human review may be useful.',
+                }],
+              });
+              return {
+                runRef: options.runRef,
+                feedbackInvocationRef: 'feedback-000001',
+                hypothesisInvocationRef: 'hypothesis-000001',
+                hypothesisDir: join(options.outRoot!, 'hypothesis-runs/initial-run-000001'),
+                humanReportPath: join(options.outRoot!, 'hypothesis-runs/initial-run-000001/human-review.md'),
+                experimentRootHash: 'a'.repeat(64),
+                observablePayloadHash: 'b'.repeat(64),
+                feedbackHash: 'd'.repeat(64),
+              };
+            },
+            runSolutionAgent: async job => {
+              const solution = validateSolutionWork({
+                schemaVersion: 'solution-work-v1',
+                status: 'ESCALATE',
+                problemId: 'problem-hypothesis-000001',
+                options: [],
+                summary: 'Human review is required.',
+                repoRefs: [],
+                artifactRefs: [],
+              });
+              await writeJson(join(job.destinationRoot, 'result.json'), solution);
+              return {
+                ok: true,
+                result: solution,
+                invocationPath: join(job.destinationRoot, 'invocation.json'),
+                rawOutputPath: join(job.destinationRoot, 'raw-output.txt'),
+                resultPath: join(job.destinationRoot, 'result.json'),
+              };
+            },
+          },
+        });
+      },
+      executeConfiguration: async () => {
+        calls.push('execute');
+        throw new Error('configuration execution must not run for Human escalation');
+      },
+    },
+  });
+
+  assert.equal(result.outcome, 'NO_CROSS_ROUND_TRANSITION_OBSERVED');
+  assert.equal(result.stopReason, 'ROUND_1_TERMINAL_NOT_READY');
+  assert.deepEqual(calls, ['round-1']);
+  assert.equal(result.execution, null);
+  assert.deepEqual(result.rounds.map(round => ({ round: round.round, terminalRoute: round.terminalRoute, nextAction: round.nextAction })), [
+    { round: 1, terminalRoute: 'ESCALATE_HUMAN', nextAction: 'STOP' },
+  ]);
+
+  const authoritativeItemsRoot = join(authoritativeRoot, 'artifacts/evolution/human-follow-up/items');
+  const authoritativeItems = await readdir(authoritativeItemsRoot);
+  assert.equal(authoritativeItems.length, 1);
+  const retainedItem = JSON.parse(await readFile(join(authoritativeItemsRoot, authoritativeItems[0]!, 'item.json'), 'utf8')) as {
+    provenance: { workflowInstanceRef: string };
+  };
+  assert.equal(retainedItem.provenance.workflowInstanceRef, multiRoundRunRef);
+  assert.equal(
+    await pathExists(join(authoritativeItemsRoot, authoritativeItems[0]!, 'item.json')),
+    true,
+  );
+  assert.equal(
+    await pathExists(join(evolutionWorkspaceRoot, 'artifacts/evolution/human-follow-up/items')),
+    false,
+  );
+  assert.equal(await captureAuthoritativeFingerprint(authoritativeRoot), authoritativeFingerprintBefore);
 }
 
 async function fixedDependencies(input: {
@@ -387,6 +547,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     .then(() => runFailureStopTest('execution'))
     .then(() => runFailureStopTest('verification'))
     .then(() => runFailureStopTest('rerun'))
+    .then(() => runHumanFollowupPersistenceRegression())
     .then(() => runDefaultVerificationIsolationTest())
     .then(() => console.log('multiRoundExecutionValidation.test.ts: ok'))
     .catch(error => {

@@ -59,22 +59,43 @@
 → Problem Package
 → Agent 自主调查 / 提案
 → 独立 Agent Review
-→ 配置层执行，或 SKIP / DEFER / ESCALATE
-→ verification / modified runtime rerun
-→ 新一轮入口
+↓
+Decision
+├─ SKIP / DEFER
+├─ ESCALATE_HUMAN
+│      ↓
+│  retained Human follow-up work item
+│      ↔ asynchronous Human review
+│      └─ READY_FOR_FORMAL_TASK → existing formal workflow
+└─ accepted configuration work
+       ↓
+    execution
+       ↓
+    verification / modified runtime rerun
+       ↓
+    new-round entry
 ```
+
+`READY_FOR_FORMAL_TASK` 只进入 existing formal workflow，不代表自动执行。普通 unresolved Human work item 不阻塞 RUN / OBSERVE；主循环继续遵守既有 STOP / fail-closed boundary。
 
 第一 Skill `repository-grounded-investigation` v1 已完成 Solution / Reviewer 的真实 Skill-mode 使用验证，当前视为可用的重复工作方法封装。
 
 当前**不**以 Skill-off / Skill-on behavioral A/B 作为下一阶段前置。Skill 是否需要优化，由后续真实运行暴露的具体问题驱动。
 
-下一阶段产品优先顺序以 `governance/current-product-stage.md` 为准，当前方向是：
+当前阶段产品顺序以 `governance/current-product-stage.md` 为准：
 
 ```text
-Sidecar Run Report
-→ Multi-round Execution Validation
-→ Participant Communication Contract Consolidation
+P1 Sidecar Run Report — delivered / usable
+P2 Multi-round engineering path — closed
+↓
+RUN / OBSERVE
++
+Human Follow-up Loop v1 implementation planning / minimal slice
+↓
+full P3 remains `DEFERRED`
 ```
+
+当前 `NO_BOUNDED_P3_SLICE_JUSTIFIED` 不变，既有 permission / STOP boundaries 不变。
 
 其中 Report 只是旁路输出，不是主流程依赖；Report Analysis 是未来独立消费者，不在当前阶段建设。
 

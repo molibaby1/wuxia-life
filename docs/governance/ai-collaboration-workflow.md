@@ -1,7 +1,7 @@
 # Wuxia-Life AI Collaboration & Agent Workflow Protocol
 
 > 用途：规定项目开发协作，以及 Auto Evolution 产品运行时 Role / Participant / Skill / Report / Contract 的职责与边界。  
-> 最后更新：2026-08-20。  
+> 最后更新：2026-08-29。
 > 第一层产品语义以 `docs/product/auto-evolution-model.md` 为准。
 
 ---
@@ -35,6 +35,8 @@ ChatGPT / Codex 可以承担某些 Role，但具体模型、provider 或 harness
 - workflow state；
 - budget / retry；
 - `CONTINUE / SKIP / DEFER / ESCALATE / STOP`；
+- 正式 Decision Router outcome 后按机械规则创建 Human follow-up work item；
+- retained provenance 与异步 Human review handoff；
 - 前后工作交接。
 
 不负责：
@@ -117,7 +119,7 @@ Problem Package 是引用和权限载体，不是领域分析结果。
 
 ## 4. Run Report / Operational Observability
 
-当前下一优先能力是一个最小 sidecar Run Report。
+Sidecar Run Report 已是当前可用的旁路 observability capability。
 
 它从已有 workflow state / artifacts 中整理运行事实，例如：
 
@@ -137,6 +139,8 @@ Problem Package 是引用和权限载体，不是领域分析结果。
 核心边界：
 
 > **没有 Report Analysis，主流程照样运行；Report Producer 也不应成为 Skill 的依赖。**
+
+当前下一 bounded workflow work 由 `docs/governance/current-product-stage.md` 决定，目前是 Human Follow-up Loop v1 implementation planning / minimal slice。
 
 ## 5. Future Report Analysis
 
@@ -234,6 +238,8 @@ Codex 不一定能访问 Project Sources，因此 repository 文档必须独立�
 - 必要 final review；
 - 真实运行中决定是否值得干预。
 
+Human 可以异步集中 review 已正式 routed 为 `ESCALATE_HUMAN` 的 work items。Human work item 只是 operational workflow state；`READY_FOR_FORMAL_TASK` 仍需进入已有 Human Gate / accepted-design / implementation authorization 流程，不自动授予 code write permission 或产品 / 治理 authority。
+
 Human 不需要逐项给 Participant 的主观答案打“正确 / 错误”标签。
 
 ## 9. Human Gate 与授权继承
@@ -243,6 +249,8 @@ Human 不需要逐项给 Participant 的主观答案打“正确 / 错误”标�
 > **默认继续，越界才停。**
 
 Accepted design 后，如果 implementation 未新增产品假设、扩大 scope、修改第一层规范、改变 accepted boundary 或跨越 STOP，planning / implementation 自动继承授权。
+
+Human follow-up lifecycle 不改变上述授权继承规则。work-item state 不自动产生 product authority；正式改进仍按已有 Human Gate、accepted design 与 implementation authorization 处理。
 
 ## 10. Product Direction Drift Guard
 
@@ -270,15 +278,11 @@ Accepted design 后，如果 implementation 未新增产品假设、扩大 scope
 
 真实 flywheel 运行详情进入独立 artifacts / sidecar report。
 
-以后如果出现 Human Control Surface，它读取运行 artifacts，而不是把 governance 文档当数据库。
+Human follow-up work-item state 属于 operational state，应与 retained provenance 一起由后续 runtime 设计承载；governance documents 仍不是 backlog database。以后如果出现 Human Control Surface，它读取运行 artifacts / operational state，而不是把 governance 文档当数据库。
 
-## 12. 当前优先顺序
+## 12. 当前阶段引用
 
-```text
-P1 Sidecar Run Report / Operational Observability Minimal Slice
-P2 Multi-round Execution Validation
-P3 Participant Communication Contract Consolidation
-```
+具体阶段顺序以 `docs/governance/current-product-stage.md` 为准。当前仍处于 RUN / OBSERVE；下一 bounded workflow work 是 Human Follow-up Loop v1 implementation planning / minimal slice。Full P3 remains `DEFERRED`，当前 `NO_BOUNDED_P3_SLICE_JUSTIFIED` 不变。
 
 当前非优先：
 

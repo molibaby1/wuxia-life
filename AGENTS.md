@@ -213,14 +213,19 @@ Human Gate 除完成度与验证外，必须额外回答：
 
 ## 当前 Auto Evolution 成熟度与默认推进顺序
 
-截至 2026-08-20，Auto Evolution 核心 Agent workflow 已进入早期可运行 / 工程化阶段。不要再默认把“证明 workflow / Participant / Skill 是否主观更好”作为下一阶段。
+截至 2026-08-29，Auto Evolution 核心 Agent workflow 已进入早期可运行 / 工程化阶段，当前处于 RUN / OBSERVE；Human Follow-up Loop v1 authority 已记录。不要再默认把“证明 workflow / Participant / Skill 是否主观更好”作为下一阶段。
 
 当前默认顺序以 `docs/governance/current-product-stage.md` 为准：
 
 ```text
-Sidecar Run Report
-→ Multi-round Execution Validation
-→ Participant Communication Contract Consolidation
+P1 Sidecar Run Report — delivered / usable
+P2 Multi-round engineering path — closed
+↓
+RUN / OBSERVE
++
+Human Follow-up Loop v1 implementation planning / minimal slice
+↓
+full P3 remains DEFERRED
 ```
 
 额外守则：

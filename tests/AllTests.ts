@@ -33,6 +33,8 @@ import { computeExperienceDerivedMetrics } from '../scripts/computeExperienceMet
 import { GameProcessSimulator } from './GameProcessSimulator';
 import { runAllP7Tests } from './p7ActivePlanningTests';
 import { runAllP71Tests } from './p71ActiveActionExperienceTests';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import type { GameState } from '../src/types/eventTypes';
 import {
   buildDeathRiskTelemetry,
   inferSimulationCohort,
@@ -67,6 +69,23 @@ import {
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
 
+function createCanonicalBrowserMockState(overrides?: {
+  playerName?: string;
+  martialPower?: number;
+}): GameState {
+  const state = structuredClone(
+    HeadlessEngineSessionImpl.create({
+      playerName: overrides?.playerName ?? '测试玩家',
+      gender: 'male',
+      catalogVersion: '1.0.0',
+    }).serialize().state,
+  ) as GameState;
+  if (overrides?.martialPower !== undefined) {
+    state.player.martialPower = overrides.martialPower;
+  }
+  return state;
+}
+
 async function runChoiceOutcomeBranchCase(options: {
   name: string;
   statePower: number;
@@ -80,8 +99,7 @@ async function runChoiceOutcomeBranchCase(options: {
 }) {
   const engine = useNewGameEngine();
   const evaluator = new ConditionEvaluator();
-  const state = framework.createTestState();
-  state.player.martialPower = options.statePower;
+  const state = createCanonicalBrowserMockState({ martialPower: options.statePower });
 
   const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
   const originalGetGameState = gameEngine.getGameState;
@@ -141,8 +159,7 @@ async function runChoiceOutcomeBranchCase(options: {
 async function runAutoResolveCase() {
   const engine = useNewGameEngine();
   const evaluator = new ConditionEvaluator();
-  const state = framework.createTestState();
-  state.player.martialPower = 10;
+  const state = createCanonicalBrowserMockState({ martialPower: 10 });
 
   const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
   const originalGetGameState = gameEngine.getGameState;
@@ -236,7 +253,7 @@ async function runAutoResolveCase() {
 
 async function runChoiceFeedbackManualCoverageCase() {
   const engine = useNewGameEngine();
-  const initialState = framework.createTestState();
+  const initialState = createCanonicalBrowserMockState();
   initialState.flags = {
     ...initialState.flags,
     sect_faction: 'orthodox',
@@ -259,10 +276,11 @@ async function runChoiceFeedbackManualCoverageCase() {
   try {
     (gameEngine as any).getGameState = () => currentState;
     (gameEngine as any).executeChoiceEffects = async (
-      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown }>,
+      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown; operator?: string }>,
     ) => {
       const nextFlags = { ...currentState.flags };
       const nextPlayerFlags = { ...(currentState.player.flags as Record<string, unknown>) };
+      const nextPlayer = { ...currentState.player, flags: nextPlayerFlags };
       for (const effect of effects) {
         if (effect.type === EffectType.FLAG_SET) {
           const flagKey = effect.flag || effect.target;
@@ -271,14 +289,16 @@ async function runChoiceFeedbackManualCoverageCase() {
             nextPlayerFlags[flagKey] = effect.value ?? true;
           }
         }
+        if (effect.type === EffectType.STAT_MODIFY && effect.target && typeof effect.value === 'number') {
+          const current = Number((nextPlayer as any)[effect.target] ?? 0);
+          (nextPlayer as any)[effect.target] =
+            effect.operator === 'subtract' ? current - effect.value : current + effect.value;
+        }
       }
       currentState = {
         ...currentState,
         flags: nextFlags,
-        player: {
-          ...currentState.player,
-          flags: nextPlayerFlags,
-        },
+        player: nextPlayer,
       };
       return currentState;
     };
@@ -333,7 +353,7 @@ async function runChoiceFeedbackManualCoverageCase() {
 
 async function runChoiceFeedbackAutoResolveFallbackCase() {
   const engine = useNewGameEngine();
-  const initialState = framework.createTestState();
+  const initialState = createCanonicalBrowserMockState();
   initialState.flags = {
     ...initialState.flags,
     sect_faction: 'orthodox',
@@ -360,10 +380,11 @@ async function runChoiceFeedbackAutoResolveFallbackCase() {
     (gameEngine as any).getGameState = () => currentState;
     (gameEngine as any).isChoiceAvailable = () => true;
     (gameEngine as any).executeChoiceEffects = async (
-      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown }>,
+      effects: Array<{ type: EffectType; target?: string; flag?: string; value?: unknown; operator?: string }>,
     ) => {
       const nextFlags = { ...currentState.flags };
       const nextPlayerFlags = { ...(currentState.player.flags as Record<string, unknown>) };
+      const nextPlayer = { ...currentState.player, flags: nextPlayerFlags };
       for (const effect of effects) {
         if (effect.type === EffectType.FLAG_SET) {
           const flagKey = effect.flag || effect.target;
@@ -372,14 +393,16 @@ async function runChoiceFeedbackAutoResolveFallbackCase() {
             nextPlayerFlags[flagKey] = effect.value ?? true;
           }
         }
+        if (effect.type === EffectType.STAT_MODIFY && effect.target && typeof effect.value === 'number') {
+          const current = Number((nextPlayer as any)[effect.target] ?? 0);
+          (nextPlayer as any)[effect.target] =
+            effect.operator === 'subtract' ? current - effect.value : current + effect.value;
+        }
       }
       currentState = {
         ...currentState,
         flags: nextFlags,
-        player: {
-          ...currentState.player,
-          flags: nextPlayerFlags,
-        },
+        player: nextPlayer,
       };
       return currentState;
     };

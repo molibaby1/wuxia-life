@@ -1,7 +1,7 @@
 # Wuxia-Life Auto Evolution 产品模型
 
 > 状态：当前权威规范  
-> 日期：2026-08-20 Operationalization Calibration  
+> 日期：2026-08-29 Human Follow-up Loop v1 Authority Closure
 > 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Phase、实验 PRD / plan、领域专用 investigation 路线不得覆盖本文件。  
 > 与 `docs/product/player-model.md` 同属第一层产品规范。
 
@@ -169,7 +169,54 @@ Report Producer 不应理解某个具体 Skill 或领域问题，也不在第一
 
 Report schema 在对应最小切片设计时定义，不在本产品模型提前穷举。
 
-### 2.7 Future Report Analysis
+### 2.7 Human Follow-up Loop / asynchronous review
+
+正式 `decision.route == ESCALATE_HUMAN` 后，发现不能只停留在一次 run artifact 中。它进入一个轻量、足以支持异步复核的 Human work-item lifecycle。
+
+Human work item 是 downstream workflow state，不是新的 reasoning Role、Participant 或 product / governance authority system。
+
+创建责任固定为：正式 Decision Router outcome 产生后，由 Orchestrator / Host 按机械 workflow rule 创建。Solution Participant、Reviewer Participant 和 Run Report Producer 没有独立创建 authority；Reviewer 的自然语言意见不能绕过 Decision Router 创建正式 work item。
+
+v1 的自动创建入口只有 `decision.route == ESCALATE_HUMAN`，包括明确要求 Human 判断以及超出 configuration authority 的正式 routed outcome。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 本身不自动创建 Human work item；它们可以成为后续 evidence review 的观察信号，但不把普通失败或不确定性全部转嫁给 Human。
+
+普通 unresolved Human work item 不阻塞 RUN / OBSERVE 主循环：
+
+```text
+RUN / OBSERVE → continue unless an existing STOP / fail-closed boundary is hit
+```
+
+v1 lifecycle 至少表达以下 disposition：
+
+```text
+OPEN
+INVESTIGATING
+DEFERRED
+REJECTED
+READY_FOR_FORMAL_TASK
+CONVERTED
+```
+
+`READY_FOR_FORMAL_TASK` 只表示 Human 判断该事项值得进入正式产品、engineering 或 governance workflow；它不等于 implementation authorized、code write permission、Product Decision accepted 或 automatic execution authorization。正式改进仍须遵守已有 design、Human Gate、implementation planning 与 authority inheritance 规则。
+
+Human asynchronous review 必须保留足以恢复判断的最小 structured provenance。work-item state 应以 sidecar / operational-state 形式跨普通 run 持续存在，并引用原始 run、workflow 和 decision；不能只依赖可能清理或不进入 project package 的 `.tmp/evolution/**`。已有 `human-review-package.md` 可以作为 evidence source，但不是 Human backlog 的 canonical state。具体 storage path、字段和 retention implementation 留给后续设计。
+
+v1 允许用 deterministic identity 避免同一正式 decision 被机械重复创建，并可为同一 stable item 追加 occurrence provenance；不建设 semantic deduplication、embedding clustering 或 automatic issue classification。自然语言相似但 identity 不同的问题是否合并，仍由 Human / product judgment 决定。
+
+## 2.8 RUN / OBSERVE Evidence Review Policy
+
+阶段性 review trigger 与 evidence sufficiency 是两件事：
+
+> **review trigger != evidence sufficient**
+
+单次 evidence 命中已有 blocking / fail-closed 条件时，可以立即进入 Human review，例如 accepted invariant violation、STOP boundary、会使后续 observation 不可信的 provenance / evidence integrity 损坏，或继续运行会扩大已知错误。
+
+重复 product / structural evidence、重复 Role / workflow failure 和 Human inbox pressure 的具体 v1 pilot cadence，以及 review 后回到 RUN / OBSERVE 的语义，记录在 PD-100；这些规则不把触发 review 等同于自动证明产品必须修改。
+
+没有 product modification 一段时间，不能单独证明 workflow failure、产品问题或 authority expansion。只有与 repeated accepted-but-out-of-scope findings、重复 product problem 或 unresolved Human escalation 等 evidence 共同出现时，Human 才可以判断 permission boundary 是否形成真实 improvement bottleneck。
+
+阶段性 Human review 后，blocking matter 进入已有正式流程；insufficient evidence 可以继续 `INVESTIGATING` / `DEFERRED`；rejected item 保留 provenance 但退出 active inbox；converted item 链接正式 task / design / governance work；non-blocking unresolved item 可以继续存在。Human backlog 不成为主 flywheel 的同步 gate，RUN / OBSERVE 正常恢复继续。
+
+### 2.9 Future Report Analysis
 
 Report Analysis 是未来可能存在的独立消费者。
 
@@ -202,6 +249,10 @@ Independent Reviewer
 Decision
 ├─ SKIP / DEFER
 ├─ ESCALATE TO HUMAN
+│      ↓
+│  Human Follow-up Inbox / work-item
+│      ↔ asynchronous Human review
+│      └─ READY_FOR_FORMAL_TASK → existing formal workflow
 └─ accepted configuration work
        ↓
     Execution
@@ -215,7 +266,7 @@ Decision
     next-round entry
 ```
 
-注意：最后的“自动 next-round entry”是下一阶段需要验证的能力，不应从单轮成功直接推断已经稳定。
+注意：`ESCALATE TO HUMAN` 不再是没有后续定义的 dead-end；其 work-item lifecycle 与 Human review 不同步阻塞主 RUN / OBSERVE loop。最后的“自动 next-round entry”仍是需要验证的能力，不应从单轮成功直接推断已经稳定。
 
 ## 4. Agent Owns Problem Solving
 
@@ -388,8 +439,12 @@ P1 Sidecar Run Report / Operational Observability Minimal Slice
 ↓
 P2 Multi-round Execution Validation
 ↓
-P3 Participant Communication Contract Consolidation
+RUN / OBSERVE + Human Follow-up Loop v1 implementation planning / minimal slice
+↓
+P3 Participant Communication Contract Consolidation (DEFERRED)
 ```
+
+P1 与 P2 已有当前阶段记录的 delivered / closed 状态；Human Follow-up Loop v1 的 authority 已记录，但本产品规范不定义其 runtime implementation。Full P3 remains `DEFERRED`，不能因为 Human follow-up lifecycle 的定义而重新打开。
 
 ### P1
 
@@ -401,7 +456,7 @@ P3 Participant Communication Contract Consolidation
 
 ### P3
 
-基于真实运行归纳稳定通信语义；不先平台化。
+基于真实运行归纳稳定通信语义；不先平台化。当前不提出新的 bounded P3 slice，继续遵守 `NO_BOUNDED_P3_SLICE_JUSTIFIED`。
 
 ## 13. 当前不优先设计
 

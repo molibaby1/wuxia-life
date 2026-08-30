@@ -1,6 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { copyFile, cp, lstat, mkdir, open, readFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { getP8PersonaById } from '../../src/p8/personas';
 import {
   validateSolutionDecision,
@@ -44,6 +45,7 @@ import {
 } from './problemAgnosticSolution/runSolutionReviewer';
 import { routeSolutionDecision } from './problemAgnosticSolution/routeSolutionDecision';
 import { buildHumanReviewPackage } from './problemAgnosticSolution/buildHumanReviewPackage';
+import { retainHumanFollowupWorkItem } from './humanFollowup/retainHumanFollowupWorkItem';
 import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 import {
   buildParticipantFailureOutcome,
@@ -77,6 +79,8 @@ export interface ProblemAgnosticLoopDependencies {
 
 export interface RunProblemAgnosticAgentSolutionLoopOptions {
   repositoryRoot?: string;
+  humanFollowupRoot?: string;
+  workflowInstanceRef?: string;
   fixedSourceRoot: string;
   experimentRoot?: string;
   apiKey?: string;
@@ -258,6 +262,10 @@ export async function runProblemAgnosticAgentSolutionLoop(
   const repositoryRoot = resolve(options.repositoryRoot ?? process.cwd());
   const fixedSourceRoot = resolve(options.fixedSourceRoot);
   const experimentRoot = resolve(options.experimentRoot ?? join(repositoryRoot, DEFAULT_EXPERIMENT_ROOT));
+  const humanFollowupRoot = resolve(options.humanFollowupRoot ?? repositoryRoot);
+  const workflowRef = relative(repositoryRoot, experimentRoot).split(sep).join('/') || 'repository-root-workflow';
+  const workflowInstanceRef = options.workflowInstanceRef
+    ?? `workflow-${randomUUID()}`;
   await assertAbsent(experimentRoot, 'problem-agnostic experiment root');
   await mkdir(experimentRoot, { recursive: true });
   const dependencies = options.dependencies ?? {};
@@ -527,6 +535,17 @@ export async function runProblemAgnosticAgentSolutionLoop(
       configGameplayExecutionPerformed: false,
     },
   });
+  if (decision.route === 'ESCALATE_HUMAN') {
+    await retainHumanFollowupWorkItem({
+      repositoryRoot: humanFollowupRoot,
+      workflowRoot: experimentRoot,
+      workflowInstanceRef,
+      sourceRunRef,
+      sourceFingerprintSha256: preflight.sourceFingerprintSha256,
+      problemPackagePath,
+      decisionPath,
+    });
+  }
   return {
     status: 'completed',
     sourceRunRef,

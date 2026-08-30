@@ -1424,3 +1424,48 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要更改默认 hard boundary 数值或语义（例如把它改回 ordinary budget）；
 - 需要把 retransmission / retry ceiling 与 hard-timeout 合并；
 - 需要按 Role / provider 引入不同 hard-timeout defaults。
+
+### PD-100：Human Follow-up Loop v1 与 RUN / OBSERVE Evidence Review Policy
+
+**实施决策（Human accepted：2026-08-29；本条为 authority closure）**
+
+#### 稳定产品不变量
+
+- 正式 `decision.route == ESCALATE_HUMAN` 后，发现进入一个轻量、足以支持异步复核的 Human work-item lifecycle，不得只停留在一次 run artifact 中。
+- Human work item 是 downstream operational workflow state，不是新的 reasoning Role、Participant、product authority 或 governance authority system。
+- 创建由正式 Decision Router outcome 产生后，由 Orchestrator / Host 按机械 workflow rule 负责；Solution Participant、Reviewer Participant 与 Run Report Producer 不拥有独立创建 authority，Reviewer 的自然语言意见不能绕过 Decision Router 创建正式 work item。
+- v1 自动创建入口仅为 `decision.route == ESCALATE_HUMAN`。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 不因自身 outcome 自动生成 Human work item，但可以成为后续 evidence review 的观察信号。
+- 普通 unresolved Human work item 不阻塞 RUN / OBSERVE；主循环继续遵守 `RUN / OBSERVE → continue unless an existing STOP / fail-closed boundary is hit`。
+- Full P3 remains `DEFERRED`；本条不改变 `NO_BOUNDED_P3_SLICE_JUSTIFIED`。
+- lifecycle 至少表达 `OPEN`、`INVESTIGATING`、`DEFERRED`、`REJECTED`、`READY_FOR_FORMAL_TASK` 与 `CONVERTED`。其中 `READY_FOR_FORMAL_TASK` 只表示值得进入正式 workflow，不等于 implementation authorization、code write permission、Product Decision acceptance 或 automatic execution authorization。
+- 异步复核必须跨普通 run 保留最小 structured provenance，采用 sidecar / operational-state 形式并引用原始 run / workflow / decision；不得只依赖 `.tmp/evolution/**`。`human-review-package.md` 可作为 evidence source，但不是 Human backlog canonical state。
+- 允许 deterministic identity 防止同一正式 decision 被机械重复创建，并为 stable item 追加 occurrence provenance；不建设 semantic deduplication、embedding clustering 或 automatic issue classification，相似但 identity 不同的问题是否合并仍由 Human / product judgment 决定。
+- 阶段性 review 的触发不等于 evidence 已充分：`review trigger != evidence sufficient`。review 只能把 accumulated state 交给 Human 检查，不能自动证明产品必须修改。
+- 命中 accepted invariant violation、STOP boundary、会破坏后续可信 observation 的 provenance / evidence integrity，或继续运行会扩大已知错误等 blocking / fail-closed 条件时，允许立即 review。
+- review 完成后，blocking matter 进入已有正式处理流程；insufficient evidence 可继续 `INVESTIGATING` / `DEFERRED`；rejected item 保留 provenance 但退出 active inbox；converted item 链接正式 task / design / governance work；non-blocking unresolved item 可继续存在；Human backlog 不成为主 flywheel 的同步 gate。
+- 没有 product modification 不能单独证明 workflow failure、产品问题或 authority-expansion；只有与 repeated accepted-but-out-of-scope findings、重复 product problem 或 unresolved Human escalation 等 evidence 结合时，Human 才判断 permission boundary 是否形成真实 improvement bottleneck。
+
+#### v1 pilot policy parameters（可复议，不是长期 invariant）
+
+- **2-run recurrence signal**：同一 player-observable / structural issue 在至少两个 independent real runs 中重复，是当前 repeated-evidence review signal；一个 real run 加独立 repository / runtime evidence 支持同一问题，也可以进入正式 review。
+- **2-run Role/workflow failure signal**：同一 Role + 同一 structural failure class 在至少两个 independent real runs 中重复，可触发 workflow review；isolated Role-local noise 不自动升级。
+- **3 active items**：3 个 unresolved active Human items 可触发一次 batch Human review。这是 workflow ergonomics pilot parameter，不是长期 product invariant。
+- **5 fresh normal runs**：最多连续 5 个 fresh normal real runs 可以不做阶段性 Human review，达到窗口后必须做一次 lightweight review。5 不是 evidence-sufficient statistical threshold，也不是长期 invariant，而是防止“再多跑一些”无限期持续的 pilot cadence guard。
+
+上述 pilot 参数在获得真实 Human review 成本与收益 evidence 后重新裁决；调整它们不应被解释为自动扩大 code / runtime / framework / formal Contract 权限。
+
+**明确不做**
+
+- 本条不实现 Human work-item runtime、UI、dashboard、database、GitHub Issues 或 automatic Human-item execution；
+- 不创建真实 Human items、JSON / YAML schema implementation，也不定义完整 storage path、field schema、copy policy 或 retention implementation；
+- 不建设 semantic dedupe、priority scoring、Report Analysis、new reasoning Role 或 Participant quality scorer；
+- 不修改 Auto Evolution execution logic、Solution / Reviewer / Decision Router / Sidecar Report schema，不修改 timeout / retransmission behavior；
+- 不打开 full P3 或新增 Participant Communication Contract slice，不授权 autonomous code modification。
+
+**重新讨论条件**
+
+- Human review 实际无法从 retained provenance 恢复判断，或 work-item state 与 existing workflow authority 发生冲突；
+- recurring evidence 显示当前 recurrence / cadence 参数无法支持真实异步 review，且有足够 evidence 重新裁决 pilot policy；
+- 需要把 Human backlog 变成主循环同步 gate、建立新的 authority system，或把 `READY_FOR_FORMAL_TASK` 改写为自动 implementation authorization；
+- 需要建设 UI、database、semantic dedupe、priority scoring、Report Analysis 或其他超出本条轻量 workflow closure 的能力；
+- 需要修改 full P3、Communication Contract、代码 / Runtime / Framework / formal Contract 权限边界。

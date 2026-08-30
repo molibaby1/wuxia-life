@@ -66,6 +66,8 @@ export interface MutableEvolutionWorkspace {
 export interface MultiRoundLoopInput {
   round: 1 | 2;
   repositoryRoot: string;
+  humanFollowupRoot: string;
+  workflowInstanceRef: string;
   fixedSourceRoot: string;
   experimentRoot: string;
   participant: WorkspaceAgentParticipantOptions;
@@ -203,6 +205,8 @@ function isReady(result: ProblemAgnosticAgentSolutionLoopResult): result is Extr
 function defaultRunSingleRound(input: MultiRoundLoopInput): Promise<ProblemAgnosticAgentSolutionLoopResult> {
   return runProblemAgnosticAgentSolutionLoop({
     repositoryRoot: input.repositoryRoot,
+    humanFollowupRoot: input.humanFollowupRoot,
+    workflowInstanceRef: input.workflowInstanceRef,
     fixedSourceRoot: input.fixedSourceRoot,
     experimentRoot: input.experimentRoot,
     workspaceAgentParticipant: input.participant,
@@ -557,6 +561,8 @@ export async function runMultiRoundExecutionValidation(
       round1 = await runSingleRound({
         round: 1,
         repositoryRoot: evolutionWorkspace.workspaceRoot,
+        humanFollowupRoot: resolve(input.authoritativeRoot),
+        workflowInstanceRef: input.multiRoundRunRef,
         fixedSourceRoot: resolve(input.initialSourceRoot),
         experimentRoot: round1Root,
         participant: input.participant,
@@ -669,6 +675,8 @@ export async function runMultiRoundExecutionValidation(
               round2 = await runSingleRound({
                 round: 2,
                 repositoryRoot: evolutionWorkspace.workspaceRoot,
+                humanFollowupRoot: resolve(input.authoritativeRoot),
+                workflowInstanceRef: input.multiRoundRunRef,
                 fixedSourceRoot: rerun.outDir,
                 experimentRoot: round2Root,
                 participant: input.participant,

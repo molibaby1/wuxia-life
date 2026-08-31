@@ -205,7 +205,7 @@ function testChoiceRequirementExplanationDoesNotExposeNumericWealth(): void {
 }
 
 function testFormalCatalogNumericWealthZeroAndGuardRejects(): void {
-  assert.equal(EventLoader.getInstance().getAllEvents().length, 412);
+  assert.equal(EventLoader.getInstance().getAllEvents().length, 391);
   assert.equal(collectFormalNumericWealthWrites().length, 0);
   assert.equal(collectFormalNumericWealthConditions().length, 0);
   assert.deepEqual(collectFormalWalletAuthoringErrors(EventLoader.getInstance().getAllEvents()), []);

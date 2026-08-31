@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-08-17
+> 最后更新：2026-08-31
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -1529,3 +1529,27 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 真实内容需要 sex 之外的 semantic variable、第二个核心 sex-specific branch、多个 concrete persons、Person object / registry、random identity generation、generic person-aware expression/effect 或新的 Save Schema compatibility；
 - 第一实现证明 `variantId fact + static catalog + closed presentation context` 无法提供稳定身份与同一事件链；
 - 需要 Parenthood、Relationship / affinity 或其他独立产品域与该 binding 建立新的共享语义。
+
+### PD-104：Generic Relationship Legacy Quarantine
+
+**产品决策（Human accepted：2026-08-31；本条为 authority closure）**
+
+- `docs/product/generic-relationship-legacy-quarantine-design.md` 正式定义 generic relationship legacy 的 active-content disposition、consumer closure boundary 与后续重设计前的 quarantine 状态。
+- Quarantine pending redesign：`relationship_master_disciple`、`relationship_master_betrayal`、`relationship_master_legacy`、`relationship_blood_brotherhood`、`relationship_sworn_help`、`relationship_mentor_encounter` 与 `p22_relationship_mentor_obligation`。
+- Retired semantics：`relationship_enemy_create` 与 `relationship_revenge`；其 authored source 仅作为 deferred provenance 保留，不授权恢复。
+- Retained / out of scope：`relationship_life_saving`、`relationship_debt_return`、`p28_social_momentum_network_fork`、`p28_social_reputation_reinforcement`、`p29_social_momentum_patron_obligation`、`p42_social_momentum_youth_introduction` 与 `p42_social_momentum_later_testimonial`。
+- `ally_network` 是独立 social-network evidence，`ally_network != mentor evidence`，也不得推导 master、specific important person 或 concrete mentor。
+- Generic `has_master`、`has_sworn_siblings` 与 `mentor_bond` 不得单独制造 concrete-person presentation 或 synthetic affinity；若 `master_legacy` / `mentor_bond` 不再有合法 active producer，则不得保留只依赖它们的 active consumer。
+- 本决策不引入 migration、fallback、history reconstruction、replacement person、new relationship flag、Relationship schema / affinity change、Person Archetype 或 PD-103 expansion；不进入 Relationship v2，也不重做 P17/P18、life-saving/debt 或 social-network content。
+- 本次 destructive development 不保证旧内容状态连续性；formal runtime inventory 应由 `400 - 9` 收敛为 `28` runtime-loaded files、`391` runtime events 与 `7` active `relationship.json` events。该数量不是通过添加占位事件达成的目标。
+
+**明确不做**
+
+- 不创建 master、sworn-sibling、mentor、rival 或 enemy replacement NPC。
+- 不新增 Person Archetype、generic person registry、generic relationship flags、Relationship v2、migration layer 或 P17/P18 replacement semantics。
+
+**重新讨论条件**
+
+- 需要为 quarantined relationship content 设计 concrete person identity、replacement NPC、new Relationship schema / affinity 或新的 P17/P18 product semantics；
+- inventory 无法以 `400 - 9 = 391` 与 `28 / 7` active-source counts reconcile；
+- 需要恢复 legacy content-state compatibility，或把 `ally_network` 解释为 mentor/master/concrete-person evidence。

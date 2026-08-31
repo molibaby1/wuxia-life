@@ -16,7 +16,7 @@ export const P20_MARTIAL_ASCENDANT: ArchetypeFamilyConfig = {
     growthPatternFlags: ['martial_talent_acknowledged', 'joined_sect'],
     routeIdentityKeys: ['martial', 'orthodox'],
     socialRoleFlags: ['has_disciples', 'hero_rep_mantle'],
-    legacyShapeFlags: ['martial_transmission', 'master_legacy', 'inheritance_legacy_complete'],
+    legacyShapeFlags: ['martial_transmission', 'inheritance_legacy_complete'],
     endgameCategoryKinds: ['legendary_echo', 'quiet_continuity'],
     historicalMemoryTones: ['admired', 'respected'],
   },
@@ -37,9 +37,9 @@ export const P20_SCHOLAR_STATESMAN: ArchetypeFamilyConfig = {
   lifecycleSignals: {
     originIds: ['scholar_house', 'poor_family'],
     originTags: ['study', 'scholarly'],
-    growthPatternFlags: ['scholar_path_started', 'mentor_bond'],
+    growthPatternFlags: ['scholar_path_started'],
     routeIdentityKeys: ['scholarly', 'academic'],
-    socialRoleFlags: ['mentor_bond', 'ally_network'],
+    socialRoleFlags: ['ally_network'],
     legacyShapeFlags: ['scholarly_heritage_high', 'teaching_legacy'],
     endgameCategoryKinds: ['quiet_continuity', 'bittersweet_closure'],
     historicalMemoryTones: ['respected', 'mixed'],
@@ -246,7 +246,7 @@ export const P20_SLICE_LEGACY_ENDGAME: ReplaySliceConfig = {
   label: '传承与终局记忆分歧切片',
   emphasis: 'legacy_endgame_memory',
   archetypeFamilyId: P20_SCHOLAR_STATESMAN.id,
-  seedFlags: ['scholar_path_started', 'teaching_legacy', 'mentor_bond'],
+  seedFlags: ['scholar_path_started', 'teaching_legacy'],
   validationSignals: ['legacy_shape', 'endgame_category', 'historical_memory_tone'],
 };
 

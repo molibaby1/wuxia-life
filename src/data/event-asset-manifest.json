@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-31T08:31:27.137Z",
+  "generatedAt": "2026-08-31T13:06:44.729Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -13,20 +13,20 @@
   },
   "summary": {
     "runtimeLoadedFiles": 28,
-    "nonLoadedFiles": 42,
-    "totalEventsInRuntime": 400,
+    "nonLoadedFiles": 43,
+    "totalEventsInRuntime": 391,
     "byStatus": {
       "active": 36,
       "candidate": 70,
-      "broken": 11,
-      "deferred": 283,
+      "broken": 12,
+      "deferred": 273,
       "dead": 0
     },
     "byFileStatus": {
       "active": 0,
       "candidate": 12,
       "broken": 0,
-      "deferred": 58,
+      "deferred": 59,
       "dead": 0
     }
   },
@@ -435,8 +435,8 @@
       "fileName": "p22-content-expansions.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 14,
-      "goldenLineOverlapCount": 10,
+      "eventCount": 13,
+      "goldenLineOverlapCount": 9,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -464,11 +464,19 @@
       "notes": "Not in events.json imports; backlog asset"
     },
     {
+      "fileName": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 9,
+      "goldenLineOverlapCount": 9,
+      "notes": "Not in events.json imports; backlog asset"
+    },
+    {
       "fileName": "relationship.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 15,
-      "goldenLineOverlapCount": 13,
+      "eventCount": 7,
+      "goldenLineOverlapCount": 5,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -6622,17 +6630,6 @@
       "notes": "File classified deferred for golden line"
     },
     {
-      "eventId": "p22_relationship_mentor_obligation",
-      "sourceFile": "p22-content-expansions.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 28,
-      "ageMax": 38,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "File classified deferred for golden line"
-    },
-    {
       "eventId": "p22_faction_sect_continuation",
       "sourceFile": "p22-content-expansions.json",
       "runtimeLoaded": true,
@@ -7030,91 +7027,113 @@
     },
     {
       "eventId": "relationship_master_disciple",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 18,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_master_betrayal",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 25,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_master_legacy",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 30,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_blood_brotherhood",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 40,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_sworn_help",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_enemy_create",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 20,
       "ageMax": 50,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_revenge",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 25,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "File classified deferred for golden line"
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "relationship_mentor_encounter",
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 30,
+      "ageMax": 55,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "p22_relationship_mentor_obligation",
+      "sourceFile": "relationship-person-legacy-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 38,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "relationship_life_saving",
       "sourceFile": "relationship.json",
       "runtimeLoaded": true,
-      "status": "deferred",
+      "status": "broken",
       "ageMin": 20,
       "ageMax": 50,
       "overlapsGoldenLine": true,
-      "eventType": "auto",
-      "notes": "File classified deferred for golden line"
+      "eventType": "choice",
+      "notes": "Failed event quality or loader validation"
     },
     {
       "eventId": "relationship_debt_return",
@@ -7122,17 +7141,6 @@
       "runtimeLoaded": true,
       "status": "deferred",
       "ageMin": 25,
-      "ageMax": 55,
-      "overlapsGoldenLine": true,
-      "eventType": "auto",
-      "notes": "File classified deferred for golden line"
-    },
-    {
-      "eventId": "relationship_mentor_encounter",
-      "sourceFile": "relationship.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 30,
       "ageMax": 55,
       "overlapsGoldenLine": true,
       "eventType": "auto",

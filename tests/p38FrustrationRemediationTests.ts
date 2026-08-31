@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EventLoader } from '../src/core/EventLoader';
 import { collectFrustrationMetrics } from '../src/p8/collectPersonaMetrics';
+import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
 import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 import type { EffectDefinition, GameState } from '../src/types/eventTypes';
 
@@ -24,6 +25,12 @@ function fixedEventText(eventId: 'setback_injury' | 'setback_property_loss'): st
   const text = EventLoader.getInstance().getEventById(eventId)?.content?.text;
   if (!text) throw new Error(`missing narrative text for ${eventId}`);
   return text;
+}
+
+function deferredRelationshipEvent(eventId: string): EventDefinition {
+  const event = (relationshipLegacyDeferredEvents as EventDefinition[]).find(candidate => candidate.id === eventId);
+  if (!event) throw new Error(`missing deferred relationship event ${eventId}`);
+  return event;
 }
 
 function assert(condition: boolean, message: string): void {
@@ -481,7 +488,7 @@ function testWealthOpaquePresentationTargets(): void {
     'retreat choice must warn about the reputation cost while retaining the connections benefit',
   );
 
-  const swornHelpEvent = EventLoader.getInstance().getEventById('relationship_sworn_help');
+  const swornHelpEvent = deferredRelationshipEvent('relationship_sworn_help');
   const swornHelpChoice = swornHelpEvent?.choices?.find(choice => choice.text?.startsWith('全力相助'));
   assert(swornHelpEvent && swornHelpChoice, 'relationship_sworn_help full-help choice must load');
   const swornHelpResult = collectFrustrationMetrics([
@@ -545,7 +552,7 @@ function testWealthTargetEffectInvariance(): void {
   assert(JSON.stringify(perilEvent?.ageRange) === JSON.stringify({ min: 24, max: 40 }), 'retreat age range must remain unchanged');
   assert(JSON.stringify(perilEvent?.triggers) === JSON.stringify([{ type: 'age_reach', value: 24 }]), 'retreat triggers must remain unchanged');
 
-  const swornHelpEvent = EventLoader.getInstance().getEventById('relationship_sworn_help');
+  const swornHelpEvent = deferredRelationshipEvent('relationship_sworn_help');
   const swornHelpChoice = swornHelpEvent?.choices?.find(choice => choice.text?.startsWith('全力相助'));
   assert(
     JSON.stringify(swornHelpChoice?.effects) ===

@@ -45,7 +45,6 @@ function testExpansionEventsLoaded(): void {
     'p22_origin_frontier_orphan',
     'p22_childhood_street_shaping',
     'p22_early_wealth_route_fork',
-    'p22_relationship_mentor_obligation',
     'p22_faction_sect_continuation',
     'p22_legacy_teaching_succession',
     'p22_endgame_hermit_memory',

@@ -63,10 +63,10 @@ export const P18_ROLE_INHERITING_STUDENT: SuccessorRoleConfig = {
   id: 'p18_role_inheriting_student',
   label: '传功弟子',
   roleKind: 'inheriting_student',
-  triggerFlags: ['master_legacy', 'martial_transmission', 'inheritance_legacy_complete'],
+  triggerFlags: ['martial_transmission', 'inheritance_legacy_complete'],
   cultivationCapacityWeight: 1.1,
   inheritanceChannelOverlap: ['p18_channel_martial_teaching', 'p18_channel_reputation'],
-  qualitySignals: ['martialHeritage', 'master_legacy', 'martial_transmission'],
+  qualitySignals: ['martialHeritage', 'martial_transmission'],
 };
 
 export const WUXIA_SUCCESSOR_ROLE_CONFIGS: SuccessorRoleConfig[] = [
@@ -83,7 +83,7 @@ export const P18_CHANNEL_MARTIAL_TEACHING: InheritanceChannelPattern = {
   label: '武学传承',
   channelKind: 'martial_teaching',
   polarity: 'asset',
-  triggerFlags: ['master_legacy', 'martial_transmission', 'child_martial_artist'],
+  triggerFlags: ['martial_transmission', 'child_martial_artist'],
   lifePathSignals: ['disciple'],
   baseIntensity: 0.75,
   opportunityTags: [
@@ -213,7 +213,7 @@ export const WUXIA_INHERITANCE_CHANNEL_PATTERNS: InheritanceChannelPattern[] = [
 export const P18_COST_DISCIPLE_CULTIVATION: SuccessorCultivationCostPattern = {
   id: 'p18_cost_disciple_cultivation',
   label: '弟子培养',
-  successorRoleFlags: ['has_disciples', 'disciple_training_active', 'master_legacy'],
+  successorRoleFlags: ['has_disciples', 'disciple_training_active'],
   costDimensions: [
     {
       dimension: 'time',

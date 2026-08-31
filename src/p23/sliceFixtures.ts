@@ -193,7 +193,7 @@ export function scoreSliceExperience(
     case 'legacy_resonance':
     case 'endgame_aftertaste': {
       const flags = { ...(state.flags ?? {}), ...(state.player?.flags ?? {}) };
-      const transmissionBoost = ['teaching_legacy', 'martial_transmission', 'master_legacy'].some(
+      const transmissionBoost = ['teaching_legacy', 'martial_transmission'].some(
         f => flags[f],
       )
         ? 0.18

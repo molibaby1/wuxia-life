@@ -128,7 +128,7 @@ export const WUXIA_LIVE_OPS_WAVE_CONFIGS: LiveOpsContentWaveConfig[] = [
     lifePhase: 'mid_life',
     targetPoolId: 'p22_pool_midlife_consequence',
     targetWeakness: 'wealth merchant and mentor obligation mid-life support',
-    eventIds: ['p22_early_wealth_route_fork', 'p22_relationship_mentor_obligation', 'p22_faction_sect_continuation', 'p22_wave_mid_merchant_identity'],
+    eventIds: ['p22_early_wealth_route_fork', 'p22_faction_sect_continuation', 'p22_wave_mid_merchant_identity'],
     workflowSteps: [
       'audit:weak-spot',
       'author:event-json',

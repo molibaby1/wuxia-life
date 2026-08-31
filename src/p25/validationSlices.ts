@@ -35,7 +35,6 @@ export const P25_REPRESENTATIVE_LIFE_PATHS: LifePathFixture[] = [
       route_orthodox: true,
       orthodox_trial_completed: true,
       p16_guardian_oath: true,
-      mentor_bond: true,
     },
     summarySignals: ['尊师重道', '护道'],
   },
@@ -44,7 +43,7 @@ export const P25_REPRESENTATIVE_LIFE_PATHS: LifePathFixture[] = [
     label: '江湖名宿线',
     originId: 'scholar_house',
     player: { age: 38, martialPower: 50, reputation: 70, connections: 60 },
-    flags: { mentor_bond: true, ally_network: true, scholar_path_started: true },
+    flags: { ally_network: true, scholar_path_started: true },
     summarySignals: ['名望', '人脉'],
   },
   {
@@ -150,8 +149,6 @@ export function evaluateHabitLedPathWithP31Bridges(
 }
 
 const GHOST_FLAG_CONSUMERS: Array<{ flag: string; eventId: string; source: string }> = [
-  { flag: 'mentor_bond', eventId: 'p22_relationship_mentor_obligation', source: 'p22-content-expansions.json' },
-  { flag: 'ally_network', eventId: 'p22_relationship_mentor_obligation', source: 'p22-content-expansions.json' },
   { flag: 'medical_divine_doctor_fame', eventId: 'medical_imperial_doctor', source: 'medical.json' },
 ];
 

@@ -281,12 +281,6 @@ function buildRelationships(state: GameState): LifeMemoryRelationshipEntry[] {
   }
 
   const flags = state.flags || {};
-  if (flags.has_master && !seen.has('master')) {
-    pushEntry('master', '恩师', 'master', 50);
-  }
-  if (flags.has_sworn_siblings && !seen.has('sworn')) {
-    pushEntry('sworn', '义兄弟', 'sworn', 45);
-  }
   if (flags.lover_mingyue && !seen.has('mingyue')) {
     pushEntry('mingyue', '明月', 'lover', 70);
   }
@@ -317,10 +311,6 @@ function buildUnresolvedDebts(state: GameState): LifeMemoryDebtEntry[] {
       diagnostic: { sourceFlags, sourceFields },
     });
   };
-
-  if (flags.has_life_debt === true) {
-    pushDebt('debt-life', DEBT_FLAG_LABELS.has_life_debt, 'low', ['has_life_debt'], ['flags.has_life_debt']);
-  }
 
   if (flags.hero_gray_debtor === true && !flags.hero_gray_judgment_done) {
     pushDebt(

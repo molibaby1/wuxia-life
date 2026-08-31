@@ -28,11 +28,11 @@ export const P25_MAINSTREAM_ACHIEVEMENT_TRACEABILITY: Record<string, Achievement
   },
   lone_sword_legend: {
     choiceFlags: ['p16_rare_master_encounter'],
-    midLifeConsequenceSurfaces: ['hidden_master_line', 'p22_relationship_mentor_obligation'],
+    midLifeConsequenceSurfaces: ['hidden_master_line'],
   },
   jianghu_renown_sage: {
-    choiceFlags: ['mentor_bond', 'ally_network'],
-    midLifeConsequenceSurfaces: ['p22_relationship_mentor_obligation', 'jianghu_year_patrol'],
+    choiceFlags: ['ally_network'],
+    midLifeConsequenceSurfaces: ['jianghu_year_patrol'],
     habitLedOnRampEvents: [
       'p28_social_momentum_network_fork',
       'p28_social_reputation_reinforcement',

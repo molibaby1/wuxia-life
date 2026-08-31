@@ -108,7 +108,6 @@ export const MIDLIFE_OUTCOME_LABELS: Record<string, string> = {
 };
 
 export const DEBT_FLAG_LABELS: Record<string, string> = {
-  has_life_debt: '尚欠救命之恩',
   hero_gray_debtor: '灰色案中的庇护之债',
   demonic_usurp_failed: '夺位失败后清算阴影',
   merchant_shop_failed: '初次经营失利，本钱受损',

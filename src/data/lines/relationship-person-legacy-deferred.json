@@ -1,0 +1,690 @@
+[
+  {
+    "id": "relationship_master_disciple",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 80,
+    "weight": 65,
+    "ageRange": {
+      "min": 18,
+      "max": 30
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 18
+      },
+      {
+        "type": "expression",
+        "expression": "martialPower >= 30"
+      }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "拜师学艺",
+      "text": "你遇到了一位武林高手，他对你颇为赏识，有意收你为徒。这是你武学道路上的重要契机。",
+      "description": "拜师学艺"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "relationship_master_disciple_choice_1",
+        "text": "拜入名门（需学识≥40）",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "knowledge >= 40"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "flag_set",
+            "flag": "has_master",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "relationship_master_disciple_choice_2",
+        "text": "自学成才",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 8
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "relationship_master_betrayal",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 75,
+    "weight": 45,
+    "ageRange": {
+      "min": 25,
+      "max": 50
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has_master == true && chivalry <= 30"
+      }
+    ],
+    "content": {
+      "title": "师徒反目",
+      "text": "你与师父的理念产生分歧，最终走向了对立面。师徒情断，江湖路远。",
+      "description": "师徒反目"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "relationship_master_betrayal_choice_1",
+        "text": "背叛师门（侠义 -30，武力 +15）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -30
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -20
+          },
+          {
+            "type": "flag_unset",
+            "flag": "has_master",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "relationship_master_betrayal_choice_2",
+        "text": "道歉认错（侠义 +10）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "relationship_master_legacy",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 85,
+    "weight": 50,
+    "ageRange": {
+      "min": 30,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      },
+      {
+        "type": "random",
+        "value": 0.1
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has_master == true && chivalry >= 60"
+      }
+    ],
+    "content": {
+      "title": "师父传功",
+      "text": "师父年事已高，决定将毕生功力传授给你。这是对你多年孝心的回报，也是对你的期望。",
+      "description": "师父传功"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "stat": "martialPower",
+        "value": 25
+      },
+      {
+        "type": "stat_modify",
+        "stat": "knowledge",
+        "value": 15
+      },
+      {
+        "type": "flag_set",
+        "flag": "master_legacy",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "relationship_blood_brotherhood",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 78,
+    "weight": 60,
+    "ageRange": {
+      "min": 20,
+      "max": 40
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      },
+      {
+        "type": "expression",
+        "expression": "charisma >= 40 && chivalry >= 40"
+      }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "桃园结义",
+      "text": "你与几位志同道合的朋友意气相投，决定结为异姓兄弟/姐妹。从此生死与共，患难同当。",
+      "description": "桃园结义"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "chivalry",
+        "value": 10
+      },
+      {
+        "type": "stat_modify",
+        "stat": "reputation",
+        "value": 10
+      },
+      {
+        "type": "flag_set",
+        "flag": "has_sworn_siblings",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "relationship_sworn_help",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 72,
+    "weight": 55,
+    "ageRange": {
+      "min": 25,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.12
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has_sworn_siblings == true"
+      }
+    ],
+    "content": {
+      "title": "生死与共",
+      "text": "你的结拜兄弟/姐妹遇到了麻烦，请你帮忙。作为结义之人，你义不容辞。",
+      "description": "兄弟有难"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "sworn_help_full",
+        "text": "全力相助（需武力≥70，侠义 +15）",
+        "description": "全力相助可守住侠义，却会让你的功力、体魄与名望承受损失，这是必须付出的代价。",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "martialPower >= 70"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 10
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "constitution",
+            "value": -5
+          }
+        ]
+      },
+      {
+        "id": "sworn_help_financial",
+        "text": "提供资金支持（侠义 +8，魅力 +5）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "charisma",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "sworn_help_stand_aside",
+        "text": "袖手旁观（侠义 -20）",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "relationship_enemy_create",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 70,
+    "weight": 50,
+    "ageRange": {
+      "min": 20,
+      "max": 50
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 20
+      },
+      {
+        "type": "random",
+        "value": 0.1
+      }
+    ],
+    "conditions": [],
+    "content": {
+      "title": "结仇事件",
+      "text": "你在江湖行走时，无意中得罪了某人，从此结下仇怨。江湖路远，仇家难避。",
+      "description": "结仇"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "relationship_enemy_create_choice_1",
+        "text": "主动和解（需魅力≥50）",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "charisma >= 50"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "charisma",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "relationship_enemy_create_choice_2",
+        "text": "武力解决（需武力≥60）",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "martialPower >= 60"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 8
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 5
+          },
+          {
+            "type": "stat_modify",
+            "stat": "chivalry",
+            "value": -5
+          }
+        ]
+      },
+      {
+        "id": "relationship_enemy_create_choice_3",
+        "text": "置之不理",
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "luck",
+            "value": -5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "relationship_revenge",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 82,
+    "weight": 45,
+    "ageRange": {
+      "min": 25,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 25
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "martialPower >= 80"
+      }
+    ],
+    "content": {
+      "title": "复仇之战",
+      "text": "你的仇家找上门来，或者你决定主动出击。这一战，将决定恩怨的终结。",
+      "description": "复仇之战"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "relationship_revenge_choice_1",
+        "text": "正面决战（需武力≥80）",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "martialPower >= 80"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "martialPower",
+            "value": 15
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 20
+          },
+          {
+            "type": "stat_modify",
+            "stat": "constitution",
+            "value": -10
+          },
+          {
+            "type": "flag_set",
+            "flag": "revenge_complete",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "relationship_revenge_choice_2",
+        "text": "智取（需学识≥60）",
+        "conditions": [
+          {
+            "type": "expression",
+            "expression": "knowledge >= 60"
+          }
+        ],
+        "effects": [
+          {
+            "type": "stat_modify",
+            "stat": "knowledge",
+            "value": 12
+          },
+          {
+            "type": "stat_modify",
+            "stat": "reputation",
+            "value": 15
+          },
+          {
+            "type": "flag_set",
+            "flag": "revenge_complete",
+            "value": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "relationship_mentor_encounter",
+    "version": "1.0",
+    "category": "relationship",
+    "priority": 80,
+    "weight": 45,
+    "ageRange": {
+      "min": 30,
+      "max": 55
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 30
+      },
+      {
+        "type": "random",
+        "value": 0.08
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "knowledge >= 50 && chivalry >= 50"
+      }
+    ],
+    "content": {
+      "title": "知遇之恩",
+      "text": "你遇到了一位赏识你的前辈，他不仅指点你的武学，还教你做人的道理。这份知遇之恩，你铭记在心。",
+      "description": "知遇之恩"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {
+        "type": "stat_modify",
+        "stat": "knowledge",
+        "value": 20
+      },
+      {
+        "type": "stat_modify",
+        "stat": "martialPower",
+        "value": 15
+      },
+      {
+        "type": "stat_modify",
+        "stat": "chivalry",
+        "value": 10
+      },
+      {
+        "type": "stat_modify",
+        "stat": "charisma",
+        "value": 10
+      },
+      {
+        "type": "flag_set",
+        "flag": "has_mentor",
+        "value": true
+      },
+      {
+        "type": "flag_set",
+        "flag": "mentor_bond",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "p22_relationship_mentor_obligation",
+    "version": "1.0.0",
+    "category": "main_story",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": {
+      "min": 28,
+      "max": 38
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 28
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mentor_bond\") || flags.has(\"ally_network\")"
+      }
+    ],
+    "content": {
+      "title": "师恩未报",
+      "text": "昔日恩师遭仇家追杀，来信求援。你中年之际仍须抉择：是赴约担责，还是守成家业——这一选择将重塑你与师门、盟友之间的羁绊。",
+      "description": "P22 关系后果池扩展：师门义务延续"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "answer_mentor_call",
+        "text": "放下手头事务，赴师门之约",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_mentor_obligation_honored",
+            "value": true
+          },
+          {
+            "type": "stat_modify",
+            "target": "reputation",
+            "value": 5,
+            "operator": "add"
+          }
+        ]
+      },
+      {
+        "id": "send_aid_instead",
+        "text": "遣人送援，自己暂不出面",
+        "effects": [
+          {
+            "type": "flag_set",
+            "target": "p22_mentor_obligation_partial",
+            "value": true
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1781000000000,
+      "updatedAt": 1781000000000,
+      "enabled": true,
+      "tags": [
+        "relationship",
+        "consequence",
+        "p17",
+        "p22",
+        "mentor",
+        "live_ops_expansion"
+      ],
+      "authoringSemantics": {
+        "contentRole": "archetype_sensitive",
+        "routeFit": [
+          "scholarly",
+          "social"
+        ],
+        "stageFit": [
+          "midlife_consequence"
+        ],
+        "toneMarkers": [
+          "师徒",
+          "恩怨",
+          "江湖"
+        ],
+        "duplicateRiskClass": "relationship_consequence",
+        "authoringNotes": "Sustains mentor_bond mid-life relational trajectory."
+      }
+    }
+  }
+]

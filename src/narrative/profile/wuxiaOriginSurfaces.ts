@@ -377,7 +377,7 @@ export const WUXIA_COMPOSITE_DESTINY_OUTCOMES: CompositeDestinyOutcome[] = [
       { dimension: 'skill_growth', minValue: 45 },
       { dimension: 'reputation', minValue: 65 },
       { dimension: 'social_capital', minValue: 55 },
-      { dimension: 'key_choices', anyOfFlags: ['mentor_bond', 'ally_network'] },
+      { dimension: 'key_choices', anyOfFlags: ['ally_network'] },
     ],
   },
   {

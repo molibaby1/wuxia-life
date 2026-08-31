@@ -68,7 +68,14 @@ function testProfileSchema(): void {
 }
 
 function testRelationshipPatternsDiffer(): void {
-  const sworn = makeState({ flags: { has_sworn_siblings: true }, player: { flags: { has_sworn_siblings: true } } as GameState['player'] });
+  const ally = makeState({
+    lifePath: {
+      faction: 'neutral',
+      achievements: [],
+      relationships: { allies: ['ally'], enemies: [], mentors: [], disciples: [] },
+      commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+    },
+  });
   const feud = makeState({
     lifePath: {
       faction: 'neutral',
@@ -77,25 +84,19 @@ function testRelationshipPatternsDiffer(): void {
       commitments: { cannotJoin: [], mustProtect: [], swornEnemies: ['x'] },
     },
   });
-  const obligation = makeState({ flags: { has_life_debt: true }, player: { flags: { has_life_debt: true } } as GameState['player'] });
-
-  const swornActive = resolveActiveRelationshipConsequences(sworn);
+  const allyActive = resolveActiveRelationshipConsequences(ally);
   const feudActive = resolveActiveRelationshipConsequences(feud);
-  const obligationActive = resolveActiveRelationshipConsequences(obligation);
 
-  assert(swornActive.some(a => a.pattern.consequenceKind === 'social_shielding'), 'shielding active');
+  assert(allyActive.some(a => a.pattern.consequenceKind === 'social_shielding'), 'concrete ally shielding active');
   assert(feudActive.some(a => a.pattern.consequenceKind === 'feud'), 'feud active');
-  assert(obligationActive.some(a => a.pattern.consequenceKind === 'entanglement'), 'entanglement active');
 
-  const swornMul = getLaterLifeConsequenceMultiplierForTags(sworn, new Set(['rescue', 'relationship']));
+  const allyMul = getLaterLifeConsequenceMultiplierForTags(ally, new Set(['rescue', 'relationship']));
   const feudMul = getLaterLifeConsequenceMultiplierForTags(feud, new Set(['conflict', 'feud']));
-  const obligationMul = getLaterLifeConsequenceMultiplierForTags(obligation, new Set(['duty', 'debt']));
-  assert(swornMul.multiplier > 1.1, 'sworn boosts opportunity tags');
-  const swornConflict = getLaterLifeConsequenceMultiplierForTags(sworn, new Set(['conflict']));
-  assert(swornConflict.multiplier < 1, 'sworn shielding dampens conflict-tagged events');
+  assert(allyMul.multiplier > 1.1, 'concrete ally boosts opportunity tags');
+  const allyConflict = getLaterLifeConsequenceMultiplierForTags(ally, new Set(['conflict']));
+  assert(allyConflict.multiplier < 1, 'concrete ally shielding dampens conflict-tagged events');
   assert(feudMul.report.riskMultiplier > 1.15, 'feud boosts risk tags');
-  assert(obligationMul.report.riskMultiplier > 1.1, 'obligation boosts duty/debt');
-  assert(swornMul.multiplier !== feudMul.multiplier, 'relationship patterns differ materially');
+  assert(allyMul.multiplier !== feudMul.multiplier, 'relationship patterns differ materially');
 }
 
 function testFactionPatternsDiffer(): void {
@@ -159,7 +160,15 @@ function testCombineSchedulingMultiplier(): void {
 }
 
 function testLaterLifeAgeGate(): void {
-  const young = makeState({ player: { age: 20, flags: { has_sworn_siblings: true } } as GameState['player'], flags: { has_sworn_siblings: true } });
+  const young = makeState({
+    player: { age: 20 } as GameState['player'],
+    lifePath: {
+      faction: 'neutral',
+      achievements: [],
+      relationships: { allies: ['ally'], enemies: [], mentors: [], disciples: [] },
+      commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+    },
+  });
   const report = buildLaterLifeConsequenceReport(young, new Set(['rescue']), 20);
   assert(report.combinedMultiplier === 1, 'no consequence weight before min age');
   assert(P17_LATER_LIFE_MIN_AGE === 25, 'documented min age');
@@ -181,7 +190,7 @@ function testEventTagCollection(): void {
 function testValidationSlice(): void {
   const slice = runMidLateLifeValidationSlice();
   assert(sliceHasP17(), 'profile has P17 sections');
-  assert(slice.allyChangesOpportunity, 'ally changes opportunity');
+  assert(slice.allyChangesOpportunity, 'concrete ally changes opportunity');
   assert(slice.factionAddsDuty, 'faction adds duty');
   assert(slice.achievementFragileWhenNeglected, 'achievement fragile when neglected');
   assert(slice.cases.length >= 5, 'validation cases');

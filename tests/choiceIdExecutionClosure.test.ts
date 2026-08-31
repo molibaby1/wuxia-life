@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import familyLifeEvents from '../src/data/lines/family-life.json';
-import relationshipEvents from '../src/data/lines/relationship.json';
+import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
 import { EventLoader } from '../src/core/EventLoader';
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../src/contracts/choiceExecution';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
@@ -207,7 +207,7 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
 const SOURCE_EVENTS: Record<string, JsonRecord[]> = {
   family_child_education: familyLifeEvents as JsonRecord[],
   family_crisis: familyLifeEvents as JsonRecord[],
-  relationship_sworn_help: relationshipEvents as JsonRecord[],
+  relationship_sworn_help: relationshipLegacyDeferredEvents as JsonRecord[],
 };
 
 function findSourceEvent(eventId: string): JsonRecord {
@@ -340,7 +340,6 @@ async function main(): Promise<void> {
 
   await assertHeadlessChoiceExecution('family_child_education', { has_child: true });
   await assertHeadlessChoiceExecution('family_crisis', {});
-  await assertHeadlessChoiceExecution('relationship_sworn_help', { has_sworn_siblings: true });
 
   // Keep the request contract explicit at the same boundary used by production execution.
   assert.equal(CHOICE_EXECUTION_REQUEST_VERSION, '1.0.0');

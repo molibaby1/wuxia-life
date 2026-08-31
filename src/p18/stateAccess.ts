@@ -45,10 +45,6 @@ export function inferSuccessorQuality(state: GameState): number {
     quality += 0.15;
     weight += 0.15;
   }
-  if (flagIsActive(flags, 'master_legacy')) {
-    quality += 0.1;
-    weight += 0.1;
-  }
   if (flagIsActive(flags, 'child_martial_artist')) {
     quality += 0.08;
     weight += 0.08;

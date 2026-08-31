@@ -3,7 +3,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { difficultyManager } from '../src/core/DifficultyManager';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import relationshipEvents from '../src/data/lines/relationship.json';
+import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
 import setbackEvents from '../src/data/lines/setback-events.json';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import type { EventCondition, EventDefinition, GameState } from '../src/types/eventTypes';
@@ -54,7 +54,7 @@ function stateWithoutMoney(state: GameState): JsonRecord {
 }
 
 function testAuthoringSemantics(): void {
-  const relationship = relationshipEvents as JsonRecord[];
+  const relationship = relationshipLegacyDeferredEvents as JsonRecord[];
   const setback = setbackEvents as JsonRecord[];
   const swornHelp = findEvent(relationship, 'relationship_sworn_help');
   const financialHelp = findChoice(swornHelp, 'sworn_help_financial');
@@ -132,7 +132,7 @@ function testAuthoringSemantics(): void {
 }
 
 async function testRuntimeMoneyInvariance(): Promise<void> {
-  const relationship = relationshipEvents as JsonRecord[];
+  const relationship = relationshipLegacyDeferredEvents as JsonRecord[];
   const setback = setbackEvents as JsonRecord[];
   const swornHelp = findEvent(relationship, 'relationship_sworn_help');
   const financialHelp = findChoice(swornHelp, 'sworn_help_financial');

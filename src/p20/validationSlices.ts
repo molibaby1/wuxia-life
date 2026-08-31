@@ -165,7 +165,6 @@ export function runArchetypeDifferentiationSlice(): ArchetypeDifferentiationSlic
     flags: {
       origin_id: 'scholar_house',
       scholar_path_started: true,
-      mentor_bond: true,
       teaching_legacy: true,
     },
     player: {
@@ -280,7 +279,7 @@ export function runPacingDifferentiationSlice(): PacingDifferentiationSliceResul
     player: { age: 15 },
   });
   const scholar = baseState({
-    flags: { origin_id: 'scholar_house', scholar_path_started: true, mentor_bond: true },
+    flags: { origin_id: 'scholar_house', scholar_path_started: true },
     player: { age: 15, knowledge: 30 },
   });
 
@@ -336,7 +335,7 @@ export function runReplaySliceValidations(): ReplaySliceValidationResult[] {
       expectedFamily: P20_SCHOLAR_STATESMAN.id,
       signals: ['legacy', 'growth'],
       state: baseState({
-        flags: { scholar_path_started: true, teaching_legacy: true, mentor_bond: true },
+        flags: { scholar_path_started: true, teaching_legacy: true },
         player: { age: 58, scholarlyHeritage: 35 },
       }),
     },
@@ -476,7 +475,7 @@ export function runReplayabilityValidationComparison(): {
 
   const scholarCandidate = resolveArchetypeCandidates(
     baseState({
-      flags: { origin_id: 'scholar_house', scholar_path_started: true, mentor_bond: true },
+      flags: { origin_id: 'scholar_house', scholar_path_started: true },
       player: { age: 40, knowledge: 55 },
     }),
   )[0];

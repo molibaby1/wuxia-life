@@ -58,7 +58,6 @@ export const P25_ORDINARY_LIFE_PATHS: LifePathFixture[] = [
     originId: 'farm_peasant',
     player: { age: 44, martialPower: 46, reputation: 68, connections: 58 },
     flags: {
-      mentor_bond: true,
       peasant_steadfast_field: true,
       ordinary_peasant_midlife_seed: true,
     },

@@ -1,6 +1,7 @@
 import { assert } from './GameTestFramework';
 import { EventLoader } from '../src/core/EventLoader';
 import eventsIndexJson from '../src/data/events.json';
+import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
 import type { EffectDefinition, EventDefinition } from '../src/types/eventTypes';
 
 const LEGACY_MARTIAL_FIELDS = new Set(['externalSkill', 'internalSkill', 'qinggong']);
@@ -46,7 +47,7 @@ function collectBranches(events: EventDefinition[]): Branch[] {
 
 function testFinalInventory(events: EventDefinition[], branches: Branch[]): void {
   assert(eventsIndexJson.imports.length === 28, `formal EventLoader file count must be 28, got ${eventsIndexJson.imports.length}`);
-  assert(events.length === 412, `formal EventLoader event count must be 412, got ${events.length}`);
+  assert(events.length === 391, `formal EventLoader event count must be 391, got ${events.length}`);
   assert(branches.length === 0, `formal EventLoader must have 0 legacy producer branches, got ${branches.length}`);
   assert(branches.reduce((count, branch) => count + branch.effects.length, 0) === 0, 'formal EventLoader must have 0 legacy effects');
   assert(new Set(branches.map(branch => branch.eventId)).size === 0, 'formal EventLoader must have 0 legacy producer events');
@@ -140,9 +141,9 @@ function testNoCompensationBranches(events: EventDefinition[]): void {
   );
 }
 
-function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
-  const loader = EventLoader.getInstance();
-  const disciple = loader.getEventById('relationship_master_disciple');
+function testRelationshipDuplicateWrites(): void {
+  const deferredEvents = relationshipLegacyDeferredEvents as EventDefinition[];
+  const disciple = deferredEvents.find(event => event.id === 'relationship_master_disciple');
   const discipleChoice = disciple?.choices?.find(choice => choice.text === '拜入名门（需学识≥40）');
   const discipleLegacy = legacyEffects(discipleChoice?.effects);
   assert(discipleLegacy.length === 0, 'relationship_master_disciple must not write legacy martial fields');
@@ -151,14 +152,14 @@ function testRelationshipDuplicateWrites(events: EventDefinition[]): void {
     'relationship_master_disciple must retain exactly martialPower +20',
   );
 
-  const legacy = loader.getEventById('relationship_master_legacy');
+  const legacy = deferredEvents.find(event => event.id === 'relationship_master_legacy');
   const legacyEffectsAfter = legacyEffects(legacy?.autoEffects);
   assert(legacyEffectsAfter.length === 0, 'relationship_master_legacy must not write legacy martial fields');
   assert(
     legacy?.autoEffects?.filter(effect => (effect.target ?? effect.stat) === 'martialPower' && effect.value === 25).length === 1,
     'relationship_master_legacy must retain exactly martialPower +25',
   );
-  assert(events.includes(disciple as EventDefinition) && events.includes(legacy as EventDefinition), 'relationship events must be formally loaded');
+  assert(deferredEvents.includes(disciple as EventDefinition) && deferredEvents.includes(legacy as EventDefinition), 'relationship legacy events must remain in the deferred source');
 }
 
 const events = EventLoader.getInstance().getAllEvents();
@@ -167,5 +168,5 @@ const branches = collectBranches(events);
 testFinalInventory(events, branches);
 testMartialPowerMigrations(events);
 testNoCompensationBranches(events);
-testRelationshipDuplicateWrites(events);
+testRelationshipDuplicateWrites();
 console.log('canonicalMartialLegacyProducerPruning.test.ts: ok');

@@ -149,7 +149,6 @@ function createCoreMidlifeOrthodoxState(): GameState {
       route_orthodox: true,
       join_orthodox: true,
       sect_faction: 'orthodox',
-      has_life_debt: true,
       sect_midlife_faction_pressure_done: true,
       sect_midlife_gray_executed: true,
       sect_midlife_judgment_pending: true,
@@ -337,7 +336,7 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
 // Serializability
 {
   const state = createBaseState({
-    flags: { route_wanderer: true, has_life_debt: true },
+    flags: { route_wanderer: true, life_debt_owed_to_player: true },
     eventHistory: [{ eventId: 'sect_choice', age: 14, selectedChoice: 'stay_home' }],
   });
   const summary = deriveLifeMemorySummary(state);

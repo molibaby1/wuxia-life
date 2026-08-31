@@ -4,12 +4,12 @@ import type {
   RelationshipConsequencePattern,
 } from './types';
 
-/** Supportive / shielding — sworn brotherhood backing. */
+/** Supportive / shielding — concrete ally backing. */
 export const P17_RELATIONSHIP_SWORN_SHIELDING: RelationshipConsequencePattern = {
-  id: 'p17_sworn_shielding',
-  label: '义兄弟庇护',
+  id: 'p17_ally_shielding',
+  label: '同道庇护',
   consequenceKind: 'social_shielding',
-  triggerFlags: ['has_sworn_siblings'],
+  lifePathSignals: ['ally'],
   baseIntensity: 0.75,
   opportunityTags: [
     { tag: 'relationship', multiplier: 1.35 },
@@ -25,7 +25,6 @@ export const P17_RELATIONSHIP_MENTOR_OBLIGATION: RelationshipConsequencePattern 
   id: 'p17_mentor_obligation',
   label: '师门恩情',
   consequenceKind: 'obligation',
-  triggerFlags: ['has_mentor'],
   lifePathSignals: ['mentor'],
   baseIntensity: 0.7,
   opportunityTags: [
@@ -54,21 +53,6 @@ export const P17_RELATIONSHIP_FEUD_PRESSURE: RelationshipConsequencePattern = {
     { tag: 'betrayal', multiplier: 1.35 },
   ],
   summarySignal: 'feud_pressure_active',
-};
-
-/** Life-debt entanglement — positive tie with ongoing cost. */
-export const P17_RELATIONSHIP_LIFE_DEBT: RelationshipConsequencePattern = {
-  id: 'p17_life_debt_burden',
-  label: '救命之恩',
-  consequenceKind: 'entanglement',
-  triggerFlags: ['has_life_debt'],
-  baseIntensity: 0.65,
-  riskTags: [
-    { tag: 'debt', multiplier: 1.5 },
-    { tag: 'duty', multiplier: 1.35 },
-    { tag: 'obligation', multiplier: 1.25 },
-  ],
-  summarySignal: 'life_debt_active',
 };
 
 /** Kinship protection obligation — must-protect commitments. */

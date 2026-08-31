@@ -26,7 +26,6 @@ const ORDINARY_RETIRED_EVENTS = [
   'border_alliance',
   'family_marriage',
   'family_child_education',
-  'relationship_debt_return',
   'p29_social_momentum_patron_obligation',
   'court_politics_revealed',
   'career_recruit_disciples',
@@ -219,12 +218,6 @@ async function testRepresentativeMoneySentinelInvariance(): Promise<void> {
   const cases: Array<{ eventId: string; choiceId?: string; assert?: (state: GameState) => void }> = [
     { eventId: 'border_clan_conflict', choiceId: 'border_conflict_trade' },
     { eventId: 'family_marriage', choiceId: 'marry_mingyue' },
-    {
-      eventId: 'relationship_debt_return',
-      assert: state => {
-        assert.equal(state.player.reputation, 15);
-        assert.equal(state.flags.has_life_debt, undefined);
-      },
     },
     { eventId: 'p9_childhood_first_trade' },
     { eventId: 'p11_wealth_reinforcement_first_deal' },

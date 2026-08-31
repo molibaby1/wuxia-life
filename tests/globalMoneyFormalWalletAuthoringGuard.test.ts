@@ -64,7 +64,7 @@ function testFormalCatalogHasZeroWalletAuthoring(): void {
   assert.equal(typeof formalEvents.length, 'number');
   assert.notEqual(formalEvents.length, staleManifestCount,
     `formal EventLoader count must not be taken from stale manifest totalEventsInRuntime=${staleManifestCount}`);
-  assert.equal(formalEvents.length, 412, 'formal EventLoader catalog must remain the current 412-event source');
+  assert.equal(formalEvents.length, 391, 'formal EventLoader catalog must remain the current 391-event source');
 
   const errors = collectFormalWalletAuthoringErrors(formalEvents);
   assert.deepEqual(errors, [], `formal wallet authoring must be zero; got: ${errors.join(' | ')}`);

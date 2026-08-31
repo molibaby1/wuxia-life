@@ -387,18 +387,7 @@ Person Definition Contract v1 首先是**内容设计 / authoring Contract**，�
 
 人物关系内容不得依赖该 identity 的生成过程。
 
-**人物实例化不是本 Contract 的组成部分。**
-
-当前不在本文设计：
-
-- generator；
-- prototype runtime schema；
-- 姓名生成；
-- 性别生成；
-- 亲属身份实例化算法；
-- generic NPC framework。
-
-人物实例化未来可以作为独立能力设计，并通过最小接口向人物内容提供 concrete person。
+**Generic Person Instantiation 仍未授权。** 有限 Sex-Variant Person Archetype 能力由 PD-103 / Sex-Variant Person Archetype Contract v1 独立治理；该能力不授权 generator、prototype runtime schema、姓名/性别生成、亲属身份实例化算法或 generic NPC framework。
 
 ## 14. 人物原型可以拥有专属内容
 

@@ -11,10 +11,18 @@
 
 `player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Product Contract v1` 与 `Character / Relationship Product Contract v1` 是在玩家模型之下登记的当前 accepted product contracts，不替代第一层规范。`player-model` 分别把经济能力语义、重要人物与人物关系语义委托给对应 Contract；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
 
+```text
+player-model
+├─ Wealth / Economy Contract
+├─ Character / Relationship Contract
+│  └─ Sex-Variant Person Archetype Contract
+└─ Parenthood / Family Life Contract
+```
 ### 已接受的产品契约
 
 - [Wealth / Economy Product Contract v1](product/wealth-economy-product-contract-design.md)：完整 Human-accepted 财力/资产产品语义；含 2026-08-22 historical repository inventory（非 current authority）；当前 implementation closure 见该文档最新 status section / PD-098（Snapshot `3.16.0`，`wealthCapacity`-only）。
-- [Character / Relationship Product Contract v1](product/character-relationship-product-contract-design.md)：Human-accepted 的重要人物与人物关系产品语义；person-first、fact-driven relationship、恋爱/婚姻分离、no generic affinity；包含 Person Definition Contract v1、shared-vs-character-specific promotion boundary 与明月人物纵切 v1 验证边界。人物实例化仍是独立、尚未设计的产品能力。
+- [Character / Relationship Product Contract v1](product/character-relationship-product-contract-design.md)：Human-accepted 的重要人物与人物关系产品语义；person-first、fact-driven relationship、恋爱/婚姻分离、no generic affinity；包含 Person Definition Contract v1、shared-vs-character-specific promotion boundary 与明月人物纵切 v1 验证边界。Generic Person Instantiation 仍未授权；有限 Sex-Variant Person Archetype 由 PD-103 独立治理。
+- [Sex-Variant Person Archetype Contract v1](product/sex-variant-person-archetype-contract-design.md)：Human-accepted 的极窄人物原型性别变体契约；只允许核心人物语义不变时的有限 authored male/female identity variant，不授权 Generic Person Instantiation、NPC Generator 或开放式人物属性系统。
 - [Phase 1B Minimal Asset Semantics Design](product/wealth-economy-phase-1b-minimal-asset-semantics-design.md)：Human-accepted 的 `merchant_shop` 最小 Asset identity、ownership、persistence 与 presentation implementation boundary。
 - [Merchant Shop Legacy Money Migration Design](product/wealth-economy-merchant-shop-legacy-money-migration-design.md)：Human-accepted 的 merchant talent → first shop → shop-failure 竖切，从 legacy `money` 迁移到 Wealth Capacity + `merchant_shop` Asset（已交付）。
 - [Merchant Caravan Legacy Money Migration Design](product/wealth-economy-merchant-caravan-legacy-money-migration-design.md)：Human-accepted 的 `merchant_caravan_guard` + `merchant_market_monopoly` 入口竖切，从 legacy `money` 迁移到 Wealth Capacity（已交付）。

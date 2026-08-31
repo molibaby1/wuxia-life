@@ -1502,3 +1502,30 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要改变当前恋爱 / 婚姻分离、人物可达性、Person Definition Contract 或 shared-vs-character-specific boundary；
 - 明月真实纵切证明当前 Person Definition / fact-first 模型无法支撑可玩的连续人物内容。
 
+### PD-103：Sex-Variant Person Archetype Contract v1
+
+**产品决策（Human accepted：2026-08-31；本条为 authority closure）**
+
+- 只有在 Access、Character Anchors、Core Concern、Event Responsibilities、Relationship Possibilities 与主要 causal chain 保持不变时，male / female variant 才属于同一个 Person Archetype；性别变化不得改变人物核心语义。
+- v1 variant fields 仅为 `sex`、`displayName`、`pronoun` 与 `address`；不开放 attributes、traits、personality、background、socialClass、familyTrade、variantMetadata 或任何通用扩展槽。
+- 第一实现样本为 `merchant_introduced_partner_v1`：male player → `female_qinghe`，female player → `male_zhiheng`。当前只支持这一个 authored archetype 与两个 authored variants。
+- canonical persisted state 只保存一个 string fact：`person_variant:<archetypeId>`；不新增 Person object、registry、Person state、Snapshot 顶层字段或第二个实例绑定维度。
+- 只有在声明 `create` 的事件真正被选中准备呈现时才 materialize；`require` 只接受已有有效 binding，缺失时不得自动 create、fallback、alias 或 inference。
+- Runtime 只允许 `{{person.name}}`、`{{person.pronoun}}` 与 `{{person.address}}` 三个封闭 presentation tokens；不增加 generic `person.*` condition/property access 或 generic effect templating。
+- 允许一个专用 `set_spouse_from_person` consumer 解析已有 binding；固定人物继续使用既有 `set_spouse`。
+- Snapshot schema 保持 exactly `3.16.0`。
+- 当前 development stage 为 destructive development；pre-PD-103 沈清禾 mid-chain content-state compatibility 不受支持，不做 load-time inference、spouse/history reconstruction、schema migration、fallback 或 alias。
+- Generic Person Instantiation、NPC Generator、Person/NPC Registry、开放式人物属性、random name/sex/portrait、relationship/affinity integration、Parenthood generalization、multiple instantiated persons per event 与 materially different male/female core chains 均不在本决策授权范围。
+- 以下任一复杂度触发默认 `BLOCK / split archetype / Human re-design`：第二个 semantic instantiation dimension；组合属性笛卡尔积；第二个核心 sex-gated event；不同 Character Anchors / Core Concern；大量分叉 choice/effects 或专属事件链；generic Person state / condition / effect；同一事件多个 instantiated-person bindings；Person object/registry persistence；generic personality/background/social-class generator；或无法用一句话解释两个 variant 仍是同一 archetype。
+
+**明确不做**
+
+- 不迁移 fixed characters；不建设 global orientation system、generic relationship compatibility engine、generic person condition language、generic effect templating、multi-person event binding 或随机人物生成。
+- 不为 pre-PD-103 沈清禾存档增加迁移、历史重建、别名、fallback 或 inferred variant binding；缺少 canonical binding 的 `require` 后续内容直接 fail closed。
+- 不进入 Generic Relationship Legacy、第二个 archetype、random names、random-sex non-marriage NPCs、portrait variants、sex-gated events 或任何 later phase。
+
+**重新讨论条件**
+
+- 真实内容需要 sex 之外的 semantic variable、第二个核心 sex-specific branch、多个 concrete persons、Person object / registry、random identity generation、generic person-aware expression/effect 或新的 Save Schema compatibility；
+- 第一实现证明 `variantId fact + static catalog + closed presentation context` 无法提供稳定身份与同一事件链；
+- 需要 Parenthood、Relationship / affinity 或其他独立产品域与该 binding 建立新的共享语义。

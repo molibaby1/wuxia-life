@@ -61,23 +61,21 @@ const EXPERIENCE_ONLY_METRIC_DEFINITIONS: ReadonlyArray<ExperienceHealthMetricDe
   {
     key: 'adjacent_same_class_rate',
     label: 'Adjacent Same Class Rate',
-    description: '相邻两年 injury/illness/economy/family 同类重复比例（按样本取最差值）。',
-    severity: 'blocker',
-    nonWaivable: true,
+    description: 'Deprecated legacy diagnostic：只观察 class-positive subset + heuristic taxonomy，不是玩家可见节奏的产品证据。',
+    severity: 'info',
+    nonWaivable: false,
     baseline: {
-      max: P0_REPETITION_THRESHOLDS.adjacentSameClassRateMax,
-      note: '任一样本超标即阻断 validate。',
+      note: 'Legacy diagnostic only；不参与 Experience gate PASS/FAIL。',
     },
   },
   {
     key: 'short_window_same_class_rate',
     label: 'Short Window Same Class Rate',
-    description: '过去 5 个游戏年内出现同类重复的事件占比（按样本取最差值）。',
-    severity: 'blocker',
-    nonWaivable: true,
+    description: 'Deprecated legacy diagnostic：只观察 class-positive subset + heuristic taxonomy，不是玩家可见节奏的产品证据。',
+    severity: 'info',
+    nonWaivable: false,
     baseline: {
-      max: P0_REPETITION_THRESHOLDS.shortWindowSameClassRateMax,
-      note: '任一样本超标即阻断 validate。',
+      note: 'Legacy diagnostic only；不参与 Experience gate PASS/FAIL。',
     },
   },
   {

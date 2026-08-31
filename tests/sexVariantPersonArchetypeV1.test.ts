@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   getPersonArchetype,
   getPersonVariant,
@@ -12,6 +14,7 @@ import {
 } from '../src/core/SexVariantPersonArchetype';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { EventExecutor } from '../src/core/EventExecutor';
+import { SUPPORTED_CONDITION_EXPRESSION_CAPABILITIES } from '../src/types/conditionExpression';
 import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
 import type { PersonEventBinding } from '../src/types/personArchetype';
@@ -338,6 +341,56 @@ function testPrePd103StateDoesNotReconstructMissingBinding(): void {
   assert.equal(result.state.player.spouse, null);
 }
 
+function testComplexityFirewall(): void {
+  const sourcePaths = [
+    'src/types/personArchetype.ts',
+    'src/data/personArchetypeCatalog.ts',
+    'src/core/SexVariantPersonArchetype.ts',
+    'src/types/eventTypes.ts',
+    'src/data/lines/merchant.json',
+  ];
+  const source = sourcePaths
+    .map(sourcePath => fs.readFileSync(path.resolve(sourcePath), 'utf8'))
+    .join('\n');
+  for (const forbidden of [
+    'personInstances',
+    'person.attributes',
+    'attributes: Record<',
+    'variantMetadata',
+    'person_sex_is',
+    'person_property',
+    'PersonRegistry',
+    'NpcRegistry',
+    'NPCRegistry',
+    'randomName',
+    'familyTrade',
+    'temperament',
+  ]) {
+    assert.equal(source.includes(forbidden), false, `${forbidden} must remain outside the v1 subsystem`);
+  }
+
+  const eventTypesSource = fs.readFileSync(path.resolve('src/types/eventTypes.ts'), 'utf8');
+  assert.equal(eventTypesSource.includes('personBinding?: PersonEventBinding'), true);
+  assert.equal(eventTypesSource.includes('personBindings'), false);
+
+  const conditionSource = [
+    'src/types/conditionExpression.ts',
+    'src/core/ConditionEvaluator.ts',
+  ]
+    .map(sourcePath => fs.readFileSync(path.resolve(sourcePath), 'utf8'))
+    .join('\n');
+  assert.equal(conditionSource.includes('person.'), false);
+  assert.equal(conditionSource.includes('person_sex_is'), false);
+  assert.deepEqual(SUPPORTED_CONDITION_EXPRESSION_CAPABILITIES, {
+    playerPropertyAccess: 'player.<property>',
+    flagQuery: "flags.has('flag_name')",
+    eventQuery: "events.has('event_id')",
+    comparisonOperators: ['>', '>=', '<', '<=', '==', '!='],
+    logicOperators: ['&&', '||', '!', 'AND', 'OR', 'NOT'],
+    parentheses: true,
+  });
+}
+
 testClosedCatalogDefinitions();
 testMalePlayerMaterializesFemaleVariant();
 testFemalePlayerMaterializesMaleVariant();
@@ -347,6 +400,7 @@ testUnknownPersistedBindingFailsClosed();
 testEngineIntegratesBindingAtSelectionTime();
 testBindingRoundTripsWithoutSchemaExpansion();
 testPrePd103StateDoesNotReconstructMissingBinding();
+testComplexityFirewall();
 await testDedicatedSpouseConsumer();
 
 console.log('sexVariantPersonArchetypeV1: PASS');

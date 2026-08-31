@@ -2,6 +2,7 @@ import type { ConditionExpression } from './conditionExpression';
 import type { EventAuthoringSemantics } from '../narrative/config/authoringSchema';
 import type { WealthCapacity } from './wealthCapacity';
 import type { AssetId } from './asset';
+import type { PersonEventBinding } from './personArchetype';
 
 /**
  * 事件系统类型定义
@@ -692,6 +693,9 @@ export interface EventDefinition {
   
   /** 依赖关系 */
   dependencies?: EventDependency[];
+
+  /** Optional closed binding to one authored person archetype. */
+  personBinding?: PersonEventBinding;
   
   /** 前置条件（扩展） */
   triggerConditions?: any;

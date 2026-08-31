@@ -357,10 +357,11 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     let event = this.volatile.currentEvent;
     if (!event || event.id !== request.action.eventId) {
       try {
-        event = this.dependencies.catalog.getEventById(
+        const rawEvent = this.dependencies.catalog.getEventById(
           request.action.eventId,
           this.catalogVersion,
         );
+        event = this.engine.materializeEventForExecution(rawEvent);
         this.volatile.currentEvent = event;
       } catch {
         // fall through to stale handling

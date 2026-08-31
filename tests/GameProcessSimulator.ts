@@ -57,11 +57,6 @@ import {
   rankChoiceScores,
 } from '../src/p8/personaChoiceBias';
 import type { ChoiceScoreDiagnostic } from '../src/p8/types';
-import {
-  buildRomanceFamilyArcReport,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
-  type RomanceFamilyArcReport,
-} from '../scripts/romanceFamilyArcTelemetry';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -605,7 +600,7 @@ export class GameProcessSimulator {
       if (track === 'official') {
         if (flagName === 'route_official' || flagName === 'origin_scholar_family') score += 1200;
         if (flagName === 'route_official_completed') score += 4000;
-        if (flagName === 'official_first_post' || flagName === 'official_love_obstacle') score += 400;
+        if (flagName === 'official_first_post') score += 400;
       }
 
       if (track === 'beggars') {
@@ -677,74 +672,6 @@ export class GameProcessSimulator {
       if (choiceId.startsWith('old_case_') || choiceId.startsWith('rep_') || choiceId.startsWith('ally_') || choiceId.startsWith('gray_') || choiceId.startsWith('settlement_')) score += 800;
       if (choiceId === 'join_orthodox' || choiceId.includes('accept_demonic')) score -= 2000;
       if (choiceId.includes('beggars')) score -= 1200;
-    }
-
-    return score;
-  }
-
-  private isRomanceFamilyArcSample(): boolean {
-    return this.config.sampleId === GOLDEN_ROMANCE_FAMILY_SAMPLE_ID;
-  }
-
-  /** US-009/010: P3-RF arc — KC-1/2/3 choice bias for arc_rf_mingyue. */
-  private scoreRomanceArcChoice(choice: EventChoice, eventId?: string): number {
-    if (!this.isRomanceFamilyArcSample() || !eventId) {
-      return 0;
-    }
-
-    const choiceId = (choice.id || '').toLowerCase();
-    let score = 0;
-
-    if (eventId === 'love_first_meet') {
-      if (choiceId === 'love_greet' || choiceId === 'love_charm') {
-        score += 1200;
-      }
-      if (choiceId === 'love_pass') {
-        score -= 2000;
-      }
-    }
-
-    if (eventId === 'love_family_obstacle') {
-      if (choiceId === 'love_prove') {
-        score += 1200;
-      }
-      if (choiceId === 'love_avoid') {
-        score -= 1000;
-      }
-    }
-
-    return score;
-  }
-
-  /** US-009: prefer 迎娶明月 when love line is active at family_marriage. */
-  private scoreRomanceFamilyChoice(choice: EventChoice, eventId?: string): number {
-    if (eventId !== 'family_marriage') {
-      return 0;
-    }
-
-    const flags = gameEngine.getGameState()?.player?.flags ?? {};
-    if (!flags.love_started && !this.isRomanceFamilyArcSample()) {
-      return 0;
-    }
-
-    let score = 0;
-    const effects = this.collectChoiceEffects(choice);
-    for (const effect of effects) {
-      if (effect.type !== 'flag_set') {
-        continue;
-      }
-      const flagName = (effect.flag || effect.target || '') as string;
-      if (flagName === 'spouse_mingyue' || flagName === 'marriage_type_love') {
-        score += 1500;
-      }
-      if (flagName === 'spouse_arranged' || flagName === 'mingyue_married_other') {
-        score -= 1200;
-      }
-    }
-
-    const choiceId = (choice.id || '').toLowerCase();
-    if (choiceId === 'marry_mingyue') {
-      score += 500;
     }
 
     return score;
@@ -844,8 +771,6 @@ export class GameProcessSimulator {
       }
 
       score += this.scoreRouteTrackChoice(choice);
-      score += this.scoreRomanceArcChoice(choice, eventId);
-      score += this.scoreRomanceFamilyChoice(choice, eventId);
       score += this.scoreDemonicMidlifeChoice(choice, eventId);
 
       const effects = choice.outcomes?.[0]?.effects ?? choice.effects ?? [];
@@ -949,22 +874,10 @@ export class GameProcessSimulator {
         }
       }
 
-      if (effect.type === 'flag_set') {
-        const flagName = (effect.flag || effect.target || '') as string;
-        if (tendency === 'relationship' || tendency === 'balanced') {
-          if (flagName === 'spouse_mingyue' || flagName === 'marriage_type_love') {
-            score += 600;
-          }
-          if (flagName === 'love_started') {
-            score += 400;
-          }
-          if (flagName === 'has_child') {
-            score += 300;
-          }
-        }
-      }
-
-      if (effect.type === 'special' && effect.target === 'set_spouse') {
+      if (
+        effect.type === 'special'
+        && (effect.target === 'set_spouse' || effect.target === 'set_spouse_from_person')
+      ) {
         if (tendency === 'relationship' || tendency === 'balanced') {
           score += 500;
         }
@@ -1295,14 +1208,6 @@ export class GameProcessSimulator {
     };
 
     baseReport.deathRiskTelemetry = buildDeathRiskTelemetry(baseReport, this.config.sampleId);
-    if (this.config.sampleId) {
-      const endAge = this.config.ageRange?.endAge ?? this.config.simulateYears;
-      baseReport.romanceFamilyArcReport = buildRomanceFamilyArcReport(
-        baseReport,
-        this.config.sampleId,
-        endAge,
-      );
-    }
     baseReport.p8ChoiceDiagnostics = [...this.p8ChoiceDiagnostics];
     baseReport.p8ActiveActionReasons = [...this.p8ActiveActionReasons];
     return baseReport;

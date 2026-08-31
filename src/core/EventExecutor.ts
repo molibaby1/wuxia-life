@@ -39,6 +39,9 @@ import { buildEndingPresentationDescription } from './endingPresentation';
 import { LifePathManager } from './LifePathSystem';
 import { traitSystem } from './TraitSystem';
 import { isAffiliationId } from './affiliationCatalog';
+import { getBoundPersonDisplayName } from './SexVariantPersonArchetype';
+import { isPersonArchetypeId } from '../data/personArchetypeCatalog';
+import type { PersonArchetypeId } from '../types/personArchetype';
 
 /**
  * 事件执行器实现
@@ -842,6 +845,23 @@ export class SpecialEffectHandler implements EffectHandler {
     
     if (target === 'set_spouse') {
       const spouseName = typeof effect.value === 'string' ? effect.value : null;
+      if (!state.player || !spouseName) {
+        return state;
+      }
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          spouse: spouseName,
+        },
+      };
+    }
+
+    if (target === 'set_spouse_from_person') {
+      if (typeof effect.value !== 'string' || !isPersonArchetypeId(effect.value)) {
+        return state;
+      }
+      const spouseName = getBoundPersonDisplayName(state, effect.value as PersonArchetypeId);
       if (!state.player || !spouseName) {
         return state;
       }

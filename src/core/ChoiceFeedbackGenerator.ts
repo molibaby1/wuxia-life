@@ -85,7 +85,11 @@ export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): Choi
       continue;
     }
 
-    if (effect.type === 'special' && effect.target === 'set_spouse' && typeof effect.value === 'string') {
+    if (
+      effect.type === 'special'
+      && (effect.target === 'set_spouse' || effect.target === 'set_spouse_from_person')
+      && typeof effect.value === 'string'
+    ) {
       baseFeedback.player.statImpacts.push({
         stat: 'spouse',
         delta: 1,

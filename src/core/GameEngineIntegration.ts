@@ -58,6 +58,10 @@ import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import { cloneCanonicalGameState } from '../contracts/validation/canonicalGameStateValidation';
 import {
+  canSatisfyPersonBinding,
+  materializePersonBoundEvent,
+} from './SexVariantPersonArchetype';
+import {
   applyRareLineFlags,
   rollRareEventLines,
 } from '../p16/rareEventLines';
@@ -457,6 +461,10 @@ export class GameEngineIntegration {
         return false;
       }
 
+      if (event.personBinding && !canSatisfyPersonBinding(gameState, event.personBinding)) {
+        return false;
+      }
+
       return true;
     } catch (error) {
       console.warn(`[GameEngine] Runtime condition guard failed for event "${event.id}"`, error);
@@ -659,7 +667,6 @@ export class GameEngineIntegration {
     event: EventDefinition,
     narrativeContext?: NarrativeSchedulingContext,
   ): number {
-    const romanceFamilyMultiplier = this.getRomanceFamilySchedulingMultiplier(event);
     const wandererMidlifeMultiplier = this.getWandererMidlifeSchedulingMultiplier(event);
     const context = narrativeContext ?? buildNarrativeSchedulingContextFromState(this.gameState);
     const narrativeMultiplier = getNarrativeSchedulingMultiplier(event, context);
@@ -678,7 +685,6 @@ export class GameEngineIntegration {
     const archetypeMultiplier = getArchetypeSchedulingMultiplier(this.gameState, event);
     const pacingMultiplier = getWholeLifePacingMultiplier(this.gameState, event);
     return (
-      romanceFamilyMultiplier *
       wandererMidlifeMultiplier *
       narrativeMultiplier *
       laterLifeConsequenceMultiplier *
@@ -723,48 +729,6 @@ export class GameEngineIntegration {
       return 5;
     }
     return 4;
-  }
-
-  /** US-009: guarantee family_marriage / family_child_born fire inside their age windows when love line is active. */
-  private getRomanceFamilySchedulingMultiplier(event: EventDefinition): number {
-    const player = this.gameState.player;
-    if (!player) {
-      return 1;
-    }
-
-    const age = player.age ?? 0;
-    const flags = player.flags ?? {};
-
-    if (event.id === 'family_marriage' && !flags.married && flags.love_started && age >= 20 && age <= 30) {
-      if (age >= 28) {
-        return 8;
-      }
-      if (age >= 25) {
-        return 5;
-      }
-      return 3.5;
-    }
-
-    if (
-      event.id === 'family_child_born' &&
-      flags.married &&
-      !flags.has_child &&
-      age >= 25 &&
-      age <= 40
-    ) {
-      return 3;
-    }
-
-    return 1;
-  }
-
-  private isRomanceFamilyCriticalEvent(event: EventDefinition): boolean {
-    if (event.id !== 'family_marriage') {
-      return false;
-    }
-    const age = this.gameState.player?.age ?? 0;
-    const flags = this.gameState.player?.flags ?? {};
-    return age >= 26 && age <= 30 && !flags.married && Boolean(flags.love_started);
   }
 
   /**
@@ -870,7 +834,7 @@ export class GameEngineIntegration {
   }
 
   private isCriticalLayerEvent(event: EventDefinition): boolean {
-    return this.isMandatoryEvent(event) || this.isRomanceFamilyCriticalEvent(event);
+    return this.isMandatoryEvent(event);
   }
 
   private isStorylineLayerEvent(event: EventDefinition): boolean {
@@ -1205,7 +1169,7 @@ export class GameEngineIntegration {
     const availableEvents = this.getAvailableEvents(currentAge);
     
     if (availableEvents.length === 0) {
-      return dailyEventSystem.selectEvent(this.gameState);
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
     
     // 过滤掉已触发的事件（根据maxTriggers决定是否可以再次触发）
@@ -1250,7 +1214,7 @@ export class GameEngineIntegration {
     });
     
     if (untriggeredEvents.length === 0) {
-      return dailyEventSystem.selectEvent(this.gameState);
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
     
     // 声望门槛检查：过滤不满足声望要求的事件
@@ -1266,31 +1230,31 @@ export class GameEngineIntegration {
     const eventsToSelect = reputationFilteredEvents.length > 0 ? reputationFilteredEvents : untriggeredEvents;
 
     if (eventsToSelect.length === 0) {
-      return dailyEventSystem.selectEvent(this.gameState);
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
 
     const { criticalEvents, storylineEvents, regularFormalEvents } = this.splitEventLayers(eventsToSelect);
 
     const exactAgeMandatory = this.getExactAgeMandatoryEvents(criticalEvents, currentAge);
     if (exactAgeMandatory.length > 0) {
-      return exactAgeMandatory[0];
+      return this.materializeSelectedEvent(exactAgeMandatory[0]);
     }
 
     // Layer 1: critical lane, never paused by rhythm pressure.
     const criticalSelection = this.pickWeightedFormalEvent(criticalEvents, currentAge);
     if (criticalSelection) {
-      return criticalSelection;
+      return this.materializeSelectedEvent(criticalSelection);
     }
 
     // Layer 2: storyline lane, protected from daily fallback unless empty.
     const storylineSelection = this.pickWeightedFormalEvent(storylineEvents, currentAge);
     if (storylineSelection) {
-      return storylineSelection;
+      return this.materializeSelectedEvent(storylineSelection);
     }
 
     // Layer 3: regular formal lane can yield to cross-age daily cadence or rhythm pause.
     if (regularFormalEvents.length === 0) {
-      return dailyEventSystem.selectEvent(this.gameState);
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
 
     if (this.shouldYieldRegularFormalToDailyCadence()) {
@@ -1303,22 +1267,45 @@ export class GameEngineIntegration {
           ? this.getHistoryRecordSuppressionClass(lastRecord.eventId)
           : null;
         if (!dailyClass || dailyClass !== lastClass) {
-          return cadenceDaily;
+          return this.materializeSelectedEvent(cadenceDaily);
         }
       }
     }
 
     if (this.shouldPauseEventsThisYear(regularFormalEvents)) {
-      return dailyEventSystem.selectEvent(this.gameState);
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
 
     const regularSelection = this.pickWeightedFormalEvent(regularFormalEvents, currentAge);
     if (regularSelection) {
-      return regularSelection;
+      return this.materializeSelectedEvent(regularSelection);
     }
 
     // Layer 4 + 5: daily fallback then null.
-    return dailyEventSystem.selectEvent(this.gameState);
+    return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
+  }
+
+  private materializeSelectedEvent(event: EventDefinition | null): EventDefinition | null {
+    if (!event?.personBinding) {
+      return event;
+    }
+
+    const result = materializePersonBoundEvent(this.gameState, event, { allowCreate: true });
+    if (!result.event) {
+      return null;
+    }
+    if (result.state !== this.gameState) {
+      this.applyGameState(result.state);
+    }
+    return result.event;
+  }
+
+  public materializeEventForExecution(event: EventDefinition): EventDefinition {
+    const result = materializePersonBoundEvent(this.gameState, event, { allowCreate: false });
+    if (!result.event) {
+      throw new Error(`Person binding unavailable for event "${event.id}"`);
+    }
+    return result.event;
   }
   
   /**

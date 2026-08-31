@@ -11,9 +11,13 @@ import {
   readBoundPersonVariant,
 } from '../src/core/SexVariantPersonArchetype';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { EventCategory, EventPriority } from '../src/types/eventTypes';
+import { EventExecutor } from '../src/core/EventExecutor';
+import { EffectType, EventCategory, EventPriority } from '../src/types/eventTypes';
 import type { EventDefinition, GameState } from '../src/types/eventTypes';
 import type { PersonEventBinding } from '../src/types/personArchetype';
+import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
+import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
+import { FixedTimeSource } from '../src/headless/adapters/timeSource';
 
 const ARCHETYPE_ID = 'merchant_introduced_partner_v1' as const;
 const FACT_KEY = 'person_variant:merchant_introduced_partner_v1';
@@ -202,11 +206,147 @@ function testUnknownPersistedBindingFailsClosed(): void {
   assert.equal(result.state.facts[FACT_KEY], 'unknown_variant');
 }
 
+function createIsolatedPersonCatalog() {
+  const createEvent = {
+    ...createPersonBoundEvent('create'),
+    id: 'fixture_person_create',
+  } as unknown as EventDefinition;
+  const requireEvent = {
+    ...createPersonBoundEvent('require'),
+    id: 'fixture_person_require',
+  } as unknown as EventDefinition;
+  const events = [createEvent, requireEvent] as const;
+  return {
+    getAllEvents: () => events,
+    getEventsByAge: (age: number) => events.filter(event => age >= event.ageRange.min && age <= (event.ageRange.max ?? age)),
+    getEventById: (id: string) => events.find(event => event.id === id),
+    getWeightForAge: () => 1,
+  };
+}
+
+function testEngineIntegratesBindingAtSelectionTime(): void {
+  const engine = new GameEngineIntegration(createIsolatedPersonCatalog());
+  engine.getGameState().player.age = 22;
+
+  const availableBeforeSelection = engine.getAvailableEvents(22);
+  assert.equal(availableBeforeSelection.some(event => event.id === 'fixture_person_create'), true);
+  assert.equal(availableBeforeSelection.some(event => event.id === 'fixture_person_require'), false);
+  assert.equal(Object.hasOwn(engine.getGameState().facts, FACT_KEY), false);
+
+  const selected = engine.selectEvent(22);
+  assert.equal(selected?.id, 'fixture_person_create');
+  assert.equal(selected?.content.title, '沈清禾来访');
+  assert.equal(engine.getGameState().facts[FACT_KEY], 'female_qinghe');
+  assert.equal(Object.keys(engine.getGameState().facts).filter(key => key === FACT_KEY).length, 1);
+
+  const availableAfterSelection = engine.getAvailableEvents(22);
+  assert.equal(availableAfterSelection.some(event => event.id === 'fixture_person_require'), true);
+}
+
+async function testDedicatedSpouseConsumer(): Promise<void> {
+  const executor = new EventExecutor();
+  const maleState = createState('male');
+  maleState.facts[FACT_KEY] = 'female_qinghe';
+  const maleResult = await executor.executeEffects([{
+    type: EffectType.SPECIAL,
+    target: 'set_spouse_from_person',
+    value: ARCHETYPE_ID,
+  }], maleState);
+  assert.equal(maleResult.player.spouse, '沈清禾');
+
+  const femaleState = createState('female');
+  femaleState.facts[FACT_KEY] = 'male_zhiheng';
+  const femaleResult = await executor.executeEffects([{
+    type: EffectType.SPECIAL,
+    target: 'set_spouse_from_person',
+    value: ARCHETYPE_ID,
+  }], femaleState);
+  assert.equal(femaleResult.player.spouse, '沈知衡');
+
+  const missingBindingResult = await executor.executeEffects([{
+    type: EffectType.SPECIAL,
+    target: 'set_spouse_from_person',
+    value: ARCHETYPE_ID,
+  }], createState('male'));
+  assert.equal(missingBindingResult.player.spouse, null);
+
+  const unknownArchetypeResult = await executor.executeEffects([{
+    type: EffectType.SPECIAL,
+    target: 'set_spouse_from_person',
+    value: 'unknown_archetype',
+  }], maleState);
+  assert.equal(unknownArchetypeResult.player.spouse, null);
+}
+
+function testBindingRoundTripsWithoutSchemaExpansion(): void {
+  for (const [gender, expectedVariant] of [
+    ['male', 'female_qinghe'],
+    ['female', 'male_zhiheng'],
+  ] as const) {
+    const state = createState(gender);
+    const materialized = materializePersonBoundEvent(
+      state,
+      createPersonBoundEvent('create'),
+      { allowCreate: true },
+    );
+    assert(materialized.event);
+
+    const snapshot = defaultSnapshotConverter.toSnapshot(materialized.state, {
+      eventCatalogVersion: '1.0.0',
+      sourcePlatform: 'node-headless',
+      time: new FixedTimeSource(1717200000000),
+    });
+    const roundTripped = defaultSnapshotConverter.fromSnapshot(
+      JSON.parse(JSON.stringify(snapshot)),
+    );
+    assert.equal(snapshot.metadata.schemaVersion, GAME_STATE_SNAPSHOT_SCHEMA_VERSION);
+    assert.equal(Object.hasOwn(snapshot.state, 'personInstances'), false);
+    assert.equal(roundTripped.facts[FACT_KEY], expectedVariant);
+
+    const executionEvent = materializePersonBoundEvent(
+      roundTripped,
+      createPersonBoundEvent('require'),
+      { allowCreate: false },
+    );
+    assert.equal(executionEvent.event?.content.title, expectedVariant === 'female_qinghe' ? '沈清禾来访' : '沈知衡来访');
+  }
+}
+
+function testPrePd103StateDoesNotReconstructMissingBinding(): void {
+  const oldState = createState('male');
+  oldState.player.age = 32;
+  oldState.flags.origin_merchant_family = true;
+  oldState.eventHistory = [{
+    eventId: 'shen_qinghe_shared_matter',
+    age: 32,
+    triggeredAt: 32,
+  }];
+  const snapshot = defaultSnapshotConverter.toSnapshot(oldState, {
+    eventCatalogVersion: '1.0.0',
+    sourcePlatform: 'node-headless',
+    time: new FixedTimeSource(1717200000000),
+  });
+  const restored = defaultSnapshotConverter.fromSnapshot(JSON.parse(JSON.stringify(snapshot)));
+  const result = materializePersonBoundEvent(
+    restored,
+    createPersonBoundEvent('require'),
+    { allowCreate: false },
+  );
+
+  assert.equal(result.event, null);
+  assert.equal(Object.hasOwn(result.state.facts, FACT_KEY), false);
+  assert.equal(result.state.player.spouse, null);
+}
+
 testClosedCatalogDefinitions();
 testMalePlayerMaterializesFemaleVariant();
 testFemalePlayerMaterializesMaleVariant();
 testExistingBindingIsReusedWithoutReselection();
 testRequireAndCreateFailClosedWhenBindingIsUnavailable();
 testUnknownPersistedBindingFailsClosed();
+testEngineIntegratesBindingAtSelectionTime();
+testBindingRoundTripsWithoutSchemaExpansion();
+testPrePd103StateDoesNotReconstructMissingBinding();
+await testDedicatedSpouseConsumer();
 
 console.log('sexVariantPersonArchetypeV1: PASS');

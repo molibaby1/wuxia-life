@@ -4,8 +4,11 @@ import type { GameProcessReport, GameProcessRecord } from '../src/types/simulati
 import { eventLoader } from '../src/core/EventLoader';
 import {
   buildFormalEventTimeline,
+  CALIBRATION_DIRECT_CONTINUITY,
+  computeSemanticMeasurementPrototype,
   formatCalibrationReport,
   getCalibrationAnnotation,
+  isSemanticRepetitionPair,
   type FormalEventTimelineItem,
 } from '../scripts/experienceMeasurementCalibration';
 import { detectEventClasses } from '../scripts/eventRepetitionClassDetection';
@@ -230,4 +233,171 @@ function testCalibrationReportSeparatesCoverageViews(): void {
 }
 
 testCalibrationReportSeparatesCoverageViews();
+
+function semanticItem(
+  eventId: string,
+  age: number,
+  domain: FormalEventTimelineItem['annotation']['domain'],
+  narrativeRole: FormalEventTimelineItem['annotation']['narrativeRole'],
+): FormalEventTimelineItem {
+  return {
+    age,
+    eventId,
+    title: eventId,
+    eventType: 'auto',
+    progressionKind: null,
+    legacyClasses: [],
+    annotation: { domain, narrativeRole },
+  };
+}
+
+function testSemanticPrototypeUsesFormalAdjacencyAndScorableDenominators(): void {
+  const prototype = computeSemanticMeasurementPrototype([
+    semanticItem('commerce_a', 20, 'commerce', 'development'),
+    semanticItem('commerce_b', 25, 'commerce', 'conflict'),
+  ]);
+
+  assert.equal(prototype.adjacentScorablePairCount, 1);
+  assert.equal(prototype.adjacentUnscorablePairCount, 0);
+  assert.equal(prototype.adjacentSemanticRepetitionCount, 0);
+  assert.equal(prototype.adjacentSemanticRepetitionRate, 0);
+  assert.deepEqual(prototype.annotatedEventCoverage, {
+    annotatedEventCount: 2,
+    formalEventCount: 2,
+    rate: 1,
+  });
+  assert.deepEqual(
+    prototype.adjacentPairEvidence.map(pair => [pair.previous.eventId, pair.current.eventId]),
+    [['commerce_a', 'commerce_b']],
+  );
+}
+
+testSemanticPrototypeUsesFormalAdjacencyAndScorableDenominators();
+
+function testSemanticPrototypeDistinguishesRoleAndContinuity(): void {
+  const differentRole = computeSemanticMeasurementPrototype([
+    semanticItem('relationship_setup', 20, 'relationship', 'setup'),
+    semanticItem('relationship_development', 21, 'relationship', 'development'),
+  ]);
+  assert.equal(differentRole.adjacentSemanticRepetitionCount, 0);
+
+  const sameRole = computeSemanticMeasurementPrototype([
+    semanticItem('commerce_development_a', 20, 'commerce', 'development'),
+    semanticItem('commerce_development_b', 21, 'commerce', 'development'),
+  ]);
+  assert.equal(sameRole.adjacentSemanticRepetitionCount, 1);
+  assert.equal(sameRole.adjacentSemanticRepetitionRate, 1);
+
+  assert.equal(
+    isSemanticRepetitionPair(
+      semanticItem('continuity_a', 20, 'relationship', 'development'),
+      semanticItem('continuity_b', 21, 'relationship', 'development'),
+      true,
+    ),
+    false,
+  );
+  assert.ok(CALIBRATION_DIRECT_CONTINUITY.length > 0);
+  assert.match(CALIBRATION_DIRECT_CONTINUITY[0].evidence, /condition|sets|requires/);
+
+  const liveContinuity = computeSemanticMeasurementPrototype([
+    semanticItem('mingyue_market_meet', 20, 'relationship', 'setup'),
+    semanticItem('mingyue_second_encounter', 21, 'relationship', 'development'),
+  ]);
+  assert.equal(liveContinuity.adjacentPairEvidence[0].knownDirectCausalContinuity, true);
+  assert.equal(liveContinuity.adjacentPairEvidence[0].semanticRepetition, false);
+}
+
+testSemanticPrototypeDistinguishesRoleAndContinuity();
+
+function testSemanticPrototypeDoesNotSkipUnknownEvents(): void {
+  const prototype = computeSemanticMeasurementPrototype([
+    semanticItem('commerce_before_unknown', 20, 'commerce', 'development'),
+    semanticItem('unknown_formal_event', 21, 'unknown', 'unknown'),
+    semanticItem('commerce_after_unknown', 22, 'commerce', 'development'),
+  ]);
+
+  assert.equal(prototype.adjacentScorablePairCount, 0);
+  assert.equal(prototype.adjacentUnscorablePairCount, 2);
+  assert.equal(prototype.adjacentSemanticRepetitionCount, 0);
+  assert.deepEqual(
+    prototype.adjacentPairEvidence.map(pair => [pair.previous.eventId, pair.current.eventId]),
+    [
+      ['commerce_before_unknown', 'unknown_formal_event'],
+      ['unknown_formal_event', 'commerce_after_unknown'],
+    ],
+  );
+}
+
+testSemanticPrototypeDoesNotSkipUnknownEvents();
+
+function testDomainConcentrationKeepsFiveFormalEventsInDenominator(): void {
+  const prototype = computeSemanticMeasurementPrototype([
+    semanticItem('relationship_1', 20, 'relationship', 'setup'),
+    semanticItem('relationship_2', 21, 'relationship', 'development'),
+    semanticItem('unknown_3', 22, 'unknown', 'unknown'),
+    semanticItem('commerce_4', 23, 'commerce', 'development'),
+    semanticItem('relationship_5', 24, 'relationship', 'conflict'),
+  ]);
+
+  assert.equal(prototype.shortWindowDomainConcentration, 0.6);
+  assert.equal(prototype.shortWindowDomainConcentrationWindow?.concentration, 0.6);
+  assert.equal(prototype.shortWindowDomainConcentrationWindow?.dominantDomain, 'relationship');
+  assert.equal(prototype.shortWindowDomainConcentrationWindow?.knownAnnotationCount, 4);
+  assert.equal(prototype.shortWindowDomainConcentrationWindow?.events.length, 5);
+}
+
+testDomainConcentrationKeepsFiveFormalEventsInDenominator();
+
+function testRoleStagnationKeepsUnknownEventsInFourEventWindows(): void {
+  const stagnant = computeSemanticMeasurementPrototype([
+    semanticItem('development_1', 20, 'commerce', 'development'),
+    semanticItem('development_2', 21, 'commerce', 'development'),
+    semanticItem('unknown_3', 22, 'unknown', 'unknown'),
+    semanticItem('development_4', 23, 'commerce', 'development'),
+  ]);
+  assert.equal(stagnant.narrativeRoleStagnantWindowCount, 1);
+  assert.equal(stagnant.narrativeRoleWindowCount, 1);
+  assert.equal(stagnant.narrativeRoleStagnationRate, 1);
+
+  const varied = computeSemanticMeasurementPrototype([
+    semanticItem('development_1', 20, 'commerce', 'development'),
+    semanticItem('unknown_2', 21, 'unknown', 'unknown'),
+    semanticItem('conflict_3', 22, 'commerce', 'conflict'),
+    semanticItem('development_4', 23, 'commerce', 'development'),
+  ]);
+  assert.equal(varied.narrativeRoleStagnantWindowCount, 0);
+  assert.equal(varied.narrativeRoleWindowCount, 1);
+  assert.equal(varied.narrativeRoleStagnationRate, 0);
+}
+
+testRoleStagnationKeepsUnknownEventsInFourEventWindows();
+
+function testSemanticPrototypeReportIsReportOnly(): void {
+  const timeline = [
+    semanticItem('commerce_a', 20, 'commerce', 'development'),
+    semanticItem('commerce_b', 21, 'commerce', 'development'),
+    semanticItem('unknown_c', 22, 'unknown', 'unknown'),
+    semanticItem('commerce_d', 23, 'commerce', 'conflict'),
+    semanticItem('commerce_e', 24, 'commerce', 'development'),
+  ];
+  const prototype = computeSemanticMeasurementPrototype(timeline);
+  const output = formatCalibrationReport([
+    { sampleId: 'prototype-sample', seed: 1, timeline },
+  ]);
+
+  assert.equal('threshold' in prototype, false);
+  assert.equal('severity' in prototype, false);
+  assert.match(output, /SEMANTIC_MEASUREMENT_PROTOTYPE/);
+  assert.match(output, /annotation coverage: 4\/5/);
+  assert.match(output, /scorable_pairs=2 \| unscorable_pairs=2/);
+  assert.match(output, /REPORT_ONLY/);
+  assert.match(output, /NO_HARD_THRESHOLD/);
+  assert.match(output, /PARTIAL_ANNOTATION/);
+  assert.match(output, /DO_NOT_INTERPRET_AS_GLOBAL_EXPERIENCE_SCORE/);
+  assert.match(output, /CALIBRATION_DIRECT_CONTINUITY_EVIDENCE/);
+  assert.match(output, /mingyue_market_meet -> mingyue_second_encounter/);
+  assert.match(output, /HUMAN_CALIBRATION_EVIDENCE/);
+}
+
+testSemanticPrototypeReportIsReportOnly();
 console.log('experienceMeasurementCalibration: PASS');

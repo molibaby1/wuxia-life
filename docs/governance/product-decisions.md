@@ -1553,3 +1553,44 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要为 quarantined relationship content 设计 concrete person identity、replacement NPC、new Relationship schema / affinity 或新的 P17/P18 product semantics；
 - inventory 无法以 `400 - 9 = 391` 与 `28 / 7` active-source counts reconcile；
 - 需要恢复 legacy content-state compatibility，或把 `ally_network` 解释为 mentor/master/concrete-person evidence。
+
+### PD-105：Experience Measurement Contract v1
+
+**产品决策（Human accepted：2026-09-01；本条为 authority closure）**
+
+- `docs/product/experience-measurement-contract-design.md` 正式成为 Experience Rhythm 测量 authority；正式测量对象是玩家实际经历、会推进人生或故事状态的正式人生事件序列。
+- 正式事件不得因缺少 taxonomy annotation 而从完整 timeline 消失；未标注事件使用 `unknown`，v1 semantic calibration 只使用 `domain`、`narrativeRole` 与已有真实因果连续性证据。
+- `adjacent_same_class_rate` 与 `short_window_same_class_rate` 降级为 deprecated legacy diagnostics，不再作为 Experience hard-failure 的直接依据；不删除旧计算公式或现有 report data。
+- 新 semantic measurement candidates 在完成多 trace 的 Human semantic calibration 前均为 `REPORT_ONLY`，不新增 hard threshold，不将 metric 变化直接解释为体验改善或恶化。
+- 第一阶段只使用现有 6 条 deterministic traces 和小规模显式 annotation sample；不批量迁移 391 个事件，不修改 scheduler、runtime event schema、正式事件内容或已 quarantine/retired 内容。
+
+**明确不做**
+
+- 不建立通用 Story / Arc runtime、多标签 ontology、LLM 在线 judging、批量事件 annotation 或新的 hard threshold。
+- 不因 measurement failure 自动补事件、调 scheduler 或恢复 PD-104 deferred events。
+
+**重新讨论条件**
+
+- Human semantic calibration 在多个独立 trace 上确认新 measurement semantics 稳定，并需要讨论正式 threshold；
+- 现有 formal-event timeline、causal continuity 或 sampling boundary 需要新的 runtime/schema 语义；
+- 需要扩展出超出 `REPORT_ONLY` 的 measurement consumer 或 product gate。
+
+### PD-106：Content Authoring Workflow Contract v1
+
+**产品决策（Human accepted：2026-09-01；本条为 authority closure）**
+
+- `docs/product/content-authoring-workflow-contract-design.md` 正式成为内容发现、设计、实现和验证的 workflow authority。
+- metric failure、coverage、route 空白或异常不能直接等于内容缺口；问题必须先归入 `CONTENT_GAP`、`ACCESS_PROBLEM`、`CAUSALITY_PROBLEM`、`SCHEDULING_PROBLEM`、`MEASUREMENT_PROBLEM`、`PRESENTATION_PROBLEM` 或 `NO_PROBLEM`，只有 `CONTENT_GAP` 才能进入新增内容流程。
+- Event 是人生意义单位，Person 不预装固定剧情模板，Story / Arc 连续性优先由具体 history、choice history、durable facts 与 prerequisites 形成。
+- 正式内容须经过 Gap Diagnosis → Content Proposal → Authoring Contract → Human Approval → Implementation → Semantic Verification → Experience Verification；Experience Verification 失败必须回到 Gap Diagnosis。
+- Auto Evolution 当前保持 `RUN / OBSERVE`，可以发现和报告信号，但不能因 metric failure 自动扩张 catalog；Codex 只能按已批准 Contract 实施，不得自行扩大产品语义或 runtime scope。
+
+**明确不做**
+
+- 不自动新增 Person/Event，不以“补充篇幅”为理由扩写，不绕过 Human Approval，不把 `READY_FOR_FORMAL_TASK` 或 Agent 输出当作 implementation authorization。
+
+**重新讨论条件**
+
+- 需要新增或修改 Runtime、Schema、通用 Person/Story/Household/Relationship abstraction；
+- 需要改变 Gap Diagnosis closed categories、Human approval boundary 或 Auto Evolution permission / STOP boundary；
+- 真实 Experience Verification 证明现有内容语义之外存在新的产品问题。

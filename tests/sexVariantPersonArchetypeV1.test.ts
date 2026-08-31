@@ -21,6 +21,8 @@ import type { PersonEventBinding } from '../src/types/personArchetype';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import { FixedTimeSource } from '../src/headless/adapters/timeSource';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import { CHOICE_EXECUTION_REQUEST_VERSION } from '../src/contracts/choiceExecution';
 
 const ARCHETYPE_ID = 'merchant_introduced_partner_v1' as const;
 const FACT_KEY = 'person_variant:merchant_introduced_partner_v1';
@@ -341,6 +343,35 @@ function testPrePd103StateDoesNotReconstructMissingBinding(): void {
   assert.equal(result.state.player.spouse, null);
 }
 
+async function testHeadlessExecutionDoesNotReconstructMissingBinding(): Promise<void> {
+  const oldState = createState('male');
+  oldState.player.age = 32;
+  oldState.flags.origin_merchant_family = true;
+  oldState.eventHistory = [{
+    eventId: 'shen_qinghe_shared_matter',
+    age: 32,
+    triggeredAt: 32,
+  }];
+  const snapshot = defaultSnapshotConverter.toSnapshot(oldState, {
+    eventCatalogVersion: '1.0.0',
+    sourcePlatform: 'node-headless',
+    time: new FixedTimeSource(1717200000000),
+  });
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+  await assert.rejects(() => session.executeChoice({
+    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
+    snapshotRef: { snapshot },
+    action: {
+      eventId: 'shen_qinghe_shared_matter',
+      choiceId: 'shen_qinghe_matter_honor_terms',
+    },
+  }));
+  const after = session.serialize();
+  assert.equal(Object.hasOwn(after.state.facts, FACT_KEY), false);
+  assert.equal(after.state.player.spouse, null);
+}
+
 function testComplexityFirewall(): void {
   const sourcePaths = [
     'src/types/personArchetype.ts',
@@ -401,6 +432,7 @@ testEngineIntegratesBindingAtSelectionTime();
 testBindingRoundTripsWithoutSchemaExpansion();
 testPrePd103StateDoesNotReconstructMissingBinding();
 testComplexityFirewall();
+await testHeadlessExecutionDoesNotReconstructMissingBinding();
 await testDedicatedSpouseConsumer();
 
 console.log('sexVariantPersonArchetypeV1: PASS');

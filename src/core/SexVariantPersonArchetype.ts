@@ -151,7 +151,7 @@ function renderText(text: string | undefined, variant: PersonVariantDefinition):
   }
 
   return text
-    .replaceAll('{{person.name}}', variant.displayName)
-    .replaceAll('{{person.pronoun}}', variant.pronoun)
-    .replaceAll('{{person.address}}', variant.address);
+    .replace(/\{\{person\.name\}\}/g, variant.displayName)
+    .replace(/\{\{person\.pronoun\}\}/g, variant.pronoun)
+    .replace(/\{\{person\.address\}\}/g, variant.address);
 }

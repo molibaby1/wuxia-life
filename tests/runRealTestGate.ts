@@ -80,6 +80,7 @@ const suites: Suite[] = [
   { name: 'v10LaunchReadinessTests', entry: 'tests/v10LaunchReadinessTests.ts' },
   { name: 'AllTests', entry: 'tests/AllTests.ts' },
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },
+  { name: 'sexVariantPersonArchetypeV1', entry: 'tests/sexVariantPersonArchetypeV1.test.ts' },
   { name: 'formalChoiceIdGate', entry: 'tests/formalChoiceIdGate.test.ts' },
   { name: 'multiRoundExecutionValidation', entry: 'tests/evolution/multiRoundExecutionValidation.test.ts' },
   { name: 'skillBehavioralValidation', entry: 'tests/evolution/skillBehavioralValidation.test.ts' },

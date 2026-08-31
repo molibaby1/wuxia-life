@@ -678,5 +678,198 @@
         ]
       }
     ]
+  },
+  {
+    "id": "shen_qinghe_introduction",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 22, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "personBinding": {
+      "archetypeId": "merchant_introduced_partner_v1",
+      "mode": "create"
+    },
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"origin_merchant_family\") && player.age >= 22 && player.age <= 32 && !flags.has(\"married\") && !player.spouse && !flags.has(\"mingyue_romance_confirmed\") && !events.has(\"shen_qinghe_introduction\")"
+      }
+    ],
+    "content": {
+      "title": "家里介绍的人",
+      "text": "家里提起了与沈家长期有生意往来的旧交：{{person.name}}一直实际参与自家账目和货物流转，对承诺和账目都认真。家里问你：你愿不愿意见{{person.name}}一面？这只是认识一个具体的人，不是替你接受一桩婚事。",
+      "description": "家族介绍只提供认识{{person.name}}的机会，不替两个人作婚姻决定。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "shen_qinghe_meet",
+        "text": "愿意见{{person.pronoun}}一面",
+        "description": "先认识这个具体的人，看看两个人是否愿意继续面对彼此的生活。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 2, "timeUnit": "month" },
+          { "type": "event_record", "target": "shen_qinghe_met" }
+        ]
+      },
+      {
+        "id": "shen_qinghe_introduction_not_now",
+        "text": "这次不见面",
+        "description": "你不把这次介绍当成必须接受的婚事，家里也不替你留下失败或遗憾的结论。",
+        "effects": [
+          { "type": "event_record", "target": "shen_qinghe_introduction" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "沈清禾", "家族介绍", "商家往来", "once"],
+      "enabled": true
+    },
+    "storyLine": "shen_qinghe_character",
+    "cooldown": 0
+  },
+  {
+    "id": "shen_qinghe_shared_matter",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 22, "max": 33 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "personBinding": {
+      "archetypeId": "merchant_introduced_partner_v1",
+      "mode": "require"
+    },
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"shen_qinghe_met\") && player.age >= 22 && player.age <= 33 && !events.has(\"shen_qinghe_shared_matter\") && !flags.has(\"married\") && !player.spouse && !flags.has(\"mingyue_romance_confirmed\")"
+      }
+    ],
+    "content": {
+      "title": "货路改变之后",
+      "text": "两家合作的一批货因路途变化出现延误，原先承诺已经很难完全照办。{{person.name}}作为实际参与家中经营的人，和你一起核对账目和货物流转，把眼前的现实问题摊在桌上处理。",
+      "description": "一次真实共同经历，让你们看见彼此如何面对承诺、现实变化和商业责任。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "shen_qinghe_matter_honor_terms",
+        "text": "尽量照原约承担",
+        "description": "即使自己多承担一部分代价，也先兑现已经说出口的承诺。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
+          { "type": "event_record", "target": "shen_qinghe_matter_honor_terms" }
+        ]
+      },
+      {
+        "id": "shen_qinghe_matter_renegotiate",
+        "text": "把变化和损失摊开，重新商议",
+        "description": "现实已经改变，就把风险、损失和新的安排全部说清，再重新确定双方责任。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
+          { "type": "event_record", "target": "shen_qinghe_matter_renegotiate" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "沈清禾", "共同经历", "商业责任", "once"],
+      "enabled": true
+    },
+    "storyLine": "shen_qinghe_character",
+    "cooldown": 0
+  },
+  {
+    "id": "shen_qinghe_marriage_decision",
+    "version": "1.0.0",
+    "category": "merchant",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 22, "max": 34 },
+    "triggers": [{ "type": "age_reach", "value": 22 }],
+    "personBinding": {
+      "archetypeId": "merchant_introduced_partner_v1",
+      "mode": "require"
+    },
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"shen_qinghe_shared_matter\") && (events.has(\"shen_qinghe_matter_honor_terms\") || events.has(\"shen_qinghe_matter_renegotiate\")) && player.age >= 22 && player.age <= 34 && !events.has(\"shen_qinghe_marriage_decision\") && !flags.has(\"married\") && !player.spouse && !flags.has(\"mingyue_romance_confirmed\")"
+      }
+    ],
+    "content": {
+      "title": "两个人的婚姻决定",
+      "text": "两家长辈重新提到婚事。{{person.name}}却先把话说清：两家合作只是认识彼此的原因，不能替两个人作婚姻决定；如果成婚，{{person.pronoun}}仍希望继续参与自己的家业事务。{{person.pronoun}}问你愿不愿意和{{person.pronoun}}一起作这个决定。",
+      "description": "婚姻读取你们已经共同经历过的具体事情，但不要求先有恋爱确认，也不替玩家排名哪种人生更好。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "shen_qinghe_choose_marriage",
+        "text": "与{{person.name}}成婚",
+        "description": "你们把婚姻作为两个人此刻共同作出的决定。",
+        "effects": [],
+        "outcomes": [
+          {
+            "id": "shen_qinghe_marriage_after_honor_terms",
+            "text": "{{person.name}}记得，上一次货路出问题时，你选择先承担自己已经答应的责任。{{person.pronoun}}说这让{{person.pronoun}}知道，你遇事会把说出口的承诺放在前面；在把两家合作与两个人的决定分开谈清后，你们决定成婚。",
+            "condition": { "type": "expression", "expression": "events.has(\"shen_qinghe_matter_honor_terms\")" },
+            "effects": [
+              { "type": "special", "target": "set_spouse_from_person", "value": "merchant_introduced_partner_v1" },
+              { "type": "flag_set", "target": "married", "value": true }
+            ]
+          },
+          {
+            "id": "shen_qinghe_marriage_after_renegotiate",
+            "text": "{{person.name}}记得，上一次现实发生变化时，你选择把损失和困难摊开重新谈清。{{person.pronoun}}说这让{{person.pronoun}}知道，你遇事会把变化和责任一起说清；在把两家合作与两个人的决定分开谈清后，你们决定成婚。",
+            "condition": { "type": "expression", "expression": "events.has(\"shen_qinghe_matter_renegotiate\")" },
+            "effects": [
+              { "type": "special", "target": "set_spouse_from_person", "value": "merchant_introduced_partner_v1" },
+              { "type": "flag_set", "target": "married", "value": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "shen_qinghe_not_now_marriage",
+        "text": "这次不成婚",
+        "description": "你们不在此刻把婚事定下，各自继续承担自己的生活。",
+        "effects": [],
+        "outcomes": [
+          {
+            "id": "shen_qinghe_no_marriage_after_honor_terms",
+            "text": "{{person.name}}记得，上一次货路出问题时，你选择先承担自己已经答应的责任。你们决定这次不把婚事定下，各自继续承担自己的生活。",
+            "condition": { "type": "expression", "expression": "events.has(\"shen_qinghe_matter_honor_terms\")" },
+            "effects": [
+              { "type": "event_record", "target": "shen_qinghe_marriage_decision" }
+            ]
+          },
+          {
+            "id": "shen_qinghe_no_marriage_after_renegotiate",
+            "text": "{{person.name}}记得，上一次现实发生变化时，你选择把损失和困难摊开重新谈清。你们决定这次不把婚事定下，各自继续承担自己的生活。",
+            "condition": { "type": "expression", "expression": "events.has(\"shen_qinghe_matter_renegotiate\")" },
+            "effects": [
+              { "type": "event_record", "target": "shen_qinghe_marriage_decision" }
+            ]
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "沈清禾", "婚姻", "共同前史", "once"],
+      "enabled": true
+    },
+    "storyLine": "shen_qinghe_character",
+    "cooldown": 0
   }
 ]

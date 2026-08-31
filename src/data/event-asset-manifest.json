@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-24T14:51:06.095Z",
+  "generatedAt": "2026-08-31T08:31:27.137Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -13,20 +13,20 @@
   },
   "summary": {
     "runtimeLoadedFiles": 28,
-    "nonLoadedFiles": 40,
-    "totalEventsInRuntime": 415,
+    "nonLoadedFiles": 42,
+    "totalEventsInRuntime": 400,
     "byStatus": {
       "active": 36,
-      "candidate": 76,
+      "candidate": 70,
       "broken": 11,
-      "deferred": 292,
+      "deferred": 283,
       "dead": 0
     },
     "byFileStatus": {
       "active": 0,
       "candidate": 12,
       "broken": 0,
-      "deferred": 56,
+      "deferred": 58,
       "dead": 0
     }
   },
@@ -62,6 +62,14 @@
       "eventCount": 7,
       "goldenLineOverlapCount": 4,
       "notes": "Not in events.json imports; backlog asset"
+    },
+    {
+      "fileName": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "eventCount": 12,
+      "goldenLineOverlapCount": 12,
+      "notes": "Golden-line candidate pool (PXG2 selects active spine)"
     },
     {
       "fileName": "chivalry-events.json",
@@ -115,9 +123,17 @@
       "fileName": "family-life.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 10,
-      "goldenLineOverlapCount": 3,
+      "eventCount": 2,
+      "goldenLineOverlapCount": 0,
       "notes": "Primarily post-30 or non-golden-line identity module"
+    },
+    {
+      "fileName": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "eventCount": 7,
+      "goldenLineOverlapCount": 2,
+      "notes": "Not in events.json imports; backlog asset"
     },
     {
       "fileName": "follower.json",
@@ -211,7 +227,7 @@
       "fileName": "identity-merchant.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 2,
+      "eventCount": 1,
       "goldenLineOverlapCount": 0,
       "notes": "Primarily post-30 or non-golden-line identity module"
     },
@@ -297,11 +313,11 @@
     },
     {
       "fileName": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "eventCount": 18,
       "goldenLineOverlapCount": 18,
-      "notes": "Golden-line candidate pool (PXG2 selects active spine)"
+      "notes": "Not in events.json imports; backlog asset"
     },
     {
       "fileName": "martial-arts-meeting.json",
@@ -323,15 +339,15 @@
       "fileName": "merchant.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 18,
-      "goldenLineOverlapCount": 11,
+      "eventCount": 21,
+      "goldenLineOverlapCount": 14,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
       "fileName": "middle-age-career.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 12,
+      "eventCount": 11,
       "goldenLineOverlapCount": 2,
       "notes": "Primarily post-30 or non-golden-line identity module"
     },
@@ -355,8 +371,8 @@
       "fileName": "official.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 4,
-      "goldenLineOverlapCount": 4,
+      "eventCount": 3,
+      "goldenLineOverlapCount": 3,
       "notes": "Non-priority route per scope freeze (official/beggars ≠ PRD priority routes)"
     },
     {
@@ -427,8 +443,8 @@
       "fileName": "p9-remediation.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 23,
-      "goldenLineOverlapCount": 23,
+      "eventCount": 22,
+      "goldenLineOverlapCount": 22,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -499,8 +515,8 @@
       "fileName": "sect-border.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 15,
-      "goldenLineOverlapCount": 15,
+      "eventCount": 16,
+      "goldenLineOverlapCount": 16,
       "notes": "Priority route golden-line pool (PXG2 selects active spine)"
     },
     {
@@ -515,8 +531,8 @@
       "fileName": "sect-shaolin.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 4,
-      "goldenLineOverlapCount": 4,
+      "eventCount": 3,
+      "goldenLineOverlapCount": 3,
       "notes": "Priority route golden-line pool (PXG2 selects active spine)"
     },
     {
@@ -1478,6 +1494,138 @@
       "overlapsGoldenLine": false,
       "eventType": "ending",
       "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "mingyue_market_meet",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "active",
+      "ageMin": 15,
+      "ageMax": 20,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Golden-line spine (PXG2 active)"
+    },
+    {
+      "eventId": "mingyue_second_encounter",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 16,
+      "ageMax": 24,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_shared_experience",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 17,
+      "ageMax": 28,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_value_conflict",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 18,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_relationship_choice",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 19,
+      "ageMax": 40,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_echo_romantic",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 60,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_echo_non_romantic",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 60,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_echo_conflict_support",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 60,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_marriage_decision",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 60,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_parenthood_decision",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 40,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_child_arrival",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 41,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
+      "eventId": "mingyue_early_parenting",
+      "sourceFile": "character-mingyue-v1.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 30,
+      "ageMax": 60,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
     },
     {
       "eventId": "chivalry_high_alliance_invite",
@@ -2503,89 +2651,12 @@
       "notes": "Awaiting golden spine selection"
     },
     {
-      "eventId": "family_marriage",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 20,
-      "ageMax": 30,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "File classified deferred for golden line"
-    },
-    {
-      "eventId": "family_child_born",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 25,
-      "ageMax": 40,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "File classified deferred for golden line"
-    },
-    {
-      "eventId": "family_child_education",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 28,
-      "ageMax": 45,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "File classified deferred for golden line"
-    },
-    {
       "eventId": "family_crisis",
       "sourceFile": "family-life.json",
       "runtimeLoaded": true,
-      "status": "deferred",
+      "status": "broken",
       "ageMin": 35,
       "ageMax": 50,
-      "overlapsGoldenLine": false,
-      "eventType": "choice",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
-      "eventId": "family_child_marriage",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 45,
-      "ageMax": 60,
-      "overlapsGoldenLine": false,
-      "eventType": "choice",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
-      "eventId": "family_grandchild_born",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 50,
-      "ageMax": 70,
-      "overlapsGoldenLine": false,
-      "eventType": "auto",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
-      "eventId": "family_reunion",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 40,
-      "ageMax": 70,
-      "overlapsGoldenLine": false,
-      "eventType": "auto",
-      "notes": "Outside ages 0-30 golden line"
-    },
-    {
-      "eventId": "family_teach_grandchild",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
-      "status": "broken",
-      "ageMin": 55,
-      "ageMax": 75,
       "overlapsGoldenLine": false,
       "eventType": "choice",
       "notes": "Failed event quality or loader validation"
@@ -2602,15 +2673,81 @@
       "notes": "Outside ages 0-30 golden line"
     },
     {
+      "eventId": "family_child_born",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 25,
+      "ageMax": 40,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "family_child_education",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 28,
+      "ageMax": 45,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "family_child_marriage",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 45,
+      "ageMax": 60,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "family_grandchild_born",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 50,
+      "ageMax": 70,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "family_reunion",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 40,
+      "ageMax": 70,
+      "overlapsGoldenLine": false,
+      "eventType": "auto",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
+      "eventId": "family_teach_grandchild",
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
+      "status": "deferred",
+      "ageMin": 55,
+      "ageMax": 75,
+      "overlapsGoldenLine": false,
+      "eventType": "choice",
+      "notes": "Source file not runtime-loaded"
+    },
+    {
       "eventId": "family_family_honor",
-      "sourceFile": "family-life.json",
-      "runtimeLoaded": true,
+      "sourceFile": "family-parenthood-deferred.json",
+      "runtimeLoaded": false,
       "status": "deferred",
       "ageMin": 48,
       "ageMax": 65,
       "overlapsGoldenLine": false,
       "eventType": "auto",
-      "notes": "Outside ages 0-30 golden line"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "follower_first_recruit",
@@ -3548,7 +3685,7 @@
       "notes": "Outside ages 0-30 golden line"
     },
     {
-      "eventId": "demonic_midlife_isolation_spouse",
+      "eventId": "demonic_midlife_isolation_family",
       "sourceFile": "identity-demon.json",
       "runtimeLoaded": true,
       "status": "deferred",
@@ -4771,200 +4908,200 @@
     {
       "eventId": "love_first_meet",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "active",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 15,
       "ageMax": 20,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Golden-line spine (PXG2 active)"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_after_greet",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 15,
       "ageMax": 35,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_shared_mission",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 16,
       "ageMax": 25,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_family_obstacle",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 17,
       "ageMax": 26,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_rival_appears",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 20,
       "ageMax": 26,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_separation",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 21,
       "ageMax": 28,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_reunion",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 22,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_misunderstanding",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 18,
       "ageMax": 25,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_secret_help",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 20,
       "ageMax": 28,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_life_or_death",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 23,
       "ageMax": 32,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_family_reconcile",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 21,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_ending_good",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 24,
       "ageMax": 35,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_ending_sad",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 24,
       "ageMax": 35,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_ending_sacrifice",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 22,
       "ageMax": 35,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_ending_hideaway",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 23,
       "ageMax": 36,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_hideaway_pull",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 24,
       "ageMax": 36,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "love_demonic_conflict",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 19,
       "ageMax": 30,
       "overlapsGoldenLine": true,
       "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "spouse_mingyue_daily",
       "sourceFile": "love.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
+      "runtimeLoaded": false,
+      "status": "deferred",
       "ageMin": 21,
       "ageMax": 60,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "Awaiting golden spine selection"
+      "notes": "Source file not runtime-loaded"
     },
     {
       "eventId": "martial_arts_youth",
@@ -5528,6 +5665,39 @@
       "notes": "Outside ages 0-30 golden line"
     },
     {
+      "eventId": "shen_qinghe_introduction",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 32,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "shen_qinghe_shared_matter",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 33,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "shen_qinghe_marriage_decision",
+      "sourceFile": "merchant.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 22,
+      "ageMax": 34,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "File classified deferred for golden line"
+    },
+    {
       "eventId": "career_foundation_sect",
       "sourceFile": "middle-age-career.json",
       "runtimeLoaded": true,
@@ -5866,17 +6036,6 @@
       "ageMax": 32,
       "overlapsGoldenLine": true,
       "eventType": "auto",
-      "notes": "File classified deferred for golden line"
-    },
-    {
-      "eventId": "official_love_obstacle",
-      "sourceFile": "official.json",
-      "runtimeLoaded": true,
-      "status": "deferred",
-      "ageMin": 24,
-      "ageMax": 35,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
       "notes": "File classified deferred for golden line"
     },
     {
@@ -8443,6 +8602,17 @@
       "notes": "Awaiting golden spine selection"
     },
     {
+      "eventId": "border_saiyin_trade_followup",
+      "sourceFile": "sect-border.json",
+      "runtimeLoaded": true,
+      "status": "candidate",
+      "ageMin": 22,
+      "ageMax": 35,
+      "overlapsGoldenLine": true,
+      "eventType": "choice",
+      "notes": "Awaiting golden spine selection"
+    },
+    {
       "eventId": "border_career_growth",
       "sourceFile": "sect-border.json",
       "runtimeLoaded": true,
@@ -8768,17 +8938,6 @@
       "status": "candidate",
       "ageMin": 15,
       "ageMax": 22,
-      "overlapsGoldenLine": true,
-      "eventType": "choice",
-      "notes": "Awaiting golden spine selection"
-    },
-    {
-      "eventId": "buddhist_love_trial",
-      "sourceFile": "sect-shaolin.json",
-      "runtimeLoaded": true,
-      "status": "candidate",
-      "ageMin": 18,
-      "ageMax": 28,
       "overlapsGoldenLine": true,
       "eventType": "choice",
       "notes": "Awaiting golden spine selection"

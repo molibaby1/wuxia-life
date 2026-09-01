@@ -89,55 +89,6 @@
     }
   },
   {
-    "id": "official_love_obstacle",
-    "version": "1.0.0",
-    "category": "side_quest",
-    "priority": 1,
-    "weight": 25,
-    "ageRange": { "min": 24, "max": 35 },
-    "triggers": [{ "type": "age_reach", "value": 24 }],
-    "conditions": [
-      { "type": "expression", "expression": "flags.has(\"route_official\") && flags.has(\"love_started\") && !flags.has(\"official_love_obstacle\")" }
-    ],
-    "content": {
-      "text": "仕途繁忙，明月心生不满，你必须在仕途与爱情间权衡。",
-      "title": "仕途与爱情",
-      "description": "官场之路牵扯感情。"
-    },
-    "eventType": "choice",
-    "choices": [
-      {
-        "id": "official_prioritize_love",
-        "text": "暂缓仕途，安抚感情",
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 6 } },
-          { "type": "flag_set", "target": "official_love_obstacle" },
-          { "type": "event_record", "target": "official_love_prioritize" }
-        ]
-      },
-      {
-        "id": "official_prioritize_career",
-        "text": "仕途为重",
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
-          { "type": "stat_modify", "target": "reputation", "value": 3, "operator": "add" },
-          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -5 } },
-          { "type": "flag_set", "target": "official_love_obstacle" },
-          { "type": "event_record", "target": "official_love_career" }
-        ]
-      }
-    ],
-    "metadata": {
-      "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
-      "author": "development_team",
-      "tags": ["官场", "爱情", "联动", "once"],
-      "routeTargets": ["official"],
-      "enabled": true
-    }
-  },
-  {
     "id": "official_resign",
     "version": "1.0.0",
     "category": "special_event",

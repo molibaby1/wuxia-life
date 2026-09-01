@@ -27,7 +27,7 @@ export async function runP72ActivePlanningParityTests(): Promise<void> {
 
   for (const actionId of actionIds) {
     const seed = 1000 + actionId.length;
-    // Use charisma = 4 to disable love_first_meet (requires charisma >= 5)
+    // Use a low-charisma baseline without social exposure to keep the story pool stable.
     const snap = baseSnapshot(16, 4);
     const rng = new SeededRandomSource(seed);
     const random = () => rng.next();

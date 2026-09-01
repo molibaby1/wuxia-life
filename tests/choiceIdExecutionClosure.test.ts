@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import familyLifeEvents from '../src/data/lines/family-life.json';
+import familyParenthoodDeferredEvents from '../src/data/lines/family-parenthood-deferred.json';
 import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
 import { EventLoader } from '../src/core/EventLoader';
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../src/contracts/choiceExecution';
@@ -70,12 +71,11 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
         outcomes: null,
       },
       {
-        text: '从商：继承家业 (财富 +50)',
+        text: '从商：继承家业',
         description: null,
         condition: null,
         conditions: null,
         effects: [
-          { type: 'stat_modify', target: 'money', value: 50, operator: 'add' },
           { type: 'flag_set', flag: 'child_merchant', value: true },
         ],
         outcomes: null,
@@ -93,37 +93,35 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
     type: 'family',
     eventType: 'choice',
     tags: ['family', 'crisis'],
-    storyLine: 'love_story',
+    storyLine: null,
     triggers: [{ type: 'age_reach', value: 35 }],
     triggerConditions: { age: { min: 35, max: 50 } },
     conditions: null,
     content: {
       title: '家族危机',
-      text: '家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？',
+      text: '家族遭遇困难，需要你出面解决。家人也在等待你的抉择——是全力支援家族，还是量力而行？',
     },
     maxTriggers: null,
     metadata: null,
     difficulty: null,
     choices: [
       {
-        text: '倾尽家财，帮助家族 (财富 -100, 声望 +20)',
+        text: '全力支援家族 (声望 +20)',
         description: null,
-        condition: null,
+        condition: { type: 'wealth_capacity_at_least', minimum: 'comfortable_means' },
         conditions: null,
         effects: [
-          { type: 'stat_modify', target: 'money', value: -100, operator: 'add' },
           { type: 'stat_modify', target: 'reputation', value: 20, operator: 'add' },
           { type: 'status_add', status: 'anxious' },
         ],
         outcomes: null,
       },
       {
-        text: '尽力而为，量力而行 (财富 -30)',
+        text: '尽力而为，量力而行',
         description: null,
-        condition: null,
+        condition: { type: 'wealth_capacity_at_least', minimum: 'modest_savings' },
         conditions: null,
         effects: [
-          { type: 'stat_modify', target: 'money', value: -30, operator: 'add' },
           { type: 'status_add', status: 'anxious' },
         ],
         outcomes: null,
@@ -205,7 +203,7 @@ const EXPECTED_STABLE_FIELDS: Record<string, JsonRecord> = {
 };
 
 const SOURCE_EVENTS: Record<string, JsonRecord[]> = {
-  family_child_education: familyLifeEvents as JsonRecord[],
+  family_child_education: familyParenthoodDeferredEvents as JsonRecord[],
   family_crisis: familyLifeEvents as JsonRecord[],
   relationship_sworn_help: relationshipLegacyDeferredEvents as JsonRecord[],
 };
@@ -338,7 +336,8 @@ async function main(): Promise<void> {
     throw new Error(`Instance 007 choice-id regression:\n${failures.join('\n')}`);
   }
 
-  await assertHeadlessChoiceExecution('family_child_education', { has_child: true });
+  assert.equal(loader.getEventById('family_child_education'), undefined);
+  assert.equal(loader.getEventById('family_child_marriage'), undefined);
   await assertHeadlessChoiceExecution('family_crisis', {});
 
   // Keep the request contract explicit at the same boundary used by production execution.

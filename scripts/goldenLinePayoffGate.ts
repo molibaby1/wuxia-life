@@ -241,7 +241,7 @@ function inferBlockReason(
   if (keyChoiceId === 'orthodox_trial_entry') {
     return {
       reason: 'priority_ordering',
-      detail: 'love_first_meet and trial chain compete for age 15 payoff slot',
+      detail: 'the Mingyue character entry and trial chain compete for an early payoff slot',
       verified: true,
     };
   }

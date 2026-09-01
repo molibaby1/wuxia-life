@@ -40,7 +40,7 @@ export const WUXIA_BASELINE_POOL_CONFIGS: BaselinePoolConfig[] = [
     id: 'p22_pool_midlife_consequence',
     label: '中年后果与身份延续池',
     lifePhase: 'midlife_consequence',
-    sourcePaths: ['./lines/love.json', './lines/faction-revelation.json', './lines/middle-age-career.json', './lines/p22-content-expansions.json'],
+    sourcePaths: ['./lines/character-mingyue-v1.json', './lines/faction-revelation.json', './lines/middle-age-career.json', './lines/p22-content-expansions.json'],
     eventTagPrefixes: ['consequence', 'faction', 'relationship', 'p17', 'p22'],
     minimumEventCount: 10,
     knownThinAreas: ['mentor obligation continuation', 'sect exposure sustained role'],

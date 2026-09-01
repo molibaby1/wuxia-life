@@ -81,53 +81,6 @@
     }
   },
   {
-    "id": "buddhist_love_trial",
-    "version": "1.0.0",
-    "category": "side_quest",
-    "priority": 1,
-    "weight": 22,
-    "ageRange": { "min": 18, "max": 28 },
-    "triggers": [{ "type": "age_reach", "value": 18 }],
-    "conditions": [
-      { "type": "expression", "expression": "flags.has(\"route_buddhist\") && flags.has(\"love_started\") && !flags.has(\"buddhist_love_trial\")" }
-    ],
-    "content": {
-      "text": "寺中长老提醒你：情之一字，最易乱心。你该如何面对明月？",
-      "title": "情劫",
-      "description": "佛门与情缘的抉择。"
-    },
-    "eventType": "choice",
-    "choices": [
-      {
-        "id": "buddhist_keep_love",
-        "text": "情缘不舍",
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 20, "timeUnit": "day" },
-          { "type": "relation_change", "target": "lover", "operator": "add", "value": { "id": "lover_mingyue", "name": "明月", "role": "lover", "delta": 4 } },
-          { "type": "flag_set", "target": "buddhist_love_trial" },
-          { "type": "event_record", "target": "buddhist_love_keep" }
-        ]
-      },
-      {
-        "id": "buddhist_release_love",
-        "text": "斩断情缘",
-        "effects": [
-          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "month" },
-          { "type": "stat_modify", "target": "chivalry", "value": 2, "operator": "add" },
-          { "type": "flag_set", "target": "buddhist_love_trial" },
-          { "type": "event_record", "target": "buddhist_love_release" }
-        ]
-      }
-    ],
-    "metadata": {
-      "createdAt": 1773317774544,
-      "updatedAt": 1773317774544,
-      "author": "development_team",
-      "tags": ["佛门", "爱情", "联动", "once"],
-      "enabled": true
-    }
-  },
-  {
     "id": "buddhist_guard_temple",
     "version": "1.0.0",
     "category": "main_story",

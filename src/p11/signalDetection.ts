@@ -266,7 +266,11 @@ function detectIdentitySignal(records: GameProcessRecord[], finalFlags: Record<s
 }
 
 function detectRelationshipShift(records: GameProcessRecord[]): DetectedSignal | null {
-  const relationshipEvents = ['family_marriage', 'family_child_born', 'love_confession'];
+  const relationshipEvents = [
+    'mingyue_value_conflict',
+    'mingyue_relationship_choice',
+    'family_child_born',
+  ];
   const hits = records.filter(record => {
     if (record.age < 20 || record.age >= 30) {
       return false;
@@ -275,7 +279,11 @@ function detectRelationshipShift(records: GameProcessRecord[]): DetectedSignal |
       return true;
     }
     const flags = readFlags(record);
-    if (hasFlag(flags, 'married') || hasFlag(flags, 'love_started')) {
+    if (
+      hasFlag(flags, 'married') ||
+      hasFlag(flags, 'mingyue_romance_confirmed') ||
+      hasFlag(flags, 'mingyue_non_romantic_relationship')
+    ) {
       return true;
     }
     return declaredStageSignalsFromRecord(record).includes('relationship_shift');

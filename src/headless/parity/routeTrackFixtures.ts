@@ -123,9 +123,6 @@ export function applyRouteTrackFixtureBootstrap(
     if (flags.route_official && age >= 24 && !flags.official_first_post) {
       flags.official_first_post = true;
     }
-    if (flags.route_official && age >= 28 && !flags.official_love_obstacle) {
-      flags.official_love_obstacle = true;
-    }
     if (flags.route_official && age >= 34 && !flags.route_official_completed) {
       syncFlag('route_official_completed');
     }

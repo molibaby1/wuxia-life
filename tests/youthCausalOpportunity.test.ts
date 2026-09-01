@@ -232,53 +232,22 @@ async function main(): Promise<void> {
   const untrainedMartial = createYouthEngine(16);
   const trainedMartial = createYouthEngine(16);
   trainedMartial.getGameState().player.lifeStates.trainingHabit = 1;
-  trainedMartial.getGameState().flags.love_started = true;
   assert(!availableIds(untrainedMartial, 16).has('martial_improvement'));
   assert(availableIds(trainedMartial, 16).has('martial_improvement'));
 
-  // Romance requires a formal social fact; passing the meeting must not start it.
+  // The public market entry is available without social exposure; participation
+  // only records that the player met Mingyue and must not start a romance state.
   assert.equal(eventLoader.getEventById('meet_love_interest'), undefined);
-  const noExposure = createYouthEngine(18, { charisma: 10 });
-  const withExposure = createYouthEngine(18, { charisma: 10 });
-  assert(!availableIds(noExposure, 18).has('love_first_meet'));
-  recordFact(withExposure.getGameState(), 'jianghu_experience');
-  assert(availableIds(withExposure, 18).has('love_first_meet'));
-  const exposed = createYouthEngine(17, { charisma: 10 });
-  recordFact(exposed.getGameState(), 'jianghu_experience');
-  await executeChoice(exposed, 'love_first_meet', 'love_pass');
-  assert.equal(exposed.getGameState().flags.love_started, undefined);
-
-  const missedLove = createYouthEngine(17, { charisma: 10 });
-  recordFact(missedLove.getGameState(), 'jianghu_experience');
-  await executeChoice(missedLove, 'love_first_meet', 'love_pass');
-  const missedLoveIds = availableIds(missedLove, 17);
-  assert(!missedLoveIds.has('love_after_greet'));
-  assert(!missedLoveIds.has('love_shared_mission'));
-  assert(!missedLoveIds.has('love_family_obstacle'));
-
-  const provenLove = createYouthEngine(17);
-  recordFact(provenLove.getGameState(), 'love_shared_mission');
-  assert(availableIds(provenLove, 17).has('love_family_obstacle'));
-  await executeChoice(provenLove, 'love_family_obstacle', 'love_prove');
-  assert(!availableIds(provenLove, 20).has('love_rival_appears'));
-
-  const avoidedLove = createYouthEngine(17);
-  recordFact(avoidedLove.getGameState(), 'love_shared_mission');
-  assert(availableIds(avoidedLove, 17).has('love_family_obstacle'));
-  await executeChoice(avoidedLove, 'love_family_obstacle', 'love_avoid');
-  assert(availableIds(avoidedLove, 20).has('love_rival_appears'));
-
-  for (const [choiceId, expectsSeparation] of [
-    ['love_duel', false],
-    ['love_withdraw', true],
-    ['love_clumsy_mediation', false],
-  ] as const) {
-    const rivalPath = createYouthEngine(20);
-    recordFact(rivalPath.getGameState(), 'love_family_obstacle_avoid');
-    assert(availableIds(rivalPath, 20).has('love_rival_appears'));
-    await executeChoice(rivalPath, 'love_rival_appears', choiceId);
-    assert.equal(availableIds(rivalPath, 21).has('love_separation'), expectsSeparation, choiceId);
-  }
+  const noExposure = createYouthEngine(18);
+  const withExposure = createYouthEngine(18, { connections: 5 });
+  assert(availableIds(noExposure, 18).has('mingyue_market_meet'));
+  assert(availableIds(withExposure, 18).has('mingyue_market_meet'));
+  const met = createYouthEngine(15, { connections: 5 });
+  await executeChoice(met, 'mingyue_market_meet', 'mingyue_participate');
+  assert.equal(met.getGameState().flags.mingyue_met, true);
+  assert.equal(met.getGameState().flags.love_started, undefined);
+  assert(!availableIds(met, 15).has('mingyue_second_encounter'));
+  assert(availableIds(met, 16).has('mingyue_second_encounter'));
 
   // Shadow-sect contact needs youth road peril; acceptance only opens its invitation.
   const shadowWithoutContact = createYouthEngine(16, { chivalry: 20 });
@@ -427,36 +396,6 @@ async function main(): Promise<void> {
   assert.equal(stayedHome.getGameState().flags.route_wanderer, undefined);
   assert.equal(stayedHome.getGameState().flags.route_demonic, undefined);
 
-  // Love and shadow-sect allegiance must jointly gate the conflict.
-  const noLove = createYouthEngine(19);
-  noLove.getGameState().player.affiliation = 'shadow_sect';
-  assert(!availableIds(noLove, 19).has('love_demonic_conflict'));
-
-  const noShadowSect = createYouthEngine(19);
-  noShadowSect.getGameState().flags.love_started = true;
-  assert(!availableIds(noShadowSect, 19).has('love_demonic_conflict'));
-
-  const leftSect = createYouthEngine(19);
-  leftSect.getGameState().flags.love_started = true;
-  leftSect.getGameState().player.affiliation = 'shadow_sect';
-  assert(availableIds(leftSect, 19).has('love_demonic_conflict'));
-  await executeChoice(leftSect, 'love_demonic_conflict', 'love_choose_redemption');
-  assert.equal(leftSect.getGameState().player.affiliation, null);
-  assert(leftSect.getGameState().player.events.some(record =>
-    record.eventId === 'love_demonic_conflict_left_shadow_sect'));
-
-  const stayed = createYouthEngine(19);
-  stayed.getGameState().flags.love_started = true;
-  stayed.getGameState().player.affiliation = 'shadow_sect';
-  stayed.getGameState().relations.lover_mingyue = 10;
-  const relationBefore = stayed.getGameState().relations.lover_mingyue ?? 0;
-  await executeChoice(stayed, 'love_demonic_conflict', 'love_choose_demonic');
-  assert.equal(stayed.getGameState().player.affiliation, 'shadow_sect');
-  assert(stayed.getGameState().player.statuses.includes('anxious'));
-  assert.equal(stayed.getGameState().relations.lover_mingyue, relationBefore - 8);
-  assert(stayed.getGameState().player.events.some(record =>
-    record.eventId === 'love_demonic_conflict_stayed_shadow_sect'));
-
   // Expired opportunity windows must not backfill when their former facts exist.
   const expiredOpportunities = createYouthEngine(21, { charisma: 10, martialPower: 15 });
   expiredOpportunities.getGameState().player.lifeStates.trainingHabit = 1;
@@ -464,7 +403,7 @@ async function main(): Promise<void> {
   recordFact(expiredOpportunities.getGameState(), 'demonic_encounter_accept');
   const expiredIds = availableIds(expiredOpportunities, 21);
   assert(!expiredIds.has('sect_choice'));
-  assert(!expiredIds.has('love_first_meet'));
+  assert(!expiredIds.has('mingyue_market_meet'));
   assert(!expiredIds.has('outlaw_identity_beginning'));
 
   // A life with no target line still selects regular formal or daily gameplay at 21.
@@ -472,14 +411,15 @@ async function main(): Promise<void> {
   const noMajorIds = availableIds(noMajorLine, 21);
   const unavailableAtTwentyOne = new Set([
     'sect_choice',
-    'love_first_meet',
+    'mingyue_market_meet',
     'youth_road_peril',
     'demonic_encounter',
     'outlaw_identity_beginning',
     'martial_arts_invitation',
-    'love_after_greet',
-    'love_shared_mission',
-    'love_family_obstacle',
+    'mingyue_second_encounter',
+    'mingyue_shared_experience',
+    'mingyue_value_conflict',
+    'mingyue_relationship_choice',
     'martial_arts_beginner',
     'martial_arts_observer',
     'love_demonic_conflict',
@@ -517,8 +457,6 @@ async function main(): Promise<void> {
   assert.deepEqual(Object.keys(cleanState.player).sort(), INITIAL_PLAYER_STATE_KEYS);
   assert.deepEqual(Object.keys(stayedHome.getGameState()).sort(), POST_CHOICE_GAME_STATE_KEYS);
   assert.deepEqual(Object.keys(stayedHome.getGameState().player).sort(), INITIAL_PLAYER_STATE_KEYS);
-  assert.deepEqual(Object.keys(exposed.getGameState()).sort(), POST_CHOICE_GAME_STATE_KEYS);
-  assert.deepEqual(Object.keys(exposed.getGameState().player).sort(), INITIAL_PLAYER_STATE_KEYS);
   const snapshot = defaultSnapshotConverter.toSnapshot(stayedHome.getGameState(), {
     eventCatalogVersion: '1.0.0',
     sourcePlatform: 'node-headless',

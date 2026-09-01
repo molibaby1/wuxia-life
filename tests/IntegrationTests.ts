@@ -258,39 +258,41 @@ const multiPathSuite: TestSuite = {
       },
     },
     {
-      name: '多路径测试 - 爱情线分支',
-      description: '测试爱情线触发和不触发的不同路径',
+      name: '多路径测试 - 明月人物入口',
+      description: '测试明月市集事件的公共人物入口与人物认识结果',
       test: async () => {
         const executor = new EventExecutor();
         const evaluator = new ConditionEvaluator();
-        const loveEvent = allEvents.find(e => e.id === 'love_first_meet');
-        assert(loveEvent, '正式事件应包含爱情线初遇');
-        assert((loveEvent.conditions?.length ?? 0) > 0, '爱情线初遇应定义正式前置条件');
-        const greetChoice = loveEvent.choices?.find(c => c.id === 'love_greet');
-        assert(greetChoice, '爱情线初遇应包含正式的礼貌搭话选项');
+        const marketEvent = allEvents.find(e => e.id === 'mingyue_market_meet');
+        assert(marketEvent, '正式事件应包含明月市集入口');
+        assert((marketEvent.conditions?.length ?? 0) > 0, '明月市集入口应定义正式前置条件');
+        const participateChoice = marketEvent.choices?.find(c => c.id === 'mingyue_participate');
+        assert(participateChoice, '明月市集入口应包含参与处理具体事务的选项');
         
-        // 测试有正式社会经历时可触发爱情线
+        // 市集是公共人物入口，不要求人脉、江湖经历或门派归属
         let state1 = framework.createTestState();
         state1.player.age = 17;
-        state1.player.connections = 5;
+        state1.player.connections = 0;
+        state1.player.affiliation = null;
         assert(
-          loveEvent.conditions!.every(c => evaluator.evaluate(c, state1)),
-          '人脉达标时应满足爱情线初遇前置',
+          marketEvent.conditions!.every(c => evaluator.evaluate(c, state1)),
+          '无社会曝光时也应满足明月市集入口前置',
         );
-        state1 = await executor.executeEffects(greetChoice.effects, state1);
+        state1 = await executor.executeEffects(participateChoice.effects, state1);
         assert(
-          state1.player.events?.some(record => record.eventId === 'love_greet_selected') === true,
-          '礼貌搭话应记录真实选项事实',
+          state1.player.flags?.mingyue_met === true,
+          '参与处理具体事务应记录认识明月的事实',
         );
+        assert(state1.player.flags?.love_started !== true, '人物入口不得开启旧爱情状态');
         
-        // 测试无社会经历时不可触发爱情线
+        // 无社会经历不应阻断这个公共入口
         const state2 = framework.createTestState();
         state2.player.age = 17;
         state2.player.connections = 0;
         state2.player.affiliation = null;
         assert(
-          !loveEvent.conditions!.every(c => evaluator.evaluate(c, state2)),
-          '无人脉、江湖经历或门派归属时不应触发爱情线初遇',
+          marketEvent.conditions!.every(c => evaluator.evaluate(c, state2)),
+          '无人脉、江湖经历或门派归属时仍应触发明月市集入口',
         );
       },
     },

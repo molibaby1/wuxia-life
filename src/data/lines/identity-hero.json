@@ -799,7 +799,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && (player.connections >= 10 || (flags.has(\"married\") && flags.has(\"spouse_mingyue\"))) && (flags.has(\"hero_midlife_beat_old_case\") || flags.has(\"hero_midlife_beat_reputation\")) && !flags.has(\"hero_midlife_beat_ally\")"
+        "expression": "flags.has(\"route_wanderer\") && !flags.has(\"route_demonic\") && (player.connections >= 10 || flags.has(\"married\")) && (flags.has(\"hero_midlife_beat_old_case\") || flags.has(\"hero_midlife_beat_reputation\")) && !flags.has(\"hero_midlife_beat_ally\")"
       }
     ],
     "triggerConditions": {
@@ -814,7 +814,7 @@
     },
     "content": {
       "title": "盟友代价",
-      "text": "因你的侠名或旧案，同伴与明月被仇家盯上——你常年漂泊在外，他们却代你承受Targeting。",
+      "text": "因你的侠名或旧案，同伴与身边人被仇家盯上——你常年漂泊在外，他们却代你承受Targeting。",
       "description": "此劫凶险，须慎选退路；以声望担责可保他们平安，切割或涉险各有代价。"
     },
     "choices": [
@@ -1061,7 +1061,7 @@
       {
         "id": "settlement_family",
         "text": "漂泊有家",
-        "description": "你仍漂泊在外，但明月信你——家不在山门，在人心里。",
+        "description": "你仍漂泊在外，但家人信你——家不在山门，在愿意共同承担的人心里。",
         "condition": {
           "type": "expression",
           "expression": "flags.has(\"married\") && flags.has(\"hero_ally_shielded\")"

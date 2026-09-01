@@ -5,8 +5,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { EventLoader } from '../src/core/EventLoader';
-import { collectFrustrationMetrics } from '../src/p8/collectPersonaMetrics';
 import relationshipLegacyDeferredEvents from '../src/data/lines/relationship-person-legacy-deferred.json';
+import { collectFrustrationMetrics } from '../src/p8/collectPersonaMetrics';
 import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
 import type { EffectDefinition, GameState } from '../src/types/eventTypes';
 
@@ -138,6 +138,14 @@ function testLocalChoiceEvidenceDoesNotAttachAutoEffects(): void {
   ]);
   assert(correctedResult.setbacks.length === 1, 'Local choice without effects evidence must use its state diff');
   assert(correctedResult.setbacks[0]?.classification === 'opaque', 'Local retreat remains opaque');
+}
+
+function testSimulatorDoesNotPreferProducingAChild(): void {
+  const simulatorSource = fs.readFileSync(path.join(process.cwd(), 'tests/GameProcessSimulator.ts'), 'utf8');
+  assert(
+    !simulatorSource.includes("if (flagName === 'has_child')"),
+    'balanced and relationship simulator personas must not prefer has_child by a fixed score',
+  );
 }
 
 function testRecoveryAndRealSetbacks(): void {
@@ -281,7 +289,7 @@ function testInventoryBClassifierCoverage(): void {
   const family = collectFrustrationMetrics([
     record(
       'family_crisis',
-      '家族遭遇困难，需要你出面解决。若明月与子女已在身旁，他们也在等待你的抉择——是倾尽家财，还是量力而行？',
+      '家族遭遇困难，需要你出面解决。家人也在等待你的抉择——是倾尽家财，还是量力而行？',
       state({ reputation: 10 }),
       state({ reputation: 0 }),
       { id: 'family_self_protection', text: '抽身自保，先守住自家日子 (声望 -10)' },
@@ -306,15 +314,15 @@ function testInventoryBClassifierCoverage(): void {
 
   const isolation = collectFrustrationMetrics([
     record(
-      'demonic_midlife_isolation_spouse',
-      '江湖正道避你如蛇蝎，旧友疏远。明月在灯下问你：当年迎娶时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？',
+      'demonic_midlife_isolation_family',
+      '江湖正道避你如蛇蝎，旧友疏远。家人在灯下问你：当初成家时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？',
       state({
         reputation: 24,
-        relationships: [{ id: 'lover_mingyue', affinity: 40 }],
+        relationships: [{ id: 'family_support', affinity: 40 }],
       }),
       state({
         reputation: 18,
-        relationships: [{ id: 'lover_mingyue', affinity: 32 }],
+        relationships: [{ id: 'family_support', affinity: 32 }],
       }),
       undefined,
       '关于你的传言似乎不那么美好了。',
@@ -609,6 +617,7 @@ function main(): void {
   testDangerousForegroundRequiresActualNegativeResult();
   testMixedTradeoffRetainsActualNegativeResult();
   testLocalChoiceEvidenceDoesNotAttachAutoEffects();
+  testSimulatorDoesNotPreferProducingAChild();
   testRecoveryAndRealSetbacks();
   testRealOpaqueResultRemainsOpaque();
   testDailyNegativeStateEvidenceIsClassified();

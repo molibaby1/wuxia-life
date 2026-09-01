@@ -37,7 +37,7 @@
     "demonic_usurpation",
     "demonic_renounce_path",
     "understand_unconventional_truth",
-    "love_first_meet",
+    "mingyue_market_meet",
     "hero_first_case",
     "outlaw_cultivation"
   ],
@@ -56,7 +56,7 @@
     "demonic_power_struggle",
     "demonic_usurpation",
     "training_focus",
-    "love_first_meet",
+    "mingyue_market_meet",
     "hero_first_case",
     "outlaw_cultivation"
   ],
@@ -87,6 +87,6 @@
     { "age": 17, "phase": "route_commitment", "events": ["martial_improvement", "demonic_usurpation"] },
     { "age": 18, "phase": "early_adulthood", "events": ["understand_unconventional_truth", "orthodox_trial_completion"] },
     { "age": 19, "phase": "early_adulthood", "events": ["continued_journey"] },
-    { "age": 20, "phase": "early_adulthood", "events": ["hero_first_case", "love_first_meet"] }
+    { "age": 20, "phase": "early_adulthood", "events": ["hero_first_case", "mingyue_market_meet"] }
   ]
 }

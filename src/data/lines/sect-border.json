@@ -636,7 +636,7 @@
       }
     ],
     "content": {
-      "text": "你参与开辟互市通道，需在护商与谈判之间取舍。",
+      "text": "你参与开辟互市通道，第一次与负责带队互市的赛音照面，需在护商与谈判之间取舍。",
       "title": "互市通道",
       "description": "商路是另一种战场。"
     },
@@ -650,8 +650,8 @@
           {
             "type": "time_advance",
             "target": "age",
-            "value": 15,
-            "timeUnit": "day"
+            "value": 3,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -681,8 +681,8 @@
           {
             "type": "time_advance",
             "target": "age",
-            "value": 15,
-            "timeUnit": "day"
+            "value": 3,
+            "timeUnit": "month"
           },
           {
             "type": "stat_modify",
@@ -716,7 +716,85 @@
       ],
       "autoResolve": true,
       "enabled": true
-    }
+    },
+    "storyLine": "border_saiyin_character"
+  },
+  {
+    "id": "border_saiyin_trade_followup",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 24,
+    "ageRange": {
+      "min": 22,
+      "max": 35
+    },
+    "triggers": [
+      {
+        "type": "age_reach",
+        "value": 22
+      }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trade_route\") && (events.has(\"border_trade_guard\") || events.has(\"border_trade_negotiate\")) && !events.has(\"border_saiyin_trade_guard\") && !events.has(\"border_saiyin_trade_negotiate\")"
+      }
+    ],
+    "content": {
+      "text": "数月以后，赛音在新一轮互市交接处认出你。你们把上次留下的护送路线与货单重新摊开，决定怎样把这段共同经历接续下去。",
+      "title": "互市重逢",
+      "description": "旧日同行成为今日协作的凭据。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "border_saiyin_trade_guard",
+        "text": "先核实护送路线",
+        "description": "这一次和赛音共同逐段核实互市护送路线与巡护责任",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "event_record",
+            "target": "border_saiyin_trade_guard"
+          }
+        ]
+      },
+      {
+        "id": "border_saiyin_trade_negotiate",
+        "text": "先核对互市账册",
+        "description": "这一次和赛音共同逐项核对互市账册、通商规则与分担条款",
+        "effects": [
+          {
+            "type": "time_advance",
+            "target": "age",
+            "value": 15,
+            "timeUnit": "day"
+          },
+          {
+            "type": "event_record",
+            "target": "border_saiyin_trade_negotiate"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1773317774544,
+      "updatedAt": 1773317774544,
+      "author": "development_team",
+      "tags": [
+        "边地",
+        "赛音",
+        "人物前史"
+      ],
+      "enabled": true
+    },
+    "storyLine": "border_saiyin_character"
   },
   {
     "id": "border_career_growth",
@@ -879,86 +957,89 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"route_border\") && flags.has(\"border_trade_route\") && !flags.has(\"border_alliance\")"
+        "expression": "flags.has(\"route_border\") && flags.has(\"border_trade_route\") && (events.has(\"border_saiyin_trade_guard\") || events.has(\"border_saiyin_trade_negotiate\")) && !flags.has(\"border_alliance\")"
       }
     ],
     "content": {
-      "text": "部族首领提出联姻或盟约以稳固互市，你需要作出选择。",
+      "text": "部族首领邀请你以盟约稳固互市，赛音也带着此前共同往来的账册来到席间；你需要作出选择。",
       "title": "部族盟约",
-      "description": "情义与利益并行。"
+      "description": "共同经历与现实利益并行。"
     },
     "eventType": "choice",
     "choices": [
       {
-        "id": "border_alliance_marriage",
-        "text": "接受联姻",
-        "weight": 1,
-        "effects": [
-          {
-            "type": "time_advance",
-            "target": "age",
-            "value": 1,
-            "timeUnit": "month"
-          },
-          {
-            "type": "stat_modify",
-            "target": "charisma",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "relation_change",
-            "target": "lover",
-            "operator": "add",
-            "value": {
-              "id": "lover_saiyin",
-              "name": "赛音",
-              "role": "lover",
-              "delta": 6
-            }
-          },
-          {
-            "type": "flag_set",
-            "target": "border_alliance"
-          },
-          {
-            "type": "flag_set",
-            "target": "border_path_marriage"
-          },
-          {
-            "type": "event_record",
-            "target": "border_alliance_marriage"
-          }
-        ]
-      },
-      {
         "id": "border_alliance_contract",
         "text": "缔结盟约",
         "weight": 2,
-        "effects": [
+        "effects": [],
+        "outcomes": [
           {
-            "type": "time_advance",
-            "target": "age",
-            "value": 20,
-            "timeUnit": "day"
+            "id": "border_saiyin_guard_context",
+            "text": "赛音记得后来你们共同厘清护送路线与巡护责任；她把这次协作带到席间，盟约据此落笔。",
+            "condition": {
+              "type": "expression",
+              "expression": "events.has(\"border_saiyin_trade_guard\")"
+            },
+            "effects": [
+              {
+                "type": "time_advance",
+                "target": "age",
+                "value": 20,
+                "timeUnit": "day"
+              },
+              {
+                "type": "stat_modify",
+                "target": "knowledge",
+                "value": 3,
+                "operator": "add"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_alliance"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_path_contract"
+              },
+              {
+                "type": "event_record",
+                "target": "border_alliance_contract"
+              }
+            ]
           },
           {
-            "type": "stat_modify",
-            "target": "knowledge",
-            "value": 3,
-            "operator": "add"
-          },
-          {
-            "type": "flag_set",
-            "target": "border_alliance"
-          },
-          {
-            "type": "flag_set",
-            "target": "border_path_contract"
-          },
-          {
-            "type": "event_record",
-            "target": "border_alliance_contract"
+            "id": "border_saiyin_negotiate_context",
+            "text": "赛音记得后来你们共同核过互市账册、通商规则与分担条款；她把这次协作带到席间，盟约据此落笔。",
+            "condition": {
+              "type": "expression",
+              "expression": "events.has(\"border_saiyin_trade_negotiate\")"
+            },
+            "effects": [
+              {
+                "type": "time_advance",
+                "target": "age",
+                "value": 20,
+                "timeUnit": "day"
+              },
+              {
+                "type": "stat_modify",
+                "target": "knowledge",
+                "value": 3,
+                "operator": "add"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_alliance"
+              },
+              {
+                "type": "flag_set",
+                "target": "border_path_contract"
+              },
+              {
+                "type": "event_record",
+                "target": "border_alliance_contract"
+              }
+            ]
           }
         ]
       },
@@ -1005,7 +1086,8 @@
       ],
       "autoResolve": true,
       "enabled": true
-    }
+    },
+    "storyLine": "border_saiyin_character"
   },
   {
     "id": "border_crisis",
@@ -1368,9 +1450,9 @@
       }
     ],
     "content": {
-      "text": "你以盟约为基，往返中原与塞外，成为两地的使者。",
-      "title": "和亲使者",
-      "description": "风沙万里，使命同行。"
+      "text": "你与赛音共同维护互市盟约，往返中原与塞外，成为两地守约的使者。",
+      "title": "互市盟约使者",
+      "description": "赛音带来的旧日商路，成为两地长期往来的凭据。"
     },
     "eventType": "auto",
     "autoEffects": [

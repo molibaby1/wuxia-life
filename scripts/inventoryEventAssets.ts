@@ -69,7 +69,7 @@ const PRIORITY_ROUTE_FILES = new Set([
 const GOLDEN_CANDIDATE_FILES = new Set([
   'origin.json',
   'general.json',
-  'love.json',
+  'character-mingyue-v1.json',
   'faction-revelation.json',
   'setback-events.json',
   ...PRIORITY_ROUTE_FILES,

@@ -46,7 +46,7 @@ async function hydrateAtAge(
 
 export async function runP72SessionPhaseTests(): Promise<void> {
   const planningSession = await hydrateAtAge(16, 77, { connections: 5 });
-  // Social exposure makes love_first_meet eligible; selecting a story event enters story_event.
+  // Social exposure makes the Mingyue character entry eligible; selecting a story event enters story_event.
   const next = await planningSession.getNextEvent();
   assert(next, 'eligible story event selected');
   assert(planningSession.getSessionPhase() === 'story_event', 'current event → story_event');
@@ -64,7 +64,7 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     assert(option.riskLevel.length > 0, 'risk populated');
   }
 
-  // With no social exposure, love_first_meet is unavailable and active planning can proceed.
+  // With no social exposure, the Mingyue character entry is unavailable and active planning can proceed.
   const actionSession = await hydrateAtAge(16, 12345, { charisma: 4, connections: 0 });
   const beforeStats = { ...actionSession.getRuntimeState().player };
   await actionSession.executeActiveAction('action_training_basic');
@@ -81,7 +81,7 @@ export async function runP72SessionPhaseTests(): Promise<void> {
     'stat delta applied',
   );
 
-  // No social exposure keeps the loop out of the romance opportunity.
+  // No social exposure keeps the loop out of the character opportunity.
   const loopSession = await hydrateAtAge(16, 88, { charisma: 4, connections: 0 });
   await loopSession.executeActiveAction('action_socializing_basic');
   await loopSession.acknowledgeProgression('action_summary');

@@ -488,7 +488,7 @@
     ],
     "content": {
       "title": "江湖避你如蛇蝎",
-      "text": "正道中人见你绕道，旧友来信渐稀。若你曾迎娶明月，她亦在夜里问你：这条路，还要走多远？",
+      "text": "正道中人见你绕道，旧友来信渐稀。若你曾成家，家人也在夜里问你：这条路，还要走多远？",
       "description": "扩张的权势换来孤立——名望与关系正在流失。"
     },
     "autoEffects": [
@@ -526,7 +526,7 @@
     ],
     "content": {
       "title": "铁腕之后的寒夜",
-      "text": "兼并周边的消息传遍江湖，仇家与旧友皆离你更远。若明月仍在身侧，她质问你：为了门势，还要牺牲多少？",
+      "text": "兼并周边的消息传遍江湖，仇家与旧友皆离你更远。若家人仍在身侧，他们质问你：为了门势，还要牺牲多少？",
       "description": "铁腕扩张换来更重的名望与人脉代价。"
     },
     "autoEffects": [
@@ -582,8 +582,8 @@
     }
   },
   {
-    "id": "demonic_midlife_isolation_spouse",
-    "name": "魔道中年孤立（明月）",
+    "id": "demonic_midlife_isolation_family",
+    "name": "魔道中年孤立（家人）",
     "description": "已婚者面对扩张后的家庭压力。",
     "version": "1.0.0",
     "category": "identity",
@@ -597,18 +597,17 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && flags.spouse_mingyue == true && !flags.has('demonic_midlife_isolation_done')"
+        "expression": "flags.has('route_demonic') && !flags.has('route_orthodox') && flags.has('demonic_midlife_expansion_done') && flags.has('married') && !flags.has('demonic_midlife_isolation_done')"
       }
     ],
     "autoEffects": [
       {"type": "stat_modify", "target": "reputation", "value": 6, "operator": "subtract"},
-      {"type": "relation_change", "target": "lover", "operator": "add", "value": {"id": "lover_mingyue", "name": "明月", "role": "lover", "delta": -8}},
       {"type": "flag_set", "target": "demonic_midlife_isolation_done"},
-      {"type": "event_record", "target": "demonic_midlife_isolation_spouse"}
+      {"type": "event_record", "target": "demonic_midlife_isolation_family"}
     ],
     "content": {
-      "title": "明月问你还要走多远",
-      "text": "江湖正道避你如蛇蝎，旧友疏远。明月在灯下问你：当年迎娶时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？",
+      "title": "家人问你还要走多远",
+      "text": "江湖正道避你如蛇蝎，旧友疏远。家人在灯下问你：当初成家时的诺言，还可信吗？此路若再走下去，家与门，孰轻孰重？",
       "description": "扩张的权势正在侵蚀家庭信任。"
     },
     "metadata": {

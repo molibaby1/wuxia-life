@@ -1,13 +1,6 @@
 import { computeExperienceDerivedMetrics } from './computeExperienceMetricsFromReports';
 import { buildDeathRiskTelemetry } from './deathRiskTelemetry';
 import {
-  buildRomanceFamilyArcReport,
-  evaluateP3RomanceFamilyAchievementRate,
-  formatRomanceFamilyArcReportLines,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
-  type RomanceFamilyArcReport,
-} from './romanceFamilyArcTelemetry';
-import {
   EXPERIENCE_HEALTH_METRIC_DEFINITIONS,
   type ExperienceHealthMetricDefinition,
   type ExperienceHealthMetricKey,
@@ -15,7 +8,6 @@ import {
 import {
   P3_DEATH_RATE_MAX,
   P3_EVAL_COHORT_LABEL,
-  P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN,
 } from './p3TrustTargets';
 import {
   evaluateSimulationGate,
@@ -51,7 +43,6 @@ export interface ExperienceHealthGateResult {
   p2Gate: SimulationGateResult;
   derivedMetrics: ReturnType<typeof computeExperienceDerivedMetrics>;
   p3EvalSampleCount?: number;
-  p3RomanceFamily?: P3RomanceFamilyGateSnapshot;
   /** US-029: P3-EVAL trust metrics enforced as blockers when present. */
   p3TrustEnforced?: boolean;
 }
@@ -61,16 +52,9 @@ export type P3EvalReportEntry = {
   sampleId: string;
 };
 
-export type P3RomanceFamilyGateSnapshot = {
-  primaryArcReport: RomanceFamilyArcReport | null;
-  p3EvalAchievementRate: number | null;
-};
-
 const P3_ONLY_KEYS = new Set<ExperienceHealthMetricKey>([
   'death_without_warning_count',
   'p2_legacy_death_rate',
-  'romance_family_primary_sample_pass',
-  'p3_romance_family_achievement_rate',
 ]);
 
 const DEFINITION_MAP = new Map(
@@ -84,7 +68,6 @@ const P2_KEYS = new Set(
       'auto_event_rate',
       'death_rate',
       'ending_distribution',
-      'romance_family_achievement_rate',
       'save_count',
     ].includes(def.key)
   ).map(def => def.key)
@@ -310,69 +293,6 @@ function applyP3DeathEvaluations(
   }
 }
 
-function applyP3RomanceFamilyEvaluations(
-  evaluations: ExperienceHealthMetricEvaluation[],
-  p3EvalEntries: P3EvalReportEntry[],
-  waiverMap: Map<string, string>,
-): P3RomanceFamilyGateSnapshot {
-  const primaryEntry = p3EvalEntries.find(
-    entry => entry.sampleId === GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
-  );
-  const primaryArcReport = primaryEntry
-    ? buildRomanceFamilyArcReport(primaryEntry.report, primaryEntry.sampleId)
-    : null;
-
-  const passValue = primaryArcReport?.primarySamplePass ? 1 : 0;
-  const passDefinition = DEFINITION_MAP.get('romance_family_primary_sample_pass');
-  if (passDefinition) {
-    const status: ExperienceHealthGateStatus = passValue === 1 ? 'pass' : 'fail';
-    const waiverReason = waiverMap.get('romance_family_primary_sample_pass');
-    const waived = Boolean(waiverReason);
-    const outcome = primaryArcReport?.arcOutcome ?? 'n/a';
-    evaluations.push({
-      key: 'romance_family_primary_sample_pass',
-      label: passDefinition.label,
-      severity: passDefinition.severity,
-      actualValue: passValue,
-      thresholdMin: passDefinition.baseline.min,
-      thresholdMax: passDefinition.baseline.max,
-      status: status === 'fail' && waived ? 'warning' : status,
-      detail: `P3-RF ${GOLDEN_ROMANCE_FAMILY_SAMPLE_ID} arc_outcome=${outcome}, pass=${passValue === 1}`,
-      waived,
-      waiverReason,
-      nonWaivable: passDefinition.nonWaivable ?? false,
-    });
-  }
-
-  const p3EvalAchievementRate = evaluateP3RomanceFamilyAchievementRate(p3EvalEntries);
-  const romanceMetric = evaluations.find(metric => metric.key === 'romance_family_achievement_rate');
-  if (romanceMetric && p3EvalAchievementRate !== null) {
-    romanceMetric.detail = `${romanceMetric.detail}; ${P3_EVAL_COHORT_LABEL} rate=${p3EvalAchievementRate.toFixed(4)} (${p3EvalEntries.length} samples)`;
-  }
-
-  const p3RateDefinition = DEFINITION_MAP.get('p3_romance_family_achievement_rate');
-  if (p3RateDefinition && p3EvalAchievementRate !== null) {
-    const status: ExperienceHealthGateStatus =
-      p3EvalAchievementRate >= P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN ? 'pass' : 'fail';
-    const waiverReason = waiverMap.get('p3_romance_family_achievement_rate');
-    const waived = Boolean(waiverReason);
-    evaluations.push({
-      key: 'p3_romance_family_achievement_rate',
-      label: p3RateDefinition.label,
-      severity: p3RateDefinition.severity,
-      actualValue: p3EvalAchievementRate,
-      thresholdMin: P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN,
-      status: status === 'fail' && waived ? 'warning' : status,
-      detail: `${P3_EVAL_COHORT_LABEL} actual=${p3EvalAchievementRate.toFixed(4)}, min=${P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN}, samples=${p3EvalEntries.length}`,
-      waived,
-      waiverReason,
-      nonWaivable: p3RateDefinition.nonWaivable ?? false,
-    });
-  }
-
-  return { primaryArcReport, p3EvalAchievementRate };
-}
-
 export function evaluateExperienceHealthGate(
   reports: GameProcessReport[],
   waivers: SimulationWaiver[] = [],
@@ -403,10 +323,8 @@ export function evaluateExperienceHealthGate(
     evaluations.push(evaluateDerivedMetric(definition, value, waiverMap));
   }
 
-  let p3RomanceFamily: P3RomanceFamilyGateSnapshot | undefined;
   if (p3EvalEntries.length > 0) {
     applyP3DeathEvaluations(evaluations, p3EvalEntries, reports, waiverMap);
-    p3RomanceFamily = applyP3RomanceFamilyEvaluations(evaluations, p3EvalEntries, waiverMap);
   }
 
   const blockingMetrics = evaluations.filter(metric => metric.severity === 'blocker');
@@ -426,20 +344,6 @@ export function evaluateExperienceHealthGate(
     p2Gate,
     derivedMetrics,
     p3EvalSampleCount: p3EvalEntries.length > 0 ? p3EvalEntries.length : undefined,
-    p3RomanceFamily,
     p3TrustEnforced: p3EvalEntries.length > 0,
   };
-}
-
-export function formatP3RomanceFamilyGateSection(
-  snapshot: P3RomanceFamilyGateSnapshot | undefined,
-): string[] {
-  if (!snapshot?.primaryArcReport) {
-    return ['P3-RF romance/family: (no golden-romance-family sample in queue)'];
-  }
-  return [
-    'P3-RF romance/family arc (golden-romance-family):',
-    ...formatRomanceFamilyArcReportLines(snapshot.primaryArcReport).map(line => `  ${line}`),
-    `  P3-EVAL romance_family_achievement_rate=${snapshot.p3EvalAchievementRate?.toFixed(4) ?? 'n/a'}`,
-  ];
 }

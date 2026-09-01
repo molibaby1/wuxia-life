@@ -9,8 +9,6 @@ export const P3_DEATH_RATE_MAX = 0;
 
 export const P3_DEATH_WITHOUT_WARNING_MAX = 0;
 
-export const P3_ROMANCE_FAMILY_ACHIEVEMENT_MIN = 0.2;
-
 export const P3_SIMULATED_PAYOFF_MIN = 0.7;
 
 export const P3_ROUTE_CONTRADICTION_MAX = 0;

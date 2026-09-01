@@ -42,7 +42,6 @@ import {
 } from '../scripts/deathRiskTelemetry';
 import {
   GOLDEN_LINE_SAMPLES,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE,
   P3_EVAL_END_AGE,
   P3_EVAL_SAMPLES,
   runP3EvalSimulation,
@@ -58,12 +57,6 @@ import {
   MIN_MIDLIFE_MANUAL_CHOICES,
   MIN_MIDLIFE_ROUTE_EVENTS,
 } from '../scripts/midlifeGate';
-import {
-  ARC_RF_MINGYUE_ID,
-  buildRomanceFamilyArcReport,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
-  resolveRomanceArcOutcome,
-} from '../scripts/romanceFamilyArcTelemetry';
 
 // ========== 创建测试框架实例 ==========
 const framework = new GameTestFramework();
@@ -1651,8 +1644,8 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '选择解析 - resolveFirstChoiceEffects 写入 love_started',
-      description: 'resolveFirstChoiceEffects + executeChoiceEffects 应执行 outcome 并设置 love_started',
+      name: '选择解析 - resolveFirstChoiceEffects 写入事实',
+      description: 'resolveFirstChoiceEffects + executeChoiceEffects 应执行 outcome 并设置事实 flag',
       test: async () => {
         const engine = new GameEngineIntegration();
         const state = engine.getGameState();
@@ -1670,7 +1663,7 @@ const coreFunctionSuite: TestSuite = {
                 {
                   id: 'default',
                   condition: { type: 'expression', expression: 'true' },
-                  effects: [{ type: EffectType.FLAG_SET, target: 'love_started', value: true }],
+                  effects: [{ type: EffectType.FLAG_SET, target: 'test_fact', value: true }],
                 },
               ],
             },
@@ -1681,9 +1674,9 @@ const coreFunctionSuite: TestSuite = {
         assert(resolved !== null, 'resolveFirstChoiceEffects 应解析出首个可用 choice/outcome');
         assert(
           resolved!.effects.some(
-            effect => effect.type === EffectType.FLAG_SET && effect.target === 'love_started'
+            effect => effect.type === EffectType.FLAG_SET && effect.target === 'test_fact'
           ),
-          '解析结果应包含 love_started 的 flag_set 效果'
+          '解析结果应包含事实 flag_set 效果'
         );
 
         await engine.executeChoiceEffects(
@@ -1693,9 +1686,9 @@ const coreFunctionSuite: TestSuite = {
         );
 
         assertEqual(
-          engine.getGameState().flags.love_started,
+          engine.getGameState().flags.test_fact,
           true,
-          'executeChoiceEffects 后应写入 love_started flag'
+          'executeChoiceEffects 后应写入事实 flag'
         );
       },
     },
@@ -2371,121 +2364,6 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: 'P3 US-010 - romance arc 终态分类',
-      description: 'arc_outcome 应区分 completed / separated / skipped / failed',
-      test: () => {
-        const completed = createSimulationReportStub({
-          finalAge: 50,
-          isAlive: true,
-          statistics: { spouse: '明月', children: 1 } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'],
-          records: [
-            {
-              age: 18,
-              eventId: 'love_first_meet',
-              eventTitle: '初见',
-              eventType: 'choice',
-              selectedChoice: { id: 'love_greet', text: '搭话', effects: [] },
-              gameState: {
-                ...framework.createTestState(),
-                player: {
-                  ...framework.createTestState().player,
-                  flags: {
-                    love_started: true,
-                    married: true,
-                    spouse_mingyue: true,
-                  },
-                },
-              },
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        });
-        assertEqual(
-          resolveRomanceArcOutcome(completed, 50),
-          'completed',
-          '有 spouse/children 且存活至 50 应为 completed',
-        );
-
-        const separated = createSimulationReportStub({
-          finalAge: 50,
-          isAlive: true,
-          records: [
-            {
-              age: 20,
-              eventId: 'love_separation',
-              eventTitle: '分离',
-              eventType: 'auto',
-              gameState: {
-                ...framework.createTestState(),
-                player: {
-                  ...framework.createTestState().player,
-                  flags: { love_started: true, love_separation: true },
-                },
-              },
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        });
-        assertEqual(resolveRomanceArcOutcome(separated, 50), 'separated', '分离 flag 应为 separated');
-
-        const skipped = createSimulationReportStub({
-          finalAge: 50,
-          isAlive: true,
-          records: [
-            {
-              age: 10,
-              eventId: 'daily',
-              eventTitle: '日常',
-              eventType: 'auto',
-              gameState: framework.createTestState(),
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        });
-        assertEqual(resolveRomanceArcOutcome(skipped, 50), 'skipped', '未开启 love_started 应为 skipped');
-      },
-    },
-    {
-      name: 'P3 US-010 - experience gate 暴露 P3-RF 指标',
-      description: 'romance_family_primary_sample_pass 应出现在 gate 输出',
-      test: () => {
-        const passReport = createSimulationReportStub({
-          finalAge: 50,
-          isAlive: true,
-          statistics: {
-            spouse: '明月',
-            children: 1,
-          } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'],
-          records: [
-            {
-              age: 22,
-              eventId: 'family_marriage',
-              eventTitle: '成家',
-              eventType: 'choice',
-              selectedChoice: { id: 'marry_mingyue', text: '迎娶明月', effects: [] },
-              gameState: {
-                ...framework.createTestState(),
-                player: {
-                  ...framework.createTestState().player,
-                  flags: { love_started: true, married: true, spouse_mingyue: true },
-                },
-              },
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        });
-        const gate = evaluateExperienceHealthGate([], [], [
-          { sampleId: GOLDEN_ROMANCE_FAMILY_SAMPLE_ID, report: passReport },
-        ]);
-        const metric = gate.blockingMetrics.find(m => m.key === 'romance_family_primary_sample_pass');
-        assert(metric, '应包含 romance_family_primary_sample_pass');
-        assertEqual(metric?.severity, 'blocker', 'US-029 应为 blocker');
-        assertEqual(metric?.status, 'pass', 'completed arc 应 pass');
-        assertEqual(gate.p3RomanceFamily?.primaryArcReport?.arcId, ARC_RF_MINGYUE_ID, 'arc_id 应对齐');
-        assertEqual(gate.p3RomanceFamily?.primaryArcReport?.arcOutcome, 'completed', 'arc_outcome 应为 completed');
-      },
-    },
-    {
       name: 'P3 US-014 - payoff gate 区分 static 与 simulated',
       description: '静态 gate 通过时 priority-route 仿真缺口应保留为 warning signal',
       test: () => {
@@ -2602,43 +2480,6 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: 'P3 US-029 - P3-EVAL romance 聚合阈值',
-      description: 'p3_romance_family_achievement_rate < 0.20 应 fail',
-      test: () => {
-        const stub = (achieved: boolean) =>
-          createSimulationReportStub({
-            finalAge: 50,
-            isAlive: true,
-            statistics: achieved
-              ? ({ spouse: 'x', children: 0 } as import('../src/types/simulationRecordTypes').GameProcessReport['statistics'])
-              : ({} as import('../src/types/simulationRecordTypes').GameProcessReport['statistics']),
-          });
-        const lowRateEntries = Array.from({ length: 5 }, (_, index) => ({
-          sampleId: `sample-${index}`,
-          report: stub(false),
-        }));
-        const lowGate = evaluateExperienceHealthGate([], [], lowRateEntries);
-        const lowMetric = lowGate.blockingMetrics.find(
-          m => m.key === 'p3_romance_family_achievement_rate',
-        );
-        assert(lowMetric, '应有 P3 romance 聚合指标');
-        assertEqual(lowMetric?.status, 'fail', '0% 应 fail');
-
-        const passEntries = [
-          { sampleId: 'a', report: stub(true) },
-          ...Array.from({ length: 4 }, (_, index) => ({
-            sampleId: `b-${index}`,
-            report: stub(false),
-          })),
-        ];
-        const passGate = evaluateExperienceHealthGate([], [], passEntries);
-        const passMetric = passGate.blockingMetrics.find(
-          m => m.key === 'p3_romance_family_achievement_rate',
-        );
-        assertEqual(passMetric?.status, 'pass', '20% 应 pass');
-      },
-    },
-    {
       name: 'P3 US-014 - golden line gate 集成 payoff 阻断',
       description: '仿真 payoff gap signal 不应单独使 evaluateGoldenLineGates 失败',
       test: () => {
@@ -2730,7 +2571,6 @@ const coreFunctionSuite: TestSuite = {
         assert(typeof m.eventCount === 'number', 'midlife eventCount');
         assert(typeof m.choiceCount === 'number', 'midlife choiceCount');
         assert(Array.isArray(m.routeFlags), 'midlife routeFlags');
-        assert(m.relationshipState !== undefined, 'midlife relationshipState');
         assert(m.deathStatus !== undefined, 'midlife deathStatus');
         assert(m.payoffStatus !== undefined, 'midlife payoffStatus');
         assert(typeof m.payoffStatus.simulatedPayoffRate === 'number', 'payoff rate');
@@ -2740,7 +2580,7 @@ const coreFunctionSuite: TestSuite = {
       name: 'P3 US-017 - P3-EVAL 队列分段报告',
       description: 'P3-EVAL 全样本应产出 youth/midlife 双分段指标',
       test: async () => {
-        assertEqual(P3_EVAL_SAMPLES.length, 5, 'P3-EVAL 应为 5 个样本');
+        assertEqual(P3_EVAL_SAMPLES.length, 4, 'P3-EVAL 应为 4 个样本');
         for (const sample of P3_EVAL_SAMPLES) {
           const run = await runP3EvalSimulation(sample);
           const report = buildP3EvalSegmentReport(run);
@@ -2748,28 +2588,6 @@ const coreFunctionSuite: TestSuite = {
           assert(report.midlife.eventCount >= 1, `${sample.id} midlife 应有事件`);
           assertEqual(report.finalAge, P3_EVAL_END_AGE, `${sample.id} finalAge`);
         }
-      },
-    },
-    {
-      name: 'P3 US-010 - golden-romance-family 0–50 回归样本',
-      description: 'P3-RF 样本应存活至 50 并完成 arc_rf_mingyue',
-      test: async () => {
-        const run = await runP3EvalSimulation(GOLDEN_ROMANCE_FAMILY_SAMPLE);
-        const arc = run.report.romanceFamilyArcReport;
-        assert(arc, '报告应包含 romanceFamilyArcReport');
-        assertEqual(run.report.finalAge, 50, '应跑至 50 岁');
-        assertEqual(run.report.isAlive, true, '情感线样本应存活');
-        assertEqual(arc.arcOutcome, 'completed', `arc 应 completed，实际=${arc.arcOutcome}`);
-        assert(arc.achievement, '应达成 romance/family achievement');
-        assert(arc.primarySamplePass, 'primarySamplePass 应为 true');
-        assert(
-          arc.keyChoices.find(kc => kc.id === 'KC-1')?.triggered,
-          'KC-1 love_first_meet 应触发',
-        );
-        assert(
-          arc.keyChoices.find(kc => kc.id === 'KC-3')?.choiceId === 'marry_mingyue',
-          'KC-3 应选迎娶明月',
-        );
       },
     },
     {

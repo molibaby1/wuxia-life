@@ -1,7 +1,6 @@
 import type { ChoiceScoreDiagnostic } from '../p8/types';
 import type { EffectDefinition, EventChoice, GameState } from './eventTypes';
 import type { DeathRiskTelemetry } from './deathRiskTelemetryTypes';
-import type { RomanceFamilyArcReport } from './romanceFamilyArcTypes';
 
 /**
  * Shared simulation replay record used by persona gates, P11 signal detection,
@@ -86,8 +85,6 @@ export interface GameProcessReport {
   deathReason: string | null;
   /** P3 US-005: populated when simulation ends with death or forced ending. */
   deathRiskTelemetry?: DeathRiskTelemetry | null;
-  /** P3 US-010: romance/family arc regression snapshot when sampleId is set. */
-  romanceFamilyArcReport?: RomanceFamilyArcReport | null;
   totalEvents: number;
   totalChoices: number;
   totalSaves: number;

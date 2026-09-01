@@ -10,7 +10,6 @@ import { GameProcessSimulator } from '../../../tests/GameProcessSimulator';
 import type { GameProcessRecord } from '../../types/simulationRecordTypes';
 import {
   GOLDEN_LINE_SAMPLES,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE,
   type GoldenLineSimulationSample,
 } from '../../../scripts/goldenLineSimulation';
 import { HeadlessEngineSessionImpl } from '../session/HeadlessEngineSessionImpl';
@@ -27,7 +26,6 @@ import type { RouteTrack } from './routeTrackFixtures';
 
 export const P5_PARITY_SAMPLES: GoldenLineSimulationSample[] = [
   ...GOLDEN_LINE_SAMPLES,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE,
 ];
 
 const P3_EVAL_END_AGE = 50;

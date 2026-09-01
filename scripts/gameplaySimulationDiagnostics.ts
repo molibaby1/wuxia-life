@@ -5,12 +5,6 @@ import type { GameProcessReport } from '../src/types/simulationRecordTypes';
 
 export type EventFrequencyRow = { eventId: string; count: number };
 
-export type RomanceFamilySummary = {
-  livesWithSpouse: number;
-  livesWithChildren: number;
-  avgNotableRelations: number;
-};
-
 function countEventFrequencies(report: GameProcessReport): Map<string, number> {
   const map = new Map<string, number>();
   for (const rec of report.records) {
@@ -26,26 +20,6 @@ export function topRepeatedEvents(report: GameProcessReport, limit = 12): EventF
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([eventId, count]) => ({ eventId, count }));
-}
-
-export function summarizeRomanceFamilyAcrossReports(reports: GameProcessReport[]): RomanceFamilySummary {
-  let livesWithSpouse = 0;
-  let livesWithChildren = 0;
-  let relationSum = 0;
-
-  for (const report of reports) {
-    if (report.statistics.spouse) livesWithSpouse += 1;
-    if ((report.statistics.children || 0) > 0) livesWithChildren += 1;
-    const final = report.records.length > 0 ? report.records[report.records.length - 1].gameState : null;
-    const rel = final?.relations ? Object.keys(final.relations).length : 0;
-    relationSum += rel;
-  }
-
-  return {
-    livesWithSpouse,
-    livesWithChildren,
-    avgNotableRelations: reports.length > 0 ? relationSum / reports.length : 0,
-  };
 }
 
 export function aggregateTopEventsAcrossReports(reports: GameProcessReport[], limit = 15): EventFrequencyRow[] {
@@ -65,7 +39,6 @@ export function aggregateTopEventsAcrossReports(reports: GameProcessReport[], li
 export function formatDiagnosticsMarkdownSection(reports: GameProcessReport[]): string {
   const agg = aggregateTopEventsAcrossReports(reports);
   const rows = agg.map(r => `| ${r.eventId} | ${r.count} |`).join('\n');
-  const rf = summarizeRomanceFamilyAcrossReports(reports);
 
   const perSample = reports
     .map((report, i) => {
@@ -85,12 +58,6 @@ export function formatDiagnosticsMarkdownSection(reports: GameProcessReport[]): 
     '|---|---:|',
     rows || '| (none) | 0 |',
     '',
-    'Romance / family snapshot (per-report aggregates):',
-    '',
-    `- lives with spouse (count / ${reports.length}): ${rf.livesWithSpouse}`,
-    `- lives with children > 0 (count / ${reports.length}): ${rf.livesWithChildren}`,
-    `- avg relation keys in final state: ${rf.avgNotableRelations.toFixed(2)}`,
-    '',
     'Per-sample: top 5 event IDs by count.',
     '',
     '| sample | persona | ending | top5 events |',
@@ -106,7 +73,4 @@ export function printDiagnosticsToConsole(reports: GameProcessReport[]): void {
   for (const row of agg) {
     console.log(`  ${row.eventId}: ${row.count}`);
   }
-  const rf = summarizeRomanceFamilyAcrossReports(reports);
-  console.log(`Spouse present in ${rf.livesWithSpouse}/${reports.length} samples`);
-  console.log(`Children>0 in ${rf.livesWithChildren}/${reports.length} samples`);
 }

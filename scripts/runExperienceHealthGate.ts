@@ -19,7 +19,6 @@ import {
 } from './goldenLineGate';
 import { evaluateMidlifeGate } from './midlifeGate';
 import { runAllP3EvalSimulations } from './goldenLineSimulation';
-import { formatP3RomanceFamilyGateSection } from './experienceHealthGate';
 import type { P3EvalReportEntry } from './experienceHealthGate';
 import { P3_EVAL_COHORT_LABEL } from './p3TrustTargets';
 
@@ -57,8 +56,6 @@ function printP3TrustMetrics(gate: ExperienceHealthGateResult): void {
   const p3Keys = new Set([
     'death_rate',
     'death_without_warning_count',
-    'romance_family_primary_sample_pass',
-    'p3_romance_family_achievement_rate',
   ]);
   const p3Metrics = [
     ...gate.blockingMetrics,
@@ -104,7 +101,6 @@ function writeJsonOutput(
     goldenLinePass: goldenLineGate.pass,
     midlifePass,
     derivedMetrics: gate.derivedMetrics,
-    p3RomanceFamily: gate.p3RomanceFamily?.primaryArcReport ?? null,
     metrics: [
       ...gate.blockingMetrics,
       ...gate.warningMetrics,
@@ -205,10 +201,6 @@ async function main(): Promise<void> {
   printSection('Warning Metrics', gate.warningMetrics);
   printSection('Info Metrics', gate.infoMetrics);
   printP3TrustMetrics(gate);
-  console.log('\n=== P3 Romance/Family Arc (US-010) ===');
-  for (const line of formatP3RomanceFamilyGateSection(gate.p3RomanceFamily)) {
-    console.log(line);
-  }
   console.log(`\nDecision: ${gate.decision.toUpperCase()}`);
   console.log(`Warnings failed (non-blocking): ${gate.warningsFailed}`);
   console.log(`JSON: ${path.relative(process.cwd(), jsonPath)}`);

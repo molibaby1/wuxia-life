@@ -72,11 +72,6 @@ function computeMetrics(reports: GameProcessReport[]): Record<SimulationMetricDe
   const totalSaves = reports.reduce((sum, report) => sum + report.totalSaves, 0);
   const deaths = reports.filter(report => !report.isAlive).length;
   const lifeCount = reports.length;
-  const withFamilyOrRomance = reports.filter(report => {
-    const spouse = report.statistics.spouse;
-    const children = report.statistics.children || 0;
-    return Boolean(spouse) || children > 0;
-  }).length;
 
   const endingCounts = new Map<string, number>();
   for (const report of reports) {
@@ -92,7 +87,6 @@ function computeMetrics(reports: GameProcessReport[]): Record<SimulationMetricDe
     auto_event_rate: totalEvents > 0 ? totalAutoEvents / totalEvents : null,
     death_rate: lifeCount > 0 ? deaths / lifeCount : null,
     ending_distribution: maxEndingShare,
-    romance_family_achievement_rate: lifeCount > 0 ? withFamilyOrRomance / lifeCount : null,
     save_count: lifeCount > 0 ? totalSaves / lifeCount : null,
   };
 }

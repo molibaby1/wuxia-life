@@ -9,13 +9,6 @@ import { P3_EVAL_END_AGE } from './goldenLineSimulation';
 
 export type SimulationLifeSegment = '0-30' | '31-50';
 
-export type RelationshipStateSummary = {
-  spouse: string | null;
-  children: number;
-  romanceFamilyArcOutcome: string | null;
-  romanceFamilyAchievement: boolean | null;
-};
-
 export type SegmentDeathStatus = {
   isAliveAtSegmentEnd: boolean;
   deathReason: string | null;
@@ -33,7 +26,6 @@ export type SimulationSegmentMetrics = {
   eventCount: number;
   choiceCount: number;
   routeFlags: string[];
-  relationshipState: RelationshipStateSummary;
   deathStatus: SegmentDeathStatus;
   payoffStatus: SegmentPayoffStatus;
 };
@@ -74,23 +66,6 @@ function lastReplayInSegment(
 ): GoldenLineReplayRecord | undefined {
   const segmentReplay = replayInSegment(replay, segment);
   return segmentReplay[segmentReplay.length - 1];
-}
-
-function buildRelationshipState(
-  report: GameProcessReport,
-  segment: SimulationLifeSegment,
-): RelationshipStateSummary {
-  const segmentRecords = recordsInSegment(report.records, segment);
-  const lastRecord = segmentRecords[segmentRecords.length - 1];
-  const player = lastRecord?.gameState.player;
-  const arc = report.romanceFamilyArcReport;
-
-  return {
-    spouse: player?.spouse ?? null,
-    children: player?.children ?? 0,
-    romanceFamilyArcOutcome: arc?.arcOutcome ?? null,
-    romanceFamilyAchievement: arc?.achievement ?? null,
-  };
 }
 
 function buildDeathStatus(
@@ -140,7 +115,6 @@ function buildSegmentMetrics(
     eventCount: segmentRecords.length,
     choiceCount: segmentRecords.filter(record => record.eventType === 'choice').length,
     routeFlags: finalReplay?.routeFlags ?? [],
-    relationshipState: buildRelationshipState(run.report, segment),
     deathStatus: buildDeathStatus(run.report, segment),
     payoffStatus: buildPayoffStatus(payoffMetrics),
   };

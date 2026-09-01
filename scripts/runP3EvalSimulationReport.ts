@@ -36,7 +36,7 @@ function formatMarkdownReport(reports: P3EvalSegmentReport[]): string {
     '| 分段 | 年龄 | 必填字段 |',
     '| --- | --- | --- |',
     '| Youth | 0–30 | event/choice 计数、route flags、simulated payoff |',
-    '| Midlife | 31–50 | 同上 + relationship state、death status、payoff status |',
+    '| Midlife | 31–50 | 同上 + death status、payoff status |',
     '',
     '## 样本汇总',
     '',
@@ -59,9 +59,6 @@ function formatMarkdownReport(reports: P3EvalSegmentReport[]): string {
     lines.push(`| eventCount | ${m.eventCount} |`);
     lines.push(`| choiceCount | ${m.choiceCount} |`);
     lines.push(`| routeFlags | ${m.routeFlags.join(', ') || '—'} |`);
-    lines.push(
-      `| relationshipState | spouse=${m.relationshipState.spouse ?? '—'}, children=${m.relationshipState.children}, arc=${m.relationshipState.romanceFamilyArcOutcome ?? '—'} |`,
-    );
     lines.push(
       `| deathStatus | alive=${m.deathStatus.isAliveAtSegmentEnd}, diedInSegment=${m.deathStatus.diedInSegment}, reason=${m.deathStatus.deathReason ?? '—'} |`,
     );

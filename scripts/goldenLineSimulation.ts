@@ -1,6 +1,5 @@
 import { GameProcessSimulator } from '../tests/GameProcessSimulator';
 import type { GameProcessReport } from '../src/types/simulationRecordTypes';
-import { GOLDEN_ROMANCE_FAMILY_SAMPLE_ID } from './romanceFamilyArcTelemetry';
 
 /** P3-EVAL / golden-line deterministic end age (US-002 §5.1, US-017). */
 export const P3_EVAL_END_AGE = 50;
@@ -58,21 +57,8 @@ export const GOLDEN_LINE_SAMPLES: GoldenLineSimulationSample[] = [
   },
 ];
 
-/** P3-RF: deterministic romance/family regression (US-010, arc_rf_mingyue). */
-export const GOLDEN_ROMANCE_FAMILY_SAMPLE: GoldenLineSimulationSample = {
-  id: GOLDEN_ROMANCE_FAMILY_SAMPLE_ID,
-  personaName: '沈照霜',
-  gender: 'female',
-  seed: 305,
-  choiceTendency: 'relationship',
-  description: 'P3-RF romance/family arc regression (0–50)',
-};
-
-/** P3-EVAL trust queue: golden routes + romance/family primary sample (US-002 §2.1). */
-export const P3_EVAL_SAMPLES: GoldenLineSimulationSample[] = [
-  ...GOLDEN_LINE_SAMPLES,
-  GOLDEN_ROMANCE_FAMILY_SAMPLE,
-];
+/** P3-EVAL trust queue: the four golden route/baseline samples (US-002 §2.1). */
+export const P3_EVAL_SAMPLES: GoldenLineSimulationSample[] = [...GOLDEN_LINE_SAMPLES];
 
 export type GoldenLineReplayRecord = {
   age: number;

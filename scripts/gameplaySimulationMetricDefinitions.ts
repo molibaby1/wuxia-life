@@ -8,7 +8,6 @@ export interface SimulationMetricDefinition {
     | 'auto_event_rate'
     | 'death_rate'
     | 'ending_distribution'
-    | 'romance_family_achievement_rate'
     | 'save_count';
   label: string;
   description: string;
@@ -66,18 +65,6 @@ export const P2_SIMULATION_METRIC_DEFINITIONS: ReadonlyArray<SimulationMetricDef
     baseline: {
       mode: 'observation_baseline',
       note: '任一单结局占比超过 70% 记为 warning 观察信号；超过 85% 可升级为 blocker。',
-    },
-  },
-  {
-    key: 'romance_family_achievement_rate',
-    label: 'Romance/Family Achievement Rate',
-    description: '达成恋爱或家庭相关里程碑的比例，用于评估非战斗人生线可达性。',
-    severity: 'info',
-    baseline: {
-      mode: 'observation_baseline',
-      min: 0.05,
-      max: 0.7,
-      note: '过低可能表示支线无法触达；过高可能表示单一路径过强。',
     },
   },
   {

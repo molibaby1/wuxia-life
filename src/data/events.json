@@ -3,7 +3,7 @@
   "imports": [
     "./lines/origin.json",
     "./lines/general.json",
-    "./lines/love.json",
+    "./lines/character-mingyue-v1.json",
     "./lines/official.json",
     "./lines/sect-beggars.json",
     "./lines/sect-border.json",

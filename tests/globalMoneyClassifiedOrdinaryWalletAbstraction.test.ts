@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import familyParenthoodDeferredEvents from '../src/data/lines/family-parenthood-deferred.json';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import type { EffectDefinition, EventDefinition, GameState, PlayerState } from '../src/types/eventTypes';
 
@@ -24,8 +25,8 @@ const ORDINARY_RETIRED_EVENTS = [
   'border_trade_route',
   'border_career_growth',
   'border_alliance',
-  'family_marriage',
   'family_child_education',
+  'relationship_debt_return',
   'p29_social_momentum_patron_obligation',
   'court_politics_revealed',
   'career_recruit_disciples',
@@ -46,6 +47,8 @@ const ORDINARY_RETIRED_EVENTS = [
 ] as const;
 
 type MoneyWrite = { eventId: string; choiceId?: string; effect: EffectDefinition };
+
+const deferredFamilyEvents = familyParenthoodDeferredEvents as unknown as EventDefinition[];
 
 function isMoneyEffect(effect: EffectDefinition): boolean {
   return effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money';
@@ -73,7 +76,8 @@ function collectFormalMoneyWrites(): MoneyWrite[] {
 }
 
 function getEvent(eventId: string): EventDefinition {
-  const event = EventLoader.getInstance().getEventById(eventId);
+  const event = EventLoader.getInstance().getEventById(eventId) ??
+    deferredFamilyEvents.find(candidate => candidate.id === eventId);
   assert(event, `missing event: ${eventId}`);
   return event;
 }
@@ -217,8 +221,6 @@ async function executeChoice(eventId: string, choiceId: string, money: number): 
 async function testRepresentativeMoneySentinelInvariance(): Promise<void> {
   const cases: Array<{ eventId: string; choiceId?: string; assert?: (state: GameState) => void }> = [
     { eventId: 'border_clan_conflict', choiceId: 'border_conflict_trade' },
-    { eventId: 'family_marriage', choiceId: 'marry_mingyue' },
-    },
     { eventId: 'p9_childhood_first_trade' },
     { eventId: 'p11_wealth_reinforcement_first_deal' },
     { eventId: 'hvg_merchant_first_responsibility_challenge', choiceId: 'ledger_rushed_collection' },
@@ -290,8 +292,6 @@ function choiceMoneyWriteCount(eventId: string, choiceId: string): number {
 function testStaleWalletWordingRemoved(): void {
   const cases: Array<{ eventId: string; choiceId: string; stale: string; keep?: string }> = [
     { eventId: 'border_career_growth', choiceId: 'border_career_trade', stale: '金钱 +50' },
-    { eventId: 'family_marriage', choiceId: 'marry_mingyue', stale: '财富 -50' },
-    { eventId: 'family_marriage', choiceId: 'marry_arranged', stale: '财富 +50', keep: '人脉 +20' },
     { eventId: 'family_child_education', choiceId: 'child_education_merchant', stale: '财富 +50' },
     { eventId: 'career_recruit_disciples', choiceId: 'career_recruit_disciples_choice_2', stale: '财富 +50' },
     { eventId: 'career_sect_expansion', choiceId: 'career_sect_expansion_choice_2', stale: '财富 -50', keep: '声望 +10' },

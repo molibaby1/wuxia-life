@@ -16,7 +16,7 @@ import eventsIndexJson from '../data/events.json';
 import generalEventsJson from '../data/lines/general.json';
 import originEventsJson from '../data/lines/origin.json';
 import officialEventsJson from '../data/lines/official.json';
-import loveEventsJson from '../data/lines/love.json';
+import mingyueEventsJson from '../data/lines/character-mingyue-v1.json';
 import middleAgeCareerEventsJson from '../data/lines/middle-age-career.json';
 import familyLifeEventsJson from '../data/lines/family-life.json';
 import jianghuConflictEventsJson from '../data/lines/jianghu-conflict.json';
@@ -52,7 +52,7 @@ import sampleLinesSpineEventsJson from '../data/lines/sample-lines-spine.json';
 // import pathExamplesJson from '../data/lines/path-examples.json';
 
 const generalEvents = generalEventsJson as EventDefinition[];
-const loveEvents = loveEventsJson as EventDefinition[];
+const mingyueEvents = mingyueEventsJson as EventDefinition[];
 const officialEvents = officialEventsJson as EventDefinition[];
 const originEvents = originEventsJson as EventDefinition[];
 const middleAgeCareerEvents = middleAgeCareerEventsJson as EventDefinition[];
@@ -281,7 +281,7 @@ export class EventLoader {
     const lineMap: Record<string, EventDefinition[]> = {
       './lines/origin.json': originEvents,
       './lines/general.json': generalEvents,
-      './lines/love.json': loveEvents,
+      './lines/character-mingyue-v1.json': mingyueEvents,
       './lines/official.json': officialEvents,
       './lines/middle-age-career.json': middleAgeCareerEvents,
       './lines/family-life.json': familyLifeEvents,

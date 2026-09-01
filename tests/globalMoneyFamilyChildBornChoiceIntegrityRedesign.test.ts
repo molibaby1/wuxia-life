@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
@@ -25,8 +27,12 @@ const WEALTH_REPLACEMENT_EFFECTS = new Set([
 ]);
 
 function getEvent(): EventDefinition {
-  const event = EventLoader.getInstance().getEventById(EVENT_ID);
+  const deferredSource = JSON.parse(
+    fs.readFileSync(path.resolve('src/data/lines/family-parenthood-deferred.json'), 'utf8'),
+  ) as EventDefinition[];
+  const event = deferredSource.find(candidate => candidate.id === EVENT_ID);
   assert(event, `missing event: ${EVENT_ID}`);
+  assert.equal(EventLoader.getInstance().getEventById(EVENT_ID), undefined, `${EVENT_ID} must remain deferred`);
   return event;
 }
 

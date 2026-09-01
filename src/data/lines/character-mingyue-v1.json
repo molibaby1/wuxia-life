@@ -1,0 +1,579 @@
+[
+  {
+    "id": "mingyue_market_meet",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 80,
+    "ageRange": { "min": 15, "max": 20 },
+    "triggers": [{ "type": "age_reach", "value": 15 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "!events.has(\"mingyue_market_meet\")"
+      }
+    ],
+    "content": {
+      "title": "市集上的账簿",
+      "text": "市集忽然传来争执：一名摊主把一册记账簿摔在地上，指责货商少交了一批药材。明月蹲下捡起账簿，发现两边的记号都被雨水洇开了。她没有急着替谁说话，只请双方把还能核对的货箱重新点一遍。",
+      "description": "一件地方小事，让你有机会看见明月如何面对责任与现实。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_participate",
+        "text": "留下来帮忙核对货物",
+        "description": "你参与处理眼前的事情，也因此真正认识了明月。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "flag_set", "target": "mingyue_met", "value": true },
+          { "type": "event_record", "target": "mingyue_market_participated" }
+        ]
+      },
+      {
+        "id": "mingyue_pass_by",
+        "text": "不介入，继续赶路",
+        "description": "你只是从争执旁经过，明月也没有进入你这一局人生。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 1, "timeUnit": "day" },
+          { "type": "event_record", "target": "mingyue_market_passed" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "市集", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_second_encounter",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 70,
+    "ageRange": { "min": 16, "max": 24 },
+    "triggers": [{ "type": "age_reach", "value": 16 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mingyue_met\") && !events.has(\"mingyue_second_encounter\")"
+      }
+    ],
+    "content": {
+      "title": "旧账的新去处",
+      "text": "几个月后，你在渡口再次见到明月。她已经把那册被雨水洇过的账簿抄成了两份：一份交给摊主，一份留给货商。她说，事情解决了，账却不能只靠某个人记得。",
+      "description": "明月记得那次市集上的小事，也在用自己的方式承担后果。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+      { "type": "event_record", "target": "mingyue_second_encounter" }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "连续性", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_shared_experience",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 65,
+    "ageRange": { "min": 17, "max": 28 },
+    "triggers": [{ "type": "age_reach", "value": 17 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_second_encounter\") && !events.has(\"mingyue_shared_experience\")"
+      }
+    ],
+    "content": {
+      "title": "渡口的药箱",
+      "text": "渡口一艘货船翻了半边，几箱药材泡在浅水里。明月先记下哪些药还能用，再请船主把剩下的药送到附近的医馆。她说，救急不能等账目完全清楚，但事后仍要把损失分清。",
+      "description": "你们共同处理一件具体事务，明月的取舍也留下了可追溯的历史。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_shared_help",
+        "text": "先帮她把药箱搬到医馆",
+        "description": "先处理眼前的急事，再一起核对损失。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_shared_help" }
+        ]
+      },
+      {
+        "id": "mingyue_shared_boundary",
+        "text": "留下来替她守住分账的边界",
+        "description": "你不替任何一方承担全部损失，但愿意确保分账不被含糊带过。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_shared_boundary" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "共同经历", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_value_conflict",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 60,
+    "ageRange": { "min": 18, "max": 32 },
+    "triggers": [{ "type": "age_reach", "value": 18 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_shared_experience\") && !events.has(\"mingyue_value_conflict\")"
+      }
+    ],
+    "content": {
+      "title": "家门内外",
+      "text": "明月的家族要她接手一份旧账：若她替家里把几笔亏空记成尚未结清，家族能暂时保住名声，但渡口上几户小商贩会因此被追债。她不愿用别人的日子填补家里的体面，却也知道拒绝会让家人失去生计。",
+      "description": "这首先是明月自己的人生选择：个人判断与家族、现实责任发生冲突。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_conflict_support",
+        "text": "支持她承担家族后果",
+        "description": "你认可她不把损失转嫁给无关的人。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_conflict_support" }
+        ]
+      },
+      {
+        "id": "mingyue_conflict_question",
+        "text": "提醒她也要顾及家人的生计",
+        "description": "你不同意她只承担道德上的一边，要求她正视家族的现实处境。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_conflict_question" }
+        ]
+      },
+      {
+        "id": "mingyue_conflict_boundary",
+        "text": "说明你不会替她作决定",
+        "description": "你承认这是她必须承担的选择，但愿意在她决定后面对结果。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_conflict_boundary" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "家族", "现实约束", "价值冲突", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_relationship_choice",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 55,
+    "ageRange": { "min": 19, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 19 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_shared_experience\") && events.has(\"mingyue_value_conflict\") && !events.has(\"mingyue_relationship_choice\")"
+      }
+    ],
+    "content": {
+      "title": "各自的决定",
+      "text": "经历过渡口的药箱与家门内外的争执后，明月把话说得很清楚：她愿意继续把你当作重要的人，但不愿让任何关系替她承担本该由她面对的家族选择。你们需要决定这段关系以什么方式继续。",
+      "description": "关系性质由共同前史与当下选择共同形成，不是一次相遇的自动结论。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_choose_romantic",
+        "text": "明确进一步发展感情",
+        "description": "你们都确认愿意以恋爱关系继续相处，同时保留各自面对现实的边界。",
+        "effects": [
+          { "type": "flag_set", "target": "mingyue_romance_confirmed", "value": true },
+          { "type": "flag_unset", "target": "mingyue_non_romantic_relationship" },
+          { "type": "event_record", "target": "mingyue_relationship_romantic" }
+        ]
+      },
+      {
+        "id": "mingyue_choose_non_romantic",
+        "text": "不发展为恋爱，但继续相互扶持",
+        "description": "你们确认这段关系的重要性，却不把它定义为恋爱。",
+        "effects": [
+          { "type": "flag_set", "target": "mingyue_non_romantic_relationship", "value": true },
+          { "type": "flag_unset", "target": "mingyue_romance_confirmed" },
+          { "type": "event_record", "target": "mingyue_relationship_non_romantic" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "关系选择", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_echo_romantic",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mingyue_romance_confirmed\") && events.has(\"mingyue_relationship_choice\") && !events.has(\"mingyue_echo_romantic\")"
+      }
+    ],
+    "content": {
+      "title": "仍在商量的人生",
+      "text": "多年后，明月带着一份新的家族账目来找你。你们仍会争论怎样面对家人的期待，也仍会在争论后把各自愿意承担的部分写清楚。这段感情没有替你们消除现实，只让你们继续共同面对它。",
+      "description": "较晚的人生事件读取你们明确建立感情的事实。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "event_record", "target": "mingyue_echo_romantic" }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "后续回响", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_echo_non_romantic",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mingyue_non_romantic_relationship\") && events.has(\"mingyue_relationship_choice\") && !events.has(\"mingyue_echo_non_romantic\")"
+      }
+    ],
+    "content": {
+      "title": "旧识的新信",
+      "text": "多年后，明月托人送来一封信：她接手的渡口终于换了新的账法，想请你为一批远行的人引路。你们没有成为恋人，却仍会在各自的人生需要时记得那段共同处理过的旧事。",
+      "description": "不发展为恋爱并没有抹去明月；共同经历仍然在后来的人生中产生回响。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "event_record", "target": "mingyue_echo_non_romantic" }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "后续回响", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_echo_conflict_support",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_relationship_choice\") && events.has(\"mingyue_conflict_support\") && !events.has(\"mingyue_echo_conflict_support\")"
+      }
+    ],
+    "content": {
+      "title": "明月记得你的立场",
+      "text": "多年后，明月再次提起家门内外的那场争执。她记得你当时支持她承担家族选择的后果，也记得那份支持没有替她作决定。如今她仍按自己的判断处理新的账目，只把你当年如何看待这件事当作一段清楚的共同历史。",
+      "description": "后续回响读取具体的价值冲突前史，只改变人物反应，不决定关系性质。"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      { "type": "event_record", "target": "mingyue_echo_conflict_support" }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "价值冲突", "后续回响", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_marriage_decision",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 40,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"mingyue_romance_confirmed\") && events.has(\"mingyue_echo_romantic\") && !events.has(\"mingyue_marriage_decision\") && !flags.has(\"married\") && !player.spouse"
+      }
+    ],
+    "content": {
+      "title": "相伴之后",
+      "text": "多年相伴之后，明月把婚姻看作需要共同承担的事实，而不是感情的终点。她问你是否愿意与她成婚；决定权在你。",
+      "description": "婚姻是独立选择，不自动等同于恋爱完成、关系质量或家庭安排。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_choose_marriage",
+        "text": "与明月成婚",
+        "description": "将多年相伴正式写入婚姻。",
+        "effects": [
+          { "type": "special", "target": "set_spouse", "value": "明月" },
+          { "type": "flag_set", "target": "married", "value": true }
+        ]
+      },
+      {
+        "id": "mingyue_decline_marriage",
+        "text": "继续相伴，但暂不成婚",
+        "description": "保留这段感情，不让系统替你定义婚姻。",
+        "effects": [
+          { "type": "event_record", "target": "mingyue_marriage_decision" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "婚姻", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_parenthood_decision",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 30, "max": 40 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "player.gender == \"male\" && player.spouse == \"明月\" && flags.has(\"married\") && player.children == 0 && !flags.has(\"has_child\") && !events.has(\"mingyue_parenthood_decision\") && player.age >= 30 && player.age <= 40"
+      }
+    ],
+    "content": {
+      "title": "要不要把孩子带进这段日子",
+      "text": "明月把一张新的日程摊在桌上：你们已经成婚，但各自的事务仍有许多未完。她问你们是否愿意在往后的日子里迎接一个孩子，并一起承担这会改变的生活安排。",
+      "description": "这是你与明月共同面对的一次具体 Parenthood 决定，不由婚姻本身自动触发。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_parenthood_enter",
+        "text": "愿意为孩子腾出人生位置",
+        "description": "你们决定进入这段新的家庭生活，但孩子不会在这一刻直接出现。",
+        "effects": [
+          { "type": "time_advance", "target": "age", "value": 10, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_parenthood_chosen" }
+        ]
+      },
+      {
+        "id": "mingyue_parenthood_defer",
+        "text": "现在暂不进入 Parenthood",
+        "description": "你们保留这次决定的余地，婚姻与各自的生活继续照常展开。",
+        "effects": [
+          { "type": "event_record", "target": "mingyue_parenthood_decision" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "Parenthood", "家庭责任", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_child_arrival",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 50,
+    "ageRange": { "min": 30, "max": 41 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_parenthood_chosen\") && player.spouse == \"明月\" && flags.has(\"married\") && player.children == 0 && !flags.has(\"has_child\") && !events.has(\"mingyue_child_arrival\")"
+      }
+    ],
+    "content": {
+      "title": "孩子来到你们的日子里",
+      "text": "经过一段等待，孩子出生了。明月仍有自己的事务，你也有尚未放下的生活；孩子已经成为你们共同历史中一个可以被后来日子记住的具体事实。",
+      "description": "孩子由这次具体 arrival 进入人生；children 与 has_child 只保留兼容性的粗粒度事实。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_child_arrival_direct_care",
+        "text": "暂缓部分外务，承担更多直接照料",
+        "description": "孩子出生后的最初几个月，你先把更多时间放在家中。",
+        "effects": [
+          { "type": "stat_modify", "target": "children", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "has_child", "value": true },
+          { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_child_arrival_direct_care" }
+        ]
+      },
+      {
+        "id": "mingyue_child_arrival_external_duties",
+        "text": "接过更多家庭对外事务，让明月先恢复",
+        "description": "孩子出生后的最初几个月，你先承担更多对外事务，让明月有时间恢复，再共同调整日常。",
+        "effects": [
+          { "type": "stat_modify", "target": "children", "value": 1, "operator": "add" },
+          { "type": "flag_set", "target": "has_child", "value": true },
+          { "type": "time_advance", "target": "age", "value": 6, "timeUnit": "month" },
+          { "type": "event_record", "target": "mingyue_child_arrival_external_duties" }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "Parenthood", "具体家庭经历", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  },
+  {
+    "id": "mingyue_early_parenting",
+    "version": "1.0.0",
+    "category": "side_quest",
+    "priority": 1,
+    "weight": 45,
+    "ageRange": { "min": 30, "max": 60 },
+    "triggers": [{ "type": "age_reach", "value": 30 }],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "events.has(\"mingyue_child_arrival\") && player.spouse == \"明月\" && flags.has(\"married\") && player.children > 0 && flags.has(\"has_child\") && !events.has(\"mingyue_early_parenting\")"
+      }
+    ],
+    "content": {
+      "title": "重新安排孩子出生后的日常",
+      "text": "孩子出生后的半年过去了。明月仍有自己的事务，你也有自己的生活，原来的安排已经需要重新调整；你们开始商量怎样承担直接照料与对外事务。",
+      "description": "这次具体的早期家庭经历读取孩子 arrival 的真实前史，不进入教育、性格或继承内容。"
+    },
+    "eventType": "choice",
+    "choices": [
+      {
+        "id": "mingyue_early_care",
+        "text": "这段时间由我更多承担直接照料",
+        "description": "你愿意把更多日常照料接过来，再与明月继续协调各自的事务。",
+        "effects": [],
+        "outcomes": [
+          {
+            "id": "mingyue_early_care_after_direct_arrival",
+            "text": "你记得孩子出生时曾停下部分外务承担直接照料，如今仍愿意先把一部分日常接过来。",
+            "condition": { "type": "expression", "expression": "events.has(\"mingyue_child_arrival_direct_care\")" },
+            "effects": [
+              { "type": "event_record", "target": "mingyue_early_parenting" }
+            ]
+          },
+          {
+            "id": "mingyue_early_care_after_external_arrival",
+            "text": "你记得孩子出生时曾接过较多外务让明月先恢复，如今愿意把一部分直接照料接过来。",
+            "condition": { "type": "expression", "expression": "events.has(\"mingyue_child_arrival_external_duties\")" },
+            "effects": [
+              { "type": "event_record", "target": "mingyue_early_parenting" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mingyue_early_rotate",
+        "text": "双方重新拆分事务，轮换承担照料",
+        "description": "你们把直接照料与对外事务重新拆开，按各自的忙闲轮换承担。",
+        "effects": [],
+        "outcomes": [
+          {
+            "id": "mingyue_early_rotate_after_direct_arrival",
+            "text": "你记得孩子出生时曾停下部分外务承担直接照料，这次你们把照料与外务重新排成轮换。",
+            "condition": { "type": "expression", "expression": "events.has(\"mingyue_child_arrival_direct_care\")" },
+            "effects": [
+              { "type": "event_record", "target": "mingyue_early_parenting" }
+            ]
+          },
+          {
+            "id": "mingyue_early_rotate_after_external_arrival",
+            "text": "你记得孩子出生时曾接过较多外务让明月先恢复，这次你们把照料与外务重新排成轮换。",
+            "condition": { "type": "expression", "expression": "events.has(\"mingyue_child_arrival_external_duties\")" },
+            "effects": [
+              { "type": "event_record", "target": "mingyue_early_parenting" }
+            ]
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "createdAt": 1780000000000,
+      "updatedAt": 1780000000000,
+      "author": "development_team",
+      "tags": ["人物", "明月", "Parenthood", "早期家庭经历", "once"],
+      "enabled": true
+    },
+    "storyLine": "mingyue_character",
+    "cooldown": 0
+  }
+]

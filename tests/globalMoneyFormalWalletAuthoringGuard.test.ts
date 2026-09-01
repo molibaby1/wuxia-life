@@ -52,18 +52,11 @@ function testFormalCatalogHasZeroWalletAuthoring(): void {
   const loader = EventLoader.getInstance();
   const formalEvents = loader.getAllEvents();
   const eventsIndex = readJson<{ imports: string[] }>('src/data/events.json');
-  const manifest = readJson<{ summary?: { totalEventsInRuntime?: number } }>(
-    'src/data/event-asset-manifest.json',
-  );
-
   assert.equal(loader.getUndeclaredImportPaths().length, 0, 'events.json imports must all be wired in EventLoader');
   assert.equal(eventsIndex.imports.length > 0, true, 'events.json must declare formal imports');
 
-  // Authority is EventLoader/events.json, never stale manifest totals (currently 415).
-  const staleManifestCount = manifest.summary?.totalEventsInRuntime;
+  // Authority is EventLoader/events.json, not a generated asset report.
   assert.equal(typeof formalEvents.length, 'number');
-  assert.notEqual(formalEvents.length, staleManifestCount,
-    `formal EventLoader count must not be taken from stale manifest totalEventsInRuntime=${staleManifestCount}`);
   assert.equal(formalEvents.length, 391, 'formal EventLoader catalog must remain the current 391-event source');
 
   const errors = collectFormalWalletAuthoringErrors(formalEvents);

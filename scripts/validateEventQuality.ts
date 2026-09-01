@@ -14,7 +14,7 @@ import {
 } from './eventQualityGateRules';
 import originEventsJson from '../src/data/lines/origin.json';
 import generalEventsJson from '../src/data/lines/general.json';
-import loveEventsJson from '../src/data/lines/love.json';
+import mingyueEventsJson from '../src/data/lines/character-mingyue-v1.json';
 import officialEventsJson from '../src/data/lines/official.json';
 import middleAgeCareerEventsJson from '../src/data/lines/middle-age-career.json';
 import familyLifeEventsJson from '../src/data/lines/family-life.json';
@@ -70,6 +70,7 @@ const STAT_KEYS = new Set([
   'knowledge',
   'businessAcumen',
   'influence',
+  'children',
   'money',
   'wealth',
 ]);
@@ -268,7 +269,7 @@ function buildLoadedSourceById(loadedEvents: EventDefinition[]): Map<string, str
   const lineMap: Array<{ source: string; events: EventDefinition[] }> = [
     { source: './lines/origin.json', events: originEventsJson as EventDefinition[] },
     { source: './lines/general.json', events: generalEventsJson as EventDefinition[] },
-    { source: './lines/love.json', events: loveEventsJson as EventDefinition[] },
+    { source: './lines/character-mingyue-v1.json', events: mingyueEventsJson as EventDefinition[] },
     { source: './lines/official.json', events: officialEventsJson as EventDefinition[] },
     { source: './lines/middle-age-career.json', events: middleAgeCareerEventsJson as EventDefinition[] },
     { source: './lines/family-life.json', events: familyLifeEventsJson as EventDefinition[] },

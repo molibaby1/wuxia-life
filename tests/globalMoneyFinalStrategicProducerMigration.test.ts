@@ -3,11 +3,14 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import familyParenthoodDeferredEvents from '../src/data/lines/family-parenthood-deferred.json';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import type { EffectDefinition, EventChoice, EventDefinition, GameState, PlayerState } from '../src/types/eventTypes';
 import type { WealthCapacity } from '../src/types/wealthCapacity';
 
 process.env.WUXIA_ENGINE_QUIET = '1';
+
+const deferredFamilyEvents = familyParenthoodDeferredEvents as unknown as EventDefinition[];
 
 const MONEY_SENTINELS = [0, 317, 9999] as const;
 const WEALTH_TIERS = [
@@ -49,7 +52,8 @@ function collectFormalMoneyWrites(): Array<{ eventId: string; choiceId?: string 
 }
 
 function getEvent(eventId: string): EventDefinition {
-  const event = EventLoader.getInstance().getEventById(eventId);
+  const event = EventLoader.getInstance().getEventById(eventId) ??
+    deferredFamilyEvents.find(candidate => candidate.id === eventId);
   assert(event, `missing event: ${eventId}`);
   return event;
 }

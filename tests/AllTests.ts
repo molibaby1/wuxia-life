@@ -2487,7 +2487,7 @@ const coreFunctionSuite: TestSuite = {
     },
     {
       name: 'P3 US-014 - payoff gate 区分 static 与 simulated',
-      description: '静态 gate 通过时 priority-route 仿真缺口应为 blocker',
+      description: '静态 gate 通过时 priority-route 仿真缺口应保留为 warning signal',
       test: () => {
         const replay: GoldenLineReplayRecord[] = [
           {
@@ -2544,18 +2544,19 @@ const coreFunctionSuite: TestSuite = {
           '应含 expected payoff id',
         );
         assertEqual(gap?.blockReason, 'static_data_mismatch', '应推断 block reason');
-        const blocker = evaluation.findings.find(
+        const signal = evaluation.findings.find(
           finding =>
             finding.sampleId === 'golden-sect' &&
-            finding.severity === 'blocker' &&
-            finding.status === 'fail',
+            finding.findingType === 'simulated_gap' &&
+            finding.severity === 'warning' &&
+            finding.status === 'warning',
         );
-        assert(blocker, 'priority-route 仿真不足应为 blocker');
+        assert(signal, 'priority-route 仿真不足应保留为 warning signal');
       },
     },
     {
-      name: 'P3 US-029 - neutral 仿真 payoff 为 blocker',
-      description: 'golden-neutral-baseline 仿真不足在 US-029 应为 blocker',
+      name: 'P3 US-029 - neutral 仿真 payoff 为 warning signal',
+      description: 'golden-neutral-baseline 仿真不足在 US-029 应报告但不阻断',
       test: () => {
         const replay: GoldenLineReplayRecord[] = [
           {
@@ -2590,13 +2591,14 @@ const coreFunctionSuite: TestSuite = {
           replay,
         };
         const evaluation = evaluatePayoffGate([run]);
-        const blocker = evaluation.findings.find(
+        const signal = evaluation.findings.find(
           finding =>
             finding.sampleId === 'golden-neutral-baseline' &&
-            finding.severity === 'blocker' &&
-            finding.status === 'fail',
+            finding.findingType === 'simulated_gap' &&
+            finding.severity === 'warning' &&
+            finding.status === 'warning',
         );
-        assert(blocker, 'neutral 样本仿真不足应为 blocker');
+        assert(signal, 'neutral 样本仿真不足应保留为 warning signal');
       },
     },
     {
@@ -2638,7 +2640,7 @@ const coreFunctionSuite: TestSuite = {
     },
     {
       name: 'P3 US-014 - golden line gate 集成 payoff 阻断',
-      description: '仿真 payoff blocker 应使 evaluateGoldenLineGates 失败',
+      description: '仿真 payoff gap signal 不应单独使 evaluateGoldenLineGates 失败',
       test: () => {
         const replay: GoldenLineReplayRecord[] = [
           {
@@ -2674,16 +2676,26 @@ const coreFunctionSuite: TestSuite = {
           replay,
         };
         const gate = evaluateGoldenLineGates([run]);
-        assertEqual(gate.pass, false, '仿真 payoff 未达标时 gate 应 fail');
+        assertEqual(gate.pass, false, 'fixture 仍有其他 gate blocker，不能归因于 payoff signal');
         assert(
           gate.payoffEvaluation.summary.staticPayoffRate >= 0.7,
           '静态 map 仍应通过阈值',
         );
         assert(
           gate.findings.some(
-            finding => finding.gate === 'payoff' && finding.severity === 'blocker',
+            finding =>
+              finding.gate === 'payoff' &&
+              finding.findingType === 'simulated_gap' &&
+              finding.severity === 'warning' &&
+              finding.status === 'warning',
           ),
-          '应含 payoff blocker finding',
+          '应含 payoff warning signal',
+        );
+        assert(
+          !gate.findings.some(
+            finding => finding.gate === 'payoff' && finding.severity === 'blocker' && finding.status === 'fail',
+          ),
+          'payoff signal 不应产生 blocker',
         );
       },
     },

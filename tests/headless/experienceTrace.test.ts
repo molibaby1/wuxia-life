@@ -3,6 +3,9 @@ import { runHeadlessPersona } from '../../src/headless/playability/headlessPerso
 import { getP8PersonaById } from '../../src/p8/personas';
 import type { ExperienceTrace } from '../../src/headless/playability/experienceTraceTypes';
 import type { ChoiceScoreDiagnostic } from '../../src/p8/types';
+import type { DisturbanceNarrativeDisplay } from '../../src/types/activeActionTypes';
+
+const EXPERIENCE_TRACE_SEED = 808;
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -38,6 +41,7 @@ async function runTrace(): Promise<ExperienceTrace> {
   if (!persona) throw new Error('missing p8-martial-lin fixture');
   const result = await runHeadlessPersona({
     persona,
+    seed: EXPERIENCE_TRACE_SEED,
     endAge: 40,
     catalogVersion: '1.0.0',
     maxSteps: 1200,
@@ -55,7 +59,7 @@ export async function runExperienceTraceTests(): Promise<void> {
   assert(trace.schemaVersion === 'experience-trace-v1', 'trace schema version');
   assert(trace.runtimePath === 'headless_server', 'trace runtime path');
   assert(trace.persona.id === persona.id, 'trace persona id');
-  assert(trace.seed === persona.seed, 'trace seed');
+  assert(trace.seed === EXPERIENCE_TRACE_SEED, 'trace seed');
   assert(trace.endAge === 40, 'trace end age');
   assert(trace.selectionPolicy.kind === 'oracle_effect_score_v1', 'trace selection policy');
   assert(trace.selectionPolicy.usesHiddenEffects, 'trace policy should expose hidden-effect use');
@@ -110,9 +114,24 @@ export async function runExperienceTraceTests(): Promise<void> {
     getPhaseSteps(trace, 'passive_progression').some(step => step.presentation?.passiveNarrative),
     'passive narrative should be captured before acknowledgement',
   );
+  const disturbanceSteps = getPhaseSteps(trace, 'disturbance_narrative').filter(
+    step => step.presentation?.disturbanceNarrative,
+  );
+  assert(disturbanceSteps.length > 0, 'disturbance narrative should be captured');
+  for (const step of disturbanceSteps) {
+    const narrative = step.presentation!.disturbanceNarrative as DisturbanceNarrativeDisplay;
+    assert(
+      narrative.title.length > 0 && narrative.bodyText.length > 0 && narrative.impactSummary.length > 0,
+      'disturbance narrative should contain player-understandable content',
+    );
+  }
+  const disturbanceAcknowledgementSteps = trace.steps.filter(
+    step => step.acknowledgement?.kind === 'disturbance',
+  );
+  assert(disturbanceAcknowledgementSteps.length > 0, 'disturbance acknowledgement should be captured');
   assert(
-    getPhaseSteps(trace, 'disturbance_narrative').some(step => step.presentation?.disturbanceNarrative),
-    'disturbance narrative should be captured before acknowledgement',
+    disturbanceAcknowledgementSteps.every(step => Boolean(step.presentation?.disturbanceNarrative)),
+    'disturbance acknowledgement must not replace the narrative on its trace step',
   );
 
   const tieDiagnostic: ChoiceScoreDiagnostic = {
@@ -136,6 +155,7 @@ export async function runExperienceTraceTests(): Promise<void> {
 
   const plain = await runHeadlessPersona({
     persona,
+    seed: EXPERIENCE_TRACE_SEED,
     endAge: 40,
     catalogVersion: '1.0.0',
     maxSteps: 1200,

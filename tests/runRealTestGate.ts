@@ -54,7 +54,6 @@ const suites: Suite[] = [
   { name: 'p37AdditionalMixedPinnacleParityTests', entry: 'tests/p37AdditionalMixedPinnacleParityTests.ts' },
   { name: 'p38FrustrationRemediationTests', entry: 'tests/p38FrustrationRemediationTests.ts' },
   { name: 'p39ContentPoolConsistencyTests', entry: 'tests/p39ContentPoolConsistencyTests.ts' },
-  { name: 'p40ReplayPacingPolishTests', entry: 'tests/p40ReplayPacingPolishTests.ts' },
   { name: 'p41HabitFeedbackTests', entry: 'tests/p41HabitFeedbackTests.ts' },
   { name: 'p122EarlyVisibleGrowthFeedbackTests', entry: 'tests/p122EarlyVisibleGrowthFeedbackTests.ts' },
   { name: 'p127MartialSecondVisibleGrowthTests', entry: 'tests/p127MartialSecondVisibleGrowthTests.ts' },

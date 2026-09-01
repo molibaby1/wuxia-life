@@ -66,7 +66,7 @@ function formatMarkdownReport(reports: P3EvalSegmentReport[]): string {
       `| deathStatus | alive=${m.deathStatus.isAliveAtSegmentEnd}, diedInSegment=${m.deathStatus.diedInSegment}, reason=${m.deathStatus.deathReason ?? '—'} |`,
     );
     lines.push(
-      `| payoffStatus | rate=${(m.payoffStatus.simulatedPayoffRate * 100).toFixed(1)}%, hits=${m.payoffStatus.simulatedHits}/${m.payoffStatus.keyChoicesMade}, pass=${m.payoffStatus.pass} |`,
+      `| payoffStatus | rate=${(m.payoffStatus.simulatedPayoffRate * 100).toFixed(1)}%, hits=${m.payoffStatus.simulatedHits}/${m.payoffStatus.keyChoicesMade}, thresholdSignal=${m.payoffStatus.pass} |`,
     );
     lines.push('');
   }

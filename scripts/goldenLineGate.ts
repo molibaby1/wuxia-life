@@ -372,16 +372,16 @@ export function writeGoldenLineGateReport(result: GoldenLineGateResult): string 
   const payoffSummary = result.payoffEvaluation.summary;
   lines.push(
     `- static map: **${(payoffSummary.staticPayoffRate * 100).toFixed(1)}%**`,
-    `- simulated threshold: **${payoffSummary.simulatedPayoffThreshold * 100}%**`,
+    `- simulated threshold reference: **${payoffSummary.simulatedPayoffThreshold * 100}%** (reporting signal only)`,
     `- missed opportunities (simulated_gap): **${payoffSummary.missedOpportunityCount}**`,
     `- never-reached key choices: **${payoffSummary.neverReachedKeyChoiceCount}**`,
     '',
-    '| Sample | Sim rate | Static | Pass |',
+    '| Sample | Sim rate | Static | Threshold signal |',
     '| --- | ---: | ---: | --- |',
   );
   for (const sample of payoffSummary.samples) {
     lines.push(
-      `| ${sample.id} | ${(sample.simulatedPayoffRate * 100).toFixed(1)}% | ${(payoffSummary.staticPayoffRate * 100).toFixed(1)}% | ${sample.pass ? 'yes' : 'no'} |`,
+      `| ${sample.id} | ${(sample.simulatedPayoffRate * 100).toFixed(1)}% | ${(payoffSummary.staticPayoffRate * 100).toFixed(1)}% | ${sample.pass ? 'met' : 'below'} |`,
     );
   }
 

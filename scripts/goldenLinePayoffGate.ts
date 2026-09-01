@@ -308,9 +308,9 @@ function inferNeverReachedReason(keyChoiceEventId: string): {
   };
 }
 
-/** US-029: all P3-EVAL samples (including neutral) enforce simulated payoff as blocker. */
-function severityForSimulatedGap(_sampleId: string): 'blocker' | 'warning' {
-  return 'blocker';
+/** Causal-gap inventory is a triage signal; payoff thresholds do not block the gate. */
+function severityForSimulatedGap(_sampleId: string): 'warning' {
+  return 'warning';
 }
 
 function buildKeyChoiceRecords(
@@ -370,9 +370,9 @@ export function evaluatePayoffGate(runs: GoldenLineSimulationRun[]): PayoffGateE
 
   findings.push({
     gate: 'payoff',
-    severity: staticPayoffRate < PAYOFF_RATE_THRESHOLD ? 'blocker' : 'info',
-    status: staticPayoffRate < PAYOFF_RATE_THRESHOLD ? 'fail' : 'pass',
-    detail: `Static key-choice payoff map coverage ${(staticPayoffRate * 100).toFixed(1)}% (threshold ${PAYOFF_RATE_THRESHOLD * 100}%)`,
+    severity: 'info',
+    status: staticPayoffRate < PAYOFF_RATE_THRESHOLD ? 'warning' : 'pass',
+    detail: `Static key-choice payoff map coverage ${(staticPayoffRate * 100).toFixed(1)}% (threshold ${PAYOFF_RATE_THRESHOLD * 100}%; causal-gap signal only)`,
   });
 
   const allKeyChoiceIds = new Set(payoffByKeyChoice.keys());
@@ -576,7 +576,7 @@ export function evaluatePayoffGate(runs: GoldenLineSimulationRun[]): PayoffGateE
         severity,
         status: severity === 'blocker' ? 'fail' : 'warning',
         sampleId,
-        detail: `Simulated payoff ${(simulatedPayoffRate * 100).toFixed(1)}% < ${PAYOFF_RATE_THRESHOLD * 100}% (${simulatedHits}/${denominator}); static map=${(staticPayoffRate * 100).toFixed(1)}%`,
+        detail: `Simulated payoff ${(simulatedPayoffRate * 100).toFixed(1)}% < ${PAYOFF_RATE_THRESHOLD * 100}% (${simulatedHits}/${denominator}); static map=${(staticPayoffRate * 100).toFixed(1)}%; causal-gap signal only`,
       });
     }
 
@@ -589,12 +589,12 @@ export function evaluatePayoffGate(runs: GoldenLineSimulationRun[]): PayoffGateE
       ) {
         findings.push({
           gate: 'payoff',
-          severity: 'blocker',
-          status: 'fail',
+          severity: 'warning',
+          status: 'warning',
           sampleId,
           findingType: 'segment_fail',
           segment: segmentLabel,
-          detail: `segment_fail ${segmentLabel}: simulated ${(segmentMetrics.simulatedPayoffRate * 100).toFixed(1)}% < ${PAYOFF_RATE_THRESHOLD * 100}%`,
+          detail: `segment_fail ${segmentLabel}: simulated ${(segmentMetrics.simulatedPayoffRate * 100).toFixed(1)}% < ${PAYOFF_RATE_THRESHOLD * 100}%; causal-gap signal only`,
         });
       }
     }

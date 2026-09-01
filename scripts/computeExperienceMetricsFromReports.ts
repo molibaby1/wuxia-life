@@ -1,27 +1,20 @@
-import { eventLoader } from '../src/core/EventLoader';
 import type { GameProcessReport } from '../src/types/simulationRecordTypes';
-import { detectEventClasses, type EventClass } from './eventRepetitionClassDetection';
 
 export interface TimelineEvent {
   age: number;
   eventId: string;
   title: string;
-  classes: EventClass[];
   isDaily: boolean;
   isFamily: boolean;
 }
 
 export interface ExperienceDerivedMetrics {
   adjacent_same_event_rate: number | null;
-  adjacent_same_class_rate: number | null;
-  short_window_same_class_rate: number | null;
   formal_event_ratio: number | null;
   daily_event_ratio: number | null;
   top_event_concentration: number | null;
   family_event_share: number | null;
 }
-
-const SHORT_WINDOW_SIZE = 5;
 
 function isDailyRecord(eventId: string): boolean {
   return eventId.startsWith('daily_');
@@ -41,14 +34,11 @@ function buildTimeline(report: GameProcessReport): TimelineEvent[] {
         continue;
       }
       const title = record.eventTitle || record.eventId;
-      const definition = eventLoader.getEventById(record.eventId);
-      const classes = definition ? detectEventClasses(definition) : [];
       const isFamily = record.eventId.startsWith('family_');
       timeline.push({
         age: record.age,
         eventId: record.eventId,
         title,
-        classes,
         isDaily: isDailyRecord(record.eventId),
         isFamily,
       });
@@ -56,11 +46,6 @@ function buildTimeline(report: GameProcessReport): TimelineEvent[] {
 
   timeline.sort((a, b) => a.age - b.age || a.eventId.localeCompare(b.eventId));
   return timeline;
-}
-
-/** 与 repro:event-repetition 一致：仅跟踪 injury/illness/economy 类事件 */
-function buildRepetitionTimeline(report: GameProcessReport): TimelineEvent[] {
-  return buildTimeline(report).filter(event => event.classes.length > 0);
 }
 
 function countCalendarAdjacentPairs(timeline: TimelineEvent[]): number {
@@ -89,21 +74,15 @@ function averageSampleRate(values: Array<number | null>): number | null {
   return numbers.reduce((sum, value) => sum + value, 0) / numbers.length;
 }
 
-function computeRepetitionRates(timeline: TimelineEvent[]): Pick<
-  ExperienceDerivedMetrics,
-  'adjacent_same_event_rate' | 'adjacent_same_class_rate' | 'short_window_same_class_rate'
-> {
+function computeAdjacentSameEventRate(
+  timeline: TimelineEvent[],
+): Pick<ExperienceDerivedMetrics, 'adjacent_same_event_rate'> {
   if (timeline.length === 0) {
-    return {
-      adjacent_same_event_rate: 0,
-      adjacent_same_class_rate: 0,
-      short_window_same_class_rate: 0,
-    };
+    return { adjacent_same_event_rate: 0 };
   }
 
   const adjacentPairs = countCalendarAdjacentPairs(timeline);
   let sameEventCount = 0;
-  let sameClassCount = 0;
 
   for (let i = 1; i < timeline.length; i++) {
     const prev = timeline[i - 1];
@@ -113,34 +92,10 @@ function computeRepetitionRates(timeline: TimelineEvent[]): Pick<
     }
     if (prev.eventId === current.eventId) {
       sameEventCount += 1;
-      continue;
-    }
-    const shared = current.classes.filter(cls => prev.classes.includes(cls));
-    if (shared.length > 0) {
-      sameClassCount += 1;
     }
   }
 
-  let shortWindowRepeated = 0;
-  for (let i = 0; i < timeline.length; i++) {
-    const current = timeline[i];
-    const windowMinAge = current.age - SHORT_WINDOW_SIZE;
-    const recent = timeline.filter(
-      event => event.age < current.age && event.age > windowMinAge
-    );
-    const repeatedInWindow = current.classes.filter(cls =>
-      recent.some(event => event.classes.includes(cls))
-    );
-    if (repeatedInWindow.length > 0) {
-      shortWindowRepeated += 1;
-    }
-  }
-
-  return {
-    adjacent_same_event_rate: adjacentPairs > 0 ? sameEventCount / adjacentPairs : 0,
-    adjacent_same_class_rate: adjacentPairs > 0 ? sameClassCount / adjacentPairs : 0,
-    short_window_same_class_rate: timeline.length > 0 ? shortWindowRepeated / timeline.length : 0,
-  };
+  return { adjacent_same_event_rate: adjacentPairs > 0 ? sameEventCount / adjacentPairs : 0 };
 }
 
 function computeRhythmRates(timeline: TimelineEvent[]): Pick<
@@ -177,14 +132,12 @@ function computeRhythmRates(timeline: TimelineEvent[]): Pick<
 export function computeExperienceDerivedMetrics(
   reports: GameProcessReport[],
 ): ExperienceDerivedMetrics {
-  const repetitionBySample = reports.map(report => computeRepetitionRates(buildRepetitionTimeline(report)));
+  const adjacentSameEventBySample = reports.map(report => computeAdjacentSameEventRate(buildTimeline(report)));
   const rhythmBySample = reports.map(report => computeRhythmRates(buildTimeline(report)));
 
   return {
-    adjacent_same_event_rate: maxSampleRate(repetitionBySample.map(sample => sample.adjacent_same_event_rate)),
-    adjacent_same_class_rate: maxSampleRate(repetitionBySample.map(sample => sample.adjacent_same_class_rate)),
-    short_window_same_class_rate: maxSampleRate(
-      repetitionBySample.map(sample => sample.short_window_same_class_rate)
+    adjacent_same_event_rate: maxSampleRate(
+      adjacentSameEventBySample.map(sample => sample.adjacent_same_event_rate),
     ),
     formal_event_ratio: averageSampleRate(rhythmBySample.map(sample => sample.formal_event_ratio)),
     daily_event_ratio: averageSampleRate(rhythmBySample.map(sample => sample.daily_event_ratio)),

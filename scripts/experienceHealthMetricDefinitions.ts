@@ -14,8 +14,6 @@ export type ExperienceHealthMetricKey =
   | 'p3_romance_family_achievement_rate'
   | 'save_count'
   | 'adjacent_same_event_rate'
-  | 'adjacent_same_class_rate'
-  | 'short_window_same_class_rate'
   | 'formal_event_ratio'
   | 'daily_event_ratio'
   | 'top_event_concentration'
@@ -37,8 +35,6 @@ export interface ExperienceHealthMetricDefinition {
 
 export const P0_REPETITION_THRESHOLDS = {
   adjacentSameEventRateMax: 0.08,
-  adjacentSameClassRateMax: 0.35,
-  shortWindowSameClassRateMax: 0.45,
 } as const;
 
 export const P1_RHYTHM_THRESHOLDS = {
@@ -56,26 +52,6 @@ const EXPERIENCE_ONLY_METRIC_DEFINITIONS: ReadonlyArray<ExperienceHealthMetricDe
     baseline: {
       max: P0_REPETITION_THRESHOLDS.adjacentSameEventRateMax,
       note: '任一样本超标即阻断 validate。',
-    },
-  },
-  {
-    key: 'adjacent_same_class_rate',
-    label: 'Adjacent Same Class Rate',
-    description: 'Deprecated legacy diagnostic：只观察 class-positive subset + heuristic taxonomy，不是玩家可见节奏的产品证据。',
-    severity: 'info',
-    nonWaivable: false,
-    baseline: {
-      note: 'Legacy diagnostic only；不参与 Experience gate PASS/FAIL。',
-    },
-  },
-  {
-    key: 'short_window_same_class_rate',
-    label: 'Short Window Same Class Rate',
-    description: 'Deprecated legacy diagnostic：只观察 class-positive subset + heuristic taxonomy，不是玩家可见节奏的产品证据。',
-    severity: 'info',
-    nonWaivable: false,
-    baseline: {
-      note: 'Legacy diagnostic only；不参与 Experience gate PASS/FAIL。',
     },
   },
   {

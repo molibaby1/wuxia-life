@@ -16,7 +16,6 @@ import { EventExecutor } from '../src/core/EventExecutor';
 import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { resolveFirstChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
-import { detectEventClasses } from '../scripts/eventRepetitionClassDetection';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import { dailyEventSystem } from '../src/core/DailyEventSystem';
@@ -1609,87 +1608,6 @@ const coreFunctionSuite: TestSuite = {
           choiceHistory.some(entry => entry.eventId === 'history_choice_event' && entry.age === 18),
           '选择事件执行后应写入 eventHistory'
         );
-      },
-    },
-    {
-      name: '复读分类 - 真实受伤事件应识别为 injury',
-      description: 'detectEventClasses 应识别 setback_injury 与「意外受伤」等身体受伤语义',
-      test: () => {
-        const physicalInjury = detectEventClasses({
-          id: 'setback_injury',
-          category: 'setback',
-          content: { title: '意外受伤', description: '练功受伤需要休养' },
-        } as any);
-        assert(physicalInjury.includes('injury'), 'setback_injury / 意外受伤 应归类为 injury');
-
-        const woundTag = detectEventClasses({
-          id: 'custom_wound_event',
-          metadata: { tags: ['injury', 'negative'] },
-          content: { title: '旧伤复发', description: 'trauma from a past wound' },
-        } as any);
-        assert(woundTag.includes('injury'), 'injury/wound 标签或英文描述应归类为 injury');
-      },
-    },
-    {
-      name: '复读分类 - 情感伤人措辞不得误判为 injury',
-      description: 'love_misunderstanding「流言最伤人」及伤心/伤感/伤情不得进入 injury 类',
-      test: () => {
-        const loveMisunderstanding = detectEventClasses({
-          id: 'love_misunderstanding',
-          category: 'side_quest',
-          content: {
-            title: '误会',
-            description: '流言最伤人。',
-            text: '江湖流言纷纷，你百口莫辩。',
-          },
-        } as any);
-        assert(
-          !loveMisunderstanding.includes('injury'),
-          'love_misunderstanding 不应因「伤人」被判为 injury'
-        );
-
-        const emotionalPhrases = detectEventClasses({
-          id: 'love_emotional_stub',
-          content: {
-            title: '心事',
-            description: '令人伤心又伤感，伤情难诉，最伤人者莫过于流言。',
-          },
-        } as any);
-        assert(
-          !emotionalPhrases.includes('injury'),
-          '伤心/伤感/伤情/伤人 等情感措辞 alone 不应判为 injury'
-        );
-      },
-    },
-    {
-      name: '复读分类 - 本钱不得误判为 economy',
-      description: 'setback_illness「身体是武学的本钱」不应进入 economy；财产损失仍应识别',
-      test: () => {
-        const illnessWithBenQian = detectEventClasses({
-          id: 'setback_illness',
-          category: 'setback',
-          content: {
-            title: '大病一场',
-            description: '身体是武学的本钱，生病会影响修炼进度',
-          },
-          metadata: { tags: ['挫折', '生病', '负面'] },
-        } as any);
-        assert(illnessWithBenQian.includes('illness'), 'setback_illness 应仍为 illness');
-        assert(
-          !illnessWithBenQian.includes('economy'),
-          '「本钱」不应使 setback_illness 被判为 economy'
-        );
-
-        const propertyLoss = detectEventClasses({
-          id: 'setback_property_loss',
-          category: 'setback',
-          content: {
-            title: '财产损失',
-            description: '财富损失是常见的风险',
-          },
-          metadata: { tags: ['挫折', '财产', '负面'] },
-        } as any);
-        assert(propertyLoss.includes('economy'), 'setback_property_loss 应识别为 economy');
       },
     },
     {

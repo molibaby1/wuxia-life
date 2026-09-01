@@ -112,10 +112,10 @@ Future Hook 可以明确为“无”，但不能无意识地生成孤立填充�
 ↓
 6. Semantic Verification
 ↓
-7. Experience Verification
+7. Player-visible Experience Review
 ```
 
-Experience Verification 失败后必须回到 Gap Diagnosis，而不是直接继续加内容。
+Player-visible Experience Review 失败后必须回到 Gap Diagnosis，而不是直接继续加内容。
 
 ---
 
@@ -193,20 +193,13 @@ Gap
 
 > “这条线还能再写什么？”
 
-### 4.1 扩写已有故事线的分类
+### 4.1 扩写已有故事线的审稿问题
 
-新增故事内容前，应先判断它属于：
+新增故事内容前，应先逐项审查：
 
-```text
-A. 缺失 setup
-B. 缺失 development
-C. 缺失 conflict
-D. 缺失 meaningful choice
-E. 缺失 payoff_echo
-F. 什么都不缺，只是想增加篇幅
-```
-
-如果是 `F`：默认不加。
+- 这条线是真的缺少铺垫、发展、冲突、关键选择或后来回应吗？
+- 这项缺失是否造成了玩家可感知的连续性或人生意义问题？
+- 还是只是想增加篇幅？如果只是增加篇幅，默认不加。
 
 ---
 
@@ -218,14 +211,13 @@ F. 什么都不缺，只是想增加篇幅
 
 1. **Event Purpose** — 为什么值得进入玩家人生？
 2. **Access** — 什么具体条件下可以发生？
-3. **Domain** — primary life domain。
-4. **Narrative Role** — `setup / development / conflict / choice / payoff_echo`。
-5. **Past Evidence Consumed** — 依赖玩家过去真实发生过什么？
-6. **Meaningful Player Decision** — 如果有选择，选择真正改变什么；如果是 auto，为什么 auto 合理？
-7. **Durable Result** — 结束后留下什么具体 history/fact？
-8. **Future Hook** — 哪些未来内容可能消费它；没有则明确“无”。
-9. **Presentation** — 玩家看到的核心情境是什么？
-10. **Scope Check** — 是否为一个事件引入了不必要的新系统？
+3. **Story / Life Function Review** — 这件事为什么值得成为正式人生 Event？它在当前故事/人生阶段承担什么作用？
+4. **Past Evidence Consumed** — 依赖玩家过去真实发生过什么？
+5. **Meaningful Player Decision** — 如果有选择，选择真正改变什么；如果是 auto，为什么 auto 合理？
+6. **Durable Result** — 结束后留下什么具体 history/fact？
+7. **Future Hook** — 哪些未来内容可能消费它；没有则明确“无”。
+8. **Presentation** — 玩家看到的核心情境是什么？
+9. **Scope Check** — 是否为一个事件引入了不必要的新系统？
 
 ### 5.2 Person Authoring Card
 
@@ -350,20 +342,28 @@ STOP
 
 ---
 
-## 9. Stage 7：Experience Verification
+## 9. Stage 7：Player-visible Experience Review
 
-语义正确后，再检查实际人生 trace：
+语义正确后，再进行定性的玩家可见体验审查。可以使用：
+
+- actual life traces；
+- Human play observation；
+- Auto Evolution qualitative participant feedback；
+- Agent qualitative analysis；
+- 客观 reachability / frequency facts（如需要）。
+
+主要检查：
 
 - 内容是否真实可达；
-- 出现年龄/阶段是否合理；
-- 与前后内容间隔是否合理；
-- 是否与附近内容产生明显同质碰撞；
-- 玩家是否能理解为什么现在发生；
-- 过去选择是否能被玩家感知；
-- 是否过于频繁；
-- 是否稀有到几乎不存在。
+- 时间/年龄是否合理；
+- 前后间隔是否自然；
+- 是否与附近内容明显撞车；
+- 玩家能否理解为什么现在发生；
+- 过去选择是否可感知；
+- 是否明显过频或过稀；
+- 是否主观感觉重复、拖沓或空洞。
 
-Experience Verification 失败不能自动得出“继续加内容”。
+Player-visible Experience Review 不要求生成节奏分数。失败不能自动得出“继续加内容”。
 
 必须回到 Gap Diagnosis，重新判断：
 
@@ -428,16 +428,18 @@ presentation
 
 ---
 
-## 11. 与 PD-101～105 的关系
+## 11. 与具体领域 Contract 的关系
 
-PD-106 是内容生产治理层，不替代具体领域 authority。
+PD-106 是内容生产治理层，不替代具体领域 authority，也不依赖已退休的体验度量实验。
 
 ```text
-PD-105 Experience Measurement
+Human / Auto Evolution / tests / traces
         ↓
-可能发现问题
+发现 signal
         ↓
-PD-106 Gap Diagnosis / Authoring Workflow
+PD-106 Gap Diagnosis
+        ↓
+如果确认 CONTENT_GAP
         ↓
 具体领域 Contract
 ├─ PD-101 Character / Relationship
@@ -466,9 +468,7 @@ RUN / OBSERVE
 推荐闭环：
 
 ```text
-Auto Evolution 发现信号
-↓
-PD-105 判断 measurement 是否可信
+Auto Evolution / tests / traces 发现 signal
 ↓
 PD-106 Gap Diagnosis
 ↓
@@ -484,7 +484,7 @@ Codex Implementation
 ↓
 Semantic Verification
 ↓
-PD-105 Experience Verification
+Player-visible Experience Review
 ```
 
 禁止：
@@ -564,8 +564,8 @@ PD-106 v1 成功意味着：
 5. Story continuity 优先由真实 history 构成。
 6. Human 在产品语义层审批，默认看到中文材料。
 7. Codex 不得在 Implementation 阶段自行扩大 scope。
-8. Semantic Verification 在 Experience Verification 之前。
-9. Experience failure 必须重新归因，不能自动加内容。
+8. Semantic Verification 在 Player-visible Experience Review 之前。
+9. Player-visible Experience Review failure 必须重新归因，不能自动加内容。
 10. Auto Evolution 保持发现/观察能力，不获得自动扩张 catalog 的权力。
 
 该 Contract 不要求立即生成新人物或新事件；它首先是未来内容生产的一致治理边界。

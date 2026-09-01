@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { eventLoader } from '../src/core/EventLoader';
+
+const OFFICIAL_COLLEAGUE = '许慎言';
 
 function createOfficialEngine(eventHistory: string[]): GameEngineIntegration {
   const engine = new GameEngineIntegration();
@@ -31,5 +34,32 @@ assert.equal(
   true,
   'official_resign must become eligible after official_first_post',
 );
+
+function loadedOfficialEvent(eventId: string) {
+  const event = eventLoader.getEventById(eventId);
+  assert.ok(event, `${eventId} must be loaded by the formal EventLoader`);
+  return event;
+}
+
+const firstPostEvent = loadedOfficialEvent('official_first_post');
+const resignEvent = loadedOfficialEvent('official_resign');
+const firstPostText = firstPostEvent.content.text;
+const resignText = resignEvent.content.text;
+const officialText = `${firstPostText} ${resignText}`;
+
+assert.equal(firstPostEvent.personBinding, undefined);
+assert.equal(resignEvent.personBinding, undefined);
+assert.match(firstPostText, new RegExp(OFFICIAL_COLLEAGUE));
+assert.match(firstPostText, /同僚/);
+assert.match(firstPostText, /赈济账目|卷宗/);
+assert.match(firstPostText, /署名|责任/);
+assert.match(firstPostText, /官场的复杂/);
+assert.match(resignText, new RegExp(OFFICIAL_COLLEAGUE));
+assert.match(resignText, /多年后|仍/);
+assert.match(resignText, /接手|签下|尚未交割/);
+assert.match(resignText, /继续仕途/);
+assert.match(resignText, /由你自己决定|你自己决定/);
+assert.doesNotMatch(officialText, /导师|师父|上司|门生/);
+assert.doesNotMatch(officialText, /恋爱|爱情|真爱|婚姻|成婚/);
 
 console.log('officialCausalOrdering.test.ts: ok');

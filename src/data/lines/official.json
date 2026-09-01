@@ -99,7 +99,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "flags.has(\"route_official\") && !flags.has(\"official_resigned\")"
+        "expression": "flags.has(\"route_official\") && events.has(\"official_first_post\") && !flags.has(\"official_resigned\")"
       }
     ],
     "content": {

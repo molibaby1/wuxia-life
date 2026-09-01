@@ -253,6 +253,7 @@ const suites: Suite[] = [
   { name: 'canonicalPersistenceBoundaryTests', entry: 'tests/canonicalPersistenceBoundary.test.ts' },
   { name: 'canonicalCriticalChoiceNormalizationTests', entry: 'tests/canonicalCriticalChoiceNormalization.test.ts' },
   { name: 'youthCausalOpportunity', entry: 'tests/youthCausalOpportunity.test.ts' },
+  { name: 'officialCausalOrdering', entry: 'tests/officialCausalOrdering.test.ts' },
   { name: 'b0GuardrailCalibration', entry: 'tests/b0/b0GuardrailCalibration.test.ts' },
   { name: 'b0IsolationAndHash', entry: 'tests/b0/b0IsolationAndHash.test.ts' },
   { name: 'b0PatchScopeAndBlocked', entry: 'tests/b0/b0PatchScopeAndBlocked.test.ts' },

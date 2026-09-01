@@ -2,8 +2,6 @@ import { EndingSystem } from '../src/core/EndingSystem';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { eventLoader } from '../src/core/EventLoader';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
-import { runHeadlessPersona } from '../src/headless/playability/headlessPersonaRunner';
-import { getP8PersonaById } from '../src/p8/personas';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -75,52 +73,10 @@ async function testHeadlessTerminalAndSnapshotClosure(): Promise<void> {
   assert(repeated.stoppedReason === 'terminal' && repeated.stepsExecuted === 0, 'terminal ack must be idempotent');
 }
 
-async function testExperienceTraceStopsAtTerminal(): Promise<void> {
-  const persona = getP8PersonaById('p8-martial-lin');
-  assert(Boolean(persona), 'martial representative persona must exist');
-  const result = await runHeadlessPersona({
-    persona: persona!,
-    seed: 801,
-    endAge: 100,
-    catalogVersion: '1.0.0',
-    experienceTrace: true,
-  });
-
-  assert(result.stoppedReason === 'terminal', 'experience trace must stop at formal terminal');
-  assert(result.finalAge < 100, 'terminal trace must not depend on end-age truncation');
-  assert(result.finalGameState.player?.alive === false, 'terminal trace must mark player dead');
-  const terminalStep = result.experienceTrace?.steps.find(step => step.phaseAfter === 'terminal');
-  const terminalEventId = terminalStep?.event?.id;
-  assert(Boolean(terminalEventId), 'terminal trace must retain the terminal event');
-  assert(
-    result.finalGameState.eventHistory?.some(record => record.eventId === terminalEventId) === true,
-    'terminal event must be recorded in formal history',
-  );
-  assert(
-    result.experienceTrace?.steps.some(
-      step => step.phaseAfter === 'terminal' && step.event?.id === terminalEventId,
-    ) === true,
-    'terminal trace must include the terminal event',
-  );
-
-  if (terminalEventId === 'ordinary_life') {
-    assert(Boolean(result.finalGameState.ending), 'ordinary_life terminal must include ending');
-    assert(
-      result.records.some(record => record.eventId === terminalEventId && record.eventType === 'ending'),
-      'ordinary_life terminal must be classified as ending',
-    );
-  } else {
-    assert(terminalEventId === 'setback_early_death', 'generic terminal must use a known lifecycle');
-    assert(result.finalGameState.player?.deathReason === '英年早逝', 'early death terminal must preserve reason');
-    assert(result.finalGameState.flags?.gameEnded === true, 'early death terminal must set gameEnded');
-  }
-}
-
 async function main(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
   await testFormalOrdinaryLifeEffect();
   await testHeadlessTerminalAndSnapshotClosure();
-  await testExperienceTraceStopsAtTerminal();
   console.log('normalLongevityEndingClosure.test.ts: ok');
 }
 

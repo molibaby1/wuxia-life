@@ -90,9 +90,17 @@ async function testExperienceTraceStopsAtTerminal(): Promise<void> {
   assert(result.finalAge < 100, 'terminal trace must not depend on end-age truncation');
   assert(Boolean(result.finalGameState.ending), 'terminal trace must include ending');
   assert(result.finalGameState.player?.alive === false, 'terminal trace must mark player dead');
+  const terminalEventId = result.finalGameState.eventHistory?.at(-1)?.eventId;
+  assert(Boolean(terminalEventId), 'terminal trace must retain the terminal event');
   assert(
-    result.finalGameState.eventHistory?.filter(record => record.eventId === 'ordinary_life').length === 1,
-    'terminal trace must record ordinary_life once',
+    result.experienceTrace?.steps.some(
+      step => step.phaseAfter === 'terminal' && step.event?.id === terminalEventId,
+    ) === true,
+    'terminal trace must include the formal ending event',
+  );
+  assert(
+    result.records.some(record => record.eventId === terminalEventId && record.eventType === 'ending'),
+    'terminal report must classify the formal ending as ending',
   );
 }
 

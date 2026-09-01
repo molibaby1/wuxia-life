@@ -151,6 +151,15 @@ function eventRequiresChoice(event: EventDefinition): boolean {
   if (event.eventType === 'auto') return false;
   return Boolean(event.choices?.length);
 }
+
+function reportEventType(event: EventDefinition): GameProcessRecord['eventType'] {
+  const legacyEndingFields = event as unknown as { category?: string; isEnding?: boolean };
+  if (event.eventType === 'ending' || legacyEndingFields.category === 'ending' || legacyEndingFields.isEnding === true) {
+    return 'ending';
+  }
+  return event.eventType;
+}
+
 function resolveCatalogEvent(session: HeadlessEngineSession, event: EventDefinition): EventDefinition {
   const version = session.serialize().metadata.eventCatalogVersion;
   try {
@@ -198,7 +207,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         eventId: event.id,
         eventTitle: event.content?.title ?? event.id,
         eventText: event.content?.text ?? '',
-        eventType: 'auto',
+        eventType: reportEventType(event),
         progressionKind: 'story_event',
         gameState: stateBefore,
         outcomeEvidence: {
@@ -236,7 +245,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       eventId: catalogEvent.id,
       eventTitle: catalogEvent.content?.title ?? catalogEvent.id,
       eventText: catalogEvent.content?.text ?? '',
-      eventType: 'auto',
+      eventType: reportEventType(catalogEvent),
       progressionKind: 'story_event',
       gameState: stateBefore,
       outcomeEvidence: {
@@ -312,7 +321,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     eventId: catalogEvent.id,
     eventTitle: catalogEvent.content?.title ?? catalogEvent.id,
     eventText: catalogEvent.content?.text ?? '',
-    eventType: 'choice',
+    eventType: reportEventType(catalogEvent),
     progressionKind: 'story_event',
     selectedChoice: selection.choice,
     outcomeText: choiceResponse.status === 'success' ? choiceResponse.feedback.player.narrativeResult : undefined,

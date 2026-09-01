@@ -1502,6 +1502,41 @@ Game、Auto Evolution、Skill、Run Report、Future Report Analysis 应保持低
 - 需要改变当前恋爱 / 婚姻分离、人物可达性、Person Definition Contract 或 shared-vs-character-specific boundary；
 - 明月真实纵切证明当前 Person Definition / fact-first 模型无法支撑可玩的连续人物内容。
 
+### PD-102：Parenthood / Family Life Product Contract v1 与第一 Parenthood 纵切治理边界
+
+**产品决策（Human accepted：2026-08-31；本条为 authority closure）**
+
+- `docs/product/parenthood-family-life-product-contract-design.md` 正式成为 `player-model` 之下的 accepted Parenthood / Family Life Product Contract；它与 Character / Relationship Contract 协作，从 Parenthood 开始定义子女与家庭生活语义。
+- Romance、Marriage、Parenthood、Succession 分离；恋爱不自动产生婚姻，婚姻不自动产生孩子；no-child life 合法，不因缺少 spouse / children / grandchild 推导 failure、regret、unfinished 或统一 fulfillment ranking。
+- child 是可被后续稳定引用的 concrete person，不是 children count、普通属性 reward 或 successor projection；不允许 synthetic child affinity；parent-child identity 不自动证明亲近、信任、喜爱或 relationship quality。
+- Parenthood 可以产生责任、风险、机会、时间投入、冲突与事业取舍，但不建立 parenting quality / family happiness / generic family quality score。
+- `has_child != has_heir / has_successor`；孩子不天然是家业、门派、武学或政治继承人；children count 不提升 successor quality。
+- child marriage、grandchild、family honor 不构成默认 Parenthood lifecycle；family status 不构成人生完成度评价。
+- 旧 family child chain，包括 `married → family_child_born`、一次选择决定孩子完整方向、child education 的玩家普通属性奖励、父母直接决定 child marriage、自动 grandchild、family honor reward、synthetic affinity、`has_child → successor/heir` 与缺少 spouse / children 的 unfinished / regret 语义，降级为 `legacy product semantics pending migration`。
+- `family_crisis` 与 `family_family_precepts` 不整体列为 legacy Parenthood semantics；前者更接近 kinship responsibility，后者更接近 legacy / 家风，后续单独判断。P18 与 Ending 只记录 migration conflict，本 authority closure 不修改 P18 或 EndingSystem。
+- PD-090 对 legacy wallet cost retirement 的结论仍有效：不恢复 `money -50 / -10 / -20`，不换成 Wealth Capacity 或其他经济数值。但 PD-090 当时是 bounded Wealth migration，并未治理 Parenthood；其“`children +1` / `has_child = true` / existing event scheduling / eligibility unchanged”不再构成当前 Parenthood authority。
+- 同理，PD-091 / PD-092 对 `family_child_marriage` 的 economic migration correctness 不等于该 child-marriage event 的 Parenthood legitimacy；不得从经济迁移结论推断 child lifecycle 仍应 active。
+- 在本条 authority closure 下，第一 Parenthood vertical slice 只授权后续独立 planning，边界为：independent Parenthood decision → after meaningful time concrete child → one early parenting experience reads a real prior fact；do not enter Parenthood now 时 relationship / marriage / life 正常继续。第一 sample 可以使用 `spouse = 明月`、`married = true`，但不把 marriage 设为 canonical Parenthood 前提。
+- 第一纵切不包含 child education lifecycle、child marriage、grandchild、family honor、full succession、inheritance、multi-child simulation 或 late-life complete family biography；不因一个 concrete child 立即新增 generic Child Runtime、Family Relationship schema、parenting stage machine、universal child archetype、child personality matrix 或 household simulation。
+- 本条 authority closure 本身不授权 Runtime、Schema、Event、PlayerState、Snapshot、manifest、P18、EndingSystem、tests 或其他实现修改；本轮 Human 另行明确授权 bounded first Parenthood slice：independent Parenthood decision → meaningful time → concrete child → one early parenting experience reads a real prior fact，并允许其必要的 active event、loader、validation 与 regression-test wiring。该授权不包含 PlayerState / Snapshot / generic Runtime / P18 / EndingSystem redesign，也不恢复 deferred legacy child lifecycle。
+
+**明确不做**
+
+- 不建设 fertility、pregnancy、reproduction、wants-child、parenting quality、family happiness 或多子女模拟数值。
+- 不把当前 repository implementation、deferred asset、runtime-loaded legacy content 或既有 count 自动提升为新 Contract 的 authority。
+- 不在本条中重做完整 Kinship、Succession、Family Legacy、P18 或 Ending redesign。
+
+**重新讨论条件**
+
+- 需要 generic Child / Household Runtime Schema；
+- 需要修改 PlayerState / Snapshot；
+- 需要 fertility / pregnancy / parenting score；
+- 需要 canonical succession / heir semantics；
+- 需要多子女模拟；
+- 需要设计 non-marriage Parenthood、adoption 或其他新家庭结构；
+- 第一真实纵切证明 concrete child + history / facts 模型无法成立；
+- 需要把 child marriage、grandchild、family honor 或 family status 变成独立正式产品消费者。
+
 ### PD-103：Sex-Variant Person Archetype Contract v1
 
 **产品决策（Human accepted：2026-08-31；本条为 authority closure）**

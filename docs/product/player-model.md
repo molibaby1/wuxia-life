@@ -102,6 +102,8 @@ Generic Relationship Legacy Quarantine 的 active-content disposition、generic 
 
 有限 Sex-Variant Person Archetype 的正式语义由 [Sex-Variant Person Archetype Contract v1](sex-variant-person-archetype-contract-design.md) 定义；它只允许同一合法 Person Archetype 在核心人物语义不变时绑定有限 male/female identity variant，不授权 Generic Person Instantiation、NPC Generator 或开放式人物属性系统。
 
+Parenthood 与子女 / 家庭生活的正式产品语义由 [Parenthood / Family Life Product Contract v1](parenthood-family-life-product-contract-design.md) 定义。该 Contract 位于本规范之下，与 Character / Relationship Contract 协作，不得覆盖本文件定义的玩家模型边界。`children` count 不能替代 concrete child identity / relationship semantics；child status 不能自动推导 succession；不建设通用 parenting / family quality 数值系统。
+
 现阶段不建设通用 NPC 好感度或关系数值系统；人物关系优先由具体历史、具体 relationship 与后续确实需要消费的事件专属 Fact 表达。
 
 ### Discipline 与 Indulgence

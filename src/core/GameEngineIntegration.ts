@@ -70,9 +70,6 @@ import {
   createEmptyTendencyAccumulator,
 } from '../p16/tendencyShaping';
 
-/** 每年进入正式候选池的事件数量上限（节奏治理：避免 Top-3 垄断） */
-const FORMAL_CANDIDATE_POOL_CAP = 12;
-
 const SECT_CHOICE_VALUE_BY_CHOICE_ID = {
   join_shaolin: 'orthodox',
   join_wudang: 'orthodox',
@@ -433,7 +430,7 @@ export class GameEngineIntegration {
     return [
       ...criticalEvents,
       ...storylineEvents,
-      ...regularFormalEvents.slice(0, FORMAL_CANDIDATE_POOL_CAP),
+      ...regularFormalEvents,
     ];
   }
 

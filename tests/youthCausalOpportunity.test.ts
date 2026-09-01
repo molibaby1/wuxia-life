@@ -122,14 +122,14 @@ async function executeChoice(
   await engine.executeChoiceEffects(resolved.effects, eventId, choiceId);
 }
 
-function probeEvent(id: string, priority: number, storyLine?: string): unknown {
+function probeEvent(id: string, priority: number, storyLine?: string, age = 15): unknown {
   return {
     id,
     version: '1.0.0',
     category: 'side_quest',
     priority,
     weight: 1,
-    ageRange: { min: 15, max: 15 },
+    ageRange: { min: age, max: age },
     eventType: 'auto',
     content: { title: id, text: id, description: id },
     metadata: { tags: [], enabled: true },
@@ -156,7 +156,8 @@ async function main(): Promise<void> {
   assert.equal(goldenLinePayoffMap.entries.filter(entry => entry.payoffs.length > 0).length, 9);
   assert.equal(evaluatePayoffGate([]).summary.staticPayoffRate, 0.9);
 
-  // A global cap must not hide eligible critical or storyline opportunities.
+  // Critical and storyline lanes stay protected, while every eligible regular
+  // formal event remains available to the weighted scheduler.
   const loader = eventLoader as unknown as {
     getEventsByAge(age: number): ReturnType<typeof eventLoader.getEventsByAge>;
   };
@@ -170,9 +171,33 @@ async function main(): Promise<void> {
     const ids = availableIds(createYouthEngine(15), 15);
     assert(ids.has('critical_probe'));
     assert(ids.has('storyline_probe'));
-    assert.equal([...ids].filter(id => id.startsWith('regular_probe_')).length, 12);
+    assert.equal([...ids].filter(id => id.startsWith('regular_probe_')).length, 13);
   } finally {
     loader.getEventsByAge = getEventsByAge;
+  }
+
+  // A naturally eligible Official entry is regular formal content. It must
+  // remain visible even when lower-priority regular candidates outnumber 12.
+  const officialEntry = eventLoader.getEventById('official_entry');
+  assert(officialEntry, 'missing official_entry');
+  const officialEngine = createYouthEngine(22, { knowledge: 12, charisma: 8 });
+  officialEngine.getGameState().flags.origin_scholar_family = true;
+  const officialLoaderEvents = loader.getEventsByAge;
+  loader.getEventsByAge = () => [
+    ...Array.from({ length: 13 }, (_, index) => probeEvent(`official_regular_probe_${index}`, 3, undefined, 22)),
+    officialEntry,
+  ] as ReturnType<typeof eventLoader.getEventsByAge>;
+  try {
+    const officialIds = availableIds(officialEngine, 22);
+    assert.equal(officialEngine.getGameState().flags.route_official, undefined);
+    assert.equal(officialEngine.getGameState().flags.official_first_post, undefined);
+    assert(officialIds.has('official_entry'));
+    assert.equal(
+      [...officialIds].filter(id => id.startsWith('official_regular_probe_')).length,
+      13,
+    );
+  } finally {
+    loader.getEventsByAge = officialLoaderEvents;
   }
 
   const sectChoice = eventLoader.getEventById('sect_choice');

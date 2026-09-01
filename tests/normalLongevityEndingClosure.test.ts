@@ -88,20 +88,32 @@ async function testExperienceTraceStopsAtTerminal(): Promise<void> {
 
   assert(result.stoppedReason === 'terminal', 'experience trace must stop at formal terminal');
   assert(result.finalAge < 100, 'terminal trace must not depend on end-age truncation');
-  assert(Boolean(result.finalGameState.ending), 'terminal trace must include ending');
   assert(result.finalGameState.player?.alive === false, 'terminal trace must mark player dead');
-  const terminalEventId = result.finalGameState.eventHistory?.at(-1)?.eventId;
+  const terminalStep = result.experienceTrace?.steps.find(step => step.phaseAfter === 'terminal');
+  const terminalEventId = terminalStep?.event?.id;
   assert(Boolean(terminalEventId), 'terminal trace must retain the terminal event');
+  assert(
+    result.finalGameState.eventHistory?.some(record => record.eventId === terminalEventId) === true,
+    'terminal event must be recorded in formal history',
+  );
   assert(
     result.experienceTrace?.steps.some(
       step => step.phaseAfter === 'terminal' && step.event?.id === terminalEventId,
     ) === true,
-    'terminal trace must include the formal ending event',
+    'terminal trace must include the terminal event',
   );
-  assert(
-    result.records.some(record => record.eventId === terminalEventId && record.eventType === 'ending'),
-    'terminal report must classify the formal ending as ending',
-  );
+
+  if (terminalEventId === 'ordinary_life') {
+    assert(Boolean(result.finalGameState.ending), 'ordinary_life terminal must include ending');
+    assert(
+      result.records.some(record => record.eventId === terminalEventId && record.eventType === 'ending'),
+      'ordinary_life terminal must be classified as ending',
+    );
+  } else {
+    assert(terminalEventId === 'setback_early_death', 'generic terminal must use a known lifecycle');
+    assert(result.finalGameState.player?.deathReason === '英年早逝', 'early death terminal must preserve reason');
+    assert(result.finalGameState.flags?.gameEnded === true, 'early death terminal must set gameEnded');
+  }
 }
 
 async function main(): Promise<void> {

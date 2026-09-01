@@ -1,7 +1,7 @@
 # Wuxia-Life AI Collaboration & Agent Workflow Protocol
 
 > 用途：规定项目开发协作，以及 Auto Evolution 产品运行时 Role / Participant / Skill / Report / Contract 的职责与边界。  
-> 最后更新：2026-08-29。
+> 最后更新：2026-09-01。
 > 第一层产品语义以 `docs/product/auto-evolution-model.md` 为准。
 
 ---
@@ -241,6 +241,35 @@ Codex 不一定能访问 Project Sources，因此 repository 文档必须独立�
 Human 可以异步集中 review 已正式 routed 为 `ESCALATE_HUMAN` 的 work items。Human work item 只是 operational workflow state；`READY_FOR_FORMAL_TASK` 仍需进入已有 Human Gate / accepted-design / implementation authorization 流程，不自动授予 code write permission 或产品 / 治理 authority。
 
 Human 不需要逐项给 Participant 的主观答案打“正确 / 错误”标签。
+
+### Repository Handoff Review Input Contract
+
+ChatGPT 发给 Codex 的工程任务，必须声明下一次 review 所需的输入：
+
+```text
+NEXT_REVIEW_INPUT: REPORT_ONLY
+```
+
+或：
+
+```text
+NEXT_REVIEW_INPUT: REPOSITORY_REQUIRED
+```
+
+`REPORT_ONLY` 表示 Codex 的结构化报告本身足以支持下一步判断。默认不要求 Human 更新 repository attachment；ChatGPT 不应为了习惯性核对文件增加交接成本。典型场景包括 read-only diagnostic、deterministic evidence collection，以及报告已经足以证明结论的简单验证。
+
+`REPOSITORY_REQUIRED` 表示下一轮结论需要核对真实 implementation。Human 应提供 fresh repository snapshot；当 snapshot 不可读取时，ChatGPT 不得假装已经完成 repository review。典型场景包括 runtime/core implementation 修改、跨文件语义一致性、schema/config/build/packaging 改动，以及 Codex 报告无法独立证明的代码事实。
+
+Repository attachment / ZIP 是 transport，不是 authority。有效的 repository evidence 至少分别记录：
+
+```text
+ARCHIVE_READABLE
+SNAPSHOT_IDENTITY
+```
+
+`ARCHIVE_READABLE` 只表示 attachment/ZIP 内的目标文件能够被读取；`SNAPSHOT_IDENTITY` 表示能够核对 branch、full HEAD commit 和 clean/dirty 状态。ZIP 内生成的 `repository-status.txt` 用于支持 `SNAPSHOT_IDENTITY`，不能替代文件可读性检查。
+
+Repository attachment / ZIP 无法读取时，不得静默自动回退到可能过期的 GitHub branch。GitHub 只有在 Human 明确授权、target branch / commit 已识别，并且 remote 状态被明确标记为 remote evidence 时才可使用；不得把未知 freshness 的 remote 状态当作本地最新 snapshot。
 
 ## 9. Human Gate 与授权继承
 

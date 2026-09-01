@@ -31,7 +31,7 @@ function testMoneyCannotSelectBittersweetEnding(): void {
     assert.equal(
       ending.id,
       'unfulfilled_ambition',
-      `money=${money} must not select bittersweet_success or otherwise change this stable neutral classification`,
+      `money=${money} must not select bittersweet_success or change the stable neutral classification`
     );
   }
 }

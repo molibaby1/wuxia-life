@@ -108,7 +108,6 @@ export const WUXIA_RELATIONSHIP_CONSEQUENCE_PATTERNS: RelationshipConsequencePat
   P17_RELATIONSHIP_SWORN_SHIELDING,
   P17_RELATIONSHIP_MENTOR_OBLIGATION,
   P17_RELATIONSHIP_FEUD_PRESSURE,
-  P17_RELATIONSHIP_LIFE_DEBT,
   P17_RELATIONSHIP_KINSHIP_DUTY,
 ];
 
@@ -264,13 +263,13 @@ export const P17_MAINTENANCE_HERO_REPUTATION: AchievementMaintenancePattern = {
 export const P17_MAINTENANCE_FAMILY_LEGACY: AchievementMaintenancePattern = {
   id: 'p17_family_legacy_upkeep',
   label: '家业与人脉',
-  achievementFlags: ['married', 'family_legacy'],
+  achievementFlags: ['family_legacy'],
   dimensions: [
     {
       dimension: 'alliances',
       requiredLevel: 0.5,
       neglectRiskMultiplier: 1.4,
-      satisfactionSignals: ['player.connections', 'player.children'],
+      satisfactionSignals: ['player.connections'],
     },
     {
       dimension: 'followers',

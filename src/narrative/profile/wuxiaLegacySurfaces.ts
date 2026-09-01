@@ -29,7 +29,7 @@ export const P18_ROLE_HEIR: SuccessorRoleConfig = {
     'p18_channel_responsibility',
     'p18_channel_reputation',
   ],
-  qualitySignals: ['merchantNetwork', 'player.children'],
+  qualitySignals: ['merchantNetwork'],
 };
 
 /** Biological offspring — education-path biased. */
@@ -72,7 +72,6 @@ export const P18_ROLE_INHERITING_STUDENT: SuccessorRoleConfig = {
 export const WUXIA_SUCCESSOR_ROLE_CONFIGS: SuccessorRoleConfig[] = [
   P18_ROLE_DISCIPLE,
   P18_ROLE_HEIR,
-  P18_ROLE_OFFSPRING,
   P18_ROLE_ADOPTED,
   P18_ROLE_INHERITING_STUDENT,
 ];
@@ -238,14 +237,14 @@ export const P18_COST_DISCIPLE_CULTIVATION: SuccessorCultivationCostPattern = {
 /** Heir / offspring cultivation cost — emotional and political exposure. */
 export const P18_COST_HEIR_OFFSPRING: SuccessorCultivationCostPattern = {
   id: 'p18_cost_heir_offspring',
-  label: '嗣子培养',
-  successorRoleFlags: ['has_child', 'family_heir', 'sect_heir', 'heir_designated'],
+  label: '继承人培养',
+  successorRoleFlags: ['family_heir', 'sect_heir', 'heir_designated'],
   costDimensions: [
     {
       dimension: 'emotional_burden',
       requiredLevel: 0.4,
       underinvestmentRiskMultiplier: 1.4,
-      satisfactionSignals: ['has_child', 'child_martial_artist', 'child_scholar'],
+      satisfactionSignals: ['child_martial_artist', 'child_scholar'],
     },
     {
       dimension: 'political_exposure',
@@ -325,7 +324,7 @@ export const P18_OUTCOME_UNDERINVESTMENT: LegacyOutcomePattern = {
   id: 'p18_outcome_underinvestment',
   label: '疏于栽培',
   outcomeKind: 'underinvestment',
-  triggerFlags: ['has_disciples', 'has_child'],
+  triggerFlags: ['has_disciples'],
   baseIntensity: 0.65,
   riskTags: [
     { tag: 'decline', multiplier: 1.4 },

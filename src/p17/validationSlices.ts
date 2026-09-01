@@ -58,11 +58,16 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
     35,
   );
 
-  const swornAlly = baseMidLifeState();
-  swornAlly.flags = { has_sworn_siblings: true };
-  swornAlly.player!.flags = { has_sworn_siblings: true };
-  const swornReport = buildLaterLifeConsequenceReport(
-    swornAlly,
+  const concreteAlly = baseMidLifeState();
+  concreteAlly.lifePath = {
+    faction: 'neutral',
+    lifeStage: 'growth',
+    achievements: [],
+    relationships: { allies: ['ally_mo'], enemies: [], mentors: [], disciples: [] },
+    commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+  };
+  const allyReport = buildLaterLifeConsequenceReport(
+    concreteAlly,
     new Set(['rescue', 'relationship']),
     35,
   );
@@ -115,15 +120,15 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
       materiallyDifferent: false,
     },
     {
-      caseId: 'sworn_ally',
-      description: 'Sworn sibling backing shifts opportunity space',
-      combinedMultiplier: swornReport.combinedMultiplier,
-      riskMultiplier: swornReport.riskMultiplier,
-      opportunityMultiplier: swornReport.opportunityMultiplier,
-      activeRelationshipPatterns: swornReport.activeRelationshipPatterns.map(p => p.patternId),
-      activeFactionPatterns: swornReport.activeFactionPatterns.map(p => p.patternId),
-      unmetMaintenanceCount: swornReport.unmetMaintenance.length,
-      materiallyDifferent: swornReport.combinedMultiplier > baselineReport.combinedMultiplier + 0.08,
+      caseId: 'concrete_ally',
+      description: 'Concrete ally backing shifts opportunity space',
+      combinedMultiplier: allyReport.combinedMultiplier,
+      riskMultiplier: allyReport.riskMultiplier,
+      opportunityMultiplier: allyReport.opportunityMultiplier,
+      activeRelationshipPatterns: allyReport.activeRelationshipPatterns.map(p => p.patternId),
+      activeFactionPatterns: allyReport.activeFactionPatterns.map(p => p.patternId),
+      unmetMaintenanceCount: allyReport.unmetMaintenance.length,
+      materiallyDifferent: allyReport.combinedMultiplier > baselineReport.combinedMultiplier + 0.08,
     },
     {
       caseId: 'feud_enemy',
@@ -145,7 +150,7 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
       activeRelationshipPatterns: orthodoxReport.activeRelationshipPatterns.map(p => p.patternId),
       activeFactionPatterns: orthodoxReport.activeFactionPatterns.map(p => p.patternId),
       unmetMaintenanceCount: orthodoxReport.unmetMaintenance.length,
-      materiallyDifferent: orthodoxReport.riskMultiplier > swornReport.riskMultiplier,
+      materiallyDifferent: orthodoxReport.riskMultiplier > allyReport.riskMultiplier,
     },
     {
       caseId: 'neglected_hero',
@@ -163,7 +168,7 @@ export function runMidLateLifeValidationSlice(): MidLateLifeValidationSliceResul
   return {
     slice: 'mid_late_life_consequences',
     cases,
-    allyChangesOpportunity: cases.find(c => c.caseId === 'sworn_ally')?.materiallyDifferent ?? false,
+    allyChangesOpportunity: cases.find(c => c.caseId === 'concrete_ally')?.materiallyDifferent ?? false,
     factionAddsDuty: cases.find(c => c.caseId === 'orthodox_duty')?.materiallyDifferent ?? false,
     achievementFragileWhenNeglected:
       cases.find(c => c.caseId === 'neglected_hero')?.materiallyDifferent ?? false,

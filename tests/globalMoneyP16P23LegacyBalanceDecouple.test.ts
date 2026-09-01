@@ -65,7 +65,7 @@ function testCompiledSlicesOmitLegacyBalanceFixtures(): void {
 
 function testValidationSlicesRemainMateriallyDistinct(): void {
   const p17 = runMidLateLifeValidationSlice();
-  assert(p17.allyChangesOpportunity, 'P17 sworn ally must still shift opportunity');
+  assert(p17.allyChangesOpportunity, 'P17 concrete ally must still shift opportunity');
   assert(p17.factionAddsDuty, 'P17 orthodox duty must still add burden');
   assert(p17.achievementFragileWhenNeglected, 'P17 neglected hero must still show fragility');
 

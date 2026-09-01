@@ -7,14 +7,20 @@ import { getWorldProfile, WUXIA_WORLD_PROFILE } from '../src/narrative/worldProf
 import {
   P19_CATEGORY_INFAMOUS_ECHO,
   P19_CATEGORY_LEGENDARY_ECHO,
+  P19_CATEGORY_QUIET_CONTINUITY,
   P19_MEMORY_ADMIRED_HERO,
+  P19_MEMORY_QUIET_LOCAL,
   P19_RECOVERY_FACTION_PROTECTION,
   P19_RECOVERY_LEGACY_CONTINUITY,
   P19_RECOVERY_RELATIONSHIP_RECONCILIATION,
 } from '../src/narrative/profile/wuxiaEndgameSurfaces';
 import { buildEndgameCategoryReport, selectEndgameCategory } from '../src/p19/endgameCategories';
 import { composeP19FinalSummary } from '../src/p19/finalSummaryComposition';
-import { buildHistoricalMemoryReport } from '../src/p19/historicalMemory';
+import {
+  buildHistoricalMemoryReport,
+  resolveActiveHistoricalMemoryPatterns,
+} from '../src/p19/historicalMemory';
+import { inferRelationshipScore, patternTriggersActive } from '../src/p19/stateAccess';
 import {
   buildPreEndgameRecoveryReport,
   resolveActivePreEndgameRecoveries,
@@ -187,14 +193,60 @@ function testHistoricalMemorySamples(): void {
   );
 
   const local = makeState({
-    flags: { family_legacy: true, quiet_retirement: true, has_child: true },
-    player: { connections: 30, reputation: 40, children: 2, spouse: 'x' } as GameState['player'],
+    flags: { family_legacy: true, quiet_retirement: true },
+    player: { connections: 30, reputation: 40, children: 0, spouse: null } as GameState['player'],
   });
   const localReport = buildHistoricalMemoryReport(local);
   assert(localReport.divergenceScore >= 0.35, 'lived vs memory divergence');
   assert(
     localReport.livedSelfUnderstanding !== localReport.posthumousReputation,
     'self understanding differs from posthumous text',
+  );
+}
+
+function testParenthoodShortcutsAreQuarantined(): void {
+  const childOnly = makeState({
+    flags: { has_child: true },
+    player: { children: 5, flags: { has_child: true } } as GameState['player'],
+  });
+  assert(
+    !patternTriggersActive(childOnly, P19_CATEGORY_QUIET_CONTINUITY.triggerFlags),
+    'has_child-only must not trigger quiet continuity',
+  );
+  assert(
+    !resolveActiveHistoricalMemoryPatterns(childOnly).some(
+      pattern => pattern.patternId === P19_MEMORY_QUIET_LOCAL.id,
+    ),
+    'has_child-only must not activate quiet local memory',
+  );
+
+  const noChildren = makeState({
+    flags: { family_legacy: true, quiet_retirement: true },
+    player: {
+      children: 0,
+      flags: { family_legacy: true, quiet_retirement: true },
+    } as GameState['player'],
+  });
+  const manyChildren = makeState({
+    flags: { family_legacy: true, quiet_retirement: true },
+    player: {
+      children: 5,
+      flags: { family_legacy: true, quiet_retirement: true },
+    } as GameState['player'],
+  });
+  assert(
+    inferRelationshipScore(noChildren) === inferRelationshipScore(manyChildren),
+    'children count must not change relationship score when other evidence is equal',
+  );
+  assert(
+    patternTriggersActive(noChildren, P19_CATEGORY_QUIET_CONTINUITY.triggerFlags),
+    'family_legacy / quiet_retirement must retain quiet continuity capability',
+  );
+  assert(
+    resolveActiveHistoricalMemoryPatterns(noChildren).some(
+      pattern => pattern.patternId === P19_MEMORY_QUIET_LOCAL.id,
+    ),
+    'family_legacy / quiet_retirement must retain quiet local memory capability',
   );
 }
 
@@ -246,6 +298,7 @@ function runAll(): void {
   testEndgameCategorySelection();
   testPreEndgameRecoverySamples();
   testHistoricalMemorySamples();
+  testParenthoodShortcutsAreQuarantined();
   testFinalSummaryUpgrade();
   testValidationSlices();
   testGateReport();

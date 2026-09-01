@@ -6,10 +6,17 @@ import { getWorldProfile, WUXIA_WORLD_PROFILE } from '../src/narrative/worldProf
 import {
   P18_CHANNEL_MARTIAL_TEACHING,
   P18_CHANNEL_VENDETTA,
+  P18_COST_HEIR_OFFSPRING,
+  P18_OUTCOME_UNDERINVESTMENT,
   P18_OUTCOME_TRANSMISSION_SUCCESS,
+  P18_ROLE_HEIR,
   P18_ROLE_DISCIPLE,
+  P18_ROLE_OFFSPRING,
 } from '../src/narrative/profile/wuxiaLegacySurfaces';
-import { collectUnmetCultivationPressure } from '../src/p18/cultivationPressure';
+import {
+  collectUnmetCultivationPressure,
+  resolveActiveCultivationCostPatterns,
+} from '../src/p18/cultivationPressure';
 import { resolveActiveInheritanceChannels } from '../src/p18/inheritanceChannels';
 import {
   buildLaterLifeLegacyReport,
@@ -17,6 +24,7 @@ import {
   getLaterLifeLegacyMultiplierForTags,
 } from '../src/p18/laterLifeLegacySelection';
 import { resolveActiveLegacyOutcomes } from '../src/p18/legacyOutcomes';
+import { inferSuccessorQuality } from '../src/p18/stateAccess';
 import { assembleP18GateReport, profileHasP18Sections } from '../src/p18/reportBuilder';
 import { resolveActiveSuccessorRoles } from '../src/p18/successorRoles';
 import {
@@ -123,6 +131,61 @@ function testSuccessorRolesAndChannels(): void {
   assert(transmissionMul.multiplier !== burdenMul.multiplier, 'legacy trajectories differ');
 }
 
+function testParenthoodShortcutsAreQuarantined(): void {
+  const childOnly = makeState({
+    flags: { has_child: true },
+    player: { children: 5, flags: { has_child: true } } as GameState['player'],
+  });
+  const childOnlyRoles = resolveActiveSuccessorRoles(childOnly);
+  const childOnlyCosts = resolveActiveCultivationCostPatterns(childOnly);
+  const childOnlyOutcomes = resolveActiveLegacyOutcomes(childOnly);
+
+  assert(
+    !WUXIA_WORLD_PROFILE.successorRoleConfigs?.some(role => role.id === P18_ROLE_OFFSPRING.id),
+    'offspring role must not remain in the active successor role configs',
+  );
+  assert(
+    !childOnlyRoles.some(role => role.config.id === P18_ROLE_OFFSPRING.id),
+    'has_child-only state must not activate an offspring successor role',
+  );
+  assert(
+    !childOnlyCosts.some(cost => cost.pattern.id === P18_COST_HEIR_OFFSPRING.id),
+    'has_child-only state must not activate heir cultivation cost',
+  );
+  assert(
+    !childOnlyOutcomes.some(outcome => outcome.pattern.id === P18_OUTCOME_UNDERINVESTMENT.id),
+    'has_child-only state must not trigger underinvestment outcome',
+  );
+
+  const noChildren = makeState({
+    flags: { family_heir: true },
+    player: { flags: { family_heir: true }, children: 0 } as GameState['player'],
+  });
+  const manyChildren = makeState({
+    flags: { family_heir: true },
+    player: { flags: { family_heir: true }, children: 5 } as GameState['player'],
+  });
+  assert(
+    inferSuccessorQuality(noChildren) === inferSuccessorQuality(manyChildren),
+    'children count must not change inferred successor quality',
+  );
+
+  for (const flag of ['family_heir', 'sect_heir', 'heir_designated']) {
+    const state = makeState({
+      flags: { [flag]: true },
+      player: { flags: { [flag]: true } } as GameState['player'],
+    });
+    assert(
+      resolveActiveSuccessorRoles(state).some(role => role.config.id === P18_ROLE_HEIR.id),
+      `${flag} must continue activating the formal heir role`,
+    );
+    assert(
+      resolveActiveCultivationCostPatterns(state).some(cost => cost.pattern.id === P18_COST_HEIR_OFFSPRING.id),
+      `${flag} must continue activating heir cultivation cost`,
+    );
+  }
+}
+
 function testCultivationPressure(): void {
   const invested = makeState({
     flags: { has_disciples: true, disciple_training_active: true, martial_transmission: true },
@@ -133,13 +196,12 @@ function testCultivationPressure(): void {
     } as GameState['player'],
   });
   const neglected = makeState({
-    flags: { has_disciples: true, has_child: true },
+    flags: { has_disciples: true },
     player: {
-      flags: { has_disciples: true, has_child: true },
+      flags: { has_disciples: true },
       martialHeritage: 5,
       connections: 8,
       martialPower: 95,
-      children: 2,
     } as GameState['player'],
     lifePath: {
       faction: 'neutral',
@@ -232,6 +294,7 @@ function testGateReport(): void {
 function runAll(): void {
   testProfileSchema();
   testSuccessorRolesAndChannels();
+  testParenthoodShortcutsAreQuarantined();
   testCultivationPressure();
   testLegacyOutcomes();
   testLaterLifeAgeGate();

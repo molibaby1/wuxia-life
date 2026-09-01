@@ -155,13 +155,12 @@ export function assembleP18GateReport(profile: WorldProfile = getWorldProfile())
   });
 
   const underinvestState = makeSampleState({
-    flags: { has_disciples: true, has_child: true },
+    flags: { has_disciples: true },
     player: {
-      flags: { has_disciples: true, has_child: true },
+      flags: { has_disciples: true },
       martialHeritage: 5,
       connections: 10,
       martialPower: 90,
-      children: 2,
     } as GameState['player'],
     lifePath: {
       faction: 'neutral',

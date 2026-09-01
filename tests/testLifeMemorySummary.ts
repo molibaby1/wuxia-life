@@ -236,22 +236,44 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   console.log('✓ relationship in memory summary');
 }
 
-// Unresolved debt when present
+// Parenthood is a fact entry, not a synthetic relationship-quality signal.
 {
   const state = createBaseState({
-    flags: { has_life_debt: true },
+    player: {
+      ...createBaseState().player,
+      children: 2,
+    },
+  });
+
+  const summary = deriveLifeMemorySummary(state);
+  const childEntry = summary.relationships?.find(
+    (entry) => entry.diagnostic.relationId === 'children',
+  );
+  assert(childEntry !== undefined, 'children fact entry should exist when children > 0');
+  assert(childEntry!.name === '2位子嗣', 'children entry should keep the fact count in its name');
+  assert(childEntry!.roleLabel === '子嗣', 'children entry role should be factual');
+  assert(childEntry!.statusLabel === '有子女', 'children entry status should be factual');
+  assert(!('affinityBand' in childEntry!), 'children entry must not expose affinityBand');
+  assert(!('affinity' in childEntry!.diagnostic), 'children diagnostic must not expose affinity');
+  console.log('✓ children remain a fact-only relationship entry');
+}
+
+// A life favor owed to the player is not player debt.
+{
+  const state = createBaseState({
+    flags: { life_debt_owed_to_player: true },
   });
 
   const summary = deriveLifeMemorySummary(state);
   assert(
-    summary.unresolvedDebts?.some((entry) => entry.label.includes('救命')),
-    'unresolved debts should surface life debt',
+    !summary.unresolvedDebts?.some((entry) => entry.label.includes('救命')),
+    'a life favor owed to the player must not surface as player debt',
   );
   assert(
-    filterPlayerVisible(summary.unresolvedDebts).length >= 1,
-    'debts must remain player-visible for UI consumption',
+    filterPlayerVisible(summary.unresolvedDebts).every(entry => !entry.label.includes('救命')),
+    'Life Memory must not present the favor as player-visible debt',
   );
-  console.log('✓ unresolved debt when present');
+  console.log('✓ life favor direction is excluded from unresolved debt');
 }
 
 // Unresolved risk when present

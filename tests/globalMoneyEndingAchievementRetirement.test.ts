@@ -55,6 +55,11 @@ function testModerateNonMoneyEvidenceRemainsEffective(): void {
         'unfulfilled_ambition',
         `moderate non-money evidence must remain effective at money=${money}`,
       );
+      assert.equal(
+        endingIdForMoney(money, { ...evidence, spouse: '发妻', children: 1 }),
+        'quiet_family_life',
+        `family anchor should preserve quiet-family classification at money=${money}`,
+      );
     }
   }
 }

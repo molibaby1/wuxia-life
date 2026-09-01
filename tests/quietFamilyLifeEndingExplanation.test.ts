@@ -112,54 +112,18 @@ function testDescriptionIsDeterministicAndOtherEndingsRemainStatic(): void {
   );
 }
 
-function testEndingClassificationDoesNotChange(): void {
-  const martial = makeState({ martialPower: 95 });
-  const scholar = makeState({ knowledge: 85 });
-  const wealth = makeState({ businessAcumen: 75, spouse: '发妻', children: 1 });
-  const balanced = makeState({ martialPower: 61, knowledge: 59, spouse: '发妻', children: 1 });
+function testFamilyPresenceRetainsCanonicalNeutralClassification(): void {
+  const lowNoFamily = makeState({ martialPower: 20, reputation: 40, knowledge: 20 });
+  const lowWithSpouse = makeState({ martialPower: 20, reputation: 40, knowledge: 20, spouse: '发妻' });
+  const lowWithChild = makeState({ martialPower: 20, reputation: 40, knowledge: 20, children: 1 });
+  assert(EndingSystem.determineEnding(lowNoFamily).id === 'ordinary_life', 'low no-family state should remain ordinary');
+  assert(EndingSystem.determineEnding(lowWithSpouse).id === 'quiet_family_life', 'spouse should preserve quiet-family classification');
+  assert(EndingSystem.determineEnding(lowWithChild).id === 'quiet_family_life', 'child should preserve quiet-family classification');
 
-  assert(EndingSystem.determineEnding(martial).id === 'martial_god', 'martial classification changed');
-  assert(EndingSystem.determineEnding(scholar).id === 'great_scholar', 'scholar classification changed');
-  assert(EndingSystem.determineEnding(wealth).id === 'quiet_family_life', 'wealth classification changed');
-  assert(EndingSystem.determineEnding(balanced).id === 'quiet_family_life', 'balanced classification changed');
-}
-
-function testQuietFamilyClassificationRetiresMoneyVeto(): void {
-  for (const _legacyMoney of [0, 899, 900, 1000, 9999]) {
-    const ending = EndingSystem.determineEnding(makeState({
-      spouse: '发妻',
-      martialPower: 20,
-      knowledge: 20,
-      reputation: 40,
-    }));
-    assert(
-      ending.id === 'quiet_family_life',
-      'quiet_family_life classification must not depend on removed money field',
-    );
-  }
-
-  const noFamilyAnchor = EndingSystem.determineEnding(makeState({
-    martialPower: 20,
-    knowledge: 20,
-    reputation: 40,
-  }));
-  assert(
-    noFamilyAnchor.id !== 'quiet_family_life',
-    'family anchor must remain necessary for quiet_family_life',
-  );
-
-  for (const _legacyMoney of [0, 899, 900, 1000, 9999]) {
-    const highAchievement = EndingSystem.determineEnding(makeState({
-      spouse: '发妻',
-      martialPower: 75,
-      knowledge: 20,
-      reputation: 40,
-    }));
-    assert(
-      highAchievement.id !== 'quiet_family_life',
-      'high non-money achievement must block quiet_family_life',
-    );
-  }
+  const moderateNoFamily = makeState({ martialPower: 55, reputation: 40, knowledge: 20 });
+  const moderateWithFamily = makeState({ martialPower: 55, reputation: 40, knowledge: 20, spouse: '发妻', children: 1 });
+  assert(EndingSystem.determineEnding(moderateNoFamily).id === 'unfulfilled_ambition', 'moderate no-family state should remain unfulfilled');
+  assert(EndingSystem.determineEnding(moderateWithFamily).id === 'quiet_family_life', 'family anchor should preserve quiet-family classification');
 }
 
 async function testRuntimeAndSnapshotUseTheSameDescription(): Promise<void> {
@@ -212,8 +176,7 @@ async function main(): Promise<void> {
   testWealthAndBalancedExplanationsDiffer();
   testNoFamilyDescriptionIsNotFabricated();
   testDescriptionIsDeterministicAndOtherEndingsRemainStatic();
-  testEndingClassificationDoesNotChange();
-  testQuietFamilyClassificationRetiresMoneyVeto();
+  testFamilyPresenceRetainsCanonicalNeutralClassification();
   await testRuntimeAndSnapshotUseTheSameDescription();
   console.log('quietFamilyLifeEndingExplanation.test.ts: ok');
 }

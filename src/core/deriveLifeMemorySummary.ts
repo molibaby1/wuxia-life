@@ -87,8 +87,6 @@ const ACHIEVEMENT_FLAG_PATTERNS: Array<{
   label: string;
   category: LifeMemoryAchievementEntry['category'];
 }> = [
-  { flag: 'married', label: '喜结良缘', category: 'family' },
-  { flag: 'lover_mingyue', label: '与明月结缘', category: 'family' },
   { flag: 'sect_trial_completed', label: '通过门派试炼', category: 'martial' },
   { flag: 'orthodox_trial_completed', label: '完成正道试炼', category: 'martial' },
 ];
@@ -256,11 +254,31 @@ function buildRelationships(state: GameState): LifeMemoryRelationshipEntry[] {
   }
 
   if (state.player.spouse) {
-    pushEntry('spouse', state.player.spouse, 'spouse', 60);
+    if (!seen.has('spouse')) {
+      seen.add('spouse');
+      entries.push({
+        id: 'relationship-spouse',
+        visibility: 'player',
+        sortKey: -1000,
+        name: state.player.spouse,
+        roleLabel: RELATIONSHIP_ROLE_LABELS.spouse,
+        statusLabel: '已婚',
+        diagnostic: { relationId: 'spouse' },
+      });
+    }
   }
 
   if ((state.player.children ?? 0) > 0) {
-    pushEntry('children', `${state.player.children}位子嗣`, 'children', 40);
+    entries.push({
+      id: 'relationship-children',
+      visibility: 'player',
+      sortKey: -450,
+      name: `${state.player.children}位子嗣`,
+      roleLabel: RELATIONSHIP_ROLE_LABELS.children,
+      statusLabel: '有子女',
+      diagnostic: { relationId: 'children' },
+    });
+    seen.add('children');
   }
 
   const lifePathRelations = state.lifePath?.relationships;
@@ -278,11 +296,6 @@ function buildRelationships(state: GameState): LifeMemoryRelationshipEntry[] {
         pushEntry(relationId, relationId, role, affinity);
       }
     }
-  }
-
-  const flags = state.flags || {};
-  if (flags.lover_mingyue && !seen.has('mingyue')) {
-    pushEntry('mingyue', '明月', 'lover', 70);
   }
 
   entries.sort((a, b) => a.sortKey - b.sortKey);
@@ -556,7 +569,7 @@ function inferAchievementCategory(
   if (achievementId.includes('trial') || achievementId.includes('martial')) {
     return 'martial';
   }
-  if (achievementId.includes('married') || achievementId.includes('family') || achievementId.includes('lover')) {
+  if (achievementId.includes('married') || achievementId.includes('family')) {
     return 'family';
   }
   if (achievementId.includes('reputation') || achievementId.includes('connection')) {
@@ -638,10 +651,6 @@ function buildAchievements(state: GameState): LifeMemoryAchievementEntry[] {
   const age40Identity = deriveSampleLineAge40Identity(state);
   if (age40Identity) {
     pushAchievement('achievement-age40-identity', age40Identity, 'route', 'age40_identity');
-  }
-
-  if ((state.player.children ?? 0) > 0) {
-    pushAchievement('achievement-children', '膝下有子', 'family', 'children');
   }
 
   entries.sort((a, b) => a.sortKey - b.sortKey);

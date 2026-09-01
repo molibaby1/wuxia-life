@@ -193,7 +193,7 @@ function eventHasLifeStateTarget(eventId: string, target: string): boolean {
 }
 
 function testFamilyContentRemoval(): void {
-  assert(!eventHasLifeStateTarget('family_child_born', 'familyBond'), 'child birth uses children and has_child only');
+  assert(EventLoader.getInstance().getEventById('family_child_born') === undefined, 'child birth must remain deferred');
   assert(!eventHasLifeStateTarget('family_crisis', 'familyBond'), 'family crisis uses concrete outcomes only');
 
   for (const id of [

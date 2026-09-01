@@ -104,9 +104,14 @@ export function assembleP17GateReport(
     achievementPrestigeAndUpkeep: maintenancePatterns.length >= 3 && dimensionFamilies.size >= 2,
   };
 
-  const swornState = makeSampleState({
-    flags: { has_sworn_siblings: true },
-    player: { flags: { has_sworn_siblings: true } } as GameState['player'],
+  const allyState = makeSampleState({
+    lifePath: {
+      faction: 'neutral',
+      lifeStage: 'growth',
+      achievements: [],
+      relationships: { allies: ['ally_mo'], enemies: [], mentors: [], disciples: [] },
+      commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+    },
   });
   const feudState = makeSampleState({
     lifePath: {
@@ -139,7 +144,7 @@ export function assembleP17GateReport(
   const dutyTags = new Set(['duty', 'sect', 'political']);
   const declineTags = new Set(['decline', 'backlash']);
 
-  const swornReport = buildLaterLifeConsequenceReport(swornState, new Set(['rescue', 'relationship']), 35);
+  const allyReport = buildLaterLifeConsequenceReport(allyState, new Set(['rescue', 'relationship']), 35);
   const feudReport = buildLaterLifeConsequenceReport(feudState, conflictTags, 35);
   const orthodoxReport = buildLaterLifeConsequenceReport(orthodoxState, dutyTags, 35);
   const neglectedReport = buildLaterLifeConsequenceReport(neglectedHeroState, declineTags, 35);
@@ -159,8 +164,8 @@ export function assembleP17GateReport(
   if (!balance.factionProtectionAndDuty) {
     warnings.push('faction patterns missing protection/duty balance');
   }
-  if (swornReport.combinedMultiplier <= 1.05) {
-    warnings.push('sworn ally sample multiplier too low');
+  if (allyReport.combinedMultiplier <= 1.05) {
+    warnings.push('concrete ally sample multiplier too low');
   }
   if (feudReport.riskMultiplier <= 1.05) {
     warnings.push('feud enemy sample risk multiplier too low');
@@ -204,8 +209,8 @@ export function assembleP17GateReport(
     balance,
     sampleReports: {
       swornAlly: [
-        `multiplier=${swornReport.combinedMultiplier.toFixed(2)}`,
-        `patterns=${swornReport.activeRelationshipPatterns.map(p => p.patternId).join(',')}`,
+        `multiplier=${allyReport.combinedMultiplier.toFixed(2)}`,
+        `patterns=${allyReport.activeRelationshipPatterns.map(p => p.patternId).join(',')}`,
       ],
       feudEnemy: [
         `risk=${feudReport.riskMultiplier.toFixed(2)}`,

@@ -9,7 +9,6 @@ import type { GameState } from '../types/eventTypes';
 import { flagIsActive, lifePathSignalActive, readMergedFlags } from '../p17/stateAccess';
 
 const HERITAGE_CEILING = 100;
-const CHILDREN_CEILING = 5;
 const DISCIPLE_CEILING = 8;
 
 export function inferSuccessorQuality(state: GameState): number {
@@ -28,8 +27,6 @@ export function inferSuccessorQuality(state: GameState): number {
     1,
     (state.lifePath?.relationships?.disciples?.length ?? 0) / DISCIPLE_CEILING,
   );
-  const childBoost = Math.min(1, (player.children ?? 0) / CHILDREN_CEILING);
-
   quality += martialHeritage * 0.35;
   weight += 0.35;
   quality += scholarlyHeritage * 0.15;
@@ -38,9 +35,6 @@ export function inferSuccessorQuality(state: GameState): number {
   weight += 0.1;
   quality += discipleBoost * 0.2;
   weight += 0.2;
-  quality += childBoost * 0.1;
-  weight += 0.1;
-
   if (flagIsActive(flags, 'martial_transmission')) {
     quality += 0.15;
     weight += 0.15;

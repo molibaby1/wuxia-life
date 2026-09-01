@@ -3,9 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
-import { P17_MAINTENANCE_SECT_LEADERSHIP } from '../src/narrative/profile/wuxiaConsequenceSurfaces';
+import {
+  P17_MAINTENANCE_FAMILY_LEGACY,
+  P17_MAINTENANCE_SECT_LEADERSHIP,
+  P17_RELATIONSHIP_KINSHIP_DUTY,
+} from '../src/narrative/profile/wuxiaConsequenceSurfaces';
 import { resolveActiveAchievementMaintenance } from '../src/p17/achievementMaintenance';
 import { buildLaterLifeConsequenceReport } from '../src/p17/laterLifeSelection';
+import { resolveActiveRelationshipConsequences } from '../src/p17/relationshipConsequences';
 import type { GameState } from '../src/types/eventTypes';
 
 type SectLeadershipOutcome = {
@@ -116,18 +121,78 @@ function testInternalStabilityRemainsEffective(): void {
   assert(lowOutcome.riskMultiplier > highOutcome.riskMultiplier, 'internal stability must still affect decline risk');
 }
 
-function testOtherP17MaintenancePatternsRemain(): void {
+function testFamilyLegacyRequiresExplicitAchievement(): void {
   const hero = new GameEngineIntegration().getGameState();
   hero.flags = { hero_rep_mantle: true };
   hero.player.flags = { hero_rep_mantle: true };
-  const family = new GameEngineIntegration().getGameState();
-  family.flags = { married: true };
-  family.player.flags = { married: true };
+  const marriedOnly = new GameEngineIntegration().getGameState();
+  marriedOnly.flags = { married: true };
+  marriedOnly.player.flags = { married: true };
+  const familyLegacy = new GameEngineIntegration().getGameState();
+  familyLegacy.flags = { family_legacy: true };
+  familyLegacy.player.flags = { family_legacy: true };
 
   const heroPatterns = resolveActiveAchievementMaintenance(hero).map(item => item.pattern.id);
-  const familyPatterns = resolveActiveAchievementMaintenance(family).map(item => item.pattern.id);
+  const marriedOnlyPatterns = resolveActiveAchievementMaintenance(marriedOnly).map(item => item.pattern.id);
+  const familyLegacyPatterns = resolveActiveAchievementMaintenance(familyLegacy).map(item => item.pattern.id);
   assert(heroPatterns.includes('p17_hero_reputation_upkeep'), 'hero reputation maintenance must remain active');
-  assert(familyPatterns.includes('p17_family_legacy_upkeep'), 'family legacy maintenance must remain active');
+  assert(
+    !marriedOnlyPatterns.includes(P17_MAINTENANCE_FAMILY_LEGACY.id),
+    'married alone must not activate family legacy maintenance',
+  );
+  assert(
+    familyLegacyPatterns.includes(P17_MAINTENANCE_FAMILY_LEGACY.id),
+    'family_legacy must continue activating family legacy maintenance',
+  );
+}
+
+function testMarriageStillActivatesKinshipDuty(): void {
+  const married = new GameEngineIntegration().getGameState();
+  married.flags = { married: true };
+  married.player.flags = { married: true };
+
+  const relationshipPatterns = resolveActiveRelationshipConsequences(married).map(item => item.pattern.id);
+  assert(
+    relationshipPatterns.includes(P17_RELATIONSHIP_KINSHIP_DUTY.id),
+    'married must continue activating kinship duty',
+  );
+}
+
+function familyLegacyOutcome(children: number): Pick<
+  ReturnType<typeof buildLaterLifeConsequenceReport>,
+  'activeMaintenancePatterns' | 'unmetMaintenance' | 'aggregateUnmetPressure' |
+  'opportunityMultiplier' | 'riskMultiplier' | 'combinedMultiplier'
+> {
+  const state = new GameEngineIntegration().getGameState();
+  state.player.age = 45;
+  state.player.children = children;
+  state.player.connections = 30;
+  state.player.flags = { family_legacy: true };
+  state.flags = { family_legacy: true };
+  state.lifePath = {
+    faction: 'neutral',
+    lifeStage: 'legacy',
+    achievements: [],
+    relationships: { allies: [], enemies: [], mentors: [], disciples: ['d1', 'd2'] },
+    commitments: { cannotJoin: [], mustProtect: [], swornEnemies: [] },
+  };
+  const report = buildLaterLifeConsequenceReport(state, new Set(['family', 'obligation']), 45);
+  return {
+    activeMaintenancePatterns: report.activeMaintenancePatterns,
+    unmetMaintenance: report.unmetMaintenance,
+    aggregateUnmetPressure: report.aggregateUnmetPressure,
+    opportunityMultiplier: report.opportunityMultiplier,
+    riskMultiplier: report.riskMultiplier,
+    combinedMultiplier: report.combinedMultiplier,
+  };
+}
+
+function testFamilyLegacySatisfactionIgnoresChildren(): void {
+  assert.deepEqual(
+    familyLegacyOutcome(0),
+    familyLegacyOutcome(3),
+    'family legacy maintenance satisfaction must not improve from child count',
+  );
 }
 
 function testNoSyntheticOrWealthReplacement(): void {
@@ -151,7 +216,9 @@ function main(): void {
   testNumericWealthInvariance();
   testCombinedExtremeSentinelInvariance();
   testInternalStabilityRemainsEffective();
-  testOtherP17MaintenancePatternsRemain();
+  testFamilyLegacyRequiresExplicitAchievement();
+  testMarriageStillActivatesKinshipDuty();
+  testFamilyLegacySatisfactionIgnoresChildren();
   testNoSyntheticOrWealthReplacement();
   assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
   console.log('globalMoneyP17ResourceRetirement.test.ts: ok');

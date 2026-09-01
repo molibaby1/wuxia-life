@@ -50,7 +50,6 @@ const P22_EXPANSION_EVENTS: Array<{
   { sliceId: 'origin', eventId: 'p22_origin_frontier_orphan', targetPool: 'p22_pool_origin', weakArchetype: 'frontier_military' },
   { sliceId: 'childhood', eventId: 'p22_childhood_street_shaping', targetPool: 'p22_pool_childhood_shaping', weakArchetype: 'streetborn' },
   { sliceId: 'early_route', eventId: 'p22_early_wealth_route_fork', targetPool: 'p22_pool_early_route', weakArchetype: 'wealth_merchant' },
-  { sliceId: 'relationship', eventId: 'p22_relationship_mentor_obligation', targetPool: 'p22_pool_midlife_consequence', weakArchetype: 'social_connector' },
   { sliceId: 'faction', eventId: 'p22_faction_sect_continuation', targetPool: 'p22_pool_midlife_consequence', weakArchetype: 'demonic_outlaw' },
   { sliceId: 'legacy', eventId: 'p22_legacy_teaching_succession', targetPool: 'p22_pool_legacy_endgame', weakArchetype: 'scholar_statesman' },
   { sliceId: 'endgame', eventId: 'p22_endgame_hermit_memory', targetPool: 'p22_pool_legacy_endgame', weakArchetype: 'hermit_withdrawal' },
@@ -143,7 +142,7 @@ export function runExpansionWave(): P22ExpansionWaveResult {
     {
       caseId: 'weak_area_improved',
       description: 'P22 expansions load with authoring semantics for previously weak archetype bands',
-      passed: expansions.every(s => s.passed) && expansions.length >= 7,
+      passed: expansions.every(s => s.passed) && expansions.length >= 6,
     },
     {
       caseId: 'tuning_stabilized',

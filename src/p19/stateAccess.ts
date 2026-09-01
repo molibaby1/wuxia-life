@@ -17,7 +17,6 @@ export function inferRelationshipScore(state: GameState): number {
   let score = 0;
   score += Math.min(1, (player.connections ?? 0) / 80) * 0.25;
   score += player.spouse ? 0.15 : 0;
-  score += Math.min(1, (player.children ?? 0) / 3) * 0.15;
   const allies = state.lifePath?.relationships?.allies?.length ?? 0;
   const disciples = state.lifePath?.relationships?.disciples?.length ?? 0;
   score += Math.min(1, allies / 5) * 0.15;

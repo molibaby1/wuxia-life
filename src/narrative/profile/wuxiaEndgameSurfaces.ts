@@ -39,7 +39,7 @@ export const P19_CATEGORY_QUIET_CONTINUITY: EndgameCategoryConfig = {
   id: 'p19_category_quiet_continuity',
   label: '烟火延续',
   categoryKind: 'quiet_continuity',
-  triggerFlags: ['family_legacy', 'has_child', 'quiet_retirement'],
+  triggerFlags: ['family_legacy', 'quiet_retirement'],
   lifePathSignals: ['ally'],
   trajectoryWeights: {
     relationshipScore: 1,
@@ -239,7 +239,7 @@ export const P19_MEMORY_QUIET_LOCAL: HistoricalMemoryPattern = {
   label: '乡里温情',
   dimension: 'local_remembrance',
   memoryTone: 'respected',
-  triggerFlags: ['family_legacy', 'quiet_retirement', 'has_child'],
+  triggerFlags: ['family_legacy', 'quiet_retirement'],
   baseIntensity: 0.85,
   livedRealityDelta: 0.55,
   summaryLine: '江湖未必记得你的名字，但身边人仍把你当作值得依靠的长者。',

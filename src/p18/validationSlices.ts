@@ -91,8 +91,8 @@ export function runContinuityComparisonSlice(): ContinuityComparisonSliceResult 
   const investedReport = buildLaterLifeLegacyReport(invested, new Set(['legacy', 'continuity']), 50);
 
   const neglected = baseLateLifeState();
-  neglected.flags = { has_disciples: true, has_child: true };
-  neglected.player!.flags = { has_disciples: true, has_child: true };
+  neglected.flags = { has_disciples: true };
+  neglected.player!.flags = { has_disciples: true };
   neglected.player!.martialPower = 95;
   neglected.player!.reputation = 90;
   neglected.lifePath = {

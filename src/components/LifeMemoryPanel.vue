@@ -138,7 +138,7 @@
           >
             <div class="memory-item-row">
               <span v-if="milestone.occurredAtAge" class="memory-age">{{ milestone.occurredAtAge }}岁</span>
-              <span class="memory-label">{{ formatMilestoneTitle(milestone) }}</span>
+              <span class="memory-label">{{ formatAchievedMilestoneHistoryTitle(milestone) }}</span>
             </div>
             <p v-if="milestone.description" class="memory-consequence">{{ milestone.description }}</p>
             <p
@@ -164,7 +164,6 @@
 import { computed, ref } from 'vue';
 import type {
   LifeMemoryDebtUrgency,
-  LifeMemoryMilestoneEntry,
   LifeMemoryPayoffStatus,
   LifeMemoryRiskSeverity,
   LifeMemorySummary,
@@ -191,10 +190,6 @@ const visibleKeyChoices = computed(() => filterPlayer(props.summary.keyChoices))
 const visibleRelationships = computed(() => filterPlayer(props.summary.relationships));
 const visibleAchievements = computed(() => filterPlayer(props.summary.achievements));
 const visibleMilestones = computed(() => filterPlayer(props.summary.achievedMilestones));
-
-function formatMilestoneTitle(entry: LifeMemoryMilestoneEntry): string {
-  return formatAchievedMilestoneHistoryTitle(entry);
-}
 
 const diagnosticJson = computed(() => {
   if (!showDiagnostic) {

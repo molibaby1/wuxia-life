@@ -97,6 +97,7 @@ const suites: Suite[] = [
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },
   { name: 'testLifeMemorySummary', entry: 'tests/testLifeMemorySummary.ts' },
   { name: 'lifeMemoryFeedback', entry: 'tests/lifeMemoryFeedback.test.ts' },
+  { name: 'pd108PhaseBPlayerReview', entry: 'tests/pd108PhaseBPlayerReview.test.ts' },
   { name: 'lifeMilestoneSystem', entry: 'tests/lifeMilestoneSystem.test.ts' },
   { name: 'merchantStatecraftVerticalSlice', entry: 'tests/testMerchantStatecraftVerticalSlice.ts' },
   { name: 'canonicalWealthCapacityState', entry: 'tests/canonicalWealthCapacityState.test.ts' },

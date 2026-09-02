@@ -3,6 +3,8 @@
  * Uses real derive + presentation helpers; does not mutate gameplay eligibility.
  */
 import { strict as assert } from 'node:assert';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { deriveLifeMemorySummary } from '../src/core/deriveLifeMemorySummary';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import {
@@ -206,4 +208,13 @@ console.log('=== Phase B Player Review Surfaces ===');
 for (const line of findings) console.log(line);
 console.log('MISSING_TIER_FALSE_AFFORDANCE=PASS');
 console.log('ACQUISITION_SALIENCE=SUFFICIENT');
+
+{
+  const gate = readFileSync(resolve(process.cwd(), 'tests/runRealTestGate.ts'), 'utf8');
+  assert(
+    gate.includes("entry: 'tests/pd108PhaseBPlayerReview.test.ts'"),
+    'pd108PhaseBPlayerReview must remain registered in runRealTestGate',
+  );
+}
+
 console.log('pd108PhaseBPlayerReview: ok');

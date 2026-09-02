@@ -4,7 +4,10 @@ import type {
   LifeMemorySummary,
 } from '../types/lifeMemory';
 import type { MilestoneKind, MilestoneTier } from '../types/milestone';
-import type { ProgressionOverlayCard } from '../types/progressionOverlay';
+import {
+  compactOverlayMetaLines,
+  type ProgressionOverlayCard,
+} from '../types/progressionOverlay';
 import {
   formatAchievedProgressLabel,
   milestoneKindSurfaceLabel,
@@ -81,7 +84,9 @@ function buildAchievementOverlayCard(items: AchievementFeedbackItem[]): Progress
 }
 
 function buildMilestoneOverlayCard(item: MilestoneFeedbackItem): ProgressionOverlayCard {
-  const evidenceMeta = item.evidenceLabels.map(label => `依据：${label}`);
+  const metaLines = compactOverlayMetaLines(
+    ...item.evidenceLabels.map(label => `依据：${label}`),
+  );
   const sourceLabel = milestoneKindSurfaceLabel(item.milestoneKind, item.milestoneTier);
   const title = item.milestoneKind === 'progress_stage' && item.milestoneTier !== undefined
     ? formatAchievedProgressLabel(item.label, item.milestoneTier)
@@ -92,7 +97,7 @@ function buildMilestoneOverlayCard(item: MilestoneFeedbackItem): ProgressionOver
     sourceLabel,
     title,
     body: item.description,
-    metaLines: evidenceMeta,
+    ...(metaLines.length > 0 ? { metaLines } : {}),
   };
 }
 

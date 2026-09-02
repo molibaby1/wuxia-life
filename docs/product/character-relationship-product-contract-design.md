@@ -2,7 +2,9 @@
 
 > 状态：Accepted product contract
 >
-> Human accepted：2026-08-30
+> Human accepted：2026-08-30（Character / Relationship Product Contract v1）
+>
+> Person Domain Authoring Contract：v1.1 operational consolidation（PD-107；Human accepted）
 >
 > 本文位于 `docs/product/player-model.md` 之下，定义 Wuxia-Life 重要人物与人物关系领域的正式产品语义。本文不替代第一层玩家模型，也不授权本轮直接修改 Runtime、Event Schema、PlayerState、Snapshot 或现有事件内容。
 >
@@ -265,29 +267,170 @@
 
 属性变化仍可作为具体事件的自然结果，但不得把重要人物主要设计成永久 buff 或装备式加成。
 
-## 11. Person Definition Contract v1
+## 11. Person Domain Authoring Contract v1.1
 
-Person Definition Contract v1 首先是**内容设计 / authoring Contract**，不等于新增 Runtime Schema。
+Person Domain Authoring Contract v1.1 是本文件内的**内容设计 / authoring Contract**，不是 Runtime Schema，也不授权 Generic Person Runtime、Person registry、NPC generator 或 machine-readable Person model。
 
-一个达到“重要人物”级别的 NPC，原则上只需要回答以下八类问题。
+v1.1 是对既有 Person Definition Contract v1（PD-101）的原地 operational consolidation：保留八项 Person Definition 字段，并补齐人物必要性、分类、identity / continuity strategy、Person ↔ Event 接口、统一验证与 conformance examples。PD-101 仍是历史 accepted decision；本条规则以本节与 PD-107 为准。
 
-### 11.1 Identity
+### 11.0 Person Necessity Gate
+
+设计 Person 之前，先判断当前内容是否真的需要一个持续人物。
+
+```text
+场景功能角色
+→ 不升级 Person
+
+需要跨事件稳定识别 / 消费共同历史
+→ 进入 Person Domain authoring
+```
+
+明确：
+
+```text
+“某个角色出现”
+≠
+“需要创建重要人物”
+```
+
+尤其禁止：
+
+- 缺医生 → 自动命名一个医生；
+- 角色第二次出现 → 自动建设人物系统 / Person Card / 专属状态。
+
+只有当后续内容必须稳定识别同一个人，并消费与其相关的共同历史或责任时，才进入本节的 Person Authoring。
+
+### 11.1 Actor Classification
+
+正式定义四种 authoring shape。`actor_class` 回答：**这是哪种人物 authoring shape？**
+
+#### 11.1.1 `TRANSIENT_ROLE`
+
+用于村民、病患、普通官员、摊主等只服务当前场景的社会角色。
+
+特点：
+
+- 不要求未来稳定引用；
+- 不需要完整 Person Authoring Card；
+- 不为“丰富度”创建永久 identity / state。
+
+#### 11.1.2 `RECURRING_IDENTIFIABLE_ROLE`
+
+角色可以跨事件稳定被玩家识别，但当前内容不要求正式命名身份或人物专属状态。
+
+边界样例：一位云游神医 → 玩家拜师 → 后续“师父”。
+
+明确：recurring identifiable role 可以已经拥有足够人物连续性；**没有姓名本身不是 `CONTENT_GAP`**。
+
+#### 11.1.3 `FIXED_PERSON`
+
+稳定 authored identity。当前合法例：明月、赛音、许慎言。
+
+明确：
+
+```text
+FIXED_PERSON
+≠
+必须拥有完整人物故事线
+```
+
+人物复杂度由真实 Event Responsibilities 决定，不由“重要程度标签”决定。
+
+#### 11.1.4 `BOUNDED_PERSON_ARCHETYPE`
+
+只有有限 authored identity variant，且人物核心语义保持不变。
+
+当前合法 specialization 仍由 PD-103 管理：
+
+```text
+merchant_introduced_partner_v1
+→ 沈清禾 / 沈知衡
+```
+
+本分类本身不授权新的 archetype，也不把 PD-103 泛化为 generator。
+
+### 11.2 Identity Strategy
+
+`actor_class` 与 `identity_strategy` 不是同一个概念。
+
+- `actor_class`：这是哪种人物 authoring shape？
+- `identity_strategy`：内容和 runtime 如何稳定知道这是同一个人？
+
+当前已验证的 authoring vocabulary（不是 Runtime enum / schema）：
+
+| Strategy | 含义 | 当前例 |
+| --- | --- | --- |
+| `FIXED_LITERAL_IDENTITY` | 作者固定身份可被后续内容直接引用 | 明月、赛音、许慎言 |
+| `BOUNDED_VARIANT_BINDING` | 有限 variant binding 决定 presentation identity；核心语义不变 | PD-103 `person_variant:<archetypeId>` |
+
+不得据此新增 Runtime enum、Save Schema 或 Person object。
+
+### 11.3 Continuity / State Escalation Strategy
+
+默认遵循：
+
+```text
+最少状态
+→ 只有真实 future consumer 才升级
+```
+
+#### Level 0 — `EVENT_HISTORY_ONLY`
+
+若后续语义可由真实 Event / Choice History 证明，**不得新增人物状态**。
+
+标准样例：许慎言 — `official_first_post` happened → `official_resign` 可以合法继续引用同一人物。
+
+这是默认优先方式。
+
+#### Level 1 — `CHARACTER_DURABLE_FACT`
+
+只有当后续必须读取一个持续成立、且不能仅由已有 history 正确推导的具体人物事实时，才创建人物专属 durable fact。
+
+例如：`mingyue_romance_confirmed`。
+
+该语义必须有真实 future consumer。禁止为方便、对称、记录所有选择或“未来也许会用”而新增。
+
+#### Level 2 — `BOUNDED_PERSON_BINDING`
+
+只有 runtime identity 本身需要有限选择时才使用；受 PD-103 约束。
+
+例如：`person_variant:<archetypeId>`。
+
+不能由普通 Person authoring 自动授权。
+
+#### Level 3 — `GENERIC_PERSON_RUNTIME`
+
+概念包括：generic Person object、Person registry、generic personality state、relationship graph、generic NPC lifecycle。
+
+默认：
+
+```text
+BLOCK / NOT AUTHORIZED
+```
+
+遇到真实独立需求必须重新进入产品设计；不得因 Auto Evolution 方便提前授权。
+
+### 11.4 Eight-field Person Definition
+
+达到需要 Person Domain authoring 的人物，仍回答以下八类问题。不得重新发明另一套字段名称。
+
+#### 11.4.1 Identity
 
 这个人基本是谁：
 
 - 稳定 identity；
-- 固定人物或可实例化人物原型；
-- 名称固定或由原型实例化；
-- 性别固定或允许变化；
+- 固定人物或有限 bounded archetype variant；
+- 名称固定或由已授权 archetype binding 决定；
+- 性别固定或允许变化（仅在 PD-103 边界内）；
 - 当前内容真正需要知道的基础社会身份。
 
 不要求人物百科。
 
-### 11.2 Access
+#### 11.4.2 Access
 
 玩家为什么有机会认识这个人。可以是普适型入口，也可以是路径关联型入口。
 
-### 11.3 Character Anchors
+#### 11.4.3 Character Anchors
 
 只定义足以让人物在不同事件中保持一致的少量稳定锚点，通常包括：
 
@@ -297,13 +440,13 @@ Person Definition Contract v1 首先是**内容设计 / authoring Contract**，�
 
 一般只需要 2～3 个当前内容真正使用的锚点，不建设人格参数矩阵。
 
-### 11.4 Core Concern
+#### 11.4.4 Core Concern
 
 定义这个人物自己的故事主要围绕什么问题、责任或矛盾展开。
 
 人物自己的核心 concern 应当在不发生恋爱时仍然成立，避免把人物写成“专门陪玩家谈恋爱的人”。
 
-### 11.5 Event Responsibilities
+#### 11.4.5 Event Responsibilities
 
 定义人物内容需要承担哪些职责，例如：
 
@@ -316,19 +459,202 @@ Person Definition Contract v1 首先是**内容设计 / authoring Contract**，�
 
 这是职责列表，不是固定事件数量、统一剧情流程或关系状态机。
 
-### 11.6 Durable Facts
+#### 11.4.6 Durable Facts
 
-只定义后续内容真正必须读取的少量事实。人物专属事实可以保持人物专属，不要求所有人物共享一套字段。
+只定义后续内容真正必须读取的少量事实。人物专属事实可以保持人物专属，不要求所有人物共享一套字段。默认优先 Level 0 `EVENT_HISTORY_ONLY`；只有通过 §11.3 Level 1 测试才新增。
 
-### 11.7 Relationship Possibilities
+#### 11.4.7 Relationship Possibilities
 
 只声明当前内容真正支持的关系可能性。
 
-某个人物可以支持友情、恋爱、疏远等；另一个人物可以只支持合作与友情。不得要求所有人物覆盖所有关系类型。
+某个人物可以支持友情、恋爱、疏远等；另一个人物可以只支持合作与友情。不得要求所有人物覆盖所有关系类型，也不得自动升级为朋友 / 恋人 / 仇敌 / 导师。
 
-### 11.8 Long-term Hooks
+#### 11.4.8 Long-term Hooks
 
 只定义当前已有内容依据的少量后续入口。不得为了“人物完整”提前设计其几十年完整人生。
+
+### 11.5 Person ↔ Event Interface
+
+`Person.Event Responsibilities` 与 Event Authoring Card 的 Event Purpose / Life Function 必须形成正式双向关系。
+
+正向：
+
+> 每一项 Person Event Responsibility 都必须被 Minimum Event Set 中至少一个 Event Card 实际承担，或者明确标记为当前不实现并从当前 Person scope 删除。
+
+反向：
+
+> 每一个为该人物新增 / 修改的 Event，都必须说明自己承担哪一项 Person Responsibility。
+
+禁止：
+
+```text
+先设计 5 个“看起来不错”的人物事件
+→ 再解释它们为什么存在
+```
+
+也禁止：
+
+```text
+Person Card 写出大量 responsibilities
+→ 没有 Event consumer
+→ 留作“以后再做”
+```
+
+### 11.6 Minimum Event Set 与 RESPONSIBILITY_TO_EVENT_MAP
+
+PD-106 的最低必要 Event Set 在此与 Person Domain 正式连接。
+
+Person Card 输出概念上应包含：
+
+```text
+RESPONSIBILITY_TO_EVENT_MAP
+
+R1 → Event A
+R2 → Event A
+R3 → Event B
+Long-term Echo → NONE
+```
+
+正式原则：
+
+> Event 数量由职责和真实因果需要决定，而不是由“人物重要程度”决定。
+
+许慎言是反过度设计样例：`FIXED_PERSON` + 2 existing events + 0 person-specific flags，足以形成有效纵切。
+
+**不要把“2–5 events”变成硬数量规范。** 典型内容可能落在这个量级，但合法范围由 responsibilities 与因果需要证明。
+
+### 11.7 Person Validation Contract
+
+以下是 authoring invariants；它们是语义验证问题，不要求每项都创建自动测试。
+
+| Invariant | 问题 |
+| --- | --- |
+| `PERSON_NECESSITY` | 为什么必须是持续人物，而不是 transient actor？ |
+| `ACCESS` | 这个人为什么会合理进入玩家人生？ |
+| `IDENTITY_CONTINUITY` | 后续内容凭什么能证明这是同一个人？ |
+| `PERSON_FIRST` | 去掉与玩家的关系后，这个人自身的行为、责任与 Core Concern 是否仍成立？ |
+| `FACT_FIRST` | 人物 / 关系 presentation 是否只声称真实发生过的历史？ |
+| `CAUSAL_RESPONSIBILITY` | 人物是否真正参与当前人生事件，而不是只把名字塞进文案？ |
+| `PLAYER_AUTONOMY` | 人物是否没有替玩家定义私人关系、路线选择或人生价值？ |
+| `RELATIONSHIP_BOUNDARY` | 当前内容到底支持什么关系？不得自动升级为朋友 / 恋人 / 仇敌 / 导师 |
+| `STATE_MINIMALITY` | 每一个新增 durable person fact 是否都有明确 future consumer？ |
+| `ANTI_OVERDESIGN` | 为了这个人物是否开始要求 generic framework、无关系统或大量统一状态？若是 → `STOP` |
+
+### 11.8 Person Authoring Card v1.1
+
+标准 authoring output 是 Markdown authoring interface，不是 JSON Schema / TypeScript type / runtime validation。
+
+```text
+PERSON AUTHORING CARD v1.1
+
+Need
+- gap:
+- why_person_required:
+- why_transient_role_insufficient:
+
+Classification
+- actor_class:
+- identity_strategy:
+
+Identity
+- ...
+
+Access
+- ...
+
+Character Anchors
+- ...
+- ...
+- ...
+
+Core Concern
+- ...
+
+Relationship Possibilities
+- ...
+
+Continuity
+- continuity_strategy:
+
+Durable Facts
+- ...
+
+Event Responsibilities
+- R1:
+- R2:
+
+Minimum Event Set
+- Event A → R1
+- Event B → R2
+
+Long-term Hooks
+- ...
+
+Validation Plan
+- PERSON_NECESSITY
+- ACCESS
+- IDENTITY_CONTINUITY
+- PERSON_FIRST
+- FACT_FIRST
+- CAUSAL_RESPONSIBILITY
+- PLAYER_AUTONOMY
+- RELATIONSHIP_BOUNDARY
+- STATE_MINIMALITY
+- ANTI_OVERDESIGN
+
+Scope / STOP
+- new_runtime_abstraction:
+- new_schema:
+- new_generic_person_capability:
+```
+
+本任务及本 Contract **禁止**创建：JSON Schema、TypeScript type、runtime validation、machine-readable Person model。
+
+### 11.9 Conformance Examples
+
+以下是 conformance examples，不是剧情模板。不得要求未来人物必须像明月 / 许慎言一样拥有相同事件结构。
+
+#### 明月 — Deep Fixed Person
+
+证明：
+
+- `FIXED_PERSON`
+- event history + limited character-specific durable facts
+- multiple meaningful responsibilities
+- relationship possibilities may branch
+
+明确：深人物纵切合法，但不是默认复杂度。细节边界见 §16–§17。
+
+#### 许慎言 — Minimal Fixed Person
+
+证明：
+
+- `FIXED_PERSON`
+- `EVENT_HISTORY_ONLY`
+- 2 existing events
+- 0 person-specific state
+
+这是 anti-overdesign 的正面样例。
+
+#### 赛音 — Fixed Person without romance requirement
+
+证明：人物可以通过持续共同社会 / 边疆事务保持重要性，而不需要进入私人 / 恋爱关系。
+
+#### 沈清禾 / 沈知衡 — Bounded Archetype
+
+证明：
+
+- `BOUNDED_PERSON_ARCHETYPE`
+- 只有 bounded identity presentation 变化
+- 人物核心 concern / responsibilities / causal semantics 不变
+
+明确 cross-reference PD-103；本例不授权新 archetype。
+
+#### 云游神医 — Boundary Example
+
+分类：`RECURRING_IDENTIFIABLE_ROLE`
+
+证明：可识别、持续出现、承担因果责任，并不自动意味着需要名字、Person Archetype 或人物专属状态。
 
 ## 12. Shared vs character-specific
 

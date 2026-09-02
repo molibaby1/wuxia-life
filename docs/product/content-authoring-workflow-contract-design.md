@@ -39,16 +39,7 @@
 相遇 → 好感 → 冲突 → 恋爱 → 结婚 → 生子 → 结局
 ```
 
-人物提供：
-
-- Identity
-- Access
-- Character Anchors
-- Core Concern
-- Event Responsibilities
-- Durable Facts
-- Relationship Possibilities
-- Long-term Hooks
+需要正式 Person 时，人物领域语义由 Character / Relationship **Person Domain Authoring Contract v1.1** 定义（见 §5.2）。PD-106 只规定流程顺序，不维护第二套会独立漂移的人物规则。
 
 事件数量由人物在玩家人生中的真实语义需要决定，而不是由“NPC 完整度”决定。
 
@@ -221,25 +212,41 @@ Gap
 
 ### 5.2 Person Authoring Card
 
-需要新人物时，先定义 Person，再定义 Event：
+Content Proposal 确认需要 Person 时：
 
-1. Identity
-2. Access
-3. 2–3 Character Anchors
-4. Core Concern
-5. Event Responsibilities
-6. Durable Facts
-7. Relationship Possibilities
-8. Long-term Hooks
+```text
+Content Proposal requires a Person
+↓
+invoke Character / Relationship Person Domain Authoring Contract
+↓
+produce conforming Person Authoring Card
+↓
+derive Event Responsibilities
+↓
+derive Minimum Event Set
+↓
+produce Event Authoring Cards
+```
+
+权威字段、分类、continuity、validation 与 Card 结构以 `docs/product/character-relationship-product-contract-design.md` §11 Person Domain Authoring Contract v1.1 为准。
+
+PD-106 可保留极简提示，但不维护平行完整人物规则：
+
+- 先过 Person Necessity Gate（场景功能角色不得自动升级 Person）
+- 再选择 `actor_class` / `identity_strategy`
+- 再填写八项 Person Definition 与 `RESPONSIBILITY_TO_EVENT_MAP`
+- Bounded Person Archetype 另受 PD-103 约束
 
 顺序必须是：
 
 ```text
-Person Definition
+Person Domain Authoring
 ↓
 Event Responsibilities
 ↓
 最低必要 Event Set
+↓
+Event Authoring Cards
 ```
 
 禁止：
@@ -252,9 +259,9 @@ Event Responsibilities
 
 ### 5.3 最低必要事件集
 
-新人物或新主题不要求固定事件数量。
+新人物或新主题不要求固定事件数量。Event 数量由 Person Event Responsibilities 与真实因果需要决定，并通过 Person Card 的 `RESPONSIBILITY_TO_EVENT_MAP` 与 Minimum Event Set 证明。
 
-典型内容可能只需 2–5 个关键 Event Cards；如果需要更多，必须由因果语义证明，而不是为了“丰富度”。
+典型内容可能只需少量关键 Event Cards；如果需要更多，必须由因果语义证明，而不是为了“丰富度”。**不得把“2–5 events”写成硬数量规范。**
 
 ---
 
@@ -442,7 +449,7 @@ PD-106 Gap Diagnosis
 如果确认 CONTENT_GAP
         ↓
 具体领域 Contract
-├─ PD-101 Character / Relationship
+├─ PD-101 / Person Domain Authoring Contract（Character / Relationship）
 ├─ PD-102 Parenthood / Family Life
 ├─ PD-103 Sex-Variant Person Archetype
 └─ PD-104 Generic Relationship Legacy Quarantine
@@ -450,10 +457,12 @@ PD-106 Gap Diagnosis
 
 例如：
 
-- 确认缺一个重要人物后，Person 设计仍受 PD-101 约束；
-- 需要 sex-variant archetype 时仍受 PD-103 限制；
+- Person need → invoke PD-101 / Person Domain Authoring Contract；产出 conforming Person Authoring Card，再 derive Event Responsibilities 与 Minimum Event Set；
+- Bounded Person Archetype → additionally PD-103；
 - Parenthood 仍受 PD-102 限制；
 - PD-104 deferred relationship events 不是 backlog，不能因“内容缺”自动恢复。
+
+**PD-106 不授权自行扩大 Person capability**，也不维护第二套会独立漂移的完整人物 specification。
 
 ---
 

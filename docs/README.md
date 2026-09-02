@@ -22,7 +22,7 @@ player-model
 ### 已接受的产品契约
 
 - [Wealth / Economy Product Contract v1](product/wealth-economy-product-contract-design.md)：完整 Human-accepted 财力/资产产品语义；含 2026-08-22 historical repository inventory（非 current authority）；当前 implementation closure 见该文档最新 status section / PD-098（Snapshot `3.16.0`，`wealthCapacity`-only）。
-- [Character / Relationship Product Contract v1](product/character-relationship-product-contract-design.md)：Human-accepted 的重要人物与人物关系产品语义；person-first、fact-driven relationship、恋爱/婚姻分离、no generic affinity；包含 Person Definition Contract v1、shared-vs-character-specific promotion boundary 与明月人物纵切 v1 验证边界。Generic Person Instantiation 仍未授权；有限 Sex-Variant Person Archetype 由 PD-103 独立治理。
+- [Character / Relationship Product Contract v1](product/character-relationship-product-contract-design.md)：Human-accepted 的重要人物与人物关系产品语义；person-first、fact-driven relationship、恋爱/婚姻分离、no generic affinity；包含 Person Domain Authoring Contract v1.1（八项 Person Definition + actor classification + continuity/state escalation + Person ↔ Event mapping + unified validation + conformance examples）、shared-vs-character-specific promotion boundary 与明月人物纵切 v1 验证边界。Generic Person Instantiation 仍未授权；有限 Sex-Variant Person Archetype 由 PD-103 独立治理。
 - [Generic Relationship Legacy Quarantine Design](product/generic-relationship-legacy-quarantine-design.md)：PD-104 Human-accepted 的 generic relationship legacy active-content quarantine、consumer closure 与 400 - 9 = 391 inventory boundary；不授权 replacement person、Relationship v2 或 PD-103 expansion。
 - [Sex-Variant Person Archetype Contract v1](product/sex-variant-person-archetype-contract-design.md)：Human-accepted 的极窄人物原型性别变体契约；只允许核心人物语义不变时的有限 authored male/female identity variant，不授权 Generic Person Instantiation、NPC Generator 或开放式人物属性系统。
 - [Parenthood / Family Life Product Contract v1](product/parenthood-family-life-product-contract-design.md)：Human-accepted 的 Parenthood 与家庭生活产品语义；Parenthood 独立于 Marriage、concrete child、no-child life valid、Parenthood ≠ Succession；旧 child lifecycle 语义降级为 legacy product semantics pending migration。
@@ -37,7 +37,7 @@ player-model
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood 与 Generic Relationship Legacy Quarantine current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow 与 Person Domain Authoring consolidation 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107。
 - [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
 - [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
 - [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。

@@ -1619,3 +1619,27 @@ Experience semantic taxonomy and repetition measurement experiment is no longer 
 - 需要新增或修改 Runtime、Schema、通用 Person/Story/Household/Relationship abstraction；
 - 需要改变 Gap Diagnosis closed categories、Human approval boundary 或 Auto Evolution permission / STOP boundary；
 - 真实 Player-visible Experience Review 证明现有内容语义之外存在新的产品问题。
+
+### PD-107：Person Domain Authoring Contract v1.1 Consolidation
+
+**产品决策（Human accepted；本条为 authority closure）**
+
+- 在既有 Character / Relationship Product Contract 内，将 Person Definition Contract v1 **原地** operational consolidate 为 **Person Domain Authoring Contract v1.1**；不新建平行 Person authority 文档。
+- v1.1 仍是 authoring / product contract，不是 Runtime Schema；八项 Person Definition 字段全部保留：`Identity / Access / Character Anchors / Core Concern / Event Responsibilities / Durable Facts / Relationship Possibilities / Long-term Hooks`。
+- 正式补齐：Person Necessity Gate；Actor Classification（`TRANSIENT_ROLE` / `RECURRING_IDENTIFIABLE_ROLE` / `FIXED_PERSON` / `BOUNDED_PERSON_ARCHETYPE`）；Identity Strategy（至少 `FIXED_LITERAL_IDENTITY` / `BOUNDED_VARIANT_BINDING`，仅为 authoring vocabulary）；Continuity / State Escalation（`EVENT_HISTORY_ONLY` → `CHARACTER_DURABLE_FACT` → `BOUNDED_PERSON_BINDING` → `GENERIC_PERSON_RUNTIME` 默认 BLOCK）；Person ↔ Event Responsibility mapping；Minimum Event Set / `RESPONSIBILITY_TO_EVENT_MAP`；unified Person Validation Contract；Person Authoring Card v1.1；Conformance Examples。
+- PD-106 调用 Person Domain，而不维护第二套会独立漂移的完整人物规则；Bounded Person Archetype 继续 additionally 受 PD-103 约束。
+- Conformance examples（明月、许慎言、赛音、沈清禾/沈知衡、云游神医）证明边界，不是未来人物必须复制的剧情模板。
+
+**明确不做**
+
+- 不授权 Generic Person Runtime、Person registry、Person generator、NPC simulation、new Person schema、relationship graph、affinity / trust / relationshipStage、automatic Person generation、new NPC / Event content，或 PD-103 expansion。
+- 不因“以后 Auto Evolution 可能方便”提前授权 Runtime / machine-readable Person model。
+- 不重写 PD-101 假装 v1.1 规则在 2026-08-30 已全部存在；PD-101 保持历史 accepted decision，本条记录 consolidation。
+
+**重新讨论条件**
+
+- 两个以上独立领域确实需要相同新的 shared person semantic；
+- Event History / character-specific facts 无法可靠表达实际人物连续性；
+- bounded archetype 不足以表达真实 identity requirement；
+- 多个真实生产者需要 machine-readable Person validation；
+- Generic Person Runtime 出现独立玩家产品需求。

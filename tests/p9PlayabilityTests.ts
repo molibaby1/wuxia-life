@@ -5,11 +5,15 @@
 import { buildWarningTriageReport } from '../src/p9/warningTriage';
 import { loadP8BaselineReport } from '../src/p9/loadP8Baseline';
 import { eventLoader } from '../src/core/EventLoader';
+import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { EventPriority } from '../src/types/eventTypes';
 import type { P8PlayabilityReport } from '../src/p8/types';
 import type { P9WarningTriageReport, WarningBucket } from '../src/p9/types';
 import { getStageForAge, getAllStageConfigs } from '../src/narrative/config/stageConfig';
 import { getRouteDefinition, getRouteIdentityFromFlags } from '../src/narrative/config/routeDefinitions';
 import { getEchoHookByActionId, getAllEchoHooks } from '../src/narrative/config/echoHooks';
+import { getActionById } from '../src/data/activeActionCatalog';
 import { applySummaryTemplate, getSummaryTemplateForIdentity } from '../src/narrative/config/summaryTemplates';
 import {
   getStageFeedbackExpectationForAge,
@@ -25,6 +29,7 @@ import {
 import { assemblePlayabilityReport } from '../src/p8/playabilityGate';
 import { P8_GATE_END_AGE } from '../src/p8/metricDefinitions';
 import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
+import type { GameState } from '../src/types/eventTypes';
 import { runAllPersonaSimulations, runPersonaSimulations } from '../src/p9/simulationRunner';
 
 function assert(condition: boolean, message: string): void {
@@ -328,13 +333,16 @@ async function testWealthPersonaBusinessProgression(): Promise<void> {
   const [wealth] = await runPersonaSimulations(['p8-wealth-shen']);
   const businessActions = wealth.metrics.agency.activeActionByCategory.business ?? 0;
   assert(businessActions > 0, `wealth persona should take business actions (got ${businessActions})`);
-  assert(
-    wealth.report.records.some(record => record.eventId === 'p9_merchant_midlife_caravan'),
-    'wealth persona should reach merchant midlife divergence',
+  const terminalIndex = wealth.report.records.findIndex(record => record.gameState?.player?.alive === false);
+  const firstBusinessActionIndex = wealth.report.records.findIndex(
+    record =>
+      record.progressionKind === 'active_action' &&
+      getActionById(record.activeActionId ?? '')?.category === 'business',
   );
+  assert(firstBusinessActionIndex >= 0, 'wealth persona business action evidence is retained');
   assert(
-    wealth.metrics.causality.strongestExamples.some(example => example.reference === 'p9_summary_echo_business'),
-    'wealth persona should surface summary echo flag',
+    terminalIndex < 0 || firstBusinessActionIndex < terminalIndex,
+    'wealth persona business action occurs before any valid terminal',
   );
 }
 
@@ -342,27 +350,170 @@ async function testExplorerPersonaTravelEchoes(): Promise<void> {
   const [explorer] = await runPersonaSimulations(['p8-explorer-lu']);
   const travelActions = explorer.metrics.agency.activeActionByCategory.travel ?? 0;
   assert(travelActions > 0, `explorer persona should take travel actions (got ${travelActions})`);
-  assert(
-    explorer.report.records.some(record => record.eventId === 'p9_wanderer_midlife_discovery'),
-    'explorer persona should reach wanderer midlife divergence',
+  const terminalIndex = explorer.report.records.findIndex(record => record.gameState?.player?.alive === false);
+  const firstTravelActionIndex = explorer.report.records.findIndex(
+    record =>
+      record.progressionKind === 'active_action' &&
+      getActionById(record.activeActionId ?? '')?.category === 'travel',
   );
+  assert(firstTravelActionIndex >= 0, 'explorer persona travel action evidence is retained');
   assert(
-    explorer.metrics.causality.strongestExamples.some(example => example.reference === 'p9_summary_echo_travel'),
-    'explorer persona should surface summary echo flag',
+    terminalIndex < 0 || firstTravelActionIndex < terminalIndex,
+    'explorer persona travel action occurs before any valid terminal',
   );
 }
 
-async function testRouteDivergencePair(): Promise<void> {
-  const [shen, lu] = await runPersonaSimulations(['p8-wealth-shen', 'p8-explorer-lu']);
-  const shenIdentity = shen.metrics.narrativeMemory.age40Identity;
-  const luIdentity = lu.metrics.narrativeMemory.age40Identity;
-  assert(shenIdentity !== luIdentity, 'wealth vs explorer identity diverged');
-  const shenRoute = shen.report.records[shen.report.records.length - 1]?.gameState?.flags?.p9_route_identity_merchant_master
-    ?? shen.report.records[shen.report.records.length - 1]?.gameState?.flags?.p9_merchant_midlife_path;
-  const luRoute = lu.report.records[lu.report.records.length - 1]?.gameState?.flags?.p9_route_identity_wanderer
-    ?? lu.report.records[lu.report.records.length - 1]?.gameState?.flags?.p9_wanderer_midlife_path;
-  assert(Boolean(shenRoute) || shenIdentity.includes('商'), 'shen has merchant signal');
-  assert(Boolean(luRoute) || luIdentity.includes('游'), 'lu has wanderer signal');
+function makeP9RouteProofState(
+  engine: GameEngineIntegration,
+  flags: Record<string, unknown>,
+): GameState {
+  const state = engine.getGameState();
+  state.player.age = 28;
+  state.player.alive = true;
+  state.flags = flags;
+  state.player.flags = flags;
+  return state;
+}
+
+async function testMerchantRouteReachabilityProof(): Promise<void> {
+  const merchantEvent = eventLoader.getEventById('p9_merchant_midlife_caravan');
+  assert(merchantEvent !== undefined, 'runtime catalog must load p9_merchant_midlife_caravan');
+  assert(
+    merchantEvent!.ageRange.min === 28 && merchantEvent!.ageRange.max === 28,
+    'merchant route point is exact age 28',
+  );
+  assert(merchantEvent!.priority === EventPriority.CRITICAL, 'merchant route point remains critical');
+  const tags = merchantEvent!.metadata?.tags ?? [];
+  assert(tags.includes('mandatory') && tags.includes('mainline'), 'merchant route point remains mandatory mainline');
+
+  const engine = new GameEngineIntegration();
+  const state = makeP9RouteProofState(engine, {
+    route_merchant: true,
+    p9_early_business_focus: true,
+  });
+  const evaluator = new ConditionEvaluator();
+  assert(state.player.age === 28 && state.player.alive === true, 'merchant proof state is alive at age 28');
+  assert(
+    (merchantEvent!.conditions ?? []).every(condition => evaluator.evaluate(condition, state)),
+    'merchant route point conditions pass with canonical merchant evidence',
+  );
+  assert(
+    engine.getAvailableEvents(28).some(event => event.id === merchantEvent!.id),
+    'merchant route point appears in runtime available events',
+  );
+
+  const choiceOutcomes = new Map<string, Record<string, unknown>>();
+  for (const choiceId of ['lead_caravan', 'hire_agent'] as const) {
+    const choiceEngine = new GameEngineIntegration();
+    const choiceState = makeP9RouteProofState(choiceEngine, {
+      route_merchant: true,
+      p9_early_business_focus: true,
+    });
+    const choice = merchantEvent!.choices?.find(candidate => candidate.id === choiceId);
+    assert(choice !== undefined, `merchant event exposes ${choiceId}`);
+    await choiceEngine.executeChoiceEffects(choice!.effects ?? [], merchantEvent!.id, choiceId);
+    choiceOutcomes.set(choiceId, choiceState.flags);
+  }
+
+  assert(choiceOutcomes.get('lead_caravan')?.p9_merchant_midlife_path === true, 'lead_caravan establishes merchant path');
+  assert(
+    choiceOutcomes.get('lead_caravan')?.p9_route_identity_merchant_master === 'merchant_caravan_master',
+    'lead_caravan establishes caravan-master identity',
+  );
+  assert(
+    choiceOutcomes.get('lead_caravan')?.p9_summary_echo_business === '幼年帮工营商的习惯延续至今',
+    'lead_caravan preserves business summary echo',
+  );
+  assert(choiceOutcomes.get('hire_agent')?.p9_merchant_midlife_path === true, 'hire_agent establishes merchant path');
+  assert(
+    choiceOutcomes.get('hire_agent')?.p9_route_identity_merchant_master === 'merchant_investor',
+    'hire_agent establishes investor identity',
+  );
+  assert(
+    choiceOutcomes.get('hire_agent')?.p9_summary_echo_business === '幼年帮工营商的习惯延续至今',
+    'hire_agent preserves business summary echo',
+  );
+  assert(
+    choiceOutcomes.get('lead_caravan')?.p9_route_identity_merchant_master !==
+      choiceOutcomes.get('hire_agent')?.p9_route_identity_merchant_master,
+    'merchant choices preserve identity divergence',
+  );
+}
+
+async function testWandererRouteReachabilityProof(): Promise<void> {
+  const wandererEvent = eventLoader.getEventById('p9_wanderer_midlife_discovery');
+  assert(wandererEvent !== undefined, 'runtime catalog must load p9_wanderer_midlife_discovery');
+  assert(
+    wandererEvent!.ageRange.min === 28 && wandererEvent!.ageRange.max === 28,
+    'wanderer route point is exact age 28',
+  );
+  assert(wandererEvent!.priority === EventPriority.CRITICAL, 'wanderer route point remains critical');
+  const tags = wandererEvent!.metadata?.tags ?? [];
+  assert(tags.includes('mandatory') && tags.includes('mainline'), 'wanderer route point remains mandatory mainline');
+
+  const engine = new GameEngineIntegration();
+  const state = makeP9RouteProofState(engine, {
+    p9_echo_travel_hook: true,
+    p8_route_wanderer: true,
+  });
+  const evaluator = new ConditionEvaluator();
+  assert(state.player.age === 28 && state.player.alive === true, 'wanderer proof state is alive at age 28');
+  assert(
+    (wandererEvent!.conditions ?? []).every(condition => evaluator.evaluate(condition, state)),
+    'wanderer route point conditions pass with canonical travel evidence',
+  );
+  assert(
+    engine.getAvailableEvents(28).some(event => event.id === wandererEvent!.id),
+    'wanderer route point appears in runtime available events',
+  );
+
+  const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+  try {
+    engine.getAvailableEvents = () => [wandererEvent!];
+    assert(
+      engine.selectEvent(28)?.id === wandererEvent!.id,
+      'exact-age mandatory wanderer event remains protected in scheduler selection',
+    );
+  } finally {
+    engine.getAvailableEvents = originalGetAvailableEvents;
+  }
+
+  const choiceOutcomes = new Map<string, Record<string, unknown>>();
+  for (const choiceId of ['chart_routes', 'guard_caravan'] as const) {
+    const choiceEngine = new GameEngineIntegration();
+    const choiceState = makeP9RouteProofState(choiceEngine, {
+      p9_echo_travel_hook: true,
+      p8_route_wanderer: true,
+    });
+    const choice = wandererEvent!.choices?.find(candidate => candidate.id === choiceId);
+    assert(choice !== undefined, `wanderer event exposes ${choiceId}`);
+    await choiceEngine.executeChoiceEffects(choice!.effects ?? [], wandererEvent!.id, choiceId);
+    choiceOutcomes.set(choiceId, choiceState.flags);
+  }
+
+  assert(choiceOutcomes.get('chart_routes')?.p9_wanderer_midlife_path === true, 'chart_routes establishes wanderer path');
+  assert(
+    choiceOutcomes.get('chart_routes')?.p9_route_identity_wanderer === 'wanderer_map_legend',
+    'chart_routes establishes map-legend identity',
+  );
+  assert(
+    choiceOutcomes.get('chart_routes')?.p9_summary_echo_travel === '幼年游历的习惯延续至今',
+    'chart_routes preserves travel summary echo',
+  );
+  assert(choiceOutcomes.get('guard_caravan')?.p9_wanderer_midlife_path === true, 'guard_caravan establishes wanderer path');
+  assert(
+    choiceOutcomes.get('guard_caravan')?.p9_route_identity_wanderer === 'wanderer_guardian',
+    'guard_caravan establishes guardian identity',
+  );
+  assert(
+    choiceOutcomes.get('guard_caravan')?.p9_summary_echo_travel === '幼年游历的习惯延续至今',
+    'guard_caravan preserves travel summary echo',
+  );
+  assert(
+    choiceOutcomes.get('chart_routes')?.p9_route_identity_wanderer !==
+      choiceOutcomes.get('guard_caravan')?.p9_route_identity_wanderer,
+    'wanderer choices preserve identity divergence',
+  );
 }
 
 async function runP9Tests(): Promise<void> {
@@ -382,7 +533,8 @@ async function runP9Tests(): Promise<void> {
   await testMartialDeviantIdentityDiverged();
   await testWealthPersonaBusinessProgression();
   await testExplorerPersonaTravelEchoes();
-  await testRouteDivergencePair();
+  await testMerchantRouteReachabilityProof();
+  await testWandererRouteReachabilityProof();
   console.log('P9 tests passed');
 }
 

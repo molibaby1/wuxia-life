@@ -1821,6 +1821,200 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
+      name: '分层调度回归 - mixed lane 保留 formal 与 daily 语义',
+      description: '测试 critical 保护、storyline/regular 混合加权与 regular-only 节奏行为',
+      test: () => {
+        const engine = new GameEngineIntegration() as any;
+        const state = engine.getGameState();
+        state.player.age = 25;
+        state.player.reputation = 0;
+        state.eventHistory = [];
+
+        const originalGetAvailableEvents = engine.getAvailableEvents.bind(engine);
+        const originalShouldPauseEventsThisYear = engine.shouldPauseEventsThisYear.bind(engine);
+        const originalShouldYieldRegularFormalToDailyCadence =
+          engine.shouldYieldRegularFormalToDailyCadence.bind(engine);
+        const originalPickWeightedFormalEvent = engine.pickWeightedFormalEvent.bind(engine);
+        const originalGetWeightForAge = eventLoader.getWeightForAge.bind(eventLoader);
+        const originalDailySelector = dailyEventSystem.selectEvent;
+        const originalMathRandom = Math.random;
+        const evaluator = new ConditionEvaluator();
+        let yieldCalls = 0;
+        let pauseCalls = 0;
+        let medicalWeightedCandidateIds: string[] | null = null;
+
+        const criticalEvent = {
+          id: 'critical_starvation_probe',
+          category: EventCategory.MAIN_STORY,
+          priority: EventPriority.CRITICAL,
+          weight: 1,
+          ageRange: { min: 24, max: 26 },
+          content: { title: '关键保护事件', text: '关键事件仍受保护' },
+          metadata: { tags: ['critical'] },
+        };
+        const storylineEvent = {
+          id: 'storyline_starvation_probe',
+          category: EventCategory.SIDE_QUEST,
+          priority: EventPriority.HIGH,
+          weight: 1,
+          ageRange: { min: 24, max: 26 },
+          content: { title: '剧情推进事件', text: '普通剧情推进' },
+          metadata: { tags: [] },
+          storyLine: 'starvation_probe',
+        };
+        const regularEvents = [
+          {
+            id: 'regular_starvation_probe_a',
+            category: EventCategory.SIDE_QUEST,
+            priority: EventPriority.NORMAL,
+            weight: 1,
+            ageRange: { min: 24, max: 26 },
+            content: { title: '普通正式事件 A', text: '普通正式事件' },
+            metadata: { tags: [] },
+          },
+          {
+            id: 'regular_starvation_probe_b',
+            category: EventCategory.SIDE_QUEST,
+            priority: EventPriority.NORMAL,
+            weight: 1,
+            ageRange: { min: 24, max: 26 },
+            content: { title: '普通正式事件 B', text: '普通正式事件' },
+            metadata: { tags: [] },
+          },
+        ];
+        const regularIds = new Set(regularEvents.map(event => event.id));
+        const dailyEvent = {
+          id: 'daily_mixed_lane_probe',
+          category: EventCategory.DAILY_EVENT,
+          priority: EventPriority.LOW,
+          weight: 1,
+          ageRange: { min: 8, max: 26 },
+          content: { title: '日常补位', text: '不应替换受保护的 mixed formal' },
+          metadata: { tags: ['daily_pool'] },
+        };
+        const medicalEvent = eventLoader.getEventById('medical_talent_discovery');
+        const medicalStorylineEvent = {
+          ...storylineEvent,
+          id: 'medical_storyline_probe',
+          ageRange: { min: 8, max: 10 },
+        };
+
+        try {
+          (dailyEventSystem as any).selectEvent = () => dailyEvent;
+          (eventLoader as any).getWeightForAge = () => 1;
+
+          // Critical remains outside the mixed lane and bypasses cadence/pause handling.
+          engine.getAvailableEvents = () => [criticalEvent, storylineEvent, ...regularEvents];
+          engine.shouldYieldRegularFormalToDailyCadence = () => {
+            yieldCalls += 1;
+            return true;
+          };
+          engine.shouldPauseEventsThisYear = () => {
+            pauseCalls += 1;
+            return true;
+          };
+          Math.random = () => 0.99;
+          const selectedCritical = engine.selectEvent(25);
+          assertEqual(
+            selectedCritical?.id,
+            'critical_starvation_probe',
+            'critical 事件必须继续绕过普通 weighted lane'
+          );
+
+          // Mixed lane can select storyline and regular with deterministic draws.
+          engine.getAvailableEvents = () => [storylineEvent, ...regularEvents];
+          Math.random = () => 0.4;
+          const selectedStoryline = engine.selectEvent(25);
+          assertEqual(
+            selectedStoryline?.id,
+            'storyline_starvation_probe',
+            '非关键 storyline 必须保留有效的 weighted selection opportunity'
+          );
+
+          Math.random = () => 0.99;
+          const selectedRegular = engine.selectEvent(25);
+          assert(
+            regularIds.has(selectedRegular?.id ?? ''),
+            'storyline 存在时，regular formal 不能从 mixed weighted selection 中被结构性排除'
+          );
+          assertEqual(
+            selectedRegular?.id,
+            'regular_starvation_probe_b',
+            'mixed weighted lane 应允许 deterministic RNG 命中 regular formal'
+          );
+
+          // A regular result from the mixed lane remains protected from daily replacement.
+          assertEqual(yieldCalls, 0, 'mixed lane 命中 regular 后不应执行 daily cadence yield');
+          assertEqual(pauseCalls, 0, 'mixed lane 命中 regular 后不应执行 rhythm pause');
+
+          // With no storyline, the pre-existing regular-only cadence and pause behavior remains.
+          engine.getAvailableEvents = () => [regularEvents[0]];
+          engine.shouldYieldRegularFormalToDailyCadence = () => true;
+          engine.shouldPauseEventsThisYear = () => false;
+          const selectedByCadence = engine.selectEvent(25);
+          assertEqual(
+            selectedByCadence?.id,
+            'daily_mixed_lane_probe',
+            '没有 storyline 时，regular formal 仍可被 daily cadence 替换'
+          );
+
+          engine.shouldYieldRegularFormalToDailyCadence = () => false;
+          engine.shouldPauseEventsThisYear = () => true;
+          const selectedByPause = engine.selectEvent(25);
+          assertEqual(
+            selectedByPause?.id,
+            'daily_mixed_lane_probe',
+            '没有 storyline 时，regular formal 仍可被 rhythm pause 替换'
+          );
+
+          engine.shouldYieldRegularFormalToDailyCadence = () => false;
+          engine.shouldPauseEventsThisYear = () => false;
+          const selectedRegularOnly = engine.selectEvent(25);
+          assertEqual(
+            selectedRegularOnly?.id,
+            'regular_starvation_probe_a',
+            '没有 storyline 且无 cadence/pause 时应返回 regular formal'
+          );
+
+          // Use the runtime-loaded Medical event to guard against reintroducing structural exclusion.
+          assert(medicalEvent !== undefined, 'runtime catalog must load medical_talent_discovery');
+          state.player.age = 8;
+          state.player.knowledge = 15;
+          state.player.chivalry = 15;
+          const medicalEligible = medicalEvent!.conditions?.every(condition =>
+            evaluator.evaluate(condition, state),
+          );
+          assert(medicalEligible === true, 'medical_talent_discovery must be formally eligible in the probe state');
+          (eventLoader as any).getWeightForAge = originalGetWeightForAge;
+          engine.pickWeightedFormalEvent = (events: any[], age: number) => {
+            if (events.some(event => event.id === 'medical_talent_discovery')) {
+              medicalWeightedCandidateIds = events.map(event => event.id);
+            }
+            return originalPickWeightedFormalEvent(events, age);
+          };
+          engine.getAvailableEvents = () => [medicalStorylineEvent, medicalEvent!];
+          Math.random = () => 0.01;
+          engine.selectEvent(8);
+          assert(
+            medicalWeightedCandidateIds?.includes('medical_talent_discovery') === true,
+            'eligible medical_talent_discovery must remain in the mixed weighted opportunity',
+          );
+          assert(
+            medicalWeightedCandidateIds?.includes('medical_storyline_probe') === true,
+            'the Medical probe must reach weighted selection together with a non-critical storyline',
+          );
+        } finally {
+          engine.getAvailableEvents = originalGetAvailableEvents;
+          engine.shouldPauseEventsThisYear = originalShouldPauseEventsThisYear;
+          engine.shouldYieldRegularFormalToDailyCadence = originalShouldYieldRegularFormalToDailyCadence;
+          engine.pickWeightedFormalEvent = originalPickWeightedFormalEvent;
+          (eventLoader as any).getWeightForAge = originalGetWeightForAge;
+          (dailyEventSystem as any).selectEvent = originalDailySelector;
+          Math.random = originalMathRandom;
+        }
+      },
+    },
+    {
       name: '节奏回归 - 空候选时回退到 daily',
       description: '测试 formal 候选为空时，选择逻辑稳定回退到 daily 事件',
       test: () => {

@@ -75,6 +75,7 @@ const SECT_CHOICE_VALUE_BY_CHOICE_ID = {
   join_wudang: 'orthodox',
   stay_home: 'none',
 } satisfies Record<string, NonNullable<CriticalChoices['sect_choice']>>;
+const STORYLINE_SCHEDULING_MULTIPLIER = 2;
 
 function engineDiagnosticsEnabled(): boolean {
   const quiet = typeof process !== 'undefined' && process.env ? process.env.WUXIA_ENGINE_QUIET : undefined;
@@ -838,6 +839,10 @@ export class GameEngineIntegration {
     return Boolean(event.storyLine) && !this.isCriticalLayerEvent(event);
   }
 
+  private getStorylineSchedulingMultiplier(event: EventDefinition): number {
+    return this.isStorylineLayerEvent(event) ? STORYLINE_SCHEDULING_MULTIPLIER : 1;
+  }
+
   private splitEventLayers(events: EventDefinition[]): {
     criticalEvents: EventDefinition[];
     storylineEvents: EventDefinition[];
@@ -883,7 +888,8 @@ export class GameEngineIntegration {
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
       const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
       const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
-      return sum + this.adjustWeightByAnnualPressure(event, routeAdjusted);
+      const storylineAdjusted = routeAdjusted * this.getStorylineSchedulingMultiplier(event);
+      return sum + this.adjustWeightByAnnualPressure(event, storylineAdjusted);
     }, 0);
 
     if (totalWeight <= 0) {
@@ -905,7 +911,8 @@ export class GameEngineIntegration {
         repetitionAdjusted * this.getProfileRepetitionPressureMultiplier(event);
       const adjacentAdjusted = profileRepetitionAdjusted * this.getAdjacentClassSuppressionMultiplier(event);
       const routeAdjusted = adjacentAdjusted * this.getRouteSchedulingMultiplier(event, narrativeContext);
-      random -= this.adjustWeightByAnnualPressure(event, routeAdjusted);
+      const storylineAdjusted = routeAdjusted * this.getStorylineSchedulingMultiplier(event);
+      random -= this.adjustWeightByAnnualPressure(event, storylineAdjusted);
       if (random <= 0) {
         return event;
       }
@@ -1243,13 +1250,20 @@ export class GameEngineIntegration {
       return this.materializeSelectedEvent(criticalSelection);
     }
 
-    // Layer 2: storyline lane, protected from daily fallback unless empty.
-    const storylineSelection = this.pickWeightedFormalEvent(storylineEvents, currentAge);
-    if (storylineSelection) {
-      return this.materializeSelectedEvent(storylineSelection);
+    // Layer 2: non-critical storyline and regular formal events share one weighted lane.
+    // The presence of storyline content protects this formal opportunity from daily fallback.
+    if (storylineEvents.length > 0) {
+      const formalSelection = this.pickWeightedFormalEvent(
+        [...storylineEvents, ...regularFormalEvents],
+        currentAge,
+      );
+      if (formalSelection) {
+        return this.materializeSelectedEvent(formalSelection);
+      }
+      return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }
 
-    // Layer 3: regular formal lane can yield to cross-age daily cadence or rhythm pause.
+    // With no storyline candidate, retain the existing regular formal cadence and rhythm pause.
     if (regularFormalEvents.length === 0) {
       return this.materializeSelectedEvent(dailyEventSystem.selectEvent(this.gameState));
     }

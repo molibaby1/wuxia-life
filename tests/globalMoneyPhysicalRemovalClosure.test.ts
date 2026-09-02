@@ -191,7 +191,7 @@ function testWealthCapacityRequiredAndRoundTrips(): void {
 // 7. Formal EventLoader money/numeric-wealth authoring zero/rejected
 function testFormalEventLoaderAuthoringZeroAndRejected(): void {
   const events = EventLoader.getInstance().getAllEvents();
-  assert.equal(events.length, 391);
+  assert.equal(events.length, 392);
 
   const moneyWrites: string[] = [];
   const wealthWrites: string[] = [];

@@ -229,12 +229,37 @@
       {"type": "age_reach", "value": 16}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.medical_apprentice == true || flags.medical_self_taught == true"}
+      {"type": "expression", "expression": "flags.medical_apprentice == true && !flags.has(\"medical_self_taught\")"}
     ],
     "content": {
       "title": "采药炼丹",
       "text": "师父教你识别各种草药，带你上山采药。你学会了如何辨别药材的品质，以及如何炼制丹药。",
       "description": "学习采药炼丹"
+    },
+    "eventType": "auto",
+    "autoEffects": [
+      {"type": "stat_modify", "stat": "knowledge", "value": 6},
+      {"type": "stat_modify", "stat": "constitution", "value": 4},
+      {"type": "flag_set", "flag": "medical_herb_master", "value": true}
+    ]
+  },
+  {
+    "id": "medical_herb_gathering_self_taught",
+    "version": "1.0",
+    "category": "medical",
+    "priority": 90,
+    "weight": 85,
+    "ageRange": {"min": 16, "max": 22},
+    "triggers": [
+      {"type": "age_reach", "value": 16}
+    ],
+    "conditions": [
+      {"type": "expression", "expression": "flags.medical_self_taught == true && !flags.has(\"medical_apprentice\")"}
+    ],
+    "content": {
+      "title": "自学采药炼丹",
+      "text": "你独自上山采药，把这些年摸索出的辨药经验一一验证。渐渐地，你学会分辨药材的品质，也摸索出了炼制丹药的方法。",
+      "description": "自学采药炼丹"
     },
     "eventType": "auto",
     "autoEffects": [

@@ -76,6 +76,7 @@ const suites: Suite[] = [
   { name: 'p22ContentLibraryTests', entry: 'tests/p22ContentLibraryTests.ts' },
   { name: 'p23ExperienceAcceptanceTests', entry: 'tests/p23ExperienceAcceptanceTests.ts' },
   { name: 'p24PlaytestCalibrationTests', entry: 'tests/p24PlaytestCalibrationTests.ts' },
+  { name: 'medicalHerbExperienceSplit', entry: 'tests/medicalHerbExperienceSplit.test.ts' },
   { name: 'v10LaunchReadinessTests', entry: 'tests/v10LaunchReadinessTests.ts' },
   { name: 'AllTests', entry: 'tests/AllTests.ts' },
   { name: 'IntegrationTests', entry: 'tests/IntegrationTests.ts' },

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-31T13:06:44.729Z",
+  "generatedAt": "2026-09-02T07:49:41.104Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,12 +14,12 @@
   "summary": {
     "runtimeLoadedFiles": 28,
     "nonLoadedFiles": 43,
-    "totalEventsInRuntime": 391,
+    "totalEventsInRuntime": 392,
     "byStatus": {
       "active": 36,
       "candidate": 70,
       "broken": 12,
-      "deferred": 273,
+      "deferred": 274,
       "dead": 0
     },
     "byFileStatus": {
@@ -331,8 +331,8 @@
       "fileName": "medical.json",
       "runtimeLoaded": true,
       "status": "deferred",
-      "eventCount": 20,
-      "goldenLineOverlapCount": 14,
+      "eventCount": 21,
+      "goldenLineOverlapCount": 15,
       "notes": "Runtime-loaded but outside golden-line candidate pool"
     },
     {
@@ -5311,6 +5311,17 @@
     },
     {
       "eventId": "medical_herb_gathering",
+      "sourceFile": "medical.json",
+      "runtimeLoaded": true,
+      "status": "deferred",
+      "ageMin": 16,
+      "ageMax": 22,
+      "overlapsGoldenLine": true,
+      "eventType": "auto",
+      "notes": "File classified deferred for golden line"
+    },
+    {
+      "eventId": "medical_herb_gathering_self_taught",
       "sourceFile": "medical.json",
       "runtimeLoaded": true,
       "status": "deferred",

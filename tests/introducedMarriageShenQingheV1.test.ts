@@ -168,7 +168,7 @@ function testCatalogAddsExactlyThreeEvents(): void {
     IDS.sharedMatter,
     IDS.marriageDecision,
   ]);
-  assert.equal(EventLoader.getInstance().getAllEvents().length, 391);
+  assert.equal(EventLoader.getInstance().getAllEvents().length, 392);
   assert.equal(EventLoader.getInstance().getAllEvents().filter(event => event.id.startsWith('shen_qinghe_')).length, 3);
   assert.equal(EventLoader.getInstance().getUndeclaredImportPaths().length, 0);
 }

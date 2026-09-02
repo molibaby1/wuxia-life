@@ -143,7 +143,7 @@ function hasCompiledMoneyWealthOwnership(source: string): boolean {
 
 function testFormalCatalogMoneyAndNumericWealthZero(): void {
   const events = EventLoader.getInstance().getAllEvents();
-  assert.equal(events.length, 391);
+  assert.equal(events.length, 392);
 
   const moneyWrites: string[] = [];
   const wealthWrites: string[] = [];

@@ -112,6 +112,27 @@ full P3 remains `DEFERRED`
 
 其中 Report 只是旁路输出，不是主流程依赖；Report Analysis 是未来独立消费者，不在当前阶段建设。
 
+### Operational entry
+
+Human 只需要记住一个固定入口：
+
+`artifacts/evolution/index.md`
+
+其中：
+
+- Run Reports（历史化旁路 observability）→ `artifacts/evolution/run-reports/`
+- Human Follow-up（retention-protected operational state）→ `artifacts/evolution/human-follow-up/`
+
+正常 host 在 AE run/session terminal 后应机械刷新：
+
+1. archived Run Report（`npm run evolution:observability:archive -- --root <session-root>`）
+2. Human Follow-up Inbox（`npm run evolution:human-followup:inbox`）
+3. Operational Index（archive 会重建；也可单独 `npm run evolution:observability:index`）
+
+这些都是 post-run sidecar steps。生成失败只报告 `OBSERVABILITY_REFRESH_FAILED`，不否定 AE outcome，也不授权 rerun。主 workflow 从不依赖它们。
+
+遗留即时聚合命令 `npm run report:evolution-run` 仍保留，默认写出 `artifacts/reports/auto-evolution-run-report.md`。
+
 ## 模块边界
 
 当前应保持以下能力低耦合：

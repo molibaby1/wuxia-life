@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
+import { archiveOperationalRunReport } from '../../scripts/evolution/reporting/archiveOperationalRunReport';
+import { buildOperationalObservabilityIndex } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
 import { buildOperationalRunReport } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 
 async function writeJson(path: string, value: unknown): Promise<void> {
@@ -195,6 +197,15 @@ export async function runOperationalRunReportTests(): Promise<void> {
   await testFailClosedStructuredTerminalDelivery();
   await testRetransmissionSucceededDespiteAcceptanceRejection();
   await testStructuredTerminalDeliveryAggregates();
+  await testArchiveCreationAndIndexes();
+  await testArchiveStableIdentity();
+  await testArchiveChangedSummaryNewIdentity();
+  await testArchiveJsonMarkdownParity();
+  await testArchiveMultipleWorkflows();
+  await testObservabilityIndexRebuild();
+  await testInvalidReportSidecarFailsClosed();
+  await testArchiveDoesNotMutateHumanFollowup();
+  await testArchiveDoesNotCopyRawArtifacts();
 }
 
 async function testReadyForConfigExecution(): Promise<void> {
@@ -641,6 +652,251 @@ async function testStructuredTerminalDeliveryAggregates(): Promise<void> {
   assert.match(report, /Retransmissions attempted: 2/);
   assert.match(report, /Retransmissions succeeded: 1/);
   assert.match(report, /Final structured-output successes: 2/);
+}
+
+async function createArchiveFixtureRepository(): Promise<{
+  repositoryRoot: string;
+  sessionRoot: string;
+  sessionRelative: string;
+}> {
+  const repositoryRoot = await createRoot();
+  const sessionRoot = join(repositoryRoot, '.tmp', 'evolution', 'archive-session');
+  const runRoot = join(sessionRoot, 'problem-agnostic-agent-solution-loop-instance-012');
+  await createProblemPackage(runRoot);
+  await writeJson(join(runRoot, 'solution-agent/result.json'), { status: 'OPTIONS' });
+  await writeJson(join(runRoot, 'reviewer-agent/review.json'), { decision: 'ACCEPT_OPTION' });
+  await writeJson(join(runRoot, 'decision.json'), {
+    route: 'READY_FOR_CONFIG_EXECUTION',
+    reasonCode: 'ACCEPTED_CONFIGURATION_SCOPE',
+  });
+  await writeJson(join(runRoot, 'source/observable-payload.json'), { entries: [] });
+  return {
+    repositoryRoot,
+    sessionRoot,
+    sessionRelative: '.tmp/evolution/archive-session',
+  };
+}
+
+async function testArchiveCreationAndIndexes(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const result = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+
+  assert.match(result.reportId, /^ae-report-[a-f0-9]{16}$/);
+  assert.equal(result.workflowCount, 1);
+  const reportJson = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as Record<string, unknown>;
+  const reportMarkdown = await readFile(result.reportMarkdownPath, 'utf8');
+  const runReportsIndex = await readFile(result.runReportsIndexPath, 'utf8');
+  const topIndex = await readFile(result.topLevelIndexPath, 'utf8');
+
+  assert.equal(reportJson.schemaVersion, 'auto-evolution-operational-run-report-v1');
+  assert.equal(reportJson.reportId, result.reportId);
+  assert.equal(reportJson.sourceRoot, fixture.sessionRelative);
+  assert.match(reportMarkdown, new RegExp(`Report ID: ${result.reportId}`));
+  assert.match(reportMarkdown, /Observed workflow runs: 1/);
+  assert.match(reportMarkdown, /Artifact reference retention/);
+  assert.match(runReportsIndex, /total reports: 1/);
+  assert.match(runReportsIndex, new RegExp(`${result.reportId}/report\\.md`));
+  assert.match(topIndex, /# Auto Evolution Operational Index/);
+  assert.match(topIndex, /total: 1/);
+  assert.match(topIndex, /run-reports\/index\.md/);
+  assert.match(topIndex, /human-follow-up/);
+}
+
+async function testArchiveStableIdentity(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const first = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  const second = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+
+  assert.equal(second.reportId, first.reportId);
+  assert.equal(second.createdAt, first.createdAt);
+  assert.equal(second.reusedCreatedAt, true);
+  const entries = await readdir(join(fixture.repositoryRoot, 'artifacts/evolution/run-reports'), { withFileTypes: true });
+  assert.equal(entries.filter(entry => entry.isDirectory()).length, 1);
+}
+
+async function testArchiveChangedSummaryNewIdentity(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const first = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  await writeJson(
+    join(fixture.sessionRoot, 'problem-agnostic-agent-solution-loop-instance-012', 'decision.json'),
+    {
+      route: 'DEFER',
+      reasonCode: 'REVIEW_REJECTED',
+    },
+  );
+  const second = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+
+  assert.notEqual(second.reportId, first.reportId);
+  const entries = await readdir(join(fixture.repositoryRoot, 'artifacts/evolution/run-reports'), { withFileTypes: true });
+  assert.equal(entries.filter(entry => entry.isDirectory()).length, 2);
+}
+
+async function testArchiveJsonMarkdownParity(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const result = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  const report = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as {
+    workflows: Array<{
+      problemStatement: string | null;
+      status: string;
+      reviewerDecision: string | null;
+      terminalRoute: string | null;
+      reason: string | null;
+      failedStage: string | null;
+      participantErrorKind: string | null;
+    }>;
+  };
+  const markdown = await readFile(result.reportMarkdownPath, 'utf8');
+  const workflow = report.workflows[0];
+  assert.ok(workflow);
+  assert.match(markdown, new RegExp(`Problem statement: ${workflow.problemStatement}`));
+  assert.match(markdown, new RegExp(`Status: ${workflow.status}`));
+  assert.match(markdown, new RegExp(`Reviewer decision: ${workflow.reviewerDecision}`));
+  assert.match(markdown, new RegExp(`Terminal route / workflow outcome: ${workflow.terminalRoute}`));
+  assert.match(markdown, new RegExp(`Reason: ${workflow.reason}`));
+}
+
+async function testArchiveMultipleWorkflows(): Promise<void> {
+  const repositoryRoot = await createRoot();
+  const sessionRelative = '.tmp/evolution/multi-round-session';
+  await writeJson(join(repositoryRoot, sessionRelative, 'p2-run', 'round-1', 'decision.json'), {
+    route: 'DEFER',
+    reasonCode: 'INSUFFICIENT_EVIDENCE',
+  });
+  await writeJson(join(repositoryRoot, sessionRelative, 'p2-run', 'round-2', 'decision.json'), {
+    route: 'SKIP',
+    reasonCode: 'NO_PROPOSAL',
+  });
+
+  const result = await archiveOperationalRunReport({
+    repositoryRoot,
+    root: sessionRelative,
+  });
+  const report = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as {
+    workflowCount: number;
+    workflows: Array<{ identity: string }>;
+  };
+  assert.equal(result.workflowCount, 2);
+  assert.equal(report.workflowCount, 2);
+  assert.deepEqual(report.workflows.map(workflow => workflow.identity), [
+    'p2-run/round-1',
+    'p2-run/round-2',
+  ]);
+}
+
+async function testObservabilityIndexRebuild(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const archived = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  await rm(archived.runReportsIndexPath, { force: true });
+  await rm(archived.topLevelIndexPath, { force: true });
+
+  const rebuilt = await buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot });
+  const runReportsIndex = await readFile(rebuilt.runReportsIndexPath, 'utf8');
+  const topIndex = await readFile(rebuilt.topLevelIndexPath, 'utf8');
+  assert.match(runReportsIndex, /total reports: 1/);
+  assert.match(runReportsIndex, new RegExp(archived.reportId));
+  assert.match(topIndex, /total: 1/);
+  assert.match(topIndex, new RegExp(archived.reportId));
+}
+
+async function testInvalidReportSidecarFailsClosed(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+
+  const badSchemaDir = join(fixture.repositoryRoot, 'artifacts/evolution/run-reports', 'ae-report-badschema000');
+  await mkdir(badSchemaDir, { recursive: true });
+  await writeJson(join(badSchemaDir, 'report.json'), {
+    schemaVersion: 'wrong-schema',
+    reportId: 'ae-report-badschema000',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    sourceRoot: '.tmp/evolution/x',
+    workflowCount: 0,
+    workflows: [],
+  });
+  await assert.rejects(
+    () => buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot }),
+    /wrong schemaVersion/,
+  );
+  await rm(badSchemaDir, { recursive: true, force: true });
+
+  const mismatchDir = join(fixture.repositoryRoot, 'artifacts/evolution/run-reports', 'ae-report-mismatch0000');
+  await mkdir(mismatchDir, { recursive: true });
+  await writeJson(join(mismatchDir, 'report.json'), {
+    schemaVersion: 'auto-evolution-operational-run-report-v1',
+    reportId: 'ae-report-otherid000000',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    sourceRoot: '.tmp/evolution/x',
+    workflowCount: 0,
+    workflows: [],
+  });
+  await assert.rejects(
+    () => buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot }),
+    /directory\/reportId mismatch/,
+  );
+  await rm(mismatchDir, { recursive: true, force: true });
+
+  const malformedDir = join(fixture.repositoryRoot, 'artifacts/evolution/run-reports', 'ae-report-malformed000');
+  await mkdir(malformedDir, { recursive: true });
+  await writeFile(join(malformedDir, 'report.json'), '{not-json', 'utf8');
+  await assert.rejects(
+    () => buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot }),
+    /invalid operational run report JSON/,
+  );
+}
+
+async function testArchiveDoesNotMutateHumanFollowup(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const itemDir = join(fixture.repositoryRoot, 'artifacts/evolution/human-follow-up/items', 'item-preserve');
+  await mkdir(itemDir, { recursive: true });
+  await writeFile(join(itemDir, 'item.json'), '{"keep":true}\n', 'utf8');
+  const before = await readFile(join(itemDir, 'item.json'), 'utf8');
+
+  await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  await buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot });
+
+  const after = await readFile(join(itemDir, 'item.json'), 'utf8');
+  assert.equal(after, before);
+  const itemEntries = await readdir(join(fixture.repositoryRoot, 'artifacts/evolution/human-follow-up/items'));
+  assert.deepEqual(itemEntries, ['item-preserve']);
+}
+
+async function testArchiveDoesNotCopyRawArtifacts(): Promise<void> {
+  const fixture = await createArchiveFixtureRepository();
+  const result = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  const reportEntries = await readdir(result.reportDirectory);
+  assert.deepEqual(reportEntries.sort(), ['report.json', 'report.md']);
+  await assert.rejects(() => stat(join(result.reportDirectory, 'solution-agent/result.json')));
+  await assert.rejects(() => stat(join(result.reportDirectory, 'reviewer-agent/review.json')));
+  await assert.rejects(() => stat(join(result.reportDirectory, 'decision.json')));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -56,7 +56,7 @@ export interface BuildOperationalRunReportResult {
   workflowCount: number;
 }
 
-interface WorkflowSummary {
+export interface WorkflowSummary {
   identity: string;
   status: string;
   sourceRunRef: string | null;
@@ -71,6 +71,13 @@ interface WorkflowSummary {
   lastAvailableArtifact: string | null;
   artifactRefs: string[];
   structuredTerminalDelivery: StructuredTerminalDeliverySummary | null;
+}
+
+export interface RenderOperationalRunReportInput {
+  summaries: WorkflowSummary[];
+  reportId?: string;
+  createdAt?: string;
+  includeArtifactRetentionNote?: boolean;
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -383,6 +390,14 @@ async function summarizeWorkflow(root: string, identity: string): Promise<Workfl
   };
 }
 
+/** One source of workflow summarization truth for legacy aggregate and archived reports. */
+export async function collectWorkflowSummaries(root: string): Promise<WorkflowSummary[]> {
+  const workflowRoots = await discoverWorkflowRoots(root);
+  return Promise.all(workflowRoots.map(workflowRoot => (
+    summarizeWorkflow(workflowRoot, displayWorkflowIdentity(root, workflowRoot))
+  )));
+}
+
 function renderOptionalLine(label: string, value: string | null): string[] {
   return value === null ? [] : [`- ${label}: ${value}`];
 }
@@ -438,13 +453,37 @@ function renderWorkflow(summary: WorkflowSummary, index: number): string[] {
   return lines;
 }
 
-function renderReport(summaries: WorkflowSummary[]): string {
+export function renderOperationalRunReportMarkdown(input: RenderOperationalRunReportInput): string {
+  const { summaries } = input;
   const aggregateCounts = aggregateStructuredTerminalDelivery(summaries);
   const headerLines = [
     '# Auto Evolution Run Report',
     '',
-    `Observed workflow runs: ${summaries.length}`,
   ];
+
+  const isArchivedView = input.reportId !== undefined || input.createdAt !== undefined
+    || input.includeArtifactRetentionNote === true;
+  if (isArchivedView) {
+    if (input.reportId !== undefined) {
+      headerLines.push(`- Report ID: ${input.reportId}`);
+    }
+    if (input.createdAt !== undefined) {
+      headerLines.push(`- Created: ${input.createdAt}`);
+    }
+    headerLines.push(`- Observed workflow runs: ${summaries.length}`);
+    if (input.includeArtifactRetentionNote === true) {
+      headerLines.push(
+        '',
+        '## Artifact reference retention',
+        '',
+        'Artifact refs below point at original execution locations (often under `.tmp/evolution/**`).',
+        'Those raw workflow artifacts are not retention-protected, may be cleaned, and are not copied into this archive.',
+        'Long-lived evidence needed to restore Human judgment remains under Human Follow-up retention.',
+      );
+    }
+  } else {
+    headerLines.push(`Observed workflow runs: ${summaries.length}`);
+  }
 
   if (aggregateCounts !== null) {
     headerLines.push(
@@ -466,13 +505,14 @@ function renderReport(summaries: WorkflowSummary[]): string {
   ].join('\n');
 }
 
+function renderReport(summaries: WorkflowSummary[]): string {
+  return renderOperationalRunReportMarkdown({ summaries });
+}
+
 export async function buildOperationalRunReport(
   input: BuildOperationalRunReportInput,
 ): Promise<BuildOperationalRunReportResult> {
-  const workflowRoots = await discoverWorkflowRoots(input.root);
-  const summaries = await Promise.all(workflowRoots.map(root => (
-    summarizeWorkflow(root, displayWorkflowIdentity(input.root, root))
-  )));
+  const summaries = await collectWorkflowSummaries(input.root);
   const report = renderReport(summaries);
   await mkdir(dirname(resolve(input.outputPath)), { recursive: true });
   await writeFile(input.outputPath, report, 'utf8');

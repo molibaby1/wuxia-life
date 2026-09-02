@@ -12,6 +12,8 @@
     "test:evolution:human-followup": "tsx tests/evolution/humanFollowupWorkItemContract.test.ts && tsx tests/evolution/humanFollowupRetention.test.ts && tsx tests/evolution/humanFollowupSolutionLoopIntegration.test.ts && tsx tests/evolution/humanFollowupReview.test.ts && tsx tests/evolution/humanFollowupInbox.test.ts",
     "evolution:human-followup:inbox": "tsx scripts/evolution/humanFollowup/buildHumanFollowupInbox.ts",
     "evolution:human-followup:review": "tsx scripts/evolution/humanFollowup/reviewHumanFollowupWorkItem.ts",
+    "evolution:observability:archive": "tsx scripts/evolution/reporting/archiveOperationalRunReport.ts",
+    "evolution:observability:index": "tsx scripts/evolution/reporting/buildOperationalObservabilityIndex.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
     "test:contracts:choice": "tsx tests/contracts/choiceExecutionContract.test.ts",
     "test:contracts:replay": "tsx tests/contracts/replayContract.test.ts",

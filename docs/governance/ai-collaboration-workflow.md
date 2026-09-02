@@ -140,6 +140,22 @@ Sidecar Run Report 已是当前可用的旁路 observability capability。
 
 > **没有 Report Analysis，主流程照样运行；Report Producer 也不应成为 Skill 的依赖。**
 
+固定入口：`artifacts/evolution/index.md`。
+
+Sidecar historical reports 使用：
+
+`artifacts/evolution/run-reports/`
+
+每份 archived report 包含 `report.md`（Human view）与 `report.json`（machine-readable summary）。它们是 generated observability history，不是 Human backlog canonical state，也不复制 `.tmp/evolution/**` raw workflow artifacts。
+
+Human Follow-up 继续使用：
+
+`artifacts/evolution/human-follow-up/`
+
+Host 在 terminal run 后刷新 sidecar outputs（archive Run Report → refresh HFL inbox → refresh operational index）。主 workflow 从不依赖这些步骤；刷新失败只报告 `OBSERVABILITY_REFRESH_FAILED`，不改变 Decision。
+
+遗留即时聚合命令 `npm run report:evolution-run` 仍保留，表示对指定 root / 默认 `.tmp/evolution` 的即时 scan。
+
 当前 bounded Human Follow-up scope 由 `docs/governance/current-product-stage.md` 决定：`retain + review + list` minimal runtime 已可用，implementation review 已 ACCEPTED，real-use pilot completed (`HFL_REAL_USE_VALIDATED`)；Human 可异步 review retained items，workflow first / productization later 不变；automatic Review Trigger analysis 尚未引入。
 
 ## 5. Future Report Analysis

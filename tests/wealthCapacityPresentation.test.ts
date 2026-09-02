@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
 import { mapSessionProgression } from '../server/src/services/sessionProgressionMapper';
-import type { LifeMemorySummary } from '../src/types/lifeMemory';
+import { LIFE_MEMORY_SCHEMA_VERSION, type LifeMemorySummary } from '../src/types/lifeMemory';
 import type { WealthCapacity } from '../src/types/wealthCapacity';
 
 type PlayerSummaryWithCapacity = PlayerSummaryDto & {
@@ -37,7 +37,7 @@ function createPlayerSummary(overrides: Partial<PlayerSummaryWithCapacity> = {})
 
 function createLifeMemory(overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary {
   return {
-    schemaVersion: '3.1.0',
+    schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
     derivedAtAge: 19,
     ...overrides,
   };

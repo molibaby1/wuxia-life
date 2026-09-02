@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
 import type { PlayerLifeStates } from '../src/types/eventTypes';
-import type { LifeMemorySummary } from '../src/types/lifeMemory';
+import { LIFE_MEMORY_SCHEMA_VERSION, type LifeMemorySummary } from '../src/types/lifeMemory';
 import { buildMainScreenModel, type MainScreenPlayer, P124_MARTIAL_DOMINANT_SAMPLE } from '../src/components/mainScreenModel';
 
 function assert(condition: boolean, message: string): void {
@@ -67,7 +67,7 @@ function createMainScreenPlayer(overrides: Partial<MainScreenPlayer> = {}): Main
 
 function createLifeMemory(overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary {
   return {
-    schemaVersion: '3.1.0',
+    schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
     derivedAtAge: 19,
     risks: [
       {

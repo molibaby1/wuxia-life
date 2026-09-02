@@ -4,6 +4,8 @@
     "label": "初涉书卷",
     "description": "你开始主动把时间投入读书，求学不再只是被动安排。",
     "category": "study",
+    "kind": "progress_stage",
+    "tier": 1,
     "priority": 80,
     "visibility": "full",
     "conditions": [{ "type": "action_count", "category": "study", "min": 1, "label": "主动读书 1 次" }]
@@ -13,6 +15,8 @@
     "label": "少年勤学",
     "description": "你在少年时期多次主动读书，求学已经成为这段人生的重要经历。",
     "category": "study",
+    "kind": "progress_stage",
+    "tier": 2,
     "priority": 100,
     "visibility": "full",
     "conditions": [{ "type": "action_count", "category": "study", "min": 3, "maxAge": 20, "label": "20 岁前主动读书 3 次" }]
@@ -22,6 +26,8 @@
     "label": "初试身手",
     "description": "你第一次主动投入时间练功，武学开始成为自己的选择。",
     "category": "training",
+    "kind": "progress_stage",
+    "tier": 1,
     "priority": 80,
     "visibility": "full",
     "conditions": [{ "type": "action_count", "category": "training", "min": 1, "label": "主动练功 1 次" }]
@@ -31,6 +37,8 @@
     "label": "初通营生",
     "description": "你第一次主动经营生计，开始尝试掌握自己的财路。",
     "category": "business",
+    "kind": "progress_stage",
+    "tier": 1,
     "priority": 80,
     "visibility": "full",
     "conditions": [{ "type": "action_count", "category": "business", "min": 1, "label": "主动营生 1 次" }]
@@ -40,6 +48,8 @@
     "label": "读书成习",
     "description": "长期读书实践已经形成稳定积累。",
     "category": "study",
+    "kind": "progress_stage",
+    "tier": 2,
     "priority": 90,
     "visibility": "full",
     "conditions": [{ "type": "habit_at_least", "habit": "studyHabit", "min": 2, "label": "读书实践 2 级" }]
@@ -49,6 +59,8 @@
     "label": "练功成习",
     "description": "长期练功实践已经形成稳定积累。",
     "category": "training",
+    "kind": "progress_stage",
+    "tier": 2,
     "priority": 90,
     "visibility": "full",
     "conditions": [{ "type": "habit_at_least", "habit": "trainingHabit", "min": 2, "label": "练功实践 2 级" }]
@@ -58,6 +70,8 @@
     "label": "营生成习",
     "description": "长期营生实践已经形成稳定积累。",
     "category": "business",
+    "kind": "progress_stage",
+    "tier": 2,
     "priority": 90,
     "visibility": "full",
     "conditions": [{ "type": "habit_at_least", "habit": "businessHabit", "min": 2, "label": "营生实践 2 级" }]
@@ -67,6 +81,8 @@
     "label": "功行渐深",
     "description": "长久练功已经越过单纯成习，武学积累逐渐形成更扎实的底子。",
     "category": "training",
+    "kind": "progress_stage",
+    "tier": 3,
     "priority": 100,
     "visibility": "full",
     "conditions": [
@@ -78,6 +94,7 @@
     "label": "行功遇险",
     "description": "一次行功失序让你真正尝到了修炼失控的凶险。",
     "category": "training",
+    "kind": "turning_point",
     "priority": 105,
     "visibility": "full",
     "conditions": [
@@ -89,6 +106,7 @@
     "label": "旧卷回声",
     "description": "多年读书的积累终于在后来的人生中真正派上了用场。",
     "category": "study",
+    "kind": "payoff_echo",
     "priority": 105,
     "visibility": "full",
     "conditions": [
@@ -100,6 +118,7 @@
     "label": "养生拳意",
     "description": "练功在你的文士人生中没有走向争胜，而逐渐化成了自守体魄的一部分。",
     "category": "mixed",
+    "kind": "payoff_echo",
     "priority": 105,
     "visibility": "full",
     "conditions": [
@@ -111,6 +130,7 @@
     "label": "小摊初立",
     "description": "长期帮衬营生的积累终于落到了自己的第一处营盘上。",
     "category": "business",
+    "kind": "payoff_echo",
     "priority": 105,
     "visibility": "full",
     "conditions": [
@@ -122,6 +142,7 @@
     "label": "文武并进",
     "description": "读书与练功都形成了持续实践。",
     "category": "mixed",
+    "kind": "synthesis",
     "priority": 110,
     "visibility": "full",
     "conditions": [

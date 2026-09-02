@@ -6,7 +6,7 @@
 
 ### 产品规范（第一层）
 
-- [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范。
+- [玩家模型](product/player-model.md)：当前游戏人物状态与产品语义的权威规范；含 Derived Life Milestone Domain & Feedback v2（PD-108）。
 - [Auto Evolution 产品模型](product/auto-evolution-model.md)：Agent Workflow Orchestrator、Skill、旁路运行报告与模块边界的当前权威产品规范。
 
 `player-model` 与 `auto-evolution-model` 同属第一层产品规范；`Wealth / Economy Product Contract v1`、`Character / Relationship Product Contract v1`、`Parenthood / Family Life Product Contract v1` 与 `Generic Relationship Legacy Quarantine Design (PD-104)` 是在玩家模型之下登记的当前 accepted product/governance authorities，不替代第一层规范。`player-model` 分别把经济能力、重要人物与人物关系、子女与家庭生活及 generic relationship legacy disposition 委托给对应 authority；`auto-evolution-model` 负责 Auto Evolution 如何组织外部 Participant 帮助产品持续演化。
@@ -37,7 +37,7 @@ player-model
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow 与 Person Domain Authoring consolidation 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow、Person Domain Authoring consolidation 与 Life Milestone Domain & Feedback v2 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107 / PD-108。
 - [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
 - [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
 - [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。

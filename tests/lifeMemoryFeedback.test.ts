@@ -1,20 +1,34 @@
 import { strict as assert } from 'node:assert';
 import * as lifeMemoryFeedback from '../src/components/lifeMemoryFeedback';
-import type { LifeMemorySummary } from '../src/types/lifeMemory';
+import {
+  LIFE_MEMORY_SCHEMA_VERSION,
+  type LifeMemorySummary,
+} from '../src/types/lifeMemory';
+import type { MilestoneKind, MilestoneTier } from '../src/types/milestone';
 
 const base = (overrides: Partial<LifeMemorySummary> = {}): LifeMemorySummary => ({
-  schemaVersion: '3.1.0',
+  schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
   derivedAtAge: 18,
   ...overrides,
 });
 
-const milestone = (id: string, label: string, visibility: 'player' | 'hidden' = 'player') => ({
+const milestone = (
+  id: string,
+  label: string,
+  options: {
+    visibility?: 'player' | 'hidden';
+    kind?: MilestoneKind;
+    tier?: MilestoneTier;
+  } = {},
+) => ({
   id,
-  visibility,
+  visibility: options.visibility ?? 'player',
   sortKey: 80,
   label,
   description: `${label}说明`,
   category: 'study' as const,
+  kind: options.kind ?? ('progress_stage' as const),
+  ...(options.tier === undefined ? {} : { tier: options.tier }),
   evidenceLabels: ['主动读书 1 次'],
   diagnostic: {
     milestoneId: id.replace('milestone-', ''),
@@ -32,14 +46,14 @@ const achievement = (id: string, label: string, visibility: 'player' | 'hidden' 
 });
 
 const previous = base({
-  achievedMilestones: [milestone('milestone-old', '旧印记')],
+  achievedMilestones: [milestone('milestone-old', '旧印记', { kind: 'progress_stage', tier: 1 })],
   achievements: [],
 });
 const current = base({
   achievedMilestones: [
-    milestone('milestone-old', '旧印记'),
-    milestone('milestone-new', '新印记'),
-    milestone('milestone-hidden', '隐藏印记', 'hidden'),
+    milestone('milestone-old', '旧印记', { kind: 'progress_stage', tier: 1 }),
+    milestone('milestone-new', '新印记', { kind: 'progress_stage', tier: 1 }),
+    milestone('milestone-hidden', '隐藏印记', { visibility: 'hidden', kind: 'progress_stage', tier: 1 }),
   ],
   achievements: [achievement('save-village', '拯救村庄')],
 });
@@ -51,8 +65,30 @@ assert.deepEqual(
   'new achievements should precede new milestones and hidden entries should stay hidden',
 );
 assert.equal(feedback[1]?.description, '新印记说明');
+assert.equal(feedback[1]?.kind, 'milestone');
+if (feedback[1]?.kind === 'milestone') {
+  assert.equal(feedback[1].milestoneKind, 'progress_stage');
+  assert.equal(feedback[1].milestoneTier, 1);
+}
 assert.deepEqual(lifeMemoryFeedback.collectNewLifeMemoryFeedback(current, current), []);
 assert.deepEqual(lifeMemoryFeedback.collectNewLifeMemoryFeedback(base(), base()), []);
+
+{
+  const turningFeedback = lifeMemoryFeedback.collectNewLifeMemoryFeedback(
+    base(),
+    base({
+      achievedMilestones: [
+        milestone('milestone-turning', '行功遇险', { kind: 'turning_point' }),
+      ],
+    }),
+  );
+  assert.equal(turningFeedback.length, 1);
+  assert.equal(turningFeedback[0]?.kind, 'milestone');
+  if (turningFeedback[0]?.kind === 'milestone') {
+    assert.equal(turningFeedback[0].milestoneKind, 'turning_point');
+    assert.equal(turningFeedback[0].milestoneTier, undefined);
+  }
+}
 
 const buildLifeMemoryFeedbackOverlayCard = (
   lifeMemoryFeedback as typeof lifeMemoryFeedback & {

@@ -689,6 +689,13 @@ function milestoneDiagnostic(evaluation: MilestoneEvaluation) {
   };
 }
 
+function milestoneSemantics(definition: MilestoneEvaluation['definition']) {
+  if (definition.kind === 'progress_stage') {
+    return { kind: definition.kind, tier: definition.tier };
+  }
+  return { kind: definition.kind };
+}
+
 function buildAchievedMilestones(projection: MilestoneProjection): LifeMemoryMilestoneEntry[] {
   return projection.achieved.map((evaluation) => ({
     id: `milestone-${evaluation.definition.id}`,
@@ -698,6 +705,7 @@ function buildAchievedMilestones(projection: MilestoneProjection): LifeMemoryMil
     label: evaluation.definition.label,
     description: evaluation.definition.description,
     category: evaluation.definition.category,
+    ...milestoneSemantics(evaluation.definition),
     evidenceLabels: evaluation.evidenceLabels,
     diagnostic: milestoneDiagnostic(evaluation),
   }));
@@ -711,6 +719,7 @@ function buildMilestoneProspects(projection: MilestoneProjection): LifeMemoryMil
     label: evaluation.definition.label,
     description: evaluation.definition.description,
     category: evaluation.definition.category,
+    ...milestoneSemantics(evaluation.definition),
     progressRatio: evaluation.progressRatio,
     progressLabels: evaluation.progressLabels,
     diagnostic: milestoneDiagnostic(evaluation),

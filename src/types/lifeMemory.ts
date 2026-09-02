@@ -3,9 +3,14 @@
  * Serializable, derived-only — not persisted as redundant game state.
  */
 
-import type { MilestoneCategory, MilestoneCondition } from './milestone';
+import type {
+  MilestoneCategory,
+  MilestoneCondition,
+  MilestoneKind,
+  MilestoneTier,
+} from './milestone';
 
-export const LIFE_MEMORY_SCHEMA_VERSION = '3.1.0' as const;
+export const LIFE_MEMORY_SCHEMA_VERSION = '3.2.0' as const;
 
 export type LifeMemoryVisibility = 'player' | 'hidden' | 'diagnostic';
 
@@ -76,6 +81,8 @@ export interface LifeMemoryMilestoneEntry extends LifeMemoryEntryBase {
   label: string;
   description: string;
   category: MilestoneCategory;
+  kind: MilestoneKind;
+  tier?: MilestoneTier;
   evidenceLabels: string[];
   diagnostic: {
     milestoneId: string;
@@ -87,6 +94,8 @@ export interface LifeMemoryMilestoneProspectEntry extends LifeMemoryEntryBase {
   label: string;
   description: string;
   category: MilestoneCategory;
+  kind: MilestoneKind;
+  tier?: MilestoneTier;
   progressRatio: number;
   progressLabels: string[];
   diagnostic: {

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { LIFE_MEMORY_SCHEMA_VERSION } from '../src/types/lifeMemory';
 import { gameStateSnapshotAge50 } from '../src/contracts/fixtures/gameStateSnapshotAge50';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
@@ -328,7 +329,7 @@ function testE2E3PlayerFacingClosureRemains(): void {
     currentYear: 30,
     currentMonth: 1,
     currentDay: 1,
-  } as PlayerSummaryDto, { schemaVersion: '3.1.0', derivedAtAge: 30 });
+  } as PlayerSummaryDto, { schemaVersion: LIFE_MEMORY_SCHEMA_VERSION, derivedAtAge: 30 });
   assert.equal(model.topResources.some((item) => item.key === 'money'), false);
 }
 

@@ -46,6 +46,69 @@ assert(!catalogText.includes('reward'), 'catalog must not use rewards');
 assert(!definitions.some((item) => Object.keys(item).includes('script')), 'catalog must not use custom scripts');
 
 {
+  const approved: Record<string, { kind: MilestoneDefinition['kind']; tier?: 1 | 2 | 3 }> = {
+    'study-first-step': { kind: 'progress_stage', tier: 1 },
+    'training-first-step': { kind: 'progress_stage', tier: 1 },
+    'business-first-step': { kind: 'progress_stage', tier: 1 },
+    'study-young-diligent': { kind: 'progress_stage', tier: 2 },
+    'study-habit-formed': { kind: 'progress_stage', tier: 2 },
+    'training-habit-formed': { kind: 'progress_stage', tier: 2 },
+    'business-habit-formed': { kind: 'progress_stage', tier: 2 },
+    'training-practice-deepened': { kind: 'progress_stage', tier: 3 },
+    'training-cultivation-deviation': { kind: 'turning_point' },
+    'study-old-scroll-echo': { kind: 'payoff_echo' },
+    'mixed-scholar-training-body-echo': { kind: 'payoff_echo' },
+    'business-first-stall': { kind: 'payoff_echo' },
+    'study-training-balanced': { kind: 'synthesis' },
+  };
+  assert.equal(Object.keys(approved).length, 13, 'approved mapping covers all thirteen ids');
+  assert.deepEqual(
+    [...definitions.map((item) => item.id)].sort(),
+    [...Object.keys(approved)].sort(),
+    'catalog ids must match the approved mapping exactly',
+  );
+
+  const byKind = {
+    progress_stage: 0,
+    turning_point: 0,
+    payoff_echo: 0,
+    synthesis: 0,
+  };
+  const byTier = { 1: 0, 2: 0, 3: 0 };
+
+  for (const definition of definitions) {
+    const expected = approved[definition.id];
+    assert.equal(definition.kind, expected.kind, `${definition.id} kind must match approved mapping`);
+    if (definition.kind === 'progress_stage') {
+      assert.ok(definition.tier === 1 || definition.tier === 2 || definition.tier === 3,
+        `${definition.id} progress_stage must have tier 1|2|3`);
+      assert.equal(definition.tier, expected.tier, `${definition.id} tier must match approved mapping`);
+      byTier[definition.tier] += 1;
+    } else {
+      assert.equal(
+        Object.prototype.hasOwnProperty.call(definition, 'tier'),
+        false,
+        `${definition.id} non-progress kind must omit tier`,
+      );
+      assert.equal(expected.tier, undefined, `${definition.id} approved mapping must forbid tier`);
+    }
+    byKind[definition.kind] += 1;
+  }
+
+  assert.deepEqual(byKind, {
+    progress_stage: 8,
+    turning_point: 1,
+    payoff_echo: 3,
+    synthesis: 1,
+  });
+  assert.deepEqual(byTier, { 1: 3, 2: 4, 3: 1 });
+  assert(
+    !definitions.some((item) => item.kind === 'progress_stage' && item.priority === item.tier),
+    'priority must remain independent of tier',
+  );
+}
+
+{
   const state = createState({
     actionHistory: [
       activeAction('study', 16),
@@ -84,7 +147,8 @@ assert(!definitions.some((item) => Object.keys(item).includes('script')), 'catal
   });
   assert.equal(event.occurredAtAge, 18, 'event conditions should recover their event age');
   const combined = evaluateMilestone(state, {
-    id: 'combined', label: '组合', description: '组合', category: 'mixed', priority: 1, visibility: 'full',
+    id: 'combined', label: '组合', description: '组合', category: 'mixed',
+    kind: 'synthesis', priority: 1, visibility: 'full',
     conditions: [
       { type: 'habit_at_least', habit: 'studyHabit', min: 2, label: '读书实践 2 级' },
       { type: 'habit_at_least', habit: 'trainingHabit', min: 3, label: '练功实践 3 级' },

@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-08-31
+> 最后更新：2026-09-02
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -1643,3 +1643,92 @@ Experience semantic taxonomy and repetition measurement experiment is no longer 
 - bounded archetype 不足以表达真实 identity requirement；
 - 多个真实生产者需要 machine-readable Person validation；
 - Generic Person Runtime 出现独立玩家产品需求。
+
+### PD-108：Life Milestone Domain & Feedback v2
+
+**产品决策（Human accepted）**
+
+在保留 PD-053 derived-only 边界的前提下，将 Life Milestone 原地升级为 Domain & Feedback v2。PD-053 保留为历史 accepted decision；本条是当前语义权威补充。`docs/product/player-model.md` 仍是唯一 Milestone semantic authority；不新建平行 contract 文档。
+
+**四个职责**
+
+1. **ACQUISITION** — 我刚刚形成了什么？
+2. **POSITION** — 我现在已经形成了怎样的人生轨迹？
+3. **PROSPECT** — 基于已经真实开始的实践，我正在接近什么？
+4. **CONTINUITY** — 过去的投入后来产生了什么意义？
+
+**Kinds**
+
+| Kind | Tier |
+| --- | --- |
+| `PROGRESS_STAGE` | REQUIRED：1 / 2 / 3 |
+| `TURNING_POINT` | FORBIDDEN |
+| `PAYOFF_ECHO` | FORBIDDEN |
+| `SYNTHESIS` | FORBIDDEN |
+
+正式分离：
+
+```text
+category = 内容领域
+kind     = 人生反馈类型
+tier     = progress-stage practice depth
+priority = presentation sorting
+```
+
+```text
+Tier = practice depth
+Tier != life value
+priority != Tier
+```
+
+**Prospect**
+
+Prospect 仍由真实透明的部分证据驱动（`!achieved && !expired && 0 < progressRatio < 1`）。Prospect 不是任务系统；不得按 Kind hard-code Prospect 资格。
+
+**Derived-only**
+
+Life Milestone 仍是只读派生反馈：
+
+- 不写入 PlayerState / GameState / Snapshot state / save；
+- 不建立 persistent milestone unlock ledger；
+- 不反向影响 event / route / ending / reward。
+
+Life Memory schema 因携带 Kind / Tier metadata 升级为 `3.2.0`；这不等于 Snapshot structural schema bump 或 save migration。
+
+**Approved catalog mapping（现有 13 个，本裁决不新增内容）**
+
+Progress Stage / T1：`study-first-step`、`training-first-step`、`business-first-step`
+
+Progress Stage / T2：`study-young-diligent`、`study-habit-formed`、`training-habit-formed`、`business-habit-formed`
+
+Progress Stage / T3：`training-practice-deepened`
+
+Turning Point：`training-cultivation-deviation`
+
+Payoff Echo：`study-old-scroll-echo`、`mixed-scholar-training-body-echo`、`business-first-stall`
+
+Synthesis：`study-training-balanced`
+
+分布：`PROGRESS_STAGE=8`（T1=3 / T2=4 / T3=1）、`TURNING_POINT=1`、`PAYOFF_ECHO=3`、`SYNTHESIS=1`；合计 13。
+
+**明确不做**
+
+- 新 Milestone 内容、Study T3、Business T3、full tier matrix；
+- Milestone XP / points / rarity / reward / unlock ledger / hidden achievements / quest tree；
+- persistent milestone state；
+- route / event eligibility 或 ending effects；
+- generic progression engine；
+- modal 要求；
+- Achievement / Milestone merge；
+- 补齐 catalog 不对称（Tier model exposes asymmetry ≠ authorizes filling asymmetry）。
+
+Presentation 后续可按 Kind / Tier 分化，但本裁决不自动授权 Phase B 视觉实现。
+
+**重新讨论条件**
+
+- Tier 无法表达真实新的 Progress Stage；
+- 非 Progress Kind 出现真实必要的层级语义；
+- 需要永久保存无法由 history 恢复的 milestone unlock；
+- Milestone 需要反向影响 gameplay；
+- player-visible evidence 证明 Kind / Tier presentation policy 不够；
+- hidden / full catalog 出现独立产品需求。

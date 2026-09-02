@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { LIFE_MEMORY_SCHEMA_VERSION } from '../src/types/lifeMemory';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import { gameStateSnapshotAge50 } from '../src/contracts/fixtures/gameStateSnapshotAge50';
 import { validateGameStateSnapshot } from '../src/contracts/validation/contractValidation';
@@ -60,7 +61,7 @@ const model = buildMainScreenModel(
     knowledge: 14,
     chivalry: 15,
   },
-  { schemaVersion: '3.1.0', derivedAtAge: 0, risks: [] } as never,
+  { schemaVersion: LIFE_MEMORY_SCHEMA_VERSION, derivedAtAge: 0, risks: [] } as never,
 );
 assert.deepEqual(
   model.coreStats.map(item => item.key),

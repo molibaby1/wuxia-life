@@ -380,10 +380,17 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
     }],
   });
   const summary = deriveLifeMemorySummary(state);
-  assert(summary.schemaVersion === '3.1.0', 'Life Memory schema should advance to 3.1.0');
-  assert(summary.achievedMilestones?.some((entry) => entry.label === '初涉书卷'));
-  assert(summary.achievedMilestones?.some((entry) => entry.label === '读书成习'));
+  assert(summary.schemaVersion === '3.2.0', 'Life Memory schema should advance to 3.2.0');
+  const firstStep = summary.achievedMilestones?.find((entry) => entry.label === '初涉书卷');
+  assert(firstStep?.kind === 'progress_stage' && firstStep.tier === 1, '初涉书卷 must carry progress_stage tier 1');
+  const habitFormed = summary.achievedMilestones?.find((entry) => entry.label === '读书成习');
+  assert(habitFormed?.kind === 'progress_stage' && habitFormed.tier === 2, '读书成习 must carry progress_stage tier 2');
   assert(summary.milestoneProspects?.[0]?.label === '少年勤学');
+  assert(
+    summary.milestoneProspects?.[0]?.kind === 'progress_stage'
+      && summary.milestoneProspects?.[0]?.tier === 2,
+    '少年勤学 prospect must carry progress_stage tier 2',
+  );
   assert(!summary.achievements?.some((entry) => entry.label === '初涉书卷'), 'milestones must not enter achievements');
   assert(JSON.stringify(serializeLifeMemorySummary(summary)) === JSON.stringify(summary));
   console.log('✓ derives serializable milestones independently from achievements');
@@ -453,6 +460,24 @@ console.log('=== Life Memory Summary Regression Tests (US-028) ===\n');
   );
   assert(JSON.stringify(serializeLifeMemorySummary(summary)) === JSON.stringify(summary), 'complete milestones should round-trip');
   assert(JSON.stringify(state) === JSON.stringify(stateBeforeDerivation), 'Life Memory derivation must not mutate GameState');
+
+  const turningPoint = summary.achievedMilestones?.find((entry) => entry.diagnostic.milestoneId === 'training-cultivation-deviation');
+  assert(turningPoint?.kind === 'turning_point', '行功遇险 must propagate turning_point');
+  assert(turningPoint?.tier === undefined, '行功遇险 must omit tier');
+  const payoffEcho = summary.achievedMilestones?.find((entry) => entry.diagnostic.milestoneId === 'study-old-scroll-echo');
+  assert(payoffEcho?.kind === 'payoff_echo', '旧卷回声 must propagate payoff_echo');
+  assert(payoffEcho?.tier === undefined, '旧卷回声 must omit tier');
+  const roundTrip = serializeLifeMemorySummary(summary);
+  assert(
+    roundTrip.achievedMilestones?.find((entry) => entry.diagnostic.milestoneId === 'training-cultivation-deviation')?.kind === 'turning_point',
+    'turning_point must survive JSON round trip',
+  );
+  assert(
+    roundTrip.achievedMilestones?.find((entry) => entry.diagnostic.milestoneId === 'study-old-scroll-echo')?.kind === 'payoff_echo'
+      && roundTrip.achievedMilestones?.find((entry) => entry.diagnostic.milestoneId === 'study-old-scroll-echo')?.tier === undefined,
+    'payoff_echo metadata must survive JSON round trip without inventing tier',
+  );
+
   console.log('✓ keeps the complete achieved milestone projection');
 }
 

@@ -3,6 +3,14 @@ import type { LifeStateKey } from './eventTypes';
 
 export type MilestoneCategory = 'study' | 'training' | 'business' | 'mixed';
 
+export type MilestoneKind =
+  | 'progress_stage'
+  | 'turning_point'
+  | 'payoff_echo'
+  | 'synthesis';
+
+export type MilestoneTier = 1 | 2 | 3;
+
 export interface HabitAtLeastCondition {
   type: 'habit_at_least';
   habit: LifeStateKey;
@@ -26,7 +34,7 @@ export interface EventOccurredCondition {
 
 export type MilestoneCondition = HabitAtLeastCondition | ActionCountCondition | EventOccurredCondition;
 
-export interface MilestoneDefinition {
+interface BaseMilestoneDefinition {
   id: string;
   label: string;
   description: string;
@@ -35,3 +43,13 @@ export interface MilestoneDefinition {
   visibility: 'full';
   conditions: MilestoneCondition[];
 }
+
+export type MilestoneDefinition =
+  | (BaseMilestoneDefinition & {
+      kind: 'progress_stage';
+      tier: MilestoneTier;
+    })
+  | (BaseMilestoneDefinition & {
+      kind: 'turning_point' | 'payoff_echo' | 'synthesis';
+      tier?: never;
+    });

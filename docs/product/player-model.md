@@ -126,9 +126,9 @@ Parenthood 与子女 / 家庭生活的正式产品语义由 [Parenthood / Family
 
 Habit 可以开启一个新的路线选择机会，但不能单独证明玩家已经拥有该路线或身份。身份型内容必须使用明确路线/身份事实，并在确有必要时同时要求 Habit 门槛。
 
-### Derived Life Milestone / 派生人生里程碑
+### Derived Life Milestone Domain & Feedback v2
 
-Life Milestone 用于将玩家已经形成的实践、状态和经历翻译为可理解的阶段反馈。
+Life Milestone 用于将玩家已经形成的实践、状态和经历翻译为可理解的人生反馈。
 
 正式数据关系为：
 
@@ -141,11 +141,71 @@ Canonical Player Facts
 → Player-visible Progress Feedback
 ```
 
-Life Milestone 回答：
+#### 四个职责
 
-- 玩家已经形成了哪些阶段成果；
-- 玩家当前正在接近哪些可能性；
-- 已有数值、实践和经历对玩家而言意味着什么。
+Life Milestone 正式承担四个反馈职责：
+
+1. **ACQUISITION（获得）** — 我刚刚形成了什么？
+2. **POSITION（位置）** — 我现在已经形成了怎样的人生轨迹？
+3. **PROSPECT（前景）** — 基于已经真实开始的实践，我正在接近什么？
+4. **CONTINUITY（延续）** — 过去的投入后来产生了什么意义？
+
+```text
+Milestone
+!= Achievement
+!= Identity
+!= Title
+!= Occupation
+!= Route
+!= Task
+!= Reward
+```
+
+#### Kind 与 Tier
+
+正式 Kind：
+
+| Kind | 含义 |
+| --- | --- |
+| `progress_stage` | 实践深度阶段反馈；必须携带 Tier 1/2/3 |
+| `turning_point` | 人生转折；禁止 Tier |
+| `payoff_echo` | 往事回响 / 投入兑现；禁止 Tier |
+| `synthesis` | 跨实践综合；禁止 Tier |
+
+正式规则：
+
+```text
+category = 内容领域（study / training / business / mixed）
+kind     = 人生反馈类型
+tier     = progress_stage 的实践深度（仅 progress_stage 允许）
+priority = presentation sorting（不得重新解释为 Tier）
+```
+
+```text
+PROGRESS_STAGE → tier REQUIRED (1 | 2 | 3)
+TURNING_POINT / PAYOFF_ECHO / SYNTHESIS → tier FORBIDDEN
+```
+
+```text
+Tier = practice depth
+Tier != life value
+```
+
+现有 catalog 允许不对称（例如 Study/Business 尚无 T3）。暴露不对称不等于授权补齐不对称。
+
+#### Prospect
+
+Prospect 仍由真实透明的部分证据驱动：
+
+```text
+!achieved
+&& !expired
+&& progressRatio > 0
+&& progressRatio < 1
+→ may become Prospect
+```
+
+Prospect 不是任务系统，也不是按 Kind hard-code 的特殊分支。事件派生 Milestone 在事件发生前 `progressRatio = 0`，自然不进入 Prospect。
 
 #### 正式边界
 
@@ -160,7 +220,9 @@ Life Milestone 是只读派生结果，不属于新的玩家状态真相。
 - Route；
 - Achievement；
 - Ending；
-- Habit。
+- Habit；
+- Task；
+- Reward。
 
 Life Milestone 不得写入或修改：
 
@@ -276,6 +338,8 @@ studyHabit 达到稳定积累
 - 当前进度或尚缺条件。
 
 隐藏条件、模糊提示和探索型成就不属于第一阶段。
+
+后续 presentation 可按 Kind / Tier 分化，但不自动授权 modal、稀有度、积分或奖励。
 
 ### Family / Social life-state removal
 

@@ -59,7 +59,7 @@ function cloneFixture(): any {
 console.log('=== Canonical Identity / Affiliation Closure Tests ===');
 
 assert.equal(GAME_STATE_SNAPSHOT_SCHEMA_VERSION, '3.16.0');
-assert.equal(LIFE_MEMORY_SCHEMA_VERSION, '3.1.0');
+assert.equal(LIFE_MEMORY_SCHEMA_VERSION, '3.2.0');
 
 const engine = new GameEngineIntegration();
 const initialState = engine.getGameState() as any;
@@ -124,7 +124,7 @@ assert.equal((roundTrip.player as any).affiliation, 'wudang');
 
 const baseSnapshot = cloneFixture();
 assert.equal(baseSnapshot.metadata.schemaVersion, '3.16.0');
-assert.equal(baseSnapshot.metadata.lifeMemorySchemaVersion, '3.1.0');
+assert.equal(baseSnapshot.metadata.lifeMemorySchemaVersion, '3.2.0');
 assert.equal(baseSnapshot.state.player.affiliation, 'wudang');
 assert.equal(baseSnapshot.state.player.title, '武当长老');
 

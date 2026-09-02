@@ -3,17 +3,30 @@ import type {
   LifeMemoryMilestoneEntry,
   LifeMemorySummary,
 } from '../types/lifeMemory';
+import type { MilestoneKind, MilestoneTier } from '../types/milestone';
 import type { ProgressionOverlayCard } from '../types/progressionOverlay';
 
-export type LifeMemoryFeedbackKind = 'achievement' | 'milestone';
-
-export interface LifeMemoryFeedbackItem {
+export type AchievementFeedbackItem = {
   id: string;
-  kind: LifeMemoryFeedbackKind;
+  kind: 'achievement';
   label: string;
   description?: string;
   evidenceLabels: string[];
-}
+};
+
+export type MilestoneFeedbackItem = {
+  id: string;
+  kind: 'milestone';
+  milestoneKind: MilestoneKind;
+  milestoneTier?: MilestoneTier;
+  label: string;
+  description?: string;
+  evidenceLabels: string[];
+};
+
+export type LifeMemoryFeedbackItem = AchievementFeedbackItem | MilestoneFeedbackItem;
+
+export type LifeMemoryFeedbackKind = LifeMemoryFeedbackItem['kind'];
 
 function visibleAchievements(summary: LifeMemorySummary | null | undefined): LifeMemoryAchievementEntry[] {
   return (summary?.achievements ?? []).filter(entry => entry.visibility === 'player');
@@ -30,7 +43,7 @@ export function collectNewLifeMemoryFeedback(
   const previousAchievementIds = new Set(visibleAchievements(previous).map(entry => entry.id));
   const previousMilestoneIds = new Set(visibleMilestones(previous).map(entry => entry.id));
 
-  const newAchievements = visibleAchievements(current)
+  const newAchievements: AchievementFeedbackItem[] = visibleAchievements(current)
     .filter(entry => !previousAchievementIds.has(entry.id))
     .map(entry => ({
       id: entry.id,
@@ -39,11 +52,13 @@ export function collectNewLifeMemoryFeedback(
       evidenceLabels: [],
     }));
 
-  const newMilestones = visibleMilestones(current)
+  const newMilestones: MilestoneFeedbackItem[] = visibleMilestones(current)
     .filter(entry => !previousMilestoneIds.has(entry.id))
     .map(entry => ({
       id: entry.id,
       kind: 'milestone' as const,
+      milestoneKind: entry.kind,
+      ...(entry.tier === undefined ? {} : { milestoneTier: entry.tier }),
       label: entry.label,
       description: entry.description,
       evidenceLabels: [...entry.evidenceLabels],

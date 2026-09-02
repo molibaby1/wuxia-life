@@ -11,7 +11,7 @@ import { calculatePublicStatDeltas } from '../src/core/activePlanning/periodSumm
 import { buildEndingPresentationDescription } from '../src/core/endingPresentation';
 import { buildPlayerDeltaOverlayCard } from '../src/types/progressionOverlay';
 import type { EffectDefinition } from '../src/types/eventTypes';
-import type { LifeMemorySummary } from '../src/types/lifeMemory';
+import { LIFE_MEMORY_SCHEMA_VERSION, type LifeMemorySummary } from '../src/types/lifeMemory';
 
 process.env.WUXIA_ENGINE_QUIET = '1';
 
@@ -72,7 +72,7 @@ function createPlayerSummary(): PlayerSummaryDto {
 
 function createLifeMemory(): LifeMemorySummary {
   return {
-    schemaVersion: '3.1.0',
+    schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
     derivedAtAge: 30,
   };
 }

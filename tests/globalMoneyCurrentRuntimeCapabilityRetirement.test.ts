@@ -13,7 +13,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { calculatePublicStatDeltas } from '../src/core/activePlanning/periodSummaryBuilder';
 import type { EffectDefinition, GameState, PlayerState } from '../src/types/eventTypes';
-import type { LifeMemorySummary } from '../src/types/lifeMemory';
+import { LIFE_MEMORY_SCHEMA_VERSION, type LifeMemorySummary } from '../src/types/lifeMemory';
 import { EffectType } from '../src/types/eventTypes';
 
 process.env.WUXIA_ENGINE_QUIET = '1';
@@ -116,7 +116,7 @@ function createPlayerSummary(): PlayerSummaryDto {
 
 function createLifeMemory(): LifeMemorySummary {
   return {
-    schemaVersion: '3.1.0',
+    schemaVersion: LIFE_MEMORY_SCHEMA_VERSION,
     derivedAtAge: 30,
   };
 }

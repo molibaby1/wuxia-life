@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildMainScreenModel } from '../src/components/mainScreenModel';
+import { LIFE_MEMORY_SCHEMA_VERSION } from '../src/types/lifeMemory';
 import { gameStateSnapshotAge50 } from '../src/contracts/fixtures/gameStateSnapshotAge50';
 import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSnapshot';
 import type { PlayerSummaryDto } from '../src/contracts/sessionProgression';
@@ -332,7 +333,7 @@ function testLiveSurfacesDoNotOwnExactBalances(): void {
     currentDay: 1,
   };
   assert.equal('money' in summary, false);
-  const model = buildMainScreenModel(summary, { schemaVersion: '3.1.0', derivedAtAge: 30 });
+  const model = buildMainScreenModel(summary, { schemaVersion: LIFE_MEMORY_SCHEMA_VERSION, derivedAtAge: 30 });
   assert.equal(model.topResources.some((item) => item.key === 'money' || item.label === '银两'), false);
   assert.equal(model.topResources.some((item) => item.key === 'wealthCapacity'), true);
 

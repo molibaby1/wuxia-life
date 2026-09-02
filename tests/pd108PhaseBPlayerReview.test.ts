@@ -171,6 +171,9 @@ const findings: string[] = [];
   assert(!blob.includes('☆'));
   assert(!/Study.*2\/3|读书.*2\/3|读书等级|locked|下一阶段 \?\?\?/.test(blob));
   assert(!summary.achievedMilestones?.some(m => m.diagnostic.milestoneId.includes('study') && m.tier === 3));
+  assert(model.milestoneSummary?.includes('少年勤学 · ★★') || model.milestoneSummary?.includes('读书成习 · ★★'));
+  assert(!model.milestoneSummary?.includes('★★ 少年勤学'));
+  assert(!model.milestoneSummary?.includes('★★ 读书成习'));
   findings.push(`MISSING_STUDY_T3 surface: position=${model.milestoneSummary}; prospect=${model.milestoneProspectSummary}`);
 }
 

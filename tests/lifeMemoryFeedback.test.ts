@@ -8,6 +8,7 @@ import {
 import {
   formatAchievedMilestoneCompactLabel,
   formatAchievedMilestoneHistoryTitle,
+  formatAchievedProgressLabel,
   milestoneKindSurfaceLabel,
   progressStageStars,
 } from '../src/components/milestonePresentation';
@@ -239,7 +240,7 @@ assert.equal(progressStageStars(3), '★★★');
 assert.equal(milestoneKindSurfaceLabel('progress_stage', 2), '里程碑 · 成形');
 assert.equal(formatAchievedMilestoneCompactLabel({
   kind: 'progress_stage', tier: 2, label: '读书成习',
-}), '★★ 读书成习');
+}), '读书成习 · ★★');
 assert.equal(formatAchievedMilestoneCompactLabel({
   kind: 'turning_point', label: '行功遇险',
 }), '行功遇险');
@@ -249,12 +250,14 @@ assert.equal(formatAchievedMilestoneHistoryTitle({
 assert.equal(formatAchievedMilestoneHistoryTitle({
   kind: 'synthesis', label: '文武并进',
 }), '人生印记 · 文武并进');
+assert.equal(formatAchievedProgressLabel('读书成习', 2), '★★ 读书成习');
 
 {
   const panel = readFileSync(resolve(process.cwd(), 'src/components/LifeMemoryPanel.vue'), 'utf8');
-  assert(panel.includes('人生印记'), 'Life Memory panel must expose achieved milestone section');
+  assert(panel.includes('人生里程碑'), 'Life Memory panel section must be 人生里程碑');
   assert(panel.includes('visibleMilestones'), 'Life Memory panel must render achievedMilestones');
   assert(panel.includes('formatAchievedMilestoneHistoryTitle'), 'Life Memory panel must use shared milestone presentation');
+  assert(!panel.includes('memory-section-title">人生印记<'), 'section title must not remain 人生印记');
   assert(!panel.includes('locked'), 'Life Memory panel must not expose locked milestone catalog');
   assert(!panel.includes('???'), 'Life Memory panel must not invent unknown tiers');
   assert(!panel.includes('☆'), 'Life Memory panel must not render empty stars');

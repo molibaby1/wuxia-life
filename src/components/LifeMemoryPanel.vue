@@ -127,9 +127,9 @@
         </ul>
       </div>
 
-      <!-- 人生印记：已取得的派生里程碑 -->
+      <!-- 人生里程碑：已取得的派生里程碑 -->
       <div v-if="visibleMilestones.length > 0" class="memory-section">
-        <p class="memory-section-title">人生印记</p>
+        <p class="memory-section-title">人生里程碑</p>
         <ul class="memory-list">
           <li
             v-for="milestone in visibleMilestones"

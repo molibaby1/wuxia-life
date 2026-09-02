@@ -37,14 +37,14 @@ export function milestoneKindSurfaceLabel(
   }
 }
 
-/** Compact MainScreen / chip label for an already-achieved milestone. */
+/** Compact MainScreen label: name first, then this Milestone's depth. */
 export function formatAchievedMilestoneCompactLabel(entry: {
   kind: MilestoneKind;
   tier?: MilestoneTier;
   label: string;
 }): string {
   if (entry.kind === 'progress_stage' && entry.tier !== undefined) {
-    return formatAchievedProgressLabel(entry.label, entry.tier);
+    return `${entry.label} · ${progressStageStars(entry.tier)}`;
   }
   return entry.label;
 }

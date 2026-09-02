@@ -421,8 +421,9 @@ console.log('=== Main Screen Model Tests ===\n');
       },
     ],
   }));
-  assert(model.milestoneSummary === '文武并进、★★ 读书成习', 'progress stars only on achieved progress_stage; non-progress stays plain');
+  assert(model.milestoneSummary === '文武并进、读书成习 · ★★', 'progress stars bind after the Milestone name; synthesis stays plain');
   assert(model.milestoneProspectSummary === '少年勤学 · 20 岁前主动读书 3 次 2/3', 'only the top prospect should be rendered');
+  assert(!model.milestoneSummary?.includes('★★ 读书成习'), 'MainScreen must not use prefix stars that read as domain rating');
   assert(!model.milestoneProspectSummary?.includes('★'), 'prospects must not show tier stars');
   assert(!model.milestoneSummary?.includes('/3'), 'position must not expose category tier completion');
   assert(!model.milestoneSummary?.includes('☆'), 'position must not render empty stars');
@@ -442,9 +443,15 @@ console.log('=== Main Screen Model Tests ===\n');
         category: 'study', kind: 'progress_stage', tier: 2, evidenceLabels: ['读书实践 2 级'],
         sortKey: 90, diagnostic: { milestoneId: 'study-habit-formed', conditionTypes: ['habit_at_least'] },
       },
+      {
+        id: 'milestone-study-young', visibility: 'player', label: '少年勤学', description: '少年',
+        category: 'study', kind: 'progress_stage', tier: 2, evidenceLabels: ['20 岁前主动读书 3 次'],
+        sortKey: 100, diagnostic: { milestoneId: 'study-young-diligent', conditionTypes: ['action_count'] },
+      },
     ],
   }));
-  assert(studyOnly.milestoneSummary === '★★ 读书成习、★ 初涉书卷');
+  assert(studyOnly.milestoneSummary === '少年勤学 · ★★、读书成习 · ★★', 'two Study T2 must read as independent Milestone depths');
+  assert(!studyOnly.milestoneSummary?.includes('★★ 少年勤学'), 'prefix star pairs must not remain');
   assert(!studyOnly.milestoneSummary?.includes('★★★'), 'missing Study T3 must not invent a third star');
   assert(!JSON.stringify(studyOnly).includes('2/3'), 'missing Study T3 must not show category completion');
   console.log('✓ summarizes visible milestone feedback without changing existing summaries');

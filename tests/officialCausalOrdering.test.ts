@@ -25,12 +25,12 @@ function officialResignIsEligible(eventHistory: string[]): boolean {
 }
 
 assert.equal(
-  officialResignIsEligible(['route_official']),
+  officialResignIsEligible([]),
   false,
   'official_resign must remain unavailable before official_first_post',
 );
 assert.equal(
-  officialResignIsEligible(['route_official', 'official_first_post']),
+  officialResignIsEligible(['official_first_post']),
   true,
   'official_resign must become eligible after official_first_post',
 );

@@ -385,19 +385,68 @@ console.log('=== Main Screen Model Tests ===\n');
 {
   const model = buildMainScreenModel(createPlayer(), createLifeMemory({
     achievedMilestones: [
-      { id: 'milestone-1', visibility: 'player', label: '初涉书卷', description: '开始读书', category: 'study', evidenceLabels: ['主动读书 1 次'], sortKey: 80, diagnostic: { milestoneId: 'study-first-step', conditionTypes: ['action_count'] } },
-      { id: 'milestone-2', visibility: 'player', label: '读书成习', description: '读书成习', category: 'study', evidenceLabels: ['读书实践 2 级'], sortKey: 90, diagnostic: { milestoneId: 'study-habit-formed', conditionTypes: ['habit_at_least'] } },
-      { id: 'milestone-3', visibility: 'player', label: '文武并进', description: '文武并进', category: 'mixed', evidenceLabels: ['读书实践 2 级'], sortKey: 110, diagnostic: { milestoneId: 'study-training-balanced', conditionTypes: ['habit_at_least'] } },
+      {
+        id: 'milestone-1', visibility: 'player', label: '初涉书卷', description: '开始读书',
+        category: 'study', kind: 'progress_stage', tier: 1, evidenceLabels: ['主动读书 1 次'],
+        sortKey: 80, diagnostic: { milestoneId: 'study-first-step', conditionTypes: ['action_count'] },
+      },
+      {
+        id: 'milestone-2', visibility: 'player', label: '读书成习', description: '读书成习',
+        category: 'study', kind: 'progress_stage', tier: 2, evidenceLabels: ['读书实践 2 级'],
+        sortKey: 90, diagnostic: { milestoneId: 'study-habit-formed', conditionTypes: ['habit_at_least'] },
+      },
+      {
+        id: 'milestone-3', visibility: 'player', label: '文武并进', description: '文武并进',
+        category: 'mixed', kind: 'synthesis', evidenceLabels: ['读书实践 2 级'],
+        sortKey: 110, diagnostic: { milestoneId: 'study-training-balanced', conditionTypes: ['habit_at_least'] },
+      },
+      {
+        id: 'milestone-4', visibility: 'player', label: '旧卷回声', description: '往事',
+        category: 'study', kind: 'payoff_echo', evidenceLabels: ['经历旧卷回声'],
+        sortKey: 70, diagnostic: { milestoneId: 'study-old-scroll-echo', conditionTypes: ['event_occurred'] },
+      },
     ],
     milestoneProspects: [
-      { id: 'prospect-1', visibility: 'player', label: '少年勤学', description: '少年读书', category: 'study', progressRatio: 2 / 3, progressLabels: ['20 岁前主动读书 3 次 2/3'], sortKey: 100, diagnostic: { milestoneId: 'study-young-diligent', conditionTypes: ['action_count'] } },
-      { id: 'prospect-2', visibility: 'player', label: '练功成习', description: '练功', category: 'training', progressRatio: 1 / 2, progressLabels: ['练功实践 2 级 1/2'], sortKey: 90, diagnostic: { milestoneId: 'training-habit-formed', conditionTypes: ['habit_at_least'] } },
+      {
+        id: 'prospect-1', visibility: 'player', label: '少年勤学', description: '少年读书',
+        category: 'study', kind: 'progress_stage', tier: 2, progressRatio: 2 / 3,
+        progressLabels: ['20 岁前主动读书 3 次 2/3'], sortKey: 100,
+        diagnostic: { milestoneId: 'study-young-diligent', conditionTypes: ['action_count'] },
+      },
+      {
+        id: 'prospect-2', visibility: 'player', label: '练功成习', description: '练功',
+        category: 'training', kind: 'progress_stage', tier: 2, progressRatio: 1 / 2,
+        progressLabels: ['练功实践 2 级 1/2'], sortKey: 90,
+        diagnostic: { milestoneId: 'training-habit-formed', conditionTypes: ['habit_at_least'] },
+      },
     ],
   }));
-  assert(model.milestoneSummary === '文武并进、读书成习', 'milestones should be priority-ranked and capped at two');
+  assert(model.milestoneSummary === '文武并进、★★ 读书成习', 'progress stars only on achieved progress_stage; non-progress stays plain');
   assert(model.milestoneProspectSummary === '少年勤学 · 20 岁前主动读书 3 次 2/3', 'only the top prospect should be rendered');
+  assert(!model.milestoneProspectSummary?.includes('★'), 'prospects must not show tier stars');
+  assert(!model.milestoneSummary?.includes('/3'), 'position must not expose category tier completion');
+  assert(!model.milestoneSummary?.includes('☆'), 'position must not render empty stars');
+  assert(!model.milestoneSummary?.includes('locked'), 'position must not expose locked tiers');
   const empty = buildMainScreenModel(createPlayer(), createLifeMemory());
   assert(empty.milestoneSummary === undefined && empty.milestoneProspectSummary === undefined, 'empty milestone data should not render summaries');
+
+  const studyOnly = buildMainScreenModel(createPlayer(), createLifeMemory({
+    achievedMilestones: [
+      {
+        id: 'milestone-study-t1', visibility: 'player', label: '初涉书卷', description: '开始',
+        category: 'study', kind: 'progress_stage', tier: 1, evidenceLabels: ['主动读书 1 次'],
+        sortKey: 80, diagnostic: { milestoneId: 'study-first-step', conditionTypes: ['action_count'] },
+      },
+      {
+        id: 'milestone-study-t2', visibility: 'player', label: '读书成习', description: '成习',
+        category: 'study', kind: 'progress_stage', tier: 2, evidenceLabels: ['读书实践 2 级'],
+        sortKey: 90, diagnostic: { milestoneId: 'study-habit-formed', conditionTypes: ['habit_at_least'] },
+      },
+    ],
+  }));
+  assert(studyOnly.milestoneSummary === '★★ 读书成习、★ 初涉书卷');
+  assert(!studyOnly.milestoneSummary?.includes('★★★'), 'missing Study T3 must not invent a third star');
+  assert(!JSON.stringify(studyOnly).includes('2/3'), 'missing Study T3 must not show category completion');
   console.log('✓ summarizes visible milestone feedback without changing existing summaries');
 }
 

@@ -60,6 +60,7 @@ import type { LifeMemoryRiskSeverity, LifeMemorySummary } from '../types/lifeMem
 import { getAffiliationDefinition } from '../core/affiliationCatalog';
 import { WEALTH_CAPACITY_LABELS } from '../types/wealthCapacity';
 import { ASSET_LABELS, ASSET_VALUES, type AssetId } from '../types/asset';
+import { formatAchievedMilestoneCompactLabel } from './milestonePresentation';
 
 export interface MainScreenStatItem {
   key: string;
@@ -199,7 +200,9 @@ function buildMilestoneSummary(summary: LifeMemorySummary): string | undefined {
     .filter((entry) => entry.visibility === 'player')
     .sort((left, right) => right.sortKey - left.sortKey || left.id.localeCompare(right.id))
     .slice(0, 2);
-  return milestones.length > 0 ? milestones.map((entry) => entry.label).join('、') : undefined;
+  return milestones.length > 0
+    ? milestones.map((entry) => formatAchievedMilestoneCompactLabel(entry)).join('、')
+    : undefined;
 }
 
 function buildMilestoneProspectSummary(summary: LifeMemorySummary): string | undefined {

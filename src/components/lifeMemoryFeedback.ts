@@ -5,6 +5,10 @@ import type {
 } from '../types/lifeMemory';
 import type { MilestoneKind, MilestoneTier } from '../types/milestone';
 import type { ProgressionOverlayCard } from '../types/progressionOverlay';
+import {
+  formatAchievedProgressLabel,
+  milestoneKindSurfaceLabel,
+} from './milestonePresentation';
 
 export type AchievementFeedbackItem = {
   id: string;
@@ -67,28 +71,44 @@ export function collectNewLifeMemoryFeedback(
   return [...newAchievements, ...newMilestones];
 }
 
-export function buildLifeMemoryFeedbackOverlayCard(
-  items: LifeMemoryFeedbackItem[],
-): ProgressionOverlayCard | null {
-  if (items.length === 0) return null;
-
-  const hasAchievement = items.some(item => item.kind === 'achievement');
-  const hasMilestone = items.some(item => item.kind === 'milestone');
-  const title = hasAchievement && hasMilestone
-    ? '新的成就与里程碑'
-    : hasAchievement
-      ? '新的成就'
-      : '新的里程碑';
-  const body = items
-    .map(item => item.description ? `${item.label}：${item.description}` : item.label)
-    .join('；');
-  const metaLines = items.flatMap(item => item.evidenceLabels.map(label => `依据：${label}`));
-
+function buildAchievementOverlayCard(items: AchievementFeedbackItem[]): ProgressionOverlayCard {
   return {
     id: `life-memory-${items.map(item => item.id).join('-')}`,
     sourceLabel: '新的成长',
-    title,
-    body,
-    metaLines,
+    title: '新的成就',
+    body: items.map(item => item.label).join('；'),
   };
+}
+
+function buildMilestoneOverlayCard(item: MilestoneFeedbackItem): ProgressionOverlayCard {
+  const evidenceMeta = item.evidenceLabels.map(label => `依据：${label}`);
+  const sourceLabel = milestoneKindSurfaceLabel(item.milestoneKind, item.milestoneTier);
+  const title = item.milestoneKind === 'progress_stage' && item.milestoneTier !== undefined
+    ? formatAchievedProgressLabel(item.label, item.milestoneTier)
+    : item.label;
+
+  return {
+    id: `life-memory-${item.id}`,
+    sourceLabel,
+    title,
+    body: item.description,
+    metaLines: evidenceMeta,
+  };
+}
+
+/** One semantic card per acquired Milestone; Achievements stay a single non-modal card. */
+export function buildLifeMemoryFeedbackOverlayCards(
+  items: LifeMemoryFeedbackItem[],
+): ProgressionOverlayCard[] {
+  const achievements = items.filter((item): item is AchievementFeedbackItem => item.kind === 'achievement');
+  const milestones = items.filter((item): item is MilestoneFeedbackItem => item.kind === 'milestone');
+  const cards: ProgressionOverlayCard[] = [];
+
+  if (achievements.length > 0) {
+    cards.push(buildAchievementOverlayCard(achievements));
+  }
+  for (const milestone of milestones) {
+    cards.push(buildMilestoneOverlayCard(milestone));
+  }
+  return cards;
 }

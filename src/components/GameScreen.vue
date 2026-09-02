@@ -165,7 +165,7 @@ import MainScreenLifeSummary from './MainScreenLifeSummary.vue';
 import MainScreenStatsPanel from './MainScreenStatsPanel.vue';
 import { buildMainScreenModel, type MainScreenPlayer } from './mainScreenModel';
 import {
-  buildLifeMemoryFeedbackOverlayCard,
+  buildLifeMemoryFeedbackOverlayCards,
   collectNewLifeMemoryFeedback,
   type LifeMemoryFeedbackItem,
 } from './lifeMemoryFeedback';
@@ -313,21 +313,21 @@ const lifeMemorySummary = computed(() => {
 });
 
 const lifeMemoryFeedbackItems = ref<LifeMemoryFeedbackItem[]>([]);
-const lifeMemoryFeedbackCard = ref<ProgressionOverlayCard | null>(null);
+const lifeMemoryFeedbackCards = ref<ProgressionOverlayCard[]>([]);
 const seenLifeMemoryFeedbackIds = new Set<string>();
 let hasLifeMemoryBaseline = false;
 let suppressNextLifeMemoryFeedback = false;
 
 const progressionEchoCards = computed(() => [
   ...(props.progressionOverlay?.cards ?? []),
-  ...(lifeMemoryFeedbackCard.value ? [lifeMemoryFeedbackCard.value] : []),
+  ...lifeMemoryFeedbackCards.value,
 ]);
 
 watch(
   () => props.progressionOverlay,
   () => {
     lifeMemoryFeedbackItems.value = [];
-    lifeMemoryFeedbackCard.value = null;
+    lifeMemoryFeedbackCards.value = [];
   },
   { flush: 'sync' },
 );
@@ -339,7 +339,7 @@ watch(
       if (suppressNextLifeMemoryFeedback) {
         seenLifeMemoryFeedbackIds.clear();
         lifeMemoryFeedbackItems.value = [];
-        lifeMemoryFeedbackCard.value = null;
+        lifeMemoryFeedbackCards.value = [];
       }
       for (const item of collectNewLifeMemoryFeedback(null, current)) {
         seenLifeMemoryFeedbackIds.add(item.id);
@@ -357,7 +357,7 @@ watch(
       seenLifeMemoryFeedbackIds.add(item.id);
     }
     lifeMemoryFeedbackItems.value = [...lifeMemoryFeedbackItems.value, ...freshItems];
-    lifeMemoryFeedbackCard.value = buildLifeMemoryFeedbackOverlayCard(
+    lifeMemoryFeedbackCards.value = buildLifeMemoryFeedbackOverlayCards(
       lifeMemoryFeedbackItems.value,
     );
   },

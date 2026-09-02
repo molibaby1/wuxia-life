@@ -127,6 +127,30 @@
         </ul>
       </div>
 
+      <!-- 人生印记：已取得的派生里程碑 -->
+      <div v-if="visibleMilestones.length > 0" class="memory-section">
+        <p class="memory-section-title">人生印记</p>
+        <ul class="memory-list">
+          <li
+            v-for="milestone in visibleMilestones"
+            :key="milestone.id"
+            class="memory-item memory-item-stacked"
+          >
+            <div class="memory-item-row">
+              <span v-if="milestone.occurredAtAge" class="memory-age">{{ milestone.occurredAtAge }}岁</span>
+              <span class="memory-label">{{ formatMilestoneTitle(milestone) }}</span>
+            </div>
+            <p v-if="milestone.description" class="memory-consequence">{{ milestone.description }}</p>
+            <p
+              v-if="milestone.evidenceLabels.length > 0"
+              class="memory-consequence"
+            >
+              依据：{{ milestone.evidenceLabels.join(' / ') }}
+            </p>
+          </li>
+        </ul>
+      </div>
+
       <!-- diagnostic：仅 debug 模式 -->
       <div v-if="showDiagnostic" class="memory-diagnostic">
         <p class="memory-section-title">诊断信息</p>
@@ -140,12 +164,14 @@
 import { computed, ref } from 'vue';
 import type {
   LifeMemoryDebtUrgency,
+  LifeMemoryMilestoneEntry,
   LifeMemoryPayoffStatus,
   LifeMemoryRiskSeverity,
   LifeMemorySummary,
   LifeMemoryVisibility,
 } from '../types/lifeMemory';
 import { isPlayerDebugEnabled } from '../utils/debugAccess';
+import { formatAchievedMilestoneHistoryTitle } from './milestonePresentation';
 
 const props = defineProps<{
   summary: LifeMemorySummary;
@@ -164,6 +190,11 @@ const visibleDebts = computed(() => filterPlayer(props.summary.unresolvedDebts))
 const visibleKeyChoices = computed(() => filterPlayer(props.summary.keyChoices));
 const visibleRelationships = computed(() => filterPlayer(props.summary.relationships));
 const visibleAchievements = computed(() => filterPlayer(props.summary.achievements));
+const visibleMilestones = computed(() => filterPlayer(props.summary.achievedMilestones));
+
+function formatMilestoneTitle(entry: LifeMemoryMilestoneEntry): string {
+  return formatAchievedMilestoneHistoryTitle(entry);
+}
 
 const diagnosticJson = computed(() => {
   if (!showDiagnostic) {
@@ -176,6 +207,7 @@ const diagnosticJson = computed(() => {
       unresolvedDebts: visibleDebts.value.map((entry) => entry.diagnostic),
       risks: visibleRisks.value.map((entry) => entry.diagnostic),
       achievements: visibleAchievements.value.map((entry) => entry.diagnostic),
+      achievedMilestones: visibleMilestones.value.map((entry) => entry.diagnostic),
     },
     null,
     2,

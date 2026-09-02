@@ -70,7 +70,7 @@ assert(
 );
 assert(!source.includes('v-if="periodSummaryDisplay"'), 'period summary must not become a second player-operated screen');
 assert(source.includes('collectNewLifeMemoryFeedback'), 'GameScreen must diff Life Memory feedback');
-assert(source.includes('buildLifeMemoryFeedbackOverlayCard'), 'Life Memory unlocks must join the progression echo');
+assert(source.includes('buildLifeMemoryFeedbackOverlayCards'), 'Life Memory unlocks must join the progression echo');
 assert(!source.includes('life-memory-feedback-backdrop'), 'Life Memory unlocks must not block the next stage with a modal');
 assert(!source.includes('aria-modal="true"'), 'Life Memory unlocks must not be modal');
 assert(!source.includes('知道了'), 'Life Memory unlocks must not require confirmation');

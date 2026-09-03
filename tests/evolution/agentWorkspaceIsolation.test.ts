@@ -8,6 +8,31 @@ import {
   captureAuthoritativeFingerprint,
   prepareAgentWorkspace,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
+import { isEvolutionWorkspacePathExcluded } from '../../scripts/evolution/workspaceAuthoritySurface';
+
+const AUTHORITY_SURFACE_CASES: Array<{ path: string; excluded: boolean }> = [
+  { path: '.agent-workspace-manifest.json', excluded: true },
+  { path: 'project.zip', excluded: true },
+  { path: 'handoff.ZIP', excluded: true },
+  { path: '.git/config', excluded: true },
+  { path: '.omx/logs/omx-2026-09-03.jsonl', excluded: true },
+  { path: '.superpowers/plans/noise.md', excluded: true },
+  { path: 'artifacts/evolution/index.md', excluded: true },
+  { path: 'agent_docs/noise.md', excluded: true },
+  { path: '.tmp/evolution/noise.txt', excluded: true },
+  { path: 'node_modules/pkg/index.js', excluded: true },
+  { path: 'dist/bundle.js', excluded: true },
+  { path: '.env', excluded: true },
+  { path: '.env.local', excluded: true },
+  { path: 'public/reports/generated-report.json', excluded: true },
+  { path: 'public/reports/generated-report.html', excluded: true },
+  { path: 'src/core/runtime.ts', excluded: false },
+  { path: 'src/data/lines/family-life.json', excluded: false },
+  { path: 'docs/authority.md', excluded: false },
+  { path: 'package.json', excluded: false },
+  { path: 'public/reports/manifest.json', excluded: false },
+  { path: 'public/real-static-asset.ext', excluded: false },
+];
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -51,6 +76,14 @@ async function fixture(): Promise<string> {
 }
 
 export async function runAgentWorkspaceIsolationTests(): Promise<void> {
+  for (const sample of AUTHORITY_SURFACE_CASES) {
+    assert.equal(
+      isEvolutionWorkspacePathExcluded(sample.path),
+      sample.excluded,
+      `authority surface mismatch for ${sample.path}`,
+    );
+  }
+
   const root = await fixture();
   const destinationRoot = join(root, '.tmp/evolution/problem-agnostic-agent-solution-loop');
   const initialFingerprint = await captureAuthoritativeFingerprint(root);

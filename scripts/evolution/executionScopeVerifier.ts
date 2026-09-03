@@ -3,6 +3,7 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type { SolutionOptionV1 } from '../../src/evolution/solutionWorkContract';
 import { parseRepoReference } from './problemAgnosticSolution/repoReference';
 import { sha256Hex } from './phase0/provenance';
+import { isEvolutionWorkspacePathExcluded } from './workspaceAuthoritySurface';
 
 export interface WorkspaceSnapshotEntry {
   path: string;
@@ -41,6 +42,7 @@ async function collectSnapshotEntries(root: string, current = ''): Promise<Works
   const result: WorkspaceSnapshotEntry[] = [];
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const relativePath = normalized(current ? join(current, entry.name) : entry.name);
+    if (entry.name === '.DS_Store' || isEvolutionWorkspacePathExcluded(relativePath)) continue;
     const absolutePath = safePath(root, relativePath);
     if (entry.isDirectory()) {
       result.push(...await collectSnapshotEntries(root, relativePath));

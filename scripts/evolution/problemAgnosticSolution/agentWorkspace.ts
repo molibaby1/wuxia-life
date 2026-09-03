@@ -12,8 +12,7 @@ import {
 } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
-
-const EXPERIMENT_ROOT = '.tmp/evolution/problem-agnostic-agent-solution-loop';
+import { isEvolutionWorkspacePathExcluded } from '../workspaceAuthoritySurface';
 
 export interface PrepareAgentWorkspaceInput {
   authoritativeRoot: string;
@@ -48,31 +47,6 @@ function normalized(relativePath: string): string {
   return relativePath.split(sep).join('/');
 }
 
-function isExcluded(relativePath: string): boolean {
-  const path = normalized(relativePath);
-  if (!path) return false;
-  if (path === '.agent-workspace-manifest.json') return true;
-  if (path.toLowerCase().endsWith('.zip')) return true;
-  if (path === EXPERIMENT_ROOT || path.startsWith(`${EXPERIMENT_ROOT}/`)) return true;
-  if (
-    path.startsWith('public/reports/')
-    && path !== 'public/reports/manifest.json'
-    && (path.endsWith('.html') || path.endsWith('.json'))
-  ) return true;
-  if (path === '.tmp/evolution' || path.startsWith('.tmp/evolution/')) return true;
-  return path.split('/').some(part =>
-    part === '.git'
-    || part === '.omx'
-    || part === '.superpowers'
-    || part === 'artifacts'
-    || part === 'agent_docs'
-    || part === '.tmp'
-    || part === 'node_modules'
-    || part === 'dist'
-    || part === '.env'
-    || part.startsWith('.env.'));
-}
-
 function safePath(root: string, relativePath: string): string {
   const resolvedRoot = resolve(root);
   if (relativePath === '.' || relativePath === '') return resolvedRoot;
@@ -90,7 +64,7 @@ async function collectEntries(root: string, current = ''): Promise<ManifestEntry
   const result: ManifestEntry[] = [];
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const relativePath = normalized(current ? join(current, entry.name) : entry.name);
-    if (entry.name === '.DS_Store' || isExcluded(relativePath)) continue;
+    if (entry.name === '.DS_Store' || isEvolutionWorkspacePathExcluded(relativePath)) continue;
     const absolutePath = safePath(root, relativePath);
     if (entry.isDirectory()) {
       result.push(...await collectEntries(root, relativePath));
@@ -132,7 +106,7 @@ async function copyTree(sourceRoot: string, destinationRoot: string, current = '
   const entries = await readdir(sourceDirectory, { withFileTypes: true });
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const relativePath = normalized(current ? join(current, entry.name) : entry.name);
-    if (entry.name === '.DS_Store' || isExcluded(relativePath)) continue;
+    if (entry.name === '.DS_Store' || isEvolutionWorkspacePathExcluded(relativePath)) continue;
     const source = safePath(sourceRoot, relativePath);
     const destination = safePath(destinationRoot, relativePath);
     if (entry.isDirectory()) {

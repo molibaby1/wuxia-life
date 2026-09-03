@@ -447,11 +447,50 @@ export async function runScopeValidationTests(): Promise<void> {
 
   await writeFile(join(workspaceRoot, 'src/core/runtime.ts'), 'export const runtime = false;\n');
   const unauthorizedAfter = await snapshotWorkspace(workspaceRoot);
-  assert.equal(verifyActualChangedFiles(before, unauthorizedAfter, [CONFIG_PATH]).status, 'scope_violation');
+  const unauthorizedRuntime = verifyActualChangedFiles(before, unauthorizedAfter, [CONFIG_PATH]);
+  assert.equal(unauthorizedRuntime.status, 'scope_violation');
+  assert.ok(unauthorizedRuntime.unauthorizedFiles.includes('src/core/runtime.ts'));
 
   await writeFile(join(workspaceRoot, 'src/unauthorized.ts'), 'export const unauthorized = true;\n');
   const unauthorizedAddition = await snapshotWorkspace(workspaceRoot);
-  assert.equal(verifyActualChangedFiles(before, unauthorizedAddition, [CONFIG_PATH]).status, 'scope_violation');
+  const unauthorizedAdd = verifyActualChangedFiles(before, unauthorizedAddition, [CONFIG_PATH]);
+  assert.equal(unauthorizedAdd.status, 'scope_violation');
+  assert.ok(unauthorizedAdd.unauthorizedFiles.includes('src/unauthorized.ts'));
+
+  // Primary regression from real operator smoke:
+  // allowed config change + operational host metadata must not be a scope violation.
+  const operationalRoot = await createWorkspace();
+  const operationalBefore = await snapshotWorkspace(operationalRoot);
+  await writeFile(join(operationalRoot, CONFIG_PATH), '{"choices":[{"id":"allowed-with-noise"}]}\n');
+  await mkdir(join(operationalRoot, '.omx/logs'), { recursive: true });
+  await writeFile(join(operationalRoot, '.omx/logs/omx-2026-09-03.jsonl'), 'host metadata\n');
+  await mkdir(join(operationalRoot, '.tmp/evolution/noise'), { recursive: true });
+  await writeFile(join(operationalRoot, '.tmp/evolution/noise/side-effect.txt'), 'tmp noise\n');
+  await mkdir(join(operationalRoot, 'artifacts/evolution'), { recursive: true });
+  await writeFile(join(operationalRoot, 'artifacts/evolution/index.md'), '# noise\n');
+  await mkdir(join(operationalRoot, '.superpowers/plans'), { recursive: true });
+  await writeFile(join(operationalRoot, '.superpowers/plans/noise.md'), 'noise\n');
+  await mkdir(join(operationalRoot, 'agent_docs'), { recursive: true });
+  await writeFile(join(operationalRoot, 'agent_docs/noise.md'), 'noise\n');
+  const operationalAfter = await snapshotWorkspace(operationalRoot);
+  assert.deepEqual(
+    verifyActualChangedFiles(operationalBefore, operationalAfter, [CONFIG_PATH]),
+    { status: 'passed', actualChangedFiles: [CONFIG_PATH], unauthorizedFiles: [] },
+  );
+
+  // public/reports/manifest.json remains authoritative unless explicitly allowed.
+  const manifestRoot = await createWorkspace();
+  await mkdir(join(manifestRoot, 'public/reports'), { recursive: true });
+  await writeFile(join(manifestRoot, 'public/reports/manifest.json'), '{"reports":[]}\n');
+  await writeFile(join(manifestRoot, 'public/reports/generated-report.json'), '{"generated":true}\n');
+  const manifestBefore = await snapshotWorkspace(manifestRoot);
+  await writeFile(join(manifestRoot, 'public/reports/manifest.json'), '{"reports":["changed"]}\n');
+  await writeFile(join(manifestRoot, 'public/reports/generated-report.json'), '{"generated":false}\n');
+  const manifestAfter = await snapshotWorkspace(manifestRoot);
+  const manifestResult = verifyActualChangedFiles(manifestBefore, manifestAfter, [CONFIG_PATH]);
+  assert.equal(manifestResult.status, 'scope_violation');
+  assert.deepEqual(manifestResult.actualChangedFiles, ['public/reports/manifest.json']);
+  assert.deepEqual(manifestResult.unauthorizedFiles, ['public/reports/manifest.json']);
 
   await assert.rejects(
     () => deriveAllowedWritePaths({

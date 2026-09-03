@@ -105,6 +105,7 @@ async function main(): Promise<void> {
   const roundInputs: Array<{ round: 1 | 2; fixedSourceRoot: string }> = [];
   const calls: string[] = [];
   let evolutionWorkspaceRoot = '';
+  let mutatedCatalogEventId = '';
   const dependencies: MultiRoundExecutionValidationDependencies = {
     materializeEvolutionWorkspace: async input => {
       const prepared = await prepareAgentWorkspace({
@@ -135,6 +136,9 @@ async function main(): Promise<void> {
       const events = JSON.parse(await readFile(configFile, 'utf8')) as Array<Record<string, unknown>>;
       const firstEvent = events[0];
       assert.ok(firstEvent);
+      assert.equal(typeof firstEvent.id, 'string');
+      assert.ok(String(firstEvent.id).length > 0);
+      mutatedCatalogEventId = String(firstEvent.id);
       firstEvent.description = `${String(firstEvent.description)} [p2 deterministic rerun]`;
       await writeFile(configFile, `${JSON.stringify(events, null, 2)}\n`);
       return { schemaVersion: 'configuration-execution-result-v1', status: 'completed', changedFiles: [CONFIG_PATH], verificationResults: [], deviations: [] };
@@ -179,7 +183,11 @@ async function main(): Promise<void> {
   assert.equal(rerunPersona.id, PERSONA_ID);
 
   const rerunCatalog = JSON.parse(await readFile(join(rerunOutDir, 'inputs/catalog.json'), 'utf8')) as { events: Array<{ id: string; description?: string }> };
-  assert.match(rerunCatalog.events.find(event => event.id === 'family_marriage')?.description ?? '', /p2 deterministic rerun/);
+  // Prove the scenario-mutated config event (not a hardcoded Family product id) reached the sealed rerun catalog.
+  assert.ok(mutatedCatalogEventId);
+  const mutatedCatalogEvent = rerunCatalog.events.find(event => event.id === mutatedCatalogEventId);
+  assert.ok(mutatedCatalogEvent, `sealed rerun catalog missing mutated event ${mutatedCatalogEventId}`);
+  assert.match(mutatedCatalogEvent.description ?? '', /p2 deterministic rerun/);
   const sourceFingerprint = JSON.parse(await readFile(join(rerunOutDir, 'provenance/source-fingerprint.json'), 'utf8')) as { headSha: string; branch: string; worktreeEntries: Array<{ path: string; objectKind?: string; sha256?: string }> };
   assert.equal(sourceFingerprint.headSha, 'isolated-evolution-workspace');
   assert.equal(sourceFingerprint.branch, 'isolated-evolution-workspace');

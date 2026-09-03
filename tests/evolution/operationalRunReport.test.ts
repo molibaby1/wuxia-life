@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { archiveOperationalRunReport } from '../../scripts/evolution/reporting/archiveOperationalRunReport';
 import { buildOperationalObservabilityIndex } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
-import { buildOperationalRunReport } from '../../scripts/evolution/reporting/buildOperationalRunReport';
+import {
+  buildOperationalRunReport,
+  renderOperationalRunReportMarkdownFromReport,
+} from '../../scripts/evolution/reporting/buildOperationalRunReport';
 
 async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
@@ -201,6 +204,7 @@ export async function runOperationalRunReportTests(): Promise<void> {
   await testArchiveStableIdentity();
   await testArchiveChangedSummaryNewIdentity();
   await testArchiveJsonMarkdownParity();
+  await testDynamicReportTextPreservation();
   await testArchiveMultipleWorkflows();
   await testObservabilityIndexRebuild();
   await testInvalidReportSidecarFailsClosed();
@@ -225,16 +229,16 @@ async function testReadyForConfigExecution(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 1);
-  assert.match(report, /Observed workflow runs: 1/);
+  assert.match(report, /工作流数量：1/);
   assert.match(report, /problem-agnostic-agent-solution-loop-instance-012/);
-  assert.match(report, /Source run ref: source-run-000001/);
-  assert.match(report, /Problem statement: The late-game workflow repeats too much content\./);
-  assert.match(report, /Solution status \/ result kind: OPTIONS/);
-  assert.match(report, /Reviewer decision: ACCEPT_OPTION/);
-  assert.match(report, /Terminal route \/ workflow outcome: READY_FOR_CONFIG_EXECUTION/);
-  assert.match(report, /Reason: ACCEPTED_CONFIGURATION_SCOPE/);
-  assert.match(report, /Accepted configuration work is ready for separately authorized execution\./);
-  assert.match(report, /Authoritative modification in this workflow: NO/);
+  assert.match(report, /Source Run：source-run-000001/);
+  assert.match(report, /问题描述：The late-game workflow repeats too much content\./);
+  assert.match(report, /解决方案状态 \/ 结果类型：OPTIONS/);
+  assert.match(report, /审核决策：ACCEPT_OPTION/);
+  assert.match(report, /终止路由 \/ 工作流结果：READY_FOR_CONFIG_EXECUTION/);
+  assert.match(report, /原因：ACCEPTED_CONFIGURATION_SCOPE/);
+  assert.match(report, /已接受的配置工作可等待单独授权后执行。/);
+  assert.match(report, /本工作流产生权威变更：NO/);
   assert.doesNotMatch(report, /configuration has been modified|问题已解决|raw-output\.txt|human-review-package\.md/);
 }
 
@@ -260,11 +264,11 @@ async function testParticipantFailure(): Promise<void> {
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /Status: PARTICIPANT_FAILURE/);
-  assert.match(report, /Terminal route \/ workflow outcome: DEFER/);
-  assert.match(report, /Failed stage: SOLUTION/);
-  assert.match(report, /Participant error kind: invalid_output/);
-  assert.match(report, /Authoritative modification in this workflow: NO/);
+  assert.match(report, /状态：PARTICIPANT_FAILURE/);
+  assert.match(report, /终止路由 \/ 工作流结果：DEFER/);
+  assert.match(report, /失败阶段：SOLUTION/);
+  assert.match(report, /Participant 错误类型：invalid_output/);
+  assert.match(report, /本工作流产生权威变更：NO/);
 }
 
 async function testEarlyFeedbackParticipantFailure(): Promise<void> {
@@ -280,12 +284,12 @@ async function testEarlyFeedbackParticipantFailure(): Promise<void> {
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /Status: PARTICIPANT_FAILURE/);
-  assert.match(report, /Source run ref: early-feedback-run-000001/);
-  assert.match(report, /Terminal route \/ workflow outcome: DEFER/);
-  assert.match(report, /Failed stage: EXTERNAL_FEEDBACK/);
-  assert.match(report, /Participant error kind: timeout/);
-  assert.match(report, /Authoritative modification in this workflow: NO/);
+  assert.match(report, /状态：PARTICIPANT_FAILURE/);
+  assert.match(report, /Source Run：early-feedback-run-000001/);
+  assert.match(report, /终止路由 \/ 工作流结果：DEFER/);
+  assert.match(report, /失败阶段：EXTERNAL_FEEDBACK/);
+  assert.match(report, /Participant 错误类型：timeout/);
+  assert.match(report, /本工作流产生权威变更：NO/);
 }
 
 async function testEarlyHypothesisParticipantFailure(): Promise<void> {
@@ -301,12 +305,12 @@ async function testEarlyHypothesisParticipantFailure(): Promise<void> {
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /Status: PARTICIPANT_FAILURE/);
-  assert.match(report, /Source run ref: early-hypothesis-run-000001/);
-  assert.match(report, /Terminal route \/ workflow outcome: DEFER/);
-  assert.match(report, /Failed stage: IMPROVEMENT_HYPOTHESIS/);
-  assert.match(report, /Participant error kind: timeout/);
-  assert.match(report, /Authoritative modification in this workflow: NO/);
+  assert.match(report, /状态：PARTICIPANT_FAILURE/);
+  assert.match(report, /Source Run：early-hypothesis-run-000001/);
+  assert.match(report, /终止路由 \/ 工作流结果：DEFER/);
+  assert.match(report, /失败阶段：IMPROVEMENT_HYPOTHESIS/);
+  assert.match(report, /Participant 错误类型：timeout/);
+  assert.match(report, /本工作流产生权威变更：NO/);
 }
 
 async function testMalformedOrMissingFailureInvocation(): Promise<void> {
@@ -341,8 +345,8 @@ async function testMalformedOrMissingFailureInvocation(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 2);
-  assert.doesNotMatch(report, /Source run ref:/);
-  assert.match(report, /Authoritative modification in this workflow: NO/g);
+  assert.doesNotMatch(report, /Source Run：/);
+  assert.match(report, /本工作流产生权威变更：NO/g);
 }
 
 async function testUnsafeFailureArtifactReference(): Promise<void> {
@@ -379,9 +383,9 @@ async function testUnsafeFailureArtifactReference(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 2);
-  assert.doesNotMatch(report, /Source run ref:/);
+  assert.doesNotMatch(report, /Source Run：/);
   assert.doesNotMatch(report, /unsafe-source-run-000001/);
-  assert.match(report, /Authoritative modification in this workflow: NO/g);
+  assert.match(report, /本工作流产生权威变更：NO/g);
 }
 
 async function testNestedRoundOne(): Promise<void> {
@@ -396,8 +400,8 @@ async function testNestedRoundOne(): Promise<void> {
 
   assert.equal(result.workflowCount, 1);
   assert.match(report, /## 1\. p2-run\/round-1/);
-  assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
+  assert.match(report, /状态：INCOMPLETE/);
+  assert.match(report, /终止路由 \/ 工作流结果：未记录/);
 }
 
 async function testProblemPackageOnlyIsNotWorkflow(): Promise<void> {
@@ -410,7 +414,7 @@ async function testProblemPackageOnlyIsNotWorkflow(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 0);
-  assert.match(report, /Observed workflow runs: 0/);
+  assert.match(report, /工作流数量：0/);
   assert.doesNotMatch(report, /first-skill-behavioral-validation-package-000001/);
 }
 
@@ -456,9 +460,9 @@ async function testIncompleteNestedWorkflow(): Promise<void> {
 
   assert.equal(result.workflowCount, 1);
   assert.match(report, /## 1\. p2-run\/round-1/);
-  assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
-  assert.match(report, /Problem statement: The late-game workflow repeats too much content\./);
+  assert.match(report, /状态：INCOMPLETE/);
+  assert.match(report, /终止路由 \/ 工作流结果：未记录/);
+  assert.match(report, /问题描述：The late-game workflow repeats too much content\./);
   assert.doesNotMatch(report, /ENGINEERING_DEFECT|PARTICIPANT_FAILURE|SYSTEM_FAILURE/);
 }
 
@@ -475,7 +479,7 @@ async function testFalsePositiveDirectories(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 0);
-  assert.match(report, /Observed workflow runs: 0/);
+  assert.match(report, /工作流数量：0/);
 }
 
 async function testIncompleteHistoricalAttempt(): Promise<void> {
@@ -489,9 +493,9 @@ async function testIncompleteHistoricalAttempt(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 1);
-  assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
-  assert.match(report, /Last available artifact: source\/observable-payload\.json/);
+  assert.match(report, /状态：INCOMPLETE/);
+  assert.match(report, /终止路由 \/ 工作流结果：未记录/);
+  assert.match(report, /最后可用 Artifact：source\/observable-payload\.json/);
   assert.doesNotMatch(report, /PARTICIPANT_FAILURE|SYSTEM_FAILURE|Agent crashed|Human aborted/);
 }
 
@@ -537,10 +541,10 @@ async function testRecoveredStructuredTerminalDelivery(): Promise<void> {
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /Structured terminal delivery/);
-  assert.match(report, /First attempt: ENVELOPE_FAILURE/);
-  assert.match(report, /Bounded retransmission: SUCCEEDED/);
-  assert.match(report, /Final structured output: VALID/);
+  assert.match(report, /结构化终止交付/);
+  assert.match(report, /首次尝试：ENVELOPE_FAILURE/);
+  assert.match(report, /有界重传：SUCCEEDED/);
+  assert.match(report, /最终结构化输出：VALID/);
   assert.match(report, /solution-agent\/execution-trace\.json/);
   assert.doesNotMatch(report, /terminal-attempt-/);
 }
@@ -563,9 +567,9 @@ async function testFailClosedStructuredTerminalDelivery(): Promise<void> {
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /First attempt: ENVELOPE_FAILURE/);
-  assert.match(report, /Bounded retransmission: SCHEMA_FAILURE/);
-  assert.match(report, /Final structured output: FAILED/);
+  assert.match(report, /首次尝试：ENVELOPE_FAILURE/);
+  assert.match(report, /有界重传：SCHEMA_FAILURE/);
+  assert.match(report, /最终结构化输出：FAILED/);
 }
 
 function acceptanceRejectedAfterRetransmissionTrace(): Record<string, unknown> {
@@ -619,8 +623,8 @@ async function testRetransmissionSucceededDespiteAcceptanceRejection(): Promise<
   const outputPath = join(scanRoot, 'report.md');
   const report = await readFile((await buildOperationalRunReport({ root: scanRoot, outputPath })).reportPath, 'utf8');
 
-  assert.match(report, /Bounded retransmission: SUCCEEDED/);
-  assert.match(report, /Final structured output: FAILED/);
+  assert.match(report, /有界重传：SUCCEEDED/);
+  assert.match(report, /最终结构化输出：FAILED/);
 }
 
 async function testStructuredTerminalDeliveryAggregates(): Promise<void> {
@@ -647,11 +651,11 @@ async function testStructuredTerminalDeliveryAggregates(): Promise<void> {
   const report = await readFile(result.reportPath, 'utf8');
 
   assert.equal(result.workflowCount, 3);
-  assert.match(report, /First-pass structured-output successes: 1/);
-  assert.match(report, /First-pass envelope failures: 2/);
-  assert.match(report, /Retransmissions attempted: 2/);
-  assert.match(report, /Retransmissions succeeded: 1/);
-  assert.match(report, /Final structured-output successes: 2/);
+  assert.match(report, /首次结构化输出成功：1/);
+  assert.match(report, /首次封装失败：2/);
+  assert.match(report, /已尝试重传：2/);
+  assert.match(report, /重传成功：1/);
+  assert.match(report, /最终结构化输出成功：2/);
 }
 
 async function createArchiveFixtureRepository(): Promise<{
@@ -694,13 +698,16 @@ async function testArchiveCreationAndIndexes(): Promise<void> {
   assert.equal(reportJson.schemaVersion, 'auto-evolution-operational-run-report-v1');
   assert.equal(reportJson.reportId, result.reportId);
   assert.equal(reportJson.sourceRoot, fixture.sessionRelative);
-  assert.match(reportMarkdown, new RegExp(`Report ID: ${result.reportId}`));
-  assert.match(reportMarkdown, /Observed workflow runs: 1/);
-  assert.match(reportMarkdown, /Artifact reference retention/);
-  assert.match(runReportsIndex, /total reports: 1/);
+  assert.match(reportMarkdown, new RegExp(`报告 ID：${result.reportId}`));
+  assert.match(reportMarkdown, /工作流数量：1/);
+  assert.match(reportMarkdown, /证据引用与保留/);
+  assert.match(runReportsIndex, /报告总数：1/);
+  assert.match(runReportsIndex, /\| 创建时间 \| 报告 \| 会话停止原因 \| 多轮结果 \| 执行状态 \| 工作流路由 \| Source Run \|/);
   assert.match(runReportsIndex, new RegExp(`${result.reportId}/report\\.md`));
-  assert.match(topIndex, /# Auto Evolution Operational Index/);
-  assert.match(topIndex, /total: 1/);
+  assert.match(topIndex, /# Auto Evolution 运行索引/);
+  assert.match(topIndex, /## 运行报告/);
+  assert.match(topIndex, /## Human Follow-up/);
+  assert.match(topIndex, /总数：1/);
   assert.match(topIndex, /run-reports\/index\.md/);
   assert.match(topIndex, /human-follow-up/);
 }
@@ -752,25 +759,56 @@ async function testArchiveJsonMarkdownParity(): Promise<void> {
     repositoryRoot: fixture.repositoryRoot,
     root: fixture.sessionRelative,
   });
-  const report = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as {
-    workflows: Array<{
-      problemStatement: string | null;
-      status: string;
-      reviewerDecision: string | null;
-      terminalRoute: string | null;
-      reason: string | null;
-      failedStage: string | null;
-      participantErrorKind: string | null;
-    }>;
-  };
+  const report = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as Parameters<typeof renderOperationalRunReportMarkdownFromReport>[0];
   const markdown = await readFile(result.reportMarkdownPath, 'utf8');
   const workflow = report.workflows[0];
   assert.ok(workflow);
-  assert.match(markdown, new RegExp(`Problem statement: ${workflow.problemStatement}`));
-  assert.match(markdown, new RegExp(`Status: ${workflow.status}`));
-  assert.match(markdown, new RegExp(`Reviewer decision: ${workflow.reviewerDecision}`));
-  assert.match(markdown, new RegExp(`Terminal route / workflow outcome: ${workflow.terminalRoute}`));
-  assert.match(markdown, new RegExp(`Reason: ${workflow.reason}`));
+  assert.match(markdown, new RegExp(`问题描述：${workflow.problemStatement}`));
+  assert.match(markdown, new RegExp(`状态：${workflow.status}`));
+  assert.match(markdown, new RegExp(`审核决策：${workflow.reviewerDecision}`));
+  assert.match(markdown, new RegExp(`终止路由 / 工作流结果：${workflow.terminalRoute}`));
+  assert.match(markdown, new RegExp(`原因：${workflow.reason}`));
+  assert.equal(renderOperationalRunReportMarkdownFromReport(report), markdown);
+}
+
+async function testDynamicReportTextPreservation(): Promise<void> {
+  const repositoryRoot = await createRoot();
+  const sessionRelative = '.tmp/evolution/dynamic-text-session';
+  const runRoot = join(repositoryRoot, sessionRelative, 'round-1');
+  await writeJson(join(runRoot, 'problem-package.json'), {
+    schemaVersion: 'problem-package-v1',
+    problemId: 'problem-hypothesis-dynamic-000001',
+    problem: { statement: '玩家问题原文：后期事件重复，但保留这段中文。' },
+    source: { runRef: 'dynamic-source-run-000001' },
+    permissions: {
+      authoritativeProductWrite: false,
+      codeExecution: false,
+      productExecution: false,
+      sandboxWrite: true,
+    },
+  });
+  await writeJson(join(runRoot, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(runRoot, 'workflow-outcome.json'), {
+    outcome: 'PARTICIPANT_FAILURE',
+    failedStage: 'SOLUTION',
+    route: 'DEFER',
+    participantErrorKind: 'English Participant payload: do not translate this text',
+  });
+
+  const result = await archiveOperationalRunReport({
+    repositoryRoot,
+    root: sessionRelative,
+  });
+  const reportJsonBefore = await readFile(result.reportJsonPath, 'utf8');
+  const report = JSON.parse(reportJsonBefore) as Parameters<typeof renderOperationalRunReportMarkdownFromReport>[0];
+  const markdown = await readFile(result.reportMarkdownPath, 'utf8');
+
+  assert.match(markdown, /问题描述：玩家问题原文：后期事件重复，但保留这段中文。/);
+  assert.match(markdown, /Participant 错误类型：English Participant payload: do not translate this text/);
+  assert.equal(report.reportId, result.reportId);
+  assert.equal(report.createdAt, result.createdAt);
+  assert.equal(renderOperationalRunReportMarkdownFromReport(report), markdown);
+  assert.equal(await readFile(result.reportJsonPath, 'utf8'), reportJsonBefore);
 }
 
 async function testArchiveMultipleWorkflows(): Promise<void> {
@@ -813,9 +851,9 @@ async function testObservabilityIndexRebuild(): Promise<void> {
   const rebuilt = await buildOperationalObservabilityIndex({ repositoryRoot: fixture.repositoryRoot });
   const runReportsIndex = await readFile(rebuilt.runReportsIndexPath, 'utf8');
   const topIndex = await readFile(rebuilt.topLevelIndexPath, 'utf8');
-  assert.match(runReportsIndex, /total reports: 1/);
+  assert.match(runReportsIndex, /报告总数：1/);
   assert.match(runReportsIndex, new RegExp(archived.reportId));
-  assert.match(topIndex, /total: 1/);
+  assert.match(topIndex, /总数：1/);
   assert.match(topIndex, new RegExp(archived.reportId));
 }
 

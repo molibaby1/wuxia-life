@@ -228,51 +228,51 @@ export function formatOrdinaryEvolutionOperatorSummary(
 ): string {
   const session = result.sessionExecution;
   const lines = [
-    'AE RUN',
+    'AE 运行',
     '',
-    'session:',
+    '会话：',
     result.sessionId,
     '',
-    'source:',
+    '源版本：',
     `${result.branch}@${result.headSha}`,
     '',
-    'participant:',
+    'Participant：',
     result.participantBinding,
     '',
-    'host stop reason:',
+    'Host 停止原因：',
     session.stopReason,
     '',
-    'multi-round outcome:',
+    '多轮执行结果：',
     session.outcome,
     '',
-    'last round route:',
-    session.lastRoundTerminalRoute ?? '(none)',
+    '最后一轮路由：',
+    session.lastRoundTerminalRoute ?? '（无）',
     '',
-    'execution status:',
+    '执行状态：',
     session.execution.status,
     '',
-    'cross-round:',
-    session.crossRoundTransitions > 0 ? 'yes' : 'no',
+    '跨轮：',
+    session.crossRoundTransitions > 0 ? '是' : '否',
     '',
-    'authoritative root integrity:',
-    result.authoritativeRootChanged ? 'CHANGED' : 'UNCHANGED',
+    '权威仓库根完整性：',
+    result.authoritativeRootChanged ? '已变更' : '未变更',
     '',
-    'report:',
-    result.runReportPath ?? '(unavailable)',
+    '报告：',
+    result.runReportPath ?? '（不可用）',
     '',
-    'human follow-up:',
+    'Human Follow-up：',
     result.humanFollowupActiveCount === null
-      ? '(unavailable)'
-      : `${result.humanFollowupActiveCount} active`,
+      ? '（不可用）'
+      : `${result.humanFollowupActiveCount} 项 active`,
     '',
-    'index:',
-    result.operationalIndexPath ?? '(unavailable)',
+    '索引：',
+    result.operationalIndexPath ?? '（不可用）',
     '',
-    'observability:',
+    '可观测性：',
     result.observabilityStatus,
   ];
   if (result.observabilityError) {
-    lines.push('', 'observability-error:', result.observabilityError);
+    lines.push('', '可观测性错误：', result.observabilityError);
   }
   return `${lines.join('\n')}\n`;
 }

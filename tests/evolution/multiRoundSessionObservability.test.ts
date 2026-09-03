@@ -208,12 +208,12 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
     includeArtifactRetentionNote: true,
     sessionExecution: smokeSummary,
   });
-  assert.match(markdown, /## Session Execution/);
-  assert.match(markdown, /Host stop reason: EXECUTION_SCOPE_VIOLATION/);
-  assert.match(markdown, /Last round route: READY_FOR_CONFIG_EXECUTION/);
-  assert.match(markdown, /## Workflow \/ Round Details/);
-  assert.match(markdown, /Round workflow accepted configuration scope; see Session Execution for what followed/);
-  assert.doesNotMatch(markdown, /Accepted configuration work is ready for separately authorized execution/);
+  assert.match(markdown, /## 会话执行/);
+  assert.match(markdown, /Host 停止原因：EXECUTION_SCOPE_VIOLATION/);
+  assert.match(markdown, /最后一轮路由：READY_FOR_CONFIG_EXECUTION/);
+  assert.match(markdown, /## 工作流 \/ 轮次详情/);
+  assert.match(markdown, /本轮工作流已接受配置范围；后续情况见“会话执行”。/);
+  assert.doesNotMatch(markdown, /已接受的配置工作可等待单独授权后执行/);
 
   // Operator/report session summary parity: same projection function.
   const operatorView = {
@@ -234,9 +234,9 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
     experimentRoot: '.tmp/evolution/ordinary-run-20260903-000001/problem-agnostic-agent-solution-loop-instance-000001',
   };
   const summaryText = formatOrdinaryEvolutionOperatorSummary(operatorView);
-  assert.match(summaryText, /host stop reason:\nEXECUTION_SCOPE_VIOLATION/);
-  assert.match(summaryText, /last round route:\nREADY_FOR_CONFIG_EXECUTION/);
-  assert.match(summaryText, /execution status:\nscope_violation/);
+  assert.match(summaryText, /Host 停止原因：\nEXECUTION_SCOPE_VIOLATION/);
+  assert.match(summaryText, /最后一轮路由：\nREADY_FOR_CONFIG_EXECUTION/);
+  assert.match(summaryText, /执行状态：\nscope_violation/);
   assert.doesNotMatch(summaryText, /\noutcome:\nREADY_FOR_CONFIG_EXECUTION/);
 
   // Archive session root with child experiment manifest → v2.
@@ -329,7 +329,7 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
       join(reportsRoot, 'index.md'),
       'utf8',
     );
-    assert.match(indexMarkdown, /\(workflow-only\)/);
+    assert.match(indexMarkdown, /（仅工作流）/);
     assert.match(indexMarkdown, /EXECUTION_SCOPE_VIOLATION/);
   }
 }

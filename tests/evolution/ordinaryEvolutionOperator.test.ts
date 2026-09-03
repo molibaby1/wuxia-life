@@ -311,13 +311,19 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.equal(result.operationalIndexPath, 'artifacts/evolution/index.md');
 
     const text = formatOrdinaryEvolutionOperatorSummary(result);
-    assert.match(text, /session:\nordinary-run-20260903-000042/);
-    assert.match(text, new RegExp(`host stop reason:\\n${caseInput.stopReason}`));
-    assert.match(text, new RegExp(`multi-round outcome:\\n${caseInput.outcome}`));
-    assert.match(text, new RegExp(`last round route:\\n${caseInput.lastRoundTerminalRoute}`));
-    assert.match(text, new RegExp(`execution status:\\n${caseInput.executionStatus}`));
-    assert.match(text, /authoritative root integrity:\nUNCHANGED/);
-    assert.match(text, /observability:\nPASS/);
+    assert.match(text, /AE 运行/);
+    assert.match(text, /会话：\nordinary-run-20260903-000042/);
+    assert.match(text, new RegExp(`Host 停止原因：\\n${caseInput.stopReason}`));
+    assert.match(text, new RegExp(`多轮执行结果：\\n${caseInput.outcome}`));
+    assert.match(text, new RegExp(`最后一轮路由：\\n${caseInput.lastRoundTerminalRoute}`));
+    assert.match(text, new RegExp(`执行状态：\\n${caseInput.executionStatus}`));
+    assert.match(text, /权威仓库根完整性：\n未变更/);
+    assert.match(text, /Participant：\nCODEX_CURRENT/);
+    assert.match(
+      text,
+      new RegExp(`Human Follow-up：\\n${caseInput.lastRoundTerminalRoute === 'ESCALATE_HUMAN' ? 1 : 0} 项 active`),
+    );
+    assert.match(text, /可观测性：\nPASS/);
     assert.doesNotMatch(text, /\noutcome:\n/);
   }
 
@@ -364,7 +370,11 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.match(result.observabilityError ?? '', /archive exploded/);
     assert.match(
       formatOrdinaryEvolutionOperatorSummary(result),
-      /host stop reason:\nROUND_1_TERMINAL_NOT_READY/,
+      /Host 停止原因：\nROUND_1_TERMINAL_NOT_READY/,
+    );
+    assert.match(
+      formatOrdinaryEvolutionOperatorSummary(result),
+      /可观测性错误：\narchive exploded/,
     );
   }
 

@@ -406,7 +406,7 @@ export async function collectWorkflowSummaries(root: string): Promise<WorkflowSu
 }
 
 function renderOptionalLine(label: string, value: string | null): string[] {
-  return value === null ? [] : [`- ${label}: ${value}`];
+  return value === null ? [] : [`- ${label}：${value}`];
 }
 
 function renderWorkflow(
@@ -417,52 +417,52 @@ function renderWorkflow(
   const lines = [
     `## ${index}. ${summary.identity}`,
     '',
-    `- Status: ${summary.status}`,
-    ...renderOptionalLine('Source run ref', summary.sourceRunRef),
-    ...renderOptionalLine('Problem statement', summary.problemStatement),
-    ...renderOptionalLine('Solution status / result kind', summary.solutionStatus),
-    ...renderOptionalLine('Reviewer decision', summary.reviewerDecision),
+    `- 状态：${summary.status}`,
+    ...renderOptionalLine('Source Run', summary.sourceRunRef),
+    ...renderOptionalLine('问题描述', summary.problemStatement),
+    ...renderOptionalLine('解决方案状态 / 结果类型', summary.solutionStatus),
+    ...renderOptionalLine('审核决策', summary.reviewerDecision),
   ];
 
   if (summary.terminalRoute === null) {
-    lines.push('- Terminal route / workflow outcome: NOT RECORDED');
+    lines.push('- 终止路由 / 工作流结果：未记录');
   } else {
-    lines.push(`- Terminal route / workflow outcome: ${summary.terminalRoute}`);
+    lines.push(`- 终止路由 / 工作流结果：${summary.terminalRoute}`);
   }
-  lines.push(...renderOptionalLine('Reason', summary.reason));
-  lines.push(...renderOptionalLine('Failed stage', summary.failedStage));
-  lines.push(...renderOptionalLine('Participant error kind', summary.participantErrorKind));
-  lines.push(`- Authoritative modification in this workflow: ${summary.authoritativeModification}`);
+  lines.push(...renderOptionalLine('原因', summary.reason));
+  lines.push(...renderOptionalLine('失败阶段', summary.failedStage));
+  lines.push(...renderOptionalLine('Participant 错误类型', summary.participantErrorKind));
+  lines.push(`- 本工作流产生权威变更：${summary.authoritativeModification}`);
 
   if (summary.structuredTerminalDelivery !== null) {
-    lines.push('', '### Structured terminal delivery', '');
+    lines.push('', '### 结构化终止交付', '');
     if (summary.structuredTerminalDelivery.firstAttempt !== null) {
-      lines.push(`- First attempt: ${summary.structuredTerminalDelivery.firstAttempt}`);
+      lines.push(`- 首次尝试：${summary.structuredTerminalDelivery.firstAttempt}`);
     }
     if (summary.structuredTerminalDelivery.retransmission !== null) {
-      lines.push(`- Bounded retransmission: ${summary.structuredTerminalDelivery.retransmission}`);
+      lines.push(`- 有界重传：${summary.structuredTerminalDelivery.retransmission}`);
     }
     if (summary.structuredTerminalDelivery.finalStructuredOutput !== null) {
-      lines.push(`- Final structured output: ${summary.structuredTerminalDelivery.finalStructuredOutput}`);
+      lines.push(`- 最终结构化输出：${summary.structuredTerminalDelivery.finalStructuredOutput}`);
     }
   }
 
   if (summary.status === 'READY_FOR_CONFIG_EXECUTION') {
     if (sessionExecution && sessionExecution.execution.status !== 'not_started') {
       lines.push(
-        '- Round workflow accepted configuration scope; see Session Execution for what followed.',
+        '- 本轮工作流已接受配置范围；后续情况见“会话执行”。',
       );
     } else {
-      lines.push('- Accepted configuration work is ready for separately authorized execution.');
+      lines.push('- 已接受的配置工作可等待单独授权后执行。');
     }
   }
   if (summary.status === 'INCOMPLETE') {
-    lines.push(...renderOptionalLine('Last available artifact', summary.lastAvailableArtifact));
+    lines.push(...renderOptionalLine('最后可用 Artifact', summary.lastAvailableArtifact));
   }
 
-  lines.push('', '### Relevant artifact references', '');
+  lines.push('', '### 相关 Artifact 引用', '');
   if (summary.artifactRefs.length === 0) {
-    lines.push('- unavailable');
+    lines.push('- 不可用');
   } else {
     lines.push(...summary.artifactRefs.map(reference => `- ${reference}`));
   }
@@ -472,19 +472,19 @@ function renderWorkflow(
 
 function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): string[] {
   const changed = summary.execution.actualChangedFiles.length === 0
-    ? '(none)'
+    ? '（无）'
     : summary.execution.actualChangedFiles.join(', ');
   return [
-    '## Session Execution',
+    '## 会话执行',
     '',
-    `- Multi-round run: ${summary.multiRoundRunRef}`,
-    `- Host stop reason: ${summary.stopReason}`,
-    `- Multi-round outcome: ${summary.outcome}`,
-    `- Cross-round transitions: ${summary.crossRoundTransitions}`,
-    `- Last round route: ${summary.lastRoundTerminalRoute ?? '(none)'}`,
-    `- Execution status: ${summary.execution.status}`,
-    `- Actual execution changes: ${changed}`,
-    `- Resulting run: ${summary.execution.resultingRunRef ?? '(none)'}`,
+    `- 多轮运行：${summary.multiRoundRunRef}`,
+    `- Host 停止原因：${summary.stopReason}`,
+    `- 多轮执行结果：${summary.outcome}`,
+    `- 跨轮次数：${summary.crossRoundTransitions}`,
+    `- 最后一轮路由：${summary.lastRoundTerminalRoute ?? '（无）'}`,
+    `- 执行状态：${summary.execution.status}`,
+    `- 实际执行变更：${changed}`,
+    `- 结果运行：${summary.execution.resultingRunRef ?? '（无）'}`,
     '',
   ];
 }
@@ -493,7 +493,7 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
   const { summaries } = input;
   const aggregateCounts = aggregateStructuredTerminalDelivery(summaries);
   const headerLines = [
-    '# Auto Evolution Run Report',
+    '# Auto Evolution 运行报告',
     '',
   ];
 
@@ -501,41 +501,41 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
     || input.includeArtifactRetentionNote === true;
   if (isArchivedView) {
     if (input.reportId !== undefined) {
-      headerLines.push(`- Report ID: ${input.reportId}`);
+      headerLines.push(`- 报告 ID：${input.reportId}`);
     }
     if (input.createdAt !== undefined) {
-      headerLines.push(`- Created: ${input.createdAt}`);
+      headerLines.push(`- 创建时间：${input.createdAt}`);
     }
-    headerLines.push(`- Observed workflow runs: ${summaries.length}`);
+    headerLines.push(`- 工作流数量：${summaries.length}`);
     if (input.includeArtifactRetentionNote === true) {
       headerLines.push(
         '',
-        '## Artifact reference retention',
+        '## 证据引用与保留',
         '',
-        'Artifact refs below point at original execution locations (often under `.tmp/evolution/**`).',
-        'Those raw workflow artifacts are not retention-protected, may be cleaned, and are not copied into this archive.',
-        'Long-lived evidence needed to restore Human judgment remains under Human Follow-up retention.',
+        '以下 Artifact 引用指向原始执行位置（通常位于 `.tmp/evolution/**`）。',
+        '这些原始工作流 Artifact 不受 retention 保护，可能被清理，也不会复制到此归档中。',
+        '恢复 Human 判断所需的长期证据仍由 Human Follow-up retention 保留。',
       );
     }
   } else {
-    headerLines.push(`Observed workflow runs: ${summaries.length}`);
+    headerLines.push(`- 工作流数量：${summaries.length}`);
   }
 
   if (input.sessionExecution) {
     headerLines.push('', ...renderSessionExecutionSection(input.sessionExecution));
-    headerLines.push('## Workflow / Round Details', '');
+    headerLines.push('## 工作流 / 轮次详情', '');
   }
 
   if (aggregateCounts !== null) {
     headerLines.push(
       '',
-      '## Structured terminal delivery aggregates',
+      '## 结构化终止交付汇总',
       '',
-      `- First-pass structured-output successes: ${aggregateCounts.firstPassStructuredOutputSuccesses}`,
-      `- First-pass envelope failures: ${aggregateCounts.firstPassEnvelopeFailures}`,
-      `- Retransmissions attempted: ${aggregateCounts.retransmissionsAttempted}`,
-      `- Retransmissions succeeded: ${aggregateCounts.retransmissionsSucceeded}`,
-      `- Final structured-output successes: ${aggregateCounts.finalStructuredOutputSuccesses}`,
+      `- 首次结构化输出成功：${aggregateCounts.firstPassStructuredOutputSuccesses}`,
+      `- 首次封装失败：${aggregateCounts.firstPassEnvelopeFailures}`,
+      `- 已尝试重传：${aggregateCounts.retransmissionsAttempted}`,
+      `- 重传成功：${aggregateCounts.retransmissionsSucceeded}`,
+      `- 最终结构化输出成功：${aggregateCounts.finalStructuredOutputSuccesses}`,
     );
   }
 
@@ -544,6 +544,25 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
     '',
     ...summaries.flatMap((summary, index) => renderWorkflow(summary, index + 1, input.sessionExecution)),
   ].join('\n');
+}
+
+export interface ArchivedOperationalRunReportForMarkdown {
+  reportId: string;
+  createdAt: string;
+  workflows: WorkflowSummary[];
+  sessionExecution?: MultiRoundSessionSummaryV1 | null;
+}
+
+export function renderOperationalRunReportMarkdownFromReport(
+  report: ArchivedOperationalRunReportForMarkdown,
+): string {
+  return renderOperationalRunReportMarkdown({
+    summaries: report.workflows,
+    reportId: report.reportId,
+    createdAt: report.createdAt,
+    includeArtifactRetentionNote: true,
+    ...(report.sessionExecution == null ? {} : { sessionExecution: report.sessionExecution }),
+  });
 }
 
 function renderReport(summaries: WorkflowSummary[], sessionExecution?: MultiRoundSessionSummaryV1): string {

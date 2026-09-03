@@ -191,7 +191,7 @@ async function loadArchivedReports(repositoryRoot: string): Promise<OperationalR
 }
 
 function workflowRouteSummary(workflows: WorkflowSummary[]): string {
-  if (workflows.length === 0) return '(none)';
+  if (workflows.length === 0) return '（无）';
   return workflows.map(workflow => workflow.terminalRoute ?? workflow.status).join(', ');
 }
 
@@ -199,7 +199,7 @@ function sourceRunSummary(workflows: WorkflowSummary[]): string {
   const refs = workflows
     .map(workflow => workflow.sourceRunRef)
     .filter((value): value is string => value !== null);
-  if (refs.length === 0) return '(none)';
+  if (refs.length === 0) return '（无）';
   return [...new Set(refs)].join(', ');
 }
 
@@ -208,20 +208,20 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
     right.createdAt.localeCompare(left.createdAt) || left.reportId.localeCompare(right.reportId)
   ));
   const lines = [
-    '# Auto Evolution Run Reports',
+    '# Auto Evolution 运行报告',
     '',
-    `- total reports: ${sorted.length}`,
+    `- 报告总数：${sorted.length}`,
     '',
-    '| created | report | session stop | multi-round outcome | execution | workflow routes | source runs |',
+    '| 创建时间 | 报告 | 会话停止原因 | 多轮结果 | 执行状态 | 工作流路由 | Source Run |',
     '| --- | --- | --- | --- | --- | --- | --- |',
   ];
   if (sorted.length === 0) {
-    lines.push('| *(none)* |  |  |  |  |  |  |');
+    lines.push('| *（无）* |  |  |  |  |  |  |');
   } else {
     for (const report of sorted) {
       const sessionStop = report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
         ? report.sessionExecution.stopReason
-        : '(workflow-only)';
+        : '（仅工作流）';
       const multiRoundOutcome = report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
         ? report.sessionExecution.outcome
         : '—';
@@ -235,8 +235,8 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
   }
   lines.push(
     '',
-    'This index is derived from archived `report.json` sidecars. It is observability history, not Human backlog canonical state.',
-    'V1 rows are workflow-only. V2 rows expose session execution facts from `run-manifest.json`.',
+    '本索引由归档的 `report.json` sidecar 生成，是可观测性历史，不是 Human backlog 的规范状态。',
+    'V1 行仅包含工作流信息；V2 行从 `run-manifest.json` 展示会话执行事实。',
     '',
   );
   return lines.join('\n');
@@ -248,26 +248,26 @@ function renderTopLevelIndex(input: {
   humanFollowupIndexPresent: boolean;
 }): string {
   const latestLine = input.latestReport === null
-    ? '- latest: *(none)*'
-    : `- latest: [${input.latestReport.reportId}](run-reports/${input.latestReport.reportId}/report.md) (${input.latestReport.createdAt})`;
+    ? '- 最新：*（无）*'
+    : `- 最新：[${input.latestReport.reportId}](run-reports/${input.latestReport.reportId}/report.md)（${input.latestReport.createdAt}）`;
   const humanFollowupLine = input.humanFollowupIndexPresent
-    ? '- open [human-follow-up/index.md](human-follow-up/index.md)'
-    : '- human-follow-up/index.md not generated yet (run `npm run evolution:human-followup:inbox`)';
+    ? '- 打开 [human-follow-up/index.md](human-follow-up/index.md)'
+    : '- human-follow-up/index.md 尚未生成（运行 `npm run evolution:human-followup:inbox`）';
 
   return [
-    '# Auto Evolution Operational Index',
+    '# Auto Evolution 运行索引',
     '',
-    '## Run Reports',
+    '## 运行报告',
     '',
-    `- total: ${input.reportCount}`,
+    `- 总数：${input.reportCount}`,
     latestLine,
-    '- open [run-reports/index.md](run-reports/index.md)',
+    '- 打开 [run-reports/index.md](run-reports/index.md)',
     '',
     '## Human Follow-up',
     '',
     humanFollowupLine,
     '',
-    'Run Reports are generated observability history. Human Follow-up remains retention-protected operational state.',
+    '运行报告是生成式可观测性历史；Human Follow-up 仍是受 retention 保护的 operational state。',
     '',
   ].join('\n');
 }

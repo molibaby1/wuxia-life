@@ -11,7 +11,7 @@ import {
 } from '../multiRoundRunManifestContract';
 import {
   collectWorkflowSummaries,
-  renderOperationalRunReportMarkdown,
+  renderOperationalRunReportMarkdownFromReport,
   type WorkflowSummary,
 } from './buildOperationalRunReport';
 import {
@@ -181,11 +181,10 @@ export async function archiveOperationalRunReport(
   const report: OperationalRunReport = sessionExecution === null
     ? buildReportDocumentV1({ reportId, createdAt, sourceRoot, workflows })
     : buildReportDocumentV2({ reportId, createdAt, sourceRoot, sessionExecution, workflows });
-  const markdown = renderOperationalRunReportMarkdown({
-    summaries: workflows,
+  const markdown = renderOperationalRunReportMarkdownFromReport({
     reportId,
     createdAt,
-    includeArtifactRetentionNote: true,
+    workflows,
     ...(sessionExecution === null ? {} : { sessionExecution }),
   });
 

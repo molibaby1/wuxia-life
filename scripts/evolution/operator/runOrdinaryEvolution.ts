@@ -185,6 +185,43 @@ async function readRoundDecision(experimentRoot: string): Promise<{
   }
 }
 
+/**
+ * Host-terminal outcome for the operator summary.
+ * Round decision route is only authoritative when multi-round stopped because
+ * Round 1 / Round 2 itself terminated; otherwise prefer multi-round stopReason
+ * (e.g. EXECUTION_SCOPE_VIOLATION after a READY decision).
+ */
+export function resolveOperatorTerminalOutcome(input: {
+  multiRound: Pick<MultiRoundExecutionValidationResult, 'stopReason' | 'outcome' | 'rounds'>;
+  decisionRoute: string | null;
+}): string {
+  const lastRoundTerminal = [...input.multiRound.rounds]
+    .reverse()
+    .map(round => round.terminalRoute)
+    .find((route): route is string => typeof route === 'string' && route.length > 0)
+    ?? input.decisionRoute;
+
+  if (
+    input.multiRound.stopReason === 'ROUND_1_TERMINAL_NOT_READY'
+    || input.multiRound.stopReason === 'ROUND_2_COMPLETED'
+  ) {
+    return lastRoundTerminal ?? input.multiRound.stopReason;
+  }
+
+  return input.multiRound.stopReason
+    || input.multiRound.outcome
+    || lastRoundTerminal
+    || 'UNKNOWN_OPERATOR_TERMINAL';
+}
+
+export function resolveAuthoritativeRepoModificationObserved(input: {
+  fingerprintBefore: string;
+  fingerprintAfter: string;
+}): boolean {
+  // Fingerprint already excludes operational / gitignored trees (.tmp, artifacts, .omx, …).
+  return input.fingerprintBefore !== input.fingerprintAfter;
+}
+
 async function defaultRunAeWorkflow(input: {
   repositoryRoot: string;
   sessionId: string;
@@ -204,17 +241,19 @@ async function defaultRunAeWorkflow(input: {
   });
   const fingerprintAfter = await captureAuthoritativeFingerprint(input.repositoryRoot);
   const decision = await readRoundDecision(experimentRoot);
-  const terminalOutcome = decision.route
-    ?? multiRound.outcome
-    ?? multiRound.stopReason;
   return {
     multiRound,
-    terminalOutcome,
+    terminalOutcome: resolveOperatorTerminalOutcome({
+      multiRound,
+      decisionRoute: decision.route,
+    }),
     decisionRoute: decision.route,
     decisionReasonCode: decision.reasonCode,
     crossRoundObserved: multiRound.crossRoundTransitions > 0,
-    authoritativeRepoModificationObserved: fingerprintBefore !== fingerprintAfter
-      || multiRound.execution !== null,
+    authoritativeRepoModificationObserved: resolveAuthoritativeRepoModificationObserved({
+      fingerprintBefore,
+      fingerprintAfter,
+    }),
     experimentRoot,
   };
 }

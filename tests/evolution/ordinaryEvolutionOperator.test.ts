@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   formatOrdinaryEvolutionOperatorSummary,
+  resolveAuthoritativeRepoModificationObserved,
+  resolveOperatorTerminalOutcome,
   runOrdinaryEvolution,
   type OperatorAeWorkflowResult,
   type OrdinaryEvolutionOperatorResult,
@@ -283,6 +285,62 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     });
     assert.equal(allocated, 'ordinary-run-20260903-000002');
     assert.equal(formatOrdinarySessionId('20260903', 2), 'ordinary-run-20260903-000002');
+  }
+
+  {
+    // Host terminal must not hide post-READY multi-round stopReasons.
+    assert.equal(
+      resolveOperatorTerminalOutcome({
+        multiRound: {
+          stopReason: 'EXECUTION_SCOPE_VIOLATION',
+          outcome: 'STOPPED',
+          rounds: [{
+            round: 1,
+            workflowRef: 'round-1',
+            sourceRunRef: 'ordinary-run-20260903-000001',
+            terminalRoute: 'READY_FOR_CONFIG_EXECUTION',
+            executionRef: 'configuration-execution-000001',
+            resultingRunRef: null,
+            nextAction: 'CONFIGURATION_EXECUTION',
+          }],
+        },
+        decisionRoute: 'READY_FOR_CONFIG_EXECUTION',
+      }),
+      'EXECUTION_SCOPE_VIOLATION',
+    );
+    assert.equal(
+      resolveOperatorTerminalOutcome({
+        multiRound: {
+          stopReason: 'ROUND_1_TERMINAL_NOT_READY',
+          outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+          rounds: [{
+            round: 1,
+            workflowRef: 'round-1',
+            sourceRunRef: 'ordinary-run-20260903-000002',
+            terminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+            executionRef: null,
+            resultingRunRef: null,
+            nextAction: 'STOP',
+          }],
+        },
+        decisionRoute: 'DEFER_MORE_WORK_REQUESTED',
+      }),
+      'DEFER_MORE_WORK_REQUESTED',
+    );
+    assert.equal(
+      resolveAuthoritativeRepoModificationObserved({
+        fingerprintBefore: 'aaa',
+        fingerprintAfter: 'aaa',
+      }),
+      false,
+    );
+    assert.equal(
+      resolveAuthoritativeRepoModificationObserved({
+        fingerprintBefore: 'aaa',
+        fingerprintAfter: 'bbb',
+      }),
+      true,
+    );
   }
 
   {

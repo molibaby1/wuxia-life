@@ -35,7 +35,6 @@ const EXPECTATIONS: EventExpectation[] = [
     ageRange: { min: 18, max: 65 },
     triggers: [
       { type: 'age_reach', value: 18 },
-      { type: 'random', value: 0.25 },
     ],
     choiceIds: ['farming_diligent', 'farming_leisure'],
   },
@@ -48,7 +47,6 @@ const EXPECTATIONS: EventExpectation[] = [
     ageRange: { min: 20, max: 60 },
     triggers: [
       { type: 'age_reach', value: 20 },
-      { type: 'random', value: 0.35 },
     ],
     choiceIds: ['trade_risk', 'trade_stable'],
   },
@@ -61,7 +59,6 @@ const EXPECTATIONS: EventExpectation[] = [
     ageRange: { min: 25, max: 55 },
     triggers: [
       { type: 'age_reach', value: 25 },
-      { type: 'random', value: 0.2 },
     ],
     choiceIds: ['crisis_innovate', 'crisis_retreat'],
   },

@@ -264,10 +264,6 @@
       {
         "type": "age_reach",
         "value": 16
-      },
-      {
-        "type": "random",
-        "value": 0.2
       }
     ],
     "conditions": [],

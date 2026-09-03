@@ -13,10 +13,6 @@
       {
         "type": "age_reach",
         "value": 20
-      },
-      {
-        "type": "random",
-        "value": 0.12
       }
     ],
     "conditions": [
@@ -64,10 +60,6 @@
       {
         "type": "age_reach",
         "value": 25
-      },
-      {
-        "type": "random",
-        "value": 0.1
       }
     ],
     "conditions": [

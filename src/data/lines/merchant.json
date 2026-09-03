@@ -110,8 +110,7 @@
     "weight": 40,
     "ageRange": {"min": 17, "max": 24},
     "triggers": [
-      {"type": "age_reach", "value": 17},
-      {"type": "random", "value": 0.3}
+      {"type": "age_reach", "value": 17}
     ],
     "conditions": [
       {"type": "asset_owned", "asset": "merchant_shop"},

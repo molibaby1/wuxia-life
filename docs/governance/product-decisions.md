@@ -1777,3 +1777,37 @@ Difficulty Setback System 是唯一 mapped-setback occurrence-policy owner；Map
 - 新 setback、为当前 unmapped Difficulty setbacks 补 mapping、generic setback framework；
 - 全局 RandomTrigger 实现、EventTrigger schema 重设计；
 - AE evidence / AE host wrapper、Milestone redesign、save/snapshot schema change。
+
+### PD-110：Active Formal Random Trigger Retirement
+
+**产品决策（Human accepted）**
+
+Active Formal Event 的 `triggers.random` 是已退役的 authoring metadata。Global RandomTrigger runtime semantic 被 **REJECTED / NOT AUTHORIZED**。现有 runtime scheduling 行为不变；陈旧 random 数值的 exact-percentage 含义不再具有权威。
+
+**核心权威**
+
+- `triggers.random` 不是当前 Formal Event runtime semantic。
+- 不得把 `random` 加入 `EventTrigger`。
+- 不得在 `GameEngineIntegration` 增加 random gate。
+- 不得把陈旧 numeric value 重新解释为 exact probability authority。
+- 既有 `ageRange`、conditions/thresholds、weight 与当前 scheduler 仍是权威。
+- 只从 runtime-loaded active catalog 移除 `triggers.random`。
+- Deferred / unwired source 保留为 historical provenance，本决策不清理。
+
+**本任务精确影响的 active 声明（共 16）**
+
+- `src/data/lines/identity-year-events.json`：12
+- `src/data/lines/relationship.json`：2（`relationship_life_saving`、`relationship_debt_return`）
+- `src/data/lines/faction-revelation.json`：1（`refugee_sect_story`）
+- `src/data/lines/merchant.json`：1（`merchant_shop_failure`）
+
+**治理调和**
+
+- **PD-083**：仅在“移除受影响 Identity-Year 事件上的 inert `random` metadata”这一点上被 supersede；wallet / identity / eligibility / weight / scheduling 行为不变。
+- **PD-104**：仅在移除以下两条 active Relationship 事件的 inert `random` metadata 上被 supersede：`relationship_life_saving`、`relationship_debt_return`。不改变其 content、flags、causality、Person 语义、Relationship model 或 lifecycle。不得触碰 deferred `relationship_sworn_help` 或其他 quarantined Relationship source。
+
+**明确不做**
+
+- RandomTrigger / Formal scheduling probability gate / RNG injection；
+- 概率校准、weight 相乘、年度概率语义、schema migration；
+- 扩大到 deferred / unwired event families。

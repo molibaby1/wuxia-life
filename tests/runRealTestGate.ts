@@ -21,6 +21,7 @@ const suites: Suite[] = [
   { name: 'normalLongevityEndingClosure', entry: 'tests/normalLongevityEndingClosure.test.ts' },
   { name: 'earlyDeathTerminalConsistency', entry: 'tests/earlyDeathTerminalConsistency.test.ts' },
   { name: 'setbackProducerOwnership', entry: 'tests/setbackProducerOwnership.test.ts' },
+  { name: 'activeFormalRandomTriggerRetirement', entry: 'tests/activeFormalRandomTriggerRetirement.test.ts' },
   { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },
   { name: 'p8PlayabilityTests', entry: 'tests/p8PlayabilityTests.ts' },
   { name: 'p9PlayabilityTests', entry: 'tests/p9PlayabilityTests.ts' },

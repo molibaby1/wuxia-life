@@ -7,8 +7,7 @@
     "weight": 60,
     "ageRange": { "min": 18, "max": 65 },
     "triggers": [
-      { "type": "age_reach", "value": 18 },
-      { "type": "random", "value": 0.25 }
+      { "type": "age_reach", "value": 18 }
     ],
     "thresholds": {
     },
@@ -43,8 +42,7 @@
     "weight": 50,
     "ageRange": { "min": 15, "max": 25 },
     "triggers": [
-      { "type": "age_reach", "value": 15 },
-      { "type": "random", "value": 0.2 }
+      { "type": "age_reach", "value": 15 }
     ],
     "thresholds": {
     },
@@ -82,8 +80,7 @@
     "weight": 55,
     "ageRange": { "min": 20, "max": 60 },
     "triggers": [
-      { "type": "age_reach", "value": 20 },
-      { "type": "random", "value": 0.3 }
+      { "type": "age_reach", "value": 20 }
     ],
     "thresholds": {
     },
@@ -121,8 +118,7 @@
     "weight": 70,
     "ageRange": { "min": 20, "max": 60 },
     "triggers": [
-      { "type": "age_reach", "value": 20 },
-      { "type": "random", "value": 0.35 }
+      { "type": "age_reach", "value": 20 }
     ],
     "thresholds": {
     },
@@ -158,8 +154,7 @@
     "weight": 50,
     "ageRange": { "min": 25, "max": 55 },
     "triggers": [
-      { "type": "age_reach", "value": 25 },
-      { "type": "random", "value": 0.2 }
+      { "type": "age_reach", "value": 25 }
     ],
     "thresholds": {
     },
@@ -196,8 +191,7 @@
     "weight": 60,
     "ageRange": { "min": 22, "max": 50 },
     "triggers": [
-      { "type": "age_reach", "value": 22 },
-      { "type": "random", "value": 0.25 }
+      { "type": "age_reach", "value": 22 }
     ],
     "thresholds": {
     },
@@ -235,8 +229,7 @@
     "weight": 70,
     "ageRange": { "min": 20, "max": 55 },
     "triggers": [
-      { "type": "age_reach", "value": 20 },
-      { "type": "random", "value": 0.3 }
+      { "type": "age_reach", "value": 20 }
     ],
     "thresholds": {
     },
@@ -275,8 +268,7 @@
     "weight": 75,
     "ageRange": { "min": 18, "max": 50 },
     "triggers": [
-      { "type": "age_reach", "value": 18 },
-      { "type": "random", "value": 0.35 }
+      { "type": "age_reach", "value": 18 }
     ],
     "thresholds": {
     },
@@ -320,8 +312,7 @@
     "weight": 55,
     "ageRange": { "min": 30, "max": 60 },
     "triggers": [
-      { "type": "age_reach", "value": 30 },
-      { "type": "random", "value": 0.25 }
+      { "type": "age_reach", "value": 30 }
     ],
     "thresholds": {
     },
@@ -359,8 +350,7 @@
     "weight": 70,
     "ageRange": { "min": 15, "max": 50 },
     "triggers": [
-      { "type": "age_reach", "value": 15 },
-      { "type": "random", "value": 0.35 }
+      { "type": "age_reach", "value": 15 }
     ],
     "thresholds": {
     },
@@ -396,8 +386,7 @@
     "weight": 60,
     "ageRange": { "min": 20, "max": 55 },
     "triggers": [
-      { "type": "age_reach", "value": 20 },
-      { "type": "random", "value": 0.25 }
+      { "type": "age_reach", "value": 20 }
     ],
     "thresholds": {
     },
@@ -435,8 +424,7 @@
     "weight": 55,
     "ageRange": { "min": 25, "max": 60 },
     "triggers": [
-      { "type": "age_reach", "value": 25 },
-      { "type": "random", "value": 0.2 }
+      { "type": "age_reach", "value": 25 }
     ],
     "thresholds": {
       "attributes": {

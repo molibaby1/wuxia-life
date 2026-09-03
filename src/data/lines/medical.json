@@ -23,8 +23,8 @@
         "id": "medical_talent_discovery_choice_1",
         "text": "学习医术",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 5},
-          {"type": "stat_modify", "stat": "chivalry", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5, "operator": "add"},
           {"type": "flag_set", "flag": "medical_talent", "value": true}
         ]
       },
@@ -32,7 +32,7 @@
         "id": "medical_talent_discovery_choice_2",
         "text": "继续玩耍",
         "effects": [
-          {"type": "stat_modify", "stat": "constitution", "value": 3}
+          {"type": "stat_modify", "stat": "constitution", "value": 3, "operator": "add"}
         ]
       }
     ]
@@ -61,7 +61,7 @@
         "id": "p27_study_habit_healer_reinforcement_choice_1",
         "text": "顺势钻研医理",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 4},
+          {"type": "stat_modify", "stat": "knowledge", "value": 4, "operator": "add"},
           {"type": "flag_set", "flag": "p27_study_healer_path", "value": true},
           {"type": "flag_set", "flag": "medical_pure", "value": true},
           {"type": "flag_set", "flag": "medical_talent", "value": true}
@@ -71,7 +71,7 @@
         "id": "p27_study_habit_healer_reinforcement_choice_2",
         "text": "仍专注文史",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 3},
+          {"type": "stat_modify", "stat": "knowledge", "value": 3, "operator": "add"},
           {"type": "flag_set", "flag": "p27_study_healer_path_declined", "value": true}
         ]
       }
@@ -109,7 +109,7 @@
         "id": "p29_study_habit_case_record_duty_choice_1",
         "text": "接下汇辑之责",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"},
           {"type": "flag_set", "flag": "p29_study_healer_case_duty", "value": true},
           {"type": "flag_set", "flag": "medical_divine_doctor_fame", "value": true},
           {"type": "flag_set", "flag": "medical_talent", "value": true}
@@ -119,7 +119,7 @@
         "id": "p29_study_habit_case_record_duty_choice_2",
         "text": "推辞，专心行诊",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 3},
+          {"type": "stat_modify", "stat": "chivalry", "value": 3, "operator": "add"},
           {"type": "flag_set", "flag": "p29_study_healer_case_declined", "value": true}
         ]
       }
@@ -156,8 +156,8 @@
         "id": "p29_social_momentum_healer_network_choice_1",
         "text": "开设驻点，广接病患",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 10},
-          {"type": "stat_modify", "stat": "chivalry", "value": 6},
+          {"type": "stat_modify", "stat": "reputation", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": 6, "operator": "add"},
           {"type": "flag_set", "flag": "p29_social_healer_network", "value": true},
           {"type": "flag_set", "flag": "medical_talent", "value": true}
         ]
@@ -166,7 +166,7 @@
         "id": "p29_social_momentum_healer_network_choice_2",
         "text": "择日接诊，控制规模",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 4},
+          {"type": "stat_modify", "stat": "reputation", "value": 4, "operator": "add"},
           {"type": "flag_set", "flag": "p29_social_healer_network_limited", "value": true}
         ]
       }
@@ -204,15 +204,15 @@
         "text": "拜师学艺",
         "effects": [
           {"type": "flag_set", "flag": "medical_apprentice", "value": true},
-          {"type": "stat_modify", "stat": "knowledge", "value": 8},
-          {"type": "stat_modify", "stat": "chivalry", "value": 6}
+          {"type": "stat_modify", "stat": "knowledge", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": 6, "operator": "add"}
         ]
       },
       {
         "id": "medical_master_apprentice_choice_2",
         "text": "自学成才",
         "effects": [
-          {"type": "stat_modify", "stat": "knowledge", "value": 5},
+          {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"},
           {"type": "flag_set", "flag": "medical_self_taught", "value": true}
         ]
       }
@@ -238,8 +238,8 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "knowledge", "value": 6},
-      {"type": "stat_modify", "stat": "constitution", "value": 4},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6, "operator": "add"},
+      {"type": "stat_modify", "stat": "constitution", "value": 4, "operator": "add"},
       {"type": "flag_set", "flag": "medical_herb_master", "value": true}
     ]
   },
@@ -263,8 +263,8 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "knowledge", "value": 6},
-      {"type": "stat_modify", "stat": "constitution", "value": 4},
+      {"type": "stat_modify", "stat": "knowledge", "value": 6, "operator": "add"},
+      {"type": "stat_modify", "stat": "constitution", "value": 4, "operator": "add"},
       {"type": "flag_set", "flag": "medical_herb_master", "value": true}
     ]
   },
@@ -288,9 +288,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "chivalry", "value": 8},
-      {"type": "stat_modify", "stat": "reputation", "value": 12},
-      {"type": "stat_modify", "stat": "knowledge", "value": 5}
+      {"type": "stat_modify", "stat": "chivalry", "value": 8, "operator": "add"},
+      {"type": "stat_modify", "stat": "reputation", "value": 12, "operator": "add"},
+      {"type": "stat_modify", "stat": "knowledge", "value": 5, "operator": "add"}
     ]
   },
   {
@@ -320,9 +320,9 @@
           {"type": "expression", "expression": "knowledge >= 40"}
         ],
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 20},
-          {"type": "stat_modify", "stat": "reputation", "value": 30},
-          {"type": "stat_modify", "stat": "knowledge", "value": 10},
+          {"type": "stat_modify", "stat": "chivalry", "value": 20, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 30, "operator": "add"},
+          {"type": "stat_modify", "stat": "knowledge", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "medical_plague_hero", "value": true}
         ]
       },
@@ -330,8 +330,8 @@
         "id": "medical_plague_outbreak_choice_2",
         "text": "协助救治",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 15}
+          {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"}
         ]
       }
     ]
@@ -360,8 +360,8 @@
         "id": "medical_poison_temptation_choice_1",
         "text": "拒绝，坚守医德",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 8},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 8, "operator": "add"},
           {"type": "flag_set", "flag": "medical_pure", "value": true}
         ]
       },
@@ -369,8 +369,8 @@
         "id": "medical_poison_temptation_choice_2",
         "text": "学习毒术",
         "effects": [
-          {"type": "stat_modify", "stat": "martialPower", "value": 15},
-          {"type": "stat_modify", "stat": "chivalry", "value": -10},
+          {"type": "stat_modify", "stat": "martialPower", "value": 15, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": -10, "operator": "add"},
           {"type": "flag_set", "flag": "medical_poison_path", "value": true}
         ]
       }
@@ -396,9 +396,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "martialPower", "value": 18},
-      {"type": "stat_modify", "stat": "knowledge", "value": 10},
-      {"type": "stat_modify", "stat": "chivalry", "value": -5}
+      {"type": "stat_modify", "stat": "martialPower", "value": 18, "operator": "add"},
+      {"type": "stat_modify", "stat": "knowledge", "value": 10, "operator": "add"},
+      {"type": "stat_modify", "stat": "chivalry", "value": -5, "operator": "add"}
     ]
   },
   {
@@ -421,9 +421,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "reputation", "value": 40},
-      {"type": "stat_modify", "stat": "charisma", "value": 12},
-      {"type": "stat_modify", "stat": "chivalry", "value": 10},
+      {"type": "stat_modify", "stat": "reputation", "value": 40, "operator": "add"},
+      {"type": "stat_modify", "stat": "charisma", "value": 12, "operator": "add"},
+      {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
       {"type": "flag_set", "flag": "medical_divine_doctor_fame", "value": true}
     ]
   },
@@ -451,8 +451,8 @@
         "id": "medical_imperial_doctor_choice_1",
         "text": "接受召见",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 30},
-          {"type": "stat_modify", "stat": "charisma", "value": 10},
+          {"type": "stat_modify", "stat": "reputation", "value": 30, "operator": "add"},
+          {"type": "stat_modify", "stat": "charisma", "value": 10, "operator": "add"},
           {"type": "flag_set", "flag": "medical_imperial", "value": true}
         ]
       },
@@ -460,8 +460,8 @@
         "id": "medical_imperial_doctor_choice_2",
         "text": "婉拒，继续民间行医",
         "effects": [
-          {"type": "stat_modify", "stat": "chivalry", "value": 10},
-          {"type": "stat_modify", "stat": "reputation", "value": 15},
+          {"type": "stat_modify", "stat": "chivalry", "value": 10, "operator": "add"},
+          {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"},
           {"type": "flag_set", "flag": "medical_folk_doctor", "value": true}
         ]
       }
@@ -491,15 +491,15 @@
         "id": "medical_palace_intrigue_choice_1",
         "text": "保持中立",
         "effects": [
-          {"type": "stat_modify", "stat": "charisma", "value": 8},
-          {"type": "stat_modify", "stat": "chivalry", "value": 5}
+          {"type": "stat_modify", "stat": "charisma", "value": 8, "operator": "add"},
+          {"type": "stat_modify", "stat": "chivalry", "value": 5, "operator": "add"}
         ]
       },
       {
         "id": "medical_palace_intrigue_choice_2",
         "text": "支持太子",
         "effects": [
-          {"type": "stat_modify", "stat": "reputation", "value": 15}
+          {"type": "stat_modify", "stat": "reputation", "value": 15, "operator": "add"}
         ]
       }
     ]
@@ -524,8 +524,8 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "reputation", "value": 50},
-      {"type": "stat_modify", "stat": "knowledge", "value": 12},
+      {"type": "stat_modify", "stat": "reputation", "value": 50, "operator": "add"},
+      {"type": "stat_modify", "stat": "knowledge", "value": 12, "operator": "add"},
       {"type": "flag_set", "flag": "medical_book_author", "value": true}
     ]
   },
@@ -549,9 +549,9 @@
     },
     "eventType": "auto",
     "autoEffects": [
-      {"type": "stat_modify", "stat": "martialPower", "value": 20},
-      {"type": "stat_modify", "stat": "reputation", "value": -20},
-      {"type": "stat_modify", "stat": "chivalry", "value": -10}
+      {"type": "stat_modify", "stat": "martialPower", "value": 20, "operator": "add"},
+      {"type": "stat_modify", "stat": "reputation", "value": -20, "operator": "add"},
+      {"type": "stat_modify", "stat": "chivalry", "value": -10, "operator": "add"}
     ]
   },
   {

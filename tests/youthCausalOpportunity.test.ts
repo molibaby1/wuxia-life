@@ -4,7 +4,7 @@ import { GAME_STATE_SNAPSHOT_SCHEMA_VERSION } from '../src/contracts/gameStateSn
 import { resolveChoiceEffects } from '../src/core/ChoiceOutcomeResolver';
 import { eventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
-import { formalFactsForDifficultySetback } from '../src/core/SetbackEventSystem';
+import { getCanonicalFormalSetbackEventId } from '../src/core/SetbackEventSystem';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { defaultSnapshotConverter } from '../src/headless/snapshot/SnapshotConverter';
 import goldenLinePayoffMap from '../src/data/golden-line-payoff-map.json';
@@ -296,16 +296,11 @@ async function main(): Promise<void> {
   assert(availableIds(shadowAfterPeril, 16).has('demonic_encounter'));
   assert(!availableIds(shadowAfterPeril, 16).has('youth_road_peril'));
 
-  // Legacy injury / jianghu facts no longer open the shadow contact by themselves.
-  assert.deepEqual(formalFactsForDifficultySetback('injury_accident'), [
-    'injury_accident',
-    'setback_injury',
-  ]);
+  // PD-109: mapped injury writes one canonical Formal history fact only.
+  assert.equal(getCanonicalFormalSetbackEventId('injury_accident'), 'setback_injury');
   const afterDifficultyInjury = createYouthEngine(16, { chivalry: 20 });
   afterDifficultyInjury.getGameState().player.lifeStates.trainingHabit = 1;
-  for (const factId of formalFactsForDifficultySetback('injury_accident')) {
-    recordFact(afterDifficultyInjury.getGameState(), factId);
-  }
+  recordFact(afterDifficultyInjury.getGameState(), 'setback_injury');
   assert(!availableIds(afterDifficultyInjury, 16).has('demonic_encounter'));
 
   const shadowAfterJianghuExperience = createYouthEngine(16, { chivalry: 20 });

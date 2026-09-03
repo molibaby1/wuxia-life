@@ -1,11 +1,21 @@
 import assert from 'node:assert/strict';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { eventLoader } from '../src/core/EventLoader';
-import { applySetbackEffects } from '../src/core/SetbackEventSystem';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+import { getCanonicalFormalSetbackEventId } from '../src/core/SetbackEventSystem';
+import { SETBACK_EVENTS, canSetbackEventTrigger } from '../src/data/setbackEvents';
 import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import { collectFrustrationMetrics } from '../src/p8/collectPersonaMetrics';
 import type { GameProcessRecord } from '../src/types/simulationRecordTypes';
-import type { GameState, PlayerState } from '../src/types/eventTypes';
+import {
+  EventCategory,
+  EventPriority,
+  type EventDefinition,
+  type GameState,
+  type PlayerState,
+} from '../src/types/eventTypes';
+
+process.env.WUXIA_ENGINE_QUIET = '1';
 
 const EARLY_DEATH_REASON = '英年早逝';
 
@@ -89,27 +99,65 @@ async function testEndLifeFailsClosedWithoutReason(): Promise<void> {
   );
 }
 
-async function testCatalogAndDifficultyEarlyDeathParity(): Promise<void> {
-  const catalogEvent = getCatalogEarlyDeath();
-  const catalogState = await new EventExecutor().executeEffects(
-    catalogEvent.autoEffects ?? [],
-    createState(),
-  );
-  const difficultyState = applySetbackEffects(createState(), 'early_death');
+async function testDifficultyOccurrenceResolvesThroughCanonicalFormal(): Promise<void> {
+  assert.equal(getCanonicalFormalSetbackEventId('early_death'), 'setback_early_death');
 
-  assert.deepEqual(
-    {
-      alive: catalogState.player.alive,
-      deathReason: catalogState.player.deathReason,
-      gameEnded: catalogState.flags.gameEnded,
-    },
-    {
-      alive: difficultyState.player.alive,
-      deathReason: difficultyState.player.deathReason,
-      gameEnded: difficultyState.flags.gameEnded,
-    },
-    'catalog and difficulty early death must share terminal lifecycle state',
-  );
+  const engine = new GameEngineIntegration();
+  engine.startNewGame('英年早逝所有权', 'male');
+  const state = engine.getGameState();
+  state.player.age = 28;
+  state.player.constitution = 50;
+
+  const originalRandom = Math.random;
+  const rolls: number[] = [];
+  for (const event of SETBACK_EVENTS) {
+    if (!canSetbackEventTrigger(event, state.player.age, state.player.constitution)) continue;
+    if (event.id === 'early_death') {
+      rolls.push(0);
+      rolls.push(0.999);
+    } else {
+      rolls.push(0.999);
+    }
+  }
+  let index = 0;
+  Math.random = () => (index < rolls.length ? rolls[index++] : 0.999);
+
+  const probe: EventDefinition = {
+    id: 'early_death_ownership_probe',
+    version: '1.0.0',
+    category: EventCategory.DAILY_EVENT,
+    priority: EventPriority.NORMAL,
+    weight: 1,
+    ageRange: { min: 0, max: 100 },
+    triggers: [],
+    eventType: 'auto',
+    content: { title: 'probe', text: 'probe' },
+    autoEffects: [{ type: 'time_advance', target: 'age', value: 0 }],
+    metadata: { createdAt: 0, updatedAt: 0, enabled: true, tags: [] },
+  };
+
+  try {
+    const result = await engine.executeAutoEvent(probe);
+    const setbackStages = result.stageResults.filter(stage => stage.sourceKind === 'setback');
+    assert.equal(setbackStages.length, 1);
+    assert.equal(setbackStages[0]?.id, 'setback_early_death');
+
+    const after = engine.getGameState();
+    assert.equal(after.player.alive, false);
+    assert.equal(after.player.deathReason, EARLY_DEATH_REASON);
+    assert.equal(after.flags.gameEnded, true);
+
+    const historyIds = (after.eventHistory ?? []).map(entry => entry.eventId);
+    assert.ok(historyIds.includes('setback_early_death'));
+    assert.equal(historyIds.includes('early_death'), false);
+    assert.equal(
+      engine.getAvailableEvents(28).some(event => event.id === 'setback_early_death'),
+      false,
+      'ordinary Formal selection must not produce setback_early_death',
+    );
+  } finally {
+    Math.random = originalRandom;
+  }
 }
 
 async function testHeadlessStopsAfterCatalogEarlyDeath(): Promise<void> {
@@ -168,7 +216,7 @@ function testLifeDomainMetricsRecognizeEndLife(): void {
 
 await testCatalogEarlyDeathUsesCanonicalTerminalState();
 await testEndLifeFailsClosedWithoutReason();
-await testCatalogAndDifficultyEarlyDeathParity();
+await testDifficultyOccurrenceResolvesThroughCanonicalFormal();
 await testHeadlessStopsAfterCatalogEarlyDeath();
 testLifeDomainMetricsRecognizeEndLife();
 console.log('earlyDeathTerminalConsistency.test.ts: ok');

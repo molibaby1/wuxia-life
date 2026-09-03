@@ -31,18 +31,22 @@ export type SetbackCheckOptions = {
 const LETHAL_SETBACK_IDS = new Set(['early_death']);
 
 /**
- * Difficulty setback ids that share player-visible meaning with a catalog formal fact.
- * When the difficulty system fires these, both ids are written to formal event history
- * so Condition `events.has(...)` stays aligned with the visible「意外受伤」outcome.
+ * PD-109: bounded Difficulty → Formal mapped-setback ownership.
+ * Occurrence remains Difficulty-owned; resolution/history use the Formal id only.
  */
-export const DIFFICULTY_SETBACK_FORMAL_FACT_ALIASES: Readonly<Record<string, string>> = {
+export const MAPPED_DIFFICULTY_TO_FORMAL_SETBACK: Readonly<Record<string, string>> = {
+  serious_illness: 'setback_illness',
   injury_accident: 'setback_injury',
+  early_death: 'setback_early_death',
+  property_loss: 'setback_property_loss',
+  relationship_betrayal: 'setback_betrayal',
+  // legacy malformed producer id; do not promote the leading-space form to canonical identity
+  ' cultivation_deviation': 'setback_cultivation_deviation',
 };
 
-/** Formal history ids to record for a difficulty setback (self + optional catalog alias). */
-export function formalFactsForDifficultySetback(setbackId: string): readonly string[] {
-  const alias = DIFFICULTY_SETBACK_FORMAL_FACT_ALIASES[setbackId];
-  return alias ? [setbackId, alias] : [setbackId];
+/** Canonical Formal Event id for a mapped Difficulty setback; unmapped ids return undefined. */
+export function getCanonicalFormalSetbackEventId(setbackId: string): string | undefined {
+  return MAPPED_DIFFICULTY_TO_FORMAL_SETBACK[setbackId];
 }
 
 /** Canonical numeric stats currently used by formal Setback configs. */

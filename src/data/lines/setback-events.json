@@ -11,12 +11,7 @@
     },
     "maxTriggers": 3,
     "cooldown": 4,
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.04
-      }
-    ],
+    "triggers": [],
     "conditions": [
       {
         "type": "expression",
@@ -68,7 +63,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "生病", "负面"],
+      "tags": [
+        "挫折",
+        "生病",
+        "负面"
+      ],
       "enabled": true
     }
   },
@@ -84,12 +83,7 @@
     },
     "maxTriggers": 3,
     "cooldown": 4,
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.08
-      }
-    ],
+    "triggers": [],
     "conditions": [
       {
         "type": "expression",
@@ -134,7 +128,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "受伤", "负面"],
+      "tags": [
+        "挫折",
+        "受伤",
+        "负面"
+      ],
       "enabled": true
     }
   },
@@ -148,12 +146,7 @@
       "min": 18,
       "max": 40
     },
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.003
-      }
-    ],
+    "triggers": [],
     "conditions": [
       {
         "type": "expression",
@@ -189,7 +182,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "死亡", "严重"],
+      "tags": [
+        "挫折",
+        "死亡",
+        "严重"
+      ],
       "enabled": true
     }
   },
@@ -205,12 +202,7 @@
     },
     "maxTriggers": 3,
     "cooldown": 4,
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.10
-      }
-    ],
+    "triggers": [],
     "content": {
       "title": "财产损失",
       "text": "由于遭遇盗匪，你损失了部分积蓄；此事导致你短期内手头紧拙，但慢慢经营还有机会补回。江湖上的风险总是防不胜防。",
@@ -234,7 +226,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "财产", "负面"],
+      "tags": [
+        "挫折",
+        "财产",
+        "负面"
+      ],
       "enabled": true
     }
   },
@@ -248,12 +244,7 @@
       "min": 20,
       "max": 80
     },
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.03
-      }
-    ],
+    "triggers": [],
     "conditions": [
       {
         "type": "expression",
@@ -295,7 +286,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "背叛", "负面"],
+      "tags": [
+        "挫折",
+        "背叛",
+        "负面"
+      ],
       "enabled": true
     }
   },
@@ -309,12 +304,7 @@
       "min": 16,
       "max": 70
     },
-    "triggers": [
-      {
-        "type": "random",
-        "value": 0.02
-      }
-    ],
+    "triggers": [],
     "conditions": [
       {
         "type": "expression",
@@ -356,7 +346,11 @@
       "createdAt": 1773893913000,
       "updatedAt": 1773893913000,
       "author": "difficulty_system",
-      "tags": ["挫折", "走火入魔", "严重"],
+      "tags": [
+        "挫折",
+        "走火入魔",
+        "严重"
+      ],
       "enabled": true
     }
   }

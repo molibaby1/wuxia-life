@@ -1732,3 +1732,48 @@ Presentation 后续可按 Kind / Tier 分化，但本裁决不自动授权 Phase
 - Milestone 需要反向影响 gameplay；
 - player-visible evidence 证明 Kind / Tier presentation policy 不够；
 - hidden / full catalog 出现独立产品需求。
+
+### PD-109：Canonical Setback Occurrence / Resolution Ownership
+
+**产品决策（Human accepted）**
+
+Difficulty Setback System 是唯一 mapped-setback occurrence-policy owner；Mapped Formal Setback Event 是 canonical resolution / presentation / Event History owner。Ordinary Formal Scheduler 不得产出 `isSetbackEvent` 事件。Mapped History 只写入唯一 canonical Formal Event ID。Formal mapped setback 的 `triggers.random` 退役。Difficulty 概率 / eligibility / exemptions 不变；Unmapped Difficulty setbacks 不变。Global `triggers.random` 语义为独立 follow-up，OUT OF SCOPE。
+
+**Occurrence policy**
+
+- Difficulty Setback System 决定 mapped setback 是否发生。
+- 既有 `baseProbability` / difficulty multiplier / eligibility / exemption 语义本任务不变。
+
+**Canonical resolution**
+
+- mapped Formal Setback Event 拥有玩家可见叙事、canonical effects、terminal 语义与 formal Event History。
+- mapped 解析不重跑 Formal scheduling eligibility / conditions；occurrence 已由 Difficulty 决定。
+
+**Scheduling**
+
+- `isSetbackEvent === true` 的 EventDefinition 不是 ordinary Formal Scheduler 候选。
+- Formal setback 定义仍可通过 event id 加载 / 寻址以供 canonical resolution。
+- 本决策不全局重定义 EventTrigger 或 random trigger 行为。
+
+**Canonical history**
+
+- mapped setback 恰好写入一个 canonical Formal Event ID。
+- legacy Difficulty ID 仍可作为内部 producer / monitoring identity，但不是第二条 life-history fact。
+
+**Exact mapping**
+
+| Difficulty id | Canonical Formal id |
+| --- | --- |
+| `serious_illness` | `setback_illness` |
+| `injury_accident` | `setback_injury` |
+| `early_death` | `setback_early_death` |
+| `property_loss` | `setback_property_loss` |
+| `relationship_betrayal` | `setback_betrayal` |
+| ` cultivation_deviation`（legacy malformed producer id；不晋升为 canonical） | `setback_cultivation_deviation` |
+
+**明确不做**
+
+- early-death / eligibility / exemption / difficulty multiplier 调参；
+- 新 setback、为当前 unmapped Difficulty setbacks 补 mapping、generic setback framework；
+- 全局 RandomTrigger 实现、EventTrigger schema 重设计；
+- AE evidence / AE host wrapper、Milestone redesign、save/snapshot schema change。

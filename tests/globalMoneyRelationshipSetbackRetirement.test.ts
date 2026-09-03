@@ -110,7 +110,7 @@ function testAuthoringSemantics(): void {
       priority: 40,
       weight: 60,
       ageRange: { min: 15, max: 80 },
-      triggers: [{ type: 'random', value: 0.10 }],
+      triggers: [],
       cooldown: 4,
       maxTriggers: 3,
       isSetbackEvent: true,

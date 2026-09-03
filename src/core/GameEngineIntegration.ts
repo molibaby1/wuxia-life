@@ -28,7 +28,7 @@ import {
   checkSetbackEvents,
   applySetbackEffects,
   clearExpiredSetbacks,
-  formalFactsForDifficultySetback,
+  getCanonicalFormalSetbackEventId,
 } from './SetbackEventSystem';
 import { traitSystem } from './TraitSystem';
 import { dailyEventSystem } from './DailyEventSystem';
@@ -374,6 +374,11 @@ export class GameEngineIntegration {
     
     // 过滤满足条件的事件
     const availableEvents = events.filter(event => {
+      // PD-109: Formal setbacks are resolution targets, not ordinary scheduler candidates.
+      if (event.isSetbackEvent === true) {
+        return false;
+      }
+
       if (!this.isLiveOpsExpansionSelectable(event)) {
         return false;
       }
@@ -1406,10 +1411,33 @@ export class GameEngineIntegration {
     if (setbackResults.triggeredEvents.length > 0) {
       for (const result of setbackResults.triggeredEvents) {
         const playerBeforeSetback = { ...this.gameState.player };
-        this.gameState = applySetbackEffects(this.gameState, result.event.id);
-        for (const factId of formalFactsForDifficultySetback(result.event.id)) {
-          appendFormalEventHistory(this.gameState, factId, ageBeforeEvent);
+        const canonicalFormalId = getCanonicalFormalSetbackEventId(result.event.id);
+        if (canonicalFormalId) {
+          const formalEvent = this.catalog.getEventById(canonicalFormalId);
+          if (!formalEvent || formalEvent.isSetbackEvent !== true) {
+            throw new Error(
+              `[SetbackOwnership] mapped Formal setback missing or invalid: ${result.event.id} → ${canonicalFormalId}`,
+            );
+          }
+          // Occurrence already decided by Difficulty; do not re-check Formal eligibility.
+          const resolvedState = await this.eventExecutor.executeEffects(
+            formalEvent.autoEffects ?? [],
+            this.gameState,
+          );
+          this.applyGameState(resolvedState);
+          appendFormalEventHistory(this.gameState, formalEvent.id, ageBeforeEvent);
+          stageResults.push({
+            id: formalEvent.id,
+            sourceKind: 'setback',
+            title: formalEvent.content?.title || result.event.name,
+            body: formalEvent.content?.text || formalEvent.content?.description || result.event.description,
+            deltas: calculatePublicStatDeltas(playerBeforeSetback, this.gameState.player),
+          });
+          continue;
         }
+
+        this.gameState = applySetbackEffects(this.gameState, result.event.id);
+        appendFormalEventHistory(this.gameState, result.event.id, ageBeforeEvent);
         stageResults.push({
           id: result.event.id,
           sourceKind: 'setback',

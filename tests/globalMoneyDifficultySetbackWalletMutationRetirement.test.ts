@@ -158,7 +158,16 @@ async function testExecuteAutoEventStillAppliesSetbacksWithoutMoney(): Promise<v
     const result = await engine.executeAutoEvent(probeAutoEvent());
     const setbacks = result.stageResults.filter(stage => stage.sourceKind === 'setback');
     assert.equal(setbacks.length > 0, true, 'executeAutoEvent must still be able to apply a difficulty setback');
-    assert.equal(setbacks.some(stage => stage.id === 'property_loss'), true, 'forced probe must surface property_loss');
+    assert.equal(
+      setbacks.some(stage => stage.id === 'setback_property_loss'),
+      true,
+      'mapped property_loss must resolve as canonical setback_property_loss',
+    );
+    assert.equal(
+      setbacks.some(stage => stage.id === 'property_loss'),
+      false,
+      'mapped setback must not keep legacy Difficulty history/stage id',
+    );
     assert.equal('money' in engine.getGameState().player, false, 'headless/runtime auto path must not mutate money');
   } finally {
     Math.random = random;

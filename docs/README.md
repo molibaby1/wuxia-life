@@ -114,7 +114,13 @@ full P3 remains `DEFERRED`
 
 ### Operational entry
 
-Human 只需要记住一个固定入口：
+正常 repository-host 一次 ordinary Auto Evolution run 的入口：
+
+`npm run evolution:operator:run`
+
+这是 packaging-only host wrapper：显式默认 Participant binding `CODEX_CURRENT`（不是 previous-run inheritance）、创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity、调用既有 AE workflow 恰好一次、再机械刷新 observability。它**不是**最终 Human-facing AE Skill；未来 Skill 可以调用这个稳定 host primitive。
+
+Human 只需要记住一个固定操作入口：
 
 `artifacts/evolution/index.md`
 
@@ -123,7 +129,7 @@ Human 只需要记住一个固定入口：
 - Run Reports（历史化旁路 observability）→ `artifacts/evolution/run-reports/`
 - Human Follow-up（retention-protected operational state）→ `artifacts/evolution/human-follow-up/`
 
-正常 host 在 AE run/session terminal 后应机械刷新：
+Operator wrapper 在 AE run/session terminal 后机械刷新：
 
 1. archived Run Report（`npm run evolution:observability:archive -- --root <session-root>`）
 2. Human Follow-up Inbox（`npm run evolution:human-followup:inbox`）

@@ -150,6 +150,10 @@ Sidecar Run Report 已是当前可用的旁路 observability capability。
 
 固定入口：`artifacts/evolution/index.md`。
 
+正常 repository-host ordinary run 入口：`npm run evolution:operator:run`（`scripts/evolution/operator/runOrdinaryEvolution.ts`）。
+
+这是 thin host packaging：要求 `dev` + clean working tree；canonical Participant default 为显式 `CODEX_CURRENT`（fail closed 为 `PARTICIPANT_BINDING_UNAVAILABLE`，不继承 previous-run）；创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity；调用既有 multi-round / problem-agnostic AE workflow 恰好一次；再刷新 sidecar observability。Wrapper 不复制 Feedback / Hypothesis / Solution / Reviewer / Decision Router / P2 语义。它不是最终 Human-facing AE Skill。
+
 Sidecar historical reports 使用：
 
 `artifacts/evolution/run-reports/`
@@ -160,7 +164,7 @@ Human Follow-up 继续使用：
 
 `artifacts/evolution/human-follow-up/`
 
-Host 在 terminal run 后刷新 sidecar outputs（archive Run Report → refresh HFL inbox → refresh operational index）。主 workflow 从不依赖这些步骤；刷新失败只报告 `OBSERVABILITY_REFRESH_FAILED`，不改变 Decision。
+Operator / Host 在 terminal run 后刷新 sidecar outputs（archive Run Report → refresh HFL inbox → refresh operational index）。主 workflow 从不依赖这些步骤；刷新失败只报告 `OBSERVABILITY_REFRESH_FAILED`，不改变 Decision。
 
 遗留即时聚合命令 `npm run report:evolution-run` 仍保留，表示对指定 root / 默认 `.tmp/evolution` 的即时 scan。
 

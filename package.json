@@ -14,6 +14,7 @@
     "evolution:human-followup:review": "tsx scripts/evolution/humanFollowup/reviewHumanFollowupWorkItem.ts",
     "evolution:observability:archive": "tsx scripts/evolution/reporting/archiveOperationalRunReport.ts",
     "evolution:observability:index": "tsx scripts/evolution/reporting/buildOperationalObservabilityIndex.ts",
+    "evolution:operator:run": "tsx scripts/evolution/operator/runOrdinaryEvolution.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
     "test:contracts:choice": "tsx tests/contracts/choiceExecutionContract.test.ts",
     "test:contracts:replay": "tsx tests/contracts/replayContract.test.ts",

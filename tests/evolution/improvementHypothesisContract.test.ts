@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import type { ExternalFeedback } from '../../src/evolution/externalFeedbackContract';
 import {
   parseImprovementHypothesisSet,
+  parseStoredImprovementHypothesisSet,
   validateImprovementHypothesisReferences,
 } from '../../src/evolution/improvementHypothesisContract';
 import {
@@ -40,16 +41,37 @@ const validDraft = {
 };
 
 export function runImprovementHypothesisContractTests(): void {
-  const zero = parseImprovementHypothesisSet('{"hypotheses":[]}');
-  assert.deepEqual(zero, { hypotheses: [] });
+  const zero = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [],
+    noProblemAssessment: {
+      rationale: '反馈只描述了一次局部感受，无法形成稳定的产品问题假设。',
+      feedbackRefs: ['overallImpression', 'observations[0]'],
+      evidenceRefs: ['entry-000001'],
+    },
+  }));
+  assert.equal(zero.schemaVersion, 'improvement-hypothesis-set-v2');
+  assert.equal(zero.noProblemAssessment?.rationale, '反馈只描述了一次局部感受，无法形成稳定的产品问题假设。');
+
+  assert.throws(
+    () => parseImprovementHypothesisSet(JSON.stringify({
+      schemaVersion: 'improvement-hypothesis-set-v2',
+      hypotheses: [],
+      noProblemAssessment: null,
+    })),
+    /noProblemAssessment/i,
+  );
 
   const one = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [validDraft],
+    noProblemAssessment: null,
   }));
   assert.equal(one.hypotheses[0]?.hypothesisId, 'hypothesis-000001');
   validateImprovementHypothesisReferences(one, feedback, payload);
 
   const two = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [
       {
         hypothesis: '问题 A。',
@@ -68,11 +90,25 @@ export function runImprovementHypothesisContractTests(): void {
         productSignificance: '意义 B。',
       },
     ],
+    noProblemAssessment: null,
   }));
   assert.deepEqual(two.hypotheses.map(item => item.hypothesisId), [
     'hypothesis-000001',
     'hypothesis-000002',
   ]);
+
+  assert.throws(
+    () => parseImprovementHypothesisSet(JSON.stringify({
+      schemaVersion: 'improvement-hypothesis-set-v2',
+      hypotheses: [validDraft],
+      noProblemAssessment: {
+        rationale: '不应与 hypothesis 同时存在。',
+        feedbackRefs: ['overallImpression'],
+        evidenceRefs: [],
+      },
+    })),
+    /noProblemAssessment/i,
+  );
 
   for (const forbidden of [
     'severity',
@@ -83,10 +119,12 @@ export function runImprovementHypothesisContractTests(): void {
     'modificationProposal',
   ]) {
     assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+      schemaVersion: 'improvement-hypothesis-set-v2',
       hypotheses: [{
         ...validDraft,
         [forbidden]: 'not allowed',
       }],
+      noProblemAssessment: null,
     })), /unknown field/i);
   }
 
@@ -99,6 +137,7 @@ export function runImprovementHypothesisContractTests(): void {
   );
 
   const badFeedbackRef = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{
       hypothesis: '潜在问题。',
       observedBasis: '观察。',
@@ -107,6 +146,7 @@ export function runImprovementHypothesisContractTests(): void {
       unknowns: ['仍未知。'],
       productSignificance: '值得调查。',
     }],
+    noProblemAssessment: null,
   }));
   assert.throws(
     () => validateImprovementHypothesisReferences(badFeedbackRef, feedback, payload),
@@ -119,42 +159,67 @@ export function runImprovementHypothesisContractTests(): void {
   );
   assert.throws(
     () => parseImprovementHypothesisSet('{}'),
-    /hypotheses/i,
+    /schemaVersion/i,
   );
   assert.throws(
-    () => parseImprovementHypothesisSet(JSON.stringify({ hypotheses: 'nope' })),
+    () => parseImprovementHypothesisSet(JSON.stringify({
+      schemaVersion: 'improvement-hypothesis-set-v2',
+      hypotheses: 'nope',
+      noProblemAssessment: null,
+    })),
     /hypotheses must be an array/i,
   );
 
   for (const field of ['hypothesis', 'observedBasis', 'productSignificance'] as const) {
     assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+      schemaVersion: 'improvement-hypothesis-set-v2',
       hypotheses: [{ ...validDraft, [field]: '' }],
+      noProblemAssessment: null,
     })), new RegExp(field, 'i'));
   }
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, feedbackRefs: [] }],
+    noProblemAssessment: null,
   })), /feedbackRefs/i);
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, unknowns: [] }],
+    noProblemAssessment: null,
   })), /unknowns/i);
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, feedbackRefs: [1] }],
+    noProblemAssessment: null,
   })), /feedbackRefs\[0\]/i);
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, evidenceRefs: [''] }],
+    noProblemAssessment: null,
   })), /evidenceRefs\[0\]/i);
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, unknowns: [42] }],
+    noProblemAssessment: null,
   })), /unknowns\[0\]/i);
 
   assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{ ...validDraft, hypothesisId: 'hypothesis-999999' }],
+    noProblemAssessment: null,
   })), /unknown field/i);
+
+  const legacy = parseStoredImprovementHypothesisSet(JSON.stringify({ hypotheses: [validDraft] }));
+  assert.equal(legacy.schemaVersion, 'improvement-hypothesis-set-v1');
+  assert.equal(legacy.hypotheses[0]?.hypothesisId, 'hypothesis-000001');
+  const legacyEmpty = parseStoredImprovementHypothesisSet('{"hypotheses":[]}');
+  assert.equal(legacyEmpty.schemaVersion, 'improvement-hypothesis-set-v1');
+  assert.equal(legacyEmpty.noProblemAssessment, null);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

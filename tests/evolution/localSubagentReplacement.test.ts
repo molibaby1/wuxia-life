@@ -21,7 +21,15 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
       prompts.push(input.prompt);
       const response = input.role === 'feedback'
         ? JSON.stringify({ overallImpression: 'local feedback', observations: [] })
-        : JSON.stringify({ hypotheses: [] });
+        : JSON.stringify({
+          schemaVersion: 'improvement-hypothesis-set-v2',
+          hypotheses: [],
+          noProblemAssessment: {
+            rationale: '当前材料不足以形成可审计的问题假设。',
+            feedbackRefs: ['overallImpression'],
+            evidenceRefs: [],
+          },
+        });
       return ['-e', `process.stdout.write(${JSON.stringify(response)})`];
     },
   };

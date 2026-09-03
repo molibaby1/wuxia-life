@@ -21,6 +21,7 @@ const FEEDBACK_BYTES = JSON.stringify({
 });
 
 const PARTICIPANT_JSON = JSON.stringify({
+  schemaVersion: 'improvement-hypothesis-set-v2',
   hypotheses: [{
     hypothesis: '这次体验后半段可能缺乏足够的玩家可感知差异。',
     observedBasis: 'participant 明确表达了后半段重复感。',
@@ -29,6 +30,7 @@ const PARTICIPANT_JSON = JSON.stringify({
     unknowns: ['不知道该体验是否跨 run 普遍存在，也不知道因果来源。'],
     productSignificance: '如果成立，可能削弱长生命周期体验的变化感。',
   }],
+  noProblemAssessment: null,
 });
 
 function mockFetch(
@@ -140,7 +142,8 @@ async function testRequestShapeAndConstraints(): Promise<void> {
 
     const system = String(body.messages?.[0]?.content);
     assert.match(system, /0\.\.N|0\.\.n/i);
-    assert.match(system, /\{\s*"hypotheses"\s*:\s*\[\s*\]\s*\}/);
+    assert.match(system, /"schemaVersion"\s*:\s*"improvement-hypothesis-set-v2"/);
+    assert.match(system, /noProblemAssessment/);
     assert.match(system, /一个核心|一条.*核心/);
     assert.match(system, /不是 confirmed defect|可撤销推断/);
     assert.match(system, /不要提出具体修改|不要.*具体修改/);

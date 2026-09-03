@@ -63,6 +63,7 @@ async function createCompletedHypothesisSource(input: {
   );
 
   const hypothesesJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [
       {
         hypothesis: '资源压力可能成为情感负担。',
@@ -81,6 +82,7 @@ async function createCompletedHypothesisSource(input: {
         productSignificance: '可能影响结局满意度。',
       },
     ],
+    noProblemAssessment: null,
   });
 
   const hyp = await runImprovementHypothesis(

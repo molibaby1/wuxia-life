@@ -53,9 +53,11 @@ export async function runFreshProblemTransferSelectionTests(): Promise<void> {
   {
     const root = await mkdtemp(join(tmpdir(), 'fresh-problem-selection-'));
     const source = await writeSet(root, {
+      schemaVersion: 'improvement-hypothesis-set-v2',
       hypotheses: [
         { hypothesisId: 'hypothesis-000001', ...draft('stored') },
       ],
+      noProblemAssessment: null,
     });
     const result = await selectFirstHypothesis({
       sourceHypothesesPath: source,

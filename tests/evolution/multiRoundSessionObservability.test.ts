@@ -18,6 +18,7 @@ import {
   buildOperationalObservabilityIndex,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3,
 } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
 import { renderOperationalRunReportMarkdown } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 import { formatOrdinaryEvolutionOperatorSummary } from '../../scripts/evolution/operator/runOrdinaryEvolution';
@@ -282,13 +283,13 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
       repositoryRoot,
       root: '.tmp/evolution/ordinary-run-session',
     });
-    assert.equal(archived.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2);
+    assert.equal(archived.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3);
     const report = parseOperationalRunReport(
       await (await import('node:fs/promises')).readFile(archived.reportJsonPath, 'utf8'),
       archived.reportId,
     );
-    assert.equal(report.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2);
-    if (report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2) throw new Error('expected v2');
+    assert.equal(report.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3);
+    if (report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3) throw new Error('expected v3');
     assert.deepEqual(report.sessionExecution, smokeSummary);
 
     const indexMarkdown = await (await import('node:fs/promises')).readFile(
@@ -330,6 +331,73 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
       'utf8',
     );
     assert.match(indexMarkdown, /（仅工作流）/);
+    assert.match(indexMarkdown, /EXECUTION_SCOPE_VIOLATION/);
+  }
+
+  // V3 rows are session-aware and require one decision audit per workflow.
+  {
+    const repositoryRoot = await mkdtemp(join(tmpdir(), 'v3-index-'));
+    const reportsRoot = join(repositoryRoot, 'artifacts/evolution/run-reports');
+    const decisionAudit = {
+      schemaVersion: 'ae-workflow-decision-audit-v1',
+      externalFeedback: {
+        status: 'missing',
+        artifactRef: null,
+        overallImpression: null,
+        observations: [],
+      },
+      improvementHypothesis: {
+        status: 'missing',
+        artifactRef: null,
+        hypothesisCount: null,
+        hypotheses: [],
+        noProblemAssessment: { status: 'missing' },
+      },
+      selection: {
+        status: 'missing',
+        artifactRef: null,
+        selectedHypothesisId: null,
+      },
+      solution: {
+        status: 'not_run',
+        artifactRef: null,
+        solutionStatus: null,
+        summary: null,
+        recommendedOptionId: null,
+        options: [],
+      },
+      reviewer: {
+        status: 'not_run',
+        artifactRef: null,
+        decision: null,
+        assessment: null,
+        acceptedOptionId: null,
+        scopeAssessment: null,
+        concerns: [],
+      },
+      decision: {
+        status: 'missing',
+        artifactRef: null,
+        route: null,
+        reasonCode: null,
+      },
+    };
+    await mkdir(join(reportsRoot, 'ae-report-cccccccccccccccc'), { recursive: true });
+    await writeFile(join(reportsRoot, 'ae-report-cccccccccccccccc/report.json'), `${JSON.stringify({
+      schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3,
+      reportId: 'ae-report-cccccccccccccccc',
+      createdAt: '2026-09-03T00:00:00.000Z',
+      sourceRoot: '.tmp/evolution/session-v3',
+      sessionExecution: smokeSummary,
+      workflowCount: 1,
+      workflows: [{ ...workflows[0], decisionAudit }],
+    }, null, 2)}\n`);
+    await buildOperationalObservabilityIndex({ repositoryRoot });
+    const indexMarkdown = await (await import('node:fs/promises')).readFile(
+      join(reportsRoot, 'index.md'),
+      'utf8',
+    );
+    assert.match(indexMarkdown, /V3 行展示会话执行事实与有界决策审计/);
     assert.match(indexMarkdown, /EXECUTION_SCOPE_VIOLATION/);
   }
 }

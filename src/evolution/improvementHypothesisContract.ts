@@ -11,11 +11,37 @@ export interface ImprovementHypothesis {
   productSignificance: string;
 }
 
+export const IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION = 'improvement-hypothesis-set-v2' as const;
+export const LEGACY_IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION = 'improvement-hypothesis-set-v1' as const;
+
+export interface NoProblemAssessment {
+  rationale: string;
+  feedbackRefs: string[];
+  evidenceRefs: string[];
+}
+
 export interface ImprovementHypothesisSet {
   hypotheses: ImprovementHypothesis[];
 }
 
-const ROOT_KEYS = ['hypotheses'] as const;
+export interface CurrentImprovementHypothesisSet extends ImprovementHypothesisSet {
+  schemaVersion: typeof IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION;
+  noProblemAssessment: NoProblemAssessment | null;
+}
+
+export interface StoredImprovementHypothesisSet extends ImprovementHypothesisSet {
+  schemaVersion:
+    | typeof IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION
+    | typeof LEGACY_IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION;
+  noProblemAssessment: NoProblemAssessment | null;
+}
+const CURRENT_ROOT_KEYS = [
+  'schemaVersion',
+  'hypotheses',
+  'noProblemAssessment',
+] as const;
+const LEGACY_ROOT_KEYS = ['hypotheses'] as const;
+const ASSESSMENT_KEYS = ['rationale', 'feedbackRefs', 'evidenceRefs'] as const;
 const DRAFT_KEYS = [
   'hypothesis',
   'observedBasis',
@@ -29,6 +55,10 @@ function assertObject(value: unknown, label: string): asserts value is Record<st
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new Error(`${label} must be an object and must not be null`);
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function assertExactKeys(
@@ -79,6 +109,19 @@ function hypothesisId(index: number): string {
   return `hypothesis-${String(index + 1).padStart(6, '0')}`;
 }
 
+function parseNoProblemAssessment(value: unknown): NoProblemAssessment {
+  assertObject(value, 'noProblemAssessment');
+  assertExactKeys(value, ASSESSMENT_KEYS, 'noProblemAssessment');
+  assertNonEmptyString(value.rationale, 'noProblemAssessment.rationale');
+  assertNonEmptyStringArray(value.feedbackRefs, 'noProblemAssessment.feedbackRefs');
+  assertStringArrayAllowEmpty(value.evidenceRefs, 'noProblemAssessment.evidenceRefs');
+  return {
+    rationale: value.rationale,
+    feedbackRefs: [...value.feedbackRefs],
+    evidenceRefs: [...value.evidenceRefs],
+  };
+}
+
 function parseDraft(
   value: unknown,
   index: number,
@@ -102,25 +145,103 @@ function parseDraft(
   };
 }
 
-export function parseImprovementHypothesisSet(rawResponse: string): ImprovementHypothesisSet {
+function parseJson(rawResponse: string): unknown {
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawResponse);
   } catch {
     throw new Error('improvement hypothesis response must be valid JSON');
   }
+  return parsed;
+}
 
-  assertObject(parsed, 'improvement hypothesis response');
-  assertExactKeys(parsed, ROOT_KEYS, 'improvement hypothesis response');
-  if (!Array.isArray(parsed.hypotheses)) {
+function parseHypotheses(value: unknown): ImprovementHypothesis[] {
+  if (!Array.isArray(value)) {
     throw new Error('hypotheses must be an array');
+  }
+  return value.map((item, index) => ({
+    hypothesisId: hypothesisId(index),
+    ...parseDraft(item, index),
+  }));
+}
+
+function parseStoredHypotheses(value: unknown): ImprovementHypothesis[] {
+  if (!Array.isArray(value)) {
+    throw new Error('hypotheses must be an array');
+  }
+  return value.map((item, index) => {
+    assertObject(item, `hypotheses[${index}]`);
+    const storedId = item.hypothesisId;
+    if (storedId !== undefined && storedId !== hypothesisId(index)) {
+      throw new Error(`hypotheses[${index}].hypothesisId does not match participant order`);
+    }
+    const { hypothesisId: _ignored, ...draft } = item;
+    return {
+      hypothesisId: hypothesisId(index),
+      ...parseDraft(draft, index),
+    };
+  });
+}
+
+function parseCurrentRoot(parsed: Record<string, unknown>): CurrentImprovementHypothesisSet {
+  assertExactKeys(parsed, CURRENT_ROOT_KEYS, 'improvement hypothesis response');
+  if (parsed.schemaVersion !== IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION) {
+    throw new Error(
+      `schemaVersion must be ${IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION}`,
+    );
+  }
+
+  const hypotheses = parseHypotheses(parsed.hypotheses);
+  const noProblemAssessment = parsed.noProblemAssessment === null
+    ? null
+    : parseNoProblemAssessment(parsed.noProblemAssessment);
+  if (hypotheses.length === 0 && noProblemAssessment === null) {
+    throw new Error('noProblemAssessment is required when hypotheses is empty');
+  }
+  if (hypotheses.length > 0 && noProblemAssessment !== null) {
+    throw new Error('noProblemAssessment must be null when hypotheses is non-empty');
   }
 
   return {
-    hypotheses: parsed.hypotheses.map((value, index) => ({
-      hypothesisId: hypothesisId(index),
-      ...parseDraft(value, index),
-    })),
+    schemaVersion: IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION,
+    hypotheses,
+    noProblemAssessment,
+  };
+}
+
+export function parseImprovementHypothesisSet(rawResponse: string): CurrentImprovementHypothesisSet {
+  const parsed = parseJson(rawResponse);
+
+  assertObject(parsed, 'improvement hypothesis response');
+  return parseCurrentRoot(parsed);
+}
+
+export function parseStoredImprovementHypothesisSet(rawArtifact: string): StoredImprovementHypothesisSet {
+  const parsed = parseJson(rawArtifact);
+  assertObject(parsed, 'stored improvement hypothesis set');
+
+  if (parsed.schemaVersion === IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION) {
+    const current = parseCurrentRoot({
+      ...parsed,
+      hypotheses: Array.isArray(parsed.hypotheses)
+        ? parsed.hypotheses.map(item => {
+          if (!isRecord(item)) return item;
+          const { hypothesisId: _ignored, ...draft } = item;
+          return draft;
+        })
+        : parsed.hypotheses,
+    });
+    return {
+      ...current,
+      hypotheses: parseStoredHypotheses(parsed.hypotheses),
+    };
+  }
+
+  assertExactKeys(parsed, LEGACY_ROOT_KEYS, 'stored improvement hypothesis set');
+  return {
+    schemaVersion: LEGACY_IMPROVEMENT_HYPOTHESIS_SET_SCHEMA_VERSION,
+    hypotheses: parseStoredHypotheses(parsed.hypotheses),
+    noProblemAssessment: null,
   };
 }
 
@@ -132,7 +253,7 @@ function validFeedbackRefs(feedback: ExternalFeedback): Set<string> {
 }
 
 export function validateImprovementHypothesisReferences(
-  set: ImprovementHypothesisSet,
+  set: ImprovementHypothesisSet & { noProblemAssessment?: NoProblemAssessment | null },
   feedback: ExternalFeedback,
   observablePayload: ObservablePayload,
 ): void {
@@ -153,6 +274,19 @@ export function validateImprovementHypothesisReferences(
           `hypotheses[${index}].evidenceRefs references unknown entryId: ${ref}`,
         );
       }
+    }
+  }
+
+  const assessment = set.noProblemAssessment;
+  if (assessment === undefined || assessment === null) return;
+  for (const ref of assessment.feedbackRefs) {
+    if (!feedbackRefs.has(ref)) {
+      throw new Error(`noProblemAssessment.feedbackRefs references unknown feedback source: ${ref}`);
+    }
+  }
+  for (const ref of assessment.evidenceRefs) {
+    if (!entryIds.has(ref)) {
+      throw new Error(`noProblemAssessment.evidenceRefs references unknown entryId: ${ref}`);
     }
   }
 }

@@ -173,6 +173,7 @@ async function testOneHypothesisSuccess(): Promise<void> {
   const capture: Capture = { callCount: 0 };
 
   const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{
       hypothesis: '这次体验后半段可能缺乏足够的玩家可感知差异。',
       observedBasis: 'participant 明确表达了后半段重复感。',
@@ -181,6 +182,7 @@ async function testOneHypothesisSuccess(): Promise<void> {
       unknowns: ['不知道该体验是否普遍存在，也不知道因果来源。'],
       productSignificance: '如果成立，可能削弱长生命周期体验的变化感。',
     }],
+    noProblemAssessment: null,
   });
 
   const result = await runImprovementHypothesis(
@@ -257,7 +259,15 @@ async function testZeroHypothesesCompletedSuccess(): Promise<void> {
   const runRef = 'hyp-loop-zero';
   await createSource(sourceRoot, runRef);
   const capture: Capture = { callCount: 0 };
-  const participantJson = JSON.stringify({ hypotheses: [] });
+  const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [],
+    noProblemAssessment: {
+      rationale: '当前反馈不足以形成值得进一步调查的产品问题假设。',
+      feedbackRefs: ['overallImpression'],
+      evidenceRefs: [],
+    },
+  });
 
   const result = await runImprovementHypothesis(
     { runRef, sourceRoot, outRoot, apiKey: API_KEY },
@@ -267,7 +277,8 @@ async function testZeroHypothesesCompletedSuccess(): Promise<void> {
   const hypotheses = JSON.parse(
     await readFile(join(result.hypothesisDir, 'hypotheses.json'), 'utf8'),
   );
-  assert.deepEqual(hypotheses, { hypotheses: [] });
+  assert.deepEqual(hypotheses.schemaVersion, 'improvement-hypothesis-set-v2');
+  assert.equal(hypotheses.noProblemAssessment.rationale, '当前反馈不足以形成值得进一步调查的产品问题假设。');
 
   const invocation = JSON.parse(
     await readFile(join(result.hypothesisDir, 'invocation.json'), 'utf8'),
@@ -288,6 +299,7 @@ async function testMultipleHypothesesIndependentIds(): Promise<void> {
   await createSource(sourceRoot, runRef);
   const capture: Capture = { callCount: 0 };
   const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [
       {
         hypothesis: '问题 A。',
@@ -306,6 +318,7 @@ async function testMultipleHypothesesIndependentIds(): Promise<void> {
         productSignificance: '意义 B。',
       },
     ],
+    noProblemAssessment: null,
   });
 
   const result = await runImprovementHypothesis(
@@ -336,6 +349,7 @@ async function testInvalidReferenceFails(): Promise<void> {
   const source = await createSource(sourceRoot, runRef);
   const capture: Capture = { callCount: 0 };
   const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{
       hypothesis: '潜在问题。',
       observedBasis: '观察。',
@@ -344,6 +358,7 @@ async function testInvalidReferenceFails(): Promise<void> {
       unknowns: ['仍未知。'],
       productSignificance: '值得调查。',
     }],
+    noProblemAssessment: null,
   });
 
   await assert.rejects(
@@ -380,6 +395,7 @@ async function testContractFailurePersistsSchemaForProof(): Promise<void> {
   const runRef = 'hyp-loop-contract-fail';
   await createSource(sourceRoot, runRef);
   const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
     hypotheses: [{
       hypothesis: 'Potential issue.',
       observedBasis: 'Observed basis.',
@@ -387,6 +403,7 @@ async function testContractFailurePersistsSchemaForProof(): Promise<void> {
       evidenceRefs: [],
       unknowns: ['Unknown.'],
     }],
+    noProblemAssessment: null,
   });
 
   await assert.rejects(
@@ -460,7 +477,15 @@ async function testNoReplaceBeforeInvoke(): Promise<void> {
   const runRef = 'hyp-loop-noreplace';
   await createSource(sourceRoot, runRef);
   const capture: Capture = { callCount: 0 };
-  const participantJson = JSON.stringify({ hypotheses: [] });
+  const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [],
+    noProblemAssessment: {
+      rationale: '当前反馈不足以形成可审计的问题假设。',
+      feedbackRefs: ['overallImpression'],
+      evidenceRefs: [],
+    },
+  });
 
   await runImprovementHypothesis(
     { runRef, sourceRoot, outRoot, apiKey: API_KEY },

@@ -1,7 +1,7 @@
 # Wuxia-Life Auto Evolution 产品模型
 
 > 状态：当前权威规范  
-> 日期：2026-08-29 Human Follow-up Loop v1 Authority Closure
+> 日期：2026-09-04 Decision Audit / SKIP Explainability Slice A
 > 发生冲突时，Auto Evolution 产品语义以本文件为准。历史 Phase、实验 PRD / plan、领域专用 investigation 路线不得覆盖本文件。  
 > 与 `docs/product/player-model.md` 同属第一层产品规范。
 
@@ -178,6 +178,10 @@ Run Report 是旁路观察 artifact，不是新的核心 reasoning Role。
 Report Producer 不应理解某个具体 Skill 或领域问题，也不在第一阶段自动分析“做得好不好”。
 
 Report schema 在对应最小切片设计时定义，不在本产品模型提前穷举。
+
+当前 Human-accepted 的 bounded correction（Decision Audit / SKIP Explainability Slice A）允许 Run Report 旁路保留已验证的 External Feedback、Improvement Hypothesis、selection、Solution、Reviewer 与 Decision structured outputs，供 Human 审计正式决策链。当前 Hypothesis contract 在形成 0 条 hypothesis 时必须保留有界的 `noProblemAssessment`、feedback refs 与 player-visible evidence refs；历史契约缺失该信息时只能标记为 unavailable，不得补造解释。
+
+该 correction 仍是 observability，不是 Report Analysis；不新增 reasoning Participant，不评价 Participant 是否正确，也不改变 `SKIP`、Decision routing 或 Human Follow-up 创建边界。
 
 ### 2.7 Human Follow-up Loop / asynchronous review
 

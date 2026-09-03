@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-08-29（PRD C synthesis = `NO_BOUNDED_P3_SLICE_JUSTIFIED`；fresh real-run observe batch = NO_CROSS_ROUND_TRANSITION_OBSERVED；hard-timeout v1=1800000ms；Slice #1 PROMISING_WITH_CAVEATS）。
+> 最后更新：2026-09-04（Decision Audit / SKIP Explainability Slice A bounded correction；仍为 RUN / OBSERVE）。
 
 ---
 
@@ -30,6 +30,8 @@ Auto Evolution 当前处于：
 - **P0 Documentation Strategic Calibration：CLOSED / Human accepted；**
 - **P1 Sidecar Run Report：ENGINEERING CLOSED / USABLE；**
 - P1 Report 已能从现有 structured workflow artifacts 生成 Human-readable run history，且不成为主流程依赖；
+- **Decision Audit / SKIP Explainability Slice A：HUMAN-AUTHORIZED / bounded correction；**
+- Run Report 可旁路保留已验证的 Participant decision outputs；当前 0-hypothesis contract 必须带有界 `noProblemAssessment`，legacy 缺失时显式标记 unavailable；不启动 Report Analysis，不新增 reasoning Participant，不改变 SKIP 或 HFL 语义；
 - **P2 Multi-round Execution Validation：DESIGN ACCEPTED / ENGINEERING CLOSED；**
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；

@@ -48,7 +48,11 @@ function selectedHypothesisFromArtifact(value: unknown): ImprovementHypothesis {
     throw new Error('selected hypothesis id does not match artifact metadata');
   }
   const { hypothesisId: _hypothesisId, ...draft } = selected;
-  const parsed = parseImprovementHypothesisSet(JSON.stringify({ hypotheses: [draft] }));
+  const parsed = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [draft],
+    noProblemAssessment: null,
+  }));
   const hypothesis = parsed.hypotheses[0];
   if (!hypothesis || hypothesis.hypothesisId !== value.selectedHypothesisId) {
     throw new Error('selected hypothesis artifact does not contain a valid hypothesis');

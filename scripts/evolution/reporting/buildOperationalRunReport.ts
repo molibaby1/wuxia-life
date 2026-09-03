@@ -7,6 +7,11 @@ import {
   readMultiRoundRunManifest,
   type MultiRoundSessionSummaryV1,
 } from '../multiRoundRunManifestContract';
+import {
+  attachWorkflowDecisionAudits,
+  collectWorkflowDecisionAudits,
+  type WorkflowDecisionAuditV1,
+} from './buildWorkflowDecisionAudit';
 
 const WORKFLOW_DIRECTORY_PREFIX = 'problem-agnostic-agent-solution-loop-instance-';
 const DEFAULT_ROOT = '.tmp/evolution';
@@ -77,6 +82,7 @@ export interface WorkflowSummary {
   lastAvailableArtifact: string | null;
   artifactRefs: string[];
   structuredTerminalDelivery: StructuredTerminalDeliverySummary | null;
+  decisionAudit?: WorkflowDecisionAuditV1;
 }
 
 export interface RenderOperationalRunReportInput {
@@ -409,6 +415,30 @@ function renderOptionalLine(label: string, value: string | null): string[] {
   return value === null ? [] : [`- ${label}：${value}`];
 }
 
+function renderDecisionAudit(audit: WorkflowDecisionAuditV1): string[] {
+  const assessment = audit.improvementHypothesis.noProblemAssessment;
+  const assessmentLines = assessment.status === 'recorded'
+    ? [
+      `- No Problem Assessment：已记录：${assessment.rationale}`,
+      `- Assessment Feedback refs：${assessment.feedbackRefs.join(', ')}`,
+      `- Assessment Evidence refs：${assessment.evidenceRefs.join(', ') || '（无）'}`,
+    ]
+    : [`- No Problem Assessment：${assessment.status === 'unavailable' ? 'legacy-unavailable' : assessment.status}`];
+  return [
+    '',
+    '### 决策审计',
+    '',
+    `- External Feedback：${audit.externalFeedback.status}`,
+    `- Improvement Hypothesis：${audit.improvementHypothesis.status}`,
+    `- Hypothesis 数量：${audit.improvementHypothesis.hypothesisCount ?? '（无）'}`,
+    ...assessmentLines,
+    `- Selection：${audit.selection.status}`,
+    `- Solution：${audit.solution.status}`,
+    `- Reviewer：${audit.reviewer.status}`,
+    `- Decision：${audit.decision.route ?? '（无）'} / ${audit.decision.reasonCode ?? '（无）'}`,
+  ];
+}
+
 function renderWorkflow(
   summary: WorkflowSummary,
   index: number,
@@ -433,6 +463,10 @@ function renderWorkflow(
   lines.push(...renderOptionalLine('失败阶段', summary.failedStage));
   lines.push(...renderOptionalLine('Participant 错误类型', summary.participantErrorKind));
   lines.push(`- 本工作流产生权威变更：${summary.authoritativeModification}`);
+
+  if (summary.decisionAudit !== undefined) {
+    lines.push(...renderDecisionAudit(summary.decisionAudit));
+  }
 
   if (summary.structuredTerminalDelivery !== null) {
     lines.push('', '### 结构化终止交付', '');
@@ -577,7 +611,13 @@ export async function buildOperationalRunReport(
   const sessionExecution = manifestPath === null
     ? undefined
     : buildMultiRoundSessionSummary(await readMultiRoundRunManifest(manifestPath));
-  const report = renderReport(summaries, sessionExecution);
+  const reportSummaries = sessionExecution === undefined
+    ? summaries
+    : attachWorkflowDecisionAudits(
+      summaries,
+      await collectWorkflowDecisionAudits(input.root),
+    );
+  const report = renderReport(reportSummaries, sessionExecution);
   await mkdir(dirname(resolve(input.outputPath)), { recursive: true });
   await writeFile(input.outputPath, report, 'utf8');
   return { reportPath: input.outputPath, workflowCount: summaries.length };

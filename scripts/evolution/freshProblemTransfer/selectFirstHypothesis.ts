@@ -1,6 +1,6 @@
 import { open, lstat, mkdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { parseImprovementHypothesisSet, type ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
+import { parseStoredImprovementHypothesisSet, type ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 
 export interface FirstHypothesisSelection {
@@ -17,38 +17,6 @@ export interface FirstHypothesisSelection {
 export interface SelectFirstHypothesisOptions {
   sourceHypothesesPath: string;
   destinationPath: string;
-}
-
-function parseStoredHypothesisSet(sourceBytes: string): string {
-  const parsed = JSON.parse(sourceBytes) as unknown;
-  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    return sourceBytes;
-  }
-
-  const root = parsed as Record<string, unknown>;
-  const hypotheses = root.hypotheses;
-  if (!Array.isArray(hypotheses)) return sourceBytes;
-
-  const hasStoredIds = hypotheses.some(
-    value => typeof value === 'object' && value !== null && !Array.isArray(value)
-      && 'hypothesisId' in value,
-  );
-  if (!hasStoredIds) return sourceBytes;
-
-  return JSON.stringify({
-    hypotheses: hypotheses.map((value, index) => {
-      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return value;
-      }
-      const record = value as Record<string, unknown>;
-      const expectedId = `hypothesis-${String(index + 1).padStart(6, '0')}`;
-      if (record.hypothesisId !== expectedId) {
-        throw new Error(`hypotheses[${index}].hypothesisId does not match participant order`);
-      }
-      const { hypothesisId: _hypothesisId, ...draft } = record;
-      return draft;
-    }),
-  });
 }
 
 async function assertAbsent(path: string): Promise<void> {
@@ -75,7 +43,7 @@ export async function selectFirstHypothesis(
   options: SelectFirstHypothesisOptions,
 ): Promise<FirstHypothesisSelection | undefined> {
   const sourceBytes = await readFile(options.sourceHypothesesPath, 'utf8');
-  const set = parseImprovementHypothesisSet(parseStoredHypothesisSet(sourceBytes));
+  const set = parseStoredImprovementHypothesisSet(sourceBytes);
   if (set.hypotheses.length === 0) return undefined;
   await assertAbsent(options.destinationPath);
 

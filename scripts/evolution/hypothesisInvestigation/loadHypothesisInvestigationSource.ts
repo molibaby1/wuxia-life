@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
-  parseImprovementHypothesisSet,
+  parseStoredImprovementHypothesisSet,
   validateImprovementHypothesisReferences,
   type ImprovementHypothesis,
 } from '../../../src/evolution/improvementHypothesisContract';
@@ -163,33 +163,7 @@ export async function loadHypothesisInvestigationSource(input: {
     );
   }
 
-  // parseImprovementHypothesisSet expects draft shape without hypothesisId.
-  // Stored hypotheses.json includes system-assigned IDs; strip them for re-parse,
-  // then re-attach and verify IDs match stored values.
-  const stored = JSON.parse(sourceHypothesesBytes) as {
-    hypotheses: Array<Record<string, unknown>>;
-  };
-  if (!Array.isArray(stored.hypotheses)) {
-    throw new Error('hypotheses.json hypotheses must be an array');
-  }
-  const draftPayload = {
-    hypotheses: stored.hypotheses.map(item => {
-      const {
-        hypothesisId: _ignored,
-        ...draft
-      } = item;
-      return draft;
-    }),
-  };
-  const parsed = parseImprovementHypothesisSet(JSON.stringify(draftPayload));
-  for (const [index, hypothesis] of parsed.hypotheses.entries()) {
-    const storedId = stored.hypotheses[index]?.hypothesisId;
-    if (typeof storedId === 'string' && storedId !== hypothesis.hypothesisId) {
-      throw new Error(
-        `hypotheses[${index}].hypothesisId mismatch: stored ${storedId}, expected ${hypothesis.hypothesisId}`,
-      );
-    }
-  }
+  const parsed = parseStoredImprovementHypothesisSet(sourceHypothesesBytes);
 
   validateImprovementHypothesisReferences(
     parsed,

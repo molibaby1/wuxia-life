@@ -2,7 +2,7 @@ import { lstat, mkdir, open, readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   validateProblemPackage,
-  type ProblemPackageV1,
+  type ProblemPackage,
 } from '../../../src/evolution/problemPackageContract';
 import {
   parseSolutionReview,
@@ -24,7 +24,7 @@ import {
 } from './solutionParticipantSkills';
 
 export interface RunSolutionReviewerInput {
-  problemPackage: ProblemPackageV1;
+  problemPackage: ProblemPackage;
   problemPackagePath: string;
   solutionWork: SolutionWorkV1;
   workspaceRoot: string;
@@ -84,7 +84,7 @@ async function validateReferences(review: SolutionReviewV1, input: RunSolutionRe
 }
 
 export function buildSolutionReviewerPrompt(
-  problemPackage: ProblemPackageV1,
+  problemPackage: ProblemPackage,
   solutionWork: SolutionWorkV1,
   assignedSkills: DeliveredParticipantSkill[],
 ): string {
@@ -101,6 +101,7 @@ export function buildSolutionReviewerPrompt(
     'You are a fresh Reviewer Participant in a separate disposable workspace.',
     'You may reject all options. Do not assume the Solution Participant is correct.',
     'Assess problem-solution fit, evidence, risks, and permission/scope boundaries.',
+    'Diagnostic evidence referenced by the Problem Package is trusted internal source-run provenance. It is not player-observable evidence. Producer attribution identifies which captured runtime producer generated an observed entry; it does not by itself prove the broader causal mechanism or that a proposed change is correct.',
     renderStructuredFinalOutputContractV1({
       roleSchemaName: 'SolutionReviewV1',
     }),

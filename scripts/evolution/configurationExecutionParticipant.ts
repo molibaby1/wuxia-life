@@ -1,7 +1,7 @@
 import { mkdir, open, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { renderStructuredFinalOutputContractV1 } from '../../src/evolution/participantStructuredOutputContract';
-import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import type { ProblemPackage } from '../../src/evolution/problemPackageContract';
 import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
 import { canonicalJson, sha256Hex } from './phase0/provenance';
@@ -15,7 +15,7 @@ export interface ConfigurationExecutionInput {
   destinationRoot: string;
   workspaceRoot: string;
   problemPackagePath: string;
-  problemPackage: ProblemPackageV1;
+  problemPackage: ProblemPackage;
   solutionWork: SolutionWorkV1;
   solutionReview: SolutionReviewV1;
   acceptedOptionId: string;

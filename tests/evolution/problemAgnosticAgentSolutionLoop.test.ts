@@ -14,11 +14,13 @@ import {
   sealPhase0Run,
   sha256Hex,
 } from '../../scripts/evolution/phase0/provenance';
+import { emptyMatchingPlayerSurfaceArtifacts } from '../../scripts/evolution/causalAttribution/emptyMatchingPlayerSurfaceArtifacts';
 import {
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
+import { CAUSAL_ATTRIBUTION_RELATIVE_PATH } from '../../scripts/evolution/causalAttribution/buildBoundedCausalAttribution';
 
 const fakeWorkspaceAgentParticipant: WorkspaceAgentParticipantOptions = {
   executable: 'fake-workspace-agent',
@@ -97,8 +99,7 @@ async function createPreflightFixture(): Promise<{
   await writeAuthorityRefFixtures(root);
   const sourceRoot = join(root, 'sealed-source');
   const experimentRoot = join(root, '.tmp/evolution/problem-agnostic-agent-solution-loop');
-  await mkdir(join(sourceRoot, 'reviewer-input'), { recursive: true });
-  await writeFile(join(sourceRoot, 'reviewer-input/observable-payload.json'), '{}');
+  const observableBytes = await writeMatchingSealedObservableSource(sourceRoot);
   return {
     root,
     sourceRoot,
@@ -106,9 +107,9 @@ async function createPreflightFixture(): Promise<{
     preflight: {
       sourceRunRef: 'cohort-run-000001',
       sourceRoot,
-      experimentRootHash: 'experiment-root-hash',
-      observablePayloadHash: 'observable-payload-hash',
-      sourceFingerprintSha256: 'source-fingerprint-hash',
+      experimentRootHash: 'a'.repeat(64),
+      observablePayloadHash: sha256Hex(observableBytes),
+      sourceFingerprintSha256: 'c'.repeat(64),
     },
   };
 }
@@ -168,17 +169,33 @@ async function createSealedSourceFixture(input: {
   runRef: string;
 }): Promise<{ sourceRoot: string; observablePayloadHash: string; experimentRootHash: string }> {
   const sourceRoot = join(input.root, input.directoryName);
+  const matching = emptyMatchingPlayerSurfaceArtifacts();
   for (const artifactPath of PHASE0_REQUIRED_SEALED_ARTIFACTS) {
     const artifact = join(sourceRoot, artifactPath);
     await mkdir(dirname(artifact), { recursive: true });
-    await writeFile(artifact, '{}');
+    if (artifactPath === 'internal/player-surface-source.json') {
+      await writeFile(artifact, matching.surfaceBytes);
+    } else if (artifactPath === 'reviewer-input/observable-payload.json') {
+      await writeFile(artifact, matching.observableBytes);
+    } else {
+      await writeFile(artifact, '{}');
+    }
   }
   const { experimentRootHash } = await sealPhase0Run(sourceRoot, input.runRef);
   return {
     sourceRoot,
-    observablePayloadHash: sha256Hex('{}'),
+    observablePayloadHash: sha256Hex(matching.observableBytes),
     experimentRootHash,
   };
+}
+
+async function writeMatchingSealedObservableSource(sourceRoot: string): Promise<string> {
+  const matching = emptyMatchingPlayerSurfaceArtifacts();
+  await mkdir(join(sourceRoot, 'reviewer-input'), { recursive: true });
+  await mkdir(join(sourceRoot, 'internal'), { recursive: true });
+  await writeFile(join(sourceRoot, 'reviewer-input/observable-payload.json'), matching.observableBytes);
+  await writeFile(join(sourceRoot, 'internal/player-surface-source.json'), matching.surfaceBytes);
+  return matching.observableBytes;
 }
 
 export async function runMissingFixedSourceBindingTests(): Promise<void> {
@@ -493,6 +510,38 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
   assert.equal(result.decision.route, 'READY_FOR_CONFIG_EXECUTION');
   assert.equal(result.actualParticipantJobs, 4);
   assert.equal(reviewerCalls, 1);
+
+  assert.equal(await pathExists(join(fixture.experimentRoot, 'feedback-runs/cohort-run-000001', CAUSAL_ATTRIBUTION_RELATIVE_PATH)), false);
+  assert.equal(await pathExists(join(fixture.experimentRoot, 'hypothesis-runs/cohort-run-000001', CAUSAL_ATTRIBUTION_RELATIVE_PATH)), false);
+  assert.equal(await pathExists(join(fixture.experimentRoot, CAUSAL_ATTRIBUTION_RELATIVE_PATH)), true);
+  const problemPackage = JSON.parse(await readFile(join(fixture.experimentRoot, 'problem-package.json'), 'utf8'));
+  assert.equal(problemPackage.schemaVersion, 'problem-package-v2');
+  assert.deepEqual(problemPackage.source.diagnosticEvidenceRefs, [CAUSAL_ATTRIBUTION_RELATIVE_PATH]);
+  const solutionDiagnostic = join(fixture.experimentRoot, 'agent-workspaces/solution', CAUSAL_ATTRIBUTION_RELATIVE_PATH);
+  const reviewerDiagnostic = join(fixture.experimentRoot, 'agent-workspaces/reviewer', CAUSAL_ATTRIBUTION_RELATIVE_PATH);
+  assert.equal(await pathExists(join(fixture.experimentRoot, 'agent-workspaces/solution/source/observable-payload.json')), true);
+  assert.equal(await pathExists(solutionDiagnostic), true);
+  assert.equal(await pathExists(reviewerDiagnostic), true);
+  assert.equal(
+    await pathExists(join(
+      fixture.experimentRoot,
+      'agent-workspaces/solution/game-runs/cohort-run-000001/internal/player-surface-source.json',
+    )),
+    false,
+  );
+  assert.equal(
+    await pathExists(join(
+      fixture.experimentRoot,
+      'agent-workspaces/reviewer/game-runs/cohort-run-000001/internal/player-surface-source.json',
+    )),
+    false,
+  );
+  assert.equal(
+    await readFile(solutionDiagnostic, 'utf8'),
+    await readFile(reviewerDiagnostic, 'utf8'),
+  );
+  const humanReview = await readFile(result.humanReviewPackagePath, 'utf8');
+  assert.match(humanReview, /old runHypothesisInvestigation invoked = false/);
 }
 
 export async function runAuthorityRefPreflightTests(): Promise<void> {

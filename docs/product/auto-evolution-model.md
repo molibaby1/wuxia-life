@@ -149,6 +149,14 @@ Problem Package 是轻量的信息与权限包，不是领域模型。
 
 > **Problem Package references evidence. Agent interprets evidence.**
 
+Evidence handoff 分层（PD-111）：
+
+- External Feedback / Improvement Hypothesis 只看到 player-observable evidence；
+- 选中 hypothesis 之后，Orchestrator 可派生 bounded internal causal-attribution diagnostic，并仅交给 Solution / Reviewer；
+- raw Phase0 `internal/player-surface-source.json` 仍禁止进入 Participant workspace；
+- diagnostic provenance ≠ player-visible evidence，也不等于完整因果解释。
+
+Active Problem Package 使用 `problem-package-v2`（含 `diagnosticEvidenceRefs`）；历史 `problem-package-v1` 仍可被契约接受。Human Follow-up escalation 在 v2 时保留 diagnostic evidence。
 ### 2.6 Run Report / Operational Report
 
 Run Report 是旁路观察 artifact，不是新的核心 reasoning Role。

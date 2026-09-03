@@ -117,6 +117,14 @@ Problem Package 是引用和权限载体，不是领域分析结果。
 
 > **Package references evidence; Agent interprets evidence.**
 
+PD-111 固定 evidence handoff：
+
+- player-observable evidence → Feedback / Hypothesis；
+- bounded internal attribution → 仅在 hypothesis 选中后由 Orchestrator 派生，交给 Solution / Reviewer；
+- raw internal Phase0 source → 继续禁止 Participant 访问；
+- Human Follow-up 在 v2 escalation 时保留 diagnostic evidence。
+
+Active path 发出 `problem-package-v2`；validator 继续接受历史 v1。
 ## 4. Run Report / Operational Observability
 
 Sidecar Run Report 已是当前可用的旁路 observability capability。

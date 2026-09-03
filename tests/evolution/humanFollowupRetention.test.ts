@@ -238,6 +238,65 @@ export async function runHumanFollowupRetentionTests(): Promise<void> {
   const itemsRoot = join(stagingFixture.repositoryRoot, 'artifacts/evolution/human-follow-up/items');
   await mkdir(join(itemsRoot, '.staging-sentinel'), { recursive: true });
   await assert.rejects(() => retain(stagingFixture), /staging/i);
+
+  const v2Package = validateProblemPackage({
+    ...problemPackage,
+    schemaVersion: 'problem-package-v2',
+    source: {
+      ...problemPackage.source,
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+    },
+  });
+  const v2Fixture = await createFixture();
+  await writeJson(v2Fixture.problemPackagePath, v2Package);
+  await writeJson(join(v2Fixture.workflowRoot, 'diagnostic/causal-attribution.json'), {
+    schemaVersion: 'bounded-causal-attribution-v1',
+    items: [],
+  });
+  const v2Retained = await retain(v2Fixture);
+  assert.deepEqual(
+    v2Retained.item.evidence.map(entry => entry.relativePath),
+    [
+      'problem-package.json',
+      'source/observable-payload.json',
+      `feedback-runs/${sourceRunRef}/feedback.json`,
+      `hypothesis-runs/${sourceRunRef}/hypotheses.json`,
+      'diagnostic/causal-attribution.json',
+      'selection/selected-hypothesis.json',
+      'solution-agent/result.json',
+      'reviewer-agent/review.json',
+      'decision.json',
+    ],
+  );
+  const diagnosticEvidence = v2Retained.item.evidence.find(
+    entry => entry.relativePath === 'diagnostic/causal-attribution.json',
+  );
+  assert.ok(diagnosticEvidence);
+  assert.equal(
+    sha256Hex(await readFile(join(dirname(v2Retained.itemPath), 'evidence/diagnostic/causal-attribution.json'))),
+    diagnosticEvidence.sha256,
+  );
+  assert.equal(
+    await pathExists(join(
+      dirname(v2Retained.itemPath),
+      'evidence/game-runs/cohort-run-000001/internal/player-surface-source.json',
+    )),
+    false,
+  );
+
+  const missingDiagnosticFixture = await createFixture();
+  await writeJson(missingDiagnosticFixture.problemPackagePath, v2Package);
+  await assert.rejects(() => retain(missingDiagnosticFixture), /required evidence|diagnostic\/causal-attribution/i);
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await lstat(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

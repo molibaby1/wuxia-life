@@ -3,6 +3,7 @@ import { lstat, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { emptyMatchingPlayerSurfaceArtifacts } from '../../scripts/evolution/causalAttribution/emptyMatchingPlayerSurfaceArtifacts';
 import {
   captureAuthoritativeFingerprint,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
@@ -16,6 +17,7 @@ import type { SolutionReviewerRunResult } from '../../scripts/evolution/problemA
 import type { HumanFollowupWorkItemV1 } from '../../src/evolution/humanFollowupWorkItemContract';
 import { validateSolutionReview, type SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import { validateSolutionWork, type SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
+import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 const sourceRunRef = 'cohort-run-000001';
 const authorityRefs = [
@@ -60,7 +62,10 @@ async function createFixture(): Promise<{
   }
   const sourceRoot = join(root, 'sealed-source');
   const experimentRoot = join(root, '.tmp/evolution/problem-agnostic-agent-solution-loop');
-  await writeJson(join(sourceRoot, 'reviewer-input/observable-payload.json'), { playerSurface: 'observed' });
+  const matching = emptyMatchingPlayerSurfaceArtifacts();
+  await writeJson(join(sourceRoot, 'internal/player-surface-source.json'), matching.surface);
+  await mkdir(dirname(join(sourceRoot, 'reviewer-input/observable-payload.json')), { recursive: true });
+  await writeFile(join(sourceRoot, 'reviewer-input/observable-payload.json'), matching.observableBytes);
   return {
     root,
     sourceRoot,
@@ -69,7 +74,7 @@ async function createFixture(): Promise<{
       sourceRunRef,
       sourceRoot,
       experimentRootHash: 'a'.repeat(64),
-      observablePayloadHash: 'b'.repeat(64),
+      observablePayloadHash: sha256Hex(matching.observableBytes),
       sourceFingerprintSha256: 'c'.repeat(64),
     },
   };

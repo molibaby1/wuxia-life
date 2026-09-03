@@ -4,10 +4,8 @@ import { createDefaultRuntimeEventCatalog } from '../../../src/core/EventLoaderR
 import type { RuntimeEventCatalog } from '../../../src/core/RuntimeEventCatalog';
 import { activeActionRepeatMechanismFacts } from '../../../src/core/activePlanning/ActionResultResolver';
 import {
-  activeActionCatalog,
   getActionById,
 } from '../../../src/data/activeActionCatalog';
-import { childhoodActionCatalog } from '../../../src/data/childhoodActionCatalog';
 import type { EventDefinition } from '../../../src/types/eventTypes';
 import type { ActiveActionDefinition } from '../../../src/types/activeActionTypes';
 import type { ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
@@ -20,15 +18,21 @@ import {
 import { projectHeadlessApiPlayerObservablePayload } from '../../../src/evolution/wuxiaPlayerObservableProjector';
 import {
   HEADLESS_API_PLAYER_SURFACE_SOURCE_VERSION,
-  type HeadlessApiPlayerSurfaceStep,
   type HeadlessApiPlayerSurfaceTrace,
 } from '../../../src/headless/playability/playerSurfaceCapture';
+import {
+  mapObservableEntriesToPlayerSurfaceSteps,
+  mapPlayerSurfaceStepsToObservableEntries,
+} from '../causalAttribution/playerSurfaceEntryMapping';
+import { resolveActiveActionIdFromSurfaceStep } from '../causalAttribution/resolveActiveActionIdFromSurfaceStep';
 import {
   canonicalJson,
   captureCatalogInput,
   type Phase0CatalogInput,
 } from '../phase0/provenance';
 import type { HypothesisInvestigationSource } from './loadHypothesisInvestigationSource';
+
+export { resolveActiveActionIdFromSurfaceStep } from '../causalAttribution/resolveActiveActionIdFromSurfaceStep';
 
 export type InvestigationEvidenceMode = 'direct-v1' | 'longitudinal-v1' | 'cohort-v1';
 
@@ -75,62 +79,11 @@ export interface CohortEvidenceInput {
   }>;
 }
 
-interface EntryRange {
-  entryIds: string[];
-  step: HeadlessApiPlayerSurfaceStep;
-}
-
 interface ActionOccurrence {
   sequence: number;
   age?: number;
   actionId: string;
   observableEntryIds: string[];
-}
-
-function entryRef(index: number): string {
-  return `entry-${String(index).padStart(6, '0')}`;
-}
-
-function emittedEntryCount(step: HeadlessApiPlayerSurfaceStep): number {
-  const cards = step.presentationCards ?? [];
-  if (step.kind === 'story_event') {
-    return 1 + Math.max(0, cards.length - 1);
-  }
-  return cards.length;
-}
-
-function mapObservableEntriesToSteps(
-  source: HeadlessApiPlayerSurfaceTrace,
-): Map<string, EntryRange> {
-  const map = new Map<string, EntryRange>();
-  let cursor = 0;
-  for (const step of source.steps) {
-    const count = emittedEntryCount(step);
-    if (count <= 0) continue;
-    const entryIds: string[] = [];
-    for (let offset = 0; offset < count; offset += 1) {
-      entryIds.push(entryRef(cursor + offset + 1));
-    }
-    for (const entryId of entryIds) {
-      map.set(entryId, { entryIds, step });
-    }
-    cursor += count;
-  }
-  return map;
-}
-
-function mapStepsToObservableEntries(
-  source: HeadlessApiPlayerSurfaceTrace,
-): Map<HeadlessApiPlayerSurfaceStep, string[]> {
-  const map = new Map<HeadlessApiPlayerSurfaceStep, string[]>();
-  let cursor = 0;
-  for (const step of source.steps) {
-    const count = emittedEntryCount(step);
-    const entryIds = Array.from({ length: count }, (_, offset) => entryRef(cursor + offset + 1));
-    map.set(step, entryIds);
-    cursor += count;
-  }
-  return map;
 }
 
 function positiveCostStats(action: ActiveActionDefinition): string[] {
@@ -280,50 +233,6 @@ export function investigationEvidenceRefs(
   return new Set(pack.items.map(item => item.evidenceId));
 }
 
-function formalActiveActions(): readonly ActiveActionDefinition[] {
-  return [...activeActionCatalog, ...childhoodActionCatalog];
-}
-
-/**
- * Resolve formal action identity from a player-surface active_action_result step.
- * Prefer sealed/captured actionId; otherwise fail-closed unique name join against formal catalogs.
- */
-export function resolveActiveActionIdFromSurfaceStep(
-  step: HeadlessApiPlayerSurfaceStep,
-): string {
-  if (step.kind !== 'active_action_result') {
-    throw new Error(`expected active_action_result step, got ${step.kind}`);
-  }
-
-  if (typeof step.actionId === 'string' && step.actionId.length > 0) {
-    const byId = getActionById(step.actionId);
-    if (!byId) {
-      throw new Error(`unknown active action id on surface step: ${step.actionId}`);
-    }
-    return byId.id;
-  }
-
-  const title = step.presentationCards?.[0]?.title;
-  if (typeof title !== 'string' || title.length === 0) {
-    throw new Error(
-      'active_action_result step missing actionId and presentation title; cannot resolve formal action identity',
-    );
-  }
-
-  const matches = formalActiveActions().filter(action => action.name === title);
-  if (matches.length === 0) {
-    throw new Error(
-      `cannot resolve active action identity: no formal action named ${JSON.stringify(title)}`,
-    );
-  }
-  if (matches.length > 1) {
-    throw new Error(
-      `cannot resolve active action identity: ambiguous formal action name ${JSON.stringify(title)}`,
-    );
-  }
-  return matches[0]!.id;
-}
-
 function actionDefinitionPayload(action: ActiveActionDefinition): Record<string, unknown> {
   return {
     id: action.id,
@@ -443,8 +352,8 @@ export async function buildInvestigationEvidence(input: {
     });
   }
 
-  const entryToStep = mapObservableEntriesToSteps(surface);
-  const stepToEntryIds = mapStepsToObservableEntries(surface);
+  const entryToStep = mapObservableEntriesToPlayerSurfaceSteps(surface);
+  const stepToEntryIds = mapPlayerSurfaceStepsToObservableEntries(surface);
   const directEventIds = new Set<string>();
   const directActionIds = new Set<string>();
 

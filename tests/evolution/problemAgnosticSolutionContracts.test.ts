@@ -176,6 +176,47 @@ export function runProblemAgnosticSolutionContractTests(): void {
     );
   }
 
+  const problemPackageV2 = {
+    ...problemPackage,
+    schemaVersion: 'problem-package-v2' as const,
+    source: {
+      ...problemPackage.source,
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+    },
+  };
+  assert.deepEqual(parseProblemPackage(JSON.stringify(problemPackageV2)), problemPackageV2);
+  assert.throws(
+    () => parseProblemPackage(JSON.stringify({
+      ...problemPackage,
+      schemaVersion: 'problem-package-v2',
+      source: { ...problemPackage.source },
+    })),
+    /missing field: diagnosticEvidenceRefs|diagnosticEvidenceRefs/,
+  );
+  assert.throws(
+    () => parseProblemPackage(JSON.stringify({
+      ...problemPackageV2,
+      source: {
+        ...problemPackageV2.source,
+        mechanismType: 'forbidden',
+      },
+    })),
+    /unknown field/,
+  );
+  assert.throws(
+    () => parseProblemPackage(JSON.stringify({
+      ...problemPackageV2,
+      source: {
+        ...problemPackageV2.source,
+        diagnosticEvidenceRefs: [
+          'diagnostic/causal-attribution.json',
+          'diagnostic/causal-attribution.json',
+        ],
+      },
+    })),
+    /duplicate ref/,
+  );
+
   assert.throws(
     () => parseSolutionWork(JSON.stringify({ ...solutionWork, unexpected: true })),
     /unknown field.*unexpected/,

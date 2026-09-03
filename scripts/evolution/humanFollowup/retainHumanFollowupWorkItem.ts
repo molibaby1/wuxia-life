@@ -11,7 +11,7 @@ import {
   type HumanFollowupEvidenceEntry,
   type HumanFollowupWorkItemV1,
 } from '../../../src/evolution/humanFollowupWorkItemContract';
-import { validateProblemPackage, type ProblemPackageV1 } from '../../../src/evolution/problemPackageContract';
+import { validateProblemPackage, type ProblemPackage } from '../../../src/evolution/problemPackageContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../../src/evolution/solutionDecisionContract';
 
 export interface RetainHumanFollowupWorkItemInput {
@@ -155,7 +155,7 @@ async function validateExistingItem(
     decisionSha256: string;
     sourceFingerprintSha256: string;
     productSourceFingerprintSha256: string;
-    problem: ProblemPackageV1['problem'];
+    problem: ProblemPackage['problem'];
     reasonCode: HumanFollowupWorkItemV1['trigger']['reasonCode'];
     evidencePaths: string[];
   },
@@ -193,7 +193,7 @@ async function assertNoPreExistingStaging(itemsRoot: string): Promise<void> {
 
 function buildEvidenceSources(
   workflowRoot: string,
-  problemPackage: ProblemPackageV1,
+  problemPackage: ProblemPackage,
   problemPackagePath: string,
   decisionPath: string,
   reviewerPresent: boolean,
@@ -203,9 +203,19 @@ function buildEvidenceSources(
     { relativePath: safeRelativePath(problemPackage.source.observablePayloadRef, 'observablePayloadRef'), sourcePath: join(workflowRoot, problemPackage.source.observablePayloadRef) },
     { relativePath: safeRelativePath(problemPackage.source.externalFeedbackRef, 'externalFeedbackRef'), sourcePath: join(workflowRoot, problemPackage.source.externalFeedbackRef) },
     { relativePath: safeRelativePath(problemPackage.source.improvementHypothesisRef, 'improvementHypothesisRef'), sourcePath: join(workflowRoot, problemPackage.source.improvementHypothesisRef) },
+  ];
+  if (problemPackage.schemaVersion === 'problem-package-v2') {
+    for (const diagnosticRef of problemPackage.source.diagnosticEvidenceRefs) {
+      sources.push({
+        relativePath: safeRelativePath(diagnosticRef, 'diagnosticEvidenceRef'),
+        sourcePath: join(workflowRoot, diagnosticRef),
+      });
+    }
+  }
+  sources.push(
     { relativePath: SELECTION_PATH, sourcePath: join(workflowRoot, SELECTION_PATH) },
     { relativePath: SOLUTION_PATH, sourcePath: join(workflowRoot, SOLUTION_PATH) },
-  ];
+  );
   if (reviewerPresent) sources.push({ relativePath: REVIEWER_PATH, sourcePath: join(workflowRoot, REVIEWER_PATH) });
   sources.push({ relativePath: 'decision.json', sourcePath: decisionPath });
   return sources;

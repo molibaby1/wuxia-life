@@ -37,7 +37,7 @@ player-model
 
 ### 治理
 
-- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow、Person Domain Authoring consolidation、Life Milestone Domain & Feedback v2、Canonical Setback Occurrence / Resolution Ownership 与 Active Formal Random Trigger Retirement 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107 / PD-108 / PD-109 / PD-110。
+- [产品决策](governance/product-decisions.md)：长期 Product Decisions；Auto Evolution 当前方向重点见 PD-055、PD-062、PD-063；Character / Relationship、Sex-Variant Person Archetype、Parenthood、Generic Relationship Legacy Quarantine、Content Authoring Workflow、Person Domain Authoring consolidation、Life Milestone Domain & Feedback v2、Canonical Setback Occurrence / Resolution Ownership、Active Formal Random Trigger Retirement 与 Bounded Causal Attribution Evidence Handoff 的 current authority closure 见 PD-101 / PD-103 / PD-102 / PD-104 / PD-106 / PD-107 / PD-108 / PD-109 / PD-110 / PD-111。
 - [当前产品阶段](governance/current-product-stage.md)：短滚动看板；当前成熟度、优先级、授权边界与 STOP。
 - [项目收敛](governance/project-convergence.md)：长期收敛、模块化和复杂度预算原则。
 - [AI 协作与 Agent Workflow](governance/ai-collaboration-workflow.md)：项目开发协作，以及 Role / Participant / Skill / Report / Contract 的职责边界。

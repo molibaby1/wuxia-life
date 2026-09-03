@@ -1811,3 +1811,41 @@ Active Formal Event 的 `triggers.random` 是已退役的 authoring metadata。G
 - RandomTrigger / Formal scheduling probability gate / RNG injection；
 - 概率校准、weight 相乘、年度概率语义、schema migration；
 - 扩大到 deferred / unwired event families。
+
+### PD-111：Bounded Causal Attribution Evidence Handoff
+
+**产品决策（Human accepted）**
+
+External Feedback 与 Improvement Hypothesis 仍然只消费 player-observable evidence。Raw Phase0 `internal/player-surface-source.json` 继续禁止进入 Solution / Reviewer Participant workspace。仅在 hypothesis 已选中之后，trusted deterministic Orchestrator 可从 sealed source run 派生 **bounded causal-attribution projection**；投影范围严格等于 `selectedHypothesis.evidenceRefs`。
+
+**核心权威**
+
+1. Feedback / Hypothesis = player-observable evidence only。
+2. Raw internal player-surface source = Participant forbidden。
+3. 选中 hypothesis 后，Orchestrator 才可派生 bounded diagnostic provenance。
+4. Projection scope = `selectedHypothesis.evidenceRefs` only；无 nearby / same-storyline / longitudinal expansion。
+5. 第一版允许的 attribution：`story_event → eventId`（含已捕获的 selected internal choice identity）、`active_action_result → actionId`（优先 captured；legacy 缺失时 fail-closed unique formal name resolution）、其余 source kind → `unavailable`；允许 source sequence / source kind / age 作为 provenance metadata。
+6. 明确禁止进入 diagnostic artifact：seed、persona、GameState、hidden flags/lifeStates、stateDelta/effects、RNG、candidate pools、weights/probabilities、full catalog、full internal trace、未选中 observable entries 的 producer identities。
+7. Solution 与 Reviewer 接收 byte-identical diagnostic evidence。
+8. Diagnostic provenance 是 internal source-run evidence；它不是 player-visible evidence，也不单独证明更广 mechanism / root cause。
+9. Active Problem Package 升级为 `problem-package-v2`，通过 `source.diagnosticEvidenceRefs` 显式引用 diagnostic artifact；历史 v1 继续被 validator 接受。
+10. Human Follow-up retention 在 v2 escalation 时保留 diagnostic evidence；不保留 raw Phase0 internal source。
+
+**明确拒绝**
+
+- Domain Router / EarlyDeathAnalyzer / 任何 domain-specific analyzer
+- 新 Participant / 额外 LLM call
+- raw internal trace 对 Participant 开放
+- 用 eventId 富化 observable payload
+- 复活旧 Hypothesis Investigation Role / pipeline
+
+**Active path**
+
+```text
+selectFirstHypothesis
+→ buildBoundedCausalAttribution (diagnostic/causal-attribution.json)
+→ buildProblemPackage v2
+→ Solution / Reviewer workspaces receive:
+   source/observable-payload.json
+   diagnostic/causal-attribution.json
+```

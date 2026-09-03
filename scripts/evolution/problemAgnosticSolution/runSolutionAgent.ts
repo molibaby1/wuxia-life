@@ -2,7 +2,7 @@ import { lstat, mkdir, open, readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep, join } from 'node:path';
 import {
   validateProblemPackage,
-  type ProblemPackageV1,
+  type ProblemPackage,
 } from '../../../src/evolution/problemPackageContract';
 import {
   validateSolutionWork,
@@ -24,7 +24,7 @@ import {
 } from './solutionParticipantSkills';
 
 export interface RunSolutionAgentInput {
-  problemPackage: ProblemPackageV1;
+  problemPackage: ProblemPackage;
   problemPackagePath: string;
   workspaceRoot: string;
   artifactRoot: string;
@@ -90,7 +90,7 @@ async function validateReferences(result: SolutionWorkV1, input: RunSolutionAgen
 }
 
 export function buildSolutionAgentPrompt(
-  problemPackage: ProblemPackageV1,
+  problemPackage: ProblemPackage,
   assignedSkills: DeliveredParticipantSkill[],
 ): string {
   const skillSections = assignedSkills.flatMap(skill => [
@@ -107,6 +107,7 @@ export function buildSolutionAgentPrompt(
     'Do not modify or assume access to the authoritative repository.',
     'Return zero to three options or an explicit no-proposal/insufficient-evidence/escalate result.',
     'Program/code recommendations are allowed, but execution permission is separate.',
+    'Diagnostic evidence referenced by the Problem Package is trusted internal source-run provenance. It is not player-observable evidence. Producer attribution identifies which captured runtime producer generated an observed entry; it does not by itself prove the broader causal mechanism or that a proposed change is correct.',
     renderStructuredFinalOutputContractV1({
       roleSchemaName: 'SolutionWorkV1',
     }),

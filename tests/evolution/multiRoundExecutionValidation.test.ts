@@ -24,6 +24,8 @@ import {
   captureAuthoritativeFingerprint,
   prepareAgentWorkspace,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
+import { emptyMatchingPlayerSurfaceArtifacts } from '../../scripts/evolution/causalAttribution/emptyMatchingPlayerSurfaceArtifacts';
+import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 const READY_PROBLEM_ID = 'problem-hypothesis-000001';
 const CONFIG_PATH = 'src/data/lines/family-life.json';
@@ -204,11 +206,15 @@ async function runHumanFollowupPersistenceRegression(): Promise<void> {
   const authoritativeRoot = await createWorkspace();
   const evolutionWorkspaceRoot = await createWorkspace();
   const initialSourceRoot = await mkdtemp(join(tmpdir(), 'p2-human-followup-source-'));
-  await writeJson(join(initialSourceRoot, 'reviewer-input/observable-payload.json'), { observed: true });
+  const matching = emptyMatchingPlayerSurfaceArtifacts();
+  await writeJson(join(initialSourceRoot, 'internal/player-surface-source.json'), matching.surface);
+  await mkdir(join(initialSourceRoot, 'reviewer-input'), { recursive: true });
+  await writeFile(join(initialSourceRoot, 'reviewer-input/observable-payload.json'), matching.observableBytes);
   const outerRoot = await mkdtemp(join(tmpdir(), 'p2-human-followup-run-'));
   const multiRoundRunRef = 'p2-human-followup-000001';
   const calls: string[] = [];
   const authoritativeFingerprintBefore = await captureAuthoritativeFingerprint(authoritativeRoot);
+  const observablePayloadHash = sha256Hex(matching.observableBytes);
 
   const result = await runMultiRoundExecutionValidation({
     multiRoundRunRef,
@@ -222,7 +228,7 @@ async function runHumanFollowupPersistenceRegression(): Promise<void> {
         sourceRunRef: 'initial-run-000001',
         sourceRoot: initialSourceRoot,
         experimentRootHash: 'a'.repeat(64),
-        observablePayloadHash: 'b'.repeat(64),
+        observablePayloadHash,
         sourceFingerprintSha256: 'c'.repeat(64),
       }),
       materializeEvolutionWorkspace: async () => ({
@@ -246,7 +252,7 @@ async function runHumanFollowupPersistenceRegression(): Promise<void> {
               sourceRunRef: 'initial-run-000001',
               sourceRoot: initialSourceRoot,
               experimentRootHash: 'a'.repeat(64),
-              observablePayloadHash: 'b'.repeat(64),
+              observablePayloadHash,
               sourceFingerprintSha256: 'c'.repeat(64),
             }),
             runExternalFeedback: async options => {

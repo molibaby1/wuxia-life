@@ -6,7 +6,7 @@ import {
 } from '../../../src/evolution/improvementHypothesisContract';
 import {
   validateProblemPackage,
-  type ProblemPackageV1,
+  type ProblemPackage,
 } from '../../../src/evolution/problemPackageContract';
 import { canonicalJson } from '../phase0/provenance';
 
@@ -25,6 +25,7 @@ export interface BuildProblemPackageInput {
   observablePayloadRef: string;
   externalFeedbackRef: string;
   improvementHypothesisRef: string;
+  diagnosticEvidenceRefs: string[];
   authorityRefs: string[];
   productSourceFingerprintSha256: string;
   destinationPath: string;
@@ -80,17 +81,18 @@ async function writeCreateOnly(path: string, bytes: string): Promise<void> {
 
 export async function buildProblemPackage(
   input: BuildProblemPackageInput,
-): Promise<ProblemPackageV1> {
+): Promise<ProblemPackage> {
   const selectedArtifact = JSON.parse(await readFile(input.selectedHypothesisPath, 'utf8')) as unknown;
   const hypothesis = selectedHypothesisFromArtifact(selectedArtifact);
   const packageValue = validateProblemPackage({
-    schemaVersion: 'problem-package-v1',
+    schemaVersion: 'problem-package-v2',
     problemId: `problem-${hypothesis.hypothesisId}`,
     source: {
       runRef: input.runRef,
       observablePayloadRef: input.observablePayloadRef,
       externalFeedbackRef: input.externalFeedbackRef,
       improvementHypothesisRef: input.improvementHypothesisRef,
+      diagnosticEvidenceRefs: input.diagnosticEvidenceRefs,
     },
     problem: {
       hypothesisId: hypothesis.hypothesisId,

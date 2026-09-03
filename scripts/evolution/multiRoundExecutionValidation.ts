@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { getP8PersonaById } from '../../src/p8/personas';
 import {
   validateProblemPackage,
-  type ProblemPackageV1,
+  type ProblemPackage,
 } from '../../src/evolution/problemPackageContract';
 import {
   validateSolutionReview,

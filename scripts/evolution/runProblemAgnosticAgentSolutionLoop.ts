@@ -32,6 +32,10 @@ import {
   type PreparedAgentWorkspace,
 } from './problemAgnosticSolution/agentWorkspace';
 import { buildProblemPackage } from './problemAgnosticSolution/buildProblemPackage';
+import {
+  buildBoundedCausalAttribution,
+  CAUSAL_ATTRIBUTION_RELATIVE_PATH,
+} from './causalAttribution/buildBoundedCausalAttribution';
 import { assertRepoReferenceFile } from './problemAgnosticSolution/repoReference';
 import {
   runSolutionAgent,
@@ -53,7 +57,7 @@ import {
 } from './problemAgnosticSolution/participantFailureRouting';
 import type { ParticipantFailureOutcomeV1, ParticipantFailureStage } from '../../src/evolution/participantFailureOutcomeContract';
 import { pathToFileURL } from 'node:url';
-import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import type { ProblemPackage } from '../../src/evolution/problemPackageContract';
 import {
   REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
   SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
@@ -407,6 +411,15 @@ export async function runProblemAgnosticAgentSolutionLoop(
     }
   }
   const authoritativeFingerprint = await captureAuthoritativeFingerprint(repositoryRoot);
+  const causalAttributionPath = join(experimentRoot, CAUSAL_ATTRIBUTION_RELATIVE_PATH);
+  await buildBoundedCausalAttribution({
+    sealedPhase0SourceRoot: join(experimentRoot, 'game-runs', sourceRunRef),
+    sealedObservablePayloadPath: join(experimentRoot, 'source/observable-payload.json'),
+    selectedHypothesisPath: selectionPath,
+    sourceRunRef,
+    sourceExperimentRootHash: preflight.experimentRootHash,
+    destinationPath: causalAttributionPath,
+  });
   const problemPackagePath = join(experimentRoot, 'problem-package.json');
   const problemPackage = await buildProblemPackage({
     selectedHypothesisPath: selectionPath,
@@ -414,11 +427,18 @@ export async function runProblemAgnosticAgentSolutionLoop(
     observablePayloadRef: 'source/observable-payload.json',
     externalFeedbackRef: `feedback-runs/${sourceRunRef}/feedback.json`,
     improvementHypothesisRef: `hypothesis-runs/${sourceRunRef}/hypotheses.json`,
+    diagnosticEvidenceRefs: [CAUSAL_ATTRIBUTION_RELATIVE_PATH],
     authorityRefs,
     productSourceFingerprintSha256: authoritativeFingerprint,
     destinationPath: problemPackagePath,
   });
-  const sourceArtifact = { artifactSourceRoot: experimentRoot, artifactRelativePaths: ['source/observable-payload.json'] };
+  const sourceArtifact = {
+    artifactSourceRoot: experimentRoot,
+    artifactRelativePaths: [
+      'source/observable-payload.json',
+      CAUSAL_ATTRIBUTION_RELATIVE_PATH,
+    ],
+  };
   const workspacesRoot = join(experimentRoot, 'agent-workspaces');
   const solutionWorkspace = await prepareAgentWorkspace({
     authoritativeRoot: repositoryRoot,

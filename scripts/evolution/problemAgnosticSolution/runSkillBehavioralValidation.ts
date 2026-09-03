@@ -3,7 +3,7 @@ import { copyFile, mkdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
   validateProblemPackage,
-  type ProblemPackageV1,
+  type ProblemPackage,
 } from '../../../src/evolution/problemPackageContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
@@ -40,7 +40,7 @@ export interface SkillBehavioralValidationDependencies {
 export interface RunSkillBehavioralValidationOptions {
   repositoryRoot: string;
   experimentRoot: string;
-  problemPackage: ProblemPackageV1;
+  problemPackage: ProblemPackage;
   problemPackagePath: string;
   sourceRunRef: string;
   sourceExperimentRootHash: string;

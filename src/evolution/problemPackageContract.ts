@@ -1,3 +1,20 @@
+export interface ProblemPackageProblem {
+  hypothesisId: string;
+  statement: string;
+  observedBasis: string;
+  feedbackRefs: string[];
+  evidenceRefs: string[];
+  unknowns: string[];
+  productSignificance: string;
+}
+
+export interface ProblemPackagePermissions {
+  authoritativeProductWrite: false;
+  sandboxWrite: true;
+  productExecution: false;
+  codeExecution: false;
+}
+
 export interface ProblemPackageV1 {
   schemaVersion: 'problem-package-v1';
   problemId: string;
@@ -7,24 +24,29 @@ export interface ProblemPackageV1 {
     externalFeedbackRef: string;
     improvementHypothesisRef: string;
   };
-  problem: {
-    hypothesisId: string;
-    statement: string;
-    observedBasis: string;
-    feedbackRefs: string[];
-    evidenceRefs: string[];
-    unknowns: string[];
-    productSignificance: string;
-  };
+  problem: ProblemPackageProblem;
   authorityRefs: string[];
   productSourceFingerprintSha256: string;
-  permissions: {
-    authoritativeProductWrite: false;
-    sandboxWrite: true;
-    productExecution: false;
-    codeExecution: false;
-  };
+  permissions: ProblemPackagePermissions;
 }
+
+export interface ProblemPackageV2 {
+  schemaVersion: 'problem-package-v2';
+  problemId: string;
+  source: {
+    runRef: string;
+    observablePayloadRef: string;
+    externalFeedbackRef: string;
+    improvementHypothesisRef: string;
+    diagnosticEvidenceRefs: string[];
+  };
+  problem: ProblemPackageProblem;
+  authorityRefs: string[];
+  productSourceFingerprintSha256: string;
+  permissions: ProblemPackagePermissions;
+}
+
+export type ProblemPackage = ProblemPackageV1 | ProblemPackageV2;
 
 const ROOT_KEYS = [
   'schemaVersion',
@@ -35,11 +57,18 @@ const ROOT_KEYS = [
   'productSourceFingerprintSha256',
   'permissions',
 ] as const;
-const SOURCE_KEYS = [
+const SOURCE_KEYS_V1 = [
   'runRef',
   'observablePayloadRef',
   'externalFeedbackRef',
   'improvementHypothesisRef',
+] as const;
+const SOURCE_KEYS_V2 = [
+  'runRef',
+  'observablePayloadRef',
+  'externalFeedbackRef',
+  'improvementHypothesisRef',
+  'diagnosticEvidenceRefs',
 ] as const;
 const PROBLEM_KEYS = [
   'hypothesisId',
@@ -88,47 +117,64 @@ function stringArray(value: unknown, path: string): string[] {
   return [...value] as string[];
 }
 
+function uniqueNonEmptyStringArray(value: unknown, path: string): string[] {
+  const items = stringArray(value, path);
+  const seen = new Set<string>();
+  for (const item of items) {
+    if (seen.has(item)) throw new Error(`${path} contains duplicate ref: ${item}`);
+    seen.add(item);
+  }
+  return items;
+}
+
 function fixedBoolean<T extends boolean>(value: unknown, expected: T, path: string): T {
   if (value !== expected) throw new Error(`${path} must be ${String(expected)}`);
   return expected;
 }
 
-export function validateProblemPackage(value: unknown): ProblemPackageV1 {
+function parseProblem(value: unknown): ProblemPackageProblem {
+  assertObject(value, 'problem package.problem');
+  assertExactKeys(value, PROBLEM_KEYS, 'problem package.problem');
+  return {
+    hypothesisId: nonEmptyString(value.hypothesisId, 'problem package.problem.hypothesisId'),
+    statement: nonEmptyString(value.statement, 'problem package.problem.statement'),
+    observedBasis: nonEmptyString(value.observedBasis, 'problem package.problem.observedBasis'),
+    feedbackRefs: stringArray(value.feedbackRefs, 'problem package.problem.feedbackRefs'),
+    evidenceRefs: stringArray(value.evidenceRefs, 'problem package.problem.evidenceRefs'),
+    unknowns: stringArray(value.unknowns, 'problem package.problem.unknowns'),
+    productSignificance: nonEmptyString(
+      value.productSignificance,
+      'problem package.problem.productSignificance',
+    ),
+  };
+}
+
+function parsePermissions(value: unknown): ProblemPackagePermissions {
+  assertObject(value, 'problem package.permissions');
+  assertExactKeys(value, PERMISSION_KEYS, 'problem package.permissions');
+  return {
+    authoritativeProductWrite: fixedBoolean(
+      value.authoritativeProductWrite,
+      false,
+      'problem package.permissions.authoritativeProductWrite',
+    ),
+    sandboxWrite: fixedBoolean(value.sandboxWrite, true, 'problem package.permissions.sandboxWrite'),
+    productExecution: fixedBoolean(
+      value.productExecution,
+      false,
+      'problem package.permissions.productExecution',
+    ),
+    codeExecution: fixedBoolean(
+      value.codeExecution,
+      false,
+      'problem package.permissions.codeExecution',
+    ),
+  };
+}
+
+export function validateProblemPackage(value: unknown): ProblemPackage {
   assertObject(value, 'problem package');
   assertExactKeys(value, ROOT_KEYS, 'problem package');
-  if (value.schemaVersion !== 'problem-package-v1') {
-    throw new Error('problem package schemaVersion must be problem-package-v1');
-  }
-
-  assertObject(value.source, 'problem package.source');
-  assertExactKeys(value.source, SOURCE_KEYS, 'problem package.source');
-  const source = {
-    runRef: nonEmptyString(value.source.runRef, 'problem package.source.runRef'),
-    observablePayloadRef: nonEmptyString(value.source.observablePayloadRef, 'problem package.source.observablePayloadRef'),
-    externalFeedbackRef: nonEmptyString(value.source.externalFeedbackRef, 'problem package.source.externalFeedbackRef'),
-    improvementHypothesisRef: nonEmptyString(value.source.improvementHypothesisRef, 'problem package.source.improvementHypothesisRef'),
-  };
-
-  assertObject(value.problem, 'problem package.problem');
-  assertExactKeys(value.problem, PROBLEM_KEYS, 'problem package.problem');
-  const problem = {
-    hypothesisId: nonEmptyString(value.problem.hypothesisId, 'problem package.problem.hypothesisId'),
-    statement: nonEmptyString(value.problem.statement, 'problem package.problem.statement'),
-    observedBasis: nonEmptyString(value.problem.observedBasis, 'problem package.problem.observedBasis'),
-    feedbackRefs: stringArray(value.problem.feedbackRefs, 'problem package.problem.feedbackRefs'),
-    evidenceRefs: stringArray(value.problem.evidenceRefs, 'problem package.problem.evidenceRefs'),
-    unknowns: stringArray(value.problem.unknowns, 'problem package.problem.unknowns'),
-    productSignificance: nonEmptyString(value.problem.productSignificance, 'problem package.problem.productSignificance'),
-  };
-
-  assertObject(value.permissions, 'problem package.permissions');
-  assertExactKeys(value.permissions, PERMISSION_KEYS, 'problem package.permissions');
-  const permissions = {
-    authoritativeProductWrite: fixedBoolean(value.permissions.authoritativeProductWrite, false, 'problem package.permissions.authoritativeProductWrite'),
-    sandboxWrite: fixedBoolean(value.permissions.sandboxWrite, true, 'problem package.permissions.sandboxWrite'),
-    productExecution: fixedBoolean(value.permissions.productExecution, false, 'problem package.permissions.productExecution'),
-    codeExecution: fixedBoolean(value.permissions.codeExecution, false, 'problem package.permissions.codeExecution'),
-  } as const;
 
   const fingerprint = nonEmptyString(
     value.productSourceFingerprintSha256,
@@ -138,18 +184,74 @@ export function validateProblemPackage(value: unknown): ProblemPackageV1 {
     throw new Error('problem package.productSourceFingerprintSha256 must be a SHA-256 hex string');
   }
 
-  return {
-    schemaVersion: 'problem-package-v1',
-    problemId: nonEmptyString(value.problemId, 'problem package.problemId'),
-    source,
-    problem,
-    authorityRefs: stringArray(value.authorityRefs, 'problem package.authorityRefs'),
-    productSourceFingerprintSha256: fingerprint,
-    permissions,
-  };
+  const problem = parseProblem(value.problem);
+  const permissions = parsePermissions(value.permissions);
+  const problemId = nonEmptyString(value.problemId, 'problem package.problemId');
+  const authorityRefs = stringArray(value.authorityRefs, 'problem package.authorityRefs');
+
+  assertObject(value.source, 'problem package.source');
+  if (value.schemaVersion === 'problem-package-v1') {
+    assertExactKeys(value.source, SOURCE_KEYS_V1, 'problem package.source');
+    return {
+      schemaVersion: 'problem-package-v1',
+      problemId,
+      source: {
+        runRef: nonEmptyString(value.source.runRef, 'problem package.source.runRef'),
+        observablePayloadRef: nonEmptyString(
+          value.source.observablePayloadRef,
+          'problem package.source.observablePayloadRef',
+        ),
+        externalFeedbackRef: nonEmptyString(
+          value.source.externalFeedbackRef,
+          'problem package.source.externalFeedbackRef',
+        ),
+        improvementHypothesisRef: nonEmptyString(
+          value.source.improvementHypothesisRef,
+          'problem package.source.improvementHypothesisRef',
+        ),
+      },
+      problem,
+      authorityRefs,
+      productSourceFingerprintSha256: fingerprint,
+      permissions,
+    };
+  }
+
+  if (value.schemaVersion === 'problem-package-v2') {
+    assertExactKeys(value.source, SOURCE_KEYS_V2, 'problem package.source');
+    return {
+      schemaVersion: 'problem-package-v2',
+      problemId,
+      source: {
+        runRef: nonEmptyString(value.source.runRef, 'problem package.source.runRef'),
+        observablePayloadRef: nonEmptyString(
+          value.source.observablePayloadRef,
+          'problem package.source.observablePayloadRef',
+        ),
+        externalFeedbackRef: nonEmptyString(
+          value.source.externalFeedbackRef,
+          'problem package.source.externalFeedbackRef',
+        ),
+        improvementHypothesisRef: nonEmptyString(
+          value.source.improvementHypothesisRef,
+          'problem package.source.improvementHypothesisRef',
+        ),
+        diagnosticEvidenceRefs: uniqueNonEmptyStringArray(
+          value.source.diagnosticEvidenceRefs,
+          'problem package.source.diagnosticEvidenceRefs',
+        ),
+      },
+      problem,
+      authorityRefs,
+      productSourceFingerprintSha256: fingerprint,
+      permissions,
+    };
+  }
+
+  throw new Error('problem package schemaVersion must be problem-package-v1 or problem-package-v2');
 }
 
-export function parseProblemPackage(raw: string): ProblemPackageV1 {
+export function parseProblemPackage(raw: string): ProblemPackage {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);

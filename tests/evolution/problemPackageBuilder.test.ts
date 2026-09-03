@@ -39,15 +39,20 @@ export async function runProblemPackageBuilderTests(): Promise<void> {
     observablePayloadRef: 'source/observable-payload.json',
     externalFeedbackRef: 'feedback/feedback.json',
     improvementHypothesisRef: 'hypothesis/hypotheses.json',
+    diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
     authorityRefs: ['docs/product/auto-evolution-model.md'],
     productSourceFingerprintSha256: 'a'.repeat(64),
     destinationPath,
   });
+  assert.equal(packageValue.schemaVersion, 'problem-package-v2');
   assert.equal(packageValue.problemId, 'problem-hypothesis-000001');
   assert.equal(packageValue.problem.statement, hypothesis.hypothesis);
   assert.deepEqual(packageValue.problem.feedbackRefs, hypothesis.feedbackRefs);
   assert.deepEqual(packageValue.problem.evidenceRefs, hypothesis.evidenceRefs);
   assert.deepEqual(packageValue.problem.unknowns, hypothesis.unknowns);
+  if (packageValue.schemaVersion === 'problem-package-v2') {
+    assert.deepEqual(packageValue.source.diagnosticEvidenceRefs, ['diagnostic/causal-attribution.json']);
+  }
   assert.equal(JSON.parse(await readFile(destinationPath, 'utf8')).problem.statement, hypothesis.hypothesis);
 
   await assert.rejects(
@@ -57,6 +62,7 @@ export async function runProblemPackageBuilderTests(): Promise<void> {
       observablePayloadRef: 'source/observable-payload.json',
       externalFeedbackRef: 'feedback/feedback.json',
       improvementHypothesisRef: 'hypothesis/hypotheses.json',
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
       authorityRefs: ['docs/product/auto-evolution-model.md'],
       productSourceFingerprintSha256: 'a'.repeat(64),
       destinationPath,
@@ -77,6 +83,7 @@ export async function runProblemPackageBuilderTests(): Promise<void> {
       observablePayloadRef: 'source/observable-payload.json',
       externalFeedbackRef: 'feedback/feedback.json',
       improvementHypothesisRef: 'hypothesis/hypotheses.json',
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
       authorityRefs: ['docs/product/auto-evolution-model.md'],
       productSourceFingerprintSha256: 'a'.repeat(64),
       destinationPath: join(forbiddenRoot, 'problem-package.json'),

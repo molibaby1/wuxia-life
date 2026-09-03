@@ -14,6 +14,7 @@ import assert from 'node:assert/strict';
 import { EventExecutor } from '../src/core/EventExecutor';
 import { EventLoader } from '../src/core/EventLoader';
 import { generateChoiceFeedback } from '../src/core/ChoiceFeedbackGenerator';
+import medicalEventsJson from '../src/data/lines/medical.json';
 import type { EffectDefinition, EventDefinition, GameState, PlayerState } from '../src/types';
 
 function baseGameState(overrides: Partial<PlayerState> = {}): GameState {
@@ -160,15 +161,17 @@ async function testPoisonKingAdditive(): Promise<void> {
 // Medical-wide authoring invariant — every stat_modify must be additive
 // ---------------------------------------------------------------------------
 function testMedicalWideAdditiveInvariant(): void {
-  // The canonical Medical catalog is exactly the 21 authored events in
-  // src/data/lines/medical.json, all exposed by the runtime EventLoader.
-  const medicalIds = ['medical_talent_discovery', 'p27_study_habit_healer_reinforcement', 'p29_study_habit_case_record_duty', 'p29_social_momentum_healer_network', 'medical_master_apprentice', 'medical_herb_gathering', 'medical_herb_gathering_self_taught', 'medical_clinic_practice', 'medical_plague_outbreak', 'medical_poison_temptation', 'medical_dual_cultivation', 'medical_divine_doctor_fame', 'medical_imperial_doctor', 'medical_palace_intrigue', 'medical_medical_book', 'medical_poison_king', 'medical_ending_divine_doctor', 'medical_ending_poison_king', 'medical_ending_imperial_doctor', 'medical_ending_folk_doctor', 'medical_ending_hermit'];
+  // The canonical Medical catalog is derived directly from the authored source
+  // src/data/lines/medical.json (the same top-level array the runtime
+  // EventLoader consumes) rather than a maintained list of event IDs, so the
+  // invariant covers every event — current and future — automatically.
+  const medicalEvents = medicalEventsJson as EventDefinition[];
+  assert(medicalEvents.length > 0, 'medical.json 必须包含事件目录');
 
   let total = 0;
   let withAdd = 0;
   const offenders: string[] = [];
-  for (const id of medicalIds) {
-    const event = getEvent(id);
+  for (const event of medicalEvents) {
     const effectArrays: EffectDefinition[][] = [
       ...(event.autoEffects ?? []).map(effect => [effect]),
     ];
@@ -183,13 +186,13 @@ function testMedicalWideAdditiveInvariant(): void {
         if (effect.operator === 'add') {
           withAdd += 1;
         } else {
-          offenders.push(`${id}:${effect.stat}`);
+          offenders.push(`${event.id}:${effect.stat}`);
         }
       }
     }
   }
 
-  assert(total > 0, 'Medical 事件必须包含至少一个 stat_modify');
+  assert(total > 0, 'Medical 事件必须包含至少一个 stat_modify（若此处为 0，说明遍历未覆盖到任何效果）');
   assert.equal(withAdd, total, `所有 ${total} 个 Medical stat_modify 必须显式声明 operator:'add'，缺失/其他操作符：${offenders.join(', ')}`);
   console.log(`   Medical stat_modify total=${total}, operator:add=${withAdd}, offenders=0`);
 }

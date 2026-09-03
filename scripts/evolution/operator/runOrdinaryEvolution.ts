@@ -11,6 +11,11 @@ import {
   runMultiRoundExecutionValidation,
   type MultiRoundExecutionValidationResult,
 } from '../multiRoundExecutionValidation';
+import {
+  buildMultiRoundSessionSummary,
+  readMultiRoundRunManifest,
+  type MultiRoundSessionSummaryV1,
+} from '../multiRoundRunManifestContract';
 import { archiveOperationalRunReport } from '../reporting/archiveOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
 import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
@@ -44,11 +49,8 @@ export interface OperatorGitPreflight {
 
 export interface OperatorAeWorkflowResult {
   multiRound: MultiRoundExecutionValidationResult;
-  terminalOutcome: string;
-  decisionRoute: string | null;
-  decisionReasonCode: string | null;
-  crossRoundObserved: boolean;
-  authoritativeRepoModificationObserved: boolean;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  authoritativeRootChanged: boolean;
   experimentRoot: string;
 }
 
@@ -79,7 +81,6 @@ export interface RunOrdinaryEvolutionDependencies {
   refreshOperationalIndex?: (input: { repositoryRoot: string }) => Promise<{
     topLevelIndexPath: string;
   }>;
-  captureAuthoritativeFingerprint?: (repositoryRoot: string) => Promise<string>;
 }
 
 export interface RunOrdinaryEvolutionInput {
@@ -91,16 +92,13 @@ export interface RunOrdinaryEvolutionInput {
 export type ObservabilityStatus = 'PASS' | 'OBSERVABILITY_REFRESH_FAILED';
 
 export interface OrdinaryEvolutionOperatorResult {
-  schemaVersion: 'ordinary-evolution-operator-result-v1';
+  schemaVersion: 'ordinary-evolution-operator-result-v2';
   sessionId: string;
   branch: string;
   headSha: string;
   participantBinding: OperatorParticipantBindingId;
-  terminalOutcome: string;
-  decisionRoute: string | null;
-  decisionReasonCode: string | null;
-  crossRoundObserved: boolean;
-  authoritativeRepoModificationObserved: boolean;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  authoritativeRootChanged: boolean;
   runReportId: string | null;
   runReportPath: string | null;
   humanFollowupActiveCount: number | null;
@@ -167,58 +165,10 @@ async function defaultRunPhase0Source(input: {
   return { sourceRoot: phase0.outDir, sourceRunRef: input.sessionId };
 }
 
-async function readRoundDecision(experimentRoot: string): Promise<{
-  route: string | null;
-  reasonCode: string | null;
-}> {
-  try {
-    const decision = JSON.parse(await readFile(join(experimentRoot, 'round-1/decision.json'), 'utf8')) as {
-      route?: unknown;
-      reasonCode?: unknown;
-    };
-    return {
-      route: typeof decision.route === 'string' ? decision.route : null,
-      reasonCode: typeof decision.reasonCode === 'string' ? decision.reasonCode : null,
-    };
-  } catch {
-    return { route: null, reasonCode: null };
-  }
-}
-
-/**
- * Host-terminal outcome for the operator summary.
- * Round decision route is only authoritative when multi-round stopped because
- * Round 1 / Round 2 itself terminated; otherwise prefer multi-round stopReason
- * (e.g. EXECUTION_SCOPE_VIOLATION after a READY decision).
- */
-export function resolveOperatorTerminalOutcome(input: {
-  multiRound: Pick<MultiRoundExecutionValidationResult, 'stopReason' | 'outcome' | 'rounds'>;
-  decisionRoute: string | null;
-}): string {
-  const lastRoundTerminal = [...input.multiRound.rounds]
-    .reverse()
-    .map(round => round.terminalRoute)
-    .find((route): route is string => typeof route === 'string' && route.length > 0)
-    ?? input.decisionRoute;
-
-  if (
-    input.multiRound.stopReason === 'ROUND_1_TERMINAL_NOT_READY'
-    || input.multiRound.stopReason === 'ROUND_2_COMPLETED'
-  ) {
-    return lastRoundTerminal ?? input.multiRound.stopReason;
-  }
-
-  return input.multiRound.stopReason
-    || input.multiRound.outcome
-    || lastRoundTerminal
-    || 'UNKNOWN_OPERATOR_TERMINAL';
-}
-
-export function resolveAuthoritativeRepoModificationObserved(input: {
+export function resolveAuthoritativeRootChanged(input: {
   fingerprintBefore: string;
   fingerprintAfter: string;
 }): boolean {
-  // Fingerprint already excludes operational / gitignored trees (.tmp, artifacts, .omx, …).
   return input.fingerprintBefore !== input.fingerprintAfter;
 }
 
@@ -240,17 +190,11 @@ async function defaultRunAeWorkflow(input: {
     participantMode: input.binding.participantMode,
   });
   const fingerprintAfter = await captureAuthoritativeFingerprint(input.repositoryRoot);
-  const decision = await readRoundDecision(experimentRoot);
+  const manifest = await readMultiRoundRunManifest(multiRound.manifestPath);
   return {
     multiRound,
-    terminalOutcome: resolveOperatorTerminalOutcome({
-      multiRound,
-      decisionRoute: decision.route,
-    }),
-    decisionRoute: decision.route,
-    decisionReasonCode: decision.reasonCode,
-    crossRoundObserved: multiRound.crossRoundTransitions > 0,
-    authoritativeRepoModificationObserved: resolveAuthoritativeRepoModificationObserved({
+    sessionExecution: buildMultiRoundSessionSummary(manifest),
+    authoritativeRootChanged: resolveAuthoritativeRootChanged({
       fingerprintBefore,
       fingerprintAfter,
     }),
@@ -282,6 +226,7 @@ async function defaultRefreshHumanFollowupInbox(input: {
 export function formatOrdinaryEvolutionOperatorSummary(
   result: OrdinaryEvolutionOperatorResult,
 ): string {
+  const session = result.sessionExecution;
   const lines = [
     'AE RUN',
     '',
@@ -294,14 +239,23 @@ export function formatOrdinaryEvolutionOperatorSummary(
     'participant:',
     result.participantBinding,
     '',
-    'outcome:',
-    result.terminalOutcome,
+    'host stop reason:',
+    session.stopReason,
+    '',
+    'multi-round outcome:',
+    session.outcome,
+    '',
+    'last round route:',
+    session.lastRoundTerminalRoute ?? '(none)',
+    '',
+    'execution status:',
+    session.execution.status,
     '',
     'cross-round:',
-    result.crossRoundObserved ? 'yes' : 'no',
+    session.crossRoundTransitions > 0 ? 'yes' : 'no',
     '',
-    'authoritative repo changes:',
-    result.authoritativeRepoModificationObserved ? 'observed' : 'none',
+    'authoritative root integrity:',
+    result.authoritativeRootChanged ? 'CHANGED' : 'UNCHANGED',
     '',
     'report:',
     result.runReportPath ?? '(unavailable)',
@@ -392,16 +346,13 @@ export async function runOrdinaryEvolution(
   }
 
   const result: OrdinaryEvolutionOperatorResult = {
-    schemaVersion: 'ordinary-evolution-operator-result-v1',
+    schemaVersion: 'ordinary-evolution-operator-result-v2',
     sessionId,
     branch: git.branch,
     headSha: git.headSha,
     participantBinding: binding.bindingId,
-    terminalOutcome: ae.terminalOutcome,
-    decisionRoute: ae.decisionRoute,
-    decisionReasonCode: ae.decisionReasonCode,
-    crossRoundObserved: ae.crossRoundObserved,
-    authoritativeRepoModificationObserved: ae.authoritativeRepoModificationObserved,
+    sessionExecution: ae.sessionExecution,
+    authoritativeRootChanged: ae.authoritativeRootChanged,
     runReportId,
     runReportPath,
     humanFollowupActiveCount,

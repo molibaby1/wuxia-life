@@ -3,16 +3,26 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
+  buildMultiRoundSessionSummary,
+  discoverMultiRoundRunManifestPath,
+  durableMultiRoundSessionSemantics,
+  readMultiRoundRunManifest,
+  type MultiRoundSessionSummaryV1,
+} from '../multiRoundRunManifestContract';
+import {
   collectWorkflowSummaries,
   renderOperationalRunReportMarkdown,
   type WorkflowSummary,
 } from './buildOperationalRunReport';
 import {
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2,
   RUN_REPORTS_ROOT,
   buildOperationalObservabilityIndex,
   parseOperationalRunReport,
+  type OperationalRunReport,
   type OperationalRunReportV1,
+  type OperationalRunReportV2,
 } from './buildOperationalObservabilityIndex';
 
 const REPORT_ID_PREFIX = 'ae-report-';
@@ -31,6 +41,7 @@ export interface ArchiveOperationalRunReportResult {
   createdAt: string;
   reusedCreatedAt: boolean;
   workflowCount: number;
+  schemaVersion: OperationalRunReport['schemaVersion'];
   runReportsIndexPath: string;
   topLevelIndexPath: string;
 }
@@ -61,6 +72,7 @@ function durableWorkflowSemantics(summary: WorkflowSummary): Record<string, unkn
   };
 }
 
+/** Legacy workflow-only report identity. Unchanged for v1 archives. */
 export function computeOperationalRunReportId(input: {
   sourceRoot: string;
   workflows: WorkflowSummary[];
@@ -72,7 +84,21 @@ export function computeOperationalRunReportId(input: {
   return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
 }
 
-function buildReportDocument(input: {
+/** Session-aware report identity: sourceRoot + sessionExecution + workflows. */
+export function computeOperationalRunReportIdV2(input: {
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  workflows: WorkflowSummary[];
+}): string {
+  const digest = sha256Hex(canonicalJson({
+    sourceRoot: input.sourceRoot,
+    sessionExecution: durableMultiRoundSessionSemantics(input.sessionExecution),
+    workflows: input.workflows.map(durableWorkflowSemantics),
+  }));
+  return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
+}
+
+function buildReportDocumentV1(input: {
   reportId: string;
   createdAt: string;
   sourceRoot: string;
@@ -88,6 +114,24 @@ function buildReportDocument(input: {
   };
 }
 
+function buildReportDocumentV2(input: {
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  workflows: WorkflowSummary[];
+}): OperationalRunReportV2 {
+  return {
+    schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2,
+    reportId: input.reportId,
+    createdAt: input.createdAt,
+    sourceRoot: input.sourceRoot,
+    sessionExecution: input.sessionExecution,
+    workflowCount: input.workflows.length,
+    workflows: input.workflows,
+  };
+}
+
 async function tryReadExistingCreatedAt(
   reportJsonPath: string,
   reportId: string,
@@ -97,7 +141,6 @@ async function tryReadExistingCreatedAt(
     return existing.createdAt;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
-    // Missing or unreadable prior sidecar → treat as first archive for this identity.
     try {
       await lstat(reportJsonPath);
     } catch (statError) {
@@ -121,24 +164,29 @@ export async function archiveOperationalRunReport(
 
   const sourceRoot = toRepositoryRelativePath(repositoryRoot, absoluteRoot);
   const workflows = await collectWorkflowSummaries(absoluteRoot);
-  const reportId = computeOperationalRunReportId({ sourceRoot, workflows });
+  const manifestPath = await discoverMultiRoundRunManifestPath(absoluteRoot);
+  const sessionExecution = manifestPath === null
+    ? null
+    : buildMultiRoundSessionSummary(await readMultiRoundRunManifest(manifestPath));
+
+  const reportId = sessionExecution === null
+    ? computeOperationalRunReportId({ sourceRoot, workflows })
+    : computeOperationalRunReportIdV2({ sourceRoot, sessionExecution, workflows });
   const reportDirectory = join(repositoryRoot, RUN_REPORTS_ROOT, reportId);
   const reportJsonPath = join(reportDirectory, 'report.json');
   const reportMarkdownPath = join(reportDirectory, 'report.md');
 
   const existingCreatedAt = await tryReadExistingCreatedAt(reportJsonPath, reportId);
   const createdAt = existingCreatedAt ?? new Date().toISOString();
-  const report = buildReportDocument({
-    reportId,
-    createdAt,
-    sourceRoot,
-    workflows,
-  });
+  const report: OperationalRunReport = sessionExecution === null
+    ? buildReportDocumentV1({ reportId, createdAt, sourceRoot, workflows })
+    : buildReportDocumentV2({ reportId, createdAt, sourceRoot, sessionExecution, workflows });
   const markdown = renderOperationalRunReportMarkdown({
     summaries: workflows,
     reportId,
     createdAt,
     includeArtifactRetentionNote: true,
+    ...(sessionExecution === null ? {} : { sessionExecution }),
   });
 
   await mkdir(reportDirectory, { recursive: true });
@@ -155,6 +203,7 @@ export async function archiveOperationalRunReport(
     createdAt,
     reusedCreatedAt: existingCreatedAt !== null,
     workflowCount: workflows.length,
+    schemaVersion: report.schemaVersion,
     runReportsIndexPath: indexes.runReportsIndexPath,
     topLevelIndexPath: indexes.topLevelIndexPath,
   };
@@ -186,6 +235,7 @@ if (import.meta.url === executedPath) {
   archiveOperationalRunReport(parseCliArgs(process.argv.slice(2)))
     .then(result => {
       console.log(`Archived operational run report: ${result.reportId}`);
+      console.log(`Schema: ${result.schemaVersion}`);
       console.log(`Workflows: ${result.workflowCount}`);
       console.log(`Created: ${result.createdAt}${result.reusedCreatedAt ? ' (preserved)' : ''}`);
       console.log(`Wrote ${result.reportJsonPath}`);

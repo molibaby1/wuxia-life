@@ -120,6 +120,12 @@ full P3 remains `DEFERRED`
 
 这是 packaging-only host wrapper：显式默认 Participant binding `CODEX_CURRENT`（不是 previous-run inheritance）、创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity、调用既有 AE workflow 恰好一次、再机械刷新 observability。它**不是**最终 Human-facing AE Skill；未来 Skill 可以调用这个稳定 host primitive。
 
+Session execution 权威：
+
+- `run-manifest.json` = multi-round / host session 执行真相（`outcome` / `stopReason` / execution status / cross-round）
+- `round-*/decision.json` 与 workflow outcome = 该 round 的 workflow 真相
+- Operator 与 archived Run Report（v2）都必须分别渲染这两层，不得把 round route 合成假的 session terminal
+
 Human 只需要记住一个固定操作入口：
 
 `artifacts/evolution/index.md`

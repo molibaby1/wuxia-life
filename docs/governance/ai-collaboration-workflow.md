@@ -154,6 +154,8 @@ Sidecar Run Report 已是当前可用的旁路 observability capability。
 
 这是 thin host packaging：要求 `dev` + clean working tree；canonical Participant default 为显式 `CODEX_CURRENT`（fail closed 为 `PARTICIPANT_BINDING_UNAVAILABLE`，不继承 previous-run）；创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity；调用既有 multi-round / problem-agnostic AE workflow 恰好一次；再刷新 sidecar observability。Wrapper 不复制 Feedback / Hypothesis / Solution / Reviewer / Decision Router / P2 语义。它不是最终 Human-facing AE Skill。
 
+`run-manifest.json` 是 session execution 真相；round decision / workflow outcome 只是 round-level 真相。Operator summary 与 archived Run Report v2 必须分别展示 host stop reason 与 last round route，不得合成单一 terminalOutcome。
+
 Sidecar historical reports 使用：
 
 `artifacts/evolution/run-reports/`

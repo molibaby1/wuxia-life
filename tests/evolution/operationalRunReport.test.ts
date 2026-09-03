@@ -397,7 +397,7 @@ async function testNestedRoundOne(): Promise<void> {
   assert.equal(result.workflowCount, 1);
   assert.match(report, /## 1\. p2-run\/round-1/);
   assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal outcome: NOT RECORDED/);
+  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
 }
 
 async function testProblemPackageOnlyIsNotWorkflow(): Promise<void> {
@@ -457,7 +457,7 @@ async function testIncompleteNestedWorkflow(): Promise<void> {
   assert.equal(result.workflowCount, 1);
   assert.match(report, /## 1\. p2-run\/round-1/);
   assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal outcome: NOT RECORDED/);
+  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
   assert.match(report, /Problem statement: The late-game workflow repeats too much content\./);
   assert.doesNotMatch(report, /ENGINEERING_DEFECT|PARTICIPANT_FAILURE|SYSTEM_FAILURE/);
 }
@@ -490,7 +490,7 @@ async function testIncompleteHistoricalAttempt(): Promise<void> {
 
   assert.equal(result.workflowCount, 1);
   assert.match(report, /Status: INCOMPLETE/);
-  assert.match(report, /Terminal outcome: NOT RECORDED/);
+  assert.match(report, /Terminal route \/ workflow outcome: NOT RECORDED/);
   assert.match(report, /Last available artifact: source\/observable-payload\.json/);
   assert.doesNotMatch(report, /PARTICIPANT_FAILURE|SYSTEM_FAILURE|Agent crashed|Human aborted/);
 }

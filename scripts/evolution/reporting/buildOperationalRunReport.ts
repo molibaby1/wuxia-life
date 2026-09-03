@@ -1,6 +1,12 @@
 import { mkdir, readdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { validatePhase0RunRef } from '../phase0/provenance';
+import {
+  buildMultiRoundSessionSummary,
+  discoverMultiRoundRunManifestPath,
+  readMultiRoundRunManifest,
+  type MultiRoundSessionSummaryV1,
+} from '../multiRoundRunManifestContract';
 
 const WORKFLOW_DIRECTORY_PREFIX = 'problem-agnostic-agent-solution-loop-instance-';
 const DEFAULT_ROOT = '.tmp/evolution';
@@ -78,6 +84,7 @@ export interface RenderOperationalRunReportInput {
   reportId?: string;
   createdAt?: string;
   includeArtifactRetentionNote?: boolean;
+  sessionExecution?: MultiRoundSessionSummaryV1;
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -402,7 +409,11 @@ function renderOptionalLine(label: string, value: string | null): string[] {
   return value === null ? [] : [`- ${label}: ${value}`];
 }
 
-function renderWorkflow(summary: WorkflowSummary, index: number): string[] {
+function renderWorkflow(
+  summary: WorkflowSummary,
+  index: number,
+  sessionExecution: MultiRoundSessionSummaryV1 | undefined,
+): string[] {
   const lines = [
     `## ${index}. ${summary.identity}`,
     '',
@@ -414,7 +425,7 @@ function renderWorkflow(summary: WorkflowSummary, index: number): string[] {
   ];
 
   if (summary.terminalRoute === null) {
-    lines.push('- Terminal outcome: NOT RECORDED');
+    lines.push('- Terminal route / workflow outcome: NOT RECORDED');
   } else {
     lines.push(`- Terminal route / workflow outcome: ${summary.terminalRoute}`);
   }
@@ -437,7 +448,13 @@ function renderWorkflow(summary: WorkflowSummary, index: number): string[] {
   }
 
   if (summary.status === 'READY_FOR_CONFIG_EXECUTION') {
-    lines.push('- Accepted configuration work is ready for separately authorized execution.');
+    if (sessionExecution && sessionExecution.execution.status !== 'not_started') {
+      lines.push(
+        '- Round workflow accepted configuration scope; see Session Execution for what followed.',
+      );
+    } else {
+      lines.push('- Accepted configuration work is ready for separately authorized execution.');
+    }
   }
   if (summary.status === 'INCOMPLETE') {
     lines.push(...renderOptionalLine('Last available artifact', summary.lastAvailableArtifact));
@@ -451,6 +468,25 @@ function renderWorkflow(summary: WorkflowSummary, index: number): string[] {
   }
   lines.push('');
   return lines;
+}
+
+function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): string[] {
+  const changed = summary.execution.actualChangedFiles.length === 0
+    ? '(none)'
+    : summary.execution.actualChangedFiles.join(', ');
+  return [
+    '## Session Execution',
+    '',
+    `- Multi-round run: ${summary.multiRoundRunRef}`,
+    `- Host stop reason: ${summary.stopReason}`,
+    `- Multi-round outcome: ${summary.outcome}`,
+    `- Cross-round transitions: ${summary.crossRoundTransitions}`,
+    `- Last round route: ${summary.lastRoundTerminalRoute ?? '(none)'}`,
+    `- Execution status: ${summary.execution.status}`,
+    `- Actual execution changes: ${changed}`,
+    `- Resulting run: ${summary.execution.resultingRunRef ?? '(none)'}`,
+    '',
+  ];
 }
 
 export function renderOperationalRunReportMarkdown(input: RenderOperationalRunReportInput): string {
@@ -485,6 +521,11 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
     headerLines.push(`Observed workflow runs: ${summaries.length}`);
   }
 
+  if (input.sessionExecution) {
+    headerLines.push('', ...renderSessionExecutionSection(input.sessionExecution));
+    headerLines.push('## Workflow / Round Details', '');
+  }
+
   if (aggregateCounts !== null) {
     headerLines.push(
       '',
@@ -501,19 +542,23 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
   return [
     ...headerLines,
     '',
-    ...summaries.flatMap((summary, index) => renderWorkflow(summary, index + 1)),
+    ...summaries.flatMap((summary, index) => renderWorkflow(summary, index + 1, input.sessionExecution)),
   ].join('\n');
 }
 
-function renderReport(summaries: WorkflowSummary[]): string {
-  return renderOperationalRunReportMarkdown({ summaries });
+function renderReport(summaries: WorkflowSummary[], sessionExecution?: MultiRoundSessionSummaryV1): string {
+  return renderOperationalRunReportMarkdown({ summaries, sessionExecution });
 }
 
 export async function buildOperationalRunReport(
   input: BuildOperationalRunReportInput,
 ): Promise<BuildOperationalRunReportResult> {
   const summaries = await collectWorkflowSummaries(input.root);
-  const report = renderReport(summaries);
+  const manifestPath = await discoverMultiRoundRunManifestPath(input.root);
+  const sessionExecution = manifestPath === null
+    ? undefined
+    : buildMultiRoundSessionSummary(await readMultiRoundRunManifest(manifestPath));
+  const report = renderReport(summaries, sessionExecution);
   await mkdir(dirname(resolve(input.outputPath)), { recursive: true });
   await writeFile(input.outputPath, report, 'utf8');
   return { reportPath: input.outputPath, workflowCount: summaries.length };

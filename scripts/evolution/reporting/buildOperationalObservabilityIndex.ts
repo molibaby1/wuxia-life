@@ -2,8 +2,13 @@ import { access, lstat, mkdir, readdir, readFile, writeFile } from 'node:fs/prom
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { WorkflowSummary } from './buildOperationalRunReport';
+import {
+  MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION,
+  type MultiRoundSessionSummaryV1,
+} from '../multiRoundRunManifestContract';
 
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION = 'auto-evolution-operational-run-report-v1';
+export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2 = 'auto-evolution-operational-run-report-v2';
 export const RUN_REPORTS_ROOT = 'artifacts/evolution/run-reports';
 export const EVOLUTION_OPERATIONAL_INDEX_PATH = 'artifacts/evolution/index.md';
 export const HUMAN_FOLLOWUP_INDEX_PATH = 'artifacts/evolution/human-follow-up/index.md';
@@ -16,6 +21,18 @@ export interface OperationalRunReportV1 {
   workflowCount: number;
   workflows: WorkflowSummary[];
 }
+
+export interface OperationalRunReportV2 {
+  schemaVersion: typeof OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2;
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  workflowCount: number;
+  workflows: WorkflowSummary[];
+}
+
+export type OperationalRunReport = OperationalRunReportV1 | OperationalRunReportV2;
 
 export interface BuildOperationalObservabilityIndexInput {
   repositoryRoot: string;
@@ -47,7 +64,60 @@ function markdownCell(value: string): string {
   return value.replaceAll('|', '\\|').replaceAll('\r', ' ').replaceAll('\n', ' ');
 }
 
-export function parseOperationalRunReport(raw: string, expectedReportId: string): OperationalRunReportV1 {
+function parseSessionExecution(value: unknown, reportId: string): MultiRoundSessionSummaryV1 {
+  if (!isRecord(value)) {
+    throw new Error(`missing sessionExecution for ${reportId}`);
+  }
+  if (value.schemaVersion !== MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION) {
+    throw new Error(`invalid sessionExecution.schemaVersion for ${reportId}`);
+  }
+  if (typeof value.multiRoundRunRef !== 'string' || value.multiRoundRunRef.length === 0) {
+    throw new Error(`invalid sessionExecution.multiRoundRunRef for ${reportId}`);
+  }
+  if (typeof value.stopReason !== 'string' || value.stopReason.length === 0) {
+    throw new Error(`invalid sessionExecution.stopReason for ${reportId}`);
+  }
+  if (
+    value.outcome !== 'CROSS_ROUND_TRANSITION_OBSERVED'
+    && value.outcome !== 'NO_CROSS_ROUND_TRANSITION_OBSERVED'
+    && value.outcome !== 'STOPPED'
+  ) {
+    throw new Error(`invalid sessionExecution.outcome for ${reportId}`);
+  }
+  if (typeof value.roundCount !== 'number' || !Number.isInteger(value.roundCount)) {
+    throw new Error(`invalid sessionExecution.roundCount for ${reportId}`);
+  }
+  if (value.crossRoundTransitions !== 0 && value.crossRoundTransitions !== 1) {
+    throw new Error(`invalid sessionExecution.crossRoundTransitions for ${reportId}`);
+  }
+  if (!(value.lastRoundTerminalRoute === null || typeof value.lastRoundTerminalRoute === 'string')) {
+    throw new Error(`invalid sessionExecution.lastRoundTerminalRoute for ${reportId}`);
+  }
+  if (!isRecord(value.execution)) {
+    throw new Error(`invalid sessionExecution.execution for ${reportId}`);
+  }
+  const execution = value.execution;
+  if (typeof execution.executionRef !== 'string') {
+    throw new Error(`invalid sessionExecution.execution.executionRef for ${reportId}`);
+  }
+  if (
+    execution.status !== 'completed'
+    && execution.status !== 'failed'
+    && execution.status !== 'scope_violation'
+    && execution.status !== 'not_started'
+  ) {
+    throw new Error(`invalid sessionExecution.execution.status for ${reportId}`);
+  }
+  if (!Array.isArray(execution.actualChangedFiles) || execution.actualChangedFiles.some(entry => typeof entry !== 'string')) {
+    throw new Error(`invalid sessionExecution.execution.actualChangedFiles for ${reportId}`);
+  }
+  if (!(execution.resultingRunRef === null || typeof execution.resultingRunRef === 'string')) {
+    throw new Error(`invalid sessionExecution.execution.resultingRunRef for ${reportId}`);
+  }
+  return value as MultiRoundSessionSummaryV1;
+}
+
+export function parseOperationalRunReport(raw: string, expectedReportId: string): OperationalRunReport {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw) as unknown;
@@ -57,9 +127,12 @@ export function parseOperationalRunReport(raw: string, expectedReportId: string)
   if (!isRecord(parsed)) {
     throw new Error(`invalid operational run report shape for ${expectedReportId}`);
   }
-  if (parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION) {
+  if (
+    parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION
+    && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
+  ) {
     throw new Error(
-      `wrong schemaVersion for ${expectedReportId}: expected ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION}, got ${String(parsed.schemaVersion)}`,
+      `wrong schemaVersion for ${expectedReportId}: expected ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION} or ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2}, got ${String(parsed.schemaVersion)}`,
     );
   }
   if (typeof parsed.reportId !== 'string' || parsed.reportId.length === 0) {
@@ -83,16 +156,24 @@ export function parseOperationalRunReport(raw: string, expectedReportId: string)
   if (parsed.workflows.length !== parsed.workflowCount) {
     throw new Error(`workflowCount mismatch for ${expectedReportId}`);
   }
-  return parsed as OperationalRunReportV1;
+
+  if (parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION) {
+    return parsed as OperationalRunReportV1;
+  }
+
+  return {
+    ...(parsed as OperationalRunReportV2),
+    sessionExecution: parseSessionExecution(parsed.sessionExecution, expectedReportId),
+  };
 }
 
-async function loadArchivedReports(repositoryRoot: string): Promise<OperationalRunReportV1[]> {
+async function loadArchivedReports(repositoryRoot: string): Promise<OperationalRunReport[]> {
   const reportsRoot = join(repositoryRoot, RUN_REPORTS_ROOT);
   const rootStat = await tryLstat(reportsRoot);
   if (!rootStat) return [];
   if (!rootStat.isDirectory()) throw new Error(`run-reports root must be a directory: ${RUN_REPORTS_ROOT}`);
 
-  const reports: OperationalRunReportV1[] = [];
+  const reports: OperationalRunReport[] = [];
   const entries = (await readdir(reportsRoot, { withFileTypes: true }))
     .filter(entry => entry.isDirectory())
     .sort((left, right) => left.name.localeCompare(right.name));
@@ -109,7 +190,7 @@ async function loadArchivedReports(repositoryRoot: string): Promise<OperationalR
   return reports;
 }
 
-function outcomeSummary(workflows: WorkflowSummary[]): string {
+function workflowRouteSummary(workflows: WorkflowSummary[]): string {
   if (workflows.length === 0) return '(none)';
   return workflows.map(workflow => workflow.terminalRoute ?? workflow.status).join(', ');
 }
@@ -122,7 +203,7 @@ function sourceRunSummary(workflows: WorkflowSummary[]): string {
   return [...new Set(refs)].join(', ');
 }
 
-function renderRunReportsIndex(reports: OperationalRunReportV1[]): string {
+function renderRunReportsIndex(reports: OperationalRunReport[]): string {
   const sorted = [...reports].sort((left, right) => (
     right.createdAt.localeCompare(left.createdAt) || left.reportId.localeCompare(right.reportId)
   ));
@@ -131,21 +212,31 @@ function renderRunReportsIndex(reports: OperationalRunReportV1[]): string {
     '',
     `- total reports: ${sorted.length}`,
     '',
-    '| created | report | workflows | outcomes | source runs |',
-    '| --- | --- | --- | --- | --- |',
+    '| created | report | session stop | multi-round outcome | execution | workflow routes | source runs |',
+    '| --- | --- | --- | --- | --- | --- | --- |',
   ];
   if (sorted.length === 0) {
-    lines.push('| *(none)* |  |  |  |  |');
+    lines.push('| *(none)* |  |  |  |  |  |  |');
   } else {
     for (const report of sorted) {
+      const sessionStop = report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
+        ? report.sessionExecution.stopReason
+        : '(workflow-only)';
+      const multiRoundOutcome = report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
+        ? report.sessionExecution.outcome
+        : '—';
+      const execution = report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
+        ? report.sessionExecution.execution.status
+        : '—';
       lines.push(
-        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${report.workflowCount} | ${markdownCell(outcomeSummary(report.workflows))} | ${markdownCell(sourceRunSummary(report.workflows))} |`,
+        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${markdownCell(sessionStop)} | ${markdownCell(multiRoundOutcome)} | ${markdownCell(execution)} | ${markdownCell(workflowRouteSummary(report.workflows))} | ${markdownCell(sourceRunSummary(report.workflows))} |`,
       );
     }
   }
   lines.push(
     '',
     'This index is derived from archived `report.json` sidecars. It is observability history, not Human backlog canonical state.',
+    'V1 rows are workflow-only. V2 rows expose session execution facts from `run-manifest.json`.',
     '',
   );
   return lines.join('\n');
@@ -153,7 +244,7 @@ function renderRunReportsIndex(reports: OperationalRunReportV1[]): string {
 
 function renderTopLevelIndex(input: {
   reportCount: number;
-  latestReport: OperationalRunReportV1 | null;
+  latestReport: OperationalRunReport | null;
   humanFollowupIndexPresent: boolean;
 }): string {
   const latestLine = input.latestReport === null

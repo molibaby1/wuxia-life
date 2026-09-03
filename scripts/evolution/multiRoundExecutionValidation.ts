@@ -49,6 +49,18 @@ import {
   type ScopeVerificationResult,
   type WorkspaceSnapshot,
 } from './executionScopeVerifier';
+import {
+  type MultiRoundRunManifestV1,
+  type MultiRoundVerificationResultV1,
+  type RoundManifestEntry,
+} from './multiRoundRunManifestContract';
+
+export type {
+  MultiRoundRunManifestV1,
+  RoundManifestEntry,
+} from './multiRoundRunManifestContract';
+
+export type WorkspaceVerificationResult = MultiRoundVerificationResultV1;
 
 const execFileAsync = promisify(execFile);
 const MAX_ROUNDS = 2 as const;
@@ -74,12 +86,6 @@ export interface MultiRoundLoopInput {
   participantMode?: RunProblemAgnosticAgentSolutionLoopOptions['participantMode'];
   apiKey?: string;
   authorityRefs?: string[];
-}
-
-export interface WorkspaceVerificationResult {
-  name: string;
-  status: 'passed' | 'failed';
-  details: string;
 }
 
 export interface Phase0RerunResult {
@@ -119,48 +125,6 @@ export interface MultiRoundExecutionValidationInput {
   apiKey?: string;
   authorityRefs?: string[];
   dependencies?: MultiRoundExecutionValidationDependencies;
-}
-
-export interface RoundManifestEntry {
-  round: 1 | 2;
-  workflowRef: string;
-  sourceRunRef: string;
-  terminalRoute: string | null;
-  executionRef: string | null;
-  resultingRunRef: string | null;
-  nextAction: 'CONFIGURATION_EXECUTION' | 'ROUND_2' | 'STOP';
-}
-
-export interface MultiRoundRunManifestV1 {
-  schemaVersion: 'multi-round-run-manifest-v1';
-  multiRoundRunRef: string;
-  initialSourceRunRef: string;
-  limits: {
-    maxAgentRounds: 2;
-    maxCrossRoundTransitions: 1;
-    maxRoundParticipantJobs: 4;
-    maxExecutionParticipantJobs: 1;
-    maxTotalParticipantJobs: 9;
-    retryCount: 0;
-  };
-  rounds: RoundManifestEntry[];
-  execution: {
-    executionRef: string;
-    allowedWritePaths: string[];
-    actualChangedFiles: string[];
-    status: 'completed' | 'failed' | 'scope_violation' | 'not_started';
-    verificationResults: WorkspaceVerificationResult[];
-    resultingRunRef: string | null;
-  };
-  budget: {
-    round1ParticipantJobs: number;
-    executionParticipantJobs: number;
-    round2ParticipantJobs: number;
-    totalParticipantJobs: number;
-    retryCount: 0;
-  };
-  outcome: 'CROSS_ROUND_TRANSITION_OBSERVED' | 'NO_CROSS_ROUND_TRANSITION_OBSERVED' | 'STOPPED';
-  stopReason: string;
 }
 
 export interface MultiRoundExecutionValidationResult {

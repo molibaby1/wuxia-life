@@ -100,6 +100,7 @@ const suites: Suite[] = [
   { name: 'skillBehavioralValidation', entry: 'tests/evolution/skillBehavioralValidation.test.ts' },
   { name: 'skillBehavioralTerminalReport', entry: 'tests/evolution/skillBehavioralTerminalReport.test.ts' },
   { name: 'operationalRunReport', entry: 'tests/evolution/operationalRunReport.test.ts' },
+  { name: 'humanReviewSummary', entry: 'tests/evolution/humanReviewSummary.test.ts' },
   { name: 'ordinaryEvolutionOperator', entry: 'tests/evolution/ordinaryEvolutionOperator.test.ts' },
   { name: 'multiRoundSessionObservability', entry: 'tests/evolution/multiRoundSessionObservability.test.ts' },
   { name: 'testGameSimulation', entry: 'tests/testGameSimulation.ts' },

@@ -13,6 +13,7 @@
     "evolution:human-followup:inbox": "tsx scripts/evolution/humanFollowup/buildHumanFollowupInbox.ts",
     "evolution:human-followup:review": "tsx scripts/evolution/humanFollowup/reviewHumanFollowupWorkItem.ts",
     "evolution:observability:archive": "tsx scripts/evolution/reporting/archiveOperationalRunReport.ts",
+    "evolution:observability:refresh": "tsx scripts/evolution/reporting/refreshArchivedOperationalRunReports.ts",
     "evolution:observability:index": "tsx scripts/evolution/reporting/buildOperationalObservabilityIndex.ts",
     "evolution:operator:run": "tsx scripts/evolution/operator/runOrdinaryEvolution.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",

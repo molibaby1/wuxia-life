@@ -260,6 +260,11 @@ export function formatOrdinaryEvolutionOperatorSummary(
     '报告：',
     result.runReportPath ?? '（不可用）',
     '',
+    '下一步：',
+    result.runReportPath === null
+      ? 'Human review view 不可用；请先查看下方的可观测性错误。'
+      : '查看本次报告顶部的「一眼结论」和「你现在该做什么」。',
+    '',
     'Human Follow-up：',
     result.humanFollowupActiveCount === null
       ? '（不可用）'

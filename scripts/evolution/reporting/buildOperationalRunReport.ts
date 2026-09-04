@@ -12,6 +12,7 @@ import {
   collectWorkflowDecisionAudits,
   type WorkflowDecisionAuditV1,
 } from './buildWorkflowDecisionAudit';
+import { buildHumanReviewSummary } from './buildHumanReviewSummary';
 
 const WORKFLOW_DIRECTORY_PREFIX = 'problem-agnostic-agent-solution-loop-instance-';
 const DEFAULT_ROOT = '.tmp/evolution';
@@ -417,26 +418,54 @@ function renderOptionalLine(label: string, value: string | null): string[] {
 
 function renderDecisionAudit(audit: WorkflowDecisionAuditV1): string[] {
   const assessment = audit.improvementHypothesis.noProblemAssessment;
-  const assessmentLines = assessment.status === 'recorded'
-    ? [
-      `- No Problem Assessment：已记录：${assessment.rationale}`,
-      `- Assessment Feedback refs：${assessment.feedbackRefs.join(', ')}`,
-      `- Assessment Evidence refs：${assessment.evidenceRefs.join(', ') || '（无）'}`,
-    ]
-    : [`- No Problem Assessment：${assessment.status === 'unavailable' ? 'legacy-unavailable' : assessment.status}`];
-  return [
-    '',
-    '### 决策审计',
-    '',
-    `- External Feedback：${audit.externalFeedback.status}`,
-    `- Improvement Hypothesis：${audit.improvementHypothesis.status}`,
-    `- Hypothesis 数量：${audit.improvementHypothesis.hypothesisCount ?? '（无）'}`,
-    ...assessmentLines,
-    `- Selection：${audit.selection.status}`,
-    `- Solution：${audit.solution.status}`,
-    `- Reviewer：${audit.reviewer.status}`,
-    `- Decision：${audit.decision.route ?? '（无）'} / ${audit.decision.reasonCode ?? '（无）'}`,
-  ];
+  const lines = ['', '### 决策审计 / 判断链', '', '#### External Feedback', '', `- 状态：${audit.externalFeedback.status}`];
+  if (audit.externalFeedback.overallImpression !== null) {
+    lines.push(`- 总体感受：${audit.externalFeedback.overallImpression}`);
+  }
+  audit.externalFeedback.observations.forEach((observation, index) => {
+    lines.push(`- 观察 ${index + 1}：${observation.feedback}`);
+    lines.push(`  - 玩家证据：${observation.evidenceRefs.join(', ') || '（无）'}`);
+  });
+  lines.push('', '#### Improvement Hypothesis', '', `- 状态：${audit.improvementHypothesis.status}`, `- 形成改善假设：${audit.improvementHypothesis.hypothesisCount ?? '（无）'} 条`);
+  audit.improvementHypothesis.hypotheses.forEach((hypothesis, index) => {
+    lines.push(
+      `- 假设 ${index + 1}：${hypothesis.hypothesis}`,
+      `  - observedBasis：${hypothesis.observedBasis}`,
+      `  - productSignificance：${hypothesis.productSignificance}`,
+      `  - unknowns：${hypothesis.unknowns.join('；')}`,
+      `  - Feedback refs：${hypothesis.feedbackRefs.join(', ')}`,
+      `  - 玩家证据：${hypothesis.evidenceRefs.join(', ') || '（无）'}`,
+    );
+  });
+  if (assessment.status === 'recorded') {
+    lines.push(
+      `- 未形成问题的判断：${assessment.rationale}`,
+      `  - 引用 Feedback：${assessment.feedbackRefs.join(', ')}`,
+      `  - 玩家证据：${assessment.evidenceRefs.join(', ') || '（无）'}`,
+    );
+  } else {
+    lines.push(`- 未形成问题的判断：${assessment.status === 'unavailable' ? 'legacy-unavailable（历史契约未保留）' : assessment.status}`);
+  }
+  lines.push('', '#### Selection', '', `- 状态：${audit.selection.status}`);
+  lines.push(audit.selection.status === 'selected'
+    ? `- 已选择 hypothesis：${audit.selection.selectedHypothesisId}`
+    : '- 未选择 hypothesis。');
+  lines.push('', '#### Solution', '', `- 状态：${audit.solution.status}`);
+  if (audit.solution.summary !== null) lines.push(`- summary：${audit.solution.summary}`);
+  if (audit.solution.options.length > 0) {
+    audit.solution.options.forEach(option => {
+      lines.push(`- 方案 ${option.optionId}：${option.proposedChange}；理由：${option.rationale}；范围：${option.changeScope}`);
+    });
+  } else {
+    lines.push('- 未运行或未形成方案。');
+  }
+  lines.push('', '#### Reviewer', '', `- 状态：${audit.reviewer.status}`);
+  if (audit.reviewer.decision !== null) lines.push(`- decision：${audit.reviewer.decision}`);
+  if (audit.reviewer.assessment !== null) lines.push(`- assessment：${audit.reviewer.assessment}`);
+  if (audit.reviewer.scopeAssessment !== null) lines.push(`- scope assessment：${audit.reviewer.scopeAssessment}`);
+  if (audit.reviewer.concerns.length > 0) lines.push(`- concerns：${audit.reviewer.concerns.join('；')}`);
+  lines.push('', '#### Decision', '', `- ${audit.decision.route ?? '（无）'} / ${audit.decision.reasonCode ?? '（无）'}`);
+  return lines;
 }
 
 function renderWorkflow(
@@ -526,10 +555,27 @@ function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): str
 export function renderOperationalRunReportMarkdown(input: RenderOperationalRunReportInput): string {
   const { summaries } = input;
   const aggregateCounts = aggregateStructuredTerminalDelivery(summaries);
+  const humanReview = buildHumanReviewSummary({
+    workflows: summaries,
+    ...(input.reportId === undefined ? {} : { reportId: input.reportId }),
+    ...(input.sessionExecution === undefined ? {} : { sessionExecution: input.sessionExecution }),
+  });
   const headerLines = [
     '# Auto Evolution 运行报告',
     '',
+    '## 一眼结论',
+    '',
+    humanReview.conclusion,
+    '',
+    ...humanReview.explanation.map(line => `- ${line}`),
+    '',
+    '## 你现在该做什么',
+    '',
+    humanReview.recommendedAction,
   ];
+  if (humanReview.handoff !== null) {
+    headerLines.push('', '## 如需进一步复核', '', humanReview.handoff.label, '', '```text', humanReview.handoff.prompt, '```');
+  }
 
   const isArchivedView = input.reportId !== undefined || input.createdAt !== undefined
     || input.includeArtifactRetentionNote === true;
@@ -548,7 +594,8 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
         '',
         '以下 Artifact 引用指向原始执行位置（通常位于 `.tmp/evolution/**`）。',
         '这些原始工作流 Artifact 不受 retention 保护，可能被清理，也不会复制到此归档中。',
-        '恢复 Human 判断所需的长期证据仍由 Human Follow-up retention 保留。',
+        'V3 report.json 本身保留已验证的 bounded Decision Audit；V1/V2 不含该审计时会明确标记不可重建，SKIP 不依赖 Human Follow-up 才可审计。',
+        'Human Follow-up retention 只保留正式创建 HFL item 的 route 所需 operational state。',
       );
     }
   } else {

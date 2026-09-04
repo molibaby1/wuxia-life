@@ -10,6 +10,7 @@ import {
   MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION,
   type MultiRoundSessionSummaryV1,
 } from '../multiRoundRunManifestContract';
+import { buildHumanReviewSummary, type HumanReviewSummary } from './buildHumanReviewSummary';
 
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION = 'auto-evolution-operational-run-report-v1';
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2 = 'auto-evolution-operational-run-report-v2';
@@ -240,8 +241,8 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
     '',
     `- 报告总数：${sorted.length}`,
     '',
-    '| 创建时间 | 报告 | 会话停止原因 | 多轮结果 | 执行状态 | 工作流路由 | Source Run |',
-    '| --- | --- | --- | --- | --- | --- | --- |',
+    '| 创建时间 | 报告 | 会话停止原因 | 多轮结果 | 执行状态 | 工作流路由 | Source Run | 人类结论 | 建议动作 |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
   ];
   if (sorted.length === 0) {
     lines.push('| *（无）* |  |  |  |  |  |  |');
@@ -256,15 +257,20 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
       const execution = report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION
         ? report.sessionExecution.execution.status
         : '—';
+      const human = buildHumanReviewSummary({
+        workflows: report.workflows,
+        reportId: report.reportId,
+        ...(report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION ? {} : { sessionExecution: report.sessionExecution }),
+      });
       lines.push(
-        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${markdownCell(sessionStop)} | ${markdownCell(multiRoundOutcome)} | ${markdownCell(execution)} | ${markdownCell(workflowRouteSummary(report.workflows))} | ${markdownCell(sourceRunSummary(report.workflows))} |`,
+        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${markdownCell(sessionStop)} | ${markdownCell(multiRoundOutcome)} | ${markdownCell(execution)} | ${markdownCell(workflowRouteSummary(report.workflows))} | ${markdownCell(sourceRunSummary(report.workflows))} | ${markdownCell(human.conclusion)} | ${markdownCell(human.recommendedAction)} |`,
       );
     }
   }
   lines.push(
     '',
     '本索引由归档的 `report.json` sidecar 生成，是可观测性历史，不是 Human backlog 的规范状态。',
-    'V1 行仅包含工作流信息；V2 行展示会话执行事实；V3 行展示会话执行事实与有界决策审计。',
+    'V1 行仅包含工作流信息；V2 行展示会话执行事实；V3 行展示会话执行事实与有界决策审计。人类结论与建议动作均来自共享 Human Review projection。',
     '',
   );
   return lines.join('\n');
@@ -273,6 +279,7 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
 function renderTopLevelIndex(input: {
   reportCount: number;
   latestReport: OperationalRunReport | null;
+  latestHumanReview: HumanReviewSummary | null;
   humanFollowupIndexPresent: boolean;
 }): string {
   const latestLine = input.latestReport === null
@@ -281,6 +288,12 @@ function renderTopLevelIndex(input: {
   const humanFollowupLine = input.humanFollowupIndexPresent
     ? '- 打开 [human-follow-up/index.md](human-follow-up/index.md)'
     : '- human-follow-up/index.md 尚未生成（运行 `npm run evolution:human-followup:inbox`）';
+  const humanGuidance = input.latestHumanReview === null
+    ? ['- 一句话人类结论：*（无）*', '- 建议动作：*（无）*']
+    : [
+      `- 一句话人类结论：${input.latestHumanReview.conclusion}`,
+      `- 建议动作：${input.latestHumanReview.recommendedAction}`,
+    ];
 
   return [
     '# Auto Evolution 运行索引',
@@ -289,13 +302,14 @@ function renderTopLevelIndex(input: {
     '',
     `- 总数：${input.reportCount}`,
     latestLine,
+    ...humanGuidance,
     '- 打开 [run-reports/index.md](run-reports/index.md)',
     '',
     '## Human Follow-up',
     '',
     humanFollowupLine,
     '',
-    '运行报告是生成式可观测性历史；Human Follow-up 仍是受 retention 保护的 operational state。',
+    '运行报告是生成式可观测性历史；V3 report.json 保留 bounded Decision Audit，Human Follow-up 只保留正式 HFL item 的 operational state。',
     '',
   ].join('\n');
 }
@@ -315,6 +329,14 @@ export async function buildOperationalObservabilityIndex(
 
   const runReportsIndexPath = join(repositoryRoot, RUN_REPORTS_ROOT, 'index.md');
   const topLevelIndexPath = join(repositoryRoot, EVOLUTION_OPERATIONAL_INDEX_PATH);
+  const latestReport = sortedForLatest[0] ?? null;
+  const latestHumanReview = latestReport === null
+    ? null
+    : buildHumanReviewSummary({
+      workflows: latestReport.workflows,
+      reportId: latestReport.reportId,
+      ...(latestReport.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION ? {} : { sessionExecution: latestReport.sessionExecution }),
+    });
   await mkdir(join(repositoryRoot, RUN_REPORTS_ROOT), { recursive: true });
   await mkdir(join(repositoryRoot, 'artifacts/evolution'), { recursive: true });
   await writeFile(runReportsIndexPath, renderRunReportsIndex(reports), 'utf8');
@@ -322,7 +344,8 @@ export async function buildOperationalObservabilityIndex(
     topLevelIndexPath,
     renderTopLevelIndex({
       reportCount: reports.length,
-      latestReport: sortedForLatest[0] ?? null,
+      latestReport,
+      latestHumanReview,
       humanFollowupIndexPresent: await pathExists(join(repositoryRoot, HUMAN_FOLLOWUP_INDEX_PATH)),
     }),
     'utf8',

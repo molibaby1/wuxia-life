@@ -40,7 +40,7 @@ export interface ChoiceFeedbackRiskHint {
 }
 
 export interface ChoiceFeedbackPlayerView {
-  narrativeResult: string;
+  narrativeResult: string | null;
   statImpacts: ChoiceFeedbackStatImpact[];
   relationshipImpacts: ChoiceFeedbackRelationshipImpact[];
   routeImpact: ChoiceFeedbackRouteImpact | null;
@@ -49,8 +49,6 @@ export interface ChoiceFeedbackPlayerView {
 }
 
 export interface ChoiceFeedbackDiagnosticView {
-  fallbackUsed: boolean;
-  fallbackReason?: string;
   sourceEventId?: string;
   sourceChoiceId?: string;
   sourceOutcomeId?: string;
@@ -62,7 +60,7 @@ export interface ChoiceFeedbackModel {
   diagnostic: ChoiceFeedbackDiagnosticView;
 }
 
-export interface ChoiceFeedbackFallbackInput {
+export interface ChoiceFeedbackInput {
   narrativeResult?: string | null;
   sourceEventId?: string;
   sourceChoiceId?: string;
@@ -70,19 +68,17 @@ export interface ChoiceFeedbackFallbackInput {
   rawEffects?: EffectDefinition[];
 }
 
-const DEFAULT_NARRATIVE_FALLBACK = '你的选择激起了涟漪，后续影响仍在发酵。';
-
-/**
- * 当上游未提供反馈内容时，生成可渲染、可追踪的最小反馈结构。
- */
-export function createChoiceFeedbackFallback(
-  input: ChoiceFeedbackFallbackInput = {},
+export function createChoiceFeedback(
+  input: ChoiceFeedbackInput = {},
 ): ChoiceFeedbackModel {
-  const hasNarrative = typeof input.narrativeResult === 'string' && input.narrativeResult.trim().length > 0;
+  const narrativeResult =
+    typeof input.narrativeResult === 'string' && input.narrativeResult.trim().length > 0
+      ? input.narrativeResult.trim()
+      : null;
 
   return {
     player: {
-      narrativeResult: hasNarrative ? input.narrativeResult!.trim() : DEFAULT_NARRATIVE_FALLBACK,
+      narrativeResult,
       statImpacts: [],
       relationshipImpacts: [],
       routeImpact: null,
@@ -90,8 +86,6 @@ export function createChoiceFeedbackFallback(
       riskHints: [],
     },
     diagnostic: {
-      fallbackUsed: !hasNarrative,
-      fallbackReason: hasNarrative ? undefined : 'missing_narrative_result',
       sourceEventId: input.sourceEventId,
       sourceChoiceId: input.sourceChoiceId,
       sourceOutcomeId: input.sourceOutcomeId,

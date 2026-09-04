@@ -62,7 +62,6 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
       riskHints: [{ code: 'secret-risk', hint: '不应进入 overlay', severity: 'high', visibility: 'player' }],
     },
     diagnostic: {
-      fallbackUsed: false,
       sourceEventId: 'internal-event',
       sourceChoiceId: 'available-a',
       rawEffects: [],
@@ -85,6 +84,20 @@ export async function runPlayerSurfaceCaptureTests(): Promise<void> {
   });
   assert.equal(JSON.stringify(actual).includes('secret-risk'), false);
   assert.equal(JSON.stringify(actual).includes('-99'), false);
+
+  const nullFeedback: ChoiceFeedbackModel = {
+    ...feedback,
+    player: { ...feedback.player, narrativeResult: null },
+    diagnostic: {
+      sourceEventId: 'internal-event',
+      sourceChoiceId: 'available-a',
+      rawEffects: [],
+    },
+  };
+  const nullPresentation = buildChoiceSurfacePresentation(story, 'available-a', nullFeedback);
+  assert.equal(nullPresentation.body, undefined);
+  assert.equal(nullPresentation.metaLines?.includes('选择：上前询问'), true);
+  assert.equal(JSON.stringify(nullPresentation).includes('你的选择激起了涟漪'), false);
 
   assert.throws(
     () => buildChoiceSurfacePresentation(story, 'missing-choice', feedback),

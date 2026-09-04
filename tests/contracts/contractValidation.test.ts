@@ -94,6 +94,10 @@ console.log('=== P4 US-023: Contract Validation Helper Tests ===\n');
 {
   assert(validateChoiceExecutionResponse(choiceExecutionSuccessResponseValid).ok, 'valid success passes');
   assert(validateChoiceExecutionResponse(choiceExecutionFailureResponseValidation).ok, 'valid failure passes');
+  assert(
+    !validateChoiceExecutionResponse({ ...choiceExecutionSuccessResponseValid, responseVersion: '1.0.0' }).ok,
+    'retired response contract version fails closed',
+  );
 
   const missingSuccessFields = {
     responseVersion: CHOICE_EXECUTION_RESPONSE_VERSION,

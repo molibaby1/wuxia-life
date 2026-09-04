@@ -1849,3 +1849,22 @@ selectFirstHypothesis
    source/observable-payload.json
    diagnostic/causal-attribution.json
 ```
+
+### PD-112：Honest Choice Result Narrative Presentation
+
+**产品决策（Human accepted）**
+
+Choice execution 的 `feedback.player.narrativeResult` 只表达实际 resolved conditional outcome 的显式 `ChoiceOutcome.text`：
+
+- 非空显式 outcome text 规范化后作为 `string`；
+- 没有独立 semantic post-choice narrative 时为 `null`；
+- `null` 是合法 successful result state，不是 degraded feedback 或 soft failure。
+
+Player result surface 在 narrative 为 `null` 时不显示伪造正文，但继续显示已选择的 choice 与 canonical actual public feedback（如有）。Player UI 只读取 `feedback.player`；diagnostic 只保留真实 source provenance 与 raw effects，不包含 missing-narrative fallback 状态。
+
+明确排除：
+
+- `choice.description`、configured effects prose、generic causal/ripple fallback 不得成为 post-choice narrative；
+- 不为补齐普通 result copy 新建 `ChoiceOutcome` wrapper 或新的 result-text schema；
+- 不改变 choice execution semantics、canonical before/after delta、event history、snapshot/save/replay schema、HTTP route version、Random Effect、Ending 或 Auto Evolution terminal capture；
+- `PRESENTATION_PROBLEM` 不自动转化为 content authoring。

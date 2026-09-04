@@ -22,7 +22,7 @@ const CHOICE_FEEDBACK_CHECKS: CoverageCheck[] = [
   {
     key: 'auto_case_exists',
     label: 'auto_resolve_choice_feedback_case',
-    patterns: ['runChoiceFeedbackAutoResolveFallbackCase'],
+    patterns: ['runChoiceFeedbackAutoResolveNullNarrativeCase'],
   },
   {
     key: 'stat_impact_assertion',
@@ -45,9 +45,12 @@ const CHOICE_FEEDBACK_CHECKS: CoverageCheck[] = [
     patterns: ['feedback?.player.longTermFlags.some'],
   },
   {
-    key: 'fallback_assertion',
-    label: 'fallback_text_assertion',
-    patterns: ['feedback?.diagnostic.fallbackUsed === true', 'feedback?.player.narrativeResult'],
+    key: 'null_narrative_assertion',
+    label: 'nullable_narrative_assertion',
+    patterns: [
+      'feedback?.player.narrativeResult as string | null',
+      '缺少显式结果叙事时不得生成兜底文本',
+    ],
   },
 ];
 

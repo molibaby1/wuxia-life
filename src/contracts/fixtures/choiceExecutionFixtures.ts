@@ -106,7 +106,6 @@ export const choiceExecutionSuccessResponseValid: ChoiceExecutionSuccessResponse
       riskHints: [],
     },
     diagnostic: {
-      fallbackUsed: false,
       sourceEventId: 'age50_reflection_01',
       sourceChoiceId: 'reflect_on_legacy',
       sourceOutcomeId: 'legacy_peaceful',

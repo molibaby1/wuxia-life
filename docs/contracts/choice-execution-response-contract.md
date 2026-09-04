@@ -14,7 +14,7 @@ Both variants share:
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `responseVersion` | `'1.0.0'` | Contract version |
+| `responseVersion` | `'2.0.0'` | Contract version |
 | `traceId` | `string?` | Echo from request when provided |
 
 ## 2. Success Response
@@ -52,19 +52,21 @@ Reuse existing visibility model from `ChoiceFeedbackModel`:
 
 | Layer | Audience | Contents |
 | --- | --- | --- |
-| `feedback.player` | Player UI | narrative, stat/relationship/route impacts, risk hints |
-| `feedback.diagnostic` | Dev/report only | fallback flags, raw effects, source ids |
+| `feedback.player` | Player UI | explicit result narrative or `null`, stat/relationship/route impacts, risk hints |
+| `feedback.diagnostic` | Dev/report only | raw effects and source ids |
 | `diagnostics` | Server audit / replay | execution timing, catalog version used, snapshot hash before/after |
 | `warnings` | Both (filtered by visibility) | non-fatal validation notices |
 
 **Rule:** Player UI must render only `feedback.player` and warnings marked `visibility: 'player'`. Diagnostic and hidden entries must not appear in default player flow.
 
-### 2.3 Failure within success path
+### 2.3 Missing result narrative
 
-Soft failures (fallback feedback used) remain `status: 'success'` with:
+`feedback.player.narrativeResult` has exactly two meanings:
 
-- `feedback.diagnostic.fallbackUsed === true`
-- optional `warnings` explaining degraded feedback
+- `string`: explicit semantic post-choice narrative from the resolved `ChoiceOutcome.text`;
+- `null`: this successful choice execution has no independent semantic post-choice narrative.
+
+`null` is a valid successful result state. It must not be replaced with `choice.description`, configured-effect prose, or a generic ripple message. The player surface continues to show the selected choice and canonical actual public impacts when present. Missing narrative is not a soft failure and does not produce fallback diagnostic fields.
 
 Hard execution failures use the failure response shape below.
 
@@ -130,11 +132,11 @@ interface ChoiceExecutionDiagnostics {
 }
 ```
 
-## 5. Non-Goals
+## 5. Boundaries
 
-- No change to `ChoiceFeedbackGenerator` runtime behavior.
-- No UI rendering changes.
-- No HTTP transport in P4.
+- Player UI reads only `feedback.player`; it must not inspect `feedback.diagnostic` for normal presentation.
+- Request contract remains `1.0.0`; this response contract change does not version `/v1/...` HTTP routes.
+- Snapshot, Save, Replay schemas and choice execution effects are unchanged.
 
 ## 6. References
 

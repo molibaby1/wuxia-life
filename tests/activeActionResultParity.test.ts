@@ -129,7 +129,7 @@ function testProgressionEchoKeepsOnlyNewOutcomeInformation(): void {
       longTermFlags: [{ flag: 'p9_echo_business_hook', value: true, visibility: 'player' }],
       riskHints: [],
     },
-    diagnostic: { fallbackUsed: false, rawEffects: [] },
+    diagnostic: { rawEffects: [] },
   };
   const choiceCard = progressionOverlay.buildChoiceFeedbackOverlayCard(
     'choice-result',

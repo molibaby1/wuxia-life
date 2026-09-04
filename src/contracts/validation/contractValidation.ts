@@ -179,7 +179,7 @@ export function validateChoiceExecutionResponse(
     return fail(['response must be an object']);
   }
   const r = response;
-  if (r.responseVersion !== '1.0.0') errors.push('responseVersion must be 1.0.0');
+  if (r.responseVersion !== '2.0.0') errors.push('responseVersion must be 2.0.0');
   if (r.status === 'success') {
     if (!isPlainObject(r.nextSnapshot)) {
       errors.push('nextSnapshot required on success');

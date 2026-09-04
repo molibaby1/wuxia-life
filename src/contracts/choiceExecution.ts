@@ -16,7 +16,7 @@ import type {
 } from './gameStateSnapshot';
 
 export const CHOICE_EXECUTION_REQUEST_VERSION = '1.0.0' as const;
-export const CHOICE_EXECUTION_RESPONSE_VERSION = '1.0.0' as const;
+export const CHOICE_EXECUTION_RESPONSE_VERSION = '2.0.0' as const;
 
 /** Inline snapshot or server-resolved reference. */
 export interface SnapshotReference {

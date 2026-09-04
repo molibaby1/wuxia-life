@@ -93,7 +93,38 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
     action: { eventId: 'sect_choice', choiceId: 'join_shaolin' },
   });
   assert(response.status === 'success', 'sect choice should execute once');
+  assert(response.responseVersion === '2.0.0', 'choice response should use response contract v2');
+  assert(
+    response.feedback.player.narrativeResult ===
+      '你顺利拜入少林，成为一名少林弟子。在师父的指导下，你的武艺进步神速。',
+    'explicit outcome text should remain the player narrative',
+  );
+  assert(!('fallbackUsed' in response.feedback.diagnostic), 'diagnostic must not report a narrative fallback');
   const summary = eligible.session.getProgressionVolatileState().pendingPeriodSummary;
+  assert(
+    summary?.body.startsWith(response.feedback.player.narrativeResult),
+    'headless period body should use only explicit outcome text',
+  );
+
+  const nullNarrativeCase = await getSectEvent(15);
+  const nullNarrativeChoice = nullNarrativeCase.next.raw.choices?.find(choice => choice.id === 'stay_home');
+  assert(nullNarrativeChoice !== undefined, 'stay-home choice should be available for fallback hierarchy regression');
+  nullNarrativeChoice.description = '独立的选项说明';
+  const nullNarrativeResponse = await nullNarrativeCase.session.executeChoice({
+    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
+    snapshotRef: { snapshot: nullNarrativeCase.session.serialize() },
+    action: { eventId: 'sect_choice', choiceId: 'stay_home' },
+  });
+  assert(nullNarrativeResponse.status === 'success', 'choice without outcome text should still execute successfully');
+  assert(
+    nullNarrativeResponse.feedback.player.narrativeResult === null,
+    'choice without outcome text must keep nullable player narrative semantics',
+  );
+  assert(
+    nullNarrativeCase.session.getProgressionVolatileState().pendingPeriodSummary?.body?.startsWith('独立的选项说明') === true,
+    'period summary must retain the independent description fallback hierarchy',
+  );
+
   const actualDeltas = calculatePublicStatDeltas(
     beforeChoiceSnapshot.state.player,
     response.nextSnapshot.state.player,

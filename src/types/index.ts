@@ -9,9 +9,9 @@ export type {
   ChoiceFeedbackPlayerView,
   ChoiceFeedbackDiagnosticView,
   ChoiceFeedbackModel,
-  ChoiceFeedbackFallbackInput,
+  ChoiceFeedbackInput,
 } from './choiceFeedback';
-export { createChoiceFeedbackFallback } from './choiceFeedback';
+export { createChoiceFeedback } from './choiceFeedback';
 import type {
   EffectOperator,
   EffectType,

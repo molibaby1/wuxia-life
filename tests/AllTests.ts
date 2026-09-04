@@ -225,9 +225,10 @@ async function runAutoResolveCase() {
     assertEqual(executedChoiceId, 'valid_choice', 'autoResolve 只能选择可用选项');
     assertEqual(executedOutcomeTarget, 'valid_fallback_outcome', 'autoResolve 应按真实条件命中可达 outcome');
     assert(engine.engineState.lastChoiceFeedback !== null, 'autoResolve 应复用统一反馈结构');
-    assert(
-      typeof engine.engineState.lastChoiceFeedback?.player?.narrativeResult === 'string',
-      'autoResolve 反馈应包含玩家可展示叙事结果',
+    assertEqual(
+      engine.engineState.lastChoiceFeedback?.player?.narrativeResult,
+      '可达兜底分支',
+      'autoResolve 应保留显式 outcome 叙事',
     );
   } finally {
     (gameEngine as any).getGameState = originalGetGameState;
@@ -343,7 +344,7 @@ async function runChoiceFeedbackManualCoverageCase() {
   }
 }
 
-async function runChoiceFeedbackAutoResolveFallbackCase() {
+async function runChoiceFeedbackAutoResolveNullNarrativeCase() {
   const engine = useNewGameEngine();
   const initialState = createCanonicalBrowserMockState();
   initialState.flags = {
@@ -407,6 +408,7 @@ async function runChoiceFeedbackAutoResolveFallbackCase() {
         {
           id: 'auto_feedback_choice',
           text: '自动测试反馈覆盖',
+          description: '选项说明不应成为结果叙事',
           effects: [],
           outcomes: [
             {
@@ -437,11 +439,16 @@ async function runChoiceFeedbackAutoResolveFallbackCase() {
       feedback?.player.longTermFlags.some(item => item.flag === 'auto_long_term_mark'),
       'autoResolve 应记录长期标记变化',
     );
-    assert(feedback?.diagnostic.fallbackUsed === true, '应启用缺失叙事兜底标记');
     assertEqual(
-      feedback?.player.narrativeResult,
-      '你的选择激起了涟漪，后续影响仍在发酵。',
-      '应回退到默认兜底叙事文本',
+      feedback?.player.narrativeResult as string | null,
+      null,
+      '缺少显式结果叙事时不得生成兜底文本',
+    );
+    assert(!('fallbackUsed' in (feedback?.diagnostic ?? {})), '缺少叙事不再记录 fallbackUsed');
+    assert(!('fallbackReason' in (feedback?.diagnostic ?? {})), '缺少叙事不再记录 fallbackReason');
+    assert(
+      engine.engineState.pendingStageResult?.[0]?.body === undefined,
+      '缺少显式结果叙事时 overlay 不应显示选项说明或占位正文',
     );
   } finally {
     (gameEngine as any).getGameState = originalGetGameState;
@@ -507,8 +514,8 @@ async function runStateConsistencyRegressionCase() {
     const choiceHandled = await engine.handleChoice({ id: 'state_consistency_choice' } as any);
     assert(choiceHandled, '选择执行失败，无法验证状态同步链路');
     assert(
-      engine.engineState.lastChoiceFeedback?.player.narrativeResult === '用于验证选择后引擎状态与 UI 状态一致',
-      '选择结算反馈未保留到 UI 状态',
+      engine.engineState.lastChoiceFeedback?.player.narrativeResult === null,
+      '选择说明不得进入选择结算反馈叙事',
     );
     assert(
       engine.engineState.progressionOverlay?.cards[0]?.title === '上一阶段' &&
@@ -1436,10 +1443,10 @@ const coreFunctionSuite: TestSuite = {
       },
     },
     {
-      name: '选择反馈回归 - autoResolve 覆盖关键字段与兜底文本',
-      description: '测试 autoResolve 可稳定产出反馈并在叙事缺失时触发兜底文本',
+      name: '选择反馈回归 - autoResolve 覆盖关键字段与合法 null 叙事',
+      description: '测试 autoResolve 在显式叙事缺失时保留 null，同时保留实际影响',
       test: async () => {
-        await runChoiceFeedbackAutoResolveFallbackCase();
+        await runChoiceFeedbackAutoResolveNullNarrativeCase();
       },
     },
     {

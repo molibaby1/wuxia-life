@@ -324,7 +324,9 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     eventType: reportEventType(catalogEvent),
     progressionKind: 'story_event',
     selectedChoice: selection.choice,
-    outcomeText: choiceResponse.status === 'success' ? choiceResponse.feedback.player.narrativeResult : undefined,
+    ...(choiceResponse.status === 'success' && choiceResponse.feedback.player.narrativeResult !== null
+      ? { outcomeText: choiceResponse.feedback.player.narrativeResult }
+      : {}),
     choiceScoreDiagnostic: selection.diagnostic
       ? {
           selectedScore: selection.diagnostic.selectedScore,

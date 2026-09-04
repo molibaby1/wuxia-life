@@ -1,6 +1,6 @@
 import type { ChoiceFeedbackModel } from '../types';
 import type { EffectDefinition, PlayerState } from '../types/eventTypes';
-import { createChoiceFeedbackFallback } from '../types';
+import { createChoiceFeedback } from '../types';
 import {
   isPlayerVisibleFlag,
   readRawRouteKeyFromFlags,
@@ -20,7 +20,7 @@ interface GenerateChoiceFeedbackInput {
 }
 
 export function generateChoiceFeedback(input: GenerateChoiceFeedbackInput): ChoiceFeedbackModel {
-  const baseFeedback = createChoiceFeedbackFallback({
+  const baseFeedback = createChoiceFeedback({
     narrativeResult: input.narrativeResult,
     sourceEventId: input.sourceEventId,
     sourceChoiceId: input.sourceChoiceId,

@@ -17,13 +17,6 @@ function read(relativePath: string): string {
   return readFileSync(resolve(root, relativePath), 'utf8');
 }
 
-function extractGetStatNameBlock(): string {
-  const source = read('src/composables/useNewGameEngine.ts');
-  const match = source.match(/const getStatName\s*=\s*\(stat:\s*string\):\s*string\s*=>\s*\{[\s\S]*?return statNames\[stat\][\s\S]*?\};/);
-  assert(match, 'getStatName must exist in useNewGameEngine');
-  return match[0];
-}
-
 function extractOutcomeNarrativeBlock(): string {
   const source = read('src/composables/useNewGameEngine.ts');
   const match = source.match(/statName === '金钱'[\s\S]{0,180}/);
@@ -31,13 +24,12 @@ function extractOutcomeNarrativeBlock(): string {
 }
 
 function testUseNewGameEngineHasNoWalletPresentation(): void {
-  const getStatName = extractGetStatNameBlock();
-  assert.equal(/\bmoney\s*:/.test(getStatName), false, 'getStatName must not map money');
-  assert.equal(/金钱|银两/.test(getStatName), false, 'getStatName must not expose wallet labels');
+  const source = read('src/composables/useNewGameEngine.ts');
+  assert.equal(/const getStatName\s*=/.test(source), false, 'dead outcome text stat helper must be removed');
 
   const walletBranch = extractOutcomeNarrativeBlock();
   assert.equal(walletBranch.includes("statName === '金钱'"), false, 'wallet outcome branch must be retired');
-  assert.equal(/钱袋|积蓄少了一些|积蓄/.test(read('src/composables/useNewGameEngine.ts').match(/case 'stat_modify':[\s\S]*?break;/)?.[0] ?? ''), false);
+  assert.equal(/钱袋|积蓄少了一些|积蓄/.test(source), false);
 }
 
 function testD6DenyGuardsRemain(): void {

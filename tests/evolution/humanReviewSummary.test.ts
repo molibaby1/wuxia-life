@@ -102,7 +102,9 @@ function testSkipProjection(): void {
   assert.match(result.conclusion, /没有形成足够依据支持的改善问题/);
   assert.match(result.recommendedAction, /无需处理/);
   assert.match(result.recommendedAction, /不要.*READY|READY.*重跑/);
-  assert.ok(result.explanation.some(line => line.includes('External Feedback') && line.includes('1')));
+  // C. SKIP: ChatGPT audit remains optional.
+  assert.equal(result.handoff?.mode, 'optional');
+  assert.ok(result.explanation.length >= 1 && result.explanation.length <= 4);
   assert.ok(result.handoff);
   assert.match(result.handoff?.prompt ?? '', /project\.zip/);
   assert.match(result.handoff?.prompt ?? '', /artifacts\/evolution\/run-reports\/ae-report-test\/report\.json/);
@@ -122,9 +124,15 @@ function testFailureAndSessionOverrides(): void {
     }, audit({ decision: { status: 'completed', artifactRef: 'decision.json', route: 'ESCALATE_HUMAN', reasonCode: 'PARTICIPANT_FAILURE' } }))],
   });
   assert.match(failure.conclusion, /没有形成可靠的产品结论/);
-  assert.match(failure.explanation.join('\n'), /IMPROVEMENT_HYPOTHESIS/);
+  assert.match(failure.explanation.join('\n'), /IMPROVEMENT_HYPOTHESIS|失败阶段/);
   assert.match(failure.explanation.join('\n'), /timeout/);
   assert.doesNotMatch(failure.conclusion, /没有形成足够依据/);
+  // D. PARTICIPANT_FAILURE: no "no problem" implication, no blind rerun.
+  assert.doesNotMatch(failure.recommendedAction, /没有问题/);
+  assert.match(failure.recommendedAction, /不要.*修改产品/);
+  assert.match(failure.recommendedAction, /不要.*重跑/);
+  assert.ok(failure.explanation.length <= 4);
+  assert.equal(failure.handoff?.mode, 'optional');
 
   const scopeViolation = buildHumanReviewSummary({
     sessionExecution: session({
@@ -136,6 +144,11 @@ function testFailureAndSessionOverrides(): void {
   });
   assert.match(scopeViolation.conclusion, /范围校验停止/);
   assert.doesNotMatch(scopeViolation.conclusion, /准备好执行配置/);
+  // F. scope_violation: execution integration failure distinguished from product rejection.
+  assert.match(scopeViolation.explanation.join('\n').length > 0 ? scopeViolation.explanation.join('\n') : scopeViolation.conclusion, /范围|执行/);
+  assert.match(scopeViolation.recommendedAction, /不要.*绕过/);
+  assert.doesNotMatch(scopeViolation.conclusion, /产品方案被否决/);
+  assert.ok(scopeViolation.explanation.length <= 4);
 }
 
 function testLegacyAndReasonDistinctions(): void {
@@ -158,9 +171,23 @@ function testLegacyAndReasonDistinctions(): void {
     workflows: [workflow({ reason: 'EXPLICIT_ESCALATION', terminalRoute: 'ESCALATE_HUMAN' }, audit({ decision: { status: 'completed', artifactRef: 'decision.json', route: 'ESCALATE_HUMAN', reasonCode: 'EXPLICIT_ESCALATION' } }))],
   });
   assert.match(escalate.conclusion, /需要 Human 判断/);
-  assert.match(escalate.recommendedAction, /artifacts\/evolution\/human-follow-up\/index\.md/);
-  assert.match(escalate.handoff?.prompt ?? '', /Human Follow-up/);
+  // A. ESCALATE required handoff: physical Human action, not internal workflow state.
+  assert.equal(escalate.handoff?.mode, 'required');
+  assert.match(escalate.action.title, /交给 ChatGPT.*只读/);
+  assert.ok(escalate.action.steps.some(step => step.includes('project.zip')));
+  assert.ok(escalate.action.steps.some(step => step.includes('提示词')));
+  assert.ok(escalate.action.steps.join('\n').includes('不需要') && escalate.action.steps.join('\n').includes('Run Report'));
+  assert.match(escalate.recommendedAction, /project\.zip/);
+  assert.doesNotMatch(escalate.recommendedAction, /先审 Human Follow-up/);
   assert.match(escalate.handoff?.prompt ?? '', /只读/);
+  // B. Historical/current safety: prompt checks CURRENT disposition first, never reopens converted items.
+  assert.match(escalate.handoff?.prompt ?? '', /CURRENT|当前.*状态|disposition/);
+  assert.match(escalate.handoff?.prompt ?? '', /CONVERTED/);
+  assert.match(escalate.handoff?.prompt ?? '', /不要.*重新开启|不要.*重开|do NOT reopen/i);
+  assert.doesNotMatch(escalate.conclusion, /现在仍待审查/);
+  assert.doesNotMatch(escalate.recommendedAction, /现在仍待审查/);
+  // G. First-screen density: short bounded key reasons.
+  assert.ok(escalate.explanation.length >= 1 && escalate.explanation.length <= 4);
 
   const defer = buildHumanReviewSummary({
     workflows: [workflow({ reason: 'INSUFFICIENT_EVIDENCE', terminalRoute: 'DEFER' }, audit({ decision: { status: 'completed', artifactRef: 'decision.json', route: 'DEFER', reasonCode: 'INSUFFICIENT_EVIDENCE' } }))],
@@ -169,6 +196,11 @@ function testLegacyAndReasonDistinctions(): void {
   assert.match(defer.explanation.join('\n'), /INSUFFICIENT_EVIDENCE/);
   assert.match(defer.recommendedAction, /不应执行修改/);
   assert.match(defer.recommendedAction, /只读调查/);
+  // E. DEFER: concrete investigation action, no blind resampling.
+  assert.ok(defer.action.steps.join('\n').includes('project.zip') || defer.action.steps.join('\n').includes('只读'));
+  assert.match(defer.recommendedAction, /不要.*重复|而不是重复/);
+  assert.ok(defer.explanation.length <= 4);
+  assert.equal(defer.handoff?.mode, 'optional');
 }
 
 function testCrossRoundCompletion(): void {
@@ -189,6 +221,11 @@ function testCrossRoundCompletion(): void {
 
 async function testSurfacesConsumeProjection(): Promise<void> {
   const auditedWorkflow = workflow({}, audit());
+  const summary = buildHumanReviewSummary({
+    reportId: 'ae-report-test',
+    sessionExecution: session(),
+    workflows: [auditedWorkflow],
+  });
   const report = renderOperationalRunReportMarkdown({
     reportId: 'ae-report-test',
     createdAt: '2026-09-04T00:00:00.000Z',
@@ -196,9 +233,11 @@ async function testSurfacesConsumeProjection(): Promise<void> {
     summaries: [auditedWorkflow],
   });
   assert.ok(report.indexOf('## 一眼结论') < report.indexOf('## 会话执行'));
-  assert.match(report, /现有反馈只支持一次性体验描述/);
-  assert.match(report, /没有观察到足以支持产品问题的重复模式/);
+  // G. First-screen density: short bullets up top, full audit preserved below.
   assert.match(report, /### 决策审计 \/ 判断链/);
+  // H. Shared projection: report consumes the same action semantics (no duplicate tables).
+  assert.match(report, new RegExp(summary.action.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 20)));
+  assert.doesNotMatch(report, /如需进一步复核/);
 
   const repositoryRoot = await mkdtemp(join(tmpdir(), 'human-review-index-'));
   const reportDirectory = join(repositoryRoot, 'artifacts/evolution/run-reports/ae-report-test');
@@ -228,10 +267,46 @@ async function testSurfacesConsumeProjection(): Promise<void> {
   assert.match(await readFile(join(reportDirectory, 'report.md'), 'utf8'), /## 一眼结论/);
 }
 
+function testEscalateSurfaceAndMachineInvariance(): void {
+  const escalateAudit = audit({ decision: { status: 'completed', artifactRef: 'decision.json', route: 'ESCALATE_HUMAN', reasonCode: 'EXPLICIT_ESCALATION' } });
+  const escalateWorkflow = workflow({ reason: 'EXPLICIT_ESCALATION', terminalRoute: 'ESCALATE_HUMAN', problemStatement: '测试问题陈述' }, escalateAudit);
+  const before = JSON.stringify(escalateWorkflow);
+  const summary = buildHumanReviewSummary({
+    reportId: 'ae-report-escalate-surface',
+    sessionExecution: session({ multiRoundRunRef: 'ordinary-run-20260904-000005' }),
+    workflows: [escalateWorkflow],
+  });
+  // I. machine invariance: projection does not mutate input.
+  assert.equal(JSON.stringify(escalateWorkflow), before);
+  const report = renderOperationalRunReportMarkdown({
+    reportId: 'ae-report-escalate-surface',
+    createdAt: '2026-09-04T00:00:00.000Z',
+    sessionExecution: session({ multiRoundRunRef: 'ordinary-run-20260904-000005' }),
+    summaries: [escalateWorkflow],
+  });
+  // Required handoff uses primary heading, never "如需进一步复核".
+  assert.match(report, /## 下一步：交给 ChatGPT 做只读/);
+  assert.doesNotMatch(report, /如需进一步复核/);
+  assert.match(report, /上传当前 `project\.zip` 给 ChatGPT/);
+  assert.match(report, /复制下面的提示词/);
+  assert.match(report, /不需要另外复制整份 Run Report/);
+  // HFL appears only as audit evidence after the handoff, not as the primary instruction.
+  const handoffPos = report.indexOf('下一步：交给 ChatGPT');
+  const hflPos = report.indexOf('human-follow-up/index.md');
+  assert.ok(handoffPos >= 0 && hflPos > handoffPos);
+  // Prompt carries historical/current safety semantics with repo-relative identifiers.
+  assert.match(report, /CURRENT disposition/);
+  assert.match(report, /CONVERTED/);
+  assert.match(report, /artifacts\/evolution\/run-reports\/ae-report-escalate-surface\/report\.json/);
+  assert.match(report, /artifacts\/evolution\/human-follow-up\//);
+  assert.doesNotMatch(report, /\/Users\//);
+}
+
 testSkipProjection();
 testFailureAndSessionOverrides();
 testLegacyAndReasonDistinctions();
 testCrossRoundCompletion();
+testEscalateSurfaceAndMachineInvariance();
 await testSurfacesConsumeProjection();
 
 console.log('humanReviewSummary.test.ts: ok');

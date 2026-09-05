@@ -238,6 +238,8 @@ STOP
 - Codex task definition；
 - read-only review。
 
+Run Report 内的人工 ChatGPT handoff（Human 上传当前项目包并复制报告内只读审查提示词）是明确支持的工作流；ChatGPT 不集成进 AE 执行、不自动调用。历史 Run Report 是不可变的运行证据，当前 Human Follow-up disposition 才是规范 operational state。
+
 应特别避免：
 
 - 在真实问题出现前穷举验证所有模型质量风险；

@@ -569,12 +569,28 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
     '',
     ...humanReview.explanation.map(line => `- ${line}`),
     '',
-    '## 你现在该做什么',
+    `## ${humanReview.action.title}`,
     '',
-    humanReview.recommendedAction,
+    ...(humanReview.handoff?.mode === 'required'
+      ? ['这一步需要你处理。', '']
+      : humanReview.handoff !== null
+        ? ['这一步可选。', '']
+        : []),
+    ...humanReview.action.steps.map((step, index) => `${index + 1}. ${step}`),
   ];
   if (humanReview.handoff !== null) {
-    headerLines.push('', '## 如需进一步复核', '', humanReview.handoff.label, '', '```text', humanReview.handoff.prompt, '```');
+    headerLines.push('', humanReview.handoff.label, '', '```text', humanReview.handoff.prompt, '```');
+  }
+  if (humanReview.attention === 'human_review') {
+    headerLines.push(
+      '',
+      '系统证据（审计引用，不是前置学习材料）：',
+      '',
+      '- Human Follow-up index: artifacts/evolution/human-follow-up/index.md',
+      ...(input.reportId === undefined
+        ? []
+        : [`- Run Report: artifacts/evolution/run-reports/${input.reportId}/report.json`]),
+    );
   }
 
   const isArchivedView = input.reportId !== undefined || input.createdAt !== undefined

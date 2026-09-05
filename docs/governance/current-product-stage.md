@@ -33,7 +33,7 @@ Auto Evolution 当前处于：
 - **Decision Audit / SKIP Explainability Slice A：HUMAN-AUTHORIZED / bounded correction；**
 - Run Report 可旁路保留已验证的 Participant decision outputs；当前 0-hypothesis contract 必须带有界 `noProblemAssessment`，legacy 缺失时显式标记 unavailable；不启动 Report Analysis，不新增 reasoning Participant，不改变 SKIP 或 HFL 语义；
 - **Human Review Surface v1 Slice B：HUMAN-AUTHORIZED / deterministic Human-view projection；**
-- Report 首屏与运行索引现在消费同一 projection，翻译 bounded Decision Audit 为结论、解释、建议动作与必要时的手工 ChatGPT 只读 handoff；不写入 `report.json`，不新增 LLM、Report Analysis、UI、自动任务或重跑，不改变 routing / HFL lifecycle；
+- Report 首屏与运行索引现在消费同一 projection，翻译 bounded Decision Audit 为结论、解释、建议动作与必要时的手工 ChatGPT 只读 handoff；首屏按 Human next action（上传项目包、复制提示词）而非 system next state 表达，ESCALATE handoff 为 required、SKIP 审计为 optional，历史报告保持 run-time 真实且要求先确认当前 HFL disposition；不写入 `report.json`，不新增 LLM、Report Analysis、UI、自动任务或重跑，不改变 routing / HFL lifecycle；
 - **P2 Multi-round Execution Validation：DESIGN ACCEPTED / ENGINEERING CLOSED；**
 - P2 deterministic engineering path 已验证：`Round 1 → bounded configuration execution → scope verification → verification → real Phase 0 rerun → new sealed source → Round 2 → STOP`；
 - P2 已验证 no-op execution、authoritative repository mutation、scope violation、verification / rerun failure 等边界会 fail closed；

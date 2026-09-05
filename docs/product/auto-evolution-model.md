@@ -183,7 +183,9 @@ Report schema 在对应最小切片设计时定义，不在本产品模型提前
 
 该 correction 仍是 observability，不是 Report Analysis；不新增 reasoning Participant，不评价 Participant 是否正确，也不改变 `SKIP`、Decision routing 或 Human Follow-up 创建边界。
 
-Human Review Surface v1 Slice B 是同一 bounded Decision Audit 的 deterministic Human-view projection：它把已验证的 machine evidence 翻译为首屏可理解的结论、解释、建议动作与必要时的手工 ChatGPT 只读审查提示。ChatGPT 不属于 Auto Evolution execution，也不是 Report Analysis Agent 或 Human Control Surface automation；报告不自动调用它、不创建任务、不重跑。
+Human Review Surface v1 Slice B 是同一 bounded Decision Audit 的 deterministic Human-view projection：它把已验证的 machine evidence 翻译为首屏可理解的结论、解释、建议动作与必要时的手工 ChatGPT 只读审查提示。ChatGPT 不属于 Auto Evolution execution，也不是 Report Analysis Agent 或 Human Control Surface automation；报告不自动调用它、不创建任务、不重跑。手工 ChatGPT handoff（Human 上传当前项目包并复制报告内提示词）是明确支持的工作流，但 ChatGPT 始终不集成进 AE 执行。
+
+该 projection 的首屏原则是 Human next action、not system next state：每个可行动路由用物理动作（上传项目包、复制提示词）而不是内部工作流状态（先审 Human Follow-up）指导 Human；ESCALATE_HUMAN 的 ChatGPT handoff 是 required，SKIP 的只读决策审计是 optional。历史 Run Report 是不可变的运行证据，当前 HFL disposition 才是规范 operational state；ESCALATE 提示词因此先要求确认 CURRENT disposition，已 CONVERTED / REJECTED / DEFERRED 的事项只说明当前状态、不重新开启审查。
 
 该 projection 不写入 `report.json`，不改变 report schema、report identity、Decision Audit、routing 或 HFL lifecycle。V3 `report.json` 保留 bounded validated Decision Audit；原始 Artifact refs 可能指向会消失的 `.tmp/evolution/**`；只有正式创建 HFL item 的 route 才由 HFL 保留 operational state，SKIP 的可审计性不依赖 HFL。
 

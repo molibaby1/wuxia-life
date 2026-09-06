@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -19,9 +19,16 @@ import {
 import {
   buildInvestigationEvidence,
 } from '../../scripts/evolution/hypothesisInvestigation/buildInvestigationEvidence';
+import {
+  buildCohortPatternEvidence,
+  assertCohortHypothesisReferencesPatternEvidence,
+  assertCohortPatternEvidenceReady,
+  persistCohortPatternEvidence,
+} from '../../scripts/evolution/runCrossRunCohortInvestigationExperiment';
 import type { HypothesisInvestigationSource } from '../../scripts/evolution/hypothesisInvestigation/loadHypothesisInvestigationSource';
 import type { ExternalFeedbackSource } from '../../scripts/evolution/improvementHypothesis/loadExternalFeedbackSource';
 import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
+import { buildExperienceSemanticContext } from '../../src/evolution/experienceSemanticContext';
 import {
   serializeObservablePayload,
   type ObservablePayload,
@@ -75,6 +82,19 @@ function surfaceWithoutPressure(): HeadlessApiPlayerSurfaceTrace {
         }],
       },
     ],
+  };
+}
+
+function surfaceWithRepeatedExperienceContext(): HeadlessApiPlayerSurfaceTrace {
+  return {
+    schemaVersion: 'headless-api-player-surface-source-v1',
+    steps: [{
+      sequence: 1,
+      kind: 'story_event',
+      age: 16,
+      experienceContext: buildExperienceSemanticContext({ age: 16, kind: 'story_event' }),
+      storyEvent: { eventId: 'repeated-event', title: '早期经历', text: '真实 run 的玩家可见经历。' },
+    }],
   };
 }
 
@@ -314,6 +334,43 @@ async function testCohortV1Composition(): Promise<void> {
     cohortEvidence: { items: cohortEvidenceItems(bundle) },
   });
 
+  const patternEvidence = {
+    schemaVersion: 'experience-pattern-evidence-v1' as const,
+    patterns: [{
+      patternId: 'pattern-000001',
+      description: '跨 run 重复出现的体验模式。',
+      supportingRuns: ['cohort-run-000001', 'cohort-run-000002'],
+      evidenceRefs: ['run:cohort-run-000001:observable:entry-000001'],
+      experienceContextRefs: ['run:cohort-run-000001:entry:entry-000001:experienceContext'],
+    }],
+  };
+  const patternSource = {
+    ...source,
+    selectedHypothesis: {
+      ...source.selectedHypothesis,
+      patternEvidenceRefs: ['pattern:pattern-000001'],
+    },
+  };
+  const longitudinalWithPattern = await buildInvestigationEvidence({
+    source: patternSource,
+    evidenceMode: 'longitudinal-v1',
+    patternEvidence,
+  });
+  assert.equal(
+    longitudinalWithPattern.items.some(item => item.evidenceId === 'pattern:pattern-000001'),
+    false,
+  );
+  const cohortWithPattern = await buildInvestigationEvidence({
+    source: patternSource,
+    evidenceMode: 'cohort-v1',
+    cohortEvidence: { items: cohortEvidenceItems(bundle) },
+    patternEvidence,
+  });
+  assert.equal(
+    cohortWithPattern.items.some(item => item.evidenceId === 'pattern:pattern-000001'),
+    true,
+  );
+
   assert.equal(cohort.schemaVersion, 'hypothesis-investigation-evidence-v3');
   assert.equal(cohort.evidenceMode, 'cohort-v1');
   assert.equal(cohort.items.some(item => item.evidenceId === 'cohort:summary'), true);
@@ -340,6 +397,79 @@ async function testCohortV1Composition(): Promise<void> {
   assert.equal(forbidden.includes('"seed"'), false);
 }
 
+async function testCohortPatternProducerUsesMultiRunArtifacts(): Promise<void> {
+  const root = await mkdtemp(join(tmpdir(), 'wuxia-cohort-pattern-producer-'));
+  const payload = payloadFromSurface(surfaceWithRepeatedExperienceContext());
+  const patternEvidence = buildCohortPatternEvidence({
+    runs: COHORT_REGISTRATIONS.map(registration => ({
+      runRef: registration.cohortRunId,
+      items: payload.entries.map(entry => ({
+        evidenceId: `observable:${entry.entryId}`,
+        kind: 'observable_entry',
+        payload: entry,
+      })),
+    })),
+  });
+
+  assert.equal(patternEvidence.patterns.length, 1);
+  const pattern = patternEvidence.patterns[0]!;
+  assert.deepEqual(pattern.supportingRuns, COHORT_REGISTRATIONS.map(run => run.cohortRunId));
+  assert.equal(pattern.evidenceRefs.length, COHORT_REGISTRATIONS.length);
+  assert.equal(pattern.experienceContextRefs.length, COHORT_REGISTRATIONS.length);
+  assert.equal(pattern.evidenceRefs[0], 'run:cohort-run-000001:observable:entry-000001');
+  assert.equal(
+    pattern.experienceContextRefs[0],
+    'run:cohort-run-000001:entry:entry-000001:experienceContext',
+  );
+
+  const patternPath = join(root, 'pattern-evidence.json');
+  const persisted = await persistCohortPatternEvidence({ patternPath, patternEvidence });
+  const artifact = JSON.parse(await readFile(patternPath, 'utf8')) as {
+    patternEvidenceHash?: string;
+    patterns: unknown[];
+  };
+  assert.equal(artifact.patternEvidenceHash, persisted.patternEvidenceHash);
+  const { patternEvidenceHash: _ignored, ...artifactPayload } = artifact;
+  assert.equal(canonicalJson(artifactPayload), canonicalJson(patternEvidence));
+  assert.equal(persisted.patternEvidenceHash, sha256Hex(canonicalJson(patternEvidence)));
+}
+
+function testCohortPatternProducerFailsClosedWithoutPatternReference(): void {
+  assert.throws(
+    () => assertCohortPatternEvidenceReady({
+      schemaVersion: 'experience-pattern-evidence-v1',
+      patterns: [],
+    }),
+    /requires at least one repeated pattern/i,
+  );
+
+  const patternEvidence = {
+    schemaVersion: 'experience-pattern-evidence-v1' as const,
+    patterns: [{
+      patternId: 'pattern-000001',
+      description: '重复出现的体验模式。',
+      supportingRuns: ['cohort-run-000001', 'cohort-run-000002'],
+      evidenceRefs: ['run:cohort-run-000001:observable:entry-000001'],
+      experienceContextRefs: ['run:cohort-run-000001:entry:entry-000001:experienceContext'],
+    }],
+  };
+  assert.throws(
+    () => assertCohortHypothesisReferencesPatternEvidence({
+      hypothesis: {
+        patternEvidenceRefs: [],
+      },
+      patternEvidence,
+    }),
+    /must reference at least one pattern evidence item/i,
+  );
+  assert.doesNotThrow(() => assertCohortHypothesisReferencesPatternEvidence({
+    hypothesis: {
+      patternEvidenceRefs: ['pattern:pattern-000001'],
+    },
+    patternEvidence,
+  }));
+}
+
 export async function runCrossRunCohortInvestigationTests(): Promise<void> {
   testCohortPlanRoster();
   await testCohortPlanCreateOnly();
@@ -348,6 +478,8 @@ export async function runCrossRunCohortInvestigationTests(): Promise<void> {
   testParticipantRedaction();
   await testObservableSerializationGate();
   await testCohortV1Composition();
+  await testCohortPatternProducerUsesMultiRunArtifacts();
+  testCohortPatternProducerFailsClosedWithoutPatternReference();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -14,6 +14,9 @@ import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalEx
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
 import { runHypothesisInvestigation } from '../../scripts/evolution/runHypothesisInvestigation';
 import { parseHypothesisInvestigationResult } from '../../src/evolution/hypothesisInvestigationContract';
+import type { ExperiencePatternEvidence } from '../../src/evolution/experiencePatternEvidenceContract';
+import { projectInvestigationHandoff } from '../../src/evolution/investigationHandoff';
+import { withExperiencePatternEvidenceHash } from '../../scripts/evolution/experiencePattern/buildExperiencePatternEvidence';
 
 const API_KEY = 'sk-test-key-not-real';
 
@@ -84,6 +87,7 @@ async function createHypothesisSource(input: {
   mefRoot: string;
   hypothesisRoot: string;
   runRef: string;
+  patternEvidence?: ExperiencePatternEvidence;
 }): Promise<void> {
   const persona = getP8PersonaById('p8-martial-lin');
   assert.ok(persona, 'p8-martial-lin must exist');
@@ -137,6 +141,13 @@ async function createHypothesisSource(input: {
         observedBasis: 'participant 明确提到遗憾。',
         feedbackRefs: ['observations[3]'],
         evidenceRefs: ['entry-000001'],
+        ...(input.patternEvidence !== undefined
+          ? {
+            patternEvidenceRefs: input.patternEvidence.patterns.map(
+              pattern => `pattern:${pattern.patternId}`,
+            ),
+          }
+          : {}),
         unknowns: ['是否多数玩家有同样反应。'],
         productSignificance: '可能影响结局满意度。',
       },
@@ -150,6 +161,9 @@ async function createHypothesisSource(input: {
       sourceRoot: input.mefRoot,
       outRoot: input.hypothesisRoot,
       apiKey: API_KEY,
+      ...(input.patternEvidence !== undefined
+        ? { patternEvidence: input.patternEvidence }
+        : {}),
     },
     {
       invoke: async () => ({
@@ -166,6 +180,7 @@ async function createHypothesisSource(input: {
 
 export async function runHypothesisInvestigationLoopTests(): Promise<void> {
   await testCompletedLoop();
+  await testPatternEvidenceFlowsIntoInvestigation();
   await testLongitudinalMode();
   await testEvidenceGapCompleted();
   await testInvalidReferenceFails();
@@ -294,6 +309,97 @@ async function testCompletedLoop(): Promise<void> {
   ) as { status: string; hypothesisId: string };
   assert.equal(invocation.status, 'completed');
   assert.equal(invocation.hypothesisId, hypothesisId);
+}
+
+async function testPatternEvidenceFlowsIntoInvestigation(): Promise<void> {
+  const mefRoot = await mkdtemp(join(tmpdir(), 'wuxia-inv-loop-mef-pattern-'));
+  const hypRoot = await mkdtemp(join(tmpdir(), 'wuxia-inv-loop-hyp-pattern-'));
+  const outRoot = await mkdtemp(join(tmpdir(), 'wuxia-inv-loop-out-pattern-'));
+  const runRef = 'inv-loop-pattern';
+  const patternEvidence: ExperiencePatternEvidence = withExperiencePatternEvidenceHash({
+    schemaVersion: 'experience-pattern-evidence-v1',
+    patterns: [{
+      patternId: 'pattern-000001',
+      patternType: 'frequency',
+      description: '跨 run 重复出现的体验模式。',
+      supportingRuns: [runRef, 'inv-loop-pattern-peer'],
+      evidenceRefs: [`run:${runRef}:observable:entry-000001`],
+      experienceContextRefs: [`run:${runRef}:entry:entry-000001:experienceContext`],
+    }],
+  });
+  await createHypothesisSource({
+    mefRoot,
+    hypothesisRoot: hypRoot,
+    runRef,
+    patternEvidence,
+  });
+  const capture: Capture = { callCount: 0 };
+
+  const result = await runHypothesisInvestigation(
+    {
+      runRef,
+      hypothesisId: 'hypothesis-000002',
+      mefSourceRoot: mefRoot,
+      hypothesisSourceRoot: hypRoot,
+      outRoot,
+      evidenceMode: 'cohort-v1',
+      cohortEvidence: { items: [] },
+      sealedLongitudinalEvidenceHash: 'f'.repeat(64),
+      apiKey: API_KEY,
+    },
+    {
+      invoke: successInvoke(input => {
+        const pack = JSON.parse(input.evidencePackBytes) as {
+          items: Array<{ evidenceId: string; kind: string; payload: unknown }>;
+        };
+        const pattern = pack.items.find(item => item.evidenceId === 'pattern:pattern-000001');
+        assert.ok(pattern);
+        assert.equal(pattern.kind, 'experience_pattern');
+        return JSON.stringify({
+          confirmedFacts: [{
+            statement: 'Investigation 引用了跨 run Pattern Evidence。',
+            evidenceRefs: ['pattern:pattern-000001', 'observable:entry-000001'],
+          }],
+          relevantMechanisms: [],
+          limitingEvidence: [],
+          unresolvedQuestions: ['Pattern 仍不是问题 verdict。'],
+          evidenceGaps: [],
+        });
+      }, capture),
+    },
+  );
+
+  assert.equal(capture.callCount, 1);
+  assert.equal(await pathExists(join(result.investigationDir, 'source-pattern-evidence.json')), true);
+  const storedPatternEvidence = JSON.parse(
+    await readFile(join(result.investigationDir, 'source-pattern-evidence.json'), 'utf8'),
+  ) as ExperiencePatternEvidence;
+  assert.equal(storedPatternEvidence.patternEvidenceHash, patternEvidence.patternEvidenceHash);
+  const investigationInvocation = JSON.parse(
+    await readFile(join(result.investigationDir, 'invocation.json'), 'utf8'),
+  ) as { patternEvidenceHash?: string };
+  assert.equal(investigationInvocation.patternEvidenceHash, patternEvidence.patternEvidenceHash);
+  const pack = JSON.parse(
+    await readFile(join(result.investigationDir, 'investigation-evidence.json'), 'utf8'),
+  ) as { runRef: string; items: Array<{ evidenceId: string; kind: string; payload: unknown }> };
+  const investigation = parseHypothesisInvestigationResult(
+    await readFile(join(result.investigationDir, 'investigation.json'), 'utf8'),
+  );
+  const handoff = projectInvestigationHandoff(investigation, pack);
+  assert.deepEqual(handoff.evidenceBasis, [
+    {
+      kind: 'single_run_observation',
+      evidenceRefs: ['observable:entry-000001'],
+    },
+    {
+      kind: 'multi_run_pattern',
+      evidenceRefs: ['pattern:pattern-000001'],
+    },
+    {
+      kind: 'experience_semantic_context',
+      evidenceRefs: [`run:${pack.runRef}:entry:entry-000001:experienceContext`],
+    },
+  ]);
 }
 
 async function testEvidenceGapCompleted(): Promise<void> {

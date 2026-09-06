@@ -102,6 +102,8 @@ export function buildSolutionReviewerPrompt(
     'You may reject all options. Do not assume the Solution Participant is correct.',
     'Assess problem-solution fit, evidence, risks, and permission/scope boundaries.',
     'Diagnostic evidence referenced by the Problem Package is trusted internal source-run provenance. It is not player-observable evidence. Producer attribution identifies which captured runtime producer generated an observed entry; it does not by itself prove the broader causal mechanism or that a proposed change is correct.',
+    'The observable payload referenced by ProblemPackage.source.observablePayloadRef may include validated Experience Semantic Context on each entry. Read it as player-observable meaning: milestone meaning, life-stage meaning, experience category, and expected experience signals.',
+    'The Experience Semantic Context is descriptive only. It contains no hidden runtime state, and you must not treat it as a solution recommendation, quality score, authority, or permission.',
     renderStructuredFinalOutputContractV1({
       roleSchemaName: 'SolutionReviewV1',
     }),

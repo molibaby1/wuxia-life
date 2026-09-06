@@ -12,6 +12,8 @@ import { DEEPSEEK_PLAYER_EXPERIENCE_MODEL } from '../../scripts/evolution/extern
 import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalExternalFeedback';
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
 import { proveLegacyParticipantFailure } from '../../scripts/evolution/problemAgnosticSolution/participantFailureRouting';
+import type { ExperiencePatternEvidence } from '../../src/evolution/experiencePatternEvidenceContract';
+import { canonicalJson, sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 const API_KEY = 'sk-test-key-not-real';
 const FORBIDDEN_PROVIDER_INPUT_MARKERS = [
@@ -60,6 +62,7 @@ type HypothesisInvokeInput = {
   feedbackHash: string;
   observablePayloadBytes: string;
   feedbackBytes: string;
+  patternEvidenceBytes?: string;
 };
 
 type Capture = Partial<HypothesisInvokeInput> & { callCount: number };
@@ -157,6 +160,7 @@ async function createSource(sourceRoot: string, runRef: string): Promise<{
 
 export async function runImprovementHypothesisLoopTests(): Promise<void> {
   await testOneHypothesisSuccess();
+  await testPatternEvidenceInputAndProvenance();
   await testZeroHypothesesCompletedSuccess();
   await testMultipleHypothesesIndependentIds();
   await testInvalidReferenceFails();
@@ -251,6 +255,65 @@ async function testOneHypothesisSuccess(): Promise<void> {
   assert.match(report, /继续调查 ≠ 已证实|继续调查≠已证实|不是已确认缺陷/);
   assert.match(report, /STOP/);
   assert.match(report, /可撤销产品推断/);
+  assert.equal(await pathExists(join(result.hypothesisDir, 'source-pattern-evidence.json')), false);
+  const singleRunInvocation = JSON.parse(
+    await readFile(join(result.hypothesisDir, 'invocation.json'), 'utf8'),
+  ) as { schemaVersion: string };
+  assert.equal(singleRunInvocation.schemaVersion, 'improvement-hypothesis-invocation-v1');
+}
+
+async function testPatternEvidenceInputAndProvenance(): Promise<void> {
+  const sourceRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-src-pattern-'));
+  const outRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-out-pattern-'));
+  const runRef = 'hyp-loop-pattern';
+  const source = await createSource(sourceRoot, runRef);
+  const patternEvidence: ExperiencePatternEvidence = {
+    schemaVersion: 'experience-pattern-evidence-v1',
+    patterns: [{
+      patternId: 'pattern-000001',
+      patternType: 'frequency',
+      description: '跨 run 重复出现的玩家体验模式。',
+      supportingRuns: [runRef, 'hyp-loop-pattern-peer'],
+      evidenceRefs: [`run:${runRef}:observable:entry-000001`],
+      experienceContextRefs: [`run:${runRef}:entry:entry-000001:experienceContext`],
+    }],
+  };
+  const capture: Capture = { callCount: 0 };
+  const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [{
+      hypothesis: '跨 run 重复模式可能削弱体验差异感。',
+      observedBasis: 'participant feedback 与 Pattern Evidence 共同提供依据。',
+      feedbackRefs: ['observations[0]'],
+      evidenceRefs: ['entry-000001'],
+      patternEvidenceRefs: ['pattern:pattern-000001'],
+      unknowns: ['仍不知道该模式是否构成需要处理的问题。'],
+      productSignificance: '值得进入现有 Investigation 流程。',
+    }],
+    noProblemAssessment: null,
+  });
+
+  const result = await runImprovementHypothesis(
+    { runRef, sourceRoot, outRoot, apiKey: API_KEY, patternEvidence },
+    { invoke: successInvoke(participantJson, capture) },
+  );
+  const expectedPatternBytes = canonicalJson(patternEvidence);
+  assert.equal(capture.patternEvidenceBytes, expectedPatternBytes);
+  assert.equal(
+    await readFile(join(result.hypothesisDir, 'source-pattern-evidence.json'), 'utf8'),
+    expectedPatternBytes,
+  );
+  assert.equal(result.patternEvidenceHash, sha256Hex(expectedPatternBytes));
+
+  const hypotheses = JSON.parse(
+    await readFile(join(result.hypothesisDir, 'hypotheses.json'), 'utf8'),
+  ) as { hypotheses: Array<{ patternEvidenceRefs?: string[] }> };
+  assert.deepEqual(hypotheses.hypotheses[0]?.patternEvidenceRefs, ['pattern:pattern-000001']);
+  const invocation = JSON.parse(
+    await readFile(join(result.hypothesisDir, 'invocation.json'), 'utf8'),
+  ) as { schemaVersion: string; patternEvidenceHash?: string };
+  assert.equal(invocation.schemaVersion, 'improvement-hypothesis-invocation-v2');
+  assert.equal(invocation.patternEvidenceHash, result.patternEvidenceHash);
 }
 
 async function testZeroHypothesesCompletedSuccess(): Promise<void> {

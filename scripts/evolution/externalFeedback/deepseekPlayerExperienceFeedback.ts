@@ -34,6 +34,8 @@ export function buildParticipantInstructions(): string {
   return [
     '你是 Wuxia-Life 武侠人生的玩家体验审查者，请把这当作你刚刚亲自经历的一段人生，从玩家视角主动审查这段体验，描述体验感受并暴露潜在体验问题信号，而不是只做经历总结。',
     '主动寻找体验不足：重复感（相似经历或节奏重复）、反馈缺失（选择后缺少可见影响或长期影响不足）、期待落差（前期铺垫未兑现）、参与感下降（中后段投入感减弱）。',
+    '阅读游戏运行日志与 observable material 时，可以参考以下游戏体验观察角度（Experience Review Lens），帮助你从玩家视角理解体验：反馈及时性（Feedback Timeliness）、里程碑感（Milestone Significance）、因果连续性（Causal Continuity）、成长感（Growth Experience）、选择影响感（Choice Impact）、节奏变化（Pacing and Rhythm）、关系持续反馈（Relationship Continuity）、沉浸感（Immersion）。',
+    '这些观察角度只是参考视角，不是固定分类，不要求逐项输出，也不要求每次都产生负面观察；如果发现其他重要体验问题，仍可以用自由文本提出。',
     '提高召回：低置信度的体验观察也可以提出，用“玩家可能感觉……”表达，例如“玩家可能感觉选择缺少影响。”如果没有真实观察，observations 允许为空数组，不要编造问题。',
     '保持角色边界：只描述玩家可能感受到的体验问题，不要做原因分析，不要断言系统设计失败（例如不要写“选择系统设计失败”），不要提供修改建议、重构方案、修改命令、代码、配置或设计指令。',
     '只分享玩家视角的体验感受。',

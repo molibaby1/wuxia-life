@@ -48,6 +48,7 @@ export async function runDeepSeekPlayerExperienceFeedbackTests(): Promise<void> 
   await testSuccessExtractsRawBodies();
   await testRequestShapeAndConstraints();
   await testCritiqueAlignmentBoundary();
+  await testExperienceReviewLens();
   await testWeakExperiencePromptBoundary();
   await testHttpErrorPreservesRawBody();
   await testTimeoutFailure();
@@ -161,6 +162,40 @@ async function testCritiqueAlignmentBoundary(): Promise<void> {
   assert.match(system, /不要.*score/i);
   assert.match(system, /不要.*置信度/);
   assert.match(system, /不要.*系统设计失败/);
+}
+
+async function testExperienceReviewLens(): Promise<void> {
+  const system = buildParticipantInstructions();
+
+  // Lens present as reference perspectives.
+  assert.match(system, /Experience Review Lens/);
+  assert.match(system, /参考/);
+  assert.match(system, /不是固定分类/);
+  assert.match(system, /不要求逐项输出|不要求每次/);
+
+  // All eight lenses named (English anchors).
+  for (const lens of [
+    'Feedback Timeliness',
+    'Milestone Significance',
+    'Causal Continuity',
+    'Growth Experience',
+    'Choice Impact',
+    'Pacing and Rhythm',
+    'Relationship Continuity',
+    'Immersion',
+  ]) {
+    assert.match(system, new RegExp(lens.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+
+  // Other important issues still allowed in free text; empty observations allowed.
+  assert.match(system, /其他重要体验问题|自由文本/);
+  assert.match(system, /为空数组/);
+
+  // Role boundary retained: experience observation + evidence refs, no diagnosis/solution.
+  assert.match(system, /entryId/);
+  assert.match(system, /不要.*原因分析/);
+  assert.match(system, /不要.*修改建议/);
+  assert.match(system, /不要.*score/i);
 }
 
 async function testWeakExperiencePromptBoundary(): Promise<void> {

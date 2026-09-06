@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {
+  buildParticipantInstructions,
+  buildPlayerExperienceFeedbackPrompt,
   DEEPSEEK_PLAYER_EXPERIENCE_MODEL,
   invokeDeepSeekPlayerExperienceFeedback,
 } from '../../scripts/evolution/externalFeedback/deepseekPlayerExperienceFeedback';
@@ -45,6 +47,8 @@ function buildSuccessResponseBody(participantText: string): string {
 export async function runDeepSeekPlayerExperienceFeedbackTests(): Promise<void> {
   await testSuccessExtractsRawBodies();
   await testRequestShapeAndConstraints();
+  await testCritiqueAlignmentBoundary();
+  await testWeakExperiencePromptBoundary();
   await testHttpErrorPreservesRawBody();
   await testTimeoutFailure();
   await testNetworkFailure();
@@ -128,6 +132,62 @@ async function testRequestShapeAndConstraints(): Promise<void> {
   } finally {
     restore();
   }
+}
+
+async function testCritiqueAlignmentBoundary(): Promise<void> {
+  const system = buildParticipantInstructions();
+
+  // Role: reviewer, not diary author / summary-only.
+  assert.match(system, /审查/);
+  assert.match(system, /主动审查|主动寻找/);
+  assert.match(system, /而不是只做|而不是/);
+
+  // Must actively look for weakness signals.
+  assert.match(system, /重复/);
+  assert.match(system, /反馈缺失|缺少.*影响/);
+  assert.match(system, /期待落差/);
+  assert.match(system, /参与感/);
+
+  // High recall, low-confidence allowed; empty observations allowed.
+  assert.match(system, /玩家可能感觉/);
+  assert.match(system, /observations/);
+  assert.match(system, /为空数组/);
+  assert.match(system, /不要编造/);
+
+  // Role boundary: forbid cause analysis, fix suggestions, scores.
+  assert.match(system, /不要.*原因分析/);
+  assert.match(system, /不要.*修改建议/);
+  assert.match(system, /不要.*评分/);
+  assert.match(system, /不要.*score/i);
+  assert.match(system, /不要.*置信度/);
+  assert.match(system, /不要.*系统设计失败/);
+}
+
+async function testWeakExperiencePromptBoundary(): Promise<void> {
+  const weakPayloadBytes = JSON.stringify({
+    transcriptVersion: 'player-observable-v1',
+    entries: [
+      { entryId: 'entry-000001', kind: 'story_event', title: '初入江湖', body: '你拜入山门，师父许诺传你绝学。' },
+      { entryId: 'entry-000002', kind: 'story_event', title: '苦修三年', body: '每日挑水劈柴，节奏与昨日相似。' },
+      { entryId: 'entry-000003', kind: 'story_event', title: '再苦修两年', body: '每日挑水劈柴，节奏与昨日相似。' },
+      { entryId: 'entry-000004', kind: 'choice_event', title: '抉择', body: '你选择下山行侠，但此后无人再提此事。' },
+    ],
+  });
+
+  const prompt = buildPlayerExperienceFeedbackPrompt(weakPayloadBytes);
+
+  // Prompt must embed the weak mock experience verbatim.
+  assert.equal(prompt.includes(weakPayloadBytes), true);
+
+  // Instructions must allow reporting repetition / missing feedback / expectation gap.
+  assert.match(prompt, /重复/);
+  assert.match(prompt, /反馈缺失|缺少.*影响/);
+  assert.match(prompt, /期待落差/);
+
+  // Instructions must prohibit cause analysis, fix suggestions, and scores.
+  assert.match(prompt, /不要.*原因分析/);
+  assert.match(prompt, /不要.*修改建议/);
+  assert.match(prompt, /不要.*score/i);
 }
 
 async function testHttpErrorPreservesRawBody(): Promise<void> {

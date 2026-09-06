@@ -7,6 +7,13 @@ import {
   type ImprovementHypothesis,
   type ImprovementHypothesisSet,
 } from '../../src/evolution/improvementHypothesisContract';
+import {
+  computeExperiencePatternEvidenceHash,
+} from './experiencePattern/buildExperiencePatternEvidence';
+import {
+  validateExperiencePatternEvidence,
+  type ExperiencePatternEvidence,
+} from '../../src/evolution/experiencePatternEvidenceContract';
 import type { ExternalFeedback } from '../../src/evolution/externalFeedbackContract';
 import type { ObservableEntry, ObservablePayload } from '../../src/evolution/playerObservableTranscript';
 import {
@@ -36,7 +43,8 @@ import {
 
 const DEFAULT_SOURCE_ROOT = 'artifacts/reports/evolution/minimal-external-feedback';
 const DEFAULT_OUT_ROOT = 'artifacts/reports/evolution/improvement-hypothesis';
-const INVOCATION_SCHEMA_VERSION = 'improvement-hypothesis-invocation-v1' as const;
+const LEGACY_INVOCATION_SCHEMA_VERSION = 'improvement-hypothesis-invocation-v1' as const;
+const PATTERN_INVOCATION_SCHEMA_VERSION = 'improvement-hypothesis-invocation-v2' as const;
 const DOTENV_PATH = resolve(process.cwd(), '.env');
 
 /** ponytail: tiny KEY=VALUE loader; no multiline/escape support — upgrade to dotenv if needed */
@@ -71,6 +79,7 @@ export interface RunImprovementHypothesisOptions {
   outRoot?: string;
   apiKey?: string;
   localParticipant?: WorkspaceAgentParticipantOptions;
+  patternEvidence?: ExperiencePatternEvidence;
 }
 
 export interface RunImprovementHypothesisTestHooks {
@@ -86,6 +95,7 @@ export interface RunImprovementHypothesisResult {
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
 }
 
 interface HypothesisParticipant {
@@ -102,13 +112,16 @@ interface HypothesisParticipant {
 }
 
 interface HypothesisInvocationRecord {
-  schemaVersion: typeof INVOCATION_SCHEMA_VERSION;
+  schemaVersion:
+    | typeof LEGACY_INVOCATION_SCHEMA_VERSION
+    | typeof PATTERN_INVOCATION_SCHEMA_VERSION;
   runRef: string;
   feedbackInvocationRef: string;
   hypothesisInvocationRef: string;
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   participant: HypothesisParticipant;
   status: 'completed' | 'failed';
   errorKind?: 'provider' | 'parse' | 'invalid_reference';
@@ -220,6 +233,7 @@ function renderHypothesisSection(
   hypothesis: ImprovementHypothesis,
   feedback: ExternalFeedback,
   observablePayload: ObservablePayload,
+  patternEvidenceBytes?: string,
 ): string {
   const entryById = new Map(
     observablePayload.entries.map(entry => [entry.entryId, entry] as const),
@@ -247,6 +261,18 @@ function renderHypothesisSection(
           ? `- ${ref}:\n${renderEntry(entry)}`
           : `- ${ref}: (unavailable)`;
       })),
+    ...(hypothesis.patternEvidenceRefs !== undefined
+      ? [
+        '',
+        '### Experience Pattern Evidence references',
+        ...(hypothesis.patternEvidenceRefs.length === 0
+          ? ['- （无 Pattern 引用）']
+          : hypothesis.patternEvidenceRefs.map(ref => `- ${ref}`)),
+        ...(patternEvidenceBytes !== undefined
+          ? ['Pattern Evidence artifact 已在本次 hypothesis run 中按 hash 保存。']
+          : []),
+      ]
+      : []),
     '',
     '### 当前仍不知道',
     ...hypothesis.unknowns.map(item => `- ${item}`),
@@ -269,11 +295,13 @@ function renderHumanReview(input: {
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   status: 'completed' | 'failed';
   errorKind?: string;
   participant: HypothesisParticipant;
   sourceFeedback: ExternalFeedback;
   sourceFeedbackBytes: string;
+  patternEvidenceBytes?: string;
   rawHypothesisParticipantResponse?: string;
   hypotheses?: ImprovementHypothesisSet;
   observablePayload: ObservablePayload;
@@ -287,6 +315,9 @@ function renderHumanReview(input: {
     `- experimentRootHash: ${input.experimentRootHash}`,
     `- observablePayloadHash: ${input.observablePayloadHash}`,
     `- feedbackHash: ${input.feedbackHash}`,
+    ...(input.patternEvidenceHash
+      ? [`- patternEvidenceHash: ${input.patternEvidenceHash}`]
+      : []),
     `- provider: ${input.participant.provider}`,
     `- modelRequested: ${input.participant.modelRequested}`,
     ...(input.participant.modelReturned
@@ -326,7 +357,12 @@ function renderHumanReview(input: {
     } else {
       for (const hypothesis of input.hypotheses.hypotheses) {
         sections.push(
-          renderHypothesisSection(hypothesis, input.sourceFeedback, input.observablePayload),
+          renderHypothesisSection(
+            hypothesis,
+            input.sourceFeedback,
+            input.observablePayload,
+            input.patternEvidenceBytes,
+          ),
         );
       }
     }
@@ -367,6 +403,7 @@ async function persistFailure(input: {
   hypothesisDir: string;
   record: HypothesisInvocationRecord;
   source: ExternalFeedbackSource;
+  patternEvidenceBytes?: string;
   rawHypothesisParticipantResponse?: string;
 }): Promise<string> {
   const humanReportPath = join(input.hypothesisDir, 'human-review.md');
@@ -385,6 +422,8 @@ async function persistFailure(input: {
       participant: input.record.participant,
       sourceFeedback: input.source.feedback,
       sourceFeedbackBytes: input.source.feedbackBytes,
+      patternEvidenceHash: input.record.patternEvidenceHash,
+      patternEvidenceBytes: input.patternEvidenceBytes,
       rawHypothesisParticipantResponse: input.rawHypothesisParticipantResponse,
       observablePayload: input.source.observablePayload,
     }),
@@ -404,6 +443,23 @@ export async function runImprovementHypothesis(
     sourceRoot: resolve(options.sourceRoot ?? DEFAULT_SOURCE_ROOT),
     runRef,
   });
+  const normalizedPatternEvidence = options.patternEvidence === undefined
+    ? undefined
+    : validateExperiencePatternEvidence(options.patternEvidence);
+  const patternEvidenceBytes = normalizedPatternEvidence === undefined
+    ? undefined
+    : canonicalJson(normalizedPatternEvidence);
+  const patternEvidenceHash = patternEvidenceBytes === undefined
+    ? undefined
+    : computeExperiencePatternEvidenceHash(normalizedPatternEvidence!);
+  if (
+    normalizedPatternEvidence?.patternEvidenceHash !== undefined
+    && normalizedPatternEvidence.patternEvidenceHash !== patternEvidenceHash
+  ) {
+    throw new Error(
+      `patternEvidenceHash mismatch: expected ${patternEvidenceHash}, got ${normalizedPatternEvidence.patternEvidenceHash}`,
+    );
+  }
 
   const hypothesisInvocationRef = `${runRef}-${localParticipant ? 'local-improvement-hypothesis' : 'deepseek-improvement-hypothesis'}-001`;
   const hypothesisRoot = resolve(options.outRoot ?? DEFAULT_OUT_ROOT);
@@ -422,6 +478,12 @@ export async function runImprovementHypothesis(
     join(hypothesisDir, 'source-feedback-raw-participant-response.txt'),
     source.rawFeedbackParticipantResponse,
   );
+  if (patternEvidenceBytes !== undefined) {
+    await writeCreateOnly(
+      join(hypothesisDir, 'source-pattern-evidence.json'),
+      patternEvidenceBytes,
+    );
+  }
 
   let invokeResult: HypothesisInvokeResult;
   let evidenceWorkspace: EvidenceOnlyWorkspaceManifest | undefined;
@@ -436,6 +498,7 @@ export async function runImprovementHypothesis(
       feedbackHash: source.feedbackHash,
       observablePayloadBytes: source.observablePayloadBytes,
       feedbackBytes: source.feedbackBytes,
+      ...(patternEvidenceBytes !== undefined ? { patternEvidenceBytes } : {}),
     });
   } else if (localParticipant) {
     evidenceWorkspace = await createEvidenceOnlyWorkspace({
@@ -443,6 +506,9 @@ export async function runImprovementHypothesis(
       files: {
         'input/observable-payload.json': source.observablePayloadBytes,
         'input/feedback.json': source.feedbackBytes,
+        ...(patternEvidenceBytes !== undefined
+          ? { 'input/pattern-evidence.json': patternEvidenceBytes }
+          : {}),
       },
     });
     invokeResult = await runLocalEvidenceOnlyParticipant({
@@ -457,6 +523,7 @@ export async function runImprovementHypothesis(
         feedbackHash: source.feedbackHash,
         observablePayloadBytes: source.observablePayloadBytes,
         feedbackBytes: source.feedbackBytes,
+        ...(patternEvidenceBytes !== undefined ? { patternEvidenceBytes } : {}),
       }),
       participant: localParticipant,
     });
@@ -471,19 +538,23 @@ export async function runImprovementHypothesis(
       feedbackHash: source.feedbackHash,
       observablePayloadBytes: source.observablePayloadBytes,
       feedbackBytes: source.feedbackBytes,
+      ...(patternEvidenceBytes !== undefined ? { patternEvidenceBytes } : {}),
     });
   }
 
   await saveRawResponses(hypothesisDir, invokeResult);
 
   const baseRecord = {
-    schemaVersion: INVOCATION_SCHEMA_VERSION,
+    schemaVersion: patternEvidenceBytes === undefined
+      ? LEGACY_INVOCATION_SCHEMA_VERSION
+      : PATTERN_INVOCATION_SCHEMA_VERSION,
     runRef,
     feedbackInvocationRef: source.feedbackInvocationRef,
     hypothesisInvocationRef,
     experimentRootHash: source.experimentRootHash,
     observablePayloadHash: source.observablePayloadHash,
     feedbackHash: source.feedbackHash,
+    ...(patternEvidenceHash !== undefined ? { patternEvidenceHash } : {}),
   } as const;
 
   if (!invokeResult.ok) {
@@ -496,6 +567,7 @@ export async function runImprovementHypothesis(
         errorKind: 'provider',
       },
       source,
+      patternEvidenceBytes,
     });
     throw new Error(`hypothesis participant invocation failed: ${invokeResult.errorKind}`);
   }
@@ -514,6 +586,7 @@ export async function runImprovementHypothesis(
         errorKind: 'parse',
       },
       source,
+      patternEvidenceBytes,
       rawHypothesisParticipantResponse: invokeResult.rawParticipantResponse,
     });
     throw error;
@@ -524,6 +597,7 @@ export async function runImprovementHypothesis(
       parsed,
       source.feedback,
       source.observablePayload,
+      normalizedPatternEvidence,
     );
   } catch (error) {
     await persistFailure({
@@ -535,6 +609,7 @@ export async function runImprovementHypothesis(
         errorKind: 'invalid_reference',
       },
       source,
+      patternEvidenceBytes,
       rawHypothesisParticipantResponse: invokeResult.rawParticipantResponse,
     });
     throw error;
@@ -560,10 +635,12 @@ export async function runImprovementHypothesis(
       experimentRootHash: source.experimentRootHash,
       observablePayloadHash: source.observablePayloadHash,
       feedbackHash: source.feedbackHash,
+      patternEvidenceHash,
       status: 'completed',
       participant,
       sourceFeedback: source.feedback,
       sourceFeedbackBytes: source.feedbackBytes,
+      patternEvidenceBytes,
       rawHypothesisParticipantResponse: invokeResult.rawParticipantResponse,
       hypotheses: parsed,
       observablePayload: source.observablePayload,
@@ -579,6 +656,7 @@ export async function runImprovementHypothesis(
     experimentRootHash: source.experimentRootHash,
     observablePayloadHash: source.observablePayloadHash,
     feedbackHash: source.feedbackHash,
+    ...(patternEvidenceHash !== undefined ? { patternEvidenceHash } : {}),
   };
 }
 

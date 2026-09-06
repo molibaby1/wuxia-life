@@ -6,6 +6,10 @@ import {
   type ImprovementHypothesis,
 } from '../../../src/evolution/improvementHypothesisContract';
 import {
+  validateExperiencePatternEvidence,
+  type ExperiencePatternEvidence,
+} from '../../../src/evolution/experiencePatternEvidenceContract';
+import {
   loadExternalFeedbackSource,
   type ExternalFeedbackSource,
 } from '../improvementHypothesis/loadExternalFeedbackSource';
@@ -16,7 +20,10 @@ import {
   validatePhase0RunRef,
 } from '../phase0/provenance';
 
-const HYPOTHESIS_INVOCATION_SCHEMA_VERSION = 'improvement-hypothesis-invocation-v1' as const;
+const LEGACY_HYPOTHESIS_INVOCATION_SCHEMA_VERSION =
+  'improvement-hypothesis-invocation-v1' as const;
+const PATTERN_HYPOTHESIS_INVOCATION_SCHEMA_VERSION =
+  'improvement-hypothesis-invocation-v2' as const;
 const HYPOTHESIS_ID_PATTERN = /^hypothesis-\d{6}$/;
 
 export interface HypothesisInvestigationSource {
@@ -32,19 +39,87 @@ export interface HypothesisInvestigationSource {
   selectedHypothesis: ImprovementHypothesis;
   sourceHypothesesBytes: string;
   sourceHypothesisInvocationBytes: string;
+  patternEvidence?: ExperiencePatternEvidence;
+  patternEvidenceBytes?: string;
+  patternEvidenceHash?: string;
   mefSource: ExternalFeedbackSource;
   gameRunPath: string;
 }
 
 interface HypothesisInvocationRecord {
-  schemaVersion: typeof HYPOTHESIS_INVOCATION_SCHEMA_VERSION;
+  schemaVersion:
+    | typeof LEGACY_HYPOTHESIS_INVOCATION_SCHEMA_VERSION
+    | typeof PATTERN_HYPOTHESIS_INVOCATION_SCHEMA_VERSION;
   runRef: string;
   feedbackInvocationRef: string;
   hypothesisInvocationRef: string;
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   status: 'completed' | 'failed';
+}
+
+async function loadOptionalPatternEvidence(input: {
+  hypothesisDir: string;
+  invocation: HypothesisInvocationRecord;
+}): Promise<{
+  patternEvidence: ExperiencePatternEvidence;
+  patternEvidenceBytes: string;
+  patternEvidenceHash: string;
+} | undefined> {
+  let patternEvidenceBytes: string;
+  try {
+    patternEvidenceBytes = await readFile(
+      join(input.hypothesisDir, 'source-pattern-evidence.json'),
+      'utf8',
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if (input.invocation.patternEvidenceHash !== undefined) {
+        throw new Error('patternEvidenceHash is present but source-pattern-evidence.json is missing');
+      }
+      return undefined;
+    }
+    throw error;
+  }
+
+  if (input.invocation.patternEvidenceHash === undefined) {
+    throw new Error('source-pattern-evidence.json exists without patternEvidenceHash');
+  }
+  if (!/^[a-f0-9]{64}$/.test(input.invocation.patternEvidenceHash)) {
+    throw new Error('hypothesis source invocation.patternEvidenceHash must be a SHA-256 hex string');
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(patternEvidenceBytes);
+  } catch {
+    throw new Error('source pattern evidence must be valid JSON');
+  }
+  const patternEvidence = validateExperiencePatternEvidence(parsed);
+  const { patternEvidenceHash: declaredArtifactHash, ...patternEvidencePayload } = patternEvidence;
+  const patternEvidenceHash = declaredArtifactHash === undefined
+    ? sha256Hex(patternEvidenceBytes)
+    : sha256Hex(canonicalJson(patternEvidencePayload));
+  if (
+    declaredArtifactHash !== undefined
+    && declaredArtifactHash !== patternEvidenceHash
+  ) {
+    throw new Error(
+      `source patternEvidenceHash mismatch: expected ${declaredArtifactHash}, got ${patternEvidenceHash}`,
+    );
+  }
+  if (patternEvidenceHash !== input.invocation.patternEvidenceHash) {
+    throw new Error(
+      `patternEvidenceHash mismatch: expected ${input.invocation.patternEvidenceHash}, got ${patternEvidenceHash}`,
+    );
+  }
+  return {
+    patternEvidence,
+    patternEvidenceBytes,
+    patternEvidenceHash,
+  };
 }
 
 function assertObject(value: unknown, label: string): asserts value is Record<string, unknown> {
@@ -69,9 +144,12 @@ function validateHypothesisId(hypothesisId: string): string {
 function parseHypothesisInvocation(value: unknown): HypothesisInvocationRecord {
   assertObject(value, 'hypothesis source invocation');
   assertNonEmptyString(value.schemaVersion, 'hypothesis source invocation.schemaVersion');
-  if (value.schemaVersion !== HYPOTHESIS_INVOCATION_SCHEMA_VERSION) {
+  if (
+    value.schemaVersion !== LEGACY_HYPOTHESIS_INVOCATION_SCHEMA_VERSION
+    && value.schemaVersion !== PATTERN_HYPOTHESIS_INVOCATION_SCHEMA_VERSION
+  ) {
     throw new Error(
-      `hypothesis source invocation.schemaVersion must be ${HYPOTHESIS_INVOCATION_SCHEMA_VERSION}`,
+      `unsupported hypothesis source invocation.schemaVersion: ${String(value.schemaVersion)}`,
     );
   }
   assertNonEmptyString(value.runRef, 'hypothesis source invocation.runRef');
@@ -95,14 +173,31 @@ function parseHypothesisInvocation(value: unknown): HypothesisInvocationRecord {
   if (value.status !== 'completed' && value.status !== 'failed') {
     throw new Error('hypothesis source invocation.status must be completed or failed');
   }
+  if (value.patternEvidenceHash !== undefined) {
+    if (value.schemaVersion === LEGACY_HYPOTHESIS_INVOCATION_SCHEMA_VERSION) {
+      throw new Error('improvement-hypothesis-invocation-v1 cannot contain patternEvidenceHash');
+    }
+    assertNonEmptyString(
+      value.patternEvidenceHash,
+      'hypothesis source invocation.patternEvidenceHash',
+    );
+    if (!/^[a-f0-9]{64}$/.test(value.patternEvidenceHash)) {
+      throw new Error('hypothesis source invocation.patternEvidenceHash must be a SHA-256 hex string');
+    }
+  } else if (value.schemaVersion === PATTERN_HYPOTHESIS_INVOCATION_SCHEMA_VERSION) {
+    throw new Error('improvement-hypothesis-invocation-v2 requires patternEvidenceHash');
+  }
   return {
-    schemaVersion: HYPOTHESIS_INVOCATION_SCHEMA_VERSION,
+    schemaVersion: value.schemaVersion,
     runRef: value.runRef,
     feedbackInvocationRef: value.feedbackInvocationRef,
     hypothesisInvocationRef: value.hypothesisInvocationRef,
     experimentRootHash: value.experimentRootHash,
     observablePayloadHash: value.observablePayloadHash,
     feedbackHash: value.feedbackHash,
+    ...(value.patternEvidenceHash !== undefined
+      ? { patternEvidenceHash: value.patternEvidenceHash }
+      : {}),
     status: value.status,
   };
 }
@@ -131,6 +226,7 @@ export async function loadHypothesisInvestigationSource(input: {
     'utf8',
   );
   const invocation = parseHypothesisInvocation(JSON.parse(sourceHypothesisInvocationBytes));
+  const patternSource = await loadOptionalPatternEvidence({ hypothesisDir, invocation });
 
   if (invocation.runRef !== runRef) {
     throw new Error(
@@ -169,6 +265,7 @@ export async function loadHypothesisInvestigationSource(input: {
     parsed,
     mefSource.feedback,
     mefSource.observablePayload,
+    patternSource?.patternEvidence,
   );
 
   const selectedHypothesis = parsed.hypotheses.find(
@@ -196,6 +293,7 @@ export async function loadHypothesisInvestigationSource(input: {
     selectedHypothesis,
     sourceHypothesesBytes,
     sourceHypothesisInvocationBytes,
+    ...(patternSource !== undefined ? patternSource : {}),
     mefSource,
     gameRunPath,
   };

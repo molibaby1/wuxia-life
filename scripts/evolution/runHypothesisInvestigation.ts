@@ -14,6 +14,7 @@ import {
   type InvestigationEvidenceMode,
   type InvestigationEvidencePack,
 } from './hypothesisInvestigation/buildInvestigationEvidence';
+import type { ExperiencePatternEvidence } from '../../src/evolution/experiencePatternEvidenceContract';
 import {
   DEEPSEEK_HYPOTHESIS_INVESTIGATION_MODEL,
   invokeDeepSeekHypothesisInvestigation,
@@ -76,6 +77,7 @@ export interface RunHypothesisInvestigationOptions {
   outRoot?: string;
   evidenceMode?: InvestigationEvidenceMode;
   cohortEvidence?: CohortEvidenceInput;
+  patternEvidence?: ExperiencePatternEvidence;
   sealedLongitudinalEvidenceHash?: string;
   apiKey: string;
 }
@@ -95,6 +97,7 @@ export interface RunHypothesisInvestigationResult {
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   hypothesesHash: string;
   selectedHypothesisHash: string;
   evidencePackHash: string;
@@ -123,6 +126,7 @@ interface HypothesisInvestigationInvocationRecord {
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   hypothesesHash: string;
   selectedHypothesisHash: string;
   evidencePackHash: string;
@@ -213,6 +217,7 @@ function renderHumanReview(input: {
   experimentRootHash: string;
   observablePayloadHash: string;
   feedbackHash: string;
+  patternEvidenceHash?: string;
   hypothesesHash: string;
   selectedHypothesisHash: string;
   evidencePackHash: string;
@@ -236,6 +241,9 @@ function renderHumanReview(input: {
     `- experimentRootHash: ${input.experimentRootHash}`,
     `- observablePayloadHash: ${input.observablePayloadHash}`,
     `- feedbackHash: ${input.feedbackHash}`,
+    ...(input.patternEvidenceHash
+      ? [`- patternEvidenceHash: ${input.patternEvidenceHash}`]
+      : []),
     `- hypothesesHash: ${input.hypothesesHash}`,
     `- selectedHypothesisHash: ${input.selectedHypothesisHash}`,
     `- evidencePackHash: ${input.evidencePackHash}`,
@@ -366,6 +374,7 @@ async function persistFailure(input: {
       experimentRootHash: input.record.experimentRootHash,
       observablePayloadHash: input.record.observablePayloadHash,
       feedbackHash: input.record.feedbackHash,
+      patternEvidenceHash: input.record.patternEvidenceHash,
       hypothesesHash: input.record.hypothesesHash,
       selectedHypothesisHash: input.record.selectedHypothesisHash,
       evidencePackHash: input.record.evidencePackHash,
@@ -398,15 +407,29 @@ export async function runHypothesisInvestigation(
   });
 
   const evidenceMode = options.evidenceMode ?? 'direct-v1';
+  if (
+    source.patternEvidence !== undefined
+    && options.patternEvidence !== undefined
+    && canonicalJson(source.patternEvidence) !== canonicalJson(options.patternEvidence)
+  ) {
+    throw new Error('pattern evidence does not match the source hypothesis artifact');
+  }
+  const patternEvidence = source.patternEvidence ?? options.patternEvidence;
+  const patternEvidenceBytes = source.patternEvidenceBytes
+    ?? (patternEvidence !== undefined ? canonicalJson(patternEvidence) : undefined);
+  const patternEvidenceHash = source.patternEvidenceHash
+    ?? (patternEvidenceBytes !== undefined ? sha256Hex(patternEvidenceBytes) : undefined);
   if (evidenceMode === 'cohort-v1') {
     const longitudinalPack = await buildInvestigationEvidence({
       source,
       evidenceMode: 'longitudinal-v1',
+      ...(patternEvidence !== undefined ? { patternEvidence } : {}),
     });
     const longitudinalHash = sha256Hex(canonicalJson(longitudinalPack));
-    const expectedHash = options.sealedLongitudinalEvidenceHash
-      ?? SEALED_LONGITUDINAL_EVIDENCE_HASH;
-    if (longitudinalHash !== expectedHash) {
+    const expectedHash = patternEvidence === undefined
+      ? options.sealedLongitudinalEvidenceHash ?? SEALED_LONGITUDINAL_EVIDENCE_HASH
+      : undefined;
+    if (expectedHash !== undefined && longitudinalHash !== expectedHash) {
       throw new Error(
         `rebuilt longitudinal-v1 hash mismatch: expected ${expectedHash}, got ${longitudinalHash}`,
       );
@@ -421,6 +444,9 @@ export async function runHypothesisInvestigation(
     evidenceMode,
     ...(options.cohortEvidence !== undefined
       ? { cohortEvidence: options.cohortEvidence }
+      : {}),
+    ...(patternEvidence !== undefined
+      ? { patternEvidence }
       : {}),
   });
   const evidencePackBytes = canonicalJson(evidencePack);
@@ -449,6 +475,12 @@ export async function runHypothesisInvestigation(
     join(investigationDir, 'source-hypothesis-invocation.json'),
     source.sourceHypothesisInvocationBytes,
   );
+  if (patternEvidenceBytes !== undefined) {
+    await writeCreateOnly(
+      join(investigationDir, 'source-pattern-evidence.json'),
+      patternEvidenceBytes,
+    );
+  }
   await writeCreateOnly(
     join(investigationDir, 'investigation-evidence.json'),
     evidencePackBytes,
@@ -485,6 +517,7 @@ export async function runHypothesisInvestigation(
     experimentRootHash: source.experimentRootHash,
     observablePayloadHash: source.observablePayloadHash,
     feedbackHash: source.feedbackHash,
+    ...(patternEvidenceHash !== undefined ? { patternEvidenceHash } : {}),
     hypothesesHash: source.hypothesesHash,
     selectedHypothesisHash: source.selectedHypothesisHash,
     evidencePackHash,
@@ -568,6 +601,7 @@ export async function runHypothesisInvestigation(
       experimentRootHash: source.experimentRootHash,
       observablePayloadHash: source.observablePayloadHash,
       feedbackHash: source.feedbackHash,
+      patternEvidenceHash,
       hypothesesHash: source.hypothesesHash,
       selectedHypothesisHash: source.selectedHypothesisHash,
       evidencePackHash,
@@ -591,6 +625,7 @@ export async function runHypothesisInvestigation(
     experimentRootHash: source.experimentRootHash,
     observablePayloadHash: source.observablePayloadHash,
     feedbackHash: source.feedbackHash,
+    ...(patternEvidenceHash !== undefined ? { patternEvidenceHash } : {}),
     hypothesesHash: source.hypothesesHash,
     selectedHypothesisHash: source.selectedHypothesisHash,
     evidencePackHash,

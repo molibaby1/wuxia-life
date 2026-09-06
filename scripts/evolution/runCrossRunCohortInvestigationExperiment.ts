@@ -10,11 +10,23 @@ import {
   assertSignalLinesPresentInText,
   writeCohortPlanCreateOnly,
 } from './crossRunCohortInvestigation/cohortPlan';
+import { COHORT_REGISTRATIONS } from './crossRunCohortInvestigation/cohortPlan';
 import { prepareCohortRuntimeWorkspace } from './crossRunCohortInvestigation/prepareRuntimeWorkspace';
 import { runCohortPhase0Batch } from './crossRunCohortInvestigation/runCohortPhase0';
+import {
+  extractExperiencePatternEvidence,
+  computeExperiencePatternEvidenceHash,
+  withExperiencePatternEvidenceHash,
+  type ExperiencePatternRunInput,
+} from './experiencePattern/buildExperiencePatternEvidence';
+import { runImprovementHypothesis } from './runImprovementHypothesis';
 import { runHypothesisInvestigation } from './runHypothesisInvestigation';
 import { canonicalJson, sha256Hex, validatePhase0RunSeal } from './phase0/provenance';
 import { serializeObservablePayload } from '../../src/evolution/playerObservableTranscript';
+import {
+  validateExperiencePatternEvidence,
+  type ExperiencePatternEvidence,
+} from '../../src/evolution/experiencePatternEvidenceContract';
 
 const EXPERIMENT_ROOT = '.tmp/evolution/cross-run-cohort-investigation-evidence';
 const SEALED_ANCHOR_OBSERVABLE =
@@ -22,7 +34,7 @@ const SEALED_ANCHOR_OBSERVABLE =
 const MEF_SOURCE_ROOT =
   '.tmp/evolution/fresh-problem-candidate-transfer/real-external-feedback';
 const HYPOTHESIS_SOURCE_ROOT =
-  '.tmp/evolution/fresh-problem-candidate-transfer/real-improvement-hypothesis';
+  `${EXPERIMENT_ROOT}/real-improvement-hypothesis`;
 const SEALED_LONGITUDINAL_EVIDENCE =
   '.tmp/evolution/longitudinal-investigation-evidence/real-investigation/investigation-runs/ae-fresh-problem-transfer-001/hypothesis-000001/investigation-evidence.json';
 const SEALED_LONGITUDINAL_HASH =
@@ -128,12 +140,94 @@ function assertChildPathUnderRoot(root: string, candidate: string, label: string
   return resolvedCandidate;
 }
 
+export function buildCohortPatternEvidence(input: {
+  runs: ExperiencePatternRunInput[];
+}): ExperiencePatternEvidence {
+  if (input.runs.length !== COHORT_REGISTRATIONS.length) {
+    throw new Error(
+      `cohort pattern evidence requires exactly ${COHORT_REGISTRATIONS.length} runs, got ${input.runs.length}`,
+    );
+  }
+
+  const patternRuns: ExperiencePatternRunInput[] = input.runs.map((run, index) => {
+    const expected = COHORT_REGISTRATIONS[index]!;
+    if (run.runRef !== expected.cohortRunId) {
+      throw new Error(`cohort pattern evidence run order mismatch at ${expected.cohortRunId}`);
+    }
+    return run;
+  });
+
+  // Cohort-v1 has no pairwise ComparativeFeedback artifact. Keep this input explicit and empty.
+  return extractExperiencePatternEvidence({
+    runs: patternRuns,
+    comparativeEvidence: [],
+  });
+}
+
+export function assertCohortPatternEvidenceReady(
+  patternEvidence: ExperiencePatternEvidence,
+): ExperiencePatternEvidence {
+  const validated = validateExperiencePatternEvidence(patternEvidence);
+  if (validated.patterns.length === 0) {
+    throw new Error('cohort pattern evidence requires at least one repeated pattern');
+  }
+  return validated;
+}
+
+export function assertCohortHypothesisReferencesPatternEvidence(input: {
+  hypothesis: { patternEvidenceRefs?: string[] };
+  patternEvidence: ExperiencePatternEvidence;
+}): void {
+  const patternRefs = new Set(
+    validateExperiencePatternEvidence(input.patternEvidence).patterns
+      .map(pattern => `pattern:${pattern.patternId}`),
+  );
+  const refs = input.hypothesis.patternEvidenceRefs ?? [];
+  if (refs.length === 0) {
+    throw new Error('cohort hypothesis must reference at least one pattern evidence item');
+  }
+  for (const ref of refs) {
+    if (!patternRefs.has(ref)) {
+      throw new Error(`cohort hypothesis references unknown pattern evidence: ${ref}`);
+    }
+  }
+}
+
+export async function persistCohortPatternEvidence(input: {
+  patternPath: string;
+  patternEvidence: ExperiencePatternEvidence;
+}): Promise<{
+  patternPath: string;
+  patternEvidence: ExperiencePatternEvidence;
+  patternEvidenceHash: string;
+}> {
+  const patternEvidence = validateExperiencePatternEvidence(input.patternEvidence);
+  const patternEvidenceHash = computeExperiencePatternEvidenceHash(patternEvidence);
+  if (
+    patternEvidence.patternEvidenceHash !== undefined
+    && patternEvidence.patternEvidenceHash !== patternEvidenceHash
+  ) {
+    throw new Error(
+      `patternEvidenceHash mismatch: expected ${patternEvidenceHash}, got ${patternEvidence.patternEvidenceHash}`,
+    );
+  }
+  const artifact = withExperiencePatternEvidenceHash(patternEvidence);
+  const patternBytes = canonicalJson(artifact);
+  await writeCreateOnly(input.patternPath, patternBytes);
+  return {
+    patternPath: input.patternPath,
+    patternEvidence: artifact,
+    patternEvidenceHash,
+  };
+}
+
 export async function assembleCohortEvidenceForInvestigation(input: {
   repositoryRoot?: string;
   mappingPath: string;
   phase0OutRoot?: string;
 }): Promise<{
   items: ReturnType<typeof cohortEvidenceItems>;
+  patternRuns: ExperiencePatternRunInput[];
   bundleHash: string;
   sealedLongitudinalHash: string;
 }> {
@@ -155,6 +249,7 @@ export async function assembleCohortEvidenceForInvestigation(input: {
   }
 
   const runs = [];
+  const patternRuns: ExperiencePatternRunInput[] = [];
   for (const run of mapping.runs) {
     if (typeof run.experimentRootHash !== 'string' || run.experimentRootHash.length === 0) {
       throw new Error(`cohort run ${run.cohortRunId} is missing experimentRootHash`);
@@ -181,6 +276,14 @@ export async function assembleCohortEvidenceForInvestigation(input: {
       payload: artifacts.payload,
       surface: artifacts.surface,
     });
+    patternRuns.push({
+      runRef: run.cohortRunId,
+      items: artifacts.payload.entries.map(entry => ({
+        evidenceId: `observable:${entry.entryId}`,
+        kind: 'observable_entry',
+        payload: entry,
+      })),
+    });
   }
   const bundle = buildCohortEvidenceBundle({ plan: mapping.plan, runs });
   const items = cohortEvidenceItems(bundle);
@@ -195,6 +298,7 @@ export async function assembleCohortEvidenceForInvestigation(input: {
 
   return {
     items,
+    patternRuns,
     bundleHash: sha256Hex(canonicalJson(bundle)),
     sealedLongitudinalHash: sealedCanonicalHash,
   };
@@ -202,7 +306,9 @@ export async function assembleCohortEvidenceForInvestigation(input: {
 
 function renderHumanReviewPackage(input: {
   investigationDir: string;
+  hypothesisInvocationRef: string;
   evidencePackHash: string;
+  patternEvidenceHash: string;
   investigationInvocationRef: string;
   cohortSummary: unknown;
   providerResponseId?: string;
@@ -217,7 +323,9 @@ function renderHumanReviewPackage(input: {
     '',
     `- runRef: \`${FIXED_RUN_REF}\``,
     `- hypothesisId: \`${FIXED_HYPOTHESIS_ID}\``,
+    `- hypothesisInvocationRef: \`${input.hypothesisInvocationRef}\``,
     '- evidence mode: `cohort-v1`',
+    `- patternEvidenceHash: \`${input.patternEvidenceHash}\``,
     `- investigationInvocationRef: \`${input.investigationInvocationRef}\``,
     `- evidencePackHash: \`${input.evidencePackHash}\``,
     `- providerResponseId: \`${input.providerResponseId ?? 'n/a'}\``,
@@ -231,7 +339,7 @@ function renderHumanReviewPackage(input: {
     '- Longitudinal Investigation Evidence Experiment: `CLOSED / Human accepted`',
     '- Cross-Run Cohort Investigation Evidence Experiment: `ACTIVE / implementation authorized`',
     '- real Investigation: completed',
-    '- real calls: exactly `1`',
+    '- real participant calls: exactly `2` (Improvement Hypothesis + Investigation)',
     '- retry: `0`',
     '- STOP: Human final review pending',
     '',
@@ -253,6 +361,7 @@ function renderHumanReviewPackage(input: {
     '## Artifacts',
     '',
     `- investigation dir: \`${input.investigationDir}\``,
+    '- pattern evidence artifact: `evidence/pattern-evidence.json`',
     `- experiment root: \`${EXPERIMENT_ROOT}\``,
     '',
   ].join('\n');
@@ -284,8 +393,44 @@ export async function runCrossRunCohortInvestigationExperiment(input: {
     phase0OutRoot: join(root, EXPERIMENT_ROOT, 'phase0'),
   });
 
+  const patternEvidence = buildCohortPatternEvidence({
+    runs: assembled.patternRuns,
+  });
+  assertCohortPatternEvidenceReady(patternEvidence);
+  const persistedPattern = await persistCohortPatternEvidence({
+    patternPath: join(evidenceRoot, 'pattern-evidence.json'),
+    patternEvidence,
+  });
+
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) throw new Error('DEEPSEEK_API_KEY is required');
+
+  const hypothesis = await runImprovementHypothesis({
+    runRef: FIXED_RUN_REF,
+    sourceRoot: join(root, MEF_SOURCE_ROOT),
+    outRoot: join(root, HYPOTHESIS_SOURCE_ROOT),
+    patternEvidence: persistedPattern.patternEvidence,
+    apiKey,
+  });
+  if (hypothesis.patternEvidenceHash !== persistedPattern.patternEvidenceHash) {
+    throw new Error(
+      `hypothesis patternEvidenceHash mismatch: expected ${persistedPattern.patternEvidenceHash}, got ${hypothesis.patternEvidenceHash ?? 'missing'}`,
+    );
+  }
+
+  const hypotheses = JSON.parse(
+    await readFile(join(hypothesis.hypothesisDir, 'hypotheses.json'), 'utf8'),
+  ) as { hypotheses?: Array<{ hypothesisId?: string; patternEvidenceRefs?: string[] }> };
+  const selectedHypothesis = hypotheses.hypotheses?.find(
+    candidate => candidate.hypothesisId === FIXED_HYPOTHESIS_ID,
+  );
+  if (!selectedHypothesis) {
+    throw new Error(`cohort hypothesis artifact is missing ${FIXED_HYPOTHESIS_ID}`);
+  }
+  assertCohortHypothesisReferencesPatternEvidence({
+    hypothesis: selectedHypothesis,
+    patternEvidence: persistedPattern.patternEvidence,
+  });
 
   const result = await runHypothesisInvestigation({
     runRef: FIXED_RUN_REF,
@@ -295,9 +440,15 @@ export async function runCrossRunCohortInvestigationExperiment(input: {
     outRoot: join(root, EXPERIMENT_ROOT, 'real-investigation'),
     evidenceMode: 'cohort-v1',
     cohortEvidence: { items: assembled.items },
-    sealedLongitudinalEvidenceHash: SEALED_LONGITUDINAL_HASH,
+    patternEvidence: persistedPattern.patternEvidence,
+    sealedLongitudinalEvidenceHash: assembled.sealedLongitudinalHash,
     apiKey,
   });
+  if (result.patternEvidenceHash !== persistedPattern.patternEvidenceHash) {
+    throw new Error(
+      `investigation patternEvidenceHash mismatch: expected ${persistedPattern.patternEvidenceHash}, got ${result.patternEvidenceHash ?? 'missing'}`,
+    );
+  }
 
   const invocation = JSON.parse(
     await readFile(join(result.investigationDir, 'invocation.json'), 'utf8'),
@@ -314,7 +465,9 @@ export async function runCrossRunCohortInvestigationExperiment(input: {
     reviewPath,
     renderHumanReviewPackage({
       investigationDir: result.investigationDir,
+      hypothesisInvocationRef: hypothesis.hypothesisInvocationRef,
       evidencePackHash: result.evidencePackHash,
+      patternEvidenceHash: persistedPattern.patternEvidenceHash,
       investigationInvocationRef: invocation.investigationInvocationRef,
       cohortSummary: cohortSummaryItem?.payload ?? null,
       providerResponseId: invocation.participant?.providerResponseId,

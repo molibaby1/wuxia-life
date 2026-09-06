@@ -604,7 +604,10 @@ async function persistFailure(input: {
       errorKind: input.record.errorKind,
       participant: input.record.participant,
       source: input.source,
-      handoff: input.handoff ?? projectInvestigationHandoff(input.source.investigation),
+      handoff: input.handoff ?? projectInvestigationHandoff(
+        input.source.investigation,
+        input.source.evidencePack,
+      ),
       rawParticipantResponse: input.rawParticipantResponse,
     })
     : renderHumanReview({
@@ -649,7 +652,7 @@ export async function runModificationWork(
     hypothesisId,
   });
 
-  const handoff = projectInvestigationHandoff(source.investigation);
+  const handoff = projectInvestigationHandoff(source.investigation, source.evidencePack);
   const participantInputBytes = contractVersion === 'v2'
     ? buildModificationWorkParticipantInputV2(source, handoff)
     : buildModificationWorkParticipantInput(source);

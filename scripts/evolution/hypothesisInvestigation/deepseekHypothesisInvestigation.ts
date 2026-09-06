@@ -42,6 +42,7 @@ function buildParticipantInstructions(): string {
     '不要决定 hypothesis 为 true/false，也不要判断它是否成立或不成立。',
     '不要声称唯一根因 / unique root cause。',
     '不要提出修改、modification、proposedChanges、candidate 或实现方案。',
+    '如果 evidence pack 包含 experience pattern evidence，它只表示跨 run 的描述性重复模式，不是 problem verdict、confidence、score 或 solution recommendation。',
     '不要输出 severity、confidence、priority、score。',
     '空的 confirmedFacts / relevantMechanisms / limitingEvidence，以及只有 unresolvedQuestions / evidenceGaps 的结果都是合法 valid completed result。',
     'evidenceRefs 只能引用 evidence pack 中已有的 evidence ID。',

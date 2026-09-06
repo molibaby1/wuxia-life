@@ -11,6 +11,10 @@ import type { ActiveActionDefinition } from '../../../src/types/activeActionType
 import type { ImprovementHypothesis } from '../../../src/evolution/improvementHypothesisContract';
 import type { ExternalFeedback } from '../../../src/evolution/externalFeedbackContract';
 import {
+  validateExperiencePatternEvidence,
+  type ExperiencePatternEvidence,
+} from '../../../src/evolution/experiencePatternEvidenceContract';
+import {
   serializeObservablePayload,
   type ObservableEntry,
   type ObservablePayload,
@@ -50,7 +54,8 @@ export interface InvestigationEvidenceItem {
     | 'longitudinal_action'
     | 'longitudinal_resource'
     | 'cohort_summary'
-    | 'cohort_run';
+    | 'cohort_run'
+    | 'experience_pattern';
   payload: unknown;
 }
 
@@ -77,6 +82,41 @@ export interface CohortEvidenceInput {
     kind: 'cohort_summary' | 'cohort_run';
     payload: unknown;
   }>;
+}
+
+function appendExperiencePatternEvidence(
+  items: InvestigationEvidenceItem[],
+  patternEvidence: ExperiencePatternEvidence,
+): void {
+  const validated = validateExperiencePatternEvidence(patternEvidence);
+  for (const pattern of validated.patterns) {
+    appendInvestigationEvidenceItem(items, {
+      evidenceId: `pattern:${pattern.patternId}`,
+      authority: 'comparison',
+      kind: 'experience_pattern',
+      payload: pattern,
+    });
+  }
+}
+
+function validateSelectedPatternEvidence(
+  selected: ImprovementHypothesis,
+  patternEvidence: ExperiencePatternEvidence | undefined,
+): void {
+  const refs = selected.patternEvidenceRefs ?? [];
+  if (refs.length === 0) return;
+  if (patternEvidence === undefined) {
+    throw new Error('selected hypothesis references pattern evidence but none was provided');
+  }
+  const patternRefs = new Set(
+    validateExperiencePatternEvidence(patternEvidence).patterns
+      .map(pattern => `pattern:${pattern.patternId}`),
+  );
+  for (const ref of refs) {
+    if (!patternRefs.has(ref)) {
+      throw new Error(`selected hypothesis references unknown pattern evidence: ${ref}`);
+    }
+  }
 }
 
 interface ActionOccurrence {
@@ -265,9 +305,11 @@ export async function buildInvestigationEvidence(input: {
   currentRuntimeCatalog?: RuntimeEventCatalog;
   evidenceMode?: InvestigationEvidenceMode;
   cohortEvidence?: CohortEvidenceInput;
+  patternEvidence?: ExperiencePatternEvidence;
 }): Promise<InvestigationEvidencePack> {
   const { source } = input;
   const evidenceMode = input.evidenceMode ?? 'direct-v1';
+  validateSelectedPatternEvidence(source.selectedHypothesis, input.patternEvidence);
   if (evidenceMode === 'cohort-v1') {
     if (!input.cohortEvidence) {
       throw new Error('cohort-v1 requires cohortEvidence input');
@@ -276,10 +318,16 @@ export async function buildInvestigationEvidence(input: {
       source,
       currentRuntimeCatalog: input.currentRuntimeCatalog,
       evidenceMode: 'longitudinal-v1',
+      ...(input.patternEvidence !== undefined
+        ? { patternEvidence: input.patternEvidence }
+        : {}),
     });
     const items: InvestigationEvidenceItem[] = [...longitudinal.items];
     for (const item of input.cohortEvidence.items) {
       appendInvestigationEvidenceItem(items, item);
+    }
+    if (input.patternEvidence !== undefined) {
+      appendExperiencePatternEvidence(items, input.patternEvidence);
     }
     items.sort((left, right) => left.evidenceId.localeCompare(right.evidenceId));
     return {
@@ -594,6 +642,10 @@ export async function buildInvestigationEvidence(input: {
         payload: actionMechanismPayload(actionId),
       });
     }
+  }
+
+  if (input.patternEvidence !== undefined && evidenceMode !== 'longitudinal-v1') {
+    appendExperiencePatternEvidence(items, input.patternEvidence);
   }
 
   items.sort((left, right) => left.evidenceId.localeCompare(right.evidenceId));

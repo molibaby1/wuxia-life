@@ -21,8 +21,16 @@ import {
   validatePhase0RunRef,
 } from '../phase0/provenance';
 
-const INVESTIGATION_INVOCATION_SCHEMA_VERSION = 'hypothesis-investigation-invocation-v1' as const;
-const EVIDENCE_PACK_SCHEMA_VERSION = 'hypothesis-investigation-evidence-v1' as const;
+const INVESTIGATION_INVOCATION_SCHEMA_VERSIONS = new Set([
+  'hypothesis-investigation-invocation-v1',
+  'hypothesis-investigation-invocation-v2',
+  'hypothesis-investigation-invocation-v3',
+] as const);
+const EVIDENCE_PACK_SCHEMA_VERSIONS = new Set([
+  'hypothesis-investigation-evidence-v1',
+  'hypothesis-investigation-evidence-v2',
+  'hypothesis-investigation-evidence-v3',
+] as const);
 const HYPOTHESIS_ID_PATTERN = /^hypothesis-\d{6}$/;
 
 export interface ModificationWorkSource {
@@ -50,7 +58,10 @@ export interface ModificationWorkSource {
 }
 
 interface InvestigationInvocationRecord {
-  schemaVersion: typeof INVESTIGATION_INVOCATION_SCHEMA_VERSION;
+  schemaVersion:
+    | 'hypothesis-investigation-invocation-v1'
+    | 'hypothesis-investigation-invocation-v2'
+    | 'hypothesis-investigation-invocation-v3';
   runRef: string;
   hypothesisId: string;
   feedbackInvocationRef: string;
@@ -87,9 +98,11 @@ function validateHypothesisId(hypothesisId: string): string {
 function parseInvestigationInvocation(value: unknown): InvestigationInvocationRecord {
   assertObject(value, 'investigation source invocation');
   assertNonEmptyString(value.schemaVersion, 'investigation source invocation.schemaVersion');
-  if (value.schemaVersion !== INVESTIGATION_INVOCATION_SCHEMA_VERSION) {
+  if (!INVESTIGATION_INVOCATION_SCHEMA_VERSIONS.has(
+    value.schemaVersion as InvestigationInvocationRecord['schemaVersion'],
+  )) {
     throw new Error(
-      `investigation source invocation.schemaVersion must be ${INVESTIGATION_INVOCATION_SCHEMA_VERSION}`,
+      'investigation source invocation.schemaVersion must be hypothesis-investigation-invocation-v1, v2, or v3',
     );
   }
   assertNonEmptyString(value.runRef, 'investigation source invocation.runRef');
@@ -125,7 +138,7 @@ function parseInvestigationInvocation(value: unknown): InvestigationInvocationRe
     throw new Error('investigation source invocation.status must be completed or failed');
   }
   return {
-    schemaVersion: INVESTIGATION_INVOCATION_SCHEMA_VERSION,
+    schemaVersion: value.schemaVersion as InvestigationInvocationRecord['schemaVersion'],
     runRef: value.runRef,
     hypothesisId: value.hypothesisId,
     feedbackInvocationRef: value.feedbackInvocationRef,
@@ -150,9 +163,11 @@ function parseEvidencePack(bytes: string): InvestigationEvidencePack {
   }
   assertObject(parsed, 'investigation evidence pack');
   assertNonEmptyString(parsed.schemaVersion, 'investigation evidence pack.schemaVersion');
-  if (parsed.schemaVersion !== EVIDENCE_PACK_SCHEMA_VERSION) {
+  if (!EVIDENCE_PACK_SCHEMA_VERSIONS.has(
+    parsed.schemaVersion as InvestigationEvidencePack['schemaVersion'],
+  )) {
     throw new Error(
-      `investigation evidence pack.schemaVersion must be ${EVIDENCE_PACK_SCHEMA_VERSION}`,
+      'investigation evidence pack.schemaVersion must be hypothesis-investigation-evidence-v1, v2, or v3',
     );
   }
   if (!Array.isArray(parsed.items)) {
@@ -192,7 +207,10 @@ export function buildModificationWorkParticipantInput(
 
 export function buildModificationWorkParticipantInputV2(
   source: ModificationWorkSource,
-  handoff: InvestigationHandoff = projectInvestigationHandoff(source.investigation),
+  handoff: InvestigationHandoff = projectInvestigationHandoff(
+    source.investigation,
+    source.evidencePack,
+  ),
 ): string {
   return canonicalJson({
     schemaVersion: 'modification-work-input-v2',

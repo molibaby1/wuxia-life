@@ -1,3 +1,8 @@
+import {
+  validateExperienceSemanticContext,
+  type ExperienceSemanticContext,
+} from './experienceSemanticContext';
+
 export const PLAYER_OBSERVABLE_TRANSCRIPT_VERSION = 'player-observable-v1' as const;
 export const HEADLESS_API_PLAYER_SURFACE_ID = 'headless-api-player-v1' as const;
 
@@ -28,6 +33,7 @@ export interface ObservableEntry {
   entryId: string;
   kind: ObservableEntryKind;
   age?: number;
+  experienceContext?: ExperienceSemanticContext;
   title?: string;
   body?: string;
   visibleChoices?: ObservableChoice[];
@@ -48,6 +54,7 @@ const ENTRY_KEYS = [
   'entryId',
   'kind',
   'age',
+  'experienceContext',
   'title',
   'body',
   'visibleChoices',
@@ -128,6 +135,13 @@ function serializeEntry(entry: ObservableEntry, index: number): Record<string, u
   if (entry.age !== undefined && (typeof entry.age !== 'number' || !Number.isFinite(entry.age))) {
     throw new Error(`${path}.age must be a finite number when present`);
   }
+  const serialized: Record<string, unknown> = {
+    entryId: entry.entryId,
+    kind: entry.kind,
+  };
+  if (entry.experienceContext !== undefined) {
+    serialized.experienceContext = validateExperienceSemanticContext(entry.experienceContext);
+  }
   assertOptionalString(entry.title, `${path}.title`);
   assertOptionalString(entry.body, `${path}.body`);
   assertOptionalString(entry.selectedChoiceRef, `${path}.selectedChoiceRef`);
@@ -143,10 +157,6 @@ function serializeEntry(entry: ObservableEntry, index: number): Record<string, u
     });
   }
 
-  const serialized: Record<string, unknown> = {
-    entryId: entry.entryId,
-    kind: entry.kind,
-  };
   if (entry.age !== undefined) serialized.age = entry.age;
   if (entry.title !== undefined) serialized.title = entry.title;
   if (entry.body !== undefined) serialized.body = entry.body;

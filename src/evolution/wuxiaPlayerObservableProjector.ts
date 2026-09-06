@@ -89,6 +89,9 @@ export function projectHeadlessApiPlayerObservablePayload(
         entryId: entryRef(nextEntryIndex),
         kind: 'story_event',
         ...(step.age !== undefined ? { age: step.age } : {}),
+        ...(step.experienceContext !== undefined
+          ? { experienceContext: step.experienceContext }
+          : {}),
         title: step.storyEvent.title,
         body: step.storyEvent.text,
         ...(visibleChoices !== undefined ? { visibleChoices } : {}),
@@ -102,6 +105,9 @@ export function projectHeadlessApiPlayerObservablePayload(
           entryId: entryRef(extraIndex),
           kind: 'other',
           ...(step.age !== undefined ? { age: step.age } : {}),
+          ...(step.experienceContext !== undefined
+            ? { experienceContext: step.experienceContext }
+            : {}),
           title: extraCard.title,
           ...(extraCard.body !== undefined ? { body: extraCard.body } : {}),
           ...(extraCard.metaLines !== undefined
@@ -118,6 +124,9 @@ export function projectHeadlessApiPlayerObservablePayload(
         entryId: entryRef(nextEntryIndex),
         kind: mapNonStoryKind(step.kind),
         ...(step.age !== undefined ? { age: step.age } : {}),
+        ...(step.experienceContext !== undefined
+          ? { experienceContext: step.experienceContext }
+          : {}),
         title: card.title,
         ...(card.body !== undefined ? { visibleOutcome: card.body } : {}),
         ...(card.metaLines !== undefined ? { visibleFeedbackLines: [...card.metaLines] } : {}),

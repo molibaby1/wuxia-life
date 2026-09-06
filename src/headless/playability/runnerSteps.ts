@@ -3,6 +3,7 @@
  */
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../contracts/choiceExecution';
 import { getActionById } from '../../data/activeActionCatalog';
+import { buildExperienceSemanticContext } from '../../evolution/experienceSemanticContext';
 import { toActiveActionReplayEventId } from '../../core/activePlanning/activeActionReplay';
 import { selectPersonaActiveAction } from '../../p8/personaActionStrategy';
 import type { P8Persona } from '../../p8/types';
@@ -197,6 +198,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
         recordPlayerSurfaceStep(ctx, {
           kind: 'story_event',
           age,
+          experienceContext: buildExperienceSemanticContext({ age, kind: 'story_event' }),
           storyEvent: capturePlayerSafeStoryEvent(next),
         });
       }
@@ -235,6 +237,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       recordPlayerSurfaceStep(ctx, {
         kind: 'story_event',
         age,
+        experienceContext: buildExperienceSemanticContext({ age, kind: 'story_event' }),
         storyEvent: capturePlayerSafeStoryEvent(pending),
       });
     }
@@ -276,6 +279,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       recordPlayerSurfaceStep(ctx, {
         kind: 'story_event',
         age,
+        experienceContext: buildExperienceSemanticContext({ age, kind: 'story_event' }),
         storyEvent: playerSafeStory,
       });
     }
@@ -288,6 +292,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
       recordPlayerSurfaceStep(ctx, {
         kind: 'story_event',
         age,
+        experienceContext: buildExperienceSemanticContext({ age, kind: 'story_event' }),
         storyEvent: playerSafeStory,
       });
     }
@@ -311,6 +316,7 @@ export async function runStoryEventStep(ctx: RunnerStepContext): Promise<void> {
     recordPlayerSurfaceStep(ctx, {
       kind: 'story_event',
       age,
+      experienceContext: buildExperienceSemanticContext({ age, kind: 'story_event' }),
       storyEvent: playerSafeStory,
       ...(choiceResponse.status === 'success' ? { selectedChoiceId: choiceId } : {}),
       ...(presentation ? { presentationCards: [presentation] } : {}),
@@ -389,6 +395,7 @@ export async function runActivePlanningStep(ctx: RunnerStepContext): Promise<voi
     recordPlayerSurfaceStep(ctx, {
       kind: 'active_action_result',
       age,
+      experienceContext: buildExperienceSemanticContext({ age, kind: 'active_action_result' }),
       actionId: selection.actionId,
       presentationCards: [buildActiveActionSurfacePresentation(summary)],
     });
@@ -444,6 +451,10 @@ export async function runDisturbanceAckStep(ctx: RunnerStepContext): Promise<voi
     recordPlayerSurfaceStep(ctx, {
       kind: 'disturbance',
       age: stateBefore.player?.age ?? 0,
+      experienceContext: buildExperienceSemanticContext({
+        age: stateBefore.player?.age ?? 0,
+        kind: 'disturbance',
+      }),
       presentationCards: [
         { title: disturbance.title, body: disturbance.bodyText },
         buildDisturbanceSurfacePresentation(disturbance),
@@ -466,6 +477,10 @@ export async function runPassiveProgressionStep(ctx: RunnerStepContext): Promise
     recordPlayerSurfaceStep(ctx, {
       kind: 'passive_narrative',
       age: stateBefore.player?.age ?? 0,
+      experienceContext: buildExperienceSemanticContext({
+        age: stateBefore.player?.age ?? 0,
+        kind: 'passive_narrative',
+      }),
       presentationCards: [buildPassiveSurfacePresentation(passive)],
     });
   }
@@ -484,6 +499,10 @@ export async function runPeriodSummaryStep(ctx: RunnerStepContext): Promise<void
     recordPlayerSurfaceStep(ctx, {
       kind: 'period_summary',
       age: stateBefore.player?.age ?? 0,
+      experienceContext: buildExperienceSemanticContext({
+        age: stateBefore.player?.age ?? 0,
+        kind: 'period_summary',
+      }),
       presentationCards: buildPeriodSummarySurfacePresentations(periodSummary),
     });
   }

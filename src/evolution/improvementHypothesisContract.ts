@@ -1,4 +1,8 @@
 import type { ExternalFeedback } from './externalFeedbackContract';
+import {
+  validateExperiencePatternEvidence,
+  type ExperiencePatternEvidence,
+} from './experiencePatternEvidenceContract';
 import type { ObservablePayload } from './playerObservableTranscript';
 
 export interface ImprovementHypothesis {
@@ -7,6 +11,7 @@ export interface ImprovementHypothesis {
   observedBasis: string;
   feedbackRefs: string[];
   evidenceRefs: string[];
+  patternEvidenceRefs?: string[];
   unknowns: string[];
   productSignificance: string;
 }
@@ -50,6 +55,7 @@ const DRAFT_KEYS = [
   'unknowns',
   'productSignificance',
 ] as const;
+const DRAFT_OPTIONAL_KEYS = ['patternEvidenceRefs'] as const;
 
 function assertObject(value: unknown, label: string): asserts value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -65,8 +71,9 @@ function assertExactKeys(
   value: Record<string, unknown>,
   allowed: readonly string[],
   label: string,
+  optional: readonly string[] = [],
 ): void {
-  const allowedSet = new Set(allowed);
+  const allowedSet = new Set([...allowed, ...optional]);
   for (const key of Object.keys(value)) {
     if (!allowedSet.has(key)) {
       throw new Error(`${label} contains unknown field: ${key}`);
@@ -128,11 +135,16 @@ function parseDraft(
 ): Omit<ImprovementHypothesis, 'hypothesisId'> {
   const path = `hypotheses[${index}]`;
   assertObject(value, path);
-  assertExactKeys(value, DRAFT_KEYS, path);
+  assertExactKeys(value, DRAFT_KEYS, path, DRAFT_OPTIONAL_KEYS);
   assertNonEmptyString(value.hypothesis, `${path}.hypothesis`);
   assertNonEmptyString(value.observedBasis, `${path}.observedBasis`);
   assertNonEmptyStringArray(value.feedbackRefs, `${path}.feedbackRefs`);
   assertStringArrayAllowEmpty(value.evidenceRefs, `${path}.evidenceRefs`);
+  let patternEvidenceRefs: string[] | undefined;
+  if (value.patternEvidenceRefs !== undefined) {
+    assertStringArrayAllowEmpty(value.patternEvidenceRefs, `${path}.patternEvidenceRefs`);
+    patternEvidenceRefs = value.patternEvidenceRefs as string[];
+  }
   assertNonEmptyStringArray(value.unknowns, `${path}.unknowns`);
   assertNonEmptyString(value.productSignificance, `${path}.productSignificance`);
   return {
@@ -140,6 +152,9 @@ function parseDraft(
     observedBasis: value.observedBasis,
     feedbackRefs: [...value.feedbackRefs],
     evidenceRefs: [...value.evidenceRefs],
+    ...(patternEvidenceRefs !== undefined
+      ? { patternEvidenceRefs: [...patternEvidenceRefs] }
+      : {}),
     unknowns: [...value.unknowns],
     productSignificance: value.productSignificance,
   };
@@ -256,9 +271,16 @@ export function validateImprovementHypothesisReferences(
   set: ImprovementHypothesisSet & { noProblemAssessment?: NoProblemAssessment | null },
   feedback: ExternalFeedback,
   observablePayload: ObservablePayload,
+  patternEvidence?: ExperiencePatternEvidence,
 ): void {
   const feedbackRefs = validFeedbackRefs(feedback);
   const entryIds = new Set(observablePayload.entries.map(entry => entry.entryId));
+  const patternRefs = patternEvidence === undefined
+    ? new Set<string>()
+    : new Set(
+      validateExperiencePatternEvidence(patternEvidence).patterns
+        .map(pattern => `pattern:${pattern.patternId}`),
+    );
 
   for (const [index, hypothesis] of set.hypotheses.entries()) {
     for (const ref of hypothesis.feedbackRefs) {
@@ -272,6 +294,13 @@ export function validateImprovementHypothesisReferences(
       if (!entryIds.has(ref)) {
         throw new Error(
           `hypotheses[${index}].evidenceRefs references unknown entryId: ${ref}`,
+        );
+      }
+    }
+    for (const ref of hypothesis.patternEvidenceRefs ?? []) {
+      if (!patternRefs.has(ref)) {
+        throw new Error(
+          `hypotheses[${index}].patternEvidenceRefs references unknown pattern evidence: ${ref}`,
         );
       }
     }

@@ -40,6 +40,18 @@ const validDraft = {
   productSignificance: '如果成立，可能削弱长生命周期体验的变化感。',
 };
 
+const patternEvidence = {
+  schemaVersion: 'experience-pattern-evidence-v1',
+  patterns: [{
+    patternId: 'pattern-000001',
+    patternType: 'frequency',
+    description: '跨 run 重复出现的体验模式。',
+    supportingRuns: ['run-000001', 'run-000002'],
+    evidenceRefs: ['run:run-000001:observable:entry-000001'],
+    experienceContextRefs: ['run:run-000001:entry:entry-000001:experienceContext'],
+  }],
+};
+
 export function runImprovementHypothesisContractTests(): void {
   const zero = parseImprovementHypothesisSet(JSON.stringify({
     schemaVersion: 'improvement-hypothesis-set-v2',
@@ -69,6 +81,30 @@ export function runImprovementHypothesisContractTests(): void {
   }));
   assert.equal(one.hypotheses[0]?.hypothesisId, 'hypothesis-000001');
   validateImprovementHypothesisReferences(one, feedback, payload);
+
+  const withPattern = parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [{
+      ...validDraft,
+      patternEvidenceRefs: ['pattern:pattern-000001'],
+    }],
+    noProblemAssessment: null,
+  }));
+  assert.deepEqual(withPattern.hypotheses[0]?.patternEvidenceRefs, ['pattern:pattern-000001']);
+  validateImprovementHypothesisReferences(withPattern, feedback, payload, patternEvidence);
+  assert.throws(
+    () => validateImprovementHypothesisReferences(withPattern, feedback, payload),
+    /patternEvidenceRefs|pattern evidence/i,
+  );
+  assert.throws(
+    () => validateImprovementHypothesisReferences(
+      withPattern,
+      feedback,
+      payload,
+      { ...patternEvidence, patterns: [{ ...patternEvidence.patterns[0], patternId: 'pattern-other' }] },
+    ),
+    /patternEvidenceRefs|unknown pattern/i,
+  );
 
   const two = parseImprovementHypothesisSet(JSON.stringify({
     schemaVersion: 'improvement-hypothesis-set-v2',
@@ -127,6 +163,12 @@ export function runImprovementHypothesisContractTests(): void {
       noProblemAssessment: null,
     })), /unknown field/i);
   }
+
+  assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [{ ...validDraft, patternEvidenceRefs: [''] }],
+    noProblemAssessment: null,
+  })), /patternEvidenceRefs/i);
 
   assert.throws(
     () => validateImprovementHypothesisReferences(one, feedback, {

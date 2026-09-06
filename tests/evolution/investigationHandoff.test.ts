@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { projectInvestigationHandoff } from '../../src/evolution/investigationHandoff';
 import type { HypothesisInvestigationResult } from '../../src/evolution/hypothesisInvestigationContract';
+import { buildExperienceSemanticContext } from '../../src/evolution/experienceSemanticContext';
 
 function sampleInvestigation(): HypothesisInvestigationResult {
   return {
@@ -96,4 +97,58 @@ export function runInvestigationHandoffTests(): void {
     statement: 'only-gap',
     evidenceRefs: [],
   });
+
+  const withPattern = projectInvestigationHandoff({
+    confirmedFacts: [{
+      statement: 'investigation used all supplied evidence kinds',
+      evidenceRefs: [
+        'feedback:observations[0]',
+        'observable:entry-000001',
+        'pattern:pattern-000001',
+      ],
+    }],
+    relevantMechanisms: [],
+    limitingEvidence: [],
+    unresolvedQuestions: [],
+    evidenceGaps: [],
+  }, {
+    runRef: 'run-000001',
+    items: [
+      {
+        evidenceId: 'feedback:observations[0]',
+        kind: 'feedback',
+        payload: { text: '一次反馈。' },
+      },
+      {
+        evidenceId: 'observable:entry-000001',
+        kind: 'observable_entry',
+        payload: {
+          entryId: 'entry-000001',
+          experienceContext: buildExperienceSemanticContext({ age: 16, kind: 'story_event' }),
+        },
+      },
+      {
+        evidenceId: 'pattern:pattern-000001',
+        kind: 'experience_pattern',
+        payload: {
+          patternId: 'pattern-000001',
+          experienceContextRefs: ['run:run-000001:entry:entry-000001:experienceContext'],
+        },
+      },
+    ],
+  });
+  assert.deepEqual(withPattern.evidenceBasis, [
+    {
+      kind: 'single_run_observation',
+      evidenceRefs: ['feedback:observations[0]', 'observable:entry-000001'],
+    },
+    {
+      kind: 'multi_run_pattern',
+      evidenceRefs: ['pattern:pattern-000001'],
+    },
+    {
+      kind: 'experience_semantic_context',
+      evidenceRefs: ['run:run-000001:entry:entry-000001:experienceContext'],
+    },
+  ]);
 }

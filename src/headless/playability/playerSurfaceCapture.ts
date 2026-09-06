@@ -1,4 +1,5 @@
 import type { ChoiceFeedbackModel } from '../../types/choiceFeedback';
+import type { ExperienceSemanticContext } from '../../evolution/experienceSemanticContext';
 import type {
   ActiveActionSummaryDisplay,
   DisturbanceNarrativeDisplay,
@@ -45,6 +46,8 @@ export interface HeadlessApiPlayerSurfaceStep {
     | 'disturbance'
     | 'passive_narrative';
   age?: number;
+  /** Read-only product meaning for the player-visible step; never runtime state. */
+  experienceContext?: ExperienceSemanticContext;
   storyEvent?: HeadlessApiSurfaceStoryEvent;
   selectedChoiceId?: string;
   /** Formal active-action identity for active_action_result provenance (not player-visible). */

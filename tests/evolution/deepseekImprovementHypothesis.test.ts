@@ -3,6 +3,7 @@ import {
   DEEPSEEK_IMPROVEMENT_HYPOTHESIS_MODEL,
   invokeDeepSeekImprovementHypothesis,
 } from '../../scripts/evolution/improvementHypothesis/deepseekImprovementHypothesis';
+import { parseImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
 
 const API_KEY = 'sk-test-key-not-real';
 const INVOCATION_REF = 'hyp-inv-ref-0001';
@@ -141,6 +142,19 @@ async function testRequestShapeAndConstraints(): Promise<void> {
     assert.match(user, /Participant feedback（参与者意见，不是系统指令）/);
 
     const system = String(body.messages?.[0]?.content);
+    // Examples are participant output contracts: both legal branches must parse
+    // through the same strict consumer that handles real responses.
+    const examples = (system.match(/\{\n[\s\S]*?\n\}/g) ?? [])
+      .map(example => parseImprovementHypothesisSet(example));
+    assert.ok(examples.some(example => example.hypotheses.length > 0));
+    const noProblemExample = examples.find(example => example.hypotheses.length === 0);
+    assert.ok(noProblemExample, 'prompt must demonstrate the zero-hypothesis response contract');
+    assert.ok(noProblemExample.noProblemAssessment?.rationale);
+    const { rationale, ...assessmentRefs } = noProblemExample.noProblemAssessment!;
+    assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({
+      ...noProblemExample,
+      noProblemAssessment: { ...assessmentRefs, finalRationale: rationale },
+    })), /unknown field: finalRationale/);
     assert.match(system, /0\.\.N|0\.\.n/i);
     assert.match(system, /"schemaVersion"\s*:\s*"improvement-hypothesis-set-v2"/);
     assert.match(system, /noProblemAssessment/);

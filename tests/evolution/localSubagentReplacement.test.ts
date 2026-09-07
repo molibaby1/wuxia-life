@@ -21,15 +21,9 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
       prompts.push(input.prompt);
       const response = input.role === 'feedback'
         ? JSON.stringify({ overallImpression: 'local feedback', observations: [] })
-        : JSON.stringify({
-          schemaVersion: 'improvement-hypothesis-set-v2',
-          hypotheses: [],
-          noProblemAssessment: {
-            rationale: '当前材料不足以形成可审计的问题假设。',
-            feedbackRefs: ['overallImpression'],
-            evidenceRefs: [],
-          },
-        });
+        : (input.prompt.match(/\{\n[\s\S]*?\n\}/g) ?? [])
+          .find(example => JSON.parse(example).hypotheses?.length === 0);
+      assert.ok(response, 'local participant must receive a usable zero-hypothesis example');
       return ['-e', `process.stdout.write(${JSON.stringify(response)})`];
     },
   };
@@ -81,6 +75,12 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
   ]);
   assert.match(hypothesisInvocation.participant.evidenceOnlyWorkspace.manifestSha256, /^[a-f0-9]{64}$/);
   assert.equal(hypothesisInvocation.status, 'completed');
+  const storedHypotheses = JSON.parse(
+    await readFile(join(hypothesis.hypothesisDir, 'hypotheses.json'), 'utf8'),
+  );
+  assert.equal(storedHypotheses.hypotheses.length, 0);
+  assert.ok(storedHypotheses.noProblemAssessment.rationale);
+  assert.deepEqual(storedHypotheses.noProblemAssessment.feedbackRefs, ['overallImpression']);
   assert.equal(
     await readFile(join(hypothesis.hypothesisDir, 'participant-workspace/input/feedback.json'), 'utf8')
       .then(() => true),

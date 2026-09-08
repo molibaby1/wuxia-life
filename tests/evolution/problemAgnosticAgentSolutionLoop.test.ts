@@ -555,7 +555,8 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
     assert.equal(await pathExists(join(workspaceRoot, problemPackage.source.improvementHypothesisRef)), true);
     assert.equal(await pathExists(join(
       workspaceRoot,
-      'feedback-runs/cohort-run-000001/raw-provider-response.txt',
+      dirname(problemPackage.source.externalFeedbackRef),
+      'raw-provider-response.txt',
     )), false);
   }
   assert.equal(

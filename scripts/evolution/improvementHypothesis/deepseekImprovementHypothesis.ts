@@ -3,7 +3,7 @@ export const DEEPSEEK_IMPROVEMENT_HYPOTHESIS_MODEL = 'deepseek-v4-flash' as cons
 const DEEPSEEK_CHAT_COMPLETIONS_URL = 'https://api.deepseek.com/chat/completions';
 const DEEPSEEK_IMPROVEMENT_HYPOTHESIS_TIMEOUT_MS = 180_000; // ponytail: same transport ceiling as feedback adapter; raise if 180s truncates
 
-const HYPOTHESIS_JSON_EXAMPLE = `{
+export const HYPOTHESIS_JSON_EXAMPLE = `{
   "schemaVersion": "improvement-hypothesis-set-v2",
   "hypotheses": [
     {
@@ -18,7 +18,7 @@ const HYPOTHESIS_JSON_EXAMPLE = `{
   "noProblemAssessment": null
 }`;
 
-const NO_PROBLEM_JSON_EXAMPLE = `{
+export const NO_PROBLEM_JSON_EXAMPLE = `{
   "schemaVersion": "improvement-hypothesis-set-v2",
   "hypotheses": [],
   "noProblemAssessment": {

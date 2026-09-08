@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {
   DEEPSEEK_IMPROVEMENT_HYPOTHESIS_MODEL,
+  HYPOTHESIS_JSON_EXAMPLE,
+  NO_PROBLEM_JSON_EXAMPLE,
   invokeDeepSeekImprovementHypothesis,
 } from '../../scripts/evolution/improvementHypothesis/deepseekImprovementHypothesis';
 import { parseImprovementHypothesisSet } from '../../src/evolution/improvementHypothesisContract';
@@ -144,11 +146,12 @@ async function testRequestShapeAndConstraints(): Promise<void> {
     const system = String(body.messages?.[0]?.content);
     // Examples are participant output contracts: both legal branches must parse
     // through the same strict consumer that handles real responses.
-    const examples = (system.match(/\{\n[\s\S]*?\n\}/g) ?? [])
-      .map(example => parseImprovementHypothesisSet(example));
-    assert.ok(examples.some(example => example.hypotheses.length > 0));
-    const noProblemExample = examples.find(example => example.hypotheses.length === 0);
-    assert.ok(noProblemExample, 'prompt must demonstrate the zero-hypothesis response contract');
+    assert.ok(system.includes(HYPOTHESIS_JSON_EXAMPLE));
+    assert.ok(system.includes(NO_PROBLEM_JSON_EXAMPLE));
+    const hypothesisExample = parseImprovementHypothesisSet(HYPOTHESIS_JSON_EXAMPLE);
+    const noProblemExample = parseImprovementHypothesisSet(NO_PROBLEM_JSON_EXAMPLE);
+    assert.ok(hypothesisExample.hypotheses.length > 0);
+    assert.equal(noProblemExample.hypotheses.length, 0);
     assert.ok(noProblemExample.noProblemAssessment?.rationale);
     const { rationale, ...assessmentRefs } = noProblemExample.noProblemAssessment!;
     assert.throws(() => parseImprovementHypothesisSet(JSON.stringify({

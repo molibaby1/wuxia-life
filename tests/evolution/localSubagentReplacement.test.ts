@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { getP8PersonaById } from '../../src/p8/personas';
 import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalExternalFeedback';
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
+import { NO_PROBLEM_JSON_EXAMPLE } from '../../scripts/evolution/improvementHypothesis/deepseekImprovementHypothesis';
 
 export async function runLocalSubagentReplacementTests(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -19,11 +20,16 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
     reasoningEffort: 'high',
     buildArgs: input => {
       prompts.push(input.prompt);
-      const response = input.role === 'feedback'
-        ? JSON.stringify({ overallImpression: 'local feedback', observations: [] })
-        : (input.prompt.match(/\{\n[\s\S]*?\n\}/g) ?? [])
-          .find(example => JSON.parse(example).hypotheses?.length === 0);
-      assert.ok(response, 'local participant must receive a usable zero-hypothesis example');
+      let response: string;
+      if (input.role === 'feedback') {
+        response = JSON.stringify({ overallImpression: 'local feedback', observations: [] });
+      } else {
+        assert.ok(
+          input.prompt.includes(NO_PROBLEM_JSON_EXAMPLE),
+          'local participant must receive a usable zero-hypothesis example',
+        );
+        response = NO_PROBLEM_JSON_EXAMPLE;
+      }
       return ['-e', `process.stdout.write(${JSON.stringify(response)})`];
     },
   };
@@ -81,6 +87,7 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
   assert.equal(storedHypotheses.hypotheses.length, 0);
   assert.ok(storedHypotheses.noProblemAssessment.rationale);
   assert.deepEqual(storedHypotheses.noProblemAssessment.feedbackRefs, ['overallImpression']);
+  assert.deepEqual(storedHypotheses.noProblemAssessment.evidenceRefs, []);
   assert.equal(
     await readFile(join(hypothesis.hypothesisDir, 'participant-workspace/input/feedback.json'), 'utf8')
       .then(() => true),

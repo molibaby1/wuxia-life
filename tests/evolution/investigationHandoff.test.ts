@@ -151,4 +151,56 @@ export function runInvestigationHandoffTests(): void {
       evidenceRefs: ['run:run-000001:entry:entry-000001:experienceContext'],
     },
   ]);
+
+  assert.throws(() => projectInvestigationHandoff({
+    confirmedFacts: [{
+      statement: 'pattern without context refs',
+      evidenceRefs: ['pattern:pattern-broken'],
+    }],
+    relevantMechanisms: [],
+    limitingEvidence: [],
+    unresolvedQuestions: [],
+    evidenceGaps: [],
+  }, {
+    runRef: 'run-000001',
+    items: [{
+      evidenceId: 'pattern:pattern-broken',
+      kind: 'experience_pattern',
+      payload: {
+        patternId: 'pattern-broken',
+        experienceContextRefs: ['', 'dup', 'dup'],
+      },
+    }],
+  }), /experienceContextRefs must be non-empty strings|duplicate/i);
+
+  assert.throws(() => projectInvestigationHandoff({
+    confirmedFacts: [{
+      statement: 'pattern with non-array context refs',
+      evidenceRefs: ['pattern:pattern-soft'],
+    }],
+    relevantMechanisms: [],
+    limitingEvidence: [],
+    unresolvedQuestions: [],
+    evidenceGaps: [],
+  }, {
+    runRef: 'run-000001',
+    items: [{
+      evidenceId: 'pattern:pattern-soft',
+      kind: 'experience_pattern',
+      payload: {
+        patternId: 'pattern-soft',
+        experienceContextRefs: 'not-an-array',
+      },
+    }],
+  }), /experienceContextRefs must be an array/i);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    runInvestigationHandoffTests();
+    console.log('investigationHandoff.test.ts: ok');
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
 }

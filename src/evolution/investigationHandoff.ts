@@ -84,9 +84,26 @@ function addContextRefsFromPattern(
   item: InvestigationHandoffEvidenceItem,
 ): void {
   if (item.kind !== 'experience_pattern' || !isRecord(item.payload)) return;
-  if (!Array.isArray(item.payload.experienceContextRefs)) return;
-  for (const ref of item.payload.experienceContextRefs) {
-    if (typeof ref === 'string' && ref.length > 0) contextRefs.add(ref);
+  if (!('experienceContextRefs' in item.payload)) {
+    throw new Error(`experience_pattern ${item.evidenceId} is missing experienceContextRefs`);
+  }
+  const refs = item.payload.experienceContextRefs;
+  if (!Array.isArray(refs)) {
+    throw new Error(`experience_pattern ${item.evidenceId}.experienceContextRefs must be an array`);
+  }
+  if (refs.length === 0) {
+    throw new Error(`experience_pattern ${item.evidenceId}.experienceContextRefs must not be empty`);
+  }
+  const seen = new Set<string>();
+  for (const ref of refs) {
+    if (typeof ref !== 'string' || ref.length === 0) {
+      throw new Error(`experience_pattern ${item.evidenceId}.experienceContextRefs must be non-empty strings`);
+    }
+    if (seen.has(ref)) {
+      throw new Error(`experience_pattern ${item.evidenceId}.experienceContextRefs contains duplicate: ${ref}`);
+    }
+    seen.add(ref);
+    contextRefs.add(ref);
   }
 }
 

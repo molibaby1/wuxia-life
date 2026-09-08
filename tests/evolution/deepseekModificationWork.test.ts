@@ -215,6 +215,9 @@ async function testPromptHasNoTargetSolutionLeakage(): Promise<void> {
   assert.match(instructions, /一项具体产品行为改变|具体.*产品行为/);
   assert.match(instructions, /scopeRefs/);
   assert.match(instructions, /只能引用|must (only )?reference|supplied current-product/i);
+  assert.match(instructions, /Experience Semantic Context|Experience Pattern/);
+  assert.match(instructions, /descriptive|描述性/);
+  assert.match(instructions, /authority|permission/);
 
   const adapterSource = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), '../../scripts/evolution/modificationWork/deepseekModificationWork.ts'),
@@ -263,6 +266,8 @@ async function testV2PromptHasNoCaseSpecificLeakage(): Promise<void> {
   assert.match(instructions, /confirmed_fact|relevant_mechanism|limiting_evidence/);
   assert.match(instructions, /unresolved_question|evidence_gap/);
   assert.match(instructions, /no_proposal/);
+  assert.match(instructions, /Experience Semantic Context|Experience Pattern/);
+  assert.match(instructions, /不得把 evidenceBasis 本身当作 investigationBasisRefs/);
 }
 
 async function testV2InstructionsPassedWhenProvided(): Promise<void> {

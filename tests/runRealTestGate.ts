@@ -21,6 +21,8 @@ const suites: Suite[] = [
   { name: 'experienceSemanticContext', entry: 'tests/evolution/experienceSemanticContext.test.ts' },
   { name: 'experiencePatternEvidence', entry: 'tests/evolution/experiencePatternEvidence.test.ts' },
   { name: 'experiencePatternEvidenceIntegration', entry: 'tests/evolution/experiencePatternEvidenceIntegration.test.ts' },
+  { name: 'improvementHypothesisContract', entry: 'tests/evolution/improvementHypothesisContract.test.ts' },
+  { name: 'investigationHandoff', entry: 'tests/evolution/investigationHandoff.test.ts' },
   { name: 'normalLongevityEndingClosure', entry: 'tests/normalLongevityEndingClosure.test.ts' },
   { name: 'earlyDeathTerminalConsistency', entry: 'tests/earlyDeathTerminalConsistency.test.ts' },
   { name: 'setbackProducerOwnership', entry: 'tests/setbackProducerOwnership.test.ts' },

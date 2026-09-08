@@ -44,6 +44,31 @@ function assertExactKeys(value: RecordValue, allowed: readonly string[], label: 
   }
 }
 
+function assertNonEmptyString(value: unknown, label: string): string {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(`${label} must be a non-empty string`);
+  }
+  return value;
+}
+
+function assertBoolean(value: unknown, label: string): boolean {
+  if (typeof value !== 'boolean') throw new Error(`${label} must be a boolean`);
+  return value;
+}
+
+function assertInteger(value: unknown, label: string): number {
+  if (typeof value !== 'number' || !Number.isInteger(value)) {
+    throw new Error(`${label} must be an integer`);
+  }
+  return value;
+}
+
+function assertNullableString(value: unknown, label: string): string | null {
+  if (value === null) return null;
+  if (typeof value !== 'string') throw new Error(`${label} must be a string or null`);
+  return value;
+}
+
 function parseReplayInput(raw: string): RouteSolutionDecisionInput {
   let parsed: unknown;
   try {
@@ -58,7 +83,26 @@ function parseReplayInput(raw: string): RouteSolutionDecisionInput {
   assertExactKeys(parsed.permissions, PERMISSION_KEYS, 'decision replay input.permissions');
   assertObject(parsed.budget, 'decision replay input.budget');
   assertExactKeys(parsed.budget, BUDGET_KEYS, 'decision replay input.budget');
-  return parsed as unknown as RouteSolutionDecisionInput;
+
+  // Input shape/types are enforced here; enum/policy legality remains with route + validateSolutionDecision.
+  return {
+    problemId: assertNonEmptyString(parsed.problemId, 'decision replay input.problemId'),
+    solutionStatus: assertNonEmptyString(parsed.solutionStatus, 'decision replay input.solutionStatus') as RouteSolutionDecisionInput['solutionStatus'],
+    reviewerDecision: assertNullableString(parsed.reviewerDecision, 'decision replay input.reviewerDecision') as RouteSolutionDecisionInput['reviewerDecision'],
+    solutionScope: assertNullableString(parsed.solutionScope, 'decision replay input.solutionScope') as RouteSolutionDecisionInput['solutionScope'],
+    reviewScope: assertNullableString(parsed.reviewScope, 'decision replay input.reviewScope') as RouteSolutionDecisionInput['reviewScope'],
+    permissions: {
+      authoritativeProductWrite: assertBoolean(parsed.permissions.authoritativeProductWrite, 'decision replay input.permissions.authoritativeProductWrite'),
+      sandboxWrite: assertBoolean(parsed.permissions.sandboxWrite, 'decision replay input.permissions.sandboxWrite'),
+      productExecution: assertBoolean(parsed.permissions.productExecution, 'decision replay input.permissions.productExecution'),
+      codeExecution: assertBoolean(parsed.permissions.codeExecution, 'decision replay input.permissions.codeExecution'),
+    },
+    budget: {
+      actualParticipantJobs: assertInteger(parsed.budget.actualParticipantJobs, 'decision replay input.budget.actualParticipantJobs'),
+      maxParticipantJobs: assertInteger(parsed.budget.maxParticipantJobs, 'decision replay input.budget.maxParticipantJobs'),
+      retryCount: assertInteger(parsed.budget.retryCount, 'decision replay input.budget.retryCount'),
+    },
+  };
 }
 
 export function replaySolutionDecision(raw: string): SolutionDecisionV1 {

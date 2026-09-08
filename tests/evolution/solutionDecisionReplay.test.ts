@@ -71,6 +71,14 @@ export async function runSolutionDecisionReplayTests(): Promise<void> {
   invalidEnum.solutionStatus = 'INVALID_STATUS';
   assert.throws(() => replay(invalidEnum), /invalid value/i);
 
+  const invalidType = cloneRequestMoreWorkInput();
+  invalidType.solutionStatus = 123;
+  assert.throws(() => replay(invalidType), /must be a non-empty string/i);
+
+  const invalidPermissionType = cloneRequestMoreWorkInput();
+  (invalidPermissionType.permissions as Record<string, unknown>).sandboxWrite = 'yes';
+  assert.throws(() => replay(invalidPermissionType), /must be a boolean/i);
+
   const invalidPermission = cloneRequestMoreWorkInput();
   (invalidPermission.permissions as Record<string, unknown>).sandboxWrite = false;
   assert.throws(() => replay(invalidPermission), /sandboxWrite must be true/i);

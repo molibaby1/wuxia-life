@@ -10,6 +10,7 @@
     "test:all": "npm test && npm run test:contracts && npm run test:headless && npm run test:headless:parity && npm run test:sample-lines-routes",
     "test:contracts": "tsx tests/contracts/runContractTests.ts",
     "test:evolution:human-followup": "tsx tests/evolution/humanFollowupWorkItemContract.test.ts && tsx tests/evolution/humanFollowupRetention.test.ts && tsx tests/evolution/humanFollowupSolutionLoopIntegration.test.ts && tsx tests/evolution/humanFollowupReview.test.ts && tsx tests/evolution/humanFollowupInbox.test.ts",
+    "test:evolution:solution-replay": "tsx tests/evolution/solutionDecisionReplay.test.ts && tsx tests/evolution/solutionReviewerReplay.test.ts",
     "evolution:human-followup:inbox": "tsx scripts/evolution/humanFollowup/buildHumanFollowupInbox.ts",
     "evolution:human-followup:review": "tsx scripts/evolution/humanFollowup/reviewHumanFollowupWorkItem.ts",
     "evolution:observability:archive": "tsx scripts/evolution/reporting/archiveOperationalRunReport.ts",

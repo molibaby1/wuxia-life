@@ -435,8 +435,12 @@ export async function runProblemAgnosticAgentSolutionLoop(
   const sourceArtifact = {
     artifactSourceRoot: experimentRoot,
     artifactRelativePaths: [
-      'source/observable-payload.json',
-      CAUSAL_ATTRIBUTION_RELATIVE_PATH,
+      problemPackage.source.observablePayloadRef,
+      problemPackage.source.externalFeedbackRef,
+      problemPackage.source.improvementHypothesisRef,
+      ...(problemPackage.schemaVersion === 'problem-package-v2'
+        ? problemPackage.source.diagnosticEvidenceRefs
+        : []),
     ],
   };
   const workspacesRoot = join(experimentRoot, 'agent-workspaces');

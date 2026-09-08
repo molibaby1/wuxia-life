@@ -88,6 +88,9 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const prompt = buildSolutionReviewerPrompt(problemPackage, solutionWork, [assignedSkill]);
   assert.match(prompt, /independently inspect|independent source inspection/i);
   assert.match(prompt, /reject all options/i);
+  assert.match(prompt, /Independently read the relevant supplied authorityRefs/i);
+  assert.match(prompt, /passing tests does not establish product authorization/i);
+  assert.match(prompt, /recreates explicitly excluded behavior/i);
   assert.match(prompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);
   assert.match(prompt, /repository-grounded-investigation/);
   assert.match(prompt, new RegExp(canonicalSkillSha256));

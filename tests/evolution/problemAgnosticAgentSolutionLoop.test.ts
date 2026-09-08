@@ -146,10 +146,17 @@ async function writeLegacyFailureArtifact(input: {
   await writeFile(join(runDirectory, 'human-review.md'), 'failure evidence');
 }
 
-async function writeValidHypothesisArtifact(
+async function writeValidFeedbackAndHypothesisArtifacts(
   experimentRoot: string,
   runRef = 'cohort-run-000001',
 ): Promise<string> {
+  const feedbackDir = join(experimentRoot, `feedback-runs/${runRef}`);
+  await mkdir(feedbackDir, { recursive: true });
+  await writeFile(join(feedbackDir, 'feedback.json'), JSON.stringify({
+    overallImpression: 'Observed in the fixed source.',
+    observations: [],
+  }));
+  await writeFile(join(feedbackDir, 'raw-provider-response.txt'), 'private provider canary');
   const hypothesisDir = join(experimentRoot, `hypothesis-runs/${runRef}`);
   await mkdir(hypothesisDir, { recursive: true });
   await writeFile(join(hypothesisDir, 'hypotheses.json'), JSON.stringify({ hypotheses: [{
@@ -270,7 +277,7 @@ export async function runManifestAuthoritativeSourceBindingTests(): Promise<void
         };
       },
       runImprovementHypothesis: async options => {
-        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!, options.runRef);
+        const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!, options.runRef);
         return {
           runRef: options.runRef,
           feedbackInvocationRef: 'feedback-000001',
@@ -442,7 +449,7 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
         experimentRootHash: fixture.preflight.experimentRootHash,
       }),
       runImprovementHypothesis: async options => {
-        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
         return {
           runRef: options.runRef,
           feedbackInvocationRef: 'feedback-000001',
@@ -456,6 +463,16 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
       },
       runSolutionAgent: async input => {
         assert.equal(await pathExists(join(input.workspaceRoot, '..', 'reviewer')), false);
+        for (const ref of [
+          input.problemPackage.source.externalFeedbackRef,
+          input.problemPackage.source.improvementHypothesisRef,
+        ]) {
+          assert.equal(
+            await readFile(join(input.workspaceRoot, ref), 'utf8'),
+            await readFile(join(fixture.experimentRoot, ref), 'utf8'),
+            'declared structured evidence must be readable before the Solution starts',
+          );
+        }
         return {
           ok: true,
           result: {
@@ -486,6 +503,16 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
       runSolutionReviewer: async input => {
         reviewerCalls += 1;
         assert.equal(await pathExists(input.workspaceRoot), true);
+        for (const ref of [
+          input.problemPackage.source.externalFeedbackRef,
+          input.problemPackage.source.improvementHypothesisRef,
+        ]) {
+          assert.equal(
+            await readFile(join(input.workspaceRoot, ref), 'utf8'),
+            await readFile(join(fixture.experimentRoot, 'agent-workspaces/solution', ref), 'utf8'),
+            'Reviewer must independently receive identical structured evidence',
+          );
+        }
         return {
           ok: true,
           review: {
@@ -522,6 +549,15 @@ export async function runSuccessfulOptionsReviewerOrchestrationTests(): Promise<
   assert.equal(await pathExists(join(fixture.experimentRoot, 'agent-workspaces/solution/source/observable-payload.json')), true);
   assert.equal(await pathExists(solutionDiagnostic), true);
   assert.equal(await pathExists(reviewerDiagnostic), true);
+  for (const role of ['solution', 'reviewer']) {
+    const workspaceRoot = join(fixture.experimentRoot, 'agent-workspaces', role);
+    assert.equal(await pathExists(join(workspaceRoot, problemPackage.source.externalFeedbackRef)), true);
+    assert.equal(await pathExists(join(workspaceRoot, problemPackage.source.improvementHypothesisRef)), true);
+    assert.equal(await pathExists(join(
+      workspaceRoot,
+      'feedback-runs/cohort-run-000001/raw-provider-response.txt',
+    )), false);
+  }
   assert.equal(
     await pathExists(join(
       fixture.experimentRoot,
@@ -572,7 +608,7 @@ export async function runAuthorityRefPreflightTests(): Promise<void> {
           experimentRootHash: fixture.preflight.experimentRootHash,
         }),
         runImprovementHypothesis: async options => {
-          const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+          const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
           return {
             runRef: options.runRef,
             feedbackInvocationRef: 'feedback-000001',
@@ -646,7 +682,7 @@ export async function runLocalParticipantModeInsufficientEvidenceTests(): Promis
       runImprovementHypothesis: async options => {
         assert.equal(options.localParticipant, fakeWorkspaceAgentParticipant);
         localParticipantPasses += 1;
-        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
         return {
           runRef: options.runRef,
           feedbackInvocationRef: 'local-feedback-000001',
@@ -710,7 +746,7 @@ export async function runInsufficientEvidenceDoesNotMaterializeReviewerWorkspace
         experimentRootHash: fixture.preflight.experimentRootHash,
       }),
       runImprovementHypothesis: async options => {
-        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
         return {
           runRef: options.runRef,
           feedbackInvocationRef: 'feedback-000001',
@@ -905,7 +941,7 @@ export async function runSolutionAndReviewerFailureOrchestrationTests(): Promise
           experimentRootHash: fixture.preflight.experimentRootHash,
         }),
         runImprovementHypothesis: async options => {
-          await writeValidHypothesisArtifact(options.outRoot!);
+          await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
           return {
             runRef: options.runRef,
             feedbackInvocationRef: 'feedback-000001',
@@ -1028,7 +1064,7 @@ export async function runSolutionRecoveryParticipantJobAccountingTests(): Promis
         experimentRootHash: fixture.preflight.experimentRootHash,
       }),
       runImprovementHypothesis: async options => {
-        const hypothesisDir = await writeValidHypothesisArtifact(options.outRoot!);
+        const hypothesisDir = await writeValidFeedbackAndHypothesisArtifacts(options.outRoot!);
         return {
           runRef: options.runRef,
           feedbackInvocationRef: 'feedback-000001',

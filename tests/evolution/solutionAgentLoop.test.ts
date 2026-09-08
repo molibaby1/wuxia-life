@@ -160,6 +160,9 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /disposable workspace/i);
   assert.match(deliveredPrompt, /zero to three options/i);
   assert.match(deliveredPrompt, /execution permission is separate/i);
+  assert.match(deliveredPrompt, /read the relevant supplied authorityRefs/i);
+  assert.match(deliveredPrompt, /passing tests does not establish product authorization/i);
+  assert.match(deliveredPrompt, /recreates behavior an authority explicitly excludes/i);
   assert.match(deliveredPrompt, /stop broad exploration/i);
   assert.match(deliveredPrompt, /one bounded re-grounding/i);
   assert.match(deliveredPrompt, /time-budget escape hatch/i);

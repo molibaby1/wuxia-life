@@ -1,5 +1,5 @@
 import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
@@ -20,14 +20,22 @@ import {
   type AuditedWorkflowSummary,
 } from './buildWorkflowDecisionAudit';
 import {
+  durableWorkspaceStateProvenanceSemantics,
+  projectWorkspaceStateProvenance,
+  readWorkspaceStateProvenance,
+  type WorkspaceStateProvenanceProjection,
+} from '../workspaceStateProvenance';
+import {
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4,
   RUN_REPORTS_ROOT,
   buildOperationalObservabilityIndex,
   parseOperationalRunReport,
   type OperationalRunReport,
   type OperationalRunReportV1,
   type OperationalRunReportV3,
+  type OperationalRunReportV4,
 } from './buildOperationalObservabilityIndex';
 
 const REPORT_ID_PREFIX = 'ae-report-';
@@ -120,6 +128,24 @@ export function computeOperationalRunReportIdV3(input: {
   return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
 }
 
+export function computeOperationalRunReportIdV4(input: {
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowSummary[];
+}): string {
+  const digest = sha256Hex(canonicalJson({
+    sourceRoot: input.sourceRoot,
+    sessionExecution: durableMultiRoundSessionSemantics(input.sessionExecution),
+    workspaceProvenance: durableWorkspaceStateProvenanceSemantics(input.workspaceProvenance),
+    workflows: input.workflows.map(workflow => ({
+      ...durableWorkflowSemantics(workflow),
+      decisionAudit: workflow.decisionAudit,
+    })),
+  }));
+  return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
+}
+
 function buildReportDocumentV1(input: {
   reportId: string;
   createdAt: string;
@@ -149,6 +175,26 @@ function buildReportDocumentV3(input: {
     createdAt: input.createdAt,
     sourceRoot: input.sourceRoot,
     sessionExecution: input.sessionExecution,
+    workflowCount: input.workflows.length,
+    workflows: input.workflows,
+  };
+}
+
+function buildReportDocumentV4(input: {
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV1;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowSummary[];
+}): OperationalRunReportV4 {
+  return {
+    schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4,
+    reportId: input.reportId,
+    createdAt: input.createdAt,
+    sourceRoot: input.sourceRoot,
+    sessionExecution: input.sessionExecution,
+    workspaceProvenance: input.workspaceProvenance,
     workflowCount: input.workflows.length,
     workflows: input.workflows,
   };
@@ -190,6 +236,18 @@ export async function archiveOperationalRunReport(
   const sessionExecution = manifestPath === null
     ? null
     : buildMultiRoundSessionSummary(await readMultiRoundRunManifest(manifestPath));
+  const workspaceProvenance = manifestPath === null
+    ? null
+    : await (async () => {
+      const provenancePath = join(dirname(manifestPath), 'workspace-state-provenance.json');
+      try {
+        await lstat(provenancePath);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+        throw error;
+      }
+      return projectWorkspaceStateProvenance(await readWorkspaceStateProvenance(provenancePath));
+    })();
 
   const auditedWorkflows = sessionExecution === null
     ? null
@@ -199,7 +257,14 @@ export async function archiveOperationalRunReport(
     );
   const reportId = sessionExecution === null
     ? computeOperationalRunReportId({ sourceRoot, workflows })
-    : computeOperationalRunReportIdV3({ sourceRoot, sessionExecution, workflows: auditedWorkflows });
+    : workspaceProvenance === null
+      ? computeOperationalRunReportIdV3({ sourceRoot, sessionExecution, workflows: auditedWorkflows })
+      : computeOperationalRunReportIdV4({
+        sourceRoot,
+        sessionExecution,
+        workspaceProvenance,
+        workflows: auditedWorkflows,
+      });
   const reportDirectory = join(repositoryRoot, RUN_REPORTS_ROOT, reportId);
   const reportJsonPath = join(reportDirectory, 'report.json');
   const reportMarkdownPath = join(reportDirectory, 'report.md');
@@ -208,18 +273,28 @@ export async function archiveOperationalRunReport(
   const createdAt = existingCreatedAt ?? new Date().toISOString();
   const report: OperationalRunReport = sessionExecution === null
     ? buildReportDocumentV1({ reportId, createdAt, sourceRoot, workflows })
-    : buildReportDocumentV3({
-      reportId,
-      createdAt,
-      sourceRoot,
-      sessionExecution,
-      workflows: auditedWorkflows,
-    });
+    : workspaceProvenance === null
+      ? buildReportDocumentV3({
+        reportId,
+        createdAt,
+        sourceRoot,
+        sessionExecution,
+        workflows: auditedWorkflows,
+      })
+      : buildReportDocumentV4({
+        reportId,
+        createdAt,
+        sourceRoot,
+        sessionExecution,
+        workspaceProvenance,
+        workflows: auditedWorkflows,
+      });
   const markdown = renderOperationalRunReportMarkdownFromReport({
     reportId,
     createdAt,
     workflows: auditedWorkflows ?? workflows,
     ...(sessionExecution === null ? {} : { sessionExecution }),
+    ...(workspaceProvenance === null ? {} : { workspaceProvenance }),
   });
 
   await mkdir(reportDirectory, { recursive: true });

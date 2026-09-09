@@ -11,6 +11,8 @@ import {
 import {
   computeOperationalRunReportId,
   computeOperationalRunReportIdV2,
+  computeOperationalRunReportIdV3,
+  computeOperationalRunReportIdV4,
   archiveOperationalRunReport,
 } from '../../scripts/evolution/reporting/archiveOperationalRunReport';
 import {
@@ -19,9 +21,16 @@ import {
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4,
 } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
 import { renderOperationalRunReportMarkdown } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 import { formatOrdinaryEvolutionOperatorSummary } from '../../scripts/evolution/operator/runOrdinaryEvolution';
+import {
+  WORKSPACE_STATE_FINGERPRINT_METHOD,
+  WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+  projectWorkspaceStateProvenance,
+  type WorkspaceStateProvenanceV1,
+} from '../../scripts/evolution/workspaceStateProvenance';
 
 function baseManifest(overrides: Partial<MultiRoundRunManifestV1> = {}): MultiRoundRunManifestV1 {
   return parseMultiRoundRunManifest({
@@ -64,6 +73,21 @@ function baseManifest(overrides: Partial<MultiRoundRunManifestV1> = {}): MultiRo
     stopReason: 'EXECUTION_SCOPE_VIOLATION',
     ...overrides,
   });
+}
+
+function baseWorkspaceProvenance(): WorkspaceStateProvenanceV1 {
+  return {
+    schemaVersion: WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+    fingerprintMethod: WORKSPACE_STATE_FINGERPRINT_METHOD,
+    workspaceRootRef: 'evolution-workspace/evolution',
+    start: { status: 'available', fingerprintSha256: 'a'.repeat(64) },
+    executionBoundary: {
+      before: { status: 'available', fingerprintSha256: 'a'.repeat(64) },
+      after: { status: 'available', fingerprintSha256: 'b'.repeat(64) },
+    },
+    end: { status: 'available', fingerprintSha256: 'b'.repeat(64) },
+    consistencyWarnings: [],
+  };
 }
 
 export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
@@ -196,6 +220,29 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
     workflows,
   });
   assert.notEqual(idA, idB);
+  const workspaceProjection = projectWorkspaceStateProvenance(baseWorkspaceProvenance());
+  const idV3 = computeOperationalRunReportIdV3({
+    sourceRoot: '.tmp/evolution/session',
+    sessionExecution: smokeSummary,
+    workflows,
+  });
+  const idV4A = computeOperationalRunReportIdV4({
+    sourceRoot: '.tmp/evolution/session',
+    sessionExecution: smokeSummary,
+    workspaceProvenance: workspaceProjection,
+    workflows,
+  });
+  const idV4B = computeOperationalRunReportIdV4({
+    sourceRoot: '.tmp/evolution/session',
+    sessionExecution: smokeSummary,
+    workspaceProvenance: projectWorkspaceStateProvenance({
+      ...baseWorkspaceProvenance(),
+      end: { status: 'available', fingerprintSha256: 'c'.repeat(64) },
+    }),
+    workflows,
+  });
+  assert.notEqual(idV4A, idV3);
+  assert.notEqual(idV4A, idV4B);
   const legacyId = computeOperationalRunReportId({
     sourceRoot: '.tmp/evolution/session',
     workflows,
@@ -218,10 +265,11 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
 
   // Operator/report session summary parity: same projection function.
   const operatorView = {
-    schemaVersion: 'ordinary-evolution-operator-result-v2' as const,
+    schemaVersion: 'ordinary-evolution-operator-result-v3' as const,
     sessionId: smokeSummary.multiRoundRunRef,
     branch: 'dev',
     headSha: 'a'.repeat(40),
+    workingTreeClean: true,
     participantBinding: 'CODEX_CURRENT' as const,
     sessionExecution: smokeSummary,
     authoritativeRootChanged: false,
@@ -239,6 +287,17 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
   assert.match(summaryText, /最后一轮路由：\nREADY_FOR_CONFIG_EXECUTION/);
   assert.match(summaryText, /执行状态：\nscope_violation/);
   assert.doesNotMatch(summaryText, /\noutcome:\nREADY_FOR_CONFIG_EXECUTION/);
+
+  const provenanceMarkdown = renderOperationalRunReportMarkdown({
+    summaries: workflows,
+    sessionExecution: smokeSummary,
+    workspaceProvenance: workspaceProjection,
+  });
+  assert.match(provenanceMarkdown, /## Workspace Provenance \/ Workspace State/);
+  assert.match(provenanceMarkdown, /Start state capture: available/);
+  assert.match(provenanceMarkdown, /Execution mutation: changed/);
+  assert.match(provenanceMarkdown, /End state capture: available/);
+  assert.match(provenanceMarkdown, /Continuity: UNKNOWN/);
 
   // Archive session root with child experiment manifest → v2.
   {
@@ -300,6 +359,50 @@ export async function runMultiRoundSessionObservabilityTests(): Promise<void> {
     assert.match(indexMarkdown, /scope_violation/);
     // READY may appear as workflow route, but session stop column is EXECUTION_SCOPE_VIOLATION.
     assert.match(indexMarkdown, /\| [^|]* \| [^|]* \| EXECUTION_SCOPE_VIOLATION \|/);
+  }
+
+  // A validated workspace provenance sibling upgrades a session archive to V4.
+  {
+    const repositoryRoot = await mkdtemp(join(tmpdir(), 'session-archive-v4-'));
+    const sessionRoot = join(repositoryRoot, '.tmp/evolution/ordinary-run-session');
+    const experimentRoot = join(sessionRoot, 'problem-agnostic-agent-solution-loop-instance-000001');
+    await mkdir(join(experimentRoot, 'round-1'), { recursive: true });
+    await writeFile(join(experimentRoot, 'run-manifest.json'), `${JSON.stringify(smokeManifest, null, 2)}\n`);
+    await writeFile(join(experimentRoot, 'workspace-state-provenance.json'), `${JSON.stringify(baseWorkspaceProvenance(), null, 2)}\n`);
+    await writeFile(join(experimentRoot, 'round-1/decision.json'), `${JSON.stringify({ route: 'DEFER', reasonCode: 'NO_PROPOSAL' })}\n`);
+
+    const archived = await archiveOperationalRunReport({
+      repositoryRoot,
+      root: '.tmp/evolution/ordinary-run-session',
+    });
+    assert.equal(archived.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4);
+    const report = parseOperationalRunReport(
+      await (await import('node:fs/promises')).readFile(archived.reportJsonPath, 'utf8'),
+      archived.reportId,
+    );
+    assert.equal(report.schemaVersion, OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4);
+    if (report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4) throw new Error('expected v4');
+    assert.equal(report.workspaceProvenance.continuity, 'UNKNOWN');
+    assert.equal(report.workspaceProvenance.predecessorRef, null);
+    const markdown = await (await import('node:fs/promises')).readFile(archived.reportMarkdownPath, 'utf8');
+    assert.match(markdown, /## Workspace Provenance \/ Workspace State/);
+    assert.match(markdown, /Execution mutation: changed/);
+  }
+
+  // A malformed provenance sibling fails the observability archive and leaves the session manifest untouched.
+  {
+    const repositoryRoot = await mkdtemp(join(tmpdir(), 'session-archive-malformed-provenance-'));
+    const sessionRoot = join(repositoryRoot, '.tmp/evolution/ordinary-run-session');
+    const experimentRoot = join(sessionRoot, 'problem-agnostic-agent-solution-loop-instance-000001');
+    await mkdir(experimentRoot, { recursive: true });
+    const manifestText = `${JSON.stringify(smokeManifest, null, 2)}\n`;
+    await writeFile(join(experimentRoot, 'run-manifest.json'), manifestText);
+    await writeFile(join(experimentRoot, 'workspace-state-provenance.json'), '{"schemaVersion":"malformed"}\n');
+    await assert.rejects(
+      () => archiveOperationalRunReport({ repositoryRoot, root: '.tmp/evolution/ordinary-run-session' }),
+      /invalid workspace state provenance/,
+    );
+    assert.equal(await (await import('node:fs/promises')).readFile(join(experimentRoot, 'run-manifest.json'), 'utf8'), manifestText);
   }
 
   // Mixed v1/v2 index.

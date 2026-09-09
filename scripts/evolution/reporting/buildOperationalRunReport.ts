@@ -13,6 +13,11 @@ import {
   type WorkflowDecisionAuditV1,
 } from './buildWorkflowDecisionAudit';
 import { buildHumanReviewSummary } from './buildHumanReviewSummary';
+import {
+  projectWorkspaceStateProvenance,
+  readWorkspaceStateProvenance,
+  type WorkspaceStateProvenanceProjection,
+} from '../workspaceStateProvenance';
 
 const WORKFLOW_DIRECTORY_PREFIX = 'problem-agnostic-agent-solution-loop-instance-';
 const DEFAULT_ROOT = '.tmp/evolution';
@@ -92,6 +97,7 @@ export interface RenderOperationalRunReportInput {
   createdAt?: string;
   includeArtifactRetentionNote?: boolean;
   sessionExecution?: MultiRoundSessionSummaryV1;
+  workspaceProvenance?: WorkspaceStateProvenanceProjection;
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -552,6 +558,29 @@ function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): str
   ];
 }
 
+function renderWorkspaceProvenanceSection(provenance: WorkspaceStateProvenanceProjection): string[] {
+  const executionMutation = provenance.executionBoundary === null
+    ? 'unchanged'
+    : provenance.executionBoundary.before.status !== 'available'
+      || provenance.executionBoundary.after.status !== 'available'
+      ? 'unavailable'
+      : provenance.executionBoundary.before.fingerprintSha256 === provenance.executionBoundary.after.fingerprintSha256
+        ? 'unchanged'
+        : 'changed';
+  return [
+    '## Workspace Provenance / Workspace State',
+    '',
+    `- Start state capture: ${provenance.start.status}`,
+    `- Execution mutation: ${executionMutation}`,
+    `- End state capture: ${provenance.end.status}`,
+    `- Continuity: ${provenance.continuity}`,
+    ...(provenance.consistencyWarnings.length === 0
+      ? []
+      : [`- Consistency warning: ${provenance.consistencyWarnings.join(', ')}`]),
+    '',
+  ];
+}
+
 export function renderOperationalRunReportMarkdown(input: RenderOperationalRunReportInput): string {
   const { summaries } = input;
   const aggregateCounts = aggregateStructuredTerminalDelivery(summaries);
@@ -610,7 +639,7 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
         '',
         '以下 Artifact 引用指向原始执行位置（通常位于 `.tmp/evolution/**`）。',
         '这些原始工作流 Artifact 不受 retention 保护，可能被清理，也不会复制到此归档中。',
-        'V3 report.json 本身保留已验证的 bounded Decision Audit；V1/V2 不含该审计时会明确标记不可重建，SKIP 不依赖 Human Follow-up 才可审计。',
+        'V3/V4 report.json 本身保留已验证的 bounded Decision Audit；V1/V2 不含该审计时会明确标记不可重建，SKIP 不依赖 Human Follow-up 才可审计。',
         'Human Follow-up retention 只保留正式创建 HFL item 的 route 所需 operational state。',
       );
     }
@@ -620,6 +649,9 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
 
   if (input.sessionExecution) {
     headerLines.push('', ...renderSessionExecutionSection(input.sessionExecution));
+    if (input.workspaceProvenance !== undefined) {
+      headerLines.push(...renderWorkspaceProvenanceSection(input.workspaceProvenance));
+    }
     headerLines.push('## 工作流 / 轮次详情', '');
   }
 
@@ -648,6 +680,7 @@ export interface ArchivedOperationalRunReportForMarkdown {
   createdAt: string;
   workflows: WorkflowSummary[];
   sessionExecution?: MultiRoundSessionSummaryV1 | null;
+  workspaceProvenance?: WorkspaceStateProvenanceProjection | null;
 }
 
 export function renderOperationalRunReportMarkdownFromReport(
@@ -659,11 +692,16 @@ export function renderOperationalRunReportMarkdownFromReport(
     createdAt: report.createdAt,
     includeArtifactRetentionNote: true,
     ...(report.sessionExecution == null ? {} : { sessionExecution: report.sessionExecution }),
+    ...(report.workspaceProvenance == null ? {} : { workspaceProvenance: report.workspaceProvenance }),
   });
 }
 
-function renderReport(summaries: WorkflowSummary[], sessionExecution?: MultiRoundSessionSummaryV1): string {
-  return renderOperationalRunReportMarkdown({ summaries, sessionExecution });
+function renderReport(
+  summaries: WorkflowSummary[],
+  sessionExecution?: MultiRoundSessionSummaryV1,
+  workspaceProvenance?: WorkspaceStateProvenanceProjection,
+): string {
+  return renderOperationalRunReportMarkdown({ summaries, sessionExecution, workspaceProvenance });
 }
 
 export async function buildOperationalRunReport(
@@ -674,13 +712,25 @@ export async function buildOperationalRunReport(
   const sessionExecution = manifestPath === null
     ? undefined
     : buildMultiRoundSessionSummary(await readMultiRoundRunManifest(manifestPath));
+  const workspaceProvenance = manifestPath === null
+    ? undefined
+    : await (async () => {
+      const provenancePath = join(dirname(manifestPath), 'workspace-state-provenance.json');
+      try {
+        await stat(provenancePath);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+        throw error;
+      }
+      return projectWorkspaceStateProvenance(await readWorkspaceStateProvenance(provenancePath));
+    })();
   const reportSummaries = sessionExecution === undefined
     ? summaries
     : attachWorkflowDecisionAudits(
       summaries,
       await collectWorkflowDecisionAudits(input.root),
     );
-  const report = renderReport(reportSummaries, sessionExecution);
+  const report = renderReport(reportSummaries, sessionExecution, workspaceProvenance);
   await mkdir(dirname(resolve(input.outputPath)), { recursive: true });
   await writeFile(input.outputPath, report, 'utf8');
   return { reportPath: input.outputPath, workflowCount: summaries.length };

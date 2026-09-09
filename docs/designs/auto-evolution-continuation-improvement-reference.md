@@ -240,6 +240,21 @@ P0 首个展示切片已实施并完成本地验证，尚未提交：
 
 **本项收口与下一设计边界：** 准入影响复核完成。持续经历耗时仍值得独立设计，优先候选限定为 `jianghu_year_training`（三个选择）与 `scholar_year_study`（两个选择），原因是两者明确描述持续练习且本样本实际零耗时。先确定耗时与已有投入语义、年龄窗口、事件效果执行顺序的关系，再给出具体差异和对照验证；不把“增加几个月”当作已证实的正确方案。PD-113 明确保持 effects、choice semantics、scheduler behavior 不变并排除 annual cadence 调整，因此本轮不能把耗时改动并入该已接受准入切片。后续正式设计应明确新的产品决定，仅覆盖所选持续经历；保留 PD-113 conditions，不调整通用防卡死阈值或全局调度，不以减少事件数或提高 READY 比例验收。
 
+### PD-114 持续经历时间成本交付（2026-09-09）
+
+Human 已接受两类持续经历各耗时三个月的产品取舍；长期 authority 已进入 [PD-114](../governance/product-decisions.md#pd-114bounded-identity-year-practice-duration)，本节只保留实施证据，不继续保留待审批设计作为第二套 authority。
+
+- `jianghu_year_training` 的三个选择、`scholar_year_study` 的两个选择均在原 effects 末尾追加既有三个月时间效果，choice text 显示“（耗时三个月）”。原收益先按进入状态结算，再推进日历；保留 PD-113 准入条件、年龄窗口、权重和优先级。
+- 未新增 Runtime、Schema、ChoiceOutcome、投入点数或习惯奖励，未修改全局 scheduler、防停滞补偿、AE permission / budget / STOP。
+- 新增 `identityYearDuration` 并注册现有测试入口，验证五个选择的同年/跨年日期、原奖励与投入保持、开始年龄的历史记录、查看/无效选择不扣时、同一 snapshot request 重放不累加耗时，以及结果确认不重复执行、正常派发不再提供已完成事件。该重放验证不宣称跨不同 snapshot 请求的通用防重保障。
+- 真实浏览器受控场景使用生产 `GameScreen` 和 Web engine：五个选择均在点击前显示成本；闭关从 21/1/11 到 21/4/11，读书从 21/4/11 到 21/7/11。它不是自然人生游玩或真实服务端部署证明。
+- 三个固定 persona/seed，各做改前/改后对照，共六次模拟，目标停止年龄 40。改后共观察到六次目标事件，均准确推进三个月，无 max_steps；原谨慎角色的闭关、读书已分散到一月/四月/七月，而非同日完成。
+- 学者样本控制组 24 岁死亡，改后组到达 40 岁；另两组均到达 40 岁。时间成本会改变后续窗口和随机调用序列，该差异不代表证明了生存率或长期可玩性改善，也没有为保持原结局挑 seed。
+
+验证：当前 `npm test` 全部 **177 项通过**，`vue-tsc --noEmit` 通过；最终补强的 same-snapshot replay 断言另行重跑通过。未重启真实 AE Participant，故自然提案质量和接受率改善仍未验证。源码 diff 仅包含五个成本标签和五个既有 time effect；另有测试注册与治理记录更新。详情见[验证记录](../../artifacts/ae-duration-implementation-20260909/verification.json)、[对照模拟](../../artifacts/ae-duration-implementation-20260909/simulation.json)。
+
+本切片工程交付完成，停止扩大耗时改动。后续观察应关注这类明确持续经历是否产生合理机会成本；不把它视为所有同龄集中现象、所有事件耗时或模拟器强制加年问题已解决。
+
 ## 7. 证据与实现入口
 
 - 自然运行报告：

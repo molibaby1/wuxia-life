@@ -311,25 +311,28 @@
     "choices": [
       {
         "id": "training_internal",
-        "text": "专注内功修炼",
+        "text": "专注内功修炼（耗时三个月）",
         "effects": [
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" }
+          { "type": "stat_modify", "target": "knowledge", "value": 3, "operator": "add" },
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" }
         ]
       },
       {
         "id": "training_external",
-        "text": "专注外功修炼",
+        "text": "专注外功修炼（耗时三个月）",
         "effects": [
-          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" }
+          { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" }
         ]
       },
       {
         "id": "training_qinggong",
-        "text": "修炼轻功",
+        "text": "修炼轻功（耗时三个月）",
         "effects": [
           { "type": "stat_modify", "target": "martialPower", "value": 3, "operator": "add" },
-          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" }
+          { "type": "stat_modify", "target": "constitution", "value": 2, "operator": "add" },
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" }
         ]
       }
     ]
@@ -399,17 +402,19 @@
     "choices": [
       {
         "id": "study_classics",
-        "text": "研读经典，夯实基础",
+        "text": "研读经典，夯实基础（耗时三个月）",
         "effects": [
-          { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" }
+          { "type": "stat_modify", "target": "knowledge", "value": 5, "operator": "add" },
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" }
         ]
       },
       {
         "id": "study_new",
-        "text": "涉猎新知拓宽视野",
+        "text": "涉猎新知拓宽视野（耗时三个月）",
         "effects": [
           { "type": "stat_modify", "target": "knowledge", "value": 4, "operator": "add" },
-          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" }
+          { "type": "stat_modify", "target": "charisma", "value": 2, "operator": "add" },
+          { "type": "time_advance", "target": "age", "value": 3, "timeUnit": "month" }
         ]
       }
     ]

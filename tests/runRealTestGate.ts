@@ -28,6 +28,7 @@ const suites: Suite[] = [
   { name: 'setbackProducerOwnership', entry: 'tests/setbackProducerOwnership.test.ts' },
   { name: 'activeFormalRandomTriggerRetirement', entry: 'tests/activeFormalRandomTriggerRetirement.test.ts' },
   { name: 'identityYearContextEligibility', entry: 'tests/identityYearContextEligibility.test.ts' },
+  { name: 'identityYearDuration', entry: 'tests/identityYearDuration.test.ts' },
   { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },
   { name: 'p8PlayabilityTests', entry: 'tests/p8PlayabilityTests.ts' },
   { name: 'p9PlayabilityTests', entry: 'tests/p9PlayabilityTests.ts' },

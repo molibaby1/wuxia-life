@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-09-02
+> 最后更新：2026-09-10
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -1933,3 +1933,18 @@ PD-112 完全不受影响。
 - 不修改 event prose；
 - 不修改 choice result narrative；
 - 不新增 ChoiceOutcome wrapper。
+
+### PD-114：Bounded Identity-Year Practice Duration
+
+**产品决策（Human accepted）**
+
+`jianghu_year_training` 的 `training_internal`、`training_external`、`training_qinggong` 与 `scholar_year_study` 的 `study_classics`、`study_new` 均代表三个月的持续经历。三个月与现有主动练功、读书的一季度一致，不是经由单次模拟校准出的最佳平衡值。
+
+- 五个 choice text 明确显示“（耗时三个月）”，使玩家选择前知道机会成本。
+- 原 effects 数值与相对顺序保持不变，末尾追加 `time_advance`，`target=age`、`value=3`、`timeUnit=month`；原收益先结算，随后推进日历。
+- 沿用既有历法与事件历史记录规则；不新增 duration 字段、ChoiceOutcome wrapper 或即时结果叙事，`narrativeResult=null` 仍合法。
+- 不自动增加四项投入、习惯、身份或路线事实，不把时间直接换算为能力或投入点数。
+- 本决定仅对 PD-113 的 effects / choice semantics / choice 文本不变边界作上述五个选择的例外；继续保留其 conditions、ageRange、triggers、weight、priority、全局 scheduler 与年度额度。
+- 不改变 PD-112、wallet retirement、RandomTrigger retirement、Snapshot/Save Schema 或 AE permission/budget/STOP；不调整防停滞阈值，不将该局部时间成本视为全局节奏修复。
+
+验收针对真实三个月结算、选择前成本可见、原收益保持、跨年与后续年龄窗口影响，不以每年事件数量下降或 AE 接受率上升为目标。出现需要修改通用时间/生命周期机制的结构性问题时，应另行明确边界，不扩大本切片。

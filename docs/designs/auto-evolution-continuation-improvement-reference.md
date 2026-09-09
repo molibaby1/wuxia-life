@@ -62,7 +62,8 @@ AE 应帮助游戏持续发现问题、形成可审查方案，并在权限内�
 | `DEFER_MORE_WORK_REQUESTED` | 调查者逐条处理 Reviewer concerns，给出已补充/未解决/不采纳及依据，保留原方案和 review | 当前 session 已 STOP；再审须经既有授权入口，不能宣称系统已自动恢复。需要新 Participant 调用时明确其授权与预算 |
 | `ESCALATE_HUMAN`：`EXPLICIT_ESCALATION`、`ACCEPTED_OUT_OF_SCOPE` | 进入既有 HFL Inbox，定位 retained item；Human/Codex 明确需要裁决的具体边界，沿 `retain + review + list` 处理 | 先看当前 disposition，已 CONVERTED/REJECTED/DEFERRED 不重复开启。`READY_FOR_FORMAL_TASK` 只进入正式流程，不是实施授权；其他运行不因此阻塞 |
 | `PARTICIPANT_FAILURE`、`EXECUTION_PARTICIPANT_FAILURE` | 工程调查者检查 invocation、failure、execution trace，区分传输/超时/envelope/schema/引用问题；保留原失败 | 仅遵守已授权恢复机制；Solution envelope 一次同线程重传不能推广到 schema、Reviewer 或更多重试。修复后新尝试使用新身份，不改写旧结果 |
-| `OPERATOR_PREFLIGHT_FAILED`、`PARTICIPANT_BINDING_UNAVAILABLE` | 从 CLI 错误进入宿主/绑定诊断；保护 dirty tree，修复具体前置条件 | 前置条件满足并具备运行授权后再启动；不自动 stash/reset，不切换 provider，不伪造未开始的 session 结果 |
+| `OPERATOR_PREFLIGHT_FAILED`、`PARTICIPANT_BINDING_UNAVAILABLE` | 从 CLI 错误进入宿主/绑定诊断；当前仅强制 `dev` 分支。dirty tree 可启动是 **DEV_CONVENIENCE_ONLY**（本地边改边跑；result 披露 `workingTreeClean` + fingerprint），**不是** Product Decision，也不是正式观察 batch 的权威策略 | 前置条件满足并具备运行授权后再启动；不自动 stash/reset，不切换 provider，不伪造未开始的 session 结果。正式观察 / 可引用结论的 run 仍应在 clean tree 上执行；dirty 证据必须带着 `workingTreeClean=false` 解读，不得当 clean baseline |
+| `PARTICIPANT_FAILURE`（External Feedback `invalid_reference` / parse 等）且为 local-subagent | 优先读 `feedback-runs/<runRef>/` 下 create-only sidecars：`participant-prompt.txt`、`participant-binding.json`、`participant-execution-trace.json`，以及既有 `raw-participant-response.txt` / `invocation.json` | 这些 sidecars **仅覆盖 ordinary AE External Feedback local-subagent**；Hypothesis / Solution / Reviewer **不在本边界内**，不得默认期待同名文件。未证明其他 Role 需要前，不推广 |
 | Phase0 采集、构建或发布阶段报错 | 工程调查者检查异常与已有 staging/seal 文件，判断输入、运行或发布失败 | 未封存输入不得交给后续 Participant；保留失败材料，修复后重新产生有效来源 |
 | `AUTHORITATIVE_REPOSITORY_CHANGED`、`EXECUTION_SCOPE_VIOLATION` | 立即停止该分支；工程调查者核对 fingerprint、actualChangedFiles 与允许路径，必要时提交 Human | 不扩大 allowlist、不回滚他人改动、不把异常 diff 晋升为产品；受影响证据不可用于证明改进 |
 | `DETERMINISTIC_VERIFICATION_FAILURE` | 工程调查者定位失败检查，区分新增回归与基线失败 | 不弱化检查或宣称通过；修复/裁决完成前不进入改后运行 |
@@ -131,7 +132,7 @@ P0 首个展示切片已实施并完成本地验证，尚未提交：
 
 ### P2 采样链路验证（2026-09-09）
 
-当前工作区的随机采样实现已完成本地确定性验证，尚未提交，也没有新的真实 Participant batch：
+随机采样实现已完成本地确定性验证；当时尚未提交、未观察新的真实 Participant batch。后续提交与自然运行见下节：
 
 - 实际实现从完整的 8 人 P8 roster 选人；不是此前仅作对照的三个角色。生成的 seed 决定角色，封存输入记录实际角色与运行 seed；同一 session 的后续 round 沿用该来源。
 - 指定 `9000–9007` 覆盖全部 8 个 roster 位置，每人执行一次 Phase0 和同输入重放，共 16 次本地模拟，目标年龄 8 岁。全部 seal 校验通过，8 组 observable payload hash 均一致。
@@ -140,6 +141,104 @@ P0 首个展示切片已实施并完成本地验证，尚未提交：
 - 当前未修改候选选择、产品内容、权限、retry 或 HFL 状态。源码 fingerprint 在模拟前后保持一致。
 
 证据：[采样与封存重放记录](../../artifacts/ae-p2-sampling-20260909/sampling-proof.json)。本项仅关闭工程采样验证；真实随机运行能否扩大调查主题，仍待观察。下一项候选选择优化先做契约审计，不能把当前固定选择语义静默改成随机挑题或按容易执行排序。
+
+### P2 候选选择契约审计与新批次复核（2026-09-09）
+
+审计基线 `1eef1d0`；角色采样与 seed 封存已分别进入 `9a8806d` 和 `1eef1d0`。本次仅更新参考文档并生成本地审计材料，未修改运行代码。
+
+**新证据优先于旧假设。** 新发现三轮自然运行均使用 `1eef1d0`：
+
+| Session（20260909） | 实际角色 | 候选数 / 已调查数 | 实际终态与继续入口 |
+| --- | --- | --- | --- |
+| `000001` | `p8-explorer-lu` | 5 / 1 | `DEFER / INSUFFICIENT_EVIDENCE`；从原 Solution 的 unknowns 与所选 evidenceRefs 开始补证据，保留原停止结果 |
+| `000002` | `p8-balanced-wei` | 未进入 hypothesis 阶段 | `PARTICIPANT_FAILURE / EXTERNAL_FEEDBACK / invalid_reference`；从原始响应 `observations[7].evidenceRefs` 的 `entry-000-123` 开始诊断 |
+| `000003` | `p8-cautious-han` | 6 / 1 | `ESCALATE_HUMAN`；从现有 retained HFL item 与 Reviewer 意见进入异步产品复核，active count 从 4 变成 5 |
+
+三轮 observability 均 PASS，均无产品执行和跨轮。两条被调查假设均转向中后段重复体验；这证明本批确实采到了不同角色与不同人生阶段的问题，不证明随机频率均衡或长期主题覆盖。11 条候选中仍有 9 条未调查，但“未调查”不等于更重要，也不证明应该替换当前所选问题。
+
+**选择边界与耦合：**
+
+- `selectFirstHypothesis.ts` 的 `fresh-problem-hypothesis-selection-v1` 明确固定 `rule=first_hypothesis_in_participant_order`、`selectedIndex=0`，保留原始候选文件 hash 与所选 hypothesis hash。
+- `buildProblemPackage.ts` 和 `buildBoundedCausalAttribution.ts` 将所选 draft 包装为单条列表重新解析；其 ID 会被重建为 `hypothesis-000001`。若仅把选择改为第二条，Problem Package 构造会拒绝它。该行为与当前固定第一条路径一致，不是已发生的普通运行回归。
+- Hypothesis prompt 允许 `0..N`，禁止 priority/score 等字段，没有说明 downstream 固定取第一条。此处是可讨论的通信缺口，但不能直接推断 Participant 已因缺少说明而排错序，也不应借补提示词引入未经验证的优先级标准。
+- 报告通过所选 ID 引用问题；PD-111 的诊断范围必须继续严格等于所选问题的 evidenceRefs。不能通过重排、重编号历史候选或扩展诊断材料来绕过选择边界。
+
+**本次决定：暂不随机选题。** 新角色采样已经改变观察范围，继续同时改变候选规则会混淆因果；当前证据不足以证明改变选择契约比处理具体未解决事项更有价值。本项关闭“契约审计”，不关闭“长期候选覆盖改善”。
+
+若后续不同角色仍反复调查同一问题、且原始候选确有有价值的其他主题，再进入独立选择设计。其最小边界应包括：明确新版本与选择规则；保存原列表、原 ID、实际 index 和可重放选择依据；修正两个消费者对单条 ID 的重建假设；覆盖零候选、非首项、来源 hash/ID 一致性、诊断严格同域和旧产物可读性。该设计涉及原任务明确要求保留的 Schema 语义，必须获得具体边界变更授权后实施，不能把“继续”解释成静默改写 v1。
+
+**已由 Human 搁置的独立问题：** `000002` 的反馈包含不存在的 `entry-000-123`。Human 补充说明该格式错误曾多次出现，并明确要求后续专门处理，本轮不再调查。保持 validator fail closed，不猜测修正 ID、不覆盖旧响应、不增加隐式重试。
+
+验证：`freshProblemTransferSelection`、`problemPackageBuilder`、`boundedCausalAttribution` 三组原有测试通过；本地受控探针证明第一条可构造、第二条因 ID 重建被拒绝。未新增游戏模拟或真实模型调用，未重跑全套测试，未宣称运行改善。审计材料：[新批次与候选清单](../../artifacts/ae-p2-candidate-audit-20260909/new-runs.json)、[选择边界探针](../../artifacts/ae-p2-candidate-audit-20260909/check-selection.ts)。
+
+### P1 方案具体化与可接手调查（2026-09-09）
+
+继续处理“证据不足”和“方案不合规”之后缺少具体推进条件的问题。修改限定在现有 Solution / Reviewer prompt 和对应测试，沿用现有输出字段、决策契约及调用预算：
+
+- Solution 在 `proposedChange` 交代对象与具体前后差异，在既有 rationale/risks 中交代保留语义与验证方法；未定的产品选择留在 unknowns，不编造参数凑成可执行方案。
+- 未知项需要说明已有证据回答了什么、最小区分性检查、起始引用及恢复条件。仅使用当前 job 可访问证据，不假定其他 session 已传入，也不请求越界内部材料。
+- 跨运行普遍性只用于确实依赖它的结论或决策，不把它变成所有局部问题的默认前置条件。
+- Reviewer 区分“这个实现方案被禁止”与“产品目标必须改变权威”，在有依据时指出现有边界内的调查路径，不替 Solution 设计或批准未经审查的替代方案。
+
+本次另用已完成的 `20260909-000001/000003` 做有界证据对照，未把对照注入或改写历史 Participant 结果。13 个已选条目中，两轮共同出现 `jianghu_year_patrol` 与 `scholar_year_social`，支持不同角色的这些案例存在相近的即时反馈形态；不证明全体玩家或所有路线的普遍性。部分选择配置含持久 flag / event record，因此“即时只有数值”不能直接推出“没有后果”。涉及配置与封存 workspace 文件均与当前源码一致。
+
+原 `000001` 请求的不同角色证据现在部分具备；仍需区分呈现、内容与节奏原因。原 `000003` 的普通 ChoiceOutcome wrapper 方案继续不合规，不要求 Human 为救该方案而撤销 PD-112。下一条具体调查可以从既有 `medical_apprentice` 的写入、后续消费者和真实可见回应开始，验证是否丢失已存在的有意义后果，再决定是呈现修复还是正式产品缺口。不能仅凭配置消费者存在就宣称本次人生实际出现了后续回应。
+
+证据：[跨运行条目与配置对照](../../artifacts/ae-p1-handoff-20260909/cross-run-evidence.json)、[已回答问题及后续检查](../../artifacts/ae-p1-handoff-20260909/followup.json)。测试先复现缺少交接要求，再验证两端实际 prompt 交付；这仅证明工程交付，不证明 LLM 遵循率或自然运行改善。没有新模型调用、自动 continuation、游戏配置修改或 HFL 状态变更；效果未验证前不扩大本轮范围。
+
+验证结果：Solution、Reviewer、workflow integration、Solution/Reviewer replay 及 `vue-tsc --noEmit` 通过。全套 178 项中 175 项通过；`b0GuardrailCalibration`、`b0IsolationAndHash`、`b0RealControlHeadless` 三项冻结基线检查失败，输出含既有 HEAD 超出 freeze 和当前 dirty paths，不宣称全绿、不放宽 gate。详见[验证记录](../../artifacts/ae-p1-handoff-20260909/verification.json)。
+
+> 后续工程便利（**非** Product Decision）：ordinary operator 允许 dirty tree 启动并披露 `workingTreeClean`（`DEV_CONVENIENCE_ONLY`）；`runRealTestGate` 将 B0 标为 `B0_NOT_IN_WORKING_TREE_GATE`（frozen-checkout 实验，不再作为当前 working-tree gate）。正式观察 batch 仍应用 clean tree；若恢复 clean 门禁，应同步重审是否把 B0 加回 gate。
+
+### P1 拜师后果可见性核查（2026-09-09）
+
+**关闭本案例的“已有后果是否丢失”疑问：没有发现丢失，不实施游戏修复。** 对 `ordinary-run-20260909-000003` 原始 sealed source 的核查确认：
+
+| 原始 entry | 年龄 | 玩家已收到的经历 | 与拜师的联系 |
+| --- | --- | --- | --- |
+| `entry-000062` | 20 | 拜师名医，选择“拜师学艺” | 既有选择配置写入 `medical_apprentice` |
+| `entry-000066` | 20 | 采药炼丹，正文明确“师父教你识别各种草药，带你上山采药” | 事件条件读取 `medical_apprentice`，后续写入 `medical_herb_master` |
+| `entry-000070` | 21 | 坐诊治病，正文说明医馆坐诊与临床经验 | 条件读取 `medical_herb_master` |
+| `entry-000073` | 21 | 瘟疫救治，玩家选择“全力救治” | 条件读取 `medical_apprentice` |
+
+证据层级：原始运行已实际捕获上述事件；不是仅从配置推断可达，也未注入路线 flag。Medical 配置与原运行封存 workspace 一致。原 Phase0 seal 校验通过；从原 source 重新投影完整 observable payload，与 sealed reviewer-input、round source、Solution workspace、Reviewer workspace 四处文件逐字节一致。故本案例不存在这些后续正文在 AE 材料交付中丢失的问题。此结论不证明浏览器呈现或玩家主观成就感充足，也不否定“即时选择反馈偏数值”的原观察。
+
+本次调查说明后续检查应区分**即时反馈形态**与**后续经历回应**，不能以所选 entry 缺少即时 narrative 为由推断整个后续人生没有回应。无需新增 ChoiceOutcome wrapper，也不需要为本案例改写 PD-112。完整 player-observable payload 本已包含后续材料；不要据此扩大 PD-111 的内部 diagnostic projection。
+
+验证材料：[可重复核查脚本](../../artifacts/ae-medical-followup-20260909/verify.ts)、[原始链路与校验结果](../../artifacts/ae-medical-followup-20260909/verification.json)。现有 `playerSurfaceCapture`（含本地模拟）与 `playerObservableTranscript` 测试通过。本项未修改运行源码，未调用真实 Participant，未修改原 session 或 HFL disposition；未重跑全套测试。
+
+下一有界入口保留为原对照中独立的节奏疑问：`000003` 多个不同事件集中在 20 岁，先区分真实调度与模拟推进造成的集中，再决定是否存在可修复问题。它尚未被判定为 bug，不以本次 Medical 可见链路核查替代该验证。
+
+### P1 同龄事件集中：时间与连续派发诊断（2026-09-09）
+
+**确认存在同日连续事件，暂不实施无依据的耗时修改。** 使用 `000003` 的归档 workspace 代码、原 persona 与 seed 做本地重放，目标停止年龄 23；23 岁前的 player-surface 原始步骤与原运行完全相同。记录实际日历后发现：20 岁的 8 个事件全部开始并结束于游戏日历第 21 年 1 月 11 日：行侠仗义、闭关修炼、文会交际、苦读诗书、拜师名医、远行贸易、采药炼丹、邻里人情。
+
+源头分为两层：
+
+1. 这些已执行选择或 auto effects 没有推进日历；`selectChoice` 执行配置效果后生成 summary，`period_summary` 确认路径可在当前日期继续取得下一事件。`ageRange.min=20` 仅表示进入候选窗口，并不意味着要在 20 岁当天经历全部内容。
+2. `headlessPersonaRunner` 在 16 个年龄未变的 phase 步骤后调用 `ensureProgressionCatchUp`，强制加一年。该计数包括 summary 确认，并非“16 个事件”。本样本因此结束了这段同龄集中；不能将此补偿等同于事件本身合理消耗了一年。
+
+有界反事实只在进程内抑制 20 岁的补偿调用，未改动归档文件或正式源码：20 岁事件从 8 个增至 11 个，前八个的顺序与日期不变；随后才由真实时间效果推进月份。它反证了“强制加年造成最初八个事件同日集中”的解释，不证明应删除 guard。两次实验均正常达到停止年龄条件；控制组最终 25 岁、反事实组 23 岁，目标年龄是停止阈值，允许最后一次事件耗时越过阈值，不截断事件伪造一致终点。
+
+**问题分类与后续入口：** 当前更支持事件耗时语义与连续派发节奏不协调。闭关、苦读、远行等描述持续经历，却可在该路径无日历耗时地连续结算；不能仅归咎于奖励文案重复，也不能通过增加普通结果文案解决时间关系。下一步针对这些既有事件形成最小时间语义方案，区分应有持续时间的经历与允许同日发生的瞬时决定；只有明确既有时间推进机制、年龄窗口影响和合理耗时依据后，才实施有界修改。不得任意统一“一事一年”、改防卡死阈值充当产品节奏、或恢复概率 gate。具体耗时尚无验证依据，本轮不编造数值、不改玩家模型或已确定契约。
+
+验证：[重放/反事实脚本](../../artifacts/ae-age20-audit-20260909/replay.ts)、[结果摘要](../../artifacts/ae-age20-audit-20260909/summary.json)、[控制组细节](../../artifacts/ae-age20-audit-20260909/replay.json)、[反事实细节](../../artifacts/ae-age20-audit-20260909/counterfactual.json)。涉及的 runner、progressionLoop、session 与 Medical 配置和当前文件一致；收尾时发现 `identity-year-events.json` 有并行新增路线/习惯准入条件，已保留。实验使用归档代码，不能把本批事件数量直接推广到正在修改的工作区。下一步先在并行修改稳定后复核准入影响，再评估耗时方案。仅证明本次 Headless 路径及实验区别，尚未证明浏览器相同行为或玩家体验改善；未调用 LLM、未变更历史决策或执行产品修复。
+
+### PD-113 准入修改后的节奏复核（2026-09-09）
+
+使用 `000003` 原 persona/seed，分别运行原归档代码、仅替换八条 PD-113 conditions 的归档代码、当前工作区，共三次本地模拟，目标停止年龄 23。单变量实验先断言八个事件除 conditions 外无变化，不修改源码或归档 catalog。原组 23 岁前的 surface 步骤与历史运行完全一致；准入条件文件在实验前后字节不变。
+
+| 组别 | 20 岁事件数 | 其中执行前后日历不变 | 结果 |
+| --- | --- | --- | --- |
+| 原归档版本 | 8 | 8 | 原同日序列复现 |
+| 仅替换准入条件 | 8 | 7 | 事件组成改变，持续时间问题仍在 |
+| 当前工作区 | 8 | 7 | 19–22 岁事件与时间记录和单变量组完全一致 |
+
+本样本不再选到原序列中的 `jianghu_year_patrol`、`scholar_year_social`、`merchant_year_trade`，但其他合格事件接替了它们。新序列前六个事件仍不推进日历，随后 `mingyue_value_conflict` 推进三个月。这支持准入修复改变了角色经历的内容，不支持把它称为节奏修复，也不应以总事件数没下降否定 PD-113 的准入目标。
+
+`identityYearContextEligibility` 与 `globalMoneyIdentityYearWalletFlowRetirement` 两组原有/并行交付测试通过。未重跑全套测试；未改动并行实现、未新增模型调用。样本只有一个角色/seed 和有限年龄窗口，不推断全人生或总体体验改善。证据：[对照脚本](../../artifacts/ae-context-followup-20260909/compare.ts)、[完整记录](../../artifacts/ae-context-followup-20260909/comparison.json)、[摘要](../../artifacts/ae-context-followup-20260909/summary.json)。
+
+**本项收口与下一设计边界：** 准入影响复核完成。持续经历耗时仍值得独立设计，优先候选限定为 `jianghu_year_training`（三个选择）与 `scholar_year_study`（两个选择），原因是两者明确描述持续练习且本样本实际零耗时。先确定耗时与已有投入语义、年龄窗口、事件效果执行顺序的关系，再给出具体差异和对照验证；不把“增加几个月”当作已证实的正确方案。PD-113 明确保持 effects、choice semantics、scheduler behavior 不变并排除 annual cadence 调整，因此本轮不能把耗时改动并入该已接受准入切片。后续正式设计应明确新的产品决定，仅覆盖所选持续经历；保留 PD-113 conditions，不调整通用防卡死阈值或全局调度，不以减少事件数或提高 READY 比例验收。
 
 ## 7. 证据与实现入口
 

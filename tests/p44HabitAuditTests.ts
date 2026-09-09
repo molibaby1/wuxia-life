@@ -17,13 +17,27 @@ function assert(condition: boolean, message: string): void {
 function testCoverageAuditShape(): void {
   const result = runHabitCoverageAudit();
   assert(result.readers.length > 0, 'coverage audit should inventory gated readers');
-  assert(result.gaps.length > 0, 'expected at least one coverage gap in current pool');
 
   for (const axis of EXPECTED_AXES) {
     const row = result.matrix[axis];
     assert(typeof row.total === 'number', `matrix missing total for ${axis}`);
     for (const band of AGE_BANDS) {
       assert(typeof row[band.id] === 'number', `matrix missing band ${band.id} for ${axis}`);
+
+      const readerCount = row[band.id];
+      const inGaps = result.gaps.some(entry => entry.axis === axis && entry.band === band.id);
+      const inLowDensity = result.lowDensity.some(entry => entry.axis === axis && entry.band === band.id);
+
+      if (readerCount === 0) {
+        assert(inGaps, `${axis}/${band.id} with 0 readers must be classified as gap`);
+        assert(!inLowDensity, `${axis}/${band.id} with 0 readers must not be low_density`);
+      } else if (readerCount === 1) {
+        assert(inLowDensity, `${axis}/${band.id} with 1 reader must be classified as low_density`);
+        assert(!inGaps, `${axis}/${band.id} with 1 reader must not be gap`);
+      } else {
+        assert(!inGaps, `${axis}/${band.id} with ${readerCount} readers must not be gap`);
+        assert(!inLowDensity, `${axis}/${band.id} with ${readerCount} readers must not be low_density`);
+      }
     }
   }
 

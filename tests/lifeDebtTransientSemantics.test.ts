@@ -104,7 +104,13 @@ async function run(): Promise<void> {
   assert.equal(conditionMatches(returnEvent, historyWithoutPending), false, 'event occurrence alone must not unlock return');
 
   const beforeReturn = playerSnapshot(savedState);
-  await saveEngine.executeAutoEvent(returnEvent);
+  const originalRandom = Math.random;
+  Math.random = () => 1;
+  try {
+    await saveEngine.executeAutoEvent(returnEvent);
+  } finally {
+    Math.random = originalRandom;
+  }
   const returnedState = saveEngine.getGameState();
   assert.deepEqual(playerSnapshot(returnedState), beforeReturn, 'return must not grant generic payoff rewards');
   assert.equal(returnedState.flags[PENDING_FLAG], undefined, 'return must close the pending favor');

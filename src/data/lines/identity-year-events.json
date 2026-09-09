@@ -120,6 +120,12 @@
     "triggers": [
       { "type": "age_reach", "value": 20 }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.businessHabit >= 1 || flags.has(\"route_merchant\")"
+      }
+    ],
     "thresholds": {
     },
     "content": {
@@ -155,6 +161,12 @@
     "ageRange": { "min": 25, "max": 55 },
     "triggers": [
       { "type": "age_reach", "value": 25 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_merchant\")"
+      }
     ],
     "thresholds": {
     },
@@ -192,6 +204,12 @@
     "ageRange": { "min": 22, "max": 50 },
     "triggers": [
       { "type": "age_reach", "value": 22 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"route_merchant\")"
+      }
     ],
     "thresholds": {
     },
@@ -231,6 +249,12 @@
     "triggers": [
       { "type": "age_reach", "value": 20 }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"hero_first_case\") || flags.has(\"route_wanderer\") || flags.has(\"jianghuTraveler\")"
+      }
+    ],
     "thresholds": {
     },
     "content": {
@@ -269,6 +293,12 @@
     "ageRange": { "min": 18, "max": 50 },
     "triggers": [
       { "type": "age_reach", "value": 18 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.trainingHabit >= 1"
+      }
     ],
     "thresholds": {
     },
@@ -313,6 +343,12 @@
     "ageRange": { "min": 30, "max": 60 },
     "triggers": [
       { "type": "age_reach", "value": 30 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "flags.has(\"p27_mentor_obligation_taken\") || flags.has(\"has_disciples\") || flags.has(\"hero_teacher\")"
+      }
     ],
     "thresholds": {
     },
@@ -388,6 +424,12 @@
     "triggers": [
       { "type": "age_reach", "value": 20 }
     ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 1"
+      }
+    ],
     "thresholds": {
     },
     "content": {
@@ -425,6 +467,12 @@
     "ageRange": { "min": 25, "max": 60 },
     "triggers": [
       { "type": "age_reach", "value": 25 }
+    ],
+    "conditions": [
+      {
+        "type": "expression",
+        "expression": "lifeStates.studyHabit >= 2"
+      }
     ],
     "thresholds": {
       "attributes": {

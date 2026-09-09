@@ -126,17 +126,6 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '师门盟约与学者线拧在一处，开派之路已开';
   }
-  if (flags.jianghu_myth_legend_luck_window_done) {
-    if (flags.jianghu_myth_legend_luck_hit) {
-      return '隐世奇遇已至，武林神话的运气门槛已过';
-    }
-    if (flags.jianghu_myth_legend_luck_miss) {
-      return '隐世线已闭，单靠苦练填不满神话门槛';
-    }
-  }
-  if (flags.jianghu_myth_legend_on_ramp_done) {
-    return '护道誓下，武林神话之路已开';
-  }
   if (flags.orthodox_age45_legacy_steward_done) {
     return '传承守门，门派遗命在肩';
   }
@@ -148,6 +137,19 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
   }
   if (flags.orthodox_gray_pressure_visible) {
     return '灰度压力在肩，守正须付代价';
+  }
+  // Myth stays above righteousness-cost until product decides cost-vs-myth priority.
+  // Late-life steward / identity / gray must still beat a sticky myth on-ramp flag.
+  if (flags.jianghu_myth_legend_luck_window_done) {
+    if (flags.jianghu_myth_legend_luck_hit) {
+      return '隐世奇遇已至，武林神话的运气门槛已过';
+    }
+    if (flags.jianghu_myth_legend_luck_miss) {
+      return '隐世线已闭，单靠苦练填不满神话门槛';
+    }
+  }
+  if (flags.jianghu_myth_legend_on_ramp_done) {
+    return '护道誓下，武林神话之路已开';
   }
   if (flags.orthodox_righteousness_cost_visible && age >= 25) {
     return '守正有代价，门派义务先于私利';

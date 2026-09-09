@@ -1868,3 +1868,68 @@ Player result surface 在 narrative 为 `null` 时不显示伪造正文，但继
 - 不为补齐普通 result copy 新建 `ChoiceOutcome` wrapper 或新的 result-text schema；
 - 不改变 choice execution semantics、canonical before/after delta、event history、snapshot/save/replay schema、HTTP route version、Random Effect、Ending 或 Auto Evolution terminal capture；
 - `PRESENTATION_PROBLEM` 不自动转化为 content authoring。
+
+### PD-113：Identity-Year Context Eligibility
+
+**产品决策（Human accepted）**
+
+Real AE player-visible evidence 证明，Identity-Year universal eligibility 会使没有相应人生上下文的角色消费多个 merchant / jianghu / scholar 年度事件，并造成跨路线体验趋同。
+
+因此：
+
+- Identity-Year 不改为严格职业锁；
+- 明确假定既有领域实践、路线或关系的事件读取已有 canonical evidence；
+- universal / on-ramp events 继续开放；
+- 不新增 Identity Runtime、Occupation Schema 或新的 canonical identity owner。
+
+**保持开放（不得新增 conditions）**
+
+- `commoner_year_farming`
+- `commoner_year_apprentice`
+- `commoner_year_neighbor`
+- `scholar_year_study`
+
+**新增 bounded context eligibility**
+
+| Event | Approved condition |
+| --- | --- |
+| `merchant_year_trade` | `lifeStates.businessHabit >= 1 \|\| flags.has("route_merchant")` |
+| `merchant_year_crisis` | `flags.has("route_merchant")` |
+| `merchant_year_network` | `flags.has("route_merchant")` |
+| `jianghu_year_training` | `lifeStates.trainingHabit >= 1` |
+| `jianghu_year_patrol` | `flags.has("hero_first_case") \|\| flags.has("route_wanderer") \|\| flags.has("jianghuTraveler")` |
+| `jianghu_year_disciple` | `flags.has("p27_mentor_obligation_taken") \|\| flags.has("has_disciples") \|\| flags.has("hero_teacher")` |
+| `scholar_year_social` | `lifeStates.studyHabit >= 1` |
+| `scholar_year_write` | 保留既有 `knowledge >= 30` threshold，并新增 `lifeStates.studyHabit >= 2`（AND） |
+
+明确禁止把 `ally_network`、泛属性门槛、P8 persona flags、或 generic relationship signal 解释为弟子/商会/行侠上下文。
+
+**对既有 PD 的调和**
+
+PD-113 仅 supersede **PD-083 / PD-110 中关于 Identity-Year eligibility 必须保持不变的部分**。
+
+仍然保持：
+
+- PD-083 的 wallet retirement；
+- PD-110 的 RandomTrigger retirement；
+- Identity-Year ageRange；
+- triggers；
+- priority；
+- weight；
+- effects；
+- choice semantics；
+- scheduler behavior。
+
+PD-112 完全不受影响。
+
+**明确不做**
+
+- 不调整 annual cadence；
+- 不调整 `maxEventsPerYear`；
+- 不调整 event weight / priority；
+- 不引入 strict route-lock system；
+- 不使用 P8 persona flags 作为正常 gameplay authority；
+- 不新增 identity / occupation framework；
+- 不修改 event prose；
+- 不修改 choice result narrative；
+- 不新增 ChoiceOutcome wrapper。

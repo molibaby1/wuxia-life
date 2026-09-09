@@ -27,6 +27,7 @@ const suites: Suite[] = [
   { name: 'earlyDeathTerminalConsistency', entry: 'tests/earlyDeathTerminalConsistency.test.ts' },
   { name: 'setbackProducerOwnership', entry: 'tests/setbackProducerOwnership.test.ts' },
   { name: 'activeFormalRandomTriggerRetirement', entry: 'tests/activeFormalRandomTriggerRetirement.test.ts' },
+  { name: 'identityYearContextEligibility', entry: 'tests/identityYearContextEligibility.test.ts' },
   { name: 'quietFamilyLifeEndingExplanation', entry: 'tests/quietFamilyLifeEndingExplanation.test.ts' },
   { name: 'p8PlayabilityTests', entry: 'tests/p8PlayabilityTests.ts' },
   { name: 'p9PlayabilityTests', entry: 'tests/p9PlayabilityTests.ts' },
@@ -271,10 +272,9 @@ const suites: Suite[] = [
   { name: 'canonicalCriticalChoiceNormalizationTests', entry: 'tests/canonicalCriticalChoiceNormalization.test.ts' },
   { name: 'youthCausalOpportunity', entry: 'tests/youthCausalOpportunity.test.ts' },
   { name: 'officialCausalOrdering', entry: 'tests/officialCausalOrdering.test.ts' },
-  { name: 'b0GuardrailCalibration', entry: 'tests/b0/b0GuardrailCalibration.test.ts' },
-  { name: 'b0IsolationAndHash', entry: 'tests/b0/b0IsolationAndHash.test.ts' },
-  { name: 'b0PatchScopeAndBlocked', entry: 'tests/b0/b0PatchScopeAndBlocked.test.ts' },
-  { name: 'b0RealControlHeadless', entry: 'tests/b0/b0RealControlHeadless.test.ts' },
+  // B0_NOT_IN_WORKING_TREE_GATE: frozen-checkout calibration experiment only.
+  // Intentionally excluded while ordinary AE allows dirty-tree DEV_CONVENIENCE runs.
+  // Not product-retired; not a current working-tree regression gate. Re-evaluate with dirty policy.
   { name: 'canonicalRuntimeLoadIsolationTests', entry: 'tests/canonicalRuntimeLoadIsolation.test.ts' },
   { name: 'canonicalRuntimeExactApplicationTests', entry: 'tests/canonicalRuntimeExactApplication.test.ts' },
   { name: 'canonicalJsonContainerBoundaryTests', entry: 'tests/canonicalJsonContainerBoundary.test.ts' },

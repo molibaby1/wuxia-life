@@ -123,7 +123,7 @@ function testAuthoringAndSchedulingContracts(): void {
     assert.equal(event.weight, expectation.weight);
     assert.deepEqual(event.ageRange, expectation.ageRange, `${event.id} age range must remain unchanged`);
     assert.deepEqual(event.triggers, expectation.triggers, `${event.id} triggers must remain unchanged`);
-    assert.deepEqual(event.conditions ?? [], [], `${event.id} eligibility must remain unchanged`);
+    // Identity-Year eligibility is now owned by PD-113 dedicated regression coverage; this test continues to own PD-083 wallet/scheduling invariants.
     assert.deepEqual(event.thresholds ?? {}, {}, `${event.id} thresholds must remain unchanged`);
     assert.deepEqual(event.choices?.map(choice => choice.id), expectation.choiceIds);
     assert.equal(

@@ -79,10 +79,15 @@ function testOrthodoxExpression(): void {
     } as GameState['eventHistory'][0],
   ];
   const summary = deriveLifeMemorySummary(midlife);
-  assert(summary.currentGoalLabel?.includes('守正'), 'orthodox midlife goal missing');
+  // PD-115: midlife gray outcome is not currentGoal; disciple commitment remains.
+  assert(
+    summary.currentGoalLabel?.includes('行侠') || summary.currentGoalLabel?.includes('义务'),
+    `orthodox midlife active goal missing: ${summary.currentGoalLabel}`,
+  );
+  assert(!summary.currentGoalLabel?.includes('守正有代价'), 'midlife gray residue must not own goal');
   assert(
     summary.achievements?.some((entry) => entry.label.includes('守正') || entry.label.includes('正派'))
-    || summary.currentGoalLabel?.includes('代价'),
+    || summary.currentGoalLabel?.includes('义务'),
     'orthodox midlife identity signal missing',
   );
 
@@ -234,15 +239,94 @@ function testPost40PayoffExpression(): void {
   }
 }
 
+function testPd115OrthodoxActiveObjectiveEligibility(): void {
+  const endgame = makeState(70, {
+    route_orthodox: true,
+    founding_patriarch_endgame_echo_done: true,
+  });
+  assert(
+    deriveSampleLineCurrentGoal(endgame) === '暂无明确目标',
+    'endgame plaque must yield empty active objective',
+  );
+
+  const mythOnly = makeState(22, {
+    route_orthodox: true,
+    jianghu_myth_legend_on_ramp_done: true,
+  });
+  assert(
+    (deriveSampleLineCurrentGoal(mythOnly) ?? '').includes('神话'),
+    'active myth on-ramp commitment may own goal',
+  );
+
+  const mythAfterWindow = makeState(24, {
+    route_orthodox: true,
+    jianghu_myth_legend_on_ramp_done: true,
+    jianghu_myth_legend_luck_window_done: true,
+    jianghu_myth_legend_luck_miss: true,
+    orthodox_trial_completed: true,
+  });
+  const afterWindow = deriveSampleLineCurrentGoal(mythAfterWindow) ?? '';
+  assert(!afterWindow.includes('奇遇') && !afterWindow.includes('隐世线已闭'), `window echo must not own goal: ${afterWindow}`);
+  assert(afterWindow === '入门试炼、争取认可' || afterWindow.includes('行侠'), `fall through to active disciple goal: ${afterWindow}`);
+
+  const mythSuperseded = makeState(45, {
+    route_orthodox: true,
+    jianghu_myth_legend_on_ramp_done: true,
+    orthodox_age45_legacy_steward_done: true,
+  });
+  assert(
+    (deriveSampleLineCurrentGoal(mythSuperseded) ?? '').includes('传承'),
+    'later steward commitment must supersede myth on-ramp',
+  );
+
+  const pressureOnly = makeState(36, {
+    route_orthodox: true,
+    founding_patriarch_midlife_pressure_done: true,
+    orthodox_formal_disciple: true,
+  });
+  const pressureGoal = deriveSampleLineCurrentGoal(pressureOnly) ?? '';
+  assert(!pressureGoal.includes('开派担子已压实'), `pressure must not own goal: ${pressureGoal}`);
+  assert(pressureGoal.includes('行侠') || pressureGoal.includes('义务'), `pressure falls to disciple: ${pressureGoal}`);
+
+  const age40PlaqueOnly = makeState(40, {
+    route_orthodox: true,
+    orthodox_age40_identity_done: true,
+  });
+  assert(
+    deriveSampleLineCurrentGoal(age40PlaqueOnly) === '暂无明确目标',
+    'age-40 plaque alone must not fall back to pre-entry childhood goal',
+  );
+
+  const age40WithDisciple = makeState(40, {
+    route_orthodox: true,
+    orthodox_age40_identity_done: true,
+    orthodox_formal_disciple: true,
+  });
+  assert(
+    deriveSampleLineCurrentGoal(age40WithDisciple) === '行侠守义，承担门派义务',
+    'age-40 plaque must not hide active disciple commitment',
+  );
+
+  const payoffFactOnly = makeState(50, {
+    route_orthodox: true,
+    founding_patriarch_payoff_done: true,
+  });
+  assert(
+    deriveSampleLineCurrentGoal(payoffFactOnly) === '暂无明确目标',
+    'payoff fact without standing commitment subtype must be empty',
+  );
+}
+
 function testOrthodox301ResidualExpression(): void {
+  // PD-115: cost / gray pressure are not currentGoal; active disciple commitment remains.
   const age25Cost = makeState(26, {
     route_orthodox: true,
     orthodox_righteousness_cost_visible: true,
     orthodox_trial_completed: true,
   });
   const costGoal = deriveSampleLineCurrentGoal(age25Cost) ?? '';
-  assert(costGoal.includes('代价') || costGoal.includes('义务'), `orthodox age-25 cost goal: ${costGoal}`);
-  assert(isPlayerVisibleSampleLineText(costGoal), `orthodox age-25 cost goal has raw key: ${costGoal}`);
+  assert(costGoal === '行侠守义，承担门派义务', `orthodox age-25 goal: ${costGoal}`);
+  assert(isPlayerVisibleSampleLineText(costGoal), `orthodox age-25 goal has raw key: ${costGoal}`);
 
   const age32Gray = makeState(33, {
     route_orthodox: true,
@@ -251,14 +335,13 @@ function testOrthodox301ResidualExpression(): void {
     orthodox_trial_completed: true,
   });
   const grayGoal = deriveSampleLineCurrentGoal(age32Gray) ?? '';
-  assert(grayGoal.includes('灰度') || grayGoal.includes('代价'), `orthodox age-32 gray goal: ${grayGoal}`);
-  assert(isPlayerVisibleSampleLineText(grayGoal), `orthodox age-32 gray goal has raw key: ${grayGoal}`);
+  assert(grayGoal === '行侠守义，承担门派义务', `orthodox age-32 goal: ${grayGoal}`);
+  assert(isPlayerVisibleSampleLineText(grayGoal), `orthodox age-32 goal has raw key: ${grayGoal}`);
 
   const graySummary = deriveLifeMemorySummary(age32Gray);
   assert(
-    graySummary.currentGoalLabel?.includes('灰度')
-    || graySummary.currentGoalLabel?.includes('代价'),
-    'orthodox gray pressure missing from life-memory goal',
+    graySummary.currentGoalLabel === '行侠守义，承担门派义务',
+    `orthodox life-memory goal: ${graySummary.currentGoalLabel}`,
   );
 }
 
@@ -954,6 +1037,7 @@ function main(): void {
   testMerchantExpression();
   testCrossLineAge13CostLabels();
   testMerchantLineWinsOverParallelDemonicRoute();
+  testPd115OrthodoxActiveObjectiveEligibility();
   testOrthodox301ResidualExpression();
   testMerchant804ResidualExpression();
   testPost40PayoffExpression();

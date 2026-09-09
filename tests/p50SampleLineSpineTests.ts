@@ -157,20 +157,20 @@ async function testOrthodox301Age25Goal(): Promise<void> {
     routeTrack: 'sect',
     sampleId: 'golden-sect',
   });
-  // age-25 may surface righteousness-cost OR jianghu-myth expression; both are orthodox-line.
-  // Do not encode cost-vs-myth presentation priority here until product decides.
+  // PD-115: age-25 goal must be an active orthodox objective (not cost/pressure residue).
   assertAge25Goal(
     'seed 301',
     report,
     (goal) =>
       goal.includes('行侠')
       || goal.includes('门派')
-      || goal.includes('守正')
       || goal.includes('义务')
       || goal.includes('护道')
       || goal.includes('神话')
-      || goal.includes('奇遇'),
-    ['店铺', '经营', '试探底线', '力量与地盘'],
+      || goal.includes('试炼')
+      || goal.includes('习武')
+      || goal === '暂无明确目标',
+    ['店铺', '经营', '试探底线', '力量与地盘', '灰度', '守正有代价'],
   );
 }
 
@@ -250,29 +250,36 @@ async function testOrthodox301ResidualSpineSignals(): Promise<void> {
 
   const rec28 = [...report.records].reverse().find((record) => record.age <= 28);
   assert(Boolean(rec28?.gameState.flags?.orthodox_righteousness_cost_visible), 'seed 301: missing orthodox_righteousness_cost_visible by age 28');
-  // Expression may still show jianghu-myth text while cost flag is set; cost-vs-myth priority is undecided.
+  // PD-115: cost flag proves spine; currentGoal must remain an active objective (not cost copy).
   const goal28 = deriveSampleLineCurrentGoal(rec28!.gameState) ?? '';
   assert(
-    goal28.includes('代价')
+    goal28.includes('行侠')
     || goal28.includes('义务')
+    || goal28.includes('门派')
     || goal28.includes('护道')
     || goal28.includes('神话')
-    || goal28.includes('奇遇'),
-    `seed 301 age-28 goal off orthodox-line while cost flag set: ${goal28}`,
+    || goal28.includes('习武')
+    || goal28 === '暂无明确目标',
+    `seed 301 age-28 goal must be active objective while cost flag set: ${goal28}`,
   );
+  assert(!goal28.includes('守正有代价'), `seed 301 age-28 goal must not be cost residue: ${goal28}`);
 
   const rec35 = [...report.records].reverse().find((record) => record.age <= 35);
   assert(Boolean(rec35?.gameState.flags?.orthodox_gray_pressure_visible), 'seed 301: missing orthodox_gray_pressure_visible by age 35');
-  // Same undecided priority: gray flag may be set while myth expression still wins presentation.
   const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
   assert(
-    goal35.includes('灰度')
-    || goal35.includes('代价')
+    goal35.includes('行侠')
+    || goal35.includes('义务')
+    || goal35.includes('门派')
     || goal35.includes('护道')
     || goal35.includes('神话')
-    || goal35.includes('奇遇'),
-    `seed 301 age-35 goal off orthodox-line while gray flag set: ${goal35}`,
+    || goal35.includes('习武')
+    || goal35.includes('传承')
+    || goal35.includes('守山')
+    || goal35 === '暂无明确目标',
+    `seed 301 age-35 goal must be active objective while gray flag set: ${goal35}`,
   );
+  assert(!goal35.includes('灰度'), `seed 301 age-35 goal must not be gray residue: ${goal35}`);
 }
 
 async function testMerchant804ResidualDebtSpine(): Promise<void> {

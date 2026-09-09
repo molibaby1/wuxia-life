@@ -167,17 +167,19 @@ function assertAge25GoalForLine(seed: number, goal: string): void {
   assert(isPlayerVisibleSampleLineText(goal), `seed ${seed} age-25 goal has raw key: ${goal}`);
   assert(!goal.includes('试探底线'), `seed ${seed} age-25 goal bleeds demonic: ${goal}`);
   if (seed === 301) {
-    // cost-vs-myth expression priority undecided; accept either orthodox presentation.
+    // PD-115: active orthodox objective (myth on-ramp ok if still active); not cost/gray residue.
     assert(
       goal.includes('行侠')
       || goal.includes('门派')
-      || goal.includes('守正')
       || goal.includes('义务')
       || goal.includes('护道')
       || goal.includes('神话')
-      || goal.includes('奇遇'),
-      `seed 301 age-25 goal not orthodox: ${goal}`,
+      || goal.includes('试炼')
+      || goal.includes('习武')
+      || goal === '暂无明确目标',
+      `seed 301 age-25 goal not active orthodox objective: ${goal}`,
     );
+    assert(!goal.includes('灰度') && !goal.includes('守正有代价'), `seed 301 age-25 goal residue: ${goal}`);
   } else if (seed === 303) {
     assert(
       goal.includes('力量') || goal.includes('地盘') || goal.includes('邪') || goal.includes('诱惑'),
@@ -243,24 +245,40 @@ async function testLiveResidualSignalAlignment(): Promise<void> {
     'seed 301: missing orthodox_righteousness_cost_visible by age 28',
   );
   const goal28 = deriveSampleLineCurrentGoal(rec28!.gameState) ?? '';
-  assert(isPlayerVisibleSampleLineText(goal28), `seed 301 residual cost goal has raw key: ${goal28}`);
-  // cost-vs-myth expression priority undecided; flag proves residual cost spine, goal may still be myth.
+  assert(isPlayerVisibleSampleLineText(goal28), `seed 301 residual goal has raw key: ${goal28}`);
+  // PD-115: flag proves cost spine; goal stays active objective.
   assert(
-    goal28.includes('代价')
+    goal28.includes('行侠')
     || goal28.includes('义务')
+    || goal28.includes('门派')
     || goal28.includes('护道')
     || goal28.includes('神话')
-    || goal28.includes('奇遇'),
-    `seed 301 residual age-28 goal off orthodox-line: ${goal28}`,
+    || goal28.includes('习武')
+    || goal28 === '暂无明确目标',
+    `seed 301 residual age-28 goal must be active objective: ${goal28}`,
   );
+  assert(!goal28.includes('守正有代价'), `seed 301 residual age-28 must not be cost residue: ${goal28}`);
   const rec35 = [...orthodoxReport.records].reverse().find((record) => record.age <= 35);
   assert(Boolean(rec35), 'seed 301: missing age-35 checkpoint record for residual gray signal');
-  const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
-  assert(isPlayerVisibleSampleLineText(goal35), `seed 301 residual gray goal has raw key: ${goal35}`);
   assert(
-    goal35.includes('灰度') || goal35.includes('代价'),
-    `seed 301 residual gray goal missing by age 35: ${goal35}`,
+    Boolean(rec35!.gameState.flags?.orthodox_gray_pressure_visible),
+    'seed 301: missing orthodox_gray_pressure_visible by age 35',
   );
+  const goal35 = deriveSampleLineCurrentGoal(rec35!.gameState) ?? '';
+  assert(isPlayerVisibleSampleLineText(goal35), `seed 301 residual gray-era goal has raw key: ${goal35}`);
+  assert(
+    goal35.includes('行侠')
+    || goal35.includes('义务')
+    || goal35.includes('门派')
+    || goal35.includes('护道')
+    || goal35.includes('神话')
+    || goal35.includes('习武')
+    || goal35.includes('传承')
+    || goal35.includes('守山')
+    || goal35 === '暂无明确目标',
+    `seed 301 residual age-35 goal must be active objective: ${goal35}`,
+  );
+  assert(!goal35.includes('灰度'), `seed 301 residual age-35 must not be gray residue: ${goal35}`);
 
   const merchant = P49_SAMPLE_LINE_MATRIX[2]!;
   const merchantReport = await createSampleLineSimulator(merchant, 50).simulate();

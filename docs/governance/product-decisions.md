@@ -1948,3 +1948,60 @@ PD-112 完全不受影响。
 - 不改变 PD-112、wallet retirement、RandomTrigger retirement、Snapshot/Save Schema 或 AE permission/budget/STOP；不调整防停滞阈值，不将该局部时间成本视为全局节奏修复。
 
 验收针对真实三个月结算、选择前成本可见、原收益保持、跨年与后续年龄窗口影响，不以每年事件数量下降或 AE 接受率上升为目标。出现需要修改通用时间/生命周期机制的结构性问题时，应另行明确边界，不扩大本切片。
+
+### PD-115：Sample-Line `currentGoal` Active-Objective Eligibility
+
+**产品决策（Human accepted：2026-09-10）**
+
+Sample-line / 玩家可见的 `currentGoal` 只表示：
+
+> **当前仍在推进、尚未完成、会牵引后续行动的主要叙事目标 / 承诺（Active Objective）。**
+
+#### 资格（语义判断，禁止按 flag 名机械分类）
+
+一条候选文案可以成为 `currentGoal`，当且仅当同时满足：
+
+1. **Active**：其指向的承诺 / 目标仍在推进；
+2. **Incomplete**：该目标尚未完成；
+3. **Traction**：它会牵引后续行动（选择、事件、承诺兑现等）；
+4. **Not superseded**：未被后续人生阶段或更新的 active objective 取代。
+
+**`*_done` 后缀本身不决定资格。**  
+例如 `*_on_ramp_done` **只有在**其开启的承诺仍 active、未完成、且未被后续阶段取代时，才可支持 `currentGoal`；若仅表示“曾经解锁 / 已经发生”，则不具备 goal 资格。
+
+#### 明确不具备 `currentGoal` 资格
+
+- window hit / miss 等窗口结果回声；
+- 纯历史事实、完成回声、纪念性 payoff / endgame **事实本身**；
+- 持续代价、压力、债务、风险（cost / pressure / debt / risk），**默认不进入** `currentGoal`。
+
+#### Payoff / endgame 的例外读法
+
+payoff / endgame **事实本身**不进 `currentGoal`。  
+若它们**产生了新的持续承诺**，则显示那个**新的** active objective——不是把 payoff/endgame 纪念句留作永久 headline。
+
+#### 空状态
+
+当不存在合格的 active objective 时，允许显示 **「暂无明确目标」**（或等价的明确空状态）。  
+空状态是合法产品结果，不是渲染失败，也不是把 cost / on-ramp 残渣塞回 goal 的许可。
+
+#### 实施边界
+
+- 首个实现切片：**orthodox-only bounded implementation**；其他 sample line 同一 PD，分线跟进。
+- 合格子集内部可继续使用现有线内局部顺序；**不**因此建立全局优先级框架或信号类型引擎。
+
+#### 明确不做
+
+- 不新增 cost / burden 呈现槽，不把既有 `costLabel` / identity / destiny 升格为本决策的配套权威框架；
+- 不按 flag 命名约定（`*_done` / `*_on_ramp_*` / `*_visible` 等）做机械分类表；
+- 不把 `currentGoal` 做成“最近事件回声”或“持续处境标签”；
+- 不借本条修改事件调度、weight、priority、Snapshot/Save Schema、或 Auto Evolution permission / budget / STOP；
+- 不以“goal 变空频率下降”或 sample-line 旧文案碎片断言作为验收目标；验收看 eligibility 是否被遵守。
+
+#### 允许重新讨论的条件
+
+仅当出现以下情况之一，才允许重开本条：
+
+- 玩家体验证明 Active Objective 定义无法区分“进行中的承诺”与“解锁史实”；
+- 空状态被证明系统性地损害可理解性，且无法在不违反本条的前提下用文案 / 既有非-goal 通道解决；
+- 需要为 `currentGoal` 引入第二职责（处境、铭牌、回声）——必须新开 PD，不得静默塞回。

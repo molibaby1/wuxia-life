@@ -79,15 +79,15 @@ export function detectSampleLine(
 }
 
 function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): string {
+  // PD-115: currentGoal = Active Objective only (orthodox slice).
+  // Eligibility is semantic — not mechanical *_done / *_visible classification.
+
+  // Endgame echo is a completion plaque, not an active objective.
   if (flags.founding_patriarch_endgame_echo_done) {
-    if (flags.founding_patriarch_endgame_rule_echo) {
-      return '门规碑立，治学师承交给后来人续';
-    }
-    if (flags.founding_patriarch_endgame_alliance_echo) {
-      return '盟约碑立，诸派续责交给后来人扛';
-    }
-    return '开派名号已定，终局自有终局的定论';
+    return '暂无明确目标';
   }
+
+  // Late-life keeper duties are ongoing commitments produced after payoff.
   if (flags.founding_patriarch_late_life_done) {
     if (flags.founding_patriarch_late_rule_keeper) {
       return '守门规至终，治学师承不能断';
@@ -97,6 +97,8 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '治理次序之后，晚年自有晚年的过法';
   }
+
+  // Payoff fact itself is not the goal; show the new standing commitment it opens.
   if (flags.founding_patriarch_payoff_done) {
     if (flags.founding_patriarch_payoff_legacy_holder) {
       return '续责如山，开派名号落在门派与治学一并传承之上';
@@ -107,17 +109,20 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
     if (flags.founding_patriarch_payoff_dual_gate) {
       return '盟约师承各守其份，开派之路不再两头拉扯';
     }
+    // Payoff done without a standing commitment subtype: empty, not childhood residue.
+    return '暂无明确目标';
   }
-  if (flags.founding_patriarch_midlife_pressure_done) {
-    if (flags.founding_patriarch_pressure_rule_first) {
-      return '先稳门规传承，再承接诸派盟约续责，开派担子已压实';
-    }
-    if (flags.founding_patriarch_pressure_alliance_first) {
-      return '先承接诸派盟约续责，再收束门规传承，开派担子已压实';
-    }
-    return '门规传承与盟约续责并压在肩，开派担子已压实';
-  }
-  if (flags.founding_patriarch_on_ramp_done) {
+
+  // Midlife pressure is burden/pressure — not currentGoal (PD-115).
+
+  // On-ramp supports goal only while its opened founding commitment is still active
+  // and not superseded by payoff / late-life / endgame.
+  if (
+    flags.founding_patriarch_on_ramp_done
+    && !flags.founding_patriarch_payoff_done
+    && !flags.founding_patriarch_late_life_done
+    && !flags.founding_patriarch_endgame_echo_done
+  ) {
     if (flags.founding_patriarch_on_ramp_scholar) {
       return '学者师徒与治学盟约并进，开宗立派的念头渐明';
     }
@@ -126,39 +131,43 @@ function orthodoxCurrentGoal(flags: Record<string, unknown>, age: number): strin
     }
     return '师门盟约与学者线拧在一处，开派之路已开';
   }
+
   if (flags.orthodox_age45_legacy_steward_done) {
     return '传承守门，门派遗命在肩';
   }
+  // Age-40 plaque alone is identity echo; only the pre-steward commitment is active.
   if (flags.orthodox_age40_identity_done && age >= 44) {
     return '四十回望之后，守山之责待承';
   }
-  if (flags.orthodox_age40_identity_done) {
-    return '回望正道身份，守正之路已刻进一生';
-  }
-  if (flags.orthodox_gray_pressure_visible) {
-    return '灰度压力在肩，守正须付代价';
-  }
-  // Myth stays above righteousness-cost until product decides cost-vs-myth priority.
-  // Late-life steward / identity / gray must still beat a sticky myth on-ramp flag.
-  if (flags.jianghu_myth_legend_luck_window_done) {
-    if (flags.jianghu_myth_legend_luck_hit) {
-      return '隐世奇遇已至，武林神话的运气门槛已过';
-    }
-    if (flags.jianghu_myth_legend_luck_miss) {
-      return '隐世线已闭，单靠苦练填不满神话门槛';
-    }
-  }
-  if (flags.jianghu_myth_legend_on_ramp_done) {
+
+  // Gray pressure / righteousness cost / midlife gray outcomes: not currentGoal (PD-115).
+
+  // Myth luck window hit/miss: historical window echo — not currentGoal.
+  // Myth on-ramp: active only while the opened myth commitment is incomplete and
+  // not superseded by later orthodox life-stage commitments.
+  const mythSuperseded = Boolean(
+    flags.orthodox_age45_legacy_steward_done
+    || flags.orthodox_age40_identity_done
+    || flags.founding_patriarch_on_ramp_done
+    || flags.founding_patriarch_payoff_done
+    || flags.founding_patriarch_late_life_done
+    || flags.founding_patriarch_endgame_echo_done
+  );
+  if (
+    flags.jianghu_myth_legend_on_ramp_done
+    && !flags.jianghu_myth_legend_luck_window_done
+    && !mythSuperseded
+  ) {
     return '护道誓下，武林神话之路已开';
   }
-  if (flags.orthodox_righteousness_cost_visible && age >= 25) {
-    return '守正有代价，门派义务先于私利';
-  }
-  if (flags.sect_midlife_gray_executed || flags.sect_midlife_gray_leaked || flags.sect_midlife_gray_refused) {
-    return '守正有代价，仍在承担门派义务';
-  }
+
   if (flags.orthodox_formal_disciple || flags.orthodox_trial_completed) {
     return age >= 25 ? '行侠守义，承担门派义务' : '入门试炼、争取认可';
+  }
+  // Age-40 plaque already happened; pre-entry childhood goals are superseded history.
+  // Pre-steward commitment only opens at age >= 44 (handled above).
+  if (flags.orthodox_age40_identity_done) {
+    return '暂无明确目标';
   }
   if (flags.sect_faction === 'orthodox' || flags.orthodox_childhood_seed_done) {
     return '门派倾向已显，尚未立誓入门';

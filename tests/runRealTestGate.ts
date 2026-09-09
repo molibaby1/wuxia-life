@@ -101,6 +101,7 @@ const suites: Suite[] = [
   { name: 'genericRelationshipLegacyQuarantine', entry: 'tests/genericRelationshipLegacyQuarantine.test.ts' },
   { name: 'lifeDebtTransientSemantics', entry: 'tests/lifeDebtTransientSemantics.test.ts' },
   { name: 'formalChoiceIdGate', entry: 'tests/formalChoiceIdGate.test.ts' },
+  { name: 'workspaceStateProvenance', entry: 'tests/evolution/workspaceStateProvenance.test.ts' },
   { name: 'multiRoundExecutionValidation', entry: 'tests/evolution/multiRoundExecutionValidation.test.ts' },
   { name: 'skillBehavioralValidation', entry: 'tests/evolution/skillBehavioralValidation.test.ts' },
   { name: 'skillBehavioralTerminalReport', entry: 'tests/evolution/skillBehavioralTerminalReport.test.ts' },

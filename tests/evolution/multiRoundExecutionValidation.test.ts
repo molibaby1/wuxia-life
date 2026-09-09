@@ -24,6 +24,10 @@ import {
   captureAuthoritativeFingerprint,
   prepareAgentWorkspace,
 } from '../../scripts/evolution/problemAgnosticSolution/agentWorkspace';
+import {
+  captureWorkspaceState,
+  parseWorkspaceStateProvenance,
+} from '../../scripts/evolution/workspaceStateProvenance';
 import { emptyMatchingPlayerSurfaceArtifacts } from '../../scripts/evolution/causalAttribution/emptyMatchingPlayerSurfaceArtifacts';
 import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
@@ -144,6 +148,7 @@ function skippedRound(input: {
 }
 
 async function writeReadyArtifacts(root: string): Promise<void> {
+  await mkdir(root, { recursive: true });
   const problemPackage = validateProblemPackage({
     schemaVersion: 'problem-package-v1',
     problemId: READY_PROBLEM_ID,
@@ -433,6 +438,202 @@ export async function runRound1NonReadyStopTest(): Promise<void> {
     manifest.rounds.map(round => ({ round: round.round, nextAction: round.nextAction })),
     [{ round: 1, nextAction: 'STOP' }],
   );
+  const provenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(root, 'run/workspace-state-provenance.json'), 'utf8')));
+  assert.equal(provenance.start.status, 'available');
+  assert.equal(provenance.end.status, 'available');
+  assert.equal(provenance.start.fingerprintSha256, provenance.end.fingerprintSha256);
+  assert.equal(provenance.executionBoundary, null);
+}
+
+export async function runWorkspaceStateLifecycleTest(): Promise<void> {
+  const authoritativeRoot = await createWorkspace();
+  const workspaceRoot = await createWorkspace();
+  const calls: string[] = [];
+  const root = await mkdtemp(join(tmpdir(), 'p2-provenance-lifecycle-'));
+  const base = await fixedDependencies({ workspaceRoot, roundResults: ['ready', 'skip'], calls });
+  const dependencies: MultiRoundExecutionValidationDependencies = {
+    ...base,
+    captureWorkspaceState: async workspace => {
+      calls.push('capture');
+      return captureWorkspaceState(workspace);
+    },
+  };
+  const result = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-provenance-lifecycle-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    authoritativeRoot,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(root, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies,
+  });
+  assert.equal(result.stopReason, 'ROUND_2_COMPLETED');
+  assert.deepEqual(calls.slice(0, 4), ['capture', 'round-1', 'capture', 'execute']);
+  const provenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(root, 'run/workspace-state-provenance.json'), 'utf8')));
+  assert.equal(provenance.start.status, 'available');
+  assert.equal(provenance.executionBoundary?.before.status, 'available');
+  assert.equal(provenance.executionBoundary?.after.status, 'available');
+  assert.notEqual(provenance.executionBoundary?.before.fingerprintSha256, provenance.executionBoundary?.after.fingerprintSha256);
+  assert.equal(provenance.end.fingerprintSha256, provenance.executionBoundary?.after.fingerprintSha256);
+  assert.deepEqual(provenance.consistencyWarnings, ['START_BASELINE_FINGERPRINT_NOT_COMPARABLE']);
+}
+
+export async function runWorkspaceStateFailureLifecycleTests(): Promise<void> {
+  const run = async (input: {
+    name: string;
+    executeConfiguration: MultiRoundExecutionValidationDependencies['executeConfiguration'];
+  }): Promise<Awaited<ReturnType<typeof runMultiRoundExecutionValidation>>> => {
+    const authoritativeRoot = await createWorkspace();
+    const workspaceRoot = await createWorkspace();
+    const calls: string[] = [];
+    const root = await mkdtemp(join(tmpdir(), `p2-provenance-${input.name}-`));
+    const base = await fixedDependencies({ workspaceRoot, roundResults: ['ready', 'skip'], calls });
+    const result = await runMultiRoundExecutionValidation({
+      multiRoundRunRef: `p2-prov-${input.name.slice(0, 20)}-${Date.now()}`,
+      authoritativeRoot,
+      initialSourceRoot: '/sealed/initial-run-000001',
+      experimentRoot: join(root, 'run'),
+      participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+      dependencies: { ...base, executeConfiguration: input.executeConfiguration },
+    });
+    const provenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(root, 'run/workspace-state-provenance.json'), 'utf8')));
+    assert.equal(provenance.executionBoundary?.before.status, 'available');
+    assert.equal(provenance.executionBoundary?.after.status, 'available');
+    assert.notEqual(provenance.executionBoundary?.before.fingerprintSha256, provenance.executionBoundary?.after.fingerprintSha256);
+    assert.equal(provenance.end.fingerprintSha256, provenance.executionBoundary?.after.fingerprintSha256);
+    return result;
+  };
+
+  const executionFailure = await run({
+    name: 'execution-failure-after-mutation',
+    executeConfiguration: async execution => {
+      await writeFile(join(execution.workspaceRoot, CONFIG_PATH), '{"choices":[{"id":"failed"}]}\n');
+      return {
+        schemaVersion: 'configuration-execution-result-v1',
+        status: 'failed',
+        changedFiles: [CONFIG_PATH],
+        verificationResults: [],
+        deviations: ['participant failure after mutation'],
+      };
+    },
+  });
+  assert.equal(executionFailure.stopReason, 'EXECUTION_PARTICIPANT_FAILURE');
+
+  const scopeViolation = await run({
+    name: 'scope-violation',
+    executeConfiguration: async execution => {
+      await writeFile(join(execution.workspaceRoot, CONFIG_PATH), '{"choices":[{"id":"allowed"}]}\n');
+      await writeFile(join(execution.workspaceRoot, 'src/core/runtime.ts'), 'export const runtime = false;\n');
+      return {
+        schemaVersion: 'configuration-execution-result-v1',
+        status: 'completed',
+        changedFiles: [CONFIG_PATH, 'src/core/runtime.ts'],
+        verificationResults: [],
+        deviations: [],
+      };
+    },
+  });
+  assert.equal(scopeViolation.stopReason, 'EXECUTION_SCOPE_VIOLATION');
+
+  const noChangeAuthoritativeRoot = await createWorkspace();
+  const noChangeWorkspaceRoot = await createWorkspace();
+  const noChangeRoot = await mkdtemp(join(tmpdir(), 'p2-provenance-no-change-'));
+  const noChangeBase = await fixedDependencies({ workspaceRoot: noChangeWorkspaceRoot, roundResults: ['ready', 'skip'], calls: [] });
+  const noChange = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-prov-nochange-${Date.now()}`,
+    authoritativeRoot: noChangeAuthoritativeRoot,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(noChangeRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: {
+      ...noChangeBase,
+      executeConfiguration: async () => ({
+        schemaVersion: 'configuration-execution-result-v1',
+        status: 'completed',
+        changedFiles: [],
+        verificationResults: [],
+        deviations: [],
+      }),
+    },
+  });
+  assert.equal(noChange.stopReason, 'NO_CONFIGURATION_CHANGE');
+  const noChangeProvenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(noChangeRoot, 'run/workspace-state-provenance.json'), 'utf8')));
+  assert.equal(noChangeProvenance.executionBoundary?.before.fingerprintSha256, noChangeProvenance.executionBoundary?.after.fingerprintSha256);
+  assert.equal(noChangeProvenance.end.fingerprintSha256, noChangeProvenance.executionBoundary?.after.fingerprintSha256);
+}
+
+export async function runWorkspaceStateEndCaptureFailureTest(): Promise<void> {
+  const authoritativeRoot = await createWorkspace();
+  const workspaceRoot = await createWorkspace();
+  const root = await mkdtemp(join(tmpdir(), 'p2-provenance-end-failure-'));
+  let captureCount = 0;
+  const result = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-prov-end-${Date.now()}`,
+    authoritativeRoot,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(root, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: {
+      ...(await fixedDependencies({ workspaceRoot, roundResults: ['skip'], calls: [] })),
+      captureWorkspaceState: async workspace => {
+        captureCount += 1;
+        if (captureCount === 2) throw new Error('end capture unavailable');
+        return captureWorkspaceState(workspace);
+      },
+    },
+  });
+  assert.equal(result.stopReason, 'ROUND_1_TERMINAL_NOT_READY');
+  const provenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(root, 'run/workspace-state-provenance.json'), 'utf8')));
+  assert.equal(provenance.start.status, 'available');
+  assert.equal(provenance.end.status, 'unavailable');
+  assert.ok(provenance.consistencyWarnings.includes('END_CAPTURE_UNAVAILABLE'));
+}
+
+export async function runWorkspaceStateStartFailureTests(): Promise<void> {
+  const workspaceRoot = await createWorkspace();
+  const root = await mkdtemp(join(tmpdir(), 'p2-provenance-start-failure-'));
+  const calls: string[] = [];
+  const base = await fixedDependencies({ workspaceRoot, roundResults: ['skip'], calls });
+  const mismatchDependencies: MultiRoundExecutionValidationDependencies = {
+    ...base,
+    materializeEvolutionWorkspace: async () => ({
+      workspaceRoot,
+      workspaceBaselineFingerprintSha256: '0'.repeat(64),
+      manifestPath: join(workspaceRoot, '.agent-workspace-manifest.json'),
+    }),
+  };
+  const mismatch = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-provenance-baseline-mismatch-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    authoritativeRoot: workspaceRoot,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(root, 'mismatch'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: mismatchDependencies,
+  });
+  assert.equal(mismatch.stopReason, 'WORKSPACE_BASELINE_MISMATCH');
+  assert.deepEqual(calls, []);
+
+  let captureCount = 0;
+  const captureFailure = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-provenance-start-capture-failure-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    authoritativeRoot: workspaceRoot,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(root, 'capture-failure'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: {
+      ...base,
+      captureWorkspaceState: async workspace => {
+        captureCount += 1;
+        if (captureCount === 1) throw new Error('start capture unavailable');
+        return captureWorkspaceState(workspace);
+      },
+    },
+  });
+  assert.equal(captureFailure.stopReason, 'WORKSPACE_START_STATE_CAPTURE_FAILURE');
+  assert.deepEqual(calls, []);
+  const provenance = parseWorkspaceStateProvenance(JSON.parse(await readFile(join(root, 'capture-failure/workspace-state-provenance.json'), 'utf8')));
+  assert.equal(provenance.start.status, 'unavailable');
+  assert.equal(provenance.end.status, 'available');
+  assert.ok(provenance.consistencyWarnings.includes('START_CAPTURE_UNAVAILABLE'));
 }
 
 export async function runScopeValidationTests(): Promise<void> {
@@ -588,6 +789,10 @@ export async function runDefaultVerificationIsolationTest(): Promise<void> {
 if (import.meta.url === `file://${process.argv[1]}`) {
   Promise.resolve()
     .then(() => runRound1NonReadyStopTest())
+    .then(() => runWorkspaceStateLifecycleTest())
+    .then(() => runWorkspaceStateFailureLifecycleTests())
+    .then(() => runWorkspaceStateStartFailureTests())
+    .then(() => runWorkspaceStateEndCaptureFailureTest())
     .then(() => runScopeValidationTests())
     .then(() => runFailureStopTest('execution'))
     .then(() => runFailureStopTest('verification'))

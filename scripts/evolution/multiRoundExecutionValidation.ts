@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process';
 import { cp, lstat, mkdir, open, readFile, readdir, rm } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { getP8PersonaById } from '../../src/p8/personas';
 import {
@@ -54,6 +54,17 @@ import {
   type MultiRoundVerificationResultV1,
   type RoundManifestEntry,
 } from './multiRoundRunManifestContract';
+import {
+  captureWorkspaceState,
+  isComparableWorkspaceFingerprint,
+  WORKSPACE_STATE_FINGERPRINT_METHOD,
+  WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+  unavailableWorkspaceState,
+  workspaceStateConsistencyWarnings,
+  type WorkspaceStateConsistencyWarning,
+  type WorkspaceStateProvenanceV1,
+  type WorkspaceStateCapture,
+} from './workspaceStateProvenance';
 
 export type {
   MultiRoundRunManifestV1,
@@ -113,6 +124,7 @@ export interface MultiRoundExecutionValidationDependencies {
     runRef: string;
   }) => Promise<Phase0RerunResult>;
   validateSealedSource?: (result: Phase0RerunResult) => Promise<void>;
+  captureWorkspaceState?: (workspaceRoot: string) => Promise<WorkspaceStateCapture>;
 }
 
 export interface MultiRoundExecutionValidationInput {
@@ -474,6 +486,34 @@ function roundManifest(input: {
   };
 }
 
+function addProvenanceWarning(
+  provenance: WorkspaceStateProvenanceV1,
+  warning: WorkspaceStateConsistencyWarning,
+): void {
+  if (!provenance.consistencyWarnings.includes(warning)) provenance.consistencyWarnings.push(warning);
+}
+
+async function captureWorkspaceStateBestEffort(
+  capture: (workspaceRoot: string) => Promise<WorkspaceStateCapture>,
+  workspaceRoot: string,
+): Promise<{ state: WorkspaceStateCapture; failed: boolean }> {
+  try {
+    return { state: await capture(workspaceRoot), failed: false };
+  } catch {
+    return { state: unavailableWorkspaceState(), failed: true };
+  }
+}
+
+function workspaceRootReference(experimentRoot: string, workspaceRoot: string): string {
+  const candidate = relative(resolve(experimentRoot), resolve(workspaceRoot)).split(sep).join('/');
+  // The production materializer places the workspace below experimentRoot. The
+  // stable fallback keeps dependency-injected test workspaces non-absolute and
+  // does not leak a machine-specific temporary path into durable evidence.
+  return candidate.length > 0 && !candidate.startsWith('../') && candidate !== '..'
+    ? candidate
+    : 'evolution-workspace/evolution';
+}
+
 function resultFromManifest(input: {
   manifestPath: string;
   manifest: MultiRoundRunManifestV1;
@@ -512,166 +552,219 @@ export async function runMultiRoundExecutionValidation(
   let outcome: MultiRoundRunManifestV1['outcome'] = 'STOPPED';
   let stopReason = 'UNEXPECTED_STOP';
   let evolutionWorkspace: MutableEvolutionWorkspace | null = null;
+  const workspaceStateProvenance: WorkspaceStateProvenanceV1 = {
+    schemaVersion: WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+    fingerprintMethod: WORKSPACE_STATE_FINGERPRINT_METHOD,
+    workspaceRootRef: 'evolution-workspace/evolution',
+    start: unavailableWorkspaceState(),
+    executionBoundary: null,
+    end: unavailableWorkspaceState(),
+    consistencyWarnings: [],
+  };
+  const captureState = dependencies.captureWorkspaceState ?? captureWorkspaceState;
 
   try {
     evolutionWorkspace = await (dependencies.materializeEvolutionWorkspace ?? defaultMaterializeEvolutionWorkspace)({
       authoritativeRoot: resolve(input.authoritativeRoot),
       destinationRoot: join(experimentRoot, 'evolution-workspace'),
     });
-    const runSingleRound = dependencies.runSingleRound ?? defaultRunSingleRound;
-    const round1Root = join(experimentRoot, 'round-1');
-    let round1: ProblemAgnosticAgentSolutionLoopResult;
-    try {
-      round1 = await runSingleRound({
-        round: 1,
-        repositoryRoot: evolutionWorkspace.workspaceRoot,
-        humanFollowupRoot: resolve(input.authoritativeRoot),
-        workflowInstanceRef: input.multiRoundRunRef,
-        fixedSourceRoot: resolve(input.initialSourceRoot),
-        experimentRoot: round1Root,
-        participant: input.participant,
-        ...(input.participantMode !== undefined ? { participantMode: input.participantMode } : {}),
-        ...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
-        ...(input.authorityRefs !== undefined ? { authorityRefs: input.authorityRefs } : {}),
-      });
-    } catch (error) {
-      round1ParticipantJobs = await countStructuredParticipantInvocationArtifacts(round1Root);
-      throw error;
-    }
-    round1ParticipantJobs = round1.actualParticipantJobs;
-    if (round1ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
-      stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
-      rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
-    } else if (!isReady(round1)) {
-      outcome = 'NO_CROSS_ROUND_TRANSITION_OBSERVED';
-      stopReason = 'ROUND_1_TERMINAL_NOT_READY';
-      rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
+    workspaceStateProvenance.workspaceRootRef = workspaceRootReference(
+      experimentRoot,
+      evolutionWorkspace.workspaceRoot,
+    );
+    const startCapture = await captureWorkspaceStateBestEffort(captureState, evolutionWorkspace.workspaceRoot);
+    workspaceStateProvenance.start = startCapture.state;
+    let canEnterRound1 = true;
+    if (startCapture.failed || startCapture.state.status !== 'available') {
+      addProvenanceWarning(workspaceStateProvenance, 'START_CAPTURE_UNAVAILABLE');
+      stopReason = 'WORKSPACE_START_STATE_CAPTURE_FAILURE';
+      canEnterRound1 = false;
+    } else if (isComparableWorkspaceFingerprint(evolutionWorkspace.workspaceBaselineFingerprintSha256)) {
+      if (startCapture.state.fingerprintSha256 !== evolutionWorkspace.workspaceBaselineFingerprintSha256) {
+        addProvenanceWarning(workspaceStateProvenance, 'START_BASELINE_MISMATCH');
+        stopReason = 'WORKSPACE_BASELINE_MISMATCH';
+        canEnterRound1 = false;
+      }
     } else {
-      rounds.push(roundManifest({
-        round: 1,
-        root: 'round-1',
-        sourceRunRef: preflight.sourceRunRef,
-        terminalRoute: round1.decision.route,
-        nextAction: 'CONFIGURATION_EXECUTION',
-        executionRef: execution.executionRef,
-      }));
-      const solutionWork = validateSolutionWork(await readJson(join(round1Root, 'solution-agent/result.json')));
-      const solutionReview = validateSolutionReview(await readJson(join(round1Root, 'reviewer-agent/review.json')));
-      const acceptedOption = selectedOption(solutionWork, solutionReview.acceptedOptionId ?? '');
-      const allowedWritePaths = await deriveAllowedWritePaths({
-        workspaceRoot: evolutionWorkspace.workspaceRoot,
-        solutionOption: acceptedOption,
-      });
-      const executionInput = await readAcceptedExecutionInput(round1Root, evolutionWorkspace.workspaceRoot, round1, allowedWritePaths, input.participant);
-      const before = await snapshotWorkspace(evolutionWorkspace.workspaceRoot);
-      let executionResult: ConfigurationExecutionParticipantResult;
+      addProvenanceWarning(workspaceStateProvenance, 'START_BASELINE_FINGERPRINT_NOT_COMPARABLE');
+    }
+
+    if (canEnterRound1) {
+      const runSingleRound = dependencies.runSingleRound ?? defaultRunSingleRound;
+      const round1Root = join(experimentRoot, 'round-1');
+      let round1: ProblemAgnosticAgentSolutionLoopResult;
       try {
-        executionResult = await (dependencies.executeConfiguration ?? defaultExecuteConfiguration)(executionInput);
-      } catch (error) {
-        executionResult = {
-          schemaVersion: 'configuration-execution-result-v1',
-          status: 'failed',
-          changedFiles: [],
-          verificationResults: [],
-          deviations: [String(error)],
-          invocationPath: executionInput.destinationRoot,
-          rawOutputPath: executionInput.destinationRoot,
-          resultPath: null,
-          failurePath: null,
-        };
-      }
-      executionParticipantJobs = MAX_EXECUTION_PARTICIPANT_JOBS;
-      const after = await snapshotWorkspace(evolutionWorkspace.workspaceRoot);
-      const scope: ScopeVerificationResult = verifyActualChangedFiles(before, after, allowedWritePaths);
-      execution.allowedWritePaths = allowedWritePaths;
-      execution.actualChangedFiles = scope.actualChangedFiles;
-      let authoritativeRepositoryChanged = false;
-      try {
-        await assertAuthoritativeFingerprintUnchanged(input.authoritativeRoot, authoritativeFingerprint);
-      } catch {
-        authoritativeRepositoryChanged = true;
-      }
-      if (authoritativeRepositoryChanged) {
-        execution.status = 'failed';
-        stopReason = 'AUTHORITATIVE_REPOSITORY_CHANGED';
-        rounds[0] = { ...rounds[0]!, nextAction: 'STOP' };
-      } else if (scope.status === 'scope_violation') {
-        execution.status = 'scope_violation';
-        stopReason = 'EXECUTION_SCOPE_VIOLATION';
-      } else if (executionResult.status !== 'completed') {
-        execution.status = 'failed';
-        stopReason = 'EXECUTION_PARTICIPANT_FAILURE';
-      } else if (scope.actualChangedFiles.length === 0) {
-        execution.status = 'completed';
-        stopReason = 'NO_CONFIGURATION_CHANGE';
-        rounds[0] = { ...rounds[0]!, nextAction: 'STOP' };
-      } else {
-        execution.status = 'completed';
-        const verification = await (dependencies.verifyWorkspace ?? defaultVerifyWorkspace)({
-          workspaceRoot: evolutionWorkspace.workspaceRoot,
-          authoritativeRoot: resolve(input.authoritativeRoot),
+        round1 = await runSingleRound({
+          round: 1,
+          repositoryRoot: evolutionWorkspace.workspaceRoot,
+          humanFollowupRoot: resolve(input.authoritativeRoot),
+          workflowInstanceRef: input.multiRoundRunRef,
+          fixedSourceRoot: resolve(input.initialSourceRoot),
+          experimentRoot: round1Root,
+          participant: input.participant,
+          ...(input.participantMode !== undefined ? { participantMode: input.participantMode } : {}),
+          ...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
+          ...(input.authorityRefs !== undefined ? { authorityRefs: input.authorityRefs } : {}),
         });
-        execution.verificationResults = verification;
-        if (verification.some(item => item.status !== 'passed')) {
-          stopReason = 'DETERMINISTIC_VERIFICATION_FAILURE';
+      } catch (error) {
+        round1ParticipantJobs = await countStructuredParticipantInvocationArtifacts(round1Root);
+        throw error;
+      }
+      round1ParticipantJobs = round1.actualParticipantJobs;
+      if (round1ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
+        stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
+        rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
+      } else if (!isReady(round1)) {
+        outcome = 'NO_CROSS_ROUND_TRANSITION_OBSERVED';
+        stopReason = 'ROUND_1_TERMINAL_NOT_READY';
+        rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
+      } else {
+        rounds.push(roundManifest({
+          round: 1,
+          root: 'round-1',
+          sourceRunRef: preflight.sourceRunRef,
+          terminalRoute: round1.decision.route,
+          nextAction: 'CONFIGURATION_EXECUTION',
+          executionRef: execution.executionRef,
+        }));
+        const solutionWork = validateSolutionWork(await readJson(join(round1Root, 'solution-agent/result.json')));
+        const solutionReview = validateSolutionReview(await readJson(join(round1Root, 'reviewer-agent/review.json')));
+        const acceptedOption = selectedOption(solutionWork, solutionReview.acceptedOptionId ?? '');
+        const allowedWritePaths = await deriveAllowedWritePaths({
+          workspaceRoot: evolutionWorkspace.workspaceRoot,
+          solutionOption: acceptedOption,
+        });
+        const executionInput = await readAcceptedExecutionInput(round1Root, evolutionWorkspace.workspaceRoot, round1, allowedWritePaths, input.participant);
+        const beforeStateCapture = await captureWorkspaceStateBestEffort(captureState, evolutionWorkspace.workspaceRoot);
+        workspaceStateProvenance.executionBoundary = {
+          before: beforeStateCapture.state,
+          after: unavailableWorkspaceState(),
+        };
+        if (beforeStateCapture.failed || beforeStateCapture.state.status !== 'available') {
+          addProvenanceWarning(workspaceStateProvenance, 'EXECUTION_BEFORE_CAPTURE_UNAVAILABLE');
+        }
+        const before = await snapshotWorkspace(evolutionWorkspace.workspaceRoot);
+        let executionResult: ConfigurationExecutionParticipantResult;
+        try {
+          executionResult = await (dependencies.executeConfiguration ?? defaultExecuteConfiguration)(executionInput);
+        } catch (error) {
+          executionResult = {
+            schemaVersion: 'configuration-execution-result-v1',
+            status: 'failed',
+            changedFiles: [],
+            verificationResults: [],
+            deviations: [String(error)],
+            invocationPath: executionInput.destinationRoot,
+            rawOutputPath: executionInput.destinationRoot,
+            resultPath: null,
+            failurePath: null,
+          };
+        }
+        executionParticipantJobs = MAX_EXECUTION_PARTICIPANT_JOBS;
+        const after = await snapshotWorkspace(evolutionWorkspace.workspaceRoot);
+        const afterStateCapture = await captureWorkspaceStateBestEffort(captureState, evolutionWorkspace.workspaceRoot);
+        workspaceStateProvenance.executionBoundary.after = afterStateCapture.state;
+        if (afterStateCapture.failed || afterStateCapture.state.status !== 'available') {
+          addProvenanceWarning(workspaceStateProvenance, 'EXECUTION_AFTER_CAPTURE_UNAVAILABLE');
+        }
+        const scope: ScopeVerificationResult = verifyActualChangedFiles(before, after, allowedWritePaths);
+        execution.allowedWritePaths = allowedWritePaths;
+        execution.actualChangedFiles = scope.actualChangedFiles;
+        for (const warning of workspaceStateConsistencyWarnings({
+          before: workspaceStateProvenance.executionBoundary.before,
+          after: workspaceStateProvenance.executionBoundary.after,
+          actualChangedFiles: execution.actualChangedFiles,
+        })) {
+          addProvenanceWarning(workspaceStateProvenance, warning);
+        }
+        let authoritativeRepositoryChanged = false;
+        try {
+          await assertAuthoritativeFingerprintUnchanged(input.authoritativeRoot, authoritativeFingerprint);
+        } catch {
+          authoritativeRepositoryChanged = true;
+        }
+        if (authoritativeRepositoryChanged) {
+          execution.status = 'failed';
+          stopReason = 'AUTHORITATIVE_REPOSITORY_CHANGED';
+          rounds[0] = { ...rounds[0]!, nextAction: 'STOP' };
+        } else if (scope.status === 'scope_violation') {
+          execution.status = 'scope_violation';
+          stopReason = 'EXECUTION_SCOPE_VIOLATION';
+        } else if (executionResult.status !== 'completed') {
+          execution.status = 'failed';
+          stopReason = 'EXECUTION_PARTICIPANT_FAILURE';
+        } else if (scope.actualChangedFiles.length === 0) {
+          execution.status = 'completed';
+          stopReason = 'NO_CONFIGURATION_CHANGE';
+          rounds[0] = { ...rounds[0]!, nextAction: 'STOP' };
         } else {
-          try {
-            const resultingRunRef = `${input.multiRoundRunRef}-round-2-run-000001`;
-            const rerun = await (dependencies.rerunGame ?? defaultRerunGame)({
-              workspaceRoot: evolutionWorkspace.workspaceRoot,
-              previousSourceRoot: resolve(input.initialSourceRoot),
-              outRoot: join(experimentRoot, 'game-runs'),
-              anchorRoot: join(experimentRoot, 'run-anchors'),
-              runRef: resultingRunRef,
-            });
-            await (dependencies.validateSealedSource ?? (async result => {
-              await validatePhase0RunSeal(result.outDir, result.experimentRootHash);
-            }))(rerun);
-            execution.resultingRunRef = rerun.runRef;
-            rounds[0] = {
-              ...rounds[0]!,
-              resultingRunRef: rerun.runRef,
-              nextAction: 'ROUND_2',
-            };
-            const round2Root = join(experimentRoot, 'round-2');
-            let round2: ProblemAgnosticAgentSolutionLoopResult;
+          execution.status = 'completed';
+          const verification = await (dependencies.verifyWorkspace ?? defaultVerifyWorkspace)({
+            workspaceRoot: evolutionWorkspace.workspaceRoot,
+            authoritativeRoot: resolve(input.authoritativeRoot),
+          });
+          execution.verificationResults = verification;
+          if (verification.some(item => item.status !== 'passed')) {
+            stopReason = 'DETERMINISTIC_VERIFICATION_FAILURE';
+          } else {
             try {
-              round2 = await runSingleRound({
-                round: 2,
-                repositoryRoot: evolutionWorkspace.workspaceRoot,
-                humanFollowupRoot: resolve(input.authoritativeRoot),
-                workflowInstanceRef: input.multiRoundRunRef,
-                fixedSourceRoot: rerun.outDir,
-                experimentRoot: round2Root,
-                participant: input.participant,
-                ...(input.participantMode !== undefined ? { participantMode: input.participantMode } : {}),
-                ...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
-                ...(input.authorityRefs !== undefined ? { authorityRefs: input.authorityRefs } : {}),
+              const resultingRunRef = `${input.multiRoundRunRef}-round-2-run-000001`;
+              const rerun = await (dependencies.rerunGame ?? defaultRerunGame)({
+                workspaceRoot: evolutionWorkspace.workspaceRoot,
+                previousSourceRoot: resolve(input.initialSourceRoot),
+                outRoot: join(experimentRoot, 'game-runs'),
+                anchorRoot: join(experimentRoot, 'run-anchors'),
+                runRef: resultingRunRef,
               });
+              await (dependencies.validateSealedSource ?? (async result => {
+                await validatePhase0RunSeal(result.outDir, result.experimentRootHash);
+              }))(rerun);
+              execution.resultingRunRef = rerun.runRef;
+              rounds[0] = {
+                ...rounds[0]!,
+                resultingRunRef: rerun.runRef,
+                nextAction: 'ROUND_2',
+              };
+              const round2Root = join(experimentRoot, 'round-2');
+              let round2: ProblemAgnosticAgentSolutionLoopResult;
+              try {
+                round2 = await runSingleRound({
+                  round: 2,
+                  repositoryRoot: evolutionWorkspace.workspaceRoot,
+                  humanFollowupRoot: resolve(input.authoritativeRoot),
+                  workflowInstanceRef: input.multiRoundRunRef,
+                  fixedSourceRoot: rerun.outDir,
+                  experimentRoot: round2Root,
+                  participant: input.participant,
+                  ...(input.participantMode !== undefined ? { participantMode: input.participantMode } : {}),
+                  ...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
+                  ...(input.authorityRefs !== undefined ? { authorityRefs: input.authorityRefs } : {}),
+                });
+              } catch (error) {
+                round2ParticipantJobs = await countStructuredParticipantInvocationArtifacts(round2Root);
+                throw error;
+              }
+              round2ParticipantJobs = round2.actualParticipantJobs;
+              if (round2ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
+                stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
+              } else {
+                rounds.push(roundManifest({
+                  round: 2,
+                  root: 'round-2',
+                  sourceRunRef: rerun.runRef,
+                  terminalRoute: terminalRoute(round2),
+                  nextAction: 'STOP',
+                  resultingRunRef: null,
+                }));
+                outcome = 'CROSS_ROUND_TRANSITION_OBSERVED';
+                stopReason = 'ROUND_2_COMPLETED';
+              }
             } catch (error) {
-              round2ParticipantJobs = await countStructuredParticipantInvocationArtifacts(round2Root);
-              throw error;
+              execution.status = 'failed';
+              stopReason = String(error).includes('experiment root') || String(error).includes('seal')
+                ? 'SEALED_SOURCE_VALIDATION_FAILURE'
+                : 'REAL_GAME_RERUN_FAILURE';
             }
-            round2ParticipantJobs = round2.actualParticipantJobs;
-            if (round2ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
-              stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
-            } else {
-              rounds.push(roundManifest({
-                round: 2,
-                root: 'round-2',
-                sourceRunRef: rerun.runRef,
-                terminalRoute: terminalRoute(round2),
-                nextAction: 'STOP',
-                resultingRunRef: null,
-              }));
-              outcome = 'CROSS_ROUND_TRANSITION_OBSERVED';
-              stopReason = 'ROUND_2_COMPLETED';
-            }
-          } catch (error) {
-            execution.status = 'failed';
-            stopReason = String(error).includes('experiment root') || String(error).includes('seal')
-              ? 'SEALED_SOURCE_VALIDATION_FAILURE'
-              : 'REAL_GAME_RERUN_FAILURE';
           }
         }
       }
@@ -691,6 +784,13 @@ export async function runMultiRoundExecutionValidation(
     if (execution.status === 'completed') execution.status = 'failed';
     outcome = 'STOPPED';
     stopReason = 'AUTHORITATIVE_REPOSITORY_CHANGED';
+  }
+  if (evolutionWorkspace !== null) {
+    const endCapture = await captureWorkspaceStateBestEffort(captureState, evolutionWorkspace.workspaceRoot);
+    workspaceStateProvenance.end = endCapture.state;
+    if (endCapture.failed || endCapture.state.status !== 'available') {
+      addProvenanceWarning(workspaceStateProvenance, 'END_CAPTURE_UNAVAILABLE');
+    }
   }
   const manifest: MultiRoundRunManifestV1 = {
     schemaVersion: 'multi-round-run-manifest-v1',
@@ -716,6 +816,7 @@ export async function runMultiRoundExecutionValidation(
     outcome,
     stopReason,
   };
+  await writeCreateOnly(join(experimentRoot, 'workspace-state-provenance.json'), workspaceStateProvenance);
   await writeCreateOnly(manifestPath, manifest);
   return resultFromManifest({ manifestPath, manifest });
 }

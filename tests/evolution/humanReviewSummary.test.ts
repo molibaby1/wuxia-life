@@ -113,6 +113,20 @@ function testSkipProjection(): void {
 }
 
 function testFailureAndSessionOverrides(): void {
+  const noAuditFailure = buildHumanReviewSummary({workflows: [workflow({status: 'PARTICIPANT_FAILURE', failedStage: 'SOLUTION'})]});
+  assert.equal(noAuditFailure.attention, 'participant_failure');
+  assert.match(noAuditFailure.action.steps.join(' '), /invocation/);
+  for (const stopReason of ['AUTHORITATIVE_REPOSITORY_CHANGED', 'PARTICIPANT_BUDGET_EXCEEDED', 'SEALED_SOURCE_VALIDATION_FAILURE', 'REAL_GAME_RERUN_FAILURE', 'DETERMINISTIC_VERIFICATION_FAILURE', 'NO_CONFIGURATION_CHANGE', 'UNEXPECTED_STOP', 'new host error']) {
+    const input = {sessionExecution: session({stopReason}), workflows: []};
+    const before = JSON.stringify(input);
+    const summary = buildHumanReviewSummary(input);
+    assert.equal(summary.attention, 'execution_boundary', stopReason);
+    assert.ok(summary.explanation.join(' ').includes(stopReason), stopReason);
+    assert.match(summary.action.steps.join(' '), /run-manifest.json/);
+    assert.match(summary.action.steps.join(' '), /恢复条件/);
+    assert.equal(JSON.stringify(input), before);
+  }
+
   const failure = buildHumanReviewSummary({
     reportId: 'ae-report-failure',
     workflows: [workflow({
@@ -152,6 +166,12 @@ function testFailureAndSessionOverrides(): void {
 }
 
 function testLegacyAndReasonDistinctions(): void {
+  for (const reasonCode of ['NO_PROPOSAL', 'REVIEW_REJECTED'] as const) {
+    const summary = buildHumanReviewSummary({workflows: [workflow({terminalRoute: 'SKIP', reason: reasonCode}, audit({decision: {status: 'completed', artifactRef: 'decision.json', route: 'SKIP', reasonCode}}))]});
+    assert.equal(summary.attention, 'none');
+    assert.match(summary.action.steps.join(' '), /重新评估条件/);
+  }
+
   const legacy = buildHumanReviewSummary({
     workflows: [workflow({ terminalRoute: 'SKIP', reason: 'NO_PROBLEM_FORMED' })],
   });

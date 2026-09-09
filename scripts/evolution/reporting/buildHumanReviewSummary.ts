@@ -318,9 +318,39 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
   ));
   const hasAudit = input.workflows.some(workflow => workflow.decisionAudit !== undefined);
   const session = input.sessionExecution;
-  if (latestWorkflow === null) return legacySummary(input);
+  if (session && session.execution.status !== 'scope_violation' && session.execution.status !== 'failed' && !['ROUND_1_TERMINAL_NOT_READY', 'ROUND_2_COMPLETED', 'ROUND_2_TERMINAL_NOT_READY'].includes(session.stopReason)) {
+    const recoveryByReason: Record<string, string> = {
+      AUTHORITATIVE_REPOSITORY_CHANGED: '核对 fingerprint 与实际 diff，确认变更归属；不要覆盖他人修改或自动回滚。',
+      EXECUTION_SCOPE_VIOLATION: '核对 actualChangedFiles 与 allowedWritePaths；不要通过扩大允许范围绕过校验。',
+      EXECUTION_PARTICIPANT_FAILURE: '检查 execution invocation、failure 与输出契约；只使用已有授权的恢复机制。',
+      UNEXPECTED_STOP: '保留原始异常，交工程调查者定位最后完成阶段和缺失材料，不猜测 route。',
+      DETERMINISTIC_VERIFICATION_FAILURE: '定位失败检查并区分新增回归与基线失败；不得弱化验证。',
+      NO_CONFIGURATION_CHANGE: '对照接受的方案与实际 diff，判断合理 no-op 或未落实修改。',
+      REAL_GAME_RERUN_FAILURE: '定位改后游戏运行的输入与异常；成功生成新证据前不进入下一轮。',
+      SEALED_SOURCE_VALIDATION_FAILURE: '核对 source identity、封存输入与 seal；不得复用无效来源或补造封存结果。',
+      PARTICIPANT_BUDGET_EXCEEDED: '核对 invocation accounting 与已发生调用，拆分剩余任务；不要自动增加预算。',
+    };
+    return {
+      conclusion: session.execution.status === 'scope_violation'
+        ? '本次执行被范围校验停止，不能把上一轮决策解释为已完成执行。'
+        : '本次会话被 Host 停止，不能把上一轮决策解释为已完成执行。',
+      explanation: [`Host 停止原因：${session.stopReason}。`, `执行状态：${session.execution.status}；已有变更：${session.execution.actualChangedFiles.join(', ') || '（未记录变更）'}。`],
+      recommendedAction: '交给工程调查者只读核对停止原因与原始证据；不要通过重复执行绕过停止边界。',
+      action: {
+        title: '下一步：调查 Host 停止原因',
+        steps: [
+          '入口：本报告的会话执行及 artifact 引用；从原 session 的 run-manifest.json、execution result、verification/failure 文件核对最后完成阶段。缺失材料应明确标记，不推测成功。',
+          recoveryByReason[session.stopReason] ?? '未知停止原因：保留原始异常，交工程调查者定位最后完成阶段和缺失材料，不猜测 route。',
+          '恢复条件：原因已查明，所需修复与验证完成，后续任务范围、权限和调用预算明确；保留原终态，不默认重试或晋升仓库变更。',
+        ],
+      },
+      attention: 'execution_boundary',
+      handoff: executionBoundaryHandoff(input),
+    };
+  }
+
   if (session?.execution.status === 'scope_violation') {
-    const audit = latestWorkflow.decisionAudit;
+    const audit = latestWorkflow?.decisionAudit;
     return {
       conclusion: '本次执行已尝试，但被范围校验停止；没有产生可接受的产品变更。',
       explanation: [
@@ -337,6 +367,7 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
           '产品工作流已经到达执行阶段，但 Host execution 被 scope verification 阻断；不要把它解释为产品方案被否决。',
           '上传当前 `project.zip` 给 ChatGPT，复制下面的提示词做只读集成诊断。',
           '不要通过重复 sampling 绕过范围判断。',
+          '工程调查入口：原 session 的 run-manifest.json、actualChangedFiles 与允许路径；恢复条件：范围问题已查明并完成必要验证，不扩大权限。',
         ],
       },
       attention: 'execution_boundary',
@@ -344,7 +375,7 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
     };
   }
   if (session?.execution.status === 'failed') {
-    const audit = latestWorkflow.decisionAudit;
+    const audit = latestWorkflow?.decisionAudit;
     return {
       conclusion: '本次受控执行失败，不能把上一轮的产品决策当作已完成执行。',
       explanation: [
@@ -361,13 +392,13 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
           '当前不要继续执行修改。',
           '上传当前 `project.zip` 给 ChatGPT，复制下面的提示词，围绕执行失败证据做只读集成诊断。',
           '不要为了绕过失败而重复执行。',
+          '工程调查入口：原 session 的 run-manifest.json、execution/failure 与 verification 文件；恢复条件：具体原因已解决、验证通过且后续授权明确。',
         ],
       },
       attention: 'execution_boundary',
       handoff: executionBoundaryHandoff(input),
     };
   }
-  if (!hasAudit || latestWorkflow.decisionAudit === undefined) return legacySummary(input);
   if (failureWorkflow !== undefined) {
     return {
       conclusion: '本次运行没有形成可靠的产品结论。',
@@ -376,18 +407,30 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
         '不能把这次失败解释为 SKIP 或“没有问题”。',
         '此前已完成的阶段仍可作为证据展示，完整判断链见下方的 Decision Chain。',
       ],
-      recommendedAction: '不要根据本次运行修改产品，也不要自动重跑以获得偏好的结果；若同类失败重复出现，再调查 Participant / contract 稳定性。',
+      recommendedAction: '不要根据本次运行修改产品，也不要自动重跑以获得偏好的结果；现在即可从失败材料开展 Participant / contract 只读诊断。',
       action: {
         title: '当前不要修改产品',
         steps: [
           '不要根据本次运行修改产品，也不要把它解释为“没有问题”。',
           '不要自动重跑以获得偏好的结果。',
-          '若同类失败重复出现，再上传当前 `project.zip` 并使用下面的提示词做只读调查。',
+          '工程调查入口：报告中的 failedStage、lastAvailableArtifact 与 artifact 引用，对照 invocation、failure、execution-trace 和输出契约。',
+          '恢复条件：原因已定位，必要修复已验证，并确认已有重传边界或新任务调用授权；保留原失败，不自动重跑。',
         ],
       },
       attention: 'participant_failure',
       handoff: participantFailureHandoff(input),
     };
+  }
+
+  if (!hasAudit || latestWorkflow?.decisionAudit === undefined) {
+    const summary = legacySummary(input);
+    if (latestWorkflow === null) {
+      summary.conclusion = '报告缺少 round 工作流材料，无法确认完整判断链。';
+      summary.explanation = ['当前没有可读的 round 工作流记录；材料缺失不代表没有问题，也不能补造终态。'];
+      summary.action.steps.push('工程调查入口：原 session 的 run-manifest.json 与最后生成文件；恢复条件：查明材料缺失原因，不能补造 decision 或默认重跑。');
+      summary.handoff = evidenceGapHandoff(input);
+    }
+    return summary;
   }
 
   if (session?.execution.status === 'completed' && session.crossRoundTransitions === 1) {
@@ -472,21 +515,28 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
       handoff: humanFollowupHandoff(input),
     };
   }
+  if (route === 'SKIP' && (reasonCode === 'NO_PROPOSAL' || reasonCode === 'REVIEW_REJECTED')) {
+    return {
+      conclusion: reasonCode === 'REVIEW_REJECTED' ? '本次方案被 Reviewer 拒绝，未形成可执行修改。' : '本次没有形成可执行方案。',
+      explanation: [shortCompletedStages(audit), `实际 bounded reason：${reasonCode}。`],
+      recommendedAction: '当前无需执行修改；有新证据或不同意不行动结论时，再开展只读复核。',
+      action: {
+        title: '无需执行；有新证据时复核',
+        steps: ['入口：本报告 Decision Chain 中的 Solution summary、Reviewer assessment 与 concerns。', '重新评估条件：出现新证据或明确反证；交调查者核对原依据，不默认重跑或重新创建人工事项。'],
+      },
+      attention: 'none',
+      handoff: evidenceGapHandoff(input),
+    };
+  }
   if (
     route === 'DEFER'
     || route === 'DEFER_MORE_WORK_REQUESTED'
     || reasonCode === 'INSUFFICIENT_EVIDENCE'
-    || reasonCode === 'NO_PROPOSAL'
     || reasonCode === 'REVIEW_REQUEST_MORE_WORK'
     || reasonCode === 'REVIEW_DEFERRED'
-    || reasonCode === 'REVIEW_REJECTED'
   ) {
     return {
-      conclusion: reasonCode === 'REVIEW_REJECTED'
-        ? '本次提出的方案被 Reviewer 拒绝，未形成可执行修改。'
-        : reasonCode === 'NO_PROPOSAL'
-        ? '本次没有形成可执行方案。'
-        : '本次暂不执行修改，当前证据或工作仍不足以继续。',
+      conclusion: '本次暂不执行修改，当前证据或工作仍不足以继续。',
       explanation: [
         `实际 bounded reason：${reasonCode ?? route ?? '（未记录）'}。`,
         shortCompletedStages(audit),
@@ -497,6 +547,8 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
         steps: [
           '当前不要实施修改。',
           '上传当前 `project.zip` 给 ChatGPT，复制下面的提示词，围绕所述证据缺口做只读调查。',
+          '调查入口：Decision Chain 中的 hypothesis unknowns、Solution summary 与 Reviewer concerns，以及对应 artifactRefs；逐项记录已回答、待取证或需产品裁决。',
+          '恢复条件：补充材料能回答具体缺口，方案明确修改对象、不变量与验证；所需 Human Approval 和后续调用授权已具备。当前 session 已停止，不会自动恢复。',
           '不要把重复 AE run 作为默认补证据方式。',
         ],
       },

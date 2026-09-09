@@ -96,10 +96,11 @@ export interface RunOrdinaryEvolutionInput {
 export type ObservabilityStatus = 'PASS' | 'OBSERVABILITY_REFRESH_FAILED';
 
 export interface OrdinaryEvolutionOperatorResult {
-  schemaVersion: 'ordinary-evolution-operator-result-v2';
+  schemaVersion: 'ordinary-evolution-operator-result-v3';
   sessionId: string;
   branch: string;
   headSha: string;
+  workingTreeClean: boolean;
   participantBinding: OperatorParticipantBindingId;
   sessionExecution: MultiRoundSessionSummaryV1;
   authoritativeRootChanged: boolean;
@@ -141,11 +142,8 @@ function assertOperatorPreflight(preflight: OperatorGitPreflight): void {
       `OPERATOR_PREFLIGHT_FAILED: branch must be dev (got ${JSON.stringify(preflight.branch || '(detached)')})`,
     );
   }
-  if (!preflight.clean) {
-    throw new OperatorPreflightError(
-      `OPERATOR_PREFLIGHT_FAILED: working tree must be clean before operator run:\n${preflight.statusShort}`,
-    );
-  }
+  // Dirty tree is not gated here: DEV_CONVENIENCE_ONLY (fingerprint + workingTreeClean disclosure).
+  // Not a Product Decision. Formal observe / citable AE batches should still use a clean tree.
 }
 
 async function defaultRunPhase0Source(input: {
@@ -250,8 +248,13 @@ export function formatOrdinaryEvolutionOperatorSummary(
     '会话：',
     result.sessionId,
     '',
-    '源版本：',
+    'Git 基线：',
     `${result.branch}@${result.headSha}`,
+    '',
+    '工作树：',
+    result.workingTreeClean
+      ? 'clean'
+      : 'dirty（DEV_CONVENIENCE_ONLY：本次 AE 使用当前 workspace，含未提交修改；正式观察仍应用 clean tree）',
     '',
     'Participant：',
     result.participantBinding,
@@ -374,10 +377,11 @@ export async function runOrdinaryEvolution(
   }
 
   const result: OrdinaryEvolutionOperatorResult = {
-    schemaVersion: 'ordinary-evolution-operator-result-v2',
+    schemaVersion: 'ordinary-evolution-operator-result-v3',
     sessionId,
     branch: git.branch,
     headSha: git.headSha,
+    workingTreeClean: git.clean,
     participantBinding: binding.bindingId,
     sessionExecution: ae.sessionExecution,
     authoritativeRootChanged: ae.authoritativeRootChanged,

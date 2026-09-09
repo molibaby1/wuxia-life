@@ -29,11 +29,18 @@ export class ParticipantBindingUnavailableError extends Error {
   }
 }
 
-function createCodexCurrentParticipant(executable: string): WorkspaceAgentParticipantOptions {
+function createCodexCurrentParticipant(
+  executable: string,
+  executableVersion: string,
+): WorkspaceAgentParticipantOptions {
   // Matches the repository's ordinary-run Codex host binding (no -m override).
   return {
     executable,
     timeoutMs: DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+    bindingMetadata: {
+      bindingId: OPERATOR_BINDING_CODEX_CURRENT,
+      executableVersion,
+    },
     buildArgs: (input: WorkspaceAgentJobInput) => [
       '--sandbox', 'workspace-write',
       '--ask-for-approval', 'never',
@@ -93,7 +100,7 @@ export async function resolveOperatorParticipantBinding(
     provider: 'codex-local-subagent',
     executable,
     executableVersion,
-    participant: createCodexCurrentParticipant(executable),
+    participant: createCodexCurrentParticipant(executable, executableVersion),
     participantMode: 'local-subagent',
   };
 }

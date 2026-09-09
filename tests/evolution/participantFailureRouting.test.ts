@@ -97,6 +97,46 @@ export async function runParticipantFailureRoutingTests(): Promise<void> {
     runRef: 'local-feedback-000001',
   });
   assert.equal(localFeedbackFailure?.participantErrorKind, 'timeout');
+  assert.deepEqual(localFeedbackFailure?.failureArtifactRefs, [
+    'feedback-runs/local-feedback-000001/invocation.json',
+    'feedback-runs/local-feedback-000001/human-review.md',
+  ]);
+
+  const localFeedbackEvidenceFixture = await fixtureRoot();
+  await writeLegacyFailure({
+    ...localFeedbackEvidenceFixture,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'local-feedback-evidence-000001',
+    errorKind: 'invalid_reference',
+    participantProvider: 'codex-local-subagent',
+    invocationRefFlavor: 'local',
+  });
+  const evidenceRunDir = join(
+    localFeedbackEvidenceFixture.experimentRoot,
+    'feedback-runs/local-feedback-evidence-000001',
+  );
+  await writeFile(join(evidenceRunDir, 'participant-prompt.txt'), 'exact rendered prompt');
+  await writeFile(
+    join(evidenceRunDir, 'participant-binding.json'),
+    JSON.stringify({ schemaVersion: 'local-participant-binding-v1' }),
+  );
+  await writeFile(
+    join(evidenceRunDir, 'participant-execution-trace.json'),
+    JSON.stringify({ schemaVersion: 'participant-execution-trace-v1' }),
+  );
+  const localFeedbackEvidenceFailure = await proveLegacyParticipantFailure({
+    experimentRoot: localFeedbackEvidenceFixture.experimentRoot,
+    stage: 'EXTERNAL_FEEDBACK',
+    runRef: 'local-feedback-evidence-000001',
+  });
+  assert.equal(localFeedbackEvidenceFailure?.participantErrorKind, 'invalid_reference');
+  assert.deepEqual(localFeedbackEvidenceFailure?.failureArtifactRefs, [
+    'feedback-runs/local-feedback-evidence-000001/invocation.json',
+    'feedback-runs/local-feedback-evidence-000001/human-review.md',
+    'feedback-runs/local-feedback-evidence-000001/participant-prompt.txt',
+    'feedback-runs/local-feedback-evidence-000001/participant-binding.json',
+    'feedback-runs/local-feedback-evidence-000001/participant-execution-trace.json',
+  ]);
 
   const localHypothesisFixture = await fixtureRoot();
   await writeLegacyFailure({

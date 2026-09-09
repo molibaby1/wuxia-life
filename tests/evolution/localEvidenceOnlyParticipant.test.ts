@@ -38,11 +38,13 @@ export async function runLocalEvidenceOnlyParticipantTests(): Promise<void> {
   await assert.rejects(() => readFile(join(workspaceRoot, 'src/canary.ts')));
 
   let capturedWorkspaceRoot = '';
+  const traceArtifactPath = join(root, 'participant-execution-trace.json');
   const result = await runLocalEvidenceOnlyParticipant({
     invocationRef: 'local-evidence-only-000001',
     role: 'feedback',
     workspaceRoot,
     prompt: 'return the structured result',
+    traceArtifactPath,
     participant: {
       executable: process.execPath,
       buildArgs: input => {
@@ -55,6 +57,9 @@ export async function runLocalEvidenceOnlyParticipantTests(): Promise<void> {
   assert.equal(result.ok, true);
   if (result.ok) assert.equal(result.rawParticipantResponse, '{"overallImpression":"ok","observations":[]}');
   assert.equal(capturedWorkspaceRoot, workspaceRoot);
+  const executionTrace = JSON.parse(await readFile(traceArtifactPath, 'utf8'));
+  assert.equal(executionTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(executionTrace.terminal.outcome, 'completed');
   await assert.rejects(() => readFile(join(root, 'execution-trace.json')));
 
   await assert.rejects(

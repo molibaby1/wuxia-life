@@ -23,7 +23,10 @@ import {
   type LocalEvidenceOnlyParticipantFailure,
   type LocalEvidenceOnlyParticipantSuccess,
 } from './localEvidenceOnlyParticipant';
-import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
+import {
+  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  type WorkspaceAgentParticipantOptions,
+} from './problemAgnosticSolution/agentParticipant';
 import {
   canonicalJson,
   resolvePhase0AnchorPath,
@@ -36,6 +39,7 @@ import { runPhase0 } from './phase0/runPhase0';
 
 const DEFAULT_OUT_ROOT = 'artifacts/reports/evolution/minimal-external-feedback';
 const INVOCATION_SCHEMA_VERSION = 'minimal-external-feedback-invocation-v1' as const;
+const LOCAL_PARTICIPANT_BINDING_SCHEMA_VERSION = 'local-participant-binding-v1' as const;
 const ALLOWED_OBSERVABLE_REL = join('reviewer-input', 'observable-payload.json');
 const SUBJECTIVE_DISCLAIMER = '反馈为该参与者的主观意见，未经过体验正确率/资格评分。';
 const DOTENV_PATH = resolve(process.cwd(), '.env');
@@ -141,6 +145,23 @@ async function writeCreateOnly(path: string, bytes: string | Uint8Array): Promis
   } finally {
     await handle.close();
   }
+}
+
+function buildLocalParticipantBindingArtifact(
+  participant: WorkspaceAgentParticipantOptions,
+): Record<string, unknown> {
+  const modelConfigured = participant.model ?? null;
+  return {
+    schemaVersion: LOCAL_PARTICIPANT_BINDING_SCHEMA_VERSION,
+    provider: 'codex-local-subagent',
+    bindingId: participant.bindingMetadata?.bindingId ?? null,
+    executable: participant.executable,
+    executableVersion: participant.bindingMetadata?.executableVersion ?? null,
+    modelConfigured,
+    modelResolution: modelConfigured === null ? 'HOST_CONFIGURED_UNOBSERVED' : 'EXPLICIT',
+    reasoningEffort: participant.reasoningEffort ?? null,
+    timeoutMs: participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
+  };
 }
 
 function requireApiKey(apiKey: string | undefined): string {
@@ -393,11 +414,18 @@ export async function runMinimalExternalFeedback(
       workspaceRoot: join(feedbackDir, 'participant-workspace'),
       files: { 'input/observable-payload.json': observablePayloadBytes },
     });
+    const participantPrompt = buildPlayerExperienceFeedbackPrompt(observablePayloadBytes);
+    await writeCreateOnly(join(feedbackDir, 'participant-prompt.txt'), participantPrompt);
+    await writeCreateOnly(
+      join(feedbackDir, 'participant-binding.json'),
+      canonicalJson(buildLocalParticipantBindingArtifact(localParticipant)),
+    );
     invokeResult = await runLocalEvidenceOnlyParticipant({
       invocationRef,
       role: 'feedback',
       workspaceRoot: evidenceWorkspace.workspaceRoot,
-      prompt: buildPlayerExperienceFeedbackPrompt(observablePayloadBytes),
+      prompt: participantPrompt,
+      traceArtifactPath: join(feedbackDir, 'participant-execution-trace.json'),
       participant: localParticipant,
     });
   } else {

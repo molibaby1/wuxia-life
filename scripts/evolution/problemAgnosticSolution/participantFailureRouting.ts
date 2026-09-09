@@ -149,6 +149,9 @@ export async function proveLegacyParticipantFailure(input: {
       resolve(runDirectory, 'human-review.md'),
       resolve(runDirectory, 'raw-provider-response.txt'),
       resolve(runDirectory, 'raw-participant-response.txt'),
+      resolve(runDirectory, 'participant-prompt.txt'),
+      resolve(runDirectory, 'participant-binding.json'),
+      resolve(runDirectory, 'participant-execution-trace.json'),
     ];
     const existingRefs: string[] = [];
     for (const reference of failureArtifactRefs) {

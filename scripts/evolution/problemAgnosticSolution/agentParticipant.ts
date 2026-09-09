@@ -127,6 +127,11 @@ export interface WorkspaceAgentParticipantOptions {
   buildArgs: (input: WorkspaceAgentJobInput) => string[];
   model?: string;
   reasoningEffort?: string;
+  /** Observability-only Host-visible binding facts; never used by buildArgs/process execution. */
+  bindingMetadata?: {
+    bindingId?: string;
+    executableVersion?: string;
+  };
   spawnProcess?: typeof spawn;
   timeoutMs?: number;
   env?: NodeJS.ProcessEnv;

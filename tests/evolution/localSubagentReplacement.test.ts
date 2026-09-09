@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getP8PersonaById } from '../../src/p8/personas';
 import { runMinimalExternalFeedback } from '../../scripts/evolution/runMinimalExternalFeedback';
 import { runImprovementHypothesis } from '../../scripts/evolution/runImprovementHypothesis';
 import { NO_PROBLEM_JSON_EXAMPLE } from '../../scripts/evolution/improvementHypothesis/deepseekImprovementHypothesis';
+import { DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 
 export async function runLocalSubagentReplacementTests(): Promise<void> {
   process.env.WUXIA_ENGINE_QUIET = '1';
@@ -18,6 +19,10 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
     executable: process.execPath,
     model: 'gpt-5.6-luna',
     reasoningEffort: 'high',
+    bindingMetadata: {
+      bindingId: 'TEST_LOCAL_BINDING',
+      executableVersion: 'test-exec-1.0.0',
+    },
     buildArgs: input => {
       prompts.push(input.prompt);
       let response: string;
@@ -63,6 +68,30 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
     true,
   );
 
+  const retainedPrompt = await readFile(join(feedback.feedbackDir, 'participant-prompt.txt'), 'utf8');
+  assert.equal(retainedPrompt, prompts[0]);
+  const binding = JSON.parse(
+    await readFile(join(feedback.feedbackDir, 'participant-binding.json'), 'utf8'),
+  ) as Record<string, unknown>;
+  assert.equal(binding.schemaVersion, 'local-participant-binding-v1');
+  assert.equal(binding.provider, 'codex-local-subagent');
+  assert.equal(binding.bindingId, 'TEST_LOCAL_BINDING');
+  assert.equal(binding.executable, process.execPath);
+  assert.equal(binding.executableVersion, 'test-exec-1.0.0');
+  assert.equal(binding.modelConfigured, 'gpt-5.6-luna');
+  assert.equal(binding.modelResolution, 'EXPLICIT');
+  assert.equal(binding.reasoningEffort, 'high');
+  assert.equal(binding.timeoutMs, DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS);
+  const bindingText = JSON.stringify(binding);
+  assert.equal(bindingText.includes('env'), false);
+  assert.equal(bindingText.includes('apiKey'), false);
+  assert.equal(bindingText.includes('Authorization'), false);
+  const successTrace = JSON.parse(
+    await readFile(join(feedback.feedbackDir, 'participant-execution-trace.json'), 'utf8'),
+  );
+  assert.equal(successTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(successTrace.terminal.outcome, 'completed');
+
   const hypothesis = await runImprovementHypothesis({
     runRef: 'local-subagent-feedback-001',
     sourceRoot: outRoot,
@@ -97,6 +126,70 @@ export async function runLocalSubagentReplacementTests(): Promise<void> {
   assert.equal(prompts.length, 2);
   assert.match(prompts[0]!, /Observable material/);
   assert.match(prompts[1]!, /Participant feedback/);
+
+  const invalidRefOutRoot = await mkdtemp(join(tmpdir(), 'local-subagent-invalid-ref-'));
+  const invalidRefJson = JSON.stringify({
+    overallImpression: 'test',
+    observations: [
+      {
+        feedback: 'invalid ref fixture',
+        evidenceRefs: ['entry-999999'],
+      },
+    ],
+  });
+  const invalidRefParticipant = {
+    executable: process.execPath,
+    model: 'gpt-5.6-luna',
+    reasoningEffort: 'high',
+    bindingMetadata: {
+      bindingId: 'TEST_LOCAL_BINDING',
+      executableVersion: 'test-exec-1.0.0',
+    },
+    buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(invalidRefJson)})`],
+  };
+  await assert.rejects(
+    () => runMinimalExternalFeedback({
+      runRef: 'local-subagent-invalid-ref-001',
+      persona,
+      seed: 42,
+      endAge: 1,
+      catalogVersion: 'local-subagent-test',
+      maxSteps: 20,
+      outRoot: invalidRefOutRoot,
+      localParticipant: invalidRefParticipant,
+    }),
+    /entry-999999|unknown entryId/,
+  );
+  const invalidFeedbackDir = join(
+    invalidRefOutRoot,
+    'feedback-runs',
+    'local-subagent-invalid-ref-001',
+  );
+  for (const name of [
+    'observable-payload.json',
+    'raw-participant-response.txt',
+    'participant-prompt.txt',
+    'participant-binding.json',
+    'participant-execution-trace.json',
+    'invocation.json',
+    'human-review.md',
+  ]) {
+    assert.equal(await pathExists(join(invalidFeedbackDir, name)), true, `missing ${name}`);
+  }
+  const invalidInvocation = JSON.parse(
+    await readFile(join(invalidFeedbackDir, 'invocation.json'), 'utf8'),
+  );
+  assert.equal(invalidInvocation.status, 'failed');
+  assert.equal(invalidInvocation.errorKind, 'invalid_reference');
+  assert.ok(
+    (await readFile(join(invalidFeedbackDir, 'raw-participant-response.txt'), 'utf8'))
+      .includes('entry-999999'),
+  );
+  const invalidTrace = JSON.parse(
+    await readFile(join(invalidFeedbackDir, 'participant-execution-trace.json'), 'utf8'),
+  );
+  assert.equal(invalidTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(invalidTrace.terminal.outcome, 'completed');
 }
 
 async function pathExists(path: string): Promise<boolean> {

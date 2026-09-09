@@ -166,6 +166,9 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /Acceptance is an assessment, not execution permission/i);
   assert.match(deliveredPrompt, /Host separately enforces execution eligibility and allowedWritePaths/i);
   assert.match(deliveredPrompt, /recreates behavior an authority explicitly excludes/i);
+  assert.match(deliveredPrompt, /concrete target and before\/after change/i);
+  assert.match(deliveredPrompt, /smallest discriminating check/i);
+  assert.match(deliveredPrompt, /Do not require cross-run prevalence/i);
   assert.match(deliveredPrompt, /stop broad exploration/i);
   assert.match(deliveredPrompt, /one bounded re-grounding/i);
   assert.match(deliveredPrompt, /time-budget escape hatch/i);

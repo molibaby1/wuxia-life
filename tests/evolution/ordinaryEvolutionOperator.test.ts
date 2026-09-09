@@ -167,28 +167,52 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
   {
     const repositoryRoot = await createRepo();
     let workflowCalls = 0;
-    await assert.rejects(
-      () => runOrdinaryEvolution({
-        repositoryRoot,
-        dependencies: {
-          preflightGit: async () => ({
-            branch: 'dev',
-            headSha: 'a'.repeat(40),
-            statusShort: ' M src/example.ts',
-            clean: false,
-          }),
-          resolveBinding: async () => {
-            throw new Error('binding must not resolve on dirty tree');
-          },
-          runAeWorkflow: async () => {
-            workflowCalls += 1;
-            return aeResult();
-          },
+    const result = await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        preflightGit: async () => ({
+          branch: 'dev',
+          headSha: 'a'.repeat(40),
+          statusShort: ' M src/example.ts',
+          clean: false,
+        }),
+        resolveBinding: async () => fakeBinding(),
+        allocateSessionId: async () => 'ordinary-run-20260903-000007',
+        runPhase0Source: async () => ({
+          sourceRoot: join(repositoryRoot, 'sealed-source'),
+          sourceRunRef: 'ordinary-run-20260903-000007',
+        }),
+        runAeWorkflow: async () => {
+          workflowCalls += 1;
+          return aeResult({
+            experimentRoot: join(repositoryRoot, 'experiment'),
+          });
         },
-      }),
-      /OPERATOR_PREFLIGHT_FAILED: working tree must be clean/,
-    );
-    assert.equal(workflowCalls, 0);
+        archiveReport: async () => ({
+          reportId: 'ae-report-dirty-worktree',
+          reportDirectory: join(repositoryRoot, 'artifacts/evolution/run-reports/ae-report-dirty-worktree'),
+        }),
+        refreshHumanFollowupInbox: async () => ({
+          inboxPath: join(repositoryRoot, 'artifacts/evolution/human-follow-up/index.md'),
+          activeCount: 0,
+        }),
+        refreshOperationalIndex: async () => ({
+          topLevelIndexPath: join(repositoryRoot, 'artifacts/evolution/index.md'),
+        }),
+      },
+    });
+    assert.equal(workflowCalls, 1);
+    assert.equal(result.schemaVersion, 'ordinary-evolution-operator-result-v3');
+    assert.equal(result.workingTreeClean, false);
+    const persisted = JSON.parse(
+      await readFile(join(repositoryRoot, result.sessionRoot, 'operator-result.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    assert.equal(persisted.schemaVersion, 'ordinary-evolution-operator-result-v3');
+    assert.equal(persisted.workingTreeClean, false);
+    const summary = formatOrdinaryEvolutionOperatorSummary(result);
+    assert.match(summary, /Git 基线：\ndev@a{40}/);
+    assert.match(summary, /工作树：\ndirty（DEV_CONVENIENCE_ONLY：本次 AE 使用当前 workspace，含未提交修改；正式观察仍应用 clean tree）/);
+    assert.doesNotMatch(summary, /源版本：/);
   }
 
   {
@@ -336,7 +360,8 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.equal(inboxCalls, 1);
     assert.equal(indexCalls, 1);
     assert.deepEqual(sequence, ['workflow', 'archive', 'inbox', 'index']);
-    assert.equal(result.schemaVersion, 'ordinary-evolution-operator-result-v2');
+    assert.equal(result.schemaVersion, 'ordinary-evolution-operator-result-v3');
+    assert.equal(result.workingTreeClean, true);
     assert.deepEqual(result.sessionExecution, summary);
     assert.equal(result.participantBinding, OPERATOR_BINDING_CODEX_CURRENT);
     assert.equal(result.sessionId, 'ordinary-run-20260903-000042');
@@ -354,6 +379,9 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     assert.match(text, new RegExp(`最后一轮路由：\\n${caseInput.lastRoundTerminalRoute}`));
     assert.match(text, new RegExp(`执行状态：\\n${caseInput.executionStatus}`));
     assert.match(text, /权威仓库根完整性：\n未变更/);
+    assert.match(text, /Git 基线：\ndev@c{40}/);
+    assert.match(text, /工作树：\nclean/);
+    assert.doesNotMatch(text, /源版本：/);
     assert.match(text, /Participant：\nCODEX_CURRENT/);
     assert.match(
       text,

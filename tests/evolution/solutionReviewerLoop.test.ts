@@ -92,6 +92,8 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   assert.match(prompt, /passing tests does not establish product authorization/i);
   assert.match(prompt, /permission flags constrain this review job/i);
   assert.match(prompt, /Acceptance is an assessment, not execution permission/i);
+  assert.match(prompt, /smallest missing evidence or proposal detail/i);
+  assert.match(prompt, /Rejecting an option does not establish/i);
   assert.match(prompt, /Host separately enforces execution eligibility and allowedWritePaths/i);
   assert.match(prompt, /recreates explicitly excluded behavior/i);
   assert.match(prompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);

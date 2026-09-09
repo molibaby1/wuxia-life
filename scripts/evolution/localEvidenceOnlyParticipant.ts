@@ -26,6 +26,8 @@ export interface RunLocalEvidenceOnlyParticipantInput {
   workspaceRoot: string;
   prompt: string;
   participant: WorkspaceAgentParticipantOptions;
+  /** Sidecar observability only; forwarded to runWorkspaceAgentJob when present. */
+  traceArtifactPath?: string;
 }
 
 export interface LocalEvidenceOnlyParticipantSuccess {
@@ -102,6 +104,9 @@ export async function runLocalEvidenceOnlyParticipant(
       role: input.role,
       workspaceRoot: resolve(input.workspaceRoot),
       prompt: input.prompt,
+      ...(input.traceArtifactPath !== undefined
+        ? { traceArtifactPath: input.traceArtifactPath }
+        : {}),
     },
     input.participant,
   );

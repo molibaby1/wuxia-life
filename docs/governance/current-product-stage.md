@@ -115,6 +115,14 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 - 不为了“完成验证”人为制造 READY、反复 retry 或预选保证可修改的问题。
 - 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
 
+### Engineering convenience（非 Product Decision）
+
+以下是本地便利边界，**不得**当成长久产品权威：
+
+- ordinary AE operator 允许 dirty tree 启动并披露 `workingTreeClean` + fingerprint（`DEV_CONVENIENCE_ONLY`）。正式观察 / 可引用结论的 batch 仍应 clean。
+- `runRealTestGate`：`B0_NOT_IN_WORKING_TREE_GATE`（frozen-checkout 实验；与 dirty convenience 同裁决，非产品退休）。
+- local External Feedback evidence sidecars（`participant-prompt.txt` / `participant-binding.json` / `participant-execution-trace.json`）仅覆盖 Feedback local-subagent；Hypothesis / Solution / Reviewer 不在此边界。
+
 ### Human Follow-up Loop v1
 
 Human Follow-up Loop v1 / RUN-OBSERVE Evidence Review Policy 的 authority 已记录于 PD-100 与 Auto Evolution 产品模型（HUMAN ACCEPTED / AUTHORITY RECORDED）。v1 minimal runtime 已 ENGINEERING DELIVERED，implementation review 已 ACCEPTED，real-use pilot completed (`HFL_REAL_USE_VALIDATED`)。

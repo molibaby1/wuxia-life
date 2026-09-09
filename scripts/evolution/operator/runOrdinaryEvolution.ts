@@ -1,9 +1,11 @@
 import { execFile } from 'node:child_process';
+import { randomInt } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
-import { getP8PersonaById } from '../../../src/p8/personas';
+import type { P8Persona } from '../../../src/p8/types';
+import { getP8GatePersonas } from '../../../src/p8/personas';
 import { runPhase0 } from '../phase0/runPhase0';
 import { captureWorktreeSourceFingerprint } from '../phase0/provenance';
 import { captureAuthoritativeFingerprint } from '../problemAgnosticSolution/agentWorkspace';
@@ -62,6 +64,8 @@ export interface RunOrdinaryEvolutionDependencies {
     repositoryRoot: string;
     sessionId: string;
     sessionRoot: string;
+    seed: number;
+    persona: P8Persona;
   }) => Promise<{ sourceRoot: string; sourceRunRef: string }>;
   runAeWorkflow?: (input: {
     repositoryRoot: string;
@@ -148,21 +152,34 @@ async function defaultRunPhase0Source(input: {
   repositoryRoot: string;
   sessionId: string;
   sessionRoot: string;
+  seed: number;
+  persona: P8Persona;
 }): Promise<{ sourceRoot: string; sourceRunRef: string }> {
-  const persona = getP8PersonaById('p8-martial-lin');
-  if (!persona) throw new Error('fixed ordinary-run persona p8-martial-lin is unavailable');
   const phase0 = await runPhase0({
     runRef: input.sessionId,
     outRoot: join(input.sessionRoot, 'game-runs'),
     anchorRoot: join(input.sessionRoot, 'phase0-anchors'),
-    persona,
-    seed: Date.now(),
+    persona: input.persona,
+    seed: input.seed,
     endAge: 80,
     catalogVersion: '1.0.0',
     maxSteps: 2400,
     sourceFingerprint: await captureWorktreeSourceFingerprint(input.repositoryRoot),
   });
   return { sourceRoot: phase0.outDir, sourceRunRef: input.sessionId };
+}
+
+export function selectP8PersonaForSeed(seed: number): P8Persona {
+  if (!Number.isSafeInteger(seed) || seed < 0) {
+    throw new Error(`ordinary-run seed must be a non-negative safe integer: ${seed}`);
+  }
+  const roster = getP8GatePersonas();
+  if (roster.length === 0) throw new Error('ordinary-run P8 persona roster is empty');
+  return roster[seed % roster.length]!;
+}
+
+function createOrdinaryRunSeed(): number {
+  return randomInt(0, 2 ** 32);
 }
 
 export function resolveAuthoritativeRootChanged(input: {
@@ -278,6 +295,7 @@ export function formatOrdinaryEvolutionOperatorSummary(
   ];
   if (result.observabilityError) {
     lines.push('', '可观测性错误：', result.observabilityError);
+    lines.push('下一步：工程调查者修复失败的旁路步骤；在原 session 上使用 evolution:observability:archive -- --root <原 session root>、evolution:human-followup:inbox 或 evolution:observability:index 重建对应产物。', '恢复条件：旁路生成成功；保留原 session outcome，不重跑游戏或 AE。');
   }
   return `${lines.join('\n')}\n`;
 }
@@ -300,10 +318,15 @@ export async function runOrdinaryEvolution(
   const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
   await mkdir(sessionRoot, { recursive: true });
 
+  const seed = createOrdinaryRunSeed();
+  const persona = selectP8PersonaForSeed(seed);
+
   const phase0 = await (dependencies.runPhase0Source ?? defaultRunPhase0Source)({
     repositoryRoot,
     sessionId,
     sessionRoot,
+    seed,
+    persona,
   });
 
   const ae = await (dependencies.runAeWorkflow ?? defaultRunAeWorkflow)({
@@ -403,6 +426,20 @@ function parseCliArgs(args: string[]): RunOrdinaryEvolutionInput {
   };
 }
 
+export function formatOperatorFailureGuidance(error: unknown): string {
+  const diagnosis = error instanceof OperatorPreflightError
+    ? '检查当前分支和 git status，保护未提交改动；不要自动 stash/reset。'
+    : error instanceof ParticipantBindingUnavailableError
+    ? '检查指定 Participant binding 的可用性；不要自动切换 provider。'
+    : '保留原始异常，检查最后生成的 session/staging、invocation 或 seal 文件；缺失终态不得补造。';
+  return [
+    '下一步：交给工程调查者做只读诊断。',
+    diagnosis,
+    '入口：本次 CLI 错误和已生成的运行目录；未生成报告时不依赖报告才能调查。',
+    '恢复条件：具体原因已解决、必要验证已通过，并明确后续运行授权与预算；不自动重跑。',
+  ].join('\n');
+}
+
 async function main(argv: string[]): Promise<void> {
   try {
     const result = await runOrdinaryEvolution(parseCliArgs(argv));
@@ -411,10 +448,12 @@ async function main(argv: string[]): Promise<void> {
   } catch (error) {
     if (error instanceof OperatorPreflightError || error instanceof ParticipantBindingUnavailableError) {
       console.error(error.message);
+      console.error(formatOperatorFailureGuidance(error));
       process.exitCode = 1;
       return;
     }
     console.error(error);
+    console.error(formatOperatorFailureGuidance(error));
     process.exitCode = 1;
   }
 }

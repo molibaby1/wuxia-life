@@ -4,10 +4,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   formatOrdinaryEvolutionOperatorSummary,
+  formatOperatorFailureGuidance,
+  OperatorPreflightError,
   resolveAuthoritativeRootChanged,
   runOrdinaryEvolution,
+  selectP8PersonaForSeed,
   type OperatorAeWorkflowResult,
 } from '../../scripts/evolution/operator/runOrdinaryEvolution';
+import { getP8GatePersonas } from '../../src/p8/personas';
 import {
   OPERATOR_BINDING_CODEX_CURRENT,
   parseOperatorParticipantBindingId,
@@ -121,6 +125,38 @@ async function createRepo(): Promise<string> {
 }
 
 export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
+  const unknownGuidance = formatOperatorFailureGuidance(new Error('unexpected phase0 failure'));
+  assert.match(unknownGuidance, /staging.*seal/);
+  assert.match(unknownGuidance, /恢复条件/);
+  assert.match(unknownGuidance, /不自动重跑/);
+  assert.match(formatOperatorFailureGuidance(new OperatorPreflightError('dirty')), /git status.*stash/);
+  assert.match(formatOperatorFailureGuidance(new ParticipantBindingUnavailableError('missing')), /不要自动切换 provider/);
+
+  const rosterIds = new Set(getP8GatePersonas().map(persona => persona.id));
+  const replayed = selectP8PersonaForSeed(123456789);
+  assert.equal(selectP8PersonaForSeed(123456789).id, replayed.id);
+  assert.deepEqual(
+    new Set(Array.from({ length: rosterIds.size }, (_, seed) => selectP8PersonaForSeed(seed).id)),
+    rosterIds,
+  );
+
+  // Observe the actual Phase0 handoff, stopping before any Participant job.
+  const repositoryRoot = await createRepo();
+  const stop = new Error('phase0 handoff inspected');
+  await assert.rejects(() => runOrdinaryEvolution({
+    repositoryRoot,
+    dependencies: {
+      preflightGit: async () => ({ branch: 'dev', headSha: 'c'.repeat(40), statusShort: '', clean: true }),
+      resolveBinding: async () => fakeBinding(),
+      allocateSessionId: async () => formatOrdinarySessionId('20260908', 1),
+      runPhase0Source: async input => {
+        assert.equal(input.persona.id, selectP8PersonaForSeed(input.seed).id);
+        assert.ok(Number.isSafeInteger(input.seed));
+        throw stop;
+      },
+      runAeWorkflow: async () => { throw new Error('must not start Participant work'); },
+    },
+  }), error => error === stop);
   assert.equal(parseOperatorParticipantBindingId(undefined), OPERATOR_BINDING_CODEX_CURRENT);
   assert.equal(parseOperatorParticipantBindingId('CODEX_CURRENT'), OPERATOR_BINDING_CODEX_CURRENT);
   assert.throws(

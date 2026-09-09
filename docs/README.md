@@ -112,6 +112,10 @@ full P3 remains `DEFERRED`
 
 其中 Report 只是旁路输出，不是主流程依赖；Report Analysis 是未来独立消费者，不在当前阶段建设。
 
+### 优化参考（非实施授权）
+
+- [AE 终态后续入口与优化优先级](designs/auto-evolution-continuation-improvement-reference.md)：基于真实运行的问题盘点、P0–P3 优先级及各类停止结果的后续入口目标；不改变当前权限、STOP 或 HFL 创建范围。
+
 ### Operational entry
 
 正常 repository-host 一次 ordinary Auto Evolution run 的入口：
@@ -119,6 +123,8 @@ full P3 remains `DEFERRED`
 `npm run evolution:operator:run`
 
 这是 packaging-only host wrapper：显式默认 Participant binding `CODEX_CURRENT`（不是 previous-run inheritance）、创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity、调用既有 AE workflow 恰好一次、再机械刷新 observability。它**不是**最终 Human-facing AE Skill；未来 Skill 可以调用这个稳定 host primitive。
+
+普通运行在启动时生成本次运行的 seed，并用该 seed 从现有 P8 persona roster 做可复现选择；seed 与选中的角色分别写入 sealed `inputs/run-input.json` 和 `inputs/persona.json`。同一 session 的后续 round 从 sealed inputs 重放相同角色与 seed。角色选择不依赖 hypothesis、Solution、Reviewer、route 或运行 outcome，问题选择、Participant binding、权限和 STOP 不变。
 
 Session execution 权威：
 

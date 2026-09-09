@@ -101,6 +101,14 @@ export async function runPhase0EndToEndTests(): Promise<void> {
       (runInput.selectionPolicy as { kind?: string } | undefined)?.kind,
       'oracle_effect_score_v1',
     );
+    assert.equal(runInput.seed, shared.seed);
+
+    const personaInput = JSON.parse(await readFile(
+      join(first.outDir, 'inputs', 'persona.json'),
+      'utf8',
+    )) as { id?: string; seed?: number };
+    assert.equal(personaInput.id, persona.id);
+    assert.equal(personaInput.seed, shared.seed);
 
     const surfaceSource = JSON.parse(await readFile(
       join(first.outDir, 'internal', 'player-surface-source.json'),

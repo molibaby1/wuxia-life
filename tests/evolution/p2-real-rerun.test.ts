@@ -179,8 +179,13 @@ async function main(): Promise<void> {
     { seed: initialInput.seed, endAge: initialInput.endAge, catalogVersion: initialInput.catalogVersion, maxSteps: initialInput.maxSteps },
     { seed: rerunInput.seed, endAge: rerunInput.endAge, catalogVersion: rerunInput.catalogVersion, maxSteps: rerunInput.maxSteps },
   );
-  const rerunPersona = JSON.parse(await readFile(join(rerunOutDir, 'inputs/persona.json'), 'utf8')) as { id: string };
+  const rerunPersona = JSON.parse(await readFile(join(rerunOutDir, 'inputs/persona.json'), 'utf8')) as { id: string; seed: number };
   assert.equal(rerunPersona.id, PERSONA_ID);
+  const initialPersona = JSON.parse(await readFile(join(initial.outDir, 'inputs/persona.json'), 'utf8')) as { id: string; seed: number };
+  assert.deepEqual(
+    { id: rerunPersona.id, seed: rerunPersona.seed },
+    { id: initialPersona.id, seed: initialPersona.seed },
+  );
 
   const rerunCatalog = JSON.parse(await readFile(join(rerunOutDir, 'inputs/catalog.json'), 'utf8')) as { events: Array<{ id: string; description?: string }> };
   // Prove the scenario-mutated config event (not a hardcoded Family product id) reached the sealed rerun catalog.

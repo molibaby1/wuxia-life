@@ -175,7 +175,7 @@ export async function runPhase0(
   const runtimeCatalog = options.runtimeCatalog ?? createDefaultRuntimeEventCatalog();
   const sourceFingerprint = options.sourceFingerprint ?? await captureWorktreeSourceFingerprint(process.cwd());
   const catalogInput = captureCatalogInput(runtimeCatalog);
-  const personaInput = cloneJson(options.persona);
+  const personaInput = cloneJson({ ...options.persona, seed: options.seed });
   const runInput: Phase0RunInputV1 = {
     schemaVersion: PHASE0_RUN_INPUT_VERSION,
     runRef,

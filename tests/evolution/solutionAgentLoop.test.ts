@@ -173,7 +173,43 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
   assert.match(deliveredPrompt, /one bounded re-grounding/i);
   assert.match(deliveredPrompt, /time-budget escape hatch/i);
   assert.match(deliveredPrompt, /Reviewer can independently assess/i);
-  assert.match(deliveredPrompt, /verify, distinguish, or materially update/i);
+  assert.match(deliveredPrompt, /identify pending checks that could materially change/i);
+  assert.match(deliveredPrompt, /pre-synthesis convergence checkpoint/i);
+  assert.match(deliveredPrompt, /compound checks into independently actionable parts/i);
+  assert.match(deliveredPrompt, /local\/static investigation/i);
+  assert.match(deliveredPrompt, /unavailable dynamic input/i);
+  assert.match(deliveredPrompt, /product\/authority decision/i);
+  assert.match(deliveredPrompt, /locally available, material, and bounded/i);
+  assert.match(deliveredPrompt, /before synthesis/i);
+  assert.match(deliveredPrompt, /unavailable dynamic input must not block.*local\/static/i);
+  assert.match(deliveredPrompt, /update candidate, proposal, and unknowns/i);
+  assert.match(deliveredPrompt, /no .*local.*material.*bounded.*pending check remains/i);
+  assert.match(deliveredPrompt, /If the evidence supports a reviewable option after the checkpoint/i);
+  assert.match(deliveredPrompt, /This checkpoint does not require an exhaustive audit/i);
+  assert.match(deliveredPrompt, /minimum sufficient evidence/i);
+  assert.match(deliveredPrompt, /decision-relevant subquestion/i);
+  assert.match(deliveredPrompt, /stronger.*dynamic.*verification/i);
+  assert.match(deliveredPrompt, /source.*configuration.*existing tests/i);
+  assert.match(deliveredPrompt, /unresolved remainder/i);
+  const minimumEvidenceIndex = deliveredPrompt.indexOf('minimum sufficient evidence');
+  const splitCompoundCheckIndex = deliveredPrompt.indexOf('Split compound checks');
+  const completeLocalCheckIndex = deliveredPrompt.indexOf('Complete every local/static investigation part');
+  const synthesisPermissionIndex = deliveredPrompt.indexOf('Synthesis is permitted only');
+  assert.ok(minimumEvidenceIndex >= 0);
+  assert.ok(splitCompoundCheckIndex >= 0);
+  assert.ok(completeLocalCheckIndex >= 0);
+  assert.ok(synthesisPermissionIndex >= 0);
+  assert.ok(minimumEvidenceIndex < splitCompoundCheckIndex);
+  assert.ok(splitCompoundCheckIndex < completeLocalCheckIndex);
+  assert.ok(completeLocalCheckIndex < synthesisPermissionIndex);
+  assert.doesNotMatch(
+    deliveredPrompt,
+    /As soon as the evidence supports a reviewable option, synthesize and return it/i,
+  );
+  const convergenceCheckpointIndex = deliveredPrompt.indexOf('pre-synthesis convergence checkpoint');
+  assert.ok(convergenceCheckpointIndex >= 0);
+  assert.ok(synthesisPermissionIndex >= 0);
+  assert.ok(convergenceCheckpointIndex < synthesisPermissionIndex);
   assert.match(deliveredPrompt, /Reference format requirements:/i);
   assert.match(deliveredPrompt, /repoRefs must reference repository-relative regular files/i);
   assert.match(deliveredPrompt, /path:line/i);

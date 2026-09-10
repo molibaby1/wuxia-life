@@ -196,6 +196,7 @@ export async function runSolutionReviewer(input: RunSolutionReviewerInput): Prom
       role: 'reviewer',
       workspaceRoot: input.workspaceRoot,
       prompt,
+      traceArtifactPath: join(input.destinationRoot, 'execution-trace.json'),
     },
     input.participant,
   );

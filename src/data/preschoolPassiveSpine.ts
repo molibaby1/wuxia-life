@@ -300,3 +300,86 @@ export function selectPreschoolPassiveEntry(
   }
   return weighted[weighted.length - 1].entry;
 }
+
+function pickWeightedPreschoolEntry(
+  pool: PreschoolPassiveEntry[],
+  originTags: Set<string>,
+  state: GameState,
+  random: () => number,
+): PreschoolPassiveEntry | undefined {
+  if (pool.length === 0) return undefined;
+  const weighted = pool.map(entry => ({
+    entry,
+    weight: scoreEntry(entry, originTags, state),
+  }));
+  const total = weighted.reduce((sum, item) => sum + item.weight, 0);
+  if (total <= 0) return undefined;
+  let roll = random() * total;
+  for (const item of weighted) {
+    roll -= item.weight;
+    if (roll <= 0) return item.entry;
+  }
+  return weighted[weighted.length - 1].entry;
+}
+
+function filterPreschoolPool(
+  ageEntries: PreschoolPassiveEntry[],
+  recentTitles: string[],
+  predicate: (entry: PreschoolPassiveEntry) => boolean,
+): PreschoolPassiveEntry[] {
+  let pool = ageEntries.filter(predicate);
+  pool = suppressRecentTitleRepeats(pool, recentTitles);
+  pool = enforceMaxConsecutiveTitleCap(pool, recentTitles, 2);
+  return pool;
+}
+
+/** Origin-tagged preschool beat; never falls through to everyday texture. */
+export function selectPreschoolOriginExclusiveEntry(
+  state: GameState,
+  random: () => number = Math.random,
+): PreschoolPassiveEntry {
+  const age = state.player?.age ?? 0;
+  const originTags = resolveOriginTags(state);
+  const history = new Set((state.eventHistory ?? []).map(record => record.eventId));
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
+  const ageEntries = getPreschoolPassiveEntries(age);
+  const originPredicate = (entry: PreschoolPassiveEntry) =>
+    isPreschoolPassiveEligible(entry, originTags) && !isNeutralOnlyPreschoolEntry(entry);
+  let pool = filterPreschoolPool(
+    ageEntries,
+    recentTitles,
+    entry => originPredicate(entry) && !history.has(entry.id),
+  );
+  if (pool.length === 0) {
+    pool = filterPreschoolPool(ageEntries, recentTitles, originPredicate);
+  }
+  return (
+    pickWeightedPreschoolEntry(pool, originTags, state, random) ??
+    buildPreschoolPassiveGapEntry(age, recentTitles)
+  );
+}
+
+/** Everyday texture only (`originTags: ['neutral']`). */
+export function selectNeutralOnlyPreschoolEntry(
+  state: GameState,
+  random: () => number = Math.random,
+): PreschoolPassiveEntry {
+  const age = state.player?.age ?? 0;
+  const originTags = resolveOriginTags(state);
+  const history = new Set((state.eventHistory ?? []).map(record => record.eventId));
+  const recentTitles = getRecentPassiveNarrativeTitles(state);
+  const ageEntries = getPreschoolPassiveEntries(age);
+  const texturePredicate = (entry: PreschoolPassiveEntry) => isNeutralOnlyPreschoolEntry(entry);
+  let pool = filterPreschoolPool(
+    ageEntries,
+    recentTitles,
+    entry => texturePredicate(entry) && !history.has(entry.id),
+  );
+  if (pool.length === 0) {
+    pool = filterPreschoolPool(ageEntries, recentTitles, texturePredicate);
+  }
+  return (
+    pickWeightedPreschoolEntry(pool, originTags, state, random) ??
+    buildPreschoolPassiveGapEntry(age, recentTitles)
+  );
+}

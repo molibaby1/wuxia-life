@@ -157,6 +157,9 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
     },
   });
   assert.equal(result.ok, true);
+  const successTrace = JSON.parse(await readFile(join(root, 'reviewer-agent/execution-trace.json'), 'utf8'));
+  assert.equal(successTrace.terminal.outcome, 'completed');
+  assert.ok(successTrace.events.some((event: { type: string }) => event.type === 'process_start'));
   assert.equal(result.review?.decision, 'ACCEPT_OPTION');
   assert.equal(JSON.parse(await readFile(join(root, 'reviewer-agent/review.json'), 'utf8')).acceptedOptionId, 'option-000001');
   assert.match(deliveredPrompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);
@@ -188,6 +191,42 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
       contentSha256: canonicalSkillSha256,
     },
   ]);
+
+  const timeoutRoot = join(root, 'timeout-reviewer-agent');
+  let timeoutCalls = 0;
+  const timeoutResult = await runSolutionReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'reviewer-timeout',
+    jobNumber: 4,
+    destinationRoot: timeoutRoot,
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      timeoutMs: 1000,
+      buildArgs: () => {
+        timeoutCalls += 1;
+        return ['-e', 'process.stderr.write("reviewer started"); setInterval(() => {}, 1000)'];
+      },
+    },
+  });
+  assert.equal(timeoutResult.ok, false);
+  assert.equal(timeoutResult.ok ? undefined : timeoutResult.errorKind, 'timeout');
+  assert.equal(timeoutCalls, 1, 'Reviewer timeout must not cause a retry');
+  const timeoutTrace = JSON.parse(await readFile(join(timeoutRoot, 'execution-trace.json'), 'utf8'));
+  assert.equal(timeoutTrace.schemaVersion, 'participant-execution-trace-v1');
+  assert.equal(timeoutTrace.terminal.outcome, 'timeout');
+  assert.equal(timeoutTrace.invocation.timeoutMs, 1000);
+  assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'process_start'));
+  assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'output_activity'));
+  assert.ok(timeoutTrace.events.some((event: { type: string }) => event.type === 'timeout'));
+  assert.ok(timeoutTrace.terminal.lastObservableActivityElapsedMs <= timeoutTrace.terminal.elapsedMs);
+  assert.equal(JSON.parse(await readFile(join(timeoutRoot, 'failure.json'), 'utf8')).errorKind, 'timeout');
+  assert.ok(!JSON.stringify(timeoutTrace).includes('reviewer started'), 'Activity trace must not duplicate output payload');
 
   const locatorReview = { ...review, repoRefs: ['src/example.ts:1-2'] };
   const locatorResult = await runSolutionReviewer({

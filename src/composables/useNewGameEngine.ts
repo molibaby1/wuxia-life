@@ -30,7 +30,8 @@ import { buildPeriodSummary } from '../core/activePlanning/periodSummaryBuilder'
 import {
   commitAnnualPassiveMemory,
   isAnnualPassiveMemoryAge,
-  prepareAnnualPassiveMemory,
+  isPreschoolSeasonMemoryAge,
+  preparePackedPassiveMemory,
   type AnnualPassiveMemoryPlan,
 } from '../core/activePlanning/annualPassiveMemory';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../data/infantPassiveNarratives';
@@ -195,10 +196,12 @@ export function useNewGameEngine() {
         engineState.availableActiveActions = [];
         engineState.isActiveActionMode = false;
         engineState.isPassiveProgressionMode = true;
-        if (isAnnualPassiveMemoryAge(age)) {
-          const annual = prepareAnnualPassiveMemory(gameEngine.getGameState());
-          engineState.annualPassiveMemory = annual;
-          engineState.passiveNarrative = { title: annual.headline, text: annual.body };
+        if (isAnnualPassiveMemoryAge(age) || isPreschoolSeasonMemoryAge(age)) {
+          const packed = preparePackedPassiveMemory(gameEngine.getGameState());
+          engineState.annualPassiveMemory = packed;
+          engineState.passiveNarrative = packed
+            ? { title: packed.headline, text: packed.body }
+            : null;
         } else {
           const entry = selectPassiveNarrative(gameEngine.getGameState());
           engineState.annualPassiveMemory = null;
@@ -222,10 +225,12 @@ export function useNewGameEngine() {
           engineState.availableActiveActions = [];
           engineState.isActiveActionMode = false;
           engineState.isPassiveProgressionMode = true;
-          if (isAnnualPassiveMemoryAge(age)) {
-            const annual = prepareAnnualPassiveMemory(gameEngine.getGameState());
-            engineState.annualPassiveMemory = annual;
-            engineState.passiveNarrative = { title: annual.headline, text: annual.body };
+          if (isAnnualPassiveMemoryAge(age) || isPreschoolSeasonMemoryAge(age)) {
+            const packed = preparePackedPassiveMemory(gameEngine.getGameState());
+            engineState.annualPassiveMemory = packed;
+            engineState.passiveNarrative = packed
+              ? { title: packed.headline, text: packed.body }
+              : null;
           } else {
             const entry = selectPassiveNarrative(gameEngine.getGameState());
             engineState.annualPassiveMemory = null;
@@ -573,15 +578,20 @@ export function useNewGameEngine() {
   const executePassiveChildhoodTick = (): PeriodSummaryDisplay => {
     const state = gameEngine.getGameState();
     const age = state.player?.age ?? 0;
-    if (isAnnualPassiveMemoryAge(age)) {
-      const annual = engineState.annualPassiveMemory;
-      if (!annual) throw new Error('Annual passive memory must be prepared before acknowledgement');
-      const result = commitAnnualPassiveMemory(state, annual);
-      gameEngine.advanceTime(1, 'year');
+    if (isAnnualPassiveMemoryAge(age) || isPreschoolSeasonMemoryAge(age)) {
+      const packed = engineState.annualPassiveMemory;
+      if (!packed) throw new Error('Packed passive memory must be prepared before acknowledgement');
+      const result = commitAnnualPassiveMemory(state, packed);
+      if (isAnnualPassiveMemoryAge(age)) {
+        gameEngine.advanceTime(1, 'year');
+        engineState.storyGapPassiveServed = false;
+      } else {
+        gameEngine.advanceTime(3, 'month');
+        engineState.storyGapPassiveServed = true;
+      }
       engineState.annualPassiveMemory = null;
       engineState.passiveNarrative = null;
       engineState.isPassiveProgressionMode = false;
-      engineState.storyGapPassiveServed = false;
       return buildPeriodSummary({
         sourceLabel: '童年岁月',
         headline: result.headline,

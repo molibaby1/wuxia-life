@@ -33,7 +33,8 @@ import {
 import {
   commitAnnualPassiveMemory,
   isAnnualPassiveMemoryAge,
-  prepareAnnualPassiveMemory,
+  isPreschoolSeasonMemoryAge,
+  preparePackedPassiveMemory,
 } from '../../core/activePlanning/annualPassiveMemory';
 import { selectPassiveNarrative, shouldRecordPassiveNarrativeInHistory } from '../../data/infantPassiveNarratives';
 import {
@@ -550,10 +551,12 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
     }
     if (!this.volatile.passiveNarrative) {
       this.runWithRandomSync(() => {
-        if (isAnnualPassiveMemoryAge(age)) {
-          const annual = prepareAnnualPassiveMemory(this.engine.getGameState());
-          this.volatile.annualPassiveMemory = annual;
-          this.volatile.passiveNarrative = { title: annual.headline, text: annual.body };
+        if (isAnnualPassiveMemoryAge(age) || isPreschoolSeasonMemoryAge(age)) {
+          const packed = preparePackedPassiveMemory(this.engine.getGameState());
+          this.volatile.annualPassiveMemory = packed;
+          this.volatile.passiveNarrative = packed
+            ? { title: packed.headline, text: packed.body }
+            : null;
         } else {
           const entry = selectPassiveNarrative(this.engine.getGameState());
           this.volatile.annualPassiveMemory = null;
@@ -566,21 +569,34 @@ export class HeadlessEngineSessionImpl implements HeadlessEngineSession {
   private async executePassiveChildhoodTick(): Promise<void> {
     const state = this.engine.getGameState();
     const age = state.player?.age ?? 0;
-    if (isAnnualPassiveMemoryAge(age)) {
-      const annual = this.volatile.annualPassiveMemory;
-      if (!annual) {
+    if (isAnnualPassiveMemoryAge(age) || isPreschoolSeasonMemoryAge(age)) {
+      const packed = this.volatile.annualPassiveMemory;
+      if (!packed) {
         throw new ProgressionError(
           'INVALID_SESSION_PHASE',
-          'Annual passive memory must be prepared before acknowledgement',
+          'Packed passive memory must be prepared before acknowledgement',
         );
       }
-      commitAnnualPassiveMemory(state, annual);
-      this.engine.advanceTime(1, 'year');
+      const result = commitAnnualPassiveMemory(state, packed);
       this.volatile.annualPassiveMemory = null;
       this.volatile.passiveNarrative = null;
-      this.volatile.storyGapPassiveServed = false;
-      await this.resolveAfterPlanningAck();
-      if (this.getSessionPhase() !== 'active_planning') this.ensurePassivePresentation();
+      if (isAnnualPassiveMemoryAge(age)) {
+        this.engine.advanceTime(1, 'year');
+        this.volatile.storyGapPassiveServed = false;
+        await this.resolveAfterPlanningAck();
+        if (this.getSessionPhase() !== 'active_planning') this.ensurePassivePresentation();
+        return;
+      }
+      this.engine.advanceTime(3, 'month');
+      this.volatile.storyGapPassiveServed = true;
+      this.volatile.pendingPeriodSummary = buildPeriodSummary({
+        sourceLabel: '童年岁月',
+        headline: result.headline,
+        body: result.body,
+        deltas: result.deltas,
+        deltaCause: result.headline,
+        lifeStates: this.engine.getGameState().player?.lifeStates,
+      });
       return;
     }
     const displayedTitle = this.volatile.passiveNarrative?.title;

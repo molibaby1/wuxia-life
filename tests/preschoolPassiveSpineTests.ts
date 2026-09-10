@@ -1,5 +1,6 @@
 import {
   getPreschoolPassiveEntries,
+  isNeutralOnlyPreschoolEntry,
   selectPreschoolPassiveEntry,
   validatePreschoolPassiveOriginTags,
 } from '../src/data/preschoolPassiveSpine';
@@ -35,6 +36,26 @@ export function runPreschoolPassiveSpineTests(): void {
 
   const clever = getPreschoolPassiveEntries(3).find(e => e.id === 'preschool_scholar_clever_speech');
   assert(clever !== undefined, 'clever_speech equivalent in config');
+
+  const textureIds = [
+    'preschool_neutral_new_year_watch',
+    'preschool_neutral_childhood_fever',
+    'preschool_neutral_night_fear',
+    'preschool_neutral_peer_hide_and_seek',
+    'preschool_neutral_broken_bowl',
+    'preschool_neutral_first_lie',
+    'preschool_neutral_kin_visit',
+    'preschool_neutral_waiting_threshold',
+  ];
+  const age5Neutrals = getPreschoolPassiveEntries(5).filter(isNeutralOnlyPreschoolEntry);
+  for (const id of textureIds) {
+    const entry = age5Neutrals.find(item => item.id === id);
+    assert(entry !== undefined, `everyday texture ${id} covers age 5`);
+    assert(entry.originTags.length === 1 && entry.originTags[0] === 'neutral', `${id} is neutral-only`);
+    assert(entry.ageMin === 4 && entry.ageMax === 7, `${id} spans 4–7`);
+    assert(!entry.statDeltas, `${id} does not grant stats`);
+  }
+  assert(age5Neutrals.length >= 8, 'age 5 has at least 8 everyday texture entries');
 
   const picked = selectPreschoolPassiveEntry({
     player: { age: 5 },

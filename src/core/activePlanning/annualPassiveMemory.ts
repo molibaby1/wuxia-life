@@ -3,7 +3,11 @@ import {
   selectPassiveNarrative,
   shouldRecordPassiveNarrativeInHistory,
 } from '../../data/infantPassiveNarratives';
-import { appendPassiveTitleToHistory } from '../../data/preschoolPassiveSpine';
+import {
+  appendPassiveTitleToHistory,
+  selectNeutralOnlyPreschoolEntry,
+  selectPreschoolOriginExclusiveEntry,
+} from '../../data/preschoolPassiveSpine';
 import type { GameState } from '../../types/eventTypes';
 import type { PassiveNarrativeEntry } from '../../data/passiveNarrativeTypes';
 import { applyStatDeltas } from './ActivePlanningService';
@@ -11,6 +15,9 @@ import { clampPassiveStatDeltasForAge } from './ageActionStatCaps';
 
 export const ANNUAL_PASSIVE_MEMORY_MAX_AGE = 3;
 export const ANNUAL_PASSIVE_MEMORY_ENTRY_COUNT = 2;
+export const PRESCHOOL_SEASON_MEMORY_MIN_AGE = 4;
+export const PRESCHOOL_SEASON_MEMORY_MAX_AGE = 7;
+export const PRESCHOOL_SEASON_MEMORY_ENTRY_COUNT = 3;
 
 export interface AnnualPassiveMemoryPlan {
   headline: string;
@@ -27,6 +34,10 @@ export interface AnnualPassiveMemoryResult {
 
 export function isAnnualPassiveMemoryAge(age: number): boolean {
   return age >= 0 && age <= ANNUAL_PASSIVE_MEMORY_MAX_AGE;
+}
+
+export function isPreschoolSeasonMemoryAge(age: number): boolean {
+  return age >= PRESCHOOL_SEASON_MEMORY_MIN_AGE && age <= PRESCHOOL_SEASON_MEMORY_MAX_AGE;
 }
 
 function addDeltas(target: Record<string, number>, source: Record<string, number>): void {
@@ -69,6 +80,36 @@ export function prepareAnnualPassiveMemory(
     body: entries.map(entry => `【${entry.title}】${entry.text}`).join('\n\n'),
     entries,
   };
+}
+
+export function preparePreschoolSeasonMemory(
+  state: GameState,
+  random: () => number = Math.random,
+): AnnualPassiveMemoryPlan {
+  const working = JSON.parse(JSON.stringify(state)) as GameState;
+  const originOne = selectPreschoolOriginExclusiveEntry(working, random);
+  applyEntry(working, originOne, {});
+  const texture = selectNeutralOnlyPreschoolEntry(working, random);
+  applyEntry(working, texture, {});
+  const originTwo = selectPreschoolOriginExclusiveEntry(working, random);
+  applyEntry(working, originTwo, {});
+  const entries = [originOne, texture, originTwo];
+  const age = state.player?.age ?? 0;
+  return {
+    headline: `${age}岁这一季`,
+    body: entries.map(entry => `【${entry.title}】${entry.text}`).join('\n\n'),
+    entries,
+  };
+}
+
+export function preparePackedPassiveMemory(
+  state: GameState,
+  random: () => number = Math.random,
+): AnnualPassiveMemoryPlan | null {
+  const age = state.player?.age ?? 0;
+  if (isAnnualPassiveMemoryAge(age)) return prepareAnnualPassiveMemory(state, random);
+  if (isPreschoolSeasonMemoryAge(age)) return preparePreschoolSeasonMemory(state, random);
+  return null;
 }
 
 export function commitAnnualPassiveMemory(

@@ -14,10 +14,13 @@ import {
 import { getP8GatePersonas } from '../../src/p8/personas';
 import {
   OPERATOR_BINDING_CODEX_CURRENT,
+  createCodexCurrentParticipant,
   parseOperatorParticipantBindingId,
   ParticipantBindingUnavailableError,
   type ResolvedOperatorParticipantBinding,
 } from '../../scripts/evolution/operator/resolveParticipantBinding';
+import { runStructuredParticipantExecution } from '../../scripts/evolution/problemAgnosticSolution/runStructuredParticipantExecution';
+import type { WorkspaceAgentJobInput } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
 import { allocateOrdinarySessionId, formatOrdinarySessionId } from '../../scripts/evolution/operator/allocateSessionId';
 import {
   buildMultiRoundSessionSummary,
@@ -125,6 +128,92 @@ async function createRepo(): Promise<string> {
 }
 
 export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
+  const binding = createCodexCurrentParticipant('codex', 'fixture');
+  const job: WorkspaceAgentJobInput = { invocationRef: 'fixture', role: 'solution', workspaceRoot: process.cwd(), prompt: 'fixture' };
+  const threadId = '01a08753-9e8e-7973-90ef-52893da1c561';
+  const threadRef = { provider: 'codex-exec', opaqueId: threadId };
+  assert.ok(binding.buildArgs(job).includes('--json'));
+  assert.ok(!binding.buildArgs(job).includes('--ephemeral'));
+  assert.ok(binding.sameThreadContinuation);
+  const resumeArgs = binding.sameThreadContinuation.buildArgs(job, threadRef);
+  assert.ok(resumeArgs.includes('resume'));
+  assert.ok(resumeArgs.includes(threadId));
+  assert.ok(!resumeArgs.includes('--last'));
+  for (const role of ['reviewer', 'feedback', 'hypothesis', 'configuration-execution'] as const) {
+    const other = { ...job, role };
+    assert.ok(binding.buildArgs(other).includes('--ephemeral'));
+    assert.ok(!binding.buildArgs(other).includes('--json'));
+    assert.throws(() => binding.sameThreadContinuation!.buildArgs(other, threadRef));
+    assert.deepEqual(binding.interpretCompletedOutput!({ job: other, stdout: 'original', stderr: '' }), { ok: true, rawOutput: 'original' });
+    assert.equal(binding.interpretCompletedOutput!({ job: other, stdout: 'original', stderr: '', expectedThreadRef: threadRef }).ok, false);
+  }
+  const wire = (payload: string, id = threadId) => [
+    { type: 'thread.started', thread_id: id },
+    { type: 'turn.started' },
+    { type: 'item.completed', item: { type: 'agent_message', text: payload } },
+    { type: 'turn.completed', usage: {} },
+  ].map(e => JSON.stringify(e)).join('\n');
+  const interpret = (stdout: string, resumed = false) => binding.interpretCompletedOutput!({ job, stdout, stderr: '', ...(resumed ? { expectedThreadRef: threadRef } : {}) });
+  const valid = interpret(wire(' {"ok":true} '));
+  assert.ok(valid.ok);
+  if (valid.ok) assert.equal(valid.rawOutput, ' {"ok":true} ', 'Host must preserve Role payload verbatim');
+  for (const invalid of [
+    'null', '[]', '17', 'not-json',
+    wire('{}').split('\n').slice(0, -1).join('\n'),
+    wire('{}').split('\n').slice(1).join('\n'),
+    wire('{}').split('\n').filter(line => !line.includes('agent_message')).join('\n'),
+    wire('{}').split('\n').filter(line => !line.includes('turn.started')).join('\n'),
+    wire('{}', 'not-a-uuid'),
+    wire('{}') + '\n' + JSON.stringify({ type: 'thread.started', thread_id: '01a08753-9e8e-7973-90ef-52893da1c562' }),
+    wire('{}') + '\n' + JSON.stringify({ type: 'turn.failed' }),
+    wire('{}') + '\n' + JSON.stringify({ type: 'error' }),
+    wire('{}') + '\n' + JSON.stringify({ type: 'turn.completed' }),
+    wire('{}') + '\n' + JSON.stringify({ type: 'item.started', item: { type: 'command_execution' } }),
+  ]) assert.equal(interpret(invalid).ok, false, invalid);
+  const mismatch = interpret(wire('{}', '01a08753-9e8e-7973-90ef-52893da1c562'), true);
+  assert.ok(!mismatch.ok);
+  if (!mismatch.ok) assert.equal(mismatch.errorKind, 'continuation');
+
+  for (const scenario of [
+    { name: 'valid', first: '{"ok":true}', second: '', calls: 1, ok: true },
+    { name: 'envelope-recovered', first: '{"ok":true', second: '{"ok":true}', calls: 2, ok: true },
+    { name: 'schema-rejected', first: '{"wrong":true}', second: '', calls: 1, ok: false },
+    { name: 'second-envelope-failed', first: '{', second: '{', calls: 2, ok: false },
+    { name: 'resume-mismatch', first: '{', second: '{"ok":true}', calls: 2, ok: false },
+    { name: 'broken-transport', first: '{}', second: '', calls: 1, ok: false },
+  ]) {
+    const destinationRoot = await mkdtemp(join(tmpdir(), `codex-binding-${scenario.name}-`));
+    let calls = 0;
+    const nodeArgs = (payload: string, id = threadId) => ['-e', `process.stdout.write(${JSON.stringify(wire(payload, id))})`];
+    const execution = await runStructuredParticipantExecution({
+      invocationRef: scenario.name, role: 'solution', workspaceRoot: process.cwd(), destinationRoot,
+      initialPrompt: 'fixture', expectedRoleSchemaName: 'fixture', retransmissionEnabled: true,
+      participant: {
+        ...binding, executable: process.execPath,
+        buildArgs: () => {
+          calls++;
+          return scenario.name === 'broken-transport'
+            ? ['-e', 'process.stdout.write("null")']
+            : nodeArgs(scenario.first);
+        },
+        sameThreadContinuation: { provider: 'codex-exec', buildArgs: (input, ref) => {
+          binding.sameThreadContinuation!.buildArgs(input, ref);
+          assert.deepEqual(ref, threadRef);
+          calls++;
+          return nodeArgs(scenario.second, scenario.name === 'resume-mismatch' ? '01a08753-9e8e-7973-90ef-52893da1c562' : threadId);
+        } },
+      },
+      validateSchema: value => { assert.equal(value.ok, true); return value; },
+      validateAcceptedResult: async () => {},
+    });
+    assert.equal(execution.ok, scenario.ok, scenario.name);
+    assert.equal(calls, scenario.calls, scenario.name);
+    assert.equal(await readFile(join(destinationRoot, 'terminal-attempt-0.txt'), 'utf8'), scenario.name === 'broken-transport' ? 'null' : scenario.first);
+    if (calls === 2) {
+      const requested = execution.executionTrace.events.find(e => e.type === 'participant_envelope_retransmission_requested');
+      assert.equal(requested?.timeoutMs, 60000);
+    }
+  }
   const unknownGuidance = formatOperatorFailureGuidance(new Error('unexpected phase0 failure'));
   assert.match(unknownGuidance, /staging.*seal/);
   assert.match(unknownGuidance, /恢复条件/);

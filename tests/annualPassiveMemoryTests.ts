@@ -2,8 +2,12 @@ import {
   ANNUAL_PASSIVE_MEMORY_ENTRY_COUNT,
   commitAnnualPassiveMemory,
   isAnnualPassiveMemoryAge,
+  isPreschoolSeasonMemoryAge,
+  PRESCHOOL_SEASON_MEMORY_ENTRY_COUNT,
   prepareAnnualPassiveMemory,
+  preparePreschoolSeasonMemory,
 } from '../src/core/activePlanning/annualPassiveMemory';
+import { isNeutralOnlyPreschoolEntry } from '../src/data/preschoolPassiveSpine';
 import { reactive } from 'vue';
 import { useNewGameEngine } from '../src/composables/useNewGameEngine';
 import { GameEngineIntegration, gameEngine } from '../src/core/GameEngineIntegration';
@@ -138,7 +142,12 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   assert(isAnnualPassiveMemoryAge(0), 'age 0 is annual-memory band');
   assert(isAnnualPassiveMemoryAge(3), 'age 3 is annual-memory band');
   assert(!isAnnualPassiveMemoryAge(4), 'age 4 leaves annual-memory band');
+  assert(isPreschoolSeasonMemoryAge(4), 'age 4 is season-memory band');
+  assert(isPreschoolSeasonMemoryAge(7), 'age 7 is season-memory band');
+  assert(!isPreschoolSeasonMemoryAge(3), 'age 3 stays on annual memory');
+  assert(!isPreschoolSeasonMemoryAge(8), 'age 8 leaves season-memory band');
   testPrepareAnnualPassiveMemoryWithReactiveState();
+  testPreparePreschoolSeasonMemory();
 
   const state = merchantInfantState(0);
   const plan = prepareAnnualPassiveMemory(state, () => 0);
@@ -165,6 +174,68 @@ export async function runAnnualPassiveMemoryTests(): Promise<void> {
   await testHeadlessAnnualAdvance();
   await testAnnualPlanClearsAcrossProgressionResets();
   await testBrowserAnnualMemoryPreemptsLegacyInfantEvents();
+  await testHeadlessSeasonAdvance();
+}
+
+function martialPreschoolState(age = 5): GameState {
+  const base = new GameEngineIntegration().getGameState();
+  return {
+    ...base,
+    player: {
+      ...base.player,
+      age,
+      constitution: 10,
+      healthStatus: 'healthy',
+      statuses: [],
+      flags: { origin_wuxia_family: true },
+      traits: [],
+    } as PlayerState,
+    flags: { ...base.flags, origin_wuxia_family: true, origin_id: 'martial_family' },
+    currentTime: { year: 5, month: 1, day: 1 },
+    eventHistory: [],
+  };
+}
+
+function testPreparePreschoolSeasonMemory(): void {
+  const state = martialPreschoolState(5);
+  const plan = preparePreschoolSeasonMemory(state, () => 0);
+  assert(plan.entries.length === PRESCHOOL_SEASON_MEMORY_ENTRY_COUNT, 'season card packs three beats');
+  assert(plan.headline === '5岁这一季', `unexpected season headline: ${plan.headline}`);
+  assert(plan.body.split('\n\n').length === 3, 'season body contains three narrative beats');
+  const textureCount = plan.entries.filter(isNeutralOnlyPreschoolEntry).length;
+  assert(textureCount === 1, `season pack must contain exactly one everyday texture, got ${textureCount}`);
+  assert(isNeutralOnlyPreschoolEntry(plan.entries[1]), 'everyday texture sits in the middle beat');
+  assert(!isNeutralOnlyPreschoolEntry(plan.entries[0]), 'first beat is origin-flavored');
+  assert(!isNeutralOnlyPreschoolEntry(plan.entries[2]), 'third beat is origin-flavored');
+  assert((state.eventHistory ?? []).length === 0, 'preparing the season card does not mutate gameplay state');
+  const result = commitAnnualPassiveMemory(state, plan);
+  assert((state.eventHistory ?? []).length === 3, 'all three season beats remain traceable');
+  assert(result.entryIds.length === 3, 'commit records three entry ids');
+}
+
+async function testHeadlessSeasonAdvance(): Promise<void> {
+  const bootstrap = HeadlessEngineSessionImpl.create({
+    playerName: '一季三笔',
+    gender: 'male',
+    catalogVersion: '1.0.0',
+    randomSeed: 21,
+  });
+  const snapshot = bootstrap.serialize();
+  snapshot.state.player.age = 5;
+  snapshot.state.flags = { ...(snapshot.state.flags ?? {}), origin_wuxia_family: true };
+  snapshot.state.player.flags = { ...(snapshot.state.player.flags ?? {}), origin_wuxia_family: true };
+  snapshot.state.currentTime = { year: 6, month: 1, day: 1 };
+  const session = HeadlessEngineSessionImpl.create({ snapshot });
+
+  session.ensurePassivePresentation();
+  const before = session.getProgressionVolatileState();
+  assert(before.passiveNarrative?.title === '5岁这一季', 'the visible node is the packed season card');
+  assert(before.annualPassiveMemory?.entries.length === 3, 'volatile state keeps three displayed entries');
+  await session.acknowledgeProgression('passive_continue');
+  const after = session.getProgressionVolatileState();
+  assert(after.pendingPeriodSummary?.headline === '5岁这一季', 'ack surfaces the packed season as period summary');
+  assert(session.getRuntimeState().currentTime?.month === 4, 'season ack advances three months on the calendar');
+  assert(session.getRuntimeState().player.age === 5, 'one season acknowledgement does not consume a whole year');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

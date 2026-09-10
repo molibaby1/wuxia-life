@@ -291,6 +291,70 @@
       "ageMin": 6,
       "ageMax": 7,
       "flags": ["preschool_tavern_rumor_listen"]
+    },
+    {
+      "id": "preschool_neutral_new_year_watch",
+      "title": "年夜守岁",
+      "text": "过年夜里你被准许晚睡，烛花爆了一下，你以为是神来了，抓住娘的袖口不肯放。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_childhood_fever",
+      "title": "热病一夜",
+      "text": "你发烧时屋梁会转，有人一遍遍用温帕子敷额。退热后你只记得药苦，和衣襟上的水痕。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_night_fear",
+      "title": "灯影怕黑",
+      "text": "熄灯后窗纸上有树影，你把被角咬湿也不肯喊，直到脚步声近了才敢出气。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_peer_hide_and_seek",
+      "title": "巷中捉迷藏",
+      "text": "你和邻家孩子围着柴垛捉迷藏，憋得脸红，被人找到时又气又想再来一回。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_broken_bowl",
+      "title": "打碎瓷碗",
+      "text": "你捧碗太满，边走边看门外，碗碎了一地。挨骂时你只盯着地面，记住了「看路」。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_first_lie",
+      "title": "第一次说谎",
+      "text": "娘问糖是谁拿的，你说不知道。她没再问，你却把那半块糖含化了也甜不起来。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_kin_visit",
+      "title": "远亲坐门",
+      "text": "远房亲戚来坐，你被推出来叫人，叫完就躲到桌下，只听见他们笑你「还认生」。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
+    },
+    {
+      "id": "preschool_neutral_waiting_threshold",
+      "title": "等门",
+      "text": "大人说「很快回来」，你在门槛上数过往的人。天擦黑时你把石子排成一行，一行是「还没回」。",
+      "originTags": ["neutral"],
+      "ageMin": 4,
+      "ageMax": 7
     }
   ]
 }

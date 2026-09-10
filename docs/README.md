@@ -124,6 +124,8 @@ full P3 remains `DEFERRED`
 
 这是 packaging-only host wrapper：显式默认 Participant binding `CODEX_CURRENT`（不是 previous-run inheritance）、创建 `ordinary-run-YYYYMMDD-NNNNNN` session identity、调用既有 AE workflow 恰好一次、再机械刷新 observability。它**不是**最终 Human-facing AE Skill；未来 Skill 可以调用这个稳定 host primitive。
 
+`CODEX_CURRENT` 的 Solution 调用保留本次 Codex 本地会话，并从 JSONL 验证会话 UUID 与完整 turn 终态，以接入既有一次 `ENVELOPE_FAILURE` 同会话重传（上限 `60000ms`）。恢复只能使用本次返回的 UUID；不使用 `--last`、旧运行或新会话替代。其他角色保持 ephemeral；Schema 失败、超时与进程失败不因此获得重试。此绑定的确定性验证不等于真实 Codex 恢复效果已验证；不会自动清理用户 Codex 会话记录。
+
 普通运行在启动时生成本次运行的 seed，并用该 seed 从现有 P8 persona roster 做可复现选择；seed 与选中的角色分别写入 sealed `inputs/run-input.json` 和 `inputs/persona.json`。同一 session 的后续 round 从 sealed inputs 重放相同角色与 seed。角色选择不依赖 hypothesis、Solution、Reviewer、route 或运行 outcome，问题选择、Participant binding、权限和 STOP 不变。
 
 Session execution 权威：

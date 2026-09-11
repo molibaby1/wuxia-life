@@ -8,7 +8,7 @@
     "ageRange": {"min": 10, "max": 18},
     "triggers": [
       {"type": "age_reach", "value": 10},
-      {"type": "expression", "expression": "flags.origin_merchant_family == true"}
+      {"type": "expression", "expression": "facts.birth_background == 'merchant_house'"}
     ],
     "conditions": [
       {"type": "expression", "expression": "money >= 100"}

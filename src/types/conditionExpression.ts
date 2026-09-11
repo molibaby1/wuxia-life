@@ -34,6 +34,7 @@ export interface ConditionExpressionCapabilities {
   playerPropertyAccess: 'player.<property>' | '<property>';
   flagQuery: "flags.has('flag_name')";
   eventQuery: "events.has('event_id')";
+  factAccess: 'facts.<fact>';
   comparisonOperators: ConditionComparisonOperator[];
   logicOperators: ConditionLogicOperator[];
   parentheses: true;
@@ -43,6 +44,7 @@ export const SUPPORTED_CONDITION_EXPRESSION_CAPABILITIES: ConditionExpressionCap
   playerPropertyAccess: 'player.<property>',
   flagQuery: "flags.has('flag_name')",
   eventQuery: "events.has('event_id')",
+  factAccess: 'facts.<fact>',
   comparisonOperators: ['>', '>=', '<', '<=', '==', '!='],
   logicOperators: ['&&', '||', '!', 'AND', 'OR', 'NOT'],
   parentheses: true,
@@ -91,11 +93,12 @@ OrExpr       ::= AndExpr ( ("||" | "OR") AndExpr )* ;
 AndExpr      ::= UnaryExpr ( ("&&" | "AND") UnaryExpr )* ;
 UnaryExpr    ::= ( "!" | "NOT" ) UnaryExpr | Primary ;
 Primary      ::= "(" Expression ")" | Predicate ;
-Predicate    ::= Operand ComparisonOp Operand | FlagQuery | EventQuery | Operand ;
+Predicate    ::= Operand ComparisonOp Operand | FlagQuery | EventQuery | FactAccess | Operand ;
 Operand      ::= PlayerProperty | DirectPlayerProperty | NumberLiteral | BooleanLiteral | StringLiteral ;
 PlayerProperty ::= "player." Identifier ;
 DirectPlayerProperty ::= Identifier ;
 FlagQuery    ::= "flags.has(" StringLiteral ")" ;
 EventQuery   ::= "events.has(" StringLiteral ")" ;
+FactAccess   ::= "facts." Identifier ;
 ComparisonOp ::= ">" | ">=" | "<" | "<=" | "==" | "!=" ;
 `.trim();

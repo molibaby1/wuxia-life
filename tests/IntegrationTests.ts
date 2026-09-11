@@ -72,8 +72,8 @@ const fullLifeSimulationSuite: TestSuite = {
         let state = framework.createTestState();
         state.player.age = 0;
         
-        // 执行出生事件
-        const birthEvent = allEvents.find(e => e.id === 'birth_wuxia_family');
+        // 执行出生后的早期事件；出生背景在 age 1 由 origin_background 统一解析。
+        const birthEvent = allEvents.find(e => e.id === 'birth_with_phenomenon');
         if (birthEvent) {
           state = await executeEventSimple(executor, state, birthEvent);
           assert(state.player.age === 1, '出生后年龄应该为 1 岁');

@@ -22,17 +22,13 @@ function state(
       connections: 2,
       ...stats,
     } as PlayerState,
-    flags: { ...base.flags, origin_merchant_family: true, ...flags },
+    facts: { ...base.facts, birth_background: 'merchant_house' },
+    flags: { ...base.flags, origin_merchant_family: true, origin_id: 'merchant_house', ...flags },
   };
 }
 
 function hasEffect(effects: Effect[] | undefined, type: string, target: string): boolean {
   return Boolean(effects?.some(effect => effect.type === type && (effect.target ?? effect.stat) === target));
-}
-
-function getStatDelta(effects: Effect[] | undefined, target: string): number | null {
-  const effect = effects?.find(item => item.type === 'stat_modify' && (item.target ?? item.stat) === target);
-  return typeof effect?.value === 'number' ? effect.value : null;
 }
 
 async function assertRecognitionRemainsVisible(
@@ -58,7 +54,8 @@ async function assertRecognitionRemainsVisible(
         flags: { ...flags },
         ...stats,
       } as PlayerState,
-      flags: { ...base.flags, origin_merchant_family: true, ...flags },
+      facts: { ...base.facts, birth_background: 'merchant_house' },
+      flags: { ...base.flags, origin_merchant_family: true, origin_id: 'merchant_house', ...flags },
       currentTime: { year: 7, month: 1, day: 1 },
       eventHistory: [],
     } as GameState);
@@ -86,11 +83,11 @@ export async function runMerchantChildhoodCausalSliceTests(): Promise<void> {
   const loader = EventLoader.getInstance();
   const evaluator = new ConditionEvaluator();
   const origin = loader.getEventById('origin_background');
-  const merchantOrigin = origin?.choices?.find(choice => choice.id === 'origin_merchant_family');
-  assert(Boolean(merchantOrigin), 'merchant origin choice loads');
+  const merchantOrigin = origin?.autoEffects?.find(effect => effect.target === 'resolve_birth_background');
+  assert(Boolean(merchantOrigin), 'merchant origin resolver loads');
   assert(
-    getStatDelta(merchantOrigin?.effects, 'connections') === 2,
-    'merchant origin provides the two starting connections assumed by the childhood payoff',
+    merchantOrigin?.type === 'special',
+    'origin background must be resolved by the canonical special effect',
   );
   const preference = loader.getEventById('merchant_childhood_preference');
   assert(Boolean(preference), 'merchant age-4 preference loads');

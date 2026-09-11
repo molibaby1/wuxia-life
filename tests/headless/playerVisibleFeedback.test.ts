@@ -1,6 +1,7 @@
 import { CHOICE_EXECUTION_REQUEST_VERSION } from '../../src/contracts/choiceExecution';
 import { buildPeriodSummary, calculatePublicStatDeltas } from '../../src/core/activePlanning/periodSummaryBuilder';
 import { SeededRandomSource } from '../../src/headless/adapters/randomSource';
+import { getCanonicalBirthBackground, getBirthBackgroundNarrative } from '../../src/p16/canonicalBirthBackground';
 import { HeadlessEngineSessionImpl } from '../../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameStateSnapshot } from '../../src/contracts/gameStateSnapshot';
 
@@ -49,14 +50,18 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
   const automaticAfterPlayer = automaticSession.serialize().state.player;
   const automaticSummary = automaticSession.getProgressionVolatileState().pendingPeriodSummary;
   const automaticDeltas = calculatePublicStatDeltas(automaticBeforePlayer, automaticAfterPlayer);
+  const automaticStages = automaticSummary?.stageResults ?? [];
   assert(
-    Object.keys(automaticDeltas).length === 0,
-    'birth automatic event should not invent a public numeric delta',
+    Object.keys(automaticStages.find(stage => stage.id === 'birth_with_phenomenon')?.deltas ?? {}).length === 0,
+    'birth phenomenon event should not invent a public numeric delta',
   );
   assert(
-    automaticSummary?.statDeltaSummary === '本期未见明显数值变化',
-    'automatic result card must accurately show the absence of a public numeric delta',
+    automaticSummary?.statDeltaSummary !== '本期未见明显数值变化' || Object.keys(automaticDeltas).length === 0,
+    'automatic summary must include only actual birth/background deltas',
   );
+  const originStage = automaticStages.find(stage => stage.id === 'origin_background');
+  assert(originStage?.body === getBirthBackgroundNarrative(automaticSession.getRuntimeState()), 'birth narrative must derive from canonical background');
+  assert(getCanonicalBirthBackground(automaticSession.getRuntimeState()) !== null, 'automatic progression must resolve canonical background');
 
   const originSession = HeadlessEngineSessionImpl.create({
     playerName: '出身说明测试',
@@ -71,11 +76,8 @@ export async function runPlayerVisibleFeedbackTests(): Promise<void> {
     originEvent = await originSession.getNextEvent();
   }
   assert(originEvent?.eventId === 'origin_background', 'origin_background should be player-visible');
-  const originDescriptions = originEvent.event.choices?.map(choice => choice.description);
-  assert(originDescriptions?.length === 4, 'all four origin choices must expose descriptions');
-  assert(originDescriptions?.every(description => Boolean(description)), 'origin descriptions must be non-empty');
-  assert(originDescriptions?.some(description => description?.includes('拳脚根基')), 'martial origin direction is visible');
-  assert(originDescriptions?.some(description => description?.includes('察言观色')), 'merchant origin direction is visible');
+  assert(originEvent.isAutomatic === true, 'production origin resolution must be automatic');
+  assert(!originEvent.event.choices?.length, 'production origin resolution must not expose independent choices');
 
   const eligible = await getSectEvent(15);
   const eligibleIds = (eligible.next.event.choices ?? [])

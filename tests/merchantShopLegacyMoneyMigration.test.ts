@@ -77,7 +77,7 @@ function testAuthoringSemantics(): void {
   const talentExpr = expressionConditions(talent).join(' ');
 
   assert.equal(talentExpr.includes('money'), false);
-  assert.match(talentExpr, /flags\.origin_merchant_family/);
+  assert.match(talentExpr, /facts\.birth_background == ['\"]merchant_house['\"]/);
   assert(
     studyBusiness.effects?.some(
       effect => effect.type === 'wealth_capacity_raise_to' && effect.minimum === 'modest_savings',
@@ -134,6 +134,7 @@ function testTalentEligibilityRuntime(): void {
 
   const merchantOrigin = baseState();
   merchantOrigin.player.charisma = 1;
+  merchantOrigin.facts = { ...merchantOrigin.facts, birth_background: 'merchant_house' };
   merchantOrigin.flags = {
     origin_merchant_family: true,
     route_merchant: true,

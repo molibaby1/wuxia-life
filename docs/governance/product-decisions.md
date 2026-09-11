@@ -2,7 +2,7 @@
 
 > 用途：记录已经完成裁决、后续默认不再重新讨论的产品与工程语义。
 > 适用对象：ChatGPT、Codex、人工维护者。
-> 最后更新：2026-09-10
+> 最后更新：2026-09-11
 > 状态口径：仅记录当前会话中已经确认的事实；未完成事项不写成既定决策。
 
 ---
@@ -2005,3 +2005,22 @@ payoff / endgame **事实本身**不进 `currentGoal`。
 - 玩家体验证明 Active Objective 定义无法区分“进行中的承诺”与“解锁史实”；
 - 空状态被证明系统性地损害可理解性，且无法在不违反本条的前提下用文案 / 既有非-goal 通道解决；
 - 需要为 `currentGoal` 引入第二职责（处境、铭牌、回声）——必须新开 PD，不得静默塞回。
+
+### PD-116：Canonical Birth Background
+
+**产品决策（Human accepted）**
+
+一名角色的一次人生只有一个 canonical birth background。它表示角色出生时所属的背景类别，与早期经历、天赋、路线和后续身份分属不同语义层。
+
+- canonical value 持久化在 `facts.birth_background`；当前合法候选沿用既有 origin pool：`martial_family`、`scholar_house`、`merchant_house`、`frontier_military`。
+- 当前阶段“武学世家 / 武侠世家”只是 birth background 的一个候选，不引入独立的 `martial lineage` / `martial heritage` 第二出生维度。
+- birth background 在 age 1 的 `origin_background` resolution event 中确定一次。正式游戏使用合法候选池随机 resolution；开发 / debug 的手动选择只作为同一 resolver 的显式 override，不产生第二个出生事实。
+- 出生叙事必须从最终 `facts.birth_background` 派生。不得先无条件写入“出生于武侠世家”，再由另一条 origin 流程写入商贾、书香或其他背景。
+- `origin_*` primary flags 与 `origin_id` 仅作为 legacy compatibility projection 保留；新正式 consumer 优先读取 `facts.birth_background`。projection 必须保持互斥，不能反向成为独立 birth fact writer。
+- “夭折”、童年疾病、家庭变故、出生异象等出生后的内容属于 early-life events，不得覆盖 `facts.birth_background`。
+
+**明确不做**
+
+- 不建立完整 family-generation framework；不新增父母职业、血缘、遗传、家族声望或独立 heritage 系统。
+- 不扩充当前 birth background candidate pool。
+- 不重做 childhood / early-life event framework，也不修改 Auto Evolution Prompt、Reviewer、Router 或 Evaluation。

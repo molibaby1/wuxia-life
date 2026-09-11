@@ -3,6 +3,7 @@ import { ConditionEvaluator } from '../src/core/ConditionEvaluator';
 import { EventLoader } from '../src/core/EventLoader';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import type { EventChoice, GameState } from '../src/types/eventTypes';
+import { resolveBirthBackground } from '../src/p16/canonicalBirthBackground';
 
 function hasMoneyEffect(choice: EventChoice): boolean {
   return (choice.effects ?? []).some(
@@ -21,18 +22,14 @@ async function run(): Promise<void> {
   const evaluator = new ConditionEvaluator();
 
   const origin = loader.getEventById('origin_background')!;
-  const merchantOrigin = origin.choices!.find(choice => choice.id === 'origin_merchant_family')!;
+  const merchantOrigin = origin.autoEffects?.find(effect => effect.target === 'resolve_birth_background')!;
   assert(
-    merchantOrigin.effects.some(
-      effect => effect.type === 'wealth_capacity_set' && effect.value === 'comfortable_means',
-    ),
-    'merchant origin must explicitly seed comfortable_means',
+    merchantOrigin.type === 'special',
+    'origin background must resolve through the canonical resolver',
   );
   assert(
-    !merchantOrigin.effects.some(
-      effect => effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money',
-    ),
-    'merchant origin must retire legacy money +200',
+    !origin.choices?.length,
+    'origin background must not expose independent choice writers',
   );
 
   const failure = loader.getEventById('merchant_shop_failure')!;
@@ -73,12 +70,7 @@ async function run(): Promise<void> {
   // Neutralize random trait growth multipliers so this slice checks the legacy cash delta itself.
   engine.getGameState().player.traits = [];
 
-  await engine.executeChoiceEffects(
-    merchantOrigin.effects,
-    origin.id,
-    merchantOrigin.id,
-  );
-  const afterOrigin = engine.getGameState();
+  const afterOrigin = resolveBirthBackground(engine.getGameState(), { override: 'merchant_house' });
   assert.equal(
     afterOrigin.player.wealthCapacity,
     'comfortable_means',

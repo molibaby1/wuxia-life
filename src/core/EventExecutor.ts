@@ -31,17 +31,21 @@ import {
   applyPrimaryOriginFamilyExclusivity,
   isPrimaryOriginFamilyFlag,
 } from '../p16/primaryOriginFlag';
-import { syncOriginFromPrimaryChoice } from '../p16/primaryOriginTraitBridge';
 import { KarmaManager } from './KarmaSystem';
 import { CriticalChoiceSystem } from './CriticalChoiceSystem';
 import { EndingSystem } from './EndingSystem';
 import { buildEndingPresentationDescription } from './endingPresentation';
 import { LifePathManager } from './LifePathSystem';
 import { traitSystem } from './TraitSystem';
+import { applyStatModifyEffect } from './statModifySemantics';
 import { isAffiliationId } from './affiliationCatalog';
 import { getBoundPersonDisplayName } from './SexVariantPersonArchetype';
 import { isPersonArchetypeId } from '../data/personArchetypeCatalog';
 import type { PersonArchetypeId } from '../types/personArchetype';
+import {
+  isBirthBackgroundId,
+  resolveBirthBackground,
+} from '../p16/canonicalBirthBackground';
 
 /**
  * 事件执行器实现
@@ -203,117 +207,8 @@ export class EventExecutor implements IEventExecutor {
  * 属性修改处理器
  */
 export class StatModifyHandler implements EffectHandler {
-  private static readonly MODIFIABLE_PLAYER_STATS = new Set<string>([
-    'age',
-    'children',
-    'martialPower',
-    'chivalry',
-    'charisma',
-    'constitution',
-    'reputation',
-    'knowledge',
-    'connections',
-    'businessAcumen',
-    'influence',
-    'martialHeritage',
-    'scholarlyHeritage',
-    'merchantNetwork',
-  ]);
-
-  private static readonly NON_NEGATIVE_CANONICAL_STATS = new Set([
-    'martialPower',
-    'constitution',
-    'knowledge',
-    'connections',
-    'reputation',
-  ]);
-
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
-    const target = effect.target || (effect as any).stat;
-    const { value, operator = 'set', randomRange } = effect;
-
-    if (!target || typeof target !== 'string') {
-      console.warn('[StatModifyHandler] 跳过无效属性修改效果:', effect);
-      return state;
-    }
-
-    // 处理随机效果
-    let finalValue = value;
-    if (randomRange) {
-      finalValue = Math.floor(
-        Math.random() * (randomRange.maxValue - randomRange.minValue + 1)
-        + randomRange.minValue
-      );
-    }
-    
-    if (!StatModifyHandler.MODIFIABLE_PLAYER_STATS.has(target)) {
-      return state;
-    }
-
-    // 获取当前值
-    const rawCurrentValue = (state.player as any)[target];
-    const currentValue = rawCurrentValue ?? 0;
-    
-    let adjustedValue = finalValue;
-    if (operator === 'add') {
-      if (adjustedValue > 0) {
-        const multiplier = traitSystem.getGrowthMultiplier(state.player, target);
-        adjustedValue = Math.max(1, Math.round(adjustedValue * multiplier));
-      }
-    }
-    
-    // 应用操作符
-    let newValue: number;
-    switch (operator) {
-      case 'add':
-        newValue = currentValue + adjustedValue;
-        break;
-      case 'subtract':
-        newValue = currentValue - adjustedValue;
-        break;
-      case 'multiply':
-        newValue = currentValue * adjustedValue;
-        break;
-      case 'divide':
-        newValue = adjustedValue === 0 ? currentValue : Math.floor(currentValue / adjustedValue);
-        break;
-      default:
-        newValue = adjustedValue;
-    }
-    
-    // 确保值在合理范围内
-    newValue = this.clampValue(newValue, target);
-    
-    return {
-      ...state,
-      player: {
-        ...state.player,
-        [target]: newValue,
-      },
-    };
-  }
-  
-  /**
-   * 限制值在合理范围内
-   */
-  private clampValue(value: number, statName: string): number {
-    if (StatModifyHandler.NON_NEGATIVE_CANONICAL_STATS.has(statName)) {
-      return Math.max(0, value);
-    }
-
-    if (statName === 'chivalry') {
-      return value;
-    }
-
-    // Canonical 属性不在这里设置固定上限；其余保留既有运行时边界。
-    const ranges: Record<string, [number, number]> = {
-      charisma: [0, 100],
-    };
-    
-    const range = ranges[statName];
-    if (!range) return value;
-    
-    return Math.max(range[0], Math.min(range[1], value));
+    return applyStatModifyEffect(effect, state);
   }
 }
 
@@ -420,7 +315,7 @@ export class FlagSetHandler implements EffectHandler {
       [flagName]: flagValue,
     };
 
-    // origin_background 四选一：设置主出身 flag 时清除其他四主 flag
+    // Legacy primary-origin flags remain mutually exclusive when compatibility data is written.
     if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
       newFlags = applyPrimaryOriginFamilyExclusivity(newFlags, flagName);
     }
@@ -462,9 +357,6 @@ export class FlagSetHandler implements EffectHandler {
         flags: newFlags,
       },
     };
-    if (flagValue && isPrimaryOriginFamilyFlag(flagName)) {
-      result = syncOriginFromPrimaryChoice(result, flagName);
-    }
     return result;
   }
 }
@@ -842,6 +734,19 @@ export class CompositeEffectHandler implements EffectHandler {
 export class SpecialEffectHandler implements EffectHandler {
   async execute(effect: EffectDefinition, state: GameState): Promise<GameState> {
     const { target } = effect;
+
+    if (target === 'resolve_birth_background') {
+      const override = effect.value === undefined
+        ? undefined
+        : isBirthBackgroundId(effect.value)
+          ? effect.value
+          : (() => {
+              throw new Error(`Invalid birth background override: ${String(effect.value)}`);
+            })();
+      return resolveBirthBackground(state, {
+        override,
+      });
+    }
     
     if (target === 'set_spouse') {
       const spouseName = typeof effect.value === 'string' ? effect.value : null;

@@ -31,6 +31,10 @@ function merchantSampleState(overrides: Partial<GameState> = {}): GameState {
       origin_id: P122_SAMPLE_ORIGIN_ID,
       ...(overrides.flags ?? {}),
     },
+    facts: {
+      birth_background: P122_SAMPLE_ORIGIN_ID,
+      ...(overrides.facts ?? {}),
+    },
   } as GameState;
 }
 
@@ -108,6 +112,7 @@ function testPeriodSummaryShapingGrowth(): void {
 
 function testNoSecondRouteParallelization(): void {
   const scholar = merchantSampleState({
+    facts: { birth_background: 'scholar_house' },
     flags: { origin_scholar_family: true, origin_merchant_family: false },
     player: {
       traits: ['keen_mind', 'lazy', 'bold'],

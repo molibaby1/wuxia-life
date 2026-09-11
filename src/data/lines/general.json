@@ -1,54 +1,5 @@
 [
   {
-    "id": "birth_wuxia_family",
-    "version": "1.0.0",
-    "category": "main_story",
-    "priority": 0,
-    "weight": 70,
-    "ageRange": {
-      "min": 0,
-      "max": 0
-    },
-    "triggers": [
-      {
-        "type": "age_reach",
-        "value": 0
-      }
-    ],
-    "content": {
-      "text": "你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。",
-      "title": "降生武侠世家",
-      "description": "人生的第一刻，命运的齿轮开始转动。"
-    },
-    "eventType": "auto",
-    "autoEffects": [
-      {
-        "type": "time_advance",
-        "target": "age",
-        "value": 1
-      },
-      {
-        "type": "flag_set",
-        "target": "bornInWuxiaFamily"
-      },
-      {
-        "type": "event_record",
-        "target": "birth_wuxia_family"
-      }
-    ],
-    "metadata": {
-      "createdAt": 1773317774543,
-      "updatedAt": 1773317774543,
-      "author": "development_team",
-      "tags": [
-        "出生",
-        "主线",
-        "武侠世家"
-      ],
-      "enabled": true
-    }
-  },
-  {
     "id": "birth_with_phenomenon",
     "version": "1.0.0",
     "category": "main_story",
@@ -221,7 +172,7 @@
     "conditions": [
       {
         "type": "expression",
-        "expression": "!flags.has('origin_merchant_family')"
+        "expression": "facts.birth_background != 'merchant_house'"
       }
     ],
     "content": {

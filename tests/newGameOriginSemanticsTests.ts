@@ -1,139 +1,65 @@
-/**
- * New-game origin semantics: headless must match browser (no preset four-main origin).
- */
-import { CHOICE_EXECUTION_REQUEST_VERSION } from '../src/contracts/choiceExecution';
-import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
+/** New-game birth background semantics: production and debug share one resolver. */
 import { EventExecutor } from '../src/core/EventExecutor';
 import { eventLoader } from '../src/core/EventLoader';
-import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
+import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import {
-  PRIMARY_ORIGIN_FAMILY_FLAGS,
-  resolvePrimaryOriginFamilyFlag,
-} from '../src/p16/primaryOriginFlag';
-import { PRIMARY_ORIGIN_TO_ORIGIN_ID } from '../src/p16/primaryOriginTraitBridge';
+  getCanonicalBirthBackground,
+  resolveBirthBackground,
+} from '../src/p16/canonicalBirthBackground';
 import { resolveChildhoodActionPalette } from '../src/p16/childhoodAgency';
+import { HeadlessEngineSessionImpl } from '../src/headless/session/HeadlessEngineSessionImpl';
 import type { GameState } from '../src/types/eventTypes';
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function assertNoPrimaryOrigin(state: GameState, label: string): void {
-  for (const flag of PRIMARY_ORIGIN_FAMILY_FLAGS) {
-    assert(!state.flags?.[flag], `${label}: top-level ${flag} must be absent`);
-    assert(!state.player?.flags?.[flag], `${label}: player.${flag} must be absent`);
-  }
-  assert(!state.flags?.origin_id, `${label}: origin_id must be unset`);
-  assert(!('traitProfile' in (state.player ?? {})), `${label}: traitProfile must be absent`);
+function assertNoBirthBackground(state: GameState, label: string): void {
+  assert(state.facts?.birth_background === undefined, `${label}: new game must not resolve birth background early`);
 }
 
-function testFreshEngineGameHasNoPresetPrimaryOrigin(): void {
-  const engine = new GameEngineIntegration();
-  engine.startNewGame('语义探针', 'male');
-  assertNoPrimaryOrigin(engine.getGameState(), 'GameEngineIntegration.startNewGame');
-  assert(
-    engine.getGameState().player?.traits.length === 3,
-    'new game should assign three canonical traits',
-  );
-}
-
-function testHeadlessCreateMatchesBrowserSemantics(): void {
-  const session = HeadlessEngineSessionImpl.create({
-    playerName: '语义探针',
-    gender: 'female',
-    randomSeed: 4242,
-  });
-  assertNoPrimaryOrigin(session.getRuntimeState(), 'HeadlessEngineSessionImpl.create');
-}
-
-async function testOriginBackgroundMerchantSyncsTraitAndOpensGate(): Promise<void> {
+async function testProductionOriginEventResolvesCanonicalBackground(): Promise<void> {
   const event = eventLoader.getEventById('origin_background');
-  assert(Boolean(event), 'origin_background must exist');
-  const choice = event!.choices?.find(c => c.id === 'origin_merchant_family');
-  assert(Boolean(choice), 'origin_merchant_family choice must exist');
+  assert(event?.eventType === 'auto', 'origin_background must be automatic in production');
+  assert(!event?.choices?.length, 'origin_background must not expose independent birth fact choices');
 
-  const executor = new EventExecutor();
   const engine = new GameEngineIntegration();
-  engine.startNewGame('商贾', 'male');
-  const before = engine.getGameState();
-  assertNoPrimaryOrigin(before, 'pre-choice');
-
-  const after = await executor.executeEffects(choice!.effects ?? [], before);
-  engine.applyGameState(after);
-
-  const state = engine.getGameState();
-  assert(
-    resolvePrimaryOriginFamilyFlag(state) === 'origin_merchant_family',
-    'primary origin must be merchant flag after choice',
-  );
-  assert(
-    state.flags?.origin_id === PRIMARY_ORIGIN_TO_ORIGIN_ID.origin_merchant_family,
-    'origin_id must sync from origin_background choice',
-  );
-  assert(state.flags?.origin_id === 'merchant_house', 'origin_id must mirror trait origin');
-  assert(
-    state.player.wealthCapacity === 'comfortable_means',
-    'merchant origin must seed comfortable_means in direct engine path',
-  );
-
-  const palette = resolveChildhoodActionPalette({
-    age: 6,
-    player: state.player,
-    flags: state.flags,
-  });
-  assert(
-    palette.some(action => action.id === 'action_household_errand'),
-    'merchant childhood gate must open from flag-only canonical path after origin_background',
-  );
+  engine.startNewGame('出生背景', 'male');
+  assertNoBirthBackground(engine.getGameState(), 'before origin event');
+  const state = await new EventExecutor().executeEffects(event?.autoEffects ?? [], engine.getGameState());
+  assert(getCanonicalBirthBackground(state) !== null, 'production path must resolve a legal background');
+  assert(state.facts.birth_background !== undefined, 'production path must persist canonical background');
+  assert(state.player.events?.filter(record => record.eventId.startsWith('origin_')).length === 1, 'production path must write one origin compatibility record');
 }
 
-function testTraitOnlyMerchantDoesNotOpenChildhoodGate(): void {
-  const palette = resolveChildhoodActionPalette({
-    age: 6,
-    player: { traits: [] } as never,
-    flags: {},
-  });
-  assert(
-    !palette.some(action => action.id === 'action_household_errand'),
-    'trait-only merchant_house without primary flag must not open merchant childhood gate',
-  );
+function testDebugOverrideUsesSameResolver(): void {
+  const engine = new GameEngineIntegration();
+  engine.startNewGame('调试背景', 'male');
+  const state = resolveBirthBackground(engine.getGameState(), { override: 'merchant_house', random: () => 0 });
+  assert(state.facts.birth_background === 'merchant_house', 'debug override must select the requested background');
+  assert(state.player.wealthCapacity === 'comfortable_means', 'merchant background effect must be applied by the shared resolver');
+  assert(!state.flags.origin_wuxia_family, 'debug override must not create a second martial origin');
+  const palette = resolveChildhoodActionPalette({ age: 6, player: state.player, flags: state.flags });
+  assert(palette.some(action => action.id === 'action_household_errand'), 'merchant childhood gate must read canonical background');
 }
 
-async function testHeadlessExecuteOriginBackgroundSyncsTrait(): Promise<void> {
+async function testHeadlessProductionPathDoesNotCreateDualOriginFacts(): Promise<void> {
   const session = HeadlessEngineSessionImpl.create({
     playerName: '链路探针',
     gender: 'male',
     randomSeed: 70003,
   });
-  assertNoPrimaryOrigin(session.getRuntimeState(), 'headless pre-origin');
-
-  await session.executeChoice({
-    requestVersion: CHOICE_EXECUTION_REQUEST_VERSION,
-    snapshotRef: { snapshot: session.serialize() },
-    action: { eventId: 'origin_background', choiceId: 'origin_merchant_family' },
-  });
-
+  assertNoBirthBackground(session.getRuntimeState(), 'headless before progression');
+  await session.progressAutomatic({ maxSteps: 8 });
   const state = session.getRuntimeState();
-  assert(
-    resolvePrimaryOriginFamilyFlag(state) === 'origin_merchant_family',
-    'headless executeChoice must set merchant primary flag',
-  );
-  assert(
-    state.flags?.origin_id === 'merchant_house',
-    'headless executeChoice must sync origin_id after origin_background',
-  );
-  assert(
-    state.player.wealthCapacity === 'comfortable_means',
-    'headless executeChoice must seed comfortable_means in the merchant origin path',
-  );
+  assert(getCanonicalBirthBackground(state) !== null, 'headless production progression must resolve background');
+  assert(state.player.events?.filter(record => record.eventId.startsWith('origin_')).length === 1, 'headless progression must not create a second origin fact');
 }
 
 export async function runNewGameOriginSemanticsTests(): Promise<void> {
-  testFreshEngineGameHasNoPresetPrimaryOrigin();
-  testHeadlessCreateMatchesBrowserSemantics();
-  await testOriginBackgroundMerchantSyncsTraitAndOpensGate();
-  testTraitOnlyMerchantDoesNotOpenChildhoodGate();
-  await testHeadlessExecuteOriginBackgroundSyncsTrait();
+  await testProductionOriginEventResolvesCanonicalBackground();
+  testDebugOverrideUsesSameResolver();
+  await testHeadlessProductionPathDoesNotCreateDualOriginFacts();
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

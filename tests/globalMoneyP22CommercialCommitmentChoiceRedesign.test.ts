@@ -103,7 +103,7 @@ function testAuthoringAndScheduleContracts(): void {
   assert.deepEqual(event.triggers, [{ type: 'age_reach', value: 18 }]);
   assert.deepEqual(event.conditions, [{
     type: 'expression',
-    expression: 'lifeStates.businessHabit >= 2 || flags.has("origin_merchant_family")',
+    expression: 'lifeStates.businessHabit >= 2 || facts.birth_background == "merchant_house"',
   }]);
   assert.equal(event.weight, 47);
   assert.deepEqual(event.choices?.map(choice => choice.id), [EXPAND_CHOICE_ID, CONSOLIDATE_CHOICE_ID]);

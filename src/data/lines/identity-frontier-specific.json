@@ -8,7 +8,7 @@
     "ageRange": {"min": 8, "max": 16},
     "triggers": [
       {"type": "age_reach", "value": 8},
-      {"type": "expression", "expression": "flags.origin_frontier == true"}
+      {"type": "expression", "expression": "facts.birth_background == 'frontier_military'"}
     ],
     "conditions": [
       {"type": "expression", "expression": "constitution >= 12"}
@@ -108,7 +108,7 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.origin_frontier == true && (reputation >= 15 || externalSkill >= 25)"}
+      {"type": "expression", "expression": "facts.birth_background == 'frontier_military' && (reputation >= 15 || externalSkill >= 25)"}
     ],
     "content": {
       "title": "文化冲突",

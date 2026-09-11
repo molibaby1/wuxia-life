@@ -1,4 +1,5 @@
 import type { GameState } from '../types/eventTypes';
+import { isBirthBackgroundId } from '../p16/canonicalBirthBackground';
 
 export function getMergedFlags(state: GameState): Record<string, boolean | number | string> {
   return {
@@ -32,6 +33,9 @@ export function getPlayerAge(state: GameState): number {
 }
 
 export function getOriginId(state: GameState): string | undefined {
+  if (isBirthBackgroundId(state.facts?.birth_background)) {
+    return state.facts.birth_background;
+  }
   const fromFlag = state.flags?.origin_id ?? state.flags?.originId;
   if (typeof fromFlag === 'string') {
     return fromFlag;

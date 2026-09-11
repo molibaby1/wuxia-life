@@ -18,59 +18,8 @@
 import { EventCategory, EventPriority, EffectType } from '../types/eventTypes';
 import type { EventDefinition, EffectOperator } from '../types/eventTypes';
 
-// ========== 出生事件（0 岁） ==========
 /**
- * 事件 1: 降生武侠世家
- * 年龄: 0 岁
- * 类型: 自动事件
- * 效果: 年龄+1，可能触发天赋效果
- */
-export const birthInWuxiaFamily: EventDefinition = {
-  id: 'birth_wuxia_family',
-  version: '1.0.0',
-  category: EventCategory.MAIN_STORY,
-  priority: EventPriority.CRITICAL,
-  weight: 70,
-  
-  ageRange: { min: 0, max: 0 },
-  triggers: [
-    { type: 'age_reach', value: 0 },
-  ],
-  
-  content: {
-    text: '你降生在一个武侠世家，哭声洪亮，远近皆闻。家族长辈们都说，你天生就有习武之资。',
-    title: '降生武侠世家',
-    description: '人生的第一刻，命运的齿轮开始转动。',
-  },
-  
-  eventType: 'auto',
-  autoEffects: [
-    {
-      type: EffectType.TIME_ADVANCE,
-      target: 'age',
-      value: 1,
-    },
-    {
-      type: EffectType.FLAG_SET,
-      target: 'bornInWuxiaFamily',
-    },
-    {
-      type: EffectType.EVENT_RECORD,
-      target: 'birth_wuxia_family',
-    },
-  ],
-  
-  metadata: {
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    author: 'development_team',
-    tags: ['出生', '主线', '武侠世家'],
-    enabled: true,
-  },
-};
-
-/**
- * 事件 2: 天降异象
+ * 出生后的早期事件：天降异象
  * 年龄: 0 岁
  * 类型: 自动事件（低权重，作为变体）
  * 效果: 年龄+1，触发特殊天赋
@@ -631,7 +580,7 @@ export const childhoodSummary: EventDefinition = {
  * 童年事件集合（0-12 岁）
  * 
  * 包含：
- * 1. 出生事件（2 个变体）
+ * 1. 出生后的早期事件
  * 2. 幼年成长（2 个事件）
  * 3. 童年启蒙（1 个选择事件）
  * 4. 武功启蒙（1 个选择事件）
@@ -640,7 +589,6 @@ export const childhoodSummary: EventDefinition = {
  * 总计：7 个事件（2 个出生事件 + 5 个发展阶段事件）
  */
 export const childhoodEvents: EventDefinition[] = [
-  birthInWuxiaFamily,
   birthWithPhenomenon,
   toddlerExploration,
   cleverSpeech,

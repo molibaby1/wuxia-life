@@ -101,6 +101,16 @@ function setFlag(engine: GameEngineIntegration, flag: string, value = true): voi
   const state = engine.getGameState();
   state.flags[flag] = value;
   state.player.flags[flag] = value;
+  const backgroundByFlag: Record<string, string> = {
+    origin_merchant_family: 'merchant_house',
+    origin_scholar_family: 'scholar_house',
+    origin_wuxia_family: 'martial_family',
+    origin_frontier: 'frontier_military',
+  };
+  const background = backgroundByFlag[flag];
+  if (background) {
+    state.facts.birth_background = background;
+  }
 }
 
 function absoluteMonth(time: GameState['currentTime']): number {
@@ -168,7 +178,7 @@ function testCatalogAddsExactlyThreeEvents(): void {
     IDS.sharedMatter,
     IDS.marriageDecision,
   ]);
-  assert.equal(EventLoader.getInstance().getAllEvents().length, 392);
+  assert.equal(EventLoader.getInstance().getAllEvents().length, 391);
   assert.equal(EventLoader.getInstance().getAllEvents().filter(event => event.id.startsWith('shen_qinghe_')).length, 3);
   assert.equal(EventLoader.getInstance().getUndeclaredImportPaths().length, 0);
 }

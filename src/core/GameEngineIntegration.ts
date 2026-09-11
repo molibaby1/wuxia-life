@@ -54,6 +54,11 @@ import { getWholeLifePacingMultiplier } from '../p20/wholeLifePacing';
 import { applyYouthTransitionSeeds, resolveChildhoodActionPalette } from '../p16/childhoodAgency';
 import { getOriginChildhoodEventMultiplier } from '../p16/originSurfaces';
 import { resolvePrimaryOriginFamilyFlag } from '../p16/primaryOriginFlag';
+import {
+  BIRTH_BACKGROUND_TO_PRIMARY_FLAG,
+  getBirthBackgroundNarrative,
+  getCanonicalBirthBackground,
+} from '../p16/canonicalBirthBackground';
 import { isSpineOriginEligible } from '../p16/spineOriginIsolation';
 import { isTraitLineSpineEligible } from '../p16/traitLineSpineEligibility';
 import { cloneCanonicalGameState } from '../contracts/validation/canonicalGameStateValidation';
@@ -539,22 +544,38 @@ export class GameEngineIntegration {
       const bg = thresholds.background;
       const evaluation = bg.evaluation || 'at_least_one';
       
-      // 获取玩家的背景标签（origin_ 开头或 bornIn 开头）
       const playerBackgrounds: string[] = [];
-      for (const [key, value] of Object.entries(flags)) {
-        if ((key.startsWith('origin_') || key.startsWith('bornIn')) && value === true) {
-          playerBackgrounds.push(key);
+      const canonicalBackground = getCanonicalBirthBackground(gameState);
+      if (canonicalBackground) {
+        playerBackgrounds.push(
+          canonicalBackground,
+          BIRTH_BACKGROUND_TO_PRIMARY_FLAG[canonicalBackground],
+        );
+        if (canonicalBackground === 'martial_family') {
+          playerBackgrounds.push('bornInWuxiaFamily');
         }
-      }
-      
-      // 也检查 gameState.player 中的背景字段
-      if (player) {
-        if ((player as any).bornInWuxiaFamily === true) playerBackgrounds.push('bornInWuxiaFamily');
-        if ((player as any).bornInScholarFamily === true) playerBackgrounds.push('bornInScholarFamily');
-        if ((player as any).bornInMerchantFamily === true) playerBackgrounds.push('bornInMerchantFamily');
-        if ((player as any).originBackground === 'wuxia') playerBackgrounds.push('origin_wuxia_family');
-        if ((player as any).originBackground === 'scholar') playerBackgrounds.push('origin_scholar_family');
-        if ((player as any).originBackground === 'merchant') playerBackgrounds.push('origin_merchant_family');
+        if (canonicalBackground === 'scholar_house') {
+          playerBackgrounds.push('bornInScholarFamily');
+        }
+        if (canonicalBackground === 'merchant_house') {
+          playerBackgrounds.push('bornInMerchantFamily');
+        }
+      } else {
+        // Compatibility fallback for legacy states without facts.birth_background.
+        for (const [key, value] of Object.entries(flags)) {
+          if ((key.startsWith('origin_') || key.startsWith('bornIn')) && value === true) {
+            playerBackgrounds.push(key);
+          }
+        }
+
+        if (player) {
+          if ((player as any).bornInWuxiaFamily === true) playerBackgrounds.push('bornInWuxiaFamily');
+          if ((player as any).bornInScholarFamily === true) playerBackgrounds.push('bornInScholarFamily');
+          if ((player as any).bornInMerchantFamily === true) playerBackgrounds.push('bornInMerchantFamily');
+          if ((player as any).originBackground === 'wuxia') playerBackgrounds.push('origin_wuxia_family');
+          if ((player as any).originBackground === 'scholar') playerBackgrounds.push('origin_scholar_family');
+          if ((player as any).originBackground === 'merchant') playerBackgrounds.push('origin_merchant_family');
+        }
       }
       
       if (bg.required && bg.required.length > 0) {
@@ -1397,6 +1418,9 @@ export class GameEngineIntegration {
       id: event.id,
       sourceKind: 'story_event',
       title: event.content?.title || '上一阶段',
+      ...(event.id === 'origin_background'
+        ? { body: getBirthBackgroundNarrative(this.gameState) ?? event.content?.text }
+        : {}),
       deltas: calculatePublicStatDeltas(playerBeforeEvent, this.gameState.player),
     }];
     

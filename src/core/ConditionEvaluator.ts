@@ -21,6 +21,7 @@ import { isWealthCapacity, meetsWealthCapacity } from '../types/wealthCapacity';
 import { isAssetId } from '../types/asset';
 import { hasAsset } from './assetOwnership';
 import { readPlayerNumeric } from '../utils/playerStatAccess';
+import { getCanonicalBirthBackground } from '../p16/canonicalBirthBackground';
 
 export type Condition = EventCondition;
 
@@ -145,6 +146,7 @@ export class ConditionEvaluator implements IConditionEvaluator {
       healthStatus: state.player?.healthStatus,
       lifeStates: state.player?.lifeStates || {},
       flags: state.flags,
+      facts: state.facts,
       playerFlags: state.player?.flags || {},
       triggeredEvents: state.triggeredEvents,
       eventHistory: (state.eventHistory || []).map(entry => entry.eventId),
@@ -466,6 +468,15 @@ class ConditionExpressionParser {
       const flagKey = identifier.slice('flags.'.length);
       this.assertSafeProperty(flagKey, token.position);
       return this.hasFlag(flagKey);
+    }
+
+    if (identifier.startsWith('facts.')) {
+      const factKey = identifier.slice('facts.'.length);
+      this.assertSafeProperty(factKey, token.position);
+      if (factKey === 'birth_background') {
+        return getCanonicalBirthBackground(this.state);
+      }
+      return this.state.facts?.[factKey];
     }
 
     if (identifier.includes('.')) {

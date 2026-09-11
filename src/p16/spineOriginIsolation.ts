@@ -31,7 +31,6 @@ export const NEUTRAL_SPINE_EVENT_IDS = new Set([
   'clever_speech',
   'childhood_preference',
   'birth_with_phenomenon',
-  'birth_wuxia_family',
   'toddler_exploration',
   'prologue_divine_birth',
   'prologue_family_trial',

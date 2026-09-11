@@ -1,5 +1,9 @@
 import type { GameState } from '../types/eventTypes';
 import { getOriginInfantPassiveChains } from '../data/originInfantPassiveChain';
+import {
+  BIRTH_BACKGROUND_TO_PRIMARY_FLAG,
+  isBirthBackgroundId,
+} from './canonicalBirthBackground';
 
 export const PRIMARY_ORIGIN_FAMILY_FLAGS = [
   'origin_scholar_family',
@@ -22,7 +26,7 @@ function presentPrimaryOriginFamilyFlags(state: GameState): PrimaryOriginFamilyF
   return PRIMARY_ORIGIN_FAMILY_FLAGS.filter(flag => hasFlag(state, flag));
 }
 
-/** origin_background choice writes event_record with target = primary flag id. */
+/** Legacy event records may identify the projected primary origin flag. */
 function resolveOriginBackgroundChoiceFlag(state: GameState): PrimaryOriginFamilyFlag | null {
   let chosen: PrimaryOriginFamilyFlag | null = null;
   for (const record of state.player?.events ?? []) {
@@ -48,12 +52,14 @@ export function applyPrimaryOriginFamilyExclusivity(
 }
 
 /**
- * Canonical primary origin from origin_background four-choice flags.
- * When multiple primary flags coexist (trait startingFlags + choice), the
- * origin_background event_record wins (Stage-6/7 four-choice priority).
- * Single-flag fallback uses infant chain order for legacy reads.
+ * Canonical primary origin projection. A persisted birth background wins;
+ * single-flag fallback remains available for legacy reads.
  */
 export function resolvePrimaryOriginFamilyFlag(state: GameState): PrimaryOriginFamilyFlag | null {
+  const canonicalBackground = state.facts?.birth_background;
+  if (isBirthBackgroundId(canonicalBackground)) {
+    return BIRTH_BACKGROUND_TO_PRIMARY_FLAG[canonicalBackground] as PrimaryOriginFamilyFlag;
+  }
   const present = presentPrimaryOriginFamilyFlags(state);
   if (present.length === 0) return null;
   if (present.length === 1) return present[0];

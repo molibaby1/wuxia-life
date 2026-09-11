@@ -5,12 +5,18 @@ import { readPlayerNumeric } from '../utils/playerStatAccess';
 import { getOriginId } from '../p20/stateAccess';
 import { resolvePrimaryOriginFamilyFlag } from './primaryOriginFlag';
 import { PRIMARY_ORIGIN_TO_ORIGIN_ID } from './primaryOriginTraitBridge';
+import {
+  getCanonicalBirthBackground,
+  getLegacyBirthBackgroundProjection,
+} from './canonicalBirthBackground';
 
 export function getOriginSurfaceForState(
   state: GameState,
   worldId = 'wuxia',
 ): WorldProfileOriginSurface | undefined {
-  const originId = getOriginId(state);
+  const originId = getCanonicalBirthBackground(state)
+    ?? getLegacyBirthBackgroundProjection(state)
+    ?? getOriginId(state);
   if (!originId) return undefined;
   const surfaces = getWorldProfile(worldId).originSurfaces ?? [];
   return surfaces.find(surface => surface.originId === originId);
@@ -29,6 +35,10 @@ export function getCanonicalOriginSurfaceForGameplay(
     player,
     flags: { ...(flags ?? {}), ...(player?.flags ?? {}) },
   } as GameState;
+  const background = getCanonicalBirthBackground(state);
+  if (background) {
+    return getOriginSurfaceById(background, worldId);
+  }
   const primary = resolvePrimaryOriginFamilyFlag(state);
   if (primary) {
     return getOriginSurfaceById(PRIMARY_ORIGIN_TO_ORIGIN_ID[primary], worldId);

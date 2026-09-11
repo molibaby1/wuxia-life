@@ -148,6 +148,7 @@ function testLiveOpsSelectionGate(): void {
   const base = gameEngine.getGameState();
   gameEngine.loadGameState({
     ...base,
+    facts: { ...base.facts, birth_background: 'frontier_military' },
     flags: { p22_live_ops_active: true, origin_frontier: true },
     player: {
       ...base.player,

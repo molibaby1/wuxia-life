@@ -4,7 +4,6 @@
   "goldenLineAgeMin": 0,
   "goldenLineAgeMax": 30,
   "spineEventIds": [
-    "birth_wuxia_family",
     "birth_with_phenomenon",
     "origin_background",
     "toddler_exploration",
@@ -42,7 +41,6 @@
     "outlaw_cultivation"
   ],
   "manualChoiceEventIds": [
-    "origin_background",
     "childhood_preference",
     "martial_arts_enlightenment",
     "sect_choice",
@@ -72,8 +70,8 @@
     "hero_first_case"
   ],
   "timelineAnchors": [
-    { "age": 0, "phase": "birth", "events": ["birth_wuxia_family", "birth_with_phenomenon"], "pickOne": true },
-    { "age": 1, "phase": "childhood", "events": ["origin_background", "toddler_exploration"], "pickOne": true },
+    { "age": 0, "phase": "birth", "events": ["birth_with_phenomenon"], "pickOne": true },
+    { "age": 1, "phase": "childhood", "events": ["origin_background", "toddler_exploration"], "pickOne": false },
     { "age": 3, "phase": "childhood", "events": ["clever_speech"] },
     { "age": 4, "phase": "childhood", "events": ["childhood_preference"] },
     { "age": 6, "phase": "childhood", "events": ["martial_arts_enlightenment"] },

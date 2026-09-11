@@ -11,7 +11,7 @@
       {"type": "random", "value": 0.4}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.origin_scholar_family == true || knowledge >= 15"}
+      {"type": "expression", "expression": "facts.birth_background == 'scholar_house' || knowledge >= 15"}
     ],
     "content": {
       "title": "读书节庆",
@@ -107,7 +107,7 @@
       {"type": "random", "value": 0.3}
     ],
     "conditions": [
-      {"type": "expression", "expression": "knowledge >= 20 && (flags.origin_scholar_family == true || reputation >= 10)"}
+      {"type": "expression", "expression": "knowledge >= 20 && (facts.birth_background == 'scholar_house' || reputation >= 10)"}
     ],
     "content": {
       "title": "学术讲座",
@@ -155,7 +155,7 @@
       {"type": "expression", "expression": "knowledge >= 25 && reputation >= 15"}
     ],
     "conditions": [
-      {"type": "expression", "expression": "flags.origin_scholar_family == true"}
+      {"type": "expression", "expression": "facts.birth_background == 'scholar_house'"}
     ],
     "content": {
       "title": "科举考试",

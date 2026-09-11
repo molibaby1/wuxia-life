@@ -45,6 +45,7 @@ const suites: Suite[] = [
   { name: 'spineOriginIsolationTests', entry: 'tests/spineOriginIsolationTests.ts' },
   { name: 'spineOriginConfigValidationTests', entry: 'tests/spineOriginConfigValidationTests.ts' },
   { name: 'primaryOriginFlagTests', entry: 'tests/primaryOriginFlagTests.ts' },
+  { name: 'canonicalBirthBackground', entry: 'tests/canonicalBirthBackground.test.ts' },
   { name: 'traitLineSpineEligibilityTests', entry: 'tests/traitLineSpineEligibilityTests.ts' },
   { name: 'dailyFallbackOriginGateTests', entry: 'tests/dailyFallbackOriginGateTests.ts' },
   { name: 'neutralPassiveDedupTests', entry: 'tests/neutralPassiveDedupTests.ts' },

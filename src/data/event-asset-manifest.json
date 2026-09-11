@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-09-02T07:49:41.104Z",
+  "generatedAt": "2026-09-11T02:08:08.430Z",
   "scope": {
     "goldenLineAgeMin": 0,
     "goldenLineAgeMax": 30,
@@ -14,12 +14,12 @@
   "summary": {
     "runtimeLoadedFiles": 28,
     "nonLoadedFiles": 43,
-    "totalEventsInRuntime": 392,
+    "totalEventsInRuntime": 391,
     "byStatus": {
-      "active": 36,
+      "active": 35,
       "candidate": 70,
-      "broken": 12,
-      "deferred": 274,
+      "broken": 11,
+      "deferred": 275,
       "dead": 0
     },
     "byFileStatus": {
@@ -147,8 +147,8 @@
       "fileName": "general.json",
       "runtimeLoaded": true,
       "status": "candidate",
-      "eventCount": 35,
-      "goldenLineOverlapCount": 22,
+      "eventCount": 34,
+      "goldenLineOverlapCount": 21,
       "notes": "Golden-line candidate pool (PXG2 selects active spine)"
     },
     {
@@ -2662,12 +2662,12 @@
       "eventId": "family_crisis",
       "sourceFile": "family-life.json",
       "runtimeLoaded": true,
-      "status": "broken",
+      "status": "deferred",
       "ageMin": 35,
       "ageMax": 50,
       "overlapsGoldenLine": false,
       "eventType": "choice",
-      "notes": "Failed event quality or loader validation"
+      "notes": "Outside ages 0-30 golden line"
     },
     {
       "eventId": "family_family_precepts",
@@ -2921,17 +2921,6 @@
       "overlapsGoldenLine": false,
       "eventType": "ending",
       "notes": "Source file not runtime-loaded"
-    },
-    {
-      "eventId": "birth_wuxia_family",
-      "sourceFile": "general.json",
-      "runtimeLoaded": true,
-      "status": "active",
-      "ageMin": 0,
-      "ageMax": 0,
-      "overlapsGoldenLine": true,
-      "eventType": "auto",
-      "notes": "Golden-line spine (PXG2 active)"
     },
     {
       "eventId": "birth_with_phenomenon",
@@ -6076,7 +6065,7 @@
       "ageMin": 1,
       "ageMax": 1,
       "overlapsGoldenLine": true,
-      "eventType": "choice",
+      "eventType": "auto",
       "notes": "Golden-line spine (PXG2 active)"
     },
     {

@@ -416,6 +416,7 @@ function testComplexityFirewall(): void {
     playerPropertyAccess: 'player.<property>',
     flagQuery: "flags.has('flag_name')",
     eventQuery: "events.has('event_id')",
+    factAccess: 'facts.<fact>',
     comparisonOperators: ['>', '>=', '<', '<=', '==', '!='],
     logicOperators: ['&&', '||', '!', 'AND', 'OR', 'NOT'],
     parentheses: true,

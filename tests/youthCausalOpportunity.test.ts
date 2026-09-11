@@ -150,7 +150,7 @@ async function main(): Promise<void> {
   ]) {
     assert(!allIds.has(removed), `${removed} must leave the formal loader`);
   }
-  assert.equal(allIds.size, 392);
+  assert.equal(allIds.size, 391);
 
   assert.equal(goldenLinePayoffMap.entries.length, 10);
   assert.equal(goldenLinePayoffMap.entries.filter(entry => entry.payoffs.length > 0).length, 9);
@@ -181,6 +181,7 @@ async function main(): Promise<void> {
   const officialEntry = eventLoader.getEventById('official_entry');
   assert(officialEntry, 'missing official_entry');
   const officialEngine = createYouthEngine(22, { knowledge: 12, charisma: 8 });
+  officialEngine.getGameState().facts.birth_background = 'scholar_house';
   officialEngine.getGameState().flags.origin_scholar_family = true;
   const officialLoaderEvents = loader.getEventsByAge;
   loader.getEventsByAge = () => [

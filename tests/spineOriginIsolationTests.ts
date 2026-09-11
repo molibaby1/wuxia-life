@@ -41,8 +41,15 @@ function assert(condition: boolean, message: string): void {
 function buildState(flag: PrimaryOriginFamilyFlag, age: number, extraFlags: Record<string, boolean> = {}): GameState {
   const base = new GameEngineIntegration().getGameState();
   const flags = { [flag]: true, ...extraFlags };
+  const backgroundByFlag: Record<PrimaryOriginFamilyFlag, string> = {
+    origin_scholar_family: 'scholar_house',
+    origin_wuxia_family: 'martial_family',
+    origin_merchant_family: 'merchant_house',
+    origin_frontier: 'frontier_military',
+  };
   return {
     ...base,
+    facts: { ...base.facts, birth_background: backgroundByFlag[flag] },
     player: { ...base.player, age, flags, traits: [] },
     flags: { ...base.flags, ...flags },
   };

@@ -30,6 +30,10 @@ function merchantState(overrides: Partial<GameState> = {}): GameState {
       origin_merchant_family: true,
       ...(overrides.flags ?? {}),
     },
+    facts: {
+      birth_background: 'merchant_house',
+      ...(overrides.facts ?? {}),
+    },
   } as GameState;
 }
 

@@ -3,6 +3,10 @@
  * ponytail: single-route constants only — extend via new PRD, not here.
  */
 import type { GameState } from '../types/eventTypes';
+import {
+  getCanonicalBirthBackground,
+  getLegacyBirthBackgroundProjection,
+} from '../p16/canonicalBirthBackground';
 
 export const P122_SAMPLE_ORIGIN_ID = 'merchant_house' as const;
 export const P122_PRIMARY_AGE_MIN = 5;
@@ -36,7 +40,8 @@ export function isP122MerchantSampleScope(state: GameState): boolean {
   if (age < P122_PRIMARY_AGE_MIN || age > P122_CONTINUATION_AGE_MAX) {
     return false;
   }
-  const originId = state.flags?.origin_id;
-  const merchantFamily = Boolean(state.flags?.origin_merchant_family);
-  return merchantFamily && (originId === P122_SAMPLE_ORIGIN_ID || originId === undefined);
+  const originId = getCanonicalBirthBackground(state)
+    ?? getLegacyBirthBackgroundProjection(state)
+    ?? state.flags?.origin_id;
+  return originId === P122_SAMPLE_ORIGIN_ID;
 }

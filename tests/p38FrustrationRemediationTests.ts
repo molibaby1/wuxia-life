@@ -538,7 +538,7 @@ function testWealthTargetEffectInvariance(): void {
         {
           type: 'expression',
           expression:
-            '(charisma >= 12 || flags.origin_merchant_family == true || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)',
+            "(charisma >= 12 || facts.birth_background == 'merchant_house' || flags.hvg_merchant_ledger_track == true || flags.hvg_merchant_caravan_track == true || flags.hvg_merchant_first_challenge_done == true) && (flags.merchant_childhood_seed_done == true || flags.p8_route_wealth == true || flags.route_merchant == true)",
         },
       ]),
     'merchant conditions must remain unchanged',

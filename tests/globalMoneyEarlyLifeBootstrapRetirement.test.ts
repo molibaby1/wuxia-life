@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { coreTalents } from '../src/data/traits/coreTalents';
 import { eventLoader } from '../src/core/EventLoader';
-import { EventExecutor } from '../src/core/EventExecutor';
 import { GameEngineIntegration } from '../src/core/GameEngineIntegration';
 import { traitSystem } from '../src/core/TraitSystem';
-import type { CoreTalentConfig, EffectDefinition, TraitId } from '../src/types/eventTypes';
+import type { CoreTalentConfig, TraitId } from '../src/types/eventTypes';
+import { resolveBirthBackground } from '../src/p16/canonicalBirthBackground';
 
 const MONEY_SENTINELS = [0, 317, 9999];
 
@@ -12,10 +12,6 @@ function getTalent(id: 'iron_abacus' | 'heroic_heart'): CoreTalentConfig {
   const talent = coreTalents.find(item => item.id === id);
   assert(talent, `${id} must remain a canonical core talent`);
   return talent;
-}
-
-function isMoneyEffect(effect: EffectDefinition): boolean {
-  return effect.type === 'stat_modify' && (effect.target ?? effect.stat) === 'money';
 }
 
 function hasWealthReplacementModifier(modifier: { stat?: unknown }): boolean {
@@ -38,8 +34,6 @@ function makePlayer() {
 async function applyMerchantOrigin() {
   const event = eventLoader.getEventById('origin_background');
   assert(event, 'origin_background must exist');
-  const choice = event.choices?.find(item => item.id === 'origin_merchant_family');
-  assert(choice, 'origin_merchant_family must exist');
 
   const engine = new GameEngineIntegration();
   engine.startNewGame('D1 merchant origin probe', 'male');
@@ -49,28 +43,15 @@ async function applyMerchantOrigin() {
   state.player.charisma = 0;
   const connectionsBefore = 0;
   const charismaBefore = 0;
-  const after = await new EventExecutor().executeEffects(choice.effects ?? [], state);
-  return { choice, before: { connections: connectionsBefore, charisma: charismaBefore }, after };
+  const after = resolveBirthBackground(state, { override: 'merchant_house' });
+  return { before: { connections: connectionsBefore, charisma: charismaBefore }, after };
 }
 
 async function testMerchantOriginAuthoringAndRuntime(): Promise<void> {
   const event = eventLoader.getEventById('origin_background');
   assert(event, 'origin_background must exist');
-  const choice = event.choices?.find(item => item.id === 'origin_merchant_family');
-  assert(choice, 'origin_merchant_family must exist');
-
-  assert.equal(choice.effects?.filter(isMoneyEffect).length, 0, 'merchant origin must not write money');
-  assert.deepEqual(
-    choice.effects
-      ?.filter(effect => effect.type.startsWith('wealth_'))
-      .map(effect => [effect.type, effect.value]),
-    [['wealth_capacity_set', 'comfortable_means']],
-    'merchant origin must retain only its existing canonical Wealth Capacity seed',
-  );
-  assert(choice.effects?.some(effect => effect.type === 'flag_set' && effect.target === 'origin_merchant_family'));
-  assert(choice.effects?.some(effect => effect.type === 'stat_modify' && effect.target === 'connections' && effect.value === 2));
-  assert(choice.effects?.some(effect => effect.type === 'stat_modify' && effect.target === 'charisma' && effect.value === 6));
-  assert(choice.effects?.some(effect => effect.type === 'event_record' && effect.target === 'origin_merchant_family'));
+  const resolver = event.autoEffects?.find(effect => effect.target === 'resolve_birth_background');
+  assert(resolver?.type === 'special', 'origin background must use the canonical resolver');
 
   for (const _sentinel of MONEY_SENTINELS) {
     const { before, after } = await applyMerchantOrigin();

@@ -1,7 +1,7 @@
 [
   {
     "id": "origin_background",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "category": "main_story",
     "priority": 0,
     "weight": 100,
@@ -16,129 +16,15 @@
       }
     ],
     "content": {
-      "text": "你的出身背景逐渐显露，家族与环境为你铺就了不同的道路。",
-      "title": "出身背景",
-      "description": "起点决定了你未来的方向。"
+      "text": "你的出生背景在这一刻确定，随后的人生将从这个起点展开。",
+      "title": "出生背景",
+      "description": "系统从合法背景候选池中确定唯一的出生背景。"
     },
-    "eventType": "choice",
-    "choices": [
+    "eventType": "auto",
+    "autoEffects": [
       {
-        "id": "origin_wuxia_family",
-        "text": "武林世家",
-        "description": "你出身武林世家，自幼耳濡目染，拳脚根基比同龄人更扎实。",
-        "effects": [
-          {
-            "type": "flag_set",
-            "target": "origin_wuxia_family"
-          },
-          {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 5,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "constitution",
-            "value": 6,
-            "operator": "add"
-          },
-          {
-            "type": "event_record",
-            "target": "origin_wuxia_family"
-          }
-        ]
-      },
-      {
-        "id": "origin_scholar_family",
-        "text": "书香门第",
-        "description": "你生在书香门第，家学渊源让你学识过人，也更重仁义礼法。",
-        "effects": [
-          {
-            "type": "flag_set",
-            "target": "origin_scholar_family"
-          },
-          {
-            "type": "stat_modify",
-            "target": "knowledge",
-            "value": 8,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "chivalry",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "event_record",
-            "target": "origin_scholar_family"
-          }
-        ]
-      },
-      {
-        "id": "origin_merchant_family",
-        "text": "商贾之家",
-        "description": "你生在商贾之家，家中殷实，你也学会了察言观色与待人接物。",
-        "effects": [
-          {
-            "type": "flag_set",
-            "target": "origin_merchant_family"
-          },
-          {
-            "type": "wealth_capacity_set",
-            "value": "comfortable_means"
-          },
-          {
-            "type": "stat_modify",
-            "target": "connections",
-            "value": 2,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "charisma",
-            "value": 6,
-            "operator": "add"
-          },
-          {
-            "type": "event_record",
-            "target": "origin_merchant_family"
-          }
-        ]
-      },
-      {
-        "id": "origin_frontier",
-        "text": "边疆异族",
-        "description": "你生在边疆异族之家，骑射与身法自幼练起，性情也更刚烈自由。",
-        "effects": [
-          {
-            "type": "flag_set",
-            "target": "origin_frontier"
-          },
-          {
-            "type": "stat_modify",
-            "target": "martialPower",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "constitution",
-            "value": 4,
-            "operator": "add"
-          },
-          {
-            "type": "stat_modify",
-            "target": "chivalry",
-            "value": 2,
-            "operator": "subtract"
-          },
-          {
-            "type": "event_record",
-            "target": "origin_frontier"
-          }
-        ]
+        "type": "special",
+        "target": "resolve_birth_background"
       }
     ],
     "metadata": {
@@ -147,9 +33,9 @@
       "author": "development_team",
       "tags": [
         "童年",
+        "出生",
         "出身",
         "背景",
-        "选择",
         "once"
       ],
       "enabled": true

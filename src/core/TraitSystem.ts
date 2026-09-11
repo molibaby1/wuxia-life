@@ -20,6 +20,7 @@ import type {
   WeaknessId,
   TemperamentId,
 } from '../types/eventTypes';
+import { getOriginId as getStateOriginId } from '../p20/stateAccess';
 
 type TraitConfig = CoreTalentConfig | WeaknessConfig | TemperamentConfig;
 
@@ -161,6 +162,13 @@ export class TraitSystem {
     return originId ? this.originMap.get(originId as OriginId)?.name : undefined;
   }
 
+  private getOriginId(state: GameState): OriginId | undefined {
+    const originId = getStateOriginId(state);
+    return typeof originId === 'string' && this.originMap.has(originId as OriginId)
+      ? originId as OriginId
+      : undefined;
+  }
+
   clampLifeState(stateKey: LifeStateKey, value: number): number {
     const config = lifeStates.find(item => item.key === stateKey);
     if (!config) return value;
@@ -193,13 +201,6 @@ export class TraitSystem {
     const temperament = traits.find(trait => this.temperamentMap.has(trait as TemperamentId)) as TemperamentId | undefined;
     if (!coreTalent || !weakness || !temperament) return undefined;
     return { coreTalent, weakness, temperament };
-  }
-
-  private getOriginId(state: GameState): OriginId | undefined {
-    const originId = state.flags?.origin_id;
-    return typeof originId === 'string' && this.originMap.has(originId as OriginId)
-      ? originId as OriginId
-      : undefined;
   }
 
   public getEventBiasTags(event: EventDefinition): Set<EventBiasTag> {

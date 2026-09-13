@@ -5,6 +5,24 @@ OUTPUT="project.zip"
 
 snapshot_dir=""
 archive_check_dir=""
+explicit_capsules=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --include-capsule)
+      if [[ $# -lt 2 ]]; then
+        echo "打包失败：--include-capsule 需要 session id" >&2
+        exit 1
+      fi
+      explicit_capsules+=("$2")
+      shift 2
+      ;;
+    *)
+      echo "打包失败：未知参数 $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 cleanup() {
   if [[ -n "$snapshot_dir" ]]; then
@@ -32,6 +50,7 @@ fi
 
 snapshot_dir="$(mktemp -d "${TMPDIR:-/tmp}/wuxia-life-repository-status.XXXXXX")"
 snapshot_file="$snapshot_dir/repository-status.txt"
+evidence_selection_file="$snapshot_dir/evidence-paths.txt"
 {
   printf '%s\n' \
     'format=wuxia-life-repository-snapshot-v1' \
@@ -48,6 +67,18 @@ snapshot_file="$snapshot_dir/repository-status.txt"
 
 # 删除旧压缩包，避免旧文件残留在新的 ZIP 中
 rm -f "$OUTPUT"
+
+evidence_prepare_args=(
+  npm exec -- tsx scripts/evolution/evidence/prepareEvidencePackage.ts
+  --repository-root "$PWD"
+  --selection-file "$evidence_selection_file"
+)
+if ((${#explicit_capsules[@]} > 0)); then
+  for capsule_id in "${explicit_capsules[@]}"; do
+    evidence_prepare_args+=(--include-capsule "$capsule_id")
+  done
+fi
+"${evidence_prepare_args[@]}"
 
 # 使用 find 列出文件，排除指定目录，再通过 zip -@ 打包。
 # workspace 只保留紧凑的 .agent-workspace-manifest.json provenance 文件。
@@ -66,6 +97,7 @@ find . \( \
     -path '*/.idea' -o \
     -path '*/public/reports' -o \
     -path '*/.tmp' -o \
+    -path './artifacts/evolution/run-evidence' -o \
     -path '*/inputs' -o \
     -path '*/agent-workspaces' \
   \) -prune -o \
@@ -77,6 +109,11 @@ find . \( \
   -not \( \( -name '.env' -o -name '.env.*' \) -a -not -name '*.example' \) \
   -print \
   | zip -@ "$OUTPUT"
+
+# Durable Evidence Capsules are selected and validated as whole artifacts by
+# prepareEvidencePackage.ts. Add only those paths after the generic source pass
+# so generic exclusions cannot prune a selected Capsule's internal paths.
+zip -q "$OUTPUT" -@ < "$evidence_selection_file"
 
 # Add exactly one fresh snapshot at the archive root, after excluding all
 # repository-provided repository-status.txt files from the find phase.
@@ -95,7 +132,9 @@ fi
 
 for forbidden_segment in workspaces inputs agent-workspaces; do
   if unzip -Z1 "$OUTPUT" | awk -v segment="$forbidden_segment" '
-    $0 ~ ("(^|/)" segment "(/|$)") && $0 !~ /\/\.agent-workspace-manifest\.json$/ { found = 1 }
+    $0 ~ ("(^|/)" segment "(/|$)") &&
+    index($0, "artifacts/evolution/run-evidence/") != 1 &&
+    $0 !~ /\/\.agent-workspace-manifest\.json$/ { found = 1 }
     END { exit (found ? 0 : 1) }
   '; then
     echo "打包失败：ZIP 内包含不应打包的目录 ${forbidden_segment}" >&2
@@ -105,7 +144,8 @@ done
 
 archive_check_dir="$(mktemp -d "${TMPDIR:-/tmp}/wuxia-life-project-zip-check.XXXXXX")"
 embedded_snapshot="$archive_check_dir/repository-status.txt"
-unzip -p "$OUTPUT" repository-status.txt > "$embedded_snapshot"
+unzip -q "$OUTPUT" -d "$archive_check_dir"
+npm exec -- tsx scripts/evolution/evidence/verifyPackagedEvidence.ts --repository-root "$archive_check_dir"
 
 read_snapshot_value() {
   local key="$1"

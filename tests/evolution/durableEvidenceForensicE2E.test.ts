@@ -137,7 +137,18 @@ export async function runDurableEvidenceForensicE2ETests(): Promise<void> {
   await rm(sessionRoot, { recursive: true, force: false });
   await assert.rejects(() => readFile(join(sessionRoot, 'experiment', 'run-manifest.json'), 'utf8'), /ENOENT/);
   await validatePhase0RunSeal(reconstructed, await readFile(join(reconstructed, 'experiment-root.sha256'), 'utf8'));
-  assert.equal((await verifyDurableEvidenceCapsule(capsuleRoot)).sessionId, sessionId);
+  const postDeletionManifest = await verifyDurableEvidenceCapsule(capsuleRoot);
+  assert.equal(postDeletionManifest.sessionId, sessionId);
+  const capsuleObject = async (relativePath: string): Promise<string> => readFile(join(capsuleRoot, relativePath), 'utf8');
+  assert.deepEqual(JSON.parse(await capsuleObject('workflow/round-1/selection/selected-hypothesis.json')), { hypothesisId: 'h-1' });
+  assert.equal(JSON.parse(await capsuleObject('workflow/round-1/causal-attribution/bounded-causal-attribution.json')).schemaVersion, 'bounded-causal-attribution-v1');
+  assert.equal(JSON.parse(await capsuleObject('workflow/round-1/problem-package.json')).problemId, 'problem-1');
+  assert.equal(JSON.parse(await capsuleObject('workflow/round-1/decision.json')).route, 'SKIP');
+  assert.deepEqual(
+    postDeletionManifest.participantReceipts.map(receipt => receipt.role).sort(),
+    ['feedback', 'hypothesis', 'reviewer', 'solution'],
+  );
+  assert.equal(postDeletionManifest.objects.some(object => object.relativePath.includes('participant-workspace')), false);
 
   await runCrossRoundSourceClosureTest();
 }

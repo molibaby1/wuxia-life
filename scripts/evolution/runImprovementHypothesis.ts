@@ -386,16 +386,31 @@ async function saveRawResponses(
   invokeResult: HypothesisInvokeResult,
 ): Promise<void> {
   if ('rawProviderResponse' in invokeResult && invokeResult.rawProviderResponse !== undefined) {
-    await writeCreateOnly(
-      join(hypothesisDir, 'raw-provider-response.txt'),
-      invokeResult.rawProviderResponse,
-    );
+    try {
+      await writeCreateOnly(
+        join(hypothesisDir, 'raw-provider-response.txt'),
+        invokeResult.rawProviderResponse,
+      );
+    } catch {
+      // Raw provider output is forensic sidecar evidence; it cannot change the invocation result.
+    }
   }
   if (invokeResult.ok) {
-    await writeCreateOnly(
-      join(hypothesisDir, 'raw-participant-response.txt'),
-      invokeResult.rawParticipantResponse,
-    );
+    try {
+      await writeCreateOnly(
+        join(hypothesisDir, 'raw-participant-response.txt'),
+        invokeResult.rawParticipantResponse,
+      );
+    } catch {
+      // Raw participant output is forensic sidecar evidence; it cannot change the invocation result.
+    }
+    if ('stderr' in invokeResult) {
+      try {
+        await writeCreateOnly(join(hypothesisDir, 'stderr.txt'), invokeResult.stderr);
+      } catch {
+        // Available stderr is forensic sidecar evidence; it cannot change the invocation result.
+      }
+    }
   }
 }
 
@@ -525,6 +540,7 @@ export async function runImprovementHypothesis(
         feedbackBytes: source.feedbackBytes,
         ...(patternEvidenceBytes !== undefined ? { patternEvidenceBytes } : {}),
       }),
+      observabilityRoot: hypothesisDir,
       participant: localParticipant,
     });
   } else {

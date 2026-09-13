@@ -160,6 +160,7 @@ async function createSource(sourceRoot: string, runRef: string): Promise<{
 
 export async function runImprovementHypothesisLoopTests(): Promise<void> {
   await testOneHypothesisSuccess();
+  await testLocalParticipantEvidenceEnvelope();
   await testPatternEvidenceInputAndProvenance();
   await testZeroHypothesesCompletedSuccess();
   await testMultipleHypothesesIndependentIds();
@@ -167,6 +168,68 @@ export async function runImprovementHypothesisLoopTests(): Promise<void> {
   await testContractFailurePersistsSchemaForProof();
   await testProviderFailure();
   await testNoReplaceBeforeInvoke();
+}
+
+async function testLocalParticipantEvidenceEnvelope(): Promise<void> {
+  const sourceRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-src-local-'));
+  const outRoot = await mkdtemp(join(tmpdir(), 'wuxia-hyp-out-local-'));
+  const runRef = 'hyp-loop-local-envelope';
+  const source = await createSource(sourceRoot, runRef);
+  const participantJson = JSON.stringify({
+    schemaVersion: 'improvement-hypothesis-set-v2',
+    hypotheses: [],
+    noProblemAssessment: {
+      rationale: '当前材料不足以形成可审计的改善假设。',
+      feedbackRefs: ['overallImpression'],
+      evidenceRefs: [],
+    },
+  });
+  const localParticipant = {
+    executable: process.execPath,
+    buildArgs: () => ['-e', `process.stdout.write(${JSON.stringify(participantJson)})`],
+    model: 'fixture-local-model',
+    reasoningEffort: 'low',
+    bindingMetadata: {
+      bindingId: 'fixture-local-binding',
+      executableVersion: 'fixture-node',
+    },
+  } as const;
+
+  const result = await runImprovementHypothesis({
+    runRef,
+    sourceRoot,
+    outRoot,
+    localParticipant,
+  });
+
+  const prompt = await readFile(join(result.hypothesisDir, 'participant-prompt.txt'), 'utf8');
+  assert.match(prompt, new RegExp(runRef));
+  assert.match(prompt, /Observable material/);
+  assert.deepEqual(
+    await readFile(join(result.hypothesisDir, 'participant-binding.json'), 'utf8').then(JSON.parse),
+    {
+      schemaVersion: 'local-participant-binding-v1',
+      provider: 'codex-local-subagent',
+      bindingId: 'fixture-local-binding',
+      executable: process.execPath,
+      executableVersion: 'fixture-node',
+      modelConfigured: 'fixture-local-model',
+      modelResolution: 'EXPLICIT',
+      reasoningEffort: 'low',
+      timeoutMs: 1_800_000,
+    },
+  );
+  const trace = JSON.parse(
+    await readFile(join(result.hypothesisDir, 'participant-execution-trace.json'), 'utf8'),
+  ) as { schemaVersion: string; events: Array<{ type: string }>; terminal: { outcome: string } };
+  assert.equal(trace.schemaVersion, 'participant-execution-trace-v1');
+  assert.ok(trace.events.some(event => event.type === 'process_start'));
+  assert.ok(trace.events.some(event => event.type === 'output_activity'));
+  assert.equal(trace.terminal.outcome, 'completed');
+  assert.equal(await readFile(join(result.hypothesisDir, 'raw-participant-response.txt'), 'utf8'), participantJson);
+  const hypotheses = JSON.parse(await readFile(join(result.hypothesisDir, 'hypotheses.json'), 'utf8'));
+  assert.deepEqual(hypotheses.hypotheses, []);
+  assert.equal(result.runRef, runRef);
 }
 
 async function testOneHypothesisSuccess(): Promise<void> {

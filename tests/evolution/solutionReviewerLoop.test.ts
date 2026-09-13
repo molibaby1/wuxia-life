@@ -173,6 +173,8 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const successTrace = JSON.parse(await readFile(join(root, 'reviewer-agent/execution-trace.json'), 'utf8'));
   assert.equal(successTrace.terminal.outcome, 'completed');
   assert.ok(successTrace.events.some((event: { type: string }) => event.type === 'process_start'));
+  assert.equal(await readFile(join(root, 'reviewer-agent/participant-prompt.txt'), 'utf8'), deliveredPrompt);
+  assert.equal(JSON.parse(await readFile(join(root, 'reviewer-agent/participant-binding.json'), 'utf8')).provider, 'codex-local-subagent');
   assert.equal(result.review?.decision, 'ACCEPT_OPTION');
   assert.equal(JSON.parse(await readFile(join(root, 'reviewer-agent/review.json'), 'utf8')).acceptedOptionId, 'option-000001');
   assert.match(deliveredPrompt, /Assigned Skills \(working methods only; they do not grant authority\):/i);

@@ -23,10 +23,7 @@ import {
   type LocalEvidenceOnlyParticipantFailure,
   type LocalEvidenceOnlyParticipantSuccess,
 } from './localEvidenceOnlyParticipant';
-import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
-  type WorkspaceAgentParticipantOptions,
-} from './problemAgnosticSolution/agentParticipant';
+import type { WorkspaceAgentParticipantOptions } from './problemAgnosticSolution/agentParticipant';
 import {
   canonicalJson,
   resolvePhase0AnchorPath,
@@ -39,7 +36,6 @@ import { runPhase0 } from './phase0/runPhase0';
 
 const DEFAULT_OUT_ROOT = 'artifacts/reports/evolution/minimal-external-feedback';
 const INVOCATION_SCHEMA_VERSION = 'minimal-external-feedback-invocation-v1' as const;
-const LOCAL_PARTICIPANT_BINDING_SCHEMA_VERSION = 'local-participant-binding-v1' as const;
 const ALLOWED_OBSERVABLE_REL = join('reviewer-input', 'observable-payload.json');
 const SUBJECTIVE_DISCLAIMER = '反馈为该参与者的主观意见，未经过体验正确率/资格评分。';
 const DOTENV_PATH = resolve(process.cwd(), '.env');
@@ -145,23 +141,6 @@ async function writeCreateOnly(path: string, bytes: string | Uint8Array): Promis
   } finally {
     await handle.close();
   }
-}
-
-function buildLocalParticipantBindingArtifact(
-  participant: WorkspaceAgentParticipantOptions,
-): Record<string, unknown> {
-  const modelConfigured = participant.model ?? null;
-  return {
-    schemaVersion: LOCAL_PARTICIPANT_BINDING_SCHEMA_VERSION,
-    provider: 'codex-local-subagent',
-    bindingId: participant.bindingMetadata?.bindingId ?? null,
-    executable: participant.executable,
-    executableVersion: participant.bindingMetadata?.executableVersion ?? null,
-    modelConfigured,
-    modelResolution: modelConfigured === null ? 'HOST_CONFIGURED_UNOBSERVED' : 'EXPLICIT',
-    reasoningEffort: participant.reasoningEffort ?? null,
-    timeoutMs: participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
-  };
 }
 
 function requireApiKey(apiKey: string | undefined): string {
@@ -316,16 +295,31 @@ async function saveRawResponses(
   invokeResult: FeedbackInvokeResult,
 ): Promise<void> {
   if ('rawProviderResponse' in invokeResult && invokeResult.rawProviderResponse !== undefined) {
-    await writeCreateOnly(
-      join(feedbackDir, 'raw-provider-response.txt'),
-      invokeResult.rawProviderResponse,
-    );
+    try {
+      await writeCreateOnly(
+        join(feedbackDir, 'raw-provider-response.txt'),
+        invokeResult.rawProviderResponse,
+      );
+    } catch {
+      // Raw provider output is forensic sidecar evidence; it cannot change the invocation result.
+    }
   }
   if (invokeResult.ok) {
-    await writeCreateOnly(
-      join(feedbackDir, 'raw-participant-response.txt'),
-      invokeResult.rawParticipantResponse,
-    );
+    try {
+      await writeCreateOnly(
+        join(feedbackDir, 'raw-participant-response.txt'),
+        invokeResult.rawParticipantResponse,
+      );
+    } catch {
+      // Raw participant output is forensic sidecar evidence; it cannot change the invocation result.
+    }
+    if ('stderr' in invokeResult) {
+      try {
+        await writeCreateOnly(join(feedbackDir, 'stderr.txt'), invokeResult.stderr);
+      } catch {
+        // Available stderr is forensic sidecar evidence; it cannot change the invocation result.
+      }
+    }
   }
 }
 
@@ -415,17 +409,12 @@ export async function runMinimalExternalFeedback(
       files: { 'input/observable-payload.json': observablePayloadBytes },
     });
     const participantPrompt = buildPlayerExperienceFeedbackPrompt(observablePayloadBytes);
-    await writeCreateOnly(join(feedbackDir, 'participant-prompt.txt'), participantPrompt);
-    await writeCreateOnly(
-      join(feedbackDir, 'participant-binding.json'),
-      canonicalJson(buildLocalParticipantBindingArtifact(localParticipant)),
-    );
     invokeResult = await runLocalEvidenceOnlyParticipant({
       invocationRef,
       role: 'feedback',
       workspaceRoot: evidenceWorkspace.workspaceRoot,
       prompt: participantPrompt,
-      traceArtifactPath: join(feedbackDir, 'participant-execution-trace.json'),
+      observabilityRoot: feedbackDir,
       participant: localParticipant,
     });
   } else {

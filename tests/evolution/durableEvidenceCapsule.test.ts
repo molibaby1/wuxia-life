@@ -56,6 +56,7 @@ export async function runDurableEvidenceCapsuleTests(): Promise<void> {
   await testStagingIsNotAValidFinalCapsule();
   await testFinalCapsuleIsCreateOnly();
   await testManifestRequiredFieldsFailClosed();
+  await testRequiredReceiptRefsFailClosed();
 }
 
 async function testManifestRequiredFieldsFailClosed(): Promise<void> {
@@ -75,6 +76,34 @@ async function testManifestRequiredFieldsFailClosed(): Promise<void> {
     await writeFile(manifestPath, JSON.stringify(manifest));
     await assert.rejects(() => verifyDurableEvidenceCapsule(result.capsuleRoot), /sourceRef|repositoryIdentity|workflowIdentity|participantReceipts|object/i);
   }
+}
+
+async function testRequiredReceiptRefsFailClosed(): Promise<void> {
+  const root = await mkdtemp(join(tmpdir(), 'wuxia-capsule-receipt-null-'));
+  const input = await fixtureInput(root);
+  input.participantReceipts = [{
+    invocationRef: 'feedback-invocation-000001',
+    role: 'feedback',
+    round: 1,
+    continuationRef: null,
+    promptLogicalName: 'alpha',
+    bindingLogicalName: 'zeta',
+    invocationLogicalName: 'alpha',
+    rawOutputLogicalName: null,
+    stderrLogicalName: null,
+    executionTraceLogicalName: 'zeta',
+    structuredResultLogicalName: 'alpha',
+    failureLogicalName: null,
+    visibleEvidenceLogicalNames: [],
+    skillLogicalNames: [],
+    authorityLogicalNames: [],
+  }];
+  const result = await publishDurableEvidenceCapsule(input);
+  const manifestPath = join(result.capsuleRoot, 'manifest.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
+  ((manifest.participantReceipts as Array<Record<string, unknown>>)[0]!).prompt = null;
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  await assert.rejects(() => verifyDurableEvidenceCapsule(result.capsuleRoot), /prompt.*required|prompt.*object|participantReceipts/i);
 }
 
 async function testDeterministicManifestAndVerification(): Promise<void> {

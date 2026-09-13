@@ -410,6 +410,11 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
         return resolved;
       });
     };
+    const requiredRef = (value: unknown, label: string): DurableEvidenceRefReceipt => {
+      const resolved = ref(value, label);
+      if (resolved === null) throw new Error(`${label} is required`);
+      return resolved;
+    };
     const structuredResult = ref(receipt.structuredResult, `manifest.participantReceipts[${index}].structuredResult`);
     const failure = ref(receipt.failure, `manifest.participantReceipts[${index}].failure`);
     if (structuredResult !== null && failure !== null) throw new Error(`manifest.participantReceipts[${index}] cannot reference both structured result and failure`);
@@ -418,12 +423,12 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
       role: receipt.role as DurableParticipantRole,
       round: receipt.round,
       continuationRef: receipt.continuationRef,
-      prompt: ref(receipt.prompt, `manifest.participantReceipts[${index}].prompt`)!,
-      binding: ref(receipt.binding, `manifest.participantReceipts[${index}].binding`)!,
-      invocation: ref(receipt.invocation, `manifest.participantReceipts[${index}].invocation`)!,
+      prompt: requiredRef(receipt.prompt, `manifest.participantReceipts[${index}].prompt`),
+      binding: requiredRef(receipt.binding, `manifest.participantReceipts[${index}].binding`),
+      invocation: requiredRef(receipt.invocation, `manifest.participantReceipts[${index}].invocation`),
       rawOutput: ref(receipt.rawOutput, `manifest.participantReceipts[${index}].rawOutput`),
       stderr: ref(receipt.stderr, `manifest.participantReceipts[${index}].stderr`),
-      executionTrace: ref(receipt.executionTrace, `manifest.participantReceipts[${index}].executionTrace`)!,
+      executionTrace: requiredRef(receipt.executionTrace, `manifest.participantReceipts[${index}].executionTrace`),
       structuredResult,
       failure,
       visibleEvidence: arrayRefs(receipt.visibleEvidence, `manifest.participantReceipts[${index}].visibleEvidence`),

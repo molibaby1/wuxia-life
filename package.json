@@ -22,6 +22,7 @@
     "evolution:observability:refresh": "tsx scripts/evolution/reporting/refreshArchivedOperationalRunReports.ts",
     "evolution:observability:index": "tsx scripts/evolution/reporting/buildOperationalObservabilityIndex.ts",
     "evolution:operator:run": "tsx scripts/evolution/operator/runOrdinaryEvolution.ts",
+    "evolution:evidence:repair": "tsx scripts/evolution/evidence/repairOrdinaryEvidence.ts",
     "test:contracts:snapshot": "tsx tests/contracts/snapshotContract.test.ts",
     "test:contracts:choice": "tsx tests/contracts/choiceExecutionContract.test.ts",
     "test:contracts:replay": "tsx tests/contracts/replayContract.test.ts",

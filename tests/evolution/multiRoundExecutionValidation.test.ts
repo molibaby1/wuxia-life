@@ -591,6 +591,43 @@ export async function runWorkspaceStateLifecycleTest(): Promise<void> {
   assert.deepEqual(provenance.consistencyWarnings, ['START_BASELINE_FINGERPRINT_NOT_COMPARABLE']);
 }
 
+export async function runConfigurationEvidenceCaptureFailureIsolationTest(): Promise<void> {
+  const run = async (captureFails: boolean): Promise<{
+    result: Awaited<ReturnType<typeof runMultiRoundExecutionValidation>>;
+    calls: string[];
+  }> => {
+    const authoritativeRoot = await createWorkspace();
+    const workspaceRoot = await createWorkspace();
+    const calls: string[] = [];
+    const root = await mkdtemp(join(tmpdir(), `p2-configuration-evidence-${captureFails ? 'failure' : 'control'}-`));
+    const base = await fixedDependencies({ workspaceRoot, roundResults: ['ready', 'skip'], calls });
+    const dependencies: MultiRoundExecutionValidationDependencies = {
+      ...base,
+      ...(captureFails ? {
+        captureConfigurationBeforeEvidence: async () => { throw new Error('before evidence unavailable'); },
+        captureConfigurationAfterEvidence: async () => { throw new Error('after evidence unavailable'); },
+      } : {}),
+    };
+    const result = await runMultiRoundExecutionValidation({
+      multiRoundRunRef: `p2-configuration-evidence-${captureFails ? 'failure' : 'control'}-${Date.now()}`,
+      authoritativeRoot,
+      initialSourceRoot: '/sealed/initial-run-000001',
+      experimentRoot: join(root, 'run'),
+      participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+      dependencies,
+    });
+    return { result, calls };
+  };
+
+  const control = await run(false);
+  const captureFailure = await run(true);
+  assert.equal(captureFailure.result.outcome, control.result.outcome);
+  assert.equal(captureFailure.result.stopReason, control.result.stopReason);
+  assert.deepEqual(captureFailure.result.execution, control.result.execution);
+  assert.equal(captureFailure.result.actualParticipantJobs, control.result.actualParticipantJobs);
+  assert.deepEqual(captureFailure.calls, control.calls);
+}
+
 export async function runWorkspaceStateFailureLifecycleTests(): Promise<void> {
   const run = async (input: {
     name: string;
@@ -1251,6 +1288,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   Promise.resolve()
     .then(() => runRound1NonReadyStopTest())
     .then(() => runWorkspaceStateLifecycleTest())
+    .then(() => runConfigurationEvidenceCaptureFailureIsolationTest())
     .then(() => runWorkspaceStateFailureLifecycleTests())
     .then(() => runWorkspaceStateStartFailureTests())
     .then(() => runWorkspaceStateEndCaptureFailureTest())

@@ -22,8 +22,10 @@ export async function runPackageProjectCapsuleTests(): Promise<void> {
   const createdSessionIds: string[] = [];
   try {
     await mkdir(evidenceRoot, { recursive: true });
-    for (let index = 1; index <= 6; index += 1) {
-      const sessionId = `ordinary-run-20990101-00000${index}`;
+    const runPackage = async (...args: string[]) => execFile('bash', ['package-project.sh', ...args], { cwd: repositoryRoot, maxBuffer: 2 ** 20 });
+    const listing = async () => (await execFile('unzip', ['-Z1', 'project.zip'], { cwd: repositoryRoot })).stdout.split('\n').filter(Boolean);
+    const publishFixture = async (index: number): Promise<void> => {
+      const sessionId = `ordinary-run-20990101-${String(index).padStart(6, '0')}`;
       createdSessionIds.push(sessionId);
       const sourcePath = join(sourceRoot, `${index}.txt`);
       await writeFile(sourcePath, `${index}\n`);
@@ -31,23 +33,39 @@ export async function runPackageProjectCapsuleTests(): Promise<void> {
         capsuleRoot: join(evidenceRoot, sessionId),
         sessionId,
         sourceRunRef: sessionId,
-        createdAt: `2099-01-01T00:00:0${index}.000Z`,
+        createdAt: `2099-01-01T00:00:${String(index).padStart(2, '0')}.000Z`,
         repositoryIdentity: { branch: 'dev', headSha: 'a'.repeat(40), workingTreeClean: true },
         workflowIdentity: { workflow: 'ordinary-auto-evolution' },
         evidence: [{ logicalName: `payload-${index}`, relativePath: `extensions/inputs/payload-${index}.txt`, sourcePath, visibility: 'HUMAN_FORENSIC_ONLY', evidenceKind: 'fixture', sourceRef: `source/${index}.txt` }],
       });
-    }
+    };
 
-    const runPackage = async (...args: string[]) => execFile('bash', ['package-project.sh', ...args], { cwd: repositoryRoot, maxBuffer: 2 ** 20 });
-    const listing = async () => (await execFile('unzip', ['-Z1', 'project.zip'], { cwd: repositoryRoot })).stdout.split('\n').filter(Boolean);
+    for (let index = 1; index <= 3; index += 1) await publishFixture(index);
     await runPackage();
     let entries = await listing();
+    assert.equal(entries.some(entry => entry.endsWith('ordinary-run-20990101-000003/extensions/inputs/payload-3.txt')), true);
+    const threeMetadata = JSON.parse((await execFile('unzip', ['-p', 'project.zip', 'artifacts/evolution/run-evidence/evidence-package.json'], { cwd: repositoryRoot })).stdout) as { includedCapsuleCount: number; includedSessionIds: Array<{ sessionId: string; reason: string }> };
+    assert.equal(threeMetadata.includedCapsuleCount, 3);
+    assert.equal(threeMetadata.includedSessionIds.filter(item => item.reason === 'recent').length, 3);
+
+    for (let index = 4; index <= 6; index += 1) await publishFixture(index);
+    await runPackage();
+    entries = await listing();
     assert.ok(entries.some(entry => entry.endsWith('ordinary-run-20990101-000006/extensions/inputs/payload-6.txt')));
     assert.equal(entries.some(entry => entry.includes('ordinary-run-20990101-000001/')), false);
     assert.ok(entries.some(entry => entry.endsWith('evidence-package.json')));
     const recentMetadata = JSON.parse((await execFile('unzip', ['-p', 'project.zip', 'artifacts/evolution/run-evidence/evidence-package.json'], { cwd: repositoryRoot })).stdout) as { includedCapsuleCount: number; includedSessionIds: Array<{ sessionId: string; reason: string }> };
     assert.equal(recentMetadata.includedCapsuleCount, 5);
     assert.equal(recentMetadata.includedSessionIds.filter(item => item.reason === 'recent').length, 5);
+
+    for (let index = 7; index <= 10; index += 1) await publishFixture(index);
+    await runPackage();
+    entries = await listing();
+    assert.ok(entries.some(entry => entry.endsWith('ordinary-run-20990101-000010/extensions/inputs/payload-10.txt')));
+    assert.equal(entries.some(entry => entry.includes('ordinary-run-20990101-000005/')), false);
+    const tenMetadata = JSON.parse((await execFile('unzip', ['-p', 'project.zip', 'artifacts/evolution/run-evidence/evidence-package.json'], { cwd: repositoryRoot })).stdout) as { includedCapsuleCount: number; includedSessionIds: Array<{ sessionId: string; reason: string }> };
+    assert.equal(tenMetadata.includedCapsuleCount, 5);
+    assert.equal(tenMetadata.includedSessionIds.filter(item => item.reason === 'recent').length, 5);
 
     await runPackage('--include-capsule', 'ordinary-run-20990101-000001');
     entries = await listing();

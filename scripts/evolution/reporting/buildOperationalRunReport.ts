@@ -111,6 +111,8 @@ export interface RenderOperationalRunReportInput {
   includeArtifactRetentionNote?: boolean;
   sessionExecution?: MultiRoundSessionSummary;
   workspaceProvenance?: WorkspaceStateProvenanceProjection;
+  durableEvidenceCapsulePath?: string | null;
+  durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -770,6 +772,12 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
       headerLines.push(`- 创建时间：${input.createdAt}`);
     }
     headerLines.push(`- 工作流数量：${summaries.length}`);
+    if (input.durableEvidenceCapsulePath !== undefined || input.durableEvidenceStatus !== undefined) {
+      headerLines.push(
+        `- Durable Evidence Capsule：${input.durableEvidenceCapsulePath ?? '（不可用）'}`,
+        `- Durable Evidence 状态：${input.durableEvidenceStatus ?? 'NOT_ATTEMPTED'}`,
+      );
+    }
     if (input.includeArtifactRetentionNote === true) {
       headerLines.push(
         '',
@@ -777,7 +785,7 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
         '',
         '以下 Artifact 引用指向原始执行位置（通常位于 `.tmp/evolution/**`）。',
         '这些原始工作流 Artifact 不受 retention 保护，可能被清理，也不会复制到此归档中。',
-        'V3/V4 report.json 本身保留已验证的 bounded Decision Audit；V1/V2 不含该审计时会明确标记不可重建，SKIP 不依赖 Human Follow-up 才可审计。',
+        'V6 report.json 本身保留已验证的 bounded Decision/Continuation Audit；较早版本不含该审计时会明确标记不可重建，SKIP 不依赖 Human Follow-up 才可审计。',
         'Human Follow-up retention 只保留正式创建 HFL item 的 route 所需 operational state。',
       );
     }
@@ -823,6 +831,8 @@ export interface ArchivedOperationalRunReportForMarkdown {
   workflows: WorkflowSummary[];
   sessionExecution?: MultiRoundSessionSummary | null;
   workspaceProvenance?: WorkspaceStateProvenanceProjection | null;
+  durableEvidenceCapsulePath?: string | null;
+  durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
 }
 
 export function renderOperationalRunReportMarkdownFromReport(
@@ -835,6 +845,8 @@ export function renderOperationalRunReportMarkdownFromReport(
     includeArtifactRetentionNote: true,
     ...(report.sessionExecution == null ? {} : { sessionExecution: report.sessionExecution }),
     ...(report.workspaceProvenance == null ? {} : { workspaceProvenance: report.workspaceProvenance }),
+    ...(report.durableEvidenceCapsulePath === undefined ? {} : { durableEvidenceCapsulePath: report.durableEvidenceCapsulePath }),
+    ...(report.durableEvidenceStatus === undefined ? {} : { durableEvidenceStatus: report.durableEvidenceStatus }),
   });
 }
 

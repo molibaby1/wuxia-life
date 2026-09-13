@@ -963,12 +963,16 @@ async function testArchiveV6ForV2Session(): Promise<void> {
   const result = await archiveOperationalRunReport({
     repositoryRoot: fixture.repositoryRoot,
     root: fixture.sessionRelative,
+    durableEvidenceCapsulePath: 'artifacts/evolution/run-evidence/ordinary-run-20260912-000001',
+    durableEvidenceStatus: 'PASS',
   });
   assert.equal(result.schemaVersion, 'auto-evolution-operational-run-report-v6');
 
   const reportJson = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as Record<string, any>;
   const reportMarkdown = await readFile(result.reportMarkdownPath, 'utf8');
   assert.equal(reportJson.schemaVersion, 'auto-evolution-operational-run-report-v6');
+  assert.equal(reportJson.durableEvidenceCapsulePath, 'artifacts/evolution/run-evidence/ordinary-run-20260912-000001');
+  assert.equal(reportJson.durableEvidenceStatus, 'PASS');
   assert.equal(reportJson.sessionExecution.schemaVersion, 'multi-round-session-summary-v2');
   assert.deepEqual(reportJson.sessionExecution.rounds[0], {
     round: 1,
@@ -987,6 +991,7 @@ async function testArchiveV6ForV2Session(): Promise<void> {
   assert.match(reportMarkdown, /#### Revised Solution/);
   assert.match(reportMarkdown, /#### Fresh Re-review/);
   assert.match(reportMarkdown, /#### Continuation Decision/);
+  assert.match(reportMarkdown, /Durable Evidence Capsule：artifacts\/evolution\/run-evidence\/ordinary-run-20260912-000001/);
   assert.match(reportMarkdown, /Base route：DEFER_MORE_WORK_REQUESTED/);
   assert.match(reportMarkdown, /Effective route：ESCALATE_HUMAN/);
 

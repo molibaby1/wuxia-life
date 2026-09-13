@@ -93,6 +93,8 @@ export interface OperationalRunReportV6 {
   workspaceProvenance: WorkspaceStateProvenanceProjection;
   workflowCount: number;
   workflows: AuditedWorkflowContinuationSummary[];
+  durableEvidenceCapsulePath?: string | null;
+  durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
 }
 
 export type OperationalRunReport = OperationalRunReportV1 | OperationalRunReportV2 | OperationalRunReportV3 | OperationalRunReportV4 | OperationalRunReportV5 | OperationalRunReportV6;
@@ -445,7 +447,7 @@ function renderTopLevelIndex(input: {
     '',
     humanFollowupLine,
     '',
-    '运行报告是生成式可观测性历史；V3/V4 report.json 保留 bounded Decision Audit，V4 额外保留 Host-observed workspace provenance，V5 保留 bounded review-continuation session semantics，V6 额外保留 continuation audit projection；Human Follow-up 只保留正式 HFL item 的 operational state。',
+    '运行报告是生成式可观测性历史；V3/V4 report.json 保留 bounded Decision Audit，V4 额外保留 Host-observed workspace provenance，V5 保留 bounded review-continuation session semantics，V6 额外保留 continuation audit projection；Durable Evidence Capsule 单独保留 bounded forensic execution evidence；Human Follow-up 只保留正式 HFL item 的 operational state。',
     '',
   ].join('\n');
 }

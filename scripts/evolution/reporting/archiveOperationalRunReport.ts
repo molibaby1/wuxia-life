@@ -55,6 +55,8 @@ const REPORT_ID_HASH_PREFIX_LENGTH = 16;
 export interface ArchiveOperationalRunReportInput {
   repositoryRoot: string;
   root: string;
+  durableEvidenceCapsulePath?: string | null;
+  durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
 }
 
 export interface ArchiveOperationalRunReportResult {
@@ -275,6 +277,8 @@ function buildReportDocumentV6(input: {
   sessionExecution: MultiRoundSessionSummaryV2;
   workspaceProvenance: WorkspaceStateProvenanceProjection;
   workflows: AuditedWorkflowContinuationSummary[];
+  durableEvidenceCapsulePath?: string | null;
+  durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
 }): OperationalRunReportV6 {
   return {
     schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6,
@@ -285,6 +289,8 @@ function buildReportDocumentV6(input: {
     workspaceProvenance: input.workspaceProvenance,
     workflowCount: input.workflows.length,
     workflows: input.workflows,
+    ...(input.durableEvidenceCapsulePath === undefined ? {} : { durableEvidenceCapsulePath: input.durableEvidenceCapsulePath }),
+    ...(input.durableEvidenceStatus === undefined ? {} : { durableEvidenceStatus: input.durableEvidenceStatus }),
   };
 }
 
@@ -398,6 +404,8 @@ export async function archiveOperationalRunReport(
           sessionExecution,
           workspaceProvenance,
           workflows: reportWorkflows,
+          ...(input.durableEvidenceCapsulePath === undefined ? {} : { durableEvidenceCapsulePath: input.durableEvidenceCapsulePath }),
+          ...(input.durableEvidenceStatus === undefined ? {} : { durableEvidenceStatus: input.durableEvidenceStatus }),
         })
       : buildReportDocumentV4({
         reportId,
@@ -413,6 +421,8 @@ export async function archiveOperationalRunReport(
     workflows: reportWorkflows ?? workflows,
     ...(sessionExecution === null ? {} : { sessionExecution }),
     ...(workspaceProvenance === null ? {} : { workspaceProvenance }),
+    ...(input.durableEvidenceCapsulePath === undefined ? {} : { durableEvidenceCapsulePath: input.durableEvidenceCapsulePath }),
+    ...(input.durableEvidenceStatus === undefined ? {} : { durableEvidenceStatus: input.durableEvidenceStatus }),
   });
 
   await mkdir(reportDirectory, { recursive: true });

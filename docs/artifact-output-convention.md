@@ -27,6 +27,28 @@ Regenerate via `npm run gate:playability`, then intentionally refresh the fixtur
 
 `artifacts/evolution/run-reports/**` is generated, gitignored operational observability history. It is package-visible, not product authority, and not retention-protected canonical Human state. Archived reports summarize workflow facts; they do not copy raw `.tmp/evolution/**` execution artifacts, and artifact refs inside reports remain non-retained location references.
 
+### Durable Evidence Capsule v1
+
+Ordinary Auto Evolution evidence has three separate lifecycle surfaces:
+
+```text
+.tmp/evolution/**
+  = ephemeral execution evidence
+
+artifacts/evolution/run-evidence/<session-id>/
+  = one bounded, immutable, create-only Durable Evidence Capsule
+  = durable forensic evidence for the completed ordinary run
+
+artifacts/evolution/run-reports/**
+  = semantic observability projection
+```
+
+Each completed ordinary run attempts to publish its Capsule through a complete staging build, manifest/hash verification, and atomic final-path publication. A failed retention attempt is an independent observability failure; it does not change the already-determined AE outcome, route, gameplay result, Participant roster, or HFL eligibility. A published Capsule is never silently replaced; an equivalent repeat may be reported as reused.
+
+Every retained object declares `PARTICIPANT_VISIBLE` or `HUMAN_FORENSIC_ONLY`. This records historical evidence authority and does not grant runtime access. Analysis Core retains bounded invocation/provenance and structured evidence; Configuration and Cross-round Extensions are present only when those events occurred. The Capsule is not a full Agent workspace and v1 does not guarantee exact replay.
+
+Local durable history retains valid Capsules without automatic GC. `package-project.sh` includes the evidence index and latest five complete Capsules by deterministic metadata ordering; `--include-capsule <session-id>` can add older Capsules without removing the recent set. Selected Capsules are packaged as whole atomic artifacts, including internal paths that generic project exclusions would otherwise match. The package performs a post-extraction manifest/hash verification.
+
 ### Retention-protected operational state
 
 `artifacts/evolution/human-follow-up/**` is retention-protected operational state. Its canonical Human work-item JSON is not freely disposable, remains gitignored, stays outside authoritative source fingerprints, and is not repository product authority. This retention protection does not provide an infinite archival guarantee.

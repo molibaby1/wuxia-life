@@ -2,19 +2,19 @@
 
 ## 1. Status
 
-**Status: DRAFT — design sections accepted in chat on 2026-09-13; written spec pending Human review.**
+**Status: HUMAN ACCEPTED — 2026-09-13; IMPLEMENTATION-READY.**
 
 Current implementation baseline inspected for this design:
 
 ```text
 repository: molibaby1/wuxia-life
 branch: dev
-baseline HEAD: f0a718d300ab8c219af22acba3f7764f1fecdc63
+baseline HEAD: 657155f09ca7272b758c7f562b1b0230c9f91ff0
 ```
 
 This design introduces a bounded durable evidence layer for ordinary Auto Evolution sessions. It does not change AE reasoning, routes, permissions, Participant evidence authority, HFL triggers, or gameplay semantics.
 
-Implementation must not begin until this written spec is Human reviewed, required formal authority updates are recorded, and an implementation plan is accepted.
+Implementation follows the Human-accepted design and must preserve its stated authority boundaries.
 
 ---
 

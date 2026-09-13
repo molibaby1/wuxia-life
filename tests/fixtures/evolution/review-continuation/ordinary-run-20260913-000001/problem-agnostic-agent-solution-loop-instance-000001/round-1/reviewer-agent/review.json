@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "solution-review-v1",
+  "problemId": "problem-hypothesis-000001",
+  "decision": "REQUEST_MORE_WORK",
+  "assessment": "The base option needs more investigation.",
+  "repoRefs": ["src/example.ts"],
+  "artifactRefs": ["source/observable-payload.json"],
+  "concerns": ["The proposed change does not yet establish the required distinction."]
+}

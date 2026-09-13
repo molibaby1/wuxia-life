@@ -9,9 +9,16 @@ import {
   type WorkspaceAgentJobInput,
   type WorkspaceAgentParticipantOptions,
 } from '../../scripts/evolution/problemAgnosticSolution/agentParticipant';
-import { runSolutionAgent } from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
+import {
+  buildSolutionRevisionPrompt,
+  runSolutionAgent,
+  runSolutionRevisionAgent,
+} from '../../scripts/evolution/problemAgnosticSolution/runSolutionAgent';
 import { SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
+import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
+import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
 
 function countingSpawn(counter: { count: number }): typeof spawn {
   return ((...args: Parameters<typeof spawn>) => {
@@ -111,6 +118,20 @@ const solutionResult = {
   repoRefs: ['src/example.ts'],
   artifactRefs: ['source/observable-payload.json'],
 };
+
+const originalReview: SolutionReviewV1 = {
+  schemaVersion: 'solution-review-v1',
+  problemId: problemPackage.problemId,
+  decision: 'REQUEST_MORE_WORK',
+  assessment: 'The option needs one bounded follow-up check.',
+  repoRefs: ['src/example.ts'],
+  artifactRefs: ['source/observable-payload.json'],
+  concerns: ['Confirm the concrete configuration path.'],
+};
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 export async function runSolutionAgentLoopTests(): Promise<void> {
   const root = await mkdtemp(join(tmpdir(), 'solution-agent-loop-'));
@@ -274,6 +295,53 @@ export async function runSolutionAgentLoopTests(): Promise<void> {
     expectedContentSha256: canonicalSkillSha256,
     contentSha256: canonicalSkillSha256,
   }]);
+
+  const originalSolutionWork = solutionResult as SolutionWorkV1;
+  const revisionPrompt = buildSolutionRevisionPrompt(
+    problemPackage,
+    originalSolutionWork,
+    originalReview,
+    [{
+      identity: 'repository-grounded-investigation',
+      version: '1',
+      canonicalPath: canonicalSkillPath,
+      content: canonicalSkillContent,
+      contentSha256: canonicalSkillSha256,
+    }],
+  );
+  assert.match(revisionPrompt, new RegExp(escapeRegex(canonicalJson(originalSolutionWork))));
+  assert.match(revisionPrompt, new RegExp(escapeRegex(canonicalJson(originalReview))));
+  assert.match(revisionPrompt, /Reviewer concerns are feedback to investigate, not ground truth/i);
+  assert.match(revisionPrompt, /bounded work only/i);
+  assert.match(revisionPrompt, /unavailable evidence.*INSUFFICIENT_EVIDENCE/i);
+  assert.match(revisionPrompt, /Human authority.*ESCALATE/i);
+  assert.doesNotMatch(revisionPrompt, /new gameplay sample/i);
+
+  let revisionInvocationRef = '';
+  const revisionRun = await runSolutionRevisionAgent({
+    problemPackage,
+    problemPackagePath: packagePath,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-revision-000001',
+    jobNumber: 1,
+    destinationRoot: join(root, 'solution-revision'),
+    skillAssignments: SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: input => {
+        revisionInvocationRef = input.invocationRef;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(solutionResult))})`];
+      },
+    },
+    originalSolutionWork,
+    originalReview,
+  });
+  assert.equal(revisionRun.ok, true);
+  assert.equal(revisionInvocationRef, 'solution-revision-000001');
+  const revisionInvocation = JSON.parse(await readFile(join(root, 'solution-revision/invocation.json'), 'utf8'));
+  assert.equal(revisionInvocation.invocationRef, 'solution-revision-000001');
 
   const sidecarFailureRoot = join(root, 'sidecar-write-failure-agent');
   await mkdir(sidecarFailureRoot, { recursive: true });

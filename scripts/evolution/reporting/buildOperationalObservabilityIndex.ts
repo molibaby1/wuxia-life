@@ -7,8 +7,15 @@ import {
   type AuditedWorkflowSummary,
 } from './buildWorkflowDecisionAudit';
 import {
+  parseWorkflowContinuationAudit,
+  type AuditedWorkflowContinuationSummary,
+} from './buildWorkflowContinuationAudit';
+import {
   MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION,
+  MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION_V2,
+  type MultiRoundSessionSummary,
   type MultiRoundSessionSummaryV1,
+  type MultiRoundSessionSummaryV2,
 } from '../multiRoundRunManifestContract';
 import { buildHumanReviewSummary, type HumanReviewSummary } from './buildHumanReviewSummary';
 import {
@@ -20,6 +27,8 @@ export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION = 'auto-evolution-operational
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2 = 'auto-evolution-operational-run-report-v2';
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3 = 'auto-evolution-operational-run-report-v3';
 export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4 = 'auto-evolution-operational-run-report-v4';
+export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5 = 'auto-evolution-operational-run-report-v5';
+export const OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6 = 'auto-evolution-operational-run-report-v6';
 export const RUN_REPORTS_ROOT = 'artifacts/evolution/run-reports';
 export const EVOLUTION_OPERATIONAL_INDEX_PATH = 'artifacts/evolution/index.md';
 export const HUMAN_FOLLOWUP_INDEX_PATH = 'artifacts/evolution/human-follow-up/index.md';
@@ -64,7 +73,29 @@ export interface OperationalRunReportV4 {
   workflows: AuditedWorkflowSummary[];
 }
 
-export type OperationalRunReport = OperationalRunReportV1 | OperationalRunReportV2 | OperationalRunReportV3 | OperationalRunReportV4;
+export interface OperationalRunReportV5 {
+  schemaVersion: typeof OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5;
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflowCount: number;
+  workflows: AuditedWorkflowSummary[];
+}
+
+export interface OperationalRunReportV6 {
+  schemaVersion: typeof OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6;
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflowCount: number;
+  workflows: AuditedWorkflowContinuationSummary[];
+}
+
+export type OperationalRunReport = OperationalRunReportV1 | OperationalRunReportV2 | OperationalRunReportV3 | OperationalRunReportV4 | OperationalRunReportV5 | OperationalRunReportV6;
 
 export interface BuildOperationalObservabilityIndexInput {
   repositoryRoot: string;
@@ -96,12 +127,22 @@ function markdownCell(value: string): string {
   return value.replaceAll('|', '\\|').replaceAll('\r', ' ').replaceAll('\n', ' ');
 }
 
-function parseSessionExecution(value: unknown, reportId: string): MultiRoundSessionSummaryV1 {
+function parseSessionExecution(
+  value: unknown,
+  reportId: string,
+  expectedSchema: typeof MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION | typeof MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION_V2,
+): MultiRoundSessionSummary {
   if (!isRecord(value)) {
     throw new Error(`missing sessionExecution for ${reportId}`);
   }
-  if (value.schemaVersion !== MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION) {
+  if (
+    value.schemaVersion !== MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION
+    && value.schemaVersion !== MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION_V2
+  ) {
     throw new Error(`invalid sessionExecution.schemaVersion for ${reportId}`);
+  }
+  if (value.schemaVersion !== expectedSchema) {
+    throw new Error(`sessionExecution schemaVersion does not match report schema for ${reportId}: expected ${expectedSchema}`);
   }
   if (typeof value.multiRoundRunRef !== 'string' || value.multiRoundRunRef.length === 0) {
     throw new Error(`invalid sessionExecution.multiRoundRunRef for ${reportId}`);
@@ -146,7 +187,34 @@ function parseSessionExecution(value: unknown, reportId: string): MultiRoundSess
   if (!(execution.resultingRunRef === null || typeof execution.resultingRunRef === 'string')) {
     throw new Error(`invalid sessionExecution.execution.resultingRunRef for ${reportId}`);
   }
-  return value as MultiRoundSessionSummaryV1;
+  if (value.schemaVersion === MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION) {
+    return value as MultiRoundSessionSummaryV1;
+  }
+  if (!Array.isArray(value.rounds) || value.rounds.length !== value.roundCount) {
+    throw new Error(`invalid sessionExecution.rounds for ${reportId}`);
+  }
+  for (const [index, round] of value.rounds.entries()) {
+    if (!isRecord(round) || (round.round !== 1 && round.round !== 2)) {
+      throw new Error(`invalid sessionExecution.rounds[${index}] for ${reportId}`);
+    }
+    for (const field of ['baseTerminalRoute', 'baseReasonCode', 'continuationRef', 'effectiveTerminalRoute', 'effectiveReasonCode']) {
+      if (!(round[field] === null || typeof round[field] === 'string')) {
+        throw new Error(`invalid sessionExecution.rounds[${index}].${field} for ${reportId}`);
+      }
+    }
+  }
+  if (value.reviewContinuationCount !== 0 && value.reviewContinuationCount !== 1) {
+    throw new Error(`invalid sessionExecution.reviewContinuationCount for ${reportId}`);
+  }
+  if (
+    typeof value.reviewContinuationParticipantJobs !== 'number'
+    || !Number.isInteger(value.reviewContinuationParticipantJobs)
+    || value.reviewContinuationParticipantJobs < 0
+    || value.reviewContinuationParticipantJobs > 2
+  ) {
+    throw new Error(`invalid sessionExecution.reviewContinuationParticipantJobs for ${reportId}`);
+  }
+  return value as MultiRoundSessionSummaryV2;
 }
 
 export function parseOperationalRunReport(raw: string, expectedReportId: string): OperationalRunReport {
@@ -164,9 +232,11 @@ export function parseOperationalRunReport(raw: string, expectedReportId: string)
     && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2
     && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3
     && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4
+    && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5
+    && parsed.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6
   ) {
     throw new Error(
-      `wrong schemaVersion for ${expectedReportId}: expected ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3}, or ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4}, got ${String(parsed.schemaVersion)}`,
+      `wrong schemaVersion for ${expectedReportId}: expected ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4}, ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5}, or ${OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6}, got ${String(parsed.schemaVersion)}`,
     );
   }
   if (typeof parsed.reportId !== 'string' || parsed.reportId.length === 0) {
@@ -195,7 +265,14 @@ export function parseOperationalRunReport(raw: string, expectedReportId: string)
     return parsed as OperationalRunReportV1;
   }
 
-  const sessionExecution = parseSessionExecution(parsed.sessionExecution, expectedReportId);
+  const sessionExecution = parseSessionExecution(
+    parsed.sessionExecution,
+    expectedReportId,
+    parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5
+      || parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6
+      ? MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION_V2
+      : MULTI_ROUND_SESSION_SUMMARY_SCHEMA_VERSION,
+  );
   if (parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V2) {
     return { ...(parsed as OperationalRunReportV2), sessionExecution };
   }
@@ -210,8 +287,32 @@ export function parseOperationalRunReport(raw: string, expectedReportId: string)
   if (parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3) {
     return { ...(parsed as OperationalRunReportV3), sessionExecution, workflows };
   }
+  if (parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4) {
+    return {
+      ...(parsed as OperationalRunReportV4),
+      sessionExecution,
+      workspaceProvenance: parseWorkspaceStateProvenanceProjection(parsed.workspaceProvenance),
+      workflows,
+    };
+  }
+  if (parsed.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6) {
+    return {
+      ...(parsed as OperationalRunReportV6),
+      sessionExecution,
+      workspaceProvenance: parseWorkspaceStateProvenanceProjection(parsed.workspaceProvenance),
+      workflows: workflows.map((workflow, index) => ({
+        ...workflow,
+        continuationAudit: parsed.workflows[index] && isRecord(parsed.workflows[index]) && parsed.workflows[index].continuationAudit === null
+          ? null
+          : parseWorkflowContinuationAudit(
+            parsed.workflows[index] && isRecord(parsed.workflows[index]) ? parsed.workflows[index].continuationAudit : undefined,
+            `workflows[${index}].continuationAudit`,
+          ),
+      })),
+    };
+  }
   return {
-    ...(parsed as OperationalRunReportV4),
+    ...(parsed as OperationalRunReportV5),
     sessionExecution,
     workspaceProvenance: parseWorkspaceStateProvenanceProjection(parsed.workspaceProvenance),
     workflows,
@@ -244,6 +345,19 @@ async function loadArchivedReports(repositoryRoot: string): Promise<OperationalR
 function workflowRouteSummary(workflows: WorkflowSummary[]): string {
   if (workflows.length === 0) return '（无）';
   return workflows.map(workflow => workflow.terminalRoute ?? workflow.status).join(', ');
+}
+
+function sessionRouteSummary(report: OperationalRunReport): string {
+  if (report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5 && report.schemaVersion !== OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6) {
+    return workflowRouteSummary(report.workflows);
+  }
+  const lastRound = report.sessionExecution.rounds.at(-1);
+  if (lastRound === undefined) return workflowRouteSummary(report.workflows);
+  return [
+    `base route: ${lastRound.baseTerminalRoute ?? '（无）'}`,
+    `review continuation: ${lastRound.continuationRef ?? '（无）'}`,
+    `effective route: ${lastRound.effectiveTerminalRoute ?? '（无）'}`,
+  ].join('; ');
 }
 
 function sourceRunSummary(workflows: WorkflowSummary[]): string {
@@ -285,14 +399,14 @@ function renderRunReportsIndex(reports: OperationalRunReport[]): string {
         ...(report.schemaVersion === OPERATIONAL_RUN_REPORT_SCHEMA_VERSION ? {} : { sessionExecution: report.sessionExecution }),
       });
       lines.push(
-        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${markdownCell(sessionStop)} | ${markdownCell(multiRoundOutcome)} | ${markdownCell(execution)} | ${markdownCell(workflowRouteSummary(report.workflows))} | ${markdownCell(sourceRunSummary(report.workflows))} | ${markdownCell(human.conclusion)} | ${markdownCell(human.recommendedAction)} |`,
+        `| ${markdownCell(report.createdAt)} | [${markdownCell(report.reportId)}](${report.reportId}/report.md) | ${markdownCell(sessionStop)} | ${markdownCell(multiRoundOutcome)} | ${markdownCell(execution)} | ${markdownCell(sessionRouteSummary(report))} | ${markdownCell(sourceRunSummary(report.workflows))} | ${markdownCell(human.conclusion)} | ${markdownCell(human.recommendedAction)} |`,
       );
     }
   }
   lines.push(
     '',
     '本索引由归档的 `report.json` sidecar 生成，是可观测性历史，不是 Human backlog 的规范状态。',
-    'V1 行仅包含工作流信息；V2 行展示会话执行事实；V3 行展示会话执行事实与有界决策审计；V4 额外保留 Host-observed workspace provenance。人类结论与建议动作均来自共享 Human Review projection。',
+    'V1 行仅包含工作流信息；V2 行展示会话执行事实；V3 行展示会话执行事实与有界决策审计；V4 额外保留 Host-observed workspace provenance；V5 保留 bounded review-continuation session semantics；V6 = V5 + continuation audit projection。人类结论与建议动作均来自共享 Human Review projection。',
     '',
   );
   return lines.join('\n');
@@ -331,7 +445,7 @@ function renderTopLevelIndex(input: {
     '',
     humanFollowupLine,
     '',
-    '运行报告是生成式可观测性历史；V3/V4 report.json 保留 bounded Decision Audit，V4 额外保留 Host-observed workspace provenance；Human Follow-up 只保留正式 HFL item 的 operational state。',
+    '运行报告是生成式可观测性历史；V3/V4 report.json 保留 bounded Decision Audit，V4 额外保留 Host-observed workspace provenance，V5 保留 bounded review-continuation session semantics，V6 额外保留 continuation audit projection；Human Follow-up 只保留正式 HFL item 的 operational state。',
     '',
   ].join('\n');
 }

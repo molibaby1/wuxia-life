@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "problem-package-v1",
+  "problemId": "problem-hypothesis-000001",
+  "source": {
+    "runRef": "ordinary-run-20260913-000001",
+    "observablePayloadRef": "source/observable-payload.json",
+    "externalFeedbackRef": "feedback-runs/ordinary-run-20260913-000001/feedback.json",
+    "improvementHypothesisRef": "hypothesis-runs/ordinary-run-20260913-000001/hypotheses.json"
+  },
+  "problem": {
+    "hypothesisId": "hypothesis-000001",
+    "statement": "The workflow repeats too much content.",
+    "observedBasis": "The player-visible transcript contains repeated content.",
+    "feedbackRefs": ["observations[0]"],
+    "evidenceRefs": ["entry-000001"],
+    "unknowns": ["The minimum change is not yet established."],
+    "productSignificance": "Repeated content may reduce player-visible variety."
+  },
+  "authorityRefs": [],
+  "productSourceFingerprintSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "permissions": {
+    "authoritativeProductWrite": false,
+    "sandboxWrite": true,
+    "productExecution": false,
+    "codeExecution": false
+  }
+}

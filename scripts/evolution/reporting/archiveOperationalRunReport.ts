@@ -8,9 +8,11 @@ import {
   durableMultiRoundSessionSemantics,
   readMultiRoundRunManifest,
   type MultiRoundSessionSummaryV1,
+  type MultiRoundSessionSummaryV2,
 } from '../multiRoundRunManifestContract';
 import {
   collectWorkflowSummaries,
+  discoverWorkflowRootsForReport,
   renderOperationalRunReportMarkdownFromReport,
   type WorkflowSummary,
 } from './buildOperationalRunReport';
@@ -19,6 +21,11 @@ import {
   collectWorkflowDecisionAudits,
   type AuditedWorkflowSummary,
 } from './buildWorkflowDecisionAudit';
+import {
+  attachWorkflowContinuationAudits,
+  collectWorkflowContinuationAudits,
+  type AuditedWorkflowContinuationSummary,
+} from './buildWorkflowContinuationAudit';
 import {
   durableWorkspaceStateProvenanceSemantics,
   projectWorkspaceStateProvenance,
@@ -29,6 +36,8 @@ import {
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V3,
   OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V4,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5,
+  OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6,
   RUN_REPORTS_ROOT,
   buildOperationalObservabilityIndex,
   parseOperationalRunReport,
@@ -36,6 +45,8 @@ import {
   type OperationalRunReportV1,
   type OperationalRunReportV3,
   type OperationalRunReportV4,
+  type OperationalRunReportV5,
+  type OperationalRunReportV6,
 } from './buildOperationalObservabilityIndex';
 
 const REPORT_ID_PREFIX = 'ae-report-';
@@ -146,6 +157,43 @@ export function computeOperationalRunReportIdV4(input: {
   return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
 }
 
+export function computeOperationalRunReportIdV5(input: {
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowSummary[];
+}): string {
+  const digest = sha256Hex(canonicalJson({
+    sourceRoot: input.sourceRoot,
+    sessionExecution: durableMultiRoundSessionSemantics(input.sessionExecution),
+    workspaceProvenance: durableWorkspaceStateProvenanceSemantics(input.workspaceProvenance),
+    workflows: input.workflows.map(workflow => ({
+      ...durableWorkflowSemantics(workflow),
+      decisionAudit: workflow.decisionAudit,
+    })),
+  }));
+  return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
+}
+
+export function computeOperationalRunReportIdV6(input: {
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowContinuationSummary[];
+}): string {
+  const digest = sha256Hex(canonicalJson({
+    sourceRoot: input.sourceRoot,
+    sessionExecution: durableMultiRoundSessionSemantics(input.sessionExecution),
+    workspaceProvenance: durableWorkspaceStateProvenanceSemantics(input.workspaceProvenance),
+    workflows: input.workflows.map(workflow => ({
+      ...durableWorkflowSemantics(workflow),
+      decisionAudit: workflow.decisionAudit,
+      continuationAudit: workflow.continuationAudit,
+    })),
+  }));
+  return `${REPORT_ID_PREFIX}${digest.slice(0, REPORT_ID_HASH_PREFIX_LENGTH)}`;
+}
+
 function buildReportDocumentV1(input: {
   reportId: string;
   createdAt: string;
@@ -200,6 +248,46 @@ function buildReportDocumentV4(input: {
   };
 }
 
+function buildReportDocumentV5(input: {
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowSummary[];
+}): OperationalRunReportV5 {
+  return {
+    schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V5,
+    reportId: input.reportId,
+    createdAt: input.createdAt,
+    sourceRoot: input.sourceRoot,
+    sessionExecution: input.sessionExecution,
+    workspaceProvenance: input.workspaceProvenance,
+    workflowCount: input.workflows.length,
+    workflows: input.workflows,
+  };
+}
+
+function buildReportDocumentV6(input: {
+  reportId: string;
+  createdAt: string;
+  sourceRoot: string;
+  sessionExecution: MultiRoundSessionSummaryV2;
+  workspaceProvenance: WorkspaceStateProvenanceProjection;
+  workflows: AuditedWorkflowContinuationSummary[];
+}): OperationalRunReportV6 {
+  return {
+    schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V6,
+    reportId: input.reportId,
+    createdAt: input.createdAt,
+    sourceRoot: input.sourceRoot,
+    sessionExecution: input.sessionExecution,
+    workspaceProvenance: input.workspaceProvenance,
+    workflowCount: input.workflows.length,
+    workflows: input.workflows,
+  };
+}
+
 async function tryReadExistingCreatedAt(
   reportJsonPath: string,
   reportId: string,
@@ -231,7 +319,8 @@ export async function archiveOperationalRunReport(
   if (!rootStat.isDirectory()) throw new Error(`--root must be a directory: ${input.root}`);
 
   const sourceRoot = toRepositoryRelativePath(repositoryRoot, absoluteRoot);
-  const workflows = await collectWorkflowSummaries(absoluteRoot);
+  const workflowRoots = await discoverWorkflowRootsForReport(absoluteRoot);
+  const workflows = await collectWorkflowSummaries(absoluteRoot, workflowRoots);
   const manifestPath = await discoverMultiRoundRunManifestPath(absoluteRoot);
   const sessionExecution = manifestPath === null
     ? null
@@ -249,16 +338,36 @@ export async function archiveOperationalRunReport(
       return projectWorkspaceStateProvenance(await readWorkspaceStateProvenance(provenancePath));
     })();
 
+  if (
+    sessionExecution?.schemaVersion === 'multi-round-session-summary-v2'
+    && workspaceProvenance === null
+  ) {
+    throw new Error('multi-round manifest v2 requires workspace provenance; refusing to down-convert the report');
+  }
+
   const auditedWorkflows = sessionExecution === null
     ? null
     : attachWorkflowDecisionAudits(
       workflows,
-      await collectWorkflowDecisionAudits(absoluteRoot),
+      await collectWorkflowDecisionAudits(absoluteRoot, workflowRoots),
     );
+  const reportWorkflows = sessionExecution?.schemaVersion === 'multi-round-session-summary-v2'
+    ? attachWorkflowContinuationAudits(
+      auditedWorkflows,
+      await collectWorkflowContinuationAudits(absoluteRoot, workflowRoots),
+    )
+    : auditedWorkflows;
   const reportId = sessionExecution === null
     ? computeOperationalRunReportId({ sourceRoot, workflows })
     : workspaceProvenance === null
       ? computeOperationalRunReportIdV3({ sourceRoot, sessionExecution, workflows: auditedWorkflows })
+      : sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
+        ? computeOperationalRunReportIdV6({
+          sourceRoot,
+          sessionExecution,
+          workspaceProvenance,
+          workflows: reportWorkflows,
+        })
       : computeOperationalRunReportIdV4({
         sourceRoot,
         sessionExecution,
@@ -281,6 +390,15 @@ export async function archiveOperationalRunReport(
         sessionExecution,
         workflows: auditedWorkflows,
       })
+      : sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
+        ? buildReportDocumentV6({
+          reportId,
+          createdAt,
+          sourceRoot,
+          sessionExecution,
+          workspaceProvenance,
+          workflows: reportWorkflows,
+        })
       : buildReportDocumentV4({
         reportId,
         createdAt,
@@ -292,7 +410,7 @@ export async function archiveOperationalRunReport(
   const markdown = renderOperationalRunReportMarkdownFromReport({
     reportId,
     createdAt,
-    workflows: auditedWorkflows ?? workflows,
+    workflows: reportWorkflows ?? workflows,
     ...(sessionExecution === null ? {} : { sessionExecution }),
     ...(workspaceProvenance === null ? {} : { workspaceProvenance }),
   });

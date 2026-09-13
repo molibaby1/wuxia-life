@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "review-continuation-v1",
+  "continuationId": "review-continuation-000001",
+  "continuationOrdinal": 1,
+  "round": 1,
+  "parentWorkflowRef": "round-1",
+  "sourceRunRef": "ordinary-run-20260913-000001",
+  "startedAt": "2026-09-13T00:00:00.000Z",
+  "completedAt": "2026-09-13T00:01:00.000Z",
+  "baseDecisionRef": "decision.json",
+  "baseDecisionSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "revisionRequestRef": "review-continuation-000001/revision-request.json",
+  "revisionRequestSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "revisionStatus": "OPTIONS",
+  "reReviewStatus": "REQUEST_MORE_WORK",
+  "continuationDecisionRef": "review-continuation-000001/decision.json",
+  "continuationDecisionSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "participantJobCount": 2,
+  "terminalStatus": "completed",
+  "terminalRoute": "DEFER_MORE_WORK_REQUESTED"
+}

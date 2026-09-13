@@ -2,7 +2,7 @@
 
 > 用途：短滚动看板——回答「现在做到哪、下一步是什么、当前禁止扩展什么」。
 > 不是长期产品规范，也不是 Participant 执行流水账。
-> 最后更新：2026-09-04（Decision Audit / Human Review Surface v1 Slice B；仍为 RUN / OBSERVE）。
+> 最后更新：2026-09-13（PD-117 / P2 natural evidence status sync；仍为 RUN / OBSERVE）。
 
 ---
 
@@ -12,7 +12,7 @@ Auto Evolution 当前处于：
 
 > **EARLY OPERATIONAL / RUN-OBSERVE STAGE — 核心 Agent workflow、旁路运行报告与一次跨轮工程路径已经可用；当前重点是进入真实使用并观察，而不是继续预先扩展系统。**
 
-这不是 production-ready、fully autonomous 或 real cross-round product hypothesis 已验证的声明。
+real cross-round transition 已自然观察到一次；这仍不是 production-ready / fully autonomous 的声明；长期稳定性尚未证明。
 
 ## 2. 已确认基础
 
@@ -61,7 +61,7 @@ Auto Evolution 当前处于：
 
 以下内容不要因 deterministic engineering validation 或设计意图而写成已成立：
 
-- **真实 Participant 驱动的一次 cross-round product transition 尚未被观察到；P2 real product hypothesis = `UNVERIFIED`；**
+- **一次真实 Participant-driven cross-round transition 已自然观察到（ordinary-run-20260913-000006）；P2 real transition hypothesis 已获得直接实例 evidence；多轮真实运行的长期稳定性、普遍性与成功率仍未证明；**
 - 2026-08-29 fresh real-run observe batch（3 normal Codex current-binding runs）：`NO_CROSS_ROUND_TRANSITION_OBSERVED`（0/3 `READY_FOR_CONFIG_EXECUTION`；sidecar `NO_REPORT_CHANGE`）；
 - 多轮真实运行在长期使用中的稳定性；
 - 每个真实 run 都能或都应该进入下一轮；
@@ -88,6 +88,8 @@ real sealed run A
 
 Deterministic integration test 只证明工程路径成立，不替代上述真实 evidence。
 
+上述真实 evidence 条件已于 ordinary-run-20260913-000006 自然满足一次（disposable evolution workspace 内 bounded configuration execution，changed file：`src/data/lines/preschool-passive-spine.json`；`authoritativeRootChanged = false`；Round 2 自动启动后以 `DEFER_MORE_WORK_REQUESTED` 终止，不视为失败）。长期稳定性仍需继续观察。
+
 ## 4. 当前阶段：RUN / OBSERVE
 
 当前不新增新的核心能力阶段。
@@ -110,10 +112,14 @@ Deterministic integration test 只证明工程路径成立，不替代上述真�
 
 - 让现有系统实际运行；
 - 观察 P1 Report 是否足以让 Human 理解运行轨迹；
-- 等待一次自然产生、已授权的真实 P2 cross-round evidence；
+- 一次自然产生、已授权的真实 P2 cross-round evidence 已完成（ordinary-run-20260913-000006），不再作为 next goal；
+- 继续 RUN / OBSERVE，使用真实 runs 查找下一个 earliest material bottleneck；
+- 不继续为 P2 / PD-117 人为制造验证样本；
+- PD-117 不再是当前局部优化目标；
 - 真实运行暴露具体问题时再修正对应模块；
 - 不为了“完成验证”人为制造 READY、反复 retry 或预选保证可修改的问题。
 - 对正式 `ESCALATE_HUMAN` outcome，按 Human Follow-up Loop v1 保留后续异步 review 语义；不把它变成 RUN / OBSERVE 的同步 gate。
+- **PD-117 Bounded More-Work Continuation v1：ENGINEERING DELIVERED / IMPLEMENTATION REVIEW ACCEPTED / INITIAL NATURAL EFFECTIVENESS SUPPORTED ACROSS MULTIPLE INDEPENDENT CASES；GLOBAL / LONG-RUN EFFECTIVENESS NOT YET ESTABLISHED；** 首个符合条件的 Reviewer `REQUEST_MORE_WORK` 在单次 session 内最多触发一次 Host continuation、最多增加两个 Participant jobs；base Decision、PD-100 HFL trigger、PD-111 evidence scope 与 full P3 boundary 保持不变。自然 evidence anchor：ordinary-run-20260913-000001（continuation 后再次 `REQUEST_MORE_WORK`）与 ordinary-run-20260913-000006（continuation 后 `ACCEPT_OPTION` → disposable workspace 配置执行 → modified rerun B → Round 2 以 `DEFER_MORE_WORK_REQUESTED` 终止，`authoritativeRootChanged = false`）；Batch #3 early-stop sampling 不用于 activation-rate 统计；不宣称 global effectiveness / 成功率 / READY 率提升。
 
 ### Engineering convenience（非 Product Decision）
 
@@ -145,7 +151,7 @@ PD-100 中的 2-run recurrence、3 active items、5 fresh normal runs 仅是可�
 **Run/Observe → Bounded P3 Program（PRD A/B/C）terminal decision：`NO_BOUNDED_P3_SLICE_JUSTIFIED`。**  
 证据索引：`.tmp/evolution/communication-evidence-synthesis-20260829/decision.json`（不把 run-by-run transcript 写入本文件）。  
 含义：当前不提出下一个 bounded P3 communication slice；不授权任何 P3 implementation PRD；继续 ordinary RUN / OBSERVE。  
-未改变：Slice #1 matrix 状态、Slice #2 已验证边界、P2 real cross-round = `UNVERIFIED`。
+未改变：Slice #1 matrix 状态、Slice #2 已验证边界；已改变：P2 real transition 已获得首次自然实例 evidence，长期稳定性仍未证明。
 
 完整 P3 仍应继续从真实运行与多轮 evidence 中逐步归纳，不启动协议平台化建设。
 
@@ -273,7 +279,7 @@ P2 isolated evolution workspace 的修改不等于 authoritative repository prom
 3b. Human Review Surface v1 Slice B？→ **ENGINEERING DELIVERED / shared deterministic projection；不改变 machine contracts**
 4. P2 engineering path 完整？→ **YES / CLOSED**
 5. P2 deterministic cross-round path 已验证？→ **YES**
-6. P2 real Participant product hypothesis 已验证？→ **NO / UNVERIFIED**
+6. P2 real Participant product hypothesis 已验证？→ **YES — first natural real cross-round transition observed（ordinary-run-20260913-000006）；long-run/generalized reliability remains unverified**
 7. 当前阶段？→ **RUN / OBSERVE**
 8. 当前应该继续加 P2 代码？→ **NO**
 9. P3 full Communication Contract Consolidation 当前启动？→ **NO / DEFERRED**

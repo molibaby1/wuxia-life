@@ -3,11 +3,16 @@ import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { archiveOperationalRunReport } from '../../scripts/evolution/reporting/archiveOperationalRunReport';
-import { buildOperationalObservabilityIndex } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
+import { buildOperationalObservabilityIndex, parseOperationalRunReport } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
+import { refreshArchivedOperationalRunReports } from '../../scripts/evolution/reporting/refreshArchivedOperationalRunReports';
 import {
   buildOperationalRunReport,
   renderOperationalRunReportMarkdownFromReport,
 } from '../../scripts/evolution/reporting/buildOperationalRunReport';
+import {
+  WORKSPACE_STATE_FINGERPRINT_METHOD,
+  WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+} from '../../scripts/evolution/workspaceStateProvenance';
 
 async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
@@ -187,6 +192,7 @@ export async function runOperationalRunReportTests(): Promise<void> {
   await testProblemPackageOnlyIsNotWorkflow();
   await testTerminalWorkflowSignatures();
   await testNestedRoundPair();
+  await testManifestAuthoritativeWorkflowDiscovery();
   await testIncompleteNestedWorkflow();
   await testFalsePositiveDirectories();
   await testParticipantFailure();
@@ -201,6 +207,10 @@ export async function runOperationalRunReportTests(): Promise<void> {
   await testRetransmissionSucceededDespiteAcceptanceRejection();
   await testStructuredTerminalDeliveryAggregates();
   await testArchiveCreationAndIndexes();
+  await testArchiveV6ForV2Session();
+  testV2SessionMarkdownKeepsAggregateAndRoundSemanticsSeparate();
+  await testV2ManifestWithoutWorkspaceProvenanceFailsClosed();
+  testHistoricalReportSchemasRemainReadable();
   await testArchiveStableIdentity();
   await testArchiveChangedSummaryNewIdentity();
   await testArchiveJsonMarkdownParity();
@@ -446,6 +456,101 @@ async function testNestedRoundPair(): Promise<void> {
   assert.match(report, /## 2\. p2-run\/round-2/);
 }
 
+function twoRoundManifest(): Record<string, unknown> {
+  return {
+    schemaVersion: 'multi-round-run-manifest-v2',
+    multiRoundRunRef: 'ordinary-run-20260913-000002',
+    initialSourceRunRef: 'ordinary-run-20260913-000002',
+    limits: {
+      maxAgentRounds: 2,
+      maxCrossRoundTransitions: 1,
+      maxRoundParticipantJobs: 4,
+      maxReviewContinuations: 1,
+      maxReviewContinuationParticipantJobs: 2,
+      maxExecutionParticipantJobs: 1,
+      maxTotalParticipantJobs: 11,
+      retryCount: 0,
+    },
+    rounds: [1, 2].map(round => ({
+      round,
+      workflowRef: `round-${round}`,
+      sourceRunRef: `ordinary-run-20260913-00000${round + 2}`,
+      baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+      baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+      continuationRef: null,
+      effectiveTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+      effectiveReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+      executionRef: null,
+      resultingRunRef: null,
+      nextAction: 'STOP',
+    })),
+    reviewContinuations: [],
+    execution: {
+      executionRef: 'configuration-execution-000001',
+      allowedWritePaths: [],
+      actualChangedFiles: [],
+      status: 'not_started',
+      verificationResults: [],
+      resultingRunRef: null,
+    },
+    budget: {
+      round1ParticipantJobs: 2,
+      reviewContinuationParticipantJobs: 0,
+      executionParticipantJobs: 0,
+      round2ParticipantJobs: 2,
+      totalParticipantJobs: 4,
+      retryCount: 0,
+    },
+    outcome: 'STOPPED',
+    stopReason: 'ROUND_2_COMPLETED',
+  };
+}
+
+async function testManifestAuthoritativeWorkflowDiscovery(): Promise<void> {
+  const repositoryRoot = await createRoot();
+  const scanRoot = join(repositoryRoot, 'session');
+  await writeJson(join(scanRoot, 'run-manifest.json'), twoRoundManifest());
+  for (const round of [1, 2]) {
+    const workflowRoot = join(scanRoot, `round-${round}`);
+    await writeJson(join(workflowRoot, 'decision.json'), {
+      route: 'DEFER_MORE_WORK_REQUESTED',
+      reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    });
+  }
+  const fakeFixtureRoot = join(
+    scanRoot,
+    'evolution-workspace/evolution/tests/fixtures/evolution/review-continuation',
+    'ordinary-run-20260913-000001',
+    'problem-agnostic-agent-solution-loop-instance-000001',
+  );
+  await createProblemPackage(fakeFixtureRoot);
+  await writeJson(join(fakeFixtureRoot, 'source/observable-payload.json'), { entries: [] });
+  await writeJson(join(fakeFixtureRoot, 'decision.json'), {
+    route: 'ESCALATE_HUMAN',
+    reasonCode: 'EXPLICIT_ESCALATION',
+  });
+
+  const outputPath = join(scanRoot, 'report.md');
+  const result = await buildOperationalRunReport({ root: scanRoot, outputPath });
+  const report = await readFile(result.reportPath, 'utf8');
+
+  assert.equal(result.workflowCount, 2);
+  assert.match(report, /## 1\. round-1/);
+  assert.match(report, /## 2\. round-2/);
+  assert.doesNotMatch(report, /evolution-workspace\/evolution\/tests\/fixtures\/evolution\/review-continuation/);
+  assert.doesNotMatch(report, /ordinary-run-20260913-000001/);
+
+  await writeJson(join(scanRoot, 'workspace-state-provenance.json'), workspaceProvenance());
+  const archived = await archiveOperationalRunReport({ repositoryRoot, root: 'session' });
+  const archivedJson = JSON.parse(await readFile(archived.reportJsonPath, 'utf8')) as {
+    workflowCount: number;
+    workflows: Array<{ identity: string }>;
+  };
+  assert.equal(archived.workflowCount, 2);
+  assert.equal(archivedJson.workflowCount, 2);
+  assert.deepEqual(archivedJson.workflows.map(workflow => workflow.identity), ['round-1', 'round-2']);
+}
+
 async function testIncompleteNestedWorkflow(): Promise<void> {
   const scanRoot = await createRoot();
   const runRoot = join(scanRoot, 'p2-run', 'round-1');
@@ -679,6 +784,425 @@ async function createArchiveFixtureRepository(): Promise<{
     sessionRoot,
     sessionRelative: '.tmp/evolution/archive-session',
   };
+}
+
+function v2SessionManifest(input: { withContinuation: boolean }): Record<string, unknown> {
+  const withContinuation = input.withContinuation;
+  return {
+    schemaVersion: 'multi-round-run-manifest-v2',
+    multiRoundRunRef: 'ordinary-run-20260912-000001',
+    initialSourceRunRef: 'ordinary-run-20260912-000001',
+    limits: {
+      maxAgentRounds: 2,
+      maxCrossRoundTransitions: 1,
+      maxRoundParticipantJobs: 4,
+      maxReviewContinuations: 1,
+      maxReviewContinuationParticipantJobs: 2,
+      maxExecutionParticipantJobs: 1,
+      maxTotalParticipantJobs: 11,
+      retryCount: 0,
+    },
+    rounds: [{
+      round: 1,
+      workflowRef: 'problem-agnostic-agent-solution-loop-instance-012',
+      sourceRunRef: 'ordinary-run-20260912-000001',
+      baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+      baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+      continuationRef: withContinuation ? 'review-continuation-000001' : null,
+      effectiveTerminalRoute: withContinuation ? 'ESCALATE_HUMAN' : 'DEFER_MORE_WORK_REQUESTED',
+      effectiveReasonCode: withContinuation ? 'EXPLICIT_ESCALATION' : 'REVIEW_REQUEST_MORE_WORK',
+      executionRef: null,
+      resultingRunRef: null,
+      nextAction: 'STOP',
+    }],
+    reviewContinuations: withContinuation ? [{
+      round: 1,
+      continuationRef: 'review-continuation-000001',
+      participantJobs: 2,
+      terminalStatus: 'completed',
+      terminalRoute: 'ESCALATE_HUMAN',
+      decisionRef: 'review-continuation-000001/decision.json',
+    }] : [],
+    execution: {
+      executionRef: 'configuration-execution-000001',
+      allowedWritePaths: [],
+      actualChangedFiles: [],
+      status: 'not_started',
+      verificationResults: [],
+      resultingRunRef: null,
+    },
+    budget: {
+      round1ParticipantJobs: 4,
+      reviewContinuationParticipantJobs: withContinuation ? 2 : 0,
+      executionParticipantJobs: 0,
+      round2ParticipantJobs: 0,
+      totalParticipantJobs: withContinuation ? 6 : 4,
+      retryCount: 0,
+    },
+    outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+    stopReason: 'ROUND_1_TERMINAL_NOT_READY',
+  };
+}
+
+function workspaceProvenance(): Record<string, unknown> {
+  return {
+    schemaVersion: WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION,
+    fingerprintMethod: WORKSPACE_STATE_FINGERPRINT_METHOD,
+    workspaceRootRef: 'evolution-workspace/evolution',
+    start: { status: 'available', fingerprintSha256: 'a'.repeat(64) },
+    executionBoundary: null,
+    end: { status: 'available', fingerprintSha256: 'a'.repeat(64) },
+    consistencyWarnings: [],
+  };
+}
+
+async function createV2ArchiveFixture(input: { withProvenance: boolean; withContinuation: boolean }): Promise<{
+  repositoryRoot: string;
+  sessionRelative: string;
+}> {
+  const fixture = await createArchiveFixtureRepository();
+  await writeJson(join(fixture.sessionRoot, 'run-manifest.json'), v2SessionManifest({ withContinuation: input.withContinuation }));
+  if (input.withContinuation) {
+    const workflowRoot = join(fixture.sessionRoot, 'problem-agnostic-agent-solution-loop-instance-012');
+    const continuationRoot = join(workflowRoot, 'review-continuation-000001');
+    const hash = 'a'.repeat(64);
+    await writeJson(join(continuationRoot, 'revision-request.json'), {
+      schemaVersion: 'review-continuation-revision-request-v1',
+      continuationId: 'review-continuation-000001',
+      continuationOrdinal: 1,
+      round: 1,
+      sourceRunRef: 'ordinary-run-20260912-000001',
+      problemPackageRef: 'problem-package.json',
+      problemPackageSha256: hash,
+      originalSolutionRef: 'solution-agent/result.json',
+      originalSolutionSha256: hash,
+      originalReviewRef: 'reviewer-agent/review.json',
+      originalReviewSha256: hash,
+      baseDecisionRef: 'decision.json',
+      baseDecisionSha256: hash,
+      workspaceBaselineFingerprintSha256: hash,
+    });
+    await writeJson(join(continuationRoot, 'solution-revision/result.json'), {
+      schemaVersion: 'solution-work-v1',
+      status: 'OPTIONS',
+      problemId: 'problem-hypothesis-000001',
+      options: [{
+        optionId: 'option-000001',
+        proposedChange: 'revised option',
+        rationale: 'revised rationale',
+        repoRefs: ['src/example.ts'],
+        artifactRefs: ['source/observable-payload.json'],
+        changeScope: 'configuration',
+        expectedPlayerObservableDifference: 'revised difference',
+        risks: ['revised risk'],
+        unknowns: ['revised unknown'],
+      }],
+      recommendedOptionId: 'option-000001',
+      summary: 'Revised solution summary',
+      repoRefs: ['src/example.ts'],
+      artifactRefs: ['source/observable-payload.json'],
+    });
+    await writeJson(join(continuationRoot, 'reviewer-agent/review.json'), {
+      schemaVersion: 'solution-review-v1',
+      problemId: 'problem-hypothesis-000001',
+      decision: 'ACCEPT_NO_ACTION',
+      assessment: 'Fresh re-review assessment',
+      repoRefs: ['src/example.ts'],
+      artifactRefs: ['source/observable-payload.json'],
+      concerns: ['Fresh re-review concern'],
+    });
+    await writeJson(join(continuationRoot, 'decision.json'), {
+      schemaVersion: 'solution-decision-v1',
+      problemId: 'problem-hypothesis-000001',
+      route: 'ESCALATE_HUMAN',
+      reasonCode: 'EXPLICIT_ESCALATION',
+      inputs: {
+        solutionStatus: 'OPTIONS',
+        reviewerDecision: 'ACCEPT_NO_ACTION',
+        solutionScope: null,
+        reviewScope: null,
+        permissions: {
+          authoritativeProductWrite: false,
+          codeExecution: false,
+          productExecution: false,
+          sandboxWrite: true,
+        },
+        budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+      },
+    });
+    await writeJson(join(continuationRoot, 'continuation.json'), {
+      schemaVersion: 'review-continuation-v1',
+      continuationId: 'review-continuation-000001',
+      continuationOrdinal: 1,
+      round: 1,
+      parentWorkflowRef: 'round-1',
+      sourceRunRef: 'ordinary-run-20260912-000001',
+      startedAt: '2026-09-12T00:00:00.000Z',
+      completedAt: '2026-09-12T00:01:00.000Z',
+      baseDecisionRef: 'decision.json',
+      baseDecisionSha256: hash,
+      revisionRequestRef: 'review-continuation-000001/revision-request.json',
+      revisionRequestSha256: hash,
+      revisionStatus: 'OPTIONS',
+      reReviewStatus: 'ACCEPT_NO_ACTION',
+      continuationDecisionRef: 'review-continuation-000001/decision.json',
+      continuationDecisionSha256: hash,
+      participantJobCount: 2,
+      terminalStatus: 'completed',
+      terminalRoute: 'ESCALATE_HUMAN',
+    });
+  }
+  if (input.withProvenance) {
+    await writeJson(join(fixture.sessionRoot, 'workspace-state-provenance.json'), workspaceProvenance());
+  }
+  return fixture;
+}
+
+async function testArchiveV6ForV2Session(): Promise<void> {
+  const fixture = await createV2ArchiveFixture({ withProvenance: true, withContinuation: true });
+  const result = await archiveOperationalRunReport({
+    repositoryRoot: fixture.repositoryRoot,
+    root: fixture.sessionRelative,
+  });
+  assert.equal(result.schemaVersion, 'auto-evolution-operational-run-report-v6');
+
+  const reportJson = JSON.parse(await readFile(result.reportJsonPath, 'utf8')) as Record<string, any>;
+  const reportMarkdown = await readFile(result.reportMarkdownPath, 'utf8');
+  assert.equal(reportJson.schemaVersion, 'auto-evolution-operational-run-report-v6');
+  assert.equal(reportJson.sessionExecution.schemaVersion, 'multi-round-session-summary-v2');
+  assert.deepEqual(reportJson.sessionExecution.rounds[0], {
+    round: 1,
+    baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+    baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    continuationRef: 'review-continuation-000001',
+    effectiveTerminalRoute: 'ESCALATE_HUMAN',
+    effectiveReasonCode: 'EXPLICIT_ESCALATION',
+  });
+  assert.equal(reportJson.workspaceProvenance.schemaVersion, WORKSPACE_STATE_PROVENANCE_SCHEMA_VERSION);
+  assert.equal(reportJson.workflows[0].continuationAudit.revisedSolution.summary, 'Revised solution summary');
+  assert.equal(reportJson.workflows[0].continuationAudit.reReview.concerns[0], 'Fresh re-review concern');
+  assert.equal(reportJson.workflows[0].continuationAudit.continuationDecision.route, 'ESCALATE_HUMAN');
+  assert.ok(reportMarkdown.indexOf('#### Decision') < reportMarkdown.indexOf('### Review Continuation Audit'));
+  assert.match(reportMarkdown, /#### Revision Request/);
+  assert.match(reportMarkdown, /#### Revised Solution/);
+  assert.match(reportMarkdown, /#### Fresh Re-review/);
+  assert.match(reportMarkdown, /#### Continuation Decision/);
+  assert.match(reportMarkdown, /Base route：DEFER_MORE_WORK_REQUESTED/);
+  assert.match(reportMarkdown, /Effective route：ESCALATE_HUMAN/);
+
+  const wrongRoundRegressionMarkdown = renderOperationalRunReportMarkdownFromReport({
+    reportId: reportJson.reportId,
+    createdAt: reportJson.createdAt,
+    workflows: reportJson.workflows,
+    sessionExecution: {
+      ...reportJson.sessionExecution,
+      roundCount: 2,
+      rounds: [
+        {
+          ...reportJson.sessionExecution.rounds[0],
+          effectiveTerminalRoute: 'READY_FOR_CONFIG_EXECUTION',
+          effectiveReasonCode: 'ACCEPTED_CONFIGURATION_SCOPE',
+        },
+        {
+          round: 2,
+          baseTerminalRoute: 'ESCALATE_HUMAN',
+          baseReasonCode: 'EXPLICIT_ESCALATION',
+          continuationRef: null,
+          effectiveTerminalRoute: 'ESCALATE_HUMAN',
+          effectiveReasonCode: 'EXPLICIT_ESCALATION',
+        },
+      ],
+    },
+    workspaceProvenance: reportJson.workspaceProvenance,
+  });
+  const continuationSection = wrongRoundRegressionMarkdown.indexOf('### Review Continuation Audit');
+  assert.notEqual(continuationSection, -1);
+  const continuationText = wrongRoundRegressionMarkdown.slice(continuationSection);
+  assert.match(continuationText, /Base route：DEFER_MORE_WORK_REQUESTED/);
+  assert.match(continuationText, /Effective route：READY_FOR_CONFIG_EXECUTION/);
+  assert.doesNotMatch(continuationText, /Effective route：ESCALATE_HUMAN/);
+  assert.doesNotMatch(continuationText, /Base route：ESCALATE_HUMAN/);
+
+  const reportJsonBeforeRefresh = await readFile(result.reportJsonPath, 'utf8');
+  await writeFile(result.reportMarkdownPath, '# stale markdown\n', 'utf8');
+  const refreshed = await refreshArchivedOperationalRunReports({ repositoryRoot: fixture.repositoryRoot });
+  assert.equal(refreshed.refreshedCount, 1);
+  assert.equal(await readFile(result.reportJsonPath, 'utf8'), reportJsonBeforeRefresh);
+  assert.match(await readFile(result.reportMarkdownPath, 'utf8'), /### Review Continuation Audit/);
+  assert.equal(
+    parseOperationalRunReport(await readFile(result.reportJsonPath, 'utf8'), result.reportId).schemaVersion,
+    'auto-evolution-operational-run-report-v6',
+  );
+
+  const first = result.reportId;
+  const noContinuation = await createV2ArchiveFixture({ withProvenance: true, withContinuation: false });
+  const second = await archiveOperationalRunReport({
+    repositoryRoot: noContinuation.repositoryRoot,
+    root: noContinuation.sessionRelative,
+  });
+  assert.notEqual(second.reportId, first, 'V2 session semantics must contribute to report identity');
+  const noContinuationJson = JSON.parse(await readFile(join(noContinuation.repositoryRoot, 'artifacts/evolution/run-reports', second.reportId, 'report.json'), 'utf8')) as Record<string, any>;
+  assert.equal(noContinuationJson.schemaVersion, 'auto-evolution-operational-run-report-v6');
+  assert.equal(noContinuationJson.workflows[0].continuationAudit, null);
+}
+
+function testV2SessionMarkdownKeepsAggregateAndRoundSemanticsSeparate(): void {
+  const markdown = renderOperationalRunReportMarkdownFromReport({
+    reportId: 'ae-report-multi-round-markdown-regression',
+    createdAt: '2026-09-13T00:00:00.000Z',
+    workflows: [1, 2].map(round => ({
+      identity: `round-${round}`,
+      status: round === 1 ? 'READY_FOR_CONFIG_EXECUTION' : 'DEFER_MORE_WORK_REQUESTED',
+      sourceRunRef: `source-run-${round}`,
+      problemStatement: null,
+      solutionStatus: null,
+      reviewerDecision: null,
+      terminalRoute: round === 1 ? 'READY_FOR_CONFIG_EXECUTION' : 'DEFER_MORE_WORK_REQUESTED',
+      reason: round === 1 ? 'ACCEPTED_CONFIGURATION_SCOPE' : 'REVIEW_REQUEST_MORE_WORK',
+      failedStage: null,
+      participantErrorKind: null,
+      authoritativeModification: 'NO' as const,
+      lastAvailableArtifact: null,
+      artifactRefs: [],
+      structuredTerminalDelivery: null,
+    })),
+    sessionExecution: {
+      schemaVersion: 'multi-round-session-summary-v2',
+      multiRoundRunRef: 'ordinary-run-20260913-000006',
+      outcome: 'CROSS_ROUND_TRANSITION_OBSERVED',
+      stopReason: 'ROUND_2_COMPLETED',
+      roundCount: 2,
+      crossRoundTransitions: 1,
+      rounds: [
+        {
+          round: 1,
+          baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+          baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+          continuationRef: 'review-continuation-000001',
+          effectiveTerminalRoute: 'READY_FOR_CONFIG_EXECUTION',
+          effectiveReasonCode: 'ACCEPTED_CONFIGURATION_SCOPE',
+        },
+        {
+          round: 2,
+          baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+          baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+          continuationRef: null,
+          effectiveTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+          effectiveReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+        },
+      ],
+      reviewContinuationCount: 1,
+      reviewContinuationParticipantJobs: 2,
+      lastRoundTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+      execution: {
+        executionRef: 'configuration-execution-000001',
+        status: 'completed',
+        actualChangedFiles: [],
+        resultingRunRef: null,
+      },
+    },
+  });
+
+  const sessionSection = markdown.slice(markdown.indexOf('## 会话执行'), markdown.indexOf('## 工作流 / 轮次详情'));
+  assert.match(sessionSection, /轮数：2/);
+  assert.match(sessionSection, /Review continuation 次数：1/);
+  assert.match(sessionSection, /Review continuation Participant jobs：2/);
+  assert.doesNotMatch(sessionSection, /^- base route:|^- review continuation：|^- effective route:|^- 最后一轮路由：|^- continuation Participant jobs：/m);
+
+  const roundSection = markdown.slice(markdown.indexOf('## 工作流 / 轮次详情'));
+  assert.match(roundSection, /### Round 1/);
+  assert.match(roundSection, /Round 1[\s\S]*base route：DEFER_MORE_WORK_REQUESTED/);
+  assert.match(roundSection, /Round 1[\s\S]*review continuation：review-continuation-000001/);
+  assert.match(roundSection, /Round 1[\s\S]*effective route：READY_FOR_CONFIG_EXECUTION/);
+  assert.match(roundSection, /### Round 2/);
+  assert.match(roundSection, /Round 2[\s\S]*review continuation：（无）/);
+  assert.match(roundSection, /Round 2[\s\S]*effective route：DEFER_MORE_WORK_REQUESTED/);
+}
+
+async function testV2ManifestWithoutWorkspaceProvenanceFailsClosed(): Promise<void> {
+  const fixture = await createV2ArchiveFixture({ withProvenance: false, withContinuation: true });
+  await assert.rejects(
+    () => archiveOperationalRunReport({ repositoryRoot: fixture.repositoryRoot, root: fixture.sessionRelative }),
+    /workspace provenance|required|fail closed/i,
+  );
+}
+
+function testHistoricalReportSchemasRemainReadable(): void {
+  const workflow = {
+    identity: 'round-1',
+    status: 'SKIP',
+    sourceRunRef: null,
+    problemStatement: null,
+    solutionStatus: null,
+    reviewerDecision: null,
+    terminalRoute: 'SKIP',
+    reason: 'NO_PROPOSAL',
+    failedStage: null,
+    participantErrorKind: null,
+    authoritativeModification: 'NO',
+    lastAvailableArtifact: 'decision.json',
+    artifactRefs: ['decision.json'],
+    structuredTerminalDelivery: null,
+  };
+  const v1 = {
+    schemaVersion: 'auto-evolution-operational-run-report-v1',
+    reportId: 'ae-report-history-v1', createdAt: '2026-09-01T00:00:00.000Z', sourceRoot: '.tmp/evolution/x', workflowCount: 1, workflows: [workflow],
+  };
+  const session = {
+    schemaVersion: 'multi-round-session-summary-v1',
+    multiRoundRunRef: 'ordinary-run-20260901-000001', outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED', stopReason: 'ROUND_1_TERMINAL_NOT_READY', roundCount: 1, crossRoundTransitions: 0, lastRoundTerminalRoute: 'SKIP', execution: { executionRef: 'execution-000001', status: 'not_started', actualChangedFiles: [], resultingRunRef: null },
+  };
+  const v2 = { ...v1, schemaVersion: 'auto-evolution-operational-run-report-v2', reportId: 'ae-report-history-v2', sessionExecution: session };
+  const audit = {
+    schemaVersion: 'ae-workflow-decision-audit-v1',
+    externalFeedback: { status: 'completed', artifactRef: null, overallImpression: null, observations: [] },
+    improvementHypothesis: { status: 'completed', artifactRef: null, hypothesisCount: 0, hypotheses: [], noProblemAssessment: { status: 'unavailable', reason: 'legacy_contract' } },
+    selection: { status: 'none', artifactRef: null, selectedHypothesisId: null },
+    solution: { status: 'not_run', artifactRef: null, solutionStatus: null, summary: null, recommendedOptionId: null, options: [] },
+    reviewer: { status: 'not_run', artifactRef: null, decision: null, assessment: null, acceptedOptionId: null, scopeAssessment: null, concerns: [] },
+    decision: { status: 'completed', artifactRef: 'decision.json', route: 'SKIP', reasonCode: 'NO_PROPOSAL' },
+  };
+  const auditedWorkflow = { ...workflow, decisionAudit: audit };
+  const v3 = { ...v2, schemaVersion: 'auto-evolution-operational-run-report-v3', reportId: 'ae-report-history-v3', workflows: [auditedWorkflow] };
+  const provenance = { ...workspaceProvenance(), predecessorRef: null, continuity: 'UNKNOWN' };
+  const v4 = { ...v3, schemaVersion: 'auto-evolution-operational-run-report-v4', reportId: 'ae-report-history-v4', workspaceProvenance: provenance };
+  const v5 = {
+    ...v4,
+    schemaVersion: 'auto-evolution-operational-run-report-v5',
+    reportId: 'ae-report-history-v5',
+    sessionExecution: {
+      schemaVersion: 'multi-round-session-summary-v2',
+      multiRoundRunRef: 'ordinary-run-20260901-000001',
+      outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+      stopReason: 'ROUND_1_TERMINAL_NOT_READY',
+      roundCount: 1,
+      crossRoundTransitions: 0,
+      rounds: [{
+        round: 1,
+        baseTerminalRoute: 'SKIP',
+        baseReasonCode: 'NO_PROPOSAL',
+        continuationRef: null,
+        effectiveTerminalRoute: 'SKIP',
+        effectiveReasonCode: 'NO_PROPOSAL',
+      }],
+      reviewContinuationCount: 0,
+      reviewContinuationParticipantJobs: 0,
+      lastRoundTerminalRoute: 'SKIP',
+      execution: { executionRef: 'execution-000001', status: 'not_started', actualChangedFiles: [], resultingRunRef: null },
+    },
+  };
+  for (const report of [v1, v2, v3, v4, v5]) {
+    assert.equal(parseOperationalRunReport(JSON.stringify(report), report.reportId).reportId, report.reportId);
+  }
+  const v5WithV1Session = {
+    ...v4,
+    schemaVersion: 'auto-evolution-operational-run-report-v5',
+    reportId: 'ae-report-history-v5-invalid-session',
+  };
+  assert.throws(
+    () => parseOperationalRunReport(JSON.stringify(v5WithV1Session), v5WithV1Session.reportId),
+    /V2|session.*v2/i,
+  );
 }
 
 async function testArchiveCreationAndIndexes(): Promise<void> {

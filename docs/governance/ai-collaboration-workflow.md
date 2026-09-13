@@ -72,6 +72,8 @@ DEFER
 ESCALATE
 ```
 
+在 PD-117 下，完成的 Reviewer `REQUEST_MORE_WORK` 只能由 Host 按 session-wide mechanical rule 触发一次 bounded continuation：一次 fresh Solution revision，以及仅在 revision 为 `OPTIONS` 时的一次 fresh independent re-review。`DEFER` 表示当前 execution context 无法取得所需 material evidence，`ESCALATE` 表示需要 Human product / governance / authority judgment；两者都不进入 continuation。第二次 `REQUEST_MORE_WORK` 必须终止为 `DEFER_MORE_WORK_REQUESTED`。这是 Orchestrator 的 workflow transition，不是 Participant 的质量目标或继续率优化。
+
 ### 2.4 Skill
 
 Skill 是 Participant 可复用工作方法。

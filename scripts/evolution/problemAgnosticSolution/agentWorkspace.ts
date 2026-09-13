@@ -101,6 +101,33 @@ async function assertSafeSymlink(root: string, linkPath: string, linkText: strin
   }
 }
 
+async function ensureDirectoryPathWithoutSymlinks(path: string, label: string): Promise<void> {
+  const target = resolve(path);
+  const missing: string[] = [];
+  let current = target;
+  while (true) {
+    try {
+      const stat = await lstat(current);
+      if (stat.isSymbolicLink()) throw new Error(`${label} must not contain a symlink: ${current}`);
+      if (!stat.isDirectory()) throw new Error(`${label} must be a directory: ${current}`);
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      const parent = dirname(current);
+      if (parent === current) throw new Error(`unable to create ${label}: ${target}`);
+      missing.push(current);
+      current = parent;
+    }
+  }
+  for (const directory of missing.reverse()) {
+    await mkdir(directory);
+    const stat = await lstat(directory);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      throw new Error(`${label} must be a newly created directory: ${directory}`);
+    }
+  }
+}
+
 async function copyTree(sourceRoot: string, destinationRoot: string, current = ''): Promise<void> {
   const sourceDirectory = safePath(sourceRoot, current || '.');
   const entries = await readdir(sourceDirectory, { withFileTypes: true });
@@ -171,7 +198,7 @@ export async function prepareAgentWorkspace(
   const workspaceRoot = join(destinationRoot, input.jobKind);
   const manifestPath = join(workspaceRoot, '.agent-workspace-manifest.json');
   const authoritative = await fingerprint(authoritativeRoot);
-  await mkdir(destinationRoot, { recursive: true });
+  await ensureDirectoryPathWithoutSymlinks(destinationRoot, 'agent workspace destination');
   await mkdir(workspaceRoot, { recursive: false });
   await copyTree(authoritativeRoot, workspaceRoot);
   await copyArtifacts(input, workspaceRoot);

@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import type { MultiRoundSessionSummaryV1 } from '../../scripts/evolution/multiRoundRunManifestContract';
+import type { MultiRoundSessionSummaryV1, MultiRoundSessionSummaryV2 } from '../../scripts/evolution/multiRoundRunManifestContract';
 import type { WorkflowSummary } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 import type { WorkflowDecisionAuditV1 } from '../../scripts/evolution/reporting/buildWorkflowDecisionAudit';
+import type { WorkflowContinuationAuditV1 } from '../../scripts/evolution/reporting/buildWorkflowContinuationAudit';
 import { buildHumanReviewSummary } from '../../scripts/evolution/reporting/buildHumanReviewSummary';
 import { renderOperationalRunReportMarkdown } from '../../scripts/evolution/reporting/buildOperationalRunReport';
 import { buildOperationalObservabilityIndex } from '../../scripts/evolution/reporting/buildOperationalObservabilityIndex';
@@ -25,6 +26,32 @@ const session = (overrides: Partial<MultiRoundSessionSummaryV1> = {}): MultiRoun
     resultingRunRef: null,
   },
   ...overrides,
+});
+
+const continuationSession = (effectiveTerminalRoute: string, effectiveReasonCode: string): MultiRoundSessionSummaryV2 => ({
+  schemaVersion: 'multi-round-session-summary-v2',
+  multiRoundRunRef: 'ordinary-run-20260912-000001',
+  outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+  stopReason: 'ROUND_1_TERMINAL_NOT_READY',
+  roundCount: 1,
+  crossRoundTransitions: 0,
+  rounds: [{
+    round: 1,
+    baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+    baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    continuationRef: 'review-continuation-000001',
+    effectiveTerminalRoute,
+    effectiveReasonCode,
+  }],
+  reviewContinuationCount: 1,
+  reviewContinuationParticipantJobs: 2,
+  lastRoundTerminalRoute: effectiveTerminalRoute,
+  execution: {
+    executionRef: 'configuration-execution-000001',
+    status: 'not_started',
+    actualChangedFiles: [],
+    resultingRunRef: null,
+  },
 });
 
 const audit = (overrides: Partial<WorkflowDecisionAuditV1> = {}): WorkflowDecisionAuditV1 => ({
@@ -92,6 +119,45 @@ const workflow = (overrides: Partial<WorkflowSummary> = {}, decisionAudit?: Work
   ...(decisionAudit === undefined ? {} : { decisionAudit }),
   ...overrides,
 });
+
+const continuationAudit: WorkflowContinuationAuditV1 = {
+  schemaVersion: 'ae-workflow-continuation-audit-v1',
+  continuationRef: 'review-continuation-000001',
+  revisionRequest: {
+    status: 'completed',
+    artifactRef: 'review-continuation-000001/revision-request.json',
+    reviewerRequest: {
+      decision: 'REQUEST_MORE_WORK',
+      assessment: 'Base request',
+      acceptedOptionId: null,
+      scopeAssessment: null,
+      concerns: ['Base concern'],
+    },
+  },
+  revisedSolution: {
+    status: 'completed',
+    artifactRef: 'review-continuation-000001/solution-revision/result.json',
+    solutionStatus: 'NO_PROPOSAL',
+    summary: 'Revised solution',
+    recommendedOptionId: null,
+    options: [],
+  },
+  reReview: {
+    status: 'completed',
+    artifactRef: 'review-continuation-000001/reviewer-agent/review.json',
+    decision: 'REQUEST_MORE_WORK',
+    assessment: 'Fresh review',
+    acceptedOptionId: null,
+    scopeAssessment: null,
+    concerns: ['Fresh concern'],
+  },
+  continuationDecision: {
+    status: 'completed',
+    artifactRef: 'review-continuation-000001/decision.json',
+    route: 'DEFER_MORE_WORK_REQUESTED',
+    reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+  },
+};
 
 function testSkipProjection(): void {
   const result = buildHumanReviewSummary({
@@ -239,6 +305,64 @@ function testCrossRoundCompletion(): void {
   assert.equal(result.handoff, null);
 }
 
+function testContinuationEffectiveRouteProjection(): void {
+  const baseAudit = audit({
+    reviewer: {
+      status: 'completed',
+      artifactRef: 'reviewer-agent/review.json',
+      decision: 'REQUEST_MORE_WORK',
+      assessment: '需要完成一个有界的当前上下文检查。',
+      acceptedOptionId: null,
+      scopeAssessment: null,
+      concerns: ['确认具体配置路径。'],
+    },
+    decision: {
+      status: 'completed',
+      artifactRef: 'decision.json',
+      route: 'DEFER_MORE_WORK_REQUESTED',
+      reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    },
+  });
+  const baseWorkflow = workflow({
+    reviewerDecision: 'REQUEST_MORE_WORK',
+    terminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+    reason: 'REVIEW_REQUEST_MORE_WORK',
+  }, baseAudit);
+
+  const escalation = buildHumanReviewSummary({
+    workflows: [baseWorkflow],
+    sessionExecution: continuationSession('ESCALATE_HUMAN', 'EXPLICIT_ESCALATION'),
+  });
+  assert.match(escalation.conclusion, /需要 Human 判断/);
+  assert.match(escalation.explanation.join('\n'), /REQUEST_MORE_WORK|更多工作|bounded/i);
+  assert.equal(escalation.attention, 'human_review');
+  assert.equal(escalation.handoff?.mode, 'required');
+
+  const secondRequest = buildHumanReviewSummary({
+    workflows: [workflow({ continuationAudit }, baseAudit)],
+    sessionExecution: continuationSession('DEFER_MORE_WORK_REQUESTED', 'REVIEW_REQUEST_MORE_WORK'),
+  });
+  assert.doesNotMatch(secondRequest.conclusion, /需要 Human 判断/);
+  assert.notEqual(secondRequest.attention, 'human_review');
+  assert.notEqual(secondRequest.handoff?.mode, 'required');
+  assert.match(secondRequest.handoff?.prompt ?? '', /Revised Solution/);
+  assert.match(secondRequest.handoff?.prompt ?? '', /Fresh Re-review concerns/);
+  assert.match(secondRequest.handoff?.prompt ?? '', /Continuation Decision/);
+  assert.match(secondRequest.handoff?.prompt ?? '', /不要推断哪些 base Reviewer concerns 已解决/);
+
+  const continuationFailure = buildHumanReviewSummary({
+    workflows: [baseWorkflow],
+    sessionExecution: {
+      ...continuationSession('PARTICIPANT_FAILURE', 'PARTICIPANT_FAILURE'),
+      stopReason: 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE',
+      reviewContinuationParticipantJobs: 1,
+    },
+  });
+  assert.equal(continuationFailure.attention, 'participant_failure');
+  assert.match(continuationFailure.conclusion, /Participant|可靠的产品结论/);
+  assert.equal(continuationFailure.handoff?.mode, 'optional');
+}
+
 async function testSurfacesConsumeProjection(): Promise<void> {
   const auditedWorkflow = workflow({}, audit());
   const summary = buildHumanReviewSummary({
@@ -326,6 +450,7 @@ testSkipProjection();
 testFailureAndSessionOverrides();
 testLegacyAndReasonDistinctions();
 testCrossRoundCompletion();
+testContinuationEffectiveRouteProjection();
 testEscalateSurfaceAndMachineInvariance();
 await testSurfacesConsumeProjection();
 

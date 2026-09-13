@@ -8,7 +8,10 @@ import {
   canonicalJson,
   sha256Hex,
 } from '../../scripts/evolution/phase0/provenance';
-import { retainHumanFollowupWorkItem } from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
+import {
+  retainHumanFollowupWorkItem,
+  type HumanFollowupContinuationEvidence,
+} from '../../scripts/evolution/humanFollowup/retainHumanFollowupWorkItem';
 import { validateProblemPackage, type ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
 import { validateSolutionDecision, type SolutionDecisionV1 } from '../../src/evolution/solutionDecisionContract';
 import { validateHumanFollowupWorkItem } from '../../src/evolution/humanFollowupWorkItemContract';
@@ -66,6 +69,55 @@ function createDecision(reasonCode: 'EXPLICIT_ESCALATION' | 'ACCEPTED_OUT_OF_SCO
   });
 }
 
+function createMoreWorkDecision(): SolutionDecisionV1 {
+  return validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: problemPackage.problemId,
+    route: 'DEFER_MORE_WORK_REQUESTED',
+    reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    inputs: {
+      solutionStatus: 'OPTIONS',
+      reviewerDecision: 'REQUEST_MORE_WORK',
+      solutionScope: 'configuration',
+      reviewScope: 'config_only',
+      permissions: {
+        authoritativeProductWrite: false,
+        sandboxWrite: true,
+        productExecution: false,
+        codeExecution: false,
+      },
+      budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+}
+
+function createContinuationDecision(route: 'ESCALATE_HUMAN' | 'DEFER' | 'SKIP'): SolutionDecisionV1 {
+  const routeData = route === 'ESCALATE_HUMAN'
+    ? { reasonCode: 'EXPLICIT_ESCALATION' as const, solutionStatus: 'ESCALATE' as const, reviewerDecision: null, solutionScope: null, reviewScope: null }
+    : route === 'DEFER'
+      ? { reasonCode: 'INSUFFICIENT_EVIDENCE' as const, solutionStatus: 'INSUFFICIENT_EVIDENCE' as const, reviewerDecision: null, solutionScope: null, reviewScope: null }
+      : { reasonCode: 'REVIEW_REJECTED' as const, solutionStatus: 'OPTIONS' as const, reviewerDecision: 'REJECT' as const, solutionScope: 'configuration' as const, reviewScope: 'config_only' as const };
+  return validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: problemPackage.problemId,
+    route,
+    reasonCode: routeData.reasonCode,
+    inputs: {
+      solutionStatus: routeData.solutionStatus,
+      reviewerDecision: routeData.reviewerDecision,
+      solutionScope: routeData.solutionScope,
+      reviewScope: routeData.reviewScope,
+      permissions: {
+        authoritativeProductWrite: false,
+        sandboxWrite: true,
+        productExecution: false,
+        codeExecution: false,
+      },
+      budget: { actualParticipantJobs: 2, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+}
+
 async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`);
@@ -107,6 +159,37 @@ async function createFixture(input: {
     problemPackagePath,
     decisionPath,
     decision,
+  };
+}
+
+async function createContinuationFixture(route: 'ESCALATE_HUMAN' | 'DEFER' | 'SKIP' = 'ESCALATE_HUMAN'): Promise<{
+  fixture: Awaited<ReturnType<typeof createFixture>>;
+  effectiveDecision: SolutionDecisionV1;
+  continuation: HumanFollowupContinuationEvidence;
+}> {
+  const fixture = await createFixture();
+  const baseDecision = createMoreWorkDecision();
+  const effectiveDecision = createContinuationDecision(route);
+  await writeJson(fixture.decisionPath, baseDecision);
+  const continuationRoot = join(fixture.workflowRoot, 'review-continuation-000001');
+  const continuationRelativePaths = [
+    'review-continuation-000001/revision-request.json',
+    'review-continuation-000001/solution-revision/result.json',
+    'review-continuation-000001/reviewer-agent/review.json',
+    'review-continuation-000001/decision.json',
+    'review-continuation-000001/continuation.json',
+  ];
+  for (const relativePath of continuationRelativePaths) {
+    await writeJson(join(fixture.workflowRoot, relativePath), { relativePath });
+  }
+  await writeJson(join(continuationRoot, 'decision.json'), effectiveDecision);
+  return {
+    fixture: { ...fixture, decision: baseDecision },
+    effectiveDecision,
+    continuation: {
+      effectiveDecisionPath: 'review-continuation-000001/decision.json',
+      continuationRelativePaths,
+    },
   };
 }
 
@@ -287,6 +370,59 @@ export async function runHumanFollowupRetentionTests(): Promise<void> {
   const missingDiagnosticFixture = await createFixture();
   await writeJson(missingDiagnosticFixture.problemPackagePath, v2Package);
   await assert.rejects(() => retain(missingDiagnosticFixture), /required evidence|diagnostic\/causal-attribution/i);
+
+  const continuationFixture = await createContinuationFixture();
+  const continuationRetained = await retainHumanFollowupWorkItem({
+    repositoryRoot: continuationFixture.fixture.repositoryRoot,
+    workflowRoot: continuationFixture.fixture.workflowRoot,
+    workflowInstanceRef: continuationFixture.fixture.workflowInstanceRef,
+    sourceRunRef,
+    sourceFingerprintSha256,
+    problemPackagePath: continuationFixture.fixture.problemPackagePath,
+    decisionPath: join(continuationFixture.fixture.workflowRoot, continuationFixture.continuation.effectiveDecisionPath),
+    continuation: continuationFixture.continuation,
+  });
+  assert.equal(continuationRetained.item.trigger.route, 'ESCALATE_HUMAN');
+  assert.equal(
+    continuationRetained.item.provenance.decisionSha256,
+    sha256Hex(canonicalJson(continuationFixture.effectiveDecision)),
+  );
+  assert.deepEqual(
+    continuationRetained.item.evidence.map(entry => entry.relativePath),
+    [
+      'problem-package.json',
+      'source/observable-payload.json',
+      `feedback-runs/${sourceRunRef}/feedback.json`,
+      `hypothesis-runs/${sourceRunRef}/hypotheses.json`,
+      'selection/selected-hypothesis.json',
+      'solution-agent/result.json',
+      'reviewer-agent/review.json',
+      'decision.json',
+      ...continuationFixture.continuation.continuationRelativePaths,
+    ],
+  );
+  assert.ok(continuationRetained.item.evidence.some(entry => entry.relativePath === 'solution-agent/result.json'));
+  assert.ok(continuationRetained.item.evidence.some(entry => entry.relativePath === 'review-continuation-000001/solution-revision/result.json'));
+  assert.ok(continuationRetained.item.evidence.some(entry => entry.relativePath === 'review-continuation-000001/reviewer-agent/review.json'));
+  assert.ok(continuationRetained.item.evidence.some(entry => entry.relativePath === 'review-continuation-000001/decision.json'));
+
+  for (const route of ['DEFER', 'SKIP'] as const) {
+    const nonEscalation = await createContinuationFixture(route);
+    await assert.rejects(
+      () => retainHumanFollowupWorkItem({
+        repositoryRoot: nonEscalation.fixture.repositoryRoot,
+        workflowRoot: nonEscalation.fixture.workflowRoot,
+        workflowInstanceRef: nonEscalation.fixture.workflowInstanceRef,
+        sourceRunRef,
+        sourceFingerprintSha256,
+        problemPackagePath: nonEscalation.fixture.problemPackagePath,
+        decisionPath: join(nonEscalation.fixture.workflowRoot, nonEscalation.continuation.effectiveDecisionPath),
+        continuation: nonEscalation.continuation,
+      }),
+      /ESCALATE_HUMAN/,
+    );
+    assert.equal(await pathExists(join(nonEscalation.fixture.repositoryRoot, 'artifacts/evolution/human-follow-up/items')), false);
+  }
 }
 
 async function pathExists(path: string): Promise<boolean> {

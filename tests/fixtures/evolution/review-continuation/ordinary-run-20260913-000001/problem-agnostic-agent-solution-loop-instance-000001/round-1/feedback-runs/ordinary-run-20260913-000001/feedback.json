@@ -1,0 +1,9 @@
+{
+  "overallImpression": "The workflow repeats too much content.",
+  "observations": [
+    {
+      "feedback": "The player-visible summary repeats content.",
+      "evidenceRefs": ["entry-000001"]
+    }
+  ]
+}

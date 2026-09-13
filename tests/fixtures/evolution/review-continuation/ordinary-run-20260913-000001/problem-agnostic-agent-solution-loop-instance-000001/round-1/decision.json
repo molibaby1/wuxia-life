@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "solution-decision-v1",
+  "problemId": "problem-hypothesis-000001",
+  "route": "DEFER_MORE_WORK_REQUESTED",
+  "reasonCode": "REVIEW_REQUEST_MORE_WORK",
+  "inputs": {
+    "solutionStatus": "OPTIONS",
+    "reviewerDecision": "REQUEST_MORE_WORK",
+    "solutionScope": "configuration",
+    "reviewScope": "config_only",
+    "permissions": {
+      "authoritativeProductWrite": false,
+      "sandboxWrite": true,
+      "productExecution": false,
+      "codeExecution": false
+    },
+    "budget": {
+      "actualParticipantJobs": 4,
+      "maxParticipantJobs": 4,
+      "retryCount": 0
+    }
+  }
+}

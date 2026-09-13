@@ -33,7 +33,13 @@ export async function refreshArchivedOperationalRunReports(input: {
       createdAt: report.createdAt,
       workflows: report.workflows,
       ...(report.schemaVersion === 'auto-evolution-operational-run-report-v1' ? {} : { sessionExecution: report.sessionExecution }),
-      ...(report.schemaVersion === 'auto-evolution-operational-run-report-v4' ? { workspaceProvenance: report.workspaceProvenance } : {}),
+      ...(
+        report.schemaVersion === 'auto-evolution-operational-run-report-v4'
+        || report.schemaVersion === 'auto-evolution-operational-run-report-v5'
+        || report.schemaVersion === 'auto-evolution-operational-run-report-v6'
+          ? { workspaceProvenance: report.workspaceProvenance }
+          : {}
+      ),
     });
     await writeFile(join(reportsRoot, entry.name, 'report.md'), markdown, 'utf8');
     refreshedCount += 1;

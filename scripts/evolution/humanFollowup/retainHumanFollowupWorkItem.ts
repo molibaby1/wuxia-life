@@ -22,6 +22,12 @@ export interface RetainHumanFollowupWorkItemInput {
   sourceFingerprintSha256: string;
   problemPackagePath: string;
   decisionPath: string;
+  continuation?: HumanFollowupContinuationEvidence;
+}
+
+export interface HumanFollowupContinuationEvidence {
+  effectiveDecisionPath: string;
+  continuationRelativePaths: string[];
 }
 
 export interface RetainedHumanFollowupWorkItem {
@@ -197,6 +203,7 @@ function buildEvidenceSources(
   problemPackagePath: string,
   decisionPath: string,
   reviewerPresent: boolean,
+  continuation?: HumanFollowupContinuationEvidence,
 ): EvidenceSource[] {
   const sources: EvidenceSource[] = [
     { relativePath: 'problem-package.json', sourcePath: problemPackagePath },
@@ -217,7 +224,15 @@ function buildEvidenceSources(
     { relativePath: SOLUTION_PATH, sourcePath: join(workflowRoot, SOLUTION_PATH) },
   );
   if (reviewerPresent) sources.push({ relativePath: REVIEWER_PATH, sourcePath: join(workflowRoot, REVIEWER_PATH) });
-  sources.push({ relativePath: 'decision.json', sourcePath: decisionPath });
+  sources.push({
+    relativePath: 'decision.json',
+    sourcePath: continuation ? join(workflowRoot, 'decision.json') : decisionPath,
+  });
+  if (continuation) {
+    for (const relativePath of continuation.continuationRelativePaths) {
+      sources.push({ relativePath, sourcePath: join(workflowRoot, relativePath) });
+    }
+  }
   return sources;
 }
 
@@ -237,14 +252,51 @@ export async function retainHumanFollowupWorkItem(
   if (workflowRelativePath(workflowRoot, problemPackagePath, 'problemPackagePath') !== 'problem-package.json') {
     throw new Error('problemPackagePath must be workflowRoot/problem-package.json');
   }
-  if (workflowRelativePath(workflowRoot, decisionPath, 'decisionPath') !== 'decision.json') {
-    throw new Error('decisionPath must be workflowRoot/decision.json');
+  const baseDecisionPath = join(workflowRoot, 'decision.json');
+  const continuation = input.continuation;
+  if (!continuation) {
+    if (workflowRelativePath(workflowRoot, decisionPath, 'decisionPath') !== 'decision.json') {
+      throw new Error('decisionPath must be workflowRoot/decision.json');
+    }
+  } else {
+    const effectiveDecisionRelativePath = safeRelativePath(continuation.effectiveDecisionPath, 'continuation.effectiveDecisionPath');
+    if (effectiveDecisionRelativePath === 'decision.json' || !effectiveDecisionRelativePath.startsWith('review-continuation-000001/')) {
+      throw new Error('continuation.effectiveDecisionPath must be nested below review-continuation-000001');
+    }
+    if (workflowRelativePath(workflowRoot, decisionPath, 'decisionPath') !== effectiveDecisionRelativePath) {
+      throw new Error('decisionPath must match continuation.effectiveDecisionPath');
+    }
+    if (continuation.continuationRelativePaths.length === 0) {
+      throw new Error('continuation.continuationRelativePaths must not be empty');
+    }
+    const normalizedContinuationPaths = continuation.continuationRelativePaths.map((path, index) => {
+      const normalized = safeRelativePath(path, `continuation.continuationRelativePaths[${index}]`);
+      if (!normalized.startsWith('review-continuation-000001/')) {
+        throw new Error(`continuation.continuationRelativePaths[${index}] must be nested below review-continuation-000001`);
+      }
+      return normalized;
+    });
+    if (new Set(normalizedContinuationPaths).size !== normalizedContinuationPaths.length) {
+      throw new Error('continuation.continuationRelativePaths must not contain duplicates');
+    }
+    if (!normalizedContinuationPaths.includes(effectiveDecisionRelativePath)) {
+      throw new Error('continuation.continuationRelativePaths must include effectiveDecisionPath');
+    }
   }
 
   const problemPackage = validateProblemPackage(await readJson(problemPackagePath, 'problem package'));
-  const decision = validateSolutionDecision(await readJson(decisionPath, 'decision'));
+  const baseDecision = validateSolutionDecision(await readJson(baseDecisionPath, 'base decision'));
+  const decision = continuation
+    ? validateSolutionDecision(await readJson(decisionPath, 'effective continuation decision'))
+    : baseDecision;
   if (problemPackage.source.runRef !== input.sourceRunRef) {
     throw new Error('problem package source runRef does not match sourceRunRef');
+  }
+  if (continuation && (
+    baseDecision.route !== 'DEFER_MORE_WORK_REQUESTED'
+    || baseDecision.reasonCode !== 'REVIEW_REQUEST_MORE_WORK'
+  )) {
+    throw new Error('continuation Human follow-up retention requires a base REQUEST_MORE_WORK decision');
   }
   if (decision.problemId !== problemPackage.problemId) {
     throw new Error('decision problemId does not match problem package problemId');
@@ -264,7 +316,7 @@ export async function retainHumanFollowupWorkItem(
   const itemPath = join(finalDirectory, 'item.json');
   const reviewerPath = join(workflowRoot, REVIEWER_PATH);
   const reviewerPresent = await optionalRegularFile(reviewerPath, REVIEWER_PATH, workflowRoot);
-  const evidenceSources = buildEvidenceSources(workflowRoot, problemPackage, problemPackagePath, decisionPath, reviewerPresent);
+  const evidenceSources = buildEvidenceSources(workflowRoot, problemPackage, problemPackagePath, decisionPath, reviewerPresent, continuation);
   const evidencePaths = evidenceSources.map(source => source.relativePath);
   const workflowRef = isWithin(realRepositoryRoot, realWorkflowRoot)
     ? workflowRelativePath(repositoryRoot, workflowRoot, 'workflowRef')

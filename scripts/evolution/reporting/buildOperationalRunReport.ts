@@ -5,13 +5,18 @@ import {
   buildMultiRoundSessionSummary,
   discoverMultiRoundRunManifestPath,
   readMultiRoundRunManifest,
-  type MultiRoundSessionSummaryV1,
+  type MultiRoundSessionSummary,
 } from '../multiRoundRunManifestContract';
 import {
   attachWorkflowDecisionAudits,
   collectWorkflowDecisionAudits,
   type WorkflowDecisionAuditV1,
 } from './buildWorkflowDecisionAudit';
+import {
+  attachWorkflowContinuationAudits,
+  collectWorkflowContinuationAudits,
+  type WorkflowContinuationAuditV1,
+} from './buildWorkflowContinuationAudit';
 import { buildHumanReviewSummary } from './buildHumanReviewSummary';
 import {
   projectWorkspaceStateProvenance,
@@ -40,6 +45,13 @@ const STRUCTURED_ARTIFACTS = [
   'reviewer-agent/failure.json',
   'decision.json',
   'workflow-outcome.json',
+  'review-continuation-000001/revision-request.json',
+  'review-continuation-000001/solution-revision/result.json',
+  'review-continuation-000001/solution-revision/failure.json',
+  'review-continuation-000001/reviewer-agent/review.json',
+  'review-continuation-000001/reviewer-agent/failure.json',
+  'review-continuation-000001/decision.json',
+  'review-continuation-000001/continuation.json',
 ] as const;
 
 const EXECUTION_TRACE_PATH = 'solution-agent/execution-trace.json';
@@ -89,6 +101,7 @@ export interface WorkflowSummary {
   artifactRefs: string[];
   structuredTerminalDelivery: StructuredTerminalDeliverySummary | null;
   decisionAudit?: WorkflowDecisionAuditV1;
+  continuationAudit?: WorkflowContinuationAuditV1 | null;
 }
 
 export interface RenderOperationalRunReportInput {
@@ -96,7 +109,7 @@ export interface RenderOperationalRunReportInput {
   reportId?: string;
   createdAt?: string;
   includeArtifactRetentionNote?: boolean;
-  sessionExecution?: MultiRoundSessionSummaryV1;
+  sessionExecution?: MultiRoundSessionSummary;
   workspaceProvenance?: WorkspaceStateProvenanceProjection;
 }
 
@@ -233,6 +246,19 @@ async function discoverWorkflowRoots(root: string): Promise<string[]> {
 
   await visit(resolvedRoot);
   return workflowRoots;
+}
+
+/**
+ * Uses the validated multi-round manifest as the workflow ownership boundary.
+ * Legacy roots without a manifest retain recursive discovery.
+ */
+export async function discoverWorkflowRootsForReport(root: string): Promise<string[]> {
+  const manifestPath = await discoverMultiRoundRunManifestPath(root);
+  if (manifestPath === null) return discoverWorkflowRoots(root);
+
+  const manifest = await readMultiRoundRunManifest(manifestPath);
+  const sessionRoot = dirname(manifestPath);
+  return manifest.rounds.map(round => resolve(sessionRoot, round.workflowRef));
 }
 
 function displayWorkflowIdentity(scanRoot: string, workflowRoot: string): string {
@@ -411,9 +437,12 @@ async function summarizeWorkflow(root: string, identity: string): Promise<Workfl
 }
 
 /** One source of workflow summarization truth for legacy aggregate and archived reports. */
-export async function collectWorkflowSummaries(root: string): Promise<WorkflowSummary[]> {
-  const workflowRoots = await discoverWorkflowRoots(root);
-  return Promise.all(workflowRoots.map(workflowRoot => (
+export async function collectWorkflowSummaries(
+  root: string,
+  workflowRoots?: string[],
+): Promise<WorkflowSummary[]> {
+  const roots = workflowRoots ?? await discoverWorkflowRootsForReport(root);
+  return Promise.all(roots.map(workflowRoot => (
     summarizeWorkflow(workflowRoot, displayWorkflowIdentity(root, workflowRoot))
   )));
 }
@@ -474,10 +503,76 @@ function renderDecisionAudit(audit: WorkflowDecisionAuditV1): string[] {
   return lines;
 }
 
+function renderContinuationAudit(
+  audit: WorkflowContinuationAuditV1,
+  baseAudit: WorkflowDecisionAuditV1 | undefined,
+  sessionExecution: MultiRoundSessionSummary | undefined,
+): string[] {
+  const sessionRound = sessionExecution?.schemaVersion === 'multi-round-session-summary-v2'
+    ? sessionExecution.rounds.find(round => round.continuationRef === audit.continuationRef)
+    : undefined;
+  const baseRoute = sessionRound?.baseTerminalRoute ?? baseAudit?.decision.route ?? null;
+  const effectiveRoute = sessionRound?.effectiveTerminalRoute ?? audit.continuationDecision.route ?? baseRoute;
+  const lines = [
+    '',
+    '### Review Continuation Audit',
+    '',
+    `- continuationRef：${audit.continuationRef}`,
+    `- Base route：${baseRoute ?? '（无）'}`,
+    `- Effective route：${effectiveRoute ?? '（无）'}`,
+    '',
+    '#### Revision Request',
+    '',
+    `- 状态：${audit.revisionRequest.status}`,
+    ...renderOptionalLine('Artifact', audit.revisionRequest.artifactRef),
+    `- Reviewer requested-work decision：${audit.revisionRequest.reviewerRequest.decision ?? '（无）'}`,
+  ];
+  if (audit.revisionRequest.reviewerRequest.assessment !== null) {
+    lines.push(`- Reviewer requested-work assessment：${audit.revisionRequest.reviewerRequest.assessment}`);
+  }
+  if (audit.revisionRequest.reviewerRequest.concerns.length > 0) {
+    lines.push(`- Reviewer requested-work concerns：${audit.revisionRequest.reviewerRequest.concerns.join('；')}`);
+  }
+  lines.push(
+    '',
+    '#### Revised Solution',
+    '',
+    `- 状态：${audit.revisedSolution.status}`,
+    ...renderOptionalLine('Artifact', audit.revisedSolution.artifactRef),
+    `- Solution terminal status：${audit.revisedSolution.solutionStatus ?? '（无语义结果）'}`,
+  );
+  if (audit.revisedSolution.summary !== null) lines.push(`- summary：${audit.revisedSolution.summary}`);
+  if (audit.revisedSolution.recommendedOptionId !== null) lines.push(`- recommended option：${audit.revisedSolution.recommendedOptionId}`);
+  audit.revisedSolution.options.forEach(option => {
+    lines.push(`- 方案 ${option.optionId}：${option.proposedChange}；理由：${option.rationale}；范围：${option.changeScope}`);
+  });
+  lines.push(
+    '',
+    '#### Fresh Re-review',
+    '',
+    `- 状态：${audit.reReview.status}`,
+    ...renderOptionalLine('Artifact', audit.reReview.artifactRef),
+    `- decision：${audit.reReview.decision ?? '（无语义结果）'}`,
+  );
+  if (audit.reReview.assessment !== null) lines.push(`- assessment：${audit.reReview.assessment}`);
+  if (audit.reReview.scopeAssessment !== null) lines.push(`- scope assessment：${audit.reReview.scopeAssessment}`);
+  if (audit.reReview.concerns.length > 0) lines.push(`- concerns：${audit.reReview.concerns.join('；')}`);
+  lines.push(
+    '',
+    '#### Continuation Decision',
+    '',
+    `- 状态：${audit.continuationDecision.status}`,
+    ...renderOptionalLine('Artifact', audit.continuationDecision.artifactRef),
+    `- route：${audit.continuationDecision.route ?? '（无语义结果）'}`,
+    `- reasonCode：${audit.continuationDecision.reasonCode ?? '（无语义结果）'}`,
+  );
+  return lines;
+}
+
 function renderWorkflow(
   summary: WorkflowSummary,
   index: number,
-  sessionExecution: MultiRoundSessionSummaryV1 | undefined,
+  sessionExecution: MultiRoundSessionSummary | undefined,
 ): string[] {
   const lines = [
     `## ${index}. ${summary.identity}`,
@@ -501,6 +596,9 @@ function renderWorkflow(
 
   if (summary.decisionAudit !== undefined) {
     lines.push(...renderDecisionAudit(summary.decisionAudit));
+  }
+  if (summary.continuationAudit !== undefined && summary.continuationAudit !== null) {
+    lines.push(...renderContinuationAudit(summary.continuationAudit, summary.decisionAudit, sessionExecution));
   }
 
   if (summary.structuredTerminalDelivery !== null) {
@@ -539,10 +637,28 @@ function renderWorkflow(
   return lines;
 }
 
-function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): string[] {
+function renderSessionExecutionSection(summary: MultiRoundSessionSummary): string[] {
   const changed = summary.execution.actualChangedFiles.length === 0
     ? '（无）'
     : summary.execution.actualChangedFiles.join(', ');
+  if (summary.schemaVersion === 'multi-round-session-summary-v2') {
+    return [
+      '## 会话执行',
+      '',
+      `- 多轮运行：${summary.multiRoundRunRef}`,
+      `- Host 停止原因：${summary.stopReason}`,
+      `- 多轮执行结果：${summary.outcome}`,
+      `- 轮数：${summary.roundCount}`,
+      `- 跨轮次数：${summary.crossRoundTransitions}`,
+      `- Review continuation 次数：${summary.reviewContinuationCount}`,
+      `- Review continuation Participant jobs：${summary.reviewContinuationParticipantJobs}`,
+      `- 执行状态：${summary.execution.status}`,
+      `- 实际执行变更：${changed}`,
+      `- 结果运行：${summary.execution.resultingRunRef ?? '（无）'}`,
+      '',
+    ];
+  }
+
   return [
     '## 会话执行',
     '',
@@ -556,6 +672,28 @@ function renderSessionExecutionSection(summary: MultiRoundSessionSummaryV1): str
     `- 结果运行：${summary.execution.resultingRunRef ?? '（无）'}`,
     '',
   ];
+}
+
+function renderRoundExecutionDetails(
+  summary: MultiRoundSessionSummary,
+  workflows: WorkflowSummary[],
+): string[] {
+  if (summary.schemaVersion !== 'multi-round-session-summary-v2') return [];
+
+  return summary.rounds.flatMap((round, index) => {
+    const workflow = workflows[index];
+    return [
+      `### Round ${round.round}`,
+      '',
+      `- Workflow：${workflow?.identity ?? '（无）'}`,
+      `- Source Run：${workflow?.sourceRunRef ?? '（无）'}`,
+      `- base route：${round.baseTerminalRoute ?? '（无）'}`,
+      `- review continuation：${round.continuationRef ?? '（无）'}`,
+      `- effective route：${round.effectiveTerminalRoute ?? '（无）'}`,
+      `- reason code：${round.effectiveReasonCode ?? '（无）'}`,
+      '',
+    ];
+  });
 }
 
 function renderWorkspaceProvenanceSection(provenance: WorkspaceStateProvenanceProjection): string[] {
@@ -652,7 +790,11 @@ export function renderOperationalRunReportMarkdown(input: RenderOperationalRunRe
     if (input.workspaceProvenance !== undefined) {
       headerLines.push(...renderWorkspaceProvenanceSection(input.workspaceProvenance));
     }
-    headerLines.push('## 工作流 / 轮次详情', '');
+    headerLines.push(
+      '## 工作流 / 轮次详情',
+      '',
+      ...renderRoundExecutionDetails(input.sessionExecution, summaries),
+    );
   }
 
   if (aggregateCounts !== null) {
@@ -679,7 +821,7 @@ export interface ArchivedOperationalRunReportForMarkdown {
   reportId: string;
   createdAt: string;
   workflows: WorkflowSummary[];
-  sessionExecution?: MultiRoundSessionSummaryV1 | null;
+  sessionExecution?: MultiRoundSessionSummary | null;
   workspaceProvenance?: WorkspaceStateProvenanceProjection | null;
 }
 
@@ -698,7 +840,7 @@ export function renderOperationalRunReportMarkdownFromReport(
 
 function renderReport(
   summaries: WorkflowSummary[],
-  sessionExecution?: MultiRoundSessionSummaryV1,
+  sessionExecution?: MultiRoundSessionSummary,
   workspaceProvenance?: WorkspaceStateProvenanceProjection,
 ): string {
   return renderOperationalRunReportMarkdown({ summaries, sessionExecution, workspaceProvenance });
@@ -707,7 +849,8 @@ function renderReport(
 export async function buildOperationalRunReport(
   input: BuildOperationalRunReportInput,
 ): Promise<BuildOperationalRunReportResult> {
-  const summaries = await collectWorkflowSummaries(input.root);
+  const workflowRoots = await discoverWorkflowRootsForReport(input.root);
+  const summaries = await collectWorkflowSummaries(input.root, workflowRoots);
   const manifestPath = await discoverMultiRoundRunManifestPath(input.root);
   const sessionExecution = manifestPath === null
     ? undefined
@@ -724,12 +867,18 @@ export async function buildOperationalRunReport(
       }
       return projectWorkspaceStateProvenance(await readWorkspaceStateProvenance(provenancePath));
     })();
-  const reportSummaries = sessionExecution === undefined
-    ? summaries
-    : attachWorkflowDecisionAudits(
+  let reportSummaries: WorkflowSummary[];
+  if (sessionExecution === undefined) {
+    reportSummaries = summaries;
+  } else {
+    const audited = attachWorkflowDecisionAudits(
       summaries,
-      await collectWorkflowDecisionAudits(input.root),
+      await collectWorkflowDecisionAudits(input.root, workflowRoots),
     );
+    reportSummaries = sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
+      ? attachWorkflowContinuationAudits(audited, await collectWorkflowContinuationAudits(input.root, workflowRoots))
+      : audited;
+  }
   const report = renderReport(reportSummaries, sessionExecution, workspaceProvenance);
   await mkdir(dirname(resolve(input.outputPath)), { recursive: true });
   await writeFile(input.outputPath, report, 'utf8');

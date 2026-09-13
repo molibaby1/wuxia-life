@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "solution-work-v1",
+  "status": "OPTIONS",
+  "problemId": "problem-hypothesis-000001",
+  "options": [
+    {
+      "optionId": "option-000001",
+      "proposedChange": "Revise the repeated configuration entry.",
+      "rationale": "The configuration is the narrowest proposed change.",
+      "repoRefs": ["src/example.ts"],
+      "artifactRefs": ["source/observable-payload.json"],
+      "changeScope": "configuration",
+      "expectedPlayerObservableDifference": "The repeated summary becomes distinct.",
+      "risks": ["The revised wording may still need review."],
+      "unknowns": ["The exact final wording is not established."]
+    }
+  ],
+  "recommendedOptionId": "option-000001",
+  "summary": "Base configuration solution summary",
+  "repoRefs": ["src/example.ts"],
+  "artifactRefs": ["source/observable-payload.json"]
+}

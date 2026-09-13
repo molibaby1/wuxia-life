@@ -49,7 +49,8 @@ snapshot_file="$snapshot_dir/repository-status.txt"
 # 删除旧压缩包，避免旧文件残留在新的 ZIP 中
 rm -f "$OUTPUT"
 
-# 使用 find 列出文件，排除指定目录，再通过 zip -@ 打包
+# 使用 find 列出文件，排除指定目录，再通过 zip -@ 打包。
+# workspace 只保留紧凑的 .agent-workspace-manifest.json provenance 文件。
 # 目标：给 ChatGPT 分析项目用的精简源码包（不含 agent 工作区 / 密钥）
 find . \( \
     -path '*/node_modules' -o \
@@ -64,12 +65,15 @@ find . \( \
     -path '*/.vscode' -o \
     -path '*/.idea' -o \
     -path '*/public/reports' -o \
-    -path '*/.tmp' \
+    -path '*/.tmp' -o \
+    -path '*/inputs' -o \
+    -path '*/agent-workspaces' \
   \) -prune -o \
   -type f \
   -not -name '.DS_Store' \
   -not -name 'project.zip' \
   -not -name 'repository-status.txt' \
+  -not \( -path '*/workspaces/*' -a -not -name '.agent-workspace-manifest.json' \) \
   -not \( \( -name '.env' -o -name '.env.*' \) -a -not -name '*.example' \) \
   -print \
   | zip -@ "$OUTPUT"
@@ -88,6 +92,16 @@ if [[ "$status_entry_count" != "1" ]]; then
   echo "打包失败：ZIP 内 repository-status.txt 数量为 ${status_entry_count}，不是 1" >&2
   exit 1
 fi
+
+for forbidden_segment in workspaces inputs agent-workspaces; do
+  if unzip -Z1 "$OUTPUT" | awk -v segment="$forbidden_segment" '
+    $0 ~ ("(^|/)" segment "(/|$)") && $0 !~ /\/\.agent-workspace-manifest\.json$/ { found = 1 }
+    END { exit (found ? 0 : 1) }
+  '; then
+    echo "打包失败：ZIP 内包含不应打包的目录 ${forbidden_segment}" >&2
+    exit 1
+  fi
+done
 
 archive_check_dir="$(mktemp -d "${TMPDIR:-/tmp}/wuxia-life-project-zip-check.XXXXXX")"
 embedded_snapshot="$archive_check_dir/repository-status.txt"

@@ -5,11 +5,15 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  buildSolutionReReviewerPrompt,
   buildSolutionReviewerPrompt,
+  runSolutionReReviewer,
   runSolutionReviewer,
 } from '../../scripts/evolution/problemAgnosticSolution/runSolutionReviewer';
 import { REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS } from '../../scripts/evolution/problemAgnosticSolution/solutionParticipantSkills';
+import { canonicalJson } from '../../scripts/evolution/phase0/provenance';
 import type { ProblemPackageV1 } from '../../src/evolution/problemPackageContract';
+import type { SolutionReviewV1 } from '../../src/evolution/solutionReviewContract';
 import type { SolutionWorkV1 } from '../../src/evolution/solutionWorkContract';
 
 const problemPackage: ProblemPackageV1 = {
@@ -61,7 +65,7 @@ const solutionWork: SolutionWorkV1 = {
   artifactRefs: ['source/observable-payload.json'],
 };
 
-const review = {
+const review: SolutionReviewV1 = {
   schemaVersion: 'solution-review-v1',
   problemId: problemPackage.problemId,
   decision: 'ACCEPT_OPTION',
@@ -72,6 +76,10 @@ const review = {
   artifactRefs: ['source/observable-payload.json'],
   concerns: [],
 };
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 export async function runSolutionReviewerLoopTests(): Promise<void> {
   const solutionWorkspacePath = '/private/solution-workspace-must-not-leak';
@@ -88,6 +96,11 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
   const prompt = buildSolutionReviewerPrompt(problemPackage, solutionWork, [assignedSkill]);
   assert.match(prompt, /independently inspect|independent source inspection/i);
   assert.match(prompt, /reject all options/i);
+  assert.match(prompt, /REQUEST_MORE_WORK: concrete, decision-relevant, bounded work achievable in the current execution context\./i);
+  assert.match(prompt, /DEFER: material evidence cannot be obtained in the current execution context and requires genuinely new evidence\./i);
+  assert.match(prompt, /ESCALATE: Human product\/governance\/authority judgment is required\./i);
+  assert.match(prompt, /REJECT: the proposal is unacceptable and bounded revision of that proposal is not the appropriate next action\./i);
+  assert.doesNotMatch(prompt, /maximize (continuation|acceptance)/i);
   assert.match(prompt, /Independently read the relevant supplied authorityRefs/i);
   assert.match(prompt, /passing tests does not establish product authorization/i);
   assert.match(prompt, /permission flags constrain this review job/i);
@@ -191,6 +204,64 @@ export async function runSolutionReviewerLoopTests(): Promise<void> {
       contentSha256: canonicalSkillSha256,
     },
   ]);
+
+  const originalReviewForRereview: SolutionReviewV1 = {
+    schemaVersion: 'solution-review-v1',
+    problemId: problemPackage.problemId,
+    decision: 'REQUEST_MORE_WORK',
+    assessment: 'The original proposal needs bounded follow-up.',
+    repoRefs: ['src/example.ts'],
+    artifactRefs: ['source/observable-payload.json'],
+    concerns: ['Investigate one concrete repository fact.'],
+  };
+  const revisedSolutionWork: SolutionWorkV1 = {
+    ...solutionWork,
+    summary: 'A revised bounded option.',
+  };
+  const reReviewerPrompt = buildSolutionReReviewerPrompt(
+    problemPackage,
+    solutionWork,
+    originalReviewForRereview,
+    revisedSolutionWork,
+    [{
+      identity: 'repository-grounded-investigation',
+      version: '1',
+      canonicalPath: canonicalSkillPath,
+      content: canonicalSkillContent,
+      contentSha256: canonicalSkillSha256,
+    }],
+  );
+  assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(solutionWork))));
+  assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(originalReviewForRereview))));
+  assert.match(reReviewerPrompt, new RegExp(escapeRegex(canonicalJson(revisedSolutionWork))));
+  assert.match(reReviewerPrompt, /independent/i);
+
+  let rereviewerInvocationRef = '';
+  const rereviewResult = await runSolutionReReviewer({
+    problemPackage,
+    problemPackagePath: packagePath,
+    solutionWork: revisedSolutionWork,
+    workspaceRoot,
+    artifactRoot,
+    workspaceBaselineFingerprintSha256: 'b'.repeat(64),
+    invocationRef: 'solution-rereviewer-000001',
+    jobNumber: 2,
+    destinationRoot: join(root, 'solution-rereviewer'),
+    skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+    participant: {
+      executable: process.execPath,
+      buildArgs: input => {
+        rereviewerInvocationRef = input.invocationRef;
+        return ['-e', `process.stdout.write(${JSON.stringify(JSON.stringify(review))})`];
+      },
+    },
+    originalSolutionWork: solutionWork,
+    originalReview: originalReviewForRereview,
+  });
+  assert.equal(rereviewResult.ok, true);
+  assert.equal(rereviewerInvocationRef, 'solution-rereviewer-000001');
+  const rereviewerInvocation = JSON.parse(await readFile(join(root, 'solution-rereviewer/invocation.json'), 'utf8'));
+  assert.equal(rereviewerInvocation.invocationRef, 'solution-rereviewer-000001');
 
   const timeoutRoot = join(root, 'timeout-reviewer-agent');
   let timeoutCalls = 0;

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "review-continuation-revision-request-v1",
+  "continuationId": "review-continuation-000001",
+  "continuationOrdinal": 1,
+  "round": 1,
+  "sourceRunRef": "ordinary-run-20260913-000001",
+  "problemPackageRef": "problem-package.json",
+  "problemPackageSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "originalSolutionRef": "solution-agent/result.json",
+  "originalSolutionSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "originalReviewRef": "reviewer-agent/review.json",
+  "originalReviewSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseDecisionRef": "decision.json",
+  "baseDecisionSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "workspaceBaselineFingerprintSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

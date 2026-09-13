@@ -1,6 +1,7 @@
-import type { MultiRoundSessionSummaryV1 } from '../multiRoundRunManifestContract';
+import type { MultiRoundSessionSummary } from '../multiRoundRunManifestContract';
 import type { WorkflowSummary } from './buildOperationalRunReport';
 import type { WorkflowDecisionAuditV1 } from './buildWorkflowDecisionAudit';
+import type { WorkflowContinuationAuditV1 } from './buildWorkflowContinuationAudit';
 
 export type HumanReviewAttention =
   | 'none'
@@ -32,8 +33,11 @@ export interface HumanReviewSummary {
 }
 
 export interface BuildHumanReviewSummaryInput {
-  sessionExecution?: MultiRoundSessionSummaryV1;
-  workflows: Array<WorkflowSummary & { decisionAudit?: WorkflowDecisionAuditV1 }>;
+  sessionExecution?: MultiRoundSessionSummary;
+  workflows: Array<WorkflowSummary & {
+    decisionAudit?: WorkflowDecisionAuditV1;
+    continuationAudit?: WorkflowContinuationAuditV1 | null;
+  }>;
   reportId?: string;
 }
 
@@ -49,7 +53,7 @@ function reportPath(reportId: string | undefined): string {
   return `artifacts/evolution/run-reports/${boundedReportId(reportId)}/report.json`;
 }
 
-function sessionIdentity(sessionExecution: MultiRoundSessionSummaryV1 | undefined): string {
+function sessionIdentity(sessionExecution: MultiRoundSessionSummary | undefined): string {
   return sessionExecution?.multiRoundRunRef ?? '（当前报告未提供会话 ID）';
 }
 
@@ -101,7 +105,21 @@ function skipAuditHandoff(input: BuildHumanReviewSummaryInput): HumanReviewHando
   };
 }
 
-function humanFollowupHandoff(input: BuildHumanReviewSummaryInput): HumanReviewHandoff {
+function continuationPriorityBody(audit: WorkflowContinuationAuditV1): string[] {
+  return [
+    '本次已发生并完成 bounded Review Continuation。请优先读取最新 continuation state：',
+    `- Revised Solution：${audit.revisedSolution.status}；artifact：${audit.revisedSolution.artifactRef ?? '（无）'}`,
+    `- Fresh Re-review：${audit.reReview.status}；artifact：${audit.reReview.artifactRef ?? '（无）'}`,
+    `- Fresh Re-review concerns：${audit.reReview.concerns.join('；') || '（无）'}`,
+    `- Continuation Decision：${audit.continuationDecision.status}；route：${audit.continuationDecision.route ?? '（无语义结果）'}；reasonCode：${audit.continuationDecision.reasonCode ?? '（无语义结果）'}`,
+    '请不要推断哪些 base Reviewer concerns 已解决，也不要让 revised state 覆盖 base judgment；只做忠实 projection 和独立判断。',
+  ];
+}
+
+function humanFollowupHandoff(
+  input: BuildHumanReviewSummaryInput,
+  continuationAudit?: WorkflowContinuationAuditV1 | null,
+): HumanReviewHandoff {
   const sessionRef = sessionIdentity(input.sessionExecution);
   const reportRef = reportPath(input.reportId);
   const prompt = [
@@ -138,6 +156,7 @@ function humanFollowupHandoff(input: BuildHumanReviewSummaryInput): HumanReviewH
     '- Solution',
     '- Reviewer',
     '- scope / concerns',
+    ...(continuationAudit === undefined || continuationAudit === null ? [] : continuationPriorityBody(continuationAudit)),
     '',
     '然后判断下一步应该：',
     '- READY_FOR_FORMAL_TASK',
@@ -182,7 +201,10 @@ function participantFailureHandoff(input: BuildHumanReviewSummaryInput): HumanRe
   };
 }
 
-function evidenceGapHandoff(input: BuildHumanReviewSummaryInput): HumanReviewHandoff {
+function evidenceGapHandoff(
+  input: BuildHumanReviewSummaryInput,
+  continuationAudit?: WorkflowContinuationAuditV1 | null,
+): HumanReviewHandoff {
   return {
     target: 'ChatGPT',
     mode: 'optional',
@@ -194,6 +216,7 @@ function evidenceGapHandoff(input: BuildHumanReviewSummaryInput): HumanReviewHan
       body: [
         '重点检查当前 bounded evidence 缺少什么、哪些已有引用可以支持下一步最小调查，以及哪些结论仍不能下。',
         '不要以重复 Auto Evolution sampling 作为默认补证据方式。',
+        ...(continuationAudit === undefined || continuationAudit === null ? [] : continuationPriorityBody(continuationAudit)),
       ],
       finalOutput: '区分已证实事实、Participant 判断与推断，并提出最小只读调查范围。',
     }),
@@ -241,6 +264,34 @@ function decisionValues(workflow: WorkflowSummary, audit: WorkflowDecisionAuditV
   return {
     route: audit.decision.route ?? workflow.terminalRoute,
     reasonCode: audit.decision.reasonCode ?? workflow.reason,
+  };
+}
+
+function projectedDecisionValues(
+  workflow: WorkflowSummary,
+  audit: WorkflowDecisionAuditV1,
+  sessionExecution: MultiRoundSessionSummary | undefined,
+): {
+  route: string | null;
+  reasonCode: string | null;
+  baseRoute: string | null;
+  baseReasonCode: string | null;
+  continuationRef: string | null;
+} {
+  const base = decisionValues(workflow, audit);
+  if (sessionExecution?.schemaVersion !== 'multi-round-session-summary-v2') {
+    return { ...base, baseRoute: base.route, baseReasonCode: base.reasonCode, continuationRef: null };
+  }
+  const round = sessionExecution.rounds.at(-1);
+  if (round === undefined) {
+    return { ...base, baseRoute: base.route, baseReasonCode: base.reasonCode, continuationRef: null };
+  }
+  return {
+    route: round.effectiveTerminalRoute ?? base.route,
+    reasonCode: round.effectiveReasonCode ?? base.reasonCode,
+    baseRoute: round.baseTerminalRoute,
+    baseReasonCode: round.baseReasonCode,
+    continuationRef: round.continuationRef,
   };
 }
 
@@ -318,7 +369,9 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
   ));
   const hasAudit = input.workflows.some(workflow => workflow.decisionAudit !== undefined);
   const session = input.sessionExecution;
-  if (session && session.execution.status !== 'scope_violation' && session.execution.status !== 'failed' && !['ROUND_1_TERMINAL_NOT_READY', 'ROUND_2_COMPLETED', 'ROUND_2_TERMINAL_NOT_READY'].includes(session.stopReason)) {
+  const continuationParticipantFailure = session?.schemaVersion === 'multi-round-session-summary-v2'
+    && session.rounds.some(round => round.effectiveTerminalRoute === 'PARTICIPANT_FAILURE');
+  if (session && !continuationParticipantFailure && session.execution.status !== 'scope_violation' && session.execution.status !== 'failed' && !['ROUND_1_TERMINAL_NOT_READY', 'ROUND_2_COMPLETED', 'ROUND_2_TERMINAL_NOT_READY'].includes(session.stopReason)) {
     const recoveryByReason: Record<string, string> = {
       AUTHORITATIVE_REPOSITORY_CHANGED: '核对 fingerprint 与实际 diff，确认变更归属；不要覆盖他人修改或自动回滚。',
       EXECUTION_SCOPE_VIOLATION: '核对 actualChangedFiles 与 allowedWritePaths；不要通过扩大允许范围绕过校验。',
@@ -399,14 +452,21 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
       handoff: executionBoundaryHandoff(input),
     };
   }
-  if (failureWorkflow !== undefined) {
-    return {
-      conclusion: '本次运行没有形成可靠的产品结论。',
-      explanation: [
+  if (failureWorkflow !== undefined || continuationParticipantFailure) {
+    const failureExplanation = failureWorkflow === undefined
+      ? [
+        'Bounded review continuation 的 Participant 在生成 continuation Decision 前失败；没有可靠的 continuation 产品结论。',
+        `Host 停止原因：${session?.stopReason ?? 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE'}。`,
+        '不能把 base Reviewer 的 REQUEST_MORE_WORK 或任何未生成的 Decision 解释为已完成结果。',
+      ]
+      : [
         `失败阶段：${failureWorkflow.failedStage ?? '（未记录）'}；Participant 错误类型：${failureWorkflow.participantErrorKind ?? '（未记录）'}。`,
         '不能把这次失败解释为 SKIP 或“没有问题”。',
         '此前已完成的阶段仍可作为证据展示，完整判断链见下方的 Decision Chain。',
-      ],
+      ];
+    return {
+      conclusion: '本次运行没有形成可靠的产品结论。',
+      explanation: failureExplanation,
       recommendedAction: '不要根据本次运行修改产品，也不要自动重跑以获得偏好的结果；现在即可从失败材料开展 Participant / contract 只读诊断。',
       action: {
         title: '当前不要修改产品',
@@ -457,7 +517,8 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
   if (audit.decision.status !== 'completed' || audit.decision.route === null || audit.decision.reasonCode === null) {
     return legacySummary(input);
   }
-  const { route, reasonCode } = decisionValues(latestWorkflow, audit);
+  const projected = projectedDecisionValues(latestWorkflow, audit, session);
+  const { route, reasonCode } = projected;
   if (route === 'SKIP' && reasonCode === 'NO_PROBLEM_FORMED') {
     return {
       conclusion: '本次没有形成足够依据支持的改善问题。',
@@ -497,6 +558,9 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
     return {
       conclusion: '本次发现了需要 Human 判断的事项；AE 没有获得继续自动执行的授权。',
       explanation: [
+        ...(projected.continuationRef !== null && projected.baseRoute === 'DEFER_MORE_WORK_REQUESTED'
+          ? [`base route：${projected.baseRoute}；Reviewer 首次返回 REQUEST_MORE_WORK，Host 执行了一次 bounded review continuation（${projected.continuationRef}）。`]
+          : []),
         '这次运行在当时需要 Human review（run-time fact）；当前是否仍待审查，以 Human Follow-up 当前状态为准，历史报告本身不代表当前仍待审查。',
         ...(latestWorkflow.problemStatement === null ? [] : [`问题：${truncateMiddle(latestWorkflow.problemStatement, 120)}`]),
         `最终 route / reasonCode：${route ?? '（未记录）'} / ${reasonCode ?? '（未记录）'}；AE 没有继续自动执行的授权。`,
@@ -512,7 +576,7 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
         ],
       },
       attention: 'human_review',
-      handoff: humanFollowupHandoff(input),
+      handoff: humanFollowupHandoff(input, latestWorkflow.continuationAudit),
     };
   }
   if (route === 'SKIP' && (reasonCode === 'NO_PROPOSAL' || reasonCode === 'REVIEW_REJECTED')) {
@@ -553,7 +617,12 @@ export function buildHumanReviewSummary(input: BuildHumanReviewSummaryInput): Hu
         ],
       },
       attention: 'evidence_gap',
-      handoff: evidenceGapHandoff(input),
+      handoff: evidenceGapHandoff(
+        input,
+        route === 'DEFER_MORE_WORK_REQUESTED' && latestWorkflow.continuationAudit?.continuationDecision.status === 'completed'
+          ? latestWorkflow.continuationAudit
+          : null,
+      ),
     };
   }
   if (route === 'READY_FOR_CONFIG_EXECUTION') {

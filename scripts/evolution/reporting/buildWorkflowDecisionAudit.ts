@@ -463,10 +463,14 @@ async function discoverWorkflowRoots(root: string): Promise<string[]> {
   return found;
 }
 
-export async function collectWorkflowDecisionAudits(root: string): Promise<Map<string, WorkflowDecisionAuditV1>> {
+export async function collectWorkflowDecisionAudits(
+  root: string,
+  workflowRoots?: string[],
+): Promise<Map<string, WorkflowDecisionAuditV1>> {
   const resolvedRoot = resolve(root);
   const audits = new Map<string, WorkflowDecisionAuditV1>();
-  for (const workflowRoot of await discoverWorkflowRoots(resolvedRoot)) {
+  const roots = workflowRoots ?? await discoverWorkflowRoots(root);
+  for (const workflowRoot of roots) {
     const identity = relative(resolvedRoot, workflowRoot).split(sep).join('/') || basename(workflowRoot);
     if (audits.has(identity)) throw new Error(`duplicate workflow identity for decision audit: ${identity}`);
     audits.set(identity, await buildWorkflowDecisionAudit({ workflowRoot }));

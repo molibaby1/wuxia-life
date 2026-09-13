@@ -51,9 +51,17 @@ import {
 } from './executionScopeVerifier';
 import {
   type MultiRoundRunManifestV1,
+  type MultiRoundRunManifestV2,
   type MultiRoundVerificationResultV1,
   type RoundManifestEntry,
+  type RoundManifestEntryV2,
+  type ReviewContinuationManifestEntryV2,
 } from './multiRoundRunManifestContract';
+import {
+  runReviewContinuation,
+  type ReviewContinuationResult,
+  type RunReviewContinuationInput,
+} from './problemAgnosticSolution/runReviewContinuation';
 import {
   captureWorkspaceState,
   isComparableWorkspaceFingerprint,
@@ -68,7 +76,9 @@ import {
 
 export type {
   MultiRoundRunManifestV1,
+  MultiRoundRunManifestV2,
   RoundManifestEntry,
+  RoundManifestEntryV2,
 } from './multiRoundRunManifestContract';
 
 export type WorkspaceVerificationResult = MultiRoundVerificationResultV1;
@@ -77,8 +87,27 @@ const execFileAsync = promisify(execFile);
 const MAX_ROUNDS = 2 as const;
 const MAX_TRANSITIONS = 1 as const;
 const MAX_ROUND_PARTICIPANT_JOBS = 4 as const;
+const MAX_REVIEW_CONTINUATIONS = 1 as const;
+const MAX_REVIEW_CONTINUATION_PARTICIPANT_JOBS = 2 as const;
 const MAX_EXECUTION_PARTICIPANT_JOBS = 1 as const;
-const MAX_TOTAL_PARTICIPANT_JOBS = 9 as const;
+const MAX_TOTAL_PARTICIPANT_JOBS = 11 as const;
+
+type HostRoundManifestEntry = RoundManifestEntryV2 & { terminalRoute: string | null };
+
+interface EffectiveRoundResolution {
+  baseResult: ProblemAgnosticAgentSolutionLoopResult;
+  baseRoute: string;
+  baseReasonCode: string | null;
+  effectiveRoute: string;
+  effectiveReasonCode: string | null;
+  continuation: ReviewContinuationResult | null;
+  participantJobs: number;
+  acceptedArtifacts: null | {
+    problemPackagePath: string;
+    solutionPath: string;
+    reviewPath: string;
+  };
+}
 
 export interface MutableEvolutionWorkspace {
   workspaceRoot: string;
@@ -125,6 +154,7 @@ export interface MultiRoundExecutionValidationDependencies {
   }) => Promise<Phase0RerunResult>;
   validateSealedSource?: (result: Phase0RerunResult) => Promise<void>;
   captureWorkspaceState?: (workspaceRoot: string) => Promise<WorkspaceStateCapture>;
+  runReviewContinuation?: (input: RunReviewContinuationInput) => Promise<ReviewContinuationResult>;
 }
 
 export interface MultiRoundExecutionValidationInput {
@@ -144,7 +174,7 @@ export interface MultiRoundExecutionValidationResult {
   outcome: MultiRoundRunManifestV1['outcome'];
   stopReason: string;
   manifestPath: string;
-  rounds: RoundManifestEntry[];
+  rounds: HostRoundManifestEntry[];
   execution: MultiRoundRunManifestV1['execution'] | null;
   actualParticipantJobs: number;
   crossRoundTransitions: 0 | 1;
@@ -172,10 +202,6 @@ async function writeCreateOnly(path: string, value: unknown): Promise<void> {
 
 function terminalRoute(result: ProblemAgnosticAgentSolutionLoopResult): string {
   return result.status === 'participant_failure' ? 'PARTICIPANT_FAILURE' : result.decision.route;
-}
-
-function isReady(result: ProblemAgnosticAgentSolutionLoopResult): result is Extract<ProblemAgnosticAgentSolutionLoopResult, { status: 'completed' }> {
-  return result.status === 'completed' && result.decision.route === 'READY_FOR_CONFIG_EXECUTION';
 }
 
 function defaultRunSingleRound(input: MultiRoundLoopInput): Promise<ProblemAgnosticAgentSolutionLoopResult> {
@@ -268,13 +294,16 @@ async function readAcceptedExecutionInput(
   result: Extract<ProblemAgnosticAgentSolutionLoopResult, { status: 'completed' }>,
   allowedWritePaths: string[],
   participant: WorkspaceAgentParticipantOptions,
+  artifactPaths: {
+    problemPackagePath: string;
+    solutionPath: string;
+    reviewPath: string;
+  },
 ): Promise<ConfigurationExecutionInput> {
-  const problemPackagePath = join(roundRoot, 'problem-package.json');
-  const solutionPath = join(roundRoot, 'solution-agent/result.json');
-  const reviewPath = join(roundRoot, 'reviewer-agent/review.json');
+  const problemPackagePath = artifactPaths.problemPackagePath;
   const problemPackage = validateProblemPackage(await readJson(problemPackagePath));
-  const solutionWork = validateSolutionWork(await readJson(solutionPath));
-  const solutionReview = validateSolutionReview(await readJson(reviewPath));
+  const solutionWork = validateSolutionWork(await readJson(artifactPaths.solutionPath));
+  const solutionReview = validateSolutionReview(await readJson(artifactPaths.reviewPath));
   if (result.decision.problemId !== problemPackage.problemId || solutionWork.problemId !== problemPackage.problemId || solutionReview.problemId !== problemPackage.problemId) {
     throw new Error('Solution and Review problem IDs do not match the accepted Problem Package');
   }
@@ -466,23 +495,47 @@ function emptyExecution(): MultiRoundRunManifestV1['execution'] {
   };
 }
 
-function roundManifest(input: {
+function roundManifestV2(input: {
   round: 1 | 2;
   root: string;
   sourceRunRef: string;
-  terminalRoute: string | null;
+  baseTerminalRoute: string | null;
+  baseReasonCode: string | null;
+  continuationRef: string | null;
+  effectiveTerminalRoute: string | null;
+  effectiveReasonCode: string | null;
   nextAction: RoundManifestEntry['nextAction'];
   executionRef?: string | null;
   resultingRunRef?: string | null;
-}): RoundManifestEntry {
+}): RoundManifestEntryV2 {
   return {
     round: input.round,
     workflowRef: input.root,
     sourceRunRef: input.sourceRunRef,
-    terminalRoute: input.terminalRoute,
+    baseTerminalRoute: input.baseTerminalRoute,
+    baseReasonCode: input.baseReasonCode,
+    continuationRef: input.continuationRef,
+    effectiveTerminalRoute: input.effectiveTerminalRoute,
+    effectiveReasonCode: input.effectiveReasonCode,
     executionRef: input.executionRef ?? null,
     resultingRunRef: input.resultingRunRef ?? null,
     nextAction: input.nextAction,
+  };
+}
+
+function continuationManifestEntry(
+  continuation: ReviewContinuationResult,
+  round: 1 | 2,
+): ReviewContinuationManifestEntryV2 {
+  return {
+    round,
+    continuationRef: continuation.continuationRef,
+    participantJobs: continuation.participantJobs,
+    terminalStatus: continuation.status === 'completed' ? 'completed' : 'participant_failure',
+    terminalRoute: continuation.terminalRoute,
+    decisionRef: continuation.status === 'completed'
+      ? 'review-continuation-000001/decision.json'
+      : null,
   };
 }
 
@@ -516,17 +569,83 @@ function workspaceRootReference(experimentRoot: string, workspaceRoot: string): 
 
 function resultFromManifest(input: {
   manifestPath: string;
-  manifest: MultiRoundRunManifestV1;
+  manifest: MultiRoundRunManifestV2;
 }): MultiRoundExecutionValidationResult {
   return {
     status: 'stopped',
     outcome: input.manifest.outcome,
     stopReason: input.manifest.stopReason,
     manifestPath: input.manifestPath,
-    rounds: input.manifest.rounds,
+    rounds: input.manifest.rounds.map(round => ({
+      ...round,
+      terminalRoute: round.effectiveTerminalRoute,
+    })),
     execution: input.manifest.execution.status === 'not_started' ? null : input.manifest.execution,
     actualParticipantJobs: input.manifest.budget.totalParticipantJobs,
     crossRoundTransitions: input.manifest.rounds.some(round => round.round === 2) ? 1 : 0,
+  };
+}
+
+async function resolveEffectiveRound(input: {
+  round: 1 | 2;
+  roundRoot: string;
+  baseResult: ProblemAgnosticAgentSolutionLoopResult;
+  repositoryRoot: string;
+  humanFollowupRoot: string;
+  workflowInstanceRef: string;
+  participant: WorkspaceAgentParticipantOptions;
+  sourceFingerprintSha256: string;
+  reviewContinuationCount: 0 | 1;
+  runReviewContinuation: (input: RunReviewContinuationInput) => Promise<ReviewContinuationResult>;
+}): Promise<EffectiveRoundResolution> {
+  const baseRoute = terminalRoute(input.baseResult);
+  const baseReasonCode = input.baseResult.status === 'completed' ? input.baseResult.decision.reasonCode : null;
+  let continuation: ReviewContinuationResult | null = null;
+  if (
+    input.baseResult.status === 'completed'
+    && input.baseResult.decision.route === 'DEFER_MORE_WORK_REQUESTED'
+    && input.reviewContinuationCount === 0
+  ) {
+    continuation = await input.runReviewContinuation({
+      round: input.round,
+      repositoryRoot: input.repositoryRoot,
+      humanFollowupRoot: input.humanFollowupRoot,
+      workflowInstanceRef: input.workflowInstanceRef,
+      roundRoot: input.roundRoot,
+      sourceRunRef: input.baseResult.sourceRunRef,
+      sourceFingerprintSha256: input.sourceFingerprintSha256,
+      participant: input.participant,
+    });
+  }
+  const effectiveRoute = continuation?.terminalRoute ?? baseRoute;
+  const effectiveReasonCode = continuation?.terminalReasonCode ?? baseReasonCode;
+  const participantJobs = input.baseResult.actualParticipantJobs + (continuation?.participantJobs ?? 0);
+  let acceptedArtifacts: EffectiveRoundResolution['acceptedArtifacts'] = null;
+  if (effectiveRoute === 'READY_FOR_CONFIG_EXECUTION') {
+    if (continuation?.status === 'completed') {
+      if (continuation.effectiveReviewPath === null) throw new Error('continuation READY_FOR_CONFIG_EXECUTION is missing an effective Reviewer artifact');
+      acceptedArtifacts = {
+        problemPackagePath: join(input.roundRoot, 'problem-package.json'),
+        solutionPath: continuation.effectiveSolutionPath,
+        reviewPath: continuation.effectiveReviewPath,
+      };
+    } else {
+      acceptedArtifacts = {
+        problemPackagePath: join(input.roundRoot, 'problem-package.json'),
+        solutionPath: join(input.roundRoot, 'solution-agent/result.json'),
+        reviewPath: join(input.roundRoot, 'reviewer-agent/review.json'),
+      };
+    }
+  }
+  return {
+    baseResult: input.baseResult,
+    baseRoute,
+    baseReasonCode,
+    effectiveRoute,
+    effectiveReasonCode,
+    continuation,
+    participantJobs,
+    acceptedArtifacts,
   };
 }
 
@@ -544,9 +663,11 @@ export async function runMultiRoundExecutionValidation(
   });
   const authoritativeFingerprint = await captureAuthoritativeFingerprint(input.authoritativeRoot);
   const manifestPath = join(experimentRoot, 'run-manifest.json');
-  const rounds: RoundManifestEntry[] = [];
+  const rounds: RoundManifestEntryV2[] = [];
+  const reviewContinuations: ReviewContinuationManifestEntryV2[] = [];
   const execution = emptyExecution();
   let round1ParticipantJobs = 0;
+  let reviewContinuationParticipantJobs = 0;
   let round2ParticipantJobs = 0;
   let executionParticipantJobs = 0;
   let outcome: MultiRoundRunManifestV1['outcome'] = 'STOPPED';
@@ -562,6 +683,7 @@ export async function runMultiRoundExecutionValidation(
     consistencyWarnings: [],
   };
   const captureState = dependencies.captureWorkspaceState ?? captureWorkspaceState;
+  const runReviewContinuationDependency = dependencies.runReviewContinuation ?? runReviewContinuation;
 
   try {
     evolutionWorkspace = await (dependencies.materializeEvolutionWorkspace ?? defaultMaterializeEvolutionWorkspace)({
@@ -613,28 +735,79 @@ export async function runMultiRoundExecutionValidation(
       round1ParticipantJobs = round1.actualParticipantJobs;
       if (round1ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
         stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
-        rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
-      } else if (!isReady(round1)) {
-        outcome = 'NO_CROSS_ROUND_TRANSITION_OBSERVED';
-        stopReason = 'ROUND_1_TERMINAL_NOT_READY';
-        rounds.push(roundManifest({ round: 1, root: 'round-1', sourceRunRef: preflight.sourceRunRef, terminalRoute: terminalRoute(round1), nextAction: 'STOP' }));
-      } else {
-        rounds.push(roundManifest({
+        rounds.push(roundManifestV2({
           round: 1,
           root: 'round-1',
           sourceRunRef: preflight.sourceRunRef,
-          terminalRoute: round1.decision.route,
-          nextAction: 'CONFIGURATION_EXECUTION',
-          executionRef: execution.executionRef,
+          baseTerminalRoute: terminalRoute(round1),
+          baseReasonCode: round1.status === 'completed' ? round1.decision.reasonCode : null,
+          continuationRef: null,
+          effectiveTerminalRoute: terminalRoute(round1),
+          effectiveReasonCode: round1.status === 'completed' ? round1.decision.reasonCode : null,
+          nextAction: 'STOP',
         }));
-        const solutionWork = validateSolutionWork(await readJson(join(round1Root, 'solution-agent/result.json')));
-        const solutionReview = validateSolutionReview(await readJson(join(round1Root, 'reviewer-agent/review.json')));
+      } else {
+        const resolution = await resolveEffectiveRound({
+          round: 1,
+          roundRoot: round1Root,
+          baseResult: round1,
+          repositoryRoot: evolutionWorkspace.workspaceRoot,
+          humanFollowupRoot: resolve(input.authoritativeRoot),
+          workflowInstanceRef: input.multiRoundRunRef,
+          participant: input.participant,
+          sourceFingerprintSha256: round1.sourceFingerprintSha256,
+          reviewContinuationCount: reviewContinuations.length === 1 ? 1 : 0,
+          runReviewContinuation: runReviewContinuationDependency,
+        });
+        if (resolution.continuation !== null) {
+          reviewContinuationParticipantJobs = resolution.continuation.participantJobs;
+          reviewContinuations.push(continuationManifestEntry(resolution.continuation, 1));
+        }
+        if (resolution.effectiveRoute !== 'READY_FOR_CONFIG_EXECUTION') {
+          outcome = 'NO_CROSS_ROUND_TRANSITION_OBSERVED';
+          stopReason = resolution.continuation?.status === 'participant_failure'
+            ? 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE'
+            : 'ROUND_1_TERMINAL_NOT_READY';
+          rounds.push(roundManifestV2({
+            round: 1,
+            root: 'round-1',
+            sourceRunRef: preflight.sourceRunRef,
+            baseTerminalRoute: resolution.baseRoute,
+            baseReasonCode: resolution.baseReasonCode,
+            continuationRef: resolution.continuation?.continuationRef ?? null,
+            effectiveTerminalRoute: resolution.effectiveRoute,
+            effectiveReasonCode: resolution.effectiveReasonCode,
+            nextAction: 'STOP',
+          }));
+        } else {
+          if (resolution.acceptedArtifacts === null) throw new Error('READY_FOR_CONFIG_EXECUTION is missing accepted artifacts');
+          rounds.push(roundManifestV2({
+            round: 1,
+            root: 'round-1',
+            sourceRunRef: preflight.sourceRunRef,
+            baseTerminalRoute: resolution.baseRoute,
+            baseReasonCode: resolution.baseReasonCode,
+            continuationRef: resolution.continuation?.continuationRef ?? null,
+            effectiveTerminalRoute: resolution.effectiveRoute,
+            effectiveReasonCode: resolution.effectiveReasonCode,
+            nextAction: 'CONFIGURATION_EXECUTION',
+            executionRef: execution.executionRef,
+          }));
+          const solutionWork = validateSolutionWork(await readJson(resolution.acceptedArtifacts.solutionPath));
+          const solutionReview = validateSolutionReview(await readJson(resolution.acceptedArtifacts.reviewPath));
         const acceptedOption = selectedOption(solutionWork, solutionReview.acceptedOptionId ?? '');
         const allowedWritePaths = await deriveAllowedWritePaths({
           workspaceRoot: evolutionWorkspace.workspaceRoot,
           solutionOption: acceptedOption,
         });
-        const executionInput = await readAcceptedExecutionInput(round1Root, evolutionWorkspace.workspaceRoot, round1, allowedWritePaths, input.participant);
+          const executionInput = await readAcceptedExecutionInput(
+            round1Root,
+            evolutionWorkspace.workspaceRoot,
+            round1,
+            allowedWritePaths,
+            input.participant,
+            resolution.acceptedArtifacts,
+          );
         const beforeStateCapture = await captureWorkspaceStateBestEffort(captureState, evolutionWorkspace.workspaceRoot);
         workspaceStateProvenance.executionBoundary = {
           before: beforeStateCapture.state,
@@ -748,16 +921,38 @@ export async function runMultiRoundExecutionValidation(
               if (round2ParticipantJobs > MAX_ROUND_PARTICIPANT_JOBS) {
                 stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
               } else {
-                rounds.push(roundManifest({
+                const resolution = await resolveEffectiveRound({
+                  round: 2,
+                  roundRoot: round2Root,
+                  baseResult: round2,
+                  repositoryRoot: evolutionWorkspace.workspaceRoot,
+                  humanFollowupRoot: resolve(input.authoritativeRoot),
+                  workflowInstanceRef: input.multiRoundRunRef,
+                  participant: input.participant,
+                  sourceFingerprintSha256: round2.sourceFingerprintSha256,
+                  reviewContinuationCount: reviewContinuations.length === 1 ? 1 : 0,
+                  runReviewContinuation: runReviewContinuationDependency,
+                });
+                if (resolution.continuation !== null) {
+                  reviewContinuationParticipantJobs += resolution.continuation.participantJobs;
+                  reviewContinuations.push(continuationManifestEntry(resolution.continuation, 2));
+                }
+                rounds.push(roundManifestV2({
                   round: 2,
                   root: 'round-2',
                   sourceRunRef: rerun.runRef,
-                  terminalRoute: terminalRoute(round2),
+                  baseTerminalRoute: resolution.baseRoute,
+                  baseReasonCode: resolution.baseReasonCode,
+                  continuationRef: resolution.continuation?.continuationRef ?? null,
+                  effectiveTerminalRoute: resolution.effectiveRoute,
+                  effectiveReasonCode: resolution.effectiveReasonCode,
                   nextAction: 'STOP',
                   resultingRunRef: null,
                 }));
                 outcome = 'CROSS_ROUND_TRANSITION_OBSERVED';
-                stopReason = 'ROUND_2_COMPLETED';
+                stopReason = resolution.continuation?.status === 'participant_failure'
+                  ? 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE'
+                  : 'ROUND_2_COMPLETED';
               }
             } catch (error) {
               execution.status = 'failed';
@@ -769,11 +964,12 @@ export async function runMultiRoundExecutionValidation(
         }
       }
     }
+    }
   } catch (error) {
     stopReason = stopReason === 'UNEXPECTED_STOP' ? String(error) : stopReason;
   }
 
-  const totalParticipantJobs = round1ParticipantJobs + executionParticipantJobs + round2ParticipantJobs;
+  const totalParticipantJobs = round1ParticipantJobs + reviewContinuationParticipantJobs + executionParticipantJobs + round2ParticipantJobs;
   if (totalParticipantJobs > MAX_TOTAL_PARTICIPANT_JOBS) {
     stopReason = 'PARTICIPANT_BUDGET_EXCEEDED';
     outcome = 'STOPPED';
@@ -792,22 +988,26 @@ export async function runMultiRoundExecutionValidation(
       addProvenanceWarning(workspaceStateProvenance, 'END_CAPTURE_UNAVAILABLE');
     }
   }
-  const manifest: MultiRoundRunManifestV1 = {
-    schemaVersion: 'multi-round-run-manifest-v1',
+  const manifest: MultiRoundRunManifestV2 = {
+    schemaVersion: 'multi-round-run-manifest-v2',
     multiRoundRunRef: input.multiRoundRunRef,
     initialSourceRunRef: preflight.sourceRunRef,
     limits: {
       maxAgentRounds: MAX_ROUNDS,
       maxCrossRoundTransitions: MAX_TRANSITIONS,
       maxRoundParticipantJobs: MAX_ROUND_PARTICIPANT_JOBS,
+      maxReviewContinuations: MAX_REVIEW_CONTINUATIONS,
+      maxReviewContinuationParticipantJobs: MAX_REVIEW_CONTINUATION_PARTICIPANT_JOBS,
       maxExecutionParticipantJobs: MAX_EXECUTION_PARTICIPANT_JOBS,
       maxTotalParticipantJobs: MAX_TOTAL_PARTICIPANT_JOBS,
       retryCount: 0,
     },
     rounds,
+    reviewContinuations,
     execution,
     budget: {
       round1ParticipantJobs,
+      reviewContinuationParticipantJobs,
       executionParticipantJobs,
       round2ParticipantJobs,
       totalParticipantJobs,

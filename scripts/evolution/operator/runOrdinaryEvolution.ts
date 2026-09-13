@@ -16,7 +16,7 @@ import {
 import {
   buildMultiRoundSessionSummary,
   readMultiRoundRunManifest,
-  type MultiRoundSessionSummaryV1,
+  type MultiRoundSessionSummary,
 } from '../multiRoundRunManifestContract';
 import { archiveOperationalRunReport } from '../reporting/archiveOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
@@ -51,7 +51,7 @@ export interface OperatorGitPreflight {
 
 export interface OperatorAeWorkflowResult {
   multiRound: MultiRoundExecutionValidationResult;
-  sessionExecution: MultiRoundSessionSummaryV1;
+  sessionExecution: MultiRoundSessionSummary;
   authoritativeRootChanged: boolean;
   experimentRoot: string;
 }
@@ -102,7 +102,7 @@ export interface OrdinaryEvolutionOperatorResult {
   headSha: string;
   workingTreeClean: boolean;
   participantBinding: OperatorParticipantBindingId;
-  sessionExecution: MultiRoundSessionSummaryV1;
+  sessionExecution: MultiRoundSessionSummary;
   authoritativeRootChanged: boolean;
   runReportId: string | null;
   runReportPath: string | null;
@@ -296,6 +296,17 @@ export function formatOrdinaryEvolutionOperatorSummary(
     '可观测性：',
     result.observabilityStatus,
   ];
+  if (session.schemaVersion === 'multi-round-session-summary-v2') {
+    const lastRound = session.rounds.at(-1);
+    if (lastRound !== undefined) {
+      lines.push(
+        '',
+        `base route: ${lastRound.baseTerminalRoute ?? '（无）'}`,
+        `review continuation: ${lastRound.continuationRef ?? '（无）'}`,
+        `effective route: ${lastRound.effectiveTerminalRoute ?? '（无）'}`,
+      );
+    }
+  }
   if (result.observabilityError) {
     lines.push('', '可观测性错误：', result.observabilityError);
     lines.push('下一步：工程调查者修复失败的旁路步骤；在原 session 上使用 evolution:observability:archive -- --root <原 session root>、evolution:human-followup:inbox 或 evolution:observability:index 重建对应产物。', '恢复条件：旁路生成成功；保留原 session outcome，不重跑游戏或 AE。');

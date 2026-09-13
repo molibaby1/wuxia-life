@@ -26,6 +26,7 @@ import {
   buildMultiRoundSessionSummary,
   parseMultiRoundRunManifest,
   type MultiRoundSessionSummaryV1,
+  type MultiRoundSessionSummaryV2,
 } from '../../scripts/evolution/multiRoundRunManifestContract';
 
 function fakeBinding(
@@ -90,6 +91,34 @@ function sessionSummary(overrides: Partial<MultiRoundSessionSummaryV1> = {}): Mu
     execution: {
       ...base.execution,
       ...(overrides.execution ?? {}),
+    },
+  };
+}
+
+function continuationSessionSummary(): MultiRoundSessionSummaryV2 {
+  return {
+    schemaVersion: 'multi-round-session-summary-v2',
+    multiRoundRunRef: 'ordinary-run-20260912-000001',
+    outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+    stopReason: 'ROUND_1_TERMINAL_NOT_READY',
+    roundCount: 1,
+    crossRoundTransitions: 0,
+    rounds: [{
+      round: 1,
+      baseTerminalRoute: 'DEFER_MORE_WORK_REQUESTED',
+      baseReasonCode: 'REVIEW_REQUEST_MORE_WORK',
+      continuationRef: 'review-continuation-000001',
+      effectiveTerminalRoute: 'ESCALATE_HUMAN',
+      effectiveReasonCode: 'EXPLICIT_ESCALATION',
+    }],
+    reviewContinuationCount: 1,
+    reviewContinuationParticipantJobs: 2,
+    lastRoundTerminalRoute: 'ESCALATE_HUMAN',
+    execution: {
+      executionRef: 'configuration-execution-000001',
+      status: 'not_started',
+      actualChangedFiles: [],
+      resultingRunRef: null,
     },
   };
 }
@@ -228,6 +257,32 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     new Set(Array.from({ length: rosterIds.size }, (_, seed) => selectP8PersonaForSeed(seed).id)),
     rosterIds,
   );
+
+  {
+    const result = {
+      ...({
+        sessionId: 'ordinary-run-20260912-000001',
+        branch: 'dev',
+        headSha: 'e'.repeat(40),
+        workingTreeClean: true,
+        participantBinding: OPERATOR_BINDING_CODEX_CURRENT,
+        authoritativeRootChanged: false,
+        runReportId: null,
+        runReportPath: null,
+        humanFollowupActiveCount: null,
+        operationalIndexPath: null,
+        observabilityStatus: 'PASS' as const,
+        observabilityError: null,
+        sessionRoot: '.tmp/evolution/ordinary-run-20260912-000001',
+        experimentRoot: '.tmp/evolution/ordinary-run-20260912-000001/problem-agnostic-agent-solution-loop-instance-000001',
+      }),
+      sessionExecution: continuationSessionSummary(),
+    } as Parameters<typeof formatOrdinaryEvolutionOperatorSummary>[0];
+    const summary = formatOrdinaryEvolutionOperatorSummary(result);
+    assert.match(summary, /base route: DEFER_MORE_WORK_REQUESTED/);
+    assert.match(summary, /review continuation: review-continuation-000001/);
+    assert.match(summary, /effective route: ESCALATE_HUMAN/);
+  }
 
   // Observe the actual Phase0 handoff, stopping before any Participant job.
   const repositoryRoot = await createRepo();

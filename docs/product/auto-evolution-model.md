@@ -199,6 +199,8 @@ Human work item 是 downstream workflow state，不是新的 reasoning Role、Pa
 
 v1 的自动创建入口只有 `decision.route == ESCALATE_HUMAN`，包括明确要求 Human 判断以及超出 configuration authority 的正式 routed outcome。`DEFER`、`DEFER_MORE_WORK_REQUESTED`、`PARTICIPANT_FAILURE`、`SKIP`、`NO_PROPOSAL` 与 `INSUFFICIENT_EVIDENCE` 本身不自动创建 Human work item；它们可以成为后续 evidence review 的观察信号，但不把普通失败或不确定性全部转嫁给 Human。
 
+在 PD-117 下，`DEFER_MORE_WORK_REQUESTED` 只在一个明确的 Host workflow 条件下允许 bounded continuation：当本 multi-round session 中首次完成的 Reviewer decision 为 `REQUEST_MORE_WORK` 时，Orchestrator 可创建一次 Host-owned `review-continuation-000001`。它包含一次 fresh Solution revision；仅当 revision 返回 `OPTIONS` 时再进行一次 fresh independent Reviewer re-review。base Decision 保持不可变，continuation Decision 作为 effective route；每 session 最多一次 continuation、最多两个 continuation Participant jobs、总 Participant jobs 最多 11，且不改变 Participant 的 reasoning authority。第二次 `REQUEST_MORE_WORK` 终止为 `DEFER_MORE_WORK_REQUESTED`；`DEFER` / `ESCALATE` 不触发 continuation。该机制不新增 gameplay sample、HFL 入口、PD-111 evidence scope 或 full P3 能力。
+
 普通 unresolved Human work item 不阻塞 RUN / OBSERVE 主循环：
 
 ```text

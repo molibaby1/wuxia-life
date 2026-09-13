@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "improvement-hypothesis-set-v2",
+  "hypotheses": [
+    {
+      "hypothesis": "Repeated content can be reduced by revising the affected configuration.",
+      "observedBasis": "The player-visible summary repeats content.",
+      "feedbackRefs": ["observations[0]"],
+      "evidenceRefs": ["entry-000001"],
+      "unknowns": ["The minimum configuration change is not yet established."],
+      "productSignificance": "Reducing repetition may improve player-visible variety."
+    }
+  ],
+  "noProblemAssessment": null
+}

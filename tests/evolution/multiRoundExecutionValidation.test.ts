@@ -20,6 +20,7 @@ import {
   type MultiRoundExecutionValidationDependencies,
   type MultiRoundLoopInput,
 } from '../../scripts/evolution/multiRoundExecutionValidation';
+import type { ReviewContinuationResult } from '../../scripts/evolution/problemAgnosticSolution/runReviewContinuation';
 import {
   captureAuthoritativeFingerprint,
   prepareAgentWorkspace,
@@ -93,6 +94,90 @@ function readySolutionReview(): Record<string, unknown> {
   };
 }
 
+function moreWorkDecision(): SolutionDecisionV1 {
+  return validateSolutionDecision({
+    schemaVersion: 'solution-decision-v1',
+    problemId: READY_PROBLEM_ID,
+    route: 'DEFER_MORE_WORK_REQUESTED',
+    reasonCode: 'REVIEW_REQUEST_MORE_WORK',
+    inputs: {
+      solutionStatus: 'OPTIONS',
+      reviewerDecision: 'REQUEST_MORE_WORK',
+      solutionScope: 'configuration',
+      reviewScope: 'config_only',
+      permissions: {
+        authoritativeProductWrite: false,
+        sandboxWrite: true,
+        productExecution: false,
+        codeExecution: false,
+      },
+      budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
+    },
+  });
+}
+
+async function writeMoreWorkArtifacts(root: string): Promise<void> {
+  await writeReadyArtifacts(root);
+  await writeJson(join(root, 'reviewer-agent/review.json'), {
+    schemaVersion: 'solution-review-v1',
+    problemId: READY_PROBLEM_ID,
+    decision: 'REQUEST_MORE_WORK',
+    assessment: 'One bounded follow-up is required.',
+    repoRefs: [],
+    artifactRefs: [],
+    concerns: ['Confirm the concrete configuration path.'],
+  });
+  await writeJson(join(root, 'decision.json'), moreWorkDecision());
+}
+
+async function writeContinuationArtifacts(roundRoot: string): Promise<{ solutionPath: string; reviewPath: string; decisionPath: string }> {
+  const continuationRoot = join(roundRoot, 'review-continuation-000001');
+  const solutionPath = join(continuationRoot, 'solution-revision/result.json');
+  const reviewPath = join(continuationRoot, 'reviewer-agent/review.json');
+  const decisionPath = join(continuationRoot, 'decision.json');
+  await writeJson(solutionPath, readySolutionWork());
+  await writeJson(reviewPath, readySolutionReview());
+  await writeJson(decisionPath, readyDecision());
+  return { solutionPath, reviewPath, decisionPath };
+}
+
+function continuationResult(
+  route: 'DEFER' | 'READY_FOR_CONFIG_EXECUTION',
+  paths: { solutionPath: string; reviewPath: string; decisionPath: string },
+): Extract<ReviewContinuationResult, { status: 'completed' }> {
+  return {
+    status: 'completed',
+    continuationRef: 'review-continuation-000001',
+    participantJobs: route === 'DEFER' ? 1 : 2,
+    terminalRoute: route,
+    terminalReasonCode: route === 'DEFER' ? 'INSUFFICIENT_EVIDENCE' : 'ACCEPTED_CONFIGURATION_SCOPE',
+    decision: route === 'DEFER'
+      ? validateSolutionDecision({
+        schemaVersion: 'solution-decision-v1',
+        problemId: READY_PROBLEM_ID,
+        route: 'DEFER',
+        reasonCode: 'INSUFFICIENT_EVIDENCE',
+        inputs: {
+          solutionStatus: 'INSUFFICIENT_EVIDENCE',
+          reviewerDecision: null,
+          solutionScope: null,
+          reviewScope: null,
+          permissions: {
+            authoritativeProductWrite: false,
+            sandboxWrite: true,
+            productExecution: false,
+            codeExecution: false,
+          },
+          budget: { actualParticipantJobs: 1, maxParticipantJobs: 4, retryCount: 0 },
+        },
+      })
+      : readyDecision(),
+    decisionPath: paths.decisionPath,
+    effectiveSolutionPath: paths.solutionPath,
+    effectiveReviewPath: route === 'DEFER' ? null : paths.reviewPath,
+  };
+}
+
 function completedRound(input: {
   sourceRunRef: string;
   decision: SolutionDecisionV1;
@@ -112,6 +197,35 @@ function completedRound(input: {
     decision: input.decision,
     solutionInvocationRef: 'solution-agent-000001',
     reviewerInvocationRef: 'solution-reviewer-000001',
+    oldInvestigationCalls: 0,
+    oldModificationWorkCalls: 0,
+    configGameplayExecutionCount: 0,
+  };
+}
+
+function participantFailureRound(input: {
+  sourceRunRef: string;
+  experimentRoot: string;
+}): ProblemAgnosticAgentSolutionLoopResult {
+  return {
+    status: 'participant_failure',
+    sourceRunRef: input.sourceRunRef,
+    workflowOutcomePath: join(input.experimentRoot, 'workflow-outcome.json'),
+    outcome: {
+      schemaVersion: 'participant-failure-outcome-v1',
+      outcome: 'PARTICIPANT_FAILURE',
+      failedStage: 'REVIEWER',
+      participantJobNumber: 4,
+      route: 'DEFER',
+      participantErrorKind: 'deterministic test failure',
+      failureArtifactRefs: ['reviewer-agent/invocation.json'],
+      budget: { actualParticipantJobs: 4, maxParticipantJobs: 4, retryCount: 0 },
+    },
+    actualParticipantJobs: 4,
+    decisionPath: null,
+    problemPackagePath: null,
+    solutionInvocationRef: null,
+    reviewerInvocationRef: null,
     oldInvestigationCalls: 0,
     oldModificationWorkCalls: 0,
     configGameplayExecutionCount: 0,
@@ -786,6 +900,353 @@ export async function runDefaultVerificationIsolationTest(): Promise<void> {
   await assert.rejects(() => lstat(join(prepared.workspaceRoot, 'node_modules')), /ENOENT/);
 }
 
+async function requestContinuationDependencies(input: {
+  workspaceRoot: string;
+  root: string;
+  calls: string[];
+  round1: 'more' | 'ready' | 'escalate' | 'defer' | 'participant_failure';
+  round2?: 'more' | 'ready' | 'skip' | 'participant_failure';
+  continuation: (round: 1 | 2, roundRoot: string) => Promise<ReviewContinuationResult>;
+}): Promise<MultiRoundExecutionValidationDependencies> {
+  const evolutionWorkspaceRoot = await createWorkspace();
+  const base = await fixedDependencies({
+    workspaceRoot: evolutionWorkspaceRoot,
+    roundResults: ['skip', 'skip'],
+    calls: input.calls,
+  });
+  return {
+    ...base,
+    runSingleRound: async round => {
+      input.calls.push(`round-${round.round}`);
+      const outcome = round.round === 1 ? input.round1 : input.round2 ?? 'skip';
+      if (outcome === 'participant_failure') {
+        return participantFailureRound({
+          sourceRunRef: round.round === 1 ? 'initial-run-000001' : 'resulting-run-000001',
+          experimentRoot: round.experimentRoot,
+        });
+      }
+      if (outcome === 'more') {
+        await writeMoreWorkArtifacts(round.experimentRoot);
+        return completedRound({
+          sourceRunRef: round.round === 1 ? 'initial-run-000001' : 'resulting-run-000001',
+          decision: moreWorkDecision(),
+          experimentRoot: round.experimentRoot,
+        });
+      }
+      if (outcome === 'ready') {
+        await writeReadyArtifacts(round.experimentRoot);
+        return completedRound({
+          sourceRunRef: round.round === 1 ? 'initial-run-000001' : 'resulting-run-000001',
+          decision: readyDecision(),
+          experimentRoot: round.experimentRoot,
+        });
+      }
+      if (outcome === 'escalate') {
+        return completedRound({
+          sourceRunRef: 'initial-run-000001',
+          decision: validateSolutionDecision({
+            schemaVersion: 'solution-decision-v1',
+            problemId: READY_PROBLEM_ID,
+            route: 'ESCALATE_HUMAN',
+            reasonCode: 'EXPLICIT_ESCALATION',
+            inputs: {
+              solutionStatus: 'ESCALATE',
+              reviewerDecision: null,
+              solutionScope: null,
+              reviewScope: null,
+              permissions: {
+                authoritativeProductWrite: false,
+                sandboxWrite: true,
+                productExecution: false,
+                codeExecution: false,
+              },
+              budget: { actualParticipantJobs: 3, maxParticipantJobs: 4, retryCount: 0 },
+            },
+          }),
+          experimentRoot: round.experimentRoot,
+        });
+      }
+      return completedRound({
+        sourceRunRef: 'initial-run-000001',
+        decision: validateSolutionDecision({
+          schemaVersion: 'solution-decision-v1',
+          problemId: READY_PROBLEM_ID,
+          route: 'DEFER',
+          reasonCode: 'INSUFFICIENT_EVIDENCE',
+          inputs: {
+            solutionStatus: 'INSUFFICIENT_EVIDENCE',
+            reviewerDecision: null,
+            solutionScope: null,
+            reviewScope: null,
+            permissions: {
+              authoritativeProductWrite: false,
+              sandboxWrite: true,
+              productExecution: false,
+              codeExecution: false,
+            },
+            budget: { actualParticipantJobs: 3, maxParticipantJobs: 4, retryCount: 0 },
+          },
+        }),
+        experimentRoot: round.experimentRoot,
+      });
+    },
+    runReviewContinuation: async continuation => input.continuation(continuation.round, continuation.roundRoot),
+  };
+}
+
+export async function runBaseParticipantFailureStopTests(): Promise<void> {
+  const round1Workspace = await createWorkspace();
+  const round1Root = await mkdtemp(join(tmpdir(), 'p2-base-participant-failure-round1-'));
+  const round1Calls: string[] = [];
+  const round1 = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-base-participant-failure-round1-${Date.now()}`,
+    authoritativeRoot: round1Workspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(round1Root, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: await requestContinuationDependencies({
+      workspaceRoot: round1Workspace,
+      root: round1Root,
+      calls: round1Calls,
+      round1: 'participant_failure',
+      continuation: async () => {
+        throw new Error('base participant failure must not invoke continuation');
+      },
+    }),
+  });
+  const round1Manifest = JSON.parse(await readFile(round1.manifestPath, 'utf8')) as {
+    rounds: Array<{ continuationRef: string | null }>;
+    reviewContinuations: unknown[];
+  };
+  assert.equal(round1.rounds[0]!.continuationRef, null);
+  assert.equal(round1Manifest.rounds[0]!.continuationRef, null);
+  assert.equal(round1Manifest.reviewContinuations.length, 0);
+  assert.equal(round1.stopReason, 'ROUND_1_TERMINAL_NOT_READY');
+  assert.notEqual(round1.stopReason, 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE');
+  assert.deepEqual(round1Calls, ['round-1']);
+
+  const round2Workspace = await createWorkspace();
+  const round2Root = await mkdtemp(join(tmpdir(), 'p2-base-participant-failure-round2-'));
+  const round2Calls: string[] = [];
+  const round2 = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-base-participant-failure-round2-${Date.now()}`,
+    authoritativeRoot: round2Workspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(round2Root, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: await requestContinuationDependencies({
+      workspaceRoot: round2Workspace,
+      root: round2Root,
+      calls: round2Calls,
+      round1: 'ready',
+      round2: 'participant_failure',
+      continuation: async () => {
+        throw new Error('base participant failure must not invoke continuation');
+      },
+    }),
+  });
+  assert.equal(round2.rounds[1]!.continuationRef, null);
+  assert.equal(round2.stopReason, 'ROUND_2_COMPLETED');
+  assert.notEqual(round2.stopReason, 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE');
+  assert.deepEqual(round2Calls, ['round-1', 'execute', 'verify', 'rerun', 'seal', 'round-2']);
+}
+
+export async function runBoundedReviewContinuationHostTests(): Promise<void> {
+  const deferredWorkspace = await createWorkspace();
+  const deferredRoot = await mkdtemp(join(tmpdir(), 'p2-continuation-defer-'));
+  const deferredCalls: string[] = [];
+  let deferredContinuationCalls = 0;
+  const deferredDependencies = await requestContinuationDependencies({
+    workspaceRoot: deferredWorkspace,
+    root: deferredRoot,
+    calls: deferredCalls,
+    round1: 'more',
+    continuation: async (_round, roundRoot) => {
+      deferredContinuationCalls += 1;
+      return continuationResult('DEFER', await writeContinuationArtifacts(roundRoot));
+    },
+  });
+  const deferred = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-continuation-defer-${Date.now()}`,
+    authoritativeRoot: deferredWorkspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(deferredRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: deferredDependencies,
+  });
+  assert.equal(deferredContinuationCalls, 1);
+  assert.deepEqual(deferredCalls, ['round-1']);
+  assert.equal(deferred.execution, null);
+  assert.deepEqual(deferred.rounds.map(round => ({
+    base: round.baseTerminalRoute,
+    effective: round.effectiveTerminalRoute,
+    continuation: round.continuationRef,
+    nextAction: round.nextAction,
+  })), [{
+    base: 'DEFER_MORE_WORK_REQUESTED',
+    effective: 'DEFER',
+    continuation: 'review-continuation-000001',
+    nextAction: 'STOP',
+  }]);
+  const deferredManifest = JSON.parse(await readFile(deferred.manifestPath, 'utf8')) as {
+    schemaVersion: string;
+    budget: { reviewContinuationParticipantJobs: number; totalParticipantJobs: number };
+  };
+  assert.equal(deferredManifest.schemaVersion, 'multi-round-run-manifest-v2');
+  assert.equal(deferredManifest.budget.reviewContinuationParticipantJobs, 1);
+  assert.equal(deferredManifest.budget.totalParticipantJobs, 5);
+
+  const readyWorkspace = await createWorkspace();
+  const readyRoot = await mkdtemp(join(tmpdir(), 'p2-continuation-ready-'));
+  const readyCalls: string[] = [];
+  let executionSolutionSummary = '';
+  const readyDependencies = await requestContinuationDependencies({
+    workspaceRoot: readyWorkspace,
+    root: readyRoot,
+    calls: readyCalls,
+    round1: 'more',
+    round2: 'skip',
+    continuation: async (_round, roundRoot) => continuationResult('READY_FOR_CONFIG_EXECUTION', await writeContinuationArtifacts(roundRoot)),
+  });
+  readyDependencies.executeConfiguration = async execution => {
+    readyCalls.push('execute');
+    executionSolutionSummary = execution.solutionWork.summary;
+    await writeFile(join(execution.workspaceRoot, CONFIG_PATH), '{"choices":[{"id":"continued"}]}\n');
+    return {
+      schemaVersion: 'configuration-execution-result-v1',
+      status: 'completed',
+      changedFiles: [CONFIG_PATH],
+      verificationResults: [],
+      deviations: [],
+    };
+  };
+  const ready = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-continuation-ready-${Date.now()}`,
+    authoritativeRoot: readyWorkspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(readyRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: readyDependencies,
+  });
+  assert.equal(executionSolutionSummary, 'One bounded configuration option.');
+  assert.ok(readyCalls.includes('execute'));
+  assert.equal(ready.rounds[0]!.effectiveTerminalRoute, 'READY_FOR_CONFIG_EXECUTION');
+  assert.equal(ready.rounds[0]!.baseTerminalRoute, 'DEFER_MORE_WORK_REQUESTED');
+
+  for (const baseRoute of ['escalate', 'defer'] as const) {
+    const workspace = await createWorkspace();
+    const root = await mkdtemp(join(tmpdir(), `p2-continuation-${baseRoute}-`));
+    const calls: string[] = [];
+    let continuationCalls = 0;
+    const dependencies = await requestContinuationDependencies({
+      workspaceRoot: workspace,
+      root,
+      calls,
+      round1: baseRoute,
+      continuation: async () => {
+        continuationCalls += 1;
+        throw new Error('continuation must not run');
+      },
+    });
+    const result = await runMultiRoundExecutionValidation({
+      multiRoundRunRef: `p2-continuation-base-${baseRoute}-${Date.now()}`,
+      authoritativeRoot: workspace,
+      initialSourceRoot: '/sealed/initial-run-000001',
+      experimentRoot: join(root, 'run'),
+      participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+      dependencies,
+    });
+    assert.equal(continuationCalls, 0);
+    assert.equal(result.rounds[0]!.baseTerminalRoute, baseRoute === 'escalate' ? 'ESCALATE_HUMAN' : 'DEFER');
+  }
+
+  const failureWorkspace = await createWorkspace();
+  const failureRoot = await mkdtemp(join(tmpdir(), 'p2-continuation-failure-'));
+  const failureCalls: string[] = [];
+  const failureDependencies = await requestContinuationDependencies({
+    workspaceRoot: failureWorkspace,
+    root: failureRoot,
+    calls: failureCalls,
+    round1: 'more',
+    continuation: async () => ({
+      status: 'participant_failure',
+      continuationRef: 'review-continuation-000001',
+      participantJobs: 1,
+      terminalRoute: 'PARTICIPANT_FAILURE',
+      terminalReasonCode: null,
+      decision: null,
+      decisionPath: null,
+      effectiveSolutionPath: null,
+      effectiveReviewPath: null,
+    }),
+  });
+  const failure = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-continuation-failure-${Date.now()}`,
+    authoritativeRoot: failureWorkspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(failureRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: failureDependencies,
+  });
+  assert.equal(failure.stopReason, 'REVIEW_CONTINUATION_PARTICIPANT_FAILURE');
+  assert.equal(failure.execution, null);
+
+  const tokenUsedWorkspace = await createWorkspace();
+  const tokenUsedRoot = await mkdtemp(join(tmpdir(), 'p2-continuation-token-used-'));
+  const tokenUsedCalls: string[] = [];
+  const tokenUsedRounds: number[] = [];
+  const tokenUsedDependencies = await requestContinuationDependencies({
+    workspaceRoot: tokenUsedWorkspace,
+    root: tokenUsedRoot,
+    calls: tokenUsedCalls,
+    round1: 'more',
+    round2: 'more',
+    continuation: async (round, roundRoot) => {
+      tokenUsedRounds.push(round);
+      return continuationResult('READY_FOR_CONFIG_EXECUTION', await writeContinuationArtifacts(roundRoot));
+    },
+  });
+  const tokenUsed = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-continuation-token-used-${Date.now()}`,
+    authoritativeRoot: tokenUsedWorkspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(tokenUsedRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: tokenUsedDependencies,
+  });
+  assert.deepEqual(tokenUsedRounds, [1]);
+  assert.equal(tokenUsed.actualParticipantJobs, 11, JSON.stringify({ calls: tokenUsedCalls, rounds: tokenUsed.rounds }));
+  assert.equal(tokenUsed.rounds[1]!.continuationRef, null);
+  assert.equal(tokenUsed.rounds[1]!.effectiveTerminalRoute, 'DEFER_MORE_WORK_REQUESTED');
+
+  const tokenAvailableWorkspace = await createWorkspace();
+  const tokenAvailableRoot = await mkdtemp(join(tmpdir(), 'p2-continuation-token-available-'));
+  const tokenAvailableCalls: string[] = [];
+  const tokenAvailableRounds: number[] = [];
+  const tokenAvailableDependencies = await requestContinuationDependencies({
+    workspaceRoot: tokenAvailableWorkspace,
+    root: tokenAvailableRoot,
+    calls: tokenAvailableCalls,
+    round1: 'ready',
+    round2: 'more',
+    continuation: async (round, roundRoot) => {
+      tokenAvailableRounds.push(round);
+      return continuationResult('DEFER', await writeContinuationArtifacts(roundRoot));
+    },
+  });
+  const tokenAvailable = await runMultiRoundExecutionValidation({
+    multiRoundRunRef: `p2-continuation-token-available-${Date.now()}`,
+    authoritativeRoot: tokenAvailableWorkspace,
+    initialSourceRoot: '/sealed/initial-run-000001',
+    experimentRoot: join(tokenAvailableRoot, 'run'),
+    participant: { executable: process.execPath, buildArgs: () => ['-e', ''] },
+    dependencies: tokenAvailableDependencies,
+  });
+  assert.deepEqual(tokenAvailableRounds, [2]);
+  assert.ok(tokenAvailable.actualParticipantJobs <= 11);
+  assert.equal(tokenAvailable.rounds[1]!.continuationRef, 'review-continuation-000001');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   Promise.resolve()
     .then(() => runRound1NonReadyStopTest())
@@ -799,6 +1260,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     .then(() => runFailureStopTest('rerun'))
     .then(() => runHumanFollowupPersistenceRegression())
     .then(() => runDefaultVerificationIsolationTest())
+    .then(() => runBaseParticipantFailureStopTests())
+    .then(() => runBoundedReviewContinuationHostTests())
     .then(() => console.log('multiRoundExecutionValidation.test.ts: ok'))
     .catch(error => {
       console.error(error);

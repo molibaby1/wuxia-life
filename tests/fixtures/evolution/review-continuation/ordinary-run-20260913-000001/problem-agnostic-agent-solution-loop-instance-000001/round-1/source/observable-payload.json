@@ -1,0 +1,13 @@
+{
+  "transcriptVersion": "player-observable-v1",
+  "surfaceId": "headless-api-player-v1",
+  "transcriptId": "transcript-ordinary-run-20260913-000001",
+  "entries": [
+    {
+      "entryId": "entry-000001",
+      "kind": "summary",
+      "title": "Repeated content",
+      "body": "The player-visible summary repeats content."
+    }
+  ]
+}

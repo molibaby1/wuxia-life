@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -180,9 +180,26 @@ export async function runNestedAgentWorkspaceMaterializationTest(): Promise<void
   assert.equal(solution.authoritativeFingerprintSha256, evolutionFingerprint);
 }
 
+export async function runDestinationSymlinkProtectionTest(): Promise<void> {
+  const authoritativeRoot = await fixture();
+  const outsideRoot = join(authoritativeRoot, 'outside-destination');
+  const destinationRoot = join(authoritativeRoot, '.tmp/destination-link');
+  await mkdir(outsideRoot, { recursive: true });
+  await mkdir(join(destinationRoot, '..'), { recursive: true });
+  await symlink(outsideRoot, destinationRoot);
+
+  await assert.rejects(() => prepareAgentWorkspace({
+    authoritativeRoot,
+    destinationRoot,
+    jobKind: 'solution',
+  }));
+  assert.equal(await pathExists(join(outsideRoot, 'solution')), false);
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   runAgentWorkspaceIsolationTests()
     .then(() => runNestedAgentWorkspaceMaterializationTest())
+    .then(() => runDestinationSymlinkProtectionTest())
     .then(() => console.log('agentWorkspaceIsolation.test.ts: ok'))
     .catch(error => {
       console.error(error);

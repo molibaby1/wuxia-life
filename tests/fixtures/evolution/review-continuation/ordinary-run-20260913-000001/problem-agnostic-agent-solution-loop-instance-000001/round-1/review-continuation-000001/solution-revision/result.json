@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "solution-work-v1",
+  "status": "OPTIONS",
+  "problemId": "problem-hypothesis-000001",
+  "options": [
+    {
+      "optionId": "option-000001",
+      "proposedChange": "Revise the configuration after the requested investigation.",
+      "rationale": "The revision addresses the base review request with a narrower proposal.",
+      "repoRefs": ["src/example.ts"],
+      "artifactRefs": ["source/observable-payload.json"],
+      "changeScope": "configuration",
+      "expectedPlayerObservableDifference": "The repeated summary has a distinct player-visible form.",
+      "risks": ["The remaining distinction may still require Human review."],
+      "unknowns": ["The final acceptance boundary remains uncertain."]
+    }
+  ],
+  "recommendedOptionId": "option-000001",
+  "summary": "Revised configuration solution summary",
+  "repoRefs": ["src/example.ts"],
+  "artifactRefs": ["source/observable-payload.json"]
+}

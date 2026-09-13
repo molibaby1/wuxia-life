@@ -2024,3 +2024,22 @@ payoff / endgame **事实本身**不进 `currentGoal`。
 - 不建立完整 family-generation framework；不新增父母职业、血缘、遗传、家族声望或独立 heritage 系统。
 - 不扩充当前 birth background candidate pool。
 - 不重做 childhood / early-life event framework，也不修改 Auto Evolution Prompt、Reviewer、Router 或 Evaluation。
+
+### PD-117：Bounded More-Work Continuation v1
+
+Human accepted: 2026-09-12.
+
+- The first completed Reviewer REQUEST_MORE_WORK in one multi-round session may trigger at most one Host-owned bounded continuation.
+- The continuation contains one fresh Solution revision and, only when the revised Solution returns OPTIONS, one fresh independent Reviewer re-review.
+- REQUEST_MORE_WORK is reserved for concrete, decision-relevant work achievable in the current execution context. Genuinely unavailable evidence routes DEFER; Human product/governance/authority judgment routes ESCALATE; an unacceptable proposal may route REJECT.
+- A second REQUEST_MORE_WORK is terminal DEFER_MORE_WORK_REQUESTED; no second continuation is allowed.
+- The base round Decision remains immutable evidence. Continuation creates its own Decision; the Host uses the continuation Decision as the effective route.
+- Session-wide limits are one review continuation, at most two continuation Participant jobs, and at most eleven total Participant jobs. Ordinary semantic retry remains zero; existing envelope retransmission remains separate transport recovery.
+- No new gameplay sample/run is created merely to satisfy continuation. Existing configuration execution and post-execution rerun semantics remain gated by an effective READY_FOR_CONFIG_EXECUTION.
+- PD-100 HFL trigger scope is unchanged: only an effective formal ESCALATE_HUMAN automatically creates retained Human Follow-up state.
+- PD-111 evidence scope is unchanged; raw internal Phase0 source remains unavailable to Solution/Reviewer.
+- Full P3 remains deferred. This decision does not authorize a generic work queue, new reasoning Role, new Reviewer subtype schema, autonomous program/code writes, model switching, or Selection tuning.
+
+#### 允许重新讨论的条件
+
+仅当需要增加 continuation 次数或预算、改变 HFL / PD-111 scope、引入新的 evidence acquisition，或将 bounded continuation 泛化为 queue 时，才重新讨论本决策。

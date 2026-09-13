@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "solution-review-v1",
+  "problemId": "problem-hypothesis-000001",
+  "decision": "REQUEST_MORE_WORK",
+  "assessment": "The revised option still needs more work.",
+  "repoRefs": ["src/example.ts"],
+  "artifactRefs": ["source/observable-payload.json"],
+  "concerns": ["The revised option still leaves the acceptance boundary unresolved."]
+}

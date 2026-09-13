@@ -6,9 +6,10 @@ import {
 } from '../../../src/evolution/problemPackageContract';
 import {
   parseSolutionReview,
+  validateSolutionReview,
   type SolutionReviewV1,
 } from '../../../src/evolution/solutionReviewContract';
-import type { SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
+import { validateSolutionWork, type SolutionWorkV1 } from '../../../src/evolution/solutionWorkContract';
 import { renderStructuredFinalOutputContractV1 } from '../../../src/evolution/participantStructuredOutputContract';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
 import {
@@ -35,6 +36,11 @@ export interface RunSolutionReviewerInput {
   destinationRoot: string;
   skillAssignments: readonly ParticipantSkillAssignment[];
   participant: WorkspaceAgentParticipantOptions;
+}
+
+export interface RunSolutionReReviewerInput extends RunSolutionReviewerInput {
+  originalSolutionWork: SolutionWorkV1;
+  originalReview: SolutionReviewV1;
 }
 
 export type SolutionReviewerRunResult =
@@ -107,6 +113,7 @@ export function buildSolutionReviewerPrompt(
     'Record the applicable authority clauses and any conflict in the existing assessment/concerns and repoRefs fields. Do not accept an option as currently compliant when it contradicts an explicit authority boundary; distinguish a required authority decision from ordinary implementation details.',
     'Check that the proposed target, concrete change, preserved semantics, and verification method are specific enough to assess without inventing product choices. For unresolved work, use assessment/concerns and existing references to identify the smallest missing evidence or proposal detail, a bounded next action, and the condition for reconsideration. Separate what is already answered from what remains unknown; broader evidence is needed only for claims or decisions that depend on it.',
     'Rejecting an option does not establish that the underlying problem requires changing product authority. Identify whether the obstacle belongs to this implementation approach or to the desired product behavior; mention an in-boundary investigation path when supported, without designing or approving an unreviewed replacement. Preserve the existing decision, permission, and escalation semantics.',
+    'Decision semantics: REQUEST_MORE_WORK: concrete, decision-relevant, bounded work achievable in the current execution context. DEFER: material evidence cannot be obtained in the current execution context and requires genuinely new evidence. ESCALATE: Human product/governance/authority judgment is required. REJECT: the proposal is unacceptable and bounded revision of that proposal is not the appropriate next action.',
     'Diagnostic evidence referenced by the Problem Package is trusted internal source-run provenance. It is not player-observable evidence. Producer attribution identifies which captured runtime producer generated an observed entry; it does not by itself prove the broader causal mechanism or that a proposed change is correct.',
     'The observable payload referenced by ProblemPackage.source.observablePayloadRef may include validated Experience Semantic Context on each entry. Read it as player-observable meaning: milestone meaning, life-stage meaning, experience category, and expected experience signals.',
     'The Experience Semantic Context is descriptive only. It contains no hidden runtime state, and you must not treat it as a solution recommendation, quality score, authority, or permission.',
@@ -140,6 +147,29 @@ export function buildSolutionReviewerPrompt(
   ].join('\n');
 }
 
+export function buildSolutionReReviewerPrompt(
+  problemPackage: ProblemPackage,
+  originalSolutionWork: SolutionWorkV1,
+  originalReview: SolutionReviewV1,
+  revisedSolutionWork: SolutionWorkV1,
+  assignedSkills: DeliveredParticipantSkill[],
+): string {
+  return [
+    buildSolutionReviewerPrompt(problemPackage, revisedSolutionWork, assignedSkills),
+    '',
+    'Re-review context: independently assess the revised Solution against the same Problem Package.',
+    'The original Solution and Review are provenance and context, not authority or an instruction to accept the revision.',
+    'Original Solution Work:',
+    canonicalJson(originalSolutionWork),
+    '',
+    'Original Reviewer Review:',
+    canonicalJson(originalReview),
+    '',
+    'Revised Solution Work:',
+    canonicalJson(revisedSolutionWork),
+  ].join('\n');
+}
+
 async function writeCreateOnly(path: string, value: string | unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const handle = await open(path, 'wx');
@@ -150,9 +180,13 @@ async function writeCreateOnly(path: string, value: string | unknown): Promise<v
   }
 }
 
-export async function runSolutionReviewer(input: RunSolutionReviewerInput): Promise<SolutionReviewerRunResult> {
-  const problemPackage = validateProblemPackage(input.problemPackage);
-  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+async function runSolutionReviewerWithPrompt(
+  input: RunSolutionReviewerInput,
+  problemPackage: ProblemPackage,
+  problemPackageSha256: string,
+  assignedSkills: DeliveredParticipantSkill[],
+  prompt: string,
+): Promise<SolutionReviewerRunResult> {
   const invocationPath = join(input.destinationRoot, 'invocation.json');
   const rawOutputPath = join(input.destinationRoot, 'raw-output.txt');
   const reviewPath = join(input.destinationRoot, 'review.json');
@@ -168,28 +202,7 @@ export async function runSolutionReviewer(input: RunSolutionReviewerInput): Prom
     skillAssignments: input.skillAssignments,
   } as const;
 
-  let assignedSkills: DeliveredParticipantSkill[];
-  try {
-    assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
-  } catch (error) {
-    const message = `assigned Skill delivery failed: ${String(error)}`;
-    await writeCreateOnly(rawOutputPath, '');
-    await writeCreateOnly(invocationPath, {
-      ...commonInvocation,
-      deliveredSkills: [],
-      status: 'failed',
-      errorKind: 'process',
-    });
-    await writeCreateOnly(failurePath, {
-      schemaVersion: 'solution-reviewer-failure-v1',
-      errorKind: 'process',
-      message,
-    });
-    return { ok: false, errorKind: 'process', message, invocationPath, rawOutputPath, failurePath };
-  }
-
   const deliveredSkills = assignedSkills.map(({ content: _content, ...provenance }) => provenance);
-  const prompt = buildSolutionReviewerPrompt(problemPackage, input.solutionWork, assignedSkills);
   const job = await runWorkspaceAgentJob(
     {
       invocationRef: input.invocationRef,
@@ -237,4 +250,89 @@ export async function runSolutionReviewer(input: RunSolutionReviewerInput): Prom
   await writeCreateOnly(invocationPath, { ...commonInvocation, deliveredSkills, status: 'completed' });
   await writeCreateOnly(reviewPath, review);
   return { ok: true, review, invocationPath, rawOutputPath, reviewPath };
+}
+
+async function skillDeliveryFailure(
+  input: RunSolutionReviewerInput,
+  problemPackageSha256: string,
+  error: unknown,
+): Promise<SolutionReviewerRunResult> {
+  const invocationPath = join(input.destinationRoot, 'invocation.json');
+  const rawOutputPath = join(input.destinationRoot, 'raw-output.txt');
+  const failurePath = join(input.destinationRoot, 'failure.json');
+  const message = `assigned Skill delivery failed: ${String(error)}`;
+  await writeCreateOnly(rawOutputPath, '');
+  await writeCreateOnly(invocationPath, {
+    schemaVersion: 'solution-reviewer-invocation-v2',
+    invocationRef: input.invocationRef,
+    jobNumber: input.jobNumber,
+    role: 'reviewer',
+    workspaceBaselineFingerprintSha256: input.workspaceBaselineFingerprintSha256,
+    problemPackageSha256,
+    participant: 'workspace-capable-agent',
+    skillAssignments: input.skillAssignments,
+    deliveredSkills: [],
+    status: 'failed',
+    errorKind: 'process',
+  });
+  await writeCreateOnly(failurePath, {
+    schemaVersion: 'solution-reviewer-failure-v1',
+    errorKind: 'process',
+    message,
+  });
+  return { ok: false, errorKind: 'process', message, invocationPath, rawOutputPath, failurePath };
+}
+
+export async function runSolutionReviewer(input: RunSolutionReviewerInput): Promise<SolutionReviewerRunResult> {
+  const problemPackage = validateProblemPackage(input.problemPackage);
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+  let assignedSkills: DeliveredParticipantSkill[];
+  try {
+    assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
+  } catch (error) {
+    return skillDeliveryFailure(input, problemPackageSha256, error);
+  }
+  return runSolutionReviewerWithPrompt(
+    input,
+    problemPackage,
+    problemPackageSha256,
+    assignedSkills,
+    buildSolutionReviewerPrompt(problemPackage, input.solutionWork, assignedSkills),
+  );
+}
+
+export async function runSolutionReReviewer(
+  input: RunSolutionReReviewerInput,
+): Promise<SolutionReviewerRunResult> {
+  const problemPackage = validateProblemPackage(input.problemPackage);
+  const originalSolutionWork = validateSolutionWork(input.originalSolutionWork);
+  const originalReview = validateSolutionReview(input.originalReview);
+  const revisedSolutionWork = validateSolutionWork(input.solutionWork);
+  if (
+    originalSolutionWork.problemId !== problemPackage.problemId
+    || originalReview.problemId !== problemPackage.problemId
+    || revisedSolutionWork.problemId !== problemPackage.problemId
+  ) {
+    throw new Error('re-review source problemId does not match ProblemPackage');
+  }
+  const problemPackageSha256 = sha256Hex(await readFile(input.problemPackagePath));
+  let assignedSkills: DeliveredParticipantSkill[];
+  try {
+    assignedSkills = await loadParticipantSkills(input.workspaceRoot, input.skillAssignments);
+  } catch (error) {
+    return skillDeliveryFailure(input, problemPackageSha256, error);
+  }
+  return runSolutionReviewerWithPrompt(
+    input,
+    problemPackage,
+    problemPackageSha256,
+    assignedSkills,
+    buildSolutionReReviewerPrompt(
+      problemPackage,
+      originalSolutionWork,
+      originalReview,
+      revisedSolutionWork,
+      assignedSkills,
+    ),
+  );
 }

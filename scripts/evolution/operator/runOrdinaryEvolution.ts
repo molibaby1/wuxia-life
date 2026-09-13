@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { randomInt } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, writeFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
@@ -21,6 +21,11 @@ import {
 import { archiveOperationalRunReport } from '../reporting/archiveOperationalRunReport';
 import { buildHumanFollowupInbox } from '../humanFollowup/buildHumanFollowupInbox';
 import { buildOperationalObservabilityIndex } from '../reporting/buildOperationalObservabilityIndex';
+import {
+  type DurableEvidenceCapsuleManifest,
+} from '../evidence/durableEvidenceCapsule';
+import { buildDurableEvidenceIndex } from '../evidence/durableEvidenceIndex';
+import { retainOrdinaryEvidenceCapsule } from '../evidence/retainOrdinaryEvidence';
 import { allocateOrdinarySessionId } from './allocateSessionId';
 import {
   OPERATOR_BINDING_CODEX_CURRENT,
@@ -47,6 +52,7 @@ export interface OperatorGitPreflight {
   headSha: string;
   statusShort: string;
   clean: boolean;
+  workingTreeFingerprint?: string;
 }
 
 export interface OperatorAeWorkflowResult {
@@ -74,7 +80,22 @@ export interface RunOrdinaryEvolutionDependencies {
     sourceRoot: string;
     binding: ResolvedOperatorParticipantBinding;
   }) => Promise<OperatorAeWorkflowResult>;
-  archiveReport?: (input: { repositoryRoot: string; root: string }) => Promise<{
+  archiveCapsule?: (input: {
+    repositoryRoot: string;
+    sessionRoot: string;
+    experimentRoot: string;
+    sessionId: string;
+    sourceRunRefs: string[];
+    git: OperatorGitPreflight;
+    sessionExecution: MultiRoundSessionSummary;
+  }) => Promise<{ capsuleRoot: string; manifest: DurableEvidenceCapsuleManifest; reused: boolean }>;
+  rebuildDurableEvidenceIndex?: typeof buildDurableEvidenceIndex;
+  archiveReport?: (input: {
+    repositoryRoot: string;
+    root: string;
+    durableEvidenceCapsulePath?: string | null;
+    durableEvidenceStatus?: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
+  }) => Promise<{
     reportId: string;
     reportDirectory: string;
   }>;
@@ -112,18 +133,32 @@ export interface OrdinaryEvolutionOperatorResult {
   observabilityError: string | null;
   sessionRoot: string;
   experimentRoot: string | null;
+  durableEvidenceCapsulePath: string | null;
+  durableEvidenceStatus: 'PASS' | 'FAILED' | 'NOT_ATTEMPTED';
+  durableEvidenceError: string | null;
 }
 
 function toRepoRelative(repositoryRoot: string, absolutePath: string): string {
   return relative(repositoryRoot, absolutePath).split(sep).join('/');
 }
 
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await lstat(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
 export async function captureOperatorGitPreflight(repositoryRoot: string): Promise<OperatorGitPreflight> {
   const root = resolve(repositoryRoot);
-  const [branchResult, headResult, statusResult] = await Promise.all([
+  const [branchResult, headResult, statusResult, workingTreeFingerprint] = await Promise.all([
     execFileAsync('git', ['branch', '--show-current'], { cwd: root }),
     execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: root }),
     execFileAsync('git', ['status', '--short'], { cwd: root }),
+    captureAuthoritativeFingerprint(root),
   ]);
   const branch = branchResult.stdout.trim();
   const headSha = headResult.stdout.trim();
@@ -133,6 +168,7 @@ export async function captureOperatorGitPreflight(repositoryRoot: string): Promi
     headSha,
     statusShort,
     clean: statusShort.length === 0,
+    workingTreeFingerprint,
   };
 }
 
@@ -295,6 +331,12 @@ export function formatOrdinaryEvolutionOperatorSummary(
     '',
     '可观测性：',
     result.observabilityStatus,
+    '',
+    'Durable Evidence Capsule：',
+    result.durableEvidenceCapsulePath ?? '（不可用）',
+    '',
+    'Durable Evidence 状态：',
+    result.durableEvidenceStatus,
   ];
   if (session.schemaVersion === 'multi-round-session-summary-v2') {
     const lastRound = session.rounds.at(-1);
@@ -309,7 +351,7 @@ export function formatOrdinaryEvolutionOperatorSummary(
   }
   if (result.observabilityError) {
     lines.push('', '可观测性错误：', result.observabilityError);
-    lines.push('下一步：工程调查者修复失败的旁路步骤；在原 session 上使用 evolution:observability:archive -- --root <原 session root>、evolution:human-followup:inbox 或 evolution:observability:index 重建对应产物。', '恢复条件：旁路生成成功；保留原 session outcome，不重跑游戏或 AE。');
+    lines.push('下一步：工程调查者修复失败的旁路步骤；Durable Evidence 可在原 session 上使用 npm run evolution:evidence:repair -- --root <原 session root> 重建，报告使用 evolution:observability:archive -- --root <原 session root>，再按需运行 evolution:human-followup:inbox 或 evolution:observability:index。', '恢复条件：旁路生成成功；保留原 session outcome，不重跑游戏或 AE。');
   }
   return `${lines.join('\n')}\n`;
 }
@@ -351,6 +393,61 @@ export async function runOrdinaryEvolution(
     binding,
   });
 
+  let durableEvidenceCapsulePath: string | null = null;
+  let durableEvidenceStatus: OrdinaryEvolutionOperatorResult['durableEvidenceStatus'] = 'NOT_ATTEMPTED';
+  let durableEvidenceError: string | null = null;
+  const sourceRunRef = phase0.sourceRunRef;
+  const additionalSourceRunRefs = [
+    ...(ae.sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
+      ? ae.sessionExecution.rounds.map(round => round.sourceRunRef)
+      : []),
+    ...(ae.sessionExecution.execution.resultingRunRef === null
+      ? []
+      : [ae.sessionExecution.execution.resultingRunRef]),
+  ].filter(ref => ref !== sourceRunRef);
+  const sourceRunRefs = [
+    sourceRunRef,
+    ...new Set(additionalSourceRunRefs),
+  ].sort((left, right) => left === sourceRunRef ? -1 : right === sourceRunRef ? 1 : left.localeCompare(right));
+  const archiveCapsule = dependencies.archiveCapsule ?? (async archiveInput => {
+    return retainOrdinaryEvidenceCapsule({
+      repositoryRoot: archiveInput.repositoryRoot,
+      sessionRoot: archiveInput.sessionRoot,
+      experimentRoot: archiveInput.experimentRoot,
+      sessionId: archiveInput.sessionId,
+      sourceRunRef,
+      sourceRunRefs: archiveInput.sourceRunRefs,
+      repositoryIdentity: {
+        branch: archiveInput.git.branch,
+        headSha: archiveInput.git.headSha,
+        workingTreeClean: archiveInput.git.clean,
+        ...(archiveInput.git.workingTreeFingerprint === undefined
+          ? {}
+          : { workingTreeFingerprint: archiveInput.git.workingTreeFingerprint }),
+      },
+      sessionExecution: archiveInput.sessionExecution,
+    });
+  });
+  const sessionEvidenceRoot = join(sessionRoot, 'game-runs');
+  try {
+    if (await pathExists(sessionEvidenceRoot) && await pathExists(ae.experimentRoot)) {
+      const capsule = await archiveCapsule({
+        repositoryRoot,
+        sessionRoot,
+        experimentRoot: ae.experimentRoot,
+        sessionId,
+        sourceRunRefs,
+        git,
+        sessionExecution: ae.sessionExecution,
+      });
+      durableEvidenceCapsulePath = toRepoRelative(repositoryRoot, capsule.capsuleRoot);
+      durableEvidenceStatus = 'PASS';
+    }
+  } catch (error) {
+    durableEvidenceStatus = 'FAILED';
+    durableEvidenceError = error instanceof Error ? error.message : String(error);
+  }
+
   let observabilityStatus: ObservabilityStatus = 'PASS';
   let observabilityError: string | null = null;
   let runReportId: string | null = null;
@@ -359,8 +456,18 @@ export async function runOrdinaryEvolution(
   let operationalIndexPath: string | null = null;
 
   try {
-    const archived = await (dependencies.archiveReport ?? (async ({ repositoryRoot: root, root: archiveRoot }) => {
-      const result = await archiveOperationalRunReport({ repositoryRoot: root, root: archiveRoot });
+    const archived = await (dependencies.archiveReport ?? (async ({
+      repositoryRoot: root,
+      root: archiveRoot,
+      durableEvidenceCapsulePath: capsulePath,
+      durableEvidenceStatus: capsuleStatus,
+    }) => {
+      const result = await archiveOperationalRunReport({
+        repositoryRoot: root,
+        root: archiveRoot,
+        durableEvidenceCapsulePath: capsulePath,
+        durableEvidenceStatus: capsuleStatus,
+      });
       return {
         reportId: result.reportId,
         reportDirectory: result.reportDirectory,
@@ -368,23 +475,58 @@ export async function runOrdinaryEvolution(
     }))({
       repositoryRoot,
       root: toRepoRelative(repositoryRoot, sessionRoot),
+      durableEvidenceCapsulePath,
+      durableEvidenceStatus,
     });
     runReportId = archived.reportId;
     runReportPath = toRepoRelative(repositoryRoot, archived.reportDirectory);
+  } catch (error) {
+    observabilityError = error instanceof Error ? `Operational Report: ${error.message}` : `Operational Report: ${String(error)}`;
+  }
 
+  try {
     const inbox = await (dependencies.refreshHumanFollowupInbox ?? defaultRefreshHumanFollowupInbox)({
       repositoryRoot,
     });
     humanFollowupActiveCount = inbox.activeCount;
+  } catch (error) {
+    observabilityError = [
+      observabilityError,
+      error instanceof Error ? `Human Follow-up Inbox: ${error.message}` : `Human Follow-up Inbox: ${String(error)}`,
+    ].filter((value): value is string => value !== null).join('\n');
+  }
 
+  try {
     const indexes = await (dependencies.refreshOperationalIndex ?? (async ({ repositoryRoot: root }) => {
       const result = await buildOperationalObservabilityIndex({ repositoryRoot: root });
       return { topLevelIndexPath: result.topLevelIndexPath };
     }))({ repositoryRoot });
     operationalIndexPath = toRepoRelative(repositoryRoot, indexes.topLevelIndexPath);
   } catch (error) {
+    observabilityError = [
+      observabilityError,
+      error instanceof Error ? `Operational Index: ${error.message}` : `Operational Index: ${String(error)}`,
+    ].filter((value): value is string => value !== null).join('\n');
+  }
+
+  if (durableEvidenceStatus === 'PASS') {
+    try {
+      await (dependencies.rebuildDurableEvidenceIndex ?? buildDurableEvidenceIndex)({ repositoryRoot });
+    } catch (error) {
+      const durableEvidenceIndexError = error instanceof Error ? error.message : String(error);
+      observabilityError = [
+        observabilityError,
+        `Durable Evidence Index: ${durableEvidenceIndexError}`,
+      ].filter((value): value is string => value !== null).join('\n');
+    }
+  }
+
+  if (durableEvidenceStatus === 'FAILED' || observabilityError !== null) {
     observabilityStatus = 'OBSERVABILITY_REFRESH_FAILED';
-    observabilityError = error instanceof Error ? error.message : String(error);
+    observabilityError = [
+      durableEvidenceError === null ? null : `Durable Evidence Capsule: ${durableEvidenceError}`,
+      observabilityError,
+    ].filter((value): value is string => value !== null).join('\n');
   }
 
   const result: OrdinaryEvolutionOperatorResult = {
@@ -404,6 +546,9 @@ export async function runOrdinaryEvolution(
     observabilityError,
     sessionRoot: toRepoRelative(repositoryRoot, sessionRoot),
     experimentRoot: toRepoRelative(repositoryRoot, ae.experimentRoot),
+    durableEvidenceCapsulePath,
+    durableEvidenceStatus,
+    durableEvidenceError,
   };
 
   await writeFile(

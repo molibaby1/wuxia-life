@@ -23,6 +23,7 @@ import {
   type ParticipantSkillAssignment,
   type DeliveredParticipantSkill,
 } from './solutionParticipantSkills';
+import { persistParticipantPromptAndBinding } from '../participantObservability';
 
 export interface RunSolutionReviewerInput {
   problemPackage: ProblemPackage;
@@ -203,6 +204,11 @@ async function runSolutionReviewerWithPrompt(
   } as const;
 
   const deliveredSkills = assignedSkills.map(({ content: _content, ...provenance }) => provenance);
+  await persistParticipantPromptAndBinding({
+    destinationRoot: input.destinationRoot,
+    prompt,
+    participant: input.participant,
+  });
   const job = await runWorkspaceAgentJob(
     {
       invocationRef: input.invocationRef,
@@ -226,6 +232,11 @@ async function runSolutionReviewerWithPrompt(
     return { ok: false, errorKind: job.errorKind, message: job.message, invocationPath, rawOutputPath, failurePath };
   }
 
+  try {
+    await writeCreateOnly(join(input.destinationRoot, 'stderr.txt'), job.stderr);
+  } catch {
+    // Available stderr is forensic sidecar evidence; preserve the semantic review result.
+  }
   let review: SolutionReviewV1;
   try {
     review = parseSolutionReview(job.rawOutput.trim());

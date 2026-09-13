@@ -564,12 +564,13 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
         archiveReport: async () => {
           throw new Error('archive exploded');
         },
-        refreshHumanFollowupInbox: async () => {
-          throw new Error('inbox must not run after archive failure');
-        },
-        refreshOperationalIndex: async () => {
-          throw new Error('index must not run after archive failure');
-        },
+        refreshHumanFollowupInbox: async () => ({
+          inboxPath: join(repositoryRoot, 'artifacts/evolution/human-follow-up/index.md'),
+          activeCount: 0,
+        }),
+        refreshOperationalIndex: async () => ({
+          topLevelIndexPath: join(repositoryRoot, 'artifacts/evolution/index.md'),
+        }),
       },
     });
     assert.equal(workflowCalls, 1);
@@ -582,8 +583,75 @@ export async function runOrdinaryEvolutionOperatorTests(): Promise<void> {
     );
     assert.match(
       formatOrdinaryEvolutionOperatorSummary(result),
-      /可观测性错误：\narchive exploded/,
+      /可观测性错误：\nOperational Report: archive exploded/,
     );
+  }
+
+  {
+    const repositoryRoot = await createRepo();
+    const sessionId = 'ordinary-run-20260913-000001';
+    await mkdir(join(repositoryRoot, '.tmp/evolution', sessionId, 'game-runs'), { recursive: true });
+    const experimentRoot = join(repositoryRoot, '.tmp/evolution', sessionId, 'experiment');
+    await mkdir(experimentRoot, { recursive: true });
+    const summary = sessionSummary({ multiRoundRunRef: sessionId });
+    let archiveReportSawFailure = false;
+    const result = await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        preflightGit: async () => ({ branch: 'dev', headSha: 'f'.repeat(40), statusShort: '', clean: true }),
+        resolveBinding: async () => fakeBinding(),
+        allocateSessionId: async () => sessionId,
+        runPhase0Source: async () => ({ sourceRoot: join(repositoryRoot, 'source'), sourceRunRef: sessionId }),
+        runAeWorkflow: async () => aeResult({ sessionExecution: summary, experimentRoot }),
+        archiveCapsule: async () => { throw new Error('hash write failure'); },
+        archiveReport: async input => {
+          archiveReportSawFailure = input.durableEvidenceStatus === 'FAILED';
+          return { reportId: 'ae-report-retention-failure', reportDirectory: join(repositoryRoot, 'artifacts/evolution/run-reports/ae-report-retention-failure') };
+        },
+        refreshHumanFollowupInbox: async () => ({ inboxPath: 'artifacts/evolution/human-follow-up/index.md', activeCount: 0 }),
+        refreshOperationalIndex: async () => ({ topLevelIndexPath: 'artifacts/evolution/index.md' }),
+      },
+    });
+    assert.equal(result.sessionExecution, summary);
+    assert.equal(result.durableEvidenceStatus, 'FAILED');
+    assert.equal(result.durableEvidenceError, 'hash write failure');
+    assert.equal(archiveReportSawFailure, true);
+    assert.equal(result.observabilityStatus, 'OBSERVABILITY_REFRESH_FAILED');
+  }
+
+  {
+    const repositoryRoot = await createRepo();
+    const sessionId = 'ordinary-run-20260913-000002';
+    const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
+    const experimentRoot = join(sessionRoot, 'experiment');
+    await mkdir(join(sessionRoot, 'game-runs'), { recursive: true });
+    await mkdir(experimentRoot, { recursive: true });
+    let firstSourceRunRef: string | undefined;
+    const result = await runOrdinaryEvolution({
+      repositoryRoot,
+      dependencies: {
+        preflightGit: async () => ({ branch: 'dev', headSha: 'a'.repeat(40), statusShort: '', clean: true }),
+        resolveBinding: async () => fakeBinding(),
+        allocateSessionId: async () => sessionId,
+        runPhase0Source: async () => ({ sourceRoot: join(repositoryRoot, 'source'), sourceRunRef: 'z-initial-run' }),
+        runAeWorkflow: async () => aeResult({
+          sessionExecution: sessionSummary({
+            multiRoundRunRef: sessionId,
+            execution: { resultingRunRef: 'a-resulting-run' },
+          }),
+          experimentRoot,
+        }),
+        archiveCapsule: async input => {
+          firstSourceRunRef = input.sourceRunRefs[0];
+          throw new Error('stop after source ref capture');
+        },
+        archiveReport: async () => ({ reportId: 'source-ref-report', reportDirectory: join(repositoryRoot, 'report') }),
+        refreshHumanFollowupInbox: async () => ({ inboxPath: join(repositoryRoot, 'inbox'), activeCount: 0 }),
+        refreshOperationalIndex: async () => ({ topLevelIndexPath: join(repositoryRoot, 'index') }),
+      },
+    });
+    assert.equal(firstSourceRunRef, 'z-initial-run');
+    assert.equal(result.durableEvidenceStatus, 'FAILED');
   }
 
   {

@@ -1,10 +1,12 @@
 import { mkdir, open } from 'node:fs/promises';
 import { sha256Hex, canonicalJson } from './phase0/provenance';
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
+  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   runWorkspaceAgentJob,
   type WorkspaceAgentParticipantOptions,
 } from './problemAgnosticSolution/agentParticipant';
+import { persistParticipantPromptAndBinding } from './participantObservability';
 
 export type EvidenceOnlyParticipantRole = 'feedback' | 'hypothesis';
 
@@ -28,11 +30,14 @@ export interface RunLocalEvidenceOnlyParticipantInput {
   participant: WorkspaceAgentParticipantOptions;
   /** Sidecar observability only; forwarded to runWorkspaceAgentJob when present. */
   traceArtifactPath?: string;
+  /** When present, writes the shared prompt/binding/trace observability envelope. */
+  observabilityRoot?: string;
 }
 
 export interface LocalEvidenceOnlyParticipantSuccess {
   ok: true;
   rawParticipantResponse: string;
+  stderr: string;
 }
 
 export interface LocalEvidenceOnlyParticipantFailure {
@@ -98,14 +103,26 @@ export async function createEvidenceOnlyWorkspace(
 export async function runLocalEvidenceOnlyParticipant(
   input: RunLocalEvidenceOnlyParticipantInput,
 ): Promise<LocalEvidenceOnlyParticipantResult> {
+  const traceArtifactPath = input.traceArtifactPath
+    ?? (input.observabilityRoot === undefined
+      ? undefined
+      : join(resolve(input.observabilityRoot), 'participant-execution-trace.json'));
+  if (input.observabilityRoot !== undefined) {
+    const observabilityRoot = resolve(input.observabilityRoot);
+    await persistParticipantPromptAndBinding({
+      destinationRoot: observabilityRoot,
+      prompt: input.prompt,
+      participant: input.participant,
+    });
+  }
   const result = await runWorkspaceAgentJob(
     {
       invocationRef: input.invocationRef,
       role: input.role,
       workspaceRoot: resolve(input.workspaceRoot),
       prompt: input.prompt,
-      ...(input.traceArtifactPath !== undefined
-        ? { traceArtifactPath: input.traceArtifactPath }
+      ...(traceArtifactPath !== undefined
+        ? { traceArtifactPath }
         : {}),
     },
     input.participant,
@@ -118,5 +135,5 @@ export async function runLocalEvidenceOnlyParticipant(
       ...(result.rawOutput !== undefined ? { rawProviderResponse: result.rawOutput } : {}),
     };
   }
-  return { ok: true, rawParticipantResponse: result.rawOutput };
+  return { ok: true, rawParticipantResponse: result.rawOutput, stderr: result.stderr };
 }

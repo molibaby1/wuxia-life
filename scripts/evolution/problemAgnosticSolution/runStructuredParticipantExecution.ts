@@ -20,6 +20,7 @@ import {
   type EnvelopeRetransmissionOutcome,
   renderEnvelopeRetransmissionRequestV1,
 } from './envelopeRetransmission';
+import { persistParticipantPromptAndBinding } from '../participantObservability';
 
 export type StructuredParticipantExecutionResult<T> =
   | {
@@ -185,6 +186,11 @@ export async function runStructuredParticipantExecution<T>(input: {
   validateSchema: (value: Record<string, unknown>) => T;
   validateAcceptedResult: (value: T) => Promise<void>;
 }): Promise<StructuredParticipantExecutionResult<T>> {
+  await persistParticipantPromptAndBinding({
+    destinationRoot: input.destinationRoot,
+    prompt: input.initialPrompt,
+    participant: input.participant,
+  });
   const aggregateStartedWallClockMs = Date.now();
   const aggregateStartedMonotonic = performance.now();
   const timeoutMs = input.participant.timeoutMs ?? DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS;

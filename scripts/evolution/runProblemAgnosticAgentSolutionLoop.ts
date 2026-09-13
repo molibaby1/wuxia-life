@@ -36,7 +36,7 @@ import {
   buildBoundedCausalAttribution,
   CAUSAL_ATTRIBUTION_RELATIVE_PATH,
 } from './causalAttribution/buildBoundedCausalAttribution';
-import { assertRepoReferenceFile } from './problemAgnosticSolution/repoReference';
+import { assertRepoReferenceFile, parseRepoReference } from './problemAgnosticSolution/repoReference';
 import {
   runSolutionAgent,
   type RunSolutionAgentInput,
@@ -61,6 +61,7 @@ import type { ProblemPackage } from '../../src/evolution/problemPackageContract'
 import {
   REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
   SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+  type ParticipantSkillAssignment,
 } from './problemAgnosticSolution/solutionParticipantSkills';
 
 export const DEFAULT_EXPERIMENT_ROOT = '.tmp/evolution/problem-agnostic-agent-solution-loop';
@@ -240,6 +241,69 @@ async function copySealedPhase0Source(
   await cp(sourceRoot, destination, { recursive: true, force: false, errorOnExist: true });
 }
 
+interface ProvenanceSnapshotResult {
+  status: 'PASS' | 'FAILED';
+  errors: string[];
+}
+
+async function captureDeclaredProvenanceSnapshots(input: {
+  repositoryRoot: string;
+  experimentRoot: string;
+  authorityRefs: string[];
+  skillAssignments: readonly ParticipantSkillAssignment[];
+}): Promise<ProvenanceSnapshotResult> {
+  const errors: string[] = [];
+  const authorityEntries: Array<{ ref: string; path: string; sha256: string }> = [];
+  for (const ref of [...new Set(input.authorityRefs)].sort()) {
+    const path = parseRepoReference(ref).path;
+    const source = resolve(input.repositoryRoot, path);
+    const bytes = await readFile(source);
+    const destination = join(input.experimentRoot, 'authority-snapshots', path);
+    try {
+      await mkdir(resolve(destination, '..'), { recursive: true });
+      await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
+      authorityEntries.push({ ref, path, sha256: sha256Hex(bytes) });
+    } catch (error) {
+      errors.push(`authority snapshot ${ref}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  try {
+    await writeCreateOnly(join(input.experimentRoot, 'authority-snapshots', 'manifest.json'), {
+      schemaVersion: 'authority-snapshot-manifest-v1',
+      entries: authorityEntries,
+    });
+  } catch (error) {
+    errors.push(`authority snapshot manifest: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const skillEntries: Array<{ identity: string; version: string; canonicalPath: string; sha256: string }> = [];
+  for (const assignment of [...input.skillAssignments].sort((left, right) => left.canonicalPath.localeCompare(right.canonicalPath))) {
+    const source = resolve(input.repositoryRoot, assignment.canonicalPath);
+    const bytes = await readFile(source);
+    const destination = join(input.experimentRoot, 'skill-snapshots', assignment.canonicalPath);
+    try {
+      await mkdir(resolve(destination, '..'), { recursive: true });
+      await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
+      skillEntries.push({
+        identity: assignment.identity,
+        version: assignment.version,
+        canonicalPath: assignment.canonicalPath,
+        sha256: sha256Hex(bytes),
+      });
+    } catch (error) {
+      errors.push(`skill snapshot ${assignment.canonicalPath}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  try {
+    await writeCreateOnly(join(input.experimentRoot, 'skill-snapshots', 'manifest.json'), {
+      schemaVersion: 'skill-snapshot-manifest-v1',
+      entries: skillEntries,
+    });
+  } catch (error) {
+    errors.push(`skill snapshot manifest: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  return { status: errors.length === 0 ? 'PASS' : 'FAILED', errors };
+}
+
 function selectedOptionScope(
   solution: SolutionAgentRunResult,
   reviewer: SolutionReviewerRunResult,
@@ -410,6 +474,17 @@ export async function runProblemAgnosticAgentSolutionLoop(
       throw new Error(`invalid authorityRef: ${authorityRef}: ${message}`);
     }
   }
+  if (dependencies.runSolutionAgent === undefined) {
+    await captureDeclaredProvenanceSnapshots({
+      repositoryRoot,
+      experimentRoot,
+      authorityRefs,
+      skillAssignments: [
+        ...SOLUTION_PARTICIPANT_SKILL_ASSIGNMENTS,
+        ...REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      ],
+    });
+  }
   const authoritativeFingerprint = await captureAuthoritativeFingerprint(repositoryRoot);
   const causalAttributionPath = join(experimentRoot, CAUSAL_ATTRIBUTION_RELATIVE_PATH);
   await buildBoundedCausalAttribution({
@@ -482,6 +557,14 @@ export async function runProblemAgnosticAgentSolutionLoop(
   let reviewer: SolutionReviewerRunResult | null = null;
   let reviewerWorkspace: PreparedAgentWorkspace | null = null;
   if (solution.result.status === 'OPTIONS') {
+    if (dependencies.runSolutionAgent !== undefined && dependencies.runSolutionReviewer === undefined) {
+      await captureDeclaredProvenanceSnapshots({
+        repositoryRoot,
+        experimentRoot,
+        authorityRefs,
+        skillAssignments: REVIEWER_PARTICIPANT_SKILL_ASSIGNMENTS,
+      });
+    }
     reviewerWorkspace = await prepareAgentWorkspace({
       authoritativeRoot: repositoryRoot,
       destinationRoot: workspacesRoot,

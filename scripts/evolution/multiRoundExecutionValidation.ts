@@ -73,6 +73,10 @@ import {
   type WorkspaceStateProvenanceV1,
   type WorkspaceStateCapture,
 } from './workspaceStateProvenance';
+import {
+  captureConfigurationAfterEvidence,
+  captureConfigurationBeforeEvidence,
+} from './evidence/configurationEvidence';
 
 export type {
   MultiRoundRunManifestV1,
@@ -154,6 +158,8 @@ export interface MultiRoundExecutionValidationDependencies {
   }) => Promise<Phase0RerunResult>;
   validateSealedSource?: (result: Phase0RerunResult) => Promise<void>;
   captureWorkspaceState?: (workspaceRoot: string) => Promise<WorkspaceStateCapture>;
+  captureConfigurationBeforeEvidence?: typeof captureConfigurationBeforeEvidence;
+  captureConfigurationAfterEvidence?: typeof captureConfigurationAfterEvidence;
   runReviewContinuation?: (input: RunReviewContinuationInput) => Promise<ReviewContinuationResult>;
 }
 
@@ -817,6 +823,15 @@ export async function runMultiRoundExecutionValidation(
           addProvenanceWarning(workspaceStateProvenance, 'EXECUTION_BEFORE_CAPTURE_UNAVAILABLE');
         }
         const before = await snapshotWorkspace(evolutionWorkspace.workspaceRoot);
+        try {
+          await (dependencies.captureConfigurationBeforeEvidence ?? captureConfigurationBeforeEvidence)({
+            workspaceRoot: evolutionWorkspace.workspaceRoot,
+            destinationRoot: executionInput.destinationRoot,
+            allowedWritePaths,
+          });
+        } catch {
+          // Configuration evidence is an observability side effect; preserve semantic execution.
+        }
         let executionResult: ConfigurationExecutionParticipantResult;
         try {
           executionResult = await (dependencies.executeConfiguration ?? defaultExecuteConfiguration)(executionInput);
@@ -841,6 +856,15 @@ export async function runMultiRoundExecutionValidation(
           addProvenanceWarning(workspaceStateProvenance, 'EXECUTION_AFTER_CAPTURE_UNAVAILABLE');
         }
         const scope: ScopeVerificationResult = verifyActualChangedFiles(before, after, allowedWritePaths);
+        try {
+          await (dependencies.captureConfigurationAfterEvidence ?? captureConfigurationAfterEvidence)({
+            workspaceRoot: evolutionWorkspace.workspaceRoot,
+            destinationRoot: executionInput.destinationRoot,
+            actualChangedFiles: scope.actualChangedFiles,
+          });
+        } catch {
+          // Configuration evidence is an observability side effect; preserve semantic execution.
+        }
         execution.allowedWritePaths = allowedWritePaths;
         execution.actualChangedFiles = scope.actualChangedFiles;
         for (const warning of workspaceStateConsistencyWarnings({

@@ -9,6 +9,7 @@ import {
   runWorkspaceAgentJob,
   type WorkspaceAgentParticipantOptions,
 } from './problemAgnosticSolution/agentParticipant';
+import { persistParticipantPromptAndBinding } from './participantObservability';
 
 export interface ConfigurationExecutionInput {
   invocationRef: string;
@@ -136,14 +137,22 @@ export async function runConfigurationExecutionParticipant(
     problemPackageSha256,
     acceptedOptionId: input.acceptedOptionId,
     allowedWritePaths: input.allowedWritePaths,
+    authorityRefs: [...input.authorityRefs],
   } as const;
+  const prompt = buildConfigurationExecutionPrompt(input);
+  await persistParticipantPromptAndBinding({
+    destinationRoot: input.destinationRoot,
+    prompt,
+    participant: input.participant,
+  });
 
   const job = await runWorkspaceAgentJob(
     {
       invocationRef: input.invocationRef,
       role: 'configuration-execution',
       workspaceRoot: input.workspaceRoot,
-      prompt: buildConfigurationExecutionPrompt(input),
+      prompt,
+      traceArtifactPath: join(input.destinationRoot, 'execution-trace.json'),
     },
     input.participant,
   );
@@ -172,6 +181,11 @@ export async function runConfigurationExecutionParticipant(
   try {
     const parsed = parseParticipantResult(job.rawOutput.trim());
     await writeCreateOnly(rawOutputPath, job.rawOutput);
+    try {
+      await writeCreateOnly(join(input.destinationRoot, 'stderr.txt'), job.stderr);
+    } catch {
+      // Available stderr is forensic sidecar evidence; preserve the semantic execution result.
+    }
     await writeCreateOnly(invocationPath, { ...commonInvocation, status: parsed.status });
     await writeCreateOnly(resultPath, parsed);
     return { ...parsed, invocationPath, rawOutputPath, resultPath, failurePath: null };

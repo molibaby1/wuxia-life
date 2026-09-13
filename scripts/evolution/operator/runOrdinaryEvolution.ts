@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { randomInt } from 'node:crypto';
-import { lstat, mkdir, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';

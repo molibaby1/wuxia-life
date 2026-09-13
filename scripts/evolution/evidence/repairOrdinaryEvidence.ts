@@ -61,6 +61,10 @@ export async function repairOrdinaryEvidence(input: {
 }): Promise<RepairOrdinaryEvidenceResult> {
   const repositoryRoot = resolve(input.repositoryRoot);
   const sessionRoot = resolve(input.sessionRoot);
+  const sessionEscape = relative(repositoryRoot, sessionRoot);
+  if (!sessionEscape || sessionEscape === '..' || sessionEscape.startsWith(`..${sep}`) || isAbsolute(sessionEscape)) {
+    throw new Error('sessionRoot escapes repository root');
+  }
   const sessionId = basename(sessionRoot);
   const operatorResult = await readOperatorResult(sessionRoot);
   if (operatorResult.sessionId !== sessionId) throw new Error(`operator-result sessionId does not match session root: ${operatorResult.sessionId} != ${sessionId}`);

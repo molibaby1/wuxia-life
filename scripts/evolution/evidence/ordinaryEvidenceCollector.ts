@@ -123,8 +123,8 @@ function evidenceKindFor(relativePath: string): string {
   if (relativePath.endsWith('execution-trace.json') || relativePath.endsWith('participant-execution-trace.json')) return 'execution_trace';
   if (relativePath.endsWith('raw-output.txt') || relativePath.endsWith('raw-participant-response.txt') || relativePath.endsWith('raw-provider-response.txt')) return 'raw_observable_output';
   if (relativePath.endsWith('failure.json')) return 'participant_failure';
-  if (relativePath.includes('/game-runs/')) return 'sealed_phase0_source';
-  if (relativePath.includes('/configuration-execution/')) return 'configuration_execution';
+  if (/(?:^|\/)game-runs\//.test(relativePath)) return 'sealed_phase0_source';
+  if (/(?:^|\/)configuration-execution\//.test(relativePath)) return 'configuration_execution';
   return 'workflow_artifact';
 }
 
@@ -320,7 +320,8 @@ async function addConfigurationEvidence(input: {
     const manifestPath = join(configurationRoot, `${phase}-manifest.json`);
     if (!await isRegularFile(manifestPath)) continue;
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
-    if (!Array.isArray(manifest.entries)) continue;
+    if (manifest.entries === undefined) continue;
+    if (!Array.isArray(manifest.entries)) throw new Error(`configuration-execution/${phase}-manifest.json must declare entries`);
     for (const [index, rawEntry] of manifest.entries.entries()) {
       if (typeof rawEntry !== 'object' || rawEntry === null || Array.isArray(rawEntry)) {
         throw new Error(`configuration-execution/${phase}-manifest.json.entries[${index}] must be an object`);
@@ -344,6 +345,7 @@ export async function collectOrdinaryEvidence(
   input: CollectOrdinaryEvidenceInput,
 ): Promise<DurableEvidenceObjectInput[]> {
   const evidence: DurableEvidenceObjectInput[] = [];
+  const sessionId = validatePhase0RunRef(input.sessionId);
   const sessionRoot = resolve(input.sessionRoot);
   const experimentRoot = resolve(input.experimentRoot);
   const sourceRunRefs = [...new Set(input.sourceRunRefs.map(validatePhase0RunRef))].sort();
@@ -370,9 +372,9 @@ export async function collectOrdinaryEvidence(
   }
 
   await addFile({
-    sourcePath: join(sessionRoot, 'phase0-anchors', `${input.sessionId}.json`),
+    sourcePath: join(sessionRoot, 'phase0-anchors', `${sessionId}.json`),
     relativePath: `session/phase0-anchor.json`,
-    sourceRef: `phase0-anchors/${input.sessionId}.json`,
+    sourceRef: `phase0-anchors/${sessionId}.json`,
     evidence,
     evidenceKind: 'session_anchor',
   });

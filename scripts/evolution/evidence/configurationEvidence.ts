@@ -1,3 +1,4 @@
+import { constants as fsConstants } from 'node:fs';
 import { copyFile, lstat, mkdir, open, readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { canonicalJson, sha256Hex } from '../phase0/provenance';
@@ -56,7 +57,7 @@ async function captureEntries(input: {
       const sourceStat = await lstat(source);
       if (!sourceStat.isFile()) throw new Error(`configuration evidence target must be a regular file: ${path}`);
       await mkdir(dirname(destination), { recursive: true });
-      await copyFile(source, destination);
+      await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
       const bytes = await readFile(destination);
       entries.push({ path, status: 'present', sha256: sha256Hex(bytes), byteLength: bytes.byteLength });
     } catch (error) {

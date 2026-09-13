@@ -255,9 +255,17 @@ async function captureDeclaredProvenanceSnapshots(input: {
   const errors: string[] = [];
   const authorityEntries: Array<{ ref: string; path: string; sha256: string }> = [];
   for (const ref of [...new Set(input.authorityRefs)].sort()) {
-    const path = parseRepoReference(ref).path;
-    const source = resolve(input.repositoryRoot, path);
-    const bytes = await readFile(source);
+    let path: string;
+    let source: string;
+    let bytes: Uint8Array;
+    try {
+      path = parseRepoReference(ref).path;
+      source = resolve(input.repositoryRoot, path);
+      bytes = await readFile(source);
+    } catch (error) {
+      errors.push(`authority snapshot ${ref}: ${error instanceof Error ? error.message : String(error)}`);
+      continue;
+    }
     const destination = join(input.experimentRoot, 'authority-snapshots', path);
     try {
       await mkdir(resolve(destination, '..'), { recursive: true });
@@ -278,9 +286,9 @@ async function captureDeclaredProvenanceSnapshots(input: {
   const skillEntries: Array<{ identity: string; version: string; canonicalPath: string; sha256: string }> = [];
   for (const assignment of [...input.skillAssignments].sort((left, right) => left.canonicalPath.localeCompare(right.canonicalPath))) {
     const source = resolve(input.repositoryRoot, assignment.canonicalPath);
-    const bytes = await readFile(source);
     const destination = join(input.experimentRoot, 'skill-snapshots', assignment.canonicalPath);
     try {
+      const bytes = await readFile(source);
       await mkdir(resolve(destination, '..'), { recursive: true });
       await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
       skillEntries.push({

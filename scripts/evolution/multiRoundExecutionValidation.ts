@@ -829,8 +829,9 @@ export async function runMultiRoundExecutionValidation(
             destinationRoot: executionInput.destinationRoot,
             allowedWritePaths,
           });
-        } catch {
+        } catch (error) {
           // Configuration evidence is an observability side effect; preserve semantic execution.
+          console.warn(`configuration before-evidence capture failed: ${error instanceof Error ? error.message : String(error)}`);
         }
         let executionResult: ConfigurationExecutionParticipantResult;
         try {
@@ -862,8 +863,9 @@ export async function runMultiRoundExecutionValidation(
             destinationRoot: executionInput.destinationRoot,
             actualChangedFiles: scope.actualChangedFiles,
           });
-        } catch {
+        } catch (error) {
           // Configuration evidence is an observability side effect; preserve semantic execution.
+          console.warn(`configuration after-evidence capture failed: ${error instanceof Error ? error.message : String(error)}`);
         }
         execution.allowedWritePaths = allowedWritePaths;
         execution.actualChangedFiles = scope.actualChangedFiles;

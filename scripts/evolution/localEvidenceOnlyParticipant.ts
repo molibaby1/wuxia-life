@@ -2,7 +2,6 @@ import { mkdir, open } from 'node:fs/promises';
 import { sha256Hex, canonicalJson } from './phase0/provenance';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
-  DEFAULT_WORKSPACE_AGENT_TIMEOUT_MS,
   runWorkspaceAgentJob,
   type WorkspaceAgentParticipantOptions,
 } from './problemAgnosticSolution/agentParticipant';

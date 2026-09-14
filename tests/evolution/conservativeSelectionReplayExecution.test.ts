@@ -24,8 +24,24 @@ export async function runConservativeSelectionReplayExecutionTests(): Promise<vo
   assert.match(prompt, /NO_CLEAR_PREFERENCE/);
   assert.match(prompt, /baseline.*eligible.*KEEP/i);
   assert.match(prompt, /exactly one/i);
+  assert.match(prompt, /schemaVersion/);
+  assert.match(prompt, /ae-conservative-selection-response-v1/);
+  assert.match(prompt, /decision/);
+  assert.match(prompt, /selectedCandidateRef/);
+  assert.match(prompt, /baselineEligibility/);
+  assert.match(prompt, /challengerEligibility/);
+  assert.match(prompt, /decisiveComparison/);
+  assert.match(prompt, /boundednessReason/);
+  assert.match(prompt, /overallReason/);
+  assert.match(prompt, /No extra top-level fields/i);
+  assert.match(prompt, /No extra rationale fields/i);
+  assert.match(prompt, /KEEP_BASELINE[\s\S]*baselineCandidateRef/);
+  assert.match(prompt, /OVERRIDE[\s\S]*challenger[\s\S]*not baseline/i);
+  assert.match(prompt, /NO_CLEAR_PREFERENCE[\s\S]*null/i);
   assert.doesNotMatch(prompt, /historical selected/i);
   assert.doesNotMatch(prompt, /sourceIndex/i);
+  assert.doesNotMatch(prompt, /sourceHypothesisId/i);
+  assert.doesNotMatch(prompt, /historicalSelectedHypothesisId/i);
 
   const userContent = buildConservativeSelectionUserContent({
     schemaVersion: 'ae-conservative-selection-input-v1',

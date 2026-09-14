@@ -4,6 +4,10 @@ import {
   sourceDecisionKey,
   type ConservativeSelectionAnalysisItem,
 } from '../../scripts/evolution/conservativeSelectionReplay/analyzeConservativeSelectionReplay';
+import {
+  determineConservativeSelectionTerminalVerdict,
+  validateConservativeSelectionHumanAuditResponse,
+} from '../../scripts/evolution/conservativeSelectionReplay/finalizeConservativeSelectionReplay';
 import type { ConservativeSelectionInput, ConservativeSelectionMapping, ConservativeSelectionTrustedResult } from '../../scripts/evolution/conservativeSelectionReplay/conservativeSelectionContracts';
 
 const CASES = [
@@ -109,6 +113,57 @@ export async function runConservativeSelectionReplayAnalysisTests(): Promise<voi
   });
   assert.equal(insufficient.machineSummary.technicalSufficiency.pass, false);
   assert.equal(insufficient.machineSummary.technicalSufficiency.reasons.length > 0, true);
+
+  const request = withOverrideBuilt.humanAuditRequest;
+  const auditResponse = {
+    schemaVersion: 'ae-conservative-selection-human-audit-response-v1',
+    items: [{
+      auditId: request.items[0].auditId,
+      verdict: 'SUPPORTED_OVERRIDE',
+      answers: {
+        baselineInvestigationEligible: true,
+        challengerInvestigationEligible: true,
+        materiallySuperiorForSlot: true,
+        superiorityNotBroadMaterialityOnly: true,
+        challengerStillBounded: true,
+        givingUpBaselineJustified: true,
+      },
+      note: '审计支持。',
+    }],
+  };
+  assert.deepEqual(validateConservativeSelectionHumanAuditResponse(auditResponse, request), auditResponse);
+  assert.throws(() => validateConservativeSelectionHumanAuditResponse({
+    ...auditResponse,
+    items: [{ ...auditResponse.items[0], auditId: 'unknown' }],
+  }, request), /unknown auditId/i);
+  assert.throws(() => validateConservativeSelectionHumanAuditResponse({
+    ...auditResponse,
+    items: [{ ...auditResponse.items[0], note: '' }],
+  }, request), /note/i);
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict(summary, [], 'supported', 'Human review note'),
+    'CONSERVATIVE_OVERRIDE_SUPPORTED_ON_DIAGNOSTIC_CORPUS',
+  );
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict({ ...summary, protection000005: { ...summary.protection000005, pass: false } }, [], 'supported', 'Human review note'),
+    'CONSERVATIVE_OVERRIDE_NOT_SUPPORTED',
+  );
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict({ ...summary, permutationGate: { ...summary.permutationGate, pass: false } }, [], 'supported', 'Human review note'),
+    'CONSERVATIVE_OVERRIDE_NOT_SUPPORTED',
+  );
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict(insufficient.machineSummary, [], 'supported', 'Human review note'),
+    'INCONCLUSIVE_TECHNICAL',
+  );
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict(summary, [{ verdict: 'UNSUPPORTED_OVERRIDE' }], 'supported', 'Human review note'),
+    'CONSERVATIVE_OVERRIDE_NOT_SUPPORTED',
+  );
+  assert.equal(
+    determineConservativeSelectionTerminalVerdict(summary, [], 'not-supported', 'Human review note'),
+    'CONSERVATIVE_OVERRIDE_NOT_SUPPORTED',
+  );
 }
 
 runConservativeSelectionReplayAnalysisTests().then(

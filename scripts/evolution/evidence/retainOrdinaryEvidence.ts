@@ -4,6 +4,7 @@ import { collectOrdinaryEvidence } from './ordinaryEvidenceCollector';
 import { buildParticipantInvocationReceiptInputs } from './participantReceipt';
 import { DURABLE_EVIDENCE_ROOT } from './durableEvidenceIndex';
 import {
+  promoteParticipantVisibleEvidence,
   publishDurableEvidenceCapsule,
   type DurableEvidenceCapsulePublishResult,
 } from './durableEvidenceCapsule';
@@ -34,6 +35,7 @@ export async function retainOrdinaryEvidenceCapsule(
     experimentRoot: input.experimentRoot,
     evidence,
   });
+  const receiptAlignedEvidence = promoteParticipantVisibleEvidence(evidence, participantReceipts);
   const configurationExecution = input.sessionExecution.execution.status !== 'not_started';
   const crossRoundTransition = input.sessionExecution.crossRoundTransitions > 0;
   const reviewContinuation = input.sessionExecution.schemaVersion === 'multi-round-session-summary-v2'
@@ -50,7 +52,7 @@ export async function retainOrdinaryEvidenceCapsule(
       workflow: 'ordinary-auto-evolution',
       sessionExecution: input.sessionExecution,
     },
-    evidence,
+    evidence: receiptAlignedEvidence,
     participantReceipts,
     importantEvents: {
       participantFailure,

@@ -46,6 +46,7 @@ async function writeEvidenceFixture(experimentRoot: string, sessionId: string): 
     [`round-1/hypothesis-runs/${sessionId}/participant-binding.json`]: '{"provider":"codex-local-subagent"}\n',
     [`round-1/hypothesis-runs/${sessionId}/participant-execution-trace.json`]: '{"schemaVersion":"participant-execution-trace-v1"}\n',
     [`round-1/hypothesis-runs/${sessionId}/source-feedback.json`]: '{}\n',
+    [`round-1/hypothesis-runs/${sessionId}/source-pattern-evidence.json`]: '{}\n',
     [`round-1/hypothesis-runs/${sessionId}/invocation.json`]: `{"invocationRef":"hypothesis-invocation-000001","status":"completed"}\n`,
     [`round-1/hypothesis-runs/${sessionId}/raw-participant-response.txt`]: 'hypothesis raw\n',
     'round-1/selection/selected-hypothesis.json': '{"hypothesisId":"h-1"}\n',
@@ -63,6 +64,14 @@ async function writeEvidenceFixture(experimentRoot: string, sessionId: string): 
     'round-1/reviewer-agent/execution-trace.json': '{"schemaVersion":"participant-execution-trace-v1"}\n',
     'round-1/reviewer-agent/raw-output.txt': 'reviewer raw\n',
     'round-1/reviewer-agent/review.json': '{"decision":"REJECT"}\n',
+    'problem-package.json': JSON.stringify({
+      source: {
+        observablePayloadRef: 'source/observable-payload.json',
+        externalFeedbackRef: `round-1/feedback-runs/${sessionId}/feedback.json`,
+        improvementHypothesisRef: `round-1/hypothesis-runs/${sessionId}/hypotheses.json`,
+        diagnosticEvidenceRefs: ['round-1/causal-attribution/bounded-causal-attribution.json'],
+      },
+    }) + '\n',
     'round-1/decision.json': '{"route":"SKIP"}\n',
     'round-1/workflow-outcome.json': '{"outcome":"COMPLETED"}\n',
   };
@@ -130,6 +139,21 @@ export async function runDurableEvidenceForensicE2ETests(): Promise<void> {
   );
   assert.equal(manifest.objects.find(object => object.relativePath === `source/${sessionId}/reviewer-input/observable-payload.json`)?.visibility, 'PARTICIPANT_VISIBLE');
   assert.equal(manifest.objects.find(object => object.relativePath === `source/${sessionId}/internal/player-surface-source.json`)?.visibility, 'HUMAN_FORENSIC_ONLY');
+  const objectsByName = new Map(manifest.objects.map(object => [object.logicalName, object] as const));
+  for (const receipt of manifest.participantReceipts) {
+    for (const visibleEvidence of receipt.visibleEvidence) {
+      assert.equal(objectsByName.get(visibleEvidence.logicalName)?.visibility, 'PARTICIPANT_VISIBLE');
+    }
+  }
+  const hypothesisReceipt = manifest.participantReceipts.find(receipt => receipt.role === 'hypothesis');
+  assert.ok(hypothesisReceipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('source-feedback.json')));
+  assert.ok(hypothesisReceipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('source-pattern-evidence.json')));
+  for (const role of ['solution', 'reviewer'] as const) {
+    const receipt = manifest.participantReceipts.find(candidate => candidate.role === role);
+    assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('feedback.json')));
+    assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('hypotheses.json')));
+    assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('bounded-causal-attribution.json')));
+  }
 
   const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
   const reconstructed = join(repositoryRoot, 'forensic-reconstructed-source');

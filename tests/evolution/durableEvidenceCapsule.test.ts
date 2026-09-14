@@ -57,6 +57,7 @@ export async function runDurableEvidenceCapsuleTests(): Promise<void> {
   await testFinalCapsuleIsCreateOnly();
   await testManifestRequiredFieldsFailClosed();
   await testRequiredReceiptRefsFailClosed();
+  await testReceiptVisibilityMismatchFailsClosed();
 }
 
 async function testManifestRequiredFieldsFailClosed(): Promise<void> {
@@ -104,6 +105,36 @@ async function testRequiredReceiptRefsFailClosed(): Promise<void> {
   ((manifest.participantReceipts as Array<Record<string, unknown>>)[0]!).prompt = null;
   await writeFile(manifestPath, JSON.stringify(manifest));
   await assert.rejects(() => verifyDurableEvidenceCapsule(result.capsuleRoot), /prompt.*required|prompt.*object|participantReceipts/i);
+}
+
+async function testReceiptVisibilityMismatchFailsClosed(): Promise<void> {
+  const root = await mkdtemp(join(tmpdir(), 'wuxia-capsule-receipt-visibility-'));
+  const input = await fixtureInput(root);
+  input.participantReceipts = [{
+    invocationRef: 'feedback-invocation-000001',
+    role: 'feedback',
+    round: 1,
+    continuationRef: null,
+    promptLogicalName: 'alpha',
+    bindingLogicalName: 'zeta',
+    invocationLogicalName: 'alpha',
+    rawOutputLogicalName: null,
+    stderrLogicalName: null,
+    executionTraceLogicalName: 'zeta',
+    structuredResultLogicalName: 'alpha',
+    failureLogicalName: null,
+    visibleEvidenceLogicalNames: ['alpha'],
+    skillLogicalNames: [],
+    authorityLogicalNames: [],
+  }];
+  const result = await publishDurableEvidenceCapsule(input);
+  const manifestPath = join(result.capsuleRoot, 'manifest.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
+  const alpha = (manifest.objects as Array<Record<string, unknown>>).find(object => object.logicalName === 'alpha');
+  assert.ok(alpha);
+  alpha.visibility = 'HUMAN_FORENSIC_ONLY';
+  await writeFile(manifestPath, JSON.stringify(manifest));
+  await assert.rejects(() => verifyDurableEvidenceCapsule(result.capsuleRoot), /visibility|PARTICIPANT_VISIBLE/i);
 }
 
 async function testDeterministicManifestAndVerification(): Promise<void> {

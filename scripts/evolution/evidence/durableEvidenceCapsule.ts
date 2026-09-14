@@ -170,9 +170,26 @@ function resolveReceiptRefs(
   logicalNames: string[],
   objectsByName: Map<string, DurableEvidenceObject>,
   label: string,
+  expectedVisibility?: DurableEvidenceVisibility,
 ): DurableEvidenceRefReceipt[] {
   if (!Array.isArray(logicalNames)) throw new Error(`${label} must be an array`);
-  return logicalNames.map((name, index) => resolveReceiptRef(name, objectsByName, `${label}[${index}]`));
+  return logicalNames.map((name, index) => {
+    const resolved = resolveReceiptRef(name, objectsByName, `${label}[${index}]`);
+    if (expectedVisibility !== undefined && objectsByName.get(resolved.logicalName)?.visibility !== expectedVisibility) {
+      throw new Error(`${label}[${index}] must reference ${expectedVisibility}: ${resolved.logicalName}`);
+    }
+    return resolved;
+  });
+}
+
+export function promoteParticipantVisibleEvidence(
+  evidence: DurableEvidenceObjectInput[],
+  participantReceipts: DurableParticipantInvocationReceiptInput[],
+): DurableEvidenceObjectInput[] {
+  const participantVisibleNames = new Set(participantReceipts.flatMap(receipt => receipt.visibleEvidenceLogicalNames));
+  return evidence.map(object => participantVisibleNames.has(object.logicalName)
+    ? { ...object, visibility: 'PARTICIPANT_VISIBLE' }
+    : object);
 }
 
 function resolveParticipantReceipts(
@@ -217,7 +234,7 @@ function resolveParticipantReceipts(
       executionTrace: resolveReceiptRef(receipt.executionTraceLogicalName, objectsByName, `participantReceipts[${index}].executionTrace`),
       structuredResult,
       failure,
-      visibleEvidence: resolveReceiptRefs(receipt.visibleEvidenceLogicalNames, objectsByName, `participantReceipts[${index}].visibleEvidence`),
+      visibleEvidence: resolveReceiptRefs(receipt.visibleEvidenceLogicalNames, objectsByName, `participantReceipts[${index}].visibleEvidence`, 'PARTICIPANT_VISIBLE'),
       skills: resolveReceiptRefs(receipt.skillLogicalNames, objectsByName, `participantReceipts[${index}].skills`),
       authority: resolveReceiptRefs(receipt.authorityLogicalNames, objectsByName, `participantReceipts[${index}].authority`),
     };
@@ -402,11 +419,14 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
       if (object.sha256 !== value.sha256) throw new Error(`${label} hash does not match logical evidence: ${value.logicalName}`);
       return { logicalName: value.logicalName, sha256: value.sha256 };
     };
-    const arrayRefs = (value: unknown, label: string): DurableEvidenceRefReceipt[] => {
+    const arrayRefs = (value: unknown, label: string, expectedVisibility?: DurableEvidenceVisibility): DurableEvidenceRefReceipt[] => {
       if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
       return value.map((entry, entryIndex) => {
         const resolved = ref(entry, `${label}[${entryIndex}]`);
         if (resolved === null) throw new Error(`${label}[${entryIndex}] cannot be null`);
+        if (expectedVisibility !== undefined && objectsByName.get(resolved.logicalName)?.visibility !== expectedVisibility) {
+          throw new Error(`${label}[${entryIndex}] must reference ${expectedVisibility}: ${resolved.logicalName}`);
+        }
         return resolved;
       });
     };
@@ -431,7 +451,7 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
       executionTrace: requiredRef(receipt.executionTrace, `manifest.participantReceipts[${index}].executionTrace`),
       structuredResult,
       failure,
-      visibleEvidence: arrayRefs(receipt.visibleEvidence, `manifest.participantReceipts[${index}].visibleEvidence`),
+      visibleEvidence: arrayRefs(receipt.visibleEvidence, `manifest.participantReceipts[${index}].visibleEvidence`, 'PARTICIPANT_VISIBLE'),
       skills: arrayRefs(receipt.skills, `manifest.participantReceipts[${index}].skills`),
       authority: arrayRefs(receipt.authority, `manifest.participantReceipts[${index}].authority`),
     };

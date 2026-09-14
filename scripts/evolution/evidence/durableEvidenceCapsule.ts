@@ -42,6 +42,8 @@ export interface DurableParticipantInvocationReceiptInput {
   visibleEvidenceLogicalNames: string[];
   skillLogicalNames: string[];
   authorityLogicalNames: string[];
+  authoritySnapshotManifestLogicalName?: string | null;
+  skillSnapshotManifestLogicalName?: string | null;
 }
 
 export interface DurableEvidenceRefReceipt {
@@ -65,6 +67,8 @@ export interface DurableParticipantInvocationReceipt {
   visibleEvidence: DurableEvidenceRefReceipt[];
   skills: DurableEvidenceRefReceipt[];
   authority: DurableEvidenceRefReceipt[];
+  authoritySnapshotManifest: DurableEvidenceRefReceipt | null;
+  skillSnapshotManifest: DurableEvidenceRefReceipt | null;
 }
 
 export interface DurableEvidenceCapsuleInput {
@@ -182,6 +186,20 @@ function resolveReceiptRefs(
   });
 }
 
+function validateSnapshotManifestRound(
+  ref: DurableEvidenceRefReceipt | null,
+  round: 1 | 2,
+  snapshotName: 'authority-snapshots' | 'skill-snapshots',
+  objectsByName: Map<string, DurableEvidenceObject>,
+  label: string,
+): void {
+  if (ref === null) return;
+  const object = objectsByName.get(ref.logicalName);
+  if (object?.sourceRef !== `round-${round}/${snapshotName}/manifest.json`) {
+    throw new Error(`${label} must reference round-${round}/${snapshotName}/manifest.json`);
+  }
+}
+
 export function promoteParticipantVisibleEvidence(
   evidence: DurableEvidenceObjectInput[],
   participantReceipts: DurableParticipantInvocationReceiptInput[],
@@ -221,6 +239,18 @@ function resolveParticipantReceipts(
       ? null
       : resolveReceiptRef(receipt.failureLogicalName, objectsByName, `participantReceipts[${index}].failure`);
     if (structuredResult !== null && failure !== null) throw new Error(`participantReceipts[${index}] cannot reference both structured result and failure`);
+    const authority = resolveReceiptRefs(receipt.authorityLogicalNames, objectsByName, `participantReceipts[${index}].authority`);
+    const skills = resolveReceiptRefs(receipt.skillLogicalNames, objectsByName, `participantReceipts[${index}].skills`);
+    const authoritySnapshotManifest = receipt.authoritySnapshotManifestLogicalName === undefined || receipt.authoritySnapshotManifestLogicalName === null
+      ? null
+      : resolveReceiptRef(receipt.authoritySnapshotManifestLogicalName, objectsByName, `participantReceipts[${index}].authoritySnapshotManifest`);
+    const skillSnapshotManifest = receipt.skillSnapshotManifestLogicalName === undefined || receipt.skillSnapshotManifestLogicalName === null
+      ? null
+      : resolveReceiptRef(receipt.skillSnapshotManifestLogicalName, objectsByName, `participantReceipts[${index}].skillSnapshotManifest`);
+    if (authority.length > 0 && authoritySnapshotManifest === null) throw new Error(`participantReceipts[${index}] is missing authority snapshot provenance`);
+    if (skills.length > 0 && skillSnapshotManifest === null) throw new Error(`participantReceipts[${index}] is missing skill snapshot provenance`);
+    validateSnapshotManifestRound(authoritySnapshotManifest, receipt.round, 'authority-snapshots', objectsByName, `participantReceipts[${index}].authoritySnapshotManifest`);
+    validateSnapshotManifestRound(skillSnapshotManifest, receipt.round, 'skill-snapshots', objectsByName, `participantReceipts[${index}].skillSnapshotManifest`);
     return {
       invocationRef: receipt.invocationRef,
       role: receipt.role,
@@ -235,8 +265,10 @@ function resolveParticipantReceipts(
       structuredResult,
       failure,
       visibleEvidence: resolveReceiptRefs(receipt.visibleEvidenceLogicalNames, objectsByName, `participantReceipts[${index}].visibleEvidence`, 'PARTICIPANT_VISIBLE'),
-      skills: resolveReceiptRefs(receipt.skillLogicalNames, objectsByName, `participantReceipts[${index}].skills`),
-      authority: resolveReceiptRefs(receipt.authorityLogicalNames, objectsByName, `participantReceipts[${index}].authority`),
+      skills,
+      authority,
+      authoritySnapshotManifest,
+      skillSnapshotManifest,
     };
   });
 }
@@ -435,9 +467,18 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
       if (resolved === null) throw new Error(`${label} is required`);
       return resolved;
     };
+    const optionalRef = (value: unknown, label: string): DurableEvidenceRefReceipt | null => value === undefined ? null : ref(value, label);
     const structuredResult = ref(receipt.structuredResult, `manifest.participantReceipts[${index}].structuredResult`);
     const failure = ref(receipt.failure, `manifest.participantReceipts[${index}].failure`);
     if (structuredResult !== null && failure !== null) throw new Error(`manifest.participantReceipts[${index}] cannot reference both structured result and failure`);
+    const authority = arrayRefs(receipt.authority, `manifest.participantReceipts[${index}].authority`);
+    const skills = arrayRefs(receipt.skills, `manifest.participantReceipts[${index}].skills`);
+    const authoritySnapshotManifest = optionalRef(receipt.authoritySnapshotManifest, `manifest.participantReceipts[${index}].authoritySnapshotManifest`);
+    const skillSnapshotManifest = optionalRef(receipt.skillSnapshotManifest, `manifest.participantReceipts[${index}].skillSnapshotManifest`);
+    if (authority.length > 0 && authoritySnapshotManifest === null) throw new Error(`manifest.participantReceipts[${index}] is missing authority snapshot provenance`);
+    if (skills.length > 0 && skillSnapshotManifest === null) throw new Error(`manifest.participantReceipts[${index}] is missing skill snapshot provenance`);
+    validateSnapshotManifestRound(authoritySnapshotManifest, receipt.round, 'authority-snapshots', objectsByName, `manifest.participantReceipts[${index}].authoritySnapshotManifest`);
+    validateSnapshotManifestRound(skillSnapshotManifest, receipt.round, 'skill-snapshots', objectsByName, `manifest.participantReceipts[${index}].skillSnapshotManifest`);
     return {
       invocationRef: receipt.invocationRef,
       role: receipt.role as DurableParticipantRole,
@@ -452,8 +493,10 @@ function parseManifest(value: unknown): DurableEvidenceCapsuleManifest {
       structuredResult,
       failure,
       visibleEvidence: arrayRefs(receipt.visibleEvidence, `manifest.participantReceipts[${index}].visibleEvidence`, 'PARTICIPANT_VISIBLE'),
-      skills: arrayRefs(receipt.skills, `manifest.participantReceipts[${index}].skills`),
-      authority: arrayRefs(receipt.authority, `manifest.participantReceipts[${index}].authority`),
+      skills,
+      authority,
+      authoritySnapshotManifest,
+      skillSnapshotManifest,
     };
   });
   if (new Set(participantReceipts.map(receipt => receipt.invocationRef)).size !== participantReceipts.length) throw new Error('manifest.participantReceipts contains duplicate invocationRef');

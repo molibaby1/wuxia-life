@@ -2,15 +2,85 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { getP8GatePersonas } from '../../src/p8/personas';
 import {
   captureConfigurationAfterEvidence,
   captureConfigurationBeforeEvidence,
 } from '../../scripts/evolution/evidence/configurationEvidence';
 import { publishDurableEvidenceCapsule, verifyDurableEvidenceCapsule } from '../../scripts/evolution/evidence/durableEvidenceCapsule';
+import { retainOrdinaryEvidenceCapsule } from '../../scripts/evolution/evidence/retainOrdinaryEvidence';
+import { runPhase0 } from '../../scripts/evolution/phase0/runPhase0';
+import { buildMultiRoundSessionSummary, parseMultiRoundRunManifest } from '../../scripts/evolution/multiRoundRunManifestContract';
+import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 export async function runConfigurationEvidenceTests(): Promise<void> {
   await testBeforeAndAfterCaptureIsTemporal();
   await testNoOpAndUnauthorizedPathAreRepresented();
+  await testConfigurationRetentionIsFailClosed();
+}
+
+function configurationExecution(sessionId: string) {
+  return buildMultiRoundSessionSummary(parseMultiRoundRunManifest({
+    schemaVersion: 'multi-round-run-manifest-v1',
+    multiRoundRunRef: sessionId,
+    initialSourceRunRef: sessionId,
+    limits: { maxAgentRounds: 2, maxCrossRoundTransitions: 1, maxRoundParticipantJobs: 4, maxExecutionParticipantJobs: 1, maxTotalParticipantJobs: 9, retryCount: 0 },
+    rounds: [{ round: 1, workflowRef: 'round-1', sourceRunRef: sessionId, terminalRoute: 'READY_FOR_CONFIG_EXECUTION', executionRef: 'configuration-execution-000001', resultingRunRef: null, nextAction: 'CONFIGURATION_EXECUTION' }],
+    execution: { executionRef: 'configuration-execution-000001', allowedWritePaths: ['src/data/example.json'], actualChangedFiles: ['src/data/example.json'], status: 'completed', verificationResults: [], resultingRunRef: null },
+    budget: { round1ParticipantJobs: 4, executionParticipantJobs: 1, round2ParticipantJobs: 0, totalParticipantJobs: 5, retryCount: 0 },
+    outcome: 'NO_CROSS_ROUND_TRANSITION_OBSERVED',
+    stopReason: 'NO_CONFIGURATION_CHANGE',
+  }));
+}
+
+async function testConfigurationRetentionIsFailClosed(): Promise<void> {
+  await assert.rejects(() => retainConfigurationFixture('missing-before'), /before-manifest/);
+  await assert.rejects(() => retainConfigurationFixture('missing-after'), /after-manifest/);
+  await assert.rejects(() => retainConfigurationFixture('missing-bytes'), /required ordinary evidence is missing/);
+  const complete = await retainConfigurationFixture('complete');
+  await verifyDurableEvidenceCapsule(complete.capsuleRoot);
+}
+
+async function retainConfigurationFixture(variant: 'missing-before' | 'missing-after' | 'missing-bytes' | 'complete') {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), `wuxia-config-retain-${variant}-`));
+  const sessionId = `ordinary-run-20260914-config-${variant}`;
+  const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
+  const experimentRoot = join(sessionRoot, 'experiment');
+  const phase0 = await runPhase0({ runRef: sessionId, outRoot: join(sessionRoot, 'game-runs'), anchorRoot: join(sessionRoot, 'phase0-anchors'), persona: getP8GatePersonas()[0]!, seed: 31, endAge: 2, catalogVersion: '1.0.0', maxSteps: 120 });
+  const configRoot = join(experimentRoot, 'configuration-execution');
+  await mkdir(configRoot, { recursive: true });
+  await mkdir(join(experimentRoot, 'round-1'), { recursive: true });
+  await writeFile(join(experimentRoot, 'round-1/problem-package.json'), '{}\n');
+  await writeFile(join(experimentRoot, 'round-1/workflow-outcome.json'), '{}\n');
+  const beforeBytes = 'before\n';
+  const afterBytes = 'after\n';
+  await writeFile(join(configRoot, 'invocation.json'), JSON.stringify({ invocationRef: 'configuration-invocation-000001', status: 'completed' }));
+  await writeFile(join(configRoot, 'participant-prompt.txt'), 'configuration prompt\n');
+  await writeFile(join(configRoot, 'participant-binding.json'), '{}\n');
+  await writeFile(join(configRoot, 'execution-trace.json'), '{}\n');
+  await writeFile(join(configRoot, 'raw-output.txt'), '{}\n');
+  await writeFile(join(configRoot, 'result.json'), '{}\n');
+  if (variant !== 'missing-before') {
+    await mkdir(join(configRoot, 'before/src/data'), { recursive: true });
+    await writeFile(join(configRoot, 'before/src/data/example.json'), beforeBytes);
+    await writeFile(join(configRoot, 'before-manifest.json'), JSON.stringify({ entries: [{ path: 'src/data/example.json', status: 'present', sha256: sha256Hex(beforeBytes), byteLength: Buffer.byteLength(beforeBytes) }] }));
+  }
+  if (variant !== 'missing-after') {
+    await mkdir(join(configRoot, 'after/src/data'), { recursive: true });
+    if (variant !== 'missing-bytes') await writeFile(join(configRoot, 'after/src/data/example.json'), afterBytes);
+    await writeFile(join(configRoot, 'after-manifest.json'), JSON.stringify({ entries: [{ path: 'src/data/example.json', status: 'present', sha256: sha256Hex(afterBytes), byteLength: Buffer.byteLength(afterBytes) }] }));
+  }
+  return retainOrdinaryEvidenceCapsule({
+    repositoryRoot,
+    sessionRoot,
+    experimentRoot,
+    sessionId,
+    sourceRunRef: phase0.runRef,
+    sourceRunRefs: [phase0.runRef],
+    repositoryIdentity: { branch: 'dev', headSha: 'a'.repeat(40) },
+    sessionExecution: configurationExecution(sessionId),
+    createdAt: '2026-09-14T00:00:00.000Z',
+  });
 }
 
 async function testBeforeAndAfterCaptureIsTemporal(): Promise<void> {

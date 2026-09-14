@@ -30,6 +30,7 @@ export async function retainOrdinaryEvidenceCapsule(
     experimentRoot: input.experimentRoot,
     sessionId: input.sessionId,
     sourceRunRefs: input.sourceRunRefs,
+    configurationExecution: input.sessionExecution.execution.status !== 'not_started',
   });
   const participantReceipts = await buildParticipantInvocationReceiptInputs({
     experimentRoot: input.experimentRoot,

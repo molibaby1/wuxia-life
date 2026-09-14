@@ -2,6 +2,7 @@ import { lstat, readdir, readFile } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   PHASE0_REQUIRED_SEALED_ARTIFACTS,
+  sha256Hex,
   validatePhase0RunRef,
   validatePhase0RunSeal,
 } from '../phase0/provenance';
@@ -16,11 +17,12 @@ const WORKFLOW_ROOT_FILES = [
   'workflow-outcome.json',
   'problem-package.json',
   'human-review-package.md',
+  'workspace-state-provenance.json',
 ] as const;
 
 const ROUND_ROOT_FILES = [
   'selection/selected-hypothesis.json',
-  'causal-attribution/bounded-causal-attribution.json',
+  'diagnostic/causal-attribution.json',
   'problem-package.json',
   'decision.json',
   'workflow-outcome.json',
@@ -86,14 +88,11 @@ const CONTINUATION_ROOT_FILES = [
 const CONFIG_EXECUTION_FILES = [
   'participant-prompt.txt',
   'participant-binding.json',
-  'invocation.json',
   'execution-trace.json',
   'raw-output.txt',
   'stderr.txt',
   'result.json',
   'failure.json',
-  'before-manifest.json',
-  'after-manifest.json',
 ] as const;
 
 export interface CollectOrdinaryEvidenceInput {
@@ -102,6 +101,7 @@ export interface CollectOrdinaryEvidenceInput {
   experimentRoot: string;
   sessionId: string;
   sourceRunRefs: string[];
+  configurationExecution?: boolean;
 }
 
 function visibilityFor(relativePath: string): DurableEvidenceVisibility {
@@ -112,7 +112,7 @@ function visibilityFor(relativePath: string): DurableEvidenceVisibility {
     || /(?:^|\/)hypothesis-runs\/[^/]+\/(?:source-)?observable-payload\.json$/.test(relativePath)
     || /(?:^|\/)hypothesis-runs\/[^/]+\/feedback\.json$/.test(relativePath)
     || /(?:^|\/)problem-package\.json$/.test(relativePath)
-    || /(?:^|\/)causal-attribution\/bounded-causal-attribution\.json$/.test(relativePath)
+    || /(?:^|\/)(?:causal-attribution\/bounded-causal-attribution|diagnostic\/causal-attribution)\.json$/.test(relativePath)
   ) return 'PARTICIPANT_VISIBLE';
   return 'HUMAN_FORENSIC_ONLY';
 }
@@ -264,6 +264,8 @@ function snapshotPath(value: unknown, label: string): string {
 
 async function addDeclaredSnapshot(input: {
   root: string;
+  roundRef: string;
+  canonicalSources: Map<string, { sourcePath: string; sha256: string }>;
   snapshotName: 'authority-snapshots' | 'skill-snapshots';
   evidence: DurableEvidenceObjectInput[];
 }): Promise<void> {
@@ -271,43 +273,85 @@ async function addDeclaredSnapshot(input: {
   const manifestPath = join(input.root, manifestSourceRef);
   if (!await isRegularFile(manifestPath)) return;
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
-  if (!Array.isArray(manifest.entries)) throw new Error(`${manifestSourceRef} must declare entries`);
-  await addDeclaredFile({
-    root: input.root,
-    sourceRef: manifestSourceRef,
-    relativePath: `provenance/${input.snapshotName}/manifest.json`,
-    evidence: input.evidence,
-    required: true,
-    evidenceKind: 'provenance_snapshot_manifest',
-  });
+  if (!Array.isArray(manifest.entries)) throw new Error(`${input.roundRef}/${manifestSourceRef} must declare entries`);
+  const addCanonical = async (sourcePath: string, canonicalSourceRef: string, relativePath: string, declaredSha256: unknown, evidenceKind: string, deduplicate: boolean): Promise<void> => {
+    if (!await isRegularFile(sourcePath)) throw new Error(`required ordinary evidence is missing: ${canonicalSourceRef}`);
+    const bytes = await readFile(sourcePath);
+    const sha256 = sha256Hex(bytes);
+    if (declaredSha256 !== undefined && (typeof declaredSha256 !== 'string' || declaredSha256 !== sha256)) {
+      throw new Error(`snapshot hash mismatch for ${canonicalSourceRef}`);
+    }
+    if (deduplicate) {
+      const existing = input.canonicalSources.get(canonicalSourceRef);
+      if (existing !== undefined) {
+        if (existing.sha256 !== sha256) throw new Error(`conflicting round snapshot bytes for ${canonicalSourceRef}`);
+        return;
+      }
+      input.canonicalSources.set(canonicalSourceRef, { sourcePath, sha256 });
+    }
+    input.evidence.push({
+      logicalName: `session:${canonicalSourceRef}`,
+      relativePath,
+      sourcePath,
+      visibility: 'HUMAN_FORENSIC_ONLY',
+      evidenceKind,
+      sourceRef: canonicalSourceRef,
+    });
+  };
+  await addCanonical(
+    manifestPath,
+    `${input.roundRef}/${manifestSourceRef}`,
+    `provenance/${input.roundRef}/${input.snapshotName}/manifest.json`,
+    undefined,
+    'provenance_snapshot_manifest',
+    false,
+  );
   for (const [index, rawEntry] of manifest.entries.entries()) {
     if (typeof rawEntry !== 'object' || rawEntry === null || Array.isArray(rawEntry)) {
-      throw new Error(`${manifestSourceRef}.entries[${index}] must be an object`);
+      throw new Error(`${input.roundRef}/${manifestSourceRef}.entries[${index}] must be an object`);
     }
     const entry = rawEntry as Record<string, unknown>;
     const path = snapshotPath(
       input.snapshotName === 'authority-snapshots' ? entry.path : entry.canonicalPath,
-      `${manifestSourceRef}.entries[${index}].path`,
+      `${input.roundRef}/${manifestSourceRef}.entries[${index}].path`,
     );
-    await addDeclaredFile({
-      root: input.root,
-      sourceRef: `${input.snapshotName}/${path}`,
-      relativePath: `provenance/${input.snapshotName}/${path}`,
-      evidence: input.evidence,
-      required: true,
-      evidenceKind: input.snapshotName === 'authority-snapshots' ? 'authority_snapshot' : 'skill_snapshot',
-    });
+    const declaredSha256 = entry.sha256;
+    if (typeof declaredSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(declaredSha256)) {
+      throw new Error(`${input.roundRef}/${manifestSourceRef}.entries[${index}].sha256 must be a lowercase SHA-256`);
+    }
+    await addCanonical(
+      join(input.root, input.snapshotName, path),
+      `${input.snapshotName}/${path}`,
+      `provenance/${input.snapshotName}/${path}`,
+      declaredSha256,
+      input.snapshotName === 'authority-snapshots' ? 'authority_snapshot' : 'skill_snapshot',
+      true,
+    );
   }
 }
 
 async function addConfigurationEvidence(input: {
   experimentRoot: string;
   evidence: DurableEvidenceObjectInput[];
+  occurred: boolean;
 }): Promise<void> {
   const configurationRoot = join(input.experimentRoot, 'configuration-execution');
-  if (!await isRegularFile(join(configurationRoot, 'invocation.json'))
+  if (!input.occurred && !await isRegularFile(join(configurationRoot, 'invocation.json'))
     && !await isRegularFile(join(configurationRoot, 'before-manifest.json'))
     && !await isRegularFile(join(configurationRoot, 'after-manifest.json'))) return;
+
+  if (input.occurred) {
+    for (const file of ['invocation.json', 'before-manifest.json', 'after-manifest.json'] as const) {
+      await addDeclaredFile({
+        root: input.experimentRoot,
+        sourceRef: `configuration-execution/${file}`,
+        relativePath: `extensions/configuration-execution/${file}`,
+        evidence: input.evidence,
+        required: true,
+        evidenceKind: 'configuration_execution',
+      });
+    }
+  }
 
   await addDeclaredFamily({
     root: input.experimentRoot,
@@ -320,7 +364,10 @@ async function addConfigurationEvidence(input: {
     const manifestPath = join(configurationRoot, `${phase}-manifest.json`);
     if (!await isRegularFile(manifestPath)) continue;
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, unknown>;
-    if (manifest.entries === undefined) continue;
+    if (manifest.entries === undefined) {
+      if (input.occurred) throw new Error(`configuration-execution/${phase}-manifest.json must declare entries`);
+      continue;
+    }
     if (!Array.isArray(manifest.entries)) throw new Error(`configuration-execution/${phase}-manifest.json must declare entries`);
     for (const [index, rawEntry] of manifest.entries.entries()) {
       if (typeof rawEntry !== 'object' || rawEntry === null || Array.isArray(rawEntry)) {
@@ -329,6 +376,12 @@ async function addConfigurationEvidence(input: {
       const entry = rawEntry as Record<string, unknown>;
       const path = snapshotPath(entry.path, `configuration-execution/${phase}-manifest.json.entries[${index}].path`);
       if (entry.status !== 'present') continue;
+      if (typeof entry.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(entry.sha256)) {
+        throw new Error(`configuration-execution/${phase}-manifest.json.entries[${index}].sha256 must be a lowercase SHA-256`);
+      }
+      if (!Number.isSafeInteger(entry.byteLength) || (entry.byteLength as number) < 0) {
+        throw new Error(`configuration-execution/${phase}-manifest.json.entries[${index}].byteLength must be a non-negative integer`);
+      }
       await addDeclaredFile({
         root: input.experimentRoot,
         sourceRef: `configuration-execution/${phase}/${path}`,
@@ -337,6 +390,10 @@ async function addConfigurationEvidence(input: {
         required: true,
         evidenceKind: 'configuration_bounded_file',
       });
+      const bytes = await readFile(join(input.experimentRoot, 'configuration-execution', phase, path));
+      if (sha256Hex(bytes) !== entry.sha256 || bytes.byteLength !== entry.byteLength) {
+        throw new Error(`configuration-execution/${phase}-manifest.json entry metadata does not match bytes: ${path}`);
+      }
     }
   }
 }
@@ -404,6 +461,13 @@ export async function collectOrdinaryEvidence(
       files: ROUND_ROOT_FILES,
       evidence,
     });
+    await addDeclaredFamily({
+      root: experimentRoot,
+      sourcePrefix: roundName,
+      destinationPrefix: `workflow/${roundName}`,
+      files: ['source/observable-payload.json'],
+      evidence,
+    });
     for (const runRef of await directoryNames(join(roundRoot, 'feedback-runs'))) {
       validatePhase0RunRef(runRef);
       await addDeclaredFamily({
@@ -459,8 +523,12 @@ export async function collectOrdinaryEvidence(
       evidence,
     });
   }
-  await addConfigurationEvidence({ experimentRoot, evidence });
-  await addDeclaredSnapshot({ root: experimentRoot, snapshotName: 'authority-snapshots', evidence });
-  await addDeclaredSnapshot({ root: experimentRoot, snapshotName: 'skill-snapshots', evidence });
+  await addConfigurationEvidence({ experimentRoot, evidence, occurred: input.configurationExecution === true });
+  const canonicalSnapshotSources = new Map<string, { sourcePath: string; sha256: string }>();
+  for (const roundName of ['round-1', 'round-2'] as const) {
+    const roundRoot = join(experimentRoot, roundName);
+    await addDeclaredSnapshot({ root: roundRoot, roundRef: roundName, snapshotName: 'authority-snapshots', evidence, canonicalSources: canonicalSnapshotSources });
+    await addDeclaredSnapshot({ root: roundRoot, roundRef: roundName, snapshotName: 'skill-snapshots', evidence, canonicalSources: canonicalSnapshotSources });
+  }
   return evidence;
 }

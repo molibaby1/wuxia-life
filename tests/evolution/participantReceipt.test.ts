@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildParticipantInvocationReceiptInputs } from '../../scripts/evolution/evidence/participantReceipt';
 import { publishDurableEvidenceCapsule, verifyDurableEvidenceCapsule } from '../../scripts/evolution/evidence/durableEvidenceCapsule';
+import { sha256Hex } from '../../scripts/evolution/phase0/provenance';
 
 async function write(root: string, path: string, value: string): Promise<void> {
   const target = join(root, path);
@@ -38,11 +39,18 @@ async function testAllInvocationRolesHaveReceipts(): Promise<void> {
       sourceRef,
     });
   };
-  const invocation = async (rootRef: string, invocationRef: string, structuredFile: string): Promise<void> => {
+  const invocation = async (rootRef: string, invocationRef: string, structuredFile: string, role: string): Promise<void> => {
     await add(`${rootRef}/participant-prompt.txt`, `${invocationRef} prompt\n`);
     await add(`${rootRef}/participant-binding.json`, '{}\n');
     await add(`${rootRef}/execution-trace.json`, '{}\n');
-    await add(`${rootRef}/invocation.json`, JSON.stringify({ invocationRef, status: 'completed', authorityRefs: [], skillAssignments: [] }) + '\n');
+    await add(`${rootRef}/invocation.json`, JSON.stringify({
+      ...(role === 'hypothesis' ? { hypothesisInvocationRef: invocationRef } : { invocationRef }),
+      status: 'completed',
+      authorityRefs: role === 'solution' || role === 'reviewer' ? ['docs/example.md'] : [],
+      skillAssignments: role === 'solution' || role === 'reviewer'
+        ? [{ identity: 'example', version: '1', canonicalPath: 'skills/example/SKILL.md' }]
+        : [],
+    }) + '\n');
     await add(`${rootRef}/${structuredFile}`, '{}\n');
     await add(`${rootRef}/raw-output.txt`, `${invocationRef} output\n`);
   };
@@ -61,33 +69,52 @@ async function testAllInvocationRolesHaveReceipts(): Promise<void> {
   await add(`${hypothesisRoot}/participant-prompt.txt`, 'hypothesis prompt\n');
   await add(`${hypothesisRoot}/participant-binding.json`, '{}\n');
   await add(`${hypothesisRoot}/participant-execution-trace.json`, '{}\n');
-  await add(`${hypothesisRoot}/invocation.json`, JSON.stringify({ invocationRef: 'hypothesis-invocation-000001', status: 'completed' }) + '\n');
+  await add(`${hypothesisRoot}/invocation.json`, JSON.stringify({ hypothesisInvocationRef: 'hypothesis-invocation-000001', status: 'completed' }) + '\n');
   await add(`${hypothesisRoot}/source-observable-payload.json`, '{}\n', 'PARTICIPANT_VISIBLE');
   await add(`${hypothesisRoot}/source-feedback.json`, '{}\n', 'PARTICIPANT_VISIBLE');
   await add(`${hypothesisRoot}/hypotheses.json`, '{}\n', 'PARTICIPANT_VISIBLE');
   await add(`${hypothesisRoot}/raw-participant-response.txt`, 'hypothesis raw\n');
 
-  await add('source/observable-payload.json', '{}\n', 'PARTICIPANT_VISIBLE');
-  await add('round-1/causal-attribution/bounded-causal-attribution.json', '{}\n', 'PARTICIPANT_VISIBLE');
-  await add('problem-package.json', JSON.stringify({
+  await add('round-1/source/observable-payload.json', '{}\n', 'PARTICIPANT_VISIBLE');
+  await add('round-1/diagnostic/causal-attribution.json', '{}\n', 'PARTICIPANT_VISIBLE');
+  await add('round-1/problem-package.json', JSON.stringify({
     source: {
       observablePayloadRef: 'source/observable-payload.json',
       externalFeedbackRef: `${feedbackRoot}/feedback.json`,
       improvementHypothesisRef: `${hypothesisRoot}/hypotheses.json`,
-      diagnosticEvidenceRefs: ['round-1/causal-attribution/bounded-causal-attribution.json'],
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
     },
   }) + '\n', 'PARTICIPANT_VISIBLE');
+  await add('authority-snapshots/docs/example.md', 'authority snapshot\n');
+  await add('skill-snapshots/skills/example/SKILL.md', 'skill snapshot\n');
+  for (const round of [1, 2] as const) {
+    await write(root, `round-${round}/authority-snapshots/docs/example.md`, 'authority snapshot\n');
+    await add(`round-${round}/authority-snapshots/manifest.json`, JSON.stringify({ entries: [{ path: 'docs/example.md', sha256: sha256Hex('authority snapshot\n') }] }));
+    await write(root, `round-${round}/skill-snapshots/skills/example/SKILL.md`, 'skill snapshot\n');
+    await add(`round-${round}/skill-snapshots/manifest.json`, JSON.stringify({ entries: [{ canonicalPath: 'skills/example/SKILL.md', sha256: sha256Hex('skill snapshot\n') }] }));
+  }
 
-  await invocation('round-1/solution-agent', 'solution-invocation-000001', 'result.json');
-  await invocation('round-1/reviewer-agent', 'reviewer-invocation-000001', 'review.json');
+  await invocation('round-1/solution-agent', 'solution-invocation-000001', 'result.json', 'solution');
+  await invocation('round-1/reviewer-agent', 'reviewer-invocation-000001', 'review.json', 'reviewer');
   await add('round-1/review-continuation-000001/continuation.json', '{}\n');
   await add('round-1/review-continuation-000001/revision-request.json', '{}\n');
-  await invocation('round-1/review-continuation-000001/solution-revision', 'solution-invocation-000002', 'result.json');
-  await invocation('round-1/review-continuation-000001/reviewer-agent', 'reviewer-invocation-000002', 'review.json');
-  await invocation('configuration-execution', 'configuration-invocation-000001', 'result.json');
+  await invocation('round-1/review-continuation-000001/solution-revision', 'solution-invocation-000002', 'result.json', 'solution');
+  await invocation('round-1/review-continuation-000001/reviewer-agent', 'reviewer-invocation-000002', 'review.json', 'reviewer');
+  await invocation('configuration-execution', 'configuration-invocation-000001', 'result.json', 'configuration-execution');
+
+  await add('round-2/source/observable-payload.json', '{"round":2}\n', 'PARTICIPANT_VISIBLE');
+  await add('round-2/diagnostic/causal-attribution.json', '{"round":2}\n', 'PARTICIPANT_VISIBLE');
+  await add('round-2/problem-package.json', JSON.stringify({
+    source: {
+      observablePayloadRef: 'source/observable-payload.json',
+      diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
+    },
+  }) + '\n', 'PARTICIPANT_VISIBLE');
+  await invocation('round-2/solution-agent', 'solution-invocation-000003', 'result.json', 'solution');
+  await invocation('round-2/reviewer-agent', 'reviewer-invocation-000003', 'review.json', 'reviewer');
 
   const receipts = await buildParticipantInvocationReceiptInputs({ experimentRoot: root, evidence });
-  assert.equal(receipts.length, 7);
+  assert.equal(receipts.length, 9);
   assert.deepEqual([...receipts.map(receipt => receipt.role)].sort(), [
     'feedback',
     'hypothesis',
@@ -96,6 +123,8 @@ async function testAllInvocationRolesHaveReceipts(): Promise<void> {
     'solution',
     'reviewer',
     'configuration-execution',
+    'solution',
+    'reviewer',
   ].sort());
   for (const receipt of receipts) {
     assert.ok(receipt.promptLogicalName);
@@ -106,6 +135,17 @@ async function testAllInvocationRolesHaveReceipts(): Promise<void> {
     assert.equal(receipt.failureLogicalName, null);
   }
   assert.equal(receipts.find(receipt => receipt.role === 'feedback')?.visibleEvidenceLogicalNames.some(name => name.includes('player-surface-source')), false);
+  assert.equal(receipts.find(receipt => receipt.role === 'hypothesis')?.invocationRef, 'hypothesis-invocation-000001');
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 1)?.visibleEvidenceLogicalNames.some(name => name.includes('round-1/diagnostic/causal-attribution.json')), true);
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 1)?.visibleEvidenceLogicalNames.some(name => name.includes('round-2/')), false);
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 2)?.visibleEvidenceLogicalNames.some(name => name.includes('round-2/diagnostic/causal-attribution.json')), true);
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 2)?.visibleEvidenceLogicalNames.some(name => name.includes('round-1/')), false);
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 1)?.authorityLogicalNames.length, 1);
+  assert.equal(receipts.find(receipt => receipt.role === 'solution' && receipt.round === 1)?.skillLogicalNames.length, 1);
+  for (const receipt of receipts.filter(candidate => candidate.role === 'solution' || candidate.role === 'reviewer')) {
+    assert.equal(receipt.authorityLogicalNames.length, 1);
+    assert.equal(receipt.skillLogicalNames.length, 1);
+  }
 
   const capsule = await publishDurableEvidenceCapsule({
     capsuleRoot: join(root, 'artifacts/evolution/run-evidence', sessionId),
@@ -118,8 +158,11 @@ async function testAllInvocationRolesHaveReceipts(): Promise<void> {
     participantReceipts: receipts,
   });
   const manifest = await verifyDurableEvidenceCapsule(capsule.capsuleRoot);
-  assert.equal(manifest.participantReceipts.length, 7);
+  assert.equal(manifest.participantReceipts.length, 9);
   assert.equal(manifest.participantReceipts.every(receipt => receipt.prompt.sha256.length === 64), true);
+  const round1SolutionReceipt = manifest.participantReceipts.find(receipt => receipt.role === 'solution' && receipt.round === 1 && receipt.continuationRef === null)! as unknown as Record<string, unknown>;
+  assert.ok(round1SolutionReceipt.authoritySnapshotManifest);
+  assert.ok(round1SolutionReceipt.skillSnapshotManifest);
 }
 
 async function testReceiptHashIntegrity(): Promise<void> {

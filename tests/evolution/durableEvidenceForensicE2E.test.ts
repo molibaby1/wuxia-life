@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getP8GatePersonas } from '../../src/p8/personas';
 import { runPhase0 } from '../../scripts/evolution/phase0/runPhase0';
-import { validatePhase0RunSeal } from '../../scripts/evolution/phase0/provenance';
+import { sha256Hex, validatePhase0RunSeal } from '../../scripts/evolution/phase0/provenance';
 import { publishDurableEvidenceCapsule, verifyDurableEvidenceCapsule } from '../../scripts/evolution/evidence/durableEvidenceCapsule';
 import { collectOrdinaryEvidence } from '../../scripts/evolution/evidence/ordinaryEvidenceCollector';
 import {
@@ -35,6 +35,7 @@ async function writeEvidenceFixture(experimentRoot: string, sessionId: string): 
     'run-manifest.json': JSON.stringify({ schemaVersion: 'multi-round-run-manifest-v1', sessionId }),
     [`round-1/feedback-runs/${sessionId}/feedback.json`]: '{"overallImpression":"clear"}\n',
     [`round-1/feedback-runs/${sessionId}/observable-payload.json`]: '{"entries":[]}\n',
+    'round-1/source/observable-payload.json': '{"entries":[]}\n',
     [`round-1/feedback-runs/${sessionId}/participant-prompt.txt`]: 'feedback prompt\n',
     [`round-1/feedback-runs/${sessionId}/participant-binding.json`]: '{"provider":"codex-local-subagent"}\n',
     [`round-1/feedback-runs/${sessionId}/participant-execution-trace.json`]: '{"schemaVersion":"participant-execution-trace-v1"}\n',
@@ -47,11 +48,10 @@ async function writeEvidenceFixture(experimentRoot: string, sessionId: string): 
     [`round-1/hypothesis-runs/${sessionId}/participant-execution-trace.json`]: '{"schemaVersion":"participant-execution-trace-v1"}\n',
     [`round-1/hypothesis-runs/${sessionId}/source-feedback.json`]: '{}\n',
     [`round-1/hypothesis-runs/${sessionId}/source-pattern-evidence.json`]: '{}\n',
-    [`round-1/hypothesis-runs/${sessionId}/invocation.json`]: `{"invocationRef":"hypothesis-invocation-000001","status":"completed"}\n`,
+    [`round-1/hypothesis-runs/${sessionId}/invocation.json`]: `{"hypothesisInvocationRef":"hypothesis-invocation-000001","status":"completed"}\n`,
     [`round-1/hypothesis-runs/${sessionId}/raw-participant-response.txt`]: 'hypothesis raw\n',
     'round-1/selection/selected-hypothesis.json': '{"hypothesisId":"h-1"}\n',
-    'round-1/causal-attribution/bounded-causal-attribution.json': '{"schemaVersion":"bounded-causal-attribution-v1"}\n',
-    'round-1/problem-package.json': '{"problemId":"problem-1"}\n',
+    'round-1/diagnostic/causal-attribution.json': '{"schemaVersion":"bounded-causal-attribution-v1"}\n',
     'round-1/solution-agent/participant-prompt.txt': 'solution prompt\n',
     'round-1/solution-agent/participant-binding.json': '{"provider":"codex-local-subagent"}\n',
     'round-1/solution-agent/invocation.json': '{"role":"solution","invocationRef":"solution-invocation-000001","status":"completed"}\n',
@@ -64,16 +64,18 @@ async function writeEvidenceFixture(experimentRoot: string, sessionId: string): 
     'round-1/reviewer-agent/execution-trace.json': '{"schemaVersion":"participant-execution-trace-v1"}\n',
     'round-1/reviewer-agent/raw-output.txt': 'reviewer raw\n',
     'round-1/reviewer-agent/review.json': '{"decision":"REJECT"}\n',
-    'problem-package.json': JSON.stringify({
+    'round-1/problem-package.json': JSON.stringify({
+      problemId: 'problem-1',
       source: {
         observablePayloadRef: 'source/observable-payload.json',
-        externalFeedbackRef: `round-1/feedback-runs/${sessionId}/feedback.json`,
-        improvementHypothesisRef: `round-1/hypothesis-runs/${sessionId}/hypotheses.json`,
-        diagnosticEvidenceRefs: ['round-1/causal-attribution/bounded-causal-attribution.json'],
+        externalFeedbackRef: `feedback-runs/${sessionId}/feedback.json`,
+        improvementHypothesisRef: `hypothesis-runs/${sessionId}/hypotheses.json`,
+        diagnosticEvidenceRefs: ['diagnostic/causal-attribution.json'],
       },
     }) + '\n',
     'round-1/decision.json': '{"route":"SKIP"}\n',
     'round-1/workflow-outcome.json': '{"outcome":"COMPLETED"}\n',
+    'workspace-state-provenance.json': '{"schemaVersion":"workspace-state-provenance-v1"}\n',
   };
   for (const [relativePath, bytes] of Object.entries(files)) {
     const path = join(experimentRoot, relativePath);
@@ -127,6 +129,8 @@ export async function runDurableEvidenceForensicE2ETests(): Promise<void> {
   assert.ok(manifest.objects.some(object => object.relativePath.endsWith('/selected-hypothesis.json')));
   assert.ok(manifest.objects.some(object => object.relativePath.endsWith('/problem-package.json')));
   assert.ok(manifest.objects.some(object => object.relativePath.endsWith('/decision.json')));
+  assert.ok(manifest.objects.some(object => object.relativePath === 'workflow/round-1/diagnostic/causal-attribution.json'));
+  assert.equal(manifest.objects.find(object => object.relativePath === 'workflow/workspace-state-provenance.json')?.visibility, 'HUMAN_FORENSIC_ONLY');
   assert.ok(manifest.objects.some(object => object.evidenceKind === 'execution_trace'));
   assert.equal(manifest.objects.some(object => object.relativePath.includes('participant-workspace')), false);
   assert.equal(
@@ -146,13 +150,14 @@ export async function runDurableEvidenceForensicE2ETests(): Promise<void> {
     }
   }
   const hypothesisReceipt = manifest.participantReceipts.find(receipt => receipt.role === 'hypothesis');
+  assert.equal(hypothesisReceipt?.invocationRef, 'hypothesis-invocation-000001');
   assert.ok(hypothesisReceipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('source-feedback.json')));
   assert.ok(hypothesisReceipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('source-pattern-evidence.json')));
   for (const role of ['solution', 'reviewer'] as const) {
     const receipt = manifest.participantReceipts.find(candidate => candidate.role === role);
     assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('feedback.json')));
     assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('hypotheses.json')));
-    assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('bounded-causal-attribution.json')));
+    assert.ok(receipt?.visibleEvidence.some(ref => ref.logicalName.endsWith('diagnostic/causal-attribution.json')));
   }
 
   const sessionRoot = join(repositoryRoot, '.tmp/evolution', sessionId);
@@ -165,7 +170,7 @@ export async function runDurableEvidenceForensicE2ETests(): Promise<void> {
   assert.equal(postDeletionManifest.sessionId, sessionId);
   const capsuleObject = async (relativePath: string): Promise<string> => readFile(join(capsuleRoot, relativePath), 'utf8');
   assert.deepEqual(JSON.parse(await capsuleObject('workflow/round-1/selection/selected-hypothesis.json')), { hypothesisId: 'h-1' });
-  assert.equal(JSON.parse(await capsuleObject('workflow/round-1/causal-attribution/bounded-causal-attribution.json')).schemaVersion, 'bounded-causal-attribution-v1');
+  assert.equal(JSON.parse(await capsuleObject('workflow/round-1/diagnostic/causal-attribution.json')).schemaVersion, 'bounded-causal-attribution-v1');
   assert.equal(JSON.parse(await capsuleObject('workflow/round-1/problem-package.json')).problemId, 'problem-1');
   assert.equal(JSON.parse(await capsuleObject('workflow/round-1/decision.json')).route, 'SKIP');
   assert.deepEqual(
@@ -190,10 +195,15 @@ async function runCrossRoundSourceClosureTest(): Promise<void> {
   const experimentRoot = join(root, 'experiment');
   await mkdir(join(experimentRoot, 'configuration-execution/before/src'), { recursive: true });
   await mkdir(join(experimentRoot, 'configuration-execution/after/src'), { recursive: true });
-  await writeFile(join(experimentRoot, 'configuration-execution/before-manifest.json'), '{"allowedWritePaths":["src/data/example.json"]}\n');
-  await writeFile(join(experimentRoot, 'configuration-execution/after-manifest.json'), '{"actualChangedFiles":["src/data/example.json"]}\n');
-  await writeFile(join(experimentRoot, 'configuration-execution/before/src/data.example.json'), 'A\n');
-  await writeFile(join(experimentRoot, 'configuration-execution/after/src/data.example.json'), 'B\n');
+  const beforeBytes = 'A\n';
+  const afterBytes = 'B\n';
+  await writeFile(join(experimentRoot, 'configuration-execution/invocation.json'), '{"invocationRef":"configuration-invocation-000001","status":"completed"}\n');
+  await writeFile(join(experimentRoot, 'configuration-execution/before-manifest.json'), JSON.stringify({ entries: [{ path: 'src/data/example.json', status: 'present', sha256: sha256Hex(beforeBytes), byteLength: Buffer.byteLength(beforeBytes) }] }) + '\n');
+  await writeFile(join(experimentRoot, 'configuration-execution/after-manifest.json'), JSON.stringify({ entries: [{ path: 'src/data/example.json', status: 'present', sha256: sha256Hex(afterBytes), byteLength: Buffer.byteLength(afterBytes) }] }) + '\n');
+  await mkdir(join(experimentRoot, 'configuration-execution/before/src/data'), { recursive: true });
+  await mkdir(join(experimentRoot, 'configuration-execution/after/src/data'), { recursive: true });
+  await writeFile(join(experimentRoot, 'configuration-execution/before/src/data/example.json'), beforeBytes);
+  await writeFile(join(experimentRoot, 'configuration-execution/after/src/data/example.json'), afterBytes);
   const evidence = await collectOrdinaryEvidence({ repositoryRoot: root, sessionRoot, experimentRoot, sessionId, sourceRunRefs: [initial.runRef, resulting.runRef] });
   const capsule = await publishDurableEvidenceCapsule({
     capsuleRoot: join(root, 'artifacts/evolution/run-evidence', sessionId),

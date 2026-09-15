@@ -27,6 +27,9 @@ export async function runMultiCandidateReportArchiveTests(): Promise<void> {
   await writeMultiCandidateSessionManifestAtomic(root, manifest([{ hostSliceId: 'host-slice-000001', startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 3, state: 'COMPLETED', reason: null }]));
   const first = await archiveMultiCandidateSessionReport({ repositoryRoot: root, logicalSessionId: 'logical-session-000001', hostSliceId: 'host-slice-000001', createdAt: '2026-09-15T00:01:00.000Z' });
   const firstBytes = await readFile(first.reportJsonPath, 'utf8');
+  const replay = await archiveMultiCandidateSessionReport({ repositoryRoot: root, logicalSessionId: 'logical-session-000001', hostSliceId: 'host-slice-000001', createdAt: '2026-09-15T02:01:00.000Z' });
+  assert.equal(replay.reportId, first.reportId);
+  assert.equal(await readFile(replay.reportJsonPath, 'utf8'), firstBytes);
   await writeMultiCandidateSessionManifestAtomic(root, manifest([
     { hostSliceId: 'host-slice-000001', startedAt: '2026-09-15T00:00:00.000Z', endedAt: '2026-09-15T00:01:00.000Z', participantJobs: 3, state: 'COMPLETED', reason: null },
     { hostSliceId: 'host-slice-000002', startedAt: '2026-09-15T01:00:00.000Z', endedAt: '2026-09-15T01:01:00.000Z', participantJobs: 0, state: 'COMPLETED', reason: null },

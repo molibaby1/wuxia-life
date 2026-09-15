@@ -71,10 +71,19 @@ async function writeCreateOnly(path: string, bytes: string): Promise<void> {
 export async function archiveMultiCandidateSessionReport(
   input: ArchiveMultiCandidateSessionReportInput,
 ): Promise<ArchiveMultiCandidateSessionReportResult> {
-  const report = await buildMultiCandidateOperationalRunReport(input);
+  let report = await buildMultiCandidateOperationalRunReport(input);
   const reportDirectory = join(resolve(input.repositoryRoot), RUN_REPORTS_ROOT, report.reportId);
   const reportJsonPath = join(reportDirectory, 'report.json');
   const reportMarkdownPath = join(reportDirectory, 'report.md');
+  try {
+    const existing = parseOperationalRunReport(await readFile(reportJsonPath, 'utf8'), report.reportId);
+    if (existing.schemaVersion !== 'operational-run-report-v7') throw new Error(`report identity collision with non-v7 report: ${report.reportId}`);
+    if (existing.createdAt !== report.createdAt) {
+      report = await buildMultiCandidateOperationalRunReport({ ...input, createdAt: existing.createdAt });
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
   const reportBytes = `${canonicalJson(report)}\n`;
   const markdown = renderMultiCandidateOperationalRunReportMarkdown(report);
   try {

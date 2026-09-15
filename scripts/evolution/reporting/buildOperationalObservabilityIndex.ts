@@ -198,6 +198,14 @@ function parseOperationalRunReportV7(value: Record<string, unknown>, expectedRep
       interruptionRef: nullableString(candidate.interruptionRef, `${label}.interruptionRef`),
     };
   });
+  const sessionExecution = parseMultiCandidateSessionSummary(value.sessionExecution, expectedReportId);
+  if (sessionExecution.logicalSessionId !== logicalSessionId) throw new Error(`sessionExecution.logicalSessionId does not match logicalSessionId for ${expectedReportId}`);
+  if (!sessionExecution.hostSlices.some(slice => slice.hostSliceId === hostSliceId)) throw new Error(`hostSliceId is not present in sessionExecution for ${expectedReportId}`);
+  if (sessionExecution.sessionState !== value.sessionStateAtSnapshot) throw new Error(`session state does not match sessionExecution for ${expectedReportId}`);
+  const parsedCandidates = candidates.map(candidate => {
+    if (!candidate.candidateRef.endsWith(`/${candidate.hypothesisId}`)) throw new Error(`candidateRef/hypothesisId mismatch for ${expectedReportId}`);
+    return candidate;
+  });
   return {
     schemaVersion: OPERATIONAL_RUN_REPORT_SCHEMA_VERSION_V7,
     reportId: nonEmptyString(value.reportId, `reportId for ${expectedReportId}`),
@@ -205,8 +213,8 @@ function parseOperationalRunReportV7(value: Record<string, unknown>, expectedRep
     logicalSessionId,
     hostSliceId,
     sessionStateAtSnapshot: value.sessionStateAtSnapshot as LogicalSessionState,
-    sessionExecution: parseMultiCandidateSessionSummary(value.sessionExecution, expectedReportId),
-    candidates,
+    sessionExecution,
+    candidates: parsedCandidates,
     recoverableSessionStateRef: nonEmptyString(value.recoverableSessionStateRef, `recoverableSessionStateRef for ${expectedReportId}`),
     terminalForensicEvidenceRef: nullableString(value.terminalForensicEvidenceRef, `terminalForensicEvidenceRef for ${expectedReportId}`),
   };

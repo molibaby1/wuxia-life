@@ -4,6 +4,7 @@ export const MULTI_CANDIDATE_SESSION_MANIFEST_SCHEMA_VERSION = 'multi-candidate-
 export const MULTI_CANDIDATE_SESSION_SUMMARY_SCHEMA_VERSION = 'multi-candidate-session-summary-v1' as const;
 
 export type LogicalSessionState = 'PROCESSING' | 'PAUSED' | 'COMPLETED' | 'INTERRUPTED' | 'FAILED';
+export type SourceEpochLifecycle = 'ANALYSIS_PENDING' | 'POOL_ACTIVE' | 'POOL_EXHAUSTED' | 'SUPERSEDED' | 'INTERRUPTED';
 
 export interface MultiCandidateSessionLimitsV1 {
   maxParticipantJobsPerHostSlice: 11;
@@ -28,6 +29,7 @@ export interface SourceEpochSummaryV1 {
   sourceRunRef: string;
   poolRef: string;
   poolStatus: CandidatePoolStatus;
+  lifecycle: SourceEpochLifecycle;
   candidateCounts: CandidateCountsV1;
   dispositionCounts: Record<string, number>;
 }
@@ -127,12 +129,13 @@ function parseDispositionCounts(value: unknown, label: string): Record<string, n
 function parseSourceEpoch(value: unknown, index: number): SourceEpochSummaryV1 {
   const label = `sourceEpochs[${index}]`;
   assertObject(value, label);
-  assertExactKeys(value, ['sourceEpochRef', 'sourceRunRef', 'poolRef', 'poolStatus', 'candidateCounts', 'dispositionCounts'], label);
+  assertExactKeys(value, ['sourceEpochRef', 'sourceRunRef', 'poolRef', 'poolStatus', 'lifecycle', 'candidateCounts', 'dispositionCounts'], label);
   return {
     sourceEpochRef: stringValue(value.sourceEpochRef, `${label}.sourceEpochRef`),
     sourceRunRef: stringValue(value.sourceRunRef, `${label}.sourceRunRef`),
     poolRef: stringValue(value.poolRef, `${label}.poolRef`),
     poolStatus: enumValue(value.poolStatus, POOL_STATES, `${label}.poolStatus`),
+    lifecycle: enumValue(value.lifecycle, ['ANALYSIS_PENDING', 'POOL_ACTIVE', 'POOL_EXHAUSTED', 'SUPERSEDED', 'INTERRUPTED'], `${label}.lifecycle`),
     candidateCounts: parseCounts(value.candidateCounts, `${label}.candidateCounts`),
     dispositionCounts: parseDispositionCounts(value.dispositionCounts, `${label}.dispositionCounts`),
   };
@@ -172,7 +175,7 @@ export interface BuildMultiCandidateSessionManifestInput {
   logicalSessionId: string;
   sessionState: LogicalSessionState;
   currentSourceEpochRef: string;
-  sourceEpochs: SourceEpochSummaryV1[];
+  sourceEpochs: Array<Omit<SourceEpochSummaryV1, 'lifecycle'> & { lifecycle?: SourceEpochLifecycle }>;
   hostSlices: HostSliceSummaryV1[];
   sourceTransitionCount: 0 | 1;
   failureRef: string | null;
@@ -223,7 +226,7 @@ export function buildMultiCandidateSessionManifestV1(input: BuildMultiCandidateS
       participantJobs: input.budgetAccounting?.participantJobs ?? 0,
       hostSliceCount: input.budgetAccounting?.hostSliceCount ?? input.hostSlices.length,
     },
-    sourceEpochs: input.sourceEpochs,
+    sourceEpochs: input.sourceEpochs.map(epoch => ({ ...epoch, lifecycle: epoch.lifecycle ?? 'POOL_ACTIVE' })),
     currentSourceEpochRef: input.currentSourceEpochRef,
     hostSlices: input.hostSlices,
     sourceTransitionCount: input.sourceTransitionCount,

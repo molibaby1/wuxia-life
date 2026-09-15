@@ -23,6 +23,11 @@ export interface RetainHumanFollowupWorkItemInput {
   problemPackagePath: string;
   decisionPath: string;
   continuation?: HumanFollowupContinuationEvidence;
+  candidateProvenance?: {
+    mode: 'candidate-activation-v1';
+    candidateActivationPath: string;
+    hypothesisSetPath: string;
+  };
 }
 
 export interface HumanFollowupContinuationEvidence {
@@ -204,6 +209,7 @@ function buildEvidenceSources(
   decisionPath: string,
   reviewerPresent: boolean,
   continuation?: HumanFollowupContinuationEvidence,
+  candidateProvenance?: RetainHumanFollowupWorkItemInput['candidateProvenance'],
 ): EvidenceSource[] {
   const sources: EvidenceSource[] = [
     { relativePath: 'problem-package.json', sourcePath: problemPackagePath },
@@ -219,10 +225,19 @@ function buildEvidenceSources(
       });
     }
   }
-  sources.push(
-    { relativePath: SELECTION_PATH, sourcePath: join(workflowRoot, SELECTION_PATH) },
-    { relativePath: SOLUTION_PATH, sourcePath: join(workflowRoot, SOLUTION_PATH) },
-  );
+  if (candidateProvenance) {
+    const candidateActivationPath = safeRelativePath(candidateProvenance.candidateActivationPath, 'candidateActivationPath');
+    const hypothesisSetPath = safeRelativePath(candidateProvenance.hypothesisSetPath, 'hypothesisSetPath');
+    if (!sources.some(source => source.relativePath === candidateActivationPath)) {
+      sources.push({ relativePath: candidateActivationPath, sourcePath: join(workflowRoot, candidateActivationPath) });
+    }
+    if (!sources.some(source => source.relativePath === hypothesisSetPath)) {
+      sources.push({ relativePath: hypothesisSetPath, sourcePath: join(workflowRoot, hypothesisSetPath) });
+    }
+  } else {
+    sources.push({ relativePath: SELECTION_PATH, sourcePath: join(workflowRoot, SELECTION_PATH) });
+  }
+  sources.push({ relativePath: SOLUTION_PATH, sourcePath: join(workflowRoot, SOLUTION_PATH) });
   if (reviewerPresent) sources.push({ relativePath: REVIEWER_PATH, sourcePath: join(workflowRoot, REVIEWER_PATH) });
   sources.push({
     relativePath: 'decision.json',
@@ -246,6 +261,9 @@ export async function retainHumanFollowupWorkItem(
   const decisionPath = resolve(nonEmpty(input.decisionPath, 'decisionPath'));
   validatePhase0RunRef(nonEmpty(input.sourceRunRef, 'sourceRunRef'));
   const sourceFingerprintSha256 = assertSha256(input.sourceFingerprintSha256, 'sourceFingerprintSha256');
+  if (input.candidateProvenance?.mode !== 'candidate-activation-v1' && input.candidateProvenance !== undefined) {
+    throw new Error('candidateProvenance mode must be candidate-activation-v1');
+  }
 
   const realRepositoryRoot = await realpath(repositoryRoot);
   const realWorkflowRoot = await realpath(workflowRoot);
@@ -316,7 +334,7 @@ export async function retainHumanFollowupWorkItem(
   const itemPath = join(finalDirectory, 'item.json');
   const reviewerPath = join(workflowRoot, REVIEWER_PATH);
   const reviewerPresent = await optionalRegularFile(reviewerPath, REVIEWER_PATH, workflowRoot);
-  const evidenceSources = buildEvidenceSources(workflowRoot, problemPackage, problemPackagePath, decisionPath, reviewerPresent, continuation);
+  const evidenceSources = buildEvidenceSources(workflowRoot, problemPackage, problemPackagePath, decisionPath, reviewerPresent, continuation, input.candidateProvenance);
   const evidencePaths = evidenceSources.map(source => source.relativePath);
   const workflowRef = isWithin(realRepositoryRoot, realWorkflowRoot)
     ? workflowRelativePath(repositoryRoot, workflowRoot, 'workflowRef')
